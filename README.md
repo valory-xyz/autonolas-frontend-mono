@@ -1,0 +1,1 @@
+# ai-registry-mech-frontend
