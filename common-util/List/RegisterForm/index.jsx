@@ -104,8 +104,9 @@ const RegisterForm = ({
         </Button>
 
         <Form.Item
-          label="Price"
+          label="Price (in Wei)"
           name="price"
+          extra="What a requester needs to pay to the mech for each request"
           validateFirst
           rules={[
             {
