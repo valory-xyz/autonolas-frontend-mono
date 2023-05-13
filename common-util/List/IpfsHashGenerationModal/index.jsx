@@ -147,45 +147,19 @@ const IpfsModal = ({
         </Form.Item>
 
         <Form.Item
-          label="Version"
-          name="version"
-          rules={[{ required: true, message: 'Please input the version' }]}
+          label="Input Format"
+          name="inputFormat"
+          rules={[{ required: true, message: 'Please input the input format the agent accepts' }]}
         >
-          <Input placeholder="1" style={{ width: 100 }} />
+          <Input placeholder="ipfs-v0.1" />
         </Form.Item>
 
         <Form.Item
-          name="code_uri"
-          label="Package hash"
-          extra="Hash should point to the package"
-          rules={[
-            {
-              required: true,
-              message: 'Please input the Package hash',
-            },
-            () => ({
-              validator(_, value) {
-                return getBase16Validator(value, hashType);
-              },
-            }),
-          ]}
+          label="Output Format"
+          name="outputFormat"
+          rules={[{ required: true, message: 'Please input the output format the agent accepts' }]}
         >
-          <Input
-            addonBefore={(
-              <Select
-                defaultValue={hashType}
-                className="select-before"
-                onChange={(e) => setHashType(e)}
-              >
-                <Select.Option value={HASH_PREFIXES.type1}>
-                  {HASH_PREFIXES.type1}
-                </Select.Option>
-                <Select.Option value={HASH_PREFIXES.type2}>
-                  {HASH_PREFIXES.type2}
-                </Select.Option>
-              </Select>
-            )}
-          />
+          <Input placeholder="ipfs-v0.1" />
         </Form.Item>
 
         <Form.Item

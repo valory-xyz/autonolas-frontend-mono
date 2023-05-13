@@ -15,20 +15,12 @@ export const getIpfsHashHelper = async (info, hashType) => {
   const updatedInfo = {
     ...info,
     image: info.image || '',
-    code_uri: `ipfs://${hashType}${info.code_uri}`,
-    attributes: [
-      {
-        trait_type: 'version',
-        value: info.version,
-      },
-    ],
   };
 
   /**
    * metadata should be compatible with standards
    * https://docs.opensea.io/docs/metadata-standards
    */
-  delete updatedInfo.version;
 
   const otherOptions = {
     wrapWithDirectory: false, // default: false

@@ -5,7 +5,7 @@ import Web3 from 'web3';
 import { Button, Form, Input } from 'antd/lib';
 import get from 'lodash/get';
 import isNil from 'lodash/isNil';
-import { WhiteButton } from 'common-util/components/Button';
+import { WhiteButton } from 'common-util/Button';
 import IpfsHashGenerationModal from '../IpfsHashGenerationModal';
 import { DependencyLabel } from '../ListCommon';
 import { RegisterFooter, ComplexLabel } from '../styles';
@@ -105,45 +105,28 @@ const RegisterForm = ({
         </Button>
 
         <Form.Item
-          label={(
-            <ComplexLabel>
-              Dependencies
-              <DependencyLabel type={listType} />
-            </ComplexLabel>
-          )}
-          name="dependencies"
+          label="Price"
+          name="price"
           validateFirst
           rules={[
             {
-              required: false,
-              message: `Please input the list of ${listType}s on which this ${listType} depends`,
+              required: true,
+              message: `Please input the price the mech charges`,
             },
             () => ({
               validator(_, value) {
-                // even empty value is accepted as it is not required
-                if (isNil(value) || value === '') {
-                  return Promise.resolve();
-                }
-
-                /**
-                 * https://regex101.com/r/ip1z51/1
-                 * accepts comma seperated values, examples below
-                 * eg
-                 * 1,2,4,2
-                 * 2,3,4
-                 * 4,   2,4,5
-                 * 2,3     ,4
-                 * 7
-                 */
-                if (/^\d+(\s*,\s*\d+?)*$/gm.test(value)) {
-                  return Promise.resolve();
-                }
-                return Promise.reject(new Error('Please input a valid list'));
+                if (true) return Promise.resolve();
+                return Promise.reject(
+                  new Error(
+                    `Please input a valid price`,
+                  ),
+                );
               },
             }),
           ]}
+          className="mb-0"
         >
-          <Input placeholder="2, 10, 15, 26" />
+          <Input placeholder="10000000000000000" />
         </Form.Item>
 
         {account ? (

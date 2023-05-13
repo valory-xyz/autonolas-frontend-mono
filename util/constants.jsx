@@ -10,5 +10,11 @@ export const NAV_TYPES = {
 export const TOTAL_VIEW_COUNT = 10;
 
 export const URL = {
-  AGENTS: "agent"
+  AGENTS: "registry"
+};
+
+export const HASH_PREFIX = 'f01701220';
+export const HASH_PREFIXES = {
+  type1: HASH_PREFIX,
+  type2: 'bafybei',
 };

@@ -36,7 +36,7 @@ const ListAgents = () => {
    * extra tab content & view click
    */
   const { searchValue, extraTabContent, clearSearch } = useExtraTabContent({
-    title: 'Agents',
+    title: '',
     onRegisterClick: () => router.push(URL.MINT_AGENT),
   });
   const onViewClick = (id) => router.push(`${URL.AGENTS}/${id}`);
@@ -183,7 +183,7 @@ const ListAgents = () => {
           );
         }}
       >
-        <TabPane tab="All" key={ALL_AGENTS}>
+        <TabPane tab="All Agents" key={ALL_AGENTS}>
           <ListTable {...tableCommonProps} list={list} />
         </TabPane>
 
