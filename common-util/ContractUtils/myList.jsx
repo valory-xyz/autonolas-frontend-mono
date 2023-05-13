@@ -6,7 +6,7 @@ export const filterByOwner = (results = [], { searchValue, account }) => results
   const ownerL = (e.owner || '').trim().toLowerCase();
   const hashL = (e.unitHash || '').trim().toLowerCase();
 
-  // for "my components/agents" search only by Account
+  // for "my agents" search only by Account
   if (account) {
     return ownerL === account.trim().toLowerCase() && includes(hashL, search);
   }
