@@ -6,3 +6,9 @@ export const NAV_TYPES = {
   OPERATOR: 'operator',
   SERVICE: 'service',
 };
+
+export const TOTAL_VIEW_COUNT = 10;
+
+export const URL = {
+  AGENTS: "agent"
+};
