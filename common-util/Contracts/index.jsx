@@ -57,6 +57,16 @@ export const getMechMinterContract = () => {
   return contract;
 };
 
+export const getMechContract = ({ agent_mech_address }) => {
+  const { web3, address , chainId } = getWeb3Details();
+  const { agentFactory } = address.agentFactory;
+  console.log("Web3 Details:" + agent_mech_address);
+  const contract = new web3.eth.Contract(
+    AGENT_MECH_ABI,
+    "0x3504fb5053ec12f748017248a395b4ed31739705",
+  );
+  return contract;
+};
 
 export async function fetchGraphQLData() {
   return new Promise((resolve, reject) => {

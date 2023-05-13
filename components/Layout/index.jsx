@@ -53,6 +53,11 @@ const NavigationBar = ({ children }) => {
               label: 'Factory',
               onClick: handleMenuItemClick,
             },
+            {
+              key: 'mech',
+              label: 'Mech',
+              onClick: handleMenuItemClick,
+            },
           ]}
         />
         <Login />
