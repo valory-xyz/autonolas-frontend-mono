@@ -1,14 +1,10 @@
 /* eslint-disable react/prop-types */
 import dayjs from 'dayjs';
 import {
-  Form, InputNumber, DatePicker, Button, Typography,
+  Form, DatePicker,
 } from 'antd/lib';
-import { range, isNil } from 'lodash';
+import { range } from 'lodash';
 import { Shimmer } from 'common-util/Shimmer';
-import { getCommaSeparatedNumber } from 'common-util/functions';
-import { useFetchBalances } from './Registry/hooks';
-
-const { Text } = Typography;
 
 const fullWidth = { width: '100%' };
 
@@ -35,59 +31,6 @@ export const parseToSeconds = (unlockTime) => {
   );
   const todayDateInTimeStamp = Math.round(new Date().getTime() / 1000);
   return futureDateInTimeStamp - todayDateInTimeStamp;
-};
-
-/**
- * @returns Amount Input
- */
-export const FormItemInputNumber = ({ text = 'Lock OLAS' }) => {
-  const { olasBalanceInEth } = useFetchBalances();
-
-  return (
-    <Form.Item
-      className="custom-form-item-lock"
-      name="amount"
-      label={text}
-      rules={[
-        { required: true, message: 'Amount is required' },
-        () => ({
-          validator(_, value) {
-            if (value === '' || isNil(value)) return Promise.resolve();
-            if (value <= 1) {
-              return Promise.reject(new Error('Please input a valid amount'));
-            }
-            if (olasBalanceInEth && value > olasBalanceInEth) {
-              return Promise.reject(
-                new Error('Amount cannot be greater than the balance'),
-              );
-            }
-            return Promise.resolve();
-          },
-        }),
-      ]}
-    >
-      <InputNumber style={fullWidth} placeholder="Add amount" />
-    </Form.Item>
-  );
-};
-
-export const MaxButton = ({ onMaxClick }) => {
-  const { olasBalanceInEth } = useFetchBalances();
-
-  return (
-    <Text type="secondary">
-      OLAS balance:&nbsp;
-      {getCommaSeparatedNumber(olasBalanceInEth)}
-      <Button
-        htmlType="button"
-        type="link"
-        onClick={onMaxClick}
-        className="pl-0"
-      >
-        Max
-      </Button>
-    </Text>
-  );
 };
 
 /**

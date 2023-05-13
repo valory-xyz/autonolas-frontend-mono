@@ -18,3 +18,5 @@ export const HASH_PREFIXES = {
   type1: HASH_PREFIX,
   type2: 'bafybei',
 };
+
+export const GATEWAY_URL = 'https://gateway.autonolas.tech/ipfs/';

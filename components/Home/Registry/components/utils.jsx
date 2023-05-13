@@ -2,10 +2,10 @@ import { notification } from 'antd/lib';
 import {
   getMechMinterContract,
   getAgentContract,
+  fetchGraphQLData,
 } from 'common-util/Contracts';
 import { getListByAccount } from 'common-util/ContractUtils/myList';
 import { getFirstAndLastIndex } from 'common-util/functions';
-import { fetchGraphQLData } from 'common-util/Contracts';
 
 // --------- HELPER METHODS ---------
 export const getAgentOwner = (id) => new Promise((resolve, reject) => {
@@ -23,40 +23,17 @@ export const getAgentOwner = (id) => new Promise((resolve, reject) => {
     });
 });
 
-
-/**
- * helper to return the list of details (table in index page)
- */
-// const getAgentsHelper = (startIndex, promiseList, resolve) => {
-//   const mechData = fetchGraphQLData();
-//   Promise.all(promiseList).then(async (agentsList) => {
-//     const results = await Promise.all(
-//       agentsList.map(async (info, i) => {
-//         const owner = await getAgentOwner(`${startIndex + i}`);
-//         console.log("Owner: " + owner);
-//         console.log("Info: " + info);
-//         console.log(mechData);
-//         // console.log(fetchGraphQLData());
-//         info['mech'] = mechData[i];
-//         return { ...info, owner };
-//       }),
-//     );
-//     resolve(results);
-//   });
-// };
 const getAgentsHelper = (startIndex, promiseList, resolve) => {
   const mechDataPromise = fetchGraphQLData(); // Get the promise for mechData
   Promise.all(promiseList).then(async (agentsList) => {
     mechDataPromise.then((mechData) => { // Resolve mechData promise
       const results = agentsList.map(async (info, i) => {
         const owner = await getAgentOwner(`${startIndex + i}`);
-        console.log("Owner: " + owner);
-        console.log("Info: " + info);
-        console.log("index : " + i);
-        console.log(mechData);
-        info['mech'] = mechData[i].mech;
-        console.log(info)
-        return { ...info, owner };
+        const updatedInfo = {
+          ...info,
+          mech: mechData[i].mech,
+        };
+        return { ...updatedInfo, owner };
       });
       Promise.all(results).then((resolvedResults) => {
         resolve(resolvedResults);
@@ -64,7 +41,6 @@ const getAgentsHelper = (startIndex, promiseList, resolve) => {
     });
   });
 };
-
 
 // --------- utils ---------
 export const getAgentDetails = (id) => new Promise((resolve, reject) => {
@@ -191,5 +167,3 @@ export const getTokenUri = (id) => new Promise((resolve, reject) => {
       reject(e);
     });
 });
-
-

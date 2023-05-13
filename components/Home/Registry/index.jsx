@@ -1,13 +1,8 @@
-import React, { useState } from 'react';
-import {
-  Typography, Space, Button, Alert,
-} from 'antd/lib';
+import React from 'react';
 import ListAgents from './components/ListAgents';
 
-export const Registry = () => {
-  return (
-    <div>
-      <ListAgents />
-    </div>
-  );
-};
+export const Registry = () => (
+  <div>
+    <ListAgents />
+  </div>
+);
