@@ -1,11 +1,12 @@
 import { useState } from 'react';
 import {
-  Input, Space, Button, Typography, Tooltip,
+  Input, Space, Button, Typography, Tooltip
 } from 'antd/lib';
 import { SearchOutlined, CopyOutlined } from '@ant-design/icons';
 import PropTypes from 'prop-types';
 
 import { NAV_TYPES, SERVICE_STATE, TOTAL_VIEW_COUNT } from 'util/constants';
+import { ExternalLink } from 'react-feather';
 
 const { Text, Title } = Typography;
 const textStyle = { maxWidth: '100%' };
@@ -78,26 +79,20 @@ export const getTableColumns = (type, { onViewClick, onUpdateClick }) => {
         dataIndex: 'hash',
         key: 'hash',
         width: 200,
-        render: (text) => <EllipsisMiddle>{text}</EllipsisMiddle>,
-      },
-      {
-        title: 'No. of component dependencies',
-        dataIndex: 'dependency',
-        width: 180,
-        key: 'dependency',
-      },
-      {
-        width: 200,
-        title: 'Action',
-        key: 'action',
-        fixed: 'right',
-        render: (_text, record) => (
-          <Space size="middle">
-            <Button type="link" onClick={() => onViewClick(record.id)}>
-              View
-            </Button>
-          </Space>
+        render: (text) => (
+          <EllipsisMiddle>
+            <a href={`https://gateway.autonolas.tech/ipfs/f01701220${text.substring(2)}`} target="_blank" rel="noopener noreferrer">
+              {text}
+            </a>
+          </EllipsisMiddle>
         ),
+      },
+      {
+        title: 'Mech',
+        dataIndex: 'mech',
+        width: 180,
+        key: 'mech',
+        render: (text) => <EllipsisMiddle>{text}</EllipsisMiddle>,
       },
     ];
   }
@@ -181,7 +176,8 @@ export const getData = (type, rawData, { current }) => {
       description: item.description || '-',
       developer: item.developer || '-',
       owner: item.owner || '-',
-      hash: item.unitHash || '-',
+      hash: item.agentHashes[0] || '-',
+      mech: item.mech,
       dependency: (item.dependencies || []).length,
     }));
   }

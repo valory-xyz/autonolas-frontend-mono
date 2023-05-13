@@ -64,7 +64,9 @@ const ListAgents = () => {
 
           // All agents
           if (currentTab === ALL_AGENTS) {
+            console.log('getTotalForAllAgents: calling now.');
             totalTemp = await getTotalForAllAgents();
+            console.log('getTotalForAllAgents: totalTemp: ', totalTemp);
           }
 
           // My agents
@@ -93,7 +95,9 @@ const ListAgents = () => {
           // All agents
           if (currentTab === ALL_AGENTS) {
             setList([]);
+            console.log('getAgents: calling now.');
             const everyComps = await getAgents(total, currentPage);
+            console.log('getAgents: everyComps: ', everyComps);
             setList(everyComps);
           }
 
@@ -170,7 +174,7 @@ const ListAgents = () => {
 
           // clear the search
           clearSearch();
-
+          console.log(`${URL.AGENTS}#${MY_AGENTS}`);
           // update the URL to keep track of my-agents
           router.push(
             e === MY_AGENTS

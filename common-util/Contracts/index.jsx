@@ -103,11 +103,80 @@ export const getWeb3Details = () => {
 };
 
 export const getAgentContract = () => {
-  const { web3, address } = getWeb3Details();
-  const { agentRegistry } = address;
+  const { web3, address , chainId } = getWeb3Details();
+  const { agentRegistry } = address.agentRegistry;
+  console.log("Web3 Details:" + AGENT_REGISTRY_ADDRESS);
   const contract = new web3.eth.Contract(
-    AGENT_REGISTRY_CONTRACT.abi,
-    agentRegistry,
+    AGENT_REGISTRY_ABI,
+    AGENT_REGISTRY_ADDRESS,
   );
   return contract;
 };
+
+
+// export async function fetchGraphQLData() {
+//   const url = "https://api.studio.thegraph.com/query/46780/mech/v0.0.1";
+//   const query = `
+//     {
+//       createMeches(first: 10) {
+//         id
+//         mech
+//         agentId
+//         price
+//       }
+//     }
+//   `;
+
+//   const response = await fetch(url, {
+//     method: "POST",
+//     headers: {
+//       "Content-Type": "application/json",
+//     },
+//     body: JSON.stringify({ query }),
+//   });
+
+//   if (response.ok) {
+//     const data = await response.json();
+//     console.log(data.data.createMeches);
+//     return data.data.createMeches;
+//   } else {
+//     console.error("Error fetching data:", response.statusText);
+//   }
+// }
+
+export async function fetchGraphQLData() {
+  return new Promise((resolve, reject) => {
+    const url = "https://api.studio.thegraph.com/query/46780/mech/v0.0.1";
+    const query = `
+      {
+        createMeches(first: 10) {
+          id
+          mech
+          agentId
+          price
+        }
+      }
+    `;
+
+    fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ query }),
+    })
+      .then((response) => {
+        if (response.ok) {
+          return response.json();
+        } else {
+          throw new Error("Error fetching data: " + response.statusText);
+        }
+      })
+      .then((data) => {
+        resolve(data.data.createMeches);
+      })
+      .catch((error) => {
+        reject(error);
+      });
+  });
+}
