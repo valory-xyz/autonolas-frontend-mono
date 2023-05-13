@@ -1,17 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import Web3 from 'web3';
-import { AGENT_MECH_ABI } from 'common-util/AbiAndAddresses'
+import { AGENT_MECH_ABI } from 'common-util/AbiAndAddresses';
 import Request from './components/Request';
 
 // Replace the following values with your specific contract information
 const CONTRACT_ADDRESS = '0x3504fb5053ec12f748017248a395b4ed31739705';
 const WEBSOCKET_PROVIDER = 'wss://rpc.gnosischain.com/wss';
-const HTTP_PROVIDER = 'https://rpc.gnosischain.com/';
 
-const truncate = (str, length) => {
-
-  return str.length > length ? str.substring(0, length) + '...' : str;
-};
+const truncate = (str, length) => (
+  str && str.length > length ? `${str.substring(0, length)}...` : str
+);
 
 const cellStyle = {
   padding: '8px',
@@ -19,9 +17,7 @@ const cellStyle = {
 
 const EventListener = () => {
   const [web3Ws, setWeb3Ws] = useState(null);
-  const [web3Http, setWeb3Http] = useState(null);
   const [contractWs, setContractWs] = useState(null);
-  const [contractHttp, setContractHttp] = useState(null);
   const [firstEvents, setFirstEvents] = useState([]);
   const [secondEvents, setSecondEvents] = useState([]);
 
@@ -36,18 +32,6 @@ const EventListener = () => {
       setContractWs(contractInstance);
     }
   }, [web3Ws]);
-
-  useEffect(() => {
-    const web3Instance = new Web3(new Web3.providers.HttpProvider(HTTP_PROVIDER));
-    setWeb3Http(web3Instance);
-  }, []);
-
-  useEffect(() => {
-    if (web3Http) {
-      const contractInstance = new web3Http.eth.Contract(AGENT_MECH_ABI, CONTRACT_ADDRESS);
-      setContractHttp(contractInstance);
-    }
-  }, [web3Http]);
 
   // Effect hook for listening to the FirstEvent
   useEffect(() => {
@@ -103,9 +87,7 @@ const EventListener = () => {
 
   return (
     <div>
-      <Request 
-        contractAddress={CONTRACT_ADDRESS}
-      />
+      <Request />
       <h2>Requests</h2>
       <table>
         <thead>

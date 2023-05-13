@@ -10,7 +10,7 @@ import { FormContainer } from 'components/styles';
 
 const { Title } = Typography;
 
-const Request = ({ account, contractAddress }) => {
+const Request = ({ account }) => {
   const [error, setError] = useState(null);
   const [information, setInformation] = useState(null);
   const router = useRouter();
@@ -22,25 +22,24 @@ const Request = ({ account, contractAddress }) => {
       setError(null);
       setInformation(null);
 
-      const contract = getMechContract({contractAddress: contractAddress});
+      const contract = getMechContract();
 
-    try {
-      const price = await contract.methods.price().call(); // Add 'await' keyword
+      try {
+        const price = await contract.methods.price().call(); // Add 'await' keyword
 
-      await contract.methods
-        .request(
+        await contract.methods.request(
           values.data,
         )
-        .send({ from: account, value: price})
-        .then((result) => {
-          setInformation(result);
-          notification.success({ message: 'Request made' });
-        });
-    } catch (e) {
+          .send({ from: account, value: price })
+          .then((result) => {
+            setInformation(result);
+            notification.success({ message: 'Request made' });
+          });
+      } catch (e) {
         setError(e);
         console.error(e);
+      }
     }
-    };
   };
 
   return (

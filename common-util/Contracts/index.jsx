@@ -38,7 +38,6 @@ export const getWeb3Details = () => {
 export const getAgentContract = () => {
   const { web3, address , chainId } = getWeb3Details();
   const { agentRegistry } = address.agentRegistry;
-  console.log("Web3 Details:" + AGENT_REGISTRY_ADDRESS);
   const contract = new web3.eth.Contract(
     AGENT_REGISTRY_ABI,
     AGENT_REGISTRY_ADDRESS,
@@ -49,7 +48,6 @@ export const getAgentContract = () => {
 export const getMechMinterContract = () => {
   const { web3, address , chainId } = getWeb3Details();
   const { agentFactory } = address.agentFactory;
-  console.log("Web3 Details:" + AGENT_FACTORY_ADDRESS);
   const contract = new web3.eth.Contract(
     AGENT_FACTORY_ABI,
     AGENT_FACTORY_ADDRESS,
@@ -57,10 +55,9 @@ export const getMechMinterContract = () => {
   return contract;
 };
 
-export const getMechContract = ({ agent_mech_address }) => {
+export const getMechContract = () => {
   const { web3, address , chainId } = getWeb3Details();
   const { agentFactory } = address.agentFactory;
-  console.log("Web3 Details:" + agent_mech_address);
   const contract = new web3.eth.Contract(
     AGENT_MECH_ABI,
     "0x3504fb5053ec12f748017248a395b4ed31739705",
