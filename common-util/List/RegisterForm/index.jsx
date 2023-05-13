@@ -7,7 +7,6 @@ import get from 'lodash/get';
 import isNil from 'lodash/isNil';
 import { WhiteButton } from 'common-util/Button';
 import IpfsHashGenerationModal from '../IpfsHashGenerationModal';
-import { DependencyLabel } from '../ListCommon';
 import { RegisterFooter, ComplexLabel } from '../styles';
 import { FormItemHash } from './helpers';
 

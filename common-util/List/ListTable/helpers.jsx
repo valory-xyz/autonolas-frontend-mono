@@ -5,7 +5,7 @@ import {
 import { SearchOutlined, CopyOutlined } from '@ant-design/icons';
 import PropTypes from 'prop-types';
 
-import { NAV_TYPES, SERVICE_STATE, TOTAL_VIEW_COUNT } from 'util/constants';
+import { NAV_TYPES, TOTAL_VIEW_COUNT } from 'util/constants';
 import { ExternalLink } from 'react-feather';
 
 const { Text, Title } = Typography;
@@ -97,51 +97,6 @@ export const getTableColumns = (type, { onViewClick, onUpdateClick }) => {
     ];
   }
 
-  if (type === NAV_TYPES.SERVICE) {
-    return [
-      {
-        title: 'ID',
-        dataIndex: 'id',
-        key: 'id',
-        width: 50,
-        fixed: 'left',
-      },
-      {
-        title: 'Owner',
-        dataIndex: 'owner',
-        key: 'owner',
-        width: 200,
-        render: (text) => <EllipsisMiddle>{text}</EllipsisMiddle>,
-      },
-      {
-        title: 'State',
-        dataIndex: 'state',
-        key: 'state',
-        width: 150,
-        render: (e) => <>{SERVICE_STATE[e]}</>,
-      },
-      {
-        width: 220,
-        title: 'Action',
-        key: 'action',
-        fixed: 'right',
-        render: (_text, record) => (
-          <Space size="middle">
-            <Button type="link" onClick={() => onViewClick(record.id)}>
-              View
-            </Button>
-
-            {onUpdateClick && (
-              <Button type="link" onClick={() => onUpdateClick(record.id)}>
-                Update
-              </Button>
-            )}
-          </Space>
-        ),
-      },
-    ];
-  }
-
   return [];
 };
 
@@ -179,16 +134,6 @@ export const getData = (type, rawData, { current }) => {
       hash: item.agentHashes[0] || '-',
       mech: item.mech,
       dependency: (item.dependencies || []).length,
-    }));
-  }
-
-  if (type === NAV_TYPES.SERVICE) {
-    data = rawData.map((item, index) => ({
-      id: item.id || `${startIndex + index}`,
-      developer: item.developer || '-',
-      owner: item.owner || '-',
-      active: `${item.active}`,
-      state: item.state,
     }));
   }
 
