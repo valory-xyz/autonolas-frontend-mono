@@ -60,7 +60,7 @@ export const getMechContract = () => {
   const { agentFactory } = address.agentFactory;
   const contract = new web3.eth.Contract(
     AGENT_MECH_ABI,
-    "0x3504fb5053ec12f748017248a395b4ed31739705",
+    "0x80f8cba027c830e06316e8d1fd9eb770772e3172",
   );
   return contract;
 };
@@ -70,7 +70,7 @@ export async function fetchGraphQLData() {
     const url = "https://api.studio.thegraph.com/query/46780/mech/v0.0.1";
     const query = `
       {
-        createMeches(first: 10) {
+        createMeches(first: 10, orderBy: agentId, order: ASC) {
           id
           mech
           agentId
