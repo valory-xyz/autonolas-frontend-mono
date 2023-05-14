@@ -18,6 +18,7 @@ Installation:
 
 To Start Server:
 
+`export NEXT_PUBLIC_REGISTRY_URL=registry.autonolas.tech`
 `yarn dev`
 
 To Visit App:

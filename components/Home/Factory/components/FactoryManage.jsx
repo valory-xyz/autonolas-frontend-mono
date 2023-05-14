@@ -26,7 +26,6 @@ const MintAgent = ({ account }) => {
 
       contract.methods
         .create(
-          '1',
           values.owner_address,
           `0x${values.hash}`,
           values.price,
