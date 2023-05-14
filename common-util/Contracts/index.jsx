@@ -60,7 +60,7 @@ export const getMechContract = () => {
   const { agentFactory } = address.agentFactory;
   const contract = new web3.eth.Contract(
     AGENT_MECH_ABI,
-    "0x80f8cba027c830e06316e8d1fd9eb770772e3172",
+    "0xFf82123dFB52ab75C417195c5fDB87630145ae81",
   );
   return contract;
 };

@@ -4,7 +4,7 @@ import { AGENT_MECH_ABI } from 'common-util/AbiAndAddresses';
 import Request from './components/Request';
 
 // Replace the following values with your specific contract information
-const CONTRACT_ADDRESS = '0x80f8cba027c830e06316e8d1fd9eb770772e3172';
+const CONTRACT_ADDRESS = '0xFf82123dFB52ab75C417195c5fDB87630145ae81';
 const WEBSOCKET_PROVIDER = 'wss://rpc.gnosischain.com/wss';
 
 const truncate = (str, length) => (
