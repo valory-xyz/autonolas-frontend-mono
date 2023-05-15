@@ -46,7 +46,7 @@ export const EllipsisMiddle = ({
     <Text style={textStyle} {...rest}>
       {isEtherscanLink ? (
         <a
-          href={`${GATEWAY_URL}/f01701220${text}`}
+          href={`${GATEWAY_URL}/${text}`}
           target="_blank"
           rel="noopener noreferrer"
         >

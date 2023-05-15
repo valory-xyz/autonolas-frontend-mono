@@ -4,10 +4,9 @@ import { connect } from 'react-redux';
 import Web3 from 'web3';
 import { Button, Form, Input } from 'antd/lib';
 import get from 'lodash/get';
-import isNil from 'lodash/isNil';
 import { WhiteButton } from 'common-util/Button';
 import IpfsHashGenerationModal from '../IpfsHashGenerationModal';
-import { RegisterFooter, ComplexLabel } from '../styles';
+import { RegisterFooter } from '../styles';
 import { FormItemHash } from './helpers';
 
 export const FORM_NAME = 'register_form';
@@ -113,16 +112,6 @@ const RegisterForm = ({
               required: true,
               message: 'Please input the price the mech charges',
             },
-            () => ({
-              validator(_, value) {
-                if (true) return Promise.resolve();
-                return Promise.reject(
-                  new Error(
-                    'Please input a valid price',
-                  ),
-                );
-              },
-            }),
           ]}
           className="mb-0"
         >
