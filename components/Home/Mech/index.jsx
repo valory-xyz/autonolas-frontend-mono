@@ -1,18 +1,48 @@
 import React, { useState, useEffect } from 'react';
 import Web3 from 'web3';
-import { Table } from 'antd/lib';
+import { Table, Typography } from 'antd/lib';
 import { AGENT_MECH_ABI } from 'common-util/AbiAndAddresses';
+import { EllipsisMiddle } from 'common-util/List/ListTable/helpers';
+import { NA } from 'common-util/constants';
 import Request from './components/Request';
 
 // Replace the following values with your specific contract information
 const CONTRACT_ADDRESS = '0xFf82123dFB52ab75C417195c5fDB87630145ae81';
 const WEBSOCKET_PROVIDER = 'wss://rpc.gnosischain.com/wss';
 
-const truncate = (str, length) => (str && str.length > length ? `${str.substring(0, length)}...` : str);
+const { Title } = Typography;
 
-const cellStyle = {
-  padding: '8px',
-};
+const columns = [
+  {
+    title: 'Index',
+    dataIndex: 'index',
+    key: 'index',
+  },
+  {
+    title: 'Request Id',
+    dataIndex: 'requestId',
+    key: 'requestId',
+    width: 420,
+    render: (text) => <EllipsisMiddle suffixCount={12}>{text}</EllipsisMiddle>,
+  },
+  {
+    title: 'Sender',
+    dataIndex: 'sender',
+    key: 'sender',
+    width: 420,
+    render: (text) => {
+      if (!text) return NA;
+      return <EllipsisMiddle suffixCount={12}>{text}</EllipsisMiddle>;
+    },
+  },
+  {
+    title: 'Data',
+    dataIndex: 'data',
+    key: 'data',
+    width: 420,
+    render: (text) => <EllipsisMiddle suffixCount={12}>{text}</EllipsisMiddle>,
+  },
+];
 
 const EventListener = () => {
   const [web3Ws, setWeb3Ws] = useState(null);
@@ -94,104 +124,30 @@ const EventListener = () => {
     index: index + 1,
     requestId: event.returnValues.requestId,
     sender: event.returnValues.sender,
-    // sender: truncate(event.returnValues.sender, 10),
     data: event.returnValues.data,
   }));
 
   const requestsDatasource = getDatasource(firstEvents);
+  const deliversDatasource = getDatasource(secondEvents);
 
   return (
     <div>
       <Request />
-      <h2>Requests</h2>
-
+      <Title level={3}>Requests</Title>
       <Table
-        columns={[
-          {
-            title: 'Index',
-            dataIndex: 'index',
-            key: 'index',
-            render: (text) => <span>{text}</span>,
-          },
-          {
-            title: 'Request Id',
-            dataIndex: 'requestId',
-            key: 'requestId',
-            render: (text) => <span>{text}</span>,
-          },
-          {
-            title: 'Sender',
-            dataIndex: 'sender',
-            key: 'sender',
-            render: (text) => <span>{text}</span>,
-          },
-          {
-            title: 'Data',
-            dataIndex: 'data',
-            key: 'data',
-            render: (text) => <span>{text}</span>,
-          },
-        ]}
+        columns={columns}
         dataSource={requestsDatasource}
         pagination={false}
-        // pagination={
-        //   isPaginationRequired
-        //     ? {
-        //       total,
-        //       current: currentPage,
-        //       defaultPageSize: TOTAL_VIEW_COUNT,
-        //       onChange: (e) => setCurrentPage(e),
-        //     }
-        //     : false
-        // }
-        scroll={{ x: 1200 }}
         rowKey={(x) => x.key}
       />
-      <table>
-        <thead>
-          <tr>
-            <th>Index</th>
-            <th>Request Id</th>
-            <th>Sender</th>
-            <th>Data</th>
-          </tr>
-        </thead>
-        <tbody>
-          {firstEvents.map((event, index) => (
-            <tr key={index}>
-              <td style={cellStyle}>{index}</td>
-              <td style={cellStyle}>{event.returnValues.requestId}</td>
-              <td style={cellStyle}>
-                {truncate(event.returnValues.sender, 10)}
-              </td>
-              <td style={cellStyle}>{event.returnValues.data}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-      <h2>Delivers</h2>
-      <table>
-        <thead>
-          <tr>
-            <th>Index</th>
-            <th>Request Id</th>
-            <th>Sender</th>
-            <th>Data</th>
-          </tr>
-        </thead>
-        <tbody>
-          {secondEvents.map((event, index) => (
-            <tr key={index}>
-              <td style={cellStyle}>{index}</td>
-              <td style={cellStyle}>{event.returnValues.requestId}</td>
-              <td style={cellStyle}>
-                {truncate(event.returnValues.sender, 10)}
-              </td>
-              <td style={cellStyle}>{event.returnValues.data}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+
+      <Title level={3}>Delivers</Title>
+      <Table
+        columns={columns}
+        dataSource={deliversDatasource}
+        pagination={false}
+        rowKey={(x) => x.key}
+      />
     </div>
   );
 };
