@@ -2,13 +2,10 @@ import Web3 from 'web3';
 import {
   AGENT_FACTORY_ADDRESS,
   AGENT_FACTORY_ABI,
-
   AGENT_MECH_ABI,
-
   AGENT_REGISTRY_ADDRESS,
   AGENT_REGISTRY_ABI,
 } from 'common-util/AbiAndAddresses';
-import { LOCAL_CHAIN_ID } from 'util/constants';
 
 export const ADDRESSES = {
   100: {
@@ -36,8 +33,7 @@ export const getWeb3Details = () => {
 };
 
 export const getAgentContract = () => {
-  const { web3, address, chainId } = getWeb3Details();
-  const { agentRegistry } = address.agentRegistry;
+  const { web3 } = getWeb3Details();
   const contract = new web3.eth.Contract(
     AGENT_REGISTRY_ABI,
     AGENT_REGISTRY_ADDRESS,
@@ -46,8 +42,7 @@ export const getAgentContract = () => {
 };
 
 export const getMechMinterContract = () => {
-  const { web3, address, chainId } = getWeb3Details();
-  const { agentFactory } = address.agentFactory;
+  const { web3 } = getWeb3Details();
   const contract = new web3.eth.Contract(
     AGENT_FACTORY_ABI,
     AGENT_FACTORY_ADDRESS,
@@ -56,8 +51,7 @@ export const getMechMinterContract = () => {
 };
 
 export const getMechContract = () => {
-  const { web3, address, chainId } = getWeb3Details();
-  const { agentFactory } = address.agentFactory;
+  const { web3 } = getWeb3Details();
   const contract = new web3.eth.Contract(
     AGENT_MECH_ABI,
     '0xFf82123dFB52ab75C417195c5fDB87630145ae81',

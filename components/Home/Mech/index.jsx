@@ -12,38 +12,6 @@ const WEBSOCKET_PROVIDER = 'wss://rpc.gnosischain.com/wss';
 
 const { Title } = Typography;
 
-const columns = [
-  {
-    title: 'Index',
-    dataIndex: 'index',
-    key: 'index',
-  },
-  {
-    title: 'Request Id',
-    dataIndex: 'requestId',
-    key: 'requestId',
-    width: 420,
-    render: (text) => <EllipsisMiddle suffixCount={12}>{text}</EllipsisMiddle>,
-  },
-  {
-    title: 'Sender',
-    dataIndex: 'sender',
-    key: 'sender',
-    width: 420,
-    render: (text) => {
-      if (!text) return NA;
-      return <EllipsisMiddle suffixCount={12}>{text}</EllipsisMiddle>;
-    },
-  },
-  {
-    title: 'Data',
-    dataIndex: 'data',
-    key: 'data',
-    width: 420,
-    render: (text) => <EllipsisMiddle suffixCount={12}>{text}</EllipsisMiddle>,
-  },
-];
-
 const EventListener = () => {
   const [web3Ws, setWeb3Ws] = useState(null);
   const [contractWs, setContractWs] = useState(null);
@@ -135,7 +103,41 @@ const EventListener = () => {
       <Request />
       <Title level={3}>Requests</Title>
       <Table
-        columns={columns}
+        columns={[
+          {
+            title: 'Index',
+            dataIndex: 'index',
+            key: 'index',
+          },
+          {
+            title: 'Request Id',
+            dataIndex: 'requestId',
+            key: 'requestId',
+            width: 420,
+            render: (text) => (
+              <EllipsisMiddle suffixCount={12}>{text}</EllipsisMiddle>
+            ),
+          },
+          {
+            title: 'Sender',
+            dataIndex: 'sender',
+            key: 'sender',
+            width: 420,
+            render: (text) => {
+              if (!text) return NA;
+              return <EllipsisMiddle suffixCount={12}>{text}</EllipsisMiddle>;
+            },
+          },
+          {
+            title: 'Data',
+            dataIndex: 'data',
+            key: 'data',
+            width: 420,
+            render: (text) => (
+              <EllipsisMiddle suffixCount={12} isEtherscanLink>{text}</EllipsisMiddle>
+            ),
+          },
+        ]}
         dataSource={requestsDatasource}
         pagination={false}
         rowKey={(x) => x.key}
@@ -143,7 +145,31 @@ const EventListener = () => {
 
       <Title level={3}>Delivers</Title>
       <Table
-        columns={columns}
+        columns={[
+          {
+            title: 'Index',
+            dataIndex: 'index',
+            key: 'index',
+          },
+          {
+            title: 'Request Id',
+            dataIndex: 'requestId',
+            key: 'requestId',
+            render: (text) => (
+              <EllipsisMiddle suffixCount={12}>{text}</EllipsisMiddle>
+            ),
+          },
+          {
+            title: 'Data',
+            dataIndex: 'data',
+            key: 'data',
+            render: (text) => (
+              <EllipsisMiddle suffixCount={12} isEtherscanLink>
+                {text}
+              </EllipsisMiddle>
+            ),
+          },
+        ]}
         dataSource={deliversDatasource}
         pagination={false}
         rowKey={(x) => x.key}

@@ -3,8 +3,9 @@ import dayjs from 'dayjs';
 import { notification } from 'antd/lib';
 import { isNil, isString } from 'lodash';
 import { COLOR } from 'util/theme';
-import { NA } from 'common-util/constants';
 import { TOTAL_VIEW_COUNT } from 'util/constants';
+import { NA } from 'common-util/constants';
+import { ADDRESSES } from 'common-util/Contracts';
 
 /**
  * https://docs.ethers.org/v5/api/utils/constants/#constants-MaxUint256
@@ -166,3 +167,5 @@ export const getFirstAndLastIndex = (total, nextPage) => {
 export const safeSendTransactionNotification = () => notification.warning({
   message: 'Please submit the transaction in your safe app.',
 });
+
+export const getSupportedNetworks = () => Object.keys(ADDRESSES).map((e) => Number(e));

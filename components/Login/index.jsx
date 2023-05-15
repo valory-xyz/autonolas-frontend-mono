@@ -9,6 +9,7 @@ import {
   setErrorMessage as setErrorMessageFn,
   setLogout as setLogoutFn,
 } from 'store/setup/actions';
+import { getSupportedNetworks } from 'common-util/functions';
 
 const Container = styled.div``;
 
@@ -50,6 +51,7 @@ const Login = ({
         rpc={rpc}
         onConnect={onConnect}
         onDisconnect={onDisconnect}
+        supportedNetworks={getSupportedNetworks()}
         onError={onError}
       />
     </Container>
