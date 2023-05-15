@@ -2,7 +2,25 @@ import styled from 'styled-components';
 import { Layout } from 'antd/lib';
 import { COLOR, MEDIA_QUERY } from 'util/theme';
 
-export const CustomLayout = styled(Layout)``;
+export const CustomLayout = styled(Layout)`
+  .registry-tabs {
+    .ant-tabs-extra-content {
+      &:not(:last-child) {
+        .ant-typography {
+          color: ${COLOR.PRIMARY};
+          margin: 0 12px 0 0;
+        }
+      }
+      &:last-child {
+        gap: 12px;
+        display: flex;
+      }
+    }
+    .ant-tabs-nav-wrap {
+      padding-left: 16px;
+    }
+  }
+`;
 
 // HEADER
 export const HeaderContainer = styled.div`

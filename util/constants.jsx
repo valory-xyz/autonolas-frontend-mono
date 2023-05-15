@@ -8,7 +8,7 @@ export const NAV_TYPES = {
 export const TOTAL_VIEW_COUNT = 10;
 
 export const URL = {
-  AGENTS: "registry"
+  AGENTS: 'registry',
 };
 
 export const HASH_PREFIX = 'f01701220';
