@@ -1,12 +1,10 @@
 import { useState } from 'react';
 import {
-  Input, Space, Button, Typography, Tooltip
+  Input, Button, Typography, Tooltip,
 } from 'antd/lib';
 import { SearchOutlined, CopyOutlined } from '@ant-design/icons';
 import PropTypes from 'prop-types';
-
-import { NAV_TYPES, TOTAL_VIEW_COUNT } from 'util/constants';
-import { ExternalLink } from 'react-feather';
+import { GATEWAY_URL, NAV_TYPES, TOTAL_VIEW_COUNT } from 'util/constants';
 
 const { Text, Title } = Typography;
 const textStyle = { maxWidth: '100%' };
@@ -22,21 +20,46 @@ export const getTrimmedText = (str, suffixCount) => {
   return `${frontText}...${backText}`;
 };
 
-export const EllipsisMiddle = ({ suffixCount, children, ...rest }) => {
+export const EllipsisMiddle = ({
+  suffixCount,
+  isEtherscanLink,
+  children,
+  ...rest
+}) => {
   if (typeof children !== 'string') return <>{children}</>;
 
   if (children.length <= 12) return <Text {...rest}>{children}</Text>;
+
+  const getText = () => {
+    if (!isEtherscanLink) return children;
+    const hash = children.substring(2);
+    return `f01701220${hash}`;
+  };
+
+  const text = getText();
+  const trimmedText = getTrimmedText(text, suffixCount, isEtherscanLink);
 
   /**
    * truncate only if the character exceeds more than 12
    */
   return (
     <Text style={textStyle} {...rest}>
-      {getTrimmedText(children, suffixCount)}
+      {isEtherscanLink ? (
+        <a
+          href={`${GATEWAY_URL}/${text}`}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          {trimmedText}
+        </a>
+      ) : (
+        trimmedText
+      )}
+
       <Tooltip title="Copy">
         &nbsp;
         <Button
-          onClick={() => navigator.clipboard.writeText(children)}
+          onClick={() => navigator.clipboard.writeText(text)}
           icon={<CopyOutlined />}
         />
       </Tooltip>
@@ -46,11 +69,13 @@ export const EllipsisMiddle = ({ suffixCount, children, ...rest }) => {
 
 EllipsisMiddle.propTypes = {
   suffixCount: PropTypes.number,
+  isEtherscanLink: PropTypes.bool,
   children: PropTypes.string,
 };
 
 EllipsisMiddle.defaultProps = {
   suffixCount: 6,
+  isEtherscanLink: false,
   children: '',
 };
 
@@ -58,7 +83,7 @@ EllipsisMiddle.defaultProps = {
  * helper functions
  */
 
-export const getTableColumns = (type, { onViewClick, onUpdateClick }) => {
+export const getTableColumns = (type) => {
   if (type === NAV_TYPES.COMPONENT || type === NAV_TYPES.AGENT) {
     return [
       {
@@ -80,10 +105,8 @@ export const getTableColumns = (type, { onViewClick, onUpdateClick }) => {
         key: 'hash',
         width: 200,
         render: (text) => (
-          <EllipsisMiddle>
-            <a href={`https://gateway.autonolas.tech/ipfs/f01701220${text.substring(2)}`} target="_blank" rel="noopener noreferrer">
-              {text}
-            </a>
+          <EllipsisMiddle isEtherscanLink suffixCount={14}>
+            {text}
           </EllipsisMiddle>
         ),
       },
@@ -143,7 +166,7 @@ export const getData = (type, rawData, { current }) => {
 /**
  * tab content
  */
-export const useExtraTabContent = ({ title, onRegisterClick = () => {} }) => {
+export const useExtraTabContent = ({ title }) => {
   const [searchValue, setSearchValue] = useState('');
   const [value, setValue] = useState('');
   const clearSearch = () => {

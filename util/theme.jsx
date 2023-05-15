@@ -34,3 +34,7 @@ export const MEDIA_QUERY = {
   laptop: `@media only screen and (max-width: ${BREAK_POINT.xl})`,
   desktop: `@media only screen and (max-width: ${BREAK_POINT.xxl})`,
 };
+
+export const OTHERS = {
+  borderRadius: '5px',
+};

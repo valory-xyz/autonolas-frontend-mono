@@ -72,7 +72,7 @@ ListTable.propTypes = {
   type: PropTypes.string.isRequired,
   searchValue: PropTypes.string.isRequired,
   isLoading: PropTypes.bool,
-  list: PropTypes.arrayOf(PropTypes.object),
+  list: PropTypes.arrayOf(PropTypes.shape({})),
   total: PropTypes.number,
   currentPage: PropTypes.number,
   setCurrentPage: PropTypes.func,

@@ -2,526 +2,526 @@ export const AGENT_FACTORY_ADDRESS = '0x88DE734655184a09B70700aE4F72364d1ad23728
 
 export const AGENT_FACTORY_ABI = [
   {
-    "inputs": [
+    inputs: [
       {
-        "internalType": "address",
-        "name": "_agentRegistry",
-        "type": "address"
-      }
+        internalType: 'address',
+        name: '_agentRegistry',
+        type: 'address',
+      },
     ],
-    "stateMutability": "nonpayable",
-    "type": "constructor"
+    stateMutability: 'nonpayable',
+    type: 'constructor',
   },
   {
-    "inputs": [
+    inputs: [
       {
-        "internalType": "address",
-        "name": "operator",
-        "type": "address"
-      }
+        internalType: 'address',
+        name: 'operator',
+        type: 'address',
+      },
     ],
-    "name": "AgentInstanceRegistered",
-    "type": "error"
+    name: 'AgentInstanceRegistered',
+    type: 'error',
   },
   {
-    "inputs": [
+    inputs: [
       {
-        "internalType": "uint256",
-        "name": "serviceId",
-        "type": "uint256"
-      }
+        internalType: 'uint256',
+        name: 'serviceId',
+        type: 'uint256',
+      },
     ],
-    "name": "AgentInstancesSlotsFilled",
-    "type": "error"
+    name: 'AgentInstancesSlotsFilled',
+    type: 'error',
   },
   {
-    "inputs": [
+    inputs: [
       {
-        "internalType": "uint256",
-        "name": "agentId",
-        "type": "uint256"
-      }
+        internalType: 'uint256',
+        name: 'agentId',
+        type: 'uint256',
+      },
     ],
-    "name": "AgentNotFound",
-    "type": "error"
+    name: 'AgentNotFound',
+    type: 'error',
   },
   {
-    "inputs": [
+    inputs: [
       {
-        "internalType": "uint256",
-        "name": "agentId",
-        "type": "uint256"
+        internalType: 'uint256',
+        name: 'agentId',
+        type: 'uint256',
       },
       {
-        "internalType": "uint256",
-        "name": "serviceId",
-        "type": "uint256"
-      }
+        internalType: 'uint256',
+        name: 'serviceId',
+        type: 'uint256',
+      },
     ],
-    "name": "AgentNotInService",
-    "type": "error"
+    name: 'AgentNotInService',
+    type: 'error',
   },
   {
-    "inputs": [
+    inputs: [
       {
-        "internalType": "uint256",
-        "name": "componentId",
-        "type": "uint256"
-      }
+        internalType: 'uint256',
+        name: 'componentId',
+        type: 'uint256',
+      },
     ],
-    "name": "ComponentNotFound",
-    "type": "error"
+    name: 'ComponentNotFound',
+    type: 'error',
   },
   {
-    "inputs": [],
-    "name": "HashExists",
-    "type": "error"
+    inputs: [],
+    name: 'HashExists',
+    type: 'error',
   },
   {
-    "inputs": [
+    inputs: [
       {
-        "internalType": "uint256",
-        "name": "sent",
-        "type": "uint256"
+        internalType: 'uint256',
+        name: 'sent',
+        type: 'uint256',
       },
       {
-        "internalType": "uint256",
-        "name": "expected",
-        "type": "uint256"
+        internalType: 'uint256',
+        name: 'expected',
+        type: 'uint256',
       },
       {
-        "internalType": "uint256",
-        "name": "serviceId",
-        "type": "uint256"
-      }
+        internalType: 'uint256',
+        name: 'serviceId',
+        type: 'uint256',
+      },
     ],
-    "name": "IncorrectAgentBondingValue",
-    "type": "error"
+    name: 'IncorrectAgentBondingValue',
+    type: 'error',
   },
   {
-    "inputs": [
+    inputs: [
       {
-        "internalType": "uint256",
-        "name": "sent",
-        "type": "uint256"
+        internalType: 'uint256',
+        name: 'sent',
+        type: 'uint256',
       },
       {
-        "internalType": "uint256",
-        "name": "expected",
-        "type": "uint256"
+        internalType: 'uint256',
+        name: 'expected',
+        type: 'uint256',
       },
       {
-        "internalType": "uint256",
-        "name": "serviceId",
-        "type": "uint256"
-      }
+        internalType: 'uint256',
+        name: 'serviceId',
+        type: 'uint256',
+      },
     ],
-    "name": "IncorrectRegistrationDepositValue",
-    "type": "error"
+    name: 'IncorrectRegistrationDepositValue',
+    type: 'error',
   },
   {
-    "inputs": [
+    inputs: [
       {
-        "internalType": "address",
-        "name": "sender",
-        "type": "address"
+        internalType: 'address',
+        name: 'sender',
+        type: 'address',
       },
       {
-        "internalType": "address",
-        "name": "manager",
-        "type": "address"
-      }
+        internalType: 'address',
+        name: 'manager',
+        type: 'address',
+      },
     ],
-    "name": "ManagerOnly",
-    "type": "error"
+    name: 'ManagerOnly',
+    type: 'error',
   },
   {
-    "inputs": [
+    inputs: [
       {
-        "internalType": "address",
-        "name": "provided",
-        "type": "address"
+        internalType: 'address',
+        name: 'provided',
+        type: 'address',
       },
       {
-        "internalType": "address",
-        "name": "expected",
-        "type": "address"
+        internalType: 'address',
+        name: 'expected',
+        type: 'address',
       },
       {
-        "internalType": "uint256",
-        "name": "serviceId",
-        "type": "uint256"
-      }
+        internalType: 'uint256',
+        name: 'serviceId',
+        type: 'uint256',
+      },
     ],
-    "name": "OnlyOwnServiceMultisig",
-    "type": "error"
+    name: 'OnlyOwnServiceMultisig',
+    type: 'error',
   },
   {
-    "inputs": [
+    inputs: [
       {
-        "internalType": "address",
-        "name": "operator",
-        "type": "address"
+        internalType: 'address',
+        name: 'operator',
+        type: 'address',
       },
       {
-        "internalType": "uint256",
-        "name": "serviceId",
-        "type": "uint256"
-      }
+        internalType: 'uint256',
+        name: 'serviceId',
+        type: 'uint256',
+      },
     ],
-    "name": "OperatorHasNoInstances",
-    "type": "error"
+    name: 'OperatorHasNoInstances',
+    type: 'error',
   },
   {
-    "inputs": [
+    inputs: [
       {
-        "internalType": "uint256",
-        "name": "provided",
-        "type": "uint256"
+        internalType: 'uint256',
+        name: 'provided',
+        type: 'uint256',
       },
       {
-        "internalType": "uint256",
-        "name": "max",
-        "type": "uint256"
-      }
+        internalType: 'uint256',
+        name: 'max',
+        type: 'uint256',
+      },
     ],
-    "name": "Overflow",
-    "type": "error"
+    name: 'Overflow',
+    type: 'error',
   },
   {
-    "inputs": [
+    inputs: [
       {
-        "internalType": "address",
-        "name": "sender",
-        "type": "address"
+        internalType: 'address',
+        name: 'sender',
+        type: 'address',
       },
       {
-        "internalType": "address",
-        "name": "owner",
-        "type": "address"
-      }
+        internalType: 'address',
+        name: 'owner',
+        type: 'address',
+      },
     ],
-    "name": "OwnerOnly",
-    "type": "error"
+    name: 'OwnerOnly',
+    type: 'error',
   },
   {
-    "inputs": [],
-    "name": "Paused",
-    "type": "error"
+    inputs: [],
+    name: 'Paused',
+    type: 'error',
   },
   {
-    "inputs": [],
-    "name": "ReentrancyGuard",
-    "type": "error"
+    inputs: [],
+    name: 'ReentrancyGuard',
+    type: 'error',
   },
   {
-    "inputs": [
+    inputs: [
       {
-        "internalType": "uint256",
-        "name": "serviceId",
-        "type": "uint256"
-      }
+        internalType: 'uint256',
+        name: 'serviceId',
+        type: 'uint256',
+      },
     ],
-    "name": "ServiceMustBeInactive",
-    "type": "error"
+    name: 'ServiceMustBeInactive',
+    type: 'error',
   },
   {
-    "inputs": [
+    inputs: [
       {
-        "internalType": "address",
-        "name": "token",
-        "type": "address"
+        internalType: 'address',
+        name: 'token',
+        type: 'address',
       },
       {
-        "internalType": "address",
-        "name": "from",
-        "type": "address"
+        internalType: 'address',
+        name: 'from',
+        type: 'address',
       },
       {
-        "internalType": "address",
-        "name": "to",
-        "type": "address"
+        internalType: 'address',
+        name: 'to',
+        type: 'address',
       },
       {
-        "internalType": "uint256",
-        "name": "value",
-        "type": "uint256"
-      }
+        internalType: 'uint256',
+        name: 'value',
+        type: 'uint256',
+      },
     ],
-    "name": "TransferFailed",
-    "type": "error"
+    name: 'TransferFailed',
+    type: 'error',
   },
   {
-    "inputs": [
+    inputs: [
       {
-        "internalType": "address",
-        "name": "multisig",
-        "type": "address"
-      }
+        internalType: 'address',
+        name: 'multisig',
+        type: 'address',
+      },
     ],
-    "name": "UnauthorizedMultisig",
-    "type": "error"
+    name: 'UnauthorizedMultisig',
+    type: 'error',
   },
   {
-    "inputs": [
+    inputs: [
       {
-        "internalType": "uint256",
-        "name": "agentId",
-        "type": "uint256"
-      }
+        internalType: 'uint256',
+        name: 'agentId',
+        type: 'uint256',
+      },
     ],
-    "name": "WrongAgentId",
-    "type": "error"
+    name: 'WrongAgentId',
+    type: 'error',
   },
   {
-    "inputs": [
+    inputs: [
       {
-        "internalType": "uint256",
-        "name": "numValues1",
-        "type": "uint256"
+        internalType: 'uint256',
+        name: 'numValues1',
+        type: 'uint256',
       },
       {
-        "internalType": "uint256",
-        "name": "numValues2",
-        "type": "uint256"
-      }
+        internalType: 'uint256',
+        name: 'numValues2',
+        type: 'uint256',
+      },
     ],
-    "name": "WrongArrayLength",
-    "type": "error"
+    name: 'WrongArrayLength',
+    type: 'error',
   },
   {
-    "inputs": [
+    inputs: [
       {
-        "internalType": "uint256",
-        "name": "serviceId",
-        "type": "uint256"
-      }
+        internalType: 'uint256',
+        name: 'serviceId',
+        type: 'uint256',
+      },
     ],
-    "name": "WrongOperator",
-    "type": "error"
+    name: 'WrongOperator',
+    type: 'error',
   },
   {
-    "inputs": [
+    inputs: [
       {
-        "internalType": "uint256",
-        "name": "state",
-        "type": "uint256"
+        internalType: 'uint256',
+        name: 'state',
+        type: 'uint256',
       },
       {
-        "internalType": "uint256",
-        "name": "serviceId",
-        "type": "uint256"
-      }
+        internalType: 'uint256',
+        name: 'serviceId',
+        type: 'uint256',
+      },
     ],
-    "name": "WrongServiceState",
-    "type": "error"
+    name: 'WrongServiceState',
+    type: 'error',
   },
   {
-    "inputs": [
+    inputs: [
       {
-        "internalType": "uint256",
-        "name": "currentThreshold",
-        "type": "uint256"
+        internalType: 'uint256',
+        name: 'currentThreshold',
+        type: 'uint256',
       },
       {
-        "internalType": "uint256",
-        "name": "minThreshold",
-        "type": "uint256"
+        internalType: 'uint256',
+        name: 'minThreshold',
+        type: 'uint256',
       },
       {
-        "internalType": "uint256",
-        "name": "maxThreshold",
-        "type": "uint256"
-      }
+        internalType: 'uint256',
+        name: 'maxThreshold',
+        type: 'uint256',
+      },
     ],
-    "name": "WrongThreshold",
-    "type": "error"
+    name: 'WrongThreshold',
+    type: 'error',
   },
   {
-    "inputs": [],
-    "name": "ZeroAddress",
-    "type": "error"
+    inputs: [],
+    name: 'ZeroAddress',
+    type: 'error',
   },
   {
-    "inputs": [],
-    "name": "ZeroValue",
-    "type": "error"
+    inputs: [],
+    name: 'ZeroValue',
+    type: 'error',
   },
   {
-    "anonymous": false,
-    "inputs": [
+    anonymous: false,
+    inputs: [
       {
-        "indexed": true,
-        "internalType": "address",
-        "name": "mech",
-        "type": "address"
+        indexed: true,
+        internalType: 'address',
+        name: 'mech',
+        type: 'address',
       },
       {
-        "indexed": true,
-        "internalType": "uint256",
-        "name": "agentId",
-        "type": "uint256"
+        indexed: true,
+        internalType: 'uint256',
+        name: 'agentId',
+        type: 'uint256',
       },
       {
-        "indexed": true,
-        "internalType": "uint256",
-        "name": "price",
-        "type": "uint256"
-      }
+        indexed: true,
+        internalType: 'uint256',
+        name: 'price',
+        type: 'uint256',
+      },
     ],
-    "name": "CreateMech",
-    "type": "event"
+    name: 'CreateMech',
+    type: 'event',
   },
   {
-    "anonymous": false,
-    "inputs": [
+    anonymous: false,
+    inputs: [
       {
-        "indexed": true,
-        "internalType": "address",
-        "name": "owner",
-        "type": "address"
-      }
+        indexed: true,
+        internalType: 'address',
+        name: 'owner',
+        type: 'address',
+      },
     ],
-    "name": "OwnerUpdated",
-    "type": "event"
+    name: 'OwnerUpdated',
+    type: 'event',
   },
   {
-    "anonymous": false,
-    "inputs": [
+    anonymous: false,
+    inputs: [
       {
-        "indexed": true,
-        "internalType": "address",
-        "name": "owner",
-        "type": "address"
-      }
+        indexed: true,
+        internalType: 'address',
+        name: 'owner',
+        type: 'address',
+      },
     ],
-    "name": "Pause",
-    "type": "event"
+    name: 'Pause',
+    type: 'event',
   },
   {
-    "anonymous": false,
-    "inputs": [
+    anonymous: false,
+    inputs: [
       {
-        "indexed": true,
-        "internalType": "address",
-        "name": "owner",
-        "type": "address"
-      }
+        indexed: true,
+        internalType: 'address',
+        name: 'owner',
+        type: 'address',
+      },
     ],
-    "name": "Unpause",
-    "type": "event"
+    name: 'Unpause',
+    type: 'event',
   },
   {
-    "inputs": [],
-    "name": "VERSION",
-    "outputs": [
+    inputs: [],
+    name: 'VERSION',
+    outputs: [
       {
-        "internalType": "string",
-        "name": "",
-        "type": "string"
-      }
+        internalType: 'string',
+        name: '',
+        type: 'string',
+      },
     ],
-    "stateMutability": "view",
-    "type": "function"
+    stateMutability: 'view',
+    type: 'function',
   },
   {
-    "inputs": [],
-    "name": "agentRegistry",
-    "outputs": [
+    inputs: [],
+    name: 'agentRegistry',
+    outputs: [
       {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
-      }
+        internalType: 'address',
+        name: '',
+        type: 'address',
+      },
     ],
-    "stateMutability": "view",
-    "type": "function"
+    stateMutability: 'view',
+    type: 'function',
   },
   {
-    "inputs": [
+    inputs: [
       {
-        "internalType": "address",
-        "name": "newOwner",
-        "type": "address"
-      }
+        internalType: 'address',
+        name: 'newOwner',
+        type: 'address',
+      },
     ],
-    "name": "changeOwner",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
+    name: 'changeOwner',
+    outputs: [],
+    stateMutability: 'nonpayable',
+    type: 'function',
   },
   {
-    "inputs": [
+    inputs: [
       {
-        "internalType": "address",
-        "name": "agentOwner",
-        "type": "address"
+        internalType: 'address',
+        name: 'agentOwner',
+        type: 'address',
       },
       {
-        "internalType": "bytes32",
-        "name": "agentHash",
-        "type": "bytes32"
+        internalType: 'bytes32',
+        name: 'agentHash',
+        type: 'bytes32',
       },
       {
-        "internalType": "uint256",
-        "name": "price",
-        "type": "uint256"
-      }
+        internalType: 'uint256',
+        name: 'price',
+        type: 'uint256',
+      },
     ],
-    "name": "create",
-    "outputs": [
+    name: 'create',
+    outputs: [
       {
-        "internalType": "uint256",
-        "name": "agentId",
-        "type": "uint256"
+        internalType: 'uint256',
+        name: 'agentId',
+        type: 'uint256',
       },
       {
-        "internalType": "address",
-        "name": "mech",
-        "type": "address"
-      }
+        internalType: 'address',
+        name: 'mech',
+        type: 'address',
+      },
     ],
-    "stateMutability": "nonpayable",
-    "type": "function"
+    stateMutability: 'nonpayable',
+    type: 'function',
   },
   {
-    "inputs": [],
-    "name": "owner",
-    "outputs": [
+    inputs: [],
+    name: 'owner',
+    outputs: [
       {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
-      }
+        internalType: 'address',
+        name: '',
+        type: 'address',
+      },
     ],
-    "stateMutability": "view",
-    "type": "function"
+    stateMutability: 'view',
+    type: 'function',
   },
   {
-    "inputs": [],
-    "name": "pause",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
+    inputs: [],
+    name: 'pause',
+    outputs: [],
+    stateMutability: 'nonpayable',
+    type: 'function',
   },
   {
-    "inputs": [],
-    "name": "paused",
-    "outputs": [
+    inputs: [],
+    name: 'paused',
+    outputs: [
       {
-        "internalType": "bool",
-        "name": "",
-        "type": "bool"
-      }
+        internalType: 'bool',
+        name: '',
+        type: 'bool',
+      },
     ],
-    "stateMutability": "view",
-    "type": "function"
+    stateMutability: 'view',
+    type: 'function',
   },
   {
-    "inputs": [],
-    "name": "unpause",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  }
+    inputs: [],
+    name: 'unpause',
+    outputs: [],
+    stateMutability: 'nonpayable',
+    type: 'function',
+  },
 ];

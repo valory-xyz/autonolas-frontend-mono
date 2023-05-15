@@ -3,8 +3,9 @@ import dayjs from 'dayjs';
 import { notification } from 'antd/lib';
 import { isNil, isString } from 'lodash';
 import { COLOR } from 'util/theme';
-import { NA } from 'common-util/constants';
 import { TOTAL_VIEW_COUNT } from 'util/constants';
+import { NA } from 'common-util/constants';
+import { ADDRESSES } from 'common-util/Contracts';
 
 /**
  * https://docs.ethers.org/v5/api/utils/constants/#constants-MaxUint256
@@ -153,10 +154,10 @@ export const convertToEth = (value) => ethers.utils.formatEther(value);
  *      = 45
  */
 export const getFirstAndLastIndex = (total, nextPage) => {
-  var first = 1;
-  if (nextPage != 1 ){
-    const first = (nextPage - 1) * TOTAL_VIEW_COUNT + 1;
-  } 
+  let first = 1;
+  if (nextPage !== 1) {
+    first = (nextPage - 1) * TOTAL_VIEW_COUNT + 1;
+  }
   const last = Math.min(nextPage * TOTAL_VIEW_COUNT, total);
   return { first, last };
 };
@@ -167,3 +168,4 @@ export const safeSendTransactionNotification = () => notification.warning({
   message: 'Please submit the transaction in your safe app.',
 });
 
+export const getSupportedNetworks = () => Object.keys(ADDRESSES).map((e) => Number(e));
