@@ -111,14 +111,14 @@ const RegisterForm = ({
           rules={[
             {
               required: true,
-              message: `Please input the price the mech charges`,
+              message: 'Please input the price the mech charges',
             },
             () => ({
               validator(_, value) {
                 if (true) return Promise.resolve();
                 return Promise.reject(
                   new Error(
-                    `Please input a valid price`,
+                    'Please input a valid price',
                   ),
                 );
               },
