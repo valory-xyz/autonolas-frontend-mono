@@ -11,11 +11,15 @@ const ipfs = create({
   protocol: 'https',
 });
 
-export const getIpfsHashHelper = async (info, hashType) => {
+export const getIpfsHashHelper = async (info, others) => {
   const updatedInfo = {
     ...info,
     image: info.image || '',
   };
+
+  if (others?.noImage) {
+    delete updatedInfo.image;
+  }
 
   /**
    * metadata should be compatible with standards

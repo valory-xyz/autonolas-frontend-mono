@@ -6,11 +6,9 @@ import { Form, Input, Button } from 'antd/lib';
 import { getIpfsHashHelper } from './helpers';
 import { CustomModal } from '../styles';
 
-export const FORM_NAME = 'ipfs_creation_form';
+export const FORM_NAME = 'ipfs_creation_form_for_mech';
 
-const IpfsModal = ({
-  visible, type, onUpdateHash, handleCancel, callback,
-}) => {
+const IpfsModal = ({ visible, handleCancel, callback }) => {
   const [form] = Form.useForm();
   const [isHashLoading, setIsHashLoading] = useState(false);
 
@@ -26,7 +24,7 @@ const IpfsModal = ({
     try {
       setIsHashLoading(true); // loading on!
 
-      const hash = await getIpfsHashHelper(values);
+      const hash = await getIpfsHashHelper(values, { noImage: true });
       if (callback) callback(hash);
       onModalClose();
 
@@ -45,14 +43,6 @@ const IpfsModal = ({
     if (callback) callback(hash);
   };
 
-  const handleUpdate = () => {
-    form.validateFields().then(async (values) => {
-      const hash = await getNewHash(values);
-      onUpdateHash(hash);
-      if (callback) callback(hash);
-    });
-  };
-
   const handleOk = () => {
     form.submit();
   };
@@ -60,7 +50,6 @@ const IpfsModal = ({
   return (
     <CustomModal
       visible={visible}
-      centered
       title="Generate IPFS Hash of Metadata File"
       okText="Copy Hash & Close"
       cancelText="Cancel"
@@ -78,11 +67,9 @@ const IpfsModal = ({
             htmlType="submit"
             type="primary"
             loading={isHashLoading}
-            onClick={onUpdateHash ? handleUpdate : handleOk}
+            onClick={handleOk}
           >
-            {onUpdateHash
-              ? 'Save File & Update Hash'
-              : 'Save File & Generate Hash'}
+            Save File & Generate Hash
           </Button>
         </Fragment>,
       ]}
@@ -98,59 +85,22 @@ const IpfsModal = ({
         onFinishFailed={onFinishFailed}
       >
         <Form.Item
-          label="Name"
-          name="name"
-          rules={[
-            { required: true, message: `Please input the name of the ${type}` },
-          ]}
+          label="Prompt"
+          name="prompt"
+          rules={[{ required: true, message: 'Please input the prompt' }]}
         >
           <Input />
         </Form.Item>
 
         <Form.Item
-          label="Description"
-          name="description"
+          label="Tool"
+          name="tool"
           rules={[
             {
               required: true,
-              message: `Please input the description of the ${type}`,
+              message: 'Please input the tool',
             },
           ]}
-        >
-          <Input.TextArea rows={4} />
-        </Form.Item>
-
-        <Form.Item
-          label="Input Format"
-          name="inputFormat"
-          rules={[
-            {
-              required: true,
-              message: 'Please input the input format the agent accepts',
-            },
-          ]}
-        >
-          <Input placeholder="ipfs-v0.1" />
-        </Form.Item>
-
-        <Form.Item
-          label="Output Format"
-          name="outputFormat"
-          rules={[
-            {
-              required: true,
-              message: 'Please input the output format the agent accepts',
-            },
-          ]}
-        >
-          <Input placeholder="ipfs-v0.1" />
-        </Form.Item>
-
-        <Form.Item
-          label="NFT Image URL"
-          name="image"
-          extra="Represents your NFT on marketplaces such as OpenSea"
-          rules={[{ required: true, message: 'Please input the image link' }]}
         >
           <Input />
         </Form.Item>
@@ -161,15 +111,11 @@ const IpfsModal = ({
 
 IpfsModal.propTypes = {
   visible: PropTypes.bool.isRequired,
-  type: PropTypes.string,
-  onUpdateHash: PropTypes.func,
   handleCancel: PropTypes.func.isRequired,
   callback: PropTypes.func,
 };
 
 IpfsModal.defaultProps = {
-  type: '',
-  onUpdateHash: null,
   callback: null,
 };
 

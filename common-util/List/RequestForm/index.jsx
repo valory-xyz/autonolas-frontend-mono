@@ -1,18 +1,28 @@
 import { useState } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
-import { Button, Form, Input } from 'antd/lib';
+import { Button, Form } from 'antd/lib';
 import get from 'lodash/get';
 import { WhiteButton } from 'common-util/Button';
+import { FormItemHash } from '../RegisterForm/helpers';
+import HashOfDataFile from '../IpfsHashGenerationModal/HashOfDataFile';
 import { RegisterFooter } from '../styles';
 
 export const FORM_NAME = 'request_form';
 
-const RequestForm = ({
-  account, handleSubmit, handleCancel,
-}) => {
+const RequestForm = ({ account, handleSubmit, handleCancel }) => {
+  const [isModalVisible, setIsModalVisible] = useState(false);
   const [form] = Form.useForm();
-  const [fields] = useState([]);
+  const [fields, setFields] = useState([]);
+
+  const onGenerateHash = (generatedHash) => {
+    setFields([
+      {
+        name: ['hash'],
+        value: generatedHash || null,
+      },
+    ]);
+  };
 
   const onFinish = (values) => {
     if (account) {
@@ -23,6 +33,8 @@ const RequestForm = ({
   const onFinishFailed = (errorInfo) => {
     console.log('Failed:', errorInfo); /* eslint-disable-line no-console */
   };
+
+  const hashValue = form.getFieldValue('hash');
 
   return (
     <>
@@ -36,19 +48,16 @@ const RequestForm = ({
         onFinishFailed={onFinishFailed}
         autoComplete="off"
       >
-        <Form.Item
-          label="Data"
-          name="data"
-          validateFirst
-          rules={[
-            {
-              required: true,
-              message: 'Please input the data',
-            },
-          ]}
+        <FormItemHash hashValue={hashValue} />
+
+        <Button
+          type="primary"
+          ghost
+          onClick={() => setIsModalVisible(true)}
+          className="mb-12"
         >
-          <Input placeholder="0xffff..." />
-        </Form.Item>
+          Generate Hash & File
+        </Button>
 
         {account ? (
           <Form.Item>
@@ -63,6 +72,12 @@ const RequestForm = ({
           </RegisterFooter>
         )}
       </Form>
+
+      <HashOfDataFile
+        visible={isModalVisible}
+        callback={onGenerateHash}
+        handleCancel={() => setIsModalVisible(false)}
+      />
     </>
   );
 };

@@ -25,11 +25,10 @@ const Request = ({ account }) => {
       const contract = getMechContract();
 
       try {
-        const price = await contract.methods.price().call(); // Add 'await' keyword
+        const price = await contract.methods.price().call();
 
-        await contract.methods.request(
-          values.data,
-        )
+        await contract.methods
+          .request(values.hash)
           .send({ from: account, value: price })
           .then((result) => {
             setInformation(result);
