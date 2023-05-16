@@ -2,34 +2,11 @@ import React, { Fragment, useState } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import get from 'lodash/get';
-import isNil from 'lodash/isNil';
 import { Form, Input, Button } from 'antd/lib';
-import { HASH_PREFIXES } from 'util/constants';
 import { getIpfsHashHelper } from './helpers';
 import { CustomModal } from '../styles';
 
 export const FORM_NAME = 'ipfs_creation_form_for_mech';
-
-export const getBase16Validator = (value, hashType = HASH_PREFIXES.type1) => {
-  if (isNil(value) || value === '') {
-    return Promise.resolve();
-  }
-
-  if (hashType === HASH_PREFIXES.type1) {
-    // only 64 characters long valid Hash
-    if (value.length === 64 && /[0-9a-f]/gm.test(value)) {
-      return Promise.resolve();
-    }
-  }
-
-  if (hashType === HASH_PREFIXES.type2) {
-    if (value.length === 52 && /[0-9a-z]/gm.test(value)) {
-      return Promise.resolve();
-    }
-  }
-
-  return Promise.reject(new Error('Please input a valid hash'));
-};
 
 const IpfsModal = ({ visible, handleCancel, callback }) => {
   const [form] = Form.useForm();

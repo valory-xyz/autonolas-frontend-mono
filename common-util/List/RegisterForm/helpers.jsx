@@ -2,7 +2,7 @@ import PropTypes from 'prop-types';
 import { Form, Input, Tooltip } from 'antd/lib';
 import { LinkOutlined } from '@ant-design/icons';
 import { GATEWAY_URL, HASH_PREFIX } from 'util/constants';
-import { getBase16Validator } from '../IpfsHashGenerationModal';
+import { getBase16Validator } from '../IpfsHashGenerationModal/utils';
 
 export const FormItemHash = ({ hashValue }) => (
   <Form.Item
