@@ -18,11 +18,32 @@ const GlobalStyle = createGlobalStyle`
   }
 
   /* common */
+  .m-0 {
+    margin: 0 !important;
+  }
+  .mb-12 {
+    margin-bottom: 12px;
+  }
+  .mb-0 {
+    margin-bottom: 0px;
+  }
   .mb-8 {
-    margin-bottom: 0.5rem;
+    margin-bottom: 8px;
+  }
+  .mt-8 {
+    margin-top: 8px;
+  }
+  .mt-12 {
+    margin-top: 12px;
   }
   .mr-12 {
     margin-right: 12px;
+  }
+  .pl-0 {
+    padding-left: 0px !important;
+  }
+  .p-0 {
+    padding: 0px !important;
   }
   .walletconnect-modal__base {
     .walletconnect-modal__mobile__toggle a {
@@ -70,6 +91,7 @@ const GlobalStyle = createGlobalStyle`
   /* tabs */
   .ant-tabs-card.ant-tabs-top {
     > .ant-tabs-nav .ant-tabs-tab {
+      padding: 10px 16px;
       border-radius: 18px;
       background-color: transparent;
       border-color: transparent !important;

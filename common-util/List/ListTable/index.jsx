@@ -1,5 +1,6 @@
 import PropTypes from 'prop-types';
 import { Table } from 'antd/lib';
+import { useRouter } from 'next/router';
 import { TOTAL_VIEW_COUNT } from 'util/constants';
 import { ListEmptyMessage } from 'common-util/List/ListCommon';
 import Loader from 'common-util/Loader';
@@ -14,10 +15,10 @@ const ListTable = ({
   currentPage,
   setCurrentPage,
   isAccountRequired,
-  onViewClick,
-  onUpdateClick,
   extra,
 }) => {
+  const router = useRouter();
+
   /**
    * no pagination on search as we won't know total beforehand
    */
@@ -37,8 +38,7 @@ const ListTable = ({
   }
 
   const columns = getTableColumns(type, {
-    onViewClick,
-    onUpdateClick,
+    router,
   });
   const dataSource = getData(type, list, { current: currentPage });
 
@@ -77,8 +77,6 @@ ListTable.propTypes = {
   currentPage: PropTypes.number,
   setCurrentPage: PropTypes.func,
   isAccountRequired: PropTypes.bool,
-  onViewClick: PropTypes.func,
-  onUpdateClick: PropTypes.func,
   extra: PropTypes.shape({
     scrollX: PropTypes.number,
   }),
@@ -91,8 +89,6 @@ ListTable.defaultProps = {
   currentPage: 0,
   setCurrentPage: () => {},
   isAccountRequired: false,
-  onViewClick: () => {},
-  onUpdateClick: null,
   extra: {},
 };
 

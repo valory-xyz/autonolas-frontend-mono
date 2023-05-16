@@ -16,9 +16,6 @@ export const CustomLayout = styled(Layout)`
         display: flex;
       }
     }
-    .ant-tabs-nav-wrap {
-      padding-left: 16px;
-    }
   }
 `;
 

@@ -1,21 +1,18 @@
 import { useState } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
-import Web3 from 'web3';
 import { Button, Form, Input } from 'antd/lib';
 import get from 'lodash/get';
-import isNil from 'lodash/isNil';
 import { WhiteButton } from 'common-util/Button';
-import { RegisterFooter, ComplexLabel } from '../styles';
+import { RegisterFooter } from '../styles';
 
 export const FORM_NAME = 'request_form';
 
 const RequestForm = ({
-  account, listType, handleSubmit, handleCancel,
+  account, handleSubmit, handleCancel,
 }) => {
   const [form] = Form.useForm();
-  const [isModalVisible, setIsModalVisible] = useState(false);
-  const [fields, setFields] = useState([]);
+  const [fields] = useState([]);
 
   const onFinish = (values) => {
     if (account) {
@@ -46,20 +43,9 @@ const RequestForm = ({
           rules={[
             {
               required: true,
-              message: `Please input the data`,
+              message: 'Please input the data',
             },
-            () => ({
-              validator(_, value) {
-                if (true) return Promise.resolve();
-                return Promise.reject(
-                  new Error(
-                    `Please input the data`,
-                  ),
-                );
-              },
-            }),
           ]}
-          className="mb-0"
         >
           <Input placeholder="0xffff..." />
         </Form.Item>
@@ -83,14 +69,12 @@ const RequestForm = ({
 
 RequestForm.propTypes = {
   account: PropTypes.string,
-  listType: PropTypes.string,
   handleSubmit: PropTypes.func.isRequired,
   handleCancel: PropTypes.func.isRequired,
 };
 
 RequestForm.defaultProps = {
   account: null,
-  listType: '',
 };
 
 const mapStateToProps = (state) => {
