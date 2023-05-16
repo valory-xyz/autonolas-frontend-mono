@@ -42,26 +42,23 @@ const NavigationBar = ({ children }) => {
           theme="light"
           mode="horizontal"
           selectedKeys={[selectedMenu]}
+          onClick={handleMenuItemClick}
           items={[
             {
               key: 'registry',
               label: 'Registry',
-              onClick: handleMenuItemClick,
             },
             {
               key: 'factory',
               label: 'Factory',
-              onClick: handleMenuItemClick,
             },
             {
               key: 'mech',
               label: 'Mech',
-              onClick: handleMenuItemClick,
             },
             {
               key: 'docs',
               label: 'Docs',
-              disabled: true,
             },
           ]}
         />

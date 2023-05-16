@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "@ant-design/icons": "^5.0.1",
-    "@autonolas/frontend-library": "^0.3.9",
+    "@autonolas/frontend-library": "^0.3.10",
     "@ethersproject/providers": "^5.6.8",
     "@walletconnect/web3-provider": "^1.7.8",
     "@web3-react/core": "^6.1.9",
@@ -31,10 +31,12 @@
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
     "react-feather": "^2.0.9",
+    "react-markdown": "^8.0.7",
     "react-redux": "^7.2.2",
     "redux": "^4.0.5",
     "redux-mock-store": "^1.5.4",
     "redux-thunk": "^2.3.0",
+    "remark-gfm": "^3.0.1",
     "styled-components": "^5.0.1",
     "web3": "^1.7.3",
     "web3modal": "^1.9.8"
