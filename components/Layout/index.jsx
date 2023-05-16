@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import dynamic from 'next/dynamic';
-import { Layout, Menu } from 'antd/lib';
+import { Layout, Menu, Tooltip } from 'antd/lib';
 import PropTypes from 'prop-types';
 import Login from '../Login';
 import { CustomLayout, Container, Logo } from './styles';
@@ -46,7 +46,14 @@ const NavigationBar = ({ children }) => {
           items={[
             {
               key: 'registry',
-              label: 'Registry',
+              label: (
+                <Tooltip
+                  title="Lorem ipsum, dolor sit amet consectetur adipisicing elit. Sit
+                fuga repudiandae consectetur omnis assumenda."
+                >
+                  Registry
+                </Tooltip>
+              ),
             },
             {
               key: 'factory',
