@@ -28,7 +28,7 @@ const Request = ({ account }) => {
         const price = await contract.methods.price().call();
 
         await contract.methods
-          .request(values.hash)
+          .request(`0x${values.hash}`)
           .send({ from: account, value: price })
           .then((result) => {
             setInformation(result);

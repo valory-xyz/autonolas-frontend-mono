@@ -89,7 +89,7 @@ const IpfsModal = ({ visible, handleCancel, callback }) => {
           name="prompt"
           rules={[{ required: true, message: 'Please input the prompt' }]}
         >
-          <Input />
+          <Input.TextArea rows={4} />
         </Form.Item>
 
         <Form.Item
