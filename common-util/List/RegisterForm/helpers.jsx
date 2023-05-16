@@ -4,14 +4,14 @@ import { LinkOutlined } from '@ant-design/icons';
 import { GATEWAY_URL, HASH_PREFIX } from 'util/constants';
 import { getBase16Validator } from '../IpfsHashGenerationModal';
 
-export const FormItemHash = ({ listType, hashValue }) => (
+export const FormItemHash = ({ hashValue }) => (
   <Form.Item
     label="Hash of Metadata File"
     name="hash"
     rules={[
       {
         required: true,
-        message: `Please input the IPFS hash of the ${listType}`,
+        message: 'Please input the IPFS hash',
       },
       () => ({
         validator(_, value) {
@@ -49,12 +49,10 @@ export const FormItemHash = ({ listType, hashValue }) => (
 );
 
 FormItemHash.propTypes = {
-  listType: PropTypes.string,
   hashValue: PropTypes.string,
 };
 
 FormItemHash.defaultProps = {
-  listType: '',
   hashValue: null,
 };
 

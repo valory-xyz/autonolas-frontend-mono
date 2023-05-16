@@ -4,6 +4,7 @@ import { connect } from 'react-redux';
 import { Button, Form, Input } from 'antd/lib';
 import get from 'lodash/get';
 import { WhiteButton } from 'common-util/Button';
+import { FormItemHash } from '../RegisterForm/helpers';
 import { RegisterFooter } from '../styles';
 
 export const FORM_NAME = 'request_form';
@@ -49,6 +50,9 @@ const RequestForm = ({
         >
           <Input placeholder="0xffff..." />
         </Form.Item>
+
+        {/* listType={listType} hashValue={hashValue}  */}
+        <FormItemHash />
 
         {account ? (
           <Form.Item>

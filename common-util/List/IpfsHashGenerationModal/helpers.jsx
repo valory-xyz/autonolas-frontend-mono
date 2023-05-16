@@ -11,7 +11,7 @@ const ipfs = create({
   protocol: 'https',
 });
 
-export const getIpfsHashHelper = async (info, hashType) => {
+export const getIpfsHashHelper = async (info) => {
   const updatedInfo = {
     ...info,
     image: info.image || '',
