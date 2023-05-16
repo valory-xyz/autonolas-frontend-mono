@@ -41,6 +41,8 @@ const EventListener = () => {
     setWeb3Ws(web3Instance);
   }, []);
 
+  const sortEvents = (events) => events.sort((a, b) => b.blockNumber - a.blockNumber);
+
   useEffect(() => {
     if (web3Ws) {
       const contractInstance = new web3Ws.eth.Contract(
@@ -61,7 +63,7 @@ const EventListener = () => {
         if (error) {
           console.error(error);
         } else {
-          setFirstEvents((prevEvents) => [...prevEvents, event]);
+          setFirstEvents((prevEvents) => sortEvents([...prevEvents, event]));
         }
       });
 
@@ -72,7 +74,7 @@ const EventListener = () => {
       );
 
       setIsFirstEventLoading(false);
-      setFirstEvents(pastFirstEvents);
+      setFirstEvents(sortEvents(pastFirstEvents));
     };
 
     if (contractWs) {
@@ -90,7 +92,7 @@ const EventListener = () => {
         if (error) {
           console.error(error);
         } else {
-          setSecondEvents((prevEvents) => [...prevEvents, event]);
+          setSecondEvents((prevEvents) => sortEvents([...prevEvents, event]));
         }
       });
 
@@ -101,7 +103,7 @@ const EventListener = () => {
       );
 
       setIsSecondEventLoading(false);
-      setSecondEvents(pastSecondEvents);
+      setFirstEvents(sortEvents(pastSecondEvents));
     };
 
     if (contractWs) {
