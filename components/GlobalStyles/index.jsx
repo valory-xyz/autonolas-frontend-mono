@@ -42,6 +42,9 @@ const GlobalStyle = createGlobalStyle`
   .pl-0 {
     padding-left: 0px !important;
   }
+  .p-0 {
+    padding: 0px !important;
+  }
   .walletconnect-modal__base {
     .walletconnect-modal__mobile__toggle a {
       color: ${COLOR.WALLECT_CONNECT_BLUE} !important;
@@ -88,6 +91,7 @@ const GlobalStyle = createGlobalStyle`
   /* tabs */
   .ant-tabs-card.ant-tabs-top {
     > .ant-tabs-nav .ant-tabs-tab {
+      padding: 10px 16px;
       border-radius: 18px;
       background-color: transparent;
       border-color: transparent !important;

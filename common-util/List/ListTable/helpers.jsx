@@ -22,7 +22,8 @@ export const getTrimmedText = (str, suffixCount) => {
 
 export const EllipsisMiddle = ({
   suffixCount,
-  isEtherscanLink,
+  isIpfsLink,
+  onClick,
   children,
   ...rest
 }) => {
@@ -31,20 +32,19 @@ export const EllipsisMiddle = ({
   if (children.length <= 12) return <Text {...rest}>{children}</Text>;
 
   const getText = () => {
-    if (!isEtherscanLink) return children;
-    const hash = children.substring(2);
-    return `f01701220${hash}`;
+    if (isIpfsLink) {
+      const hash = children.substring(2);
+      return `f01701220${hash}`;
+    }
+    return children;
   };
 
   const text = getText();
-  const trimmedText = getTrimmedText(text, suffixCount, isEtherscanLink);
+  const trimmedText = getTrimmedText(text, suffixCount);
 
-  /**
-   * truncate only if the character exceeds more than 12
-   */
-  return (
-    <Text style={textStyle} {...rest}>
-      {isEtherscanLink ? (
+  const getToDisplay = () => {
+    if (isIpfsLink) {
+      return (
         <a
           href={`${GATEWAY_URL}/${text}`}
           target="_blank"
@@ -52,9 +52,26 @@ export const EllipsisMiddle = ({
         >
           {trimmedText}
         </a>
-      ) : (
-        trimmedText
-      )}
+      );
+    }
+
+    if (typeof onClick === 'function') {
+      return (
+        <Button type="link" className="p-0" onClick={() => onClick(text)}>
+          {trimmedText}
+        </Button>
+      );
+    }
+
+    return trimmedText;
+  };
+
+  /**
+   * truncate only if the character exceeds more than 12
+   */
+  return (
+    <Text style={textStyle} {...rest}>
+      {getToDisplay()}
 
       <Tooltip title="Copy">
         &nbsp;
@@ -69,13 +86,15 @@ export const EllipsisMiddle = ({
 
 EllipsisMiddle.propTypes = {
   suffixCount: PropTypes.number,
-  isEtherscanLink: PropTypes.bool,
+  isIpfsLink: PropTypes.bool,
+  onClick: PropTypes.func,
   children: PropTypes.string,
 };
 
 EllipsisMiddle.defaultProps = {
   suffixCount: 6,
-  isEtherscanLink: false,
+  isIpfsLink: false,
+  onClick: null,
   children: '',
 };
 
@@ -83,7 +102,7 @@ EllipsisMiddle.defaultProps = {
  * helper functions
  */
 
-export const getTableColumns = (type) => {
+export const getTableColumns = (type, { router }) => {
   if (type === NAV_TYPES.COMPONENT || type === NAV_TYPES.AGENT) {
     return [
       {
@@ -105,7 +124,7 @@ export const getTableColumns = (type) => {
         key: 'hash',
         width: 200,
         render: (text) => (
-          <EllipsisMiddle isEtherscanLink suffixCount={14}>
+          <EllipsisMiddle isIpfsLink suffixCount={14}>
             {text}
           </EllipsisMiddle>
         ),
@@ -115,7 +134,15 @@ export const getTableColumns = (type) => {
         dataIndex: 'mech',
         width: 180,
         key: 'mech',
-        render: (text) => <EllipsisMiddle>{text}</EllipsisMiddle>,
+        render: (text) => (
+          <EllipsisMiddle
+            onClick={(e) => {
+              if (router) router.push(`/mech?id=${e}`);
+            }}
+          >
+            {text}
+          </EllipsisMiddle>
+        ),
       },
     ];
   }

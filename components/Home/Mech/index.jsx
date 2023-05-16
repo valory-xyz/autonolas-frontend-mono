@@ -134,7 +134,9 @@ const EventListener = () => {
             key: 'data',
             width: 420,
             render: (text) => (
-              <EllipsisMiddle suffixCount={12} isEtherscanLink>{text}</EllipsisMiddle>
+              <EllipsisMiddle suffixCount={12} isIpfsLink>
+                {text}
+              </EllipsisMiddle>
             ),
           },
         ]}
@@ -164,7 +166,7 @@ const EventListener = () => {
             dataIndex: 'data',
             key: 'data',
             render: (text) => (
-              <EllipsisMiddle suffixCount={12} isEtherscanLink>
+              <EllipsisMiddle suffixCount={12} isIpfsLink>
                 {text}
               </EllipsisMiddle>
             ),

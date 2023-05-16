@@ -154,47 +154,45 @@ const ListAgents = () => {
   };
 
   return (
-    <>
-      <Tabs
-        className="registry-tabs"
-        type="card"
-        activeKey={currentTab}
-        tabBarExtraContent={extraTabContent}
-        onChange={(e) => {
-          setCurrentTab(e);
+    <Tabs
+      className="registry-tabs"
+      type="card"
+      activeKey={currentTab}
+      tabBarExtraContent={extraTabContent}
+      onChange={(e) => {
+        setCurrentTab(e);
 
-          setList([]);
-          setTotal(0);
-          setCurrentPage(1);
-          setIsLoading(true);
+        setList([]);
+        setTotal(0);
+        setCurrentPage(1);
+        setIsLoading(true);
 
-          // clear the search
-          clearSearch();
-          // update the URL to keep track of my-agents
-          router.push(
-            e === MY_AGENTS
-              ? `${URL.AGENTS}#${MY_AGENTS}`
-              : URL.AGENTS,
-          );
-        }}
-      >
-        <TabPane tab="All Agents" key={ALL_AGENTS}>
-          <ListTable {...tableCommonProps} list={list} />
-        </TabPane>
+        // clear the search
+        clearSearch();
+        // update the URL to keep track of my-agents
+        router.push(
+          e === MY_AGENTS
+            ? `${URL.AGENTS}#${MY_AGENTS}`
+            : URL.AGENTS,
+        );
+      }}
+    >
+      <TabPane tab="All Agents" key={ALL_AGENTS}>
+        <ListTable {...tableCommonProps} list={list} />
+      </TabPane>
 
-        <TabPane tab="My Agents" key={MY_AGENTS}>
-          <ListTable
-            {...tableCommonProps}
-            list={
+      <TabPane tab="My Agents" key={MY_AGENTS}>
+        <ListTable
+          {...tableCommonProps}
+          list={
               searchValue
                 ? list
                 : getMyListOnPagination({ total, nextPage: currentPage, list })
             }
-            isAccountRequired
-          />
-        </TabPane>
-      </Tabs>
-    </>
+          isAccountRequired
+        />
+      </TabPane>
+    </Tabs>
   );
 };
 
