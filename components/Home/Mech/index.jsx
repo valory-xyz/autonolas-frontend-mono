@@ -1,13 +1,14 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import Web3 from 'web3';
 import { Table, Typography } from 'antd/lib';
+import { useRouter } from 'next/router';
 import { AGENT_MECH_ABI } from 'common-util/AbiAndAddresses';
 import { EllipsisMiddle } from 'common-util/List/ListTable/helpers';
 import { NA } from 'common-util/constants';
 import Request from './components/Request';
 
 // Replace the following values with your specific contract information
-const CONTRACT_ADDRESS = '0xFf82123dFB52ab75C417195c5fDB87630145ae81';
+const DEFAULT_CONTRACT_ADDRESS = '0xFf82123dFB52ab75C417195c5fDB87630145ae81';
 const WEBSOCKET_PROVIDER = 'wss://rpc.gnosischain.com/wss';
 
 const { Title } = Typography;
@@ -16,7 +17,22 @@ const EventListener = () => {
   const [web3Ws, setWeb3Ws] = useState(null);
   const [contractWs, setContractWs] = useState(null);
   const [firstEvents, setFirstEvents] = useState([]);
+  const [isFirstEventLoading, setIsFirstEventLoading] = useState(false);
+
   const [secondEvents, setSecondEvents] = useState([]);
+  const [isSecondEventLoading, setIsSecondEventLoading] = useState(false);
+
+  // get the id from the next js router
+  const router = useRouter();
+  const { id } = router.query;
+
+  const filterOption = useMemo(
+    () => ({
+      fromBlock: 0,
+      toBlock: 'latest',
+    }),
+    [id],
+  );
 
   useEffect(() => {
     const web3Instance = new Web3(
@@ -29,7 +45,7 @@ const EventListener = () => {
     if (web3Ws) {
       const contractInstance = new web3Ws.eth.Contract(
         AGENT_MECH_ABI,
-        CONTRACT_ADDRESS,
+        id || DEFAULT_CONTRACT_ADDRESS,
       );
       setContractWs(contractInstance);
     }
@@ -38,6 +54,8 @@ const EventListener = () => {
   // Effect hook for listening to the FirstEvent
   useEffect(() => {
     const getFirstEvents = async () => {
+      setIsFirstEventLoading(true);
+
       // Listen to new FirstEvent events
       contractWs.events.Request({}, (error, event) => {
         if (error) {
@@ -48,11 +66,12 @@ const EventListener = () => {
       });
 
       // Get past FirstEvent events
-      const pastFirstEvents = await contractWs.getPastEvents('Request', {
-        fromBlock: 27912345,
-        toBlock: 'latest',
-      });
+      const pastFirstEvents = await contractWs.getPastEvents(
+        'Request',
+        filterOption,
+      );
 
+      setIsFirstEventLoading(false);
       setFirstEvents(pastFirstEvents);
     };
 
@@ -64,6 +83,8 @@ const EventListener = () => {
   // Effect hook for listening to the SecondEvent
   useEffect(() => {
     const getSecondEvents = async () => {
+      setIsSecondEventLoading(true);
+
       // Listen to new SecondEvent events
       contractWs.events.Deliver({}, (error, event) => {
         if (error) {
@@ -74,11 +95,12 @@ const EventListener = () => {
       });
 
       // Get past SecondEvent events
-      const pastSecondEvents = await contractWs.getPastEvents('Deliver', {
-        fromBlock: 27912345,
-        toBlock: 'latest',
-      });
+      const pastSecondEvents = await contractWs.getPastEvents(
+        'Deliver',
+        filterOption,
+      );
 
+      setIsSecondEventLoading(false);
       setSecondEvents(pastSecondEvents);
     };
 
@@ -103,6 +125,10 @@ const EventListener = () => {
       <Request />
       <Title level={3}>Requests</Title>
       <Table
+        loading={isFirstEventLoading}
+        dataSource={requestsDatasource}
+        pagination={false}
+        rowKey={(x) => x.key}
         columns={[
           {
             title: 'Index',
@@ -133,20 +159,25 @@ const EventListener = () => {
             dataIndex: 'data',
             key: 'data',
             width: 420,
-            render: (text) => (
-              <EllipsisMiddle suffixCount={12} isIpfsLink>
-                {text}
-              </EllipsisMiddle>
-            ),
+            render: (text) => {
+              if (!text) return NA;
+              return (
+                <EllipsisMiddle suffixCount={12} isIpfsLink>
+                  {text}
+                </EllipsisMiddle>
+              );
+            },
           },
         ]}
-        dataSource={requestsDatasource}
-        pagination={false}
-        rowKey={(x) => x.key}
       />
 
+      <br />
       <Title level={3}>Delivers</Title>
       <Table
+        loading={isSecondEventLoading}
+        dataSource={deliversDatasource}
+        pagination={false}
+        rowKey={(x) => x.key}
         columns={[
           {
             title: 'Index',
@@ -172,9 +203,6 @@ const EventListener = () => {
             ),
           },
         ]}
-        dataSource={deliversDatasource}
-        pagination={false}
-        rowKey={(x) => x.key}
       />
     </div>
   );
