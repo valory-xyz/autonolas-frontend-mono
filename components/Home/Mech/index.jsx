@@ -5,6 +5,7 @@ import { useRouter } from 'next/router';
 import { AGENT_MECH_ABI } from 'common-util/AbiAndAddresses';
 import { EllipsisMiddle } from 'common-util/List/ListTable/helpers';
 import { NA } from 'common-util/constants';
+import { notifySuccess } from 'common-util/functions';
 import Request from './components/Request';
 
 // Replace the following values with your specific contract information
@@ -53,16 +54,32 @@ const EventListener = () => {
     }
   }, [web3Ws]);
 
+  const onNewEvent = (event) => {
+    const { transactionHash } = event;
+    notifySuccess(
+      'New event recevied',
+      <a
+        href={`https://gnosisscan.io/tx/${transactionHash}`}
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        Tx
+      </a>,
+    );
+  };
+
   // Effect hook for listening to the FirstEvent
   useEffect(() => {
+    let eventListener;
     const getFirstEvents = async () => {
       setIsFirstEventLoading(true);
 
       // Listen to new FirstEvent events
-      contractWs.events.Request({}, (error, event) => {
+      eventListener = contractWs.events.Request({}, (error, event) => {
         if (error) {
           console.error(error);
         } else {
+          onNewEvent(event);
           setFirstEvents((prevEvents) => sortEvents([...prevEvents, event]));
         }
       });
@@ -80,18 +97,26 @@ const EventListener = () => {
     if (contractWs) {
       getFirstEvents();
     }
+
+    return () => {
+      if (eventListener && eventListener.unsubscribe) {
+        eventListener.unsubscribe();
+      }
+    };
   }, [contractWs]);
 
   // Effect hook for listening to the SecondEvent
   useEffect(() => {
+    let eventListener;
     const getSecondEvents = async () => {
       setIsSecondEventLoading(true);
 
       // Listen to new SecondEvent events
-      contractWs.events.Deliver({}, (error, event) => {
+      eventListener = contractWs.events.Deliver({}, (error, event) => {
         if (error) {
           console.error(error);
         } else {
+          onNewEvent(event);
           setSecondEvents((prevEvents) => sortEvents([...prevEvents, event]));
         }
       });
@@ -109,6 +134,12 @@ const EventListener = () => {
     if (contractWs) {
       getSecondEvents();
     }
+
+    return () => {
+      if (eventListener && eventListener.unsubscribe) {
+        eventListener.unsubscribe();
+      }
+    };
   }, [contractWs]);
 
   const getDatasource = (eventsPassed) => eventsPassed.map((event, index) => ({

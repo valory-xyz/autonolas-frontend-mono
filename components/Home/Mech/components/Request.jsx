@@ -32,7 +32,7 @@ const Request = ({ account }) => {
           .send({ from: account, value: price })
           .then((result) => {
             setInformation(result);
-            notification.success({ message: 'Request made' });
+            notification.success({ message: 'Transaction successful' });
           });
       } catch (e) {
         setError(e);
