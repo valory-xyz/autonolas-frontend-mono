@@ -58,6 +58,11 @@ const NavigationBar = ({ children }) => {
               label: 'Mech',
               onClick: handleMenuItemClick,
             },
+            {
+              key: 'docs',
+              label: 'Docs',
+              disabled: true,
+            },
           ]}
         />
         <Login />
