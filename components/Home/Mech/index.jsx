@@ -41,7 +41,7 @@ const EventListener = () => {
     setWeb3Ws(web3Instance);
   }, []);
 
-  const sortEvents = (events) => events.sort((a, b) => b.blockNumber - a.blockNumber);
+  const sortEvents = (e) => e.sort((a, b) => b.blockNumber - a.blockNumber);
 
   useEffect(() => {
     if (web3Ws) {
@@ -103,7 +103,7 @@ const EventListener = () => {
       );
 
       setIsSecondEventLoading(false);
-      setFirstEvents(sortEvents(pastSecondEvents));
+      setSecondEvents(sortEvents(pastSecondEvents));
     };
 
     if (contractWs) {
