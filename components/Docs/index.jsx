@@ -11,9 +11,9 @@ const DocsContainer = styled.div`
 
 const markdown = `# Overview of AI Mech Contracts
 
-## Off-chain Agent
+## Off-chain Agent (AI Worker)
 
-Any autonomous agent or bot that runs off-chain and holds a wallet for signing transactions.
+Any autonomous agent or bot that runs off-chain, executes AI tasks and holds a wallet for signing transactions.
 
 ## Contracts
 
