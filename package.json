@@ -38,6 +38,7 @@
     "redux-thunk": "^2.3.0",
     "remark-gfm": "^3.0.1",
     "styled-components": "^5.0.1",
+    "uuid": "^9.0.0",
     "web3": "^1.7.3",
     "web3modal": "^1.9.8"
   },

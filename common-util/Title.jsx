@@ -22,7 +22,7 @@ export const HeaderTitle = ({ title, description }) => (
       <div>
         <Tooltip title={description} placement="bottomLeft">
           <InfoCircleOutlined
-            style={{ fontSize: 24, position: 'relative', top: -6 }}
+            style={{ fontSize: 24, position: 'relative', top: -3 }}
           />
         </Tooltip>
       </div>
