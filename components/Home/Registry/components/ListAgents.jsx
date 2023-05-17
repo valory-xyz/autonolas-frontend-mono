@@ -1,8 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
-import { Tabs, Tooltip } from 'antd/lib';
+import { Tabs } from 'antd/lib';
 import { useRouter } from 'next/router';
-import { InfoCircleOutlined } from '@ant-design/icons';
 import get from 'lodash/get';
 import { URL, NAV_TYPES } from 'util/constants';
 import ListTable from 'common-util/List/ListTable';
@@ -11,6 +10,7 @@ import {
   getHash,
   isMyTab,
 } from 'common-util/List/ListTable/helpers';
+import { HeaderTitle } from 'common-util/Title';
 import { getMyListOnPagination } from 'common-util/ContractUtils/myList';
 import {
   getAgents,
@@ -37,13 +37,7 @@ const ListAgents = () => {
    * extra tab content & view click
    */
   const { searchValue, extraTabContent, clearSearch } = useExtraTabContent({
-    title: (
-      <Tooltip title="prompt text" placement="right">
-        <InfoCircleOutlined
-          style={{ fontSize: 24, position: 'relative', top: -6 }}
-        />
-      </Tooltip>
-    ),
+    title: '',
     onRegisterClick: () => router.push(URL.MINT_AGENT),
   });
   const onViewClick = (id) => router.push(`${URL.AGENTS}/${id}`);
@@ -163,6 +157,8 @@ const ListAgents = () => {
 
   return (
     <>
+      <HeaderTitle title="Registry" description="View existing agents" />
+
       <Tabs
         className="registry-tabs"
         type="card"

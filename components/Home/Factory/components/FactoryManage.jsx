@@ -39,10 +39,7 @@ const MintAgent = ({ account }) => {
 
   return (
     <>
-      <HeaderTitle
-        title="Mint"
-        description="Lorem ipsum dolor sit amet consectetur adipisicing elit. Deserunt dolore tempore quibusdam reiciendis, ea asperiores facilis atque fugiat ipsam voluptate."
-      />
+      <HeaderTitle title="Mint" description="Mint agent" />
 
       <FormContainer>
         <RegisterForm

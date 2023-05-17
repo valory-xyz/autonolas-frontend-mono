@@ -2,13 +2,12 @@ import { useState } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { useRouter } from 'next/router';
-import { Typography, notification } from 'antd/lib';
+import { notification } from 'antd/lib';
 import RequestForm from 'common-util/List/RequestForm';
 import { AlertSuccess, AlertError } from 'common-util/List/ListCommon';
 import { getMechContract } from 'common-util/Contracts';
+import { HeaderTitle } from 'common-util/Title';
 import { FormContainer } from 'components/styles';
-
-const { Title } = Typography;
 
 const Request = ({ account }) => {
   const [error, setError] = useState(null);
@@ -43,8 +42,9 @@ const Request = ({ account }) => {
 
   return (
     <>
+      <HeaderTitle title="Request" description="Make agent requests" />
+
       <FormContainer>
-        <Title level={2}>Request</Title>
         <RequestForm
           listType="request"
           handleSubmit={handleSubmit}
