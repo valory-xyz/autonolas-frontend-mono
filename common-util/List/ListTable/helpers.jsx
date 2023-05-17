@@ -202,7 +202,7 @@ export const useExtraTabContent = ({ title }) => {
   };
 
   const extraTabContent = {
-    left: <Title level={2}>{title}</Title>,
+    left: title ? <Title level={2}>{title}</Title> : null,
     right: (
       <>
         <Input

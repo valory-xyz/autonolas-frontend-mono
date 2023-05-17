@@ -2,13 +2,12 @@ import { useState } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { useRouter } from 'next/router';
-import { Typography, notification } from 'antd/lib';
+import { notification } from 'antd/lib';
 import RegisterForm from 'common-util/List/RegisterForm';
 import { AlertSuccess, AlertError } from 'common-util/List/ListCommon';
 import { getMechMinterContract } from 'common-util/Contracts';
+import { HeaderTitle } from 'common-util/Title';
 import { FormContainer } from 'components/styles';
-
-const { Title } = Typography;
 
 const MintAgent = ({ account }) => {
   const [error, setError] = useState(null);
@@ -25,11 +24,7 @@ const MintAgent = ({ account }) => {
       const contract = getMechMinterContract();
 
       contract.methods
-        .create(
-          values.owner_address,
-          `0x${values.hash}`,
-          values.price,
-        )
+        .create(values.owner_address, `0x${values.hash}`, values.price)
         .send({ from: account })
         .then((result) => {
           setInformation(result);
@@ -44,8 +39,9 @@ const MintAgent = ({ account }) => {
 
   return (
     <>
+      <HeaderTitle title="Mint" description="Mint agent" />
+
       <FormContainer>
-        <Title level={2}>Mint</Title>
         <RegisterForm
           listType="agent"
           handleSubmit={handleSubmit}
