@@ -1,6 +1,6 @@
 # ai-registry-mech-frontend
 
-simple frontend - much code borrow from https://github.com/valory-xyz/autonolas-member-frontend
+Simple demo frontend. A lot of the code is borrowed from [here](https://github.com/valory-xyz/autonolas-member-frontend).
 
 ## Tech Stack
 - web3.js
