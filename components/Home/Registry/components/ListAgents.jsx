@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
-import get from 'lodash/get';
-import { Tabs } from 'antd/lib';
+import { Tabs, Tooltip } from 'antd/lib';
 import { useRouter } from 'next/router';
+import { InfoCircleOutlined } from '@ant-design/icons';
+import get from 'lodash/get';
 import { URL, NAV_TYPES } from 'util/constants';
 import ListTable from 'common-util/List/ListTable';
 import {
@@ -36,7 +37,13 @@ const ListAgents = () => {
    * extra tab content & view click
    */
   const { searchValue, extraTabContent, clearSearch } = useExtraTabContent({
-    title: '',
+    title: (
+      <Tooltip title="prompt text" placement="right">
+        <InfoCircleOutlined
+          style={{ fontSize: 24, position: 'relative', top: -6 }}
+        />
+      </Tooltip>
+    ),
     onRegisterClick: () => router.push(URL.MINT_AGENT),
   });
   const onViewClick = (id) => router.push(`${URL.AGENTS}/${id}`);
@@ -155,45 +162,45 @@ const ListAgents = () => {
   };
 
   return (
-    <Tabs
-      className="registry-tabs"
-      type="card"
-      activeKey={currentTab}
-      tabBarExtraContent={extraTabContent}
-      onChange={(e) => {
-        setCurrentTab(e);
+    <>
+      <Tabs
+        className="registry-tabs"
+        type="card"
+        activeKey={currentTab}
+        tabBarExtraContent={extraTabContent}
+        onChange={(e) => {
+          setCurrentTab(e);
 
-        setList([]);
-        setTotal(0);
-        setCurrentPage(1);
-        setIsLoading(true);
+          setList([]);
+          setTotal(0);
+          setCurrentPage(1);
+          setIsLoading(true);
 
-        // clear the search
-        clearSearch();
-        // update the URL to keep track of my-agents
-        router.push(
-          e === MY_AGENTS
-            ? `${URL.AGENTS}#${MY_AGENTS}`
-            : URL.AGENTS,
-        );
-      }}
-    >
-      <TabPane tab="All Agents" key={ALL_AGENTS}>
-        <ListTable {...tableCommonProps} list={list} />
-      </TabPane>
+          // clear the search
+          clearSearch();
+          // update the URL to keep track of my-agents
+          router.push(
+            e === MY_AGENTS ? `${URL.AGENTS}#${MY_AGENTS}` : URL.AGENTS,
+          );
+        }}
+      >
+        <TabPane tab="All Agents" key={ALL_AGENTS}>
+          <ListTable {...tableCommonProps} list={list} />
+        </TabPane>
 
-      <TabPane tab="My Agents" key={MY_AGENTS}>
-        <ListTable
-          {...tableCommonProps}
-          list={
+        <TabPane tab="My Agents" key={MY_AGENTS}>
+          <ListTable
+            {...tableCommonProps}
+            list={
               searchValue
                 ? list
                 : getMyListOnPagination({ total, nextPage: currentPage, list })
             }
-          isAccountRequired
-        />
-      </TabPane>
-    </Tabs>
+            isAccountRequired
+          />
+        </TabPane>
+      </Tabs>
+    </>
   );
 };
 
