@@ -1,11 +1,10 @@
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import dynamic from 'next/dynamic';
 import { Alert, Layout, Menu } from 'antd/lib';
 import PropTypes from 'prop-types';
 import { getSupportedNetworks } from 'common-util/functions';
-import { useSelector, useDispatch } from 'react-redux';
-import { setChainId } from 'store/setup/actions';
+import { useSelector } from 'react-redux';
 import Login from '../Login';
 import { CustomLayout, Container, Logo } from './styles';
 
@@ -15,23 +14,10 @@ const { Header, Content } = Layout;
 
 const NavigationBar = ({ children }) => {
   const router = useRouter();
-  // const dispatch = useDispatch();
 
   const chainId = useSelector((state) => state?.setup?.chainId);
   const { pathname } = router;
   const [selectedMenu, setSelectedMenu] = useState([]);
-
-  // useEffect(() => {
-  //   if (typeof window !== 'undefined') {
-  //     const currentChainId = Number(window?.MODAL_PROVIDER?.chainId);
-  //     console.log(currentChainId);
-  //     if (currentChainId) {
-  //       dispatch(setChainId(currentChainId));
-  //     }
-  //   }
-  // }, []);
-
-  console.log(chainId);
 
   // to set default menu on first render
   useEffect(() => {
@@ -85,7 +71,7 @@ const NavigationBar = ({ children }) => {
 
       <Content className="site-layout">
         <div className="site-layout-background">
-          {!getSupportedNetworks().includes(Number(chainId)) && (
+          {chainId && !getSupportedNetworks().includes(Number(chainId)) && (
             <>
               <Alert
                 showIcon
