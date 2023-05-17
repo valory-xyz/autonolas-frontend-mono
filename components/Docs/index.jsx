@@ -11,6 +11,10 @@ const DocsContainer = styled.div`
 
 const markdown = `# Overview of AI Mech Contracts
 
+## Off-chain Agent
+
+Any autonomous agent or bot that runs off-chain and holds a wallet for signing transactions.
+
 ## Contracts
 
 [Source](https://github.com/valory-xyz/ai-registry-mech/tree/main/contracts)
@@ -18,12 +22,12 @@ const markdown = `# Overview of AI Mech Contracts
 ### AgentMech
 Constructor:
 - ERC721Mech constructor
-- set agent owner as corresponding agentId owner address
+- set agent (NFT) owner as corresponding agentId owner address
 
 Events:
 - Deliver(requestId, data): AgentMech delivers a response to a task with the corresponding request id and data (e.g. IPFS hash)
 - Request(sender, requestId, data): Sender requests a task with the corresponding request id and data (e.g. IPFS hash) 
-- PriceUpdated(uint256 price): AgentMech price is updated to the corresponding price by the agent mech ownner
+- PriceUpdated(uint256 price): AgentMech price is updated to the corresponding price by the mech ownner
 
 Storage:
 - uint256 | price: price required to call 
@@ -41,7 +45,7 @@ Request
 ~~~json
 {
     "prompt": "The request prompt goes here",
-    "tool": "The tool we want to use off-chain in agent goes here, for example openai-gpt4",
+    "tool": "The tool we want the off-chain agent to use goes here, for example openai-gpt4",
     "nonce": "The uuid goes here"
 }
 ~~~
@@ -53,7 +57,7 @@ Deliver
 ~~~json
 {
     "requestId": "<ID>",
-    "result": "Off-chain agents response to the request prompt goes here",
+    "result": "Off-chain agent's response to the request prompt goes here",
 }
 ~~~
 5. Off-chain agent calls the deliver() function on-chain with the corresponding request id and response data (IPFS hash)
@@ -65,36 +69,36 @@ Each off-chain agent is instructed on-chain via the AgentMech contract's request
 ### AgentRegistry
 Constructor:
 - ERC721 constructor
-- set agent registry owner as msg.sender
+- set AgentRegistry owner as msg.sender
 
 Events:
-- CreateAgent(agentId, agentHash): Agent is created/minted to the agent owner address using AgentRegistry.create("agent owner address", "agent hash")
-- UpdateAgentHash(agentId, agentHash): Agent hash is updated using AgentRegistry.updateHash("agent id", "agent hash")
+- CreateAgent(agentId, agentHash): AgentNFT is created/minted to the AgentNFT owner address using AgentRegistry.create("AgentNFT owner address", "AgentNFT hash")
+- UpdateAgentHash(agentId, agentHash): AgentNFT hash is updated using AgentRegistry.updateHash("AgentNFT id", "AgentNFT hash")
 
 Storage:
-- Mapping | mapAgentIdHashes (agentId => agentIPFSHash): mapping used to map each agentId that exists in the contract to the corresponding agent IPFS hash
+- Mapping | mapAgentIdHashes (agentId => agentIPFSHash): mapping used to map each agentId that exists in the contract to the corresponding AgentNFT IPFS hash
 
 Functions:
-- create: creates a new agent setting the agent owner address as the owner and agent IPFS hash as input to associate to an agentId (NOTE: each agent is an AgentMech which inherits from [ERC721Mech](https://github.com/gnosis/mech/blob/f6fa16551dba14fa8310fce0fd24c40be58fc7d1/contracts/ERC721Mech.sol) minted to the specified agent owner)
-- updateHash: allows the agent owner to update the agent IPFS hash for a given agent id.
-- getHashes: returns all IPFS hashes for a given agent id input
+- create: creates a new AgentNFT setting the AgentNFT owner address as the owner and AgentNFT IPFS hash as input to associate to an agentId (NOTE: each agent is an AgentMech which inherits from [ERC721Mech](https://github.com/gnosis/mech/blob/f6fa16551dba14fa8310fce0fd24c40be58fc7d1/contracts/ERC721Mech.sol) minted to the specified AgentNFT owner)
+- updateHash: allows the AgentNFT owner to update the AgentNFT IPFS hash for a given agentId.
+- getHashes: returns all IPFS hashes for a given agentId input
 
 Abstract:
-The Agent Registry is an implementation of [generic registry](https://github.com/valory-xyz/autonolas-registries/blob/00add36760c4b2faf5b5b11199af7d1ec38957fd/contracts/GenericRegistry.sol) as found in the [Autonolas protocol](https://docs.autonolas.network/protocol/) where we have implemented functions agentRegistry.create(“agent owner”, “agent hash”) and agentRegistry.updateHash("agent id"). Create() adds an agent associated by its IPFS hash to the agent registry contract under a respective agentID and the owner of the agent with ID, "agentId", has ability to update a given agent's agent hash using UpdateHash(). Just like GenericRegistry it has a non fungible interface (ERC721) which means ownership of the AgentRegistry is transferable to different EOAs/smart wallets and the owner of the registry contract itself is set within the constructor of the contract during deployment.
+The AgentRegistry is an implementation of [generic registry](https://github.com/valory-xyz/autonolas-registries/blob/00add36760c4b2faf5b5b11199af7d1ec38957fd/contracts/GenericRegistry.sol) as found in the [Autonolas protocol](https://docs.autonolas.network/protocol/) where we have implemented functions agentRegistry.create(AgentNFT owner”, “agent hash”) and agentRegistry.updateHash("agent id"). Create() adds an AgentNFT associated by its IPFS hash to the AgentRegistry contract under a respective agentID and the owner of the AgentNFT with ID, "agentId", has ability to update a given AgentNFT's hash using UpdateHash(). Just like GenericRegistry it has a non fungible interface (ERC721) which means ownership of the AgentRegistry is transferable to different EOAs/smart wallets and the owner of the registry contract itself is set within the constructor of the contract during deployment.
 
 ### AgentFactory
 Constructor:
-- set corresponding agent registry address in immutable storage as input parameter
-- set agent factory owner as msg.sender
+- set corresponding AgentRegistry address in immutable storage as input parameter
+- set AgentFactory owner as msg.sender
 
 Events:
 - CreateMech(mech, agentId, price): New AgentMech is created with the corresponding mech address, agentId, and initial price for the AgentMech
 
 Functions:
-- create: creates a new AgentMech with the corresponding agent owner address, agent IPFS hash, and initial price for the AgentMech's construction
+- create: creates a new AgentMech with the corresponding AgentNFT owner address, AgentNFT IPFS hash, and initial price for the AgentMech's construction
 
 Abstract:
-The Agent Factory is an implementation of [Generic Manager](https://github.com/valory-xyz/autonolas-registries/blob/00add36760c4b2faf5b5b11199af7d1ec38957fd/contracts/GenericManager.sol) as found in the [Autonolas protocol](https://docs.autonolas.network/protocol/) that is used for creation of new Agent Mech contracts with AgentFactory.create(). AgentFactory ties an AgentMech to an Agent NFT.
+The AgentFactory is an implementation of [Generic Manager](https://github.com/valory-xyz/autonolas-registries/blob/00add36760c4b2faf5b5b11199af7d1ec38957fd/contracts/GenericManager.sol) as found in the [Autonolas protocol](https://docs.autonolas.network/protocol/) that is used for creation of new AgentMech contracts with AgentFactory.create(). AgentFactory ties an AgentMech to an AgentNFT.
 
 ## Libraries (Base inherited contracts => concrete implementations)
 
@@ -115,7 +119,7 @@ The Agent Factory is an implementation of [Generic Manager](https://github.com/v
 [Source](https://github.com/valory-xyz/mech/tree/main)
 
 Abstract:
-In this specific case the AI Mech project demonstrates a smart contract protocol with an interface that can allow users on-chain (public addresses on evm blockchains) to make requests in the form of an evm transaction for an off-chain agent to do some work in exchange for payment in the form of cryptocurrency. This application has a wide range of use cases from trivial examples of using a call to the request function in the AgentMech contract in order to input a prompt for GPT then have it respond with some text all the way to inputting a request to complete some complex action and having AI and/or an automated off-chain process within the agent execute programmatic instructions in a generalized way with only text as input.
+In this specific case the AI Mech project demonstrates a smart contract protocol with an interface that can allow users on-chain (public addresses on evm blockchains) to make requests in the form of an evm transaction for an off-chain agent to do some work in exchange for payment in the form of cryptocurrency. This application has a wide range of use cases from trivial examples of using a call to the request function in the AgentMech contract in order to input a prompt for GPT then have it respond with some text all the way to inputting a request to complete some complex action and having AI and/or an automated off-chain process within the off-chain agent execute programmatic instructions in a generalized way with only text as input.
 
 For the demo mech we use the Autonolas Open Autonomy framework (https://docs.autonolas.network) to construct an autonomous service that acts as an off-chain agent.
 
