@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import dynamic from 'next/dynamic';
-import { Layout, Menu } from 'antd/lib';
+import { Alert, Layout, Menu } from 'antd/lib';
 import PropTypes from 'prop-types';
+import { getSupportedNetworks } from 'common-util/functions';
+import { useSelector } from 'react-redux';
 import Login from '../Login';
 import { CustomLayout, Container, Logo } from './styles';
 
@@ -12,6 +14,8 @@ const { Header, Content } = Layout;
 
 const NavigationBar = ({ children }) => {
   const router = useRouter();
+
+  const chainId = useSelector((state) => state?.setup?.chainId);
   const { pathname } = router;
   const [selectedMenu, setSelectedMenu] = useState([]);
 
@@ -66,7 +70,32 @@ const NavigationBar = ({ children }) => {
       </Header>
 
       <Content className="site-layout">
-        <div className="site-layout-background">{children}</div>
+        <div className="site-layout-background">
+          {chainId && !getSupportedNetworks().includes(Number(chainId)) && (
+            <>
+              <Alert
+                showIcon
+                message={(
+                  <>
+                    You are on a wrong network. Please switch to Gnosis Chain
+                    network or&nbsp;
+                    <a
+                      href="https://discord.com/invite/z2PT65jKqQ"
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      join our Discord
+                    </a>
+                    &nbsp;to request other networks.
+                  </>
+                )}
+                type="error"
+                className="mb-12"
+              />
+            </>
+          )}
+          {children}
+        </div>
       </Content>
 
       <Container />
