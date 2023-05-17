@@ -29,7 +29,7 @@ const EventListener = () => {
 
   const filterOption = useMemo(
     () => ({
-      fromBlock: 27971780,
+      fromBlock: 27991163,
       toBlock: 'latest',
     }),
     [id],
