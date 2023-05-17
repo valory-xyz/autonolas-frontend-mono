@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import get from 'lodash/get';
 import { Form, Input, Button } from 'antd/lib';
+import { v4 as uuidv4 } from 'uuid';
 import { getIpfsHashHelper } from './helpers';
 import { CustomModal } from '../styles';
 
@@ -24,7 +25,13 @@ const IpfsModal = ({ visible, handleCancel, callback }) => {
     try {
       setIsHashLoading(true); // loading on!
 
-      const hash = await getIpfsHashHelper(values, { noImage: true });
+      const hash = await getIpfsHashHelper(
+        {
+          ...values,
+          nonce: uuidv4(),
+        },
+        { noImage: true },
+      );
       if (callback) callback(hash);
       onModalClose();
 
