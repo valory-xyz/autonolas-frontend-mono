@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import Web3 from 'web3';
 import { Table, Typography } from 'antd/lib';
 import { useRouter } from 'next/router';
+import { DEFAULT_MECH_CONTRACT_ADDRESS } from 'util/constants';
 import { AGENT_MECH_ABI } from 'common-util/AbiAndAddresses';
 import { EllipsisMiddle } from 'common-util/List/ListTable/helpers';
 import { NA } from 'common-util/constants';
@@ -9,7 +10,6 @@ import { notifySuccess } from 'common-util/functions';
 import Request from './components/Request';
 
 // Replace the following values with your specific contract information
-const DEFAULT_CONTRACT_ADDRESS = '0xFf82123dFB52ab75C417195c5fDB87630145ae81';
 const WEBSOCKET_PROVIDER = 'wss://rpc.gnosischain.com/wss';
 
 const { Title } = Typography;
@@ -48,7 +48,7 @@ const EventListener = () => {
     if (web3Ws) {
       const contractInstance = new web3Ws.eth.Contract(
         AGENT_MECH_ABI,
-        id || DEFAULT_CONTRACT_ADDRESS,
+        id || DEFAULT_MECH_CONTRACT_ADDRESS,
       );
       setContractWs(contractInstance);
     }

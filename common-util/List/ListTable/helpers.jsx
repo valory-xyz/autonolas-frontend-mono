@@ -134,10 +134,10 @@ export const getTableColumns = (type, { router }) => {
         dataIndex: 'mech',
         width: 180,
         key: 'mech',
-        render: (text) => (
+        render: (text, row) => (
           <EllipsisMiddle
             onClick={(e) => {
-              if (router) router.push(`/mech?id=${e}`);
+              if (router) router.push(`/mech?id=${e}&hash=${row.hash}`);
             }}
           >
             {text}
@@ -181,7 +181,8 @@ export const getData = (type, rawData, { current }) => {
       description: item.description || '-',
       developer: item.developer || '-',
       owner: item.owner || '-',
-      hash: item.agentHashes[0] || '-',
+      // show last element of agentHashes array
+      hash: item.agentHashes === 0 ? '-' : item.agentHashes[item.agentHashes.length - 1],
       mech: item.mech,
       dependency: (item.dependencies || []).length,
     }));
