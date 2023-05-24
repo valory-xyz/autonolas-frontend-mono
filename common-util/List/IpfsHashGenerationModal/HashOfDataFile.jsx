@@ -1,17 +1,33 @@
-import React, { Fragment, useState } from 'react';
+import React, { Fragment, useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import get from 'lodash/get';
-import { Form, Input, Button, Select } from 'antd/lib';
+import {
+  Form, Input, Button, Select,
+} from 'antd/lib';
 import { v4 as uuidv4 } from 'uuid';
+import { isArray } from 'lodash';
 import { getIpfsHashHelper } from './helpers';
 import { CustomModal } from '../styles';
 
 export const FORM_NAME = 'ipfs_creation_form_for_mech';
 
-const IpfsModal = ({ visible, handleCancel, callback }) => {
+const IpfsModal = ({
+  visible, tools, handleCancel, callback,
+}) => {
   const [form] = Form.useForm();
   const [isHashLoading, setIsHashLoading] = useState(false);
+
+  useEffect(() => {
+    if (tools) {
+      form.setFields([
+        {
+          name: ['tool'],
+          value: tools,
+        },
+      ]);
+    }
+  }, [tools]);
 
   const onFinishFailed = (errorInfo) => {
     console.log('Failed:', errorInfo); /* eslint-disable-line no-console */
@@ -109,12 +125,18 @@ const IpfsModal = ({ visible, handleCancel, callback }) => {
             },
           ]}
         >
-          <Select placeholder="Select a tool">
-            <Select.Option value="openai-text-davinci-002">openai-text-davinci-002</Select.Option>
-            <Select.Option value="openai-text-davinci-003">openai-text-davinci-003</Select.Option>
-            <Select.Option value="openai-gpt-3.5-turbo">openai-gpt-3.5-turbo</Select.Option>
-            <Select.Option value="openai-gpt-4">openai-gpt-4</Select.Option>
-          </Select>
+          {/* if "tools" has valid elements show dropdown, else input */}
+          {isArray(tools) && tools.length > 0 ? (
+            <Select placeholder="Select a tool">
+              {tools.map((tool) => (
+                <Select.Option key={tool} value={tool}>
+                  {tool}
+                </Select.Option>
+              ))}
+            </Select>
+          ) : (
+            <Input />
+          )}
         </Form.Item>
       </Form>
     </CustomModal>
@@ -124,10 +146,12 @@ const IpfsModal = ({ visible, handleCancel, callback }) => {
 IpfsModal.propTypes = {
   visible: PropTypes.bool.isRequired,
   handleCancel: PropTypes.func.isRequired,
+  tools: PropTypes.oneOfType([PropTypes.string, PropTypes.array]),
   callback: PropTypes.func,
 };
 
 IpfsModal.defaultProps = {
+  tools: null,
   callback: null,
 };
 

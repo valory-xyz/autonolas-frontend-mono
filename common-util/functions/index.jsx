@@ -3,7 +3,7 @@ import dayjs from 'dayjs';
 import { notification } from 'antd/lib';
 import { isNil, isString } from 'lodash';
 import { COLOR } from 'util/theme';
-import { TOTAL_VIEW_COUNT } from 'util/constants';
+import { GATEWAY_URL, TOTAL_VIEW_COUNT } from 'util/constants';
 import { NA } from 'common-util/constants';
 import { ADDRESSES } from 'common-util/Contracts';
 
@@ -169,3 +169,15 @@ export const safeSendTransactionNotification = () => notification.warning({
 });
 
 export const getSupportedNetworks = () => Object.keys(ADDRESSES).map((e) => Number(e));
+
+export const getIpfsResponse = async (hash) => {
+  try {
+    const ipfsUrl = `${GATEWAY_URL}f01701220${hash.substring(2)}`;
+    const response = await fetch(ipfsUrl);
+    const json = await response.json();
+    return json;
+  } catch (e) {
+    window.console.error('Error fetching metadata from IPFS', e);
+    throw new Error(e);
+  }
+};

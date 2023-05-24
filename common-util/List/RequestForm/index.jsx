@@ -10,7 +10,9 @@ import { RegisterFooter } from '../styles';
 
 export const FORM_NAME = 'request_form';
 
-const RequestForm = ({ account, handleSubmit, handleCancel }) => {
+const RequestForm = ({
+  account, dataList, handleSubmit, handleCancel,
+}) => {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [form] = Form.useForm();
   const [fields, setFields] = useState([]);
@@ -75,6 +77,7 @@ const RequestForm = ({ account, handleSubmit, handleCancel }) => {
 
       <HashOfDataFile
         visible={isModalVisible}
+        tools={dataList}
         callback={onGenerateHash}
         handleCancel={() => setIsModalVisible(false)}
       />
@@ -84,11 +87,13 @@ const RequestForm = ({ account, handleSubmit, handleCancel }) => {
 
 RequestForm.propTypes = {
   account: PropTypes.string,
+  dataList: PropTypes.oneOfType([PropTypes.string, PropTypes.array]),
   handleSubmit: PropTypes.func.isRequired,
   handleCancel: PropTypes.func.isRequired,
 };
 
 RequestForm.defaultProps = {
+  dataList: null,
   account: null,
 };
 

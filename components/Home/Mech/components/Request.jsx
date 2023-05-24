@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { useRouter } from 'next/router';
@@ -8,11 +8,23 @@ import { AlertSuccess, AlertError } from 'common-util/List/ListCommon';
 import { getMechContract } from 'common-util/Contracts';
 import { HeaderTitle } from 'common-util/Title';
 import { FormContainer } from 'components/styles';
+import { getIpfsResponse } from 'common-util/functions';
 
 const Request = ({ account }) => {
+  const [dataList, setDataList] = useState([]);
   const [error, setError] = useState(null);
   const [information, setInformation] = useState(null);
   const router = useRouter();
+  const { hash } = router.query;
+
+  useEffect(() => {
+    const getData = async () => {
+      const data = await getIpfsResponse(hash);
+      setDataList(data.tools || []);
+    };
+
+    if (hash) getData();
+  }, [hash]);
 
   const handleCancel = () => router.push('/mech');
 
@@ -47,6 +59,7 @@ const Request = ({ account }) => {
       <FormContainer>
         <RequestForm
           listType="request"
+          dataList={dataList}
           handleSubmit={handleSubmit}
           handleCancel={handleCancel}
         />
