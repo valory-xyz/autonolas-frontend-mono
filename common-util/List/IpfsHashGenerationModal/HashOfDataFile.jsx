@@ -2,7 +2,7 @@ import React, { Fragment, useState } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import get from 'lodash/get';
-import { Form, Input, Button } from 'antd/lib';
+import { Form, Input, Button, Select } from 'antd/lib';
 import { v4 as uuidv4 } from 'uuid';
 import { getIpfsHashHelper } from './helpers';
 import { CustomModal } from '../styles';
@@ -109,7 +109,12 @@ const IpfsModal = ({ visible, handleCancel, callback }) => {
             },
           ]}
         >
-          <Input />
+          <Select placeholder="Select a tool">
+            <Select.Option value="openai-text-davinci-002">openai-text-davinci-002</Select.Option>
+            <Select.Option value="openai-text-davinci-003">openai-text-davinci-003</Select.Option>
+            <Select.Option value="openai-gpt-3.5-turbo">openai-gpt-3.5-turbo</Select.Option>
+            <Select.Option value="openai-gpt-4">openai-gpt-4</Select.Option>
+          </Select>
         </Form.Item>
       </Form>
     </CustomModal>
