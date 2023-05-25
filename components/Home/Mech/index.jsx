@@ -29,7 +29,7 @@ const EventListener = () => {
 
   const filterOption = useMemo(
     () => ({
-      fromBlock: 28121915,
+      fromBlock: 28127133,
       toBlock: 'latest',
     }),
     [id],
@@ -164,11 +164,6 @@ const EventListener = () => {
         rowKey={(x) => x.key}
         columns={[
           {
-            title: 'Index',
-            dataIndex: 'index',
-            key: 'index',
-          },
-          {
             title: 'Request Id',
             dataIndex: 'requestId',
             key: 'requestId',
@@ -212,11 +207,6 @@ const EventListener = () => {
         pagination={false}
         rowKey={(x) => x.key}
         columns={[
-          {
-            title: 'Index',
-            dataIndex: 'index',
-            key: 'index',
-          },
           {
             title: 'Request Id',
             dataIndex: 'requestId',

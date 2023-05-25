@@ -9,13 +9,13 @@ const DocsContainer = styled.div`
   margin: 0 auto;
 `;
 
-const markdown = `# Overview of AI Mech Contracts
+const markdown = `# Overview of AI Mech Architecture
 
-## Off-chain Agent (AI Worker)
+## 1. Off-chain Agent (AI Worker)
 
 Any autonomous agent or bot that runs off-chain, executes AI tasks and holds a wallet for signing transactions.
 
-## Contracts
+## 2. On-chain Protocol
 
 [Source](https://github.com/valory-xyz/ai-registry-mech/tree/main/contracts)
 
@@ -116,7 +116,7 @@ Functions:
 Abstract:
 The AgentFactory is an implementation of [Generic Manager](https://github.com/valory-xyz/autonolas-registries/blob/00add36760c4b2faf5b5b11199af7d1ec38957fd/contracts/GenericManager.sol) as found in the [Autonolas protocol](https://docs.autonolas.network/protocol/) that is used for creation of new AgentMech contracts with AgentFactory.create(). AgentFactory ties an AgentMech to an AgentNFT.
 
-## Libraries (Base inherited contracts => concrete implementations)
+### Libraries (Base inherited contracts => concrete implementations)
 
 - [Gnosis Mech Library, programmable ownership for smart accounts](https://github.com/gnosis/mech/tree/f6fa16551dba14fa8310fce0fd24c40be58fc7d1)
     - [Mech](https://github.com/gnosis/mech/blob/f6fa16551dba14fa8310fce0fd24c40be58fc7d1/contracts/base/Mech.sol)
@@ -130,7 +130,7 @@ The AgentFactory is an implementation of [Generic Manager](https://github.com/va
         - Agent Factory
             - Extended Agent Factory
 
-## High Level Specification of Off-Chain Agents that take input from the AgentMechs
+## 3. High Level Specification of Off-Chain Agents that take input from the AgentMechs
 
 [Source](https://github.com/valory-xyz/mech/tree/main)
 
