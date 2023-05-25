@@ -37,6 +37,21 @@ Functions:
 - deliver: delivers a response to a task/request with the corresponding request id and response data (e.g. IPFS hash)
 - setPrice: sets the price required to call the AgentMech's request function
 - getRequestId: returns the request id for a given account address and data
+#### AgentMech Metadata
+
+An example of metadata for an AgentMech:
+~~~json
+{
+  "name":"Autonolas Mech III",
+  "description":"The mech executes AI tasks requested on-chain and delivers the results to the requester.",
+  "inputFormat":"ipfs-v0.1",
+  "outputFormat":"ipfs-v0.1",
+  "tools": ["openai-text-davinci-002", "openai-text-davinci-003", "openai-gpt-3.5-turbo", "openai-gpt-4"]
+  "image":"ipfs://bafybeidzpenez565d7vp7jexfrwisa2wijzx6vwcffli57buznyyqkrceq"
+}
+~~~
+
+In this case, the mech signals that it accepts the specified tools.
 
 #### Request Lifecycle:
 1. Requester calls AgentMech.request() with the corresponding data (e.g. IPFS hash)
@@ -49,6 +64,7 @@ Request
     "nonce": "The uuid goes here"
 }
 ~~~
+In the context of the above AgentMech metadata example, the tool would have to be one of the specified tools, e.g. "openai-text-davinci-003".
 2. AgentMech emits Request() event with the corresponding request id and data (IPFS hash)
 3. Off-chain agent listens for Request() events to read new request data on IPFS associated to a given request id and IPFS hash inside the Request() event on-chain.
 4. Off-chain agent uses the specified tool in the request data to return a response to the request in the form of data on IPFS at a given IPFS hash.
