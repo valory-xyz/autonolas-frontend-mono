@@ -45,7 +45,7 @@ const ContractInfo = () => {
 
       if (path === '/mech') {
         return {
-          registryText: 'MechRegistry',
+          registryText: 'Mech',
           registry: query?.id,
         };
       }
