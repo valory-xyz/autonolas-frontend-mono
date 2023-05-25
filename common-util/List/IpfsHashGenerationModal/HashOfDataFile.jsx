@@ -1,4 +1,4 @@
-import React, { Fragment, useEffect, useState } from 'react';
+import React, { Fragment, useState } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import get from 'lodash/get';
@@ -17,17 +17,6 @@ const IpfsModal = ({
 }) => {
   const [form] = Form.useForm();
   const [isHashLoading, setIsHashLoading] = useState(false);
-
-  useEffect(() => {
-    if (tools) {
-      form.setFields([
-        {
-          name: ['tool'],
-          value: tools,
-        },
-      ]);
-    }
-  }, [tools]);
 
   const onFinishFailed = (errorInfo) => {
     console.log('Failed:', errorInfo); /* eslint-disable-line no-console */
@@ -127,13 +116,14 @@ const IpfsModal = ({
         >
           {/* if "tools" has valid elements show dropdown, else input */}
           {isArray(tools) && tools.length > 0 ? (
-            <Select placeholder="Select a tool">
-              {tools.map((tool) => (
-                <Select.Option key={tool} value={tool}>
-                  {tool}
-                </Select.Option>
-              ))}
-            </Select>
+            <Select
+              placeholder="Select a tool"
+              options={tools.map((e) => ({
+                key: e,
+                value: e,
+                label: e,
+              }))}
+            />
           ) : (
             <Input />
           )}
