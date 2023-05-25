@@ -37,7 +37,7 @@ const ContractInfo = () => {
       if (path === '/' || path.includes('registry')) {
         return {
           registryText: 'AgentRegistry',
-          managerText: 'RegistriesManager',
+          managerText: 'AgentFactory',
           registry: addresses.agentRegistry,
           manager: addresses.agentFactory,
         };
