@@ -95,7 +95,6 @@ const ListAgents = () => {
           if (currentTab === ALL_AGENTS) {
             setList([]);
             const everyComps = await getAgents(total, currentPage);
-            everyComps.splice(0, 2); // removes the first two elements
             setList(everyComps);
           }
 
