@@ -6,6 +6,7 @@ import PropTypes from 'prop-types';
 import { getSupportedNetworks } from 'common-util/functions';
 import { useSelector } from 'react-redux';
 import Login from '../Login';
+import Footer from './Footer';
 import { CustomLayout, Container, Logo } from './styles';
 
 const LogoSvg = dynamic(() => import('common-util/SVGs/logo'));
@@ -99,6 +100,7 @@ const NavigationBar = ({ children }) => {
       </Content>
 
       <Container />
+      <Footer />
     </CustomLayout>
   );
 };

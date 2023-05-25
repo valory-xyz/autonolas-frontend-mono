@@ -92,3 +92,20 @@ export const SubFooter = styled.div`
   ${MEDIA_QUERY.mobileS} {
   }
 `;
+
+export const ContractsInfoContainer = styled.div`
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  .registry-contract {
+    display: flex;
+    align-items: center;
+  }
+  img {
+    margin-right: 8px;
+  }
+`;
+
+export const FooterContainer = styled.div`
+  margin: 0 -16px;
+`;
