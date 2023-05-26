@@ -17,11 +17,10 @@ const { Title } = Typography;
 const filterOption = { fromBlock: 28127133, toBlock: 'latest' };
 
 const onNewEvent = (event) => {
-  const { transactionHash } = event;
   notifySuccess(
     'New event recevied',
     <a
-      href={`https://gnosisscan.io/tx/${transactionHash}`}
+      href={`https://gnosisscan.io/tx/${event?.transactionHash}`}
       target="_blank"
       rel="noopener noreferrer"
     >
@@ -73,14 +72,18 @@ const EventListener = () => {
     const getFirstEvents = async () => {
       setIsFirstEventLoading(true);
 
-      // Get past FirstEvent events
-      const pastFirstEvents = await contractWs.getPastEvents(
-        'Request',
-        filterOption,
-      );
+      try {
+        // Get past FirstEvent events
+        const pastFirstEvents = await contractWs.getPastEvents(
+          'Request',
+          filterOption,
+        );
 
-      setIsFirstEventLoading(false);
-      setFirstEvents(sortEvents(pastFirstEvents));
+        setIsFirstEventLoading(false);
+        setFirstEvents(sortEvents(pastFirstEvents));
+      } catch (error) {
+        console.error('Error on getting past events', error);
+      }
 
       // "Events": Listen to new FirstEvent events
       eventListener = contractWs.events.Request({}, (error, event) => {
@@ -110,14 +113,18 @@ const EventListener = () => {
     const getSecondEvents = async () => {
       setIsSecondEventLoading(true);
 
-      // Get past SecondEvent events
-      const pastSecondEvents = await contractWs.getPastEvents(
-        'Deliver',
-        filterOption,
-      );
+      try {
+        // Get past SecondEvent events
+        const pastSecondEvents = await contractWs.getPastEvents(
+          'Deliver',
+          filterOption,
+        );
 
-      setIsSecondEventLoading(false);
-      setSecondEvents(sortEvents(pastSecondEvents));
+        setIsSecondEventLoading(false);
+        setSecondEvents(sortEvents(pastSecondEvents));
+      } catch (error) {
+        console.error('Error on getting past events', error);
+      }
 
       // "Events": Listen to new SecondEvent events
       eventListener = contractWs.events.Deliver({}, (error, event) => {
