@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import Web3 from 'web3';
 import { Table, Typography } from 'antd/lib';
 import { useRouter } from 'next/router';
@@ -6,13 +6,34 @@ import { DEFAULT_MECH_CONTRACT_ADDRESS } from 'util/constants';
 import { AGENT_MECH_ABI } from 'common-util/AbiAndAddresses';
 import { EllipsisMiddle } from 'common-util/List/ListTable/helpers';
 import { NA } from 'common-util/constants';
-import { notifySuccess } from 'common-util/functions';
+import { notifyError, notifySuccess } from 'common-util/functions';
 import Request from './components/Request';
 
 // Replace the following values with your specific contract information
 const WEBSOCKET_PROVIDER = 'wss://rpc.gnosischain.com/wss';
 
 const { Title } = Typography;
+
+const filterOption = { fromBlock: 28127133, toBlock: 'latest' };
+
+const onNewEvent = (event) => {
+  const { transactionHash } = event;
+  notifySuccess(
+    'New event recevied',
+    <a
+      href={`https://gnosisscan.io/tx/${transactionHash}`}
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      Tx
+    </a>,
+  );
+};
+
+const onErrorEvent = (error, type) => {
+  notifyError('Error occurred while receiving event, please check console');
+  console.error(`Error occurred on ${type} event`, error);
+};
 
 const EventListener = () => {
   const [web3Ws, setWeb3Ws] = useState(null);
@@ -26,14 +47,6 @@ const EventListener = () => {
   // get the id from the next js router
   const router = useRouter();
   const { id } = router.query;
-
-  const filterOption = useMemo(
-    () => ({
-      fromBlock: 28127133,
-      toBlock: 'latest',
-    }),
-    [id],
-  );
 
   useEffect(() => {
     const web3Instance = new Web3(
@@ -54,35 +67,11 @@ const EventListener = () => {
     }
   }, [web3Ws]);
 
-  const onNewEvent = (event) => {
-    const { transactionHash } = event;
-    notifySuccess(
-      'New event recevied',
-      <a
-        href={`https://gnosisscan.io/tx/${transactionHash}`}
-        target="_blank"
-        rel="noopener noreferrer"
-      >
-        Tx
-      </a>,
-    );
-  };
-
   // Effect hook for listening to the FirstEvent
   useEffect(() => {
     let eventListener;
     const getFirstEvents = async () => {
       setIsFirstEventLoading(true);
-
-      // Listen to new FirstEvent events
-      eventListener = contractWs.events.Request({}, (error, event) => {
-        if (error) {
-          console.error(error);
-        } else {
-          onNewEvent(event);
-          setFirstEvents((prevEvents) => sortEvents([...prevEvents, event]));
-        }
-      });
 
       // Get past FirstEvent events
       const pastFirstEvents = await contractWs.getPastEvents(
@@ -92,6 +81,16 @@ const EventListener = () => {
 
       setIsFirstEventLoading(false);
       setFirstEvents(sortEvents(pastFirstEvents));
+
+      // "Events": Listen to new FirstEvent events
+      eventListener = contractWs.events.Request({}, (error, event) => {
+        if (error) {
+          onErrorEvent(error, 'Request');
+        } else {
+          onNewEvent(event);
+          setFirstEvents((prevEvents) => sortEvents([...prevEvents, event]));
+        }
+      });
     };
 
     if (contractWs) {
@@ -99,7 +98,7 @@ const EventListener = () => {
     }
 
     return () => {
-      if (eventListener && eventListener.unsubscribe) {
+      if (eventListener && typeof eventListener.unsubscribe === 'function') {
         eventListener.unsubscribe();
       }
     };
@@ -111,16 +110,6 @@ const EventListener = () => {
     const getSecondEvents = async () => {
       setIsSecondEventLoading(true);
 
-      // Listen to new SecondEvent events
-      eventListener = contractWs.events.Deliver({}, (error, event) => {
-        if (error) {
-          console.error(error);
-        } else {
-          onNewEvent(event);
-          setSecondEvents((prevEvents) => sortEvents([...prevEvents, event]));
-        }
-      });
-
       // Get past SecondEvent events
       const pastSecondEvents = await contractWs.getPastEvents(
         'Deliver',
@@ -129,6 +118,16 @@ const EventListener = () => {
 
       setIsSecondEventLoading(false);
       setSecondEvents(sortEvents(pastSecondEvents));
+
+      // "Events": Listen to new SecondEvent events
+      eventListener = contractWs.events.Deliver({}, (error, event) => {
+        if (error) {
+          onErrorEvent(error, 'Deliver');
+        } else {
+          onNewEvent(event);
+          setSecondEvents((prevEvents) => sortEvents([...prevEvents, event]));
+        }
+      });
     };
 
     if (contractWs) {
@@ -136,13 +135,13 @@ const EventListener = () => {
     }
 
     return () => {
-      if (eventListener && eventListener.unsubscribe) {
+      if (eventListener && typeof eventListener.unsubscribe === 'function') {
         eventListener.unsubscribe();
       }
     };
   }, [contractWs]);
 
-  const getDatasource = (eventsPassed) => eventsPassed.map((event, index) => ({
+  const getDataSource = (eventsPassed) => eventsPassed.map((event, index) => ({
     key: `row-request-${index}`,
     index: index + 1,
     requestId: event.returnValues.requestId,
@@ -150,8 +149,8 @@ const EventListener = () => {
     data: event.returnValues.data,
   }));
 
-  const requestsDatasource = getDatasource(firstEvents);
-  const deliversDatasource = getDatasource(secondEvents);
+  const requestsDatasource = getDataSource(firstEvents);
+  const deliversDatasource = getDataSource(secondEvents);
 
   return (
     <div>
