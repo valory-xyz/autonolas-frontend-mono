@@ -14,6 +14,7 @@ const Request = ({ account }) => {
   const [dataList, setDataList] = useState([]);
   const [error, setError] = useState(null);
   const [information, setInformation] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
   const { hash } = router.query;
 
@@ -32,6 +33,7 @@ const Request = ({ account }) => {
     if (account) {
       setError(null);
       setInformation(null);
+      setIsLoading(true);
 
       const contract = getMechContract();
 
@@ -48,6 +50,8 @@ const Request = ({ account }) => {
       } catch (e) {
         setError(e);
         console.error(e);
+      } finally {
+        setIsLoading(false);
       }
     }
   };
@@ -59,6 +63,7 @@ const Request = ({ account }) => {
       <FormContainer>
         <RequestForm
           listType="request"
+          isLoading={isLoading}
           dataList={dataList}
           handleSubmit={handleSubmit}
           handleCancel={handleCancel}

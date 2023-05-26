@@ -82,7 +82,7 @@ const EventListener = () => {
         setIsFirstEventLoading(false);
         setFirstEvents(sortEvents(pastFirstEvents));
       } catch (error) {
-        console.error('Error on getting past events', error);
+        console.error('Error on getting past events for `Request`', error);
       }
 
       // "Events": Listen to new FirstEvent events
@@ -123,7 +123,7 @@ const EventListener = () => {
         setIsSecondEventLoading(false);
         setSecondEvents(sortEvents(pastSecondEvents));
       } catch (error) {
-        console.error('Error on getting past events', error);
+        console.error('Error on getting past events for `Deliver`', error);
       }
 
       // "Events": Listen to new SecondEvent events

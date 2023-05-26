@@ -11,7 +11,11 @@ import { RegisterFooter } from '../styles';
 export const FORM_NAME = 'request_form';
 
 const RequestForm = ({
-  account, dataList, handleSubmit, handleCancel,
+  isLoading,
+  account,
+  dataList,
+  handleSubmit,
+  handleCancel,
 }) => {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [form] = Form.useForm();
@@ -63,7 +67,7 @@ const RequestForm = ({
 
         {account ? (
           <Form.Item>
-            <Button type="primary" htmlType="submit">
+            <Button type="primary" htmlType="submit" loading={isLoading}>
               Submit
             </Button>
           </Form.Item>
@@ -86,6 +90,7 @@ const RequestForm = ({
 };
 
 RequestForm.propTypes = {
+  isLoading: PropTypes.bool,
   account: PropTypes.string,
   dataList: PropTypes.oneOfType([PropTypes.string, PropTypes.array]),
   handleSubmit: PropTypes.func.isRequired,
@@ -93,6 +98,7 @@ RequestForm.propTypes = {
 };
 
 RequestForm.defaultProps = {
+  isLoading: false,
   dataList: null,
   account: null,
 };
