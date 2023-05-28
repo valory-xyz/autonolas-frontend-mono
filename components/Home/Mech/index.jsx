@@ -160,7 +160,7 @@ const EventListener = () => {
       <Table
         loading={isFirstEventLoading}
         dataSource={requestsDatasource}
-        pagination={false}
+        pagination={{ pageSize: 10 }}
         rowKey={(x) => x.key}
         columns={[
           {
@@ -204,7 +204,7 @@ const EventListener = () => {
       <Table
         loading={isSecondEventLoading}
         dataSource={deliversDatasource}
-        pagination={false}
+        pagination={{ pageSize: 10 }}
         rowKey={(x) => x.key}
         columns={[
           {
