@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import Web3 from 'web3';
 import { Table, Typography } from 'antd/lib';
 import { useRouter } from 'next/router';
-import { DEFAULT_MECH_CONTRACT_ADDRESS } from 'util/constants';
+import { DEFAULT_MECH_CONTRACT_ADDRESS, TOTAL_VIEW_COUNT } from 'util/constants';
 import { AGENT_MECH_ABI } from 'common-util/AbiAndAddresses';
 import { EllipsisMiddle } from 'common-util/List/ListTable/helpers';
 import { NA } from 'common-util/constants';
@@ -160,7 +160,7 @@ const EventListener = () => {
       <Table
         loading={isFirstEventLoading}
         dataSource={requestsDatasource}
-        pagination={{ pageSize: 10 }}
+        pagination={{ pageSize: TOTAL_VIEW_COUNT }}
         rowKey={(x) => x.key}
         columns={[
           {
@@ -204,7 +204,7 @@ const EventListener = () => {
       <Table
         loading={isSecondEventLoading}
         dataSource={deliversDatasource}
-        pagination={{ pageSize: 10 }}
+        pagination={{ pageSize: TOTAL_VIEW_COUNT }}
         rowKey={(x) => x.key}
         columns={[
           {
