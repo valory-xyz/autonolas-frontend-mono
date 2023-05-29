@@ -117,6 +117,7 @@ const IpfsModal = ({
           {/* if "tools" has valid elements show dropdown, else input */}
           {isArray(tools) && tools.length > 0 ? (
             <Select
+              getPopupContainer={(triggerNode) => triggerNode.parentNode}
               placeholder="Select a tool"
               options={tools.map((e) => ({
                 key: e,
