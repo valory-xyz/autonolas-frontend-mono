@@ -1,7 +1,7 @@
+import { useEffect } from 'react';
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
-import styled from 'styled-components';
-import { Login as LoginComponent } from '@autonolas/frontend-library';
+import { useAccount, useNetwork, useBalance } from 'wagmi';
 import {
   setUserAccount as setUserAccountFn,
   setUserBalance as setUserBalanceFn,
@@ -9,16 +9,7 @@ import {
   setErrorMessage as setErrorMessageFn,
   setLogout as setLogoutFn,
 } from 'store/setup/actions';
-import { getSupportedNetworks } from 'common-util/functions';
-
-const Container = styled.div``;
-
-const rpc = {
-  1: process.env.NEXT_PUBLIC_MAINNET_URL,
-  5: process.env.NEXT_PUBLIC_GOERLI_URL,
-  100: process.env.NEXT_PUBLIC_XDAI_URL,
-  31337: process.env.NEXT_PUBLIC_AUTONOLAS_URL,
-};
+import { LoginV2 as LoginComponent } from 'common-util/Login';
 
 const Login = ({
   setUserAccount,
@@ -27,6 +18,21 @@ const Login = ({
   setErrorMessage,
   setLogout,
 }) => {
+  const { address } = useAccount();
+  const { chain } = useNetwork();
+  const chainId = chain?.id;
+  const { data } = useBalance({ address, chainId: chain?.id });
+
+  useEffect(() => {
+    if (address) {
+      setUserAccount(address);
+      setUserBalance(data?.formatted);
+      setChainId(chainId);
+    } else {
+      setLogout();
+    }
+  }, [address]);
+
   const onConnect = (response) => {
     setUserAccount(response.address);
     setUserBalance(response.balance);
@@ -34,10 +40,6 @@ const Login = ({
   };
 
   const onDisconnect = () => {
-    setUserAccount(null);
-    setUserBalance(null);
-    setErrorMessage(null);
-    setChainId(null);
     setLogout();
   };
 
@@ -46,15 +48,13 @@ const Login = ({
   };
 
   return (
-    <Container>
+    <div>
       <LoginComponent
-        rpc={rpc}
         onConnect={onConnect}
         onDisconnect={onDisconnect}
-        supportedNetworks={getSupportedNetworks()}
         onError={onError}
       />
-    </Container>
+    </div>
   );
 };
 
