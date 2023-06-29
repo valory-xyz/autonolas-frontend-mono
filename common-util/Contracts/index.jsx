@@ -94,3 +94,7 @@ export async function fetchGraphQLData() {
       });
   });
 }
+
+export const rpc = {
+  100: process.env.NEXT_PUBLIC_GNOSIS_URL,
+};
