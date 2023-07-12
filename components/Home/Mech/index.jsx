@@ -15,7 +15,7 @@ import { notifyError, notifySuccess } from 'common-util/functions';
 import Request from './components/Request';
 
 // Replace the following values with your specific contract information
-const WEBSOCKET_PROVIDER = 'wss://rpc.gnosischain.com/wss';
+const WEBSOCKET_PROVIDER = process.env.NEXT_PUBLIC_GNOSIS_WEB_SOCKET;
 
 const { Title } = Typography;
 
