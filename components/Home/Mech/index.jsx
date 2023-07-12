@@ -1,8 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import Web3 from 'web3';
-import { Table, Typography } from 'antd/lib';
+import {
+  Table, Typography, ConfigProvider, Empty,
+} from 'antd/lib';
 import { useRouter } from 'next/router';
-import { DEFAULT_MECH_CONTRACT_ADDRESS, TOTAL_VIEW_COUNT } from 'util/constants';
+import {
+  DEFAULT_MECH_CONTRACT_ADDRESS,
+  TOTAL_VIEW_COUNT,
+} from 'util/constants';
 import { AGENT_MECH_ABI } from 'common-util/AbiAndAddresses';
 import { EllipsisMiddle } from 'common-util/List/ListTable/helpers';
 import { NA } from 'common-util/constants';
@@ -10,7 +15,7 @@ import { notifyError, notifySuccess } from 'common-util/functions';
 import Request from './components/Request';
 
 // Replace the following values with your specific contract information
-const WEBSOCKET_PROVIDER = 'wss://rpc.gnosischain.com/wss';
+const WEBSOCKET_PROVIDER = process.env.NEXT_PUBLIC_GNOSIS_WEB_SOCKET;
 
 const { Title } = Typography;
 
@@ -37,11 +42,14 @@ const onErrorEvent = (error, type) => {
 const EventListener = () => {
   const [web3Ws, setWeb3Ws] = useState(null);
   const [contractWs, setContractWs] = useState(null);
+
   const [firstEvents, setFirstEvents] = useState([]);
   const [isFirstEventLoading, setIsFirstEventLoading] = useState(false);
+  const [isFirstEventError, setIsFirstEventError] = useState(false);
 
   const [secondEvents, setSecondEvents] = useState([]);
   const [isSecondEventLoading, setIsSecondEventLoading] = useState(false);
+  const [isSecondEventError, setIsSecondEventError] = useState(false);
 
   // get the id from the next js router
   const router = useRouter();
@@ -79,10 +87,12 @@ const EventListener = () => {
           filterOption,
         );
 
-        setIsFirstEventLoading(false);
         setFirstEvents(sortEvents(pastFirstEvents));
       } catch (error) {
+        setIsFirstEventError(true);
         console.error('Error on getting past events for `Request`', error);
+      } finally {
+        setIsFirstEventLoading(false);
       }
 
       // "Events": Listen to new FirstEvent events
@@ -120,10 +130,12 @@ const EventListener = () => {
           filterOption,
         );
 
-        setIsSecondEventLoading(false);
         setSecondEvents(sortEvents(pastSecondEvents));
       } catch (error) {
+        setIsSecondEventError(true);
         console.error('Error on getting past events for `Deliver`', error);
+      } finally {
+        setIsSecondEventLoading(false);
       }
 
       // "Events": Listen to new SecondEvent events
@@ -159,80 +171,97 @@ const EventListener = () => {
   const requestsDatasource = getDataSource(firstEvents);
   const deliversDatasource = getDataSource(secondEvents);
 
+  const isLoading = isFirstEventLoading || isSecondEventLoading;
+  const hasErrors = isFirstEventError || isSecondEventError;
+
   return (
     <div>
-      <Request />
-      <Title level={3}>Requests</Title>
-      <Table
-        loading={isFirstEventLoading}
-        dataSource={requestsDatasource}
-        pagination={{ pageSize: TOTAL_VIEW_COUNT }}
-        rowKey={(x) => x.key}
-        columns={[
-          {
-            title: 'Request Id',
-            dataIndex: 'requestId',
-            key: 'requestId',
-            width: 420,
-            render: (text) => (
-              <EllipsisMiddle suffixCount={12}>{text}</EllipsisMiddle>
-            ),
-          },
-          {
-            title: 'Sender',
-            dataIndex: 'sender',
-            key: 'sender',
-            width: 420,
-            render: (text) => {
-              if (!text) return NA;
-              return <EllipsisMiddle suffixCount={12}>{text}</EllipsisMiddle>;
+      <ConfigProvider
+        renderEmpty={() => {
+          if (hasErrors) {
+            return <Empty description="Error occurred while fetching events" />;
+          }
+
+          if (isLoading) {
+            return <Empty description="Loading events..." />;
+          }
+
+          return <Empty description="No events found" />;
+        }}
+      >
+        <Request />
+        <Title level={3}>Requests</Title>
+        <Table
+          loading={isFirstEventLoading}
+          dataSource={requestsDatasource}
+          pagination={{ pageSize: TOTAL_VIEW_COUNT }}
+          rowKey={(x) => x.key}
+          columns={[
+            {
+              title: 'Request Id',
+              dataIndex: 'requestId',
+              key: 'requestId',
+              width: 420,
+              render: (text) => (
+                <EllipsisMiddle suffixCount={12}>{text}</EllipsisMiddle>
+              ),
             },
-          },
-          {
-            title: 'Data',
-            dataIndex: 'data',
-            key: 'data',
-            width: 420,
-            render: (text) => {
-              if (!text) return NA;
-              return (
+            {
+              title: 'Sender',
+              dataIndex: 'sender',
+              key: 'sender',
+              width: 420,
+              render: (text) => {
+                if (!text) return NA;
+                return <EllipsisMiddle suffixCount={12}>{text}</EllipsisMiddle>;
+              },
+            },
+            {
+              title: 'Data',
+              dataIndex: 'data',
+              key: 'data',
+              width: 420,
+              render: (text) => {
+                if (!text) return NA;
+                return (
+                  <EllipsisMiddle suffixCount={12} isIpfsLink>
+                    {text}
+                  </EllipsisMiddle>
+                );
+              },
+            },
+          ]}
+        />
+
+        <br />
+        <Title level={3}>Delivers</Title>
+        <Table
+          loading={isSecondEventLoading}
+          dataSource={deliversDatasource}
+          pagination={{ pageSize: TOTAL_VIEW_COUNT }}
+          rowKey={(x) => x.key}
+          columns={[
+            {
+              title: 'Request Id',
+              dataIndex: 'requestId',
+              key: 'requestId',
+              render: (text) => (
+                <EllipsisMiddle suffixCount={12}>{text}</EllipsisMiddle>
+              ),
+            },
+            {
+              title: 'Data',
+              dataIndex: 'data',
+              key: 'data',
+              render: (text) => (
                 <EllipsisMiddle suffixCount={12} isIpfsLink>
                   {text}
                 </EllipsisMiddle>
-              );
+              ),
             },
-          },
-        ]}
-      />
-
-      <br />
-      <Title level={3}>Delivers</Title>
-      <Table
-        loading={isSecondEventLoading}
-        dataSource={deliversDatasource}
-        pagination={{ pageSize: TOTAL_VIEW_COUNT }}
-        rowKey={(x) => x.key}
-        columns={[
-          {
-            title: 'Request Id',
-            dataIndex: 'requestId',
-            key: 'requestId',
-            render: (text) => (
-              <EllipsisMiddle suffixCount={12}>{text}</EllipsisMiddle>
-            ),
-          },
-          {
-            title: 'Data',
-            dataIndex: 'data',
-            key: 'data',
-            render: (text) => (
-              <EllipsisMiddle suffixCount={12} isIpfsLink>
-                {text}
-              </EllipsisMiddle>
-            ),
-          },
-        ]}
-      />
+          ]}
+        />
+      </ConfigProvider>
     </div>
   );
 };
