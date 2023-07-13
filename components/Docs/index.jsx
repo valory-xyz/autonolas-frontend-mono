@@ -54,9 +54,12 @@ An example of metadata for an AgentMech:
 In this case, the mech signals that it accepts the specified tools.
 
 #### Request Lifecycle:
+
 1. Requester calls AgentMech.request() with the corresponding data (e.g. IPFS hash)
 The demo mech accepts as data an IPFS hash that points to a json file with the following format:
+
 Request
+
 ~~~json
 {
     "prompt": "The request prompt goes here",
@@ -64,11 +67,12 @@ Request
     "nonce": "The uuid goes here"
 }
 ~~~
-In the context of the above AgentMech metadata example, the tool would have to be one of the specified tools, e.g. "openai-text-davinci-003".
+2. In the context of the above AgentMech metadata example, the tool would have to be one of the specified tools, e.g. "openai-text-davinci-003".
 2. AgentMech emits Request() event with the corresponding request id and data (IPFS hash)
 3. Off-chain agent listens for Request() events to read new request data on IPFS associated to a given request id and IPFS hash inside the Request() event on-chain.
 4. Off-chain agent uses the specified tool in the request data to return a response to the request in the form of data on IPFS at a given IPFS hash.
 IPFS data format for responses:
+
 Deliver
 ~~~json
 {
@@ -76,7 +80,7 @@ Deliver
     "result": "Off-chain agent's response to the request prompt goes here",
 }
 ~~~
-5. Off-chain agent calls the deliver() function on-chain with the corresponding request id and response data (IPFS hash)
+6. Off-chain agent calls the deliver() function on-chain with the corresponding request id and response data (IPFS hash)
 
 Abstract:
 Each off-chain agent is instructed on-chain via the AgentMech contract's request() function and the off-chain agent delivers results via the deliver() function. AgentMech inherits from [ERC721Mech](https://github.com/gnosis/mech/blob/f6fa16551dba14fa8310fce0fd24c40be58fc7d1/contracts/ERC721Mech.sol) which is part of the Gnosis "Mech" library [here](https://github.com/gnosis/mech/tree/f6fa16551dba14fa8310fce0fd24c40be58fc7d1).
