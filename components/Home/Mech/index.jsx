@@ -23,7 +23,7 @@ const filterOption = { fromBlock: 28127133, toBlock: 'latest' };
 
 const onNewEvent = (event) => {
   notifySuccess(
-    'New event recevied',
+    'New event received',
     <a
       href={`https://gnosisscan.io/tx/${event?.transactionHash}`}
       target="_blank"
