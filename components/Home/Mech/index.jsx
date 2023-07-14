@@ -4,10 +4,7 @@ import {
   Table, Typography, ConfigProvider, Empty,
 } from 'antd/lib';
 import { useRouter } from 'next/router';
-import {
-  DEFAULT_MECH_CONTRACT_ADDRESS,
-  TOTAL_VIEW_COUNT,
-} from 'util/constants';
+import { DEFAULT_MECH_CONTRACT_ADDRESS } from 'util/constants';
 import { AGENT_MECH_ABI } from 'common-util/AbiAndAddresses';
 import { EllipsisMiddle } from 'common-util/List/ListTable/helpers';
 import { NA } from 'common-util/constants';
@@ -23,7 +20,7 @@ const filterOption = { fromBlock: 28127133, toBlock: 'latest' };
 
 const onNewEvent = (event) => {
   notifySuccess(
-    'New event recevied',
+    'Event received',
     <a
       href={`https://gnosisscan.io/tx/${event?.transactionHash}`}
       target="_blank"
@@ -194,7 +191,6 @@ const EventListener = () => {
         <Table
           loading={isFirstEventLoading}
           dataSource={requestsDatasource}
-          pagination={{ pageSize: TOTAL_VIEW_COUNT }}
           rowKey={(x) => x.key}
           columns={[
             {
@@ -238,7 +234,6 @@ const EventListener = () => {
         <Table
           loading={isSecondEventLoading}
           dataSource={deliversDatasource}
-          pagination={{ pageSize: TOTAL_VIEW_COUNT }}
           rowKey={(x) => x.key}
           columns={[
             {
