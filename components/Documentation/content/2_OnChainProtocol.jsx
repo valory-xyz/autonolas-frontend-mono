@@ -1,24 +1,12 @@
+import { Typography } from 'antd/lib';
 import ReactMarkdown from 'react-markdown';
-import styled from 'styled-components';
 import remarkGfm from 'remark-gfm';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
+import { DOCS_SECTIONS } from '../helpers';
 
-const DocsContainer = styled.div`
-  max-width: 800px;
-  margin: 0 auto;
-`;
+const { Title, Paragraph } = Typography;
 
-const markdown = `# Overview of AI Mech Architecture
-
-## 1. Off-chain Agent (AI Worker)
-
-Any autonomous agent or bot that runs off-chain, executes AI tasks and holds a wallet for signing transactions.
-
-<h2 id="on-chain-protocol">2. On-chain Protocol</h2>
-
-[Source](https://github.com/valory-xyz/ai-registry-mech/tree/main/contracts)
-
-### AgentMech
+const markdown = `### AgentMech
 Constructor:
 - ERC721Mech constructor
 - set agent (NFT) owner as corresponding agentId owner address
@@ -131,28 +119,21 @@ The AgentFactory is an implementation of [Generic Manager](https://github.com/va
         - Agent Registry
     - [Generic Manager](https://github.com/valory-xyz/autonolas-registries/blob/00add36760c4b2faf5b5b11199af7d1ec38957fd/contracts/GenericManager.sol)
         - Agent Factory
-            - Extended Agent Factory
+            - Extended Agent Factory`;
 
-## 3. High Level Specification of Off-Chain Agents that take input from the AgentMechs
+const OnChainProtocol = () => (
+  <div id={DOCS_SECTIONS['on-chain-protocol']}>
+    <Title level={2}>On-chain Protocol</Title>
+    <Paragraph>
+      <a
+        href="https://github.com/valory-xyz/ai-registry-mech/tree/main/contracts"
+        target="_blank"
+        rel="noreferrer"
+      >
+        Source
+      </a>
+    </Paragraph>
 
-[Source](https://github.com/valory-xyz/mech/tree/main)
-
-Abstract:
-In this specific case the AI Mech project demonstrates a smart contract protocol with an interface that can allow users on-chain (public addresses on evm blockchains) to make requests in the form of an evm transaction for an off-chain agent to do some work in exchange for payment in the form of cryptocurrency. This application has a wide range of use cases from trivial examples of using a call to the request function in the AgentMech contract in order to input a prompt for GPT then have it respond with some text all the way to inputting a request to complete some complex action and having AI and/or an automated off-chain process within the off-chain agent execute programmatic instructions in a generalized way with only text as input.
-
-For the demo mech we use the Autonolas Open Autonomy framework (https://docs.autonolas.network) to construct an autonomous service that acts as an off-chain agent.
-
-The code for the autonomous service can be found here: https://github.com/valory-xyz/mech
-
-### Autonomous Service Capabilities:
-- Read indexed on-chain data/events about on-chain state using a subgraph.
-- Read data from the IPFS network based on a given IPFS hash
-- Make calls to external APIs (OpenAI API to begin with)
-- Store data in IPFS to store data used to make responses to requests
-- Make calls to evm blockchains creating transactions to return data about the work they do after on-chain requests are fulfilled`;
-
-const Docs = () => (
-  <DocsContainer>
     <ReactMarkdown
       remarkPlugins={[remarkGfm]}
       components={{
@@ -174,7 +155,11 @@ const Docs = () => (
     >
       {markdown}
     </ReactMarkdown>
-  </DocsContainer>
+
+    <br />
+    <br />
+    <br />
+  </div>
 );
 
-export default Docs;
+export default OnChainProtocol;
