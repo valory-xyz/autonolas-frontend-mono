@@ -36,7 +36,7 @@ export const DocSection = styled.div`
   }
   .reading-section {
     max-width: 1000px;
-    padding: 0 4rem;
+    padding: 0 6rem 0 4rem;
     h3 {
       font-weight: bold;
     }

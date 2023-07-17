@@ -19,7 +19,7 @@ const Documentation = () => {
   const isMobile = !!screens.xs;
   const anchorCommonProps = {
     affix: false,
-    offsetTop: isMobile ? 20 : 60,
+    offsetTop: isMobile ? 20 : 100,
   };
 
   useEffect(() => {
