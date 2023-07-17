@@ -1,4 +1,3 @@
-/* eslint-disable react/no-children-prop */
 import ReactMarkdown from 'react-markdown';
 import styled from 'styled-components';
 import remarkGfm from 'remark-gfm';
@@ -15,7 +14,7 @@ const markdown = `# Overview of AI Mech Architecture
 
 Any autonomous agent or bot that runs off-chain, executes AI tasks and holds a wallet for signing transactions.
 
-## 2. On-chain Protocol
+<h2 id="on-chain-protocol">2. On-chain Protocol</h2>
 
 [Source](https://github.com/valory-xyz/ai-registry-mech/tree/main/contracts)
 
@@ -156,19 +155,15 @@ const Docs = () => (
   <DocsContainer>
     <ReactMarkdown
       remarkPlugins={[remarkGfm]}
-      children={markdown}
       components={{
         code({
           node, inline, className, children, ...props
         }) {
           const match = /language-(\w+)/.exec(className || '');
           return !inline && match ? (
-            <SyntaxHighlighter
-              {...props}
-              children={String(children).replace(/\n$/, '')}
-              language={match[1]}
-              PreTag="div"
-            />
+            <SyntaxHighlighter {...props} language={match[1]} PreTag="div">
+              {String(children).replace(/\n$/, '')}
+            </SyntaxHighlighter>
           ) : (
             <code {...props} className={className}>
               {children}
@@ -176,7 +171,9 @@ const Docs = () => (
           );
         },
       }}
-    />
+    >
+      {markdown}
+    </ReactMarkdown>
   </DocsContainer>
 );
 

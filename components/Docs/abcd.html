@@ -1,0 +1,138 @@
+
+<>
+<div class="Docs__DocsContainer-sc-164tv50-0 cNIgBx"><h1>Overview of AI Mech Architecture</h1>
+<h2>1. Off-chain Agent (AI Worker)</h2>
+<p>Any autonomous agent or bot that runs off-chain, executes AI tasks and holds a wallet for signing transactions.</p>
+<h2>2. On-chain Protocol</h2>
+
+
+<h4>AgentMech Metadata</h4>
+<p>An example of metadata for an AgentMech:</p>
+<pre><div style="color: black; background: rgb(245, 242, 240); text-shadow: white 0px 1px; font-family: Consolas, Monaco, &quot;Andale Mono&quot;, &quot;Ubuntu Mono&quot;, monospace; font-size: 1em; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; overflow-wrap: normal; line-height: 1.5; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto;"><code class="language-json" style="color: black; background: none; text-shadow: white 0px 1px; font-family: Consolas, Monaco, &quot;Andale Mono&quot;, &quot;Ubuntu Mono&quot;, monospace; font-size: 1em; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; overflow-wrap: normal; line-height: 1.5; tab-size: 4; hyphens: none;"><span class="token" style="color: rgb(153, 153, 153);">{</span><span>
+</span><span>  </span><span class="token" style="color: rgb(153, 0, 85);">"name"</span><span class="token" style="color: rgb(154, 110, 58); background: rgba(255, 255, 255, 0.5);">:</span><span class="token" style="color: rgb(102, 153, 0);">"Autonolas Mech III"</span><span class="token" style="color: rgb(153, 153, 153);">,</span><span>
+</span><span>  </span><span class="token" style="color: rgb(153, 0, 85);">"description"</span><span class="token" style="color: rgb(154, 110, 58); background: rgba(255, 255, 255, 0.5);">:</span><span class="token" style="color: rgb(102, 153, 0);">"The mech executes AI tasks requested on-chain and delivers the results to the requester."</span><span class="token" style="color: rgb(153, 153, 153);">,</span><span>
+</span><span>  </span><span class="token" style="color: rgb(153, 0, 85);">"inputFormat"</span><span class="token" style="color: rgb(154, 110, 58); background: rgba(255, 255, 255, 0.5);">:</span><span class="token" style="color: rgb(102, 153, 0);">"ipfs-v0.1"</span><span class="token" style="color: rgb(153, 153, 153);">,</span><span>
+</span><span>  </span><span class="token" style="color: rgb(153, 0, 85);">"outputFormat"</span><span class="token" style="color: rgb(154, 110, 58); background: rgba(255, 255, 255, 0.5);">:</span><span class="token" style="color: rgb(102, 153, 0);">"ipfs-v0.1"</span><span class="token" style="color: rgb(153, 153, 153);">,</span><span>
+</span><span>  </span><span class="token" style="color: rgb(153, 0, 85);">"tools"</span><span class="token" style="color: rgb(154, 110, 58); background: rgba(255, 255, 255, 0.5);">:</span><span> </span><span class="token" style="color: rgb(153, 153, 153);">[</span><span class="token" style="color: rgb(102, 153, 0);">"openai-text-davinci-002"</span><span class="token" style="color: rgb(153, 153, 153);">,</span><span> </span><span class="token" style="color: rgb(102, 153, 0);">"openai-text-davinci-003"</span><span class="token" style="color: rgb(153, 153, 153);">,</span><span> </span><span class="token" style="color: rgb(102, 153, 0);">"openai-gpt-3.5-turbo"</span><span class="token" style="color: rgb(153, 153, 153);">,</span><span> </span><span class="token" style="color: rgb(102, 153, 0);">"openai-gpt-4"</span><span class="token" style="color: rgb(153, 153, 153);">]</span><span>
+</span><span>  </span><span class="token" style="color: rgb(153, 0, 85);">"image"</span><span class="token" style="color: rgb(154, 110, 58); background: rgba(255, 255, 255, 0.5);">:</span><span class="token" style="color: rgb(102, 153, 0);">"ipfs://bafybeidzpenez565d7vp7jexfrwisa2wijzx6vwcffli57buznyyqkrceq"</span><span>
+</span><span></span><span class="token" style="color: rgb(153, 153, 153);">}</span></code></div></pre>
+<p>In this case, the mech signals that it accepts the specified tools.</p>
+<h4>Request Lifecycle:</h4>
+<ol>
+<li>Requester calls AgentMech.request() with the corresponding data (e.g. IPFS hash)
+The demo mech accepts as data an IPFS hash that points to a json file with the following format:</li>
+</ol>
+<p>Request</p>
+<pre><div style="color: black; background: rgb(245, 242, 240); text-shadow: white 0px 1px; font-family: Consolas, Monaco, &quot;Andale Mono&quot;, &quot;Ubuntu Mono&quot;, monospace; font-size: 1em; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; overflow-wrap: normal; line-height: 1.5; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto;"><code class="language-json" style="color: black; background: none; text-shadow: white 0px 1px; font-family: Consolas, Monaco, &quot;Andale Mono&quot;, &quot;Ubuntu Mono&quot;, monospace; font-size: 1em; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; overflow-wrap: normal; line-height: 1.5; tab-size: 4; hyphens: none;"><span class="token" style="color: rgb(153, 153, 153);">{</span><span>
+</span><span>    </span><span class="token" style="color: rgb(153, 0, 85);">"prompt"</span><span class="token" style="color: rgb(154, 110, 58); background: rgba(255, 255, 255, 0.5);">:</span><span> </span><span class="token" style="color: rgb(102, 153, 0);">"The request prompt goes here"</span><span class="token" style="color: rgb(153, 153, 153);">,</span><span>
+</span><span>    </span><span class="token" style="color: rgb(153, 0, 85);">"tool"</span><span class="token" style="color: rgb(154, 110, 58); background: rgba(255, 255, 255, 0.5);">:</span><span> </span><span class="token" style="color: rgb(102, 153, 0);">"The tool we want the off-chain agent to use goes here, for example openai-gpt4"</span><span class="token" style="color: rgb(153, 153, 153);">,</span><span>
+</span><span>    </span><span class="token" style="color: rgb(153, 0, 85);">"nonce"</span><span class="token" style="color: rgb(154, 110, 58); background: rgba(255, 255, 255, 0.5);">:</span><span> </span><span class="token" style="color: rgb(102, 153, 0);">"The uuid goes here"</span><span>
+</span><span></span><span class="token" style="color: rgb(153, 153, 153);">}</span></code></div></pre>
+<ol start="2">
+<li>In the context of the above AgentMech metadata example, the tool would have to be one of the specified tools, e.g. "openai-text-davinci-003".</li>
+<li>AgentMech emits Request() event with the corresponding request id and data (IPFS hash)</li>
+<li>Off-chain agent listens for Request() events to read new request data on IPFS associated to a given request id and IPFS hash inside the Request() event on-chain.</li>
+<li>Off-chain agent uses the specified tool in the request data to return a response to the request in the form of data on IPFS at a given IPFS hash.
+IPFS data format for responses:</li>
+</ol>
+<p>Deliver</p>
+<pre><div style="color: black; background: rgb(245, 242, 240); text-shadow: white 0px 1px; font-family: Consolas, Monaco, &quot;Andale Mono&quot;, &quot;Ubuntu Mono&quot;, monospace; font-size: 1em; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; overflow-wrap: normal; line-height: 1.5; tab-size: 4; hyphens: none; padding: 1em; margin: 0.5em 0px; overflow: auto;"><code class="language-json" style="color: black; background: none; text-shadow: white 0px 1px; font-family: Consolas, Monaco, &quot;Andale Mono&quot;, &quot;Ubuntu Mono&quot;, monospace; font-size: 1em; text-align: left; white-space: pre; word-spacing: normal; word-break: normal; overflow-wrap: normal; line-height: 1.5; tab-size: 4; hyphens: none;"><span class="token" style="color: rgb(153, 153, 153);">{</span><span>
+</span><span>    </span><span class="token" style="color: rgb(153, 0, 85);">"requestId"</span><span class="token" style="color: rgb(154, 110, 58); background: rgba(255, 255, 255, 0.5);">:</span><span> </span><span class="token" style="color: rgb(102, 153, 0);">"&lt;ID&gt;"</span><span class="token" style="color: rgb(153, 153, 153);">,</span><span>
+</span><span>    </span><span class="token" style="color: rgb(153, 0, 85);">"result"</span><span class="token" style="color: rgb(154, 110, 58); background: rgba(255, 255, 255, 0.5);">:</span><span> </span><span class="token" style="color: rgb(102, 153, 0);">"Off-chain agent's response to the request prompt goes here"</span><span class="token" style="color: rgb(153, 153, 153);">,</span><span>
+</span><span></span><span class="token" style="color: rgb(153, 153, 153);">}</span></code></div></pre>
+<ol start="6">
+<li>Off-chain agent calls the deliver() function on-chain with the corresponding request id and response data (IPFS hash)</li>
+</ol>
+<p>Abstract:
+Each off-chain agent is instructed on-chain via the AgentMech contract's request() function and the off-chain agent delivers results via the deliver() function. AgentMech inherits from <a href="https://github.com/gnosis/mech/blob/f6fa16551dba14fa8310fce0fd24c40be58fc7d1/contracts/ERC721Mech.sol">ERC721Mech</a> which is part of the Gnosis "Mech" library <a href="https://github.com/gnosis/mech/tree/f6fa16551dba14fa8310fce0fd24c40be58fc7d1">here</a>.</p>
+<h3>AgentRegistry</h3>
+<p>Constructor:</p>
+<ul>
+<li>ERC721 constructor</li>
+<li>set AgentRegistry owner as msg.sender</li>
+</ul>
+<p>Events:</p>
+<ul>
+<li>CreateAgent(agentId, agentHash): AgentNFT is created/minted to the AgentNFT owner address using AgentRegistry.create("AgentNFT owner address", "AgentNFT hash")</li>
+<li>UpdateAgentHash(agentId, agentHash): AgentNFT hash is updated using AgentRegistry.updateHash("AgentNFT id", "AgentNFT hash")</li>
+</ul>
+<p>Storage:</p>
+<ul>
+<li>Mapping | mapAgentIdHashes (agentId =&gt; agentIPFSHash): mapping used to map each agentId that exists in the contract to the corresponding AgentNFT IPFS hash</li>
+</ul>
+<p>Functions:</p>
+<ul>
+<li>create: creates a new AgentNFT setting the AgentNFT owner address as the owner and AgentNFT IPFS hash as input to associate to an agentId (NOTE: each agent is an AgentMech which inherits from <a href="https://github.com/gnosis/mech/blob/f6fa16551dba14fa8310fce0fd24c40be58fc7d1/contracts/ERC721Mech.sol">ERC721Mech</a> minted to the specified AgentNFT owner)</li>
+<li>updateHash: allows the AgentNFT owner to update the AgentNFT IPFS hash for a given agentId.</li>
+<li>getHashes: returns all IPFS hashes for a given agentId input</li>
+</ul>
+<p>Abstract:
+The AgentRegistry is an implementation of <a href="https://github.com/valory-xyz/autonolas-registries/blob/00add36760c4b2faf5b5b11199af7d1ec38957fd/contracts/GenericRegistry.sol">generic registry</a> as found in the <a href="https://docs.autonolas.network/protocol/">Autonolas protocol</a> where we have implemented functions agentRegistry.create(AgentNFT owner”, “agent hash”) and agentRegistry.updateHash("agent id"). Create() adds an AgentNFT associated by its IPFS hash to the AgentRegistry contract under a respective agentID and the owner of the AgentNFT with ID, "agentId", has ability to update a given AgentNFT's hash using UpdateHash(). Just like GenericRegistry it has a non fungible interface (ERC721) which means ownership of the AgentRegistry is transferable to different EOAs/smart wallets and the owner of the registry contract itself is set within the constructor of the contract during deployment.</p>
+<h3>AgentFactory</h3>
+<p>Constructor:</p>
+<ul>
+<li>set corresponding AgentRegistry address in immutable storage as input parameter</li>
+<li>set AgentFactory owner as msg.sender</li>
+</ul>
+<p>Events:</p>
+<ul>
+<li>CreateMech(mech, agentId, price): New AgentMech is created with the corresponding mech address, agentId, and initial price for the AgentMech</li>
+</ul>
+<p>Functions:</p>
+<ul>
+<li>create: creates a new AgentMech with the corresponding AgentNFT owner address, AgentNFT IPFS hash, and initial price for the AgentMech's construction</li>
+</ul>
+<p>Abstract:
+The AgentFactory is an implementation of <a href="https://github.com/valory-xyz/autonolas-registries/blob/00add36760c4b2faf5b5b11199af7d1ec38957fd/contracts/GenericManager.sol">Generic Manager</a> as found in the <a href="https://docs.autonolas.network/protocol/">Autonolas protocol</a> that is used for creation of new AgentMech contracts with AgentFactory.create(). AgentFactory ties an AgentMech to an AgentNFT.</p>
+<h3>Libraries (Base inherited contracts =&gt; concrete implementations)</h3>
+<ul>
+<li><a href="https://github.com/gnosis/mech/tree/f6fa16551dba14fa8310fce0fd24c40be58fc7d1">Gnosis Mech Library, programmable ownership for smart accounts</a>
+<ul>
+<li><a href="https://github.com/gnosis/mech/blob/f6fa16551dba14fa8310fce0fd24c40be58fc7d1/contracts/base/Mech.sol">Mech</a></li>
+<li><a href="https://github.com/gnosis/mech/blob/f6fa16551dba14fa8310fce0fd24c40be58fc7d1/contracts/base/ImmutableStorage.sol">Immutable Storage</a>
+<ul>
+<li><a href="https://github.com/gnosis/mech/blob/f6fa16551dba14fa8310fce0fd24c40be58fc7d1/contracts/ERC721Mech.sol">ERC721Mech</a>
+<ul>
+<li>AgentMech.sol</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="https://github.com/valory-xyz/autonolas-registries/tree/00add36760c4b2faf5b5b11199af7d1ec38957fd">Autonolas Registries</a>
+<ul>
+<li><a href="https://github.com/valory-xyz/autonolas-registries/blob/00add36760c4b2faf5b5b11199af7d1ec38957fd/contracts/GenericRegistry.sol">Generic Registry</a>
+<ul>
+<li>Agent Registry</li>
+</ul>
+</li>
+<li><a href="https://github.com/valory-xyz/autonolas-registries/blob/00add36760c4b2faf5b5b11199af7d1ec38957fd/contracts/GenericManager.sol">Generic Manager</a>
+<ul>
+<li>Agent Factory
+<ul>
+<li>Extended Agent Factory</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h2>3. High Level Specification of Off-Chain Agents that take input from the AgentMechs</h2>
+<p><a href="https://github.com/valory-xyz/mech/tree/main">Source</a></p>
+<p>Abstract:
+In this specific case the AI Mech project demonstrates a smart contract protocol with an interface that can allow users on-chain (public addresses on evm blockchains) to make requests in the form of an evm transaction for an off-chain agent to do some work in exchange for payment in the form of cryptocurrency. This application has a wide range of use cases from trivial examples of using a call to the request function in the AgentMech contract in order to input a prompt for GPT then have it respond with some text all the way to inputting a request to complete some complex action and having AI and/or an automated off-chain process within the off-chain agent execute programmatic instructions in a generalized way with only text as input.</p>
+<p>For the demo mech we use the Autonolas Open Autonomy framework (<a href="https://docs.autonolas.network">https://docs.autonolas.network</a>) to construct an autonomous service that acts as an off-chain agent.</p>
+<p>The code for the autonomous service can be found here: <a href="https://github.com/valory-xyz/mech">https://github.com/valory-xyz/mech</a></p>
+<h3>Autonomous Service Capabilities:</h3>
+<ul>
+<li>Read indexed on-chain data/events about on-chain state using a subgraph.</li>
+<li>Read data from the IPFS network based on a given IPFS hash</li>
+<li>Make calls to external APIs (OpenAI API to begin with)</li>
+<li>Store data in IPFS to store data used to make responses to requests</li>
+<li>Make calls to evm blockchains creating transactions to return data about the work they do after on-chain requests are fulfilled</li>
+</ul>
+</div>
+
+</>
