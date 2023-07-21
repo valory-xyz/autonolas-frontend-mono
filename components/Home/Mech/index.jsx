@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Web3 from 'web3';
 import {
-  Table, Typography, ConfigProvider, Empty,
+  Table, Typography, ConfigProvider, Empty, Spin,
 } from 'antd/lib';
 import { useRouter } from 'next/router';
 import { DEFAULT_MECH_CONTRACT_ADDRESS } from 'util/constants';
@@ -9,6 +9,9 @@ import { AGENT_MECH_ABI } from 'common-util/AbiAndAddresses';
 import { EllipsisMiddle } from 'common-util/List/ListTable/helpers';
 import { NA } from 'common-util/constants';
 import { notifyError, notifySuccess } from 'common-util/functions';
+import {
+  keyBy, merge, unionBy, values,
+} from 'lodash';
 import Request from './components/Request';
 
 // Replace the following values with your specific contract information
@@ -162,11 +165,54 @@ const EventListener = () => {
     index: index + 1,
     requestId: event.returnValues.requestId,
     sender: event.returnValues.sender,
-    data: event.returnValues.data,
+    requestData: event.returnValues.data,
   }));
 
+  const getDeliverDataSource = (eventsPassed) => eventsPassed.map((event, index) => ({
+    key: `row-delivers-${index}`,
+    index: index + 1,
+    requestId: event.returnValues.requestId,
+    sender: event.returnValues.sender,
+    deliverData: event.returnValues.data,
+  }));
+
+  const getSingleDataSource = () => {
+    const requestsDatasource = getDataSource(firstEvents);
+    const deliversDatasource = getDeliverDataSource(secondEvents);
+
+    if (deliversDatasource.length === 0) return requestsDatasource;
+    if (requestsDatasource.length === 0) return deliversDatasource;
+
+    const finalDataSource = requestsDatasource.map((request) => {
+      const deliver = deliversDatasource.find(
+        (d) => d.requestId === request.requestId,
+      );
+
+      if (deliver) {
+        return {
+          ...request,
+          deliverData: deliver.deliverData,
+        };
+      }
+
+      return request;
+    });
+
+    return finalDataSource;
+
+    // const dataSource = unionBy(requestsDatasource, deliversDatasource, 'requestId');
+
+    // const merged = merge(keyBy(requestsDatasource, 'requestId'),
+    //  keyBy(deliversDatasource, 'requestId'));
+    // return merged;
+    // var values = values(merged);
+
+    // console.log(dataSource);
+    // return dataSource;
+  };
+
   const requestsDatasource = getDataSource(firstEvents);
-  const deliversDatasource = getDataSource(secondEvents);
+  const deliversDatasource = getDeliverDataSource(secondEvents);
 
   const isLoading = isFirstEventLoading || isSecondEventLoading;
   const hasErrors = isFirstEventError || isSecondEventError;
@@ -190,7 +236,7 @@ const EventListener = () => {
         <Title level={3}>Requests</Title>
         <Table
           loading={isFirstEventLoading}
-          dataSource={requestsDatasource}
+          dataSource={getSingleDataSource()}
           rowKey={(x) => x.key}
           columns={[
             {
@@ -213,12 +259,27 @@ const EventListener = () => {
               },
             },
             {
-              title: 'Data',
-              dataIndex: 'data',
-              key: 'data',
+              title: 'Request Data',
+              dataIndex: 'requestData',
+              key: 'requestData',
               width: 420,
               render: (text) => {
                 if (!text) return NA;
+                return (
+                  <EllipsisMiddle suffixCount={12} isIpfsLink>
+                    {text}
+                  </EllipsisMiddle>
+                );
+              },
+            },
+            {
+              title: 'Delivers Data',
+              dataIndex: 'deliverData',
+              key: 'deliverData',
+              render: (text) => {
+                if (isSecondEventLoading) {
+                  return <Spin />;
+                }
                 return (
                   <EllipsisMiddle suffixCount={12} isIpfsLink>
                     {text}
@@ -247,8 +308,8 @@ const EventListener = () => {
             },
             {
               title: 'Data',
-              dataIndex: 'data',
-              key: 'data',
+              dataIndex: 'deliverData',
+              key: 'deliverData',
               render: (text) => (
                 <EllipsisMiddle suffixCount={12} isIpfsLink>
                   {text}
