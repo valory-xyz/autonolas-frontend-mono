@@ -1,10 +1,13 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import dynamic from 'next/dynamic';
-import { Alert, Layout, Menu } from 'antd/lib';
+import {
+  Alert, Layout, Menu, Tag,
+} from 'antd/lib';
 import PropTypes from 'prop-types';
 import { getSupportedNetworks } from 'common-util/functions';
 import { useSelector } from 'react-redux';
+import { COLOR } from '@autonolas/frontend-library';
 import Login from '../Login';
 import Footer from './Footer';
 import { CustomLayout, Container, Logo } from './styles';
@@ -39,7 +42,9 @@ const NavigationBar = ({ children }) => {
         <div className="column-1">
           <Logo data-testid="member-logo">
             <LogoSvg />
-            <span>Mech Hub</span>
+            <span className="title-text">Mech Hub</span>
+            &nbsp;
+            <Tag color={COLOR.RED}>Beta</Tag>
           </Logo>
         </div>
 

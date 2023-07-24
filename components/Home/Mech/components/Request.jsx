@@ -45,7 +45,10 @@ const Request = ({ account }) => {
           .send({ from: account, value: price })
           .then((result) => {
             setInformation(result);
-            notification.success({ message: 'Transaction successful' });
+            notification.success({
+              message: 'Transaction executed',
+              description: 'Delivery may take several seconds.',
+            });
           });
       } catch (e) {
         setError(e);

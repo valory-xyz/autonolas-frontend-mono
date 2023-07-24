@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import Web3 from 'web3';
 import {
-  Table, Typography, ConfigProvider, Empty,
+  Table, Typography, ConfigProvider, Empty, Skeleton,
 } from 'antd/lib';
 import { useRouter } from 'next/router';
 import { DEFAULT_MECH_CONTRACT_ADDRESS } from 'util/constants';
@@ -157,16 +157,40 @@ const EventListener = () => {
     };
   }, [contractWs]);
 
-  const getDataSource = (eventsPassed) => eventsPassed.map((event, index) => ({
-    key: `row-request-${index}`,
-    index: index + 1,
-    requestId: event.returnValues.requestId,
-    sender: event.returnValues.sender,
-    data: event.returnValues.data,
-  }));
+  const getRequestAndDeliversData = useCallback(() => {
+    const requestsDatasource = firstEvents.map((event, index) => ({
+      key: `row-request-${index}`,
+      index: index + 1,
+      requestId: event.returnValues.requestId,
+      sender: event.returnValues.sender,
+      requestData: event.returnValues.data,
+    }));
 
-  const requestsDatasource = getDataSource(firstEvents);
-  const deliversDatasource = getDataSource(secondEvents);
+    const deliversDatasource = secondEvents.map((event, index) => ({
+      key: `row-delivers-${index}`,
+      index: index + 1,
+      requestId: event.returnValues.requestId,
+      sender: event.returnValues.sender,
+      deliverData: event.returnValues.data,
+    }));
+
+    if (deliversDatasource.length === 0) return requestsDatasource;
+    if (requestsDatasource.length === 0) return deliversDatasource;
+
+    const finalDataSource = requestsDatasource.map((request) => {
+      const deliver = deliversDatasource.find(
+        (d) => d.requestId === request.requestId,
+      );
+
+      if (deliver) {
+        return { ...request, deliverData: deliver.deliverData };
+      }
+
+      return request;
+    });
+
+    return finalDataSource;
+  }, [firstEvents, secondEvents]);
 
   const isLoading = isFirstEventLoading || isSecondEventLoading;
   const hasErrors = isFirstEventError || isSecondEventError;
@@ -190,69 +214,57 @@ const EventListener = () => {
         <Title level={3}>Requests</Title>
         <Table
           loading={isFirstEventLoading}
-          dataSource={requestsDatasource}
+          dataSource={getRequestAndDeliversData()}
           rowKey={(x) => x.key}
           columns={[
             {
               title: 'Request Id',
               dataIndex: 'requestId',
               key: 'requestId',
-              width: 420,
+              width: 300,
               render: (text) => (
-                <EllipsisMiddle suffixCount={12}>{text}</EllipsisMiddle>
+                <EllipsisMiddle suffixCount={10}>{text}</EllipsisMiddle>
               ),
             },
             {
               title: 'Sender',
               dataIndex: 'sender',
               key: 'sender',
-              width: 420,
+              width: 300,
               render: (text) => {
                 if (!text) return NA;
-                return <EllipsisMiddle suffixCount={12}>{text}</EllipsisMiddle>;
+                return <EllipsisMiddle suffixCount={10}>{text}</EllipsisMiddle>;
               },
             },
             {
-              title: 'Data',
-              dataIndex: 'data',
-              key: 'data',
-              width: 420,
+              title: 'Request Data',
+              dataIndex: 'requestData',
+              key: 'requestData',
+              width: 300,
               render: (text) => {
                 if (!text) return NA;
                 return (
-                  <EllipsisMiddle suffixCount={12} isIpfsLink>
+                  <EllipsisMiddle suffixCount={10} isIpfsLink>
                     {text}
                   </EllipsisMiddle>
                 );
               },
             },
-          ]}
-        />
-
-        <br />
-        <Title level={3}>Delivers</Title>
-        <Table
-          loading={isSecondEventLoading}
-          dataSource={deliversDatasource}
-          rowKey={(x) => x.key}
-          columns={[
             {
-              title: 'Request Id',
-              dataIndex: 'requestId',
-              key: 'requestId',
-              render: (text) => (
-                <EllipsisMiddle suffixCount={12}>{text}</EllipsisMiddle>
-              ),
-            },
-            {
-              title: 'Data',
-              dataIndex: 'data',
-              key: 'data',
-              render: (text) => (
-                <EllipsisMiddle suffixCount={12} isIpfsLink>
-                  {text}
-                </EllipsisMiddle>
-              ),
+              title: 'Delivers Data',
+              dataIndex: 'deliverData',
+              key: 'deliverData',
+              width: 300,
+              render: (text) => {
+                if (isSecondEventLoading) {
+                  return <Skeleton.Input active />;
+                }
+                return (
+                  <EllipsisMiddle suffixCount={10} isIpfsLink>
+                    {text}
+                  </EllipsisMiddle>
+                );
+              },
             },
           ]}
         />
