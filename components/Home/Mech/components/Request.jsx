@@ -47,7 +47,8 @@ const Request = ({ account }) => {
             setInformation(result);
             notification.success({
               message: 'Transaction successful',
-              description: 'It will take few seconds to receive the new event.',
+              description:
+                'It will take few seconds to receive the new event & reflect in the table below.',
             });
           });
       } catch (e) {
