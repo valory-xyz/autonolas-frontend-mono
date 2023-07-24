@@ -27,6 +27,12 @@ const Request = ({ account }) => {
     if (hash) getData();
   }, [hash]);
 
+  notification.success({
+    message: 'Transaction successful',
+    description:
+      'It will take few seconds to receive the new event & reflect in the table below.',
+  });
+
   const handleCancel = () => router.push('/mech');
 
   const handleSubmit = async (values) => {
