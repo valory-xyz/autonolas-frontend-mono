@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import dynamic from 'next/dynamic';
-import { Alert, Layout, Menu } from 'antd/lib';
+import {
+  Alert, Layout, Menu, Badge,
+} from 'antd/lib';
 import PropTypes from 'prop-types';
 import { getSupportedNetworks } from 'common-util/functions';
 import { useSelector } from 'react-redux';
@@ -39,7 +41,13 @@ const NavigationBar = ({ children }) => {
         <div className="column-1">
           <Logo data-testid="member-logo">
             <LogoSvg />
-            <span>Mech Hub</span>
+            <Badge
+            // count={<>Beta</>}
+              count={10}
+            >
+              Mohan
+              {/* <span className="title-text">Mech Hub</span> */}
+            </Badge>
           </Logo>
         </div>
 

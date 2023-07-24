@@ -57,7 +57,8 @@ export const Logo = styled.div`
   margin-right: 3.5rem;
   font-size: 34px;
   color: ${COLOR.PRIMARY};
-  span {
+  .title-text {
+    display: inline-block;
     margin-left: 1rem;
     font-weight: bold;
   }
