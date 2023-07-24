@@ -46,7 +46,7 @@ const Request = ({ account }) => {
           .then((result) => {
             setInformation(result);
             notification.success({
-              message: 'Transaction successful',
+              message: 'Transaction executed',
               description:
                 'It will take few seconds to receive the new event & reflect in the table below.',
             });
