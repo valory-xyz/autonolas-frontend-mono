@@ -9,9 +9,6 @@ import { AGENT_MECH_ABI } from 'common-util/AbiAndAddresses';
 import { EllipsisMiddle } from 'common-util/List/ListTable/helpers';
 import { NA } from 'common-util/constants';
 import { notifyError, notifySuccess } from 'common-util/functions';
-import {
-  keyBy, merge, unionBy, values,
-} from 'lodash';
 import Request from './components/Request';
 
 // Replace the following values with your specific contract information
@@ -199,19 +196,8 @@ const EventListener = () => {
     });
 
     return finalDataSource;
-
-    // const dataSource = unionBy(requestsDatasource, deliversDatasource, 'requestId');
-
-    // const merged = merge(keyBy(requestsDatasource, 'requestId'),
-    //  keyBy(deliversDatasource, 'requestId'));
-    // return merged;
-    // var values = values(merged);
-
-    // console.log(dataSource);
-    // return dataSource;
   };
 
-  const requestsDatasource = getDataSource(firstEvents);
   const deliversDatasource = getDeliverDataSource(secondEvents);
 
   const isLoading = isFirstEventLoading || isSecondEventLoading;
