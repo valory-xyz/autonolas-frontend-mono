@@ -20,7 +20,3 @@ export const HASH_PREFIXES = {
 export const GATEWAY_URL = 'https://gateway.autonolas.tech/ipfs/';
 
 export const GNOSIS_SCAN_URL = 'https://gnosisscan.io/';
-
-// default ID & hash when "mech" page is loaded
-export const DEFAULT_MECH_CONTRACT_ADDRESS = '0xFf82123dFB52ab75C417195c5fDB87630145ae81';
-export const DEFAULT_MECH_HASH = '0xf7b5a30348ac45e9cc7311715a359c4549cf6022e27681826f0f087a2de5cf91';

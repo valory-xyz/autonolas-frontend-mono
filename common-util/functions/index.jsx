@@ -181,3 +181,6 @@ export const getIpfsResponse = async (hash) => {
     throw new Error(e);
   }
 };
+
+// show last element of agentHashes array
+export const getAgentHash = (agentHashes = []) => (agentHashes.length === 0 ? '' : agentHashes[agentHashes.length - 1]);

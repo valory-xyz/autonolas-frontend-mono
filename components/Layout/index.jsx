@@ -1,15 +1,17 @@
 import { useEffect, useState } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
 import { useRouter } from 'next/router';
 import dynamic from 'next/dynamic';
 import {
   Alert, Layout, Menu, Tag,
 } from 'antd/lib';
 import PropTypes from 'prop-types';
-import { getSupportedNetworks } from 'common-util/functions';
-import { useSelector } from 'react-redux';
+import { getAgentHash, getSupportedNetworks } from 'common-util/functions';
 import { COLOR } from '@autonolas/frontend-library';
+import { setAllAgents } from 'store/setup/actions';
 import Login from '../Login';
 import Footer from './Footer';
+import { getAgents, getTotalForAllAgents } from '../Home/Registry/utils';
 import { CustomLayout, Container, Logo } from './styles';
 
 const LogoSvg = dynamic(() => import('common-util/SVGs/logo'));
@@ -17,9 +19,11 @@ const LogoSvg = dynamic(() => import('common-util/SVGs/logo'));
 const { Header, Content } = Layout;
 
 const NavigationBar = ({ children }) => {
+  const dispatch = useDispatch();
   const router = useRouter();
 
   const chainId = useSelector((state) => state?.setup?.chainId);
+  const agentsList = useSelector((state) => state?.setup?.allAgents);
   const { pathname } = router;
   const [selectedMenu, setSelectedMenu] = useState([]);
 
@@ -30,6 +34,30 @@ const NavigationBar = ({ children }) => {
       setSelectedMenu(name || 'registry');
     }
   }, [pathname]);
+
+  // if selected menu is "mech" & doesn't contains id,
+  // redirect to mech with id & hash from the 3rd agent
+  useEffect(() => {
+    if (selectedMenu === 'mech' && !router.query?.id) {
+      const { mech, agentHashes } = agentsList[2];
+      const hash = getAgentHash(agentHashes);
+      router.push(`/mech?id=${mech}&hash=${hash}`);
+    }
+  }, [selectedMenu, agentsList]);
+
+  useEffect(() => {
+    if (chainId) {
+      (async () => {
+        try {
+          const total = await getTotalForAllAgents();
+          const agents = await getAgents(total);
+          dispatch(setAllAgents(agents));
+        } catch (error) {
+          console.error(error);
+        }
+      })();
+    }
+  }, [chainId]);
 
   const handleMenuItemClick = ({ key }) => {
     router.push(`/${key}`);
@@ -54,22 +82,10 @@ const NavigationBar = ({ children }) => {
           selectedKeys={[selectedMenu]}
           onClick={handleMenuItemClick}
           items={[
-            {
-              key: 'registry',
-              label: 'Registry',
-            },
-            {
-              key: 'factory',
-              label: 'Factory',
-            },
-            {
-              key: 'mech',
-              label: 'Mech',
-            },
-            {
-              key: 'docs',
-              label: 'Docs',
-            },
+            { key: 'registry', label: 'Registry' },
+            { key: 'factory', label: 'Factory' },
+            { key: 'mech', label: 'Mech' },
+            { key: 'docs', label: 'Docs' },
           ]}
         />
         <Login />

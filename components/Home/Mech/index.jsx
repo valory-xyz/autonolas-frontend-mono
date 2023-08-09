@@ -4,7 +4,6 @@ import {
   Table, Typography, ConfigProvider, Empty, Skeleton,
 } from 'antd/lib';
 import { useRouter } from 'next/router';
-import { DEFAULT_MECH_CONTRACT_ADDRESS } from 'util/constants';
 import { AGENT_MECH_ABI } from 'common-util/AbiAndAddresses';
 import { EllipsisMiddle } from 'common-util/List/ListTable/helpers';
 import { NA } from 'common-util/constants';
@@ -62,14 +61,11 @@ const EventListener = () => {
   const sortEvents = (e) => e.sort((a, b) => b.blockNumber - a.blockNumber);
 
   useEffect(() => {
-    if (web3Ws) {
-      const contractInstance = new web3Ws.eth.Contract(
-        AGENT_MECH_ABI,
-        id || DEFAULT_MECH_CONTRACT_ADDRESS,
-      );
+    if (web3Ws && id) {
+      const contractInstance = new web3Ws.eth.Contract(AGENT_MECH_ABI, id);
       setContractWs(contractInstance);
     }
-  }, [web3Ws]);
+  }, [web3Ws, id]);
 
   // Effect hook for listening to the FirstEvent
   useEffect(() => {

@@ -24,7 +24,9 @@ const Request = ({ account }) => {
       setDataList(data.tools || []);
     };
 
-    if (hash) getData();
+    if (hash) {
+      getData();
+    }
   }, [hash]);
 
   const handleCancel = () => router.push('/mech');

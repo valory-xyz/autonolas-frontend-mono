@@ -102,7 +102,7 @@ export const getFilteredAgents = async (searchValue, account) => {
 /**
  * Function to return all agents
  */
-export const getAgents = (total, nextPage) => new Promise((resolve, reject) => {
+export const getAgents = (total, nextPage = 1) => new Promise((resolve, reject) => {
   const contract = getAgentContract();
 
   try {
