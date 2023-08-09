@@ -20,6 +20,11 @@ export const setErrorMessage = (errorMessage) => ({
   data: { errorMessage },
 });
 
+export const setAllAgents = (allAgents) => ({
+  type: syncTypes.SET_ALL_AGENTS,
+  data: { allAgents },
+});
+
 export const setLogout = () => ({
   type: syncTypes.SET_LOGOUT,
   data: {},
