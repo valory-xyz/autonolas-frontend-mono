@@ -17,7 +17,7 @@ import {
   getFilteredAgents,
   getTotalForAllAgents,
   getTotalForMyAgents,
-} from './utils';
+} from '../utils';
 
 const { TabPane } = Tabs;
 
