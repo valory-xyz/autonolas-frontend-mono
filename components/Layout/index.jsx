@@ -45,6 +45,7 @@ const NavigationBar = ({ children }) => {
     }
   }, [selectedMenu, agentsList]);
 
+  // fetch all agents once chainId is available & set in redux
   useEffect(() => {
     if (chainId) {
       (async () => {
