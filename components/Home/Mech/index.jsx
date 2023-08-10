@@ -3,12 +3,11 @@ import Web3 from 'web3';
 import {
   Table, Typography, ConfigProvider, Empty, Skeleton,
 } from 'antd/lib';
-import { useRouter } from 'next/router';
 import { AGENT_MECH_ABI } from 'common-util/AbiAndAddresses';
 import { EllipsisMiddle } from 'common-util/List/ListTable/helpers';
 import { NA } from 'common-util/constants';
 import { notifyError, notifySuccess } from 'common-util/functions';
-import { useDefaultMechIdAndHash } from 'common-util/hooks';
+import { useMechIdAndHash } from 'common-util/hooks';
 import Request from './components/Request';
 
 // Replace the following values with your specific contract information
@@ -48,9 +47,7 @@ const EventListener = () => {
   const [isSecondEventLoading, setIsSecondEventLoading] = useState(false);
   const [isSecondEventError, setIsSecondEventError] = useState(false);
 
-  // get the id from the router OR agentHash
-  const router = useRouter();
-  const id = router?.query?.id || useDefaultMechIdAndHash().id;
+  const { id } = useMechIdAndHash();
 
   useEffect(() => {
     const web3Instance = new Web3(
