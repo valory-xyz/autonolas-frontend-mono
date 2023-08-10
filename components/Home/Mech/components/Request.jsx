@@ -7,8 +7,9 @@ import RequestForm from 'common-util/List/RequestForm';
 import { AlertSuccess, AlertError } from 'common-util/List/ListCommon';
 import { getMechContract } from 'common-util/Contracts';
 import { HeaderTitle } from 'common-util/Title';
-import { FormContainer } from 'components/styles';
 import { getIpfsResponse } from 'common-util/functions';
+import { useDefaultMechIdAndHash } from 'common-util/hooks';
+import { FormContainer } from '../../../styles';
 
 const Request = ({ account }) => {
   const [dataList, setDataList] = useState([]);
@@ -16,7 +17,7 @@ const Request = ({ account }) => {
   const [information, setInformation] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
-  const { hash } = router.query;
+  const hash = router?.query?.hash || useDefaultMechIdAndHash().hash;
 
   useEffect(() => {
     const getData = async () => {

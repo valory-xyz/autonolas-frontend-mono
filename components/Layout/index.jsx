@@ -6,7 +6,7 @@ import {
   Alert, Layout, Menu, Tag,
 } from 'antd/lib';
 import PropTypes from 'prop-types';
-import { getAgentHash, getSupportedNetworks } from 'common-util/functions';
+import { getSupportedNetworks } from 'common-util/functions';
 import { COLOR } from '@autonolas/frontend-library';
 import { setAllAgents } from 'store/setup/actions';
 import Login from '../Login';
@@ -23,7 +23,6 @@ const NavigationBar = ({ children }) => {
   const router = useRouter();
 
   const chainId = useSelector((state) => state?.setup?.chainId);
-  const agentsList = useSelector((state) => state?.setup?.allAgents);
   const { pathname } = router;
   const [selectedMenu, setSelectedMenu] = useState([]);
 
@@ -34,16 +33,6 @@ const NavigationBar = ({ children }) => {
       setSelectedMenu(name || 'registry');
     }
   }, [pathname]);
-
-  // if selected menu is "mech" & doesn't contains id,
-  // redirect to mech with id & hash from the 3rd agent
-  useEffect(() => {
-    if (selectedMenu === 'mech' && !router.query?.id) {
-      const { mech, agentHashes } = agentsList[2];
-      const hash = getAgentHash(agentHashes);
-      router.push(`/mech?id=${mech}&hash=${hash}`);
-    }
-  }, [selectedMenu, agentsList]);
 
   // fetch all agents once chainId is available & set in redux
   useEffect(() => {

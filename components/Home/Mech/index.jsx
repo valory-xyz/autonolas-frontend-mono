@@ -8,6 +8,7 @@ import { AGENT_MECH_ABI } from 'common-util/AbiAndAddresses';
 import { EllipsisMiddle } from 'common-util/List/ListTable/helpers';
 import { NA } from 'common-util/constants';
 import { notifyError, notifySuccess } from 'common-util/functions';
+import { useDefaultMechIdAndHash } from 'common-util/hooks';
 import Request from './components/Request';
 
 // Replace the following values with your specific contract information
@@ -47,9 +48,9 @@ const EventListener = () => {
   const [isSecondEventLoading, setIsSecondEventLoading] = useState(false);
   const [isSecondEventError, setIsSecondEventError] = useState(false);
 
-  // get the id from the next js router
+  // get the id from the router OR agentHash
   const router = useRouter();
-  const { id } = router.query;
+  const id = router?.query?.id || useDefaultMechIdAndHash().id;
 
   useEffect(() => {
     const web3Instance = new Web3(
