@@ -36,17 +36,15 @@ const NavigationBar = ({ children }) => {
 
   // fetch all agents once chainId is available & set in redux
   useEffect(() => {
-    if (chainId) {
-      (async () => {
-        try {
-          const total = await getTotalForAllAgents();
-          const agents = await getAgents(total);
-          dispatch(setAllAgents(agents));
-        } catch (error) {
-          console.error(error);
-        }
-      })();
-    }
+    (async () => {
+      try {
+        const total = await getTotalForAllAgents();
+        const agents = await getAgents(total);
+        dispatch(setAllAgents(agents));
+      } catch (error) {
+        console.error(error);
+      }
+    })();
   }, [chainId]);
 
   const handleMenuItemClick = ({ key }) => {

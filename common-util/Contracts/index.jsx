@@ -24,10 +24,10 @@ export const getWeb3Details = () => {
   const web3 = new Web3(
     window.WEB3_PROVIDER
       || window.web3?.currentProvider
-      || process.env.NEXT_PUBLIC_MAINNET_URL,
+      || process.env.NEXT_PUBLIC_GNOSIS_URL,
   );
 
-  const chainId = Number(window.ethereum?.chainId || 1); // default to mainnet
+  const chainId = Number(window.ethereum?.chainId || 100); // default to gnosis
   const address = ADDRESSES[chainId];
   return { web3, address, chainId };
 };
