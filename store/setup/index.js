@@ -8,7 +8,6 @@ const initialState = {
   balance: null,
   chainId: null,
   errorMessage: null,
-  allAgents: [],
 };
 
 export default (state = initialState, action) => {
@@ -23,7 +22,6 @@ export default (state = initialState, action) => {
     case syncTypes.SET_BALANCE:
     case syncTypes.SET_LOGIN_ERROR:
     case syncTypes.SET_CHAIND_ID:
-    case syncTypes.SET_ALL_AGENTS:
     case syncTypes.SET_STORE_STATE: {
       return { ...state, ...data };
     }

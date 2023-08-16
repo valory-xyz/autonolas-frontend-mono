@@ -138,7 +138,7 @@ export const getTableColumns = (type, { router }) => {
         render: (text, row) => (
           <EllipsisMiddle
             onClick={(e) => {
-              if (router) router.push(`/mech?id=${e}&hash=${row.hash}`);
+              if (router) router.push(`/mech/${e}/${row.hash}`);
             }}
           >
             {text}
