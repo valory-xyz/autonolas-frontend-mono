@@ -18,7 +18,6 @@ const Request = ({ account }) => {
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
   const hash = router?.query?.hash;
-  console.log({ hash });
 
   useEffect(() => {
     const getIpfsDetailsFromHash = async (e) => {
@@ -28,9 +27,7 @@ const Request = ({ account }) => {
 
     const getIpfsDetailsFromId = async () => {
       const agentDetails = await getAgent('3');
-      console.log(agentDetails);
       const currentHash = getAgentHash(agentDetails.agentHashes);
-      console.log({ currentHash });
       await getIpfsDetailsFromHash(currentHash);
     };
 

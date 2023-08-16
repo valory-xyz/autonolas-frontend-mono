@@ -50,8 +50,6 @@ const EventListener = () => {
   const { query } = useRouter();
   const id = query?.id;
 
-  console.log({ id });
-
   useEffect(() => {
     const web3Instance = new Web3(
       new Web3.providers.WebsocketProvider(WEBSOCKET_PROVIDER),
