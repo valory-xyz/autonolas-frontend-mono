@@ -20,3 +20,6 @@ export const HASH_PREFIXES = {
 export const GATEWAY_URL = 'https://gateway.autonolas.tech/ipfs/';
 
 export const GNOSIS_SCAN_URL = 'https://gnosisscan.io/';
+
+export const DEFAULT_MECH_CONTRACT_ADDRESS = '0xFf82123dFB52ab75C417195c5fDB87630145ae81';
+export const DEFAULT_AGENT_ID = '3';

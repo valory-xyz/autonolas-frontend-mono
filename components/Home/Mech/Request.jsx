@@ -7,9 +7,9 @@ import RequestForm from 'common-util/List/RequestForm';
 import { AlertSuccess, AlertError } from 'common-util/List/ListCommon';
 import { getMechContract } from 'common-util/Contracts';
 import { HeaderTitle } from 'common-util/Title';
-import { getIpfsResponse } from 'common-util/functions';
-import { useMechIdAndHash } from 'common-util/hooks';
-import { FormContainer } from '../../../styles';
+import { getAgentHash, getIpfsResponse } from 'common-util/functions';
+import { FormContainer } from '../../styles';
+import { getAgent } from '../Registry/utils';
 
 const Request = ({ account }) => {
   const [dataList, setDataList] = useState([]);
@@ -17,16 +17,27 @@ const Request = ({ account }) => {
   const [information, setInformation] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
-  const { hash } = useMechIdAndHash();
+  const hash = router?.query?.hash;
+  console.log({ hash });
 
   useEffect(() => {
-    const getData = async () => {
-      const data = await getIpfsResponse(hash);
+    const getIpfsDetailsFromHash = async (e) => {
+      const data = await getIpfsResponse(e);
       setDataList(data.tools || []);
     };
 
+    const getIpfsDetailsFromId = async () => {
+      const agentDetails = await getAgent('3');
+      console.log(agentDetails);
+      const currentHash = getAgentHash(agentDetails.agentHashes);
+      console.log({ currentHash });
+      await getIpfsDetailsFromHash(currentHash);
+    };
+
     if (hash) {
-      getData();
+      getIpfsDetailsFromHash(hash);
+    } else {
+      getIpfsDetailsFromId();
     }
   }, [hash]);
 

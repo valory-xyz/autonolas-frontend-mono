@@ -26,7 +26,8 @@ export const getAgentOwner = (id) => new Promise((resolve, reject) => {
 const getAgentsHelper = (startIndex, promiseList, resolve) => {
   const mechDataPromise = fetchGraphQLData(); // Get the promise for mechData
   Promise.all(promiseList).then(async (agentsList) => {
-    mechDataPromise.then((mechData) => { // Resolve mechData promise
+    mechDataPromise.then((mechData) => {
+      // Resolve mechData promise
       const results = agentsList.map(async (info, i) => {
         const owner = await getAgentOwner(`${startIndex + i}`);
         const updatedInfo = {
@@ -58,6 +59,20 @@ export const getAgentDetails = (id) => new Promise((resolve, reject) => {
     });
 });
 
+export const getAgent = (id) => new Promise((resolve, reject) => {
+  const contract = getAgentContract();
+
+  contract.methods
+    .getHashes(id)
+    .call()
+    .then((response) => {
+      resolve(response);
+    })
+    .catch((e) => {
+      console.error(e);
+      reject(e);
+    });
+});
 // totals
 export const getTotalForAllAgents = () => new Promise((resolve, reject) => {
   const contract = getAgentContract();
@@ -103,15 +118,13 @@ export const getFilteredAgents = async (searchValue, account) => {
  * Function to return all agents
  */
 export const getAgents = (total, nextPage = 1) => new Promise((resolve, reject) => {
-  const contract = getAgentContract();
-
   try {
     const allAgentsPromises = [];
 
     const { first, last } = getFirstAndLastIndex(total, nextPage);
     for (let i = first; i <= last; i += 1) {
       const agentId = `${i}`;
-      const result = contract.methods.getHashes(agentId).call();
+      const result = getAgent(agentId);
       allAgentsPromises.push(result);
     }
 
