@@ -9,7 +9,7 @@ export async function getServerSideProps(ctx) {
   if (!id) {
     return {
       redirect: {
-        destination: `/mech?id=${DEFAULT_MECH_CONTRACT_ADDRESS}`,
+        destination: `/mech/${DEFAULT_MECH_CONTRACT_ADDRESS}`,
         permanent: true,
       },
     };

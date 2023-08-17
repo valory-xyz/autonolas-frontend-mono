@@ -8,6 +8,7 @@ import { AlertSuccess, AlertError } from 'common-util/List/ListCommon';
 import { getMechContract } from 'common-util/Contracts';
 import { HeaderTitle } from 'common-util/Title';
 import { getAgentHash, getIpfsResponse } from 'common-util/functions';
+import { DEFAULT_AGENT_ID } from 'util/constants';
 import { FormContainer } from '../../styles';
 import { getAgent } from '../Registry/utils';
 
@@ -26,7 +27,7 @@ const Request = ({ account }) => {
     };
 
     const getIpfsDetailsFromId = async () => {
-      const agentDetails = await getAgent('3');
+      const agentDetails = await getAgent(DEFAULT_AGENT_ID);
       const currentHash = getAgentHash(agentDetails.agentHashes);
       await getIpfsDetailsFromHash(currentHash);
     };
