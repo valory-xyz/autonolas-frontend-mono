@@ -5,6 +5,7 @@ import {
 import { SearchOutlined, CopyOutlined } from '@ant-design/icons';
 import PropTypes from 'prop-types';
 import { GATEWAY_URL, NAV_TYPES, TOTAL_VIEW_COUNT } from 'util/constants';
+import { getAgentHash } from 'common-util/functions';
 
 const { Text, Title } = Typography;
 const textStyle = { maxWidth: '100%' };
@@ -137,7 +138,7 @@ export const getTableColumns = (type, { router }) => {
         render: (text, row) => (
           <EllipsisMiddle
             onClick={(e) => {
-              if (router) router.push(`/mech?id=${e}&hash=${row.hash}`);
+              if (router) router.push(`/mech/${e}/${row.hash}`);
             }}
           >
             {text}
@@ -164,16 +165,6 @@ export const getData = (type, rawData, { current }) => {
    */
   const startIndex = (current - 1) * TOTAL_VIEW_COUNT + 1;
   let data = [];
-  if (type === NAV_TYPES.COMPONENT) {
-    data = rawData.map((item, index) => ({
-      id: item.id || `${startIndex + index}`,
-      description: item.description || '-',
-      developer: item.developer || '-',
-      owner: item.owner || '-',
-      hash: item.unitHash || '-',
-      dependency: (item.dependencies || []).length,
-    }));
-  }
 
   if (type === NAV_TYPES.AGENT) {
     data = rawData.map((item, index) => ({
@@ -181,8 +172,7 @@ export const getData = (type, rawData, { current }) => {
       description: item.description || '-',
       developer: item.developer || '-',
       owner: item.owner || '-',
-      // show last element of agentHashes array
-      hash: item.agentHashes === 0 ? '-' : item.agentHashes[item.agentHashes.length - 1],
+      hash: getAgentHash(item.agentHashes) || '-',
       mech: item.mech,
       dependency: (item.dependencies || []).length,
     }));

@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useSelector } from 'react-redux';
 import { useRouter } from 'next/router';
 import dynamic from 'next/dynamic';
 import {
@@ -6,7 +7,6 @@ import {
 } from 'antd/lib';
 import PropTypes from 'prop-types';
 import { getSupportedNetworks } from 'common-util/functions';
-import { useSelector } from 'react-redux';
 import { COLOR } from '@autonolas/frontend-library';
 import Login from '../Login';
 import Footer from './Footer';
@@ -54,22 +54,10 @@ const NavigationBar = ({ children }) => {
           selectedKeys={[selectedMenu]}
           onClick={handleMenuItemClick}
           items={[
-            {
-              key: 'registry',
-              label: 'Registry',
-            },
-            {
-              key: 'factory',
-              label: 'Factory',
-            },
-            {
-              key: 'mech',
-              label: 'Mech',
-            },
-            {
-              key: 'docs',
-              label: 'Docs',
-            },
+            { key: 'registry', label: 'Registry' },
+            { key: 'factory', label: 'Factory' },
+            { key: 'mech', label: 'Mech' },
+            { key: 'docs', label: 'Docs' },
           ]}
         />
         <Login />

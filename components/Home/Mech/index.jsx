@@ -4,12 +4,11 @@ import {
   Table, Typography, ConfigProvider, Empty, Skeleton,
 } from 'antd/lib';
 import { useRouter } from 'next/router';
-import { DEFAULT_MECH_CONTRACT_ADDRESS } from 'util/constants';
 import { AGENT_MECH_ABI } from 'common-util/AbiAndAddresses';
 import { EllipsisMiddle } from 'common-util/List/ListTable/helpers';
 import { NA } from 'common-util/constants';
 import { notifyError, notifySuccess } from 'common-util/functions';
-import Request from './components/Request';
+import Request from './Request';
 
 // Replace the following values with your specific contract information
 const WEBSOCKET_PROVIDER = process.env.NEXT_PUBLIC_GNOSIS_WEB_SOCKET;
@@ -48,9 +47,8 @@ const EventListener = () => {
   const [isSecondEventLoading, setIsSecondEventLoading] = useState(false);
   const [isSecondEventError, setIsSecondEventError] = useState(false);
 
-  // get the id from the next js router
-  const router = useRouter();
-  const { id } = router.query;
+  const { query } = useRouter();
+  const id = query?.id;
 
   useEffect(() => {
     const web3Instance = new Web3(
@@ -62,14 +60,11 @@ const EventListener = () => {
   const sortEvents = (e) => e.sort((a, b) => b.blockNumber - a.blockNumber);
 
   useEffect(() => {
-    if (web3Ws) {
-      const contractInstance = new web3Ws.eth.Contract(
-        AGENT_MECH_ABI,
-        id || DEFAULT_MECH_CONTRACT_ADDRESS,
-      );
+    if (web3Ws && id) {
+      const contractInstance = new web3Ws.eth.Contract(AGENT_MECH_ABI, id);
       setContractWs(contractInstance);
     }
-  }, [web3Ws]);
+  }, [web3Ws, id]);
 
   // Effect hook for listening to the FirstEvent
   useEffect(() => {

@@ -1,9 +1,6 @@
 import get from 'lodash/get';
 import Mech from 'components/Home/Mech';
-import {
-  DEFAULT_MECH_CONTRACT_ADDRESS,
-  DEFAULT_MECH_HASH,
-} from 'util/constants';
+import { DEFAULT_MECH_CONTRACT_ADDRESS } from 'util/constants';
 
 export async function getServerSideProps(ctx) {
   const { query } = ctx;
@@ -12,7 +9,7 @@ export async function getServerSideProps(ctx) {
   if (!id) {
     return {
       redirect: {
-        destination: `/mech?id=${DEFAULT_MECH_CONTRACT_ADDRESS}&hash=${DEFAULT_MECH_HASH}`,
+        destination: `/mech/${DEFAULT_MECH_CONTRACT_ADDRESS}`,
         permanent: true,
       },
     };

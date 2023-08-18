@@ -10,7 +10,7 @@ import {
   updateAgentHashes,
   getAgentOwner,
   getTokenUri,
-} from './utils';
+} from '../utils';
 
 const Agent = ({ account }) => {
   const router = useRouter();

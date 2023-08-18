@@ -7,8 +7,10 @@ import RequestForm from 'common-util/List/RequestForm';
 import { AlertSuccess, AlertError } from 'common-util/List/ListCommon';
 import { getMechContract } from 'common-util/Contracts';
 import { HeaderTitle } from 'common-util/Title';
-import { FormContainer } from 'components/styles';
-import { getIpfsResponse } from 'common-util/functions';
+import { getAgentHash, getIpfsResponse } from 'common-util/functions';
+import { DEFAULT_AGENT_ID } from 'util/constants';
+import { FormContainer } from '../../styles';
+import { getAgent } from '../Registry/utils';
 
 const Request = ({ account }) => {
   const [dataList, setDataList] = useState([]);
@@ -16,15 +18,25 @@ const Request = ({ account }) => {
   const [information, setInformation] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
-  const { hash } = router.query;
+  const hash = router?.query?.hash;
 
   useEffect(() => {
-    const getData = async () => {
-      const data = await getIpfsResponse(hash);
+    const getIpfsDetailsFromHash = async (e) => {
+      const data = await getIpfsResponse(e);
       setDataList(data.tools || []);
     };
 
-    if (hash) getData();
+    const getIpfsDetailsFromId = async () => {
+      const agentDetails = await getAgent(DEFAULT_AGENT_ID);
+      const currentHash = getAgentHash(agentDetails.agentHashes);
+      await getIpfsDetailsFromHash(currentHash);
+    };
+
+    if (hash) {
+      getIpfsDetailsFromHash(hash);
+    } else {
+      getIpfsDetailsFromId();
+    }
   }, [hash]);
 
   const handleCancel = () => router.push('/mech');
