@@ -3,7 +3,7 @@ import { useSelector } from 'react-redux';
 import { useRouter } from 'next/router';
 import get from 'lodash/get';
 import { GNOSIS_SCAN_URL } from 'util/constants';
-import { Footer as CommonFooter } from '@autonolas/frontend-library';
+import { Footer as CommonFooter, ServiceStatusInfo } from '@autonolas/frontend-library';
 import { ADDRESSES, getWeb3Details } from 'common-util/Contracts';
 import { FooterContainer, ContractsInfoContainer } from './styles';
 
@@ -108,6 +108,7 @@ const ContractInfo = () => {
 const Footer = () => (
   <FooterContainer>
     <CommonFooter leftContent={<ContractInfo />} className="custom-footer" />
+    <ServiceStatusInfo appType="mlkit" />
   </FooterContainer>
 );
 
