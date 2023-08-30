@@ -5,8 +5,8 @@ import { get } from 'lodash';
 import Overview from './content/1_OffChainAgent';
 import Badge from './content/3_HighLevelSpec';
 import { DOC_NAV, NavWrapper } from './helpers';
-import { Container, DocSection } from './styles';
 import ActionsDocs from './content/2_OnChainProtocol';
+import { Container, DocSection } from './styles';
 
 const { Title } = Typography;
 const { Link } = Anchor;

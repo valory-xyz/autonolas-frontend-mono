@@ -3,6 +3,7 @@ import { Layout } from 'antd/lib';
 import { COLOR, MEDIA_QUERY } from 'util/theme';
 
 export const CustomLayout = styled(Layout)`
+  margin-bottom: 8rem;
   .registry-tabs {
     .ant-tabs-extra-content {
       &:not(:last-child) {
@@ -62,12 +63,6 @@ export const Logo = styled.div`
     margin-left: 1rem;
     font-weight: bold;
   }
-`;
-
-// FOOTER
-export const Container = styled.div`
-  margin-top: 2rem;
-  font-size: 20px;
 `;
 
 export const SubFooter = styled.div`

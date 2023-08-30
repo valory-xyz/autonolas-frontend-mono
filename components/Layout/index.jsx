@@ -10,7 +10,7 @@ import { getSupportedNetworks } from 'common-util/functions';
 import { COLOR } from '@autonolas/frontend-library';
 import Login from '../Login';
 import Footer from './Footer';
-import { CustomLayout, Container, Logo } from './styles';
+import { CustomLayout, Logo } from './styles';
 
 const LogoSvg = dynamic(() => import('common-util/SVGs/logo'));
 
@@ -92,7 +92,6 @@ const NavigationBar = ({ children }) => {
         </div>
       </Content>
 
-      <Container />
       <Footer />
     </CustomLayout>
   );
