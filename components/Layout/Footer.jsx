@@ -112,7 +112,7 @@ const Footer = () => (
   <>
     <FooterContainer>
       <CommonFooter leftContent={<ContractInfo />} className="custom-footer" />
-      <ServiceStatusInfo appType="mlkit" />
+      <ServiceStatusInfo appType="mechkit" />
     </FooterContainer>
   </>
 );
