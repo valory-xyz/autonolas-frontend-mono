@@ -89,10 +89,10 @@
     lodash "^4.17.21"
     resize-observer-polyfill "^1.5.1"
 
-"@autonolas/frontend-library@^0.4.1":
-  version "0.4.2"
-  resolved "https://registry.yarnpkg.com/@autonolas/frontend-library/-/frontend-library-0.4.2.tgz#678d7084e0b07735acbbfbe3fabceca302363ec9"
-  integrity sha512-eOvwm7h9SDUHUbbeTCzfwoAHVfqrgnz9ugB2zhVvTWRpxsnmBpnhN6k9u1ySyRBrTtwDDlyhhV5YjXComsZKfA==
+"@autonolas/frontend-library@^0.4.2":
+  version "0.4.3"
+  resolved "https://registry.yarnpkg.com/@autonolas/frontend-library/-/frontend-library-0.4.3.tgz#ec8a220ba84a14195d3f4a649ae7ab1bdfcb0bfd"
+  integrity sha512-JNYQxqmavMaW2LbITaqTyQF+LPPBs/OMhaSmpBhrzVs9m8qot7sOco0ix6yXGE8qj2kA06gZgNFbsx0MHHNsaA==
   dependencies:
     "@ant-design/icons" "^4.8.0"
     "@storybook/builder-webpack5" "^7.0.15"
