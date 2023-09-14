@@ -2,13 +2,12 @@ import { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import get from 'lodash/get';
-import { Card } from 'antd/lib';
-import { ListEmptyMessage, PrintJson } from 'common-util/List/ListCommon';
-import Loader from 'common-util/Loader';
+import { Card } from 'antd';
+import { Loader } from '@autonolas/frontend-library';
 
-const ListCards = ({
-  account, type, getList, extra,
-}) => {
+import { ListEmptyMessage, PrintJson } from 'common-util/List/ListCommon';
+
+const ListCards = ({ account, type, getList, extra }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [list, setList] = useState([]);
 

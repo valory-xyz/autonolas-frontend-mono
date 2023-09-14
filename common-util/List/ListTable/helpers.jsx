@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import {
   Input, Button, Typography, Tooltip,
-} from 'antd/lib';
+} from 'antd';
 import { SearchOutlined, CopyOutlined } from '@ant-design/icons';
 import PropTypes from 'prop-types';
 import { GATEWAY_URL, NAV_TYPES, TOTAL_VIEW_COUNT } from 'util/constants';

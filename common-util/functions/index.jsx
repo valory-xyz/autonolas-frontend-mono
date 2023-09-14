@@ -1,5 +1,5 @@
 import { ethers } from 'ethers';
-import { notification } from 'antd/lib';
+import { notification } from 'antd';
 import { isNil } from 'lodash';
 import { COLOR } from 'util/theme';
 import { GATEWAY_URL, TOTAL_VIEW_COUNT } from 'util/constants';

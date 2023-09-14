@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import Web3 from 'web3';
 import {
   Table, Typography, ConfigProvider, Empty, Skeleton,
-} from 'antd/lib';
+} from 'antd';
 import { useRouter } from 'next/router';
 import { AGENT_MECH_ABI } from 'common-util/AbiAndAddresses';
 import { EllipsisMiddle } from 'common-util/List/ListTable/helpers';

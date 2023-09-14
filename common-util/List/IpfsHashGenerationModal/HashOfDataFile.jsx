@@ -4,7 +4,7 @@ import { connect } from 'react-redux';
 import get from 'lodash/get';
 import {
   Form, Input, Button, Select,
-} from 'antd/lib';
+} from 'antd';
 import { v4 as uuidv4 } from 'uuid';
 import { isArray } from 'lodash';
 import { getIpfsHashHelper } from './helpers';

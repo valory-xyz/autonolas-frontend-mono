@@ -1,4 +1,4 @@
-import { Skeleton } from 'antd/lib';
+import { Skeleton } from 'antd';
 import PropTypes from 'prop-types';
 
 export const Shimmer = ({ active = true }) => (

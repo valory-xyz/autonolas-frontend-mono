@@ -1,9 +1,10 @@
 import PropTypes from 'prop-types';
-import { Table } from 'antd/lib';
+import { Table } from 'antd';
 import { useRouter } from 'next/router';
+import { Loader } from '@autonolas/frontend-library';
+
 import { TOTAL_VIEW_COUNT } from 'util/constants';
 import { ListEmptyMessage } from 'common-util/List/ListCommon';
-import Loader from 'common-util/Loader';
 import { getData, getTableColumns } from './helpers';
 
 const ListTable = ({

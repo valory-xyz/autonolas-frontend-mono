@@ -2,7 +2,7 @@ import React, { Fragment, useState } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import get from 'lodash/get';
-import { Form, Input, Button } from 'antd/lib';
+import { Form, Input, Button } from 'antd';
 import { getIpfsHashHelper } from './helpers';
 import { CustomModal } from '../styles';
 

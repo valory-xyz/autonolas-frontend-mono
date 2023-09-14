@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
-import { Button, Form } from 'antd/lib';
+import { Button, Form } from 'antd';
 import get from 'lodash/get';
 import { FormItemHash } from '../RegisterForm/helpers';
 import HashOfDataFile from '../IpfsHashGenerationModal/HashOfDataFile';

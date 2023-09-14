@@ -1,7 +1,7 @@
 /* eslint-disable import/no-extraneous-dependencies */
 import PropTypes from 'prop-types';
 import Link from 'next/link';
-import { Alert, Button } from 'antd/lib';
+import { Alert, Button } from 'antd';
 import bs58 from 'bs58';
 import { EmptyMessage, RegisterFooter } from 'components/styles';
 
