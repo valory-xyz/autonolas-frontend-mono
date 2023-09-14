@@ -19,7 +19,7 @@ export const ADDRESSES = {
   },
 };
 
-export const getWeb3Details = () => {
+const getWeb3Details = () => {
   const web3 = new Web3(getProvider());
   const chainId = getChainId();
   const address = ADDRESSES[chainId];

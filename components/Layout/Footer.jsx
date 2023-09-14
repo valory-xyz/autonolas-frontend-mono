@@ -1,38 +1,24 @@
-import { useState, useEffect } from 'react';
-import { useSelector } from 'react-redux';
 import { useRouter } from 'next/router';
-import get from 'lodash/get';
 import {
   Footer as CommonFooter,
   ServiceStatusInfo,
 } from '@autonolas/frontend-library';
+
 import { GNOSIS_SCAN_URL } from 'util/constants';
-import { ADDRESSES, getWeb3Details } from 'common-util/Contracts';
+import { ADDRESSES } from 'common-util/Contracts';
+import { useHelpers } from 'common-util/hooks';
 import { FooterContainer, ContractsInfoContainer } from './styles';
 
 const ContractInfo = () => {
-  const chainId = useSelector((state) => get(state, 'setup.chainId'));
+  const { chainId } = useHelpers();
   const router = useRouter();
 
-  const [addressChainId, setAddressChainId] = useState(chainId);
   const { pathname, query } = router;
 
-  // if chainId changes, update the chainId required for address
-  useEffect(() => {
-    setAddressChainId(chainId);
-  }, [chainId]);
+  // if chainId is not set, show empty container
+  if (!chainId) return <ContractsInfoContainer />;
 
-  // if there are no chainId, try to fetch from web3Details (ie. WEB3_PROVIDER)
-  // else fallback to 100 (gnosisscan address)
-  useEffect(() => {
-    if (!addressChainId) {
-      setAddressChainId(getWeb3Details().chainId || 1);
-    }
-  }, []);
-
-  if (!addressChainId) return <ContractsInfoContainer />;
-
-  const addresses = ADDRESSES[addressChainId];
+  const addresses = ADDRESSES[chainId];
   const getCurrentPageAddresses = () => {
     if (addresses) {
       const path = pathname || '';

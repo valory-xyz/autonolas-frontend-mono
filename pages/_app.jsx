@@ -17,8 +17,8 @@ const MyApp = ({ Component, pageProps }) => (
   <>
     <GlobalStyle />
     <Head>
-    <title>Mech Hub</title>
-          <meta name="title" content="Manage your mechs and instruct them" />
+      <title>Mech Hub</title>
+      <meta name="title" content="Manage your mechs and instruct them" />
     </Head>
     <ConfigProvider theme={THEME_CONFIG}>
       <WagmiConfigProvider config={wagmiConfig}>
