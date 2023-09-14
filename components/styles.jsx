@@ -1,8 +1,8 @@
 import styled from 'styled-components';
-import { COLOR } from 'util/theme';
+import { COLOR } from '@autonolas/frontend-library';
 
 export const EmptyMessage = styled.div`
-  min-height: 60vh;
+  min-height: 55vh;
   width: ${({ width }) => width || 'auto'};
   display: flex;
   align-items: center;
@@ -17,7 +17,7 @@ export const EmptyMessage = styled.div`
     background-size: contain;
     background-position: center;
     background-repeat: no-repeat;
-    background-image: url(/images/agent.png);
+    background-image: url('/images/agent.png');
   }
   p {
     margin: 0;

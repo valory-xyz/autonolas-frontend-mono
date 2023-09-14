@@ -1,21 +1,7 @@
 /* eslint-disable import/no-extraneous-dependencies */
 import PropTypes from 'prop-types';
-import Link from 'next/link';
 import { Alert, Button } from 'antd';
 import { EmptyMessage, RegisterFooter } from 'components/styles';
-
-// ----------- components -----------
-export const MyLink = ({ children, href, ...linkProps }) => (
-  <Link {...linkProps} href={href}>
-    <a href={href}>{children}</a>
-  </Link>
-);
-MyLink.propTypes = {
-  children: PropTypes.node.isRequired,
-  href: PropTypes.string.isRequired,
-};
-
-export const commaMessage = 'Each comma must be followed by a space ("1, 2" not "1,2").';
 
 export const RegisterMessage = ({ handleCancel }) => (
   <RegisterFooter>
@@ -65,12 +51,6 @@ export const ListEmptyMessage = ({ type }) => {
 };
 ListEmptyMessage.propTypes = { type: PropTypes.string };
 ListEmptyMessage.defaultProps = { type: null };
-
-// PrintJson
-export const PrintJson = ({ value }) => (
-  <pre>{JSON.stringify(value || {}, null, 2)}</pre>
-);
-PrintJson.propTypes = { value: PropTypes.shape({}).isRequired };
 
 // AlertSuccess
 export const AlertSuccess = ({ type, information }) => {

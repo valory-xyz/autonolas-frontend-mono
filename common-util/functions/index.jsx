@@ -1,5 +1,5 @@
 import { GATEWAY_URL, TOTAL_VIEW_COUNT } from 'util/constants';
-import { ADDRESSES, rpc } from 'common-util/Contracts';
+import { ADDRESSES, RPC_URLS } from 'common-util/Contracts';
 import {
   getProvider as getProviderFn,
   getChainId as getChainIdFn,
@@ -9,7 +9,7 @@ import {
 } from '@autonolas/frontend-library';
 import { SUPPORTED_CHAINS } from 'common-util/Login';
 
-export const getProvider = () => getProviderFn(SUPPORTED_CHAINS, rpc);
+export const getProvider = () => getProviderFn(SUPPORTED_CHAINS, RPC_URLS);
 
 export const getIsValidChainId = (chainId) => getIsValidChainIdFn(SUPPORTED_CHAINS, chainId);
 
@@ -22,7 +22,7 @@ export const getChainId = (chainId = null) => getChainIdFn(SUPPORTED_CHAINS, cha
 
 export const sendTransaction = (fn, account) => sendTransactionFn(fn, account, {
   supportedChains: SUPPORTED_CHAINS,
-  rpcUrls: rpc,
+  rpcUrls: RPC_URLS,
 });
 
 /**

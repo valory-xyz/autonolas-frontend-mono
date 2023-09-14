@@ -8,10 +8,10 @@ import {
   notifyError,
   notifySuccess,
   AddressLink,
+  NA,
 } from '@autonolas/frontend-library';
 
 import { AGENT_MECH_ABI } from 'common-util/AbiAndAddresses';
-import { NA } from 'common-util/constants';
 import Request from './Request';
 
 // Replace the following values with your specific contract information

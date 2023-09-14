@@ -1,24 +1,21 @@
 import { useState } from 'react';
 import PropTypes from 'prop-types';
-import { connect } from 'react-redux';
 import { Button, Form } from 'antd';
-import get from 'lodash/get';
+
+import { useHelpers } from 'common-util/hooks/useHelpers';
 import { FormItemHash } from '../RegisterForm/helpers';
 import HashOfDataFile from '../IpfsHashGenerationModal/HashOfDataFile';
-import { RegisterFooter } from '../styles';
+import { RegisterMessage } from '../ListCommon';
 
 export const FORM_NAME = 'request_form';
 
 const RequestForm = ({
-  isLoading,
-  account,
-  dataList,
-  handleSubmit,
-  handleCancel,
+  isLoading, dataList, handleSubmit, handleCancel,
 }) => {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [form] = Form.useForm();
   const [fields, setFields] = useState([]);
+  const { account } = useHelpers();
 
   const onGenerateHash = (generatedHash) => {
     setFields([
@@ -71,12 +68,7 @@ const RequestForm = ({
             </Button>
           </Form.Item>
         ) : (
-          <RegisterFooter>
-            <p>To mint, connect to wallet</p>
-            <Button onClick={handleCancel} ghost type="primary">
-              Cancel
-            </Button>
-          </RegisterFooter>
+          <RegisterMessage handleCancel={handleCancel} />
         )}
       </Form>
 
@@ -92,7 +84,6 @@ const RequestForm = ({
 
 RequestForm.propTypes = {
   isLoading: PropTypes.bool,
-  account: PropTypes.string,
   dataList: PropTypes.oneOfType([PropTypes.string, PropTypes.array]),
   handleSubmit: PropTypes.func.isRequired,
   handleCancel: PropTypes.func.isRequired,
@@ -101,12 +92,6 @@ RequestForm.propTypes = {
 RequestForm.defaultProps = {
   isLoading: false,
   dataList: null,
-  account: null,
 };
 
-const mapStateToProps = (state) => {
-  const account = get(state, 'setup.account') || null;
-  return { account };
-};
-
-export default connect(mapStateToProps, {})(RequestForm);
+export default RequestForm;

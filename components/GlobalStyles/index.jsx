@@ -1,5 +1,5 @@
 import { createGlobalStyle } from 'styled-components';
-import { MEDIA_QUERY, COLOR, OTHERS } from 'util/theme';
+import { MEDIA_QUERY, COLOR } from '@autonolas/frontend-library';
 
 const ANTD_COLOR = {
   whiteColor: '#fff',
@@ -50,11 +50,6 @@ const GlobalStyle = createGlobalStyle`
   }
   .p-0 {
     padding: 0px !important;
-  }
-  .walletconnect-modal__base {
-    .walletconnect-modal__mobile__toggle a {
-      color: ${COLOR.WALLECT_CONNECT_BLUE} !important;
-    }
   }
   .ant-alert {
     border-radius: 5px;
@@ -184,10 +179,10 @@ const GlobalStyle = createGlobalStyle`
       &:last-child {
         td {
           &:first-child {
-            border-bottom-left-radius: ${OTHERS.borderRadius};
+            border-bottom-left-radius: 5px;
           }
           &:last-child {
-            border-bottom-right-radius: ${OTHERS.borderRadius};
+            border-bottom-right-radius: 5px;
           }
         }
       }

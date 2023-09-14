@@ -3,12 +3,13 @@ import {
   AGENT_FACTORY_ADDRESS,
   AGENT_FACTORY_ABI,
   AGENT_MECH_ABI,
+  AGENT_MECH_ADDRESS,
   AGENT_REGISTRY_ADDRESS,
   AGENT_REGISTRY_ABI,
 } from 'common-util/AbiAndAddresses';
 import { getChainId, getProvider } from 'common-util/functions';
 
-export const rpc = {
+export const RPC_URLS = {
   100: process.env.NEXT_PUBLIC_GNOSIS_URL,
 };
 
@@ -45,10 +46,7 @@ export const getMechMinterContract = () => {
 };
 
 export const getMechContract = () => {
-  const contract = getContract(
-    AGENT_MECH_ABI,
-    '0xFf82123dFB52ab75C417195c5fDB87630145ae81',
-  );
+  const contract = getContract(AGENT_MECH_ABI, AGENT_MECH_ADDRESS);
 
   return contract;
 };

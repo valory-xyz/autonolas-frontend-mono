@@ -1,8 +1,7 @@
 import React, { Fragment, useState } from 'react';
 import PropTypes from 'prop-types';
-import { connect } from 'react-redux';
-import get from 'lodash/get';
 import { Form, Input, Button } from 'antd';
+
 import { getIpfsHashHelper } from './helpers';
 import { CustomModal } from '../styles';
 
@@ -173,9 +172,4 @@ IpfsModal.defaultProps = {
   callback: null,
 };
 
-const mapStateToProps = (state) => {
-  const account = get(state, 'setup.account') || null;
-  return { account };
-};
-
-export default connect(mapStateToProps, {})(IpfsModal);
+export default IpfsModal;

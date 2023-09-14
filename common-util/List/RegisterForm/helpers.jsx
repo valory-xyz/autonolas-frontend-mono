@@ -1,6 +1,7 @@
 import PropTypes from 'prop-types';
 import { Form, Input, Tooltip } from 'antd';
 import { LinkOutlined } from '@ant-design/icons';
+
 import { GATEWAY_URL, HASH_PREFIX } from 'util/constants';
 import { getBase16Validator } from '../IpfsHashGenerationModal/utils';
 
@@ -55,5 +56,3 @@ FormItemHash.propTypes = {
 FormItemHash.defaultProps = {
   hashValue: null,
 };
-
-export const getX = () => {};

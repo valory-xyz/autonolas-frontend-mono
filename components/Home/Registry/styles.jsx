@@ -1,7 +1,5 @@
 import styled from 'styled-components';
 
-export const CreateLockContainer = styled.div``;
-
 export const FormContainer = styled.div`
   .custom-vertical-form {
     display: flex;
@@ -14,8 +12,4 @@ export const FormContainer = styled.div`
   .full-width {
     width: 100%;
   }
-`;
-
-export const ModalAlertSection = styled.div`
-  margin: 1rem 0 1rem 0;
 `;
