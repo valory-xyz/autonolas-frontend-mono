@@ -29,57 +29,28 @@ export const DocSection = styled.div`
     top: 74px;
     width: 25%;
     max-width: 380px;
-    .ant-anchor-link-title {
-      white-space: normal;
-      text-overflow: unset;
+    .ant-anchor {
+      .ant-anchor-link {
+        padding-block: 8px;
+      }
+      .ant-anchor-link-title {
+        white-space: initial;
+        text-overflow: initial;
+      }
     }
   }
   .reading-section {
     max-width: 1000px;
     padding: 0 6rem 0 4rem;
+    line-height: 1.5;
     h3 {
       font-weight: bold;
     }
     .green-text-2 {
       font-size: 19px;
       color: ${COLOR.PRIMARY};
-      font-family: "minecraft", sans-serif;
+      font-family: 'minecraft', sans-serif;
     }
-  }
-  .ant-anchor {
-    padding-left: 4px;
-    .ant-anchor-ink {
-      display: none;
-    }
-    .ant-anchor-link {
-      padding-left: 0px;
-      .ant-anchor-link-title {
-        color: inherit;
-        text-decoration: none;
-      }
-      &.bold .ant-anchor-link-title {
-        color: ${COLOR.BLACK};
-        font-size: 15px;
-      }
-    }
-  }
-
-  /* custom nav-anchor */
-  .custom-nav-anchor {
-    font-size: 18px;
-    padding: 6px 40px 6px 0px;
-    padding-left: ${({ isMobile }) => (isMobile ? '16px' : '0')};
-    a.ant-anchor-link-title {
-      font-size: 18px;
-      text-decoration: none;
-    }
-    &:last-child {
-      border-bottom-color: transparent;
-    }
-  }
-  .custom-nav-anchor-active a.ant-anchor-link-title {
-    color: ${COLOR.PRIMARY} !important;
-    text-underline-offset: 4px !important;
   }
 
   ${MEDIA_QUERY.tabletL} {

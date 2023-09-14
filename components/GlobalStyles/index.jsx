@@ -67,18 +67,15 @@ const GlobalStyle = createGlobalStyle`
   }
 
   /* layout */
-  .ant-layout {
-    background: ${COLOR.WHITE};
-  }
   .ant-layout-header {
     display: flex;
     align-items: center;
     position: fixed;
-    top: 0;
-    z-index: 1;
-    width: calc(100% - 32px);
-    padding: 0 24px;
-    height: 80px;
+    z-index: 10;
+    width: 100%;
+    height: 64px;
+    line-height: 64px;
+    padding: 0 50px;
     .ant-menu {
       flex: 1;
       &.ant-menu-horizontal {
@@ -93,6 +90,7 @@ const GlobalStyle = createGlobalStyle`
       }
     }
   }
+
 
   /* tabs */
   .ant-tabs-card.ant-tabs-top {
@@ -230,6 +228,12 @@ const GlobalStyle = createGlobalStyle`
       position: relative;
       flex-direction: column;
       height: auto;
+      padding: 0;
+    }
+  }
+
+  ${MEDIA_QUERY.mobileM} {
+    .ant-layout-header {
       padding: 0;
     }
   }

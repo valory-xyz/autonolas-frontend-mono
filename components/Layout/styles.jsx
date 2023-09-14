@@ -73,7 +73,6 @@ export const CustomLayout = styled(Layout)`
   }
 `;
 
-// HEADER
 export const HeaderContainer = styled.div`
   display: flex;
   justify-content: space-between;
@@ -107,7 +106,6 @@ export const Logo = styled.div`
   display: flex;
   align-items: center;
   justify-content: left;
-  margin-left: 0.5rem;
   margin-right: 3.5rem;
   font-size: 34px;
   color: ${COLOR.PRIMARY};
@@ -156,5 +154,5 @@ export const ContractsInfoContainer = styled.div`
 `;
 
 export const FooterContainer = styled.div`
-  margin: 0 -16px;
+  margin-bottom: 8rem;
 `;

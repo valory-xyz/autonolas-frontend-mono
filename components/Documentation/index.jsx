@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
-import { Anchor, Typography, Grid } from 'antd';
+import { Anchor, Typography } from 'antd';
 import { get } from 'lodash';
+import { useScreen } from 'common-util/hooks';
 import Overview from './content/1_OffChainAgent';
 import Badge from './content/3_HighLevelSpec';
 import { DOC_NAV, NavWrapper } from './helpers';
@@ -9,14 +10,11 @@ import ActionsDocs from './content/2_OnChainProtocol';
 import { Container, DocSection } from './styles';
 
 const { Title } = Typography;
-const { Link } = Anchor;
-const { useBreakpoint } = Grid;
 
 const Documentation = () => {
   const [activeNav, setActiveNav] = useState(null);
   const router = useRouter();
-  const screens = useBreakpoint();
-  const isMobile = !!screens.xs;
+  const { isMobile } = useScreen();
   const anchorCommonProps = {
     affix: false,
     offsetTop: isMobile ? 20 : 100,
@@ -34,18 +32,16 @@ const Documentation = () => {
         <NavWrapper isMobile={isMobile}>
           <div className="navigation-section">
             <Title>Docs</Title>
-            {DOC_NAV.map(({ id: key, title }) => (
-              <Anchor
-                {...anchorCommonProps}
-                key={key}
-                className={`custom-nav-anchor ${
-                  key === activeNav ? 'custom-nav-anchor-active' : ''
-                }`}
-                onClick={() => setActiveNav(key)}
-              >
-                <Link href={`#${key}`} title={title} />
-              </Anchor>
-            ))}
+            <Anchor
+              {...anchorCommonProps}
+              getCurrentAnchor={() => activeNav}
+              onChange={(key) => setActiveNav(key)}
+              items={DOC_NAV.map(({ id: key, title }) => ({
+                key,
+                title,
+                href: `#${key}`,
+              }))}
+            />
           </div>
         </NavWrapper>
 
