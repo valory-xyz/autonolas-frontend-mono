@@ -1,10 +1,9 @@
+/* eslint-disable import/no-extraneous-dependencies */
 import PropTypes from 'prop-types';
 import Link from 'next/link';
-import { Alert } from 'antd/lib';
+import { Alert, Button } from 'antd/lib';
 import bs58 from 'bs58';
-import { ExternalLink } from 'react-feather';
 import { EmptyMessage, RegisterFooter } from 'components/styles';
-import { WhiteButton } from '../Button';
 
 // constants
 export const DEPENDENCY_IN_ASC = 'Agent IDs must be input in the order they were created (oldest first & newest last)';
@@ -47,7 +46,11 @@ export const commaMessage = 'Each comma must be followed by a space ("1, 2" not 
 export const RegisterMessage = ({ handleCancel }) => (
   <RegisterFooter>
     <p>To mint, connect to wallet</p>
-    {handleCancel && <WhiteButton onClick={handleCancel}>Cancel</WhiteButton>}
+    {handleCancel && (
+      <Button onClick={handleCancel} ghost type="primary">
+        Cancel
+      </Button>
+    )}
   </RegisterFooter>
 );
 RegisterMessage.propTypes = { handleCancel: PropTypes.func };

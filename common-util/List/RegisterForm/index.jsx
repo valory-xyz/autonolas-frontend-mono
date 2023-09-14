@@ -4,7 +4,6 @@ import { connect } from 'react-redux';
 import Web3 from 'web3';
 import { Button, Form, Input } from 'antd/lib';
 import get from 'lodash/get';
-import { WhiteButton } from 'common-util/Button';
 import IpfsHashGenerationModal from '../IpfsHashGenerationModal';
 import { RegisterFooter } from '../styles';
 import { FormItemHash } from './helpers';
@@ -127,7 +126,9 @@ const RegisterForm = ({
         ) : (
           <RegisterFooter>
             <p>To mint, connect to wallet</p>
-            <WhiteButton onClick={handleCancel}>Cancel</WhiteButton>
+            <Button onClick={handleCancel} ghost type="primary">
+              Cancel
+            </Button>
           </RegisterFooter>
         )}
       </Form>

@@ -14,7 +14,7 @@ const MintAgent = ({ account }) => {
   const [information, setInformation] = useState(null);
   const router = useRouter();
 
-  const handleCancel = () => router.push('/agents');
+  const handleCancel = () => router.push('/registry');
 
   const handleSubmit = (values) => {
     if (account) {

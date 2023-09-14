@@ -3,7 +3,6 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { Button, Form } from 'antd/lib';
 import get from 'lodash/get';
-import { WhiteButton } from 'common-util/Button';
 import { FormItemHash } from '../RegisterForm/helpers';
 import HashOfDataFile from '../IpfsHashGenerationModal/HashOfDataFile';
 import { RegisterFooter } from '../styles';
@@ -74,7 +73,9 @@ const RequestForm = ({
         ) : (
           <RegisterFooter>
             <p>To mint, connect to wallet</p>
-            <WhiteButton onClick={handleCancel}>Cancel</WhiteButton>
+            <Button onClick={handleCancel} ghost type="primary">
+              Cancel
+            </Button>
           </RegisterFooter>
         )}
       </Form>
