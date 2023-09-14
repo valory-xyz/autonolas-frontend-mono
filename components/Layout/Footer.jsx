@@ -109,12 +109,10 @@ const ContractInfo = () => {
 };
 
 const Footer = () => (
-  <>
-    <FooterContainer>
-      <CommonFooter leftContent={<ContractInfo />} className="custom-footer" />
-      <ServiceStatusInfo appType="mechkit" />
-    </FooterContainer>
-  </>
+  <FooterContainer>
+    <CommonFooter leftContent={<ContractInfo />} className="custom-footer" />
+    <ServiceStatusInfo appType="mechkit" />
+  </FooterContainer>
 );
 
 export default Footer;

@@ -4,10 +4,14 @@ import {
   Table, Typography, ConfigProvider, Empty, Skeleton,
 } from 'antd';
 import { useRouter } from 'next/router';
+import {
+  notifyError,
+  notifySuccess,
+  AddressLink,
+} from '@autonolas/frontend-library';
+
 import { AGENT_MECH_ABI } from 'common-util/AbiAndAddresses';
-import { EllipsisMiddle } from 'common-util/List/ListTable/helpers';
 import { NA } from 'common-util/constants';
-import { notifyError, notifySuccess } from 'common-util/functions';
 import Request from './Request';
 
 // Replace the following values with your specific contract information
@@ -217,8 +221,9 @@ const EventListener = () => {
               dataIndex: 'requestId',
               key: 'requestId',
               width: 300,
+              // TODO: should not be able to click
               render: (text) => (
-                <EllipsisMiddle suffixCount={10}>{text}</EllipsisMiddle>
+                <AddressLink text={text} suffixCount={10} canCopy />
               ),
             },
             {
@@ -228,7 +233,7 @@ const EventListener = () => {
               width: 300,
               render: (text) => {
                 if (!text) return NA;
-                return <EllipsisMiddle suffixCount={10}>{text}</EllipsisMiddle>;
+                return <AddressLink text={text} suffixCount={10} canCopy />;
               },
             },
             {
@@ -239,9 +244,12 @@ const EventListener = () => {
               render: (text) => {
                 if (!text) return NA;
                 return (
-                  <EllipsisMiddle suffixCount={10} isIpfsLink>
-                    {text}
-                  </EllipsisMiddle>
+                  <AddressLink
+                    text={text}
+                    suffixCount={10}
+                    canCopy
+                    isIpfsLink
+                  />
                 );
               },
             },
@@ -254,10 +262,16 @@ const EventListener = () => {
                 if (isSecondEventLoading) {
                   return <Skeleton.Input active />;
                 }
+
+                if (!text) return NA;
+
                 return (
-                  <EllipsisMiddle suffixCount={10} isIpfsLink>
-                    {text}
-                  </EllipsisMiddle>
+                  <AddressLink
+                    text={text}
+                    suffixCount={10}
+                    canCopy
+                    isIpfsLink
+                  />
                 );
               },
             },

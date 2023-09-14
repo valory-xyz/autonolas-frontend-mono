@@ -1,7 +1,7 @@
 import { getFirstAndLastIndex } from 'common-util/functions';
 import includes from 'lodash/includes';
 
-export const filterByOwner = (results = [], { searchValue, account }) => results.filter((e) => {
+export const filterByOwner = (results, { searchValue, account }) => (results || []).filter((e) => {
   const search = (searchValue || '').trim().toLowerCase();
   const ownerL = (e.owner || '').trim().toLowerCase();
   const hashL = (e.unitHash || '').trim().toLowerCase();
@@ -60,12 +60,4 @@ export const getMyListOnPagination = ({ total, nextPage, list }) => {
   const { first, last } = getFirstAndLastIndex(total, nextPage);
   const array = list.slice(first - 1, last);
   return array;
-};
-
-/**
- * call API once and return based on pagination
- */
-export const getTotalOfFilteredList = async ({ list }) => {
-  const { length } = list || [];
-  return new Promise((resolve) => resolve(length));
 };

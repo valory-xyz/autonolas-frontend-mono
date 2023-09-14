@@ -1,4 +1,4 @@
-import styled, { createGlobalStyle } from 'styled-components';
+import { createGlobalStyle } from 'styled-components';
 import { MEDIA_QUERY, COLOR, OTHERS } from 'util/theme';
 
 const ANTD_COLOR = {
@@ -13,8 +13,14 @@ const GlobalStyle = createGlobalStyle`
   :before {
     box-sizing: border-box;
   }
-  body {
-    padding: 1rem;
+  body,
+  html {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    font-family: texgyreheros__regular, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 
   /* common */
@@ -112,16 +118,6 @@ const GlobalStyle = createGlobalStyle`
     border-bottom: none;
   }
 
-  /* layout */
-  .site-layout {
-    padding: 0 24px;
-    margin-top: 56px;
-  }
-  .site-layout-background {
-    padding: 24px 0;
-    min-height: calc(100vh - 140px);
-  }
-
   ${MEDIA_QUERY.mobileL} {
     .show-only-sm {
       display: initial;
@@ -134,12 +130,6 @@ const GlobalStyle = createGlobalStyle`
   background-size: 100%;
   background-color: ${COLOR.WHITE};
 
-  .site-layout {
-    padding: 0 2rem;
-  }
-  .site-layout-background {
-    min-height: calc(100vh - 8.5rem);
-  }
   .ant-layout-footer {
     text-align: center;
   }
@@ -236,34 +226,13 @@ const GlobalStyle = createGlobalStyle`
   }
 
   ${MEDIA_QUERY.tablet} {
-    body {
-      padding: 0rem;
-    }
     .ant-layout-header {
       position: relative;
       flex-direction: column;
       height: auto;
       padding: 0;
     }
-    .site-layout-background {
-      padding: 1rem 0;
-      min-height: calc(100vh - 20rem);
-    }
-    .site-layout {
-      margin-top: 0;
-    }
   }
 `;
 
 export default GlobalStyle;
-
-export const Ellipsis = styled.span`
-  max-width: 100px;
-  display: inline-block;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  ${MEDIA_QUERY.tablet} {
-    max-width: 200px;
-  }
-`;

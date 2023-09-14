@@ -38,10 +38,16 @@ const ListTable = ({
     );
   }
 
-  const columns = getTableColumns(type, {
-    router,
-  });
+  const columns = getTableColumns(type, { router });
   const dataSource = getData(type, list, { current: currentPage });
+  const pagination = isPaginationRequired
+    ? {
+      total,
+      current: currentPage,
+      defaultPageSize: TOTAL_VIEW_COUNT,
+      onChange: (e) => setCurrentPage(e),
+    }
+    : false;
 
   return (
     <>
@@ -51,16 +57,7 @@ const ListTable = ({
         <Table
           columns={columns}
           dataSource={dataSource}
-          pagination={
-            isPaginationRequired
-              ? {
-                total,
-                current: currentPage,
-                defaultPageSize: TOTAL_VIEW_COUNT,
-                onChange: (e) => setCurrentPage(e),
-              }
-              : false
-          }
+          pagination={pagination}
           scroll={{ x: scrollX || 1200 }}
           rowKey={(record) => `${type}-row-${record.id}`}
         />

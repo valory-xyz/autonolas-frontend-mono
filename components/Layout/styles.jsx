@@ -4,6 +4,13 @@ import { COLOR, MEDIA_QUERY } from 'util/theme';
 
 export const CustomLayout = styled(Layout)`
   margin-bottom: 8rem;
+  .site-layout {
+    padding: 0 50px;
+    margin-top: 64px;
+  }
+  .site-layout-background {
+    min-height: calc(100vh - 140px);
+  }
   .registry-tabs {
     .ant-tabs-extra-content {
       &:not(:last-child) {
@@ -15,6 +22,52 @@ export const CustomLayout = styled(Layout)`
       &:last-child {
         gap: 12px;
         display: flex;
+      }
+    }
+  }
+
+  ${MEDIA_QUERY.tabletL} {
+    .site-layout {
+      padding: 0 24px;
+    }
+    .site-layout-background {
+      padding: 0;
+    }
+    .registry-tabs {
+      .ant-tabs-nav {
+        flex-direction: column;
+        align-items: flex-start;
+        justify-content: flex-start;
+        .ant-tabs-extra-content {
+          margin-top: 12px;
+        }
+      }
+      .ant-tabs-nav-wrap {
+        padding-left: 0;
+      }
+      .ant-tabs-nav-list {
+        transform: none !important;
+      }
+    }
+    /* footer from autonolas-library */
+    main + div {
+      padding: 24px;
+    }
+  }
+
+  ${MEDIA_QUERY.mobileL} {
+    .site-layout {
+      padding: 0 16px;
+    }
+    /* footer from autonolas-library */
+    main + div {
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+      .footer-center {
+        position: relative;
+        left: 0;
+        transform: none;
       }
     }
   }
