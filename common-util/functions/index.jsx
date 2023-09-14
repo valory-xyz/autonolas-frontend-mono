@@ -1,28 +1,14 @@
 import { ethers } from 'ethers';
-import dayjs from 'dayjs';
 import { notification } from 'antd/lib';
-import { isNil, isString } from 'lodash';
+import { isNil } from 'lodash';
 import { COLOR } from 'util/theme';
 import { GATEWAY_URL, TOTAL_VIEW_COUNT } from 'util/constants';
-import { NA } from 'common-util/constants';
 import { ADDRESSES } from 'common-util/Contracts';
 
 /**
  * https://docs.ethers.org/v5/api/utils/constants/#constants-MaxUint256
  */
 export const MAX_AMOUNT = ethers.constants.MaxUint256;
-
-export const getBalance = (account, p) => new Promise((resolve, reject) => {
-  p.eth
-    .getBalance(account)
-    .then((balance) => {
-      const balanceInEth = ethers.utils.formatEther(balance);
-      resolve(balanceInEth);
-    })
-    .catch((e) => {
-      reject(e);
-    });
-});
 
 /**
  *
@@ -115,29 +101,6 @@ export const getTotalVotesPercentage = (votes, totalSupply) => {
   }
 
   return null;
-};
-
-/**
- * Get formatted date from milliseconds
- * example, 1678320000000 => Mar 09 '23
- */
-export const getFormattedDate = (ms) => {
-  if (!ms) return NA;
-  return dayjs(ms).format("MMM DD 'YY");
-};
-
-/**
- * Get formatted date from milliseconds including time
- * example, 1678320000000 => Mar 09 '2023 16:00
- */
-export const getFullFormattedDate = (ms) => {
-  if (!ms) return NA;
-  return dayjs(ms).format("MMM DD 'YYYY, HH:mm");
-};
-
-export const getString = (x) => {
-  if (isNil(x)) return NA;
-  return isString(x) ? x : `${x}`;
 };
 
 export const convertToEth = (value) => ethers.utils.formatEther(value);
