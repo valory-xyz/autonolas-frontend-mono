@@ -220,10 +220,15 @@ const EventListener = () => {
               title: 'Request Id',
               dataIndex: 'requestId',
               key: 'requestId',
-              width: 300,
-              // TODO: should not be able to click
+              width: 260,
               render: (text) => (
-                <AddressLink text={text} suffixCount={10} canCopy />
+                <AddressLink
+                  text={text}
+                  textMinWidth={195}
+                  suffixCount={8}
+                  canCopy
+                  cannotClick
+                />
               ),
             },
             {
@@ -233,7 +238,14 @@ const EventListener = () => {
               width: 300,
               render: (text) => {
                 if (!text) return NA;
-                return <AddressLink text={text} suffixCount={10} canCopy />;
+                return (
+                  <AddressLink
+                    text={text}
+                    textMinWidth={245}
+                    suffixCount={10}
+                    canCopy
+                  />
+                );
               },
             },
             {
@@ -246,6 +258,7 @@ const EventListener = () => {
                 return (
                   <AddressLink
                     text={text}
+                    textMinWidth={240}
                     suffixCount={10}
                     canCopy
                     isIpfsLink
@@ -268,6 +281,7 @@ const EventListener = () => {
                 return (
                   <AddressLink
                     text={text}
+                    textMinWidth={240}
                     suffixCount={10}
                     canCopy
                     isIpfsLink

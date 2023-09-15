@@ -21,9 +21,14 @@ export const getTableColumns = (type, { router, isMobile }) => {
         title: 'Owner',
         dataIndex: 'owner',
         key: 'owner',
-        width: 160,
+        width: 250,
         render: (text) => (
-          <AddressLink text={text} suffixCount={isMobile ? 4 : 6} canCopy />
+          <AddressLink
+            text={text}
+            suffixCount={isMobile ? 4 : 6}
+            canCopy
+            textMinWidth={160}
+          />
         ),
       },
       {
@@ -34,6 +39,7 @@ export const getTableColumns = (type, { router, isMobile }) => {
         render: (text) => (
           <AddressLink
             text={text}
+            textMinWidth={320}
             suffixCount={isMobile ? 4 : 14}
             isIpfsLink
             canCopy
@@ -45,10 +51,10 @@ export const getTableColumns = (type, { router, isMobile }) => {
         dataIndex: 'mech',
         width: 180,
         key: 'mech',
-        // TODO: add onClick
         render: (text, row) => (
           <AddressLink
             text={text}
+            textMinWidth={320}
             suffixCount={isMobile ? 4 : 14}
             canCopy
             onClick={(e) => {
