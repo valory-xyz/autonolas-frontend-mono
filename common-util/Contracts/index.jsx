@@ -3,9 +3,15 @@ import {
   AGENT_FACTORY_ADDRESS,
   AGENT_FACTORY_ABI,
   AGENT_MECH_ABI,
+  AGENT_MECH_ADDRESS,
   AGENT_REGISTRY_ADDRESS,
   AGENT_REGISTRY_ABI,
 } from 'common-util/AbiAndAddresses';
+import { getChainId, getProvider } from 'common-util/functions';
+
+export const RPC_URLS = {
+  100: process.env.NEXT_PUBLIC_GNOSIS_URL,
+};
 
 export const ADDRESSES = {
   100: {
@@ -14,48 +20,34 @@ export const ADDRESSES = {
   },
 };
 
-export const getWeb3Details = () => {
-  /**
-   * web3 provider =
-   * - wallect-connect provider or
-   * - currentProvider by metamask or
-   * - fallback to remote mainnet [remote node provider](https://web3js.readthedocs.io/en/v1.7.5/web3.html#example-remote-node-provider)
-   */
-  const web3 = new Web3(
-    window.WEB3_PROVIDER
-      || window.web3?.currentProvider
-      || process.env.NEXT_PUBLIC_GNOSIS_URL,
-  );
-
-  const chainId = Number(window.ethereum?.chainId || 100); // default to gnosis
+const getWeb3Details = () => {
+  const web3 = new Web3(getProvider());
+  const chainId = getChainId();
   const address = ADDRESSES[chainId];
+
   return { web3, address, chainId };
 };
 
-export const getAgentContract = () => {
+const getContract = (abi, contractAddress) => {
   const { web3 } = getWeb3Details();
-  const contract = new web3.eth.Contract(
-    AGENT_REGISTRY_ABI,
-    AGENT_REGISTRY_ADDRESS,
-  );
+  const contract = new web3.eth.Contract(abi, contractAddress);
+  return contract;
+};
+
+export const getAgentContract = () => {
+  const contract = getContract(AGENT_REGISTRY_ABI, AGENT_REGISTRY_ADDRESS);
   return contract;
 };
 
 export const getMechMinterContract = () => {
-  const { web3 } = getWeb3Details();
-  const contract = new web3.eth.Contract(
-    AGENT_FACTORY_ABI,
-    AGENT_FACTORY_ADDRESS,
-  );
+  const contract = getContract(AGENT_FACTORY_ABI, AGENT_FACTORY_ADDRESS);
+
   return contract;
 };
 
 export const getMechContract = () => {
-  const { web3 } = getWeb3Details();
-  const contract = new web3.eth.Contract(
-    AGENT_MECH_ABI,
-    '0xFf82123dFB52ab75C417195c5fDB87630145ae81',
-  );
+  const contract = getContract(AGENT_MECH_ABI, AGENT_MECH_ADDRESS);
+
   return contract;
 };
 
@@ -94,7 +86,3 @@ export async function fetchGraphQLData() {
       });
   });
 }
-
-export const rpc = {
-  100: process.env.NEXT_PUBLIC_GNOSIS_URL,
-};

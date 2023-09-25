@@ -1,45 +1,42 @@
-/* eslint-disable jest/require-hook */
-import App from 'next/app';
 import Head from 'next/head';
 import { createWrapper } from 'next-redux-wrapper';
+import { ConfigProvider } from 'antd';
 import PropTypes from 'prop-types';
 
-import { WagmiConfig } from 'wagmi';
-import GlobalStyle from 'components/GlobalStyles';
-import Layout from 'components/Layout';
+/** wagmi config */
+import { WagmiConfig as WagmiConfigProvider } from 'wagmi';
 import { wagmiConfig } from 'common-util/Login/config';
+
+/** antd theme config */
+import Layout from 'components/Layout';
+import GlobalStyle from 'components/GlobalStyles';
+import { THEME_CONFIG } from '@autonolas/frontend-library';
 import initStore from '../store';
 
-require('../styles/antd.less');
+const MyApp = ({ Component, pageProps }) => (
+  <>
+    <GlobalStyle />
+    <Head>
+      <title>Mech Hub</title>
+      <meta name="title" content="Manage your mechs and instruct them" />
+    </Head>
+    <ConfigProvider theme={THEME_CONFIG}>
+      <WagmiConfigProvider config={wagmiConfig}>
+        <Layout>
+          <Component {...pageProps} />
+        </Layout>
+      </WagmiConfigProvider>
+    </ConfigProvider>
+  </>
+);
 
-class MyApp extends App {
-  static async getInitialProps({ Component, ctx }) {
-    const pageProps = Component.getInitialProps
-      ? await Component.getInitialProps(ctx)
-      : {};
+MyApp.getInitialProps = async ({ Component, ctx }) => {
+  const pageProps = Component.getInitialProps
+    ? await Component.getInitialProps(ctx)
+    : {};
 
-    return { pageProps };
-  }
-
-  render() {
-    const { Component, pageProps } = this.props;
-
-    return (
-      <>
-        <GlobalStyle />
-        <Head>
-          <title>Mech Hub</title>
-          <meta name="title" content="Manage your mechs and instruct them" />
-        </Head>
-        <WagmiConfig config={wagmiConfig}>
-          <Layout>
-            <Component {...pageProps} />
-          </Layout>
-        </WagmiConfig>
-      </>
-    );
-  }
-}
+  return { pageProps };
+};
 
 MyApp.propTypes = {
   Component: PropTypes.oneOfType([PropTypes.func, PropTypes.shape({})])

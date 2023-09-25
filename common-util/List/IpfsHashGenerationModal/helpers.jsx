@@ -1,5 +1,5 @@
+/* eslint-disable import/no-extraneous-dependencies */
 /* eslint-disable import/no-unresolved */
-/* eslint-disable no-restricted-syntax */
 
 import { create } from 'ipfs-http-client';
 import { base16 } from 'multiformats/bases/base16';

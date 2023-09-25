@@ -1,14 +1,21 @@
-const withAntdLess = require('next-plugin-antd-less');
+// eslint-disable-next-line import/no-extraneous-dependencies
+const withBundleAnalyzer = require('@next/bundle-analyzer');
 
-module.exports = {
-  ...withAntdLess({
-    lessVarsFilePathAppendToEndOfContent: false,
-    cssLoaderOptions: { importLoaders: 1 },
-    lessLoaderOptions: { javascriptEnabled: true },
-    productionBrowserSourceMaps: true,
-    webpack(config) {
-      return config;
+/**
+ * @type {import('next').NextConfig}
+ */
+const nextConfig = {
+  reactStrictMode: true,
+  compiler: {
+    styledComponents: true,
+  },
+  pages: {
+    '*': {
+      maxChunkSize: 30000,
     },
-  }),
-  publicRuntimeConfig: {},
+  },
 };
+
+module.exports = withBundleAnalyzer({
+  enabled: process.env.ANALYZE === 'true',
+}, nextConfig);

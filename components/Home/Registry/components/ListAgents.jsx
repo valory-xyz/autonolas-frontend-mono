@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
-import { Tabs } from 'antd/lib';
+import { Tabs } from 'antd';
 import { useRouter } from 'next/router';
 import get from 'lodash/get';
 import { URL, NAV_TYPES } from 'util/constants';

@@ -7,16 +7,18 @@ import { configureChains, createConfig } from 'wagmi';
 import { gnosis } from 'wagmi/chains';
 import { SafeConnector } from 'wagmi/connectors/safe';
 import { jsonRpcProvider } from 'wagmi/providers/jsonRpc';
-import { rpc } from 'common-util/Contracts';
+import { RPC_URLS } from 'common-util/Contracts';
 
 export const projectId = process.env.NEXT_PUBLIC_WALLET_PROJECT_ID;
 
+export const SUPPORTED_CHAINS = [gnosis];
+
 const { publicClient, webSocketPublicClient, chains } = configureChains(
-  [gnosis],
+  SUPPORTED_CHAINS,
   [
     jsonRpcProvider({
       rpc: (chain) => ({
-        http: rpc[chain.id],
+        http: RPC_URLS[chain.id],
       }),
     }),
     w3mProvider({ projectId }),

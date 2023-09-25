@@ -4,7 +4,7 @@ import { useRouter } from 'next/router';
 import dynamic from 'next/dynamic';
 import {
   Alert, Layout, Menu, Tag,
-} from 'antd/lib';
+} from 'antd';
 import PropTypes from 'prop-types';
 import { getSupportedNetworks } from 'common-util/functions';
 import { COLOR } from '@autonolas/frontend-library';
@@ -66,27 +66,25 @@ const NavigationBar = ({ children }) => {
       <Content className="site-layout">
         <div className="site-layout-background">
           {chainId && !getSupportedNetworks().includes(Number(chainId)) && (
-            <>
-              <Alert
-                showIcon
-                message={(
-                  <>
-                    You are on a wrong network. Please switch to Gnosis Chain
-                    network or&nbsp;
-                    <a
-                      href="https://discord.com/invite/z2PT65jKqQ"
-                      target="_blank"
-                      rel="noreferrer"
-                    >
-                      join our Discord
-                    </a>
-                    &nbsp;to request other networks.
-                  </>
-                )}
-                type="error"
-                className="mb-12"
-              />
-            </>
+            <Alert
+              showIcon
+              message={(
+                <>
+                  You are on a wrong network. Please switch to Gnosis Chain
+                  network or&nbsp;
+                  <a
+                    href="https://discord.com/invite/z2PT65jKqQ"
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    join our Discord
+                  </a>
+                  &nbsp;to request other networks.
+                </>
+              )}
+              type="error"
+              className="mb-12"
+            />
           )}
           {children}
         </div>

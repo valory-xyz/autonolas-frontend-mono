@@ -1,4 +1,4 @@
-import { COLOR } from 'util/theme';
+import { COLOR } from '@autonolas/frontend-library';
 
 export const Logo = () => (
   <svg

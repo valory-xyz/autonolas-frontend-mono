@@ -1,53 +1,16 @@
+/* eslint-disable import/no-extraneous-dependencies */
 import PropTypes from 'prop-types';
-import Link from 'next/link';
-import { Alert } from 'antd/lib';
-import bs58 from 'bs58';
-import { ExternalLink } from 'react-feather';
+import { Alert, Button } from 'antd';
 import { EmptyMessage, RegisterFooter } from 'components/styles';
-import { WhiteButton } from '../Button';
-
-// constants
-export const DEPENDENCY_IN_ASC = 'Agent IDs must be input in the order they were created (oldest first & newest last)';
-
-// ----------- functions -----------
-/**
- *
- * @param {String}
- * @returns {Array}
- */
-export const convertStringToArray = (str) => (str ? str.split(',').map((e) => e.trim()) : str);
-
-// E.g. "0x017dfd85d4f6cb4dcd715a88101f7b1f06cd1e009b2327a0809d01eb9c91f231"
-// --> "QmNSUYVKDSvPUnRLKmuxk9diJ6yS96r1TrAXzjTiBcCLAL"
-export const getIpfsHashFromBytes32 = (bytes32Hex) => {
-  if (!bytes32Hex) return null;
-
-  // Add our default ipfs values for first 2 bytes:
-  // function:0x12=sha2, size:0x20=256 bits
-  // and cut off leading "0x"
-  const hashHex = `1220${bytes32Hex.slice(2)}`;
-  const hashBytes = Buffer.from(hashHex, 'hex');
-  const hashStr = bs58.encode(hashBytes);
-  return hashStr;
-};
-
-// ----------- components -----------
-export const MyLink = ({ children, href, ...linkProps }) => (
-  <Link {...linkProps} href={href}>
-    <a href={href}>{children}</a>
-  </Link>
-);
-MyLink.propTypes = {
-  children: PropTypes.node.isRequired,
-  href: PropTypes.string.isRequired,
-};
-
-export const commaMessage = 'Each comma must be followed by a space ("1, 2" not "1,2").';
 
 export const RegisterMessage = ({ handleCancel }) => (
   <RegisterFooter>
     <p>To mint, connect to wallet</p>
-    {handleCancel && <WhiteButton onClick={handleCancel}>Cancel</WhiteButton>}
+    {handleCancel && (
+      <Button onClick={handleCancel} ghost type="primary">
+        Cancel
+      </Button>
+    )}
   </RegisterFooter>
 );
 RegisterMessage.propTypes = { handleCancel: PropTypes.func };
@@ -88,12 +51,6 @@ export const ListEmptyMessage = ({ type }) => {
 };
 ListEmptyMessage.propTypes = { type: PropTypes.string };
 ListEmptyMessage.defaultProps = { type: null };
-
-// PrintJson
-export const PrintJson = ({ value }) => (
-  <pre>{JSON.stringify(value || {}, null, 2)}</pre>
-);
-PrintJson.propTypes = { value: PropTypes.shape({}).isRequired };
 
 // AlertSuccess
 export const AlertSuccess = ({ type, information }) => {

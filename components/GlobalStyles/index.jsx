@@ -1,5 +1,5 @@
-import styled, { createGlobalStyle } from 'styled-components';
-import { MEDIA_QUERY, COLOR, OTHERS } from 'util/theme';
+import { createGlobalStyle } from 'styled-components';
+import { MEDIA_QUERY, COLOR } from '@autonolas/frontend-library';
 
 const ANTD_COLOR = {
   whiteColor: '#fff',
@@ -13,8 +13,14 @@ const GlobalStyle = createGlobalStyle`
   :before {
     box-sizing: border-box;
   }
-  body {
-    padding: 1rem;
+  body,
+  html {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    font-family: texgyreheros__regular, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 
   /* common */
@@ -45,11 +51,6 @@ const GlobalStyle = createGlobalStyle`
   .p-0 {
     padding: 0px !important;
   }
-  .walletconnect-modal__base {
-    .walletconnect-modal__mobile__toggle a {
-      color: ${COLOR.WALLECT_CONNECT_BLUE} !important;
-    }
-  }
   .ant-alert {
     border-radius: 5px;
   }
@@ -61,18 +62,15 @@ const GlobalStyle = createGlobalStyle`
   }
 
   /* layout */
-  .ant-layout {
-    background: ${COLOR.WHITE};
-  }
   .ant-layout-header {
     display: flex;
     align-items: center;
     position: fixed;
-    top: 0;
-    z-index: 1;
-    width: calc(100% - 32px);
-    padding: 0 24px;
-    height: 80px;
+    z-index: 10;
+    width: 100%;
+    height: 64px;
+    line-height: 64px;
+    padding: 0 50px;
     .ant-menu {
       flex: 1;
       &.ant-menu-horizontal {
@@ -87,6 +85,7 @@ const GlobalStyle = createGlobalStyle`
       }
     }
   }
+
 
   /* tabs */
   .ant-tabs-card.ant-tabs-top {
@@ -112,16 +111,6 @@ const GlobalStyle = createGlobalStyle`
     border-bottom: none;
   }
 
-  /* layout */
-  .site-layout {
-    padding: 0 24px;
-    margin-top: 56px;
-  }
-  .site-layout-background {
-    padding: 24px 0;
-    min-height: calc(100vh - 140px);
-  }
-
   ${MEDIA_QUERY.mobileL} {
     .show-only-sm {
       display: initial;
@@ -134,12 +123,6 @@ const GlobalStyle = createGlobalStyle`
   background-size: 100%;
   background-color: ${COLOR.WHITE};
 
-  .site-layout {
-    padding: 0 2rem;
-  }
-  .site-layout-background {
-    min-height: calc(100vh - 8.5rem);
-  }
   .ant-layout-footer {
     text-align: center;
   }
@@ -196,10 +179,10 @@ const GlobalStyle = createGlobalStyle`
       &:last-child {
         td {
           &:first-child {
-            border-bottom-left-radius: ${OTHERS.borderRadius};
+            border-bottom-left-radius: 5px;
           }
           &:last-child {
-            border-bottom-right-radius: ${OTHERS.borderRadius};
+            border-bottom-right-radius: 5px;
           }
         }
       }
@@ -236,34 +219,19 @@ const GlobalStyle = createGlobalStyle`
   }
 
   ${MEDIA_QUERY.tablet} {
-    body {
-      padding: 0rem;
-    }
     .ant-layout-header {
       position: relative;
       flex-direction: column;
       height: auto;
       padding: 0;
     }
-    .site-layout-background {
-      padding: 1rem 0;
-      min-height: calc(100vh - 20rem);
-    }
-    .site-layout {
-      margin-top: 0;
+  }
+
+  ${MEDIA_QUERY.mobileM} {
+    .ant-layout-header {
+      padding: 0;
     }
   }
 `;
 
 export default GlobalStyle;
-
-export const Ellipsis = styled.span`
-  max-width: 100px;
-  display: inline-block;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  ${MEDIA_QUERY.tablet} {
-    max-width: 200px;
-  }
-`;

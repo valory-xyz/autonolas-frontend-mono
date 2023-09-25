@@ -1,9 +1,8 @@
 import { useRouter } from 'next/router';
-import { connect } from 'react-redux';
-import PropTypes from 'prop-types';
-import get from 'lodash/get';
+
 import { URL } from 'util/constants';
 import Details from 'common-util/Details';
+import { useHelpers } from 'common-util/hooks/useHelpers';
 import {
   getAgentDetails,
   getAgentHashes,
@@ -12,9 +11,10 @@ import {
   getTokenUri,
 } from '../utils';
 
-const Agent = ({ account }) => {
+const Agent = () => {
   const router = useRouter();
-  const id = get(router, 'query.id') || null;
+  const id = router?.query?.id || null;
+  const { account } = useHelpers();
 
   return (
     <Details
@@ -30,17 +30,4 @@ const Agent = ({ account }) => {
   );
 };
 
-Agent.propTypes = {
-  account: PropTypes.string,
-};
-
-Agent.defaultProps = {
-  account: null,
-};
-
-const mapStateToProps = (state) => {
-  const account = get(state, 'setup.account') || null;
-  return { account };
-};
-
-export default connect(mapStateToProps, {})(Agent);
+export default Agent;

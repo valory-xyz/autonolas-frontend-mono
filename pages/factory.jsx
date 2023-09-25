@@ -1,3 +1,3 @@
-import { Factory } from 'components/Home/Factory';
+import Factory from 'components/Home/Factory';
 
 export default Factory;

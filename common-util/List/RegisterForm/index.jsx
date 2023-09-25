@@ -1,22 +1,20 @@
 import { useState } from 'react';
 import PropTypes from 'prop-types';
-import { connect } from 'react-redux';
-import Web3 from 'web3';
-import { Button, Form, Input } from 'antd/lib';
-import get from 'lodash/get';
-import { WhiteButton } from 'common-util/Button';
+import { Button, Form, Input } from 'antd';
+import { ethers } from 'ethers';
+
+import { useHelpers } from 'common-util/hooks/useHelpers';
 import IpfsHashGenerationModal from '../IpfsHashGenerationModal';
-import { RegisterFooter } from '../styles';
 import { FormItemHash } from './helpers';
+import { RegisterMessage } from '../ListCommon';
 
 export const FORM_NAME = 'register_form';
 
-const RegisterForm = ({
-  account, listType, handleSubmit, handleCancel,
-}) => {
+const RegisterForm = ({ listType, handleSubmit, handleCancel }) => {
   const [form] = Form.useForm();
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [fields, setFields] = useState([]);
+  const { account } = useHelpers();
 
   const onGenerateHash = (generatedHash) => {
     setFields([
@@ -66,7 +64,7 @@ const RegisterForm = ({
             },
             () => ({
               validator(_, value) {
-                if (Web3.utils.isAddress(value)) return Promise.resolve();
+                if (ethers.utils.isAddress(value)) return Promise.resolve();
                 return Promise.reject(
                   new Error(
                     `Please input a valid address of the ${listType} Owner`,
@@ -125,10 +123,7 @@ const RegisterForm = ({
             </Button>
           </Form.Item>
         ) : (
-          <RegisterFooter>
-            <p>To mint, connect to wallet</p>
-            <WhiteButton onClick={handleCancel}>Cancel</WhiteButton>
-          </RegisterFooter>
+          <RegisterMessage handleCancel={handleCancel} />
         )}
       </Form>
 
@@ -143,20 +138,13 @@ const RegisterForm = ({
 };
 
 RegisterForm.propTypes = {
-  account: PropTypes.string,
   listType: PropTypes.string,
   handleSubmit: PropTypes.func.isRequired,
   handleCancel: PropTypes.func.isRequired,
 };
 
 RegisterForm.defaultProps = {
-  account: null,
   listType: '',
 };
 
-const mapStateToProps = (state) => {
-  const account = get(state, 'setup.account') || null;
-  return { account };
-};
-
-export default connect(mapStateToProps, {})(RegisterForm);
+export default RegisterForm;

@@ -10,10 +10,8 @@ const initialState = {
   errorMessage: null,
 };
 
-export default (state = initialState, action) => {
-  const { data } = action;
-
-  switch (action.type) {
+const setup = (state = initialState, { data, type } = {}) => {
+  switch (type) {
     case apiTypes.GET_API: {
       return { ...state, data };
     }
@@ -33,3 +31,5 @@ export default (state = initialState, action) => {
       return state;
   }
 };
+
+export default setup;
