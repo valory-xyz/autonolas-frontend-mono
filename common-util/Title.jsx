@@ -12,6 +12,7 @@ const TitleContainer = styled.div`
   align-items: center;
   h2 {
     color: ${COLOR.PRIMARY};
+    margin-top: 16px;
   }
 `;
 

@@ -83,7 +83,7 @@ const NavigationBar = ({ children }) => {
                 </>
               )}
               type="error"
-              className="mb-12"
+              className="mt-12"
             />
           )}
           {children}
