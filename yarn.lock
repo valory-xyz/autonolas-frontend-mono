@@ -77,15 +77,16 @@
     resize-observer-polyfill "^1.5.1"
     throttle-debounce "^5.0.0"
 
-"@autonolas/frontend-library@^0.4.11":
-  version "0.4.11"
-  resolved "https://registry.yarnpkg.com/@autonolas/frontend-library/-/frontend-library-0.4.11.tgz#d2795db48b17a2dffbfdff9c54645660387553a0"
-  integrity sha512-MQs0KJmd3j+9Yabq/f2dJ4vCgSk9EofAanuH45IHFfx2jyt0YH5HV6cfz25OgxWFolZPR85gk89u/uc20VHPbQ==
+"@autonolas/frontend-library@^0.4.15":
+  version "0.4.15"
+  resolved "https://registry.yarnpkg.com/@autonolas/frontend-library/-/frontend-library-0.4.15.tgz#3b3e2fa7909acc31e24bfcc206e417d54e597e88"
+  integrity sha512-qukH1wIMCOCmcAbnwdrrOrMm1IjhKOzI51MdMAbyHPHIqeMtqbIADzGdjTxg9eseDAnI5EIMjQK5vVV94SVjwA==
   dependencies:
     "@ant-design/icons" "^5.2.6"
     "@storybook/builder-webpack5" "^7.4.1"
     "@wagmi/core" "^1.4.1"
     antd "^5.9.0"
+    dayjs "^1.11.9"
     ethers "^5.7.2"
     lodash "^4.17.21"
     react "^18.2.0"
@@ -6393,6 +6394,11 @@ dayjs@^1.11.1:
   version "1.11.9"
   resolved "https://registry.yarnpkg.com/dayjs/-/dayjs-1.11.9.tgz#9ca491933fadd0a60a2c19f6c237c03517d71d1a"
   integrity sha512-QvzAURSbQ0pKdIye2txOzNaHmxtUBXerpY0FJsFXUMKbIZeFm5ht1LS/jFsrncjnmtv8HsG0W2g6c0zUjZWmpA==
+
+dayjs@^1.11.9:
+  version "1.11.10"
+  resolved "https://registry.yarnpkg.com/dayjs/-/dayjs-1.11.10.tgz#68acea85317a6e164457d6d6947564029a6a16a0"
+  integrity sha512-vjAczensTgRcqDERK0SR2XMwsF/tSvnvlv6VcF2GIhg6Sx4yOIt/irsr1RDJsKiIyBzJDpCoXiWWq28MqH2cnQ==
 
 debug@2.6.9, debug@^2.2.0:
   version "2.6.9"
