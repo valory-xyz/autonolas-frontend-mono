@@ -1,7 +1,12 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import Web3 from 'web3';
 import {
-  Table, Typography, ConfigProvider, Empty, Skeleton,
+  Table,
+  Typography,
+  ConfigProvider,
+  Empty,
+  Skeleton,
+  Alert,
 } from 'antd';
 import { useRouter } from 'next/router';
 import {
@@ -20,7 +25,7 @@ const WEBSOCKET_PROVIDER = process.env.NEXT_PUBLIC_GNOSIS_WEB_SOCKET;
 const { Title } = Typography;
 
 // const filterOption = { fromBlock: 28127133, toBlock: 'latest' };
-const filterOption = { fromBlock: 30181255, toBlock: 'latest' }; // TODO: add pagination
+const filterOption = { fromBlock: 30157493, toBlock: 'latest' }; // TODO: add pagination
 
 const onNewEvent = (event) => {
   notifySuccess(
@@ -211,6 +216,11 @@ const EventListener = () => {
         }}
       >
         <Request />
+        <Alert
+          message="We have encountered challenges with data retrieval, resulting in a temporary unavailability of older requests."
+          type="warning"
+          showIcon
+        />
         <Title level={3}>Requests</Title>
         <Table
           loading={isFirstEventLoading}
