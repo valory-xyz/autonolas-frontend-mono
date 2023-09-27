@@ -20,7 +20,7 @@ const WEBSOCKET_PROVIDER = process.env.NEXT_PUBLIC_GNOSIS_WEB_SOCKET;
 const { Title } = Typography;
 
 // const filterOption = { fromBlock: 28127133, toBlock: 'latest' };
-const filterOption = { fromBlock: 30000000, toBlock: 'latest' }; // TODO: add pagination
+const filterOption = { fromBlock: 30181255, toBlock: 'latest' }; // TODO: add pagination
 
 const onNewEvent = (event) => {
   notifySuccess(
