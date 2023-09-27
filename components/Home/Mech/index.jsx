@@ -218,8 +218,8 @@ const EventListener = () => {
         <Request />
         <Alert
           message="We have encountered challenges with data retrieval, resulting in a temporary unavailability of older requests."
-          type="warning"
           showIcon
+          className="mt-12"
         />
         <Title level={3}>Requests</Title>
         <Table
