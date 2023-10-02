@@ -68,7 +68,12 @@ const EventListener = () => {
 
   const getFilterOption = async () => {
     const blockNumber = await web3Ws.eth.getBlockNumber();
-    const filterOption = { fromBlock: blockNumber - 5000, toBlock: 'latest' }; // TODO: add pagination
+    /**
+     * blockNumber - 5000 is used to get the past 5000 blocks
+     * due to too many events, we can't get all the events at once
+     * // TODO: add pagination
+     */
+    const filterOption = { fromBlock: blockNumber - 5000, toBlock: 'latest' };
     return filterOption;
   };
 
