@@ -24,9 +24,6 @@ const WEBSOCKET_PROVIDER = process.env.NEXT_PUBLIC_GNOSIS_WEB_SOCKET;
 
 const { Title } = Typography;
 
-// const filterOption = { fromBlock: 28127133, toBlock: 'latest' };
-const filterOption = { fromBlock: 30157493, toBlock: 'latest' }; // TODO: add pagination
-
 const onNewEvent = (event) => {
   notifySuccess(
     'Event received',
@@ -69,6 +66,17 @@ const EventListener = () => {
 
   const sortEvents = (e) => e.sort((a, b) => b.blockNumber - a.blockNumber);
 
+  const getFilterOption = async () => {
+    const blockNumber = await web3Ws.eth.getBlockNumber();
+    /**
+     * blockNumber - 5000 is used to get the past 5000 blocks
+     * due to too many events, we can't get all the events at once
+     * // TODO: add pagination
+     */
+    const filterOption = { fromBlock: blockNumber - 5000, toBlock: 'latest' };
+    return filterOption;
+  };
+
   useEffect(() => {
     if (web3Ws && id) {
       const contractInstance = new web3Ws.eth.Contract(AGENT_MECH_ABI, id);
@@ -83,6 +91,8 @@ const EventListener = () => {
       setIsFirstEventLoading(true);
 
       try {
+        const filterOption = await getFilterOption();
+
         // Get past FirstEvent events
         const pastFirstEvents = await contractWs.getPastEvents(
           'Request',
@@ -126,6 +136,8 @@ const EventListener = () => {
       setIsSecondEventLoading(true);
 
       try {
+        const filterOption = await getFilterOption();
+
         // Get past SecondEvent events
         const pastSecondEvents = await contractWs.getPastEvents(
           'Deliver',
