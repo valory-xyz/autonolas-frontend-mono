@@ -11,7 +11,7 @@
   "dependencies": {
     "@ant-design/cssinjs": "^1.16.2",
     "@ant-design/icons": "^5.2.6",
-    "@autonolas/frontend-library": "^0.4.15",
+    "@autonolas/frontend-library": "^0.4.21",
     "@wagmi/core": "^1.4.1",
     "@web3modal/ethereum": "^2.7.1",
     "@web3modal/react": "^2.7.1",

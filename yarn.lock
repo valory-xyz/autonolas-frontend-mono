@@ -77,10 +77,10 @@
     resize-observer-polyfill "^1.5.1"
     throttle-debounce "^5.0.0"
 
-"@autonolas/frontend-library@^0.4.15":
-  version "0.4.15"
-  resolved "https://registry.yarnpkg.com/@autonolas/frontend-library/-/frontend-library-0.4.15.tgz#3b3e2fa7909acc31e24bfcc206e417d54e597e88"
-  integrity sha512-qukH1wIMCOCmcAbnwdrrOrMm1IjhKOzI51MdMAbyHPHIqeMtqbIADzGdjTxg9eseDAnI5EIMjQK5vVV94SVjwA==
+"@autonolas/frontend-library@^0.4.21":
+  version "0.4.21"
+  resolved "https://registry.yarnpkg.com/@autonolas/frontend-library/-/frontend-library-0.4.21.tgz#b4da9d2523d92b1c8d69f83c110b12cd773c33c6"
+  integrity sha512-IcqaZ/oYsHpdrTsx1E1eU8ja78SrbPuaqWmmEeO30/eRmJurpsupPsbfCFPd+G+0PHjntLYursHA1a7iNvrgCg==
   dependencies:
     "@ant-design/icons" "^5.2.6"
     "@storybook/builder-webpack5" "^7.4.1"
