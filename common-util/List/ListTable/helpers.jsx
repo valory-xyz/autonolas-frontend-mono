@@ -5,6 +5,7 @@ import { AddressLink } from '@autonolas/frontend-library';
 
 import { NAV_TYPES, TOTAL_VIEW_COUNT } from 'util/constants';
 import { getAgentHash } from 'common-util/functions';
+import { SUPPORTED_CHAINS } from 'common-util/Login';
 
 const { Title } = Typography;
 
@@ -28,6 +29,7 @@ export const getTableColumns = (type, { router, isMobile }) => {
             suffixCount={isMobile ? 4 : 6}
             canCopy
             textMinWidth={160}
+            supportedChains={SUPPORTED_CHAINS}
           />
         ),
       },
@@ -43,6 +45,7 @@ export const getTableColumns = (type, { router, isMobile }) => {
             suffixCount={isMobile ? 4 : 14}
             isIpfsLink
             canCopy
+            supportedChains={SUPPORTED_CHAINS}
           />
         ),
       },
@@ -57,6 +60,7 @@ export const getTableColumns = (type, { router, isMobile }) => {
             textMinWidth={320}
             suffixCount={isMobile ? 4 : 14}
             canCopy
+            supportedChains={SUPPORTED_CHAINS}
             onClick={(e) => {
               if (router) router.push(`/mech/${e}/${row.hash}`);
             }}
