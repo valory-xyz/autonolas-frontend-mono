@@ -17,6 +17,7 @@ import {
 } from '@autonolas/frontend-library';
 
 import { AGENT_MECH_ABI } from 'common-util/AbiAndAddresses';
+import { SUPPORTED_CHAINS } from 'common-util/Login';
 import Request from './Request';
 
 // Replace the following values with your specific contract information
@@ -267,6 +268,7 @@ const EventListener = () => {
                     textMinWidth={245}
                     suffixCount={10}
                     canCopy
+                    supportedChains={SUPPORTED_CHAINS}
                   />
                 );
               },
