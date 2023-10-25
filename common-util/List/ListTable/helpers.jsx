@@ -45,7 +45,6 @@ export const getTableColumns = (type, { router, isMobile }) => {
             suffixCount={isMobile ? 4 : 14}
             isIpfsLink
             canCopy
-            supportedChains={SUPPORTED_CHAINS}
           />
         ),
       },
@@ -60,7 +59,6 @@ export const getTableColumns = (type, { router, isMobile }) => {
             textMinWidth={320}
             suffixCount={isMobile ? 4 : 14}
             canCopy
-            supportedChains={SUPPORTED_CHAINS}
             onClick={(e) => {
               if (router) router.push(`/mech/${e}/${row.hash}`);
             }}

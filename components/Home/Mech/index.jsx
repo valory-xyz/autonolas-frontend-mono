@@ -252,7 +252,6 @@ const EventListener = () => {
                   suffixCount={8}
                   canCopy
                   cannotClick
-                  supportedChains={SUPPORTED_CHAINS}
                 />
               ),
             },
@@ -288,7 +287,6 @@ const EventListener = () => {
                     suffixCount={10}
                     canCopy
                     isIpfsLink
-                    supportedChains={SUPPORTED_CHAINS}
                   />
                 );
               },
@@ -312,7 +310,6 @@ const EventListener = () => {
                     suffixCount={10}
                     canCopy
                     isIpfsLink
-                    supportedChains={SUPPORTED_CHAINS}
                   />
                 );
               },
