@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Input, Button, Typography } from 'antd';
 import { SearchOutlined } from '@ant-design/icons';
-import { AddressLink } from '@autonolas/frontend-library';
+import { AddressLink, NA } from '@autonolas/frontend-library';
 
 import { NAV_TYPES, TOTAL_VIEW_COUNT } from 'util/constants';
 import { getAgentHash } from 'common-util/functions';
@@ -53,17 +53,20 @@ export const getTableColumns = (type, { router, isMobile }) => {
         dataIndex: 'mech',
         width: 180,
         key: 'mech',
-        render: (text, row) => (
-          <AddressLink
-            text={text}
-            textMinWidth={320}
-            suffixCount={isMobile ? 4 : 14}
-            canCopy
-            onClick={(e) => {
-              if (router) router.push(`/mech/${e}/${row.hash}`);
-            }}
-          />
-        ),
+        render: (text, row) => {
+          if (!text) return NA;
+          return (
+            <AddressLink
+              text={text}
+              textMinWidth={320}
+              suffixCount={isMobile ? 4 : 14}
+              canCopy
+              onClick={(e) => {
+                if (router) router.push(`/mech/${e}/${row.hash}`);
+              }}
+            />
+          );
+        },
       },
     ];
   }

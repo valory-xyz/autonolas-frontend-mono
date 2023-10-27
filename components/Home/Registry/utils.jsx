@@ -32,7 +32,8 @@ const getAgentsHelper = (startIndex, promiseList, resolve) => {
         const owner = await getAgentOwner(`${startIndex + i}`);
         const updatedInfo = {
           ...info,
-          mech: mechData[i].mech,
+          mech:
+            mechData[i]?.mech || '0x77af31De935740567Cf4fF1986D04B2c964A786a', // TODO: this is hardcoded for now but needs to be dynamic
         };
         return { ...updatedInfo, owner };
       });
