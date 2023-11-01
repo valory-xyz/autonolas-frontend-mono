@@ -53,7 +53,7 @@ export const getMechContract = () => {
 
 export async function fetchGraphQLData() {
   return new Promise((resolve, reject) => {
-    const url = 'https://api.studio.thegraph.com/query/46780/mech/v0.0.1';
+    const url = 'https://api.studio.thegraph.com/query/57238/mech/v0.0.1';
     const query = `
       {
         createMeches(first: 10, orderBy: agentId, order: ASC) {

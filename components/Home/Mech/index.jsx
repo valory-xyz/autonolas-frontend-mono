@@ -8,7 +8,6 @@ import {
   Skeleton,
   Alert,
 } from 'antd';
-import { toLower } from 'lodash';
 import { useRouter } from 'next/router';
 import {
   notifyError,
@@ -17,10 +16,8 @@ import {
   NA,
 } from '@autonolas/frontend-library';
 
-import { NEW_MECH_ADDRESS } from 'util/constants';
 import { AGENT_MECH_ABI } from 'common-util/AbiAndAddresses';
 import { SUPPORTED_CHAINS } from 'common-util/Login';
-import { NEW_MECH_ABI } from 'common-util/AbiAndAddresses/newMech';
 import Request from './Request';
 
 // Replace the following values with your specific contract information
@@ -83,13 +80,7 @@ const EventListener = () => {
 
   useEffect(() => {
     if (web3Ws && id) {
-      const contractInstance = new web3Ws.eth.Contract(
-        // The new mech ABI should be used for the new mech address
-        toLower(id) === toLower(NEW_MECH_ADDRESS)
-          ? NEW_MECH_ABI
-          : AGENT_MECH_ABI,
-        id,
-      );
+      const contractInstance = new web3Ws.eth.Contract(AGENT_MECH_ABI, id);
       setContractWs(contractInstance);
     }
   }, [web3Ws, id]);

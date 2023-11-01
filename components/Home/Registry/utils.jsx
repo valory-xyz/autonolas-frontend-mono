@@ -1,6 +1,5 @@
 import { notification } from 'antd';
 
-import { NEW_MECH_ADDRESS } from 'util/constants';
 import {
   getMechMinterContract,
   getAgentContract,
@@ -31,12 +30,12 @@ const getAgentsHelper = (startIndex, promiseList, resolve) => {
     mechDataPromise.then((mechData) => {
       // Resolve mechData promise
       const results = agentsList.map(async (info, i) => {
-        const owner = await getAgentOwner(`${startIndex + i}`);
+        const agentId = `${startIndex + i}`;
+        const owner = await getAgentOwner(agentId);
+        const mechForCurrentAgent = mechData.find((e) => e.agentId === agentId);
         const updatedInfo = {
           ...info,
-
-          // TODO: this is hardcoded for now but needs to be dynamic
-          mech: mechData[i]?.mech || NEW_MECH_ADDRESS,
+          mech: mechForCurrentAgent?.mech,
         };
         return { ...updatedInfo, owner };
       });
