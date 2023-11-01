@@ -1,5 +1,3 @@
-export const NEW_MECH_ADDRESS = '0x77af31De935740567Cf4fF1986D04B2c964A786a';
-
 export const NEW_MECH_ABI = [
   {
     inputs: [

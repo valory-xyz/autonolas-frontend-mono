@@ -1,4 +1,6 @@
 import { notification } from 'antd';
+
+import { NEW_MECH_ADDRESS } from 'util/constants';
 import {
   getMechMinterContract,
   getAgentContract,
@@ -32,8 +34,9 @@ const getAgentsHelper = (startIndex, promiseList, resolve) => {
         const owner = await getAgentOwner(`${startIndex + i}`);
         const updatedInfo = {
           ...info,
-          mech:
-            mechData[i]?.mech || '0x77af31De935740567Cf4fF1986D04B2c964A786a', // TODO: this is hardcoded for now but needs to be dynamic
+
+          // TODO: this is hardcoded for now but needs to be dynamic
+          mech: mechData[i]?.mech || NEW_MECH_ADDRESS,
         };
         return { ...updatedInfo, owner };
       });
