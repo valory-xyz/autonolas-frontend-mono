@@ -22,6 +22,7 @@ import Request from './Request';
 
 // Replace the following values with your specific contract information
 const WEBSOCKET_PROVIDER = process.env.NEXT_PUBLIC_GNOSIS_WEB_SOCKET;
+const LATEST_BLOCK_COUNT = 5000;
 
 const { Title } = Typography;
 
@@ -74,7 +75,10 @@ const EventListener = () => {
      * due to too many events, we can't get all the events at once
      * // TODO: add pagination
      */
-    const filterOption = { fromBlock: blockNumber - 5000, toBlock: 'latest' };
+    const filterOption = {
+      fromBlock: blockNumber - LATEST_BLOCK_COUNT,
+      toBlock: 'latest',
+    };
     return filterOption;
   };
 
@@ -230,7 +234,7 @@ const EventListener = () => {
       >
         <Request />
         <Alert
-          message="We have encountered challenges with data retrieval, resulting in a temporary unavailability of older requests."
+          message={`We have encountered challenges with data retrieval, resulting in a temporary unavailability of older requests. NOTE: We only load the latest ${LATEST_BLOCK_COUNT} blocks`}
           showIcon
           className="mt-12"
         />
