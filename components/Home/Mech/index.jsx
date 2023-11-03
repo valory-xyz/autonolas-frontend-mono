@@ -235,7 +235,11 @@ const EventListener = () => {
               description={(
                 <>
                   {`No events found. Only loading latest ${LATEST_BLOCK_COUNT} block(s).`}
-                  <a href={`${GNOSIS_SCAN_URL}address/${id}#events`}>
+                  <a
+                    href={`${GNOSIS_SCAN_URL}address/${id}#events`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
                     See earlier events
                   </a>
                   .

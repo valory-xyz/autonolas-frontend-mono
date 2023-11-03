@@ -25,10 +25,9 @@ export const getAgentOwner = (id) => new Promise((resolve, reject) => {
 });
 
 const getAgentsHelper = (startIndex, promiseList, resolve) => {
-  const mechDataPromise = fetchGraphQLData(); // Get the promise for mechData
+  const mechDataPromise = fetchGraphQLData(); // Get the promise for mechData from the GraphQL
   Promise.all(promiseList).then(async (agentsList) => {
     mechDataPromise.then((mechData) => {
-      // Resolve mechData promise
       const results = agentsList.map(async (info, i) => {
         const agentId = `${startIndex + i}`;
         const owner = await getAgentOwner(agentId);
