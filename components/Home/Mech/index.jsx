@@ -16,6 +16,7 @@ import {
   NA,
 } from '@autonolas/frontend-library';
 
+import { GNOSIS_SCAN_URL } from 'util/constants';
 import { AGENT_MECH_ABI } from 'common-util/AbiAndAddresses';
 import { SUPPORTED_CHAINS } from 'common-util/Login';
 import Request from './Request';
@@ -30,7 +31,7 @@ const onNewEvent = (event) => {
   notifySuccess(
     'Event received',
     <a
-      href={`https://gnosisscan.io/tx/${event?.transactionHash}`}
+      href={`${GNOSIS_SCAN_URL}tx/${event?.transactionHash}`}
       target="_blank"
       rel="noopener noreferrer"
     >
@@ -229,7 +230,19 @@ const EventListener = () => {
             return <Empty description="Loading events..." />;
           }
 
-          return <Empty description="No events found" />;
+          return (
+            <Empty
+              description={(
+                <>
+                  {`No events found. Only loading latest ${LATEST_BLOCK_COUNT} block(s).`}
+                  <a href={`${GNOSIS_SCAN_URL}address/${id}#events`}>
+                    See earlier events
+                  </a>
+                  .
+                </>
+              )}
+            />
+          );
         }}
       >
         <Request />
