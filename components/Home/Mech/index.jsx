@@ -247,7 +247,7 @@ const EventListener = () => {
       >
         <Request />
         <Alert
-          message={`We have encountered challenges with data retrieval, resulting in a temporary unavailability of older requests. NOTE: We only load the latest ${LATEST_BLOCK_COUNT} blocks`}
+          message={`We only load the latest ${LATEST_BLOCK_COUNT} blocks due to data availability issues.`}
           showIcon
           className="mt-12"
         />
