@@ -17,7 +17,7 @@ import {
   NA,
 } from '@autonolas/frontend-library';
 
-import { NEW_MECH_ADDRESS } from 'util/constants';
+import { DEFAULT_MECH_CONTRACT_ADDRESS } from 'util/constants';
 import { AGENT_MECH_ABI } from 'common-util/AbiAndAddresses';
 import { SUPPORTED_CHAINS } from 'common-util/Login';
 import { NEW_MECH_ABI } from 'common-util/AbiAndAddresses/newMech';
@@ -85,7 +85,7 @@ const EventListener = () => {
     if (web3Ws && id) {
       const contractInstance = new web3Ws.eth.Contract(
         // The new mech ABI should be used for the new mech address
-        toLower(id) === toLower(NEW_MECH_ADDRESS)
+        toLower(id) === toLower(DEFAULT_MECH_CONTRACT_ADDRESS)
           ? NEW_MECH_ABI
           : AGENT_MECH_ABI,
         id,
