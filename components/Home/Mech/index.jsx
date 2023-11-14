@@ -19,6 +19,7 @@ import {
 import { GNOSIS_SCAN_URL } from 'util/constants';
 import { AGENT_MECH_ABI } from 'common-util/AbiAndAddresses';
 import { SUPPORTED_CHAINS } from 'common-util/Login';
+import { uniqBy } from 'lodash';
 import Request from './Request';
 
 // Replace the following values with your specific contract information
@@ -67,7 +68,14 @@ const EventListener = () => {
     setWeb3Ws(web3Instance);
   }, []);
 
-  const sortEvents = (e) => e.sort((a, b) => b.blockNumber - a.blockNumber);
+  /**
+   *
+   * @param {Array} e
+   */
+  const sortAndRemoveDuplicateEvents = (e) => {
+    const uniqueEvents = uniqBy(e, (event) => event.returnValues.requestId);
+    return uniqueEvents.sort((a, b) => b.blockNumber - a.blockNumber);
+  };
 
   const getFilterOption = async () => {
     const blockNumber = await web3Ws.eth.getBlockNumber();
@@ -105,7 +113,7 @@ const EventListener = () => {
           filterOption,
         );
 
-        setFirstEvents(sortEvents(pastFirstEvents));
+        setFirstEvents(sortAndRemoveDuplicateEvents(pastFirstEvents));
       } catch (error) {
         setIsFirstEventError(true);
         console.error('Error on getting past events for `Request`', error);
@@ -119,7 +127,7 @@ const EventListener = () => {
           onErrorEvent(error, 'Request');
         } else {
           onNewEvent(event);
-          setFirstEvents((prevEvents) => sortEvents([...prevEvents, event]));
+          setFirstEvents((prevEvents) => sortAndRemoveDuplicateEvents([...prevEvents, event]));
         }
       });
     };
@@ -150,7 +158,7 @@ const EventListener = () => {
           filterOption,
         );
 
-        setSecondEvents(sortEvents(pastSecondEvents));
+        setSecondEvents(sortAndRemoveDuplicateEvents(pastSecondEvents));
       } catch (error) {
         setIsSecondEventError(true);
         console.error('Error on getting past events for `Deliver`', error);
@@ -164,7 +172,7 @@ const EventListener = () => {
           onErrorEvent(error, 'Deliver');
         } else {
           onNewEvent(event);
-          setSecondEvents((prevEvents) => sortEvents([...prevEvents, event]));
+          setSecondEvents((prevEvents) => sortAndRemoveDuplicateEvents([...prevEvents, event]));
         }
       });
     };
