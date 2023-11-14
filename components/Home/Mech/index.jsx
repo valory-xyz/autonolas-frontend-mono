@@ -8,7 +8,6 @@ import {
   Skeleton,
   Alert,
 } from 'antd';
-import { toLower } from 'lodash';
 import { useRouter } from 'next/router';
 import {
   notifyError,
@@ -17,14 +16,14 @@ import {
   NA,
 } from '@autonolas/frontend-library';
 
-import { DEFAULT_MECH_CONTRACT_ADDRESS } from 'util/constants';
+import { GNOSIS_SCAN_URL } from 'util/constants';
 import { AGENT_MECH_ABI } from 'common-util/AbiAndAddresses';
 import { SUPPORTED_CHAINS } from 'common-util/Login';
-import { NEW_MECH_ABI } from 'common-util/AbiAndAddresses/newMech';
 import Request from './Request';
 
 // Replace the following values with your specific contract information
 const WEBSOCKET_PROVIDER = process.env.NEXT_PUBLIC_GNOSIS_WEB_SOCKET;
+const LATEST_BLOCK_COUNT = 5000;
 
 const { Title } = Typography;
 
@@ -32,7 +31,7 @@ const onNewEvent = (event) => {
   notifySuccess(
     'Event received',
     <a
-      href={`https://gnosisscan.io/tx/${event?.transactionHash}`}
+      href={`${GNOSIS_SCAN_URL}tx/${event?.transactionHash}`}
       target="_blank"
       rel="noopener noreferrer"
     >
@@ -77,19 +76,16 @@ const EventListener = () => {
      * due to too many events, we can't get all the events at once
      * // TODO: add pagination
      */
-    const filterOption = { fromBlock: blockNumber - 5000, toBlock: 'latest' };
+    const filterOption = {
+      fromBlock: blockNumber - LATEST_BLOCK_COUNT,
+      toBlock: 'latest',
+    };
     return filterOption;
   };
 
   useEffect(() => {
     if (web3Ws && id) {
-      const contractInstance = new web3Ws.eth.Contract(
-        // The new mech ABI should be used for the new mech address
-        toLower(id) === toLower(DEFAULT_MECH_CONTRACT_ADDRESS)
-          ? NEW_MECH_ABI
-          : AGENT_MECH_ABI,
-        id,
-      );
+      const contractInstance = new web3Ws.eth.Contract(AGENT_MECH_ABI, id);
       setContractWs(contractInstance);
     }
   }, [web3Ws, id]);
@@ -234,12 +230,28 @@ const EventListener = () => {
             return <Empty description="Loading events..." />;
           }
 
-          return <Empty description="No events found" />;
+          return (
+            <Empty
+              description={(
+                <>
+                  {`No events found. Only loading latest ${LATEST_BLOCK_COUNT} block(s).`}
+                  <a
+                    href={`${GNOSIS_SCAN_URL}address/${id}#events`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    See earlier events
+                  </a>
+                  .
+                </>
+              )}
+            />
+          );
         }}
       >
         <Request />
         <Alert
-          message="We have encountered challenges with data retrieval, resulting in a temporary unavailability of older requests."
+          message={`We only load the latest ${LATEST_BLOCK_COUNT} blocks due to data availability issues.`}
           showIcon
           className="mt-12"
         />

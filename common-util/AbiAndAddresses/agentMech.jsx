@@ -48,6 +48,33 @@ export const AGENT_MECH_ABI = [
     type: 'error',
   },
   {
+    inputs: [
+      {
+        internalType: 'uint256',
+        name: 'provided',
+        type: 'uint256',
+      },
+      {
+        internalType: 'uint256',
+        name: 'max',
+        type: 'uint256',
+      },
+    ],
+    name: 'Overflow',
+    type: 'error',
+  },
+  {
+    inputs: [
+      {
+        internalType: 'uint256',
+        name: 'requestId',
+        type: 'uint256',
+      },
+    ],
+    name: 'RequestIdNotFound',
+    type: 'error',
+  },
+  {
     inputs: [],
     name: 'ZeroAddress',
     type: 'error',
@@ -55,6 +82,12 @@ export const AGENT_MECH_ABI = [
   {
     anonymous: false,
     inputs: [
+      {
+        indexed: true,
+        internalType: 'address',
+        name: 'sender',
+        type: 'address',
+      },
       {
         indexed: false,
         internalType: 'uint256',
@@ -69,25 +102,6 @@ export const AGENT_MECH_ABI = [
       },
     ],
     name: 'Deliver',
-    type: 'event',
-  },
-  {
-    anonymous: false,
-    inputs: [
-      {
-        indexed: true,
-        internalType: 'address',
-        name: 'sender',
-        type: 'address',
-      },
-      {
-        indexed: false,
-        internalType: 'bytes32',
-        name: 'taskHash',
-        type: 'bytes32',
-      },
-    ],
-    name: 'Perform',
     type: 'event',
   },
   {
@@ -226,6 +240,49 @@ export const AGENT_MECH_ABI = [
     inputs: [
       {
         internalType: 'address',
+        name: 'account',
+        type: 'address',
+      },
+    ],
+    name: 'getRequestsCount',
+    outputs: [
+      {
+        internalType: 'uint256',
+        name: 'requestsCount',
+        type: 'uint256',
+      },
+    ],
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    inputs: [
+      {
+        internalType: 'uint256',
+        name: 'size',
+        type: 'uint256',
+      },
+      {
+        internalType: 'uint256',
+        name: 'offset',
+        type: 'uint256',
+      },
+    ],
+    name: 'getUndeliveredRequestIds',
+    outputs: [
+      {
+        internalType: 'uint256[]',
+        name: 'requestIds',
+        type: 'uint256[]',
+      },
+    ],
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    inputs: [
+      {
+        internalType: 'address',
         name: 'signer',
         type: 'address',
       },
@@ -266,8 +323,64 @@ export const AGENT_MECH_ABI = [
     type: 'function',
   },
   {
+    inputs: [
+      {
+        internalType: 'uint256',
+        name: '',
+        type: 'uint256',
+      },
+      {
+        internalType: 'uint256',
+        name: '',
+        type: 'uint256',
+      },
+    ],
+    name: 'mapRequestIds',
+    outputs: [
+      {
+        internalType: 'uint256',
+        name: '',
+        type: 'uint256',
+      },
+    ],
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    inputs: [
+      {
+        internalType: 'address',
+        name: '',
+        type: 'address',
+      },
+    ],
+    name: 'mapRequestsCounts',
+    outputs: [
+      {
+        internalType: 'uint256',
+        name: '',
+        type: 'uint256',
+      },
+    ],
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
     inputs: [],
     name: 'nonce',
+    outputs: [
+      {
+        internalType: 'uint256',
+        name: '',
+        type: 'uint256',
+      },
+    ],
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    inputs: [],
+    name: 'numUndeliveredRequests',
     outputs: [
       {
         internalType: 'uint256',

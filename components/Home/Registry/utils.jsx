@@ -1,6 +1,5 @@
 import { notification } from 'antd';
 
-import { DEFAULT_MECH_CONTRACT_ADDRESS } from 'util/constants';
 import {
   getMechMinterContract,
   getAgentContract,
@@ -26,17 +25,16 @@ export const getAgentOwner = (id) => new Promise((resolve, reject) => {
 });
 
 const getAgentsHelper = (startIndex, promiseList, resolve) => {
-  const mechDataPromise = fetchGraphQLData(); // Get the promise for mechData
+  const mechDataPromise = fetchGraphQLData(); // Get the promise for mechData from the GraphQL
   Promise.all(promiseList).then(async (agentsList) => {
     mechDataPromise.then((mechData) => {
-      // Resolve mechData promise
       const results = agentsList.map(async (info, i) => {
-        const owner = await getAgentOwner(`${startIndex + i}`);
+        const agentId = `${startIndex + i}`;
+        const owner = await getAgentOwner(agentId);
+        const mechForCurrentAgent = mechData.find((e) => e.agentId === agentId);
         const updatedInfo = {
           ...info,
-
-          // TODO: this is hardcoded for now but needs to be dynamic
-          mech: mechData[i]?.mech || DEFAULT_MECH_CONTRACT_ADDRESS,
+          mech: mechForCurrentAgent?.mech,
         };
         return { ...updatedInfo, owner };
       });
