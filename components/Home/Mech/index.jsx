@@ -38,6 +38,7 @@ const onNewEvent = (event) => {
     >
       Tx
     </a>,
+    event?.returnValues?.requestId,
   );
 };
 
