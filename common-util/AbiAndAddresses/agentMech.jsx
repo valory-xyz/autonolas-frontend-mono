@@ -1,5 +1,3 @@
-export const AGENT_MECH_ADDRESS = '0xFf82123dFB52ab75C417195c5fDB87630145ae81';
-
 export const AGENT_MECH_ABI = [
   {
     inputs: [
