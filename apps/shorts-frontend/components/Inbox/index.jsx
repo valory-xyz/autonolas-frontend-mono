@@ -24,9 +24,8 @@ export default function App() {
     isLimited: false,
   });
 
-  const {
-    account, setAccount, isRegistered, isRegistering, register,
-  } = useW3iAccount();
+  const { account, setAccount, isRegistered, isRegistering, register } =
+    useW3iAccount();
 
   useEffect(() => {
     if (!address) return;
@@ -126,7 +125,7 @@ export default function App() {
                                     hour: '2-digit',
                                     minute: '2-digit',
                                     second: '2-digit',
-                                  },
+                                  }
                                 )}
                               </div>
                             </div>

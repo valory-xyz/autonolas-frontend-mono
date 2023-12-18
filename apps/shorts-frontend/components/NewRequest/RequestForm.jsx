@@ -1,13 +1,15 @@
 import React, { useState } from 'react';
-import {
-  Form, Input, Button, Card, ConfigProvider,
-} from 'antd';
+import { Form, Input, Button, Card, ConfigProvider } from 'antd';
 import { useRouter } from 'next/router';
-import { notifyError, notifySuccess } from '@autonolas/frontend-library';
+import { notifyError, notifySuccess } from '@autonolas-frontend-mono/util-functions';
 
 import { GREEN_THEME } from '../../util/theme';
 import { useHelpers } from '../../common-util/hooks';
-import { getMechContract, getAgentMultisig, getAgentURL } from '../../common-util/Contracts';
+import {
+  getMechContract,
+  getAgentMultisig,
+  getAgentURL,
+} from '../../common-util/Contracts';
 
 const FORM_NAME = 'ipfs_creation_form_for_mech';
 const FORM_ID = 'myForm';
@@ -38,7 +40,7 @@ export const RequestForm = () => {
           .then(async (result) => {
             notifySuccess(
               'Transaction executed',
-              'Upon delivery you will be notified!',
+              'Upon delivery you will be notified!'
             );
             // Prepare the request data
             const requestData = {
@@ -100,11 +102,16 @@ export const RequestForm = () => {
         onFinish={onFinish}
         onFinishFailed={onFinishFailed}
       >
-
         <Form.Item
           // label="Prompt"
           name="prompt"
-          rules={[{ required: true, message: 'Please write a short prompt to guide your AI content Generatooorr.' }]}
+          rules={[
+            {
+              required: true,
+              message:
+                'Please write a short prompt to guide your AI content Generatooorr.',
+            },
+          ]}
         >
           <Input.TextArea
             rows={2}

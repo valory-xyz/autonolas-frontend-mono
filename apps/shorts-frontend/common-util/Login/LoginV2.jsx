@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 import { Web3Modal, Web3Button, Web3NetworkSwitch } from '@web3modal/react';
 import { useAccount, useNetwork, useBalance } from 'wagmi';
 import styled from 'styled-components';
-import { COLOR } from '@autonolas/frontend-library';
+import { COLOR } from '@autonolas-frontend-mono/util-functions';
 
 import { setChainId } from '../../store/setup/actions';
 import {
@@ -71,8 +71,9 @@ export const LoginV2 = ({
       try {
         // This is the initial `provider` that is returned when
         // using web3Modal to connect. Can be MetaMask or WalletConnect.
-        const modalProvider = connector?.options?.getProvider?.()
-          || (await connector?.getProvider?.());
+        const modalProvider =
+          connector?.options?.getProvider?.() ||
+          (await connector?.getProvider?.());
 
         if (modalProvider) {
           // *******************************************************
@@ -93,7 +94,7 @@ export const LoginV2 = ({
               if (modalProvider.removeListener) {
                 modalProvider.removeListener(
                   'chainChanged',
-                  handleChainChanged,
+                  handleChainChanged
                 );
               }
             };

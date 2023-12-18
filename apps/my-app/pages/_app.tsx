@@ -1,7 +1,7 @@
 import { AppProps } from 'next/app';
 import Head from 'next/head';
 import './styles.css';
-import { SharedUi } from '@autonolas-frontend-mono/shared-ui';
+import { Badge } from 'antd';
 
 function CustomApp({ Component, pageProps }: AppProps) {
   return (
@@ -10,8 +10,8 @@ function CustomApp({ Component, pageProps }: AppProps) {
         <title>Welcome to my-app!</title>
       </Head>
       <main className="app">
+        <Badge count={5} />
         <Component {...pageProps} />
-        <SharedUi />
       </main>
     </>
   );

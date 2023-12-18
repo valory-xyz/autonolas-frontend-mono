@@ -35,27 +35,24 @@ export const Request = () => {
   return (
     <Container>
       <Card
-        title={(
+        title={
           <Typography.Text>
             Success! Your prompt is being worked on ...
           </Typography.Text>
-        )}
+        }
       >
-        <Typography.Text>
-          {prompt}
-        </Typography.Text>
+        <Typography.Text>{prompt}</Typography.Text>
       </Card>
       <Row style={{ height: '20px' }} />
       <Card
-        title={(
+        title={
           <Typography.Text>
             Stay informed with Wallet Connect notifications!
           </Typography.Text>
-        )}
+        }
       >
         <Inbox />
       </Card>
     </Container>
-
   );
 };

@@ -4,7 +4,7 @@ import {
   getChainIdOrDefaultToMainnet as getChainIdOrDefaultToMainnetFn,
   getIsValidChainId as getIsValidChainIdFn,
   sendTransaction as sendTransactionFn,
-} from '@autonolas/frontend-library';
+} from '@autonolas-frontend-mono/util-functions';
 
 import { GATEWAY_URL } from '../../util/constants';
 import { ADDRESSES, RPC_URLS } from '../../common-util/Contracts';
@@ -12,21 +12,25 @@ import { SUPPORTED_CHAINS } from '../../common-util/Login';
 
 export const getProvider = () => getProviderFn(SUPPORTED_CHAINS, RPC_URLS);
 
-export const getIsValidChainId = (chainId) => getIsValidChainIdFn(SUPPORTED_CHAINS, chainId);
+export const getIsValidChainId = (chainId) =>
+  getIsValidChainIdFn(SUPPORTED_CHAINS, chainId);
 
 export const getChainIdOrDefaultToMainnet = (chainId) => {
   const x = getChainIdOrDefaultToMainnetFn(SUPPORTED_CHAINS, chainId);
   return x;
 };
 
-export const getChainId = (chainId = null) => getChainIdFn(SUPPORTED_CHAINS, chainId);
+export const getChainId = (chainId = null) =>
+  getChainIdFn(SUPPORTED_CHAINS, chainId);
 
-export const sendTransaction = (fn, account) => sendTransactionFn(fn, account, {
-  supportedChains: SUPPORTED_CHAINS,
-  rpcUrls: RPC_URLS,
-});
+export const sendTransaction = (fn, account) =>
+  sendTransactionFn(fn, account, {
+    supportedChains: SUPPORTED_CHAINS,
+    rpcUrls: RPC_URLS,
+  });
 
-export const getSupportedNetworks = () => Object.keys(ADDRESSES).map((e) => Number(e));
+export const getSupportedNetworks = () =>
+  Object.keys(ADDRESSES).map((e) => Number(e));
 
 export const getIpfsResponse = async (hash, filePath) => {
   try {
@@ -43,4 +47,5 @@ export const getIpfsResponse = async (hash, filePath) => {
 };
 
 // show last element of agentHashes array
-export const getAgentHash = (agentHashes = []) => (agentHashes.length === 0 ? '' : agentHashes[agentHashes.length - 1]);
+export const getAgentHash = (agentHashes = []) =>
+  agentHashes.length === 0 ? '' : agentHashes[agentHashes.length - 1];

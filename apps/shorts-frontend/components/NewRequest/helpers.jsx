@@ -30,7 +30,7 @@ export const getIpfsHashHelper = async (info, others) => {
 
   const response = await ipfs.add(
     { path: 'metadata.json', content: JSON.stringify(updatedInfo) },
-    otherOptions,
+    otherOptions
   );
 
   const hash = response.cid.toV1().toString(base16.encoder);

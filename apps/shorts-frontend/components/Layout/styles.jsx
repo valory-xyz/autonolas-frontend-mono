@@ -1,6 +1,6 @@
 import styled from 'styled-components';
 import { Layout } from 'antd';
-import { COLOR, MEDIA_QUERY } from '@autonolas/frontend-library';
+import { MEDIA_QUERY, COLOR } from '@autonolas-frontend-mono/util-functions';
 
 export const CustomLayout = styled(Layout)`
   margin-bottom: 8rem;
@@ -28,7 +28,8 @@ export const CustomLayout = styled(Layout)`
       }
     }
   }
-  .column-1, .column-2 {
+  .column-1,
+  .column-2 {
     display: flex;
     align-items: center;
     width: 100%;
@@ -36,7 +37,6 @@ export const CustomLayout = styled(Layout)`
   .column-2 {
     gap: 12px;
     justify-content: flex-end;
-
   }
 
   ${MEDIA_QUERY.tabletL} {
