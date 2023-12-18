@@ -31,7 +31,7 @@ const LandingPage = () => {
   }, []);
 
   const renderVideoCards = () => {
-    if (!videos || videos.length === 0) {
+    if (videos?.length === 0) {
       // Fallback content when there are no videos
       return <p>No videos to display</p>;
     }
@@ -48,15 +48,18 @@ const LandingPage = () => {
   };
 
   return (
-    <div style={{
-      display: 'flex', flexDirection: 'column', alignItems: 'center', maxWidth: '1140px', margin: '0 auto',
-    }}
+    <div
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        maxWidth: '1140px',
+        margin: '0 auto',
+      }}
     >
       <NewRequest />
       <Row style={{ height: '50px' }} />
-      <Row gutter={[16, 16]}>
-        {renderVideoCards()}
-      </Row>
+      <Row gutter={[16, 16]}>{renderVideoCards()}</Row>
     </div>
   );
 };
