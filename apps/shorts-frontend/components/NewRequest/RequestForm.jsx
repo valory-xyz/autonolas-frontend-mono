@@ -1,7 +1,10 @@
 import React, { useState } from 'react';
 import { Form, Input, Button, Card, ConfigProvider } from 'antd';
 import { useRouter } from 'next/router';
-import { notifyError, notifySuccess } from '@autonolas-frontend-mono/util-functions';
+import {
+  notifyError,
+  notifySuccess,
+} from '@autonolas-frontend-mono/util-functions';
 
 import { GREEN_THEME } from '../../util/theme';
 import { useHelpers } from '../../common-util/hooks';

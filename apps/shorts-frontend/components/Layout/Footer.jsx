@@ -1,7 +1,7 @@
 import {
   Footer as CommonFooter,
   ServiceStatusInfo,
-} from '@autonolas/frontend-library';
+} from '@autonolas-frontend-mono/feature-service-status-info';
 
 import { FooterContainer } from './styles';
 
