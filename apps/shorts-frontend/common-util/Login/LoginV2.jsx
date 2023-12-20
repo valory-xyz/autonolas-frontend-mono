@@ -6,7 +6,7 @@ import { useAccount, useNetwork, useBalance } from 'wagmi';
 import styled from 'styled-components';
 import { COLOR } from '@autonolas-frontend-mono/util-functions';
 
-import { setChainId } from '../../store/setup/actions';
+import { setChainId } from '../../store/setupSlice';
 import {
   getChainId,
   getChainIdOrDefaultToMainnet,

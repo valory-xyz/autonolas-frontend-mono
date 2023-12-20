@@ -1,5 +1,10 @@
 import styled from 'styled-components';
-import { BORDER_RADIUS, BOX_SHADOW, COLOR, MEDIA_QUERY } from '@autonolas-frontend-mono/ui-theme';
+import {
+  BORDER_RADIUS,
+  BOX_SHADOW,
+  COLOR,
+  MEDIA_QUERY,
+} from '@autonolas-frontend-mono/ui-theme';
 
 export const StickyContainer = styled.div`
   position: fixed;

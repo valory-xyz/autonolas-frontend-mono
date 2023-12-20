@@ -1,43 +1,55 @@
-/* eslint-disable react/display-name */
 import Document, {
-  Html,
   Head,
+  Html,
   Main,
   NextScript,
   DocumentContext,
-  DocumentInitialProps,
 } from 'next/document';
+import { StyleProvider, createCache, extractStyle } from '@ant-design/cssinjs';
 import { ServerStyleSheet } from 'styled-components';
 
-export default class CustomDocument extends Document {
-  static async getInitialProps(
-    ctx: DocumentContext
-  ): Promise<DocumentInitialProps> {
-    const originalRenderPage = ctx.renderPage;
+const MyDocument = () => (
+  <Html lang="en">
+    <Head />
+    <body>
+      <Main />
+      <NextScript />
+    </body>
+  </Html>
+);
 
-    const sheet = new ServerStyleSheet();
+MyDocument.getInitialProps = async (ctx: DocumentContext) => {
+  const cache = createCache();
+  const originalRenderPage = ctx.renderPage;
+  const sheet = new ServerStyleSheet();
 
-    ctx.renderPage = () =>
-      originalRenderPage({
-        enhanceApp: (App) => (props) => sheet.collectStyles(<App {...props} />),
-        enhanceComponent: (Component) => Component,
-      });
+  ctx.renderPage = () =>
+    originalRenderPage({
+      enhanceApp: (App) => (props) =>
+        (
+          <StyleProvider cache={cache}>
+            {sheet.collectStyles(<App {...props} />)}
+          </StyleProvider>
+        ),
+    });
 
-    const intialProps = await Document.getInitialProps(ctx);
-    const styles = sheet.getStyleElement();
-
-    return { ...intialProps, styles };
+  try {
+    const initialProps = await Document.getInitialProps(ctx);
+    const style = extractStyle(cache, true);
+    return {
+      ...initialProps,
+      styles: (
+        <>
+          {initialProps.styles}
+          {/* eslint-disable-next-line react/no-danger */}
+          <style dangerouslySetInnerHTML={{ __html: style }} />
+          {sheet.getStyleElement()}
+        </>
+      ),
+    };
+  } finally {
+    sheet.seal();
   }
+};
 
-  render() {
-    return (
-      <Html>
-        <Head>{this.props.styles}</Head>
-        <body>
-          <Main />
-          <NextScript />
-        </body>
-      </Html>
-    );
-  }
-}
+export default MyDocument;

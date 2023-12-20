@@ -9,7 +9,7 @@ import {
   setChainId as setChainIdFn,
   setErrorMessage as setErrorMessageFn,
   setLogout as setLogoutFn,
-} from '../../store/setup/actions';
+} from '../../store/setupSlice';
 import { LoginV2 as LoginComponent } from '../../common-util/Login';
 
 const Login = ({
