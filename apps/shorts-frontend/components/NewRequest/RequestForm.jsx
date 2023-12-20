@@ -118,7 +118,7 @@ export const RequestForm = () => {
         >
           <Input.TextArea
             rows={2}
-            placeholder="... write a short prompt to guide your AI content Generatooorr."
+            placeholder="write a short prompt to guide your AI content Generatooorr..."
           />
         </Form.Item>
 
