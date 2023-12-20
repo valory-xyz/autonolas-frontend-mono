@@ -1,1 +1,4 @@
-apps/shorts.wtf @mohandast52 @oaksprout
+# more info here - https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+
+apps/ @mohandast52 @oaksprout
+libs/ @mohandast52 @oaksprout
