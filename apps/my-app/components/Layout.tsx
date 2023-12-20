@@ -65,6 +65,7 @@ export const Layout: React.FC = () => {
 
   return (
     <>
+      <h2>Testing my-app</h2>
       <Switch
         checked={theme === 'dark'}
         onChange={changeTheme}
