@@ -17,8 +17,8 @@ import {
   BLOCKCHAIN_SHORTS_ADDRESS_GNOSIS,
   BLOCKCHAIN_SHORTS_ADDRESS_NEON,
   BLOCKCHAIN_SHORTS_ADDRESS_ZKEVM_POLYGON,
-} from '../../common-util/AbiAndAddresses';
-import { getChainId, getProvider } from '../../common-util/functions';
+} from 'common-util/AbiAndAddresses';
+import { getChainId, getProvider } from 'common-util/functions';
 
 export const RPC_URLS = {
   100: process.env.NEXT_PUBLIC_GNOSIS_URL,
