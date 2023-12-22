@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 import { Table, Space } from 'antd';
 import { AddressLink } from '@autonolas/frontend-library';
 
-import { setAgentInstancesAndOperators } from 'store/service/state/actions';
+import { setAgentInstancesAndOperators } from 'store/state';
 import { useScreen } from 'common-util/hooks/useScreen';
 import { useHelpers } from 'common-util/hooks/useHelpers';
 import { SendTransactionButton } from 'common-util/TransactionHelpers/SendTransactionButton';
