@@ -1,7 +1,7 @@
 //@ts-check
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const { composePlugins, withNx } = require('@nx/next');
+import { composePlugins, withNx } from '@nx/next';
 
 /**
  * @type {import('@nx/next/plugins/with-nx').WithNxOptions}
@@ -17,6 +17,29 @@ const nextConfig = {
     // For other options, see https://styled-components.com/docs/tooling#babel-plugin
     styledComponents: true,
   },
+  
+  redirects: async () => [
+    {
+      source: '/',
+      destination: '/ethereum/components',
+      permanent: true,
+    },
+    {
+      source: '/components',
+      destination: '/ethereum/components',
+      permanent: true,
+    },
+    {
+      source: '/agents',
+      destination: '/ethereum/agents',
+      permanent: true,
+    },
+    {
+      source: '/services',
+      destination: '/ethereum/services',
+      permanent: true,
+    },
+  ],
 };
 
 const plugins = [
@@ -24,4 +47,4 @@ const plugins = [
   withNx,
 ];
 
-module.exports = composePlugins(...plugins)(nextConfig);
+export default composePlugins(...plugins)(nextConfig);

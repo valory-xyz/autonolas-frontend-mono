@@ -45,3 +45,7 @@ Thumbs.db
 
 # env
 .env
+
+# after migrating autonolas-registry
+ganache_data
+.unlighthouse
