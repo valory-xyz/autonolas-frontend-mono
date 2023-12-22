@@ -6,12 +6,12 @@ import { useAccount, useNetwork, useBalance } from 'wagmi';
 import styled from 'styled-components';
 import { COLOR } from '@autonolas-frontend-mono/util-functions';
 
-import { setChainId } from '../../store/setupSlice';
+import { setChainId } from 'store/setupSlice';
 import {
   getChainId,
   getChainIdOrDefaultToMainnet,
-} from '../../common-util/functions';
-import { useScreen } from '../../common-util/hooks';
+} from 'common-util/functions';
+import { useScreen } from 'common-util/hooks';
 import { projectId, ethereumClient } from './config';
 
 const LoginContainer = styled.div`

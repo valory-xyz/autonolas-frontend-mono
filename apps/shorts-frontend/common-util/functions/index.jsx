@@ -6,9 +6,9 @@ import {
   sendTransaction as sendTransactionFn,
 } from '@autonolas-frontend-mono/util-functions';
 
-import { GATEWAY_URL } from '../../util/constants';
-import { ADDRESSES, RPC_URLS } from '../../common-util/Contracts';
-import { SUPPORTED_CHAINS } from '../../common-util/Login';
+import { GATEWAY_URL } from 'util/constants';
+import { ADDRESSES, RPC_URLS } from 'common-util/Contracts';
+import { SUPPORTED_CHAINS } from 'common-util/Login';
 
 export const getProvider = () => getProviderFn(SUPPORTED_CHAINS, RPC_URLS);
 

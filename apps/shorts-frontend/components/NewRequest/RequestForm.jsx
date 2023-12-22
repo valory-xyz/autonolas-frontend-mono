@@ -6,13 +6,13 @@ import {
   notifySuccess,
 } from '@autonolas-frontend-mono/util-functions';
 
-import { GREEN_THEME } from '../../util/theme';
-import { useHelpers } from '../../common-util/hooks';
+import { GREEN_THEME } from 'util/theme';
+import { useHelpers } from 'common-util/hooks';
 import {
   getMechContract,
   getAgentMultisig,
   getAgentURL,
-} from '../../common-util/Contracts';
+} from 'common-util/Contracts';
 
 const FORM_NAME = 'ipfs_creation_form_for_mech';
 const FORM_ID = 'myForm';
@@ -94,7 +94,7 @@ export const RequestForm = () => {
   };
 
   return (
-    <Card title="Imagine your content ..." style={{ width: 420 }}>
+    <Card title="Imagine your content..." style={{ width: 420 }}>
       <Form
         form={form}
         name={FORM_NAME}

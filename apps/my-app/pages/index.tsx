@@ -1,8 +1,14 @@
 import styled from 'styled-components';
+import { Layout } from '../components/Layout';
 
 const StyledPage = styled.div`
-  .page {
-  }
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  margin-top: 3rem;
+  font-family: texgyreheros__regular, sans-serif;
 `;
 
 export function Index() {
@@ -11,7 +17,11 @@ export function Index() {
    *
    * Note: The corresponding styles are in the ./index.styled-components file.
    */
-  return <StyledPage>Hello</StyledPage>;
+  return (
+    <StyledPage>
+      <Layout />
+    </StyledPage>
+  );
 }
 
 export default Index;

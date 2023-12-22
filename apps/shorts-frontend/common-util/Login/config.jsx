@@ -7,7 +7,7 @@ import { configureChains, createConfig } from 'wagmi';
 import { gnosis, polygonZkEvm } from 'wagmi/chains';
 import { SafeConnector } from 'wagmi/connectors/safe';
 import { jsonRpcProvider } from 'wagmi/providers/jsonRpc';
-import { RPC_URLS } from '../../common-util/Contracts';
+import { RPC_URLS } from 'common-util/Contracts';
 
 export const neon = {
   id: 245_022_934,

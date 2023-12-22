@@ -1,0 +1,58 @@
+{
+  "name": "autonolas-registry",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/autonolas-registry",
+  "projectType": "application",
+  "targets": {
+    "build": {
+      "executor": "@nx/next:build",
+      "outputs": ["{options.outputPath}"],
+      "defaultConfiguration": "production",
+      "options": {
+        "outputPath": "dist/apps/autonolas-registry"
+      },
+      "configurations": {
+        "development": {
+          "outputPath": "apps/autonolas-registry"
+        },
+        "production": {}
+      }
+    },
+    "serve": {
+      "executor": "@nx/next:server",
+      "defaultConfiguration": "development",
+      "options": {
+        "buildTarget": "autonolas-registry:build",
+        "dev": true
+      },
+      "configurations": {
+        "development": {
+          "buildTarget": "autonolas-registry:build:development",
+          "dev": true
+        },
+        "production": {
+          "buildTarget": "autonolas-registry:build:production",
+          "dev": false
+        }
+      }
+    },
+    "export": {
+      "executor": "@nx/next:export",
+      "options": {
+        "buildTarget": "autonolas-registry:build:production"
+      }
+    },
+    "test": {
+      "executor": "@nx/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "options": {
+        "jestConfig": "apps/autonolas-registry/jest.config.ts"
+      }
+    },
+    "lint": {
+      "executor": "@nx/eslint:lint",
+      "outputs": ["{options.outputFile}"]
+    }
+  },
+  "tags": ["app"]
+}
