@@ -29,9 +29,7 @@ const ListComponents = () => {
     isMyTab(hash) ? MY_COMPONENTS : ALL_COMPONENTS,
   );
 
-  const {
-    account, chainId, links, isL1OnlyNetwork,
-  } = useHelpers();
+  const { account, chainId, links, isL1OnlyNetwork } = useHelpers();
 
   /**
    * extra tab content & view click
@@ -116,7 +114,15 @@ const ListComponents = () => {
         }
       }
     })();
-  }, [account, chainId, isL1OnlyNetwork, total, currentPage]);
+  }, [
+    account,
+    chainId,
+    isL1OnlyNetwork,
+    total,
+    currentPage,
+    currentTab,
+    searchValue,
+  ]);
 
   /**
    * Search (All components, My Components)
@@ -145,7 +151,7 @@ const ListComponents = () => {
         }
       }
     })();
-  }, [account, chainId, searchValue]);
+  }, [account, chainId, searchValue, currentTab]);
 
   const tableCommonProps = {
     type: NAV_TYPES.COMPONENT,

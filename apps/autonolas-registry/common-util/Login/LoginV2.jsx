@@ -19,7 +19,7 @@ import {
   useScreen,
 } from '@autonolas/frontend-library';
 
-import { setUserBalance } from 'store/setup/actions';
+import { setUserBalance } from 'store/setup';
 import { isAddressProhibited } from 'common-util/functions';
 import { useHelpers } from 'common-util/hooks';
 import { YellowButton } from 'common-util/YellowButton';

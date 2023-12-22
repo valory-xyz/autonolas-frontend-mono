@@ -23,14 +23,12 @@ export const setupSlice = createSlice({
       state.balance = action.payload;
     },
     setChainId: (state, action) => {
-      const data = action.payload;
+      const chainId = action.payload;
       const networkInfo = SUPPORTED_CHAINS_MORE_INFO.find(
-        (item) => item.id === data.chainId,
+        (item) => item.id === chainId,
       );
 
-      console.log('networkInfo', networkInfo);
-
-      state.chainId = action.payload;
+      state.chainId = chainId;
       state.chainDisplayName = networkInfo?.networkDisplayName || null;
       state.chainName = networkInfo?.networkName || null;
     },

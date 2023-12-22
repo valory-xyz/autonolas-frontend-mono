@@ -6,7 +6,7 @@ import {
   setUserBalance,
   setErrorMessage,
   setLogout,
-} from 'store/setup/actions';
+} from 'store/setup';
 import { LoginV2 } from 'common-util/Login';
 import { useHelpers } from 'common-util/hooks';
 
