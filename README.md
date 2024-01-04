@@ -1,7 +1,6 @@
 # AutonolasFrontendMono
 
 This mono repo contains the frontend for the Autonolas project. It is based on the Nx workspace and contains the following projects:
-- [shorts.wtf](https://www.shorts.wtf/)
 - [autonolas-registry](https://registry.olas.network/)
 
 ## Start the app
