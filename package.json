@@ -9,6 +9,7 @@
     "@ant-design/cssinjs": "^1.16.2",
     "@ant-design/icons": "^5.2.6",
     "@autonolas/frontend-library": "^0.4.22",
+    "@balancer-labs/sdk": "^1.1.5",
     "@gnosis.pm/safe-contracts": "^1.3.0",
     "@nx/next": "v17.2.5",
     "@reduxjs/toolkit": "^2.0.1",
