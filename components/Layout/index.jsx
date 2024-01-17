@@ -32,6 +32,11 @@ const NavigationBar = ({ children }) => {
   }, [pathname]);
 
   const handleMenuItemClick = ({ key }) => {
+    if (key === 'docs') {
+      window.open('https://docs.autonolas.network/product/mechkit/', '_blank', 'noopener,noreferrer');
+      return;
+    }
+
     router.push(`/${key}`);
     setSelectedMenu(key);
   };
