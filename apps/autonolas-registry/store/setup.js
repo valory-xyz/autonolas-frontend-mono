@@ -1,9 +1,11 @@
 import { createSlice } from '@reduxjs/toolkit';
-import { SUPPORTED_CHAINS_MORE_INFO } from 'common-util/Login/config';
+import { VM_TYPE } from '../util/constants';
+import { ALL_SUPPORTED_CHAINS,EVM_SUPPORTED_CHAINS, } from '../common-util/Login/config';
 
 const initialState = {
   account: null,
   balance: null,
+  vmType: null,
   errorMessage: null,
 
   // chain info
@@ -24,13 +26,27 @@ export const setupSlice = createSlice({
     },
     setChainId: (state, action) => {
       const chainId = action.payload;
-      const networkInfo = SUPPORTED_CHAINS_MORE_INFO.find(
+      const networkInfo = EVM_SUPPORTED_CHAINS.find(
         (item) => item.id === chainId,
       );
 
       state.chainId = chainId;
       state.chainDisplayName = networkInfo?.networkDisplayName || null;
       state.chainName = networkInfo?.networkName || null;
+    },
+    setVmInfo: (state, action) => {
+      const networkName = action.payload;
+      const info = ALL_SUPPORTED_CHAINS.find(
+        (item) => item.networkName === networkName,
+      );
+
+      if (info?.vmType === VM_TYPE.SVM) {
+        state.vmType = VM_TYPE.SVM
+        state.chainDisplayName = info.networkDisplayName
+        state.chainName = info.networkName
+      } else {
+        state.vmType = VM_TYPE.EVM
+      }
     },
     setErrorMessage: (state, action) => {
       state.errorMessage = action.payload;
@@ -48,6 +64,7 @@ export const {
   setUserAccount,
   setUserBalance,
   setChainId,
+  setVmInfo,
   setErrorMessage,
   setLogout,
   setStoreState,

@@ -3,7 +3,7 @@ import {
   Input, Space, Button, Typography,
 } from 'antd';
 import { SearchOutlined } from '@ant-design/icons';
-import { AddressLink } from '@autonolas/frontend-library';
+import { AddressLink, areAddressesEqual } from '@autonolas/frontend-library';
 
 import { NAV_TYPES, SERVICE_STATE, TOTAL_VIEW_COUNT } from 'util/constants';
 
@@ -11,8 +11,15 @@ const { Title } = Typography;
 
 export const getTableColumns = (
   type,
-  { onViewClick, onUpdateClick, isMobile },
+  {
+    onViewClick, onUpdateClick, isMobile, chainName, account, chainId,
+  },
 ) => {
+  const addressLinkProps = {
+    chainId,
+    suffixCount: isMobile ? 4 : 6,
+  };
+
   if (type === NAV_TYPES.COMPONENT || type === NAV_TYPES.AGENT) {
     return [
       {
@@ -26,18 +33,14 @@ export const getTableColumns = (
         dataIndex: 'owner',
         key: 'owner',
         width: 160,
-        render: (text) => (
-          <AddressLink text={text} suffixCount={isMobile ? 4 : 6} />
-        ),
+        render: (text) => <AddressLink {...addressLinkProps} text={text} />,
       },
       {
         title: 'Hash',
         dataIndex: 'hash',
         key: 'hash',
         width: 180,
-        render: (text) => (
-          <AddressLink text={text} suffixCount={isMobile ? 4 : 6} isIpfsLink />
-        ),
+        render: (text) => <AddressLink {...addressLinkProps} text={text} />,
       },
       {
         title: 'No. of component dependencies',
@@ -75,7 +78,11 @@ export const getTableColumns = (
         key: 'owner',
         width: 200,
         render: (text) => (
-          <AddressLink text={text} suffixCount={isMobile ? 4 : 6} />
+          <AddressLink
+            {...addressLinkProps}
+            text={text}
+            chainName={chainName}
+          />
         ),
       },
       {
@@ -92,7 +99,8 @@ export const getTableColumns = (
         fixed: 'right',
         render: (_text, record) => {
           // only show update button for pre-registration state
-          const canUpdate = ['1'].includes(record.state);
+          const canUpdate = ['1'].includes(record.state)
+            && areAddressesEqual(record.owner, account);
 
           return (
             <Space size="middle">
@@ -167,7 +175,11 @@ export const getData = (type, rawData, { current }) => {
 /**
  * tab content
  */
-export const useExtraTabContent = ({ title, onRegisterClick = () => {} }) => {
+export const useExtraTabContent = ({
+  title,
+  onRegisterClick = () => {},
+  isSvm = false,
+}) => {
   const [searchValue, setSearchValue] = useState('');
   const [value, setValue] = useState('');
   const clearSearch = () => {
@@ -179,19 +191,26 @@ export const useExtraTabContent = ({ title, onRegisterClick = () => {} }) => {
     left: <Title level={2}>{title}</Title>,
     right: (
       <>
-        <Input
-          prefix={<SearchOutlined className="site-form-item-icon" />}
-          placeholder="Owner or Hash"
-          value={value}
-          onChange={(e) => setValue(e.target.value)}
-        />
-        <Button
-          ghost
-          type="primary"
-          onClick={() => setSearchValue(value || '')}
-        >
-          Search
-        </Button>
+        {/* TODO: hiding search util feature is introduced */}
+        {isSvm ? null : (
+          <>
+            <Input
+              prefix={<SearchOutlined className="site-form-item-icon" />}
+              placeholder="Owner or Hash"
+              value={value}
+              onChange={(e) => setValue(e.target.value)}
+            />
+
+            <Button
+              ghost
+              type="primary"
+              onClick={() => setSearchValue(value || '')}
+            >
+              Search
+            </Button>
+          </>
+        )}
+
         <Button type="primary" onClick={onRegisterClick}>
           Mint
         </Button>

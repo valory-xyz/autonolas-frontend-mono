@@ -4,12 +4,15 @@ import { Loader, useScreen } from '@autonolas/frontend-library';
 
 import { TOTAL_VIEW_COUNT } from 'util/constants';
 import { ListEmptyMessage } from 'common-util/List/ListCommon';
+import { useHelpers } from 'common-util/hooks';
+import { useSvmConnectivity } from 'common-util/hooks/useSvmConnectivity';
 import { getData, getTableColumns } from './helpers';
 
 const ListTable = ({
   isLoading,
   type,
   searchValue,
+  isPaginationRequired,
   list,
   total,
   currentPage,
@@ -19,21 +22,34 @@ const ListTable = ({
   onUpdateClick,
   extra,
 }) => {
+  const {
+    chainName, account, isSvm, chainId,
+  } = useHelpers();
+  const { hasNoSvmPublicKey } = useSvmConnectivity();
   /**
    * no pagination on search as we won't know total beforehand
    */
-  const isPaginationRequired = !searchValue;
+  const canShowPagination = isPaginationRequired ? !searchValue : false;
   const { isMobile } = useScreen();
 
   const { scrollX } = extra;
 
-  if (isLoading) {
+  // if svm & no public key, show Loader with connect wallet message
+  const isAccountRequiredForList = isAccountRequired || hasNoSvmPublicKey;
+
+  if (isLoading || hasNoSvmPublicKey) {
+    const connectWalletMessage = isSvm
+      ? 'connect a wallet that holds SOL'
+      : 'connect wallet';
+
+    const notConnectedMessage = isAccountRequiredForList
+      ? `To see your ${type}s, ${connectWalletMessage}.`
+      : '';
+
     return (
       <Loader
-        isAccountRequired={isAccountRequired}
-        notConnectedMessage={
-          isAccountRequired ? `To see your ${type}s, connect wallet` : ''
-        }
+        isAccountRequired={isAccountRequiredForList}
+        notConnectedMessage={notConnectedMessage}
       />
     );
   }
@@ -42,12 +58,15 @@ const ListTable = ({
     onViewClick,
     onUpdateClick,
     isMobile,
+    chainName,
+    chainId,
+    account,
   });
   const dataSource = getData(type, list, { current: currentPage });
   const pagination = {
     total,
     current: currentPage,
-    defaultPageSize: TOTAL_VIEW_COUNT,
+    defaultPageSize: canShowPagination ? TOTAL_VIEW_COUNT : total,
     onChange: (e) => setCurrentPage(e),
     showSizeChanger: false,
   };
@@ -55,12 +74,15 @@ const ListTable = ({
   return (
     <>
       {list.length === 0 ? (
-        <ListEmptyMessage type={type} />
+        <ListEmptyMessage
+          type={type}
+          message={isSvm ? 'No services – do you have SOL in your wallet?' : ''}
+        />
       ) : (
         <Table
           columns={columns}
           dataSource={dataSource}
-          pagination={isPaginationRequired ? pagination : false}
+          pagination={canShowPagination ? pagination : false}
           scroll={{ x: scrollX || 1200 }}
           rowKey={(record) => `${type}-row-${record.id}`}
         />
@@ -72,6 +94,7 @@ const ListTable = ({
 ListTable.propTypes = {
   type: PropTypes.string.isRequired,
   searchValue: PropTypes.string.isRequired,
+  isPaginationRequired: PropTypes.bool,
   isLoading: PropTypes.bool,
   list: PropTypes.arrayOf(PropTypes.object),
   total: PropTypes.number,
@@ -85,6 +108,7 @@ ListTable.propTypes = {
 
 ListTable.defaultProps = {
   isLoading: false,
+  isPaginationRequired: true,
   list: [],
   total: 0,
   currentPage: 0,
