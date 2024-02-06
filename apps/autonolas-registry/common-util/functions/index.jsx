@@ -1,5 +1,5 @@
 import { ethers } from 'ethers';
-import { toLower } from 'lodash';
+import { isString, toLower } from 'lodash';
 import {
   isValidAddress,
   getChainIdOrDefaultToMainnet as getChainIdOrDefaultToMainnetFn,
@@ -7,11 +7,17 @@ import {
   sendTransaction as sendTransactionFn,
   isL1OnlyNetwork as isL1OnlyNetworkFn,
   notifyWarning,
+  notifyError,
 } from '@autonolas/frontend-library';
+import { PublicKey } from '@solana/web3.js';
 
 import { RPC_URLS } from 'common-util/Contracts';
 import { SUPPORTED_CHAINS } from 'common-util/Login';
-import { SUPPORTED_CHAINS_MORE_INFO } from 'common-util/Login/config';
+import {
+  EVM_SUPPORTED_CHAINS,
+  SVM_SUPPORTED_CHAINS,
+} from 'common-util/Login/config';
+import { VM_TYPE } from 'util/constants';
 import prohibitedAddresses from '../../data/prohibited-addresses.json';
 
 export const getModalProvider = () => window?.MODAL_PROVIDER;
@@ -27,9 +33,7 @@ export const getChainId = (chainId = null) => {
     : Number(sessionStorage.getItem('chainId'));
 
   // if chainId is not supported, throw error
-  if (
-    !SUPPORTED_CHAINS_MORE_INFO.find((e) => e.id === chainIdfromSessionStorage)
-  ) {
+  if (!EVM_SUPPORTED_CHAINS.find((e) => e.id === chainIdfromSessionStorage)) {
     return new Error('Invalid chain id');
   }
 
@@ -45,6 +49,7 @@ export const getProvider = () => {
   }
 
   if (typeof window === 'undefined') {
+    /* eslint-disable-next-line no-console */
     console.warn(
       'No provider found, fetching RPC URL from first supported chain',
     );
@@ -92,10 +97,61 @@ export const getChainIdOrDefaultToMainnet = (chainId) => {
   return x;
 };
 
-export const sendTransaction = (fn, account) => sendTransactionFn(fn, account, {
-  supportedChains: SUPPORTED_CHAINS,
-  rpcUrls: RPC_URLS,
-});
+/**
+ * Checks if the provided object is a MethodsBuilder object.
+ * A MethodsBuilder object is expected to have certain properties that are
+ * used to interact with the blockchain.
+ *
+ * @param {object} builderIns - The object to check.
+ * @returns {boolean} - True if the object is a MethodsBuilder object, false otherwise.
+ */
+const isMethodsBuilderInstance = (builderIns, registryAddress) => {
+  if (typeof builderIns !== 'object' || builderIns === null) {
+    throw new Error('sendTransaction: Input must be an object.');
+  }
+
+  const programId = '_programId' in builderIns ? builderIns?._programId?.toString() : null; // eslint-disable-line no-underscore-dangle
+
+  // Check if the programId is the same as the registry address
+  const hasProgramId = programId === registryAddress;
+
+  // Check for a complex property with a specific structure,
+  // eslint-disable-next-line no-underscore-dangle
+  const isArgsArray = Array.isArray(builderIns._args);
+
+  // Return true if both characteristic properties are as expected
+  return hasProgramId && isArgsArray;
+};
+
+/**
+ * Sends a transaction using the appropriate method based on the virtual machine type.
+ * For SVM (Solana Virtual Machine), it uses the rpc method on the function.
+ * For EVM (Ethereum Virtual Machine), it uses a generic sendTransaction function.
+ *
+ * @param {Function} method - The transaction method to be executed.
+ * @param {string} account - The account address that is sending the transaction.
+ *                           Only required when vmType is EVM
+ * @param {Object} extra
+ * @param {string} extra.vmType - The virtual machine type to use.
+ * @param {string} extra.registryAddress - The address of the registry contract.
+ *
+ */
+export const sendTransaction = (method, account, extra) => {
+  const { vmType, registryAddress } = extra || {};
+  if (vmType === VM_TYPE.SVM) {
+    // Check if something resembling an SVM method is being passed
+    if (!isMethodsBuilderInstance(method, registryAddress)) {
+      notifyError('Invalid method object');
+      throw new Error('Invalid method object');
+    }
+    return method.rpc();
+  }
+
+  return sendTransactionFn(method, account, {
+    supportedChains: SUPPORTED_CHAINS,
+    rpcUrls: RPC_URLS,
+  });
+};
 
 export const addressValidator = () => ({
   validator(_, value) {
@@ -117,7 +173,13 @@ export const checkIfGnosisSafe = async (account, provider) => {
  */
 export const doesNetworkHaveValidServiceManagerTokenFn = (chainId) => {
   const isL1 = isL1OnlyNetworkFn(chainId);
-  return isL1 || chainId === 100 || chainId === 10200;
+  return (
+    isL1
+    || chainId === 100
+    || chainId === 10200
+    || chainId === 42161
+    || chainId === 421614
+  );
 };
 
 export const isAddressProhibited = (address) => {
@@ -127,6 +189,7 @@ export const isAddressProhibited = (address) => {
 
 const doesPathIncludesComponents = (path) => !!path?.includes('components');
 const doesPathIncludesAgents = (path) => !!path?.includes('agents');
+export const doesPathIncludesServices = (path) => !!path?.includes('services');
 export const doesPathIncludesComponentsOrAgents = (path) => {
   if (!path) return false;
   return doesPathIncludesComponents(path) || doesPathIncludesAgents(path);
@@ -134,4 +197,22 @@ export const doesPathIncludesComponentsOrAgents = (path) => {
 
 export const notifyWrongNetwork = () => {
   notifyWarning('Please switch to the correct network and try again');
+};
+
+// functions for solana
+export const isPageWithSolana = (path) => {
+  if (!path) return false;
+  if (!isString(path)) return false;
+
+  const checkPath = (e) => path.toLowerCase().includes(e.networkName.toLowerCase());
+  return SVM_SUPPORTED_CHAINS.some(checkPath);
+};
+
+export const isValidSolanaPublicKey = (publicKey) => {
+  try {
+    const isValid = PublicKey.isOnCurve(publicKey);
+    return isValid;
+  } catch (e) {
+    return false;
+  }
 };
