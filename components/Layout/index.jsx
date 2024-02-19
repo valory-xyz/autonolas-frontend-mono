@@ -8,7 +8,6 @@ import styled from 'styled-components';
 import { COLOR } from '@autonolas/frontend-library';
 import Link from 'next/link';
 import { Logo } from 'components/Branding/Logo';
-import Login from './Login';
 import Footer from './Footer';
 import { CustomLayout } from './styles';
 
@@ -32,7 +31,7 @@ const NavigationBar = ({ children }) => {
         </Link>
 
         <div className="column-2">
-          <Login />
+          {/* <Login /> */}
         </div>
       </StyledHeader>
 

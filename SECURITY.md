@@ -1,10 +1,10 @@
 # Security Policy
 
-This document outlines security procedures and general policies for the `autonolas-operate-frontend` project.
+This document outlines security procedures and general policies for the `autonolas-build-frontend` project.
 
 ## Supported Versions
 
-The following table shows which versions of `autonolas-operate-frontend` are currently being supported with security updates.
+The following table shows which versions of `autonolas-build-frontend` are currently being supported with security updates.
 
 | Version | Supported          |
 | ------- | ------------------ |
@@ -12,7 +12,7 @@ The following table shows which versions of `autonolas-operate-frontend` are cur
 
 ## Reporting a Vulnerability
 
-The `autonolas-operate-frontend` team and community take all security bugs in `autonolas-operate-frontend` seriously. Thank you for improving the security of `autonolas-operate-frontend`. We appreciate your efforts and responsible disclosure and will make every effort to acknowledge your contributions.
+The `autonolas-build-frontend` team and community take all security bugs in `autonolas-build-frontend` seriously. Thank you for improving the security of `autonolas-build-frontend`. We appreciate your efforts and responsible disclosure and will make every effort to acknowledge your contributions.
 
 Report security bugs by emailing `info@valory.xyz`.
 
