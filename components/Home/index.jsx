@@ -1,9 +1,13 @@
-import { Agents } from 'components/Agents';
+import { Paths } from 'components/Paths';
 import styled from 'styled-components';
 
-const AgentsContainer = styled.div`
+const PathsContainer = styled.div`
   max-width: 800px;
   margin: auto;
 `;
 
-export const HomePage = () => <AgentsContainer><Agents /></AgentsContainer>;
+export const HomePage = () => (
+  <PathsContainer>
+    <Paths />
+  </PathsContainer>
+);

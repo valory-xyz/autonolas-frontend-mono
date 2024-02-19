@@ -1,0 +1,26 @@
+[
+  {
+    "id": "prediction-agents-mechs-ai-tool",
+    "name": "Mechs AI Tool",
+    "description": "Create new tools on the Mechs  marketplace. Improve Prediction Agents’ prediction accuracy.",
+    "service": {
+      "id": "prediction-agents",
+      "name": "Prediction Agents",
+      "url": "https://olas.network/services/prediction-agents"
+    },
+    "isMechsToolPath": true,
+    "markdownPath": "paths-markdown/prediction-agents-mechs-ai-tool.md"
+  },
+  {
+    "id": "prediction-agents-trading-strategy",
+    "name": "Trading Strategy",
+    "description": "Craft new strategies to help Prediction Agents win prediction markets.",
+    "service": {
+      "id": "prediction-agents",
+      "name": "Prediction Agents",
+      "url": "https://olas.network/services/prediction-agents"
+    },
+    "isMechsToolPath": false,
+    "markdownPath": "paths-markdown/prediction-agents-trading-strategy.md"
+  }
+]

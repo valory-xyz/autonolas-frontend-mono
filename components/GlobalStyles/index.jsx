@@ -32,11 +32,17 @@ const GlobalStyle = createGlobalStyle`
   .mb-0 {
     margin-bottom: 0px !important;
   }
+  .mb-4 {
+    margin-bottom: 4px !important;
+  }
   .mb-8 {
     margin-bottom: 8px !important;
   }
   .mb-12 {
     margin-bottom: 12px !important;
+  }
+  .mb-16 {
+    margin-bottom: 16px !important;
   }
   .mb-128 {
     margin-bottom: 128px !important;
@@ -55,6 +61,10 @@ const GlobalStyle = createGlobalStyle`
   }
   .mr-12 {
     margin-right: 12px;
+  }
+  .mx-auto {
+    margin-left: auto !important;
+    margin-right: auto !important;
   }
   .pl-0 {
     padding-left: 0px !important;

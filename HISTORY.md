@@ -1,1 +1,1 @@
-# Release History - `autonolas-operate-frontend`
+# Release History - `autonolas-build-frontend`
