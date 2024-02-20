@@ -2,7 +2,7 @@ import { Paths } from 'components/Paths';
 import styled from 'styled-components';
 
 const PathsContainer = styled.div`
-  max-width: 800px;
+  max-width: 1400px;
   margin: auto;
 `;
 

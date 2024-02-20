@@ -22,5 +22,19 @@
     },
     "isMechsToolPath": false,
     "markdownPath": "paths-markdown/prediction-agents-trading-strategy.md"
+  },
+  {
+    "id": "general-mechs-tool",
+    "name": "General Mechs Tool",
+    "description": "Add to the Mechs AI tools marketplace for agents.",
+    "isMechsToolPath": true,
+    "markdownPath": "paths-markdown/general-mechs-tool.md"
+  },
+  {
+    "id": "build-your-own-service",
+    "name": "Build your own service",
+    "description": "Build a full autonomous service from the ground up.",
+    "isMechsToolPath": false,
+    "markdownPath": "paths-markdown/build-your-own-service.md"
   }
 ]
