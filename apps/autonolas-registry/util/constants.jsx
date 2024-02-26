@@ -81,7 +81,9 @@ export const VM_TYPE = {
   SVM: 'svm', // Solana Virtual Machine
 };
 
-// Constants for Solana chain names
+/**
+ * Constants for Solana chain names
+ */
 export const SOLANA_CHAIN_NAMES = {
   MAINNET: 'solana',
   DEVNET: 'solana-devnet',
