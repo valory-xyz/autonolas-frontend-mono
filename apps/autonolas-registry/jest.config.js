@@ -1,11 +1,36 @@
+// import { resolve } from 'path';
+// import { pathsToModuleNameMapper } from 'ts-jest/utils';
+const { resolve } = require('path');
+const { pathsToModuleNameMapper } = require('ts-jest');
+const { compilerOptions } = require('../../tsconfig.base.json');
+
+const esModules = ['wagmi'].join('|');
+
 module.exports = {
   displayName: 'autonolas-registry',
   preset: '../../jest.preset.js',
+  globals: {
+    'ts-jest': {
+      tsconfig: '<rootDir>/tsconfig.spec.json',
+      useESM: true,
+    },
+  },
+  testEnvironment: 'jsdom',
+  moduleDirectories: ['node_modules'],
+  moduleNameMapper: {
+    ...pathsToModuleNameMapper(compilerOptions.paths, { prefix: resolve(__dirname, '../..') }),
+  },
+  setupFilesAfterEnv: ['./jest.setup.js'],
+  moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx'],
   transform: {
     '^(?!.*\\.(js|jsx|ts|tsx|css|json)$)': '@nx/react/plugins/jest',
-    '^.+\\.[tj]sx?$': ['babel-jest', { presets: ['@nx/next/babel'] }],
+    '^.+\\.[tj]sx?$': ['ts-jest', { presets: ['@nx/next/babel'] }],
   },
-  moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx'],
+  transformIgnorePatterns: [`/node_modules/(?!${esModules})`],
+
+  // transformIgnorePatterns: [
+  //   'node_modules/(?!(wagmi)/)',
+  // ],
   coverageDirectory: '../../coverage/apps/autonolas-registry',
   // verbose: true,
   // collectCoverageFrom: [
