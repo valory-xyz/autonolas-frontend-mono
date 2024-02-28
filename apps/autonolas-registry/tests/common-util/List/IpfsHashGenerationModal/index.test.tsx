@@ -1,17 +1,18 @@
 import React from 'react';
 import { render, waitFor } from '@testing-library/react';
-import IpfsHashGenerationModal from 'common-util/List/IpfsHashGenerationModal';
+import '@testing-library/jest-dom';
+
+import { IpfsHashGenerationModal } from '../../../../common-util/List/IpfsHashGenerationModal';
 import { fillIpfsGenerationModal } from '../../../helpers/prefillForm';
 import { wrapProvider, mockV1Hash } from '../../../helpers';
 
-jest.mock('common-util/List/IpfsHashGenerationModal/helpers', () => ({
+jest.mock('../../../../common-util/List/IpfsHashGenerationModal/helpers', () => ({
   getIpfsHashHelper: jest.fn(() => mockV1Hash),
 }));
 
 const callbackMock = jest.fn();
 const handleCancelMock = jest.fn();
 
-// eslint-disable-next-line jest/no-disabled-tests
 describe.skip('<IpfsHashGenerationModal />', () => {
   it('should render a hash generation modal and return Hash', async () => {
     expect.hasAssertions();

@@ -6,9 +6,9 @@ import {
 } from 'antd';
 import { notifyError, notifySuccess } from '@autonolas/frontend-library';
 
-import { HASH_PREFIXES } from 'util/constants';
-import { useHelpers } from 'common-util/hooks';
-import { notifyWrongNetwork } from 'common-util/functions';
+import { HASH_PREFIXES } from '../../../util/constants';
+import { useHelpers } from '../../hooks';
+import { notifyWrongNetwork } from '../../functions';
 import { getIpfsHashHelper } from './helpers';
 import { CustomModal } from '../styles';
 

@@ -3,15 +3,15 @@ import { Tabs } from 'antd';
 import { useRouter } from 'next/router';
 import { notifyError } from '@autonolas/frontend-library';
 
-import { NAV_TYPES } from 'util/constants';
-import ListTable from 'common-util/List/ListTable';
+import { NAV_TYPES } from '../../util/constants';
+import ListTable from '../../common-util/List/ListTable';
 import {
   useExtraTabContent,
   getHash,
   isMyTab,
-} from 'common-util/List/ListTable/helpers';
-import { getMyListOnPagination } from 'common-util/ContractUtils/myList';
-import { useHelpers } from 'common-util/hooks';
+} from '../../common-util/List/ListTable/helpers';
+import { getMyListOnPagination } from '../../common-util/ContractUtils/myList';
+import { useHelpers } from '../../common-util/hooks';
 import {
   getAgents,
   getFilteredAgents,

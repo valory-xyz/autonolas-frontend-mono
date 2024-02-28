@@ -2,10 +2,10 @@ import PropTypes from 'prop-types';
 import { Table } from 'antd';
 import { Loader, useScreen } from '@autonolas/frontend-library';
 
-import { TOTAL_VIEW_COUNT } from 'util/constants';
-import { ListEmptyMessage } from 'common-util/List/ListCommon';
-import { useHelpers } from 'common-util/hooks';
-import { useSvmConnectivity } from 'common-util/hooks/useSvmConnectivity';
+import { TOTAL_VIEW_COUNT } from '../../../util/constants';
+import { ListEmptyMessage } from '../ListCommon';
+import { useHelpers } from '../../common-util/hooks';
+import { useSvmConnectivity } from '../../hooks/useSvmConnectivity';
 import { getData, getTableColumns } from './helpers';
 
 const ListTable = ({
@@ -22,9 +22,7 @@ const ListTable = ({
   onUpdateClick,
   extra,
 }) => {
-  const {
-    chainName, account, isSvm, chainId,
-  } = useHelpers();
+  const { chainName, account, isSvm, chainId } = useHelpers();
   const { hasNoSvmPublicKey } = useSvmConnectivity();
   /**
    * no pagination on search as we won't know total beforehand
