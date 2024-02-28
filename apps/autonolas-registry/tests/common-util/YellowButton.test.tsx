@@ -1,5 +1,4 @@
 
-import React from 'react'
 import { render } from "@testing-library/react";
 import { YellowButton } from "../../common-util/YellowButton";
 import '@testing-library/jest-dom';

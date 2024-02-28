@@ -1,4 +1,3 @@
-import React from 'react'
 import { Button, ConfigProvider } from 'antd';
 import PropTypes from 'prop-types';
 import { EXTRA_COLORS } from '../util/constants';
