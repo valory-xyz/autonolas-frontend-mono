@@ -12,7 +12,7 @@ import {
 // import { useRouter } from 'next/router';
 import { wrapProvider, ACTIVE_TAB, getTableTd } from '../../helpers';
 
-jest.mock('next/router', () => jest.requireActual('next-router-mock'))
+jest.mock('next/router', () => jest.requireActual('next-router-mock'));
 
 jest.mock('../../../components/ListAgents/utils', () => ({
   getAgents: jest.fn(),
@@ -34,7 +34,17 @@ jest.mock('@web3modal/ethereum', () => ({
 
 jest.mock('../../../common-util/hooks', () => ({
   useHelpers: () => ({
-    getAgent: jest.fn(),
+    account: '0x123',
+    vmType: 'EVM',
+    chainId: 1,
+    chainDisplayName: 'Ethereum',
+    chainName: 'ethereum',
+    isL1OnlyNetwork: true,
+    isL1Network: true,
+    doesNetworkHaveValidServiceManagerToken: true,
+    links: { AGENTS: '/ethereum/agents' },
+    isConnectedToWrongNetwork: false,
+    isSvm: false,
   }),
 }));
 
@@ -63,12 +73,14 @@ describe('listAgents/index.jsx', () => {
   it('should render tabs with `All Tab` as active tab & Mint button', async () => {
     const { container, getByRole } = render(wrapProvider(<ListAgents />));
 
-    if(!container) {
+    if (!container) {
       throw new Error('`All tab` is null');
     }
 
     // check if the selected tab is `All` & has the correct content
-    await waitFor(async () => expect(container.querySelector(ACTIVE_TAB)?.textContent).toBe('All'));
+    await waitFor(async () =>
+      expect(container.querySelector(ACTIVE_TAB)?.textContent).toBe('All'),
+    );
 
     await waitFor(async () => {
       // ckecking Id, description column
@@ -88,12 +100,12 @@ describe('listAgents/index.jsx', () => {
 
   it('should render tabs with `My Agents` as active tab & Mint button', async () => {
     const { container, getByRole } = render(wrapProvider(<ListAgents />));
-    if(!container) {
+    if (!container) {
       throw new Error('`My agents` is null');
     }
 
     const myAgentsTab = container.querySelector('.ant-tabs-tab:nth-child(2)');
-    if(!myAgentsTab) {
+    if (!myAgentsTab) {
       throw new Error('`My agents` tab is null');
     }
 
@@ -102,7 +114,9 @@ describe('listAgents/index.jsx', () => {
 
     // check if the selected tab is `My agents` & has the correct content
     await waitFor(async () => {
-      expect(container.querySelector(ACTIVE_TAB)?.textContent).toBe('My Agents');
+      expect(container.querySelector(ACTIVE_TAB)?.textContent).toBe(
+        'My Agents',
+      );
     });
 
     // Mint button

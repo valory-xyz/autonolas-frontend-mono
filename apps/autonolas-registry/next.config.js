@@ -1,7 +1,10 @@
 //@ts-check
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-import { composePlugins, withNx } from '@nx/next';
+// import { composePlugins, withNx } from '@nx/next';
+const objects = require('@nx/next');
+
+const { composePlugins, withNx } = objects;
 
 /**
  * @type {import('@nx/next/plugins/with-nx').WithNxOptions}
@@ -17,7 +20,7 @@ const nextConfig = {
     // For other options, see https://styled-components.com/docs/tooling#babel-plugin
     styledComponents: true,
   },
-  
+
   redirects: async () => [
     {
       source: '/',
@@ -47,4 +50,5 @@ const plugins = [
   withNx,
 ];
 
-export default composePlugins(...plugins)(nextConfig);
+// export default composePlugins(...plugins)(nextConfig);
+module.exports = composePlugins(...plugins)(nextConfig);

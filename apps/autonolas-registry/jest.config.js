@@ -1,6 +1,12 @@
+// import { resolve } from 'path';
+// import { pathsToModuleNameMapper } from 'ts-jest';
+// import { compilerOptions } from '../../tsconfig.base.json';
+
 const { resolve } = require('path');
 const { pathsToModuleNameMapper } = require('ts-jest');
-const { compilerOptions } = require('../../tsconfig.base.json');
+
+/* eslint-disable-next-line @typescript-eslint/no-var-requires */
+const { compilerOptions } = require('../../tsconfig.base.json'); 
 
 // const esModules = ['wagmi'].join('|');
 
