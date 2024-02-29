@@ -3,24 +3,24 @@ import '@testing-library/jest-dom';
 
 // import jest from 'jest';
 
-// // https:// jestjs.io/docs/manual-mocks#mocking-methods-which-are-not-implemented-in-jsdom
-// Object.defineProperty(window, 'matchMedia', {
-//   writable: true,
-//   value: jest.fn().mockImplementation((query) => ({
-//     matches: false,
-//     media: query,
-//     onchange: null,
-//     addListener: jest.fn(), // deprecated
-//     removeListener: jest.fn(), // deprecated
-//     addEventListener: jest.fn(),
-//     removeEventListener: jest.fn(),
-//     dispatchEvent: jest.fn(),
-//   })),
-// });
+// https:// jestjs.io/docs/manual-mocks#mocking-methods-which-are-not-implemented-in-jsdom
+Object.defineProperty(window, 'matchMedia', {
+  writable: true,
+  value: jest.fn().mockImplementation((query) => ({
+    matches: false,
+    media: query,
+    onchange: null,
+    addListener: jest.fn(), // deprecated
+    removeListener: jest.fn(), // deprecated
+    addEventListener: jest.fn(),
+    removeEventListener: jest.fn(),
+    dispatchEvent: jest.fn(),
+  })),
+});
 
-// jest.mock('ipfs-only-hash', () => ({
-//   of: jest.fn(),
-// }));
+jest.mock('ipfs-only-hash', () => ({
+  of: jest.fn(),
+}));
 
 // jest.mock('common-util/Login', () => ({
 //   SUPPORTED_CHAINS: [{ id: 1 }],

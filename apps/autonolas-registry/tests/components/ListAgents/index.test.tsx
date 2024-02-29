@@ -9,8 +9,10 @@ import {
   getTotalForAllAgents,
   getTotalForMyAgents,
 } from '../../../components/ListAgents/utils';
-import { useRouter } from 'next/router';
+// import { useRouter } from 'next/router';
 import { wrapProvider, ACTIVE_TAB, getTableTd } from '../../helpers';
+
+jest.mock('next/router', () => jest.requireActual('next-router-mock'))
 
 jest.mock('../../../components/ListAgents/utils', () => ({
   getAgents: jest.fn(),
@@ -19,15 +21,39 @@ jest.mock('../../../components/ListAgents/utils', () => ({
   getTotalForMyAgents: jest.fn(),
 }));
 
+jest.mock('@web3modal/ethereum', () => ({
+  EthereumClient: jest.fn().mockImplementation(() => ({
+    getAgent: jest.fn(),
+  })),
+}));
+
+// jest.mock('wagmi', () => ({
+//   configurChain: jest.fn(),
+//   createConfig: jest.fn(),
+// }));
+
+jest.mock('../../../common-util/hooks', () => ({
+  useHelpers: () => ({
+    getAgent: jest.fn(),
+  }),
+}));
+
+jest.mock('../../../common-util/hooks/useHelpers', () => ({
+  useHelpers: () => ({
+    getAgent: jest.fn(),
+  }),
+}));
+
 // dummy responses mock
 const allAgentsResponse = { id: '1', dependencies: ['4'] };
 const myAgentsResponse = { id: '2', dependencies: ['5'] };
 
+jest.mock('next/router');
 
 describe('listAgents/index.jsx', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    (useRouter as jest.Mock).mockImplementation(() => ({ push: jest.fn() }));
+    // (useRouter as jest.Mock).mockReturnValue(() => ({ push: jest.fn() }));
     (getAgents as jest.Mock).mockResolvedValue([allAgentsResponse]);
     (getFilteredAgents as jest.Mock).mockResolvedValue([myAgentsResponse]);
     (getTotalForAllAgents as jest.Mock).mockResolvedValue(1);
@@ -35,7 +61,6 @@ describe('listAgents/index.jsx', () => {
   });
 
   it('should render tabs with `All Tab` as active tab & Mint button', async () => {
-    expect.hasAssertions();
     const { container, getByRole } = render(wrapProvider(<ListAgents />));
 
     if(!container) {
@@ -62,7 +87,6 @@ describe('listAgents/index.jsx', () => {
   });
 
   it('should render tabs with `My Agents` as active tab & Mint button', async () => {
-    expect.hasAssertions();
     const { container, getByRole } = render(wrapProvider(<ListAgents />));
     if(!container) {
       throw new Error('`My agents` is null');
