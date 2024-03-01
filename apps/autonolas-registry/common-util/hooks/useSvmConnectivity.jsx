@@ -3,7 +3,7 @@ import { useAnchorWallet, useConnection } from '@solana/wallet-adapter-react';
 import { Program, AnchorProvider } from '@project-serum/anchor';
 import { PublicKey } from '@solana/web3.js';
 
-import { SOLANA_CHAIN_NAMES } from '../../util/constants';
+import { SOLANA_CHAIN_NAMES } from 'util/constants';
 import idl from '../AbiAndAddresses/ServiceRegistrySolana.json';
 import {
   SOLANA_ADDRESSES,

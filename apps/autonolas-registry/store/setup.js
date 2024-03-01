@@ -1,5 +1,6 @@
 import { createSlice } from '@reduxjs/toolkit';
-import { VM_TYPE } from '../util/constants';
+
+import { VM_TYPE } from 'util/constants';
 import { ALL_SUPPORTED_CHAINS,EVM_SUPPORTED_CHAINS, } from '../common-util/Login/config';
 
 const initialState = {

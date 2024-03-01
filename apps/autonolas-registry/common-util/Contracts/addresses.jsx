@@ -2,7 +2,7 @@ import {
   LOCAL_FORK_ID,
   LOCAL_FORK_ID_GNOSIS,
   LOCAL_FORK_ID_POLYGON,
-} from '../../util/constants';
+} from 'util/constants';
 
 const MAINNET_ADDRESSES = {
   agentRegistry: '0x2F1f7D38e4772884b88f3eCd8B6b9faCdC319112',

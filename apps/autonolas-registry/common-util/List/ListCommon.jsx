@@ -88,9 +88,6 @@ export const RegisterMessage = ({ handleCancel }) => (
 RegisterMessage.propTypes = { handleCancel: PropTypes.func };
 RegisterMessage.defaultProps = { handleCancel: null };
 
-/**
- * ListEmptyMessage
- */
 export const ListEmptyMessage = ({ message = '', type }) => {
   const getValues = () => {
     switch (type) {

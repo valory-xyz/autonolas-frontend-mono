@@ -1,6 +1,6 @@
 import { Button, ConfigProvider } from 'antd';
 import PropTypes from 'prop-types';
-import { EXTRA_COLORS } from '../util/constants';
+import { EXTRA_COLORS } from 'util/constants';
 
 export const YellowButton = ({ children, ...props }) => (
   <ConfigProvider
