@@ -34,6 +34,11 @@ jest.mock('@web3modal/ethereum', () => ({
   })),
 }));
 
+jest.mock('@solana/wallet-adapter-react', () => ({
+  useAnchorWallet: jest.fn(),
+  useConnection: () => ({ connection: 'connection' }),
+}));
+
 /*-------------------- common-util mocks ---------------------*/
 jest.mock('./common-util/Login', () => ({
   SUPPORTED_CHAINS: [{ id: 1 }],
