@@ -1,3 +1,4 @@
+/* eslint-disable jest/no-conditional-expect */
 /* eslint-disable no-await-in-loop */
 import fetch from 'node-fetch';
 import {
@@ -11,11 +12,11 @@ import {
   SERVICE_MANAGER_TOKEN_CONTRACT,
   OPERATOR_WHITELIST_CONTRACT,
 } from '../../common-util/AbiAndAddresses';
-// import {
-//   ADDRESSES,
-//   multisigAddresses,
-//   multisigSameAddresses,
-// } from '../../common-util/Contracts/addresses';
+import {
+  ADDRESSES,
+  multisigAddresses,
+  multisigSameAddresses,
+} from '../../common-util/Contracts/addresses';
 
 const LOCAL_ARTIFACTS = [
   COMPONENT_REGISTRY_CONTRACT,
@@ -39,16 +40,11 @@ type Contract = {
 
 type Chain = {
   name: string;
-  chainId: string;
+  chainId: keyof typeof ADDRESSES;
   contracts: Contract[];
 };
 
-// type Abi = {
-//   name: string;
-//   abi: string;
-// };
-
-describe.skip('test-chains/TestChains.jsx', () => {
+describe('test-chains/TestChains.jsx', () => {
   it(
     'check contract addresses and ABIs',
     async () => {
@@ -66,40 +62,49 @@ describe.skip('test-chains/TestChains.jsx', () => {
           console.log(contracts);
           const currentContract = contracts[j];
 
+          const localArtifact = LOCAL_ARTIFACTS.find(
+            (artifact) => artifact.contractName === currentContract.name,
+          );
+
+          if (!localArtifact) return;
+
           // Go over local artifacts
-          for (let k = 0; k < LOCAL_ARTIFACTS.length; k += 1) {
-            //   if (contracts[j].name === 'GnosisSafeMultisig') {
-            //     // Check for the GnosisSafeMultisig address
-            //     expect(contracts[j].address).toBe(multisigAddresses[chainId][0]);
-            //   } else if (contracts[j].name === 'GnosisSafeSameAddressMultisig') {
-            //     // Check for the GnosisSafeSameAddressMultisig address
-            //     expect(contracts[j].address).toBe(
-            //       multisigSameAddresses[chainId][0],
-            //     );
-            //   } else if (contracts[j].name === LOCAL_ARTIFACTS[k].contractName) {
+          // for (let k = 0; k < LOCAL_ARTIFACTS.length; k += 1) {
+          if (contracts[j].name === 'GnosisSafeMultisig') {
+            // Check for the GnosisSafeMultisig address
+            const multisigAddressesChainId =
+              chainId as keyof typeof multisigAddresses;
+
+            expect(contracts[j].address).toBe(
+              multisigAddresses[multisigAddressesChainId][0],
+            );
+          } else if (contracts[j].name === 'GnosisSafeSameAddressMultisig') {
+            // Check for the GnosisSafeSameAddressMultisig address
+            const multisigSameAddressesChainId =
+              chainId as keyof typeof multisigSameAddresses;
+
+            expect(contracts[j].address).toBe(
+              multisigSameAddresses[multisigSameAddressesChainId][0],
+            );
+          } else if (contracts[j].name === localArtifact.contractName) {
             // Take the configuration and local contract names that match
             // Get local and configuration ABIs, stringify them
-            const localAbi = JSON.stringify(LOCAL_ARTIFACTS[k].abi);
-
-            // Get up-to-date remote contract artifact and its ABI
-            const remoteArtifactResponse = await fetch(registriesRepo + currentContract.artifact);
+            const remoteArtifactResponse = await fetch(
+              registriesRepo + currentContract.artifact,
+            );
             const remoteArtifact = await remoteArtifactResponse.json();
-            
-            console.log(LOCAL_ARTIFACTS[k].contractName, ' << -- >> ',currentContract.name);
 
-            // Stringify the remote ABI and compare with the local one
-            const remoteAbi = JSON.stringify(remoteArtifact.abi);
-            expect(localAbi).toBe(remoteAbi);
+            expect(localArtifact.abi).toMatchObject(remoteArtifact.abi);
 
-            // // Check the address
-            // const lowLetter =
-            //   LOCAL_ARTIFACTS[k].contractName.charAt(0).toLowerCase() +
-            //   LOCAL_ARTIFACTS[k].contractName.slice(1);
-            // // Need to stringify and then convert to JSON again to access the address field
-            // const addressStruct = JSON.stringify(ADDRESSES[chainId]);
-            // const addressStructJSON = JSON.parse(addressStruct);
-            // const localAddress = addressStructJSON[lowLetter];
-            // expect(localAddress).toBe(contracts[j].address);
+            // Check the address
+            const lowLetter =
+              localArtifact.contractName.charAt(0).toLowerCase() +
+              localArtifact.contractName.slice(1);
+            // Need to stringify and then convert tstringain to access the address field
+            const addressStruct = JSON.stringify(ADDRESSES[chainId]);
+            const addressStructJSON = JSON.parse(addressStruct);
+            const localAddress = addressStructJSON[lowLetter];
+            expect(localAddress).toBe(contracts[j].address);
           }
         }
       }

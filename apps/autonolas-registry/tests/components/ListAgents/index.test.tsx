@@ -15,7 +15,7 @@ import { wrapProvider, ACTIVE_TAB, getTableTd } from '../../helpers';
 const allAgentsResponse = { id: '1', dependencies: ['4'] };
 const myAgentsResponse = { id: '2', dependencies: ['5'] };
 
-jest.mock('../../../components/ListAgents/utils', () => ({
+jest.mock('components/ListAgents/utils', () => ({
   getAgents: jest.fn(),
   getFilteredAgents: jest.fn(),
   getTotalForAllAgents: jest.fn(),
@@ -25,7 +25,6 @@ jest.mock('../../../components/ListAgents/utils', () => ({
 describe('listAgents/index.jsx', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    // (useRouter as jest.Mock).mockReturnValue(() => ({ push: jest.fn() }));
     (getAgents as jest.Mock).mockResolvedValue([allAgentsResponse]);
     (getFilteredAgents as jest.Mock).mockResolvedValue([myAgentsResponse]);
     (getTotalForAllAgents as jest.Mock).mockResolvedValue(1);

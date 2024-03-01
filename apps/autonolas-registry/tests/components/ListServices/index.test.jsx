@@ -8,7 +8,6 @@ import {
   getTotalForAllServices,
   getTotalForMyServices,
 } from 'components/ListServices/utils';
-import { useRouter } from 'next/router';
 import { getServiceContract } from 'common-util/Contracts';
 import { wrapProvider, ACTIVE_TAB, getTableTd } from '../../helpers';
 
@@ -33,7 +32,6 @@ const myServiceResponse = { id: '2' };
 describe('listServices/index.jsx', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    useRouter.mockImplementation(() => ({ push: jest.fn() }));
 
     getServiceContract.mockImplementation(() => ({
       methods: {

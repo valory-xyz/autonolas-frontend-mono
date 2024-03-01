@@ -1,4 +1,3 @@
-import React from 'react';
 import { render, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import ListComponents from 'components/ListComponents';
@@ -8,8 +7,11 @@ import {
   getTotalForAllComponents,
   getTotalForMyComponents,
 } from 'components/ListComponents/utils';
-import { useRouter } from 'next/router';
 import { wrapProvider, ACTIVE_TAB, getTableTd } from '../../helpers';
+
+// dummy responses mock
+const allComponentResponse = { id: '1', dependencies: ['1'] };
+const myComponentResponse = { id: '2', dependencies: ['2'] };
 
 jest.mock('components/ListComponents/utils', () => ({
   getComponents: jest.fn(),
@@ -18,14 +20,9 @@ jest.mock('components/ListComponents/utils', () => ({
   getTotalForMyComponents: jest.fn(),
 }));
 
-// dummy responses mock
-const allComponentResponse = { id: '1', dependencies: ['1'] };
-const myComponentResponse = { id: '2', dependencies: ['2'] };
-
 describe('listComponents/index.jsx', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    useRouter.mockImplementation(() => ({ push: jest.fn() }));
     getComponents.mockResolvedValue([allComponentResponse]);
     getFilteredComponents.mockResolvedValue([myComponentResponse]);
     getTotalForAllComponents.mockResolvedValue(1);

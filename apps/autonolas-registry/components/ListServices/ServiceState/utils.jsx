@@ -44,7 +44,12 @@ export const getBonds = async (id, tableDataSource) => {
     bondsArray.push(bond);
   }
 
-  return transformSlotsAndBonds(slotsArray, bondsArray, tableDataSource);
+  const transformedSlotsAndBonds = transformSlotsAndBonds(
+    slotsArray,
+    bondsArray,
+    tableDataSource,
+  );
+  return transformedSlotsAndBonds;
 };
 
 /* ----- common functions ----- */
@@ -219,7 +224,8 @@ export const checkIfAgentInstancesAreValid = async ({
   );
 
   const ifValidArray = (await Promise.all(agentInstanceAddressesPromises)).some(
-    (eachAgentInstance) => eachAgentInstance === DEFAULT_SERVICE_CREATION_ETH_TOKEN_ZEROS,
+    (eachAgentInstance) =>
+      eachAgentInstance === DEFAULT_SERVICE_CREATION_ETH_TOKEN_ZEROS,
   );
 
   if (!ifValidArray) {

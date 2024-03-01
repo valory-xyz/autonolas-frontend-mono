@@ -1,8 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import PropTypes from 'prop-types';
-import {
-  Button, Steps, Tooltip, Image,
-} from 'antd';
+import { Button, Steps, Tooltip, Image } from 'antd';
 import get from 'lodash/get';
 import { notifyError, notifySuccess } from '@autonolas/frontend-library';
 
@@ -43,6 +41,7 @@ const ServiceStateHeader = () => {
 
       {isStateImageVisible && (
         <Image
+          alt="Service Lifecycle"
           width={200}
           src="/images/service-lifecycle.png"
           preview={{
@@ -58,12 +57,9 @@ const ServiceStateHeader = () => {
   );
 };
 
-export const ServiceState = ({
-  isOwner, id, details, updateDetails,
-}) => {
-  const {
-    account, chainId, isSvm, doesNetworkHaveValidServiceManagerToken,
-  } = useHelpers();
+export const ServiceState = ({ isOwner, id, details, updateDetails }) => {
+  const { account, chainId, isSvm, doesNetworkHaveValidServiceManagerToken } =
+    useHelpers();
   const [currentStep, setCurrentStep] = useState(1);
   const [dataSource, setDataSource] = useState([]);
   const onTerminate = useTerminate();
@@ -84,7 +80,8 @@ export const ServiceState = ({
   const threshold = get(details, 'threshold') || '';
   const owner = get(details, 'owner') || '';
   const securityDeposit = get(details, 'securityDeposit');
-  const canShowMultisigSameAddress = get(details, 'multisig') !== `0x${'0'.repeat(40)}`;
+  const canShowMultisigSameAddress =
+    get(details, 'multisig') !== `0x${'0'.repeat(40)}`;
 
   // get service table data source and check if it's an eth token
   useEffect(() => {
