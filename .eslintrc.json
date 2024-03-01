@@ -38,11 +38,20 @@
       "rules": {}
     },
     {
-      "files": ["*.spec.ts", "*.spec.tsx", "*.spec.js", "*.spec.jsx"],
+      "files": [
+        "*.spec.ts",
+        "*.test.ts",
+        "*.spec.tsx",
+        "*.test.tsx",
+        "*.spec.js",
+        "*.test.js",
+        "*.spec.jsx",
+        "*.test.jsx"
+      ],
+      "extends": ["plugin:jest/recommended"],
       "env": {
         "jest": true
-      },
-      "rules": {}
+      }
     }
   ]
 }

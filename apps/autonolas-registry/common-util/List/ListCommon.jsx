@@ -3,8 +3,8 @@ import Link from 'next/link';
 import { Alert, Button } from 'antd';
 import { ExportOutlined } from '@ant-design/icons';
 
+import { EmptyMessage, RegisterFooter } from 'components/styles';
 import { useHelpers } from '../hooks';
-import { EmptyMessage, RegisterFooter } from './styles';
 
 // ----------- functions -----------
 /**
@@ -88,6 +88,9 @@ export const RegisterMessage = ({ handleCancel }) => (
 RegisterMessage.propTypes = { handleCancel: PropTypes.func };
 RegisterMessage.defaultProps = { handleCancel: null };
 
+/**
+ * ListEmptyMessage
+ */
 export const ListEmptyMessage = ({ message = '', type }) => {
   const getValues = () => {
     switch (type) {

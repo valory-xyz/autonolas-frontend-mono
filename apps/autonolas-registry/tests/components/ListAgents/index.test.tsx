@@ -9,10 +9,11 @@ import {
   getTotalForAllAgents,
   getTotalForMyAgents,
 } from '../../../components/ListAgents/utils';
-// import { useRouter } from 'next/router';
 import { wrapProvider, ACTIVE_TAB, getTableTd } from '../../helpers';
 
-jest.mock('next/router', () => jest.requireActual('next-router-mock'));
+// dummy responses mock
+const allAgentsResponse = { id: '1', dependencies: ['4'] };
+const myAgentsResponse = { id: '2', dependencies: ['5'] };
 
 jest.mock('../../../components/ListAgents/utils', () => ({
   getAgents: jest.fn(),
@@ -20,45 +21,6 @@ jest.mock('../../../components/ListAgents/utils', () => ({
   getTotalForAllAgents: jest.fn(),
   getTotalForMyAgents: jest.fn(),
 }));
-
-jest.mock('@web3modal/ethereum', () => ({
-  EthereumClient: jest.fn().mockImplementation(() => ({
-    getAgent: jest.fn(),
-  })),
-}));
-
-// jest.mock('wagmi', () => ({
-//   configurChain: jest.fn(),
-//   createConfig: jest.fn(),
-// }));
-
-jest.mock('../../../common-util/hooks', () => ({
-  useHelpers: () => ({
-    account: '0x123',
-    vmType: 'EVM',
-    chainId: 1,
-    chainDisplayName: 'Ethereum',
-    chainName: 'ethereum',
-    isL1OnlyNetwork: true,
-    isL1Network: true,
-    doesNetworkHaveValidServiceManagerToken: true,
-    links: { AGENTS: '/ethereum/agents' },
-    isConnectedToWrongNetwork: false,
-    isSvm: false,
-  }),
-}));
-
-jest.mock('../../../common-util/hooks/useHelpers', () => ({
-  useHelpers: () => ({
-    getAgent: jest.fn(),
-  }),
-}));
-
-// dummy responses mock
-const allAgentsResponse = { id: '1', dependencies: ['4'] };
-const myAgentsResponse = { id: '2', dependencies: ['5'] };
-
-jest.mock('next/router');
 
 describe('listAgents/index.jsx', () => {
   beforeEach(() => {

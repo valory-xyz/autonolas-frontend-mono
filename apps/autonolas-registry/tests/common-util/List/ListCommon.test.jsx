@@ -5,7 +5,7 @@ import {
   ListEmptyMessage,
   AlertSuccess,
   AlertError,
-} from 'common-util/List/ListCommon';
+} from '../../../common-util/List/ListCommon';
 
 describe('convertStringToArray()', () => {
   it.each([
@@ -28,7 +28,6 @@ describe('<ListEmptyMessage />', () => {
     { input: 'operator', output: /No operators registered/ },
     { input: null, output: /Please check type!/ },
   ])('expects valid type (input=$input)', ({ input, output }) => {
-    expect.hasAssertions();
     const { getByText } = render(<ListEmptyMessage type={input} />);
     expect(getByText(output)).toBeInTheDocument();
   });
@@ -49,12 +48,9 @@ describe('<AlertSuccess />', () => {
     const { getByText } = render(
       <AlertSuccess type={type} information={input} />,
     );
-    // eslint-disable-next-line jest/no-conditional-in-test
-    if (type) {
-      expect(getByText(`${type} minted`)).toBeInTheDocument();
-    } else {
-      expect(getByText('Minted successfully')).toBeInTheDocument();
-    }
+    expect(
+      type ? getByText(`${type} minted`) : getByText('Minted successfully'),
+    ).toBeInTheDocument();
   });
 
   it.each([{ input: null }, { input: undefined }])(
