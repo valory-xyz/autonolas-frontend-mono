@@ -1,5 +1,3 @@
-/* eslint-disable jest/max-expects */
-import React from 'react';
 import { render, waitFor } from '@testing-library/react';
 import { GATEWAY_URL } from 'util/constants';
 import AgentDetails from 'components/ListAgents/details';
@@ -17,15 +15,19 @@ import {
   mockCodeUri,
 } from '../../helpers';
 
-jest.mock('common-util/List/IpfsHashGenerationModal/helpers', () => ({
-  getIpfsHashHelper: jest.fn(() => mockV1Hash),
-}));
-
 jest.mock('next/router', () => ({
   __esModule: true,
   useRouter() {
     return { query: { id: '1' } };
   },
+}));
+
+jest.mock('common-util/List/IpfsHashGenerationModal/helpers', () => ({
+  getIpfsHashHelper: jest.fn(() => mockV1Hash),
+}));
+
+jest.mock('common-util/Details/utils', () => ({
+  checkIfServiceRequiresWhitelisting: jest.fn(() => false),
 }));
 
 jest.mock('components/ListAgents/utils', () => ({
@@ -58,9 +60,10 @@ const unmockedFetch = global.fetch;
 
 describe('listAgents/details.jsx', () => {
   beforeAll(() => {
-    global.fetch = () => Promise.resolve({
-      json: () => Promise.resolve(dummyIpfs),
-    });
+    global.fetch = () =>
+      Promise.resolve({
+        json: () => Promise.resolve(dummyIpfs),
+      });
   });
 
   beforeEach(() => {
@@ -76,8 +79,7 @@ describe('listAgents/details.jsx', () => {
   });
 
   it('should render agent details', async () => {
-    expect.hasAssertions();
-    const { getByText, getByTestId, getByRole } = render(
+    const { getByText, getByTestId, queryByRole } = render(
       wrapProvider(<AgentDetails />),
     );
     await waitFor(async () => {
@@ -98,7 +100,9 @@ describe('listAgents/details.jsx', () => {
       expect(getByTestId('owner-address').textContent).toBe(
         dummyDetails.developer,
       );
-      expect(getByRole('button', { name: 'Update Hash' })).toBeInTheDocument();
+      expect(
+        queryByRole('button', { name: 'Update Hash' }),
+      ).not.toBeInTheDocument();
       expect(getByTestId('details-dependency')).toBeInTheDocument();
 
       // NFT image

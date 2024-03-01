@@ -3,9 +3,9 @@ import { Table } from 'antd';
 import { Loader, useScreen } from '@autonolas/frontend-library';
 
 import { TOTAL_VIEW_COUNT } from 'util/constants';
-import { ListEmptyMessage } from 'common-util/List/ListCommon';
-import { useHelpers } from 'common-util/hooks';
-import { useSvmConnectivity } from 'common-util/hooks/useSvmConnectivity';
+import { useHelpers } from '../../hooks';
+import { useSvmConnectivity } from '../../hooks/useSvmConnectivity';
+import { ListEmptyMessage } from '../ListCommon';
 import { getData, getTableColumns } from './helpers';
 
 const ListTable = ({
@@ -22,9 +22,7 @@ const ListTable = ({
   onUpdateClick,
   extra,
 }) => {
-  const {
-    chainName, account, isSvm, chainId,
-  } = useHelpers();
+  const { chainName, account, isSvm, chainId } = useHelpers();
   const { hasNoSvmPublicKey } = useSvmConnectivity();
   /**
    * no pagination on search as we won't know total beforehand

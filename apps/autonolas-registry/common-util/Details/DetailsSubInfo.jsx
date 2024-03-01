@@ -53,9 +53,7 @@ const MetadataUnpinnedMessage = () => (
  * Displays view hash and view code buttons redirecting to
  * links respectively
  */
-const ViewHashAndCode = ({
-  type, metadataLoadState, hashUrl, codeHref,
-}) => {
+const ViewHashAndCode = ({ type, metadataLoadState, hashUrl, codeHref }) => {
   if (HASH_DETAILS_STATE.LOADED !== metadataLoadState) return null;
 
   return (
@@ -259,9 +257,9 @@ export const DetailsSubInfo = ({
 
     // token address is only available for L1 networks
     if (
-      doesNetworkHaveValidServiceManagerToken
-      && tokenAddress !== DEFAULT_SERVICE_CREATION_ETH_TOKEN_ZEROS
-      && !isSvm
+      doesNetworkHaveValidServiceManagerToken &&
+      tokenAddress !== DEFAULT_SERVICE_CREATION_ETH_TOKEN_ZEROS &&
+      !isSvm
     ) {
       serviceDetailsList.push({
         title: 'Token Address',
@@ -287,9 +285,10 @@ export const DetailsSubInfo = ({
     return serviceDetailsList;
   };
 
-  const details = type === NAV_TYPES.SERVICE
-    ? getServiceValues()
-    : getComponentAndAgentValues();
+  const details =
+    type === NAV_TYPES.SERVICE
+      ? getServiceValues()
+      : getComponentAndAgentValues();
 
   return (
     <SectionContainer>
@@ -309,7 +308,9 @@ DetailsSubInfo.propTypes = {
   type: typePropType,
   tokenUri: PropTypes.string,
   ownerAddress: PropTypes.string,
-  componentAndAgentDependencies: PropTypes.arrayOf(PropTypes.string),
+  componentAndAgentDependencies: PropTypes.arrayOf(
+    PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+  ),
   serviceThreshold: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
   serviceCurrentState: PropTypes.string,
   handleHashUpdate: PropTypes.func,

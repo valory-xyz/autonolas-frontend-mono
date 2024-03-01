@@ -1,11 +1,10 @@
-import React from 'react';
 import { render } from '@testing-library/react';
 import {
   convertStringToArray,
   ListEmptyMessage,
   AlertSuccess,
   AlertError,
-} from 'common-util/List/ListCommon';
+} from '../../../common-util/List/ListCommon';
 
 describe('convertStringToArray()', () => {
   it.each([
@@ -28,7 +27,6 @@ describe('<ListEmptyMessage />', () => {
     { input: 'operator', output: /No operators registered/ },
     { input: null, output: /Please check type!/ },
   ])('expects valid type (input=$input)', ({ input, output }) => {
-    expect.hasAssertions();
     const { getByText } = render(<ListEmptyMessage type={input} />);
     expect(getByText(output)).toBeInTheDocument();
   });
@@ -45,22 +43,17 @@ describe('<AlertSuccess />', () => {
       input: { name: 'Valory' },
     },
   ])('expects valid object (input=$input)', ({ type, input }) => {
-    expect.hasAssertions();
     const { getByText } = render(
       <AlertSuccess type={type} information={input} />,
     );
-    // eslint-disable-next-line jest/no-conditional-in-test
-    if (type) {
-      expect(getByText(`${type} minted`)).toBeInTheDocument();
-    } else {
-      expect(getByText('Minted successfully')).toBeInTheDocument();
-    }
+    expect(
+      type ? getByText(`${type} minted`) : getByText('Minted successfully'),
+    ).toBeInTheDocument();
   });
 
   it.each([{ input: null }, { input: undefined }])(
     'expects invalid object (input=$input)',
     ({ input }) => {
-      expect.hasAssertions();
       const { queryByTestId } = render(<AlertSuccess information={input} />);
       expect(queryByTestId('alert-info-container')).not.toBeInTheDocument();
     },

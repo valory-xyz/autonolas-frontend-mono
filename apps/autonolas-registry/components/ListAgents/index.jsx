@@ -29,9 +29,7 @@ const ListAgents = () => {
     isMyTab(hash) ? MY_AGENTS : ALL_AGENTS,
   );
 
-  const {
-    account, chainId, links, isL1OnlyNetwork,
-  } = useHelpers();
+  const { account, chainId, links, isL1OnlyNetwork } = useHelpers();
 
   /**
    * extra tab content & view click

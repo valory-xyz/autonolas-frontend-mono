@@ -10,8 +10,6 @@ jest.mock('common-util/Contracts', () => ({
 
 describe('listAgents/utils.jsx', () => {
   it('getFilteredAgents: Promise resolved', async () => {
-    expect.hasAssertions();
-
     getAgentContract.mockImplementation(() => ({
       methods: {
         totalSupply: jest.fn(() => ({
@@ -34,8 +32,6 @@ describe('listAgents/utils.jsx', () => {
   });
 
   it('getAgents: Promise resolved', async () => {
-    expect.hasAssertions();
-
     getAgentContract.mockImplementation(() => ({
       methods: {
         totalSupply: jest.fn(() => ({

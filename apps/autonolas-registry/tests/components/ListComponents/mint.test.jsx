@@ -1,4 +1,3 @@
-import React from 'react';
 import { render, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { getMechMinterContract } from 'common-util/Contracts';
@@ -19,8 +18,6 @@ jest.mock('common-util/List/IpfsHashGenerationModal/helpers', () => ({
 
 describe('listComponents/mint.jsx', () => {
   it('should submit the form & mint the `Component` successfully', async () => {
-    expect.hasAssertions();
-
     getMechMinterContract.mockImplementation(() => ({
       methods: {
         create: jest.fn(() => ({

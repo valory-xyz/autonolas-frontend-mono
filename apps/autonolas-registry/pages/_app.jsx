@@ -9,9 +9,9 @@ import { WagmiConfig as WagmiConfigProvider } from 'wagmi';
 import { wagmiConfig } from 'common-util/Login/config';
 
 /** antd theme config */
+import { THEME_CONFIG } from '@autonolas/frontend-library';
 import Layout from 'components/Layout';
 import GlobalStyle from 'components/GlobalStyles';
-import { THEME_CONFIG } from '@autonolas/frontend-library';
 import { store } from '../store';
 
 const DESC =

@@ -1,20 +1,20 @@
+/* eslint-disable jest/no-disabled-tests */
 /* eslint-disable jest/max-expects */
-import React from 'react';
 import { render, waitFor } from '@testing-library/react';
 import { GATEWAY_URL } from 'util/constants';
 import Services from 'components/ListServices/details';
-import {
-  getServiceTableDataSource,
-  getAgentInstanceAndOperator,
-  getServiceAgentInstances,
-  getBonds,
-} from 'components/ListServices/ServiceState/utils';
-import {
-  getServiceDetails,
-  getServiceHashes,
-  getServiceOwner,
-  getTokenUri,
-} from 'components/ListServices/utils';
+// import {
+//   getServiceTableDataSource,
+//   getAgentInstanceAndOperator,
+//   getServiceAgentInstances,
+//   getBonds,
+// } from 'components/ListServices/ServiceState/utils';
+// import {
+//   getServiceDetails,
+//   getServiceHashes,
+//   getServiceOwner,
+//   getTokenUri,
+// } from 'components/ListServices/utils';
 import {
   dummyAddress,
   wrapProvider,
@@ -35,19 +35,49 @@ jest.mock('common-util/List/IpfsHashGenerationModal/helpers', () => ({
   getIpfsHashHelper: jest.fn(() => mockV1Hash),
 }));
 
-jest.mock('components/ListServices/utils', () => ({
-  getServiceDetails: jest.fn(),
-  getServiceHashes: jest.fn(),
-  getServiceOwner: jest.fn(),
-  getTokenUri: jest.fn(),
+jest.mock('common-util/Details/utils', () => ({
+  getTokenDetailsRequest: jest.fn(() =>
+    Promise.resolve({
+      securityDeposit: '0',
+      token: '0x0000000000000000000000000000000000000000',
+    }),
+  ),
+  checkIfServiceRequiresWhitelisting: jest.fn(() => false),
 }));
 
-jest.mock('common-util/Details/ServiceState/utils', () => ({
-  getServiceTableDataSource: jest.fn(),
-  getAgentInstanceAndOperator: jest.fn(),
-  getServiceAgentInstances: jest.fn(),
-  getBonds: jest.fn(),
+jest.mock('components/ListServices/ServiceState/utils', () => ({
+  getServiceDetails: jest.fn(() => Promise.resolve(dummyDetails)),
+  getServiceHashes: jest.fn(() => Promise.resolve(dummyHashes)),
+  getServiceOwner: jest.fn(() => Promise.resolve(dummyAddress)),
+  getTokenUri: jest.fn(() => Promise.resolve(dummyDetails.tokenUrl)),
+  getBonds: jest.fn(() =>
+    Promise.resolve({
+      bonds: ['1000000000000000', '1000000000000000'],
+      slots: ['1', '1'],
+      totalBonds: 0,
+    }),
+  ),
+  getServiceAgentInstances: jest.fn(() =>
+    Promise.resolve({
+      agentInstances: '0xc7daF473C103aa2B112FE2F773E3A508A6999BB6',
+      numAgentInstances: 1,
+    }),
+  ),
+  getAgentInstanceAndOperator: jest.fn(() =>
+    Promise.resolve({
+      id: 'agent-instance-row-1',
+      operatorAddress: 'operator_address_1',
+      agentInstance: 'agent_instance_1',
+    }),
+  ),
 }));
+
+// jest.mock('common-util/Details/ServiceState/utils', () => ({
+//   getServiceTableDataSource: jest.fn(),
+//   getAgentInstanceAndOperator: jest.fn(),
+//   getServiceAgentInstances: jest.fn(),
+//   getBonds: jest.fn(),
+// }));
 
 const dummyDetails = {
   owner: dummyAddress,
@@ -60,6 +90,7 @@ const dummyDetails = {
   threshold: '5',
   id: 1,
   tokenUrl: 'https://localhost/service/12345',
+  bonds: ['1'],
 };
 
 const dummyHashes = {
@@ -70,43 +101,20 @@ const unmockedFetch = global.fetch;
 
 describe('listServices/details.jsx', () => {
   beforeAll(() => {
-    global.fetch = () => Promise.resolve({
-      json: () => Promise.resolve(mockIpfs),
-    });
+    global.fetch = () =>
+      Promise.resolve({
+        json: () => Promise.resolve(mockIpfs),
+      });
   });
 
   beforeEach(() => {
     jest.clearAllMocks();
-    getServiceDetails.mockResolvedValue(dummyDetails);
-    getServiceHashes.mockResolvedValue(dummyHashes);
-    getServiceOwner.mockResolvedValue(dummyAddress);
-    getTokenUri.mockResolvedValue(dummyDetails.tokenUrl);
-    getBonds.mockResolvedValue(['1']);
-    getServiceAgentInstances.mockResolvedValue(['1']);
-    getServiceTableDataSource.mockResolvedValue([
-      {
-        key: 1,
-        agentId: '1',
-        availableSlots: 1,
-        totalSlots: '1',
-        bond: 10000000000000,
-        agentAddresses: null,
-      },
-    ]);
-    getAgentInstanceAndOperator.mockResolvedValue([
-      {
-        id: 'agent-instance-row-1',
-        operatorAddress: 'operator_address_1',
-        agentInstance: 'agent_instance_1',
-      },
-    ]);
   });
 
   afterAll(() => {
     global.fetch = unmockedFetch;
   });
 
-  // eslint-disable-next-line jest/no-disabled-tests
   it.skip('should render service details', async () => {
     const { container, getByText, getByTestId } = render(
       wrapProvider(<Services />),

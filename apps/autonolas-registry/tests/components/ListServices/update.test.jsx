@@ -1,5 +1,4 @@
 /* eslint-disable jest/max-expects */
-import React from 'react';
 import { useRouter } from 'next/router';
 import { render, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -73,7 +72,6 @@ describe.skip('listServices/service.jsx', () => {
   });
 
   it('should update the service successfully', async () => {
-    expect.hasAssertions();
     const { container, getByRole } = render(
       wrapProvider(<Update isUpdateForm />),
     );

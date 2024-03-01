@@ -7,7 +7,8 @@ import { configureChains, createConfig } from 'wagmi';
 import { mainnet, goerli } from 'wagmi/chains';
 import { SafeConnector } from 'wagmi/connectors/safe';
 import { jsonRpcProvider } from 'wagmi/providers/jsonRpc';
-import { RPC_URLS } from 'common-util/Contracts';
+
+import { RPC_URLS } from '../Contracts';
 
 export const projectId = process.env.NEXT_PUBLIC_WALLET_PROJECT_ID;
 

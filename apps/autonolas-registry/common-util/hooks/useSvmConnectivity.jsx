@@ -4,11 +4,11 @@ import { Program, AnchorProvider } from '@project-serum/anchor';
 import { PublicKey } from '@solana/web3.js';
 
 import { SOLANA_CHAIN_NAMES } from 'util/constants';
-import idl from 'common-util/AbiAndAddresses/ServiceRegistrySolana.json';
+import idl from '../AbiAndAddresses/ServiceRegistrySolana.json';
 import {
   SOLANA_ADDRESSES,
   SOLANA_DEVNET_ADDRESSES,
-} from 'common-util/Contracts/addresses';
+} from '../Contracts/addresses';
 import { useHelpers } from './index';
 
 /**

@@ -16,12 +16,12 @@
         "name": "next"
       }
     ],
-    "types": ["jest", "node"]
+    "types": ["jest", "node", "react", "react-dom"]
   },
   "include": ["**/*.ts", "**/*.tsx", "**/*.js", "**/*.jsx", "next-env.d.ts"],
   "exclude": [
     "node_modules",
-    "jest.config.ts",
+    "jest.config.js",
     "src/**/*.spec.ts",
     "src/**/*.test.ts"
   ]

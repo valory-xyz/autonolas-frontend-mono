@@ -1,4 +1,3 @@
-import React from 'react';
 import { render, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import ListServices from 'components/ListServices';
@@ -8,7 +7,6 @@ import {
   getTotalForAllServices,
   getTotalForMyServices,
 } from 'components/ListServices/utils';
-import { useRouter } from 'next/router';
 import { getServiceContract } from 'common-util/Contracts';
 import { wrapProvider, ACTIVE_TAB, getTableTd } from '../../helpers';
 
@@ -33,7 +31,6 @@ const myServiceResponse = { id: '2' };
 describe('listServices/index.jsx', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    useRouter.mockImplementation(() => ({ push: jest.fn() }));
 
     getServiceContract.mockImplementation(() => ({
       methods: {
@@ -49,8 +46,6 @@ describe('listServices/index.jsx', () => {
   });
 
   it('should render tabs with `All Tab` as active tab & Mint button', async () => {
-    expect.hasAssertions();
-
     const { container, getByRole } = render(wrapProvider(<ListServices />));
     // check if the selected tab is `All` & has the correct content
     await waitFor(async () => {
@@ -70,7 +65,6 @@ describe('listServices/index.jsx', () => {
   });
 
   it('should render tabs with `All Services` as active tab & Mint button', async () => {
-    expect.hasAssertions();
     const { container, getByRole } = render(wrapProvider(<ListServices />));
 
     // click the `My services` tab

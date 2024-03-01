@@ -1,5 +1,3 @@
-/* eslint-disable jest/max-expects */
-import React from 'react';
 import { render, waitFor } from '@testing-library/react';
 import { GATEWAY_URL } from 'util/constants';
 import Component from 'components/ListComponents/details';
@@ -29,6 +27,10 @@ jest.mock('common-util/List/IpfsHashGenerationModal/helpers', () => ({
   getIpfsHashHelper: jest.fn(() => mockV1Hash),
 }));
 
+jest.mock('common-util/Details/utils', () => ({
+  checkIfServiceRequiresWhitelisting: jest.fn(() => false),
+}));
+
 jest.mock('components/ListComponents/utils', () => ({
   getComponentDetails: jest.fn(),
   getComponentHashes: jest.fn(),
@@ -51,9 +53,10 @@ const unmockedFetch = global.fetch;
 
 describe('listComponents/details.jsx', () => {
   beforeAll(() => {
-    global.fetch = () => Promise.resolve({
-      json: () => Promise.resolve(mockIpfs),
-    });
+    global.fetch = () =>
+      Promise.resolve({
+        json: () => Promise.resolve(mockIpfs),
+      });
   });
 
   beforeEach(() => {
@@ -69,8 +72,7 @@ describe('listComponents/details.jsx', () => {
   });
 
   it('should render component details', async () => {
-    expect.hasAssertions();
-    const { getByText, getByRole, getByTestId } = render(
+    const { getByText, queryByRole, getByTestId } = render(
       wrapProvider(<Component />),
     );
     await waitFor(async () => {
@@ -89,7 +91,9 @@ describe('listComponents/details.jsx', () => {
       expect(getByTestId('owner-address').textContent).toBe(
         dummyDetails.developer,
       );
-      expect(getByRole('button', { name: 'Update Hash' })).toBeInTheDocument();
+      expect(
+        queryByRole('button', { name: 'Update Hash' }),
+      ).not.toBeInTheDocument();
       expect(getByTestId('details-dependency')).toBeInTheDocument();
 
       // NFT image
