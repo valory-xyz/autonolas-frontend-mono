@@ -1,6 +1,5 @@
 /* eslint-disable jest/no-disabled-tests */
 /* eslint-disable jest/max-expects */
-import React from 'react';
 import { render, waitFor } from '@testing-library/react';
 import { GATEWAY_URL } from 'util/constants';
 import Services from 'components/ListServices/details';

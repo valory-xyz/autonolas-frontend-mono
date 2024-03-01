@@ -1,5 +1,4 @@
 /* eslint-disable jest/max-expects */
-import React from 'react';
 import { useRouter } from 'next/router';
 import { render, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';

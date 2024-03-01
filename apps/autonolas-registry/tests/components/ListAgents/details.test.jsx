@@ -1,4 +1,3 @@
-import React from 'react';
 import { render, waitFor } from '@testing-library/react';
 import { GATEWAY_URL } from 'util/constants';
 import AgentDetails from 'components/ListAgents/details';

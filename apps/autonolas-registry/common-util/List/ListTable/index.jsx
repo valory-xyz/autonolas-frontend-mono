@@ -3,8 +3,8 @@ import { Table } from 'antd';
 import { Loader, useScreen } from '@autonolas/frontend-library';
 
 import { TOTAL_VIEW_COUNT } from 'util/constants';
-import { useHelpers } from 'common-util/hooks';
-import { useSvmConnectivity } from 'common-util/hooks/useSvmConnectivity';
+import { useHelpers } from '../../hooks';
+import { useSvmConnectivity } from '../../hooks/useSvmConnectivity';
 import { ListEmptyMessage } from '../ListCommon';
 import { getData, getTableColumns } from './helpers';
 

@@ -1,6 +1,5 @@
-import React from 'react';
-import { render } from '@testing-library/react';
 import '@testing-library/jest-dom';
+import { render } from '@testing-library/react';
 
 import { IpfsHashGenerationModal } from '../../../../common-util/List/IpfsHashGenerationModal';
 import { wrapProvider, mockV1Hash } from '../../../helpers';
