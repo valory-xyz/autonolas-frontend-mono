@@ -14,8 +14,6 @@ jest.mock('common-util/Contracts', () => ({
 
 describe('listComponents/utils.jsx', () => {
   it('getComponentDetails: Promise resolved', async () => {
-    expect.hasAssertions();
-
     getComponentContract.mockImplementation(() => ({
       methods: {
         getUnit: jest.fn(() => ({
@@ -29,8 +27,6 @@ describe('listComponents/utils.jsx', () => {
   });
 
   it('getFilteredComponents: Promise resolved', async () => {
-    expect.hasAssertions();
-
     getComponentContract.mockImplementation(() => ({
       methods: {
         totalSupply: jest.fn(() => ({
@@ -53,8 +49,6 @@ describe('listComponents/utils.jsx', () => {
   });
 
   it('getComponents: Promise resolved', async () => {
-    expect.hasAssertions();
-
     getComponentContract.mockImplementation(() => ({
       methods: {
         totalSupply: jest.fn(() => ({

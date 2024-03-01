@@ -57,9 +57,8 @@ describe('test-chains/TestChains.jsx', () => {
       const numChains = parsedConfig.length;
       for (let i = 0; i < numChains; i += 1) {
         const { contracts, chainId } = parsedConfig[i];
-        // Traverse all tup-to-date configuration contracts
+        // Traverse all up-to-date configuration contracts
         for (let j = 0; j < contracts.length; j += 1) {
-          console.log(contracts);
           const currentContract = contracts[j];
 
           const localArtifact = LOCAL_ARTIFACTS.find(
@@ -70,23 +69,23 @@ describe('test-chains/TestChains.jsx', () => {
 
           // Go over local artifacts
           // for (let k = 0; k < LOCAL_ARTIFACTS.length; k += 1) {
-          if (contracts[j].name === 'GnosisSafeMultisig') {
+          if (currentContract.name === 'GnosisSafeMultisig') {
             // Check for the GnosisSafeMultisig address
             const multisigAddressesChainId =
               chainId as keyof typeof multisigAddresses;
 
-            expect(contracts[j].address).toBe(
+            expect(currentContract.address).toBe(
               multisigAddresses[multisigAddressesChainId][0],
             );
-          } else if (contracts[j].name === 'GnosisSafeSameAddressMultisig') {
+          } else if (currentContract.name === 'GnosisSafeSameAddressMultisig') {
             // Check for the GnosisSafeSameAddressMultisig address
             const multisigSameAddressesChainId =
               chainId as keyof typeof multisigSameAddresses;
 
-            expect(contracts[j].address).toBe(
+            expect(currentContract.address).toBe(
               multisigSameAddresses[multisigSameAddressesChainId][0],
             );
-          } else if (contracts[j].name === localArtifact.contractName) {
+          } else if (currentContract.name === localArtifact.contractName) {
             // Take the configuration and local contract names that match
             // Get local and configuration ABIs, stringify them
             const remoteArtifactResponse = await fetch(
@@ -94,6 +93,7 @@ describe('test-chains/TestChains.jsx', () => {
             );
             const remoteArtifact = await remoteArtifactResponse.json();
 
+            // Local and remote ABIs should match
             expect(localArtifact.abi).toMatchObject(remoteArtifact.abi);
 
             // Check the address
@@ -104,7 +104,7 @@ describe('test-chains/TestChains.jsx', () => {
             const addressStruct = JSON.stringify(ADDRESSES[chainId]);
             const addressStructJSON = JSON.parse(addressStruct);
             const localAddress = addressStructJSON[lowLetter];
-            expect(localAddress).toBe(contracts[j].address);
+            expect(localAddress).toBe(currentContract.address);
           }
         }
       }

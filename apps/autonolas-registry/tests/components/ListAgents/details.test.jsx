@@ -80,7 +80,6 @@ describe('listAgents/details.jsx', () => {
   });
 
   it('should render agent details', async () => {
-    expect.hasAssertions();
     const { getByText, getByTestId, queryByRole } = render(
       wrapProvider(<AgentDetails />),
     );

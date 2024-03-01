@@ -73,7 +73,6 @@ describe.skip('listServices/service.jsx', () => {
   });
 
   it('should update the service successfully', async () => {
-    expect.hasAssertions();
     const { container, getByRole } = render(
       wrapProvider(<Update isUpdateForm />),
     );

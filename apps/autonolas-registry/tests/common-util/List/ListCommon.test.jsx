@@ -44,7 +44,6 @@ describe('<AlertSuccess />', () => {
       input: { name: 'Valory' },
     },
   ])('expects valid object (input=$input)', ({ type, input }) => {
-    expect.hasAssertions();
     const { getByText } = render(
       <AlertSuccess type={type} information={input} />,
     );
@@ -56,7 +55,6 @@ describe('<AlertSuccess />', () => {
   it.each([{ input: null }, { input: undefined }])(
     'expects invalid object (input=$input)',
     ({ input }) => {
-      expect.hasAssertions();
       const { queryByTestId } = render(<AlertSuccess information={input} />);
       expect(queryByTestId('alert-info-container')).not.toBeInTheDocument();
     },

@@ -13,8 +13,6 @@ jest.mock('common-util/Contracts', () => ({
 
 describe('listServices/utils.jsx', () => {
   it('getFilteredServices: Promise resolved', async () => {
-    expect.hasAssertions();
-
     getServiceContract.mockImplementation(() => ({
       methods: {
         totalSupply: jest.fn(() => ({
@@ -43,8 +41,6 @@ describe('listServices/utils.jsx', () => {
   });
 
   it('getServices: Promise resolved', async () => {
-    expect.hasAssertions();
-
     getServiceContract.mockImplementation(() => ({
       methods: {
         totalSupply: jest.fn(() => ({

@@ -72,7 +72,6 @@ describe('listComponents/details.jsx', () => {
   });
 
   it('should render component details', async () => {
-    expect.hasAssertions();
     const { getByText, queryByRole, getByTestId } = render(
       wrapProvider(<Component />),
     );

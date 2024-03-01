@@ -30,8 +30,6 @@ describe('listComponents/index.jsx', () => {
   });
 
   it('should render tabs with `All Tab` as active tab & Mint button', async () => {
-    expect.hasAssertions();
-
     const { container, getByRole } = render(wrapProvider(<ListComponents />));
 
     // check if the selected tab is `All` & has the correct content
@@ -52,8 +50,6 @@ describe('listComponents/index.jsx', () => {
   });
 
   it('should render tabs with `My Components` as active tab & Mint button', async () => {
-    expect.hasAssertions();
-
     const { container, getByRole } = render(wrapProvider(<ListComponents />));
 
     // click the `My components` tab

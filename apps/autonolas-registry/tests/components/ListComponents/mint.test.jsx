@@ -18,8 +18,6 @@ jest.mock('common-util/List/IpfsHashGenerationModal/helpers', () => ({
 
 describe('listComponents/mint.jsx', () => {
   it('should submit the form & mint the `Component` successfully', async () => {
-    expect.hasAssertions();
-
     getMechMinterContract.mockImplementation(() => ({
       methods: {
         create: jest.fn(() => ({

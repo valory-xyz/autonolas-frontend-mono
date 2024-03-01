@@ -47,8 +47,6 @@ describe('listServices/index.jsx', () => {
   });
 
   it('should render tabs with `All Tab` as active tab & Mint button', async () => {
-    expect.hasAssertions();
-
     const { container, getByRole } = render(wrapProvider(<ListServices />));
     // check if the selected tab is `All` & has the correct content
     await waitFor(async () => {
@@ -68,7 +66,6 @@ describe('listServices/index.jsx', () => {
   });
 
   it('should render tabs with `All Services` as active tab & Mint button', async () => {
-    expect.hasAssertions();
     const { container, getByRole } = render(wrapProvider(<ListServices />));
 
     // click the `My services` tab

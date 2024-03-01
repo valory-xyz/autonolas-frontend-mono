@@ -4,7 +4,6 @@
 
 // describe('<Footer>', () => {
 //   it('should render footer', async () => {
-//     expect.hasAssertions();
 //     const { container } = render(<Footer />);
 //     expect(container).toHaveTextContent('Valory');
 //   });

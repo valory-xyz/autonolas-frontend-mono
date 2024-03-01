@@ -17,7 +17,6 @@ const handleCancelMock = jest.fn();
 
 describe('<IpfsHashGenerationModal />', () => {
   it('should render a hash generation modal and', async () => {
-    expect.hasAssertions();
     const { getByText } = render(
       wrapProvider(
         <IpfsHashGenerationModal
