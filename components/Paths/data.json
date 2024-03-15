@@ -42,7 +42,7 @@
   },
   {
     "id": "shorts-mech-tool",
-    "name": "shorts.wtf Mech Tool",
+    "name": "Shorts.wtf Mech Tool",
     "description": "Create new tools on the Mechs marketplace. Improve content generating functionality.",
     "isMechsToolPath": true,    
     "service": {
