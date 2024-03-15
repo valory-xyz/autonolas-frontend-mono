@@ -37,7 +37,6 @@ const PathImage = ({ name, id, images }) => (
     src={images?.homepageCard ?? `/images/${id}.png`}
     width={200}
     height={200}
-    layout="intrinsic"
     className="mx-auto"
   />
 );
@@ -54,9 +53,9 @@ PathImage.propTypes = {
 
 PathImage.defaultProps = {
   images: {
-    homepageCard: undefined,
-    description: undefined,
-    service: undefined,
+    homepageCard: null,
+    description: null,
+    service: null,
   },
 };
 
@@ -82,7 +81,7 @@ const PathCard = ({ path }) => {
           <PathImage name={name} id={id} images={images} />
         </Col>
         <Col xs={24} md={14} style={{ padding: '2rem' }}>
-          {!md && <PathImage name={name} id={id} />}
+          {!md && <PathImage name={name} id={id} images={images} />}
           <Typography.Title className="mt-0 mb-4" level={4}>
             {name}
           </Typography.Title>
