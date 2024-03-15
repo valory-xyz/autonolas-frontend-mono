@@ -148,7 +148,7 @@ export const Paths = () => {
         ))}
         {/* TODO DRY with PathCard code */}
         <Col xs={24} md={12}>
-          <Row style={{ width: '100%', marginBottom: '24px' }}>
+          <Row style={{ width: '100%', marginBottom: '24px', height: '100%' }}>
             <StyledCard>
               <Col
                 xs={0}
