@@ -2,14 +2,15 @@
   {
     "id": "prediction-agents-mechs-ai-tool",
     "name": "Mechs Prediction Tool",
-    "description": "Create new tools on the Mechs  marketplace. Improve Prediction Agents’ prediction accuracy.",
+    "description": "Create new tools on the Mechs marketplace. Improve Prediction Agents’ prediction accuracy.",
     "service": {
       "id": "prediction-agents",
       "name": "Prediction Agents",
       "url": "https://olas.network/services/prediction-agents"
     },
     "images": {
-      "homepageCard": "/images/mechs-marketplace.png"
+      "homepageCard": "/images/mechs-marketplace.png",
+      "description": "/images/mechs-marketplace.png"
     },
     "isMechsToolPath": true,
     "markdownPath": "paths-markdown/prediction-agents-mechs-ai-tool.md"
