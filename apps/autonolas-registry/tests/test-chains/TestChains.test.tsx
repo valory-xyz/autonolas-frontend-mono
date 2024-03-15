@@ -111,12 +111,4 @@ describe('test-chains/TestChains.jsx', () => {
     },
     2 * 60 * 1000,
   );
-
-  it('should have the ALL addresses for ALL the chains listed in ADDRESSES object', () => {
-    // const chains = Object.keys(ADDRESSES);
-    // it.each(chains)('should have the addresses for %s', (chain) => {
-    //   const addresses = ADDRESSES[chain];
-    //   expect(Object.keys(addresses).length).toBeGreaterThan(0);
-    // });
-  });
 });
