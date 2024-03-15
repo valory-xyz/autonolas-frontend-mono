@@ -29,7 +29,9 @@ const ListComponents = () => {
     isMyTab(hash) ? MY_COMPONENTS : ALL_COMPONENTS,
   );
 
-  const { account, chainId, links, isL1OnlyNetwork } = useHelpers();
+  const {
+    account, chainId, links, isL1OnlyNetwork, isSvm,
+  } = useHelpers();
 
   /**
    * extra tab content & view click
@@ -52,12 +54,12 @@ const ListComponents = () => {
   useEffect(() => {
     setCurrentTab(isMyTab(hash) ? MY_COMPONENTS : ALL_COMPONENTS);
     setList([]);
-  }, [router.asPath]);
+  }, [router.asPath, hash]);
 
   // fetch total
   useEffect(() => {
     (async () => {
-      if (isL1OnlyNetwork && searchValue === '') {
+      if (!isSvm && isL1OnlyNetwork && searchValue === '') {
         try {
           let totalTemp = null;
 
@@ -81,12 +83,12 @@ const ListComponents = () => {
         }
       }
     })();
-  }, [account, chainId, isL1OnlyNetwork, currentTab, searchValue]);
+  }, [account, chainId, isL1OnlyNetwork, currentTab, searchValue, isSvm]);
 
   // fetch the list (without search)
   useEffect(() => {
     (async () => {
-      if (isL1OnlyNetwork && total && currentPage && !searchValue) {
+      if (!isSvm && isL1OnlyNetwork && total && currentPage && !searchValue) {
         setIsLoading(true);
 
         try {
@@ -114,15 +116,7 @@ const ListComponents = () => {
         }
       }
     })();
-  }, [
-    account,
-    chainId,
-    isL1OnlyNetwork,
-    total,
-    currentPage,
-    currentTab,
-    searchValue,
-  ]);
+  }, [account, chainId, isL1OnlyNetwork, total, currentPage, isSvm]);
 
   /**
    * Search (All components, My Components)

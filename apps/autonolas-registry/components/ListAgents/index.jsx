@@ -29,7 +29,9 @@ const ListAgents = () => {
     isMyTab(hash) ? MY_AGENTS : ALL_AGENTS,
   );
 
-  const { account, chainId, links, isL1OnlyNetwork } = useHelpers();
+  const {
+    account, chainId, links, isL1OnlyNetwork, isSvm,
+  } = useHelpers();
 
   /**
    * extra tab content & view click
@@ -57,7 +59,7 @@ const ListAgents = () => {
   // fetch total
   useEffect(() => {
     (async () => {
-      if (isL1OnlyNetwork && searchValue === '') {
+      if (!isSvm && isL1OnlyNetwork && searchValue === '') {
         try {
           let totalTemp = null;
 
@@ -81,12 +83,12 @@ const ListAgents = () => {
         }
       }
     })();
-  }, [account, chainId, isL1OnlyNetwork, currentTab, searchValue]);
+  }, [account, chainId, isL1OnlyNetwork, currentTab, searchValue, isSvm]);
 
   // fetch the list (without search)
   useEffect(() => {
     (async () => {
-      if (isL1OnlyNetwork && total && currentPage && !searchValue) {
+      if (!isSvm && isL1OnlyNetwork && total && currentPage && !searchValue) {
         setIsLoading(true);
 
         try {
@@ -114,7 +116,7 @@ const ListAgents = () => {
         }
       }
     })();
-  }, [account, chainId, isL1OnlyNetwork, total, currentPage]);
+  }, [account, chainId, isL1OnlyNetwork, total, currentPage, isSvm]);
 
   /**
    * Search (All agents, My agents)
@@ -143,7 +145,7 @@ const ListAgents = () => {
         }
       }
     })();
-  }, [account, chainId, searchValue]);
+  }, [account, chainId, searchValue, currentTab]);
 
   const tableCommonProps = {
     type: NAV_TYPES.AGENT,
