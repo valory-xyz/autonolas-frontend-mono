@@ -1,6 +1,7 @@
 import { useRouter } from 'next/router';
 import { Grid } from 'antd';
 import Link from 'next/link';
+import Image from 'next/image';
 import {
   Footer as CommonFooter,
   getExplorerURL,
@@ -76,7 +77,7 @@ const ContractInfo = () => {
     <ContractsInfoContainer>
       {!PATHS_NOT_TO_SHOW.includes(pathname) && (
         <>
-          <img
+          <Image
             alt="Etherscan link"
             width={18}
             height={18}

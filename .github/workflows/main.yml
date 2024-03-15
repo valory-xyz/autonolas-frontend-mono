@@ -1,27 +1,27 @@
 # TODO: figure out how to trigger workflow from vercel for nx
 
-# name: Lint
-# on:
-#   push:
-#     branches:
-#       - main
-#   pull_request:
-#     branches:
-#       - main
+name: Lint
+on:
+  push:
+    branches:
+      - main
+      - fix/git-workflow
+  pull_request:
+    branches:
+      - main
 
-# jobs:
-#   build:
-#     continue-on-error: False
-#     runs-on: ubuntu-latest
-#     steps:
-#     - uses: actions/checkout@v2
-#     - name: Install modules
-#       run: yarn
-#     - name: Run ESLint
-#       run: ./node_modules/.bin/eslint . --ext .js,.jsx,.ts,.tsx
-#     - name: Run Test
-#       run: yarn test
-
+jobs:
+  build:
+    continue-on-error: False
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install modules
+        run: yarn
+      - name: Run ESLint
+        run: yarn nx affected -t lint
+    # - name: Run Test
+    #   run: yarn test
 #   scan:
 #     name: gitleaks
 #     runs-on: ubuntu-latest
