@@ -31,10 +31,10 @@ const StyledImage = styled(Image)`
   align-self: center;
 `;
 
-const PathImage = ({ name, id }) => (
+const PathImage = ({ name, id, images }) => (
   <StyledImage
     alt={name}
-    src={`/images/${id}.png`}
+    src={images?.homepageCard ?? `/images/${id}.png`}
     width={200}
     height={200}
     layout="intrinsic"
@@ -45,11 +45,24 @@ const PathImage = ({ name, id }) => (
 PathImage.propTypes = {
   name: PropTypes.string.isRequired,
   id: PropTypes.string.isRequired,
+  images: PropTypes.shape({
+    homepageCard: PropTypes.string,
+    description: PropTypes.string,
+    service: PropTypes.string,
+  }),
+};
+
+PathImage.defaultProps = {
+  images: {
+    homepageCard: undefined,
+    description: undefined,
+    service: undefined,
+  },
 };
 
 const PathCard = ({ path }) => {
   const {
-    id, name, description, service,
+    id, name, description, service, images,
   } = path;
 
   const { md } = useBreakpoint();
@@ -66,7 +79,7 @@ const PathCard = ({ path }) => {
             borderRight: md && `1px solid ${COLOR.BORDER_GREY}`,
           }}
         >
-          <PathImage name={name} id={id} />
+          <PathImage name={name} id={id} images={images} />
         </Col>
         <Col xs={24} md={14} style={{ padding: '2rem' }}>
           {!md && <PathImage name={name} id={id} />}
@@ -115,6 +128,11 @@ PathCard.propTypes = {
       name: PropTypes.string.isRequired,
       url: PropTypes.string,
     }).isRequired,
+    images: PropTypes.shape({
+      homepageCard: PropTypes.string,
+      description: PropTypes.string,
+      service: PropTypes.string,
+    }),
   }).isRequired,
 };
 
