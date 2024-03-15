@@ -13,6 +13,7 @@ const { useBreakpoint } = Grid;
 const StyledCard = styled(Card)`
   border-color: ${COLOR.BORDER_GREY};
   width: 100%;
+  height: 100%;
   display: flex;
   align-items: center;
   .ant-card-body {
@@ -54,7 +55,7 @@ const PathCard = ({ path }) => {
   const { md } = useBreakpoint();
 
   return (
-    <Row key={id} style={{ width: '100%', marginBottom: '24px' }}>
+    <Row key={id} style={{ width: '100%', marginBottom: '24px', height: '100%' }}>
       <StyledCard>
         <Col
           xs={0}

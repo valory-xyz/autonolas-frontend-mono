@@ -1,4 +1,3 @@
-import { useRouter } from 'next/router';
 import {
   Layout,
 } from 'antd';
@@ -18,31 +17,27 @@ const StyledHeader = styled(Header)`
   padding: 20px !important;
 `;
 
-const NavigationBar = ({ children }) => {
-  const router = useRouter();
-
-  return (
-    <CustomLayout pathname={router.pathname}>
-      <StyledHeader>
-        <Link href="/">
-          <div className="column-1">
-            <Logo />
-          </div>
-        </Link>
-
-        <div className="column-2">
-          {/* <Login /> */}
+const NavigationBar = ({ children }) => (
+  <CustomLayout>
+    <StyledHeader>
+      <Link href="/">
+        <div className="column-1">
+          <Logo />
         </div>
-      </StyledHeader>
+      </Link>
 
-      <Content className="site-layout">
-        <div className="site-layout-background">{children}</div>
-      </Content>
+      <div className="column-2">
+        {/* <Login /> */}
+      </div>
+    </StyledHeader>
 
-      <Footer />
-    </CustomLayout>
-  );
-};
+    <Content className="site-layout">
+      <div className="site-layout-background">{children}</div>
+    </Content>
+
+    <Footer />
+  </CustomLayout>
+);
 
 NavigationBar.propTypes = {
   children: PropTypes.element,
