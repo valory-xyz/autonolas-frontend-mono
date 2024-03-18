@@ -3,8 +3,8 @@ import userEvent from '@testing-library/user-event';
 import { getMechMinterContract } from 'common-util/Contracts';
 import MintComponent from 'components/ListComponents/mint';
 import { FORM_NAME } from 'common-util/List/RegisterForm';
-import { wrapProvider, dummyAddress, mockV1Hash } from '../../helpers';
-import { fillIpfsGenerationModal } from '../../helpers/prefillForm';
+import { wrapProvider, dummyAddress, mockV1Hash } from '../../tests-helpers';
+import { fillIpfsGenerationModal } from '../../tests-helpers/prefillForm';
 
 const NEW_COMPONENT = { name: 'New Component One' };
 

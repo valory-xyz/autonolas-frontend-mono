@@ -7,7 +7,7 @@ import {
   getTotalForAllComponents,
   getTotalForMyComponents,
 } from 'components/ListComponents/utils';
-import { wrapProvider, ACTIVE_TAB, getTableTd } from '../../helpers';
+import { wrapProvider, ACTIVE_TAB, getTableTd } from '../../tests-helpers';
 
 // dummy responses mock
 const allComponentResponse = { id: '1', dependencies: ['1'] };

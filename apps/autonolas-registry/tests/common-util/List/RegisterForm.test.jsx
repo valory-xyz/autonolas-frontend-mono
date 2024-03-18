@@ -1,8 +1,8 @@
 import { render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import RegisterForm, { FORM_NAME } from 'common-util/List/RegisterForm';
-import { fillIpfsGenerationModal } from '../../helpers/prefillForm';
-import { wrapProvider, dummyAddress, mockV1Hash } from '../../helpers';
+import { fillIpfsGenerationModal } from '../../tests-helpers/prefillForm';
+import { wrapProvider, dummyAddress, mockV1Hash } from '../../tests-helpers';
 
 const handleSubmit = jest.fn(() => {});
 const handleCancel = jest.fn(() => {});

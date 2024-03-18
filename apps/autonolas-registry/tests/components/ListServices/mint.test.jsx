@@ -3,8 +3,8 @@ import userEvent from '@testing-library/user-event';
 import { getServiceManagerContract } from 'common-util/Contracts';
 import MintService from 'components/ListServices/mint';
 import { FORM_NAME } from 'components/ListServices/helpers/RegisterForm';
-import { wrapProvider, dummyAddress, mockV1Hash, dummySvmConnectivity } from '../../helpers';
-import { fillIpfsGenerationModal } from '../../helpers/prefillForm';
+import { wrapProvider, dummyAddress, mockV1Hash, dummySvmConnectivity } from '../../tests-helpers';
+import { fillIpfsGenerationModal } from '../../tests-helpers/prefillForm';
 
 const NEW_SERVICE = { name: 'New Service One' };
 

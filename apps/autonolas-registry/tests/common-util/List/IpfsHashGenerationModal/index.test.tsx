@@ -2,7 +2,7 @@ import '@testing-library/jest-dom';
 import { render } from '@testing-library/react';
 
 import { IpfsHashGenerationModal } from '../../../../common-util/List/IpfsHashGenerationModal';
-import { wrapProvider, mockV1Hash } from '../../../helpers';
+import { wrapProvider, mockV1Hash } from '../../../tests-helpers';
 
 jest.mock(
   '../../../../common-util/List/IpfsHashGenerationModal/helpers',

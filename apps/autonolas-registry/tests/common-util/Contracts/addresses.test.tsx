@@ -11,7 +11,7 @@ import {
   SERVICE_MANAGER_CONTRACT,
   SERVICE_MANAGER_TOKEN_CONTRACT,
   OPERATOR_WHITELIST_CONTRACT,
-} from '../../common-util/AbiAndAddresses';
+} from '../../../common-util/AbiAndAddresses';
 import {
   ADDRESSES,
   multisigAddresses,
@@ -19,12 +19,12 @@ import {
   ChainIds,
   FALLBACK_HANDLER,
   safeMultiSend,
-} from '../../common-util/Contracts/addresses';
+} from '../../../common-util/Contracts/addresses';
 import {
   LOCAL_FORK_ID,
   LOCAL_FORK_ID_GNOSIS,
   LOCAL_FORK_ID_POLYGON,
-} from '../../util/constants';
+} from '../../../util/constants';
 
 const LOCAL_ARTIFACTS = [
   COMPONENT_REGISTRY_CONTRACT,
@@ -70,7 +70,7 @@ const isLocalChainId = (chainId: string): boolean => {
   );
 };
 
-describe('test-chains/TestChains.jsx', () => {
+describe('common-utils/addresses', () => {
   it(
     'check contract addresses and ABIs',
     async () => {
@@ -153,6 +153,7 @@ describe('test-chains/TestChains.jsx', () => {
         throw new Error(`Invalid chainId: ${chainId}`);
       }
 
+      // no need to check local chainIds
       if (isLocalChainId(chainId)) return;
 
       const remoteMultisigAddress = remoteResponse.networkAddresses[chainId];
@@ -177,6 +178,7 @@ describe('test-chains/TestChains.jsx', () => {
         throw new Error(`Invalid chainId: ${chainId}`);
       }
 
+      // no need to check local chainIds
       if (isLocalChainId(chainId)) return;
 
       // check if the remote fallback handler address matches the local one

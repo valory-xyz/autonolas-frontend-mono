@@ -8,7 +8,7 @@ import {
   getTotalForMyServices,
 } from 'components/ListServices/utils';
 import { getServiceContract } from 'common-util/Contracts';
-import { wrapProvider, ACTIVE_TAB, getTableTd, dummySvmConnectivity } from '../../helpers';
+import { wrapProvider, ACTIVE_TAB, getTableTd, dummySvmConnectivity } from '../../tests-helpers';
 
 jest.mock('components/ListServices/utils', () => ({
   getServices: jest.fn(),

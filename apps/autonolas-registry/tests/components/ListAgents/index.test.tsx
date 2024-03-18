@@ -9,7 +9,7 @@ import {
   getTotalForAllAgents,
   getTotalForMyAgents,
 } from '../../../components/ListAgents/utils';
-import { wrapProvider, ACTIVE_TAB, getTableTd } from '../../helpers';
+import { wrapProvider, ACTIVE_TAB, getTableTd } from '../../tests-helpers';
 
 // dummy responses mock
 const allAgentsResponse = { id: '1', dependencies: ['4'] };

@@ -4,7 +4,7 @@ import {
   getComponents,
   getFilteredComponents,
 } from 'components/ListComponents/utils';
-import { dummyAddress } from '../../helpers';
+import { dummyAddress } from '../../tests-helpers';
 
 const COMPONENT_1 = { name: 'Component One' };
 

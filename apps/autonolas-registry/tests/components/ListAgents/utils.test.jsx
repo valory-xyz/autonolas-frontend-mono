@@ -1,6 +1,6 @@
 import { getAgentContract } from 'common-util/Contracts';
 import { getAgents, getFilteredAgents } from 'components/ListAgents/utils';
-import { dummyAddress } from '../../helpers';
+import { dummyAddress } from '../../tests-helpers';
 
 const AGENT_1 = { name: 'Agent One' };
 

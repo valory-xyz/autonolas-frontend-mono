@@ -3,7 +3,7 @@ import {
   getServices,
   getFilteredServices,
 } from 'components/ListServices/utils';
-import { dummyAddress } from '../../helpers';
+import { dummyAddress } from '../../tests-helpers';
 
 const SERVICE_1 = { name: 'Service One' };
 

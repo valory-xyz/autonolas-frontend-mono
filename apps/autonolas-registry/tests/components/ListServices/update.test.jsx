@@ -18,7 +18,7 @@ import {
   dummyAddress,
   mockV1Hash,
   dummySvmConnectivity,
-} from '../../helpers';
+} from '../../tests-helpers';
 
 jest.mock('common-util/List/IpfsHashGenerationModal/helpers', () => ({
   getIpfsHashHelper: jest.fn(() => mockV1Hash),

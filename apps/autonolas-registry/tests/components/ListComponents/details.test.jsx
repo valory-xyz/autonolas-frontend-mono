@@ -15,7 +15,7 @@ import {
   mockIpfs,
   mockCodeUri,
   dummySvmConnectivity,
-} from '../../helpers';
+} from '../../tests-helpers';
 
 jest.mock('next/router', () => ({
   __esModule: true,
