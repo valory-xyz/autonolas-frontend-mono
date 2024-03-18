@@ -11,7 +11,6 @@ import {
 } from '../../../components/ListAgents/utils';
 import { wrapProvider, ACTIVE_TAB, getTableTd } from '../../tests-helpers';
 
-// dummy responses mock
 const allAgentsResponse = { id: '1', dependencies: ['4'] };
 const myAgentsResponse = { id: '2', dependencies: ['5'] };
 
