@@ -13,7 +13,12 @@ import {
   getServiceDetails,
   getServiceOwner,
 } from 'components/ListServices/utils';
-import { wrapProvider, dummyAddress, mockV1Hash } from '../../helpers';
+import {
+  wrapProvider,
+  dummyAddress,
+  mockV1Hash,
+  dummySvmConnectivity,
+} from '../../helpers';
 
 jest.mock('common-util/List/IpfsHashGenerationModal/helpers', () => ({
   getIpfsHashHelper: jest.fn(() => mockV1Hash),
@@ -29,6 +34,10 @@ jest.mock('components/ListServices/utils', () => ({
 jest.mock('common-util/Contracts', () => ({
   getServiceContract: jest.fn(),
   getServiceManagerContract: jest.fn(),
+}));
+
+jest.mock('common-util/hooks/useSvmConnectivity', () => ({
+  useSvmConnectivity: jest.fn(() => dummySvmConnectivity),
 }));
 
 const SERVICE_1 = {

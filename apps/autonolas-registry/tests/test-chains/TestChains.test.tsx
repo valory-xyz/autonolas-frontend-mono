@@ -138,49 +138,29 @@ describe('test-chains/TestChains.jsx', () => {
     2 * 60 * 1000,
   );
 
-  it.each([
-    // {
-    //   name: 'multisig',
-    //   addresses: multisigAddresses,
-    //   jsonName: 'multisig_addresses.json',
-    // },
-    // {
-    //   name: 'multisigSame',
-    //   addresses: multisigSameAddresses,
-    //   jsonName: 'multisig_same_addresses.json',
-    // },
-    {
-      name: 'safeMultiSend',
-      addresses: safeMultiSend,
-      jsonName: 'multi_send_call_only.json',
-    },
-  ])(
-    'should ensure $name addresses match between remote and local sources',
-    async ({ jsonName, name, addresses }) => {
-      const remoteResponseRaw = await fetch(
-        `${REGISTRIES_SAFE_URL}/${jsonName}`,
-      );
-      const remoteResponse = await remoteResponseRaw.json();
+  it('should ensure `safeMultiSend` matches between remote and local sources', async () => {
+    const remoteResponseRaw = await fetch(
+      `${REGISTRIES_SAFE_URL}/multi_send_call_only.json`,
+    );
+    const remoteResponse = await remoteResponseRaw.json();
 
-      if (!remoteResponse.networkAddresses) {
-        throw new Error(`Invalid ${name} remoteResponse`);
+    if (!remoteResponse.networkAddresses) {
+      throw new Error(`Invalid ${name} remoteResponse`);
+    }
+
+    chainIds.forEach((chainId) => {
+      if (!isValidKey(ADDRESSES, chainId)) {
+        throw new Error(`Invalid chainId: ${chainId}`);
       }
 
-      chainIds.forEach((chainId) => {
-        if (!isValidKey(addresses, chainId)) {
-          throw new Error(`Invalid chainId: ${chainId}`);
-        }
+      if (isLocalChainId(chainId)) return;
 
-        if (isLocalChainId(chainId)) return;
+      const remoteMultisigAddress = remoteResponse.networkAddresses[chainId];
+      const localMultisigAddress = safeMultiSend[chainId][0];
 
-        const remoteMultisigAddress = remoteResponse.networkAddresses[chainId];
-        const localMultisigAddress =
-          addresses[chainId as keyof typeof addresses][0];
-
-        expect(remoteMultisigAddress).toBe(localMultisigAddress);
-      });
-    },
-  );
+      expect(remoteMultisigAddress).toBe(localMultisigAddress);
+    });
+  });
 
   it('should ensure FALLBACK_HANDLER matches between remote and local sources', async () => {
     const fallbackHandlerResponse = await fetch(

@@ -51,3 +51,13 @@ export const mockIpfs = {
   code_uri: `ipfs://${mockCodeUri}`,
   attributes: [{ trait_type: 'version', value: '0.0.0.1' }],
 };
+
+export const dummySvmConnectivity = {
+  walletPublicKey: 'DrGvsAxY8ehyXjE6qSZXcT5A9pTsUkVm3en5ZQD3Wm5x',
+  tempWalletPublicKey: 'DrGvsAxY8ehyXjE6qSZXcT5A9pTsUkVm3en5ZQD3Wm5x',
+  connection: {},
+  program: {},
+  programId: null,
+  solanaAddresses: null,
+};
+

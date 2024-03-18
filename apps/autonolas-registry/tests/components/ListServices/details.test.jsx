@@ -22,6 +22,7 @@ import {
   mockV1Hash,
   mockIpfs,
   mockCodeUri,
+  dummySvmConnectivity,
 } from '../../helpers';
 
 jest.mock('next/router', () => ({
@@ -70,6 +71,10 @@ jest.mock('components/ListServices/ServiceState/utils', () => ({
       agentInstance: 'agent_instance_1',
     }),
   ),
+}));
+
+jest.mock('common-util/hooks/useSvmConnectivity', () => ({
+  useSvmConnectivity: jest.fn(() => dummySvmConnectivity),
 }));
 
 // jest.mock('common-util/Details/ServiceState/utils', () => ({
