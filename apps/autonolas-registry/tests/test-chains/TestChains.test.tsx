@@ -16,7 +16,14 @@ import {
   ADDRESSES,
   multisigAddresses,
   multisigSameAddresses,
+  ChainIds,
+  FALLBACK_HANDLER,
 } from '../../common-util/Contracts/addresses';
+import {
+  LOCAL_FORK_ID,
+  LOCAL_FORK_ID_GNOSIS,
+  LOCAL_FORK_ID_POLYGON,
+} from '../../util/constants';
 
 const LOCAL_ARTIFACTS = [
   COMPONENT_REGISTRY_CONTRACT,
@@ -31,6 +38,8 @@ const LOCAL_ARTIFACTS = [
 ];
 const registriesRepo =
   'https://raw.githubusercontent.com/valory-xyz/autonolas-registries/main/';
+const registriesSafe =
+  'https://raw.githubusercontent.com/safe-global/safe-deployments/main/src/';
 
 type Contract = {
   name: string;
@@ -40,8 +49,24 @@ type Contract = {
 
 type Chain = {
   name: string;
-  chainId: keyof typeof ADDRESSES;
+  chainId: ChainIds;
   contracts: Contract[];
+};
+
+const chainIds = Object.keys(ADDRESSES);
+
+const isValidKey = (
+  object: object,
+  value: string,
+): value is keyof typeof object => {
+  return Object.keys(object).includes(value);
+};
+
+const isLocalChainId = (chainId: string): boolean => {
+  const id = Number(chainId);
+  return [LOCAL_FORK_ID, LOCAL_FORK_ID_GNOSIS, LOCAL_FORK_ID_POLYGON].includes(
+    id,
+  );
 };
 
 describe('test-chains/TestChains.jsx', () => {
@@ -111,4 +136,35 @@ describe('test-chains/TestChains.jsx', () => {
     },
     2 * 60 * 1000,
   );
+
+  it('should match FALLBACK_HANDLER', async () => {
+    const fallbackHandlerResponse = await fetch(
+      `${registriesSafe}assets/v1.3.0/compatibility_fallback_handler.json`,
+    );
+    const fallbackHandler = await fallbackHandlerResponse.json();
+    if (!fallbackHandler.networkAddresses) {
+      throw new Error('Invalid fallbackHandler');
+    }
+
+    console.log('FALLBACK_HANDLER', fallbackHandler.networkAddresses);
+
+    chainIds.forEach((chainId) => {
+      if (isValidKey(ADDRESSES, chainId)) {
+        if (isLocalChainId(chainId)) return;
+
+        const remoteFallbackHandlerAddress =
+          fallbackHandler.networkAddresses[chainId];
+        const localFallbackHandlerAddress = FALLBACK_HANDLER[chainId];
+
+        console.log({
+          chainId,
+          remoteFallbackHandlerAddress,
+          localFallbackHandlerAddress,
+        });
+        expect(remoteFallbackHandlerAddress).toBe(localFallbackHandlerAddress);
+      } else {
+        throw new Error(`Invalid chainId: ${chainId}`);
+      }
+    });
+  });
 });
