@@ -1,12 +1,16 @@
 [
   {
     "id": "prediction-agents-mechs-ai-tool",
-    "name": "Mechs AI Tool",
-    "description": "Create new tools on the Mechs  marketplace. Improve Prediction Agents’ prediction accuracy.",
+    "name": "Mechs Prediction Tool",
+    "description": "Create new tools on the Mechs marketplace. Improve Prediction Agents’ prediction accuracy.",
     "service": {
       "id": "prediction-agents",
       "name": "Prediction Agents",
       "url": "https://olas.network/services/prediction-agents"
+    },
+    "images": {
+      "homepageCard": "/images/mechs-marketplace.png",
+      "description": "/images/mechs-marketplace.png"
     },
     "isMechsToolPath": true,
     "markdownPath": "paths-markdown/prediction-agents-mechs-ai-tool.md"
@@ -36,5 +40,21 @@
     "description": "Build a full autonomous service from the ground up.",
     "isMechsToolPath": false,
     "markdownPath": "paths-markdown/build-your-own-service.md"
+  },
+  {
+    "id": "shorts-mech-tool",
+    "name": "Shorts.wtf Mech Tool",
+    "description": "Create new tools on the Mechs marketplace. Improve content generating functionality.",
+    "isMechsToolPath": true,    
+    "service": {
+      "name": "Shorts.wtf",
+      "url": "https://shorts.wtf"
+    },
+    "images": {
+      "homepageCard": "/images/shorts-mech-tool.png",
+      "description": "/images/mechs-marketplace.png",
+      "service": "/images/shorts-mech-tool.png"
+    },
+    "markdownPath": "paths-markdown/shorts-mech-tool.md"
   }
 ]

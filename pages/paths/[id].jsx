@@ -92,7 +92,7 @@ const PathDetailPage = () => {
             <Row gutter={[16, 16]} align="middle" style={{ maxWidth: '500px' }}>
               <Col span={8}>
                 <Image
-                  src={`/images/${id}.png`}
+                  src={pathData.images?.description ?? `/images/${id}.png`}
                   alt={pathData.name}
                   width={200}
                   height={200}
@@ -122,7 +122,7 @@ const PathDetailPage = () => {
               >
                 <Col span={8}>
                   <Image
-                    src={`/images/services/${pathData?.service?.id}.png`}
+                    src={pathData.images?.service ?? `/images/services/${pathData?.service?.id}.png`}
                     alt={pathData.service.name}
                     width={200}
                     height={200}
@@ -202,7 +202,7 @@ const PathDetailPage = () => {
                 </Col>
                 <Col span={16}>
                   <Typography.Paragraph>
-                    This path is for building a Mechs tool. Mechs is a
+                    This path is for building a Mech tool. Mechs is a
                     marketplace for agents to easily use AI tools via a
                     blockchain.
                   </Typography.Paragraph>
