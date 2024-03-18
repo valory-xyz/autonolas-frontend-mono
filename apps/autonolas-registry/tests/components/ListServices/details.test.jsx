@@ -5,22 +5,16 @@ import {
   getTokenDetailsRequest,
   checkIfServiceRequiresWhitelisting,
 } from '../../../common-util/Details/utils';
-import { useSvmService } from '../../../components/ListServices/useSvmService';
-import { useMetadata } from '../../../common-util/hooks/useMetadata';
+// import { useSvmService } from '../../../components/ListServices/useSvmService';
+// import { useMetadata } from '../../../common-util/hooks/useMetadata';
+import { useHelpers } from '../../../common-util/hooks/useHelpers';
+import { useSvmConnectivity } from '../../../common-util/hooks/useSvmConnectivity';
 import {
   getBonds,
   getServiceTableDataSource,
   getAgentInstanceAndOperator,
-  //   getServiceAgentInstances,
-  //   getBonds,
   checkIfEth,
 } from '../../../components/ListServices/ServiceState/utils';
-// import {
-// getServiceDetails,
-// getServiceHashes,
-// getServiceOwner,
-// getTokenUri,
-// } from 'components/ListServices/utils';
 import {
   dummyAddress,
   wrapProvider,
@@ -28,7 +22,8 @@ import {
   mockV1Hash,
   mockIpfs,
   mockCodeUri,
-  dummySvmConnectivity,
+  svmConnectivityEmptyMock,
+  useHelpersEvmMock,
 } from '../../tests-helpers';
 
 jest.mock('next/router', () => ({
@@ -47,41 +42,12 @@ jest.mock('../../../common-util/Details/utils', () => ({
   checkIfServiceRequiresWhitelisting: jest.fn(),
 }));
 
-jest.mock('../../../common-util/Details/useDetails', () => ({
-  useDetails: jest.fn(() => ({
-    isLoading: false,
-    info: dummyDetails,
-    ownerAddress: dummyAddress,
-    tokenUri: 'https://localhost/service/12345',
-    isOwner: true,
-  })),
+jest.mock('../../../common-util/hooks/useHelpers', () => ({
+  useHelpers: jest.fn(),
 }));
-
-jest.mock('../../../components/ListServices/ServiceState/utils', () => ({
-  //   getServiceDetails: jest.fn(() => Promise.resolve(dummyDetails)),
-  //   getServiceHashes: jest.fn(() => Promise.resolve(dummyHashes)),
-  //   getServiceOwner: jest.fn(() => Promise.resolve(dummyAddress)),
-  //   getTokenUri: jest.fn(() => Promise.resolve(dummyDetails.tokenUrl)),
-  getServiceTableDataSource: jest.fn(),
-  getBonds: jest.fn(),
-  getServiceAgentInstances: jest.fn(() =>
-    Promise.resolve({
-      agentInstances: '0xc7daF473C103aa2B112FE2F773E3A508A6999BB6',
-      numAgentInstances: 1,
-    }),
-  ),
-  getAgentInstanceAndOperator: jest.fn(),
-  checkIfEth: jest.fn(),
-}));
-
-// jest.mock('../../../components/ListServices/useSvmService', () => ({
-//   useSvmService: jest.fn(() => ({
-//     getSvmServiceTableDataSource: jest.fn(() => []),
-//   })),
-// }));
 
 jest.mock('../../../common-util/hooks/useSvmConnectivity', () => ({
-  useSvmConnectivity: jest.fn(() => dummySvmConnectivity),
+  useSvmConnectivity: jest.fn(),
 }));
 
 jest.mock('../../../common-util/hooks/useMetadata', () => ({
@@ -89,18 +55,33 @@ jest.mock('../../../common-util/hooks/useMetadata', () => ({
     metadataLoadState: 'LOADED',
     hashUrl: `${GATEWAY_URL}12345`,
     codeHref: `${GATEWAY_URL}${mockCodeUri}`,
-      nftImageUrl: `${GATEWAY_URL}${mockNftImageHash}`,
+    nftImageUrl: `${GATEWAY_URL}${mockNftImageHash}`,
     description: mockIpfs.description,
     version: mockIpfs.attributes[0].value,
   })),
 }));
 
-// jest.mock('common-util/Details/ServiceState/utils', () => ({
-//   getServiceTableDataSource: jest.fn(),
-//   getAgentInstanceAndOperator: jest.fn(),
-//   getServiceAgentInstances: jest.fn(),
-//   getBonds: jest.fn(),
-// }));
+jest.mock('../../../common-util/Details/useDetails', () => ({
+  useDetails: jest.fn(() => ({
+    isLoading: false,
+    info: dummyDetails,
+    ownerAddress: dummyAddress,
+    isOwner: true,
+  })),
+}));
+
+jest.mock('../../../components/ListServices/ServiceState/utils', () => ({
+  checkIfEth: jest.fn(),
+  getServiceTableDataSource: jest.fn(),
+  getBonds: jest.fn(),
+  getAgentInstanceAndOperator: jest.fn(),
+  getServiceAgentInstances: jest.fn(() =>
+    Promise.resolve({
+      agentInstances: '0xc7daF473C103aa2B112FE2F773E3A508A6999BB6',
+      numAgentInstances: 1,
+    }),
+  ),
+}));
 
 const dummyDetails = {
   owner: dummyAddress,
@@ -117,18 +98,16 @@ const dummyDetails = {
   state: '5',
 };
 
-const dummyHashes = {
-  configHashes: ['Service Hash1', 'Service Hash2'],
-};
+// const dummyHashes = {
+//   configHashes: ['Service Hash1', 'Service Hash2'],
+// };
 
 const unmockedFetch = global.fetch;
 
 describe('listServices/details.jsx', () => {
   beforeAll(() => {
     global.fetch = () =>
-      Promise.resolve({
-        json: () => Promise.resolve(mockIpfs),
-      });
+      Promise.resolve({ json: () => Promise.resolve(mockIpfs) });
   });
 
   beforeEach(() => {
@@ -140,8 +119,14 @@ describe('listServices/details.jsx', () => {
   });
 
   describe('EVM', () => {
-    it('should render service details', async () => {
+    beforeEach(() => {
+      // mock hooks
+      useHelpers.mockReturnValue(useHelpersEvmMock);
+      useSvmConnectivity.mockReturnValue(svmConnectivityEmptyMock);
+
+      // mock functions
       checkIfEth.mockReturnValueOnce(true);
+      checkIfServiceRequiresWhitelisting.mockReturnValueOnce(false);
       getAgentInstanceAndOperator.mockReturnValueOnce(
         Promise.resolve({
           id: 'agent-instance-row-1',
@@ -155,7 +140,6 @@ describe('listServices/details.jsx', () => {
           token: '0x0000000000000000000000000000000000000000',
         }),
       );
-      checkIfServiceRequiresWhitelisting.mockReturnValueOnce(false);
       getBonds.mockReturnValueOnce(
         Promise.resolve({
           bonds: ['1000000000000000', '1000000000000000'],
@@ -175,10 +159,10 @@ describe('listServices/details.jsx', () => {
           },
         ]),
       );
+    });
 
-      const { container, getByText, getByTestId } = render(
-        wrapProvider(<Services />),
-      );
+    it('should render service details (left side)', async () => {
+      const { getByText, getByTestId } = render(wrapProvider(<Services />));
       await waitFor(async () => {
         expect(getByText('Service ID 1')).toBeInTheDocument();
         expect(getByTestId('service-status').textContent).toBe('Inactive');
@@ -190,26 +174,46 @@ describe('listServices/details.jsx', () => {
         );
 
         // NFT image (display on left side for services)
-        const displayedImage = getByTestId('service-nft-image').querySelector('img');
+        const displayedImage =
+          getByTestId('service-nft-image').querySelector('img');
         expect(displayedImage.src).toBe(`${GATEWAY_URL}${mockNftImageHash}`);
 
-        expect(getByTestId('description').textContent).toBe(mockIpfs.description);
+        expect(getByTestId('description').textContent).toBe(
+          mockIpfs.description,
+        );
         expect(getByTestId('version').textContent).toBe(
           mockIpfs.attributes[0].value,
         );
-        expect(getByTestId('owner-address').textContent).toBe(dummyDetails.owner);
-        expect(getByText('Threshold')).toBeInTheDocument();
-
-        // state (right-side content)
-        const getTitle = (i) => container.querySelector(
-          `.ant-steps-item:nth-child(${i}) .ant-steps-item-title`,
+        expect(getByTestId('owner-address').textContent).toBe(
+          dummyDetails.owner,
         );
+        expect(getByText('Threshold')).toBeInTheDocument();
+        expect(getByText('Operator Whitelisting')).toBeInTheDocument();
+      });
+    });
+
+    // TODO: add brief tests for operator whitelisting
+
+    it('should render service state (right side)', async () => {
+      const { container } = render(wrapProvider(<Services />));
+      await waitFor(async () => {
+        const getTitle = (i) =>
+          container.querySelector(
+            `.ant-steps-item:nth-child(${i}) .ant-steps-item-title`,
+          );
         expect(getTitle(1)).toHaveTextContent('Pre-Registration');
         expect(getTitle(2)).toHaveTextContent('Active Registration');
         expect(getTitle(3)).toHaveTextContent('Finished Registration');
         expect(getTitle(4)).toHaveTextContent('Deployed');
         expect(getTitle(5)).toHaveTextContent('Terminated Bonded');
+
+        // last step (Terminated Bonded) should be active
+        expect(
+          container.querySelector('.ant-steps-item-active'),
+        ).toHaveTextContent('Terminated Bonded');
       });
     });
   });
+
+  describe('SVM', () => {});
 });

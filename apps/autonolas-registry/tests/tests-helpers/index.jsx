@@ -52,7 +52,28 @@ export const mockIpfs = {
   attributes: [{ trait_type: 'version', value: '0.0.0.1' }],
 };
 
-export const dummySvmConnectivity = {
+export const useHelpersEvmMock = {
+  account: dummyAddress,
+  vmType: 'EVM',
+  chainId: 1,
+  chainDisplayName: 'Ethereum',
+  chainName: 'ethereum',
+  isL1OnlyNetwork: true,
+  isL1Network: true,
+  doesNetworkHaveValidServiceManagerToken: true,
+  links: { AGENTS: '/ethereum/agents' },
+  isConnectedToWrongNetwork: false,
+  isSvm: false,
+};
+
+export const useHelpersSvmMock = {
+  ...useHelpersEvmMock,
+  vmType: 'SVM',
+  chainDisplayName: 'Solana',
+  chainName: 'solana',
+};
+
+export const svmConnectivityEmptyMock = {
   walletPublicKey: 'DrGvsAxY8ehyXjE6qSZXcT5A9pTsUkVm3en5ZQD3Wm5x',
   tempWalletPublicKey: 'DrGvsAxY8ehyXjE6qSZXcT5A9pTsUkVm3en5ZQD3Wm5x',
   connection: {},
@@ -60,4 +81,3 @@ export const dummySvmConnectivity = {
   programId: null,
   solanaAddresses: null,
 };
-

@@ -17,7 +17,7 @@ import {
   wrapProvider,
   dummyAddress,
   mockV1Hash,
-  dummySvmConnectivity,
+  svmConnectivityEmptyMock,
 } from '../../tests-helpers';
 
 jest.mock('common-util/List/IpfsHashGenerationModal/helpers', () => ({
@@ -37,7 +37,7 @@ jest.mock('common-util/Contracts', () => ({
 }));
 
 jest.mock('common-util/hooks/useSvmConnectivity', () => ({
-  useSvmConnectivity: jest.fn(() => dummySvmConnectivity),
+  useSvmConnectivity: jest.fn(() => svmConnectivityEmptyMock),
 }));
 
 const SERVICE_1 = {

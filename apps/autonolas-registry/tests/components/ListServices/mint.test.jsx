@@ -3,7 +3,7 @@ import userEvent from '@testing-library/user-event';
 import { getServiceManagerContract } from 'common-util/Contracts';
 import MintService from 'components/ListServices/mint';
 import { FORM_NAME } from 'components/ListServices/helpers/RegisterForm';
-import { wrapProvider, dummyAddress, mockV1Hash, dummySvmConnectivity } from '../../tests-helpers';
+import { wrapProvider, dummyAddress, mockV1Hash, svmConnectivityEmptyMock } from '../../tests-helpers';
 import { fillIpfsGenerationModal } from '../../tests-helpers/prefillForm';
 
 const NEW_SERVICE = { name: 'New Service One' };
@@ -17,7 +17,7 @@ jest.mock('common-util/List/IpfsHashGenerationModal/helpers', () => ({
 }));
 
 jest.mock('common-util/hooks/useSvmConnectivity', () => ({
-  useSvmConnectivity: jest.fn(() => dummySvmConnectivity),
+  useSvmConnectivity: jest.fn(() => svmConnectivityEmptyMock),
 }));
 
 describe('listServices/mint.jsx', () => {

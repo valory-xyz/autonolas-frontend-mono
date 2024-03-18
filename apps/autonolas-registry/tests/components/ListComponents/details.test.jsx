@@ -14,7 +14,7 @@ import {
   mockNftImageHash,
   mockIpfs,
   mockCodeUri,
-  dummySvmConnectivity,
+  svmConnectivityEmptyMock,
 } from '../../tests-helpers';
 
 jest.mock('next/router', () => ({
@@ -40,7 +40,7 @@ jest.mock('components/ListComponents/utils', () => ({
 }));
 
 jest.mock('common-util/hooks/useSvmConnectivity', () => ({
-  useSvmConnectivity: jest.fn(() => dummySvmConnectivity),
+  useSvmConnectivity: jest.fn(() => svmConnectivityEmptyMock),
 }));
 
 const dummyDetails = {

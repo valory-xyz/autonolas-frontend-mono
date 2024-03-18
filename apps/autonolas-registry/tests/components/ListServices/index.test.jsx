@@ -8,7 +8,7 @@ import {
   getTotalForMyServices,
 } from 'components/ListServices/utils';
 import { getServiceContract } from 'common-util/Contracts';
-import { wrapProvider, ACTIVE_TAB, getTableTd, dummySvmConnectivity } from '../../tests-helpers';
+import { wrapProvider, ACTIVE_TAB, getTableTd, svmConnectivityEmptyMock } from '../../tests-helpers';
 
 jest.mock('components/ListServices/utils', () => ({
   getServices: jest.fn(),
@@ -23,7 +23,7 @@ jest.mock('common-util/Contracts', () => ({
 }));
 
 jest.mock('common-util/hooks/useSvmConnectivity', () => ({
-  useSvmConnectivity: jest.fn(() => dummySvmConnectivity),
+  useSvmConnectivity: jest.fn(() => svmConnectivityEmptyMock),
 }));
 
 const SERVICE_1 = { name: 'Service One' };
