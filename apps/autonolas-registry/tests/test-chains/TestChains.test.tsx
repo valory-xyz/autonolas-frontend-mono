@@ -18,6 +18,7 @@ import {
   multisigSameAddresses,
   ChainIds,
   FALLBACK_HANDLER,
+  safeMultiSend,
 } from '../../common-util/Contracts/addresses';
 import {
   LOCAL_FORK_ID,
@@ -38,8 +39,8 @@ const LOCAL_ARTIFACTS = [
 ];
 const registriesRepo =
   'https://raw.githubusercontent.com/valory-xyz/autonolas-registries/main/';
-const registriesSafe =
-  'https://raw.githubusercontent.com/safe-global/safe-deployments/main/src/';
+const REGISTRIES_SAFE_URL =
+  'https://raw.githubusercontent.com/safe-global/safe-deployments/main/src/assets/v1.3.0';
 
 type Contract = {
   name: string;
@@ -137,34 +138,72 @@ describe('test-chains/TestChains.jsx', () => {
     2 * 60 * 1000,
   );
 
-  it('should match FALLBACK_HANDLER', async () => {
+  it.each([
+    // {
+    //   name: 'multisig',
+    //   addresses: multisigAddresses,
+    //   jsonName: 'multisig_addresses.json',
+    // },
+    // {
+    //   name: 'multisigSame',
+    //   addresses: multisigSameAddresses,
+    //   jsonName: 'multisig_same_addresses.json',
+    // },
+    {
+      name: 'safeMultiSend',
+      addresses: safeMultiSend,
+      jsonName: 'multi_send_call_only.json',
+    },
+  ])(
+    'should ensure $name addresses match between remote and local sources',
+    async ({ jsonName, name, addresses }) => {
+      const remoteResponseRaw = await fetch(
+        `${REGISTRIES_SAFE_URL}/${jsonName}`,
+      );
+      const remoteResponse = await remoteResponseRaw.json();
+
+      if (!remoteResponse.networkAddresses) {
+        throw new Error(`Invalid ${name} remoteResponse`);
+      }
+
+      chainIds.forEach((chainId) => {
+        if (!isValidKey(addresses, chainId)) {
+          throw new Error(`Invalid chainId: ${chainId}`);
+        }
+
+        if (isLocalChainId(chainId)) return;
+
+        const remoteMultisigAddress = remoteResponse.networkAddresses[chainId];
+        const localMultisigAddress =
+          addresses[chainId as keyof typeof addresses][0];
+
+        expect(remoteMultisigAddress).toBe(localMultisigAddress);
+      });
+    },
+  );
+
+  it('should ensure FALLBACK_HANDLER matches between remote and local sources', async () => {
     const fallbackHandlerResponse = await fetch(
-      `${registriesSafe}assets/v1.3.0/compatibility_fallback_handler.json`,
+      `${REGISTRIES_SAFE_URL}/compatibility_fallback_handler.json`,
     );
     const fallbackHandler = await fallbackHandlerResponse.json();
+
     if (!fallbackHandler.networkAddresses) {
       throw new Error('Invalid fallbackHandler');
     }
 
-    console.log('FALLBACK_HANDLER', fallbackHandler.networkAddresses);
-
     chainIds.forEach((chainId) => {
-      if (isValidKey(ADDRESSES, chainId)) {
-        if (isLocalChainId(chainId)) return;
-
-        const remoteFallbackHandlerAddress =
-          fallbackHandler.networkAddresses[chainId];
-        const localFallbackHandlerAddress = FALLBACK_HANDLER[chainId];
-
-        console.log({
-          chainId,
-          remoteFallbackHandlerAddress,
-          localFallbackHandlerAddress,
-        });
-        expect(remoteFallbackHandlerAddress).toBe(localFallbackHandlerAddress);
-      } else {
+      if (!isValidKey(ADDRESSES, chainId)) {
         throw new Error(`Invalid chainId: ${chainId}`);
       }
+
+      if (isLocalChainId(chainId)) return;
+
+      // check if the remote fallback handler address matches the local one
+      const remoteFallbackHandlerAddress =
+        fallbackHandler.networkAddresses[chainId];
+      const localFallbackHandlerAddress = FALLBACK_HANDLER[chainId];
+      expect(remoteFallbackHandlerAddress).toBe(localFallbackHandlerAddress);
     });
   });
 });
