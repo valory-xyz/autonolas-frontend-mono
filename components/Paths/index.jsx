@@ -64,8 +64,6 @@ const PathCard = ({ path }) => {
     id, name, description, service, images,
   } = path;
 
-  const { md } = useBreakpoint();
-
   return (
     <Row key={id} style={{ width: '100%', marginBottom: '24px', height: '100%' }}>
       <StyledCard>
@@ -75,13 +73,15 @@ const PathCard = ({ path }) => {
           style={{
             display: 'flex',
             alignItems: 'center',
-            borderRight: md && `1px solid ${COLOR.BORDER_GREY}`,
+            borderRight: `1px solid ${COLOR.BORDER_GREY}`,
           }}
         >
           <PathImage name={name} id={id} images={images} />
         </Col>
         <Col xs={24} md={14} style={{ padding: '2rem' }}>
-          {!md && <PathImage name={name} id={id} images={images} />}
+          <Col xs={24} md={0}>
+            <PathImage name={name} id={id} images={images} />
+          </Col>
           <Typography.Title className="mt-0 mb-4" level={4}>
             {name}
           </Typography.Title>
