@@ -30,9 +30,7 @@ const ListServices = () => {
     isMyTab(hash) ? MY_SERVICES : ALL_SERVICES,
   );
 
-  const {
-    account, chainName, links, isSvm,
-  } = useHelpers();
+  const { account, chainName, links, isSvm } = useHelpers();
 
   /**
    * extra tab content & view click
@@ -198,7 +196,8 @@ const ListServices = () => {
     setCurrentPage,
     onViewClick,
     searchValue,
-    onUpdateClick: (serviceId) => router.push(`${links.UPDATE_SERVICE}/${serviceId}`),
+    onUpdateClick: (serviceId) =>
+      router.push(`${links.UPDATE_SERVICE}/${serviceId}`),
   };
 
   const myServiceList = searchValue

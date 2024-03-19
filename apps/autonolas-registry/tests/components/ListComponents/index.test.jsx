@@ -7,10 +7,24 @@ import {
   getTotalForAllComponents,
   getTotalForMyComponents,
 } from 'components/ListComponents/utils';
-import { wrapProvider, ACTIVE_TAB, getTableTd } from '../../tests-helpers';
+import {
+  wrapProvider,
+  ACTIVE_TAB,
+  getTableTd,
+  svmConnectivityEmptyMock,
+  useHelpersEvmMock,
+} from '../../tests-helpers';
 
 const allComponentResponse = { id: '1', dependencies: ['1'] };
 const myComponentResponse = { id: '2', dependencies: ['2'] };
+
+jest.mock('common-util/hooks/useHelpers', () => ({
+  useHelpers: () => useHelpersEvmMock,
+}));
+
+jest.mock('common-util/hooks/useSvmConnectivity', () => ({
+  useSvmConnectivity: () => svmConnectivityEmptyMock,
+}));
 
 jest.mock('components/ListComponents/utils', () => ({
   getComponents: jest.fn(),
@@ -32,7 +46,9 @@ describe('listComponents/index.jsx', () => {
     const { container, getByRole } = render(wrapProvider(<ListComponents />));
 
     // check if the selected tab is `All` & has the correct content
-    await waitFor(async () => expect(container.querySelector(ACTIVE_TAB).textContent).toBe('All'));
+    await waitFor(async () =>
+      expect(container.querySelector(ACTIVE_TAB).textContent).toBe('All'),
+    );
 
     await waitFor(async () => {
       // ckecking Id, description column
@@ -55,9 +71,11 @@ describe('listComponents/index.jsx', () => {
     userEvent.click(container.querySelector('.ant-tabs-tab:nth-child(2)'));
 
     // check if the selected tab is `My components` & has the correct content
-    await waitFor(async () => expect(container.querySelector(ACTIVE_TAB).textContent).toBe(
-      'My Components',
-    ));
+    await waitFor(async () =>
+      expect(container.querySelector(ACTIVE_TAB).textContent).toBe(
+        'My Components',
+      ),
+    );
 
     // Mint button
     expect(getByRole('button', { name: 'Mint' })).toBeInTheDocument();

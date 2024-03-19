@@ -11,6 +11,12 @@ jest.mock('common-util/List/IpfsHashGenerationModal/helpers', () => ({
   getIpfsHashHelper: jest.fn(() => mockV1Hash),
 }));
 
+jest.mock('common-util/hooks', () => ({
+  useHelpers: jest.fn(() => ({})),
+  useSvmConnectivity: jest.fn(),
+}));
+
+
 // eslint-disable-next-line jest/no-disabled-tests
 describe.skip('<RegisterForm />', () => {
   it('should submit the form successfully', async () => {

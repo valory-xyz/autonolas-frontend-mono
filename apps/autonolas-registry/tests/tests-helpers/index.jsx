@@ -32,6 +32,8 @@ export const wrapProviderError = (component) => (
   <Provider store={errorStore}>{component}</Provider>
 );
 
+export const getTableTh = (i) => `.ant-table-thead > tr > th:nth-child(${i})`;
+
 export const getTableTd = (i) =>
   `.ant-table-tbody > tr.ant-table-row.ant-table-row-level-0 > td:nth-child(${i})`;
 
@@ -66,18 +68,60 @@ export const useHelpersEvmMock = {
   isSvm: false,
 };
 
+export const mockSvmAddress = 'DrGvsAxY8ehyXjE6qSZXcT5A9pTsUkVm3en5ZQD3Wm5x';
+
 export const useHelpersSvmMock = {
-  ...useHelpersEvmMock,
+  account: mockSvmAddress,
   vmType: 'SVM',
+  chainId: null,
   chainDisplayName: 'Solana',
   chainName: 'solana',
+  isL1OnlyNetwork: false,
+  isL1Network: false,
+  doesNetworkHaveValidServiceManagerToken: true,
+  links: { SERVICES: '/solana/services' },
+  isConnectedToWrongNetwork: false,
+  isSvm: true,
 };
 
 export const svmConnectivityEmptyMock = {
-  walletPublicKey: 'DrGvsAxY8ehyXjE6qSZXcT5A9pTsUkVm3en5ZQD3Wm5x',
-  tempWalletPublicKey: 'DrGvsAxY8ehyXjE6qSZXcT5A9pTsUkVm3en5ZQD3Wm5x',
+  walletPublicKey: mockSvmAddress,
+  tempWalletPublicKey: mockSvmAddress,
   connection: {},
   program: {},
   programId: null,
   solanaAddresses: null,
+};
+
+export const svmConnectivityMock = {
+  walletPublicKey: mockSvmAddress,
+  tempWalletPublicKey: mockSvmAddress,
+  connection: {},
+  program: {},
+  programId: null,
+  solanaAddresses: {
+    pda: 'Gtb5et18X9b63Yex1wpPtKezeXznqDiqJ3zXh1WAqRxK',
+    serviceRegistry: 'AU428Z7KbjRMjhmqWmQwUta2AvydbpfEZNBh8dStHTDi',
+    storageAccount: 'AjHVkc5XV7wiH3KyqznfCGvMofmBQL8agF6HxCjn6H1R',
+  },
+};
+
+export const svmServiceStateMock = {
+  serviceOwner: 'DrGvsAxY8ehyXjE6qSZXcT5A9pTsUkVm3en5ZQD3Wm5x',
+  securityDeposit: '01',
+  multisig: 'CsZ2ZbCGALZ2p8Np9hFmgMDXVYg4X9i5zYN8nvbPYJ6D',
+  configHash:
+    '327277b25e86f19a5e4e5cf4bee643f3eb219067af05ca8929cb1cfcbf673b08',
+  threshold: 1,
+  maxNumAgentInstances: 1,
+  numAgentInstances: 1,
+  state: '4',
+  agentIds: [5],
+  slots: [1],
+  bonds: [1],
+  operators: ['DrGvsAxY8ehyXjE6qSZXcT5A9pTsUkVm3en5ZQD3Wm5x'],
+  agentInstances: ['Em4vhJBAsohCNpNj2HpNaJs8jaQCprpkhvEZR2m9BL45'],
+  agentIdForAgentInstances: [5],
+  id: '10',
+  owner: 'DrGvsAxY8ehyXjE6qSZXcT5A9pTsUkVm3en5ZQD3Wm5x',
 };

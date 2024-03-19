@@ -9,7 +9,7 @@ import {
   getTotalForAllAgents,
   getTotalForMyAgents,
 } from '../../../components/ListAgents/utils';
-import { wrapProvider, ACTIVE_TAB, getTableTd } from '../../tests-helpers';
+import { wrapProvider, ACTIVE_TAB, getTableTd, useHelpersEvmMock, svmConnectivityEmptyMock } from '../../tests-helpers';
 
 const allAgentsResponse = { id: '1', dependencies: ['4'] };
 const myAgentsResponse = { id: '2', dependencies: ['5'] };
@@ -19,6 +19,14 @@ jest.mock('components/ListAgents/utils', () => ({
   getFilteredAgents: jest.fn(),
   getTotalForAllAgents: jest.fn(),
   getTotalForMyAgents: jest.fn(),
+}));
+
+jest.mock('common-util/hooks/useHelpers', () => ({
+  useHelpers: () => useHelpersEvmMock,
+}));
+
+jest.mock('common-util/hooks/useSvmConnectivity', () => ({
+  useSvmConnectivity: () => svmConnectivityEmptyMock,
 }));
 
 describe('listAgents/index.jsx', () => {

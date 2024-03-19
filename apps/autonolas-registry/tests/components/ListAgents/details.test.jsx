@@ -14,6 +14,7 @@ import {
   mockV1Hash,
   mockCodeUri,
   svmConnectivityEmptyMock,
+  useHelpersEvmMock,
 } from '../../tests-helpers';
 
 jest.mock('next/router', () => ({
@@ -38,8 +39,12 @@ jest.mock('components/ListAgents/utils', () => ({
   getTokenUri: jest.fn(),
 }));
 
+jest.mock('common-util/hooks/useHelpers', () => ({
+  useHelpers: () => useHelpersEvmMock,
+}));
+
 jest.mock('common-util/hooks/useSvmConnectivity', () => ({
-  useSvmConnectivity: jest.fn(() => svmConnectivityEmptyMock),
+  useSvmConnectivity: () => svmConnectivityEmptyMock,
 }));
 
 const dummyDetails = {
@@ -77,6 +82,12 @@ describe('listAgents/details.jsx', () => {
     getAgentHashes.mockResolvedValue(dummyHashes);
     getAgentOwner.mockResolvedValue(dummyDetails.owner);
     getTokenUri.mockResolvedValue(dummyDetails.tokenUrl);
+    // useHelpers.mockReturnValue({
+    //   isSvm: false,
+    //   account: '0x123',
+    //   links: { AGENTS: '/ethereum/agents' },
+    // });
+    // useSvmConnectivity.mockReturnValue(svmConnectivityEmptyMock);
   });
 
   afterAll(() => {
@@ -107,7 +118,7 @@ describe('listAgents/details.jsx', () => {
       );
       expect(
         queryByRole('button', { name: 'Update Hash' }),
-      ).not.toBeInTheDocument();
+      ).toBeInTheDocument();
       expect(getByTestId('details-dependency')).toBeInTheDocument();
 
       // NFT image

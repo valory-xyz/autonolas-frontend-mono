@@ -11,6 +11,13 @@ jest.mock(
   }),
 );
 
+jest.mock('common-util/hooks', () => ({
+  useHelpers: jest.fn(() => ({
+    isConnectedToWrongNetwork: false,
+  })),
+  useSvmConnectivity: jest.fn(),
+}));
+
 const callbackMock = jest.fn();
 const handleCancelMock = jest.fn();
 

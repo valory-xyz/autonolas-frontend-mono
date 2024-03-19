@@ -15,6 +15,7 @@ import {
   mockIpfs,
   mockCodeUri,
   svmConnectivityEmptyMock,
+  useHelpersEvmMock,
 } from '../../tests-helpers';
 
 jest.mock('next/router', () => ({
@@ -39,8 +40,12 @@ jest.mock('components/ListComponents/utils', () => ({
   getTokenUri: jest.fn(),
 }));
 
+jest.mock('common-util/hooks/useHelpers', () => ({
+  useHelpers: () => useHelpersEvmMock,
+}));
+
 jest.mock('common-util/hooks/useSvmConnectivity', () => ({
-  useSvmConnectivity: jest.fn(() => svmConnectivityEmptyMock),
+  useSvmConnectivity: () => svmConnectivityEmptyMock,
 }));
 
 const dummyDetails = {
@@ -98,7 +103,7 @@ describe('listComponents/details.jsx', () => {
       );
       expect(
         queryByRole('button', { name: 'Update Hash' }),
-      ).not.toBeInTheDocument();
+      ).toBeInTheDocument();
       expect(getByTestId('details-dependency')).toBeInTheDocument();
 
       // NFT image

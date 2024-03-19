@@ -79,7 +79,7 @@ export const Deployed = ({
   );
 
   return (
-    <div className="step-4-terminate">
+    <div className="step-4-deployed" data-testid="step-deployed">
       <Space direction="vertical" size={10}>
         {isShowAgentInstanceVisible && (
           <Table

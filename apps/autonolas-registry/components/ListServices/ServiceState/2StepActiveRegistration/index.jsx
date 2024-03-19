@@ -165,7 +165,7 @@ export const ActiveRegistration = ({
   const totalBondEthToken = convertToEth((totalBonds || 0).toString()) || '--';
 
   let totalTokenBonds = 0;
-  ethTokenBonds.forEach((bond, index) => {
+  ethTokenBonds?.forEach((bond, index) => {
     const addressCount = getNumberOfAgentAddress(
       dataSource[index].agentAddresses,
     );
