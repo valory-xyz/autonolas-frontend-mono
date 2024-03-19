@@ -1,6 +1,5 @@
 {
   "root": true,
-  "ignorePatterns": ["**/*"],
   "plugins": ["@nx"],
   "env": {
     "browser": true,
@@ -24,7 +23,8 @@
               }
             ]
           }
-        ]
+        ],
+        "react-hooks/exhaustive-deps": "warn"
       }
     },
     {

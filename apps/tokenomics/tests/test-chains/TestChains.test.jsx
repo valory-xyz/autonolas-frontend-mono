@@ -54,10 +54,12 @@ describe('test-chains/TestChains.jsx', () => {
 
             // Stringify the remote ABI and compare with the local one
             const remoteABI = JSON.stringify(remoteArtifact.abi);
+            // eslint-disable-next-line jest/no-conditional-expect
             expect(localABI).toBe(remoteABI);
 
             // Check the address
             const localAddress = localArtifacts[k].addresses[parsedConfig[i].chainId];
+            // eslint-disable-next-line jest/no-conditional-expect
             expect(localAddress).toBe(contracts[j].address);
           }
         }

@@ -147,7 +147,6 @@ const ListServices = () => {
     if (total && currentPage && !searchValue) {
       getList();
     }
-    /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, [
     account,
     chainName,

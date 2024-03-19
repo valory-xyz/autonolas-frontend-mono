@@ -46,7 +46,7 @@
       "executor": "@nx/jest:jest",
       "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
       "options": {
-        "jestConfig": "apps/tokenomics/jest.config.ts"
+        "jestConfig": "apps/tokenomics/jest.config.js"
       }
     },
     "lint": {
