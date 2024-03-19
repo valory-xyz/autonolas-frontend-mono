@@ -1,6 +1,6 @@
 import styled from 'styled-components';
 import {
-  Row, Card, Col, Button, Typography, Tag, Grid,
+  Row, Card, Col, Button, Typography, Tag,
 } from 'antd';
 import PropTypes from 'prop-types';
 import Image from 'next/image';
@@ -8,18 +8,16 @@ import Image from 'next/image';
 import { COLOR } from '@autonolas/frontend-library';
 import paths from './data.json';
 
-const { useBreakpoint } = Grid;
-
 const StyledCard = styled(Card)`
   border-color: ${COLOR.BORDER_GREY};
   width: 100%;
   height: 100%;
-  display: flex;
   align-items: center;
   .ant-card-body {
     padding: 0;
+    min-height: 100%;
     display: flex;
-    flex-direction: row;
+    
   }
 `;
 
@@ -65,13 +63,13 @@ const PathCard = ({ path }) => {
   } = path;
 
   return (
-    <Row key={id} style={{ width: '100%', marginBottom: '24px', height: '100%' }}>
-      <StyledCard>
+    <StyledCard key={id} style={{ marginBottom: '24px' }}>
+      <Row style={{ width: '100%', minHeight: '100%', margin: 'auto 0' }}>
         <Col
           xs={0}
           md={10}
           style={{
-            display: 'flex',
+            minHeight: '100%',
             alignItems: 'center',
             borderRight: `1px solid ${COLOR.BORDER_GREY}`,
           }}
@@ -112,9 +110,10 @@ const PathCard = ({ path }) => {
           <Button type="primary" href={`/paths/${id}`} className="mb-8">
             View Path
           </Button>
+
         </Col>
-      </StyledCard>
-    </Row>
+      </Row>
+    </StyledCard>
   );
 };
 
@@ -135,34 +134,32 @@ PathCard.propTypes = {
   }).isRequired,
 };
 
-export const Paths = () => {
-  const { md } = useBreakpoint();
-  return (
-    <>
-      <Typography.Title className="mt-0" level={2}>Paths</Typography.Title>
-      <Row gutter={[24, 24]} className="mb-128">
-        {paths.map((path) => (
-          <Col key={path.id} xs={24} md={12}>
-            <PathCard key={path.id} path={path} />
-          </Col>
-        ))}
-        {/* TODO DRY with PathCard code */}
-        <Col xs={24} md={12}>
-          <Row style={{ width: '100%', marginBottom: '24px', height: '100%' }}>
-            <StyledCard>
+export const Paths = () => (
+  <>
+    <Typography.Title className="mt-0" level={2}>Paths</Typography.Title>
+    <Row gutter={[24, 24]} className="mb-128">
+      {paths.map((path) => (
+        <Col key={path.id} xs={24} md={12}>
+          <PathCard key={path.id} path={path} />
+        </Col>
+      ))}
+      {/* TODO DRY with PathCard code */}
+      <Col xs={24} md={12}>
+        <Row style={{ width: '100%', marginBottom: '24px', height: '100%' }}>
+          <StyledCard>
+            <Row>
               <Col
                 xs={0}
                 md={10}
                 style={{
-                  display: 'flex',
                   alignItems: 'center',
-                  borderRight: md && `1px solid ${COLOR.BORDER_GREY}`,
+                  borderRight: `1px solid ${COLOR.BORDER_GREY}`,
                 }}
               >
                 <PathImage name="Add your own" id="add-your-own" />
               </Col>
               <Col xs={24} md={14} style={{ padding: '2rem' }}>
-                {!md && <PathImage name="Add your own" id="add-your-own" />}
+                <Col xs={24} md={0}><PathImage name="Add your own" id="add-your-own" /></Col>
                 <Typography.Title className="mt-0 mb-4" level={4}>
                   Add your own path
                 </Typography.Title>
@@ -181,10 +178,10 @@ export const Paths = () => {
                   Create PR
                 </Button>
               </Col>
-            </StyledCard>
-          </Row>
-        </Col>
-      </Row>
-    </>
-  );
-};
+            </Row>
+          </StyledCard>
+        </Row>
+      </Col>
+    </Row>
+  </>
+);
