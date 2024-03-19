@@ -25,8 +25,8 @@ jobs:
       - run: git branch --track main origin/main
       - name: Run ESLint
         run: yarn nx lint autonolas-registry
-      # - name: Run Test
-      #   run: yarn nx test autonolas-registry
+      - name: Run Test
+        run: yarn nx test autonolas-registry
   scan:
     name: gitleaks
     runs-on: ubuntu-latest
