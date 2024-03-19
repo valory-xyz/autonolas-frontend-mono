@@ -90,7 +90,7 @@ jest.mock('../../../common-util/Details/useDetails', () => ({
 }));
 
 jest.mock('../../../common-util/hooks/useHelpers', () => ({
-  useHelpers: () => ({ isSvm: false }),
+  useHelpers: jest.fn(),
 }));
 
 jest.mock('../../../components/ListServices/ServiceState/utils', () => ({

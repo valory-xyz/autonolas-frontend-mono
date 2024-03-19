@@ -3,12 +3,24 @@ import {
   getServices,
   getFilteredServices,
 } from 'components/ListServices/utils';
-import { dummyAddress } from '../../tests-helpers';
+import {
+  dummyAddress,
+  svmConnectivityEmptyMock,
+  useHelpersEvmMock,
+} from '../../tests-helpers';
 
 const SERVICE_1 = { name: 'Service One' };
 
 jest.mock('common-util/Contracts', () => ({
   getServiceContract: jest.fn(),
+}));
+
+jest.mock('common-util/hooks/useHelpers', () => ({
+  useHelpers: () => useHelpersEvmMock,
+}));
+
+jest.mock('common-util/hooks/useSvmConnectivity', () => ({
+  useSvmConnectivity: () => svmConnectivityEmptyMock,
 }));
 
 describe('listServices/utils.jsx', () => {
@@ -19,7 +31,9 @@ describe('listServices/utils.jsx', () => {
           call: jest.fn(() => Promise.resolve(1)),
         })),
         exists: jest.fn(() => ({
-          call: jest.fn(() => Promise.resolve({ status: 'fulfilled', value: true })),
+          call: jest.fn(() =>
+            Promise.resolve({ status: 'fulfilled', value: true }),
+          ),
         })),
         balanceOf: jest.fn(() => ({
           call: jest.fn(() => Promise.resolve(1)),
@@ -47,7 +61,9 @@ describe('listServices/utils.jsx', () => {
           call: jest.fn(() => Promise.resolve(1)),
         })),
         exists: jest.fn(() => ({
-          call: jest.fn(() => Promise.resolve({ status: 'fulfilled', value: true })),
+          call: jest.fn(() =>
+            Promise.resolve({ status: 'fulfilled', value: true }),
+          ),
         })),
         getService: jest.fn(() => ({
           call: jest.fn(() => Promise.resolve(SERVICE_1)),

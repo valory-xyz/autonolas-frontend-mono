@@ -1,10 +1,19 @@
 import { render, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+
 import { getServiceManagerContract } from 'common-util/Contracts';
+import { useHelpers } from 'common-util/hooks';
 import MintService from 'components/ListServices/mint';
 import { FORM_NAME } from 'components/ListServices/helpers/RegisterForm';
-import { wrapProvider, dummyAddress, mockV1Hash, svmConnectivityEmptyMock } from '../../tests-helpers';
 import { fillIpfsGenerationModal } from '../../tests-helpers/prefillForm';
+import {
+  wrapProvider,
+  dummyAddress,
+  mockV1Hash,
+  svmConnectivityEmptyMock,
+  useHelpersEvmMock,
+  useHelpersSvmMock,
+} from '../../tests-helpers';
 
 const NEW_SERVICE = { name: 'New Service One' };
 
@@ -14,6 +23,10 @@ jest.mock('common-util/Contracts', () => ({
 
 jest.mock('common-util/List/IpfsHashGenerationModal/helpers', () => ({
   getIpfsHashHelper: jest.fn(() => mockV1Hash),
+}));
+
+jest.mock('common-util/hooks/useHelpers', () => ({
+  useHelpers: jest.fn(),
 }));
 
 jest.mock('common-util/hooks/useSvmConnectivity', () => ({
@@ -28,12 +41,11 @@ describe('listServices/mint.jsx', () => {
         send: jest.fn(() => Promise.resolve(NEW_SERVICE)),
       })),
     }));
+    useHelpers.mockReturnValue(useHelpersEvmMock);
   });
 
   it('should submit the form successfully', async () => {
-    const {
-      container, getByText, getByRole, getByTestId,
-    } = render(
+    const { container, getByText, getByRole, getByTestId } = render(
       wrapProvider(<MintService />),
     );
     // title
@@ -73,5 +85,33 @@ describe('listServices/mint.jsx', () => {
     //   'Service registered',
     // );
     // });
+  });
+
+  describe('EVM', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+      useHelpers.mockReturnValue(useHelpersEvmMock);
+    });
+
+    it('should show "ERC20 token address" input', async () => {
+      const { container } = render(wrapProvider(<MintService />));
+
+      const erc20TokenInput = container.querySelector(`#${FORM_NAME}_token`);
+      expect(erc20TokenInput).not.toBeNull();
+    });
+  });
+
+  describe('SVM', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+      useHelpers.mockReturnValue(useHelpersSvmMock);
+    });
+
+    it('should NOT show "ERC20 token address" input', async () => {
+      const { container } = render(wrapProvider(<MintService />));
+
+      const erc20TokenInput = container.querySelector(`#${FORM_NAME}_token`);
+      expect(erc20TokenInput).toBeNull();
+    });
   });
 });

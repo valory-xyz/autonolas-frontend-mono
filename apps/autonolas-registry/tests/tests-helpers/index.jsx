@@ -78,7 +78,7 @@ export const useHelpersSvmMock = {
   chainName: 'solana',
   isL1OnlyNetwork: false,
   isL1Network: false,
-  doesNetworkHaveValidServiceManagerToken: true,
+  doesNetworkHaveValidServiceManagerToken: false,
   links: { SERVICES: '/solana/services' },
   isConnectedToWrongNetwork: false,
   isSvm: true,

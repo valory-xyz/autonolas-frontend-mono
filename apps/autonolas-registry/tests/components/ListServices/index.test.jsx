@@ -16,6 +16,7 @@ import {
   getTableTh,
   dummyAddress,
   mockSvmAddress,
+  useHelpersEvmMock,
 } from '../../tests-helpers';
 
 jest.mock('../../../components/ListServices/utils', () => ({
@@ -42,12 +43,7 @@ describe('listServices/index.jsx', () => {
     beforeEach(() => {
       jest.clearAllMocks();
 
-      useHelpers.mockReturnValue({
-        account: '0x12345',
-        chainName: 'EVM',
-        links: { SERVICES: '/services' },
-        isSvm: false,
-      });
+      useHelpers.mockReturnValue(useHelpersEvmMock);
       useServiceInfo.mockReturnValue(jest.fn(() => {}));
       getTotalForAllServices.mockResolvedValue(1);
       getTotalForMyServices.mockResolvedValue(1);
