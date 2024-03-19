@@ -265,3 +265,17 @@ bc87efea151df7a3d2c8e61a2644d2b9ceeaa396:common-util/AbiAndAddresses/tokenomics.
 8659c438979a3430d024f43efed302188270da75:components/Home/Products/Deposit.jsx:generic-api-key:25
 8659c438979a3430d024f43efed302188270da75:components/Home/Products/Deposit.jsx:generic-api-key:33
 805ac04cb8e616c11dd2eecb18ae0d32bdf22662:common-util/Contracts/index.jsx:generic-api-key:37
+b10e727341b413f31fd5a3a1240787006093e8bd:common-util/Contracts/addresses.jsx:generic-api-key:85
+b10e727341b413f31fd5a3a1240787006093e8bd:common-util/Contracts/addresses.jsx:generic-api-key:87
+b10e727341b413f31fd5a3a1240787006093e8bd:common-util/Contracts/addresses.jsx:generic-api-key:92
+b10e727341b413f31fd5a3a1240787006093e8bd:common-util/Contracts/addresses.jsx:generic-api-key:94
+a4bc6cb49b5e0fd1b62fe5da49900fbc70a2c876:common-util/Contracts/addresses.jsx:generic-api-key:39
+a4bc6cb49b5e0fd1b62fe5da49900fbc70a2c876:common-util/Contracts/addresses.jsx:generic-api-key:41
+a4bc6cb49b5e0fd1b62fe5da49900fbc70a2c876:common-util/Contracts/addresses.jsx:generic-api-key:60
+a4bc6cb49b5e0fd1b62fe5da49900fbc70a2c876:common-util/Contracts/addresses.jsx:generic-api-key:62
+a4bc6cb49b5e0fd1b62fe5da49900fbc70a2c876:common-util/Contracts/addresses.jsx:generic-api-key:71
+a4bc6cb49b5e0fd1b62fe5da49900fbc70a2c876:common-util/Contracts/addresses.jsx:generic-api-key:73
+51d69459b0d7da19b568cb898507b8f3ba285a9c:common-util/Contracts/addresses.jsx:generic-api-key:57
+51d69459b0d7da19b568cb898507b8f3ba285a9c:common-util/Contracts/addresses.jsx:generic-api-key:59
+91124f27bb8f2a76c480b5deef8e81712098625d:common-util/Contracts/addresses.jsx:generic-api-key:25
+91124f27bb8f2a76c480b5deef8e81712098625d:common-util/Contracts/addresses.jsx:generic-api-key:27
