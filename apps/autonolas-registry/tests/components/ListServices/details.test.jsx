@@ -1,5 +1,5 @@
 import { render, waitFor } from '@testing-library/react';
-// import { within } from '@testing-library/dom';
+
 import { GATEWAY_URL } from 'util/constants';
 import Services from '../../../components/ListServices/details';
 import {
@@ -14,7 +14,6 @@ import {
   useSvmServiceTableDataSource,
   useSvmBonds,
 } from '../../../components/ListServices/useSvmService';
-// import { useMetadata } from '../../../common-util/hooks/useMetadata';
 import { useHelpers } from '../../../common-util/hooks/useHelpers';
 import { useSvmConnectivity } from '../../../common-util/hooks/useSvmConnectivity';
 import {
@@ -24,17 +23,10 @@ import {
   checkIfEth,
   getTokenBondRequest,
 } from '../../../components/ListServices/ServiceState/utils';
-import {
-  // useFinishRegistration,
-  // useGetActivateRegistration,
-  useRegisterAgents,
-  // useTerminate,
-  // useUnbond,
-} from '../../../components/ListServices/ServiceState/useSvmServiceStateManagement';
+import { useRegisterAgents } from '../../../components/ListServices/ServiceState/useSvmServiceStateManagement';
 import {
   useGetServiceDetails,
   useGetServiceOwner,
-  // useGetServiceTokenUri,
 } from '../../../components/ListServices/useService';
 import {
   dummyAddress,
@@ -48,7 +40,7 @@ import {
   useHelpersSvmMock,
   svmServiceStateMock,
 } from '../../tests-helpers';
-// useGetServiceDetails
+
 jest.mock('next/router', () => ({
   __esModule: true,
   useRouter() {
@@ -156,10 +148,6 @@ const dummyDetails = {
   bonds: ['1'],
   state: '5',
 };
-
-// const dummyHashes = {
-//   configHashes: ['Service Hash1', 'Service Hash2'],
-// };
 
 const unmockedFetch = global.fetch;
 
@@ -355,24 +343,10 @@ describe('listServices/details.jsx', () => {
         }),
       );
       getTokenBondRequest.mockReturnValueOnce([]);
-      // getServiceTableDataSource.mockReturnValueOnce(
-      //   Promise.resolve([
-      //     {
-      //       agentAddresses: null,
-      //       agentId: '2',
-      //       availableSlots: 0,
-      //       bond: '1000000000000000',
-      //       key: '2',
-      //       totalSlots: '4',
-      //     },
-      //   ]),
-      // );
     });
 
     it('should render service details (left side)', async () => {
-      const { getByText, getByTestId, queryByText, queryByTestId } = render(
-        wrapProvider(<Services />),
-      );
+      const { getByText, getByTestId } = render(wrapProvider(<Services />));
       await waitFor(async () => {
         expect(getByText('Service ID 1')).toBeInTheDocument();
         expect(getByTestId('service-status').textContent).toBe('Inactive');
@@ -403,7 +377,7 @@ describe('listServices/details.jsx', () => {
     });
 
     it('should render service state (right side)', async () => {
-      const { container } = render(wrapProvider(<Services />));
+      const { container, getByText } = render(wrapProvider(<Services />));
       await waitFor(async () => {
         const getTitle = (i) =>
           container.querySelector(
@@ -415,11 +389,7 @@ describe('listServices/details.jsx', () => {
 
         // deployed step
         expect(getTitle(4)).toHaveTextContent('Deployed');
-        // expect(
-        //   within(getByTestId('step-deployed')).getByText(
-        //     'Squads contract address',
-        //   ),
-        // ).toBeInTheDocument();
+        expect(getByText(/Squads contract address:/)).toBeInTheDocument();
 
         expect(getTitle(5)).toHaveTextContent('Terminated Bonded');
 

@@ -82,12 +82,6 @@ describe('listAgents/details.jsx', () => {
     getAgentHashes.mockResolvedValue(dummyHashes);
     getAgentOwner.mockResolvedValue(dummyDetails.owner);
     getTokenUri.mockResolvedValue(dummyDetails.tokenUrl);
-    // useHelpers.mockReturnValue({
-    //   isSvm: false,
-    //   account: '0x123',
-    //   links: { AGENTS: '/ethereum/agents' },
-    // });
-    // useSvmConnectivity.mockReturnValue(svmConnectivityEmptyMock);
   });
 
   afterAll(() => {

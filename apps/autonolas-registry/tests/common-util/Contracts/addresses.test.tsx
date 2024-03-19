@@ -1,5 +1,4 @@
 /* eslint-disable jest/no-conditional-expect */
-/* eslint-disable no-await-in-loop */
 import fetch from 'node-fetch';
 import {
   COMPONENT_REGISTRY_CONTRACT,
@@ -37,7 +36,7 @@ const LOCAL_ARTIFACTS = [
   SERVICE_MANAGER_TOKEN_CONTRACT,
   OPERATOR_WHITELIST_CONTRACT,
 ];
-const registriesRepo =
+const REGISTRIES_REPO_URL =
   'https://raw.githubusercontent.com/valory-xyz/autonolas-registries/main/';
 const REGISTRIES_SAFE_URL =
   'https://raw.githubusercontent.com/safe-global/safe-deployments/main/src/assets/v1.3.0';
@@ -76,7 +75,9 @@ describe('common-utils/addresses', () => {
     async () => {
       // Registries repository
       // Fetch the actual config
-      const response = await fetch(`${registriesRepo}docs/configuration.json`);
+      const response = await fetch(
+        `${REGISTRIES_REPO_URL}docs/configuration.json`,
+      );
       const parsedConfig: Chain[] = await response.json();
 
       // Loop over chains
@@ -115,7 +116,7 @@ describe('common-utils/addresses', () => {
             // Take the configuration and local contract names that match
             // Get local and configuration ABIs, stringify them
             const remoteArtifactResponse = await fetch(
-              registriesRepo + currentContract.artifact,
+              REGISTRIES_REPO_URL + currentContract.artifact,
             );
             const remoteArtifact = await remoteArtifactResponse.json();
 
