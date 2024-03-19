@@ -30,9 +30,7 @@ const ListServices = () => {
     isMyTab(hash) ? MY_SERVICES : ALL_SERVICES,
   );
 
-  const {
-    account, chainName, links, isSvm,
-  } = useHelpers();
+  const { account, chainName, links, isSvm } = useHelpers();
 
   /**
    * extra tab content & view click
@@ -149,7 +147,6 @@ const ListServices = () => {
     if (total && currentPage && !searchValue) {
       getList();
     }
-    /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, [
     account,
     chainName,
@@ -198,7 +195,8 @@ const ListServices = () => {
     setCurrentPage,
     onViewClick,
     searchValue,
-    onUpdateClick: (serviceId) => router.push(`${links.UPDATE_SERVICE}/${serviceId}`),
+    onUpdateClick: (serviceId) =>
+      router.push(`${links.UPDATE_SERVICE}/${serviceId}`),
   };
 
   const myServiceList = searchValue

@@ -46,7 +46,7 @@
       "executor": "@nx/jest:jest",
       "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
       "options": {
-        "jestConfig": "apps/autonolas-registry/jest.config.ts"
+        "jestConfig": "apps/autonolas-registry/jest.config.js"
       }
     },
     "lint": {

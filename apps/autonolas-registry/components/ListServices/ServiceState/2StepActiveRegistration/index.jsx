@@ -19,10 +19,11 @@ const { Text } = Typography;
 const STEP = 2;
 
 const getIdsAndAgentInstances = (dataSource) => {
-  const trimArray = (string) => (string || [])
-    .join()
-    .split(',')
-    .map((e) => e.trim());
+  const trimArray = (string) =>
+    (string || [])
+      .join()
+      .split(',')
+      .map((e) => e.trim());
 
   const ids = [];
 
@@ -65,9 +66,8 @@ export const ActiveRegistration = ({
   isEthToken,
   updateDetails,
 }) => {
-  const {
-    isSvm, account, chainId, doesNetworkHaveValidServiceManagerToken,
-  } = useHelpers();
+  const { isSvm, account, chainId, doesNetworkHaveValidServiceManagerToken } =
+    useHelpers();
   const { getSvmBonds } = useSvmBonds();
 
   const [totalBonds, setTotalBond] = useState(null);
@@ -85,9 +85,11 @@ export const ActiveRegistration = ({
     (async () => {
       if (serviceId) {
         try {
-          const { totalBonds: totalBondsRes } = isSvm
+          const bondsInfo = isSvm
             ? await getSvmBonds(serviceId, dataSource)
             : await getBonds(serviceId, dataSource);
+          const totalBondsRes = bondsInfo?.totalBonds;
+
           if (isMounted) {
             setTotalBond(totalBondsRes);
           }
@@ -98,10 +100,10 @@ export const ActiveRegistration = ({
       }
 
       if (
-        serviceId
-        && !isEthToken
-        && doesNetworkHaveValidServiceManagerToken
-        && !isSvm
+        serviceId &&
+        !isEthToken &&
+        doesNetworkHaveValidServiceManagerToken &&
+        !isSvm
       ) {
         const response = await getTokenBondRequest(serviceId, dataSource);
         setEthTokenBonds(response);
@@ -163,7 +165,7 @@ export const ActiveRegistration = ({
   const totalBondEthToken = convertToEth((totalBonds || 0).toString()) || '--';
 
   let totalTokenBonds = 0;
-  ethTokenBonds.forEach((bond, index) => {
+  ethTokenBonds?.forEach((bond, index) => {
     const addressCount = getNumberOfAgentAddress(
       dataSource[index].agentAddresses,
     );

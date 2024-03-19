@@ -6,6 +6,11 @@ import {
   AlertError,
 } from '../../../common-util/List/ListCommon';
 
+jest.mock('common-util/hooks', () => ({
+  useHelpers: jest.fn(() => ({})),
+  useSvmConnectivity: jest.fn(),
+}));
+
 describe('convertStringToArray()', () => {
   it.each([
     { input: 'A, B, C', output: ['A', 'B', 'C'] },

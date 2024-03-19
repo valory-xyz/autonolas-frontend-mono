@@ -40,7 +40,7 @@ export const ServiceStateContainer = styled.div`
       }
     }
   }
-  .step-4-terminate {
+  .step-4-deployed {
     > div {
       font-size: 16px;
     }
@@ -73,7 +73,7 @@ export const ServiceStateContainer = styled.div`
     .ant-radio-group {
       display: block;
     }
-    .step-4-terminate {
+    .step-4-deployed {
       .ant-table-wrapper {
         width: 300px;
       }

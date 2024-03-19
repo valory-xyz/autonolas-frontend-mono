@@ -67,7 +67,7 @@ describe('pollTransactionDetails()', () => {
       await pollTransactionDetails(hash, chainId);
     }
 
-    await expect(fetchTransactionDetails).rejects.toThrowError(
+    await expect(fetchTransactionDetails).rejects.toThrow(
       'Invalid transaction details'
     );
   });
@@ -91,7 +91,7 @@ describe('getIsValidChainId()', () => {
 
 describe('getProvider()', () => {
   it('should throw an error if supported chain is empty array', () => {
-    expect(() => getProvider([], {})).toThrowError(
+    expect(() => getProvider([], {})).toThrow(
       'Supported chains cannot be empty'
     );
   });
@@ -103,7 +103,7 @@ describe('getProvider()', () => {
       getProvider(SUPPORTED_CHAINS, {});
     }
 
-    await expect(fetchProvider).rejects.toThrowError(
+    await expect(fetchProvider).rejects.toThrow(
       'No RPC URL found for chainId: 1'
     );
   });
@@ -115,7 +115,7 @@ describe('getProvider()', () => {
       getProvider(SUPPORTED_CHAINS, mockRpcUrls);
     }
 
-    await expect(fetchProvider).rejects.toThrowError(
+    await expect(fetchProvider).rejects.toThrow(
       'No RPC URL found for chainId: 11111'
     );
   });

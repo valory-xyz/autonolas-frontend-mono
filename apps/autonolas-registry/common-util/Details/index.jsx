@@ -18,7 +18,7 @@ import { Header, DetailsTitle } from './styles';
 
 const { Text } = Typography;
 
-const Details = ({
+export const Details = ({
   id,
   type,
   getDetails,

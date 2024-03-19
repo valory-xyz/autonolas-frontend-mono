@@ -1,4 +1,3 @@
-/* eslint-disable jest/max-expects */
 import { useRouter } from 'next/router';
 import { render, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -13,7 +12,13 @@ import {
   getServiceDetails,
   getServiceOwner,
 } from 'components/ListServices/utils';
-import { wrapProvider, dummyAddress, mockV1Hash } from '../../helpers';
+import {
+  wrapProvider,
+  dummyAddress,
+  mockV1Hash,
+  svmConnectivityEmptyMock,
+  useHelpersEvmMock,
+} from '../../tests-helpers';
 
 jest.mock('common-util/List/IpfsHashGenerationModal/helpers', () => ({
   getIpfsHashHelper: jest.fn(() => mockV1Hash),
@@ -29,6 +34,14 @@ jest.mock('components/ListServices/utils', () => ({
 jest.mock('common-util/Contracts', () => ({
   getServiceContract: jest.fn(),
   getServiceManagerContract: jest.fn(),
+}));
+
+jest.mock('common-util/hooks/useHelpers', () => ({
+  useHelpers: () => useHelpersEvmMock,
+}));
+
+jest.mock('common-util/hooks/useSvmConnectivity', () => ({
+  useSvmConnectivity: () => svmConnectivityEmptyMock,
 }));
 
 const SERVICE_1 = {
