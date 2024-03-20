@@ -6,7 +6,7 @@ import {
   AlertError,
 } from '../../../common-util/List/ListCommon';
 
-jest.mock('common-util/hooks', () => ({
+jest.mock('../../../common-util/hooks', () => ({
   useHelpers: jest.fn(() => ({})),
   useSvmConnectivity: jest.fn(),
 }));

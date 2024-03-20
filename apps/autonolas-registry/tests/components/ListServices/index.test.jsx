@@ -26,11 +26,11 @@ jest.mock('../../../components/ListServices/utils', () => ({
   getTotalForMyServices: jest.fn(),
 }));
 
-jest.mock('common-util/hooks/useHelpers', () => ({
+jest.mock('../../../common-util/hooks/useHelpers', () => ({
   useHelpers: jest.fn(),
 }));
 
-jest.mock('common-util/hooks/useSvmConnectivity', () => ({
+jest.mock('../../../common-util/hooks/useSvmConnectivity', () => ({
   useSvmConnectivity: jest.fn(() => svmConnectivityEmptyMock),
 }));
 

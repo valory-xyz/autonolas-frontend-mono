@@ -1,12 +1,12 @@
 import { render, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import ListComponents from 'components/ListComponents';
+import ListComponents from '../../../components/ListComponents';
 import {
   getComponents,
   getFilteredComponents,
   getTotalForAllComponents,
   getTotalForMyComponents,
-} from 'components/ListComponents/utils';
+} from '../../../components/ListComponents/utils';
 import {
   wrapProvider,
   ACTIVE_TAB,
@@ -18,15 +18,15 @@ import {
 const allComponentResponse = { id: '1', dependencies: ['1'] };
 const myComponentResponse = { id: '2', dependencies: ['2'] };
 
-jest.mock('common-util/hooks/useHelpers', () => ({
+jest.mock('../../../common-util/hooks/useHelpers', () => ({
   useHelpers: () => useHelpersEvmMock,
 }));
 
-jest.mock('common-util/hooks/useSvmConnectivity', () => ({
+jest.mock('../../../common-util/hooks/useSvmConnectivity', () => ({
   useSvmConnectivity: () => svmConnectivityEmptyMock,
 }));
 
-jest.mock('components/ListComponents/utils', () => ({
+jest.mock('../../../components/ListComponents/utils', () => ({
   getComponents: jest.fn(),
   getFilteredComponents: jest.fn(),
   getTotalForAllComponents: jest.fn(),

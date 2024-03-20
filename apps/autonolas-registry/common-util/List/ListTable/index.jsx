@@ -3,8 +3,8 @@ import { Table } from 'antd';
 import { Loader, useScreen } from '@autonolas/frontend-library';
 
 import { TOTAL_VIEW_COUNT } from '../../../util/constants';
-import { ListEmptyMessage } from '../List/ListCommon';
-import { useHelpers } from '../hooks';
+import { ListEmptyMessage } from '../../List/ListCommon';
+import { useHelpers } from '../../hooks';
 import { fetchDataSource, getTableColumns } from './helpers';
 
 const ListTable = ({

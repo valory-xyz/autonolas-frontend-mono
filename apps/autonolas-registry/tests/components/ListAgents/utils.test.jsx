@@ -1,10 +1,10 @@
-import { getAgentContract } from 'common-util/Contracts';
-import { getAgents, getFilteredAgents } from 'components/ListAgents/utils';
+import { getAgentContract } from '../../../common-util/Contracts';
+import { getAgents, getFilteredAgents } from '../../../components/ListAgents/utils';
 import { dummyAddress } from '../../tests-helpers';
 
 const AGENT_1 = { name: 'Agent One' };
 
-jest.mock('common-util/Contracts', () => ({
+jest.mock('../../../common-util/Contracts', () => ({
   getAgentContract: jest.fn(),
 }));
 

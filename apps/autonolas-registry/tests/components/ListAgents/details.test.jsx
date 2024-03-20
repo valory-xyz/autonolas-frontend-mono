@@ -1,12 +1,13 @@
 import { render, waitFor } from '@testing-library/react';
-import { GATEWAY_URL } from 'util/constants';
-import AgentDetails from 'components/ListAgents/details';
+
+import { GATEWAY_URL } from '../../../util/constants';
+import AgentDetails from '../../../components/ListAgents/details';
 import {
   getAgentDetails,
   getAgentHashes,
   getAgentOwner,
   getTokenUri,
-} from 'components/ListAgents/utils';
+} from '../../../components/ListAgents/utils';
 import {
   dummyAddress,
   wrapProvider,
@@ -24,26 +25,26 @@ jest.mock('next/router', () => ({
   },
 }));
 
-jest.mock('common-util/List/IpfsHashGenerationModal/helpers', () => ({
+jest.mock('../../../common-util/List/IpfsHashGenerationModal/helpers', () => ({
   getIpfsHashHelper: jest.fn(() => mockV1Hash),
 }));
 
-jest.mock('common-util/Details/utils', () => ({
+jest.mock('../../../common-util/Details/utils', () => ({
   checkIfServiceRequiresWhitelisting: jest.fn(() => false),
 }));
 
-jest.mock('components/ListAgents/utils', () => ({
+jest.mock('../../../components/ListAgents/utils', () => ({
   getAgentDetails: jest.fn(),
   getAgentHashes: jest.fn(),
   getAgentOwner: jest.fn(),
   getTokenUri: jest.fn(),
 }));
 
-jest.mock('common-util/hooks/useHelpers', () => ({
+jest.mock('../../../common-util/hooks/useHelpers', () => ({
   useHelpers: () => useHelpersEvmMock,
 }));
 
-jest.mock('common-util/hooks/useSvmConnectivity', () => ({
+jest.mock('../../../common-util/hooks/useSvmConnectivity', () => ({
   useSvmConnectivity: () => svmConnectivityEmptyMock,
 }));
 

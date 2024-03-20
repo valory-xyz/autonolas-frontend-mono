@@ -11,7 +11,7 @@ jest.mock(
   }),
 );
 
-jest.mock('common-util/hooks', () => ({
+jest.mock('../../../../common-util/hooks', () => ({
   useHelpers: jest.fn(() => ({ isConnectedToWrongNetwork: false })),
   useSvmConnectivity: jest.fn(),
 }));

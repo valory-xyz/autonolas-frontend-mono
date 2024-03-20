@@ -1,17 +1,17 @@
 import { useRouter } from 'next/router';
 import { render, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { act } from 'react-dom/test-utils';
-import Update from 'components/ListServices/update';
-import { FORM_NAME } from 'components/ListServices/helpers/RegisterForm';
+
+import Update from '../../../components/ListServices/update';
+import { FORM_NAME } from '../../../components/ListServices/helpers/RegisterForm';
 import {
   getServiceContract,
   getServiceManagerContract,
-} from 'common-util/Contracts';
+} from '../../../common-util/Contracts';
 import {
   getServiceDetails,
   getServiceOwner,
-} from 'components/ListServices/utils';
+} from '../../../components/ListServices/utils';
 import {
   wrapProvider,
   dummyAddress,
@@ -20,27 +20,27 @@ import {
   useHelpersEvmMock,
 } from '../../tests-helpers';
 
-jest.mock('common-util/List/IpfsHashGenerationModal/helpers', () => ({
+jest.mock('../../../common-util/List/IpfsHashGenerationModal/helpers', () => ({
   getIpfsHashHelper: jest.fn(() => mockV1Hash),
 }));
 
-jest.mock('components/ListServices/utils', () => ({
+jest.mock('../../../components/ListServices/utils', () => ({
   getServices: jest.fn(),
   getFilteredServices: jest.fn(),
   getServiceOwner: jest.fn(),
   getServiceDetails: jest.fn(),
 }));
 
-jest.mock('common-util/Contracts', () => ({
+jest.mock('../../../common-util/Contracts', () => ({
   getServiceContract: jest.fn(),
   getServiceManagerContract: jest.fn(),
 }));
 
-jest.mock('common-util/hooks/useHelpers', () => ({
+jest.mock('../../../common-util/hooks/useHelpers', () => ({
   useHelpers: () => useHelpersEvmMock,
 }));
 
-jest.mock('common-util/hooks/useSvmConnectivity', () => ({
+jest.mock('../../../common-util/hooks/useSvmConnectivity', () => ({
   useSvmConnectivity: () => svmConnectivityEmptyMock,
 }));
 
@@ -110,7 +110,7 @@ describe.skip('listServices/service.jsx', () => {
       const submitButton = getByRole('button', { name: 'Submit' });
       expect(submitButton).toBeInTheDocument();
 
-      await act(async () => {
+      await waitFor(async () => {
         userEvent.click(submitButton);
       });
     });
