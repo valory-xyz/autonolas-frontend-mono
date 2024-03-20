@@ -5,7 +5,7 @@ import { Keypair, PublicKey } from '@solana/web3.js';
 import NodeWallet from '@project-serum/anchor/dist/cjs/nodewallet';
 import { web3, setProvider } from '@coral-xyz/anchor';
 
-import { SOLANA_CHAIN_NAMES } from 'util/constants';
+import { SOLANA_CHAIN_NAMES } from '../../util/constants';
 import idl from '../AbiAndAddresses/ServiceRegistrySolana.json';
 import {
   SOLANA_ADDRESSES,

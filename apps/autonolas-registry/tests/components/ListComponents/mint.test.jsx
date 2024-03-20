@@ -1,8 +1,8 @@
 import { render, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { getMechMinterContract } from 'common-util/Contracts';
-import MintComponent from 'components/ListComponents/mint';
-import { FORM_NAME } from 'common-util/List/RegisterForm';
+import { getMechMinterContract } from '../../../common-util/Contracts';
+import MintComponent from '../../../components/ListComponents/mint';
+import { FORM_NAME } from '../../../common-util/List/RegisterForm';
 import {
   wrapProvider,
   dummyAddress,
@@ -14,11 +14,11 @@ import { fillIpfsGenerationModal } from '../../tests-helpers/prefillForm';
 
 const NEW_COMPONENT = { name: 'New Component One' };
 
-jest.mock('common-util/Contracts', () => ({
+jest.mock('../../../common-util/Contracts', () => ({
   getMechMinterContract: jest.fn(),
 }));
 
-jest.mock('common-util/List/IpfsHashGenerationModal/helpers', () => ({
+jest.mock('../../../common-util/List/IpfsHashGenerationModal/helpers', () => ({
   getIpfsHashHelper: jest.fn(() => mockV1Hash),
 }));
 

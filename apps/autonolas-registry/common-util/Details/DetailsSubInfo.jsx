@@ -7,8 +7,8 @@ import {
   DEFAULT_SERVICE_CREATION_ETH_TOKEN_ZEROS,
   NAV_TYPES,
   HASH_DETAILS_STATE,
-} from 'util/constants';
-import { typePropType } from 'common-util/propTypes';
+} from '../../util/constants';
+import { typePropType } from '../propTypes';
 import { Circle } from '../svg/Circle';
 import { useHelpers } from '../hooks';
 import { useMetadata } from '../hooks/useMetadata';

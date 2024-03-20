@@ -3,7 +3,8 @@ import {
   Button, Form, Input, Space, Radio,
 } from 'antd';
 import { MinusCircleOutlined, PlusOutlined } from '@ant-design/icons';
-import { addressValidator } from 'common-util/functions';
+
+import { addressValidator } from '../functions';
 
 export const FormList = ({ inputOneLabel, inputTwoLabel, buttonText }) => (
   <Form.List

@@ -1,14 +1,14 @@
-import { getComponentContract } from 'common-util/Contracts';
+import { getComponentContract } from '../../../common-util/Contracts';
 import {
   getComponentDetails,
   getComponents,
   getFilteredComponents,
-} from 'components/ListComponents/utils';
+} from '../../../components/ListComponents/utils';
 import { dummyAddress } from '../../tests-helpers';
 
 const COMPONENT_1 = { name: 'Component One' };
 
-jest.mock('common-util/Contracts', () => ({
+jest.mock('../../../common-util/Contracts', () => ({
   getComponentContract: jest.fn(),
 }));
 

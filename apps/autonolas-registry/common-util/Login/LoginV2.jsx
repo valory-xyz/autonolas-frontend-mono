@@ -19,10 +19,10 @@ import {
   useScreen,
 } from '@autonolas/frontend-library';
 
-import { setUserBalance } from 'store/setup';
-import { isAddressProhibited } from 'common-util/functions';
-import { useHelpers } from 'common-util/hooks';
-import { YellowButton } from 'common-util/YellowButton';
+import { setUserBalance } from '../../store/setup';
+import { isAddressProhibited } from '../functions';
+import { useHelpers } from '../hooks';
+import { YellowButton } from '../YellowButton';
 import { SolanaWallet } from './SolanaWallet';
 import { projectId, ethereumClient } from './config';
 
@@ -77,8 +77,9 @@ export const LoginV2 = ({
       try {
         // This is the initial `provider` that is returned when
         // using web3Modal to connect. Can be MetaMask or WalletConnect.
-        const modalProvider = connector?.options?.getProvider?.()
-          || (await connector?.getProvider?.());
+        const modalProvider =
+          connector?.options?.getProvider?.() ||
+          (await connector?.getProvider?.());
 
         if (modalProvider) {
           // *******************************************************
@@ -141,7 +142,8 @@ export const LoginV2 = ({
     }
   }, [isConnectedToWrongNetwork, onSwitchNetwork]);
 
-  const hideWrongNetwork = isNil(walletConnectedChain?.id) || walletConnectedChain?.id === chainId;
+  const hideWrongNetwork =
+    isNil(walletConnectedChain?.id) || walletConnectedChain?.id === chainId;
 
   return (
     <LoginContainer>

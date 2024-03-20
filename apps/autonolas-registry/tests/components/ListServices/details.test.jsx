@@ -1,6 +1,6 @@
 import { render, waitFor } from '@testing-library/react';
 
-import { GATEWAY_URL } from 'util/constants';
+import { GATEWAY_URL } from '../../../util/constants';
 import Services from '../../../components/ListServices/details';
 import {
   getTokenDetailsRequest,

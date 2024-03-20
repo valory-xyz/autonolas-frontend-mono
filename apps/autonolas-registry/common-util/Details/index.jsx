@@ -7,9 +7,9 @@ import {
 import { get } from 'lodash';
 import { Loader, NA } from '@autonolas/frontend-library';
 
-import { NAV_TYPES } from 'util/constants';
-import { useMetadata } from 'common-util/hooks/useMetadata';
-import { typePropType } from 'common-util/propTypes';
+import { NAV_TYPES } from '../../util/constants';
+import { useMetadata } from '../hooks/useMetadata';
+import { typePropType } from '../propTypes';
 import { IpfsHashGenerationModal } from '../List/IpfsHashGenerationModal';
 import { useDetails } from './useDetails';
 import { NftImage } from './NFTImage';

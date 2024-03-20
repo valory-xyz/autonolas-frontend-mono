@@ -1,21 +1,22 @@
 import { render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import RegisterForm, { FORM_NAME } from 'common-util/List/RegisterForm';
+import RegisterForm, {
+  FORM_NAME,
+} from '../../../common-util/List/RegisterForm';
 import { fillIpfsGenerationModal } from '../../tests-helpers/prefillForm';
 import { wrapProvider, dummyAddress, mockV1Hash } from '../../tests-helpers';
 
 const handleSubmit = jest.fn(() => {});
 const handleCancel = jest.fn(() => {});
 
-jest.mock('common-util/List/IpfsHashGenerationModal/helpers', () => ({
+jest.mock('../../../common-util/List/IpfsHashGenerationModal/helpers', () => ({
   getIpfsHashHelper: jest.fn(() => mockV1Hash),
 }));
 
-jest.mock('common-util/hooks', () => ({
+jest.mock('../../../common-util/hooks', () => ({
   useHelpers: jest.fn(() => ({})),
   useSvmConnectivity: jest.fn(),
 }));
-
 
 // eslint-disable-next-line jest/no-disabled-tests
 describe.skip('<RegisterForm />', () => {

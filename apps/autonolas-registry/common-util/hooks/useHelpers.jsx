@@ -8,7 +8,7 @@ import {
   isL1Network as isL1NetworkFn,
 } from '@autonolas/frontend-library';
 
-import { URL, VM_TYPE } from 'util/constants';
+import { URL, VM_TYPE } from '../../util/constants';
 import { doesNetworkHaveValidServiceManagerTokenFn } from '../functions';
 
 export const useHelpers = () => {
@@ -49,7 +49,7 @@ export const useHelpers = () => {
 
   return {
     /**
-    * @type {string | import("@solana/web3.js").PublicKey}
+     * @type {string | import("@solana/web3.js").PublicKey}
      * account - selected in the dropdown
      * If SVM, account is the public key of the phantom wallet
      * else account is the address of the selected wallet

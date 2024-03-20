@@ -1,8 +1,8 @@
-import { getServiceContract } from 'common-util/Contracts';
+import { getServiceContract } from '../../../common-util/Contracts';
 import {
   getServices,
   getFilteredServices,
-} from 'components/ListServices/utils';
+} from '../../../components/ListServices/utils';
 import {
   dummyAddress,
   svmConnectivityEmptyMock,
@@ -11,15 +11,15 @@ import {
 
 const SERVICE_1 = { name: 'Service One' };
 
-jest.mock('common-util/Contracts', () => ({
+jest.mock('../../../common-util/Contracts', () => ({
   getServiceContract: jest.fn(),
 }));
 
-jest.mock('common-util/hooks/useHelpers', () => ({
+jest.mock('../../../common-util/hooks/useHelpers', () => ({
   useHelpers: () => useHelpersEvmMock,
 }));
 
-jest.mock('common-util/hooks/useSvmConnectivity', () => ({
+jest.mock('../../../common-util/hooks/useSvmConnectivity', () => ({
   useSvmConnectivity: () => svmConnectivityEmptyMock,
 }));
 

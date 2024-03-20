@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { Alert, Button } from 'antd';
 import { ExportOutlined } from '@ant-design/icons';
 
-import { EmptyMessage, RegisterFooter } from 'components/styles';
+import { EmptyMessage, RegisterFooter } from '../../components/styles';
 import { useHelpers } from '../hooks';
 
 // ----------- functions -----------

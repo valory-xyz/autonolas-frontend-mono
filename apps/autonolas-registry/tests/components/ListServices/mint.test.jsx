@@ -1,10 +1,10 @@
 import { render, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
-import { getServiceManagerContract } from 'common-util/Contracts';
-import { useHelpers } from 'common-util/hooks';
-import MintService from 'components/ListServices/mint';
-import { FORM_NAME } from 'components/ListServices/helpers/RegisterForm';
+import { getServiceManagerContract } from '../../../common-util/Contracts';
+import { useHelpers } from '../../../common-util/hooks';
+import MintService from '../../../components/ListServices/mint';
+import { FORM_NAME } from '../../../components/ListServices/helpers/RegisterForm';
 import { fillIpfsGenerationModal } from '../../tests-helpers/prefillForm';
 import {
   wrapProvider,
@@ -17,19 +17,19 @@ import {
 
 const NEW_SERVICE = { name: 'New Service One' };
 
-jest.mock('common-util/Contracts', () => ({
+jest.mock('../../../common-util/Contracts', () => ({
   getServiceManagerContract: jest.fn(),
 }));
 
-jest.mock('common-util/List/IpfsHashGenerationModal/helpers', () => ({
+jest.mock('../../../common-util/List/IpfsHashGenerationModal/helpers', () => ({
   getIpfsHashHelper: jest.fn(() => mockV1Hash),
 }));
 
-jest.mock('common-util/hooks/useHelpers', () => ({
+jest.mock('../../../common-util/hooks/useHelpers', () => ({
   useHelpers: jest.fn(),
 }));
 
-jest.mock('common-util/hooks/useSvmConnectivity', () => ({
+jest.mock('../../../common-util/hooks/useSvmConnectivity', () => ({
   useSvmConnectivity: jest.fn(() => svmConnectivityEmptyMock),
 }));
 

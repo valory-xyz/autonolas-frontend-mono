@@ -1,12 +1,10 @@
 import React, { Fragment, useState } from 'react';
 import PropTypes from 'prop-types';
 import isNil from 'lodash/isNil';
-import {
-  Form, Input, Button, Select,
-} from 'antd';
+import { Form, Input, Button, Select } from 'antd';
 import { notifyError, notifySuccess } from '@autonolas/frontend-library';
 
-import { HASH_PREFIXES } from 'util/constants';
+import { HASH_PREFIXES } from '../../../util/constants';
 import { useHelpers } from '../../hooks';
 import { notifyWrongNetwork } from '../../functions';
 import { getIpfsHashHelper } from './helpers';
@@ -191,7 +189,7 @@ export const IpfsHashGenerationModal = ({
           ]}
         >
           <Input
-            addonBefore={(
+            addonBefore={
               <Select
                 defaultValue={hashType}
                 className="select-before"
@@ -204,7 +202,7 @@ export const IpfsHashGenerationModal = ({
                   {HASH_PREFIXES.type2}
                 </Select.Option>
               </Select>
-            )}
+            }
           />
         </Form.Item>
 

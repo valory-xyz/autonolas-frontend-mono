@@ -1,10 +1,11 @@
 import { useState, useEffect, useMemo } from 'react';
 import { notifyError, NA } from '@autonolas/frontend-library';
 
-import { GATEWAY_URL, HASH_DETAILS_STATE } from 'util/constants';
+import { GATEWAY_URL, HASH_DETAILS_STATE } from '../../util/constants';
 
 const pattern = /https:\/\/localhost\/(agent|component|service)\/+/g;
-const getAutonolasTokenUri = (tokenUri) => (tokenUri || '').replace(pattern, GATEWAY_URL);
+const getAutonolasTokenUri = (tokenUri) =>
+  (tokenUri || '').replace(pattern, GATEWAY_URL);
 
 /**
  * NFT details: hook to fetch metadata from IPFS
