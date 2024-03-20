@@ -4,4 +4,10 @@ const AgentDetails = dynamic(() => import('../../../components/ListAgents/detail
   ssr: false,
 });
 
-export default AgentDetails;
+const Agent = () => {
+  console.log('AgentDetails pages/network/agents/id.jsx');
+  return <AgentDetails />;
+}
+
+export default Agent;
+// export default AgentDetails;
