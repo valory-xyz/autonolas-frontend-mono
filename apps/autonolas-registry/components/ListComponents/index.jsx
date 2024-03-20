@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { Tabs } from 'antd';
 import { useRouter } from 'next/router';
 import { notifyError } from '@autonolas/frontend-library';
-
 import { NAV_TYPES } from 'util/constants';
 import ListTable from 'common-util/List/ListTable';
 import {

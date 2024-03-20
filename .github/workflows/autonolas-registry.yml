@@ -6,6 +6,8 @@ on:
     paths:
       - 'apps/autonolas-registry/**'
   pull_request:
+    branches:
+      - main
     paths:
       - 'apps/autonolas-registry/**'
 
@@ -22,7 +24,6 @@ jobs:
           node-version: 18
       - name: Install modules
         run: yarn
-      - run: git branch --track main origin/main
       - name: Run ESLint
         run: yarn nx lint autonolas-registry
       - name: Run Test

@@ -7,7 +7,6 @@ import { remove, round, isNaN } from 'lodash';
 import { COLOR, NA } from '@autonolas/frontend-library';
 import { QuestionCircleOutlined } from '@ant-design/icons';
 import styled from 'styled-components';
-
 import { BONDING_PRODUCTS } from 'util/constants';
 import { notifySpecificError, parseToEth } from 'common-util/functions';
 import { useHelpers } from 'common-util/hooks/useHelpers';
