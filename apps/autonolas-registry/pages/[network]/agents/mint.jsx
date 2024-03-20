@@ -1,6 +1,6 @@
 import dynamic from 'next/dynamic';
 
-const MintAgent = dynamic(() => import('components/ListAgents/mint'), {
+const MintAgent = dynamic(() => import('../../../components/ListAgents/mint'), {
   ssr: false,
 });
 

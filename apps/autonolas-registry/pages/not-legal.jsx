@@ -1,3 +1,3 @@
-import { NotLegal } from 'components/NotLegal';
+import { NotLegal } from '../components/NotLegal';
 
 export default NotLegal;
