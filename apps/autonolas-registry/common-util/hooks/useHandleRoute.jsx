@@ -3,21 +3,18 @@ import { useDispatch } from 'react-redux';
 import { useRouter } from 'next/router';
 import { toLower } from 'lodash';
 
-import { setVmInfo, setChainId } from 'store/setup';
+import { setVmInfo, setChainId } from '../../store/setup';
 import {
   PAGES_TO_LOAD_WITHOUT_CHAINID,
   SOLANA_CHAIN_NAMES,
   URL,
-} from 'util/constants';
-import { useHelpers } from 'common-util/hooks';
-import {
-  ALL_SUPPORTED_CHAINS,
-  EVM_SUPPORTED_CHAINS,
-} from 'common-util/Login/config';
+} from '../../util/constants';
+import { useHelpers } from '../hooks';
+import { ALL_SUPPORTED_CHAINS, EVM_SUPPORTED_CHAINS } from '../Login/config';
 import {
   doesPathIncludesComponentsOrAgents,
   isPageWithSolana,
-} from 'common-util/functions';
+} from '../functions';
 
 const isValidNetworkName = (name) => {
   const isValid = ALL_SUPPORTED_CHAINS.some(
@@ -26,9 +23,10 @@ const isValidNetworkName = (name) => {
   return isValid;
 };
 
-const getChainIdFromPath = (networkName) => EVM_SUPPORTED_CHAINS.find(
-  (e) => toLower(e.networkName) === toLower(networkName),
-)?.id;
+const getChainIdFromPath = (networkName) =>
+  EVM_SUPPORTED_CHAINS.find(
+    (e) => toLower(e.networkName) === toLower(networkName),
+  )?.id;
 
 const isValidL1NetworkName = (name) => {
   if (name === 'ethereum') return true;
@@ -118,8 +116,8 @@ export const useHandleRoute = () => {
 
     // User navigates to `/[network]`
     if (
-      !PAGES_TO_LOAD_WITHOUT_CHAINID.includes(router.asPath)
-      && pathArray.length === 1
+      !PAGES_TO_LOAD_WITHOUT_CHAINID.includes(router.asPath) &&
+      pathArray.length === 1
     ) {
       router.push(
         `/${networkNameFromUrl}/${isL1Network ? 'components' : 'services'}`,
@@ -139,16 +137,17 @@ export const useHandleRoute = () => {
      */
 
     if (
-      !isValidL1NetworkName(networkNameFromUrl)
-      && doesPathIncludesComponentsOrAgents(path)
+      !isValidL1NetworkName(networkNameFromUrl) &&
+      doesPathIncludesComponentsOrAgents(path)
     ) {
       router.push(`/${networkNameFromUrl}/services`);
     }
   }, [path, networkNameFromUrl, isL1Network, router]);
 
   const onHomeClick = () => {
-    const isSvm = networkNameFromUrl === SOLANA_CHAIN_NAMES.DEVNET
-      || networkNameFromUrl === SOLANA_CHAIN_NAMES.MAINNET;
+    const isSvm =
+      networkNameFromUrl === SOLANA_CHAIN_NAMES.DEVNET ||
+      networkNameFromUrl === SOLANA_CHAIN_NAMES.MAINNET;
 
     const getListName = () => {
       if (isSvm) return 'services';

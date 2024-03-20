@@ -1,7 +1,8 @@
 import PropTypes from 'prop-types';
 import { Form, Input, Tooltip } from 'antd';
 import { LinkOutlined } from '@ant-design/icons';
-import { GATEWAY_URL, HASH_PREFIX } from 'util/constants';
+
+import { GATEWAY_URL, HASH_PREFIX } from '../../../util/constants';
 import { getBase16Validator } from '../IpfsHashGenerationModal';
 
 export const FormItemHash = ({ listType, hashValue }) => (
@@ -23,7 +24,7 @@ export const FormItemHash = ({ listType, hashValue }) => (
     <Input
       disabled
       addonBefore={HASH_PREFIX}
-      addonAfter={(
+      addonAfter={
         <Tooltip
           title={
             hashValue
@@ -43,7 +44,7 @@ export const FormItemHash = ({ listType, hashValue }) => (
             }}
           />
         </Tooltip>
-      )}
+      }
     />
   </Form.Item>
 );

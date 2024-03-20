@@ -10,13 +10,10 @@ import {
 } from '@autonolas/frontend-library';
 import { PublicKey } from '@solana/web3.js';
 
-import { RPC_URLS } from 'common-util/Contracts';
-import { SUPPORTED_CHAINS } from 'common-util/Login';
-import {
-  EVM_SUPPORTED_CHAINS,
-  SVM_SUPPORTED_CHAINS,
-} from 'common-util/Login/config';
-import { VM_TYPE } from 'util/constants';
+import { VM_TYPE } from '../../util/constants';
+import { RPC_URLS } from '../Contracts';
+import { SUPPORTED_CHAINS } from '../Login';
+import { EVM_SUPPORTED_CHAINS, SVM_SUPPORTED_CHAINS } from '../Login/config';
 import prohibitedAddresses from '../../data/prohibited-addresses.json';
 
 export const getModalProvider = () => window?.MODAL_PROVIDER;
@@ -27,9 +24,10 @@ export const getChainId = (chainId = null) => {
   if (chainId) return chainId;
 
   // chainId fetched from sessionStorage
-  const chainIdfromSessionStorage = typeof sessionStorage === 'undefined'
-    ? 1
-    : Number(sessionStorage.getItem('chainId'));
+  const chainIdfromSessionStorage =
+    typeof sessionStorage === 'undefined'
+      ? 1
+      : Number(sessionStorage.getItem('chainId'));
 
   // if chainId is not supported, throw error
   if (!EVM_SUPPORTED_CHAINS.find((e) => e.id === chainIdfromSessionStorage)) {
@@ -89,7 +87,8 @@ export const getEthersProvider = () => {
   return new ethers.providers.Web3Provider(provider, 'any');
 };
 
-export const getIsValidChainId = (chainId) => getIsValidChainIdFn(SUPPORTED_CHAINS, chainId);
+export const getIsValidChainId = (chainId) =>
+  getIsValidChainIdFn(SUPPORTED_CHAINS, chainId);
 
 export const getChainIdOrDefaultToMainnet = (chainId) => {
   const x = getChainIdOrDefaultToMainnetFn(SUPPORTED_CHAINS, chainId);
@@ -109,7 +108,8 @@ const isMethodsBuilderInstance = (builderIns, registryAddress) => {
     throw new Error('sendTransaction: Input must be an object.');
   }
 
-  const programId = '_programId' in builderIns ? builderIns?._programId?.toString() : null; // eslint-disable-line no-underscore-dangle
+  const programId =
+    '_programId' in builderIns ? builderIns?._programId?.toString() : null; // eslint-disable-line no-underscore-dangle
 
   // Check if the programId is the same as the registry address
   const hasProgramId = programId === registryAddress;
@@ -196,7 +196,8 @@ export const isPageWithSolana = (path) => {
   if (!path) return false;
   if (!isString(path)) return false;
 
-  const checkPath = (e) => path.toLowerCase().includes(e.networkName.toLowerCase());
+  const checkPath = (e) =>
+    path.toLowerCase().includes(e.networkName.toLowerCase());
   return SVM_SUPPORTED_CHAINS.some(checkPath);
 };
 

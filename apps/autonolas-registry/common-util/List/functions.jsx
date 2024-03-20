@@ -1,4 +1,4 @@
-import { TOTAL_VIEW_COUNT } from 'util/constants';
+import { TOTAL_VIEW_COUNT } from '../../util/constants';
 
 /**
  * @example

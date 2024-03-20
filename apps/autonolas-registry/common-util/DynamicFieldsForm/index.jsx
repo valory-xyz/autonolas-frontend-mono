@@ -1,8 +1,8 @@
 import PropTypes from 'prop-types';
 import { Button, Form, Typography } from 'antd';
 
-import { useHelpers } from 'common-util/hooks';
-import { RegistryForm } from 'common-util/TransactionHelpers/RegistryForm';
+import { useHelpers } from '../hooks';
+import { RegistryForm } from '../TransactionHelpers/RegistryForm';
 import { FormList } from './FormList';
 import { DynamicFormContainer } from './styles';
 

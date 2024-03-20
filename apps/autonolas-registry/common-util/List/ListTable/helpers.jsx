@@ -1,7 +1,5 @@
 import { useState } from 'react';
-import {
-  Input, Space, Button, Typography,
-} from 'antd';
+import { Input, Space, Button, Typography } from 'antd';
 import { SearchOutlined } from '@ant-design/icons';
 import {
   AddressLink,
@@ -9,15 +7,17 @@ import {
   NA,
 } from '@autonolas/frontend-library';
 
-import { NAV_TYPES, SERVICE_STATE, TOTAL_VIEW_COUNT } from 'util/constants';
+import {
+  NAV_TYPES,
+  SERVICE_STATE,
+  TOTAL_VIEW_COUNT,
+} from '../../../util/constants';
 
 const { Title } = Typography;
 
 export const getTableColumns = (
   type,
-  {
-    onViewClick, onUpdateClick, isMobile, chainName, account, chainId,
-  },
+  { onViewClick, onUpdateClick, isMobile, chainName, account, chainId },
 ) => {
   const addressLinkProps = {
     chainId,
@@ -109,8 +109,9 @@ export const getTableColumns = (
         fixed: 'right',
         render: (_text, record) => {
           // only show update button for pre-registration state
-          const canUpdate = ['1'].includes(record.state)
-            && areAddressesEqual(record.owner, account);
+          const canUpdate =
+            ['1'].includes(record.state) &&
+            areAddressesEqual(record.owner, account);
 
           return (
             <Space size="middle">

@@ -4,8 +4,8 @@ import { Button, Form, Input } from 'antd';
 import isNil from 'lodash/isNil';
 import { isValidAddress } from '@autonolas/frontend-library';
 
-import { useHelpers } from 'common-util/hooks';
-import { RegistryForm } from 'common-util/TransactionHelpers/RegistryForm';
+import { useHelpers } from '../../hooks';
+import { RegistryForm } from '../../TransactionHelpers/RegistryForm';
 import { IpfsHashGenerationModal } from '../IpfsHashGenerationModal';
 import { DependencyLabel } from '../ListCommon';
 import { FormItemHash } from './helpers';
