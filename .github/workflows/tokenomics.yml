@@ -8,6 +8,8 @@ on:
     paths:
       - 'apps/tokenomics/**'
   pull_request:
+    branches:
+      - main
     paths:
       - 'apps/tokenomics/**'
 
@@ -24,7 +26,6 @@ jobs:
           node-version: 18
       - name: Install modules
         run: yarn
-      - run: git branch --track main origin/main
       - name: Run ESLint
         run: yarn nx lint tokenomics
       - name: Run Test
