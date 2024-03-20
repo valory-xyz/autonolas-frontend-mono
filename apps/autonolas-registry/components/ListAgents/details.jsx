@@ -11,7 +11,6 @@ import {
 } from './utils';
 
 const Agent = () => {
-  console.log('AgentDetails called in components');
   const router = useRouter();
   const id = router?.query?.id;
   const { account, links } = useHelpers();
