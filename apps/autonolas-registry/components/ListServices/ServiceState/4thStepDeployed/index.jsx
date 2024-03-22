@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 import { Table, Space } from 'antd';
 import { AddressLink } from '@autonolas/frontend-library';
 
-import { setAgentInstancesAndOperators } from 'store/state';
+import { setAgentInstancesAndOperators } from '../../../../store/service';
 import { useScreen } from 'common-util/hooks/useScreen';
 import { useHelpers } from 'common-util/hooks/useHelpers';
 import { SendTransactionButton } from 'common-util/TransactionHelpers/SendTransactionButton';
@@ -27,7 +27,7 @@ export const Deployed = ({
   } = useHelpers();
   const { isMobile } = useScreen();
   const data = useSelector(
-    (state) => state?.service?.serviceState?.agentInstancesAndOperators,
+    (state) => state?.service?.agentInstancesAndOperators,
   );
   const [isTerminating, setIsTerminating] = useState(false);
   const { getSvmAgentInstanceAndOperator } = useAgentInstanceAndOperator();

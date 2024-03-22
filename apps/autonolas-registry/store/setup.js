@@ -52,7 +52,7 @@ export const setupSlice = createSlice({
     setErrorMessage: (state, action) => {
       state.errorMessage = action.payload;
     },
-    setLogout: (state, action) => {
+    setLogout: (state, _action) => {
       state = initialState;
     },
     setStoreState: (state, action) => {
