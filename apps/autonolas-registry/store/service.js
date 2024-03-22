@@ -4,8 +4,8 @@ const initialState = {
   agentInstancesAndOperators: []
 };
 
-export const stateSlice = createSlice({
-  name: 'setup',
+export const serviceSlice = createSlice({
+  name: 'service',
   initialState,
   reducers: {
     setAgentInstancesAndOperators: (state, action) => {
@@ -20,5 +20,5 @@ export const stateSlice = createSlice({
 export const {
   setAgentInstancesAndOperators,
   setStoreState,
-} = stateSlice.actions;
-export const stateReducer = stateSlice.reducer; 
+} = serviceSlice.actions;
+export const serviceReducer = serviceSlice.reducer; 
