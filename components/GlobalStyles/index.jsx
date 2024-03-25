@@ -60,6 +60,9 @@ const GlobalStyle = createGlobalStyle`
   .hide-only-sm {
     display: initial;
   }
+  .text-gray-500 {
+    color: rgb(107 114 128);
+  }
 
   /* layout */
   .ant-layout-header {

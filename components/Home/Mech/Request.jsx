@@ -4,7 +4,7 @@ import { connect } from 'react-redux';
 import { useRouter } from 'next/router';
 import { notification } from 'antd';
 import RequestForm from 'common-util/List/RequestForm';
-import { AlertSuccess, AlertError } from 'common-util/List/ListCommon';
+import { AlertSuccess } from 'common-util/List/ListCommon';
 import { getMechContract } from 'common-util/Contracts';
 import { HeaderTitle } from 'common-util/Title';
 import { getAgentHash, getIpfsResponse } from 'common-util/functions';
@@ -14,7 +14,6 @@ import { getAgent } from '../Registry/utils';
 
 const Request = ({ account }) => {
   const [dataList, setDataList] = useState([]);
-  const [error, setError] = useState(null);
   const [information, setInformation] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
@@ -39,11 +38,8 @@ const Request = ({ account }) => {
     }
   }, [hash]);
 
-  const handleCancel = () => router.push('/mech');
-
-  const handleSubmit = async (values) => {
+  const handleSubmit = async (values, onSuccess) => {
     if (account) {
-      setError(null);
       setInformation(null);
       setIsLoading(true);
 
@@ -56,6 +52,7 @@ const Request = ({ account }) => {
           .request(`0x${values.hash}`)
           .send({ from: account, value: price })
           .then((result) => {
+            onSuccess();
             setInformation(result);
             notification.success({
               message: 'Transaction executed',
@@ -63,7 +60,7 @@ const Request = ({ account }) => {
             });
           });
       } catch (e) {
-        setError(e);
+        notification.error(e);
         console.error(e);
       } finally {
         setIsLoading(false);
@@ -81,11 +78,9 @@ const Request = ({ account }) => {
           isLoading={isLoading}
           dataList={dataList}
           handleSubmit={handleSubmit}
-          handleCancel={handleCancel}
         />
       </FormContainer>
       <AlertSuccess type="Request" information={information} />
-      <AlertError error={error} />
     </>
   );
 };

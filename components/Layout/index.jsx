@@ -47,7 +47,7 @@ const NavigationBar = ({ children }) => {
         <div className="column-1">
           <Logo data-testid="member-logo">
             <LogoSvg />
-            <span className="title-text">Mech Hub</span>
+            <span className="title-text">Mech</span>
             &nbsp;
             <Tag color={COLOR.RED}>Beta</Tag>
           </Logo>
