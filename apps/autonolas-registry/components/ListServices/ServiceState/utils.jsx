@@ -68,7 +68,7 @@ export const getServiceOwner = async (id) => {
   return response;
 };
 
-const hasSufficientTokenRequest = async ({ account, chainId, serviceId }) => {
+const hasSufficientTokenRequest = async ({ account, chainId, serviceId, amountToApprove }) => {
   /**
    * - fetch the token address from the serviceId
    * - fetch the allowance of the token using the token address
@@ -78,19 +78,19 @@ const hasSufficientTokenRequest = async ({ account, chainId, serviceId }) => {
   const response = await contract.methods
     .allowance(account, ADDRESSES[chainId].serviceRegistryTokenUtility)
     .call();
-  return !(ethers.BigNumber.from(response) < ethers.constants.MaxUint256);
+  return !(ethers.BigNumber.from(response) < amountToApprove);
 };
 
 /**
  * Approves token
  */
-const approveToken = async ({ account, chainId, serviceId }) => {
+const approveToken = async ({ account, chainId, serviceId, amountToApprove }) => {
   const { token } = await getTokenDetailsRequest(serviceId);
   const contract = getGenericErc20Contract(token);
   const fn = contract.methods
     .approve(
       ADDRESSES[chainId].serviceRegistryTokenUtility,
-      ethers.constants.MaxUint256,
+      amountToApprove,
     )
     .send({ from: account });
 
@@ -98,15 +98,16 @@ const approveToken = async ({ account, chainId, serviceId }) => {
   return response;
 };
 
-export const checkAndApproveToken = async ({ account, chainId, serviceId }) => {
+export const checkAndApproveToken = async ({ account, chainId, serviceId, amountToApprove }) => {
   const hasTokenBalance = await hasSufficientTokenRequest({
     account,
     chainId,
     serviceId,
+    amountToApprove
   });
 
   if (!hasTokenBalance) {
-    const response = await approveToken({ account, chainId, serviceId });
+    const response = await approveToken({ account, chainId, serviceId, amountToApprove });
     return response;
   }
 
