@@ -23,9 +23,7 @@ export const PreRegistration = ({
   updateDetails,
 }) => {
   const router = useRouter();
-  const {
-    account, chainId, links, isSvm,
-  } = useHelpers();
+  const { account, chainId, links, isSvm } = useHelpers();
   const [isActivating, setIsActivating] = useState(false);
   const onActivateRegistration = useGetActivateRegistration();
 
@@ -40,7 +38,7 @@ export const PreRegistration = ({
           chainId,
           serviceId,
           // any amount, if not ETH token substitute with 1
-          amountToApprove: 1
+          amountToApprove: 1,
         });
       }
 

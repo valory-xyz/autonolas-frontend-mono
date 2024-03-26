@@ -22,9 +22,7 @@ export const Deployed = ({
   handleTerminate,
 }) => {
   const dispatch = useDispatch();
-  const {
-    account, chainId, isSvm, chainName,
-  } = useHelpers();
+  const { account, chainId, isSvm, chainName } = useHelpers();
   const { isMobile } = useScreen();
   const data = useSelector(
     (state) => state?.service?.agentInstancesAndOperators,
