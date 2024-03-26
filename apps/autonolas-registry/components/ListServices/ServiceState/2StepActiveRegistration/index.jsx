@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
+import { ethers } from 'ethers';
 import { Divider, Typography } from 'antd';
 import {
   convertToEth,
@@ -132,7 +133,12 @@ export const ActiveRegistration = ({
       // if not eth, check if the user has sufficient token balance
       // and if not, approve the token
       if (!isEthToken && !isSvm) {
-        await checkAndApproveToken({ account, chainId, serviceId });
+        await checkAndApproveToken({
+          account,
+          chainId,
+          serviceId,
+          amountToApprove: ethers.utils.parseUnits(`${totalBonds}`, 'ether'),
+        });
       }
 
       // check if the agent instances are valid

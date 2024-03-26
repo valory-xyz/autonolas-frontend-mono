@@ -39,6 +39,8 @@ export const PreRegistration = ({
           account,
           chainId,
           serviceId,
+          // any amount, if not ETH token substitute with 1
+          amountToApprove: 1
         });
       }
 
