@@ -47,12 +47,6 @@ export const getTableColumns = (
         render: (text) => <AddressLink {...addressLinkProps} text={text} />,
       },
       {
-        title: 'No. of component dependencies',
-        dataIndex: 'dependency',
-        width: isMobile ? 70 : 300,
-        key: 'dependency',
-      },
-      {
         width: isMobile ? 40 : 120,
         title: 'Action',
         key: 'action',
