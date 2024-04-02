@@ -8,6 +8,7 @@ import {
 } from '@autonolas/frontend-library';
 
 import {
+  HASH_PREFIX,
   NAV_TYPES,
   SERVICE_STATE,
   TOTAL_VIEW_COUNT,
@@ -37,14 +38,23 @@ export const getTableColumns = (
         dataIndex: 'owner',
         key: 'owner',
         width: 160,
-        render: (text) => <AddressLink {...addressLinkProps} text={text} />,
+        render: (text) => {
+          if (!text || text === NA) return NA;
+          return <AddressLink {...addressLinkProps} text={text} />;
+        },
       },
       {
         title: 'Hash',
         dataIndex: 'hash',
         key: 'hash',
         width: 180,
-        render: (text) => <AddressLink {...addressLinkProps} text={text} />,
+        render: (text) => {
+          if (!text || text === NA) return NA;
+          const updatedText = text.replace(HASH_PREFIX, '0x');
+          return (
+            <AddressLink {...addressLinkProps} text={updatedText} isIpfsLink />
+          );
+        },
       },
       {
         width: isMobile ? 40 : 120,

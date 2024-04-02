@@ -12,7 +12,11 @@ import {
 } from '../../common-util/List/ListTable/helpers';
 import { getMyListOnPagination } from '../../common-util/ContractUtils/myList';
 import { useHelpers } from '../../common-util/hooks';
-import { useAllUnits, useSearchUnits } from '../../common-util/hooks/useList';
+import {
+  useAllUnits,
+  useMyUnits,
+  useSearchUnits,
+} from '../../common-util/hooks/useList';
 import {
   getComponents,
   getFilteredComponents,
@@ -33,6 +37,7 @@ const ListComponents = () => {
   const { account, chainId, links, isL1OnlyNetwork, isSvm } = useHelpers();
 
   const getAllUnits = useAllUnits();
+  const getMyUnits = useMyUnits();
   const getUnitsBySearch = useSearchUnits();
 
   /**
@@ -99,7 +104,7 @@ const ListComponents = () => {
             setList([]);
             const everyComps =
               chainId === 1
-                ? await getAllUnits(NAV_TYPES.AGENT, currentPage)
+                ? await getAllUnits(NAV_TYPES.COMPONENT, currentPage)
                 : await getComponents(total, currentPage);
             setList(everyComps);
           }
@@ -110,8 +115,10 @@ const ListComponents = () => {
            * - API will be called only once & store the complete list
            */
           if (currentTab === MY_COMPONENTS && list.length === 0 && account) {
-            // TODO: use getMyUnits
-            const e = await getFilteredComponents(account);
+            const e =
+              chainId === 1
+                ? await getMyUnits(NAV_TYPES.COMPONENT, account)
+                : await getFilteredComponents(account);
             setList(e);
           }
         } catch (e) {

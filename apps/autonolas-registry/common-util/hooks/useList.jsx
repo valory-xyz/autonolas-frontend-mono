@@ -12,6 +12,14 @@ import { useSubgraph } from './useSubgraph';
 import dummyData from './mock.json';
 import { TOTAL_VIEW_COUNT } from '../../util/constants';
 
+const transformToTableData = (data) => {
+  return data.map((item) => ({
+    id: item.tokenId,
+    owner: item.owner,
+    unitHash: item.metadataHash,
+  }));
+};
+
 /**
  * Hook to get ALL units
  * @returns {function} function to get all units
@@ -40,7 +48,7 @@ export const useAllUnits = () => {
       `;
 
       const response = await graphQLClient.request(query);
-      return response?.units || dummyData.data.units; // TODO: remove dummyData
+      return transformToTableData(response?.units?.das || dummyData.data.units); // TODO: remove dummyData
     },
     [graphQLClient],
   );
@@ -125,6 +133,10 @@ export const useMyUnits = () => {
   );
 };
 
+/**
+ * Hook to get MY units by search
+ * @returns {function} function to search units
+ */
 export const useMyUnitsBySearch = () => {
   const graphQLClient = useSubgraph();
 
@@ -161,5 +173,25 @@ export const useMyUnitsBySearch = () => {
       return response?.units || dummyData.data.units; // TODO: remove dummyData
     },
     [graphQLClient],
+  );
+};
+
+export const useSearchUnits = () => {
+  const getAllUnitsBySearch = useAllUnitsBySearch();
+  const getMyUnitsBySearch = useMyUnitsBySearch();
+
+  return useCallback(
+    async (type, searchValue, currentPage, ownerAddress) => {
+      if (ownerAddress) {
+        return await getMyUnitsBySearch(
+          type,
+          ownerAddress,
+          searchValue,
+          currentPage,
+        );
+      }
+      return await getAllUnitsBySearch(type, searchValue, currentPage);
+    },
+    [getAllUnitsBySearch, getMyUnitsBySearch],
   );
 };
