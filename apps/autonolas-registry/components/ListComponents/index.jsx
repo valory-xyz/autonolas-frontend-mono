@@ -2,15 +2,17 @@ import { useState, useEffect } from 'react';
 import { Tabs } from 'antd';
 import { useRouter } from 'next/router';
 import { notifyError } from '@autonolas/frontend-library';
-import { NAV_TYPES } from 'util/constants';
-import ListTable from 'common-util/List/ListTable';
+
+import { NAV_TYPES } from '../../util/constants';
+import ListTable from '../../common-util/List/ListTable';
 import {
   useExtraTabContent,
   getHash,
   isMyTab,
-} from 'common-util/List/ListTable/helpers';
-import { getMyListOnPagination } from 'common-util/ContractUtils/myList';
-import { useHelpers } from 'common-util/hooks';
+} from '../../common-util/List/ListTable/helpers';
+import { getMyListOnPagination } from '../../common-util/ContractUtils/myList';
+import { useHelpers } from '../../common-util/hooks';
+import { useAllUnits, useSearchUnits } from '../../common-util/hooks/useList';
 import {
   getComponents,
   getFilteredComponents,
@@ -28,9 +30,10 @@ const ListComponents = () => {
     isMyTab(hash) ? MY_COMPONENTS : ALL_COMPONENTS,
   );
 
-  const {
-    account, chainId, links, isL1OnlyNetwork, isSvm,
-  } = useHelpers();
+  const { account, chainId, links, isL1OnlyNetwork, isSvm } = useHelpers();
+
+  const getAllUnits = useAllUnits();
+  const getUnitsBySearch = useSearchUnits();
 
   /**
    * extra tab content & view click
@@ -94,7 +97,10 @@ const ListComponents = () => {
           // All components
           if (currentTab === ALL_COMPONENTS) {
             setList([]);
-            const everyComps = await getComponents(total, currentPage);
+            const everyComps =
+              chainId === 1
+                ? await getAllUnits(NAV_TYPES.AGENT, currentPage)
+                : await getComponents(total, currentPage);
             setList(everyComps);
           }
 
@@ -104,6 +110,7 @@ const ListComponents = () => {
            * - API will be called only once & store the complete list
            */
           if (currentTab === MY_COMPONENTS && list.length === 0 && account) {
+            // TODO: use getMyUnits
             const e = await getFilteredComponents(account);
             setList(e);
           }
@@ -129,11 +136,21 @@ const ListComponents = () => {
         setList([]);
 
         try {
-          const filteredList = await getFilteredComponents(
-            searchValue,
-            currentTab === MY_COMPONENTS ? account : null,
-          );
-          setList(filteredList);
+          if (chainId === 1) {
+            const filteredList = await getUnitsBySearch(
+              NAV_TYPES.COMPONENT,
+              searchValue,
+              currentPage,
+              currentTab === MY_COMPONENTS ? account : null,
+            );
+            setList(filteredList);
+          } else {
+            const filteredList = await getFilteredComponents(
+              searchValue,
+              currentTab === MY_COMPONENTS ? account : null,
+            );
+            setList(filteredList);
+          }
           setTotal(0); // total won't be used if search is used
           setCurrentPage(1);
         } catch (e) {
