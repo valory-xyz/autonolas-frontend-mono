@@ -1,4 +1,7 @@
+// TODO: check all query
+
 /**
+ *
  * Helper hook to manage list of items (e.g. components, agents & services)
  */
 
@@ -9,81 +12,154 @@ import { useSubgraph } from './useSubgraph';
 import dummyData from './mock.json';
 import { TOTAL_VIEW_COUNT } from '../../util/constants';
 
-export const useListAllUnits = () => {
+/**
+ * Hook to get ALL units
+ * @returns {function} function to get all units
+ *
+ */
+export const useAllUnits = () => {
   const graphQLClient = useSubgraph();
 
-  const getUnits = useCallback(
+  return useCallback(
     async (type, currentPage) => {
-      try {
-        // TODO: check query
-        const query = gql`
-          {
-            units(
-              first: ${TOTAL_VIEW_COUNT}, 
-              skip: ${TOTAL_VIEW_COUNT * (currentPage - 1)},
-              where: { packageType: "${type}" }, orderBy: tokenId
-            ) {
-                id
-                packageType
-                tokenId
-                packageHash
-                metadataHash
-            }
+      const query = gql`
+        {
+          units(
+            first: ${TOTAL_VIEW_COUNT}, 
+            skip: ${TOTAL_VIEW_COUNT * (currentPage - 1)},
+            where: { packageType: "${type}" }, 
+            orderBy: tokenId
+          ) {
+              id
+              packageType
+              tokenId
+              packageHash
+              metadataHash
           }
-        `;
+        }
+      `;
 
-        const response = await graphQLClient.request(query);
-        const units = response?.units || dummyData.data.units; // TODO: remove dummyData
-        return units;
-      } catch (error) {
-        console.error(error);
-      }
+      const response = await graphQLClient.request(query);
+      return response?.units || dummyData.data.units; // TODO: remove dummyData
     },
     [graphQLClient],
   );
+};
 
-  const getFilteredUnits = useCallback(
+/**
+ * Hook to get ALL units by search
+ * @returns {function} function to get all units by search
+ */
+export const useAllUnitsBySearch = () => {
+  const graphQLClient = useSubgraph();
+
+  return useCallback(
     async (type, searchValue, currentPage) => {
-      try {
-        // TODO: check query & search name, description, public id, token id, package hash
-        const query = gql`
-          {
-            units(
-              first: ${TOTAL_VIEW_COUNT}, 
-              skip: ${TOTAL_VIEW_COUNT * (currentPage - 1)},
-              OR: [
-                { 
-                  packageType: "${type}", 
-                  name_contains: "${searchValue}" 
-                },
-                { 
-                  packageType: "${type}", 
-                  packageHash_contains: "${searchValue}" 
-                }
-              ],
-              orderBy: tokenId
-            ) {
-                id
-                packageType
-                tokenId
-                packageHash
-                metadataHash
-            }
+      const query = gql`
+        {
+          units(
+            first: ${TOTAL_VIEW_COUNT}, 
+            skip: ${TOTAL_VIEW_COUNT * (currentPage - 1)},
+            OR: [
+              { 
+                packageType: "${type}", 
+                name_contains: "${searchValue}" 
+              },
+              { 
+                packageType: "${type}", 
+                packageHash_contains: "${searchValue}" 
+              }
+            ],
+            orderBy: tokenId
+          ) {
+              id
+              packageType
+              tokenId
+              packageHash
+              metadataHash
           }
-        `;
+        }
+      `;
 
-        const response = await graphQLClient.request(query);
-        const units = response?.units || dummyData.data.units; // TODO: remove dummyData
-        return units;
-      } catch (error) {
-        console.error(error);
-      }
+      const response = await graphQLClient.request(query);
+      return response?.units || dummyData.data.units; // TODO: remove dummyData
     },
     [graphQLClient],
   );
+};
 
-  return {
-    getUnits,
-    getFilteredUnits,
-  };
+/**
+ * Hook to get MY units
+ * @returns {function} function to get my units
+ */
+export const useMyUnits = () => {
+  const graphQLClient = useSubgraph();
+
+  return useCallback(
+    async (type, ownerAddress, currentPage) => {
+      const query = gql`
+        {
+          units(
+            first: ${TOTAL_VIEW_COUNT}, 
+            skip: ${TOTAL_VIEW_COUNT * (currentPage - 1)},
+            where: { 
+              owner: "${ownerAddress}", 
+              packageType: "${type}" 
+            },
+            orderBy: tokenId,
+          ) {
+              id
+              packageType
+              tokenId
+              packageHash
+              metadataHash
+          }
+        }
+      `;
+
+      const response = await graphQLClient.request(query);
+      const units = response?.units || dummyData.data.units; // TODO: remove dummyData
+      return units;
+    },
+    [graphQLClient],
+  );
+};
+
+export const useMyUnitsBySearch = () => {
+  const graphQLClient = useSubgraph();
+
+  return useCallback(
+    async (type, ownerAddress, searchValue, currentPage) => {
+      const query = gql`
+        {
+          units(
+            first: ${TOTAL_VIEW_COUNT}, 
+            skip: ${TOTAL_VIEW_COUNT * (currentPage - 1)},
+            where: { owner: "${ownerAddress}" }
+            OR: [
+              { 
+                packageType: "${type}", 
+                name_contains: "${searchValue}" 
+              },
+              { 
+                packageType: "${type}", 
+                packageHash_contains: "${searchValue}" 
+              }
+            ],
+            orderBy: tokenId,
+          ) {
+              id
+              packageType
+              tokenId
+              packageHash
+              metadataHash
+          }
+        }
+      `;
+
+      const response = await graphQLClient.request(query);
+      return response?.units || dummyData.data.units; // TODO: remove dummyData
+    },
+    [graphQLClient],
+  );
 };
