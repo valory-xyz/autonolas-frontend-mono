@@ -3,15 +3,20 @@ import { Tabs } from 'antd';
 import { useRouter } from 'next/router';
 import { notifyError } from '@autonolas/frontend-library';
 
-import { NAV_TYPES } from 'util/constants';
-import ListTable from 'common-util/List/ListTable';
+import { NAV_TYPES } from '../../util/constants';
+import ListTable from '../../common-util/List/ListTable';
 import {
   useExtraTabContent,
   getHash,
   isMyTab,
-} from 'common-util/List/ListTable/helpers';
-import { getMyListOnPagination } from 'common-util/ContractUtils/myList';
-import { useHelpers } from 'common-util/hooks';
+} from '../../common-util/List/ListTable/helpers';
+import { getMyListOnPagination } from '../../common-util/ContractUtils/myList';
+import { useHelpers } from '../../common-util/hooks';
+import {
+  useAllUnits,
+  useMyUnits,
+  useSearchUnits,
+} from '../../common-util/hooks/useList';
 import {
   getAgents,
   getFilteredAgents,
@@ -29,9 +34,11 @@ const ListAgents = () => {
     isMyTab(hash) ? MY_AGENTS : ALL_AGENTS,
   );
 
-  const {
-    account, chainId, links, isL1OnlyNetwork, isSvm,
-  } = useHelpers();
+  const { account, chainId, links, isL1OnlyNetwork, isSvm } = useHelpers();
+
+  const getAllUnits = useAllUnits();
+  const getMyUnits = useMyUnits();
+  const getUnitsBySearch = useSearchUnits();
 
   /**
    * extra tab content & view click
@@ -54,7 +61,7 @@ const ListAgents = () => {
   useEffect(() => {
     setCurrentTab(isMyTab(hash) ? MY_AGENTS : ALL_AGENTS);
     setList([]);
-  }, [router.asPath]);
+  }, [router.asPath, hash]);
 
   // fetch total
   useEffect(() => {
@@ -85,6 +92,8 @@ const ListAgents = () => {
     })();
   }, [account, chainId, isL1OnlyNetwork, currentTab, searchValue, isSvm]);
 
+  const isListEmpty = list.length === 0;
+
   // fetch the list (without search)
   useEffect(() => {
     (async () => {
@@ -95,7 +104,10 @@ const ListAgents = () => {
           // All agents
           if (currentTab === ALL_AGENTS) {
             setList([]);
-            const everyAgents = await getAgents(total, currentPage);
+            const everyAgents =
+              chainId === 1
+                ? await getAllUnits(NAV_TYPES.AGENT, currentPage)
+                : await getAgents(total, currentPage);
             setList(everyAgents);
           }
 
@@ -104,8 +116,11 @@ const ListAgents = () => {
            * - search by `account` as searchValue
            * - API will be called only once & store the complete list
            */
-          if (currentTab === MY_AGENTS && list.length === 0 && account) {
-            const e = await getFilteredAgents(account);
+          if (currentTab === MY_AGENTS && isListEmpty && account) {
+            const e =
+              chainId === 1
+                ? await getMyUnits(NAV_TYPES.AGENT, account)
+                : await getFilteredAgents(account);
             setList(e);
           }
         } catch (e) {
@@ -116,7 +131,20 @@ const ListAgents = () => {
         }
       }
     })();
-  }, [account, chainId, isL1OnlyNetwork, total, currentPage, isSvm]);
+  }, [
+    account,
+    chainId,
+    isL1OnlyNetwork,
+    total,
+    currentPage,
+    isSvm,
+    getMyUnits,
+    getUnitsBySearch,
+    getAllUnits,
+    currentTab,
+    isListEmpty,
+    searchValue,
+  ]);
 
   /**
    * Search (All agents, My agents)
@@ -130,11 +158,21 @@ const ListAgents = () => {
         setList([]);
 
         try {
-          const filteredList = await getFilteredAgents(
-            searchValue,
-            currentTab === MY_AGENTS ? account : null,
-          );
-          setList(filteredList);
+          if (chainId === 1) {
+            const filteredList = await getUnitsBySearch(
+              NAV_TYPES.AGENT,
+              searchValue,
+              currentPage,
+              currentTab === MY_AGENTS ? account : null,
+            );
+            setList(filteredList);
+          } else {
+            const filteredList = await getFilteredAgents(
+              searchValue,
+              currentTab === MY_AGENTS ? account : null,
+            );
+            setList(filteredList);
+          }
           setTotal(0); // total won't be used if search is used
           setCurrentPage(1);
         } catch (e) {
@@ -145,7 +183,14 @@ const ListAgents = () => {
         }
       }
     })();
-  }, [account, chainId, searchValue, currentTab]);
+  }, [
+    account,
+    chainId,
+    searchValue,
+    currentTab,
+    currentPage,
+    getUnitsBySearch,
+  ]);
 
   const tableCommonProps = {
     type: NAV_TYPES.AGENT,

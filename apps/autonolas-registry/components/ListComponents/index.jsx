@@ -92,6 +92,8 @@ const ListComponents = () => {
     })();
   }, [account, chainId, isL1OnlyNetwork, currentTab, searchValue, isSvm]);
 
+  const isListEmpty = list.length === 0;
+
   // fetch the list (without search)
   useEffect(() => {
     (async () => {
@@ -114,7 +116,7 @@ const ListComponents = () => {
            * - search by `account` as searchValue
            * - API will be called only once & store the complete list
            */
-          if (currentTab === MY_COMPONENTS && list.length === 0 && account) {
+          if (currentTab === MY_COMPONENTS && isListEmpty && account) {
             const e =
               chainId === 1
                 ? await getMyUnits(NAV_TYPES.COMPONENT, account)
@@ -129,7 +131,20 @@ const ListComponents = () => {
         }
       }
     })();
-  }, [account, chainId, isL1OnlyNetwork, total, currentPage, isSvm]);
+  }, [
+    account,
+    chainId,
+    isL1OnlyNetwork,
+    total,
+    currentPage,
+    isSvm,
+    getMyUnits,
+    getUnitsBySearch,
+    getAllUnits,
+    currentTab,
+    isListEmpty,
+    searchValue,
+  ]);
 
   /**
    * Search (All components, My Components)
@@ -168,7 +183,14 @@ const ListComponents = () => {
         }
       }
     })();
-  }, [account, chainId, searchValue, currentTab]);
+  }, [
+    account,
+    chainId,
+    searchValue,
+    currentTab,
+    currentPage,
+    getUnitsBySearch,
+  ]);
 
   const tableCommonProps = {
     type: NAV_TYPES.COMPONENT,
