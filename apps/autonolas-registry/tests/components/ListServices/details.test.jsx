@@ -13,7 +13,7 @@ import {
   useTokenUri,
   useSvmServiceTableDataSource,
   useSvmBonds,
-} from '../../../components/ListServices/useSvmService';
+} from '../../../components/ListServices/hooks/useSvmService';
 import { useHelpers } from '../../../common-util/hooks/useHelpers';
 import { useSvmConnectivity } from '../../../common-util/hooks/useSvmConnectivity';
 import {
@@ -27,7 +27,7 @@ import { useRegisterAgents } from '../../../components/ListServices/ServiceState
 import {
   useGetServiceDetails,
   useGetServiceOwner,
-} from '../../../components/ListServices/useService';
+} from '../../../components/ListServices/hooks/useService';
 import {
   dummyAddress,
   wrapProvider,

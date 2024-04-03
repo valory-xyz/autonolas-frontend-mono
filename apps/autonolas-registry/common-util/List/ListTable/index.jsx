@@ -38,6 +38,7 @@ const ListTable = ({
     return (
       <Loader
         isAccountRequired={isAccountRequired}
+        account={account}
         notConnectedMessage={`To see your ${type}s, connect wallet.`}
       />
     );
@@ -51,10 +52,7 @@ const ListTable = ({
     chainId,
     account,
   });
-  const dataSource =
-    type === 'agent'
-      ? list
-      : fetchDataSource(type, list, { current: currentPage });
+  const dataSource = fetchDataSource(type, list, { current: currentPage });
   const pagination = {
     total,
     current: currentPage,

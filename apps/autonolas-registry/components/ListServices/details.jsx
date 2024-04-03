@@ -1,15 +1,15 @@
 import { useCallback } from 'react';
 import { useRouter } from 'next/router';
 
-import Details from 'common-util/Details';
-import { useHelpers } from 'common-util/hooks';
+import Details from '../../common-util/Details';
+import { useHelpers } from '../../common-util/hooks';
 
 import { ServiceState } from './ServiceState';
 import {
   useGetServiceDetails,
   useGetServiceOwner,
   useGetServiceTokenUri,
-} from './useService';
+} from './hooks/useService';
 
 const Service = () => {
   const router = useRouter();

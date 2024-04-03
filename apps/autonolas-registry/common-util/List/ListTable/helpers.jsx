@@ -176,14 +176,14 @@ export const fetchDataSource = (type, rawData, { current }) => {
    */
   const startIndex = (current - 1) * TOTAL_VIEW_COUNT + 1;
   let data = [];
-  if (type === NAV_TYPES.COMPONENT) {
-    data = rawData.map((item, index) => ({
-      id: item.id || `${startIndex + index}`,
-      description: item.description || NA,
-      developer: item.developer || NA,
-      owner: item.owner || NA,
-      hash: item.unitHash || NA,
-      dependency: (item.dependencies || []).length,
+  if (type === NAV_TYPES.COMPONENT || type === NAV_TYPES.AGENT) {
+    data = rawData.map((item) => ({
+      id: item.tokenId,
+      tokenId: item.tokenId,
+      owner: item.owner,
+      hash: item.metadataHash,
+      packageName: item.publicId,
+      packageHash: item.packageHash,
     }));
   }
 
@@ -243,7 +243,6 @@ export const useExtraTabContent = ({
                         <li>Name</li>
                         <li>Description</li>
                         <li>Public ID</li>
-                        <li>Token ID</li>
                         <li>Package Hash</li>
                       </ul>
                     </SearchTooltip>

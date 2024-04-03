@@ -16,14 +16,14 @@ import {
   useAllUnits,
   useMyUnits,
   useSearchUnits,
-} from '../../common-util/hooks/useList';
+} from './hooks/useServiceList';
+import { useServiceInfo } from './hooks/useSvmService';
 import {
   getServices,
   getFilteredServices,
   getTotalForAllServices,
   getTotalForMyServices,
 } from './utils';
-import { useServiceInfo } from './useSvmService';
 
 const ALL_SERVICES = 'all-services';
 const MY_SERVICES = 'my-services';

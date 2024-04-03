@@ -13,7 +13,7 @@ import {
   onTerminate,
   onStep5Unbond,
 } from './utils';
-import { useSvmDataFetch } from '../useSvmService';
+import { useSvmDataFetch } from '../hooks/useSvmService';
 
 /**
  * step 1 - activate registration

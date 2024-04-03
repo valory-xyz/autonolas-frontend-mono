@@ -1,6 +1,6 @@
 import { render, waitFor } from '@testing-library/react';
 import ListServices from '../../../components/ListServices';
-import { useServiceInfo } from '../../../components/ListServices/useSvmService';
+import { useServiceInfo } from '../../../components/ListServices/hooks/useSvmService';
 import { useHelpers } from '../../../common-util/hooks/useHelpers';
 import {
   getServices,

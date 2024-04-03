@@ -60,24 +60,25 @@ const ListAgents = () => {
   // fetch total
   useEffect(() => {
     (async () => {
-      if (!isSvm && isL1OnlyNetwork && searchValue === '') {
-        try {
-          let totalTemp = null;
+      if(isSvm) return;
+      if (!isL1OnlyNetwork) return;
+      if (searchValue !== '') return;
 
-          if (currentTab === ALL_AGENTS) {
-            totalTemp = await getTotalForAllAgents();
-          } else if (currentTab === MY_AGENTS && account) {
-            totalTemp = await getTotalForMyAgents(account);
-          }
-
-          setTotal(Number(totalTemp));
-          if (Number(totalTemp) === 0) {
-            setIsLoading(false);
-          }
-        } catch (e) {
-          console.error(e);
-          notifyError('Error fetching agents');
+      try {
+        let totalTemp = null;
+        if (currentTab === ALL_AGENTS) {
+          totalTemp = await getTotalForAllAgents();
+        } else if (currentTab === MY_AGENTS && account) {
+          totalTemp = await getTotalForMyAgents(account);
         }
+
+        setTotal(Number(totalTemp));
+        if (Number(totalTemp) === 0) {
+          setIsLoading(false);
+        }
+      } catch (e) {
+        console.error(e);
+        notifyError('Error fetching agents');
       }
     })();
   }, [account, chainId, isL1OnlyNetwork, currentTab, searchValue, isSvm]);

@@ -1,6 +1,6 @@
 /**
  *
- * Helper hook to manage list of agents
+ * Helper hook to manage list of components
  */
 
 import { useCallback } from 'react';
@@ -13,12 +13,15 @@ import {
 } from '../../common-util/hooks/useSubgraph';
 import { TOTAL_VIEW_COUNT } from '../../util/constants';
 
+const componentPackageType =
+  'packageType_in: [connection,skill,protocol,contract]';
+
 /**
- * Hook to get ALL units
+ * Hook to get ALL components
  * @returns {function} function to get all units
  *
  */
-export const useAllAgents = () => {
+export const useAllComponents = () => {
   const graphQlClient = useSubgraph();
 
   return useCallback(
@@ -28,7 +31,7 @@ export const useAllAgents = () => {
           units(
             first: ${TOTAL_VIEW_COUNT}, 
             skip: ${TOTAL_VIEW_COUNT * (currentPage - 1)},
-            where: { packageType: agent }, 
+            where: { ${componentPackageType} }, 
             orderBy: tokenId
           ) ${columnsForAgentsAndComponents}
         }
@@ -42,10 +45,10 @@ export const useAllAgents = () => {
 };
 
 /**
- * Hook to get MY units
+ * Hook to get MY components
  * @returns {function} function to get my units
  */
-export const useMyAgents = () => {
+export const useMyComponents = () => {
   const graphQlClient = useSubgraph();
 
   return useCallback(
@@ -57,7 +60,7 @@ export const useMyAgents = () => {
             skip: ${TOTAL_VIEW_COUNT * (currentPage - 1)},
             where: { 
               owner: "${ownerAddress}", 
-              packageType: agent
+              ${componentPackageType}
             },
             orderBy: tokenId,
           ) ${columnsForAgentsAndComponents}
@@ -72,10 +75,10 @@ export const useMyAgents = () => {
 };
 
 /**
- * Hook to get ALL units by search
+ * Hook to get ALL components by search
  * @returns {function} function to get all units by search
  */
-const useAllAgentsBySearch = () => {
+const useAllComponentsBySearch = () => {
   const graphQlClient = useSubgraph();
 
   return useCallback(
@@ -85,7 +88,7 @@ const useAllAgentsBySearch = () => {
           units(
             where: {
               and: [
-                { packageType: "agent" }
+                { ${componentPackageType} }
                 ${getSearchFilterSubQueryForAgentsAndComponents(searchValue)}
               ]
             }
@@ -102,10 +105,10 @@ const useAllAgentsBySearch = () => {
 };
 
 /**
- * Hook to get MY units by search
+ * Hook to get MY components by search
  * @returns {function} function to search units
  */
-const useMyAgentsBySearch = () => {
+const useMyComponentsBySearch = () => {
   const graphQlClient = useSubgraph();
 
   return useCallback(
@@ -115,7 +118,7 @@ const useMyAgentsBySearch = () => {
           units(
             where: {
               and: [
-                { packageType: "agent" }
+                { ${componentPackageType} }
                 { owner_contains_nocase: "${ownerAddress}" }
                 { 
                   or: [
@@ -140,17 +143,17 @@ const useMyAgentsBySearch = () => {
 /**
  * @returns {function} function to search units
  */
-export const useSearchAgents = () => {
-  const getAllAgentsBySearch = useAllAgentsBySearch();
-  const getMyAgentsBySearch = useMyAgentsBySearch();
+export const useSearchComponents = () => {
+  const getAllComponentsBySearch = useAllComponentsBySearch();
+  const getMyComponentsBySearch = useMyComponentsBySearch();
 
   return useCallback(
     async (searchValue, ownerAddress) => {
       if (ownerAddress) {
-        return await getMyAgentsBySearch(ownerAddress, searchValue);
+        return await getMyComponentsBySearch(ownerAddress, searchValue);
       }
-      return await getAllAgentsBySearch(searchValue);
+      return await getAllComponentsBySearch(searchValue);
     },
-    [getAllAgentsBySearch, getMyAgentsBySearch],
+    [getAllComponentsBySearch, getMyComponentsBySearch],
   );
 };

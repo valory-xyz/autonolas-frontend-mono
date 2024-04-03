@@ -8,9 +8,8 @@
 import { useCallback } from 'react';
 import { gql } from 'graphql-request';
 
-import { useSubgraph } from './useSubgraph';
-import dummyData from './mock.json';
-import { TOTAL_VIEW_COUNT } from '../../util/constants';
+import { useSubgraph } from '../../../common-util/hooks/useSubgraph';
+import { TOTAL_VIEW_COUNT } from '../../../util/constants';
 
 const transformToTableData = (data) => {
   return data.map((item) => ({
@@ -48,7 +47,7 @@ export const useAllUnits = () => {
       `;
 
       const response = await graphQlClient.request(query);
-      return transformToTableData(response?.units?.das || dummyData.data.units); // TODO: remove dummyData
+      return transformToTableData(response?.units || []);
     },
     [graphQlClient],
   );
@@ -90,7 +89,7 @@ export const useAllUnitsBySearch = () => {
       `;
 
       const response = await graphQlClient.request(query);
-      return response?.units || dummyData.data.units; // TODO: remove dummyData
+      return response?.units || [];
     },
     [graphQlClient],
   );
@@ -126,8 +125,7 @@ export const useMyUnits = () => {
       `;
 
       const response = await graphQlClient.request(query);
-      const units = response?.units || dummyData.data.units; // TODO: remove dummyData
-      return units;
+      return response?.units || [];
     },
     [graphQlClient],
   );
@@ -170,7 +168,7 @@ export const useMyUnitsBySearch = () => {
       `;
 
       const response = await graphQlClient.request(query);
-      return response?.units || dummyData.data.units; // TODO: remove dummyData
+      return response?.units || [];
     },
     [graphQlClient],
   );

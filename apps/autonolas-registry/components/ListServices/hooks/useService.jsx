@@ -6,7 +6,7 @@ import { useCallback } from 'react';
 import { useHelpers } from 'common-util/hooks';
 import { notifyError } from '@autonolas/frontend-library';
 
-import { getServiceDetails, getServiceOwner, getTokenUri } from './utils';
+import { getServiceDetails, getServiceOwner, getTokenUri } from '../utils';
 import {
   useGetSvmServiceDetails,
   useServiceOwner,

@@ -10,13 +10,12 @@ import {
   getHash,
   isMyTab,
 } from '../../common-util/List/ListTable/helpers';
-import { getMyListOnPagination } from '../../common-util/ContractUtils/myList';
 import { useHelpers } from '../../common-util/hooks';
 import {
-  useAllUnits,
-  useMyUnits,
-  useSearchUnits,
-} from '../../common-util/hooks/useList';
+  useAllComponents,
+  useMyComponents,
+  useSearchComponents,
+} from './useComponents';
 import {
   getComponents,
   getFilteredComponents,
@@ -36,9 +35,9 @@ const ListComponents = () => {
 
   const { account, chainId, links, isL1OnlyNetwork, isSvm } = useHelpers();
 
-  const getAllUnits = useAllUnits();
-  const getMyUnits = useMyUnits();
-  const getUnitsBySearch = useSearchUnits();
+  const getAllComponents = useAllComponents();
+  const getMyComponents = useMyComponents();
+  const getComponentsBySearch = useSearchComponents();
 
   /**
    * extra tab content & view click
@@ -60,44 +59,42 @@ const ListComponents = () => {
   // update current tab based on the "hash" in the URL
   useEffect(() => {
     setCurrentTab(isMyTab(hash) ? MY_COMPONENTS : ALL_COMPONENTS);
-    setList([]);
   }, [router.asPath, hash]);
 
   // fetch total
   useEffect(() => {
     (async () => {
-      if (!isSvm && isL1OnlyNetwork && searchValue === '') {
-        try {
-          let totalTemp = null;
+      if (isSvm) return;
+      if (!isL1OnlyNetwork) return;
+      if (searchValue !== '') return;
 
-          // All components
-          if (currentTab === ALL_COMPONENTS) {
-            totalTemp = await getTotalForAllComponents();
-          }
-
-          // My components
-          if (currentTab === MY_COMPONENTS && account) {
-            totalTemp = await getTotalForMyComponents(account);
-          }
-
-          setTotal(Number(totalTemp));
-          if (Number(totalTemp) === 0) {
-            setIsLoading(false);
-          }
-        } catch (e) {
-          console.error(e);
-          notifyError('Error fetching components');
+      try {
+        let totalTemp = null;
+        if (currentTab === ALL_COMPONENTS) {
+          totalTemp = await getTotalForAllComponents();
+        } else if (currentTab === MY_COMPONENTS && account) {
+          totalTemp = await getTotalForMyComponents(account);
         }
+
+        setTotal(Number(totalTemp));
+        if (Number(totalTemp) === 0) {
+          setIsLoading(false);
+        }
+      } catch (e) {
+        console.error(e);
+        notifyError('Error fetching components');
       }
     })();
   }, [account, chainId, isL1OnlyNetwork, currentTab, searchValue, isSvm]);
 
-  const isListEmpty = list.length === 0;
-
   // fetch the list (without search)
   useEffect(() => {
     (async () => {
-      if (!isSvm && isL1OnlyNetwork && total && currentPage && !searchValue) {
+      if (isSvm) return;
+      if (!isL1OnlyNetwork) return;
+      if (searchValue) return;
+
+      if (total && currentPage) {
         setIsLoading(true);
 
         try {
@@ -106,20 +103,18 @@ const ListComponents = () => {
             setList([]);
             const everyComps =
               chainId === 1
-                ? await getAllUnits(NAV_TYPES.COMPONENT, currentPage)
+                ? await getAllComponents(currentPage)
                 : await getComponents(total, currentPage);
             setList(everyComps);
-          }
-
-          /**
-           * My components
-           * - search by `account` as searchValue
-           * - API will be called only once & store the complete list
-           */
-          if (currentTab === MY_COMPONENTS && isListEmpty && account) {
+          } else if (currentTab === MY_COMPONENTS && account) {
+            /**
+             * My components
+             * - search by `account` as searchValue
+             * - API will be called only once & store the complete list
+             */
             const e =
               chainId === 1
-                ? await getMyUnits(NAV_TYPES.COMPONENT, account)
+                ? await getMyComponents(account, currentPage)
                 : await getFilteredComponents(account);
             setList(e);
           }
@@ -138,11 +133,9 @@ const ListComponents = () => {
     total,
     currentPage,
     isSvm,
-    getMyUnits,
-    getUnitsBySearch,
-    getAllUnits,
+    getMyComponents,
+    getAllComponents,
     currentTab,
-    isListEmpty,
     searchValue,
   ]);
 
@@ -153,34 +146,30 @@ const ListComponents = () => {
    */
   useEffect(() => {
     (async () => {
-      if (searchValue) {
-        setIsLoading(true);
-        setList([]);
+      if (!searchValue) return;
 
-        try {
-          if (chainId === 1) {
-            const filteredList = await getUnitsBySearch(
-              NAV_TYPES.COMPONENT,
-              searchValue,
-              currentPage,
-              currentTab === MY_COMPONENTS ? account : null,
-            );
-            setList(filteredList);
-          } else {
-            const filteredList = await getFilteredComponents(
-              searchValue,
-              currentTab === MY_COMPONENTS ? account : null,
-            );
-            setList(filteredList);
-          }
-          setTotal(0); // total won't be used if search is used
-          setCurrentPage(1);
-        } catch (e) {
-          console.error(e);
-          notifyError('Error fetching components');
-        } finally {
-          setIsLoading(false);
+      setIsLoading(true);
+      try {
+        if (chainId === 1) {
+          const filteredList = await getComponentsBySearch(
+            searchValue,
+            currentTab === MY_COMPONENTS ? account : null,
+          );
+          setList(filteredList);
+        } else {
+          const filteredList = await getFilteredComponents(
+            searchValue,
+            currentTab === MY_COMPONENTS ? account : null,
+          );
+          setList(filteredList);
         }
+        setTotal(0); // total won't be used if search is used
+        setCurrentPage(1);
+      } catch (e) {
+        console.error(e);
+        notifyError('Error fetching components');
+      } finally {
+        setIsLoading(false);
       }
     })();
   }, [
@@ -189,7 +178,7 @@ const ListComponents = () => {
     searchValue,
     currentTab,
     currentPage,
-    getUnitsBySearch,
+    getComponentsBySearch,
   ]);
 
   const tableCommonProps = {
@@ -201,10 +190,6 @@ const ListComponents = () => {
     onViewClick,
     searchValue,
   };
-
-  const myComponents = searchValue
-    ? list
-    : getMyListOnPagination({ total, nextPage: currentPage, list });
 
   return (
     <Tabs
@@ -240,11 +225,7 @@ const ListComponents = () => {
           label: 'My Components',
           key: MY_COMPONENTS,
           children: (
-            <ListTable
-              {...tableCommonProps}
-              list={myComponents}
-              isAccountRequired
-            />
+            <ListTable {...tableCommonProps} list={list} isAccountRequired />
           ),
         },
       ]}
