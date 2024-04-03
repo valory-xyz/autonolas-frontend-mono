@@ -11,7 +11,6 @@ import {
   isMyTab,
 } from '../../common-util/List/ListTable/helpers';
 import { useHelpers } from '../../common-util/hooks';
-import { useSearchUnits } from '../../common-util/hooks/useList';
 import { useAllAgents, useMyAgents, useSearchAgents } from './useAgents';
 import {
   getAgents,
@@ -35,7 +34,6 @@ const ListAgents = () => {
   const getAllAgents = useAllAgents();
   const getMyAgents = useMyAgents();
   const getAgentsBySearch = useSearchAgents();
-  const getUnitsBySearch = useSearchUnits();
 
   /**
    * extra tab content & view click
@@ -131,7 +129,6 @@ const ListAgents = () => {
     total,
     currentPage,
     getMyAgents,
-    getUnitsBySearch,
     getAllAgents,
     currentTab,
   ]);

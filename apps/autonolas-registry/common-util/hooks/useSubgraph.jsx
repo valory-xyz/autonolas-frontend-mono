@@ -18,3 +18,33 @@ export const useSubgraph = () => {
 
   return graphQlClient;
 };
+
+
+export const columnsForAgentsAndComponents = `{
+  id
+  tokenId
+  owner
+  publicId
+  packageHash
+  metadataHash
+}`;
+
+/**
+ * Searches by
+ * - publicId (package name)
+ * - description,
+ * - tokenId
+ * - packageHash
+ * - owner
+ * @returns  {string} search filter sub query
+ */
+export const getSearchFilterSubQueryForAgentsAndComponents = (searchValue) => {
+  return `{ 
+    or: [
+      { publicId_contains_nocase: "${searchValue}" } 
+      { description_contains_nocase: "${searchValue}" }
+      { packageHash_contains_nocase: "${searchValue}" }
+      { owner_contains_nocase: "${searchValue}" }
+    ]
+  }`;
+};

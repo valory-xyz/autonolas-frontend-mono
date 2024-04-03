@@ -6,37 +6,12 @@
 import { useCallback } from 'react';
 import { gql } from 'graphql-request';
 
-import { useSubgraph } from '../../common-util/hooks/useSubgraph';
+import {
+  useSubgraph,
+  columnsForAgentsAndComponents,
+  getSearchFilterSubQueryForAgentsAndComponents,
+} from '../../common-util/hooks/useSubgraph';
 import { TOTAL_VIEW_COUNT } from '../../util/constants';
-
-const columns = `{
-  id
-  tokenId
-  owner
-  publicId
-  packageHash
-  metadataHash
-}`;
-
-/**
- * Searches by
- * - publicId (package name)
- * - description,
- * - tokenId
- * - packageHash
- * - owner
- * @returns  {string} search filter sub query
- */
-const getSearchFilterSubQuery = (searchValue) => {
-  return `{ 
-    or: [
-      { publicId_contains_nocase: "${searchValue}" } 
-      { description_contains_nocase: "${searchValue}" }
-      { packageHash_contains_nocase: "${searchValue}" }
-      { owner_contains_nocase: "${searchValue}" }
-    ]
-  }`;
-};
 
 const transformToTableData = (data) => {
   return data.map((item) => ({
@@ -66,42 +41,12 @@ export const useAllAgents = () => {
             skip: ${TOTAL_VIEW_COUNT * (currentPage - 1)},
             where: { packageType: agent }, 
             orderBy: tokenId
-          ) ${columns}
+          ) ${columnsForAgentsAndComponents}
         }
       `;
 
       const response = await graphQlClient.request(query);
       console.log('response', response);
-      return transformToTableData(response?.units);
-    },
-    [graphQlClient],
-  );
-};
-
-/**
- * Hook to get ALL units by search
- * @returns {function} function to get all units by search
- */
-export const useAllAgentsBySearch = () => {
-  const graphQlClient = useSubgraph();
-
-  return useCallback(
-    async (searchValue) => {
-      const query = gql`
-        {
-          units(
-            where: {
-              and: [
-                { packageType: "agent" }
-                ${getSearchFilterSubQuery(searchValue)}
-              ]
-            }
-            orderBy: tokenId
-          ) ${columns}
-        }
-      `;
-
-      const response = await graphQlClient.request(query);
       return transformToTableData(response?.units);
     },
     [graphQlClient],
@@ -128,7 +73,37 @@ export const useMyAgents = () => {
               packageType: agent
             },
             orderBy: tokenId,
-          ) ${columns}
+          ) ${columnsForAgentsAndComponents}
+        }
+      `;
+
+      const response = await graphQlClient.request(query);
+      return transformToTableData(response?.units);
+    },
+    [graphQlClient],
+  );
+};
+
+/**
+ * Hook to get ALL units by search
+ * @returns {function} function to get all units by search
+ */
+const useAllAgentsBySearch = () => {
+  const graphQlClient = useSubgraph();
+
+  return useCallback(
+    async (searchValue) => {
+      const query = gql`
+        {
+          units(
+            where: {
+              and: [
+                { packageType: "agent" }
+                ${getSearchFilterSubQueryForAgentsAndComponents(searchValue)}
+              ]
+            }
+            orderBy: tokenId
+          ) ${columnsForAgentsAndComponents}
         }
       `;
 
@@ -143,7 +118,7 @@ export const useMyAgents = () => {
  * Hook to get MY units by search
  * @returns {function} function to search units
  */
-export const useMyAgentsBySearch = () => {
+const useMyAgentsBySearch = () => {
   const graphQlClient = useSubgraph();
 
   return useCallback(
@@ -164,7 +139,7 @@ export const useMyAgentsBySearch = () => {
               ]
             }
             orderBy: tokenId
-          ) ${columns}
+          ) ${columnsForAgentsAndComponents}
         }
       `;
 
@@ -176,7 +151,6 @@ export const useMyAgentsBySearch = () => {
 };
 
 /**
- *
  * @returns {function} function to search units
  */
 export const useSearchAgents = () => {
