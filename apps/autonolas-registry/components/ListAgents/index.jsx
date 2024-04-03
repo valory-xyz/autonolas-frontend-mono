@@ -10,13 +10,9 @@ import {
   getHash,
   isMyTab,
 } from '../../common-util/List/ListTable/helpers';
-import { getMyListOnPagination } from '../../common-util/ContractUtils/myList';
 import { useHelpers } from '../../common-util/hooks';
-import {
-  useAllUnits,
-  useMyUnits,
-  useSearchUnits,
-} from '../../common-util/hooks/useList';
+import { useSearchUnits } from '../../common-util/hooks/useList';
+import { useAllAgents, useMyAgents, useSearchAgents } from './useAgents';
 import {
   getAgents,
   getFilteredAgents,
@@ -36,8 +32,9 @@ const ListAgents = () => {
 
   const { account, chainId, links, isL1OnlyNetwork, isSvm } = useHelpers();
 
-  const getAllUnits = useAllUnits();
-  const getMyUnits = useMyUnits();
+  const getAllAgents = useAllAgents();
+  const getMyAgents = useMyAgents();
+  const getAgentsBySearch = useSearchAgents();
   const getUnitsBySearch = useSearchUnits();
 
   /**
@@ -60,7 +57,6 @@ const ListAgents = () => {
   // update current tab based on the "hash" in the links
   useEffect(() => {
     setCurrentTab(isMyTab(hash) ? MY_AGENTS : ALL_AGENTS);
-    setList([]);
   }, [router.asPath, hash]);
 
   // fetch total
@@ -70,13 +66,9 @@ const ListAgents = () => {
         try {
           let totalTemp = null;
 
-          // All agents
           if (currentTab === ALL_AGENTS) {
             totalTemp = await getTotalForAllAgents();
-          }
-
-          // My agents
-          if (currentTab === MY_AGENTS && account) {
+          } else if (currentTab === MY_AGENTS && account) {
             totalTemp = await getTotalForMyAgents(account);
           }
 
@@ -92,12 +84,14 @@ const ListAgents = () => {
     })();
   }, [account, chainId, isL1OnlyNetwork, currentTab, searchValue, isSvm]);
 
-  const isListEmpty = list.length === 0;
-
   // fetch the list (without search)
   useEffect(() => {
     (async () => {
-      if (!isSvm && isL1OnlyNetwork && total && currentPage && !searchValue) {
+      if (isSvm) return;
+      if (!isL1OnlyNetwork) return;
+      if (searchValue) return;
+
+      if (total && currentPage) {
         setIsLoading(true);
 
         try {
@@ -105,10 +99,10 @@ const ListAgents = () => {
           if (currentTab === ALL_AGENTS) {
             const everyAgents =
               chainId === 1
-                ? await getAllUnits(NAV_TYPES.AGENT, currentPage)
+                ? await getAllAgents(currentPage)
                 : await getAgents(total, currentPage);
             setList(everyAgents);
-          } else if (currentTab === MY_AGENTS && isListEmpty && account) {
+          } else if (currentTab === MY_AGENTS && account) {
             /**
              * My agents
              * - search by `account` as searchValue
@@ -116,7 +110,7 @@ const ListAgents = () => {
              */
             const e =
               chainId === 1
-                ? await getMyUnits(NAV_TYPES.AGENT, account)
+                ? await getMyAgents(account, currentPage)
                 : await getFilteredAgents(account);
             setList(e);
           }
@@ -129,18 +123,17 @@ const ListAgents = () => {
       }
     })();
   }, [
+    isSvm,
+    searchValue,
+    isL1OnlyNetwork,
     account,
     chainId,
-    isL1OnlyNetwork,
     total,
     currentPage,
-    isSvm,
-    getMyUnits,
+    getMyAgents,
     getUnitsBySearch,
-    getAllUnits,
+    getAllAgents,
     currentTab,
-    isListEmpty,
-    searchValue,
   ]);
 
   /**
@@ -150,32 +143,30 @@ const ListAgents = () => {
    */
   useEffect(() => {
     (async () => {
-      if (searchValue) {
-        setIsLoading(true);
-        try {
-          if (chainId === 1) {
-            const filteredList = await getUnitsBySearch(
-              NAV_TYPES.AGENT,
-              searchValue,
-              currentPage,
-              currentTab === MY_AGENTS ? account : null,
-            );
-            setList(filteredList);
-          } else {
-            const filteredList = await getFilteredAgents(
-              searchValue,
-              currentTab === MY_AGENTS ? account : null,
-            );
-            setList(filteredList);
-          }
-          setTotal(0); // total won't be used if search is used
-          setCurrentPage(1);
-        } catch (e) {
-          console.error(e);
-          notifyError('Error fetching agents');
-        } finally {
-          setIsLoading(false);
+      if (!searchValue) return;
+
+      setIsLoading(true);
+      try {
+        if (chainId === 1) {
+          const filteredList = await getAgentsBySearch(
+            searchValue,
+            currentTab === MY_AGENTS ? account : null,
+          );
+          setList(filteredList);
+        } else {
+          const filteredList = await getFilteredAgents(
+            searchValue,
+            currentTab === MY_AGENTS ? account : null,
+          );
+          setList(filteredList);
         }
+        setTotal(0); // total won't be used if search is used
+        setCurrentPage(1);
+      } catch (e) {
+        console.error(e);
+        notifyError('Error fetching agents');
+      } finally {
+        setIsLoading(false);
       }
     })();
   }, [
@@ -184,7 +175,7 @@ const ListAgents = () => {
     searchValue,
     currentTab,
     currentPage,
-    getUnitsBySearch,
+    getAgentsBySearch,
   ]);
 
   const tableCommonProps = {
@@ -196,10 +187,6 @@ const ListAgents = () => {
     onViewClick,
     searchValue,
   };
-
-  const myAgentsList = searchValue
-    ? list
-    : getMyListOnPagination({ total, nextPage: currentPage, list });
 
   return (
     <Tabs
@@ -232,11 +219,7 @@ const ListAgents = () => {
           key: MY_AGENTS,
           label: 'My Agents',
           children: (
-            <ListTable
-              {...tableCommonProps}
-              list={myAgentsList}
-              isAccountRequired
-            />
+            <ListTable {...tableCommonProps} list={list} isAccountRequired />
           ),
         },
       ]}

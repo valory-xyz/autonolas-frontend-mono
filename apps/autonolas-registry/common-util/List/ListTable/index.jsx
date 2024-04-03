@@ -21,9 +21,7 @@ const ListTable = ({
   onUpdateClick,
   extra,
 }) => {
-  const {
-    chainName, account, isSvm, chainId,
-  } = useHelpers();
+  const { chainName, account, isSvm, chainId } = useHelpers();
   /**
    * no pagination on search as we won't know total beforehand
    */
@@ -53,7 +51,10 @@ const ListTable = ({
     chainId,
     account,
   });
-  const dataSource = fetchDataSource(type, list, { current: currentPage });
+  const dataSource =
+    type === 'agent'
+      ? list
+      : fetchDataSource(type, list, { current: currentPage });
   const pagination = {
     total,
     current: currentPage,

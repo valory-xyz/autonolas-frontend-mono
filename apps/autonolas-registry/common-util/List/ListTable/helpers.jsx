@@ -9,6 +9,7 @@ import {
 import styled from 'styled-components';
 
 import {
+  GATEWAY_URL,
   HASH_PREFIX,
   NAV_TYPES,
   SERVICE_STATE,
@@ -30,8 +31,8 @@ export const getTableColumns = (
     return [
       {
         title: 'ID',
-        dataIndex: 'id',
-        key: 'id',
+        dataIndex: 'tokenId',
+        key: 'tokenId',
         width: isMobile ? 30 : 50,
       },
       {
@@ -59,10 +60,21 @@ export const getTableColumns = (
       },
       {
         title: 'Package Name',
-        dataIndex: 'packageId',
-        key: 'packageId',
+        dataIndex: 'packageName',
+        key: 'packageName',
         width: 180,
-        render: (text) => text || NA,
+        render: (text, row) => {
+          if (!text || text === NA) return NA;
+          return (
+            <a
+              href={`${GATEWAY_URL}${row.packageHash}`}
+              target="_blank"
+              rel="noreferrer"
+            >
+              {text}
+            </a>
+          );
+        },
       },
       {
         width: isMobile ? 40 : 120,
@@ -165,17 +177,6 @@ export const fetchDataSource = (type, rawData, { current }) => {
   const startIndex = (current - 1) * TOTAL_VIEW_COUNT + 1;
   let data = [];
   if (type === NAV_TYPES.COMPONENT) {
-    data = rawData.map((item, index) => ({
-      id: item.id || `${startIndex + index}`,
-      description: item.description || NA,
-      developer: item.developer || NA,
-      owner: item.owner || NA,
-      hash: item.unitHash || NA,
-      dependency: (item.dependencies || []).length,
-    }));
-  }
-
-  if (type === NAV_TYPES.AGENT) {
     data = rawData.map((item, index) => ({
       id: item.id || `${startIndex + index}`,
       description: item.description || NA,

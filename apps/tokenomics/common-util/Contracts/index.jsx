@@ -1,8 +1,8 @@
 import Web3 from 'web3';
 import { LOCAL_FORK_ID } from '@autonolas/frontend-library';
 
-import { LOCAL_CHAIN_ID } from 'util/constants';
-import { getChainId, getProvider } from 'common-util/functions';
+import { LOCAL_CHAIN_ID } from '../../util/constants';
+import { getChainId, getProvider } from '../functions';
 import {
   DEPOSITORY,
   DISPENSER,
@@ -14,7 +14,7 @@ import {
   COMPONENT_REGISTRY,
   SERVICE_REGISTRY,
   ERC20_ABI,
-} from 'common-util/AbiAndAddresses';
+} from '../AbiAndAddresses';
 
 const LOCAL_ADDRESSES = {
   dispenser: '0x4c5859f0F772848b2D91F1D83E2Fe57935348029',
