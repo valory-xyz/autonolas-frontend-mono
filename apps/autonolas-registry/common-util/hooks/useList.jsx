@@ -26,7 +26,7 @@ const transformToTableData = (data) => {
  *
  */
 export const useAllUnits = () => {
-  const graphQLClient = useSubgraph();
+  const graphQlClient = useSubgraph();
 
   return useCallback(
     async (type, currentPage) => {
@@ -47,10 +47,10 @@ export const useAllUnits = () => {
         }
       `;
 
-      const response = await graphQLClient.request(query);
+      const response = await graphQlClient.request(query);
       return transformToTableData(response?.units?.das || dummyData.data.units); // TODO: remove dummyData
     },
-    [graphQLClient],
+    [graphQlClient],
   );
 };
 
@@ -59,7 +59,7 @@ export const useAllUnits = () => {
  * @returns {function} function to get all units by search
  */
 export const useAllUnitsBySearch = () => {
-  const graphQLClient = useSubgraph();
+  const graphQlClient = useSubgraph();
 
   return useCallback(
     async (type, searchValue, currentPage) => {
@@ -89,10 +89,10 @@ export const useAllUnitsBySearch = () => {
         }
       `;
 
-      const response = await graphQLClient.request(query);
+      const response = await graphQlClient.request(query);
       return response?.units || dummyData.data.units; // TODO: remove dummyData
     },
-    [graphQLClient],
+    [graphQlClient],
   );
 };
 
@@ -101,7 +101,7 @@ export const useAllUnitsBySearch = () => {
  * @returns {function} function to get my units
  */
 export const useMyUnits = () => {
-  const graphQLClient = useSubgraph();
+  const graphQlClient = useSubgraph();
 
   return useCallback(
     async (type, ownerAddress, currentPage) => {
@@ -125,11 +125,11 @@ export const useMyUnits = () => {
         }
       `;
 
-      const response = await graphQLClient.request(query);
+      const response = await graphQlClient.request(query);
       const units = response?.units || dummyData.data.units; // TODO: remove dummyData
       return units;
     },
-    [graphQLClient],
+    [graphQlClient],
   );
 };
 
@@ -138,7 +138,7 @@ export const useMyUnits = () => {
  * @returns {function} function to search units
  */
 export const useMyUnitsBySearch = () => {
-  const graphQLClient = useSubgraph();
+  const graphQlClient = useSubgraph();
 
   return useCallback(
     async (type, ownerAddress, searchValue, currentPage) => {
@@ -169,10 +169,10 @@ export const useMyUnitsBySearch = () => {
         }
       `;
 
-      const response = await graphQLClient.request(query);
+      const response = await graphQlClient.request(query);
       return response?.units || dummyData.data.units; // TODO: remove dummyData
     },
-    [graphQLClient],
+    [graphQlClient],
   );
 };
 

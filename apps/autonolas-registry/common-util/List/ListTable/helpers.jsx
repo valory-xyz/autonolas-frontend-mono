@@ -1,11 +1,12 @@
 import { useState } from 'react';
-import { Input, Space, Button, Typography } from 'antd';
-import { SearchOutlined } from '@ant-design/icons';
+import { Input, Space, Button, Typography, Tooltip } from 'antd';
+import { SearchOutlined, InfoCircleOutlined } from '@ant-design/icons';
 import {
   AddressLink,
   areAddressesEqual,
   NA,
 } from '@autonolas/frontend-library';
+import styled from 'styled-components';
 
 import {
   HASH_PREFIX,
@@ -50,11 +51,18 @@ export const getTableColumns = (
         width: 180,
         render: (text) => {
           if (!text || text === NA) return NA;
-          const updatedText = text.replace(HASH_PREFIX, '0x');
+          const updatedText = text.replace(HASH_PREFIX, '0x'); // .toUpperCase();
           return (
             <AddressLink {...addressLinkProps} text={updatedText} isIpfsLink />
           );
         },
+      },
+      {
+        title: 'Package Name',
+        dataIndex: 'packageId',
+        key: 'packageId',
+        width: 180,
+        render: (text) => text || NA,
       },
       {
         width: isMobile ? 40 : 120,
@@ -191,6 +199,13 @@ export const fetchDataSource = (type, rawData, { current }) => {
   return data;
 };
 
+const SearchTooltip = styled.div`
+  ul {
+    margin: 0;
+    padding: 0 0 0 16px;
+  }
+`;
+
 /**
  * tab content
  */
@@ -215,9 +230,27 @@ export const useExtraTabContent = ({
           <>
             <Input
               prefix={<SearchOutlined className="site-form-item-icon" />}
-              placeholder="Owner or Hash"
+              placeholder="Search..."
               value={value}
               onChange={(e) => setValue(e.target.value)}
+              suffix={
+                <Tooltip
+                  title={
+                    <SearchTooltip>
+                      <div>Search by:</div>
+                      <ul>
+                        <li>Name</li>
+                        <li>Description</li>
+                        <li>Public ID</li>
+                        <li>Token ID</li>
+                        <li>Package Hash</li>
+                      </ul>
+                    </SearchTooltip>
+                  }
+                >
+                  <InfoCircleOutlined style={{ color: 'rgba(0,0,0,.45)' }} />
+                </Tooltip>
+              }
             />
 
             <Button

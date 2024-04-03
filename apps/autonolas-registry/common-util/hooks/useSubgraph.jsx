@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 import { GraphQLClient } from 'graphql-request';
 
 export const useSubgraph = () => {
-  const graphQLClient = useMemo(
+  const graphQlClient = useMemo(
     () => new GraphQLClient(
       process.env.NEXT_PUBLIC_AUTONOLAS_SUB_GRAPH_URL,
       {
@@ -16,5 +16,5 @@ export const useSubgraph = () => {
     []
   );
 
-  return graphQLClient;
+  return graphQlClient;
 };
