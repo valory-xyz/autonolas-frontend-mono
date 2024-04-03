@@ -9,6 +9,35 @@ import { gql } from 'graphql-request';
 import { useSubgraph } from '../../common-util/hooks/useSubgraph';
 import { TOTAL_VIEW_COUNT } from '../../util/constants';
 
+const columns = `{
+  id
+  tokenId
+  owner
+  publicId
+  packageHash
+  metadataHash
+}`;
+
+/**
+ * Searches by
+ * - publicId (package name)
+ * - description,
+ * - tokenId
+ * - packageHash
+ * - owner
+ * @returns  {string} search filter sub query
+ */
+const getSearchFilterSubQuery = (searchValue) => {
+  return `{ 
+    or: [
+      { publicId_contains_nocase: "${searchValue}" } 
+      { description_contains_nocase: "${searchValue}" }
+      { packageHash_contains_nocase: "${searchValue}" }
+      { owner_contains_nocase: "${searchValue}" }
+    ]
+  }`;
+};
+
 const transformToTableData = (data) => {
   return data.map((item) => ({
     id: item.tokenId,
@@ -37,14 +66,7 @@ export const useAllAgents = () => {
             skip: ${TOTAL_VIEW_COUNT * (currentPage - 1)},
             where: { packageType: agent }, 
             orderBy: tokenId
-          ) {
-              id
-              tokenId
-              owner
-              publicId
-              packageHash
-              metadataHash
-          }
+          ) ${columns}
         }
       `;
 
@@ -71,23 +93,11 @@ export const useAllAgentsBySearch = () => {
             where: {
               and: [
                 { packageType: "agent" }
-                { 
-                  or: [
-                    { publicId_contains_nocase: "${searchValue}" }
-                    { packageHash_contains_nocase: "${searchValue}" }
-                  ]
-                }
+                ${getSearchFilterSubQuery(searchValue)}
               ]
             }
             orderBy: tokenId
-          ) {
-              id
-              tokenId
-              owner
-              publicId
-              packageHash
-              metadataHash
-          }
+          ) ${columns}
         }
       `;
 
@@ -118,14 +128,7 @@ export const useMyAgents = () => {
               packageType: agent
             },
             orderBy: tokenId,
-          ) {
-            id
-            tokenId
-            owner
-            publicId
-            packageHash
-            metadataHash
-          }
+          ) ${columns}
         }
       `;
 
@@ -161,14 +164,7 @@ export const useMyAgentsBySearch = () => {
               ]
             }
             orderBy: tokenId
-          ) {
-              id
-              tokenId
-              owner
-              publicId
-              packageHash
-              metadataHash
-          }
+          ) ${columns}
         }
       `;
 
