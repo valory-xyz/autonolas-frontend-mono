@@ -3,15 +3,20 @@ import { Tabs } from 'antd';
 import { useRouter } from 'next/router';
 import { notifyError } from '@autonolas/frontend-library';
 
-import { NAV_TYPES } from 'util/constants';
-import ListTable from 'common-util/List/ListTable';
+import { NAV_TYPES } from '../../util/constants';
+import ListTable from '../../common-util/List/ListTable';
 import {
   useExtraTabContent,
   getHash,
   isMyTab,
-} from 'common-util/List/ListTable/helpers';
-import { getMyListOnPagination } from 'common-util/ContractUtils/myList';
-import { useHelpers } from 'common-util/hooks';
+} from '../../common-util/List/ListTable/helpers';
+import { getMyListOnPagination } from '../../common-util/ContractUtils/myList';
+import { useHelpers } from '../../common-util/hooks';
+import {
+  useAllUnits,
+  useMyUnits,
+  useSearchUnits,
+} from '../../common-util/hooks/useList';
 import {
   getServices,
   getFilteredServices,
@@ -30,7 +35,11 @@ const ListServices = () => {
     isMyTab(hash) ? MY_SERVICES : ALL_SERVICES,
   );
 
-  const { account, chainName, links, isSvm } = useHelpers();
+  const { account, chainName, links, isSvm, chainId } = useHelpers();
+
+  const getAllUnits = useAllUnits();
+  const getMyUnits = useMyUnits();
+  const getUnitsBySearch = useSearchUnits();
 
   /**
    * extra tab content & view click
@@ -111,29 +120,34 @@ const ListServices = () => {
       try {
         // All services
         if (currentTab === ALL_SERVICES) {
-          setList([]);
-          const everyComps = isSvm
-            ? await getSvmServices(total, currentPage)
-            : await getServices(total, currentPage);
-          setList(everyComps);
-        }
+          if (chainId === 1) {
+            const e = await getAllUnits(NAV_TYPES.SERVICE, currentPage);
+            setList(e);
+          } else {
+            const e = isSvm
+              ? await getSvmServices(total, currentPage)
+              : await getServices(total, currentPage);
+            setList(e);
+          }
+        } else if (currentTab === MY_SERVICES && list.length === 0 && account) {
+          /**
+           * My services
+           * - search by `account` as searchValue
+           * - API will be called only once & store the complete list
+           */
+          if (chainId === 1) {
+            const e = await getMyUnits(NAV_TYPES.SERVICE, account);
+            setList(e);
+          } else {
+            const e = isSvm
+              ? await getMySvmServices(account, total)
+              : await getFilteredServices(account);
+            setList(e);
 
-        /**
-         * My services
-         * - search by `account` as searchValue
-         * - API will be called only once & store the complete list
-         */
-        if (currentTab === MY_SERVICES && list.length === 0 && account) {
-          setList([]);
-
-          const e = isSvm
-            ? await getMySvmServices(account, total)
-            : await getFilteredServices(account);
-          setList(e);
-
-          // TODO: remove this once `getTotalForMySvmServices` is fixed
-          if (isSvm) {
-            setTotal(e.length);
+            // TODO: remove this once `getTotalForMySvmServices` is fixed
+            if (isSvm) {
+              setTotal(e.length);
+            }
           }
         }
       } catch (e) {
@@ -149,12 +163,18 @@ const ListServices = () => {
     }
   }, [
     account,
+    chainId,
     chainName,
     total,
     currentPage,
     currentTab,
     searchValue,
     isSvm,
+    getMyUnits,
+    getUnitsBySearch,
+    getAllUnits,
+    getSvmServices,
+    getMySvmServices,
     // list?.length,
   ]);
 

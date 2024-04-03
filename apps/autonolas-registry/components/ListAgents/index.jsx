@@ -103,20 +103,17 @@ const ListAgents = () => {
         try {
           // All agents
           if (currentTab === ALL_AGENTS) {
-            setList([]);
             const everyAgents =
               chainId === 1
                 ? await getAllUnits(NAV_TYPES.AGENT, currentPage)
                 : await getAgents(total, currentPage);
             setList(everyAgents);
-          }
-
-          /**
-           * My agents
-           * - search by `account` as searchValue
-           * - API will be called only once & store the complete list
-           */
-          if (currentTab === MY_AGENTS && isListEmpty && account) {
+          } else if (currentTab === MY_AGENTS && isListEmpty && account) {
+            /**
+             * My agents
+             * - search by `account` as searchValue
+             * - API will be called only once & store the complete list
+             */
             const e =
               chainId === 1
                 ? await getMyUnits(NAV_TYPES.AGENT, account)
@@ -155,8 +152,6 @@ const ListAgents = () => {
     (async () => {
       if (searchValue) {
         setIsLoading(true);
-        setList([]);
-
         try {
           if (chainId === 1) {
             const filteredList = await getUnitsBySearch(
@@ -215,7 +210,6 @@ const ListAgents = () => {
       onChange={(e) => {
         setCurrentTab(e);
 
-        setList([]);
         setTotal(0);
         setCurrentPage(1);
         setIsLoading(true);
