@@ -8,6 +8,7 @@ import {
   mainnet,
   gnosis,
   polygon,
+  goerli,
   polygonMumbai,
   gnosisChiado,
   arbitrum,
@@ -30,6 +31,7 @@ export const projectId = process.env.NEXT_PUBLIC_WALLET_PROJECT_ID;
 
 export const SUPPORTED_CHAINS = [
   mainnet,
+  goerli,
   gnosis,
   gnosisChiado,
   polygon,
@@ -85,6 +87,7 @@ export const ethereumClient = new EthereumClient(wagmiConfig, chains);
  * @example
  * [
  *  { name: 'Mainnet', id: 1, network: 'ethereum' },
+ *  { name: 'Goerli', id: 5, network: 'goerli' },
  *  // ...
  * ]
  */
@@ -173,6 +176,7 @@ export const ALL_SUPPORTED_CHAINS = [
     'base',
     'optimism',
     'celo',
+    'goerli',
     'gnosis-chiado',
     'polygon-mumbai',
     'solana-devnet',
