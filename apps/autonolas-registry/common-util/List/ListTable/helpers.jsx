@@ -28,23 +28,32 @@ export const getTableColumns = (
   };
 
   if (type === NAV_TYPES.COMPONENT || type === NAV_TYPES.AGENT) {
-    return [
-      {
-        title: 'ID',
-        dataIndex: 'tokenId',
-        key: 'tokenId',
-        width: isMobile ? 30 : 50,
+    const tokenIdColumn = {
+      title: 'ID',
+      dataIndex: 'tokenId',
+      key: 'tokenId',
+      width: isMobile ? 30 : 50,
+    };
+
+    const ownerColumn = {
+      title: 'Owner',
+      dataIndex: 'owner',
+      key: 'owner',
+      width: 160,
+      render: (text) => {
+        if (!text || text === NA) return NA;
+        return <AddressLink {...addressLinkProps} text={text} />;
       },
-      {
-        title: 'Owner',
-        dataIndex: 'owner',
-        key: 'owner',
-        width: 160,
-        render: (text) => {
-          if (!text || text === NA) return NA;
-          return <AddressLink {...addressLinkProps} text={text} />;
-        },
-      },
+    };
+
+    const dependencyColumn = {
+      title: 'No. of component dependencies',
+      dataIndex: 'dependency',
+      width: isMobile ? 70 : 300,
+      key: 'dependency',
+    };
+
+    const otherEthColumns = [
       {
         title: 'Hash',
         dataIndex: 'hash',
@@ -76,20 +85,25 @@ export const getTableColumns = (
           );
         },
       },
-      {
-        width: isMobile ? 40 : 120,
-        title: 'Action',
-        key: 'action',
-        fixed: 'right',
-        render: (_text, record) => (
-          <Space size="middle">
-            <Button type="link" onClick={() => onViewClick(record.id)}>
-              View
-            </Button>
-          </Space>
-        ),
-      },
     ];
+
+    const actionColumn = {
+      width: isMobile ? 40 : 120,
+      title: 'Action',
+      key: 'action',
+      fixed: 'right',
+      render: (_text, record) => (
+        <Space size="middle">
+          <Button type="link" onClick={() => onViewClick(record.id)}>
+            View
+          </Button>
+        </Space>
+      ),
+    };
+
+    return chainId === 1
+      ? [tokenIdColumn, ownerColumn, ...otherEthColumns, actionColumn]
+      : [tokenIdColumn, ownerColumn, dependencyColumn, actionColumn];
   }
 
   if (type === NAV_TYPES.SERVICE) {
@@ -162,7 +176,7 @@ export const getTableColumns = (
   return [];
 };
 
-export const fetchDataSource = (type, rawData, { current }) => {
+export const fetchDataSource = (type, rawData, { current, chainId }) => {
   /**
    * @example
    * TOTAL_VIEW_COUNT = 10, current = 1
@@ -175,20 +189,46 @@ export const fetchDataSource = (type, rawData, { current }) => {
    *       = 41
    */
   const startIndex = (current - 1) * TOTAL_VIEW_COUNT + 1;
-  let data = [];
-  if (type === NAV_TYPES.COMPONENT || type === NAV_TYPES.AGENT) {
-    data = rawData.map((item) => ({
-      id: item.tokenId,
-      tokenId: item.tokenId,
-      owner: item.owner,
-      hash: item.metadataHash,
-      packageName: item.publicId,
-      packageHash: item.packageHash,
+
+  // for mainnet
+  if (chainId === 1) {
+    if (type === NAV_TYPES.COMPONENT || type === NAV_TYPES.AGENT) {
+      return rawData.map((item) => ({
+        id: item.tokenId,
+        tokenId: item.tokenId,
+        owner: item.owner,
+        hash: item.metadataHash,
+        packageName: item.publicId,
+        packageHash: item.packageHash,
+      }));
+    }
+  }
+
+  // non-mainnet chain
+  if (type === NAV_TYPES.COMPONENT) {
+    return rawData.map((item, index) => ({
+      id: item.id || `${startIndex + index}`,
+      description: item.description || NA,
+      developer: item.developer || NA,
+      owner: item.owner || NA,
+      hash: item.unitHash || NA,
+      dependency: (item.dependencies || []).length,
+    }));
+  }
+
+  if (type === NAV_TYPES.AGENT) {
+    return rawData.map((item, index) => ({
+      id: item.id || `${startIndex + index}`,
+      description: item.description || NA,
+      developer: item.developer || NA,
+      owner: item.owner || NA,
+      hash: item.unitHash || NA,
+      dependency: (item.dependencies || []).length,
     }));
   }
 
   if (type === NAV_TYPES.SERVICE) {
-    data = rawData.map((item, index) => ({
+    return rawData.map((item, index) => ({
       id: item.id || `${startIndex + index}`,
       developer: item.developer || NA,
       owner: item.owner || NA,
@@ -197,7 +237,7 @@ export const fetchDataSource = (type, rawData, { current }) => {
     }));
   }
 
-  return data;
+  return [];
 };
 
 const SearchTooltip = styled.div`

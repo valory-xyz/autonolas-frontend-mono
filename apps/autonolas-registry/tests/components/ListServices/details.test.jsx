@@ -99,7 +99,7 @@ jest.mock('../../../components/ListServices/ServiceState/utils', () => ({
   ),
 }));
 
-jest.mock('../../../components/ListServices/useSvmService', () => ({
+jest.mock('../../../components/ListServices/hooks/useSvmService', () => ({
   useAgentInstanceAndOperator: jest.fn(() => ({
     getSvmAgentInstanceAndOperator: jest.fn(),
   })),
@@ -128,7 +128,7 @@ jest.mock(
   }),
 );
 
-jest.mock('../../../components/ListServices/useService', () => ({
+jest.mock('../../../components/ListServices/hooks/useService', () => ({
   useGetServiceDetails: jest.fn(),
   useGetServiceOwner: jest.fn(),
   useGetServiceTokenUri: jest.fn(),

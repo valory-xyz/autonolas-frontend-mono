@@ -52,7 +52,10 @@ const ListTable = ({
     chainId,
     account,
   });
-  const dataSource = fetchDataSource(type, list, { current: currentPage });
+  const dataSource = fetchDataSource(type, list, {
+    current: currentPage,
+    chainId,
+  });
   const pagination = {
     total,
     current: currentPage,
