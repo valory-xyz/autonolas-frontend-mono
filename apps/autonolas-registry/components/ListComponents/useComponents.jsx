@@ -59,8 +59,8 @@ export const useMyComponents = () => {
             first: ${TOTAL_VIEW_COUNT}, 
             skip: ${TOTAL_VIEW_COUNT * (currentPage - 1)},
             where: { 
-              owner: "${ownerAddress}", 
               ${componentPackageType}
+              owner_contains_nocase: "${ownerAddress}", 
             },
             orderBy: tokenId,
           ) ${columnsForAgentsAndComponents}
@@ -120,12 +120,7 @@ const useMyComponentsBySearch = () => {
               and: [
                 { ${componentPackageType} }
                 { owner_contains_nocase: "${ownerAddress}" }
-                { 
-                  or: [
-                    { publicId_contains_nocase: "${searchValue}" }
-                    { packageHash_contains_nocase: "${searchValue}" }
-                  ]
-                }
+                ${getSearchFilterSubQueryForAgentsAndComponents(searchValue)}
               ]
             }
             orderBy: tokenId
