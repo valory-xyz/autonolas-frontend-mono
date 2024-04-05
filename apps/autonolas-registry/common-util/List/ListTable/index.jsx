@@ -78,6 +78,7 @@ const ListTable = ({
           pagination={canShowPagination ? pagination : false}
           scroll={{ x: scrollX || 1200 }}
           rowKey={(record) => `${type}-row-${record.id}`}
+          data-testid={`${type}-table`}
         />
       )}
     </>

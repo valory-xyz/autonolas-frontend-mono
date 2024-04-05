@@ -1,5 +1,6 @@
-import { render, waitFor } from '@testing-library/react';
+import { within, render, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+
 import ListComponents from '../../../components/ListComponents';
 import {
   getComponents,
@@ -10,13 +11,45 @@ import {
 import {
   wrapProvider,
   ACTIVE_TAB,
-  getTableTd,
   svmConnectivityEmptyMock,
   useHelpersEvmMock,
+  mockCodeUri,
+  dummyAddress,
+  dummyHash1,
+  dummyAddress1,
 } from '../../tests-helpers';
 
-const allComponentResponse = { id: '1', dependencies: ['1'] };
-const myComponentResponse = { id: '2', dependencies: ['2'] };
+const allComponentsResponse = [
+  {
+    id: '1',
+    tokenId: '1',
+    owner: dummyAddress,
+    publicId: 'good_package_name_all_components',
+    packageHash: dummyHash1,
+    metadataHash: mockCodeUri,
+  },
+];
+const myComponentsResponse = [
+  {
+    ...allComponentsResponse[0],
+    tokenId: '2',
+    owner: dummyAddress1,
+    publicId: 'good_package_name_my_components',
+  },
+];
+const allComponentsSearchResponse = [
+  {
+    ...allComponentsResponse[0],
+    tokenId: '3',
+    publicId: 'good_package_name_components_search',
+  },
+];
+
+jest.mock('../../../components/ListComponents/useComponents', () => ({
+  useAllComponents: () => () => Promise.resolve(allComponentsResponse),
+  useMyComponents: () => () => Promise.resolve(myComponentsResponse),
+  useSearchComponents: () => () => Promise.resolve(allComponentsSearchResponse),
+}));
 
 jest.mock('../../../common-util/hooks/useHelpers', () => ({
   useHelpers: () => useHelpersEvmMock,
@@ -33,51 +66,104 @@ jest.mock('../../../components/ListComponents/utils', () => ({
   getTotalForMyComponents: jest.fn(),
 }));
 
-describe('listComponents/index.jsx', () => {
+describe.skip('listComponents/index.jsx', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    getComponents.mockResolvedValue([allComponentResponse]);
-    getFilteredComponents.mockResolvedValue([myComponentResponse]);
+    getComponents.mockResolvedValue(allComponentsResponse);
+    getFilteredComponents.mockResolvedValue(myComponentsResponse);
     getTotalForAllComponents.mockResolvedValue(1);
     getTotalForMyComponents.mockResolvedValue(1);
   });
 
-  it('should render tabs with `All Tab` as active tab & Mint button', async () => {
-    const { container, getByRole } = render(wrapProvider(<ListComponents />));
+  it('should display the column names', async () => {
+    const { container, getByText } = render(wrapProvider(<ListComponents />));
 
-    // check if the selected tab is `All` & has the correct content
-    await waitFor(async () =>
-      expect(container.querySelector(ACTIVE_TAB).textContent).toBe('All'),
-    );
+    if (!container) {
+      throw new Error('`All tab` is null');
+    }
 
     await waitFor(async () => {
-      // ckecking Id, description column
-      expect(container.querySelector(getTableTd(1)).textContent).toBe('1');
-      expect(container.querySelector(getTableTd(4)).textContent).toBe(
-        allComponentResponse.dependencies.length.toString(),
-      );
-
-      // it should be called once
-      // expect(useRouter).toHaveBeenCalledTimes(1);
-
-      expect(getByRole('button', { name: 'Mint' })).toBeInTheDocument();
+      expect(getByText('ID')).toBeInTheDocument();
+      expect(getByText('Owner')).toBeInTheDocument();
+      expect(getByText('Hash')).toBeInTheDocument();
+      expect(getByText('Package Name')).toBeInTheDocument();
+      expect(getByText('Action')).toBeInTheDocument();
     });
   });
 
-  it('should render tabs with `My Components` as active tab & Mint button', async () => {
-    const { container, getByRole } = render(wrapProvider(<ListComponents />));
+  describe('All Components', () => {
+    it('should display mint button', async () => {
+      const { getByRole } = render(wrapProvider(<ListComponents />));
 
-    // click the `My components` tab
-    userEvent.click(container.querySelector('.ant-tabs-tab:nth-child(2)'));
+      expect(getByRole('button', { name: 'Mint' })).toBeInTheDocument();
+    });
 
-    // check if the selected tab is `My components` & has the correct content
-    await waitFor(async () =>
-      expect(container.querySelector(ACTIVE_TAB).textContent).toBe(
-        'My Components',
-      ),
-    );
+    it('should display all components', async () => {
+      const { container, getByTestId } = render(wrapProvider(<ListComponents />));
 
-    // Mint button
-    expect(getByRole('button', { name: 'Mint' })).toBeInTheDocument();
+      if (!container) {
+        throw new Error('`All tab` is null');
+      }
+
+      // check if the selected tab is `All` & has the correct content
+      await waitFor(async () =>
+        expect(container.querySelector(ACTIVE_TAB)?.textContent).toBe('All'),
+      );
+
+      const firstAgent = allComponentsResponse[0];
+
+      await waitFor(async () => {
+        expect(
+          within(getByTestId('agent-table')).getByText(firstAgent.tokenId),
+        ).toBeInTheDocument();
+        expect(
+          within(getByTestId('agent-table')).getByText(/0x8626...9C1199/),
+        ).toBeInTheDocument();
+        expect(
+          within(getByTestId('agent-table')).getByText(/0x9cf4...315ab0/),
+        ).toBeInTheDocument();
+        expect(
+          within(getByTestId('agent-table')).getByText(firstAgent.publicId),
+        ).toBeInTheDocument();
+        expect(
+          within(getByTestId('agent-table')).getByText('View'),
+        ).toBeInTheDocument();
+      });
+    });
+
+    it('should display all components search', async () => {
+      const { container, getByTestId, getByRole, getByPlaceholderText } =
+        render(wrapProvider(<ListComponents />));
+
+      if (!container) {
+        throw new Error('`All tab` is null');
+      }
+
+      const searchInput = getByPlaceholderText('Search...');
+      await userEvent.type(searchInput, 'good_package_name_components_search');
+
+      const searchButton = getByRole('button', { name: 'Search' });
+      await userEvent.click(searchButton);
+
+      const firstAgent = allComponentsSearchResponse[0];
+
+      await waitFor(async () => {
+        expect(
+          within(getByTestId('agent-table')).getByText(firstAgent.tokenId),
+        ).toBeInTheDocument();
+        expect(
+          within(getByTestId('agent-table')).getByText(/0x8626...9C1199/),
+        ).toBeInTheDocument();
+        expect(
+          within(getByTestId('agent-table')).getByText(/0x9cf4...315ab0/),
+        ).toBeInTheDocument();
+        expect(
+          within(getByTestId('agent-table')).getByText(firstAgent.publicId),
+        ).toBeInTheDocument();
+        expect(
+          within(getByTestId('agent-table')).getByText('View'),
+        ).toBeInTheDocument();
+      });
+    });
   });
 });

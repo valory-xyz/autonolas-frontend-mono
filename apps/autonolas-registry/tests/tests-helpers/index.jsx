@@ -7,7 +7,9 @@ export const HEADER = '.ant-typography';
 
 const mockStore = configureMockStore();
 export const dummyAddress = '0x8626f6940E2eb28930eFb4CeF49B2d1F2C9C1199';
+export const dummyAddress1 = '0x8626f6940E2eb28930eFb4CeF49B2d1F2C9C1000';
 export const dummyHash = 'QmYuLhvusXYh2Pw5BqntNi9ZGg4Chcf1dhiuzxZesJCnK1';
+export const dummyHash1 = 'bafybeidetrrkvdgveu4ph5g6v53lbh7ardfspbkpstmjxctx647bzyosyy';
 export const emptyStore = mockStore({});
 
 export const initStore = mockStore({
@@ -64,6 +66,20 @@ export const useHelpersEvmMock = {
   isL1Network: true,
   doesNetworkHaveValidServiceManagerToken: true,
   links: { AGENTS: '/ethereum/agents' },
+  isConnectedToWrongNetwork: false,
+  isSvm: false,
+};
+
+export const useHelpersBaseMock = {
+  account: dummyAddress,
+  vmType: 'EVM',
+  chainId: 8453,
+  chainDisplayName: 'Base',
+  chainName: 'base',
+  isL1OnlyNetwork: false,
+  isL1Network: false,
+  doesNetworkHaveValidServiceManagerToken: true,
+  links: { AGENTS: '/base/agents' },
   isConnectedToWrongNetwork: false,
   isSvm: false,
 };
