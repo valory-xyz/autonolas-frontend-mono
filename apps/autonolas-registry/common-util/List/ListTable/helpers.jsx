@@ -42,7 +42,7 @@ export const getTableColumns = (
       width: 160,
       render: (text) => {
         if (!text || text === NA) return NA;
-        return <AddressLink {...addressLinkProps} text={text} />;
+        return <AddressLink {...addressLinkProps} text={text} canCopy />;
       },
     };
 
@@ -282,6 +282,7 @@ export const useExtraTabContent = ({
                       <ul>
                         <li>Name</li>
                         <li>Description</li>
+                        <li>Owner</li>
                         <li>Public ID</li>
                         <li>Package Hash</li>
                       </ul>

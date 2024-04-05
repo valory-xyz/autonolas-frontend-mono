@@ -20,6 +20,7 @@ const ListTable = ({
   onViewClick,
   onUpdateClick,
   extra,
+  tableDataTestId,
 }) => {
   const { chainName, account, isSvm, chainId } = useHelpers();
   /**
@@ -76,9 +77,9 @@ const ListTable = ({
           columns={columns}
           dataSource={dataSource}
           pagination={canShowPagination ? pagination : false}
-          scroll={{ x: scrollX || 1200 }}
+          scroll={{ x: scrollX }}
           rowKey={(record) => `${type}-row-${record.id}`}
-          data-testid={`${type}-table`}
+          data-testid={tableDataTestId || `${type}-table`}
         />
       )}
     </>
@@ -97,7 +98,10 @@ ListTable.propTypes = {
   isAccountRequired: PropTypes.bool,
   onViewClick: PropTypes.func,
   onUpdateClick: PropTypes.func,
-  extra: PropTypes.shape({ scrollX: PropTypes.number }),
+  tableDataTestId: PropTypes.string,
+  extra: PropTypes.shape({
+    scrollX: PropTypes.number,
+  }),
 };
 
 ListTable.defaultProps = {
@@ -110,7 +114,10 @@ ListTable.defaultProps = {
   isAccountRequired: false,
   onViewClick: () => {},
   onUpdateClick: null,
-  extra: {},
+  tableDataTestId: null,
+  extra: {
+    scrollX: 1200,
+  },
 };
 
 export default ListTable;

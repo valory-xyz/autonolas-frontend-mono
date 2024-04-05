@@ -219,13 +219,24 @@ const ListComponents = () => {
         {
           key: ALL_COMPONENTS,
           label: 'All',
-          children: <ListTable {...tableCommonProps} list={list} />,
+          children: (
+            <ListTable
+              {...tableCommonProps}
+              list={list}
+              tableDataTestId="all-components-table"
+            />
+          ),
         },
         {
           label: 'My Components',
           key: MY_COMPONENTS,
           children: (
-            <ListTable {...tableCommonProps} list={list} isAccountRequired />
+            <ListTable
+              {...tableCommonProps}
+              list={list}
+              isAccountRequired
+              tableDataTestId="my-components-table"
+            />
           ),
         },
       ]}

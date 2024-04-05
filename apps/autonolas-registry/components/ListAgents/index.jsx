@@ -60,7 +60,7 @@ const ListAgents = () => {
   // fetch total
   useEffect(() => {
     (async () => {
-      if(isSvm) return;
+      if (isSvm) return;
       if (!isL1OnlyNetwork) return;
       if (searchValue !== '') return;
 
@@ -211,13 +211,24 @@ const ListAgents = () => {
         {
           key: ALL_AGENTS,
           label: 'All',
-          children: <ListTable {...tableCommonProps} list={list} />,
+          children: (
+            <ListTable
+              {...tableCommonProps}
+              list={list}
+              tableDataTestId="all-agents-table"
+            />
+          ),
         },
         {
           key: MY_AGENTS,
           label: 'My Agents',
           children: (
-            <ListTable {...tableCommonProps} list={list} isAccountRequired />
+            <ListTable
+              {...tableCommonProps}
+              list={list}
+              isAccountRequired
+              tableDataTestId="my-agents-table"
+            />
           ),
         },
       ]}

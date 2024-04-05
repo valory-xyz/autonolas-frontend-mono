@@ -12,9 +12,8 @@ import {
 import {
   wrapProvider,
   ACTIVE_TAB,
-  getTableTd,
-  useHelpersEvmMock,
   svmConnectivityEmptyMock,
+  useHelpersEvmMock,
   mockCodeUri,
   dummyAddress,
   dummyHash1,
@@ -78,40 +77,34 @@ describe('listAgents/index.jsx', () => {
   });
 
   it('should display the column names', async () => {
-    const { container, getByTestId } = render(wrapProvider(<ListAgents />));
+    const { container, findByTestId } = render(wrapProvider(<ListAgents />));
 
     if (!container) {
       throw new Error('`All tab` is null');
     }
 
+    const allAgentsTable = await findByTestId('all-agents-table');
+
     await waitFor(async () => {
+      expect(within(allAgentsTable).getByText('ID')).toBeInTheDocument();
+      expect(within(allAgentsTable).getByText('Owner')).toBeInTheDocument();
+      expect(within(allAgentsTable).getByText('Hash')).toBeInTheDocument();
       expect(
-        within(getByTestId('agent-table')).getByText('ID'),
+        within(allAgentsTable).getByText('Package Name'),
       ).toBeInTheDocument();
-      expect(
-        within(getByTestId('agent-table')).getByText('Owner'),
-      ).toBeInTheDocument();
-      expect(
-        within(getByTestId('agent-table')).getByText('Hash'),
-      ).toBeInTheDocument();
-      expect(
-        within(getByTestId('agent-table')).getByText('Package Name'),
-      ).toBeInTheDocument();
-      expect(
-        within(getByTestId('agent-table')).getByText('Action'),
-      ).toBeInTheDocument();
+      expect(within(allAgentsTable).getByText('Action')).toBeInTheDocument();
     });
   });
 
+  it('should display mint button', async () => {
+    const { findByRole } = render(wrapProvider(<ListAgents />));
+
+    expect(await findByRole('button', { name: 'Mint' })).toBeInTheDocument();
+  });
+
   describe('All Agents', () => {
-    it('should display mint button', async () => {
-      const { getByRole } = render(wrapProvider(<ListAgents />));
-
-      expect(getByRole('button', { name: 'Mint' })).toBeInTheDocument();
-    });
-
     it('should display all agents', async () => {
-      const { container, getByTestId } = render(wrapProvider(<ListAgents />));
+      const { container, findByTestId } = render(wrapProvider(<ListAgents />));
 
       if (!container) {
         throw new Error('`All tab` is null');
@@ -123,28 +116,25 @@ describe('listAgents/index.jsx', () => {
       );
 
       const firstAgent = allAgentsResponse[0];
+      const allAgentsTable = await findByTestId('all-agents-table');
 
-      await waitFor(async () => {
-        expect(
-          within(getByTestId('agent-table')).getByText(firstAgent.tokenId),
-        ).toBeInTheDocument();
-        expect(
-          within(getByTestId('agent-table')).getByText(/0x8626...9C1199/),
-        ).toBeInTheDocument();
-        expect(
-          within(getByTestId('agent-table')).getByText(/0x9cf4...315ab0/),
-        ).toBeInTheDocument();
-        expect(
-          within(getByTestId('agent-table')).getByText(firstAgent.publicId),
-        ).toBeInTheDocument();
-        expect(
-          within(getByTestId('agent-table')).getByText('View'),
-        ).toBeInTheDocument();
-      });
+      expect(
+        within(allAgentsTable).getByText(firstAgent.tokenId),
+      ).toBeInTheDocument();
+      expect(
+        within(allAgentsTable).getByText(/0x8626...9C1199/),
+      ).toBeInTheDocument();
+      expect(
+        within(allAgentsTable).getByText(/0x9cf4...315ab0/),
+      ).toBeInTheDocument();
+      expect(
+        within(allAgentsTable).getByText(firstAgent.publicId),
+      ).toBeInTheDocument();
+      expect(within(allAgentsTable).getByText('View')).toBeInTheDocument();
     });
 
-    it.skip('should display all agents search', async () => {
-      const { container, getByTestId, getByRole, getByPlaceholderText } =
+    it('should display all agents search', async () => {
+      const { container, getByRole, findByTestId, getByPlaceholderText } =
         render(wrapProvider(<ListAgents />));
 
       if (!container) {
@@ -152,42 +142,33 @@ describe('listAgents/index.jsx', () => {
       }
 
       const searchInput = getByPlaceholderText('Search...');
-      await userEvent.type(searchInput, 'good_package_name_agents_search');
+      await userEvent.type(searchInput, '!');
 
       const searchButton = getByRole('button', { name: 'Search' });
       await userEvent.click(searchButton);
 
       const firstAgent = allAgentsSearchResponse[0];
+      const allAgentsTable = await findByTestId('all-agents-table');
 
-      await waitFor(async () => {
-        expect(
-          within(getByTestId('agent-table')).getByText(firstAgent.tokenId),
-        ).toBeInTheDocument();
-        expect(
-          within(getByTestId('agent-table')).getByText(/0x8626...9C1199/),
-        ).toBeInTheDocument();
-        expect(
-          within(getByTestId('agent-table')).getByText(/0x9cf4...315ab0/),
-        ).toBeInTheDocument();
-        expect(
-          within(getByTestId('agent-table')).getByText(firstAgent.publicId),
-        ).toBeInTheDocument();
-        expect(
-          within(getByTestId('agent-table')).getByText('View'),
-        ).toBeInTheDocument();
-      });
+      expect(
+        within(allAgentsTable).getByText(firstAgent.tokenId),
+      ).toBeInTheDocument();
+      expect(
+        within(allAgentsTable).getByText(/0x8626...9C1199/),
+      ).toBeInTheDocument();
+      expect(
+        within(allAgentsTable).getByText(/0x9cf4...315ab0/),
+      ).toBeInTheDocument();
+      expect(
+        within(allAgentsTable).getByText(firstAgent.publicId),
+      ).toBeInTheDocument();
+      expect(within(allAgentsTable).getByText('View')).toBeInTheDocument();
     });
   });
 
   describe('My Agents', () => {
-    it('should display mint button', async () => {
-      const { getByRole } = render(wrapProvider(<ListAgents />));
-
-      expect(getByRole('button', { name: 'Mint' })).toBeInTheDocument();
-    });
-
     it('should display my agents', async () => {
-      const { container } = render(wrapProvider(<ListAgents />));
+      const { container, findByTestId } = render(wrapProvider(<ListAgents />));
 
       const myAgentsTab = container.querySelector('.ant-tabs-tab:nth-child(2)');
       if (!myAgentsTab) {
@@ -195,7 +176,7 @@ describe('listAgents/index.jsx', () => {
       }
 
       // click the `My agents` tab
-      userEvent.click(myAgentsTab);
+      await userEvent.click(myAgentsTab);
 
       // check if the selected tab is `My` & has the correct content
       await waitFor(async () =>
@@ -205,24 +186,57 @@ describe('listAgents/index.jsx', () => {
       );
 
       const firstAgent = myAgentsResponse[0];
+      const myAgentsTable = await findByTestId('my-agents-table');
 
-      await waitFor(async () => {
-        expect(container.querySelector(getTableTd(1))?.textContent).toBe(
-          firstAgent.tokenId,
-        );
-        expect(container.querySelector(getTableTd(2))?.textContent).toBe(
-          '0x8626...9C1000',
-        );
-        expect(container.querySelector(getTableTd(3))?.textContent).toBe(
-          '0x9cf4...315ab0',
-        );
-        expect(container.querySelector(getTableTd(4))?.textContent).toBe(
-          firstAgent.publicId,
-        );
-        expect(container.querySelector(getTableTd(5))?.textContent).toBe(
-          'View',
-        );
-      });
+      expect(
+        within(myAgentsTable).getByText(firstAgent.tokenId),
+      ).toBeInTheDocument();
+      expect(
+        within(myAgentsTable).getByText(/0x8626...9C1000/),
+      ).toBeInTheDocument();
+      expect(
+        within(myAgentsTable).getByText(/0x9cf4...315ab0/),
+      ).toBeInTheDocument();
+      expect(
+        within(myAgentsTable).getByText(firstAgent.publicId),
+      ).toBeInTheDocument();
+      expect(within(myAgentsTable).getByText('View')).toBeInTheDocument();
+    });
+
+    it('should display my agents search', async () => {
+      const { container, getByRole, findByTestId, getByPlaceholderText } =
+        render(wrapProvider(<ListAgents />));
+
+      const myAgentsTab = container.querySelector('.ant-tabs-tab:nth-child(2)');
+      if (!myAgentsTab) {
+        throw new Error('`My agents` tab is null');
+      }
+
+      // click the `My agents` tab
+      await userEvent.click(myAgentsTab);
+
+      const searchInput = getByPlaceholderText('Search...');
+      await userEvent.type(searchInput, '!');
+
+      const searchButton = getByRole('button', { name: 'Search' });
+      await userEvent.click(searchButton);
+
+      const firstAgent = allAgentsSearchResponse[0];
+      const myAgentsTable = await findByTestId('my-agents-table');
+
+      expect(
+        within(myAgentsTable).getByText(firstAgent.tokenId),
+      ).toBeInTheDocument();
+      expect(
+        within(myAgentsTable).getByText(/0x8626...9C1199/),
+      ).toBeInTheDocument();
+      expect(
+        within(myAgentsTable).getByText(/0x9cf4...315ab0/),
+      ).toBeInTheDocument();
+      expect(
+        within(myAgentsTable).getByText(firstAgent.publicId),
+      ).toBeInTheDocument();
+      expect(within(myAgentsTable).getByText('View')).toBeInTheDocument();
     });
   });
 });
