@@ -283,7 +283,6 @@ export const useExtraTabContent = ({
                         <li>Name</li>
                         <li>Description</li>
                         <li>Owner</li>
-                        <li>Public ID</li>
                         <li>Package Hash</li>
                       </ul>
                     </SearchTooltip>
