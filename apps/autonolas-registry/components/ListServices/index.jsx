@@ -13,9 +13,9 @@ import {
 import { getMyListOnPagination } from '../../common-util/ContractUtils/myList';
 import { useHelpers } from '../../common-util/hooks';
 import {
-  useAllUnits,
-  useMyUnits,
-  useSearchUnits,
+  useAllServices,
+  useMyServices,
+  useSearchServices,
 } from './hooks/useServiceList';
 import { useServiceInfo } from './hooks/useSvmService';
 import {
@@ -37,9 +37,9 @@ const ListServices = () => {
 
   const { account, chainName, links, isSvm, chainId } = useHelpers();
 
-  const getAllUnits = useAllUnits();
-  const getMyUnits = useMyUnits();
-  const getUnitsBySearch = useSearchUnits();
+  const getAllServices = useAllServices();
+  const getMyUnits = useMyServices();
+  const getUnitsBySearch = useSearchServices();
 
   /**
    * extra tab content & view click
@@ -62,7 +62,6 @@ const ListServices = () => {
   // update current tab based on the "hash" in the URL
   useEffect(() => {
     setCurrentTab(isMyTab(hash) ? MY_SERVICES : ALL_SERVICES);
-    setList([]);
   }, [router.asPath, hash]);
 
   const {
@@ -112,8 +111,6 @@ const ListServices = () => {
     getSvmServices,
   ]);
 
-  const isListEmpty = list.length === 0;
-
   // fetch the list (All services, My Services) - WITHOUT search
   useEffect(() => {
     const getList = async () => {
@@ -123,7 +120,7 @@ const ListServices = () => {
         // All services
         if (currentTab === ALL_SERVICES) {
           if (chainId === 1) {
-            const e = await getAllUnits(NAV_TYPES.SERVICE, currentPage);
+            const e = await getAllServices(NAV_TYPES.SERVICE, currentPage);
             setList(e);
           } else {
             const e = isSvm
@@ -131,7 +128,7 @@ const ListServices = () => {
               : await getServices(total, currentPage);
             setList(e);
           }
-        } else if (currentTab === MY_SERVICES && isListEmpty && account) {
+        } else if (currentTab === MY_SERVICES && account) {
           /**
            * My services
            * - search by `account` as searchValue
@@ -173,10 +170,9 @@ const ListServices = () => {
     searchValue,
     isSvm,
     getMyUnits,
-    getAllUnits,
+    getAllServices,
     getSvmServices,
     getMySvmServices,
-    isListEmpty,
   ]);
 
   /**
@@ -186,34 +182,34 @@ const ListServices = () => {
    */
   useEffect(() => {
     (async () => {
-      if (searchValue) {
-        setIsLoading(true);
+      if (!searchValue) return;
 
-        try {
-          if (chainId === 1) {
-            const filteredList = await getUnitsBySearch(
-              NAV_TYPES.SERVICE,
-              searchValue,
-              currentPage,
-              currentTab === MY_SERVICES ? account : null,
-            );
-            setList(filteredList);
-          } else {
-            const filteredList = await getFilteredServices(
-              searchValue,
-              currentTab === MY_SERVICES ? account : null,
-            );
-            setList(filteredList);
-          }
+      setIsLoading(true);
 
-          setTotal(0); // total won't be used if search is used
-          setCurrentPage(1);
-        } catch (e) {
-          console.error(e);
-          notifyError('Error fetching services');
-        } finally {
-          setIsLoading(false);
+      try {
+        if (chainId === 1) {
+          const filteredList = await getUnitsBySearch(
+            NAV_TYPES.SERVICE,
+            searchValue,
+            currentPage,
+            currentTab === MY_SERVICES ? account : null,
+          );
+          setList(filteredList);
+        } else {
+          const filteredList = await getFilteredServices(
+            searchValue,
+            currentTab === MY_SERVICES ? account : null,
+          );
+          setList(filteredList);
         }
+
+        setTotal(0); // total won't be used if search is used
+        setCurrentPage(1);
+      } catch (e) {
+        console.error(e);
+        notifyError('Error fetching services');
+      } finally {
+        setIsLoading(false);
       }
     })();
   }, [

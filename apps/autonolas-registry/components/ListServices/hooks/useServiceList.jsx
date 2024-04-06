@@ -19,30 +19,48 @@ const transformToTableData = (data) => {
   }));
 };
 
+const serviceColumns = `{
+  id
+  serviceId
+  tokenId
+  packageHash
+  metadataHash
+  state
+}`;
+
+/**
+ * Searches by
+ * - publicId (package name)
+ * - description,
+ * - tokenId
+ * - packageHash
+ * - owner
+ * @returns  {string} search filter sub query
+ */
+export const getSearchFilterSubQueryForServices = (searchValue) => {
+  return `{ 
+    or: [
+      { publicId_contains_nocase: "${searchValue}" } 
+      { description_contains_nocase: "${searchValue}" }
+      { packageHash_contains_nocase: "${searchValue}" }
+      { owner_contains_nocase: "${searchValue}" }
+    ]
+  }`;
+};
+
 /**
  * Hook to get ALL units
  * @returns {function} function to get all units
  *
  */
-export const useAllUnits = () => {
+export const useAllServices = () => {
   const graphQlClient = useSubgraph();
 
   return useCallback(
-    async (type, currentPage) => {
+    async (currentPage) => {
       const query = gql`
         {
-          units(
-            first: ${TOTAL_VIEW_COUNT}, 
-            skip: ${TOTAL_VIEW_COUNT * (currentPage - 1)},
-            where: { packageType: "${type}" }, 
-            orderBy: tokenId
-          ) {
-              id
-              packageType
-              tokenId
-              packageHash
-              metadataHash
-          }
+          services ${serviceColumns}
         }
       `;
 
@@ -54,37 +72,24 @@ export const useAllUnits = () => {
 };
 
 /**
- * Hook to get ALL units by search
- * @returns {function} function to get all units by search
+ * Hook to get MY units
+ * @returns {function} function to get my units
  */
-export const useAllUnitsBySearch = () => {
+export const useMyServices = () => {
   const graphQlClient = useSubgraph();
 
   return useCallback(
-    async (type, searchValue, currentPage) => {
+    async (type, ownerAddress, currentPage) => {
       const query = gql`
         {
-          units(
+          services (
             first: ${TOTAL_VIEW_COUNT}, 
             skip: ${TOTAL_VIEW_COUNT * (currentPage - 1)},
-            OR: [
-              { 
-                packageType: "${type}", 
-                name_contains: "${searchValue}" 
-              },
-              { 
-                packageType: "${type}", 
-                packageHash_contains: "${searchValue}" 
-              }
-            ],
-            orderBy: tokenId
-          ) {
-              id
-              packageType
-              tokenId
-              packageHash
-              metadataHash
-          }
+            where: { 
+              owner_contains_nocase: "${ownerAddress}"
+            },
+            orderBy: tokenId,
+          ) ${serviceColumns}
         }
       `;
 
@@ -96,31 +101,22 @@ export const useAllUnitsBySearch = () => {
 };
 
 /**
- * Hook to get MY units
- * @returns {function} function to get my units
+ * Hook to get ALL units by search
+ * @returns {function} function to get all units by search
  */
-export const useMyUnits = () => {
+export const useAllServicesBySearch = () => {
   const graphQlClient = useSubgraph();
 
   return useCallback(
-    async (type, ownerAddress, currentPage) => {
+    async (type, searchValue, currentPage) => {
       const query = gql`
         {
-          units(
+          services (
             first: ${TOTAL_VIEW_COUNT}, 
             skip: ${TOTAL_VIEW_COUNT * (currentPage - 1)},
-            where: { 
-              owner: "${ownerAddress}", 
-              packageType: "${type}" 
-            },
-            orderBy: tokenId,
-          ) {
-              id
-              packageType
-              tokenId
-              packageHash
-              metadataHash
-          }
+            where: ${getSearchFilterSubQueryForServices(searchValue)},
+            orderBy: tokenId
+          ) ${serviceColumns}
         }
       `;
 
@@ -135,35 +131,24 @@ export const useMyUnits = () => {
  * Hook to get MY units by search
  * @returns {function} function to search units
  */
-export const useMyUnitsBySearch = () => {
+export const useMyServicesBySearch = () => {
   const graphQlClient = useSubgraph();
 
   return useCallback(
     async (type, ownerAddress, searchValue, currentPage) => {
       const query = gql`
         {
-          units(
+          services (
             first: ${TOTAL_VIEW_COUNT}, 
             skip: ${TOTAL_VIEW_COUNT * (currentPage - 1)},
-            where: { owner: "${ownerAddress}" }
-            OR: [
-              { 
-                packageType: "${type}", 
-                name_contains: "${searchValue}" 
-              },
-              { 
-                packageType: "${type}", 
-                packageHash_contains: "${searchValue}" 
-              }
-            ],
+            where: { 
+              and: [
+                owner_contains_nocase: "${ownerAddress}" 
+                ${getSearchFilterSubQueryForServices(searchValue)}
+              ]
+            }
             orderBy: tokenId,
-          ) {
-              id
-              packageType
-              tokenId
-              packageHash
-              metadataHash
-          }
+          ) ${serviceColumns}
         }
       `;
 
@@ -174,14 +159,14 @@ export const useMyUnitsBySearch = () => {
   );
 };
 
-export const useSearchUnits = () => {
-  const getAllUnitsBySearch = useAllUnitsBySearch();
-  const getMyUnitsBySearch = useMyUnitsBySearch();
+export const useSearchServices = () => {
+  const getAllUnitsBySearch = useAllServicesBySearch();
+  const getMyServicesBySearch = useMyServicesBySearch();
 
   return useCallback(
     async (type, searchValue, currentPage, ownerAddress) => {
       if (ownerAddress) {
-        return await getMyUnitsBySearch(
+        return await getMyServicesBySearch(
           type,
           ownerAddress,
           searchValue,
@@ -190,6 +175,6 @@ export const useSearchUnits = () => {
       }
       return await getAllUnitsBySearch(type, searchValue, currentPage);
     },
-    [getAllUnitsBySearch, getMyUnitsBySearch],
+    [getAllUnitsBySearch, getMyServicesBySearch],
   );
 };

@@ -100,7 +100,6 @@ const ListComponents = () => {
         try {
           // All components
           if (currentTab === ALL_COMPONENTS) {
-            setList([]);
             const everyComps =
               chainId === 1
                 ? await getAllComponents(currentPage)
@@ -127,16 +126,16 @@ const ListComponents = () => {
       }
     })();
   }, [
+    isSvm,
+    searchValue,
+    isL1OnlyNetwork,
     account,
     chainId,
-    isL1OnlyNetwork,
     total,
     currentPage,
-    isSvm,
     getMyComponents,
     getAllComponents,
     currentTab,
-    searchValue,
   ]);
 
   /**
@@ -200,7 +199,6 @@ const ListComponents = () => {
       onChange={(e) => {
         setCurrentTab(e);
 
-        setList([]);
         setTotal(0);
         setCurrentPage(1);
         setIsLoading(true);

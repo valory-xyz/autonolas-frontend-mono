@@ -46,7 +46,6 @@ const allComponentsSearchResponse = [
   },
 ];
 
-
 jest.mock('../../../components/ListComponents/utils', () => ({
   getComponents: jest.fn(),
   getFilteredComponents: jest.fn(),
@@ -68,13 +67,15 @@ jest.mock('../../../common-util/hooks/useSvmConnectivity', () => ({
   useSvmConnectivity: () => svmConnectivityEmptyMock,
 }));
 
-describe.skip('listComponents/index.jsx', () => {
+describe('listComponents/index.jsx', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    getComponents.mockResolvedValue(allComponentsResponse);
-    getFilteredComponents.mockResolvedValue(myComponentsResponse);
-    getTotalForAllComponents.mockResolvedValue(1);
-    getTotalForMyComponents.mockResolvedValue(1);
+    (getComponents as jest.Mock).mockResolvedValue(allComponentsResponse);
+    (getFilteredComponents as jest.Mock).mockResolvedValue(
+      myComponentsResponse,
+    );
+    (getTotalForAllComponents as jest.Mock).mockResolvedValue(1);
+    (getTotalForMyComponents as jest.Mock).mockResolvedValue(1);
   });
 
   it('should display the column names', async () => {
@@ -95,14 +96,16 @@ describe.skip('listComponents/index.jsx', () => {
       expect(
         within(allComponentsTable).getByText('Package Name'),
       ).toBeInTheDocument();
-      expect(within(allComponentsTable).getByText('Action')).toBeInTheDocument();
+      expect(
+        within(allComponentsTable).getByText('Action'),
+      ).toBeInTheDocument();
     });
   });
 
   it('should display mint button', async () => {
-    const { getByRole } = render(wrapProvider(<ListComponents />));
+    const { findByRole } = render(wrapProvider(<ListComponents />));
 
-    expect(getByRole('button', { name: 'Mint' })).toBeInTheDocument();
+    expect(await findByRole('button', { name: 'Mint' })).toBeInTheDocument();
   });
 
   describe('All Components', () => {
@@ -121,24 +124,21 @@ describe.skip('listComponents/index.jsx', () => {
       );
 
       const firstAgent = allComponentsResponse[0];
+      const allComponentsTable = await findByTestId('all-components-table');
 
       expect(
-        within(await findByTestId('agent-table')).getByText(firstAgent.tokenId),
+        within(allComponentsTable).getByText(firstAgent.tokenId),
       ).toBeInTheDocument();
       expect(
-        within(await findByTestId('agent-table')).getByText(/0x8626...9C1199/),
+        within(allComponentsTable).getByText(/0x8626...9C1199/),
       ).toBeInTheDocument();
       expect(
-        within(await findByTestId('agent-table')).getByText(/0x9cf4...315ab0/),
+        within(allComponentsTable).getByText(/0x9cf4...315ab0/),
       ).toBeInTheDocument();
       expect(
-        within(await findByTestId('agent-table')).getByText(
-          firstAgent.publicId,
-        ),
+        within(allComponentsTable).getByText(firstAgent.publicId),
       ).toBeInTheDocument();
-      expect(
-        within(await findByTestId('agent-table')).getByText('View'),
-      ).toBeInTheDocument();
+      expect(within(allComponentsTable).getByText('View')).toBeInTheDocument();
     });
 
     it('should display all components search', async () => {
@@ -156,32 +156,95 @@ describe.skip('listComponents/index.jsx', () => {
       await userEvent.click(searchButton);
 
       const firstAgent = allComponentsSearchResponse[0];
+      const allComponentsTable = await findByTestId('all-components-table');
 
       expect(
-        within(await findByTestId('agent-table')).getByText(firstAgent.tokenId),
+        within(allComponentsTable).getByText(firstAgent.tokenId),
       ).toBeInTheDocument();
       expect(
-        within(await findByTestId('agent-table')).getByText(/0x8626...9C1199/),
+        within(allComponentsTable).getByText(/0x8626...9C1199/),
       ).toBeInTheDocument();
       expect(
-        within(await findByTestId('agent-table')).getByText(/0x9cf4...315ab0/),
+        within(allComponentsTable).getByText(/0x9cf4...315ab0/),
       ).toBeInTheDocument();
       expect(
-        within(await findByTestId('agent-table')).getByText(
-          firstAgent.publicId,
-        ),
+        within(allComponentsTable).getByText(firstAgent.publicId),
       ).toBeInTheDocument();
-      expect(
-        within(await findByTestId('agent-table')).getByText('View'),
-      ).toBeInTheDocument();
+      expect(within(allComponentsTable).getByText('View')).toBeInTheDocument();
     });
   });
 
   describe('My Components', () => {
-    it('should display mint button', async () => {
-      const { findByRole } = render(wrapProvider(<ListComponents />));
+    it('should display my components', async () => {
+      const { container, findByTestId } = render(wrapProvider(<ListComponents />));
 
-      expect(await findByRole('button', { name: 'Mint' })).toBeInTheDocument();
+      const myComponentsTab = container.querySelector('.ant-tabs-tab:nth-child(2)');
+      if (!myComponentsTab) {
+        throw new Error('`My components` tab is null');
+      }
+
+      // click the `My components` tab
+      await userEvent.click(myComponentsTab);
+
+      // check if the selected tab is `My` & has the correct content
+      await waitFor(async () =>
+        expect(container.querySelector(ACTIVE_TAB)?.textContent).toBe(
+          'My Components',
+        ),
+      );
+
+      const firstAgent = myComponentsResponse[0];
+      const myComponentsTable = await findByTestId('my-components-table');
+
+      expect(
+        within(myComponentsTable).getByText(firstAgent.tokenId),
+      ).toBeInTheDocument();
+      expect(
+        within(myComponentsTable).getByText(/0x8626...9C1000/),
+      ).toBeInTheDocument();
+      expect(
+        within(myComponentsTable).getByText(/0x9cf4...315ab0/),
+      ).toBeInTheDocument();
+      expect(
+        within(myComponentsTable).getByText(firstAgent.publicId),
+      ).toBeInTheDocument();
+      expect(within(myComponentsTable).getByText('View')).toBeInTheDocument();
+    });
+
+    it('should display my components search', async () => {
+      const { container, getByRole, findByTestId, getByPlaceholderText } =
+        render(wrapProvider(<ListComponents />));
+
+      const myComponentsTab = container.querySelector('.ant-tabs-tab:nth-child(2)');
+      if (!myComponentsTab) {
+        throw new Error('`My components` tab is null');
+      }
+
+      // click the `My components` tab
+      await userEvent.click(myComponentsTab);
+
+      const searchInput = getByPlaceholderText('Search...');
+      await userEvent.type(searchInput, '!');
+
+      const searchButton = getByRole('button', { name: 'Search' });
+      await userEvent.click(searchButton);
+
+      const firstAgent = allComponentsSearchResponse[0];
+      const myComponentsTable = await findByTestId('my-components-table');
+
+      expect(
+        within(myComponentsTable).getByText(firstAgent.tokenId),
+      ).toBeInTheDocument();
+      expect(
+        within(myComponentsTable).getByText(/0x8626...9C1199/),
+      ).toBeInTheDocument();
+      expect(
+        within(myComponentsTable).getByText(/0x9cf4...315ab0/),
+      ).toBeInTheDocument();
+      expect(
+        within(myComponentsTable).getByText(firstAgent.publicId),
+      ).toBeInTheDocument();
+      expect(within(myComponentsTable).getByText('View')).toBeInTheDocument();
     });
   });
 });

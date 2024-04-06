@@ -158,6 +158,7 @@ const ListAgents = () => {
           );
           setList(filteredList);
         }
+        
         setTotal(0); // total won't be used if search is used
         setCurrentPage(1);
       } catch (e) {
