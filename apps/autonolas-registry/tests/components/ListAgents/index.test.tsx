@@ -53,7 +53,7 @@ jest.mock('../../../components/ListAgents/utils', () => ({
   getTotalForMyAgents: jest.fn(),
 }));
 
-jest.mock('../../../components/ListAgents/useAgents', () => ({
+jest.mock('../../../components/ListAgents/useAgentsList', () => ({
   useAllAgents: () => () => Promise.resolve(allAgentsResponse),
   useMyAgents: () => () => Promise.resolve(myAgentsResponse),
   useSearchAgents: () => () => Promise.resolve(allAgentsSearchResponse),

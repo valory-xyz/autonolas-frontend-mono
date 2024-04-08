@@ -135,7 +135,7 @@ const ListServices = () => {
            * - API will be called only once & store the complete list
            */
           if (chainId === 1) {
-            const e = await getMyServices(account);
+            const e = await getMyServices(account, currentPage);
             setList(e);
           } else {
             const e = isSvm

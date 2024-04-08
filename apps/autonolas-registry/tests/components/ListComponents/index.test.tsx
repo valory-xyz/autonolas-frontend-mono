@@ -53,7 +53,7 @@ jest.mock('../../../components/ListComponents/utils', () => ({
   getTotalForMyComponents: jest.fn(),
 }));
 
-jest.mock('../../../components/ListComponents/useComponents', () => ({
+jest.mock('../../../components/ListComponents/useComponentsList', () => ({
   useAllComponents: () => () => Promise.resolve(allComponentsResponse),
   useMyComponents: () => () => Promise.resolve(myComponentsResponse),
   useSearchComponents: () => () => Promise.resolve(allComponentsSearchResponse),
