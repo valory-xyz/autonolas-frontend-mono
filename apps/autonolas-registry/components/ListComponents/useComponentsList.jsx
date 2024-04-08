@@ -14,7 +14,7 @@ import {
 import { TOTAL_VIEW_COUNT } from '../../util/constants';
 
 const componentPackageType =
-  'packageType_in: [connection,skill,protocol,contract]';
+  'packageType_in: [connection,skill,protocol,contract,custom]';
 
 /**
  * Hook to get ALL components

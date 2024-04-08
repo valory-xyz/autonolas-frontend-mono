@@ -11,7 +11,7 @@ import {
   isMyTab,
 } from '../../common-util/List/ListTable/helpers';
 import { useHelpers } from '../../common-util/hooks';
-import { useAllAgents, useMyAgents, useSearchAgents } from './useAgents';
+import { useAllAgents, useMyAgents, useSearchAgents } from './useAgentsList';
 import {
   getAgents,
   getFilteredAgents,

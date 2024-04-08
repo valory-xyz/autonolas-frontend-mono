@@ -15,7 +15,7 @@ import {
   useAllComponents,
   useMyComponents,
   useSearchComponents,
-} from './useComponents';
+} from './useComponentsList';
 import {
   getComponents,
   getFilteredComponents,
