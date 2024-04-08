@@ -9,7 +9,6 @@ import {
 import styled from 'styled-components';
 
 import {
-  GATEWAY_URL,
   HASH_PREFIX,
   NAV_TYPES,
   SERVICE_STATE,
@@ -41,6 +40,21 @@ export const getTableColumns = (
       dataIndex: 'tokenId',
       key: 'tokenId',
       width: isMobile ? 30 : 50,
+    };
+
+    const packageName = {
+      title: 'Package Name',
+      dataIndex: 'packageName',
+      key: 'packageName',
+      width: 180,
+      render: (text, record) => {
+        if (!text || text === NA) return NA;
+        return (
+          <Button type="link" onClick={() => onViewClick(record.id)}>
+            {text}
+          </Button>
+        );
+      },
     };
 
     const ownerColumn = {
@@ -75,24 +89,6 @@ export const getTableColumns = (
           );
         },
       },
-      {
-        title: 'Package Name',
-        dataIndex: 'packageName',
-        key: 'packageName',
-        width: 180,
-        render: (text, row) => {
-          if (!text || text === NA) return NA;
-          return (
-            <a
-              href={`${GATEWAY_URL}${row.packageHash}`}
-              target="_blank"
-              rel="noreferrer"
-            >
-              {text}
-            </a>
-          );
-        },
-      },
     ];
 
     const actionColumn = {
@@ -101,16 +97,20 @@ export const getTableColumns = (
       key: 'action',
       fixed: 'right',
       render: (_text, record) => (
-        <Space size="middle">
-          <Button type="link" onClick={() => onViewClick(record.id)}>
-            View
-          </Button>
-        </Space>
+        <Button type="link" onClick={() => onViewClick(record.id)}>
+          View
+        </Button>
       ),
     };
 
     return isMainnet
-      ? [tokenIdColumn, ownerColumn, ...otherEthColumns, actionColumn]
+      ? [
+          tokenIdColumn,
+          packageName,
+          ownerColumn,
+          ...otherEthColumns,
+          actionColumn,
+        ]
       : [tokenIdColumn, ownerColumn, dependencyColumn, actionColumn];
   }
 

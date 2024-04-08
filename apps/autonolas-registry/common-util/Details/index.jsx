@@ -1,14 +1,13 @@
 import { useState, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import capitalize from 'lodash/capitalize';
-import {
-  Row, Col, Button, Typography,
-} from 'antd';
+import { Row, Col, Button, Typography } from 'antd';
 import { get } from 'lodash';
 import { Loader, NA } from '@autonolas/frontend-library';
 
 import { NAV_TYPES } from '../../util/constants';
 import { useMetadata } from '../hooks/useMetadata';
+import { useHelpers } from '../hooks';
 import { typePropType } from '../propTypes';
 import { IpfsHashGenerationModal } from '../List/IpfsHashGenerationModal';
 import { useDetails } from './useDetails';
@@ -31,16 +30,16 @@ export const Details = ({
 }) => {
   const [isModalVisible, setIsModalVisible] = useState(false);
 
-  const {
-    isLoading, isOwner, info, ownerAddress, tokenUri, updateDetails,
-  } = useDetails({
-    id,
-    type,
-    getDetails,
-    getOwner,
-    getTokenUri,
-  });
-  const { nftImageUrl } = useMetadata(tokenUri);
+  const { isMainnet } = useHelpers();
+  const { isLoading, isOwner, info, ownerAddress, tokenUri, updateDetails } =
+    useDetails({
+      id,
+      type,
+      getDetails,
+      getOwner,
+      getTokenUri,
+    });
+  const { nftImageUrl, packageName } = useMetadata(tokenUri);
 
   // Update button to be show only if the connected account is the owner
   // and only for agent and component
@@ -58,10 +57,18 @@ export const Details = ({
     <>
       <Header>
         <div>
-          <Text strong>{`${capitalize(type)} Name`}</Text>
-          <DetailsTitle level={2}>
-            {`${capitalize(type)} ID ${id}`}
-          </DetailsTitle>
+          {isMainnet ? (
+            <>
+              <DetailsTitle level={3}>{packageName}</DetailsTitle>
+            </>
+          ) : (
+            <>
+              <Text strong>{`${capitalize(type)} Name`}</Text>
+              <DetailsTitle level={2}>
+                {`${capitalize(type)} ID ${id}`}
+              </DetailsTitle>
+            </>
+          )}
         </div>
 
         <div className="right-content">

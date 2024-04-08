@@ -59,5 +59,6 @@ export const useMetadata = (tokenUri) => {
     codeHref,
     description: metadata?.description || NA,
     version: metadata?.attributes?.[0]?.value || NA,
+    packageName: metadata?.name || NA,
   };
 };
