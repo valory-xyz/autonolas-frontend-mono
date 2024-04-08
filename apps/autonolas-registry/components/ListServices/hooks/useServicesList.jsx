@@ -11,18 +11,11 @@ import { gql } from 'graphql-request';
 import { useSubgraph } from '../../../common-util/hooks/useSubgraph';
 import { TOTAL_VIEW_COUNT } from '../../../util/constants';
 
-const transformToTableData = (data) => {
-  return data.map((item) => ({
-    id: item.tokenId,
-    owner: item.owner,
-    unitHash: item.metadataHash,
-  }));
-};
-
 const serviceColumns = `{
   id
   serviceId
-  tokenId
+  publicId
+  owner
   packageHash
   metadataHash
   state
@@ -32,7 +25,7 @@ const serviceColumns = `{
  * Searches by
  * - publicId (package name)
  * - description,
- * - tokenId
+ * - serviceId
  * - packageHash
  * - owner
  * @returns  {string} search filter sub query
@@ -60,12 +53,16 @@ export const useAllServices = () => {
     async (currentPage) => {
       const query = gql`
         {
-          services ${serviceColumns}
+          services(
+            first: ${TOTAL_VIEW_COUNT}, 
+            skip: ${TOTAL_VIEW_COUNT * (currentPage - 1)},
+            orderBy: serviceId
+          ) ${serviceColumns}
         }
       `;
 
       const response = await graphQlClient.request(query);
-      return transformToTableData(response?.units || []);
+      return response?.services || [];
     },
     [graphQlClient],
   );
@@ -79,7 +76,7 @@ export const useMyServices = () => {
   const graphQlClient = useSubgraph();
 
   return useCallback(
-    async (type, ownerAddress, currentPage) => {
+    async (ownerAddress, currentPage) => {
       const query = gql`
         {
           services (
@@ -88,13 +85,13 @@ export const useMyServices = () => {
             where: { 
               owner_contains_nocase: "${ownerAddress}"
             },
-            orderBy: tokenId,
+            orderBy: serviceId,
           ) ${serviceColumns}
         }
       `;
 
       const response = await graphQlClient.request(query);
-      return response?.units || [];
+      return response?.services || [];
     },
     [graphQlClient],
   );
@@ -108,20 +105,20 @@ export const useAllServicesBySearch = () => {
   const graphQlClient = useSubgraph();
 
   return useCallback(
-    async (type, searchValue, currentPage) => {
+    async (searchValue, currentPage) => {
       const query = gql`
         {
           services (
             first: ${TOTAL_VIEW_COUNT}, 
             skip: ${TOTAL_VIEW_COUNT * (currentPage - 1)},
             where: ${getSearchFilterSubQueryForServices(searchValue)},
-            orderBy: tokenId
+            orderBy: serviceId
           ) ${serviceColumns}
         }
       `;
 
       const response = await graphQlClient.request(query);
-      return response?.units || [];
+      return response?.services || [];
     },
     [graphQlClient],
   );
@@ -135,7 +132,7 @@ export const useMyServicesBySearch = () => {
   const graphQlClient = useSubgraph();
 
   return useCallback(
-    async (type, ownerAddress, searchValue, currentPage) => {
+    async (ownerAddress, searchValue, currentPage) => {
       const query = gql`
         {
           services (
@@ -147,13 +144,13 @@ export const useMyServicesBySearch = () => {
                 ${getSearchFilterSubQueryForServices(searchValue)}
               ]
             }
-            orderBy: tokenId,
+            orderBy: serviceId,
           ) ${serviceColumns}
         }
       `;
 
       const response = await graphQlClient.request(query);
-      return response?.units || [];
+      return response?.services || [];
     },
     [graphQlClient],
   );
@@ -164,16 +161,15 @@ export const useSearchServices = () => {
   const getMyServicesBySearch = useMyServicesBySearch();
 
   return useCallback(
-    async (type, searchValue, currentPage, ownerAddress) => {
+    async (searchValue, currentPage, ownerAddress) => {
       if (ownerAddress) {
         return await getMyServicesBySearch(
-          type,
           ownerAddress,
           searchValue,
           currentPage,
         );
       }
-      return await getAllUnitsBySearch(type, searchValue, currentPage);
+      return await getAllUnitsBySearch(searchValue, currentPage);
     },
     [getAllUnitsBySearch, getMyServicesBySearch],
   );

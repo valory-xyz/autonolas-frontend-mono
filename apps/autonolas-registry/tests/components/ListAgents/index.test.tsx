@@ -87,11 +87,11 @@ describe('listAgents/index.jsx', () => {
 
     await waitFor(async () => {
       expect(within(allAgentsTable).getByText('ID')).toBeInTheDocument();
+      expect(
+        within(allAgentsTable).getByText('Name'),
+      ).toBeInTheDocument();
       expect(within(allAgentsTable).getByText('Owner')).toBeInTheDocument();
       expect(within(allAgentsTable).getByText('Hash')).toBeInTheDocument();
-      expect(
-        within(allAgentsTable).getByText('Package Name'),
-      ).toBeInTheDocument();
       expect(within(allAgentsTable).getByText('Action')).toBeInTheDocument();
     });
   });

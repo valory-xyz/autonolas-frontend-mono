@@ -61,7 +61,7 @@ const dummyHashes = {
 
 const dummyIpfs = {
   image: `ipfs://${mockNftImageHash}`,
-  name: 'Some name',
+  name: 'Some package name',
   description: 'Some description',
   code_uri: `ipfs://${mockCodeUri}`,
   attributes: [{ trait_type: 'version', value: '0.0.0.1' }],
@@ -95,7 +95,7 @@ describe('listAgents/details.jsx', () => {
     );
     await waitFor(async () => {
       // left column content
-      expect(getByText('Agent ID 1')).toBeInTheDocument();
+      expect(getByText('Some package name')).toBeInTheDocument();
       expect(getByTestId('view-hash-link').getAttribute('href')).toBe(
         `${GATEWAY_URL}12345`,
       );

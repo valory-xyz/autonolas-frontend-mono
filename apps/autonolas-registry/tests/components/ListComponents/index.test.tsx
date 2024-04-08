@@ -94,7 +94,7 @@ describe('listComponents/index.jsx', () => {
       expect(within(allComponentsTable).getByText('Owner')).toBeInTheDocument();
       expect(within(allComponentsTable).getByText('Hash')).toBeInTheDocument();
       expect(
-        within(allComponentsTable).getByText('Package Name'),
+        within(allComponentsTable).getByText('Name'),
       ).toBeInTheDocument();
       expect(
         within(allComponentsTable).getByText('Action'),

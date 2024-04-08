@@ -34,62 +34,60 @@ export const getTableColumns = (
     suffixCount: isMobile ? 4 : 6,
   };
 
+  const tokenIdColumn = {
+    title: 'ID',
+    dataIndex: 'tokenId',
+    key: 'tokenId',
+    width: isMobile ? 30 : 50,
+  };
+
+  const packageName = {
+    title: 'Name',
+    dataIndex: 'packageName',
+    key: 'packageName',
+    width: type === NAV_TYPES.SERVICE ? 200 : 180,
+    render: (text, record) => {
+      if (!text || text === NA) return NA;
+      return (
+        <Button type="link" onClick={() => onViewClick(record.id)}>
+          {text}
+        </Button>
+      );
+    },
+  };
+
+  const ownerColumn = {
+    title: 'Owner',
+    dataIndex: 'owner',
+    key: 'owner',
+    width: 160,
+    render: (text) => {
+      if (!text || text === NA) return NA;
+      return <AddressLink {...addressLinkProps} text={text} canCopy />;
+    },
+  };
+
+  const hashColumn = {
+    title: 'Hash',
+    dataIndex: 'hash',
+    key: 'hash',
+    width: 180,
+    render: (text) => {
+      if (!text || text === NA) return NA;
+      const updatedText = text.replace(HASH_PREFIX, '0x'); // .toUpperCase();
+      return (
+        <AddressLink {...addressLinkProps} text={updatedText} isIpfsLink />
+      );
+    },
+  };
+
   if (type === NAV_TYPES.COMPONENT || type === NAV_TYPES.AGENT) {
-    const tokenIdColumn = {
-      title: 'ID',
-      dataIndex: 'tokenId',
-      key: 'tokenId',
-      width: isMobile ? 30 : 50,
-    };
-
-    const packageName = {
-      title: 'Package Name',
-      dataIndex: 'packageName',
-      key: 'packageName',
-      width: 180,
-      render: (text, record) => {
-        if (!text || text === NA) return NA;
-        return (
-          <Button type="link" onClick={() => onViewClick(record.id)}>
-            {text}
-          </Button>
-        );
-      },
-    };
-
-    const ownerColumn = {
-      title: 'Owner',
-      dataIndex: 'owner',
-      key: 'owner',
-      width: 160,
-      render: (text) => {
-        if (!text || text === NA) return NA;
-        return <AddressLink {...addressLinkProps} text={text} canCopy />;
-      },
-    };
-
     const dependencyColumn = {
       title: 'No. of component dependencies',
       dataIndex: 'dependency',
       width: isMobile ? 70 : 300,
       key: 'dependency',
     };
-
-    const otherEthColumns = [
-      {
-        title: 'Hash',
-        dataIndex: 'hash',
-        key: 'hash',
-        width: 180,
-        render: (text) => {
-          if (!text || text === NA) return NA;
-          const updatedText = text.replace(HASH_PREFIX, '0x'); // .toUpperCase();
-          return (
-            <AddressLink {...addressLinkProps} text={updatedText} isIpfsLink />
-          );
-        },
-      },
-    ];
 
     const actionColumn = {
       width: isMobile ? 40 : 120,
@@ -104,81 +102,87 @@ export const getTableColumns = (
     };
 
     return isMainnet
-      ? [
-          tokenIdColumn,
-          packageName,
-          ownerColumn,
-          ...otherEthColumns,
-          actionColumn,
-        ]
+      ? [tokenIdColumn, packageName, ownerColumn, hashColumn, actionColumn]
       : [tokenIdColumn, ownerColumn, dependencyColumn, actionColumn];
   }
 
   if (type === NAV_TYPES.SERVICE) {
-    return [
-      {
-        title: 'ID',
-        dataIndex: 'id',
-        key: 'id',
-        width: isMobile ? 30 : 50,
+    const stateColumn = {
+      title: 'State',
+      dataIndex: 'state',
+      key: 'state',
+      width: 150,
+      render: (e) => {
+        if (!e) return NA;
+        return SERVICE_STATE[e];
       },
-      {
-        title: 'Owner',
-        dataIndex: 'owner',
-        key: 'owner',
-        width: 200,
-        render: (text) => {
-          if (!text || text === NA) return NA;
-          return (
-            <AddressLink
-              {...addressLinkProps}
-              text={text}
-              chainName={chainName}
-            />
-          );
-        },
-      },
-      {
-        title: 'State',
-        dataIndex: 'state',
-        key: 'state',
-        width: 150,
-        render: (e) => {
-          if (!e) return NA;
-          return SERVICE_STATE[e];
-        },
-      },
-      {
-        width: isMobile ? 40 : 220,
-        title: 'Action',
-        key: 'action',
-        fixed: 'right',
-        render: (_text, record) => {
-          // only show update button for pre-registration state
-          const canUpdate =
-            ['1'].includes(record.state) &&
-            areAddressesEqual(record.owner, account);
+    };
+    const actionAndUpdateColumn = {
+      width: isMobile ? 40 : 200,
+      title: 'Action',
+      key: 'action',
+      fixed: 'right',
+      render: (_text, record) => {
+        // only show update button for pre-registration state
+        const canUpdate =
+          ['1'].includes(record.state) &&
+          areAddressesEqual(record.owner, account);
 
-          return (
-            <Space size="middle">
-              <Button
-                type="link"
-                onClick={() => onViewClick(record.id)}
-                disabled={record.owner === NA}
-              >
-                View
+        return (
+          <Space size="middle">
+            <Button
+              type="link"
+              onClick={() => onViewClick(record.id)}
+              disabled={record.owner === NA}
+            >
+              View
+            </Button>
+
+            {canUpdate && onUpdateClick && (
+              <Button type="link" onClick={() => onUpdateClick(record.id)}>
+                Update
               </Button>
-
-              {canUpdate && onUpdateClick && (
-                <Button type="link" onClick={() => onUpdateClick(record.id)}>
-                  Update
-                </Button>
-              )}
-            </Space>
-          );
-        },
+            )}
+          </Space>
+        );
       },
-    ];
+    };
+
+    return isMainnet
+      ? [
+          tokenIdColumn,
+          packageName,
+          ownerColumn,
+          hashColumn,
+          stateColumn,
+          actionAndUpdateColumn,
+        ]
+      : [
+          {
+            title: 'ID',
+            dataIndex: 'id',
+            key: 'id',
+            width: isMobile ? 30 : 50,
+          },
+          {
+            title: 'Owner',
+            dataIndex: 'owner',
+            key: 'owner',
+            width: 200,
+            render: (text) => {
+              if (!text || text === NA) return NA;
+              return (
+                <AddressLink
+                  {...addressLinkProps}
+                  text={text}
+                  chainName={chainName}
+                />
+              );
+            },
+          },
+          stateColumn,
+          actionAndUpdateColumn,
+        ];
   }
 
   return [];
@@ -208,6 +212,18 @@ export const fetchDataSource = (type, rawData, { current, isMainnet }) => {
         hash: item.metadataHash,
         packageName: item.publicId,
         packageHash: item.packageHash,
+      }));
+    }
+
+    if (type === NAV_TYPES.SERVICE) {
+      return rawData.map((item) => ({
+        id: item.serviceId,
+        tokenId: item.serviceId,
+        owner: item.owner,
+        hash: item.metadataHash,
+        packageName: item.publicId,
+        packageHash: item.packageHash,
+        state: item.state,
       }));
     }
   }

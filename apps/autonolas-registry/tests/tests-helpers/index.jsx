@@ -50,7 +50,7 @@ export const mockCodeUri =
 
 export const mockIpfs = {
   image: `ipfs://${mockNftImageHash}`,
-  name: 'Some name',
+  name: 'Some package name',
   description: 'Some description',
   code_uri: `ipfs://${mockCodeUri}`,
   attributes: [{ trait_type: 'version', value: '0.0.0.1' }],
@@ -68,6 +68,7 @@ export const useHelpersEvmMock = {
   links: { AGENTS: '/ethereum/agents' },
   isConnectedToWrongNetwork: false,
   isSvm: false,
+  isMainnet: true,
 };
 
 export const useHelpersBaseMock = {

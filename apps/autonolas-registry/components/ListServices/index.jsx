@@ -12,11 +12,11 @@ import {
 } from '../../common-util/List/ListTable/helpers';
 import { getMyListOnPagination } from '../../common-util/ContractUtils/myList';
 import { useHelpers } from '../../common-util/hooks';
-// import {
-// useAllServices,
-// useMyServices,
-// useSearchServices,
-// } from './hooks/useServiceList';
+import {
+  useAllServices,
+  useMyServices,
+  useSearchServices,
+} from './hooks/useServicesList';
 import { useServiceInfo } from './hooks/useSvmService';
 import {
   getServices,
@@ -35,11 +35,11 @@ const ListServices = () => {
     isMyTab(hash) ? MY_SERVICES : ALL_SERVICES,
   );
 
-  const { account, chainName, links, isSvm, chainId } = useHelpers();
+  const { account, chainName, links, isSvm, chainId, isMainnet } = useHelpers();
 
-  // const getAllServices = useAllServices();
-  // const getMyServices = useMyServices();
-  // const getServicesBySearch = useSearchServices();
+  const getAllServices = useAllServices();
+  const getMyServices = useMyServices();
+  const getServicesBySearch = useSearchServices();
 
   /**
    * extra tab content & view click
@@ -119,36 +119,35 @@ const ListServices = () => {
       try {
         // All services
         if (currentTab === ALL_SERVICES) {
-          // if (chainId === 1) {
-          //   const e = await getAllServices(NAV_TYPES.SERVICE, currentPage);
-          //   setList(e);
-          // } else {
-          const e = isSvm
-            ? await getSvmServices(total, currentPage)
-            : await getServices(total, currentPage);
-          setList(e);
-          // }
+          if (isMainnet) {
+            const e = await getAllServices(currentPage);
+            setList(e);
+          } else {
+            const e = isSvm
+              ? await getSvmServices(total, currentPage)
+              : await getServices(total, currentPage);
+            setList(e);
+          }
         } else if (currentTab === MY_SERVICES && account) {
           /**
            * My services
            * - search by `account` as searchValue
            * - API will be called only once & store the complete list
            */
-          // if (chainId === 1) {
-          //   const e = await getMyServices(NAV_TYPES.SERVICE, account);
-          //   setList(e);
-          // } else
-          // {
-          const e = isSvm
-            ? await getMySvmServices(account, total)
-            : await getFilteredServices(account);
-          setList(e);
+          if (chainId === 1) {
+            const e = await getMyServices(account);
+            setList(e);
+          } else {
+            const e = isSvm
+              ? await getMySvmServices(account, total)
+              : await getFilteredServices(account);
+            setList(e);
 
-          // TODO: remove this once `getTotalForMySvmServices` is fixed
-          if (isSvm) {
-            setTotal(e.length);
+            // TODO: remove this once `getTotalForMySvmServices` is fixed
+            if (isSvm) {
+              setTotal(e.length);
+            }
           }
-          // }
         }
       } catch (e) {
         console.error(e);
@@ -170,10 +169,11 @@ const ListServices = () => {
     currentTab,
     searchValue,
     isSvm,
-    // getMyServices,
-    // getAllServices,
+    getMyServices,
+    getAllServices,
     getSvmServices,
     getMySvmServices,
+    isMainnet,
   ]);
 
   /**
@@ -186,24 +186,21 @@ const ListServices = () => {
       if (!searchValue) return;
 
       setIsLoading(true);
-
       try {
-        // if (chainId === 1) {
-        //   const filteredList = await getServicesBySearch(
-        //     NAV_TYPES.SERVICE,
-        //     searchValue,
-        //     currentPage,
-        //     currentTab === MY_SERVICES ? account : null,
-        //   );
-        //   setList(filteredList);
-        // }
-        // else {
-        const filteredList = await getFilteredServices(
-          searchValue,
-          currentTab === MY_SERVICES ? account : null,
-        );
-        setList(filteredList);
-        // }
+        if (chainId === 1) {
+          const filteredList = await getServicesBySearch(
+            searchValue,
+            currentPage,
+            currentTab === MY_SERVICES ? account : null,
+          );
+          setList(filteredList);
+        } else {
+          const filteredList = await getFilteredServices(
+            searchValue,
+            currentTab === MY_SERVICES ? account : null,
+          );
+          setList(filteredList);
+        }
 
         setTotal(0); // total won't be used if search is used
         setCurrentPage(1);
@@ -221,7 +218,7 @@ const ListServices = () => {
     currentTab,
     chainId,
     currentPage,
-    // getServicesBySearch,
+    getServicesBySearch,
   ]);
 
   const tableCommonProps = {
@@ -236,9 +233,15 @@ const ListServices = () => {
       router.push(`${links.UPDATE_SERVICE}/${serviceId}`),
   };
 
-  const myServiceList = searchValue
-    ? list
-    : getMyListOnPagination({ total, nextPage: currentPage, list });
+  const getMyServiceList = () => {
+    if (isMainnet) {
+      return list;
+    }
+
+    return searchValue
+      ? list
+      : getMyListOnPagination({ total, nextPage: currentPage, list });
+  };
 
   return (
     <Tabs
@@ -268,7 +271,13 @@ const ListServices = () => {
           key: ALL_SERVICES,
           label: 'All',
           disabled: isLoading,
-          children: <ListTable {...tableCommonProps} list={list} />,
+          children: (
+            <ListTable
+              {...tableCommonProps}
+              list={list}
+              tableDataTestId="all-services-table"
+            />
+          ),
         },
         {
           key: MY_SERVICES,
@@ -277,9 +286,10 @@ const ListServices = () => {
           children: (
             <ListTable
               {...tableCommonProps}
-              list={myServiceList}
+              list={getMyServiceList()}
               isPaginationRequired={!isSvm}
               isAccountRequired
+              tableDataTestId="all-services-table"
             />
           ),
         },
