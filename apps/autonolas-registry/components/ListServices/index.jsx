@@ -90,6 +90,7 @@ const ListServices = () => {
         setTotal(Number(totalTemp));
         if (Number(totalTemp) === 0) {
           setIsLoading(false);
+          setList([]);
         }
       } catch (e) {
         console.error(e);
@@ -115,7 +116,6 @@ const ListServices = () => {
   useEffect(() => {
     const getList = async () => {
       setIsLoading(true);
-
       try {
         // All services
         if (currentTab === ALL_SERVICES) {

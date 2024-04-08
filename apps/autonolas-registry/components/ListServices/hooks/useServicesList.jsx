@@ -9,7 +9,7 @@ import { useCallback } from 'react';
 import { gql } from 'graphql-request';
 
 import { useSubgraph } from '../../../common-util/hooks/useSubgraph';
-import { TOTAL_VIEW_COUNT } from '../../../util/constants';
+import { HASH_PREFIX, TOTAL_VIEW_COUNT } from '../../../util/constants';
 
 const serviceColumns = `{
   id
@@ -31,15 +31,19 @@ const serviceColumns = `{
  * @returns  {string} search filter sub query
  */
 export const getSearchFilterSubQueryForServices = (searchValue) => {
+  const completeMetadataHash = searchValue.replace(/0x/g, HASH_PREFIX);
   return `{ 
     or: [
       { publicId_contains_nocase: "${searchValue}" } 
-      { description_contains_nocase: "${searchValue}" }
       { packageHash_contains_nocase: "${searchValue}" }
       { owner_contains_nocase: "${searchValue}" }
+      { metadataHash_contains_nocase: "${completeMetadataHash}" }
     ]
   }`;
 };
+
+// TODO: description needs to be added
+// { description_contains_nocase: "${searchValue}" }
 
 /**
  * Hook to get ALL units
@@ -111,7 +115,11 @@ export const useAllServicesBySearch = () => {
           services (
             first: ${TOTAL_VIEW_COUNT}, 
             skip: ${TOTAL_VIEW_COUNT * (currentPage - 1)},
-            where: ${getSearchFilterSubQueryForServices(searchValue)},
+            where: {
+              and: [
+                ${getSearchFilterSubQueryForServices(searchValue)},
+              ]
+            }
             orderBy: serviceId
           ) ${serviceColumns}
         }
@@ -140,7 +148,7 @@ export const useMyServicesBySearch = () => {
             skip: ${TOTAL_VIEW_COUNT * (currentPage - 1)},
             where: { 
               and: [
-                owner_contains_nocase: "${ownerAddress}" 
+                { owner_contains_nocase: "${ownerAddress}" }
                 ${getSearchFilterSubQueryForServices(searchValue)}
               ]
             }
