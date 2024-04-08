@@ -278,6 +278,7 @@ export const useExtraTabContent = ({
   title,
   onRegisterClick = () => {},
   isSvm = false,
+  type,
 }) => {
   const [searchValue, setSearchValue] = useState('');
   const [value, setValue] = useState('');
@@ -298,6 +299,9 @@ export const useExtraTabContent = ({
               placeholder="Search..."
               value={value}
               onChange={(e) => setValue(e.target.value)}
+              onKeyDown={(e) =>
+                e.key === 'Enter' && setSearchValue(value || '')
+              }
               suffix={
                 <Tooltip
                   title={
@@ -305,7 +309,7 @@ export const useExtraTabContent = ({
                       <div>Search by:</div>
                       <ul>
                         <li>Name</li>
-                        <li>Description</li>
+                        {type !== NAV_TYPES.SERVICE && <li>Description</li>}
                         <li>Owner</li>
                         <li>Package Hash</li>
                       </ul>

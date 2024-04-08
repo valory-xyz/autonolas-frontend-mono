@@ -48,6 +48,7 @@ const ListServices = () => {
     title: 'Services',
     onRegisterClick: () => router.push(links.MINT_SERVICE),
     isSvm,
+    type: NAV_TYPES.SERVICE,
   });
   const onViewClick = (id) => router.push(`${links.SERVICES}/${id}`);
 
