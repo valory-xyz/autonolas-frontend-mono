@@ -22,7 +22,7 @@ const ListTable = ({
   extra,
   tableDataTestId,
 }) => {
-  const { chainName, account, isSvm, chainId } = useHelpers();
+  const { chainName, account, isSvm, chainId, isMainnet } = useHelpers();
   /**
    * no pagination on search as we won't know total beforehand
    */
@@ -52,10 +52,11 @@ const ListTable = ({
     chainName,
     chainId,
     account,
+    isMainnet,
   });
   const dataSource = fetchDataSource(type, list, {
     current: currentPage,
-    chainId,
+    isMainnet,
   });
   const pagination = {
     total,

@@ -65,6 +65,7 @@ export const useHelpers = () => {
       doesNetworkHaveValidServiceManagerTokenFn(chainId),
     links: updatedLinks,
     isConnectedToWrongNetwork,
+    isMainnet: chainId === 1,
     isSvm,
   };
 };

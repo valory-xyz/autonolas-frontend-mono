@@ -29,7 +29,8 @@ const ListAgents = () => {
     isMyTab(hash) ? MY_AGENTS : ALL_AGENTS,
   );
 
-  const { account, chainId, links, isL1OnlyNetwork, isSvm } = useHelpers();
+  const { account, chainId, links, isL1OnlyNetwork, isSvm, isMainnet } =
+    useHelpers();
 
   const getAllAgents = useAllAgents();
   const getMyAgents = useMyAgents();
@@ -96,10 +97,9 @@ const ListAgents = () => {
         try {
           // All agents
           if (currentTab === ALL_AGENTS) {
-            const everyAgents =
-              chainId === 1
-                ? await getAllAgents(currentPage)
-                : await getAgents(total, currentPage);
+            const everyAgents = isMainnet
+              ? await getAllAgents(currentPage)
+              : await getAgents(total, currentPage);
             setList(everyAgents);
           } else if (currentTab === MY_AGENTS && account) {
             /**
@@ -107,10 +107,9 @@ const ListAgents = () => {
              * - search by `account` as searchValue
              * - API will be called only once & store the complete list
              */
-            const e =
-              chainId === 1
-                ? await getMyAgents(account, currentPage)
-                : await getFilteredAgents(account);
+            const e = isMainnet
+              ? await getMyAgents(account, currentPage)
+              : await getFilteredAgents(account);
             setList(e);
           }
         } catch (e) {
@@ -126,12 +125,12 @@ const ListAgents = () => {
     searchValue,
     isL1OnlyNetwork,
     account,
-    chainId,
     total,
     currentPage,
     getMyAgents,
     getAllAgents,
     currentTab,
+    isMainnet,
   ]);
 
   /**
@@ -145,7 +144,7 @@ const ListAgents = () => {
 
       setIsLoading(true);
       try {
-        if (chainId === 1) {
+        if (isMainnet) {
           const filteredList = await getAgentsBySearch(
             searchValue,
             currentTab === MY_AGENTS ? account : null,
@@ -158,7 +157,7 @@ const ListAgents = () => {
           );
           setList(filteredList);
         }
-        
+
         setTotal(0); // total won't be used if search is used
         setCurrentPage(1);
       } catch (e) {
@@ -170,11 +169,11 @@ const ListAgents = () => {
     })();
   }, [
     account,
-    chainId,
     searchValue,
     currentTab,
     currentPage,
     getAgentsBySearch,
+    isMainnet,
   ]);
 
   const tableCommonProps = {

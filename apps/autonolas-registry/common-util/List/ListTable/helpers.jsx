@@ -20,7 +20,15 @@ const { Title } = Typography;
 
 export const getTableColumns = (
   type,
-  { onViewClick, onUpdateClick, isMobile, chainName, account, chainId },
+  {
+    onViewClick,
+    onUpdateClick,
+    isMobile,
+    chainName,
+    account,
+    chainId,
+    isMainnet,
+  },
 ) => {
   const addressLinkProps = {
     chainId,
@@ -101,7 +109,7 @@ export const getTableColumns = (
       ),
     };
 
-    return chainId === 1
+    return isMainnet
       ? [tokenIdColumn, ownerColumn, ...otherEthColumns, actionColumn]
       : [tokenIdColumn, ownerColumn, dependencyColumn, actionColumn];
   }
@@ -176,7 +184,7 @@ export const getTableColumns = (
   return [];
 };
 
-export const fetchDataSource = (type, rawData, { current, chainId }) => {
+export const fetchDataSource = (type, rawData, { current, isMainnet }) => {
   /**
    * @example
    * TOTAL_VIEW_COUNT = 10, current = 1
@@ -191,7 +199,7 @@ export const fetchDataSource = (type, rawData, { current, chainId }) => {
   const startIndex = (current - 1) * TOTAL_VIEW_COUNT + 1;
 
   // for mainnet
-  if (chainId === 1) {
+  if (isMainnet) {
     if (type === NAV_TYPES.COMPONENT || type === NAV_TYPES.AGENT) {
       return rawData.map((item) => ({
         id: item.tokenId,

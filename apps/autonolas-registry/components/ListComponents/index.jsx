@@ -33,7 +33,8 @@ const ListComponents = () => {
     isMyTab(hash) ? MY_COMPONENTS : ALL_COMPONENTS,
   );
 
-  const { account, chainId, links, isL1OnlyNetwork, isSvm } = useHelpers();
+  const { account, chainId, links, isL1OnlyNetwork, isSvm, isMainnet } =
+    useHelpers();
 
   const getAllComponents = useAllComponents();
   const getMyComponents = useMyComponents();
@@ -100,10 +101,9 @@ const ListComponents = () => {
         try {
           // All components
           if (currentTab === ALL_COMPONENTS) {
-            const everyComps =
-              chainId === 1
-                ? await getAllComponents(currentPage)
-                : await getComponents(total, currentPage);
+            const everyComps = isMainnet
+              ? await getAllComponents(currentPage)
+              : await getComponents(total, currentPage);
             setList(everyComps);
           } else if (currentTab === MY_COMPONENTS && account) {
             /**
@@ -111,10 +111,9 @@ const ListComponents = () => {
              * - search by `account` as searchValue
              * - API will be called only once & store the complete list
              */
-            const e =
-              chainId === 1
-                ? await getMyComponents(account, currentPage)
-                : await getFilteredComponents(account);
+            const e = isMainnet
+              ? await getMyComponents(account, currentPage)
+              : await getFilteredComponents(account);
             setList(e);
           }
         } catch (e) {
@@ -130,12 +129,12 @@ const ListComponents = () => {
     searchValue,
     isL1OnlyNetwork,
     account,
-    chainId,
     total,
     currentPage,
     getMyComponents,
     getAllComponents,
     currentTab,
+    isMainnet,
   ]);
 
   /**
@@ -149,7 +148,7 @@ const ListComponents = () => {
 
       setIsLoading(true);
       try {
-        if (chainId === 1) {
+        if (isMainnet) {
           const filteredList = await getComponentsBySearch(
             searchValue,
             currentTab === MY_COMPONENTS ? account : null,
@@ -173,11 +172,11 @@ const ListComponents = () => {
     })();
   }, [
     account,
-    chainId,
     searchValue,
     currentTab,
     currentPage,
     getComponentsBySearch,
+    isMainnet,
   ]);
 
   const tableCommonProps = {
