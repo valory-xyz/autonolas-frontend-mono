@@ -35,7 +35,7 @@ const ListServices = () => {
     isMyTab(hash) ? MY_SERVICES : ALL_SERVICES,
   );
 
-  const { account, chainName, links, isSvm, chainId, isMainnet } = useHelpers();
+  const { account, links, isSvm, chainId, isMainnet } = useHelpers();
 
   const getAllServices = useAllServices();
   const getMyServices = useMyServices();
@@ -63,7 +63,7 @@ const ListServices = () => {
   // update current tab based on the "hash" in the URL
   useEffect(() => {
     setCurrentTab(isMyTab(hash) ? MY_SERVICES : ALL_SERVICES);
-  }, [router.asPath, hash]);
+  }, [hash]);
 
   const {
     getTotalForAllSvmServices,
@@ -104,19 +104,21 @@ const ListServices = () => {
     }
   }, [
     account,
-    chainName,
     currentTab,
     searchValue,
     isSvm,
     getTotalForAllSvmServices,
     getTotalForMySvmServices,
     getSvmServices,
+    chainId,
   ]);
 
   // fetch the list (All services, My Services) - WITHOUT search
   useEffect(() => {
     const getList = async () => {
       setIsLoading(true);
+      setList([]);
+
       try {
         // All services
         if (currentTab === ALL_SERVICES) {
@@ -135,7 +137,7 @@ const ListServices = () => {
            * - search by `account` as searchValue
            * - API will be called only once & store the complete list
            */
-          if (chainId === 1) {
+          if (isMainnet) {
             const e = await getMyServices(account, currentPage);
             setList(e);
           } else {
@@ -163,8 +165,6 @@ const ListServices = () => {
     }
   }, [
     account,
-    chainId,
-    chainName,
     total,
     currentPage,
     currentTab,
@@ -175,6 +175,7 @@ const ListServices = () => {
     getSvmServices,
     getMySvmServices,
     isMainnet,
+    chainId,
   ]);
 
   /**
@@ -187,8 +188,10 @@ const ListServices = () => {
       if (!searchValue) return;
 
       setIsLoading(true);
+      setList([]);
+
       try {
-        if (chainId === 1) {
+        if (isMainnet) {
           const filteredList = await getServicesBySearch(
             searchValue,
             currentPage,
@@ -214,12 +217,12 @@ const ListServices = () => {
     })();
   }, [
     account,
-    chainName,
     searchValue,
     currentTab,
-    chainId,
     currentPage,
     getServicesBySearch,
+    isMainnet,
+    chainId,
   ]);
 
   const tableCommonProps = {
@@ -235,9 +238,7 @@ const ListServices = () => {
   };
 
   const getMyServiceList = () => {
-    if (isMainnet) {
-      return list;
-    }
+    if (isMainnet) return list;
 
     return searchValue
       ? list

@@ -1,22 +1,16 @@
-import { useMemo } from 'react';
 import { GraphQLClient } from 'graphql-request';
 import { HASH_PREFIX } from '../../util/constants';
 
-export const useSubgraph = () => {
-  const graphQlClient = useMemo(
-    () =>
-      new GraphQLClient(process.env.NEXT_PUBLIC_AUTONOLAS_SUB_GRAPH_URL, {
-        method: 'POST',
-        jsonSerializer: {
-          parse: JSON.parse,
-          stringify: JSON.stringify,
-        },
-      }),
-    [],
-  );
-
-  return graphQlClient;
-};
+export const GRAPHQL_CLIENT = new GraphQLClient(
+  process.env.NEXT_PUBLIC_AUTONOLAS_SUB_GRAPH_URL,
+  {
+    method: 'POST',
+    jsonSerializer: {
+      parse: JSON.parse,
+      stringify: JSON.stringify,
+    },
+  },
+);
 
 export const columnsForAgentsAndComponents = `{
   id

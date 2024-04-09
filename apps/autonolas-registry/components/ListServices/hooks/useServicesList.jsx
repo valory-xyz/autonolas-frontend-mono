@@ -1,5 +1,3 @@
-// TODO: check all query
-
 /**
  *
  * Helper hook to manage list of items (e.g. components, agents & services)
@@ -8,7 +6,7 @@
 import { useCallback } from 'react';
 import { gql } from 'graphql-request';
 
-import { useSubgraph } from '../../../common-util/hooks/useSubgraph';
+import { GRAPHQL_CLIENT } from '../../../common-util/hooks/useSubgraph';
 import { HASH_PREFIX, TOTAL_VIEW_COUNT } from '../../../util/constants';
 
 const serviceColumns = `{
@@ -51,11 +49,8 @@ export const getSearchFilterSubQueryForServices = (searchValue) => {
  *
  */
 export const useAllServices = () => {
-  const graphQlClient = useSubgraph();
-
-  return useCallback(
-    async (currentPage) => {
-      const query = gql`
+  return useCallback(async (currentPage) => {
+    const query = gql`
         {
           services(
             first: ${TOTAL_VIEW_COUNT}, 
@@ -65,11 +60,9 @@ export const useAllServices = () => {
         }
       `;
 
-      const response = await graphQlClient.request(query);
-      return response?.services || [];
-    },
-    [graphQlClient],
-  );
+    const response = await GRAPHQL_CLIENT.request(query);
+    return response?.services || [];
+  }, []);
 };
 
 /**
@@ -77,11 +70,8 @@ export const useAllServices = () => {
  * @returns {function} function to get my units
  */
 export const useMyServices = () => {
-  const graphQlClient = useSubgraph();
-
-  return useCallback(
-    async (ownerAddress, currentPage) => {
-      const query = gql`
+  return useCallback(async (ownerAddress, currentPage) => {
+    const query = gql`
         {
           services (
             first: ${TOTAL_VIEW_COUNT}, 
@@ -94,11 +84,9 @@ export const useMyServices = () => {
         }
       `;
 
-      const response = await graphQlClient.request(query);
-      return response?.services || [];
-    },
-    [graphQlClient],
-  );
+    const response = await GRAPHQL_CLIENT.request(query);
+    return response?.services || [];
+  }, []);
 };
 
 /**
@@ -106,11 +94,8 @@ export const useMyServices = () => {
  * @returns {function} function to get all units by search
  */
 export const useAllServicesBySearch = () => {
-  const graphQlClient = useSubgraph();
-
-  return useCallback(
-    async (searchValue, currentPage) => {
-      const query = gql`
+  return useCallback(async (searchValue, currentPage) => {
+    const query = gql`
         {
           services (
             first: ${TOTAL_VIEW_COUNT}, 
@@ -125,11 +110,9 @@ export const useAllServicesBySearch = () => {
         }
       `;
 
-      const response = await graphQlClient.request(query);
-      return response?.services || [];
-    },
-    [graphQlClient],
-  );
+    const response = await GRAPHQL_CLIENT.request(query);
+    return response?.services || [];
+  }, []);
 };
 
 /**
@@ -137,11 +120,8 @@ export const useAllServicesBySearch = () => {
  * @returns {function} function to search units
  */
 export const useMyServicesBySearch = () => {
-  const graphQlClient = useSubgraph();
-
-  return useCallback(
-    async (ownerAddress, searchValue, currentPage) => {
-      const query = gql`
+  return useCallback(async (ownerAddress, searchValue, currentPage) => {
+    const query = gql`
         {
           services (
             first: ${TOTAL_VIEW_COUNT}, 
@@ -157,11 +137,9 @@ export const useMyServicesBySearch = () => {
         }
       `;
 
-      const response = await graphQlClient.request(query);
-      return response?.services || [];
-    },
-    [graphQlClient],
-  );
+    const response = await GRAPHQL_CLIENT.request(query);
+    return response?.services || [];
+  }, []);
 };
 
 export const useSearchServices = () => {

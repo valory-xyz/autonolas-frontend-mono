@@ -60,7 +60,7 @@ const ListComponents = () => {
   // update current tab based on the "hash" in the URL
   useEffect(() => {
     setCurrentTab(isMyTab(hash) ? MY_COMPONENTS : ALL_COMPONENTS);
-  }, [router.asPath, hash]);
+  }, [hash]);
 
   // fetch total
   useEffect(() => {

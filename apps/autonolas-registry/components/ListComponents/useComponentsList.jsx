@@ -7,7 +7,7 @@ import { useCallback } from 'react';
 import { gql } from 'graphql-request';
 
 import {
-  useSubgraph,
+  GRAPHQL_CLIENT,
   columnsForAgentsAndComponents,
   getSearchFilterSubQueryForAgentsAndComponents,
 } from '../../common-util/hooks/useSubgraph';
@@ -22,11 +22,8 @@ const componentPackageType =
  *
  */
 export const useAllComponents = () => {
-  const graphQlClient = useSubgraph();
-
-  return useCallback(
-    async (currentPage) => {
-      const query = gql`
+  return useCallback(async (currentPage) => {
+    const query = gql`
         {
           units(
             first: ${TOTAL_VIEW_COUNT}, 
@@ -37,11 +34,9 @@ export const useAllComponents = () => {
         }
       `;
 
-      const response = await graphQlClient.request(query);
-      return response?.units;
-    },
-    [graphQlClient],
-  );
+    const response = await GRAPHQL_CLIENT.request(query);
+    return response?.units;
+  }, []);
 };
 
 /**
@@ -49,11 +44,8 @@ export const useAllComponents = () => {
  * @returns {function} function to get my units
  */
 export const useMyComponents = () => {
-  const graphQlClient = useSubgraph();
-
-  return useCallback(
-    async (ownerAddress, currentPage) => {
-      const query = gql`
+  return useCallback(async (ownerAddress, currentPage) => {
+    const query = gql`
         {
           units(
             first: ${TOTAL_VIEW_COUNT}, 
@@ -67,11 +59,9 @@ export const useMyComponents = () => {
         }
       `;
 
-      const response = await graphQlClient.request(query);
-      return response?.units;
-    },
-    [graphQlClient],
-  );
+    const response = await GRAPHQL_CLIENT.request(query);
+    return response?.units;
+  }, []);
 };
 
 /**
@@ -79,11 +69,8 @@ export const useMyComponents = () => {
  * @returns {function} function to get all units by search
  */
 const useAllComponentsBySearch = () => {
-  const graphQlClient = useSubgraph();
-
-  return useCallback(
-    async (searchValue) => {
-      const query = gql`
+  return useCallback(async (searchValue) => {
+    const query = gql`
         {
           units(
             where: {
@@ -97,11 +84,9 @@ const useAllComponentsBySearch = () => {
         }
       `;
 
-      const response = await graphQlClient.request(query);
-      return response?.units;
-    },
-    [graphQlClient],
-  );
+    const response = await GRAPHQL_CLIENT.request(query);
+    return response?.units;
+  }, []);
 };
 
 /**
@@ -109,11 +94,8 @@ const useAllComponentsBySearch = () => {
  * @returns {function} function to search units
  */
 const useMyComponentsBySearch = () => {
-  const graphQlClient = useSubgraph();
-
-  return useCallback(
-    async (ownerAddress, searchValue) => {
-      const query = gql`
+  return useCallback(async (ownerAddress, searchValue) => {
+    const query = gql`
         {
           units(
             where: {
@@ -128,11 +110,9 @@ const useMyComponentsBySearch = () => {
         }
       `;
 
-      const response = await graphQlClient.request(query);
-      return response?.units;
-    },
-    [graphQlClient],
-  );
+    const response = await GRAPHQL_CLIENT.request(query);
+    return response?.units;
+  }, []);
 };
 
 /**

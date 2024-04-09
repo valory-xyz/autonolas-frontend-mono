@@ -26,26 +26,28 @@ import {
 
 const allServicesResponse = [
   {
-    id: '1',
-    tokenId: '1',
+    id: '301',
+    serviceId: '301',
     owner: dummyAddress,
     publicId: 'good_package_name_all_services',
     packageHash: dummyHash1,
     metadataHash: mockCodeUri,
+    state: 4,
   },
 ];
 const myServicesResponse = [
   {
     ...allServicesResponse[0],
-    tokenId: '2',
+    serviceId: '302',
     owner: dummyAddress1,
     publicId: 'good_package_name_my_services',
+    state: 1,
   },
 ];
 const allServicesSearchResponse = [
   {
     ...allServicesResponse[0],
-    tokenId: '3',
+    serviceId: '3',
     publicId: 'good_package_name_services_search',
   },
 ];
@@ -84,7 +86,7 @@ describe('listServices/index.jsx', () => {
       (useServiceInfo as jest.Mock).mockReturnValue(jest.fn(() => {}));
     });
 
-    it('should render tabs with `All Tab` & Mint button', async () => {
+    it('should display tabs with `All Tab` & Mint button', async () => {
       const { container, getByRole } = render(wrapProvider(<ListServices />));
       // check if the selected tab is `All` & has the correct content
       await waitFor(async () => {
@@ -102,7 +104,7 @@ describe('listServices/index.jsx', () => {
       });
     });
 
-    describe.skip('mainnet', () => {
+    describe('mainnet', () => {
       beforeEach(() => {
         jest.clearAllMocks();
 
@@ -113,7 +115,27 @@ describe('listServices/index.jsx', () => {
         (getTotalForMyServices as jest.Mock).mockResolvedValue(1);
       });
 
-      it('should display all services', async () => {
+      it('should display columns for mainnet', async () => {
+        const { container, findByTestId } = render(
+          wrapProvider(<ListServices />),
+        );
+        const allServicesTable = await findByTestId('all-services-table');
+
+        if (!container) {
+          throw new Error('`All tab` is null');
+        }
+
+        expect(within(allServicesTable).getByText('ID')).toBeInTheDocument();
+        expect(within(allServicesTable).getByText('Name')).toBeInTheDocument();
+        expect(within(allServicesTable).getByText('Owner')).toBeInTheDocument();
+        expect(within(allServicesTable).getByText('Hash')).toBeInTheDocument();
+        expect(within(allServicesTable).getByText('State')).toBeInTheDocument();
+        expect(
+          within(allServicesTable).getByText('Action'),
+        ).toBeInTheDocument();
+      });
+
+      it('should display all services information', async () => {
         const { container, findByTestId } = render(
           wrapProvider(<ListServices />),
         );
@@ -127,22 +149,22 @@ describe('listServices/index.jsx', () => {
           expect(container.querySelector(ACTIVE_TAB)?.textContent).toBe('All'),
         );
 
-        const firstAgent = allServicesResponse[0];
+        const firstService = allServicesResponse[0];
         const allServicesTable = await findByTestId('all-services-table');
 
         expect(
-          within(allServicesTable).getByText(firstAgent.tokenId),
+          within(allServicesTable).getByText(firstService.serviceId),
         ).toBeInTheDocument();
-        // expect(
-        //   within(allServicesTable).getByText(/0x8626...9C1199/),
-        // ).toBeInTheDocument();
-        // expect(
-        //   within(allServicesTable).getByText(/0x9cf4...315ab0/),
-        // ).toBeInTheDocument();
-        // expect(
-        //   within(allServicesTable).getByText(firstAgent.publicId),
-        // ).toBeInTheDocument();
-        // expect(within(allServicesTable).getByText('View')).toBeInTheDocument();
+        expect(
+          within(allServicesTable).getByText(/0x8626...9C1199/),
+        ).toBeInTheDocument();
+        expect(
+          within(allServicesTable).getByText(/0x9cf4...315ab0/),
+        ).toBeInTheDocument();
+        expect(
+          within(allServicesTable).getByText('Deployed'),
+        ).toBeInTheDocument();
+        expect(within(allServicesTable).getByText('View')).toBeInTheDocument();
       });
     });
 
@@ -155,14 +177,11 @@ describe('listServices/index.jsx', () => {
         (getTotalForAllServices as jest.Mock).mockResolvedValue(1);
         (getTotalForMyServices as jest.Mock).mockResolvedValue(1);
         (getServices as jest.Mock).mockResolvedValue([
-          { id: '1', owner: dummyAddress, state: '5' },
-        ]);
-        (getFilteredServices as jest.Mock).mockResolvedValue([
-          { id: '2', owner: dummyAddress, state: '2' },
+          { id: '5001', owner: dummyAddress, state: '5' },
         ]);
       });
 
-      it('should render service columns and rows', async () => {
+      it('should display service columns', async () => {
         const { container, findByTestId } = render(
           wrapProvider(<ListServices />),
         );
@@ -172,31 +191,40 @@ describe('listServices/index.jsx', () => {
           throw new Error('`All tab` is null');
         }
 
-        await waitFor(async () => {
-          // column names
-          expect(within(allServicesTable).getByText('ID')).toBeInTheDocument();
-          expect(
-            within(allServicesTable).getByText('Owner'),
-          ).toBeInTheDocument();
-          expect(
-            within(allServicesTable).getByText('State'),
-          ).toBeInTheDocument();
-          expect(
-            within(allServicesTable).getByText('Action'),
-          ).toBeInTheDocument();
+        expect(within(allServicesTable).getByText('ID')).toBeInTheDocument();
+        expect(within(allServicesTable).queryByText('Name')).toBeNull();
+        expect(within(allServicesTable).getByText('Owner')).toBeInTheDocument();
+        expect(within(allServicesTable).queryByText('Hash')).toBeNull();
+        expect(within(allServicesTable).getByText('State')).toBeInTheDocument();
+        expect(
+          within(allServicesTable).getByText('Action'),
+        ).toBeInTheDocument();
+      });
 
-          // rows
-          expect(within(allServicesTable).getByText('1')).toBeInTheDocument();
-          expect(
-            within(allServicesTable).getByText('0x8626...9C1199'),
-          ).toBeInTheDocument();
-          expect(
-            within(allServicesTable).getByText('Terminated Bonded'),
-          ).toBeInTheDocument();
-          expect(
-            within(allServicesTable).getByText('View'),
-          ).toBeInTheDocument();
-        });
+      it('should display all services information', async () => {
+        const { container, findByTestId } = render(
+          wrapProvider(<ListServices />),
+        );
+
+        if (!container) {
+          throw new Error('`All tab` is null');
+        }
+
+        // check if the selected tab is `All` & has the correct content
+        await waitFor(async () =>
+          expect(container.querySelector(ACTIVE_TAB)?.textContent).toBe('All'),
+        );
+
+        const allServicesTable = await findByTestId('all-services-table');
+
+        expect(within(allServicesTable).getByText('5001')).toBeInTheDocument();
+        expect(
+          within(allServicesTable).getByText(/0x8626...9C1199/),
+        ).toBeInTheDocument();
+        expect(
+          within(allServicesTable).getByText('Terminated Bonded'),
+        ).toBeInTheDocument();
+        expect(within(allServicesTable).getByText('View')).toBeInTheDocument();
       });
     });
   });
@@ -229,7 +257,7 @@ describe('listServices/index.jsx', () => {
       (getFilteredServices as jest.Mock).mockResolvedValue([]);
     });
 
-    it('should render tabs with `All Tab` & Mint button', async () => {
+    it('should display tabs with `All Tab` & Mint button', async () => {
       const { container, getByRole } = render(wrapProvider(<ListServices />));
 
       if (!container) {
@@ -252,7 +280,7 @@ describe('listServices/index.jsx', () => {
       });
     });
 
-    it('should render service columns and rows', async () => {
+    it('should display service columns and rows', async () => {
       const { container, findByTestId } = render(
         wrapProvider(<ListServices />),
       );
