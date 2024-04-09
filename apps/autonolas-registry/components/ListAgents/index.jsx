@@ -108,10 +108,10 @@ const ListAgents = () => {
              * - search by `account` as searchValue
              * - API will be called only once & store the complete list
              */
-            const e = isMainnet
+            const myAgents = isMainnet
               ? await getMyAgents(account, currentPage)
               : await getFilteredAgents(account);
-            setList(e);
+            setList(myAgents);
           }
         } catch (e) {
           console.error(e);
@@ -193,8 +193,8 @@ const ListAgents = () => {
       type="card"
       activeKey={currentTab}
       tabBarExtraContent={extraTabContent}
-      onChange={(e) => {
-        setCurrentTab(e);
+      onChange={(tabName) => {
+        setCurrentTab(tabName);
 
         setTotal(0);
         setCurrentPage(1);
@@ -205,7 +205,7 @@ const ListAgents = () => {
 
         // update the links to keep track of my-agents
         router.push(
-          e === MY_AGENTS ? `${links.AGENTS}#${MY_AGENTS}` : links.AGENTS,
+          tabName === MY_AGENTS ? `${links.AGENTS}#${MY_AGENTS}` : links.AGENTS,
         );
       }}
       items={[

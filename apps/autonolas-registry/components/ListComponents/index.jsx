@@ -112,10 +112,10 @@ const ListComponents = () => {
              * - search by `account` as searchValue
              * - API will be called only once & store the complete list
              */
-            const e = isMainnet
+            const myComps = isMainnet
               ? await getMyComponents(account, currentPage)
               : await getFilteredComponents(account);
-            setList(e);
+            setList(myComps);
           }
         } catch (e) {
           console.error(e);
@@ -196,8 +196,8 @@ const ListComponents = () => {
       type="card"
       activeKey={currentTab}
       tabBarExtraContent={extraTabContent}
-      onChange={(e) => {
-        setCurrentTab(e);
+      onChange={(tabName) => {
+        setCurrentTab(tabName);
 
         setTotal(0);
         setCurrentPage(1);
@@ -208,7 +208,7 @@ const ListComponents = () => {
 
         // update the URL to keep track of my-components
         router.push(
-          e === MY_COMPONENTS
+          tabName === MY_COMPONENTS
             ? `${links.COMPONENTS}#${MY_COMPONENTS}`
             : links.COMPONENTS,
         );

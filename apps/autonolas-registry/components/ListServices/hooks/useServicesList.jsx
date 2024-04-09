@@ -9,7 +9,7 @@ import { gql } from 'graphql-request';
 import { GRAPHQL_CLIENT } from '../../../common-util/hooks/useSubgraph';
 import { HASH_PREFIX, TOTAL_VIEW_COUNT } from '../../../util/constants';
 
-const serviceColumns = `{
+const SERVICE_FIELDS = `{
   id
   serviceId
   publicId
@@ -56,7 +56,7 @@ export const useAllServices = () => {
             first: ${TOTAL_VIEW_COUNT}, 
             skip: ${TOTAL_VIEW_COUNT * (currentPage - 1)},
             orderBy: serviceId
-          ) ${serviceColumns}
+          ) ${SERVICE_FIELDS}
         }
       `;
 
@@ -80,7 +80,7 @@ export const useMyServices = () => {
               owner_contains_nocase: "${ownerAddress}"
             },
             orderBy: serviceId,
-          ) ${serviceColumns}
+          ) ${SERVICE_FIELDS}
         }
       `;
 
@@ -106,7 +106,7 @@ export const useAllServicesBySearch = () => {
               ]
             }
             orderBy: serviceId
-          ) ${serviceColumns}
+          ) ${SERVICE_FIELDS}
         }
       `;
 
@@ -133,7 +133,7 @@ export const useMyServicesBySearch = () => {
               ]
             }
             orderBy: serviceId,
-          ) ${serviceColumns}
+          ) ${SERVICE_FIELDS}
         }
       `;
 

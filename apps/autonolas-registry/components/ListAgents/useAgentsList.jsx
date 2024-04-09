@@ -13,6 +13,39 @@ import {
 } from '../../common-util/hooks/useSubgraph';
 import { TOTAL_VIEW_COUNT } from '../../util/constants';
 
+const getAllAndMyAgentsQuery = (currentPage, ownerAddress = null) => {
+  return gql`
+    {
+      units(
+        first: ${TOTAL_VIEW_COUNT}, 
+        skip: ${TOTAL_VIEW_COUNT * (currentPage - 1)},
+        where: { 
+          packageType: agent 
+          ${ownerAddress ? `owner_contains_nocase: "${ownerAddress}"` : ''}
+        }, 
+        orderBy: tokenId
+      ) ${columnsForAgentsAndComponents}
+    }
+  `;
+};
+
+const getAgentsBySearchQuery = (searchValue, ownerAddress = null) => {
+  return gql`
+    {
+      units(
+        where: {
+          and: [
+            { packageType: "agent" }
+            ${getSearchFilterSubQueryForAgentsAndComponents(searchValue)}
+            ${ownerAddress ? `owner_contains_nocase: "${ownerAddress}"` : ''}
+          ]
+        }
+        orderBy: tokenId
+      ) ${columnsForAgentsAndComponents}
+    }
+  `;
+};
+
 /**
  * Hook to get ALL units
  * @returns {function} function to get all units
@@ -20,17 +53,7 @@ import { TOTAL_VIEW_COUNT } from '../../util/constants';
  */
 export const useAllAgents = () => {
   return useCallback(async (currentPage) => {
-    const query = gql`
-        {
-          units(
-            first: ${TOTAL_VIEW_COUNT}, 
-            skip: ${TOTAL_VIEW_COUNT * (currentPage - 1)},
-            where: { packageType: agent }, 
-            orderBy: tokenId
-          ) ${columnsForAgentsAndComponents}
-        }
-      `;
-
+    const query = getAllAndMyAgentsQuery(currentPage);
     const response = await GRAPHQL_CLIENT.request(query);
     return response?.units;
   }, []);
@@ -42,20 +65,7 @@ export const useAllAgents = () => {
  */
 export const useMyAgents = () => {
   return useCallback(async (ownerAddress, currentPage) => {
-    const query = gql`
-        {
-          units(
-            first: ${TOTAL_VIEW_COUNT}, 
-            skip: ${TOTAL_VIEW_COUNT * (currentPage - 1)},
-            where: { 
-              packageType: agent
-              owner_contains_nocase: "${ownerAddress}", 
-            },
-            orderBy: tokenId,
-          ) ${columnsForAgentsAndComponents}
-        }
-      `;
-
+    const query = getAllAndMyAgentsQuery(currentPage, ownerAddress);
     const response = await GRAPHQL_CLIENT.request(query);
     return response?.units;
   }, []);
@@ -67,20 +77,7 @@ export const useMyAgents = () => {
  */
 const useAllAgentsBySearch = () => {
   return useCallback(async (searchValue) => {
-    const query = gql`
-        {
-          units(
-            where: {
-              and: [
-                { packageType: "agent" }
-                ${getSearchFilterSubQueryForAgentsAndComponents(searchValue)}
-              ]
-            }
-            orderBy: tokenId
-          ) ${columnsForAgentsAndComponents}
-        }
-      `;
-
+    const query = getAgentsBySearchQuery(searchValue);
     const response = await GRAPHQL_CLIENT.request(query);
     return response?.units;
   }, []);
@@ -92,21 +89,7 @@ const useAllAgentsBySearch = () => {
  */
 const useMyAgentsBySearch = () => {
   return useCallback(async (ownerAddress, searchValue) => {
-    const query = gql`
-        {
-          units(
-            where: {
-              and: [
-                { packageType: "agent" }
-                { owner_contains_nocase: "${ownerAddress}" }
-                ${getSearchFilterSubQueryForAgentsAndComponents(searchValue)}
-              ]
-            }
-            orderBy: tokenId
-          ) ${columnsForAgentsAndComponents}
-        }
-      `;
-
+    const query = getAgentsBySearchQuery(searchValue, ownerAddress);
     const response = await GRAPHQL_CLIENT.request(query);
     return response?.units;
   }, []);

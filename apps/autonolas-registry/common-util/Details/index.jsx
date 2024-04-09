@@ -58,9 +58,7 @@ export const Details = ({
       <Header>
         <div>
           {isMainnet ? (
-            <>
-              <DetailsTitle level={3}>{packageName}</DetailsTitle>
-            </>
+            <DetailsTitle level={3}>{packageName}</DetailsTitle>
           ) : (
             <>
               <Text strong>{`${capitalize(type)} Name`}</Text>
