@@ -8,7 +8,7 @@ import { gql } from 'graphql-request';
 
 import {
   GRAPHQL_CLIENT,
-  columnsForAgentsAndComponents,
+  UNIT_FIELDS,
   getSearchFilterSubQueryForAgentsAndComponents,
 } from '../../common-util/hooks/useSubgraph';
 import { TOTAL_VIEW_COUNT } from '../../util/constants';
@@ -30,7 +30,7 @@ export const useAllComponents = () => {
             skip: ${TOTAL_VIEW_COUNT * (currentPage - 1)},
             where: { ${componentPackageType} }, 
             orderBy: tokenId
-          ) ${columnsForAgentsAndComponents}
+          ) ${UNIT_FIELDS}
         }
       `;
 
@@ -55,7 +55,7 @@ export const useMyComponents = () => {
               owner_contains_nocase: "${ownerAddress}", 
             },
             orderBy: tokenId,
-          ) ${columnsForAgentsAndComponents}
+          ) ${UNIT_FIELDS}
         }
       `;
 
@@ -80,7 +80,7 @@ const useAllComponentsBySearch = () => {
               ]
             }
             orderBy: tokenId
-          ) ${columnsForAgentsAndComponents}
+          ) ${UNIT_FIELDS}
         }
       `;
 
@@ -106,7 +106,7 @@ const useMyComponentsBySearch = () => {
               ]
             }
             orderBy: tokenId
-          ) ${columnsForAgentsAndComponents}
+          ) ${UNIT_FIELDS}
         }
       `;
 

@@ -8,7 +8,7 @@ import { gql } from 'graphql-request';
 
 import {
   GRAPHQL_CLIENT,
-  columnsForAgentsAndComponents,
+  UNIT_FIELDS,
   getSearchFilterSubQueryForAgentsAndComponents,
 } from '../../common-util/hooks/useSubgraph';
 import { TOTAL_VIEW_COUNT } from '../../util/constants';
@@ -24,7 +24,7 @@ const getAllAndMyAgentsQuery = (currentPage, ownerAddress = null) => {
           ${ownerAddress ? `owner_contains_nocase: "${ownerAddress}"` : ''}
         }, 
         orderBy: tokenId
-      ) ${columnsForAgentsAndComponents}
+      ) ${UNIT_FIELDS}
     }
   `;
 };
@@ -41,7 +41,7 @@ const getAgentsBySearchQuery = (searchValue, ownerAddress = null) => {
           ]
         }
         orderBy: tokenId
-      ) ${columnsForAgentsAndComponents}
+      ) ${UNIT_FIELDS}
     }
   `;
 };

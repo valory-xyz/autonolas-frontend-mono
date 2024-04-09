@@ -4,12 +4,12 @@ import { useRouter } from 'next/router';
 import { notifyError } from '@autonolas/frontend-library';
 
 import { NAV_TYPES } from '../../util/constants';
-import ListTable from '../../common-util/List/ListTable';
 import {
+  ListTable,
   useExtraTabContent,
   getHash,
   isMyTab,
-} from '../../common-util/List/ListTable/helpers';
+} from '../../common-util/List/ListTable';
 import { useHelpers } from '../../common-util/hooks';
 import {
   useAllComponents,

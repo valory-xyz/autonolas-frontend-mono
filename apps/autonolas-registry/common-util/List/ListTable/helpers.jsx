@@ -1,21 +1,17 @@
-import { useState } from 'react';
-import { Input, Space, Button, Typography, Tooltip } from 'antd';
-import { SearchOutlined, InfoCircleOutlined } from '@ant-design/icons';
+import { Space, Button } from 'antd';
 import {
   AddressLink,
   areAddressesEqual,
   NA,
 } from '@autonolas/frontend-library';
-import styled from 'styled-components';
 
 import {
   HASH_PREFIX,
   NAV_TYPES,
   SERVICE_STATE,
+  SERVICE_STATE_KEY_MAP,
   TOTAL_VIEW_COUNT,
 } from '../../../util/constants';
-
-const { Title } = Typography;
 
 export const getTableColumns = (
   type,
@@ -112,9 +108,9 @@ export const getTableColumns = (
       dataIndex: 'state',
       key: 'state',
       width: 150,
-      render: (e) => {
-        if (!e) return NA;
-        return SERVICE_STATE[e];
+      render: (text) => {
+        if (!text) return NA;
+        return SERVICE_STATE[text];
       },
     };
     const actionAndUpdateColumn = {
@@ -123,9 +119,10 @@ export const getTableColumns = (
       key: 'action',
       fixed: 'right',
       render: (_text, record) => {
-        // only show update button for pre-registration state
+        // only show update button for pre-registration state and
+        // if the owner is the same as the current account
         const canUpdate =
-          ['1'].includes(record.state) &&
+          record.state === SERVICE_STATE_KEY_MAP.preRegistration &&
           areAddressesEqual(record.owner, account);
 
         return (
@@ -148,6 +145,30 @@ export const getTableColumns = (
       },
     };
 
+    const idColumn = {
+      title: 'ID',
+      dataIndex: 'id',
+      key: 'id',
+      width: isMobile ? 30 : 50,
+    };
+
+    const nonMainnetOwnerColumn = {
+      title: 'Owner',
+      dataIndex: 'owner',
+      key: 'owner',
+      width: 200,
+      render: (text) => {
+        if (!text || text === NA) return NA;
+        return (
+          <AddressLink
+            {...addressLinkProps}
+            text={text}
+            chainName={chainName}
+          />
+        );
+      },
+    };
+
     return isMainnet
       ? [
           tokenIdColumn,
@@ -157,38 +178,17 @@ export const getTableColumns = (
           stateColumn,
           actionAndUpdateColumn,
         ]
-      : [
-          {
-            title: 'ID',
-            dataIndex: 'id',
-            key: 'id',
-            width: isMobile ? 30 : 50,
-          },
-          {
-            title: 'Owner',
-            dataIndex: 'owner',
-            key: 'owner',
-            width: 200,
-            render: (text) => {
-              if (!text || text === NA) return NA;
-              return (
-                <AddressLink
-                  {...addressLinkProps}
-                  text={text}
-                  chainName={chainName}
-                />
-              );
-            },
-          },
-          stateColumn,
-          actionAndUpdateColumn,
-        ];
+      : [idColumn, nonMainnetOwnerColumn, stateColumn, actionAndUpdateColumn];
   }
 
   return [];
 };
 
-export const fetchDataSource = (type, rawData, { current, isMainnet }) => {
+export const convertTableRawData = (
+  type,
+  rawData,
+  { currentPage, isMainnet },
+) => {
   /**
    * @example
    * TOTAL_VIEW_COUNT = 10, current = 1
@@ -200,7 +200,7 @@ export const fetchDataSource = (type, rawData, { current, isMainnet }) => {
    *       = 40 + 1
    *       = 41
    */
-  const startIndex = (current - 1) * TOTAL_VIEW_COUNT + 1;
+  const startIndex = (currentPage - 1) * TOTAL_VIEW_COUNT + 1;
 
   // for mainnet
   if (isMainnet) {
@@ -261,84 +261,7 @@ export const fetchDataSource = (type, rawData, { current, isMainnet }) => {
     }));
   }
 
-  return [];
-};
-
-const SearchTooltip = styled.div`
-  ul {
-    margin: 0;
-    padding: 0 0 0 16px;
-  }
-`;
-
-/**
- * tab content
- */
-export const useExtraTabContent = ({
-  title,
-  onRegisterClick = () => {},
-  isSvm = false,
-  type,
-}) => {
-  const [searchValue, setSearchValue] = useState('');
-  const [value, setValue] = useState('');
-  const clearSearch = () => {
-    setValue('');
-    setSearchValue('');
-  };
-
-  const extraTabContent = {
-    left: <Title level={2}>{title}</Title>,
-    right: (
-      <>
-        {/* TODO: hiding search util feature is introduced */}
-        {isSvm ? null : (
-          <>
-            <Input
-              prefix={<SearchOutlined className="site-form-item-icon" />}
-              placeholder="Search..."
-              value={value}
-              onChange={(e) => setValue(e.target.value)}
-              onKeyDown={(e) =>
-                e.key === 'Enter' && setSearchValue(value || '')
-              }
-              suffix={
-                <Tooltip
-                  title={
-                    <SearchTooltip>
-                      <div>Search by:</div>
-                      <ul>
-                        <li>Name</li>
-                        {type !== NAV_TYPES.SERVICE && <li>Description</li>}
-                        <li>Owner</li>
-                        <li>Package Hash</li>
-                      </ul>
-                    </SearchTooltip>
-                  }
-                >
-                  <InfoCircleOutlined style={{ color: 'rgba(0,0,0,.45)' }} />
-                </Tooltip>
-              }
-            />
-
-            <Button
-              ghost
-              type="primary"
-              onClick={() => setSearchValue(value || '')}
-            >
-              Search
-            </Button>
-          </>
-        )}
-
-        <Button type="primary" onClick={onRegisterClick}>
-          Mint
-        </Button>
-      </>
-    ),
-  };
-
-  return { searchValue, extraTabContent, clearSearch };
+  throw new Error('Invalid type parameter');
 };
 
 /**

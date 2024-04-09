@@ -4,12 +4,12 @@ import { useRouter } from 'next/router';
 import { notifyError } from '@autonolas/frontend-library';
 
 import { NAV_TYPES } from '../../util/constants';
-import ListTable from '../../common-util/List/ListTable';
 import {
+  ListTable,
   useExtraTabContent,
   getHash,
   isMyTab,
-} from '../../common-util/List/ListTable/helpers';
+} from '../../common-util/List/ListTable';
 import { getMyListOnPagination } from '../../common-util/ContractUtils/myList';
 import { useHelpers } from '../../common-util/hooks';
 import {
@@ -123,13 +123,13 @@ const ListServices = () => {
         // All services
         if (currentTab === ALL_SERVICES) {
           if (isMainnet) {
-            const e = await getAllServices(currentPage);
-            setList(e);
+            const mainnetServices = await getAllServices(currentPage);
+            setList(mainnetServices);
           } else {
-            const e = isSvm
+            const nonMainnetServices = isSvm
               ? await getSvmServices(total, currentPage)
               : await getServices(total, currentPage);
-            setList(e);
+            setList(nonMainnetServices);
           }
         } else if (currentTab === MY_SERVICES && account) {
           /**
@@ -138,17 +138,17 @@ const ListServices = () => {
            * - API will be called only once & store the complete list
            */
           if (isMainnet) {
-            const e = await getMyServices(account, currentPage);
-            setList(e);
+            const mainnetMyServices = await getMyServices(account, currentPage);
+            setList(mainnetMyServices);
           } else {
-            const e = isSvm
+            const nonMainnetMyServices = isSvm
               ? await getMySvmServices(account, total)
               : await getFilteredServices(account);
-            setList(e);
+            setList(nonMainnetMyServices);
 
             // TODO: remove this once `getTotalForMySvmServices` is fixed
             if (isSvm) {
-              setTotal(e.length);
+              setTotal(nonMainnetMyServices.length);
             }
           }
         }
@@ -251,8 +251,8 @@ const ListServices = () => {
       type="card"
       activeKey={currentTab}
       tabBarExtraContent={extraTabContent}
-      onChange={(e) => {
-        setCurrentTab(e);
+      onChange={(activeTab) => {
+        setCurrentTab(activeTab);
 
         setTotal(0);
         setCurrentPage(1);
@@ -263,7 +263,7 @@ const ListServices = () => {
 
         // update the URL to keep track of my-services
         router.push(
-          e === MY_SERVICES
+          activeTab === MY_SERVICES
             ? `${links.SERVICES}#${MY_SERVICES}`
             : links.SERVICES,
         );

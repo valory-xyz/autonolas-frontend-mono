@@ -12,7 +12,7 @@ export const GRAPHQL_CLIENT = new GraphQLClient(
   },
 );
 
-export const columnsForAgentsAndComponents = `{
+export const UNIT_FIELDS = `{
   id
   tokenId
   owner

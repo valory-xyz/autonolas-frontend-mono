@@ -25,10 +25,10 @@ export const useGetServiceDetails = () => {
     async (id) => {
       if (!id) notifyError('No service id provided');
 
-      const e = isSvm
+      const serviceDetails = isSvm
         ? await getSvmServiceDetails(id)
         : await getServiceDetails(id);
-      return e;
+      return serviceDetails;
     },
     [isSvm, getSvmServiceDetails],
   );
@@ -46,10 +46,10 @@ export const useGetServiceOwner = () => {
     async (id) => {
       if (!id) notifyError('No service id provided');
 
-      const e = isSvm
+      const serviceOwner = isSvm
         ? await getSvmServiceOwner(id)
         : await getServiceOwner(id);
-      return e;
+      return serviceOwner;
     },
     [isSvm, getSvmServiceOwner],
   );
@@ -67,8 +67,10 @@ export const useGetServiceTokenUri = () => {
     async (id) => {
       if (!id) notifyError('No service id provided');
 
-      const e = isSvm ? await getSvmTokenUri(id) : await getTokenUri(id);
-      return e;
+      const serviceTokenUri = isSvm
+        ? await getSvmTokenUri(id)
+        : await getTokenUri(id);
+      return serviceTokenUri;
     },
     [isSvm, getSvmTokenUri],
   );
