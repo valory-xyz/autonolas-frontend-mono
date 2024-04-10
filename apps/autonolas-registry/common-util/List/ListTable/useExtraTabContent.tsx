@@ -12,12 +12,19 @@ const SearchUl = styled.ul`
   padding: 0 0 0 16px;
 `;
 
+type UseExtraTabContentProps = {
+  title: string;
+  onRegisterClick?: () => void;
+  isSvm?: boolean;
+  type: string;
+};
+
 export const useExtraTabContent = ({
   title,
   onRegisterClick,
   isSvm = false,
   type,
-}) => {
+}: UseExtraTabContentProps) => {
   const [searchValue, setSearchValue] = useState('');
   const [value, setValue] = useState('');
   const clearSearch = () => {
