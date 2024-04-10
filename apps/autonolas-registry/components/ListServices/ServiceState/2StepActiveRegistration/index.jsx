@@ -7,6 +7,7 @@ import {
   notifyError,
   notifySuccess,
 } from '@autonolas/frontend-library';
+import { isArray } from 'lodash';
 
 import { useHelpers } from 'common-util/hooks';
 import { SendTransactionButton } from 'common-util/TransactionHelpers/SendTransactionButton';
@@ -171,12 +172,13 @@ export const ActiveRegistration = ({
   const totalBondEthToken = convertToEth((totalBonds || 0).toString()) || '--';
 
   let totalTokenBonds = 0;
-  ethTokenBonds?.forEach((bond, index) => {
-    const addressCount = getNumberOfAgentAddress(
-      dataSource[index].agentAddresses,
-    );
-    totalTokenBonds += addressCount * bond;
-  });
+  isArray(ethTokenBonds) &&
+    ethTokenBonds.forEach((bond, index) => {
+      const addressCount = getNumberOfAgentAddress(
+        dataSource[index].agentAddresses,
+      );
+      totalTokenBonds += addressCount * bond;
+    });
 
   return (
     <div className="step-2-active-registration">

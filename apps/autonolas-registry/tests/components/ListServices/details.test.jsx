@@ -276,6 +276,22 @@ describe('listServices/details.jsx', () => {
         ).toHaveTextContent('Terminated Bonded');
       });
     });
+
+    it('should display "Update" button for service owner', async () => {
+      const mockHandleUpdate = jest.fn();
+
+      const { findByTestId } = render(
+        wrapProvider(<Services handleUpdate={mockHandleUpdate} />),
+      );
+
+      const updateButton = await findByTestId('service-update-button');
+
+      if (!updateButton) {
+        throw new Error('Update button not found');
+      }
+
+      expect(updateButton).toBeInTheDocument();
+    });
   });
 
   describe('SVM', () => {
