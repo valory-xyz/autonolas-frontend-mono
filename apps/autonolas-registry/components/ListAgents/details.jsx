@@ -1,7 +1,7 @@
 import { useRouter } from 'next/router';
 
-import Details from 'common-util/Details';
-import { useHelpers } from 'common-util/hooks';
+import { Details } from '../../common-util/Details';
+import { useHelpers } from '../../common-util/hooks';
 import { useCallback } from 'react';
 import {
   getAgentDetails,

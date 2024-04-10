@@ -1,15 +1,11 @@
-import { useState, useCallback } from 'react';
-import PropTypes from 'prop-types';
+import { useState, useCallback, FC } from 'react';
 import capitalize from 'lodash/capitalize';
-import {
-  Row, Col, Button, Typography,
-} from 'antd';
+import { Row, Col, Button, Typography } from 'antd';
 import { get } from 'lodash';
-import { Loader, NA } from '@autonolas/frontend-library';
+import { GenericObject, Loader, NA } from '@autonolas/frontend-library';
 
-import { NAV_TYPES } from '../../util/constants';
+import { NAV_TYPES, NavTypesValues } from '../../util/constants';
 import { useMetadata } from '../hooks/useMetadata';
-import { typePropType } from '../propTypes';
 import { IpfsHashGenerationModal } from '../List/IpfsHashGenerationModal';
 import { useDetails } from './useDetails';
 import { NftImage } from './NFTImage';
@@ -18,7 +14,23 @@ import { Header, DetailsTitle } from './styles';
 
 const { Text } = Typography;
 
-export const Details = ({
+type DetailsProps = {
+  id: string;
+  type: NavTypesValues;
+  getDetails: (id: string) => Promise<GenericObject>;
+  getTokenUri?: (id: string) => Promise<string>;
+  getOwner?: (id: string) => Promise<string>;
+  handleUpdate?: () => void;
+  handleHashUpdate?: () => void;
+  navigateToDependency?: (id: string, type: NavTypesValues) => void;
+  renderServiceState?: (props: {
+    isOwner: boolean;
+    details: GenericObject;
+    updateDetails: (details: GenericObject) => void;
+  }) => JSX.Element | null;
+};
+
+export const Details: FC<DetailsProps> = ({
   id,
   type,
   getDetails,
@@ -31,20 +43,19 @@ export const Details = ({
 }) => {
   const [isModalVisible, setIsModalVisible] = useState(false);
 
-  const {
-    isLoading, isOwner, info, ownerAddress, tokenUri, updateDetails,
-  } = useDetails({
-    id,
-    type,
-    getDetails,
-    getOwner,
-    getTokenUri,
-  });
+  const { isLoading, isOwner, info, ownerAddress, tokenUri, updateDetails } =
+    useDetails({
+      id,
+      type,
+      getDetails,
+      getOwner,
+      getTokenUri,
+    });
   const { nftImageUrl } = useMetadata(tokenUri);
 
   // Update button to be show only if the connected account is the owner
-  // and only for agent and component
-  const canShowUpdateBtn = isOwner && type !== NAV_TYPES.SERVICE;
+  // and only for services
+  const canShowUpdateBtn = isOwner && type === NAV_TYPES.SERVICE;
 
   const openUpdateHashModal = useCallback(() => {
     setIsModalVisible(true);
@@ -90,7 +101,7 @@ export const Details = ({
             serviceThreshold={get(info, 'threshold') || NA}
             serviceCurrentState={get(info, 'state') || NA}
             handleHashUpdate={handleHashUpdate}
-            setIsModalVisible={openUpdateHashModal}
+            openUpdateHashModal={openUpdateHashModal}
             navigateToDependency={navigateToDependency}
           />
         </Col>
@@ -120,27 +131,6 @@ export const Details = ({
       )}
     </>
   );
-};
-
-Details.propTypes = {
-  id: PropTypes.string.isRequired,
-  type: typePropType.isRequired,
-  getDetails: PropTypes.func.isRequired,
-  getTokenUri: PropTypes.func,
-  getOwner: PropTypes.func,
-  handleUpdate: PropTypes.func,
-  handleHashUpdate: PropTypes.func,
-  navigateToDependency: PropTypes.func,
-  renderServiceState: PropTypes.func,
-};
-
-Details.defaultProps = {
-  handleUpdate: null,
-  getTokenUri: () => {},
-  getOwner: () => {},
-  handleHashUpdate: () => {},
-  navigateToDependency: () => {},
-  renderServiceState: null,
 };
 
 export default Details;

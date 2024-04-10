@@ -9,7 +9,7 @@ const getAutonolasTokenUri = (tokenUri) =>
 
 /**
  * NFT details: hook to fetch metadata from IPFS
- * @param {string} tokenUri
+ * @param {string | null} tokenUri
  */
 export const useMetadata = (tokenUri) => {
   const [metadata, setMetadata] = useState(null);

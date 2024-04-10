@@ -3,7 +3,7 @@ import { BalancerSDK } from '@balancer-labs/sdk';
 import { memoize, round } from 'lodash';
 import { areAddressesEqual } from '@autonolas/frontend-library';
 
-import { DEX } from 'util/constants';
+import { DEX } from '../../../util/constants';
 import {
   MAX_AMOUNT,
   ADDRESS_ZERO,
