@@ -6,13 +6,17 @@ import { Button, Form, Input } from 'antd';
 import { isValidAddress, notifyError } from '@autonolas/frontend-library';
 
 import { DEFAULT_SERVICE_CREATION_ETH_TOKEN } from 'util/constants';
-import { commaMessage, DependencyLabel } from 'common-util/List/ListCommon';
-import { FormItemHash } from 'common-util/List/RegisterForm/helpers';
-import { IpfsHashGenerationModal } from 'common-util/List/IpfsHashGenerationModal';
-import { RegistryForm } from 'common-util/TransactionHelpers/RegistryForm';
-import { isValidSolanaPublicKey } from 'common-util/functions';
-import { useHelpers } from 'common-util/hooks';
-import { ComplexLabel } from 'common-util/List/styles';
+import {
+  commaMessage,
+  DependencyLabel,
+} from '../../../common-util/List/ListCommon';
+import { FormItemHash } from '../../../common-util/List/RegisterForm/helpers';
+import { IpfsHashGenerationModal } from '../../../common-util/List/IpfsHashGenerationModal';
+import { ComplexLabel } from '../../../common-util/List/styles';
+import { RegistryForm } from '../../../common-util/TransactionHelpers/RegistryForm';
+import { isValidSolanaPublicKey } from '../../../common-util/functions';
+import { ThresholdInput } from '../../../common-util/MintForm/utils';
+import { useHelpers } from '../../../common-util/hooks';
 
 export const FORM_NAME = 'serviceRegisterForm';
 
@@ -62,35 +66,6 @@ const validateOwnerAddress = async (isSvm, listType, value) => {
 };
 
 /**
- * validates the threshold based on the no. of slots
- */
-const validateThreshold = (form, getFieldValue, value) => {
-  if (!value || !getFieldValue('agent_num_slots')) {
-    Promise.resolve();
-  }
-
-  // eg: 1, 2, 1 and sumOfSlots = 4
-  const sumOfSlots = form
-    .getFieldValue('agent_num_slots')
-    .split(',')
-    .reduce((sum, num) => sum + parseInt(num.trim(), 10), 0);
-
-  // eg: 2/3 * 4 = 2.66
-  // Now, threshold should be at least 2.66 and not exceed the sum of no. of slots
-  // ie. threshold >= 2.66 && threshold <= 4
-  const threshold = parseInt(value, 10);
-  if (threshold >= (2 / 3) * sumOfSlots && threshold <= sumOfSlots) {
-    return Promise.resolve();
-  }
-
-  return Promise.reject(
-    new Error(
-      'Threshold must be at least 2/3 and not exceed the sum of no. of slots',
-    ),
-  );
-};
-
-/**
  * Service creation form
  */
 const RegisterForm = ({
@@ -101,7 +76,8 @@ const RegisterForm = ({
   ethTokenAddress,
   handleSubmit,
 }) => {
-  const { account, doesNetworkHaveValidServiceManagerToken, isSvm } = useHelpers();
+  const { account, doesNetworkHaveValidServiceManagerToken, isSvm } =
+    useHelpers();
 
   const [form] = Form.useForm();
   const [isModalVisible, setIsModalVisible] = useState(false);
@@ -130,14 +106,14 @@ const RegisterForm = ({
       const agentNumSlots = isSvm
         ? formInitialValues.slots?.join(', ')
         : (formInitialValues.agentParams || [])
-          .map((param) => param[0])
-          .join(', ');
+            .map((param) => param[0])
+            .join(', ');
 
       const bonds = isSvm
         ? formInitialValues.bonds?.join(', ')
         : (formInitialValues.agentParams || [])
-          .map((param) => param[1])
-          .join(', ');
+            .map((param) => param[1])
+            .join(', ');
 
       setFields([
         { name: ['owner_address'], value: formInitialValues.owner || null },
@@ -225,7 +201,8 @@ const RegisterForm = ({
               message: `Please input the address of the ${listType} Owner`,
             },
             () => ({
-              validator: (_, value) => validateOwnerAddress(isSvm, listType, value),
+              validator: (_, value) =>
+                validateOwnerAddress(isSvm, listType, value),
             }),
           ]}
         >
@@ -281,9 +258,11 @@ const RegisterForm = ({
               <Button
                 htmlType="button"
                 type="link"
-                onClick={() => form.setFieldsValue({
-                  token: DEFAULT_SERVICE_CREATION_ETH_TOKEN,
-                })}
+                onClick={() =>
+                  form.setFieldsValue({
+                    token: DEFAULT_SERVICE_CREATION_ETH_TOKEN,
+                  })
+                }
                 className="pl-0"
                 disabled={!account}
               >
@@ -319,12 +298,12 @@ const RegisterForm = ({
         <Form.Item
           name="agent_ids"
           validateFirst
-          label={(
+          label={
             <ComplexLabel>
               Canonical agent Ids
               <DependencyLabel type="service" />
             </ComplexLabel>
-          )}
+          }
           rules={[
             {
               required: true,
@@ -344,7 +323,7 @@ const RegisterForm = ({
         </Form.Item>
 
         <Form.Item
-          label={(
+          label={
             <ComplexLabel>
               No. of slots to canonical agent Ids
               <div className="label-helper-text">
@@ -354,7 +333,7 @@ const RegisterForm = ({
                 {commaMessage}
               </div>
             </ComplexLabel>
-          )}
+          }
           name="agent_num_slots"
           validateFirst
           rules={[
@@ -387,21 +366,7 @@ const RegisterForm = ({
           <Input placeholder="5000000000000000, 5000000000000000, 5000000000000000" />
         </Form.Item>
 
-        <Form.Item
-          label="Threshold"
-          name="threshold"
-          help="Threshold must be at least 2/3 the sum of no. of slots and not exceed the sum of no. of slots"
-          rules={[
-            { required: true, message: 'Please input the threshold' },
-            ({ getFieldValue }) => ({
-              validator(_, value) {
-                return validateThreshold(form, getFieldValue, value);
-              },
-            }),
-          ]}
-        >
-          <Input />
-        </Form.Item>
+        <ThresholdInput form={form} />
 
         <Form.Item>
           <Button
