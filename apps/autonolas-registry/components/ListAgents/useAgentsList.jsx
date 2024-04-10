@@ -37,7 +37,9 @@ const getAgentsBySearchQuery = (searchValue, ownerAddress = null) => {
           and: [
             { packageType: "agent" }
             ${getSearchFilterSubQueryForAgentsAndComponents(searchValue)}
-            ${ownerAddress ? `owner_contains_nocase: "${ownerAddress}"` : ''}
+            ${
+              ownerAddress ? `{ owner_contains_nocase: "${ownerAddress}" }` : ''
+            }
           ]
         }
         orderBy: tokenId

@@ -14,7 +14,42 @@ import {
 import { TOTAL_VIEW_COUNT } from '../../util/constants';
 
 const componentPackageType =
-  'packageType_in: [connection,skill,protocol,contract,custom]';
+  'packageType_in: [connection,skill,protocol,contract,custom,unknown]';
+
+const getAllAndMyComponentsQuery = (currentPage, ownerAddress = null) => {
+  return gql`
+    {
+      units(
+        first: ${TOTAL_VIEW_COUNT}, 
+        skip: ${TOTAL_VIEW_COUNT * (currentPage - 1)},
+        where: { 
+          ${componentPackageType}
+          ${ownerAddress ? `owner_contains_nocase: "${ownerAddress}"` : ''}
+        }, 
+        orderBy: tokenId
+      ) ${UNIT_FIELDS}
+    }
+  `;
+};
+
+const getComponentsBySearchQuery = (searchValue, ownerAddress = null) => {
+  return gql`
+    {
+      units(
+        where: {
+          and: [
+            { ${componentPackageType} }
+            ${getSearchFilterSubQueryForAgentsAndComponents(searchValue)}
+            ${
+              ownerAddress ? `{ owner_contains_nocase: "${ownerAddress}" }` : ''
+            }
+          ]
+        }
+        orderBy: tokenId
+      ) ${UNIT_FIELDS}
+    }
+  `;
+};
 
 /**
  * Hook to get ALL components
@@ -23,17 +58,7 @@ const componentPackageType =
  */
 export const useAllComponents = () => {
   return useCallback(async (currentPage) => {
-    const query = gql`
-        {
-          units(
-            first: ${TOTAL_VIEW_COUNT}, 
-            skip: ${TOTAL_VIEW_COUNT * (currentPage - 1)},
-            where: { ${componentPackageType} }, 
-            orderBy: tokenId
-          ) ${UNIT_FIELDS}
-        }
-      `;
-
+    const query = getAllAndMyComponentsQuery(currentPage);
     const response = await GRAPHQL_CLIENT.request(query);
     return response?.units;
   }, []);
@@ -45,20 +70,7 @@ export const useAllComponents = () => {
  */
 export const useMyComponents = () => {
   return useCallback(async (ownerAddress, currentPage) => {
-    const query = gql`
-        {
-          units(
-            first: ${TOTAL_VIEW_COUNT}, 
-            skip: ${TOTAL_VIEW_COUNT * (currentPage - 1)},
-            where: { 
-              ${componentPackageType}
-              owner_contains_nocase: "${ownerAddress}", 
-            },
-            orderBy: tokenId,
-          ) ${UNIT_FIELDS}
-        }
-      `;
-
+    const query = getAllAndMyComponentsQuery(currentPage, ownerAddress);
     const response = await GRAPHQL_CLIENT.request(query);
     return response?.units;
   }, []);
@@ -70,20 +82,7 @@ export const useMyComponents = () => {
  */
 const useAllComponentsBySearch = () => {
   return useCallback(async (searchValue) => {
-    const query = gql`
-        {
-          units(
-            where: {
-              and: [
-                { ${componentPackageType} }
-                ${getSearchFilterSubQueryForAgentsAndComponents(searchValue)}
-              ]
-            }
-            orderBy: tokenId
-          ) ${UNIT_FIELDS}
-        }
-      `;
-
+    const query = getComponentsBySearchQuery(searchValue);
     const response = await GRAPHQL_CLIENT.request(query);
     return response?.units;
   }, []);
@@ -95,21 +94,7 @@ const useAllComponentsBySearch = () => {
  */
 const useMyComponentsBySearch = () => {
   return useCallback(async (ownerAddress, searchValue) => {
-    const query = gql`
-        {
-          units(
-            where: {
-              and: [
-                { ${componentPackageType} }
-                { owner_contains_nocase: "${ownerAddress}" }
-                ${getSearchFilterSubQueryForAgentsAndComponents(searchValue)}
-              ]
-            }
-            orderBy: tokenId
-          ) ${UNIT_FIELDS}
-        }
-      `;
-
+    const query = getComponentsBySearchQuery(searchValue, ownerAddress);
     const response = await GRAPHQL_CLIENT.request(query);
     return response?.units;
   }, []);
