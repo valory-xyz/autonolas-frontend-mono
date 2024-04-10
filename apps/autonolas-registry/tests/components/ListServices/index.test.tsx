@@ -125,14 +125,24 @@ describe('listServices/index.jsx', () => {
           throw new Error('`All tab` is null');
         }
 
-        expect(within(allServicesTable).getByText('ID')).toBeInTheDocument();
-        expect(within(allServicesTable).getByText('Name')).toBeInTheDocument();
-        expect(within(allServicesTable).getByText('Owner')).toBeInTheDocument();
-        expect(within(allServicesTable).getByText('Hash')).toBeInTheDocument();
-        expect(within(allServicesTable).getByText('State')).toBeInTheDocument();
-        expect(
-          within(allServicesTable).getByText('Action'),
-        ).toBeInTheDocument();
+        await waitFor(async () => {
+          expect(within(allServicesTable).getByText('ID')).toBeInTheDocument();
+          expect(
+            within(allServicesTable).getByText('Name'),
+          ).toBeInTheDocument();
+          expect(
+            within(allServicesTable).getByText('Owner'),
+          ).toBeInTheDocument();
+          expect(
+            within(allServicesTable).getByText('Hash'),
+          ).toBeInTheDocument();
+          expect(
+            within(allServicesTable).getByText('State'),
+          ).toBeInTheDocument();
+          expect(
+            within(allServicesTable).getByText('Action'),
+          ).toBeInTheDocument();
+        });
       });
 
       it('should display all services information', async () => {
@@ -152,19 +162,23 @@ describe('listServices/index.jsx', () => {
         const firstService = allServicesResponse[0];
         const allServicesTable = await findByTestId('all-services-table');
 
-        expect(
-          within(allServicesTable).getByText(firstService.serviceId),
-        ).toBeInTheDocument();
-        expect(
-          within(allServicesTable).getByText(/0x8626...9C1199/),
-        ).toBeInTheDocument();
-        expect(
-          within(allServicesTable).getByText(/0x9cf4...315ab0/),
-        ).toBeInTheDocument();
-        expect(
-          within(allServicesTable).getByText(/Deployed/),
-        ).toBeInTheDocument();
-        expect(within(allServicesTable).getByText(/View/)).toBeInTheDocument();
+        await waitFor(async () => {
+          expect(
+            within(allServicesTable).getByText(firstService.serviceId),
+          ).toBeInTheDocument();
+          expect(
+            within(allServicesTable).getByText(/0x8626...9C1199/),
+          ).toBeInTheDocument();
+          expect(
+            within(allServicesTable).getByText(/0x9cf4...315ab0/),
+          ).toBeInTheDocument();
+          expect(
+            within(allServicesTable).getByText(/Deployed/),
+          ).toBeInTheDocument();
+          expect(
+            within(allServicesTable).getByText(/View/),
+          ).toBeInTheDocument();
+        });
       });
     });
 
@@ -191,14 +205,20 @@ describe('listServices/index.jsx', () => {
           throw new Error('`All tab` is null');
         }
 
-        expect(within(allServicesTable).getByText('ID')).toBeInTheDocument();
-        expect(within(allServicesTable).queryByText('Name')).toBeNull();
-        expect(within(allServicesTable).getByText('Owner')).toBeInTheDocument();
-        expect(within(allServicesTable).queryByText('Hash')).toBeNull();
-        expect(within(allServicesTable).getByText('State')).toBeInTheDocument();
-        expect(
-          within(allServicesTable).getByText('Action'),
-        ).toBeInTheDocument();
+        await waitFor(async () => {
+          expect(within(allServicesTable).getByText('ID')).toBeInTheDocument();
+          expect(within(allServicesTable).queryByText('Name')).toBeNull();
+          expect(
+            within(allServicesTable).getByText('Owner'),
+          ).toBeInTheDocument();
+          expect(within(allServicesTable).queryByText('Hash')).toBeNull();
+          expect(
+            within(allServicesTable).getByText('State'),
+          ).toBeInTheDocument();
+          expect(
+            within(allServicesTable).getByText('Action'),
+          ).toBeInTheDocument();
+        });
       });
 
       it('should display all services information', async () => {
@@ -217,14 +237,20 @@ describe('listServices/index.jsx', () => {
 
         const allServicesTable = await findByTestId('all-services-table');
 
-        expect(within(allServicesTable).getByText('5001')).toBeInTheDocument();
-        expect(
-          within(allServicesTable).getByText(/0x8626...9C1199/),
-        ).toBeInTheDocument();
-        expect(
-          within(allServicesTable).getByText(/Terminated Bonded/),
-        ).toBeInTheDocument();
-        expect(within(allServicesTable).getByText(/View/)).toBeInTheDocument();
+        await waitFor(async () => {
+          expect(
+            within(allServicesTable).getByText('5001'),
+          ).toBeInTheDocument();
+          expect(
+            within(allServicesTable).getByText(/0x8626...9C1199/),
+          ).toBeInTheDocument();
+          expect(
+            within(allServicesTable).getByText(/Terminated Bonded/),
+          ).toBeInTheDocument();
+          expect(
+            within(allServicesTable).getByText(/View/),
+          ).toBeInTheDocument();
+        });
       });
     });
   });
