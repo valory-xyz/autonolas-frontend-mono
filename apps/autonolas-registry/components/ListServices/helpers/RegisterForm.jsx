@@ -15,7 +15,7 @@ import { IpfsHashGenerationModal } from '../../../common-util/List/IpfsHashGener
 import { ComplexLabel } from '../../../common-util/List/styles';
 import { RegistryForm } from '../../../common-util/TransactionHelpers/RegistryForm';
 import { isValidSolanaPublicKey } from '../../../common-util/functions';
-import { ThresholdInput } from '../../../common-util/MintForm/utils';
+import { ThresholdInput } from './ThresholdInput';
 import { useHelpers } from '../../../common-util/hooks';
 
 export const FORM_NAME = 'serviceRegisterForm';

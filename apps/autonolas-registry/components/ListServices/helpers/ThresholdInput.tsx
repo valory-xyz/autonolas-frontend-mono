@@ -1,5 +1,5 @@
-import { Form, FormInstance, Input } from 'antd';
 import { FC, useEffect, useState } from 'react';
+import { Form, FormInstance, Input } from 'antd';
 
 /**
  * validates the threshold based on the no. of slots

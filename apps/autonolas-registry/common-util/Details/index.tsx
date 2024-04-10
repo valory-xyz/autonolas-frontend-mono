@@ -17,7 +17,7 @@ const { Text } = Typography;
 type DetailsProps = {
   id: string;
   type: NavTypesValues;
-  getDetails: (id: string) => Promise<GenericObject>;
+  getDetails: (id: string) => Promise<GenericObject>; // TODO: Define the return type
   getTokenUri?: (id: string) => Promise<string>;
   getOwner?: (id: string) => Promise<string>;
   handleUpdate?: () => void;
@@ -55,7 +55,8 @@ export const Details: FC<DetailsProps> = ({
 
   // Update button to be show only if the connected account is the owner
   // and only for services
-  const canShowUpdateBtn = isOwner && type === NAV_TYPES.SERVICE;
+  const canShowUpdateBtn =
+    isOwner && type === NAV_TYPES.SERVICE && !!handleUpdate;
 
   const openUpdateHashModal = useCallback(() => {
     setIsModalVisible(true);
@@ -77,12 +78,7 @@ export const Details: FC<DetailsProps> = ({
 
         <div className="right-content">
           {canShowUpdateBtn && (
-            <Button
-              disabled={!handleUpdate}
-              type="primary"
-              ghost
-              onClick={() => handleUpdate?.()}
-            >
+            <Button type="primary" ghost onClick={() => handleUpdate()}>
               Update
             </Button>
           )}

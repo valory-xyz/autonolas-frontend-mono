@@ -85,14 +85,20 @@ export const IpfsHashGenerationModal = ({
         return;
       }
 
-      const values = form.validateFields();
-      const hash = await getNewHash(values);
-      await handleHashUpdate(hash);
-      notifySuccess('Hash updated');
+      form
+        .validateFields()
+        .then(async (values) => {
+          const hash = await getNewHash(values);
+          await handleHashUpdate(hash);
+          notifySuccess('Hash updated');
 
-      if (callback) {
-        callback(hash);
-      }
+          if (callback) {
+            callback(hash);
+          }
+        })
+        .catch(() => {
+          notifyError('Please fill all the fields');
+        });
     } catch (e) {
       notifyError('Error updating hash');
       console.error(e);
