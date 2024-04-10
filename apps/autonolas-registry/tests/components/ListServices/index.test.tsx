@@ -92,13 +92,13 @@ describe('listServices/index.jsx', () => {
       await waitFor(async () => {
         expect(container.querySelector(ACTIVE_TAB)?.textContent).toBe('All');
 
-        // Mint button
         expect(getByRole('button', { name: 'Mint' })).toBeInTheDocument();
       });
     });
 
     it('should show search input', async () => {
       const { getByRole } = render(wrapProvider(<ListServices />));
+
       await waitFor(async () => {
         expect(getByRole('textbox')).toBeInTheDocument();
       });
@@ -162,9 +162,9 @@ describe('listServices/index.jsx', () => {
           within(allServicesTable).getByText(/0x9cf4...315ab0/),
         ).toBeInTheDocument();
         expect(
-          within(allServicesTable).getByText('Deployed'),
+          within(allServicesTable).getByText(/Deployed/),
         ).toBeInTheDocument();
-        expect(within(allServicesTable).getByText('View')).toBeInTheDocument();
+        expect(within(allServicesTable).getByText(/View/)).toBeInTheDocument();
       });
     });
 
@@ -222,9 +222,9 @@ describe('listServices/index.jsx', () => {
           within(allServicesTable).getByText(/0x8626...9C1199/),
         ).toBeInTheDocument();
         expect(
-          within(allServicesTable).getByText('Terminated Bonded'),
+          within(allServicesTable).getByText(/Terminated Bonded/),
         ).toBeInTheDocument();
-        expect(within(allServicesTable).getByText('View')).toBeInTheDocument();
+        expect(within(allServicesTable).getByText(/View/)).toBeInTheDocument();
       });
     });
   });
@@ -268,7 +268,6 @@ describe('listServices/index.jsx', () => {
       await waitFor(async () => {
         expect(container.querySelector(ACTIVE_TAB)?.textContent).toBe('All');
 
-        // Mint button
         expect(getByRole('button', { name: 'Mint' })).toBeInTheDocument();
       });
     });
@@ -303,12 +302,12 @@ describe('listServices/index.jsx', () => {
         // rows
         expect(within(allServicesTable).getByText('1')).toBeInTheDocument();
         expect(
-          within(allServicesTable).getByText('DrGvsA...D3Wm5x'),
+          within(allServicesTable).getByText(/DrGvsA...D3Wm5x/),
         ).toBeInTheDocument();
         expect(
-          within(allServicesTable).getByText('Terminated Bonded'),
+          within(allServicesTable).getByText(/Terminated Bonded/),
         ).toBeInTheDocument();
-        expect(within(allServicesTable).getByText('View')).toBeInTheDocument();
+        expect(within(allServicesTable).getByText(/View/)).toBeInTheDocument();
       });
     });
   });

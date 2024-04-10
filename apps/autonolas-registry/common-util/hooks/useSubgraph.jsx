@@ -30,7 +30,7 @@ export const UNIT_FIELDS = `{
  * - owner
  * @returns  {string} search filter sub query
  */
-export const getSearchFilterSubQueryForAgentsAndComponents = (searchValue) => {
+export const getSearchFilterSubQueryForUnitFields = (searchValue) => {
   const completeMetadataHash = searchValue.replace(/0x/g, HASH_PREFIX);
   return `{ 
     or: [

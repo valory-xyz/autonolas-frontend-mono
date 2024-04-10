@@ -9,7 +9,7 @@ import { gql } from 'graphql-request';
 import {
   GRAPHQL_CLIENT,
   UNIT_FIELDS,
-  getSearchFilterSubQueryForAgentsAndComponents,
+  getSearchFilterSubQueryForUnitFields,
 } from '../../common-util/hooks/useSubgraph';
 import { TOTAL_VIEW_COUNT } from '../../util/constants';
 
@@ -36,7 +36,7 @@ const getAgentsBySearchQuery = (searchValue, ownerAddress = null) => {
         where: {
           and: [
             { packageType: "agent" }
-            ${getSearchFilterSubQueryForAgentsAndComponents(searchValue)}
+            ${getSearchFilterSubQueryForUnitFields(searchValue)}
             ${
               ownerAddress ? `{ owner_contains_nocase: "${ownerAddress}" }` : ''
             }
@@ -90,7 +90,7 @@ const useAllAgentsBySearch = () => {
  * @returns {function} function to search units
  */
 const useMyAgentsBySearch = () => {
-  return useCallback(async (ownerAddress, searchValue) => {
+  return useCallback(async (searchValue, ownerAddress) => {
     const query = getAgentsBySearchQuery(searchValue, ownerAddress);
     const response = await GRAPHQL_CLIENT.request(query);
     return response?.units;
@@ -106,10 +106,9 @@ export const useSearchAgents = () => {
 
   return useCallback(
     async (searchValue, ownerAddress) => {
-      if (ownerAddress) {
-        return await getMyAgentsBySearch(ownerAddress, searchValue);
-      }
-      return await getAllAgentsBySearch(searchValue);
+      return ownerAddress
+        ? await getMyAgentsBySearch(searchValue, ownerAddress)
+        : await getAllAgentsBySearch(searchValue);
     },
     [getAllAgentsBySearch, getMyAgentsBySearch],
   );

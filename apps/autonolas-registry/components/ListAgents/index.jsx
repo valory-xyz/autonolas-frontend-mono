@@ -42,6 +42,7 @@ const ListAgents = () => {
   const { searchValue, extraTabContent, clearSearch } = useExtraTabContent({
     title: 'Agents',
     onRegisterClick: () => router.push(links.MINT_AGENT),
+    isMyTab: currentTab === MY_AGENTS,
   });
   const onViewClick = (id) => router.push(`${links.AGENTS}/${id}`);
 
@@ -79,8 +80,8 @@ const ListAgents = () => {
           setList([]);
         }
       } catch (e) {
-        console.error(e);
         notifyError('Error fetching agents');
+        console.error(e);
       }
     })();
   }, [account, chainId, isL1OnlyNetwork, currentTab, searchValue, isSvm]);
@@ -114,8 +115,8 @@ const ListAgents = () => {
             setList(myAgents);
           }
         } catch (e) {
-          console.error(e);
           notifyError('Error fetching agents');
+          console.error(e);
         } finally {
           setIsLoading(false);
         }
@@ -162,8 +163,8 @@ const ListAgents = () => {
         setTotal(0); // total won't be used if search is used
         setCurrentPage(1);
       } catch (e) {
-        console.error(e);
         notifyError('Error fetching agents');
+        console.error(e);
       } finally {
         setIsLoading(false);
       }

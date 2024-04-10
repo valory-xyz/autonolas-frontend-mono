@@ -125,7 +125,7 @@ export const useAllServicesBySearch = () => {
  * @returns {function} function to search units
  */
 export const useMyServicesBySearch = () => {
-  return useCallback(async (ownerAddress, searchValue, currentPage) => {
+  return useCallback(async (searchValue, currentPage, ownerAddress) => {
     const query = getServicesBySearchQuery(
       searchValue,
       currentPage,
@@ -142,14 +142,9 @@ export const useSearchServices = () => {
 
   return useCallback(
     async (searchValue, currentPage, ownerAddress) => {
-      if (ownerAddress) {
-        return await getMyServicesBySearch(
-          ownerAddress,
-          searchValue,
-          currentPage,
-        );
-      }
-      return await getAllUnitsBySearch(searchValue, currentPage);
+      return ownerAddress
+        ? await getMyServicesBySearch(searchValue, currentPage, ownerAddress)
+        : await getAllUnitsBySearch(searchValue, currentPage);
     },
     [getAllUnitsBySearch, getMyServicesBySearch],
   );

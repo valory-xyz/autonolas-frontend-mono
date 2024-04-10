@@ -46,6 +46,7 @@ const ListComponents = () => {
   const { searchValue, extraTabContent, clearSearch } = useExtraTabContent({
     title: 'Components',
     onRegisterClick: () => router.push(links.MINT_COMPONENT),
+    isMyTab: currentTab === MY_COMPONENTS,
   });
   const onViewClick = (id) => router.push(`${links.COMPONENTS}/${id}`);
 

@@ -49,6 +49,7 @@ const ListServices = () => {
     onRegisterClick: () => router.push(links.MINT_SERVICE),
     isSvm,
     type: NAV_TYPES.SERVICE,
+    isMyTab: currentTab === MY_SERVICES,
   });
   const onViewClick = (id) => router.push(`${links.SERVICES}/${id}`);
 
@@ -94,8 +95,8 @@ const ListServices = () => {
           setList([]);
         }
       } catch (e) {
-        console.error(e);
         notifyError('Error fetching services');
+        console.error(e);
       }
     };
 
@@ -209,8 +210,8 @@ const ListServices = () => {
         setTotal(0); // total won't be used if search is used
         setCurrentPage(1);
       } catch (e) {
-        console.error(e);
         notifyError('Error fetching services');
+        console.error(e);
       } finally {
         setIsLoading(false);
       }

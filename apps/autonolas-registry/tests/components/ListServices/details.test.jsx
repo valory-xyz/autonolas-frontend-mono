@@ -227,10 +227,8 @@ describe('listServices/details.jsx', () => {
     });
 
     it('should display service details (left side)', async () => {
-      const { getByText, getByTestId, debug } = render(
-        wrapProvider(<Services />),
-      );
-      debug();
+      const { getByText, getByTestId } = render(wrapProvider(<Services />));
+
       await waitFor(async () => {
         expect(getByText('Some package name')).toBeInTheDocument();
         expect(getByTestId('service-status').textContent).toBe('Inactive');
@@ -298,11 +296,9 @@ describe('listServices/details.jsx', () => {
       });
 
       it('should display the service name', async () => {
-        const { findByText, debug } = render(wrapProvider(<Services />));
+        const { findByText } = render(wrapProvider(<Services />));
 
-        debug();
         expect(await findByText(/Service Name/)).toBeInTheDocument();
-        // expect(await findByText(/Service ID/)).toBeInTheDocument();
       });
     });
   });

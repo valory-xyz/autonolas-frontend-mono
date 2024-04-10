@@ -20,7 +20,7 @@ const callbackMock = jest.fn();
 const handleCancelMock = jest.fn();
 
 describe('<IpfsHashGenerationModal />', () => {
-  it('should render a hash generation modal and', async () => {
+  it('should display a hash generation modal and', async () => {
     const { getByText } = render(
       wrapProvider(
         <IpfsHashGenerationModal

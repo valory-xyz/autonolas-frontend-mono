@@ -89,7 +89,7 @@ describe('listAgents/details.jsx', () => {
     global.fetch = unmockedFetch;
   });
 
-  it('should render agent details', async () => {
+  it('should display agent details', async () => {
     const { getByText, getByTestId, queryByRole } = render(
       wrapProvider(<AgentDetails />),
     );

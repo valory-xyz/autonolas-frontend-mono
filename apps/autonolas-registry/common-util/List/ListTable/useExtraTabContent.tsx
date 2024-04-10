@@ -3,7 +3,7 @@ import { Input, Button, Typography, Tooltip } from 'antd';
 import { SearchOutlined, InfoCircleOutlined } from '@ant-design/icons';
 import styled from 'styled-components';
 
-import { NAV_TYPES } from '../../../util/constants';
+import { useHelpers } from '../../hooks';
 
 const { Title } = Typography;
 
@@ -17,6 +17,7 @@ type UseExtraTabContentProps = {
   onRegisterClick?: () => void;
   isSvm?: boolean;
   type: string;
+  isMyTab: boolean;
 };
 
 export const useExtraTabContent = ({
@@ -24,7 +25,10 @@ export const useExtraTabContent = ({
   onRegisterClick,
   isSvm = false,
   type,
+  isMyTab = true,
 }: UseExtraTabContentProps) => {
+  const { account } = useHelpers();
+
   const [searchValue, setSearchValue] = useState('');
   const [value, setValue] = useState('');
   const clearSearch = () => {
@@ -37,7 +41,7 @@ export const useExtraTabContent = ({
     right: (
       <>
         {/* TODO: hiding search util feature is introduced */}
-        {isSvm ? null : (
+        {isSvm || (isMyTab && !account) ? null : (
           <>
             <Input
               prefix={<SearchOutlined className="site-form-item-icon" />}
@@ -54,7 +58,7 @@ export const useExtraTabContent = ({
                       <div>Search by:</div>
                       <SearchUl>
                         <li>Name</li>
-                        {type !== NAV_TYPES.SERVICE && <li>Description</li>}
+                        <li>Description</li>
                         <li>Owner</li>
                         <li>Package Hash</li>
                       </SearchUl>

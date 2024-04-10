@@ -81,7 +81,7 @@ describe('listComponents/details.jsx', () => {
     global.fetch = unmockedFetch;
   });
 
-  it('should render component details', async () => {
+  it('should display component details', async () => {
     const { getByText, queryByRole, getByTestId } = render(
       wrapProvider(<Component />),
     );
