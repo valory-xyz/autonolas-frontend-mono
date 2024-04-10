@@ -56,6 +56,7 @@ const Layout = ({ children }) => {
             showSearch
             className="show-scrollbar"
             style={{ width: isMobile ? 140 : 200 }}
+            listHeight={800}
             value={chainName}
             placeholder="Select Network"
             disabled={PAGES_TO_LOAD_WITHOUT_CHAINID.some((e) => path.includes(e))}
