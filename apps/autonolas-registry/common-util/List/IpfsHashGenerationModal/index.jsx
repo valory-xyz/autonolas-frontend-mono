@@ -4,7 +4,7 @@ import isNil from 'lodash/isNil';
 import { Form, Input, Button, Select } from 'antd';
 import { notifyError, notifySuccess } from '@autonolas/frontend-library';
 
-import { HASH_PREFIXES } from '../../../util/constants';
+import { HASH_PREFIXES } from 'util/constants';
 import { useHelpers } from '../../hooks';
 import { notifyWrongNetwork } from '../../functions';
 import { getIpfsHashHelper } from './helpers';
@@ -79,26 +79,32 @@ export const IpfsHashGenerationModal = ({
   };
 
   const handleUpdate = async () => {
+    const getHashFormFields = async () => {
+      try {
+        const fields = await form.validateFields();
+        return fields;
+      } catch (e) {
+        notifyError('Error updating hash');
+        return null;
+      }
+    };
+
     try {
       if (isConnectedToWrongNetwork) {
         notifyWrongNetwork();
         return;
       }
 
-      form
-        .validateFields()
-        .then(async (values) => {
-          const hash = await getNewHash(values);
-          await handleHashUpdate(hash);
-          notifySuccess('Hash updated');
+      const values = await getHashFormFields();
+      if (!values) return;
 
-          if (callback) {
-            callback(hash);
-          }
-        })
-        .catch(() => {
-          notifyError('Please fill all the fields');
-        });
+      const hash = await getNewHash(values);
+      await handleHashUpdate(hash);
+      notifySuccess('Hash updated');
+
+      if (callback) {
+        callback(hash);
+      }
     } catch (e) {
       notifyError('Error updating hash');
       console.error(e);

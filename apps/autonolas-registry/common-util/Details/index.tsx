@@ -1,10 +1,10 @@
 import { useState, useCallback, FC } from 'react';
-import capitalize from 'lodash/capitalize';
 import { Row, Col, Button, Typography } from 'antd';
-import { get } from 'lodash';
+import capitalize from 'lodash/capitalize';
+import get from 'lodash/get';
 import { GenericObject, Loader, NA } from '@autonolas/frontend-library';
 
-import { NAV_TYPES, NavTypesValues } from '../../util/constants';
+import { NAV_TYPES, NavTypesValues } from 'util/constants';
 import { useMetadata } from '../hooks/useMetadata';
 import { useHelpers } from '../hooks';
 import { IpfsHashGenerationModal } from '../List/IpfsHashGenerationModal';

@@ -6,17 +6,14 @@ import { Button, Form, Input } from 'antd';
 import { isValidAddress, notifyError } from '@autonolas/frontend-library';
 
 import { DEFAULT_SERVICE_CREATION_ETH_TOKEN } from 'util/constants';
-import {
-  commaMessage,
-  DependencyLabel,
-} from '../../../common-util/List/ListCommon';
-import { FormItemHash } from '../../../common-util/List/RegisterForm/helpers';
-import { IpfsHashGenerationModal } from '../../../common-util/List/IpfsHashGenerationModal';
-import { ComplexLabel } from '../../../common-util/List/styles';
-import { RegistryForm } from '../../../common-util/TransactionHelpers/RegistryForm';
-import { isValidSolanaPublicKey } from '../../../common-util/functions';
+import { commaMessage, DependencyLabel } from 'common-util/List/ListCommon';
+import { FormItemHash } from 'common-util/List/RegisterForm/helpers';
+import { IpfsHashGenerationModal } from 'common-util/List/IpfsHashGenerationModal';
+import { ComplexLabel } from 'common-util/List/styles';
+import { RegistryForm } from 'common-util/TransactionHelpers/RegistryForm';
+import { isValidSolanaPublicKey } from 'common-util/functions';
+import { useHelpers } from 'common-util/hooks';
 import { ThresholdInput } from './ThresholdInput';
-import { useHelpers } from '../../../common-util/hooks';
 
 export const FORM_NAME = 'serviceRegisterForm';
 

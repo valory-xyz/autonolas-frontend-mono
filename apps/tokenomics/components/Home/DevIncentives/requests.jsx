@@ -1,6 +1,6 @@
 import { notifyError } from '@autonolas/frontend-library';
 
-import { UNIT_TYPES } from '../../../util/constants';
+import { UNIT_TYPES } from 'util/constants';
 import {
   getBlockTimestamp,
   parseToEth,

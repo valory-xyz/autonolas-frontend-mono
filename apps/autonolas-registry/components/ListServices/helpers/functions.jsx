@@ -1,7 +1,7 @@
 import { BN } from '@project-serum/anchor';
 import compact from 'lodash/compact';
 
-import { convertStringToArray } from '../../../common-util/List/ListCommon';
+import { convertStringToArray } from 'common-util/List/ListCommon';
 
 /**
  * function to build the required arguments for mint or update service
