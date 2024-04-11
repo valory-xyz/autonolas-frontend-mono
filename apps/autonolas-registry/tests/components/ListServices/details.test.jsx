@@ -1,11 +1,13 @@
 import { render, waitFor } from '@testing-library/react';
 
-import { GATEWAY_URL } from '../../../util/constants';
-import Services from '../../../components/ListServices/details';
+import { GATEWAY_URL } from 'util/constants';
+import { useHelpers } from 'common-util/hooks/useHelpers';
+import { useSvmConnectivity } from 'common-util/hooks/useSvmConnectivity';
 import {
   getTokenDetailsRequest,
   checkIfServiceRequiresWhitelisting,
-} from '../../../common-util/Details/utils';
+} from 'common-util/Details/utils';
+import Services from 'components/ListServices/details';
 import {
   useAgentInstanceAndOperator,
   useGetSvmServiceDetails,
@@ -13,21 +15,19 @@ import {
   useTokenUri,
   useSvmServiceTableDataSource,
   useSvmBonds,
-} from '../../../components/ListServices/hooks/useSvmService';
-import { useHelpers } from '../../../common-util/hooks/useHelpers';
-import { useSvmConnectivity } from '../../../common-util/hooks/useSvmConnectivity';
+} from 'components/ListServices/hooks/useSvmService';
 import {
   getBonds,
   getServiceTableDataSource,
   getAgentInstanceAndOperator,
   checkIfEth,
   getTokenBondRequest,
-} from '../../../components/ListServices/ServiceState/utils';
-import { useRegisterAgents } from '../../../components/ListServices/ServiceState/useSvmServiceStateManagement';
+} from 'components/ListServices/ServiceState/utils';
+import { useRegisterAgents } from 'components/ListServices/ServiceState/useSvmServiceStateManagement';
 import {
   useGetServiceDetails,
   useGetServiceOwner,
-} from '../../../components/ListServices/hooks/useService';
+} from 'components/ListServices/hooks/useService';
 import {
   dummyAddress,
   wrapProvider,
@@ -49,20 +49,20 @@ jest.mock('next/router', () => ({
   },
 }));
 
-jest.mock('../../../common-util/List/IpfsHashGenerationModal/helpers', () => ({
+jest.mock('common-util/List/IpfsHashGenerationModal/helpers', () => ({
   getIpfsHashHelper: jest.fn(() => mockV1Hash),
 }));
 
-jest.mock('../../../common-util/Details/utils', () => ({
+jest.mock('common-util/Details/utils', () => ({
   getTokenDetailsRequest: jest.fn(),
   checkIfServiceRequiresWhitelisting: jest.fn(),
 }));
 
-jest.mock('../../../common-util/hooks/useSvmConnectivity', () => ({
+jest.mock('common-util/hooks/useSvmConnectivity', () => ({
   useSvmConnectivity: jest.fn(),
 }));
 
-jest.mock('../../../common-util/hooks/useMetadata', () => ({
+jest.mock('common-util/hooks/useMetadata', () => ({
   useMetadata: jest.fn(() => ({
     metadataLoadState: 'LOADED',
     hashUrl: `${GATEWAY_URL}12345`,
@@ -74,7 +74,7 @@ jest.mock('../../../common-util/hooks/useMetadata', () => ({
   })),
 }));
 
-jest.mock('../../../common-util/Details/useDetails', () => ({
+jest.mock('common-util/Details/useDetails', () => ({
   useDetails: jest.fn(() => ({
     isLoading: false,
     info: dummyDetails,
@@ -83,11 +83,11 @@ jest.mock('../../../common-util/Details/useDetails', () => ({
   })),
 }));
 
-jest.mock('../../../common-util/hooks/useHelpers', () => ({
+jest.mock('common-util/hooks/useHelpers', () => ({
   useHelpers: jest.fn(),
 }));
 
-jest.mock('../../../components/ListServices/ServiceState/utils', () => ({
+jest.mock('components/ListServices/ServiceState/utils', () => ({
   getTokenBondRequest: jest.fn(),
   checkIfEth: jest.fn(),
   getServiceTableDataSource: jest.fn(),
@@ -101,7 +101,7 @@ jest.mock('../../../components/ListServices/ServiceState/utils', () => ({
   ),
 }));
 
-jest.mock('../../../components/ListServices/hooks/useSvmService', () => ({
+jest.mock('components/ListServices/hooks/useSvmService', () => ({
   useAgentInstanceAndOperator: jest.fn(() => ({
     getSvmAgentInstanceAndOperator: jest.fn(),
   })),
@@ -117,7 +117,7 @@ jest.mock('../../../components/ListServices/hooks/useSvmService', () => ({
 }));
 
 jest.mock(
-  '../../../components/ListServices/ServiceState/useSvmServiceStateManagement',
+  'components/ListServices/ServiceState/useSvmServiceStateManagement',
   () => ({
     useFinishRegistration: jest.fn(),
     useGetActivateRegistration: jest.fn(),
@@ -130,7 +130,7 @@ jest.mock(
   }),
 );
 
-jest.mock('../../../components/ListServices/hooks/useService', () => ({
+jest.mock('components/ListServices/hooks/useService', () => ({
   useGetServiceDetails: jest.fn(),
   useGetServiceOwner: jest.fn(),
   useGetServiceTokenUri: jest.fn(),
@@ -278,6 +278,22 @@ describe('listServices/details.jsx', () => {
           container.querySelector('.ant-steps-item-active'),
         ).toHaveTextContent('Terminated Bonded');
       });
+    });
+
+    it('should display "Update" button for service owner', async () => {
+      const mockHandleUpdate = jest.fn();
+
+      const { findByTestId } = render(
+        wrapProvider(<Services handleUpdate={mockHandleUpdate} />),
+      );
+
+      const updateButton = await findByTestId('service-update-button');
+
+      if (!updateButton) {
+        throw new Error('Update button not found');
+      }
+
+      expect(updateButton).toBeInTheDocument();
     });
 
     describe('mainnet', () => {

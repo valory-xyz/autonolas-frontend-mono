@@ -118,7 +118,6 @@ const ListServices = () => {
   useEffect(() => {
     const getList = async () => {
       setIsLoading(true);
-      setList([]);
 
       try {
         // All services

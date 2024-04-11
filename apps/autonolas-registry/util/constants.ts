@@ -11,14 +11,16 @@ export const URL = {
   DISCLAIMER: '/disclaimer',
   PAGE_NOT_FOUND: '/page-not-found',
   NOT_LEGAL: '/not-legal',
-};
+} as const;
 
 export const NAV_TYPES = {
   COMPONENT: 'component',
   AGENT: 'agent',
-  OPERATOR: 'operator',
   SERVICE: 'service',
-};
+} as const;
+
+export type NavTypesKeys = keyof typeof NAV_TYPES;
+export type NavTypesValues = typeof NAV_TYPES[NavTypesKeys];
 
 export const SERVICE_STATE = {
   0: 'Non Existent',
@@ -27,7 +29,7 @@ export const SERVICE_STATE = {
   3: 'Finished Registration',
   4: 'Deployed',
   5: 'Terminated Bonded',
-};
+} as const;
 
 export const SERVICE_STATE_KEY_MAP = {
   nonExistent: '0',
@@ -36,29 +38,31 @@ export const SERVICE_STATE_KEY_MAP = {
   finishedRegistration: '3',
   deployed: '4',
   terminatedBonded: '5',
-};
+} as const;
 
 // should not display contracts on homepage nor load with chain Ids
 export const PAGES_TO_LOAD_WITHOUT_CHAINID = [
   '/disclaimer',
   '/page-not-found',
   '/not-legal',
-];
+] as const;
 
 export const HASH_PREFIX = 'f01701220';
 export const HASH_PREFIXES = {
   type1: HASH_PREFIX,
   type2: 'bafybei',
-};
+} as const;
 
 export const GATEWAY_URL = 'https://gateway.autonolas.tech/ipfs/';
 
 // max componets/agents/service to be shown in a single view
 export const TOTAL_VIEW_COUNT = 10;
 
-export const DEFAULT_SERVICE_CREATION_ETH_TOKEN = '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE';
+export const DEFAULT_SERVICE_CREATION_ETH_TOKEN =
+  '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE';
 
-export const DEFAULT_SERVICE_CREATION_ETH_TOKEN_ZEROS = '0x0000000000000000000000000000000000000000';
+export const DEFAULT_SERVICE_CREATION_ETH_TOKEN_ZEROS =
+  '0x0000000000000000000000000000000000000000';
 
 export const SVM_EMPTY_ADDRESS = '11111111111111111111111111111111';
 
@@ -73,13 +77,13 @@ export const DEFAULT_CHAIN_ID = 1;
 export const EXTRA_COLORS = {
   YELLOW_PRIMARY: '#eab308', // tailwind orange.500
   YELLOW_SECONDARY: '#fefce8', // tailwind orange.50
-};
+} as const;
 
 // These constants define the types of virtual machines supported
 export const VM_TYPE = {
   EVM: 'evm', // Ethereum Virtual Machine
   SVM: 'svm', // Solana Virtual Machine
-};
+} as const;
 
 /**
  * Constants for Solana chain names
@@ -87,7 +91,7 @@ export const VM_TYPE = {
 export const SOLANA_CHAIN_NAMES = {
   MAINNET: 'solana',
   DEVNET: 'solana-devnet',
-};
+} as const;
 
 /**
  * Constants for the different types of Hash Details states
@@ -96,4 +100,4 @@ export const HASH_DETAILS_STATE = {
   IS_LOADING: 'IS_LOADING',
   LOADED: 'LOADED',
   FAILED: 'FAILED',
-};
+} as const;

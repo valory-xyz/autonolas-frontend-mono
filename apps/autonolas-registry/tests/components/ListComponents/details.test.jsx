@@ -1,4 +1,6 @@
 import { render, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+
 import { GATEWAY_URL } from '../../../util/constants';
 import Component from '../../../components/ListComponents/details';
 import {
@@ -112,5 +114,37 @@ describe('listComponents/details.jsx', () => {
         `${GATEWAY_URL}${mockNftImageHash}`,
       );
     });
+  });
+
+  it('should display update hash button only for owner and open the modal when clicked', async () => {
+    getComponentOwner.mockResolvedValue(dummyAddress);
+    const { findByRole, findByText, queryByText } = render(
+      wrapProvider(<Component />),
+    );
+    const updateHashButton = await findByRole('button', {
+      name: 'Update Hash',
+    });
+
+    if (!updateHashButton) {
+      console.log('Update Button not found');
+    }
+
+    expect(updateHashButton).toBeInTheDocument();
+
+    // Initially, the modal should not be visible
+    expect(queryByText(/Generate IPFS Hash of Metadata File/)).toBeNull();
+
+    await userEvent.click(updateHashButton);
+
+    const modalTitle = await findByText(/Generate IPFS Hash of Metadata File/);
+    expect(modalTitle).toBeInTheDocument();
+  });
+
+  it('should not display update hash button for non-owner', async () => {
+    getComponentOwner.mockResolvedValue('0x123');
+    const { queryByRole } = render(wrapProvider(<Component />));
+
+    const updateHashButton = queryByRole('button', { name: 'Update Hash' });
+    expect(updateHashButton).toBeNull();
   });
 });

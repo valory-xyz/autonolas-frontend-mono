@@ -16,7 +16,14 @@
         "name": "next"
       }
     ],
-    "types": ["jest", "node", "react", "react-dom"]
+    "types": ["jest", "node", "react", "react-dom"],
+    "paths": {
+      "common-util/*": ["apps/autonolas-registry/common-util/*"],
+      "components/*": ["apps/autonolas-registry/components/*"],
+      "util/*": ["apps/autonolas-registry/util/*"],
+      "static/*": ["apps/autonolas-registry/static/*"],
+      "images/*": ["apps/autonolas-registry/public/images/*"]
+    }
   },
   "include": ["**/*.ts", "**/*.tsx", "**/*.js", "**/*.jsx", "next-env.d.ts"],
   "exclude": [
