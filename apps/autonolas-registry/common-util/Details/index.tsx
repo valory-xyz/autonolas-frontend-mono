@@ -89,7 +89,7 @@ export const Details: FC<DetailsProps> = ({
             <Button
               type="primary"
               ghost
-              onClick={() => handleUpdate()}
+              onClick={handleUpdate}
               data-testid="service-update-button"
             >
               Update
