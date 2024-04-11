@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Input, Button, Typography, Tooltip } from 'antd';
 import { SearchOutlined, InfoCircleOutlined } from '@ant-design/icons';
+import { useRouter } from 'next/router';
 import styled from 'styled-components';
 
 import { useHelpers } from '../../hooks';
@@ -24,13 +25,14 @@ export const useExtraTabContent = ({
   title,
   onRegisterClick,
   isSvm = false,
-  type,
   isMyTab = true,
 }: UseExtraTabContentProps) => {
-  const { account } = useHelpers();
+  const router = useRouter();
+  const { account, isMainnet } = useHelpers();
 
-  const [searchValue, setSearchValue] = useState('');
-  const [value, setValue] = useState('');
+  const searchQuery = isMainnet ? router.query.search ?? '' : '';
+  const [searchValue, setSearchValue] = useState(searchQuery); // to control the search
+  const [value, setValue] = useState(searchQuery); // to control the input field
   const clearSearch = () => {
     setValue('');
     setSearchValue('');

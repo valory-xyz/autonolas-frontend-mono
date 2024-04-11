@@ -7,7 +7,6 @@ import { NAV_TYPES } from '../../util/constants';
 import {
   ListTable,
   useExtraTabContent,
-  getHash,
   isMyTab,
 } from '../../common-util/List/ListTable';
 import { getMyListOnPagination } from '../../common-util/ContractUtils/myList';
@@ -30,9 +29,8 @@ const MY_SERVICES = 'my-services';
 
 const ListServices = () => {
   const router = useRouter();
-  const hash = getHash(router);
   const [currentTab, setCurrentTab] = useState(
-    isMyTab(hash) ? MY_SERVICES : ALL_SERVICES,
+    isMyTab(router) ? MY_SERVICES : ALL_SERVICES,
   );
 
   const { account, links, isSvm, chainId, isMainnet } = useHelpers();
@@ -48,7 +46,6 @@ const ListServices = () => {
     title: 'Services',
     onRegisterClick: () => router.push(links.MINT_SERVICE),
     isSvm,
-    type: NAV_TYPES.SERVICE,
     isMyTab: currentTab === MY_SERVICES,
   });
   const onViewClick = (id) => router.push(`${links.SERVICES}/${id}`);
@@ -60,11 +57,6 @@ const ListServices = () => {
   const [total, setTotal] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
   const [list, setList] = useState([]);
-
-  // update current tab based on the "hash" in the URL
-  useEffect(() => {
-    setCurrentTab(isMyTab(hash) ? MY_SERVICES : ALL_SERVICES);
-  }, [hash]);
 
   const {
     getTotalForAllSvmServices,
@@ -251,8 +243,8 @@ const ListServices = () => {
       type="card"
       activeKey={currentTab}
       tabBarExtraContent={extraTabContent}
-      onChange={(activeTab) => {
-        setCurrentTab(activeTab);
+      onChange={(tabName) => {
+        setCurrentTab(tabName);
 
         setTotal(0);
         setCurrentPage(1);
@@ -262,11 +254,10 @@ const ListServices = () => {
         clearSearch();
 
         // update the URL to keep track of my-services
-        router.push(
-          activeTab === MY_SERVICES
-            ? `${links.SERVICES}#${MY_SERVICES}`
-            : links.SERVICES,
-        );
+        router.push({
+          pathname: links.SERVICES,
+          query: tabName === ALL_SERVICES ? {} : { tab: tabName },
+        });
       }}
       items={[
         {

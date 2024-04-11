@@ -3,14 +3,10 @@ import { Tabs } from 'antd';
 import { useRouter } from 'next/router';
 import { notifyError } from '@autonolas/frontend-library';
 
-import { NAV_TYPES } from '../../util/constants';
-import {
-  ListTable,
-  useExtraTabContent,
-  getHash,
-  isMyTab,
-} from '../../common-util/List/ListTable';
-import { useHelpers } from '../../common-util/hooks';
+import { NAV_TYPES } from 'util/constants';
+import { isMyTab } from 'common-util/List/ListTable/helpers';
+import { ListTable, useExtraTabContent } from 'common-util/List/ListTable';
+import { useHelpers } from 'common-util/hooks';
 import {
   useAllComponents,
   useMyComponents,
@@ -28,9 +24,9 @@ const MY_COMPONENTS = 'my-components';
 
 const ListComponents = () => {
   const router = useRouter();
-  const hash = getHash(router);
+
   const [currentTab, setCurrentTab] = useState(
-    isMyTab(hash) ? MY_COMPONENTS : ALL_COMPONENTS,
+    isMyTab(router) ? MY_COMPONENTS : ALL_COMPONENTS,
   );
 
   const { account, chainId, links, isL1OnlyNetwork, isSvm, isMainnet } =
@@ -57,11 +53,6 @@ const ListComponents = () => {
   const [total, setTotal] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
   const [list, setList] = useState([]);
-
-  // update current tab based on the "hash" in the URL
-  useEffect(() => {
-    setCurrentTab(isMyTab(hash) ? MY_COMPONENTS : ALL_COMPONENTS);
-  }, [hash]);
 
   // fetch total
   useEffect(() => {
@@ -208,16 +199,16 @@ const ListComponents = () => {
         clearSearch();
 
         // update the URL to keep track of my-components
-        router.push(
-          tabName === MY_COMPONENTS
-            ? `${links.COMPONENTS}#${MY_COMPONENTS}`
-            : links.COMPONENTS,
-        );
+        router.push({
+          pathname: links.COMPONENTS,
+          query: tabName === ALL_COMPONENTS ? {} : { tab: tabName },
+        });
       }}
       items={[
         {
           key: ALL_COMPONENTS,
           label: 'All',
+          disabled: isLoading,
           children: (
             <ListTable
               {...tableCommonProps}
@@ -227,8 +218,9 @@ const ListComponents = () => {
           ),
         },
         {
-          label: 'My Components',
           key: MY_COMPONENTS,
+          label: 'My Components',
+          disabled: isLoading,
           children: (
             <ListTable
               {...tableCommonProps}

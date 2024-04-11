@@ -272,7 +272,8 @@ export const convertTableRawData = (
  */
 export const getHash = (router) => router?.asPath?.split('#')[1] || '';
 
+
 /**
- * my-components/my-agents/my-serices has "my" in common hence returns
+ * my-components/my-agents/my-services has "my" in common hence returns
  */
-export const isMyTab = (hash) => !!(hash || '').includes('my-');
+export const isMyTab = router => router?.query?.tab?.includes('my-'); 

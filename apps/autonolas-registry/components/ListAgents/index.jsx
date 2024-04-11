@@ -3,14 +3,10 @@ import { Tabs } from 'antd';
 import { useRouter } from 'next/router';
 import { notifyError } from '@autonolas/frontend-library';
 
-import { NAV_TYPES } from '../../util/constants';
-import {
-  ListTable,
-  useExtraTabContent,
-  getHash,
-  isMyTab,
-} from '../../common-util/List/ListTable';
-import { useHelpers } from '../../common-util/hooks';
+import { NAV_TYPES } from 'util/constants';
+import { isMyTab } from 'common-util/List/ListTable/helpers';
+import { ListTable, useExtraTabContent } from 'common-util/List/ListTable';
+import { useHelpers } from 'common-util/hooks';
 import { useAllAgents, useMyAgents, useSearchAgents } from './useAgentsList';
 import {
   getAgents,
@@ -24,9 +20,9 @@ const MY_AGENTS = 'my-agents';
 
 const ListAgents = () => {
   const router = useRouter();
-  const hash = getHash(router);
+
   const [currentTab, setCurrentTab] = useState(
-    isMyTab(hash) ? MY_AGENTS : ALL_AGENTS,
+    isMyTab(router) ? MY_AGENTS : ALL_AGENTS,
   );
 
   const { account, chainId, links, isL1OnlyNetwork, isSvm, isMainnet } =
@@ -53,11 +49,6 @@ const ListAgents = () => {
   const [total, setTotal] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
   const [list, setList] = useState([]);
-
-  // update current tab based on the "hash" in the links
-  useEffect(() => {
-    setCurrentTab(isMyTab(hash) ? MY_AGENTS : ALL_AGENTS);
-  }, [hash]);
 
   // fetch total
   useEffect(() => {
@@ -205,14 +196,16 @@ const ListAgents = () => {
         clearSearch();
 
         // update the links to keep track of my-agents
-        router.push(
-          tabName === MY_AGENTS ? `${links.AGENTS}#${MY_AGENTS}` : links.AGENTS,
-        );
+        router.push({
+          pathname: links.AGENTS,
+          query: tabName === ALL_AGENTS ? {} : { tab: tabName },
+        });
       }}
       items={[
         {
           key: ALL_AGENTS,
           label: 'All',
+          disabled: isLoading,
           children: (
             <ListTable
               {...tableCommonProps}
@@ -224,6 +217,7 @@ const ListAgents = () => {
         {
           key: MY_AGENTS,
           label: 'My Agents',
+          disabled: isLoading,
           children: (
             <ListTable
               {...tableCommonProps}
