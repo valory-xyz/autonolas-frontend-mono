@@ -13,7 +13,7 @@ import {
   useTokenUri,
   useSvmServiceTableDataSource,
   useSvmBonds,
-} from '../../../components/ListServices/useSvmService';
+} from '../../../components/ListServices/hooks/useSvmService';
 import { useHelpers } from '../../../common-util/hooks/useHelpers';
 import { useSvmConnectivity } from '../../../common-util/hooks/useSvmConnectivity';
 import {
@@ -27,7 +27,7 @@ import { useRegisterAgents } from '../../../components/ListServices/ServiceState
 import {
   useGetServiceDetails,
   useGetServiceOwner,
-} from '../../../components/ListServices/useService';
+} from '../../../components/ListServices/hooks/useService';
 import {
   dummyAddress,
   wrapProvider,
@@ -39,6 +39,7 @@ import {
   useHelpersEvmMock,
   useHelpersSvmMock,
   svmServiceStateMock,
+  useHelpersBaseMock,
 } from '../../tests-helpers';
 
 jest.mock('next/router', () => ({
@@ -69,6 +70,7 @@ jest.mock('../../../common-util/hooks/useMetadata', () => ({
     nftImageUrl: `${GATEWAY_URL}${mockNftImageHash}`,
     description: mockIpfs.description,
     version: mockIpfs.attributes[0].value,
+    packageName: mockIpfs.name,
   })),
 }));
 
@@ -99,7 +101,7 @@ jest.mock('../../../components/ListServices/ServiceState/utils', () => ({
   ),
 }));
 
-jest.mock('../../../components/ListServices/useSvmService', () => ({
+jest.mock('../../../components/ListServices/hooks/useSvmService', () => ({
   useAgentInstanceAndOperator: jest.fn(() => ({
     getSvmAgentInstanceAndOperator: jest.fn(),
   })),
@@ -128,7 +130,7 @@ jest.mock(
   }),
 );
 
-jest.mock('../../../components/ListServices/useService', () => ({
+jest.mock('../../../components/ListServices/hooks/useService', () => ({
   useGetServiceDetails: jest.fn(),
   useGetServiceOwner: jest.fn(),
   useGetServiceTokenUri: jest.fn(),
@@ -224,10 +226,11 @@ describe('listServices/details.jsx', () => {
       );
     });
 
-    it('should render service details (left side)', async () => {
+    it('should display service details (left side)', async () => {
       const { getByText, getByTestId } = render(wrapProvider(<Services />));
+
       await waitFor(async () => {
-        expect(getByText('Service ID 1')).toBeInTheDocument();
+        expect(getByText('Some package name')).toBeInTheDocument();
         expect(getByTestId('service-status').textContent).toBe('Inactive');
         expect(getByTestId('view-hash-link').getAttribute('href')).toBe(
           `${GATEWAY_URL}12345`,
@@ -257,7 +260,7 @@ describe('listServices/details.jsx', () => {
 
     // TODO: add brief tests for operator whitelisting
 
-    it('should render service state (right side)', async () => {
+    it('should display service state (right side)', async () => {
       const { container } = render(wrapProvider(<Services />));
       await waitFor(async () => {
         const getTitle = (i) =>
@@ -276,10 +279,34 @@ describe('listServices/details.jsx', () => {
         ).toHaveTextContent('Terminated Bonded');
       });
     });
+
+    describe('mainnet', () => {
+      it('should display the package name', async () => {
+        const { findByText } = render(wrapProvider(<Services />));
+
+        expect(await findByText('Some package name')).toBeInTheDocument();
+      });
+    });
+
+    describe('non-mainnet', () => {
+      beforeEach(() => {
+        jest.clearAllMocks();
+
+        useHelpers.mockReturnValue(useHelpersBaseMock);
+      });
+
+      it('should display the service name', async () => {
+        const { findByText } = render(wrapProvider(<Services />));
+
+        expect(await findByText(/Service Name/)).toBeInTheDocument();
+      });
+    });
   });
 
   describe('SVM', () => {
     beforeEach(() => {
+      jest.clearAllMocks();
+
       // mock hooks
       useHelpers.mockReturnValue(useHelpersSvmMock);
       useSvmConnectivity.mockReturnValue(svmConnectivityEmptyMock);
@@ -345,9 +372,11 @@ describe('listServices/details.jsx', () => {
       getTokenBondRequest.mockReturnValueOnce([]);
     });
 
-    it('should render service details (left side)', async () => {
+    it('should display service details (left side)', async () => {
       const { getByText, getByTestId } = render(wrapProvider(<Services />));
+
       await waitFor(async () => {
+        expect(getByText('Service Name')).toBeInTheDocument();
         expect(getByText('Service ID 1')).toBeInTheDocument();
         expect(getByTestId('service-status').textContent).toBe('Inactive');
         expect(getByTestId('view-hash-link').getAttribute('href')).toBe(
@@ -376,8 +405,9 @@ describe('listServices/details.jsx', () => {
       });
     });
 
-    it('should render service state (right side)', async () => {
+    it('should display service state (right side)', async () => {
       const { container, getByText } = render(wrapProvider(<Services />));
+
       await waitFor(async () => {
         const getTitle = (i) =>
           container.querySelector(

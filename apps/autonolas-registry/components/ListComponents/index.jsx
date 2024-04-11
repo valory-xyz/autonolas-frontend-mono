@@ -2,15 +2,20 @@ import { useState, useEffect } from 'react';
 import { Tabs } from 'antd';
 import { useRouter } from 'next/router';
 import { notifyError } from '@autonolas/frontend-library';
-import { NAV_TYPES } from 'util/constants';
-import ListTable from 'common-util/List/ListTable';
+
+import { NAV_TYPES } from '../../util/constants';
 import {
+  ListTable,
   useExtraTabContent,
   getHash,
   isMyTab,
-} from 'common-util/List/ListTable/helpers';
-import { getMyListOnPagination } from 'common-util/ContractUtils/myList';
-import { useHelpers } from 'common-util/hooks';
+} from '../../common-util/List/ListTable';
+import { useHelpers } from '../../common-util/hooks';
+import {
+  useAllComponents,
+  useMyComponents,
+  useSearchComponents,
+} from './useComponentsList';
 import {
   getComponents,
   getFilteredComponents,
@@ -28,9 +33,12 @@ const ListComponents = () => {
     isMyTab(hash) ? MY_COMPONENTS : ALL_COMPONENTS,
   );
 
-  const {
-    account, chainId, links, isL1OnlyNetwork, isSvm,
-  } = useHelpers();
+  const { account, chainId, links, isL1OnlyNetwork, isSvm, isMainnet } =
+    useHelpers();
+
+  const getAllComponents = useAllComponents();
+  const getMyComponents = useMyComponents();
+  const getComponentsBySearch = useSearchComponents();
 
   /**
    * extra tab content & view click
@@ -38,6 +46,7 @@ const ListComponents = () => {
   const { searchValue, extraTabContent, clearSearch } = useExtraTabContent({
     title: 'Components',
     onRegisterClick: () => router.push(links.MINT_COMPONENT),
+    isMyTab: currentTab === MY_COMPONENTS,
   });
   const onViewClick = (id) => router.push(`${links.COMPONENTS}/${id}`);
 
@@ -52,34 +61,31 @@ const ListComponents = () => {
   // update current tab based on the "hash" in the URL
   useEffect(() => {
     setCurrentTab(isMyTab(hash) ? MY_COMPONENTS : ALL_COMPONENTS);
-    setList([]);
-  }, [router.asPath, hash]);
+  }, [hash]);
 
   // fetch total
   useEffect(() => {
     (async () => {
-      if (!isSvm && isL1OnlyNetwork && searchValue === '') {
-        try {
-          let totalTemp = null;
+      if (isSvm) return;
+      if (!isL1OnlyNetwork) return;
+      if (searchValue !== '') return;
 
-          // All components
-          if (currentTab === ALL_COMPONENTS) {
-            totalTemp = await getTotalForAllComponents();
-          }
-
-          // My components
-          if (currentTab === MY_COMPONENTS && account) {
-            totalTemp = await getTotalForMyComponents(account);
-          }
-
-          setTotal(Number(totalTemp));
-          if (Number(totalTemp) === 0) {
-            setIsLoading(false);
-          }
-        } catch (e) {
-          console.error(e);
-          notifyError('Error fetching components');
+      try {
+        let totalTemp = null;
+        if (currentTab === ALL_COMPONENTS) {
+          totalTemp = await getTotalForAllComponents();
+        } else if (currentTab === MY_COMPONENTS && account) {
+          totalTemp = await getTotalForMyComponents(account);
         }
+
+        setTotal(Number(totalTemp));
+        if (Number(totalTemp) === 0) {
+          setIsLoading(false);
+          setList([]);
+        }
+      } catch (e) {
+        console.error(e);
+        notifyError('Error fetching components');
       }
     })();
   }, [account, chainId, isL1OnlyNetwork, currentTab, searchValue, isSvm]);
@@ -87,25 +93,30 @@ const ListComponents = () => {
   // fetch the list (without search)
   useEffect(() => {
     (async () => {
-      if (!isSvm && isL1OnlyNetwork && total && currentPage && !searchValue) {
+      if (isSvm) return;
+      if (!isL1OnlyNetwork) return;
+      if (searchValue) return;
+
+      if (total && currentPage) {
         setIsLoading(true);
 
         try {
           // All components
           if (currentTab === ALL_COMPONENTS) {
-            setList([]);
-            const everyComps = await getComponents(total, currentPage);
+            const everyComps = isMainnet
+              ? await getAllComponents(currentPage)
+              : await getComponents(total, currentPage);
             setList(everyComps);
-          }
-
-          /**
-           * My components
-           * - search by `account` as searchValue
-           * - API will be called only once & store the complete list
-           */
-          if (currentTab === MY_COMPONENTS && list.length === 0 && account) {
-            const e = await getFilteredComponents(account);
-            setList(e);
+          } else if (currentTab === MY_COMPONENTS && account) {
+            /**
+             * My components
+             * - search by `account` as searchValue
+             * - API will be called only once & store the complete list
+             */
+            const myComps = isMainnet
+              ? await getMyComponents(account, currentPage)
+              : await getFilteredComponents(account);
+            setList(myComps);
           }
         } catch (e) {
           console.error(e);
@@ -115,7 +126,18 @@ const ListComponents = () => {
         }
       }
     })();
-  }, [account, chainId, isL1OnlyNetwork, total, currentPage, isSvm]);
+  }, [
+    isSvm,
+    searchValue,
+    isL1OnlyNetwork,
+    account,
+    total,
+    currentPage,
+    getMyComponents,
+    getAllComponents,
+    currentTab,
+    isMainnet,
+  ]);
 
   /**
    * Search (All components, My Components)
@@ -124,27 +146,40 @@ const ListComponents = () => {
    */
   useEffect(() => {
     (async () => {
-      if (searchValue) {
-        setIsLoading(true);
-        setList([]);
+      if (!searchValue) return;
 
-        try {
+      setIsLoading(true);
+      try {
+        if (isMainnet) {
+          const filteredList = await getComponentsBySearch(
+            searchValue,
+            currentTab === MY_COMPONENTS ? account : null,
+          );
+          setList(filteredList);
+        } else {
           const filteredList = await getFilteredComponents(
             searchValue,
             currentTab === MY_COMPONENTS ? account : null,
           );
           setList(filteredList);
-          setTotal(0); // total won't be used if search is used
-          setCurrentPage(1);
-        } catch (e) {
-          console.error(e);
-          notifyError('Error fetching components');
-        } finally {
-          setIsLoading(false);
         }
+        setTotal(0); // total won't be used if search is used
+        setCurrentPage(1);
+      } catch (e) {
+        console.error(e);
+        notifyError('Error fetching components');
+      } finally {
+        setIsLoading(false);
       }
     })();
-  }, [account, chainId, searchValue, currentTab]);
+  }, [
+    account,
+    searchValue,
+    currentTab,
+    currentPage,
+    getComponentsBySearch,
+    isMainnet,
+  ]);
 
   const tableCommonProps = {
     type: NAV_TYPES.COMPONENT,
@@ -156,20 +191,15 @@ const ListComponents = () => {
     searchValue,
   };
 
-  const myComponents = searchValue
-    ? list
-    : getMyListOnPagination({ total, nextPage: currentPage, list });
-
   return (
     <Tabs
       className="registry-tabs"
       type="card"
       activeKey={currentTab}
       tabBarExtraContent={extraTabContent}
-      onChange={(e) => {
-        setCurrentTab(e);
+      onChange={(tabName) => {
+        setCurrentTab(tabName);
 
-        setList([]);
         setTotal(0);
         setCurrentPage(1);
         setIsLoading(true);
@@ -179,7 +209,7 @@ const ListComponents = () => {
 
         // update the URL to keep track of my-components
         router.push(
-          e === MY_COMPONENTS
+          tabName === MY_COMPONENTS
             ? `${links.COMPONENTS}#${MY_COMPONENTS}`
             : links.COMPONENTS,
         );
@@ -188,7 +218,13 @@ const ListComponents = () => {
         {
           key: ALL_COMPONENTS,
           label: 'All',
-          children: <ListTable {...tableCommonProps} list={list} />,
+          children: (
+            <ListTable
+              {...tableCommonProps}
+              list={list}
+              tableDataTestId="all-components-table"
+            />
+          ),
         },
         {
           label: 'My Components',
@@ -196,8 +232,9 @@ const ListComponents = () => {
           children: (
             <ListTable
               {...tableCommonProps}
-              list={myComponents}
+              list={list}
               isAccountRequired
+              tableDataTestId="my-components-table"
             />
           ),
         },

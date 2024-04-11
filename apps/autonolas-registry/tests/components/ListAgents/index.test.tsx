@@ -1,4 +1,4 @@
-import { render, waitFor } from '@testing-library/react';
+import { render, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
 
@@ -12,19 +12,51 @@ import {
 import {
   wrapProvider,
   ACTIVE_TAB,
-  getTableTd,
-  useHelpersEvmMock,
   svmConnectivityEmptyMock,
+  useHelpersEvmMock,
+  mockCodeUri,
+  dummyAddress,
+  dummyHash1,
+  dummyAddress1,
 } from '../../tests-helpers';
 
-const allAgentsResponse = { id: '1', dependencies: ['4'] };
-const myAgentsResponse = { id: '2', dependencies: ['5'] };
+const allAgentsResponse = [
+  {
+    id: '1',
+    tokenId: '1',
+    owner: dummyAddress,
+    publicId: 'good_package_name_all_agents',
+    packageHash: dummyHash1,
+    metadataHash: mockCodeUri,
+  },
+];
+const myAgentsResponse = [
+  {
+    ...allAgentsResponse[0],
+    tokenId: '2',
+    owner: dummyAddress1,
+    publicId: 'good_package_name_my_agents',
+  },
+];
+const allAgentsSearchResponse = [
+  {
+    ...allAgentsResponse[0],
+    tokenId: '3',
+    publicId: 'good_package_name_agents_search',
+  },
+];
 
 jest.mock('../../../components/ListAgents/utils', () => ({
   getAgents: jest.fn(),
   getFilteredAgents: jest.fn(),
   getTotalForAllAgents: jest.fn(),
   getTotalForMyAgents: jest.fn(),
+}));
+
+jest.mock('../../../components/ListAgents/useAgentsList', () => ({
+  useAllAgents: () => () => Promise.resolve(allAgentsResponse),
+  useMyAgents: () => () => Promise.resolve(myAgentsResponse),
+  useSearchAgents: () => () => Promise.resolve(allAgentsSearchResponse),
 }));
 
 jest.mock('../../../common-util/hooks/useHelpers', () => ({
@@ -38,62 +70,173 @@ jest.mock('../../../common-util/hooks/useSvmConnectivity', () => ({
 describe('listAgents/index.jsx', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    (getAgents as jest.Mock).mockResolvedValue([allAgentsResponse]);
-    (getFilteredAgents as jest.Mock).mockResolvedValue([myAgentsResponse]);
+    (getAgents as jest.Mock).mockResolvedValue(allAgentsResponse);
+    (getFilteredAgents as jest.Mock).mockResolvedValue(myAgentsResponse);
     (getTotalForAllAgents as jest.Mock).mockResolvedValue(1);
     (getTotalForMyAgents as jest.Mock).mockResolvedValue(1);
   });
 
-  it('should render tabs with `All Tab` as active tab & Mint button', async () => {
-    const { container, getByRole } = render(wrapProvider(<ListAgents />));
+  it('should display the column names', async () => {
+    const { container, findByTestId } = render(wrapProvider(<ListAgents />));
 
     if (!container) {
       throw new Error('`All tab` is null');
     }
 
-    // check if the selected tab is `All` & has the correct content
-    await waitFor(async () =>
-      expect(container.querySelector(ACTIVE_TAB)?.textContent).toBe('All'),
-    );
+    const allAgentsTable = await findByTestId('all-agents-table');
 
     await waitFor(async () => {
-      // ckecking Id, description column
-      expect(container.querySelector(getTableTd(1))?.textContent).toBe('1');
-      expect(container.querySelector(getTableTd(4))?.textContent).toBe(
-        allAgentsResponse.dependencies.length.toString(),
-      );
-      expect(getByRole('button', { name: 'View' })).toBeInTheDocument();
-
-      // it should be called once
-      // expect(useRouter).toHaveBeenCalledTimes(1);
-
-      // Mint button
-      expect(getByRole('button', { name: 'Mint' })).toBeInTheDocument();
+      expect(within(allAgentsTable).getByText('ID')).toBeInTheDocument();
+      expect(
+        within(allAgentsTable).getByText('Name'),
+      ).toBeInTheDocument();
+      expect(within(allAgentsTable).getByText('Owner')).toBeInTheDocument();
+      expect(within(allAgentsTable).getByText('Hash')).toBeInTheDocument();
+      expect(within(allAgentsTable).getByText('Action')).toBeInTheDocument();
     });
   });
 
-  it('should render tabs with `My Agents` as active tab & Mint button', async () => {
-    const { container, getByRole } = render(wrapProvider(<ListAgents />));
-    if (!container) {
-      throw new Error('`My agents` is null');
-    }
+  it('should display mint button', async () => {
+    const { findByRole } = render(wrapProvider(<ListAgents />));
 
-    const myAgentsTab = container.querySelector('.ant-tabs-tab:nth-child(2)');
-    if (!myAgentsTab) {
-      throw new Error('`My agents` tab is null');
-    }
+    expect(await findByRole('button', { name: 'Mint' })).toBeInTheDocument();
+  });
 
-    // click the `My agents` tab
-    userEvent.click(myAgentsTab);
+  describe('All Agents', () => {
+    it('should display all agents', async () => {
+      const { container, findByTestId } = render(wrapProvider(<ListAgents />));
 
-    // check if the selected tab is `My agents` & has the correct content
-    await waitFor(async () => {
-      expect(container.querySelector(ACTIVE_TAB)?.textContent).toBe(
-        'My Agents',
+      if (!container) {
+        throw new Error('`All tab` is null');
+      }
+
+      // check if the selected tab is `All` & has the correct content
+      await waitFor(async () =>
+        expect(container.querySelector(ACTIVE_TAB)?.textContent).toBe('All'),
       );
+
+      const firstAgent = allAgentsResponse[0];
+      const allAgentsTable = await findByTestId('all-agents-table');
+
+      expect(
+        within(allAgentsTable).getByText(firstAgent.tokenId),
+      ).toBeInTheDocument();
+      expect(
+        within(allAgentsTable).getByText(/0x8626...9C1199/),
+      ).toBeInTheDocument();
+      expect(
+        within(allAgentsTable).getByText(/0x9cf4...315ab0/),
+      ).toBeInTheDocument();
+      expect(
+        within(allAgentsTable).getByText(firstAgent.publicId),
+      ).toBeInTheDocument();
+      expect(within(allAgentsTable).getByText('View')).toBeInTheDocument();
     });
 
-    // Mint button
-    expect(getByRole('button', { name: 'Mint' })).toBeInTheDocument();
+    it('should display all agents search', async () => {
+      const { container, getByRole, findByTestId, getByPlaceholderText } =
+        render(wrapProvider(<ListAgents />));
+
+      if (!container) {
+        throw new Error('`All tab` is null');
+      }
+
+      const searchInput = getByPlaceholderText('Search...');
+      await userEvent.type(searchInput, '!');
+
+      const searchButton = getByRole('button', { name: 'Search' });
+      await userEvent.click(searchButton);
+
+      const firstAgent = allAgentsSearchResponse[0];
+      const allAgentsTable = await findByTestId('all-agents-table');
+
+      expect(
+        within(allAgentsTable).getByText(firstAgent.tokenId),
+      ).toBeInTheDocument();
+      expect(
+        within(allAgentsTable).getByText(/0x8626...9C1199/),
+      ).toBeInTheDocument();
+      expect(
+        within(allAgentsTable).getByText(/0x9cf4...315ab0/),
+      ).toBeInTheDocument();
+      expect(
+        within(allAgentsTable).getByText(firstAgent.publicId),
+      ).toBeInTheDocument();
+      expect(within(allAgentsTable).getByText('View')).toBeInTheDocument();
+    });
+  });
+
+  describe('My Agents', () => {
+    it('should display my agents', async () => {
+      const { container, findByTestId } = render(wrapProvider(<ListAgents />));
+
+      const myAgentsTab = container.querySelector('.ant-tabs-tab:nth-child(2)');
+      if (!myAgentsTab) {
+        throw new Error('`My agents` tab is null');
+      }
+
+      // click the `My agents` tab
+      await userEvent.click(myAgentsTab);
+
+      // check if the selected tab is `My` & has the correct content
+      await waitFor(async () =>
+        expect(container.querySelector(ACTIVE_TAB)?.textContent).toBe(
+          'My Agents',
+        ),
+      );
+
+      const firstAgent = myAgentsResponse[0];
+      const myAgentsTable = await findByTestId('my-agents-table');
+
+      expect(
+        within(myAgentsTable).getByText(firstAgent.tokenId),
+      ).toBeInTheDocument();
+      expect(
+        within(myAgentsTable).getByText(/0x8626...9C1000/),
+      ).toBeInTheDocument();
+      expect(
+        within(myAgentsTable).getByText(/0x9cf4...315ab0/),
+      ).toBeInTheDocument();
+      expect(
+        within(myAgentsTable).getByText(firstAgent.publicId),
+      ).toBeInTheDocument();
+      expect(within(myAgentsTable).getByText('View')).toBeInTheDocument();
+    });
+
+    it('should display my agents search', async () => {
+      const { container, getByRole, findByTestId, getByPlaceholderText } =
+        render(wrapProvider(<ListAgents />));
+
+      const myAgentsTab = container.querySelector('.ant-tabs-tab:nth-child(2)');
+      if (!myAgentsTab) {
+        throw new Error('`My agents` tab is null');
+      }
+
+      // click the `My agents` tab
+      await userEvent.click(myAgentsTab);
+
+      const searchInput = getByPlaceholderText('Search...');
+      await userEvent.type(searchInput, '!');
+
+      const searchButton = getByRole('button', { name: 'Search' });
+      await userEvent.click(searchButton);
+
+      const firstAgent = allAgentsSearchResponse[0];
+      const myAgentsTable = await findByTestId('my-agents-table');
+
+      expect(
+        within(myAgentsTable).getByText(firstAgent.tokenId),
+      ).toBeInTheDocument();
+      expect(
+        within(myAgentsTable).getByText(/0x8626...9C1199/),
+      ).toBeInTheDocument();
+      expect(
+        within(myAgentsTable).getByText(/0x9cf4...315ab0/),
+      ).toBeInTheDocument();
+      expect(
+        within(myAgentsTable).getByText(firstAgent.publicId),
+      ).toBeInTheDocument();
+      expect(within(myAgentsTable).getByText('View')).toBeInTheDocument();
+    });
   });
 });

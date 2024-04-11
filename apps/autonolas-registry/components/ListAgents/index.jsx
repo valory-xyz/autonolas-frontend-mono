@@ -3,15 +3,15 @@ import { Tabs } from 'antd';
 import { useRouter } from 'next/router';
 import { notifyError } from '@autonolas/frontend-library';
 
-import { NAV_TYPES } from 'util/constants';
-import ListTable from 'common-util/List/ListTable';
+import { NAV_TYPES } from '../../util/constants';
 import {
+  ListTable,
   useExtraTabContent,
   getHash,
   isMyTab,
-} from 'common-util/List/ListTable/helpers';
-import { getMyListOnPagination } from 'common-util/ContractUtils/myList';
-import { useHelpers } from 'common-util/hooks';
+} from '../../common-util/List/ListTable';
+import { useHelpers } from '../../common-util/hooks';
+import { useAllAgents, useMyAgents, useSearchAgents } from './useAgentsList';
 import {
   getAgents,
   getFilteredAgents,
@@ -29,9 +29,12 @@ const ListAgents = () => {
     isMyTab(hash) ? MY_AGENTS : ALL_AGENTS,
   );
 
-  const {
-    account, chainId, links, isL1OnlyNetwork, isSvm,
-  } = useHelpers();
+  const { account, chainId, links, isL1OnlyNetwork, isSvm, isMainnet } =
+    useHelpers();
+
+  const getAllAgents = useAllAgents();
+  const getMyAgents = useMyAgents();
+  const getAgentsBySearch = useSearchAgents();
 
   /**
    * extra tab content & view click
@@ -39,6 +42,7 @@ const ListAgents = () => {
   const { searchValue, extraTabContent, clearSearch } = useExtraTabContent({
     title: 'Agents',
     onRegisterClick: () => router.push(links.MINT_AGENT),
+    isMyTab: currentTab === MY_AGENTS,
   });
   const onViewClick = (id) => router.push(`${links.AGENTS}/${id}`);
 
@@ -53,34 +57,31 @@ const ListAgents = () => {
   // update current tab based on the "hash" in the links
   useEffect(() => {
     setCurrentTab(isMyTab(hash) ? MY_AGENTS : ALL_AGENTS);
-    setList([]);
-  }, [router.asPath]);
+  }, [hash]);
 
   // fetch total
   useEffect(() => {
     (async () => {
-      if (!isSvm && isL1OnlyNetwork && searchValue === '') {
-        try {
-          let totalTemp = null;
+      if (isSvm) return;
+      if (!isL1OnlyNetwork) return;
+      if (searchValue !== '') return;
 
-          // All agents
-          if (currentTab === ALL_AGENTS) {
-            totalTemp = await getTotalForAllAgents();
-          }
-
-          // My agents
-          if (currentTab === MY_AGENTS && account) {
-            totalTemp = await getTotalForMyAgents(account);
-          }
-
-          setTotal(Number(totalTemp));
-          if (Number(totalTemp) === 0) {
-            setIsLoading(false);
-          }
-        } catch (e) {
-          console.error(e);
-          notifyError('Error fetching agents');
+      try {
+        let totalTemp = null;
+        if (currentTab === ALL_AGENTS) {
+          totalTemp = await getTotalForAllAgents();
+        } else if (currentTab === MY_AGENTS && account) {
+          totalTemp = await getTotalForMyAgents(account);
         }
+
+        setTotal(Number(totalTemp));
+        if (Number(totalTemp) === 0) {
+          setIsLoading(false);
+          setList([]);
+        }
+      } catch (e) {
+        notifyError('Error fetching agents');
+        console.error(e);
       }
     })();
   }, [account, chainId, isL1OnlyNetwork, currentTab, searchValue, isSvm]);
@@ -88,35 +89,51 @@ const ListAgents = () => {
   // fetch the list (without search)
   useEffect(() => {
     (async () => {
-      if (!isSvm && isL1OnlyNetwork && total && currentPage && !searchValue) {
+      if (isSvm) return;
+      if (!isL1OnlyNetwork) return;
+      if (searchValue) return;
+
+      if (total && currentPage) {
         setIsLoading(true);
 
         try {
           // All agents
           if (currentTab === ALL_AGENTS) {
-            setList([]);
-            const everyAgents = await getAgents(total, currentPage);
+            const everyAgents = isMainnet
+              ? await getAllAgents(currentPage)
+              : await getAgents(total, currentPage);
             setList(everyAgents);
-          }
-
-          /**
-           * My agents
-           * - search by `account` as searchValue
-           * - API will be called only once & store the complete list
-           */
-          if (currentTab === MY_AGENTS && list.length === 0 && account) {
-            const e = await getFilteredAgents(account);
-            setList(e);
+          } else if (currentTab === MY_AGENTS && account) {
+            /**
+             * My agents
+             * - search by `account` as searchValue
+             * - API will be called only once & store the complete list
+             */
+            const myAgents = isMainnet
+              ? await getMyAgents(account, currentPage)
+              : await getFilteredAgents(account);
+            setList(myAgents);
           }
         } catch (e) {
-          console.error(e);
           notifyError('Error fetching agents');
+          console.error(e);
         } finally {
           setIsLoading(false);
         }
       }
     })();
-  }, [account, chainId, isL1OnlyNetwork, total, currentPage, isSvm]);
+  }, [
+    isSvm,
+    searchValue,
+    isL1OnlyNetwork,
+    account,
+    total,
+    currentPage,
+    getMyAgents,
+    getAllAgents,
+    currentTab,
+    isMainnet,
+  ]);
 
   /**
    * Search (All agents, My agents)
@@ -125,27 +142,41 @@ const ListAgents = () => {
    */
   useEffect(() => {
     (async () => {
-      if (searchValue) {
-        setIsLoading(true);
-        setList([]);
+      if (!searchValue) return;
 
-        try {
+      setIsLoading(true);
+      try {
+        if (isMainnet) {
+          const filteredList = await getAgentsBySearch(
+            searchValue,
+            currentTab === MY_AGENTS ? account : null,
+          );
+          setList(filteredList);
+        } else {
           const filteredList = await getFilteredAgents(
             searchValue,
             currentTab === MY_AGENTS ? account : null,
           );
           setList(filteredList);
-          setTotal(0); // total won't be used if search is used
-          setCurrentPage(1);
-        } catch (e) {
-          console.error(e);
-          notifyError('Error fetching agents');
-        } finally {
-          setIsLoading(false);
         }
+
+        setTotal(0); // total won't be used if search is used
+        setCurrentPage(1);
+      } catch (e) {
+        notifyError('Error fetching agents');
+        console.error(e);
+      } finally {
+        setIsLoading(false);
       }
     })();
-  }, [account, chainId, searchValue, currentTab]);
+  }, [
+    account,
+    searchValue,
+    currentTab,
+    currentPage,
+    getAgentsBySearch,
+    isMainnet,
+  ]);
 
   const tableCommonProps = {
     type: NAV_TYPES.AGENT,
@@ -157,20 +188,15 @@ const ListAgents = () => {
     searchValue,
   };
 
-  const myAgentsList = searchValue
-    ? list
-    : getMyListOnPagination({ total, nextPage: currentPage, list });
-
   return (
     <Tabs
       className="registry-tabs"
       type="card"
       activeKey={currentTab}
       tabBarExtraContent={extraTabContent}
-      onChange={(e) => {
-        setCurrentTab(e);
+      onChange={(tabName) => {
+        setCurrentTab(tabName);
 
-        setList([]);
         setTotal(0);
         setCurrentPage(1);
         setIsLoading(true);
@@ -180,14 +206,20 @@ const ListAgents = () => {
 
         // update the links to keep track of my-agents
         router.push(
-          e === MY_AGENTS ? `${links.AGENTS}#${MY_AGENTS}` : links.AGENTS,
+          tabName === MY_AGENTS ? `${links.AGENTS}#${MY_AGENTS}` : links.AGENTS,
         );
       }}
       items={[
         {
           key: ALL_AGENTS,
           label: 'All',
-          children: <ListTable {...tableCommonProps} list={list} />,
+          children: (
+            <ListTable
+              {...tableCommonProps}
+              list={list}
+              tableDataTestId="all-agents-table"
+            />
+          ),
         },
         {
           key: MY_AGENTS,
@@ -195,8 +227,9 @@ const ListAgents = () => {
           children: (
             <ListTable
               {...tableCommonProps}
-              list={myAgentsList}
+              list={list}
               isAccountRequired
+              tableDataTestId="my-agents-table"
             />
           ),
         },

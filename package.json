@@ -28,6 +28,7 @@
     "cors": "^2.8.5",
     "ethers": "^5.7.2",
     "express": "^4.18.2",
+    "graphql-request": "^6.1.0",
     "ipfs": "^0.63.5",
     "ipfs-http-client": "^57.0.3",
     "ipfs-only-hash": "^4.0.0",

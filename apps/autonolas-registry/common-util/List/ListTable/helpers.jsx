@@ -1,6 +1,4 @@
-import { useState } from 'react';
-import { Input, Space, Button, Typography } from 'antd';
-import { SearchOutlined } from '@ant-design/icons';
+import { Space, Button } from 'antd';
 import {
   AddressLink,
   areAddressesEqual,
@@ -8,137 +6,189 @@ import {
 } from '@autonolas/frontend-library';
 
 import {
+  HASH_PREFIX,
   NAV_TYPES,
   SERVICE_STATE,
+  SERVICE_STATE_KEY_MAP,
   TOTAL_VIEW_COUNT,
 } from '../../../util/constants';
 
-const { Title } = Typography;
-
 export const getTableColumns = (
   type,
-  { onViewClick, onUpdateClick, isMobile, chainName, account, chainId },
+  {
+    onViewClick,
+    onUpdateClick,
+    isMobile,
+    chainName,
+    account,
+    chainId,
+    isMainnet,
+  },
 ) => {
   const addressLinkProps = {
     chainId,
     suffixCount: isMobile ? 4 : 6,
   };
 
+  const tokenIdColumn = {
+    title: 'ID',
+    dataIndex: 'tokenId',
+    key: 'tokenId',
+    width: isMobile ? 30 : 50,
+  };
+
+  const packageName = {
+    title: 'Name',
+    dataIndex: 'packageName',
+    key: 'packageName',
+    width: type === NAV_TYPES.SERVICE ? 200 : 180,
+    render: (text, record) => {
+      if (!text || text === NA) return NA;
+      return (
+        <Button type="link" onClick={() => onViewClick(record.id)}>
+          {text}
+        </Button>
+      );
+    },
+  };
+
+  const ownerColumn = {
+    title: 'Owner',
+    dataIndex: 'owner',
+    key: 'owner',
+    width: 160,
+    render: (text) => {
+      if (!text || text === NA) return NA;
+      return <AddressLink {...addressLinkProps} text={text} canCopy />;
+    },
+  };
+
+  const hashColumn = {
+    title: 'Hash',
+    dataIndex: 'hash',
+    key: 'hash',
+    width: 180,
+    render: (text) => {
+      if (!text || text === NA) return NA;
+      const updatedText = text.replace(HASH_PREFIX, '0x'); // .toUpperCase();
+      return (
+        <AddressLink {...addressLinkProps} text={updatedText} isIpfsLink />
+      );
+    },
+  };
+
   if (type === NAV_TYPES.COMPONENT || type === NAV_TYPES.AGENT) {
-    return [
-      {
-        title: 'ID',
-        dataIndex: 'id',
-        key: 'id',
-        width: isMobile ? 30 : 50,
-      },
-      {
-        title: 'Owner',
-        dataIndex: 'owner',
-        key: 'owner',
-        width: 160,
-        render: (text) => <AddressLink {...addressLinkProps} text={text} />,
-      },
-      {
-        title: 'Hash',
-        dataIndex: 'hash',
-        key: 'hash',
-        width: 180,
-        render: (text) => <AddressLink {...addressLinkProps} text={text} />,
-      },
-      {
-        title: 'No. of component dependencies',
-        dataIndex: 'dependency',
-        width: isMobile ? 70 : 300,
-        key: 'dependency',
-      },
-      {
-        width: isMobile ? 40 : 120,
-        title: 'Action',
-        key: 'action',
-        fixed: 'right',
-        render: (_text, record) => (
-          <Space size="middle">
-            <Button type="link" onClick={() => onViewClick(record.id)}>
-              View
-            </Button>
-          </Space>
-        ),
-      },
-    ];
+    const dependencyColumn = {
+      title: 'No. of component dependencies',
+      dataIndex: 'dependency',
+      width: isMobile ? 70 : 300,
+      key: 'dependency',
+    };
+
+    const actionColumn = {
+      width: isMobile ? 40 : 120,
+      title: 'Action',
+      key: 'action',
+      fixed: 'right',
+      render: (_text, record) => (
+        <Button type="link" onClick={() => onViewClick(record.id)}>
+          View
+        </Button>
+      ),
+    };
+
+    return isMainnet
+      ? [tokenIdColumn, packageName, ownerColumn, hashColumn, actionColumn]
+      : [tokenIdColumn, ownerColumn, dependencyColumn, actionColumn];
   }
 
   if (type === NAV_TYPES.SERVICE) {
-    return [
-      {
-        title: 'ID',
-        dataIndex: 'id',
-        key: 'id',
-        width: isMobile ? 30 : 50,
+    const stateColumn = {
+      title: 'State',
+      dataIndex: 'state',
+      key: 'state',
+      width: 150,
+      render: (text) => {
+        if (!text) return NA;
+        return SERVICE_STATE[text];
       },
-      {
-        title: 'Owner',
-        dataIndex: 'owner',
-        key: 'owner',
-        width: 200,
-        render: (text) => {
-          if (!text || text === NA) return NA;
-          return (
-            <AddressLink
-              {...addressLinkProps}
-              text={text}
-              chainName={chainName}
-            />
-          );
-        },
-      },
-      {
-        title: 'State',
-        dataIndex: 'state',
-        key: 'state',
-        width: 150,
-        render: (e) => {
-          if (!e) return NA;
-          return SERVICE_STATE[e];
-        },
-      },
-      {
-        width: isMobile ? 40 : 220,
-        title: 'Action',
-        key: 'action',
-        fixed: 'right',
-        render: (_text, record) => {
-          // only show update button for pre-registration state
-          const canUpdate =
-            ['1'].includes(record.state) &&
-            areAddressesEqual(record.owner, account);
+    };
+    const actionAndUpdateColumn = {
+      width: isMobile ? 40 : 200,
+      title: 'Action',
+      key: 'action',
+      fixed: 'right',
+      render: (_text, record) => {
+        // only show update button for pre-registration state and
+        // if the owner is the same as the current account
+        const canUpdate =
+          record.state === SERVICE_STATE_KEY_MAP.preRegistration &&
+          areAddressesEqual(record.owner, account);
 
-          return (
-            <Space size="middle">
-              <Button
-                type="link"
-                onClick={() => onViewClick(record.id)}
-                disabled={record.owner === NA}
-              >
-                View
+        return (
+          <Space size="middle">
+            <Button
+              type="link"
+              onClick={() => onViewClick(record.id)}
+              disabled={record.owner === NA}
+            >
+              View
+            </Button>
+
+            {canUpdate && onUpdateClick && (
+              <Button type="link" onClick={() => onUpdateClick(record.id)}>
+                Update
               </Button>
-
-              {canUpdate && onUpdateClick && (
-                <Button type="link" onClick={() => onUpdateClick(record.id)}>
-                  Update
-                </Button>
-              )}
-            </Space>
-          );
-        },
+            )}
+          </Space>
+        );
       },
-    ];
+    };
+
+    const idColumn = {
+      title: 'ID',
+      dataIndex: 'id',
+      key: 'id',
+      width: isMobile ? 30 : 50,
+    };
+
+    const nonMainnetOwnerColumn = {
+      title: 'Owner',
+      dataIndex: 'owner',
+      key: 'owner',
+      width: 200,
+      render: (text) => {
+        if (!text || text === NA) return NA;
+        return (
+          <AddressLink
+            {...addressLinkProps}
+            text={text}
+            chainName={chainName}
+          />
+        );
+      },
+    };
+
+    return isMainnet
+      ? [
+          tokenIdColumn,
+          packageName,
+          ownerColumn,
+          hashColumn,
+          stateColumn,
+          actionAndUpdateColumn,
+        ]
+      : [idColumn, nonMainnetOwnerColumn, stateColumn, actionAndUpdateColumn];
   }
 
   return [];
 };
 
-export const fetchDataSource = (type, rawData, { current }) => {
+export const convertTableRawData = (
+  type,
+  rawData,
+  { currentPage, isMainnet },
+) => {
   /**
    * @example
    * TOTAL_VIEW_COUNT = 10, current = 1
@@ -150,10 +200,37 @@ export const fetchDataSource = (type, rawData, { current }) => {
    *       = 40 + 1
    *       = 41
    */
-  const startIndex = (current - 1) * TOTAL_VIEW_COUNT + 1;
-  let data = [];
+  const startIndex = (currentPage - 1) * TOTAL_VIEW_COUNT + 1;
+
+  // for mainnet
+  if (isMainnet) {
+    if (type === NAV_TYPES.COMPONENT || type === NAV_TYPES.AGENT) {
+      return rawData.map((item) => ({
+        id: item.tokenId,
+        tokenId: item.tokenId,
+        owner: item.owner,
+        hash: item.metadataHash,
+        packageName: item.publicId,
+        packageHash: item.packageHash,
+      }));
+    }
+
+    if (type === NAV_TYPES.SERVICE) {
+      return rawData.map((item) => ({
+        id: item.serviceId,
+        tokenId: item.serviceId,
+        owner: item.owner,
+        hash: item.metadataHash,
+        packageName: item.publicId,
+        packageHash: item.packageHash,
+        state: item.state,
+      }));
+    }
+  }
+
+  // non-mainnet chain
   if (type === NAV_TYPES.COMPONENT) {
-    data = rawData.map((item, index) => ({
+    return rawData.map((item, index) => ({
       id: item.id || `${startIndex + index}`,
       description: item.description || NA,
       developer: item.developer || NA,
@@ -164,7 +241,7 @@ export const fetchDataSource = (type, rawData, { current }) => {
   }
 
   if (type === NAV_TYPES.AGENT) {
-    data = rawData.map((item, index) => ({
+    return rawData.map((item, index) => ({
       id: item.id || `${startIndex + index}`,
       description: item.description || NA,
       developer: item.developer || NA,
@@ -175,7 +252,7 @@ export const fetchDataSource = (type, rawData, { current }) => {
   }
 
   if (type === NAV_TYPES.SERVICE) {
-    data = rawData.map((item, index) => ({
+    return rawData.map((item, index) => ({
       id: item.id || `${startIndex + index}`,
       developer: item.developer || NA,
       owner: item.owner || NA,
@@ -184,56 +261,7 @@ export const fetchDataSource = (type, rawData, { current }) => {
     }));
   }
 
-  return data;
-};
-
-/**
- * tab content
- */
-export const useExtraTabContent = ({
-  title,
-  onRegisterClick = () => {},
-  isSvm = false,
-}) => {
-  const [searchValue, setSearchValue] = useState('');
-  const [value, setValue] = useState('');
-  const clearSearch = () => {
-    setValue('');
-    setSearchValue('');
-  };
-
-  const extraTabContent = {
-    left: <Title level={2}>{title}</Title>,
-    right: (
-      <>
-        {/* TODO: hiding search util feature is introduced */}
-        {isSvm ? null : (
-          <>
-            <Input
-              prefix={<SearchOutlined className="site-form-item-icon" />}
-              placeholder="Owner or Hash"
-              value={value}
-              onChange={(e) => setValue(e.target.value)}
-            />
-
-            <Button
-              ghost
-              type="primary"
-              onClick={() => setSearchValue(value || '')}
-            >
-              Search
-            </Button>
-          </>
-        )}
-
-        <Button type="primary" onClick={onRegisterClick}>
-          Mint
-        </Button>
-      </>
-    ),
-  };
-
-  return { searchValue, extraTabContent, clearSearch };
+  throw new Error('Invalid type parameter');
 };
 
 /**

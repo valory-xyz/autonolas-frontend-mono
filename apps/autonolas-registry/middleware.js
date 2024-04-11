@@ -47,6 +47,7 @@ const getCspHeader = (browserName) => {
     'https://sepolia.optimism.io/',
     'https://forno.celo.org',
     'https://alfajores-forno.celo-testnet.org',
+    process.env.NEXT_PUBLIC_AUTONOLAS_SUB_GRAPH_URL
   ];
 
   if (isDev) {
