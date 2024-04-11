@@ -9,9 +9,9 @@ import {
 } from '@autonolas/frontend-library';
 import { isArray } from 'lodash';
 
-import { useHelpers } from 'common-util/hooks';
-import { SendTransactionButton } from 'common-util/TransactionHelpers/SendTransactionButton';
-import { useSvmBonds } from 'components/ListServices/useSvmService';
+import { useHelpers } from '../../../../common-util/hooks';
+import { SendTransactionButton } from '../../../../common-util/TransactionHelpers/SendTransactionButton';
+import { useSvmBonds } from '../../hooks/useSvmService';
 import { getBonds, getTokenBondRequest, checkAndApproveToken } from '../utils';
 import { getNumberOfAgentAddress } from '../../helpers/functions';
 import { ActiveRegistrationTable } from './ActiveRegistrationTable';

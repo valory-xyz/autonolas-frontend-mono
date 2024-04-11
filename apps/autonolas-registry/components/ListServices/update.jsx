@@ -10,16 +10,19 @@ import {
 import {
   DEFAULT_SERVICE_CREATION_ETH_TOKEN,
   DEFAULT_SERVICE_CREATION_ETH_TOKEN_ZEROS,
-} from 'util/constants';
-import { convertStringToArray, AlertError } from 'common-util/List/ListCommon';
-import { getEstimatedGasLimit } from 'common-util/functions/requests';
-import { getServiceManagerContract } from 'common-util/Contracts';
-import { sendTransaction } from 'common-util/functions';
-import { useHelpers } from 'common-util/hooks';
-import { useSvmConnectivity } from 'common-util/hooks/useSvmConnectivity';
+} from '../../util/constants';
+import {
+  convertStringToArray,
+  AlertError,
+} from '../../common-util/List/ListCommon';
+import { getEstimatedGasLimit } from '../../common-util/functions/requests';
+import { getServiceManagerContract } from '../../common-util/Contracts';
+import { sendTransaction } from '../../common-util/functions';
+import { useHelpers } from '../../common-util/hooks';
+import { useSvmConnectivity } from '../../common-util/hooks/useSvmConnectivity';
 import RegisterForm from './helpers/RegisterForm';
 import { getAgentParams, getTokenAddressRequest } from './utils';
-import { useGetServiceDetails } from './useService';
+import { useGetServiceDetails } from './hooks/useService';
 import { buildSvmArgsToMintOrUpdate } from './helpers/functions';
 import { FormContainer } from '../styles';
 
@@ -91,9 +94,10 @@ const UpdateService = () => {
   };
 
   const buildEvmParams = (values) => {
-    const token = values.token === DEFAULT_SERVICE_CREATION_ETH_TOKEN_ZEROS
-      ? DEFAULT_SERVICE_CREATION_ETH_TOKEN
-      : values.token;
+    const token =
+      values.token === DEFAULT_SERVICE_CREATION_ETH_TOKEN_ZEROS
+        ? DEFAULT_SERVICE_CREATION_ETH_TOKEN
+        : values.token;
 
     const commonParams = [
       `0x${values.hash}`,

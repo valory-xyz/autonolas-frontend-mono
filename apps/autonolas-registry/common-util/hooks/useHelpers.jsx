@@ -13,16 +13,9 @@ import { doesNetworkHaveValidServiceManagerTokenFn } from '../functions';
 
 export const useHelpers = () => {
   const wallet = useAnchorWallet();
-
-  const account = useSelector((state) => state?.setup?.account);
-  const vmType = useSelector((state) => state?.setup?.vmType);
-
-  // chainId - selected in the dropdown
-  const chainId = useSelector((state) => state?.setup?.chainId);
-  const chainDisplayName = useSelector(
-    (state) => state?.setup?.chainDisplayName,
+  const { account, vmType, chainId, chainDisplayName, chainName } = useSelector(
+    (state) => state?.setup,
   );
-  const chainName = useSelector((state) => state?.setup?.chainName);
   const { chain: chainFromWallet } = useNetwork();
   const chainIdFromWallet = chainFromWallet?.id;
 
@@ -65,6 +58,7 @@ export const useHelpers = () => {
       doesNetworkHaveValidServiceManagerTokenFn(chainId),
     links: updatedLinks,
     isConnectedToWrongNetwork,
+    isMainnet: chainId === 1,
     isSvm,
   };
 };

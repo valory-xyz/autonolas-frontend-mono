@@ -62,7 +62,7 @@ const dummyHashes = {
 
 const dummyIpfs = {
   image: `ipfs://${mockNftImageHash}`,
-  name: 'Some name',
+  name: 'Some package name',
   description: 'Some description',
   code_uri: `ipfs://${mockCodeUri}`,
   attributes: [{ trait_type: 'version', value: '0.0.0.1' }],
@@ -90,13 +90,13 @@ describe('listAgents/details.jsx', () => {
     global.fetch = unmockedFetch;
   });
 
-  it('should render agent details', async () => {
+  it('should display agent details', async () => {
     const { getByText, getByTestId, queryByRole } = render(
       wrapProvider(<AgentDetails />),
     );
     await waitFor(async () => {
       // left column content
-      expect(getByText('Agent ID 1')).toBeInTheDocument();
+      expect(getByText('Some package name')).toBeInTheDocument();
       expect(getByTestId('view-hash-link').getAttribute('href')).toBe(
         `${GATEWAY_URL}12345`,
       );

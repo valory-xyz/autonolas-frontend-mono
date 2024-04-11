@@ -3,22 +3,27 @@ import { Tabs } from 'antd';
 import { useRouter } from 'next/router';
 import { notifyError } from '@autonolas/frontend-library';
 
-import { NAV_TYPES } from 'util/constants';
-import ListTable from 'common-util/List/ListTable';
+import { NAV_TYPES } from '../../util/constants';
 import {
+  ListTable,
   useExtraTabContent,
   getHash,
   isMyTab,
-} from 'common-util/List/ListTable/helpers';
-import { getMyListOnPagination } from 'common-util/ContractUtils/myList';
-import { useHelpers } from 'common-util/hooks';
+} from '../../common-util/List/ListTable';
+import { getMyListOnPagination } from '../../common-util/ContractUtils/myList';
+import { useHelpers } from '../../common-util/hooks';
+import {
+  useAllServices,
+  useMyServices,
+  useSearchServices,
+} from './hooks/useServicesList';
+import { useServiceInfo } from './hooks/useSvmService';
 import {
   getServices,
   getFilteredServices,
   getTotalForAllServices,
   getTotalForMyServices,
 } from './utils';
-import { useServiceInfo } from './useSvmService';
 
 const ALL_SERVICES = 'all-services';
 const MY_SERVICES = 'my-services';
@@ -30,7 +35,11 @@ const ListServices = () => {
     isMyTab(hash) ? MY_SERVICES : ALL_SERVICES,
   );
 
-  const { account, chainName, links, isSvm } = useHelpers();
+  const { account, links, isSvm, chainId, isMainnet } = useHelpers();
+
+  const getAllServices = useAllServices();
+  const getMyServices = useMyServices();
+  const getServicesBySearch = useSearchServices();
 
   /**
    * extra tab content & view click
@@ -39,6 +48,8 @@ const ListServices = () => {
     title: 'Services',
     onRegisterClick: () => router.push(links.MINT_SERVICE),
     isSvm,
+    type: NAV_TYPES.SERVICE,
+    isMyTab: currentTab === MY_SERVICES,
   });
   const onViewClick = (id) => router.push(`${links.SERVICES}/${id}`);
 
@@ -53,8 +64,7 @@ const ListServices = () => {
   // update current tab based on the "hash" in the URL
   useEffect(() => {
     setCurrentTab(isMyTab(hash) ? MY_SERVICES : ALL_SERVICES);
-    setList([]);
-  }, [router.asPath, hash]);
+  }, [hash]);
 
   const {
     getTotalForAllSvmServices,
@@ -82,10 +92,11 @@ const ListServices = () => {
         setTotal(Number(totalTemp));
         if (Number(totalTemp) === 0) {
           setIsLoading(false);
+          setList([]);
         }
       } catch (e) {
-        console.error(e);
         notifyError('Error fetching services');
+        console.error(e);
       }
     };
 
@@ -94,46 +105,52 @@ const ListServices = () => {
     }
   }, [
     account,
-    chainName,
     currentTab,
     searchValue,
     isSvm,
     getTotalForAllSvmServices,
     getTotalForMySvmServices,
     getSvmServices,
+    chainId,
   ]);
 
   // fetch the list (All services, My Services) - WITHOUT search
   useEffect(() => {
     const getList = async () => {
       setIsLoading(true);
+      setList([]);
 
       try {
         // All services
         if (currentTab === ALL_SERVICES) {
-          setList([]);
-          const everyComps = isSvm
-            ? await getSvmServices(total, currentPage)
-            : await getServices(total, currentPage);
-          setList(everyComps);
-        }
+          if (isMainnet) {
+            const mainnetServices = await getAllServices(currentPage);
+            setList(mainnetServices);
+          } else {
+            const nonMainnetServices = isSvm
+              ? await getSvmServices(total, currentPage)
+              : await getServices(total, currentPage);
+            setList(nonMainnetServices);
+          }
+        } else if (currentTab === MY_SERVICES && account) {
+          /**
+           * My services
+           * - search by `account` as searchValue
+           * - API will be called only once & store the complete list
+           */
+          if (isMainnet) {
+            const mainnetMyServices = await getMyServices(account, currentPage);
+            setList(mainnetMyServices);
+          } else {
+            const nonMainnetMyServices = isSvm
+              ? await getMySvmServices(account, total)
+              : await getFilteredServices(account);
+            setList(nonMainnetMyServices);
 
-        /**
-         * My services
-         * - search by `account` as searchValue
-         * - API will be called only once & store the complete list
-         */
-        if (currentTab === MY_SERVICES && list.length === 0 && account) {
-          setList([]);
-
-          const e = isSvm
-            ? await getMySvmServices(account, total)
-            : await getFilteredServices(account);
-          setList(e);
-
-          // TODO: remove this once `getTotalForMySvmServices` is fixed
-          if (isSvm) {
-            setTotal(e.length);
+            // TODO: remove this once `getTotalForMySvmServices` is fixed
+            if (isSvm) {
+              setTotal(nonMainnetMyServices.length);
+            }
           }
         }
       } catch (e) {
@@ -149,13 +166,17 @@ const ListServices = () => {
     }
   }, [
     account,
-    chainName,
     total,
     currentPage,
     currentTab,
     searchValue,
     isSvm,
-    // list?.length,
+    getMyServices,
+    getAllServices,
+    getSvmServices,
+    getMySvmServices,
+    isMainnet,
+    chainId,
   ]);
 
   /**
@@ -165,27 +186,45 @@ const ListServices = () => {
    */
   useEffect(() => {
     (async () => {
-      if (searchValue) {
-        setIsLoading(true);
-        setList([]);
+      if (!searchValue) return;
 
-        try {
+      setIsLoading(true);
+      setList([]);
+
+      try {
+        if (isMainnet) {
+          const filteredList = await getServicesBySearch(
+            searchValue,
+            currentPage,
+            currentTab === MY_SERVICES ? account : null,
+          );
+          setList(filteredList);
+        } else {
           const filteredList = await getFilteredServices(
             searchValue,
             currentTab === MY_SERVICES ? account : null,
           );
           setList(filteredList);
-          setTotal(0); // total won't be used if search is used
-          setCurrentPage(1);
-        } catch (e) {
-          console.error(e);
-          notifyError('Error fetching services');
-        } finally {
-          setIsLoading(false);
         }
+
+        setTotal(0); // total won't be used if search is used
+        setCurrentPage(1);
+      } catch (e) {
+        notifyError('Error fetching services');
+        console.error(e);
+      } finally {
+        setIsLoading(false);
       }
     })();
-  }, [account, chainName, searchValue, currentTab]);
+  }, [
+    account,
+    searchValue,
+    currentTab,
+    currentPage,
+    getServicesBySearch,
+    isMainnet,
+    chainId,
+  ]);
 
   const tableCommonProps = {
     type: NAV_TYPES.SERVICE,
@@ -199,9 +238,13 @@ const ListServices = () => {
       router.push(`${links.UPDATE_SERVICE}/${serviceId}`),
   };
 
-  const myServiceList = searchValue
-    ? list
-    : getMyListOnPagination({ total, nextPage: currentPage, list });
+  const getMyServiceList = () => {
+    if (isMainnet) return list;
+
+    return searchValue
+      ? list
+      : getMyListOnPagination({ total, nextPage: currentPage, list });
+  };
 
   return (
     <Tabs
@@ -209,10 +252,9 @@ const ListServices = () => {
       type="card"
       activeKey={currentTab}
       tabBarExtraContent={extraTabContent}
-      onChange={(e) => {
-        setCurrentTab(e);
+      onChange={(activeTab) => {
+        setCurrentTab(activeTab);
 
-        setList([]);
         setTotal(0);
         setCurrentPage(1);
         setIsLoading(true);
@@ -222,7 +264,7 @@ const ListServices = () => {
 
         // update the URL to keep track of my-services
         router.push(
-          e === MY_SERVICES
+          activeTab === MY_SERVICES
             ? `${links.SERVICES}#${MY_SERVICES}`
             : links.SERVICES,
         );
@@ -232,7 +274,13 @@ const ListServices = () => {
           key: ALL_SERVICES,
           label: 'All',
           disabled: isLoading,
-          children: <ListTable {...tableCommonProps} list={list} />,
+          children: (
+            <ListTable
+              {...tableCommonProps}
+              list={list}
+              tableDataTestId="all-services-table"
+            />
+          ),
         },
         {
           key: MY_SERVICES,
@@ -241,9 +289,10 @@ const ListServices = () => {
           children: (
             <ListTable
               {...tableCommonProps}
-              list={myServiceList}
+              list={getMyServiceList()}
               isPaginationRequired={!isSvm}
               isAccountRequired
+              tableDataTestId="all-services-table"
             />
           ),
         },

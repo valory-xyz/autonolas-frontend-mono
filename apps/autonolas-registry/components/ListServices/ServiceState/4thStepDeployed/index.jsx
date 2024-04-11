@@ -8,7 +8,7 @@ import { setAgentInstancesAndOperators } from '../../../../store/service';
 import { useScreen } from 'common-util/hooks/useScreen';
 import { useHelpers } from 'common-util/hooks/useHelpers';
 import { SendTransactionButton } from 'common-util/TransactionHelpers/SendTransactionButton';
-import { useAgentInstanceAndOperator } from '../../useSvmService';
+import { useAgentInstanceAndOperator } from '../../hooks/useSvmService';
 import { getAgentInstanceAndOperator } from '../utils';
 
 export const Deployed = ({

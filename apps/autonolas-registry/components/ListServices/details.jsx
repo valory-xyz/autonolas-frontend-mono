@@ -9,7 +9,7 @@ import {
   useGetServiceDetails,
   useGetServiceOwner,
   useGetServiceTokenUri,
-} from './useService';
+} from './hooks/useService';
 
 const Service = () => {
   const router = useRouter();

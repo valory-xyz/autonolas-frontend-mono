@@ -6,6 +6,7 @@ import { GenericObject, Loader, NA } from '@autonolas/frontend-library';
 
 import { NAV_TYPES, NavTypesValues } from '../../util/constants';
 import { useMetadata } from '../hooks/useMetadata';
+import { useHelpers } from '../hooks';
 import { IpfsHashGenerationModal } from '../List/IpfsHashGenerationModal';
 import { useDetails } from './useDetails';
 import { NftImage } from './NFTImage';
@@ -43,6 +44,7 @@ export const Details: FC<DetailsProps> = ({
 }) => {
   const [isModalVisible, setIsModalVisible] = useState(false);
 
+  const { isMainnet } = useHelpers();
   const { isLoading, isOwner, info, ownerAddress, tokenUri, updateDetails } =
     useDetails({
       id,
@@ -51,7 +53,7 @@ export const Details: FC<DetailsProps> = ({
       getOwner,
       getTokenUri,
     });
-  const { nftImageUrl } = useMetadata(tokenUri);
+  const { nftImageUrl, packageName } = useMetadata(tokenUri);
 
   // Update button to be show only if the connected account is the owner
   // and only for services
@@ -70,10 +72,16 @@ export const Details: FC<DetailsProps> = ({
     <>
       <Header>
         <div>
-          <Text strong>{`${capitalize(type)} Name`}</Text>
-          <DetailsTitle level={2}>
-            {`${capitalize(type)} ID ${id}`}
-          </DetailsTitle>
+          {isMainnet ? (
+            <DetailsTitle level={3}>{packageName}</DetailsTitle>
+          ) : (
+            <>
+              <Text strong>{`${capitalize(type)} Name`}</Text>
+              <DetailsTitle level={2}>
+                {`${capitalize(type)} ID ${id}`}
+              </DetailsTitle>
+            </>
+          )}
         </div>
 
         <div className="right-content">

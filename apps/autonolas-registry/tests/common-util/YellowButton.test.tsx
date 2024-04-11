@@ -4,7 +4,7 @@ import { render } from '@testing-library/react';
 import { YellowButton } from '../../common-util/YellowButton';
 
 describe('YellowButton', () => {
-  it('should render a yellow button', () => {
+  it('should display a yellow button', () => {
     const { getByText } = render(<YellowButton>Button</YellowButton>);
     expect(getByText('Button')).toBeInTheDocument();
   });

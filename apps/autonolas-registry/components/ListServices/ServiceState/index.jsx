@@ -11,7 +11,7 @@ import { ActiveRegistration } from './2StepActiveRegistration';
 import { FinishedRegistration } from './3rdStepFinishedRegistration';
 import { Deployed } from './4thStepDeployed';
 import { Unbond } from './5StepUnbond';
-import { useSvmServiceTableDataSource } from '../useSvmService';
+import { useSvmServiceTableDataSource } from '../hooks/useSvmService';
 import { useTerminate } from './useSvmServiceStateManagement';
 import { InfoSubHeader, GenericLabel, ServiceStateContainer } from './styles';
 

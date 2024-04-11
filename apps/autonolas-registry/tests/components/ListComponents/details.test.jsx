@@ -83,13 +83,13 @@ describe('listComponents/details.jsx', () => {
     global.fetch = unmockedFetch;
   });
 
-  it('should render component details', async () => {
+  it('should display component details', async () => {
     const { getByText, queryByRole, getByTestId } = render(
       wrapProvider(<Component />),
     );
     await waitFor(async () => {
       // left column content
-      expect(getByText('Component ID 1')).toBeInTheDocument();
+      expect(getByText('Some package name')).toBeInTheDocument();
       expect(getByTestId('view-hash-link').getAttribute('href')).toBe(
         `${GATEWAY_URL}12345`,
       );

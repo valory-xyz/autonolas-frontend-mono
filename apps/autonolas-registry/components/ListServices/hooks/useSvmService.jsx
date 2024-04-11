@@ -19,7 +19,7 @@ import { useSvmConnectivity } from 'common-util/hooks/useSvmConnectivity';
 import {
   transformDatasourceForServiceTable,
   transformSlotsAndBonds,
-} from './helpers/functions';
+} from '../helpers/functions';
 
 const getLatestBlockhash = memoize(async (connection) => {
   const block = await connection.getLatestBlockhash();
