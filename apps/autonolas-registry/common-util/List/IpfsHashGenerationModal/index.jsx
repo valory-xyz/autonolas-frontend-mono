@@ -60,7 +60,6 @@ export const IpfsHashGenerationModal = ({
 
       const hash = await getIpfsHashHelper(values, hashType);
       if (callback) callback(hash);
-      onModalClose();
 
       return hash;
     } catch (error) {
@@ -74,8 +73,14 @@ export const IpfsHashGenerationModal = ({
   };
 
   const onFinish = async (values) => {
-    const hash = await getNewHash(values);
-    if (callback) callback(hash);
+    try {
+      const hash = await getNewHash(values);
+      if (callback) callback(hash);
+
+      onModalClose();
+    } catch (error) {
+      notifyError('Error generating hash');
+    }
   };
 
   const handleUpdate = async () => {
@@ -84,7 +89,7 @@ export const IpfsHashGenerationModal = ({
         const fields = await form.validateFields();
         return fields;
       } catch (e) {
-        notifyError('Error updating hash');
+        notifyError('Please fill all the fields');
         return null;
       }
     };
@@ -100,11 +105,10 @@ export const IpfsHashGenerationModal = ({
 
       const hash = await getNewHash(values);
       await handleHashUpdate(hash);
-      notifySuccess('Hash updated');
 
-      if (callback) {
-        callback(hash);
-      }
+      notifySuccess('Hash updated');
+      if (callback) callback(hash);
+      onModalClose();
     } catch (e) {
       notifyError('Error updating hash');
       console.error(e);
