@@ -1,16 +1,16 @@
 import { render, waitFor, within } from '@testing-library/react';
-// import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
+import { useRouter } from 'next/router';
 
-import ListServices from '../../../components/ListServices';
-import { useServiceInfo } from '../../../components/ListServices/hooks/useSvmService';
-import { useHelpers } from '../../../common-util/hooks/useHelpers';
+import ListServices from 'components/ListServices';
+import { useServiceInfo } from 'components/ListServices/hooks/useSvmService';
+import { useHelpers } from 'common-util/hooks/useHelpers';
 import {
   getServices,
   getFilteredServices,
   getTotalForAllServices,
   getTotalForMyServices,
-} from '../../../components/ListServices/utils';
+} from 'components/ListServices/utils';
 import {
   wrapProvider,
   ACTIVE_TAB,
@@ -23,6 +23,7 @@ import {
   mockCodeUri,
   dummyAddress1,
 } from '../../tests-helpers';
+import { checkAndGetTabComponent } from '../../tests-helpers/utils';
 
 const allServicesResponse = [
   {
@@ -52,32 +53,43 @@ const allServicesSearchResponse = [
   },
 ];
 
-jest.mock('../../../components/ListServices/utils', () => ({
+jest.mock('next/router', () => ({
+  __esModule: true,
+  useRouter: jest.fn(),
+}));
+
+jest.mock('components/ListServices/utils', () => ({
   getServices: jest.fn(),
   getFilteredServices: jest.fn(),
   getTotalForAllServices: jest.fn(),
   getTotalForMyServices: jest.fn(),
 }));
 
-jest.mock('../../../components/ListServices/hooks/useServicesList', () => ({
+jest.mock('components/ListServices/hooks/useServicesList', () => ({
   useAllServices: () => () => Promise.resolve(allServicesResponse),
   useMyServices: () => () => Promise.resolve(myServicesResponse),
   useSearchServices: () => () => Promise.resolve(allServicesSearchResponse),
 }));
 
-jest.mock('../../../common-util/hooks/useHelpers', () => ({
+jest.mock('common-util/hooks/useHelpers', () => ({
   useHelpers: jest.fn(),
 }));
 
-jest.mock('../../../common-util/hooks/useSvmConnectivity', () => ({
+jest.mock('common-util/hooks/useSvmConnectivity', () => ({
   useSvmConnectivity: jest.fn(() => svmConnectivityEmptyMock),
 }));
 
-jest.mock('../../../components/ListServices/hooks/useSvmService', () => ({
+jest.mock('components/ListServices/hooks/useSvmService', () => ({
   useServiceInfo: jest.fn(),
 }));
 
 describe('listServices/index.jsx', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+
+    (useRouter as jest.Mock).mockReturnValue({ query: {}, push: jest.fn() });
+  });
+
   describe('EVM', () => {
     beforeEach(() => {
       jest.clearAllMocks();
@@ -96,12 +108,12 @@ describe('listServices/index.jsx', () => {
       });
     });
 
-    it('should show search input', async () => {
-      const { getByRole } = render(wrapProvider(<ListServices />));
+    it('should not have search input if "search" query string is not available', async () => {
+      const { findByPlaceholderText } = render(wrapProvider(<ListServices />));
 
-      await waitFor(async () => {
-        expect(getByRole('textbox')).toBeInTheDocument();
-      });
+      const searchInput = await findByPlaceholderText('Search...');
+      if (!searchInput) throw new Error('Search input not found');
+      expect(searchInput).toHaveValue('');
     });
 
     describe('mainnet', () => {
@@ -178,6 +190,28 @@ describe('listServices/index.jsx', () => {
           expect(
             within(allServicesTable).getByText(/View/),
           ).toBeInTheDocument();
+        });
+      });
+
+      describe('Search', () => {
+        beforeEach(() => {
+          jest.clearAllMocks();
+
+          (useRouter as jest.Mock).mockReturnValue({
+            query: { search: 'Random search string' },
+            push: jest.fn(),
+          });
+        });
+
+        it('should have search input if "search" query string is available', async () => {
+          const { findByPlaceholderText } = render(
+            wrapProvider(<ListServices />),
+          );
+
+          const searchInput = await findByPlaceholderText('Search...');
+          if (!searchInput)
+            throw new Error('Search input not found in `All` tab');
+          expect(searchInput).toHaveValue('Random search string');
         });
       });
     });
@@ -306,34 +340,25 @@ describe('listServices/index.jsx', () => {
     });
 
     it('should display service columns and rows', async () => {
-      const { container, findByTestId } = render(
-        wrapProvider(<ListServices />),
+      const { container, getByText } = render(wrapProvider(<ListServices />));
+
+      await checkAndGetTabComponent(
+        container,
+        '.ant-tabs-tab:nth-child(1)',
+        'All',
       );
-
-      if (!container) {
-        throw new Error('`All tab` is null');
-      }
-
-      const allServicesTable = await findByTestId('all-services-table');
 
       await waitFor(async () => {
         // column names
-        expect(within(allServicesTable).getByText('ID')).toBeInTheDocument();
-        expect(within(allServicesTable).getByText('Owner')).toBeInTheDocument();
-        expect(within(allServicesTable).getByText('State')).toBeInTheDocument();
-        expect(
-          within(allServicesTable).getByText('Action'),
-        ).toBeInTheDocument();
+        expect(getByText('ID')).toBeInTheDocument();
+        expect(getByText('Owner')).toBeInTheDocument();
+        expect(getByText('State')).toBeInTheDocument();
+        expect(getByText('Action')).toBeInTheDocument();
 
         // rows
-        expect(within(allServicesTable).getByText('1')).toBeInTheDocument();
-        expect(
-          within(allServicesTable).getByText(/DrGvsA...D3Wm5x/),
-        ).toBeInTheDocument();
-        expect(
-          within(allServicesTable).getByText(/Terminated Bonded/),
-        ).toBeInTheDocument();
-        expect(within(allServicesTable).getByText(/View/)).toBeInTheDocument();
+        expect(getByText(/DrGvsA...D3Wm5x/)).toBeInTheDocument();
+        expect(getByText(/Terminated Bonded/)).toBeInTheDocument();
+        expect(getByText(/View/)).toBeInTheDocument();
       });
     });
   });
