@@ -30,6 +30,7 @@ export const useExtraTabContent = ({
   const router = useRouter();
   const { account, isMainnet } = useHelpers();
 
+  // search query is supported only in mainnet for now (as subgraph is available only in mainnet)
   const searchQuery = isMainnet ? router.query.search ?? '' : '';
   const [searchValue, setSearchValue] = useState(searchQuery); // to control the search
   const [value, setValue] = useState(searchQuery); // to control the input field
