@@ -275,7 +275,7 @@ describe('listAgents/index.jsx', () => {
       });
 
       it('should switch to `My Agents` tab if `tab` query is available and `search` query is available', async () => {
-        const { container, findByPlaceholderText, debug } = render(
+        const { container, findByPlaceholderText } = render(
           wrapProvider(<ListAgents />),
         );
 
@@ -286,11 +286,9 @@ describe('listAgents/index.jsx', () => {
         );
 
         const searchInput = await findByPlaceholderText('Search...');
-
-        debug(searchInput);
-
         if (!searchInput)
           throw new Error('Search input not found in `My Agents` tab');
+
         expect(searchInput).toHaveValue('Random search string');
       });
     });

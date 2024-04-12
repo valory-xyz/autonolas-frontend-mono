@@ -284,7 +284,7 @@ describe('listComponents/index.jsx', () => {
       });
 
       it('should switch to `My Components` tab if `tab` query is available and `search` query is available', async () => {
-        const { container, findByPlaceholderText, debug } = render(
+        const { container, findByPlaceholderText } = render(
           wrapProvider(<ListComponents />),
         );
 
@@ -295,11 +295,9 @@ describe('listComponents/index.jsx', () => {
         );
 
         const searchInput = await findByPlaceholderText('Search...');
-
-        debug(searchInput);
-
         if (!searchInput)
           throw new Error('Search input not found in `My Components` tab');
+
         expect(searchInput).toHaveValue('Random search string');
       });
     });

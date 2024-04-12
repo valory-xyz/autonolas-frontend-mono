@@ -45,6 +45,7 @@ describe('<AlertSuccess />', () => {
   describe('mainnet', () => {
     beforeEach(() => {
       jest.clearAllMocks();
+
       useHelpers.mockReturnValue({ isMainnet: true });
     });
     it.each([
@@ -69,6 +70,7 @@ describe('<AlertSuccess />', () => {
   describe('non-mainnet', () => {
     beforeEach(() => {
       jest.clearAllMocks();
+
       useHelpers.mockReturnValue({ isMainnet: false });
     });
     it.each([
