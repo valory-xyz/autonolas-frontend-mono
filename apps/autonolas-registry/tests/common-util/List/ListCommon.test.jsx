@@ -1,13 +1,17 @@
 import { render } from '@testing-library/react';
+
+import { useHelpers } from 'common-util/hooks';
 import {
   convertStringToArray,
   ListEmptyMessage,
   AlertSuccess,
   AlertError,
-} from '../../../common-util/List/ListCommon';
+} from 'common-util/List/ListCommon';
 
-jest.mock('../../../common-util/hooks', () => ({
-  useHelpers: jest.fn(() => ({})),
+jest.mock('common-util/hooks', () => ({
+  useHelpers: jest.fn(() => ({
+    isMainnet: true,
+  })),
   useSvmConnectivity: jest.fn(),
 }));
 
@@ -38,22 +42,52 @@ describe('<ListEmptyMessage />', () => {
 });
 
 describe('<AlertSuccess />', () => {
-  it.each([
-    {
-      type: 'Agent',
-      input: { name: 'Valory' },
-    },
-    {
-      type: null,
-      input: { name: 'Valory' },
-    },
-  ])('expects valid object (input=$input)', ({ type, input }) => {
-    const { getByText } = render(
-      <AlertSuccess type={type} information={input} />,
-    );
-    expect(
-      type ? getByText(`${type} minted`) : getByText('Minted successfully'),
-    ).toBeInTheDocument();
+  describe('mainnet', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+      useHelpers.mockReturnValue({ isMainnet: true });
+    });
+    it.each([
+      {
+        type: 'Agent',
+        input: { name: 'Valory' },
+        output: /Agent minted. This will take few minutes to reflect./,
+      },
+      {
+        type: null,
+        input: { name: 'Valory' },
+        output: /Minted successfully. This will take few minutes to reflect./,
+      },
+    ])('expects valid object (input=$input)', ({ type, input, output }) => {
+      const { getByText } = render(
+        <AlertSuccess type={type} information={input} />,
+      );
+      expect(getByText(output)).toBeInTheDocument();
+    });
+  });
+
+  describe('non-mainnet', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+      useHelpers.mockReturnValue({ isMainnet: false });
+    });
+    it.each([
+      {
+        type: 'Agent',
+        input: { name: 'Valory' },
+        output: /Agent minted./,
+      },
+      {
+        type: null,
+        input: { name: 'Valory' },
+        output: /Minted successfully./,
+      },
+    ])('expects valid object (input=$input)', ({ type, input, output }) => {
+      const { getByText } = render(
+        <AlertSuccess type={type} information={input} />,
+      );
+      expect(getByText(output)).toBeInTheDocument();
+    });
   });
 
   it.each([{ input: null }, { input: undefined }])(
@@ -67,7 +101,7 @@ describe('<AlertSuccess />', () => {
 
 describe('<AlertError />', () => {
   it.each([
-    { input: new Error('Exception occured'), output: /Exception occured/ },
+    { input: new Error('Exception occurred'), output: /Exception occurred/ },
   ])('expects valid error object (input=$input)', ({ input, output }) => {
     const { getByText, getByTestId } = render(<AlertError error={input} />);
     expect(getByText(output)).toBeInTheDocument();
