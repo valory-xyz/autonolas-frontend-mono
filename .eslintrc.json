@@ -9,7 +9,8 @@
   },
   "overrides": [
     {
-      "plugins": ["next"],
+      "plugins": [],
+      "extends": ["eslint:recommended", "next/core-web-vitals"],
       "files": ["*.ts", "*.tsx", "*.js", "*.jsx"],
       "rules": {
         "@nx/enforce-module-boundaries": [

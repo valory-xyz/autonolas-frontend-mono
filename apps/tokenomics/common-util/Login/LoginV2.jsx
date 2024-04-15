@@ -3,9 +3,8 @@ import { useDispatch } from 'react-redux';
 import Web3 from 'web3';
 import PropTypes from 'prop-types';
 import { Grid } from 'antd';
-import { Web3Modal, Web3Button, Web3NetworkSwitch } from '@web3modal/react';
 import {
-  useAccount, useNetwork, useBalance, useDisconnect,
+  useAccount, useBalance, useDisconnect,
 } from 'wagmi';
 import styled from 'styled-components';
 import {
@@ -42,7 +41,7 @@ export const LoginV2 = ({
 }) => {
   const dispatch = useDispatch();
   const { disconnect } = useDisconnect();
-  const { chain } = useNetwork();
+  const { chain } = useAccount();
 
   const chainId = chain?.id;
   const { address, connector } = useAccount({

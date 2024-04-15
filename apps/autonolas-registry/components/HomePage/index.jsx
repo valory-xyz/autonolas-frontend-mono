@@ -12,7 +12,7 @@ import { Container, HeaderRow } from './styles';
 const { Title, Text } = Typography;
 
 // TODO: this page is deprecated, @oaksprout will update it
-const IS_DEPRECATED = true;
+const IS_DEPRECATED = false;
 
 const HomePage = () => {
   const { isL1Network, links } = useHelpers();

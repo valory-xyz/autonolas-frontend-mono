@@ -1,19 +1,15 @@
 import { useCallback, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import PropTypes from 'prop-types';
-import { SwapOutlined } from '@ant-design/icons';
 import { isNil } from 'lodash';
-import { Web3Modal, Web3Button } from '@web3modal/react';
 import {
   useAccount,
   useBalance,
   useDisconnect,
-  useNetwork,
-  useSwitchNetwork,
+  useSwitchAccount,
 } from 'wagmi';
 import styled from 'styled-components';
 import {
-  COLOR,
   CannotConnectAddressOfacError,
   notifyError,
   useScreen,
@@ -22,9 +18,7 @@ import {
 import { setUserBalance } from '../../store/setup';
 import { isAddressProhibited } from '../functions';
 import { useHelpers } from '../hooks';
-import { YellowButton } from '../YellowButton';
 import { SolanaWallet } from './SolanaWallet';
-import { projectId, ethereumClient } from './config';
 
 const LoginContainer = styled.div`
   display: flex;
@@ -37,14 +31,13 @@ export const LoginV2 = ({
   isSvm,
   onConnect: onConnectCb,
   onDisconnect: onDisconnectCb,
-  theme = 'light',
 }) => {
   const dispatch = useDispatch();
-  const { isMobile } = useScreen();
   const { disconnect } = useDisconnect();
+  const screens = useScreen();
   const { chainId, isConnectedToWrongNetwork } = useHelpers();
-  const { chain: walletConnectedChain } = useNetwork();
-  const { switchNetworkAsync, isLoading } = useSwitchNetwork();
+  const { chain: walletConnectedChain } = useAccount();
+  const { switchChain } = useSwitchAccount();
 
   const { address, connector } = useAccount({
     onConnect: ({ address: currentAddress }) => {
@@ -130,11 +123,11 @@ export const LoginV2 = ({
 
   const onSwitchNetwork = useCallback(async () => {
     try {
-      await switchNetworkAsync(chainId);
+      await switchChain(chainId);
     } catch (error) {
       console.error(error);
     }
-  }, [chainId, switchNetworkAsync]);
+  }, [chainId, switchChain]);
 
   useEffect(() => {
     if (isConnectedToWrongNetwork) {
@@ -151,28 +144,11 @@ export const LoginV2 = ({
         <SolanaWallet />
       ) : (
         <>
-          {!hideWrongNetwork && (
-            <YellowButton
-              loading={isLoading}
-              type="default"
-              onClick={onSwitchNetwork}
-              icon={<SwapOutlined />}
-            >
-              {!isMobile && 'Switch network'}
-            </YellowButton>
+          {!hideWrongNetwork && (            
+            <w3m-network-button />
           )}
           &nbsp;&nbsp;
-          <Web3Button avatar="hide" balance="hide" />
-          <Web3Modal
-            projectId={projectId}
-            ethereumClient={ethereumClient}
-            themeMode={theme}
-            themeVariables={{
-              '--w3m-button-border-radius': '5px',
-              '--w3m-accent-color': COLOR.PRIMARY,
-              '--w3m-background-color': COLOR.PRIMARY,
-            }}
-          />
+          <w3m-button balance={screens.xs ? 'hide' : 'show'} />
         </>
       )}
     </LoginContainer>

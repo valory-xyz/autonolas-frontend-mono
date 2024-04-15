@@ -1,11 +1,11 @@
 import Head from 'next/head';
 import { Provider } from 'react-redux';
-import { ThemeConfigProvider } from 'libs/antd-provider-fix/src';
+import { ThemeConfigProvider, createWeb3Modal } from 'libs/providers/src';
 import PropTypes from 'prop-types';
 import { useRouter } from 'next/router';
+import { Web3ModalProvider } from 'libs/providers/src';
 
 /** wagmi config */
-import { WagmiConfig as WagmiConfigProvider } from 'wagmi';
 import { wagmiConfig } from '../common-util/Login/config';
 
 /** antd theme config */
@@ -16,6 +16,8 @@ import { store } from '../store';
 
 const DESC =
   'View and manage components, agents and services via the Autonolas on-chain registry.';
+
+createWeb3Modal(wagmiConfig);
 
 const MyApp = ({ Component, pageProps }) => {
   const router = useRouter();
@@ -33,11 +35,11 @@ const MyApp = ({ Component, pageProps }) => {
           {isNotLegal ? (
             <Component {...pageProps} />
           ) : (
-            <WagmiConfigProvider config={wagmiConfig}>
+            <Web3ModalProvider wagmiConfig={wagmiConfig}>
               <Layout>
                 <Component {...pageProps} />
               </Layout>
-            </WagmiConfigProvider>
+            </Web3ModalProvider>
           )}
         </ThemeConfigProvider>
       </Provider>

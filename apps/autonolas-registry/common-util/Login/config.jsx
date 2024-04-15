@@ -1,10 +1,4 @@
 import {
-  EthereumClient,
-  w3mConnectors,
-  w3mProvider,
-} from '@web3modal/ethereum';
-import { configureChains, createConfig } from 'wagmi';
-import {
   mainnet,
   gnosis,
   polygon,
@@ -20,12 +14,13 @@ import {
   celo,
   optimism,
 } from 'wagmi/chains';
-import { SafeConnector } from 'wagmi/connectors/safe';
-import { jsonRpcProvider } from 'wagmi/providers/jsonRpc';
+import { http } from 'wagmi';
 import { web3 } from '@project-serum/anchor';
 
 import { SOLANA_CHAIN_NAMES, VM_TYPE } from '../../util/constants';
 import { RPC_URLS } from '../Contracts';
+import { createWagmiConfig } from 'libs/providers/src';
+import { injected, walletConnect, safe } from 'wagmi/connectors';
 
 export const projectId = process.env.NEXT_PUBLIC_WALLET_PROJECT_ID;
 
@@ -46,40 +41,25 @@ export const SUPPORTED_CHAINS = [
   celoAlfajores,
 ];
 
-const { publicClient, webSocketPublicClient, chains } = configureChains(
-  SUPPORTED_CHAINS,
-  [
-    jsonRpcProvider({
-      rpc: (chain) => ({
-        http: RPC_URLS[chain.id],
-      }),
-    }),
-    w3mProvider({ projectId }),
-  ],
-);
-
-export const wagmiConfig = createConfig({
-  autoConnect: true,
-  logger: { warn: null },
+export const wagmiConfig = createWagmiConfig({
+  chains: SUPPORTED_CHAINS,
+  projectId,
+  transports: Object.entries(RPC_URLS).reduce((acc, [chainId, rpcUrl]) => {
+    acc[chainId] = http(rpcUrl);
+    return acc;
+  }, {}),
   connectors: [
-    ...w3mConnectors({
-      projectId,
-      version: 2, // v2 of wallet connect
-      chains,
+    walletConnect({
+      metadata: {        
+        name: 'OLAS Registry',
+        description: 'OLAS Registry',
+        icon: 'https://walletconnect.org/walletconnect-logo.png',
+      }
     }),
-    new SafeConnector({
-      chains,
-      options: {
-        allowedDomains: [/gnosis-safe.io$/, /app.safe.global$/],
-        debug: false,
-      },
-    }),
-  ],
-  publicClient,
-  webSocketPublicClient,
-});
-
-export const ethereumClient = new EthereumClient(wagmiConfig, chains);
+    injected(),
+    safe(),
+  ],  
+})
 
 /**
  * Returns the list of supported chains with more info such as
