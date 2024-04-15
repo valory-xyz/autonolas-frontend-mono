@@ -135,7 +135,7 @@ ListEmptyMessage.propTypes = {
 ListEmptyMessage.defaultProps = { type: null, message: '' };
 
 // AlertSuccess
-const WILL_TAKE_A_MINUTE = 'This will take few minutes to reflect.';
+const WILL_TAKE_A_MINUTE = 'This is being indexed and will take a few minutes to show.';
 export const AlertSuccess = ({ type, information }) => {
   const { isMainnet } = useHelpers();
 

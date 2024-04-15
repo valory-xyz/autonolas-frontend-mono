@@ -52,12 +52,12 @@ describe('<AlertSuccess />', () => {
       {
         type: 'Agent',
         input: { name: 'Valory' },
-        output: /Agent minted. This will take few minutes to reflect./,
+        output: /Agent minted. This is being indexed and will take a few minutes to show./,
       },
       {
         type: null,
         input: { name: 'Valory' },
-        output: /Minted successfully. This will take few minutes to reflect./,
+        output: /Minted successfully. This is being indexed and will take a few minutes to show./,
       },
     ])('expects valid object (input=$input)', ({ type, input, output }) => {
       const { getByText } = render(

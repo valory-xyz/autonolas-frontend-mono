@@ -1,2 +1,1 @@
 # Release History - `autonolas-registry`
-
