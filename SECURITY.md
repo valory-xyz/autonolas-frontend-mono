@@ -1,10 +1,10 @@
 # Security Policy
 
-This document outlines security procedures and general policies for the `autonolas-registry` project.
+This document outlines security procedures and general policies for the `autonolas-frontend-mono` project.
 
 ## Supported Versions
 
-The following table shows which versions of `autonolas-registry` are currently being supported with security updates.
+The following table shows which versions of `autonolas-frontend-mono` are currently being supported with security updates.
 
 | Version | Supported          |
 | ------- | ------------------ |
@@ -12,7 +12,7 @@ The following table shows which versions of `autonolas-registry` are currently b
 
 ## Reporting a Vulnerability
 
-The `autonolas-registry` team and community take all security bugs in `autonolas-registry` seriously. Thank you for improving the security of `autonolas-registry`. We appreciate your efforts and responsible disclosure and will make every effort to acknowledge your contributions.
+The `autonolas-frontend-mono` team and community take all security bugs in `autonolas-frontend-mono` seriously. Thank you for improving the security of `autonolas-frontend-mono`. We appreciate your efforts and responsible disclosure and will make every effort to acknowledge your contributions.
 
 Report security bugs by emailing `info@valory.xyz`.
 

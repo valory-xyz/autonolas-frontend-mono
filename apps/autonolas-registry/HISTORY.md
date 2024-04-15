@@ -1,2 +1,1 @@
-# Release History - `autonolas-registry-frontend`
-
+# Release History - `autonolas-registry`
