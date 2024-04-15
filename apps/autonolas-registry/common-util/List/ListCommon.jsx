@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import PropTypes from 'prop-types';
 import Link from 'next/link';
 import { Alert, Button } from 'antd';
@@ -12,7 +13,8 @@ import { useHelpers } from '../hooks';
  * @param {String}
  * @returns {Array}
  */
-export const convertStringToArray = (str) => (str ? str.split(',').map((e) => e.trim()) : str);
+export const convertStringToArray = (str) =>
+  str ? str.split(',').map((e) => e.trim()) : str;
 
 // ----------- components -----------
 export const MyLink = ({ children, href, ...linkProps }) => (
@@ -25,7 +27,8 @@ MyLink.propTypes = {
   href: PropTypes.string.isRequired,
 };
 
-export const commaMessage = 'Each comma must be followed by a space ("1, 2" not "1,2").';
+export const commaMessage =
+  'Each comma must be followed by a space ("1, 2" not "1,2").';
 
 export const DependencyLabel = ({ type }) => {
   const { isL1Network, isSvm } = useHelpers();
@@ -132,11 +135,20 @@ ListEmptyMessage.propTypes = {
 ListEmptyMessage.defaultProps = { type: null, message: '' };
 
 // AlertSuccess
+const WILL_TAKE_A_MINUTE = 'This is being indexed and will take a few minutes to show.';
 export const AlertSuccess = ({ type, information }) => {
+  const { isMainnet } = useHelpers();
+
+  const message = useMemo(() => {
+    const mintMsg = type ? `${type} minted.` : 'Minted successfully.';
+    return isMainnet ? `${mintMsg} ${WILL_TAKE_A_MINUTE}` : mintMsg;
+  }, [isMainnet, type]);
+
   if (!information) return null;
+
   return (
     <Alert
-      message={type ? `${type} minted` : 'Minted successfully'}
+      message={message}
       type="success"
       data-testid="alert-info-container"
       showIcon

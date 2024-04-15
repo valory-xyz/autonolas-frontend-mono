@@ -4,7 +4,8 @@ import { DEFAULT_SERVICE_CREATION_ETH_TOKEN_ZEROS } from '../../util/constants';
 import { getServiceOwnerMultisigContract } from '../Contracts';
 import { checkIfGnosisSafe, getEthersProvider } from './index';
 
-const FALLBACK_HANDLER_STORAGE_SLOT = '0x6c9a6c4a39284e37ed1cf53d337577d14212a4870fb976a4366c693b939918d5';
+const FALLBACK_HANDLER_STORAGE_SLOT =
+  '0x6c9a6c4a39284e37ed1cf53d337577d14212a4870fb976a4366c693b939918d5';
 
 /**
  * function to check the owner address can mint.
@@ -27,13 +28,14 @@ export const checkIfERC721Receive = async (account, ownerAddress) => {
           FALLBACK_HANDLER_STORAGE_SLOT,
         );
 
-        const isInvalidContent = !contents
-          || contents.slice(26)
-            === DEFAULT_SERVICE_CREATION_ETH_TOKEN_ZEROS.slice(2);
+        const isInvalidContent =
+          !contents ||
+          contents.slice(26) ===
+            DEFAULT_SERVICE_CREATION_ETH_TOKEN_ZEROS.slice(2);
 
         if (isInvalidContent) {
           notifyError(
-            `Unable to mint to ${ownerAddress} due to the absense of a fallback handler.`,
+            `Unable to mint to ${ownerAddress} due to the absence of a fallback handler.`,
           );
           return false;
         }
@@ -62,7 +64,7 @@ export const getEstimatedGasLimit = async (fn, account) => {
     return Math.floor(estimatedGas);
   } catch (error) {
     window.console.warn(
-      `Error occured on estimating gas, defaulting to ${ESTIMATED_GAS_LIMIT}`,
+      `Error occurred on estimating gas, defaulting to ${ESTIMATED_GAS_LIMIT}`,
     );
   }
 
