@@ -1,6 +1,6 @@
 import Head from 'next/head';
 import { Provider } from 'react-redux';
-import { ConfigProvider } from 'antd';
+import { ThemeConfigProvider } from 'libs/antd-provider-fix/src';
 import PropTypes from 'prop-types';
 import { useRouter } from 'next/router';
 
@@ -29,7 +29,7 @@ const MyApp = ({ Component, pageProps }) => {
         <meta name="description" content={DESC} />
       </Head>
       <Provider store={store}>
-        <ConfigProvider theme={THEME_CONFIG}>
+        <ThemeConfigProvider theme={THEME_CONFIG}>
           {isNotLegal ? (
             <Component {...pageProps} />
           ) : (
@@ -39,18 +39,10 @@ const MyApp = ({ Component, pageProps }) => {
               </Layout>
             </WagmiConfigProvider>
           )}
-        </ConfigProvider>
+        </ThemeConfigProvider>
       </Provider>
     </>
   );
-};
-
-MyApp.getInitialProps = async ({ Component, ctx }) => {
-  const pageProps = Component.getInitialProps
-    ? await Component.getInitialProps(ctx)
-    : {};
-
-  return { pageProps };
 };
 
 MyApp.propTypes = {
