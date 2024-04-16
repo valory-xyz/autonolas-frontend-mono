@@ -1,6 +1,6 @@
 import Head from 'next/head';
 import { Provider } from 'react-redux';
-import { ConfigProvider } from 'antd';
+import { ThemeConfigProvider } from 'libs/providers/src/lib/ThemeConfigProvider';
 import PropTypes from 'prop-types';
 import { useRouter } from 'next/router';
 
@@ -17,7 +17,7 @@ import { store } from '../store';
 const DESC =
   'View and manage components, agents and services via the Autonolas on-chain registry.';
 
-const MyApp = ({ Component, pageProps }) => {
+const MyApp = ({ Component, pageProps }) => {  
   const router = useRouter();
   const isNotLegal = router.pathname === '/not-legal';
 
@@ -29,28 +29,20 @@ const MyApp = ({ Component, pageProps }) => {
         <meta name="description" content={DESC} />
       </Head>
       <Provider store={store}>
-        <ConfigProvider theme={THEME_CONFIG}>
-          {isNotLegal ? (
-            <Component {...pageProps} />
-          ) : (
-            <WagmiConfigProvider config={wagmiConfig}>
-              <Layout>
-                <Component {...pageProps} />
-              </Layout>
-            </WagmiConfigProvider>
-          )}
-        </ConfigProvider>
+        <ThemeConfigProvider theme={THEME_CONFIG}>
+            {isNotLegal ? (
+              <Component {...pageProps} />
+            ) : (
+              <WagmiConfigProvider config={wagmiConfig}>
+                <Layout>
+                  <Component {...pageProps} />
+                </Layout>
+              </WagmiConfigProvider>
+            )}
+          </ThemeConfigProvider>
       </Provider>
     </>
   );
-};
-
-MyApp.getInitialProps = async ({ Component, ctx }) => {
-  const pageProps = Component.getInitialProps
-    ? await Component.getInitialProps(ctx)
-    : {};
-
-  return { pageProps };
 };
 
 MyApp.propTypes = {
