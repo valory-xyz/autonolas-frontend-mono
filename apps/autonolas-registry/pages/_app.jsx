@@ -17,7 +17,7 @@ import { store } from '../store';
 const DESC =
   'View and manage components, agents and services via the Autonolas on-chain registry.';
 
-const MyApp = ({ Component, pageProps }) => {  
+const MyApp = ({ Component, pageProps }) => {
   const router = useRouter();
   const isNotLegal = router.pathname === '/not-legal';
 
@@ -30,16 +30,16 @@ const MyApp = ({ Component, pageProps }) => {
       </Head>
       <Provider store={store}>
         <ThemeConfigProvider theme={THEME_CONFIG}>
-            {isNotLegal ? (
-              <Component {...pageProps} />
-            ) : (
-              <WagmiConfigProvider config={wagmiConfig}>
-                <Layout>
-                  <Component {...pageProps} />
-                </Layout>
-              </WagmiConfigProvider>
-            )}
-          </ThemeConfigProvider>
+          {isNotLegal ? (
+            <Component {...pageProps} />
+          ) : (
+            <WagmiConfigProvider config={wagmiConfig}>
+              <Layout>
+                <Component {...pageProps} />
+              </Layout>
+            </WagmiConfigProvider>
+          )}
+        </ThemeConfigProvider>
       </Provider>
     </>
   );
