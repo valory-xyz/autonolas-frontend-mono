@@ -277,7 +277,7 @@ describe('listServices/index.jsx - EVM', () => {
   });
 });
 
-describe('listServices/index.jsx -SVM', () => {
+describe('listServices/index.jsx - SVM', () => {
   beforeEach(() => {
     (useAllServices as jest.Mock).mockReturnValue(() => Promise.resolve(allServicesResponse));
     (useMyServices as jest.Mock).mockReturnValue(() => Promise.resolve(myServicesResponse));
