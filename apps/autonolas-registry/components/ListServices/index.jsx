@@ -212,7 +212,7 @@ const ListServices = () => {
     searchValue,
     currentTab,
     currentPage,
-    // getServicesBySearch, // TODO: weird infinite re-render bug in test cases
+    getServicesBySearch,
     isMainnet,
     chainId,
   ]);
