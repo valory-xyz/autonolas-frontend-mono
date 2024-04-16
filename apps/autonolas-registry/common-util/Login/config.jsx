@@ -22,7 +22,7 @@ import { RPC_URLS } from '../Contracts';
 import { createWagmiConfig } from 'libs/providers/src';
 import { injected, walletConnect, safe } from 'wagmi/connectors';
 
-export const projectId = process.env.NEXT_PUBLIC_WALLET_PROJECT_ID;
+export const projectId = process.env["NEXT_PUBLIC_WALLET_PROJECT_ID"];
 
 export const SUPPORTED_CHAINS = [
   mainnet,
@@ -40,26 +40,6 @@ export const SUPPORTED_CHAINS = [
   celo,
   celoAlfajores,
 ];
-
-export const wagmiConfig = createWagmiConfig({
-  chains: SUPPORTED_CHAINS,
-  projectId,
-  transports: Object.entries(RPC_URLS).reduce((acc, [chainId, rpcUrl]) => {
-    acc[chainId] = http(rpcUrl);
-    return acc;
-  }, {}),
-  connectors: [
-    walletConnect({
-      metadata: {        
-        name: 'OLAS Registry',
-        description: 'OLAS Registry',
-        icon: 'https://walletconnect.org/walletconnect-logo.png',
-      }
-    }),
-    injected(),
-    safe(),
-  ],  
-})
 
 /**
  * Returns the list of supported chains with more info such as
@@ -173,3 +153,23 @@ export const ALL_SUPPORTED_CHAINS = [
   if (aIndex > bIndex) return 1;
   return -1;
 });
+
+export const wagmiConfig = createWagmiConfig({
+  chains: EVM_SUPPORTED_CHAINS,
+  projectId,
+  transports: Object.entries(RPC_URLS).reduce((acc, [chainId, rpcUrl]) => {
+    acc[chainId] = http(rpcUrl);
+    return acc;
+  }, {}),
+  connectors: [
+    walletConnect({
+      metadata: {        
+        name: 'OLAS Registry',
+        description: 'OLAS Registry',
+        icon: 'https://walletconnect.org/walletconnect-logo.png',
+      }
+    }),
+    injected(),
+    safe(),
+  ],  
+})
