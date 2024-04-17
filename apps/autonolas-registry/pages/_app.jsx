@@ -1,6 +1,6 @@
 import Head from 'next/head';
 import { Provider } from 'react-redux';
-import { ThemeConfigProvider } from 'libs/providers/src/lib/ThemeConfigProvider';
+import { ThemeConfigProvider } from 'libs/ui-theme/src/lib/ThemeConfig';
 import PropTypes from 'prop-types';
 import { useRouter } from 'next/router';
 
@@ -9,7 +9,6 @@ import { WagmiConfig as WagmiConfigProvider } from 'wagmi';
 import { wagmiConfig } from '../common-util/Login/config';
 
 /** antd theme config */
-import { THEME_CONFIG } from '@autonolas/frontend-library';
 import Layout from '../components/Layout';
 import GlobalStyle from '../components/GlobalStyles';
 import { store } from '../store';
@@ -29,7 +28,7 @@ const MyApp = ({ Component, pageProps }) => {
         <meta name="description" content={DESC} />
       </Head>
       <Provider store={store}>
-        <ThemeConfigProvider theme={THEME_CONFIG}>
+        <ThemeConfigProvider>
           {isNotLegal ? (
             <Component {...pageProps} />
           ) : (

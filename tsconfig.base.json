@@ -30,7 +30,6 @@
       "@autonolas-frontend-mono/feature-service-status-info": [
         "libs/feature-service-status-info/src/index.ts"
       ],
-      "@autonolas-frontend-mono/providers": ["libs/providers/src/index.ts"],
       "@autonolas-frontend-mono/service-status-info": [
         "libs/service-status-info/src/index.ts"
       ],
