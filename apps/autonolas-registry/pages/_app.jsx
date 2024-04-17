@@ -1,6 +1,6 @@
 import Head from 'next/head';
 import { Provider } from 'react-redux';
-import { ThemeConfigProvider } from 'libs/ui-theme/src/lib/ThemeConfig';
+import { AutonolasThemeProvider } from 'libs/ui-theme/src/lib/ThemeConfig';
 import PropTypes from 'prop-types';
 import { useRouter } from 'next/router';
 
@@ -28,7 +28,7 @@ const MyApp = ({ Component, pageProps }) => {
         <meta name="description" content={DESC} />
       </Head>
       <Provider store={store}>
-        <ThemeConfigProvider>
+        <AutonolasThemeProvider>
           {isNotLegal ? (
             <Component {...pageProps} />
           ) : (
@@ -38,7 +38,7 @@ const MyApp = ({ Component, pageProps }) => {
               </Layout>
             </WagmiConfigProvider>
           )}
-        </ThemeConfigProvider>
+        </AutonolasThemeProvider>
       </Provider>
     </>
   );
