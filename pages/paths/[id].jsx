@@ -10,6 +10,10 @@ import Markdown from 'markdown-to-jsx';
 import paths from 'components/Paths/data.json';
 import { COLOR } from '@autonolas/frontend-library';
 
+const Container = styled.div`
+  padding: 0 32px;
+`;
+
 const LoadingContainer = styled.div`
   display: flex;
   justify-content: center;
@@ -68,7 +72,7 @@ const PathDetailPage = () => {
   }
 
   return (
-    <>
+    <Container>
       <Typography.Title className="mt-0 mb-16" level={3}>
         {pathData.name}
       </Typography.Title>
@@ -212,7 +216,7 @@ const PathDetailPage = () => {
           )}
         </Col>
       </Row>
-    </>
+    </Container>
   );
 };
 
