@@ -23,9 +23,9 @@ const StyledCard = styled(Card)`
 const StyledImage = styled(Image)`
   border-top-left-radius: 5px;
   display: block;
-  object-fit: cover;
   height: 100%;
   align-self: center;
+  ${({ canImageContain }) => `object-fit: ${canImageContain ? 'contain' : 'cover'};`}
 `;
 
 const PathImage = ({ name, id, images }) => (
@@ -34,6 +34,7 @@ const PathImage = ({ name, id, images }) => (
     src={images?.homepageCard ?? `/images/${id}.png`}
     width={200}
     height={200}
+    canImageContain={images.homepageCardImageCanContain}
     className="mx-auto"
   />
 );
@@ -45,6 +46,7 @@ PathImage.propTypes = {
     homepageCard: PropTypes.string,
     description: PropTypes.string,
     service: PropTypes.string,
+    homepageCardImageCanContain: PropTypes.bool,
   }),
 };
 
@@ -53,6 +55,7 @@ PathImage.defaultProps = {
     homepageCard: null,
     description: null,
     service: null,
+    homepageCardImageCanContain: false,
   },
 };
 

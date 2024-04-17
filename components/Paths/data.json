@@ -62,6 +62,10 @@
     "name": "Ecosystem Opportunities",
     "description": "Build agents and services for projects in the Olas ecosystem.",
     "isMechsToolPath": false,
+    "images": {
+      "homepageCard": "/images/ecosystem-opportunities.png",
+      "homepageCardImageCanContain": true
+    },
     "markdownPath": "paths-markdown/ecosystem-opportunities.md"
   }
 ]
