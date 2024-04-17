@@ -56,5 +56,12 @@
       "service": "/images/shorts-mech-tool.png"
     },
     "markdownPath": "paths-markdown/shorts-mech-tool.md"
+  }, 
+  {
+    "id": "ecosystem-opportunities",
+    "name": "Ecosystem Opportunities",
+    "description": "Build agents and services for projects in the Olas ecosystem.",
+    "isMechsToolPath": false,
+    "markdownPath": "paths-markdown/ecosystem-opportunities.md"
   }
 ]
