@@ -17,16 +17,15 @@ const StyledCard = styled(Card)`
     padding: 0;
     min-height: 100%;
     display: flex;
-    
   }
 `;
 
 const StyledImage = styled(Image)`
   border-top-left-radius: 5px;
   display: block;
-  object-fit: cover;
   height: 100%;
   align-self: center;
+  ${({ canImageContain }) => `object-fit: ${canImageContain ? 'contain' : 'cover'};`}
 `;
 
 const PathImage = ({ name, id, images }) => (
@@ -35,6 +34,7 @@ const PathImage = ({ name, id, images }) => (
     src={images?.homepageCard ?? `/images/${id}.png`}
     width={200}
     height={200}
+    canImageContain={images.homepageCardImageCanContain}
     className="mx-auto"
   />
 );
@@ -46,6 +46,7 @@ PathImage.propTypes = {
     homepageCard: PropTypes.string,
     description: PropTypes.string,
     service: PropTypes.string,
+    homepageCardImageCanContain: PropTypes.bool,
   }),
 };
 
@@ -54,6 +55,7 @@ PathImage.defaultProps = {
     homepageCard: null,
     description: null,
     service: null,
+    homepageCardImageCanContain: false,
   },
 };
 
@@ -83,8 +85,7 @@ const PathCard = ({ path }) => {
           <Typography.Title className="mt-0 mb-4" level={4}>
             {name}
           </Typography.Title>
-          {
-            service && (
+          {service && (
             <div className="mb-4">
               <Typography.Text type="secondary">
                 Contributes to:
@@ -96,9 +97,7 @@ const PathCard = ({ path }) => {
                 </a>
               </Typography.Text>
             </div>
-
-            )
-          }
+          )}
           <Tag className="mb-4" color="success">
             Rewards available
           </Tag>
@@ -110,7 +109,6 @@ const PathCard = ({ path }) => {
           <Button type="primary" href={`/paths/${id}`} className="mb-8">
             View Path
           </Button>
-
         </Col>
       </Row>
     </StyledCard>
@@ -136,7 +134,9 @@ PathCard.propTypes = {
 
 export const Paths = () => (
   <>
-    <Typography.Title className="mt-0" level={2}>Paths</Typography.Title>
+    <Typography.Title className="mt-0" level={2}>
+      Paths
+    </Typography.Title>
     <Row gutter={[24, 24]} className="mb-128">
       {paths.map((path) => (
         <Col key={path.id} xs={24} md={12}>
@@ -159,7 +159,9 @@ export const Paths = () => (
                 <PathImage name="Add your own" id="add-your-own" />
               </Col>
               <Col xs={24} md={14} style={{ padding: '2rem' }}>
-                <Col xs={24} md={0}><PathImage name="Add your own" id="add-your-own" /></Col>
+                <Col xs={24} md={0}>
+                  <PathImage name="Add your own" id="add-your-own" />
+                </Col>
                 <Typography.Title className="mt-0 mb-4" level={4}>
                   Add your own path
                 </Typography.Title>
