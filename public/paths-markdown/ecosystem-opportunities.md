@@ -5,4 +5,4 @@
 5. If applicable, mint your code on [Olas Protocol Registry ↗](https://registry.olas.network/).
 6. Get rewards in ETH & OLAS*.
 
-*Requires that somebody with at least 10k veOLAS donates to a service that uses your code.
+*Requires that you mint your code and that somebody with at least 10k veOLAS donates to a service that uses your code.
