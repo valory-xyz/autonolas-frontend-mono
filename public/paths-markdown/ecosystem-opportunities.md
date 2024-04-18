@@ -1,5 +1,5 @@
 1. Browse the existing [opportunities ↗](https://olas.network/build#opportunities).
-2. Pick one and reach out on Telegram following the link provided.
+2. Pick one and click Get in Touch.
 3. Specify the work and terms with the requesting project. 
 4. Deliver your work to the requesting project.
 5. If applicable, mint your code on [Olas Protocol Registry ↗](https://registry.olas.network/).
