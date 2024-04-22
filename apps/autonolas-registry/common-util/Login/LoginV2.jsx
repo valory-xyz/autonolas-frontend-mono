@@ -1,21 +1,19 @@
+import { SwapOutlined } from '@ant-design/icons';
+import { Grid } from 'antd';
+import { isNil } from 'lodash';
+import PropTypes from 'prop-types';
 import { useCallback, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
-import PropTypes from 'prop-types';
-import { SwapOutlined } from '@ant-design/icons';
-import { isNil } from 'lodash';
-import { Grid } from 'antd';
-import { useAccount, useBalance, useDisconnect, useSwitchChain } from 'wagmi';
 import styled from 'styled-components';
-import {
-  CannotConnectAddressOfacError,
-  notifyError,
-  useScreen,
-} from '@autonolas/frontend-library';
+import { useAccount, useBalance, useDisconnect, useSwitchChain } from 'wagmi';
 
-import { setUserBalance } from '../../store/setup';
+import { CannotConnectAddressOfacError, notifyError, useScreen } from '@autonolas/frontend-library';
+
+import { setUserBalance } from 'store/setup';
+
+import { YellowButton } from '../YellowButton';
 import { isAddressProhibited } from '../functions';
 import { useHelpers } from '../hooks';
-import { YellowButton } from '../YellowButton';
 import { SolanaWallet } from './SolanaWallet';
 
 const { useBreakpoint } = Grid;
@@ -74,8 +72,7 @@ export const LoginV2 = ({
         // This is the initial `provider` that is returned when
         // using web3Modal to connect. Can be MetaMask or WalletConnect.
         const modalProvider =
-          connector?.options?.getProvider?.() ||
-          (await connector?.getProvider?.());
+          connector?.options?.getProvider?.() || (await connector?.getProvider?.());
 
         if (modalProvider) {
           // *******************************************************
@@ -94,10 +91,7 @@ export const LoginV2 = ({
             // cleanup
             return () => {
               if (modalProvider.removeListener) {
-                modalProvider.removeListener(
-                  'chainChanged',
-                  handleChainChanged,
-                );
+                modalProvider.removeListener('chainChanged', handleChainChanged);
               }
             };
           }
@@ -138,8 +132,7 @@ export const LoginV2 = ({
     }
   }, [isConnectedToWrongNetwork, onSwitchNetwork]);
 
-  const hideWrongNetwork =
-    isNil(walletConnectedChain?.id) || walletConnectedChain?.id === chainId;
+  const hideWrongNetwork = isNil(walletConnectedChain?.id) || walletConnectedChain?.id === chainId;
 
   return (
     <LoginContainer>
@@ -152,15 +145,12 @@ export const LoginV2 = ({
               loading={isLoading}
               type="default"
               onClick={onSwitchNetwork}
-              icon={<SwapOutlined />}
-            >
+              icon={<SwapOutlined />}>
               {!isMobile && 'Switch network'}
             </YellowButton>
           )}
           &nbsp;&nbsp;
-          <w3m-network-button />
-          &nbsp;&nbsp;
-          <w3m-button balance={screens.xs ? 'hide' : 'show'} icon="hide" />
+          <w3m-button balance={screens.xs ? 'hide' : 'show'} />
         </>
       )}
     </LoginContainer>
