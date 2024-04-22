@@ -2,13 +2,13 @@ import { useCallback, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { useRouter } from 'next/router';
 import { toLower } from 'lodash';
-
-import { setVmInfo, setChainId } from '../../store/setup';
+ 
+import { setVmInfo, setChainId } from 'store/setup';
 import {
   PAGES_TO_LOAD_WITHOUT_CHAINID,
   SOLANA_CHAIN_NAMES,
   URL,
-} from '../../util/constants';
+} from 'util/constants';
 import { useHelpers } from '../hooks';
 import { ALL_SUPPORTED_CHAINS, EVM_SUPPORTED_CHAINS } from '../Login/config';
 import {
