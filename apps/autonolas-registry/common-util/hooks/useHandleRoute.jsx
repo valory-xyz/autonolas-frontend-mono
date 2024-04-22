@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useCallback, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { useRouter } from 'next/router';
 import { toLower } from 'lodash';
@@ -44,27 +44,27 @@ export const useHandleRoute = () => {
   const path = router?.pathname || '';
   const networkNameFromUrl = router?.query?.network;
 
-  const dispathWithDelay = (action) => {
+  const dispatchWithDelay = useCallback((action) => {
     setTimeout(() => {
       dispatch(action);
     }, 0);
-  };
+  }, [dispatch]);
 
-  const updateChainId = (id) => {
+  const updateChainId = useCallback((id) => {
     sessionStorage.setItem('chainId', id);
-    dispathWithDelay(setChainId(id));
-  };
+    dispatchWithDelay(setChainId(id));
+  }, [dispatchWithDelay]);
 
   // updating the blockchain information in redux
   useEffect(() => {
     const isValidNetwork = isValidNetworkName(networkNameFromUrl);
-    dispathWithDelay(setVmInfo(networkNameFromUrl));
+    dispatchWithDelay(setVmInfo(networkNameFromUrl));
 
     if (!isPageWithSolana(networkNameFromUrl)) {
       const chainIdFromPath = getChainIdFromPath(networkNameFromUrl);
       updateChainId(isValidNetwork ? chainIdFromPath : 1);
     }
-  }, [networkNameFromUrl]);
+  }, [networkNameFromUrl, dispatchWithDelay, updateChainId]);
 
   useEffect(() => {
     if (PAGES_TO_LOAD_WITHOUT_CHAINID.includes(path)) {
