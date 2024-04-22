@@ -1,34 +1,27 @@
-import Head from 'next/head';
-import { Provider } from 'react-redux';
-import { AutonolasThemeProvider } from 'libs/ui-theme/src/lib/ThemeConfig';
-import PropTypes from 'prop-types';
-import { useRouter } from 'next/router';
-
 /** wagmi config */
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import {
-  WagmiProvider,
-  cookieStorage,
-  cookieToInitialState,
-  createStorage
-} from 'wagmi';
 import { createWeb3Modal, defaultWagmiConfig } from '@web3modal/wagmi';
+import { AutonolasThemeProvider } from 'libs/ui-theme/src/lib/ThemeConfig';
+import Head from 'next/head';
+import { useRouter } from 'next/router';
+import PropTypes from 'prop-types';
+import { Provider } from 'react-redux';
+import { WagmiProvider, cookieStorage, cookieToInitialState, createStorage } from 'wagmi';
+
+import { COLOR } from '@autonolas/frontend-library';
+
 import { SUPPORTED_CHAINS } from '../common-util/Login/config';
+import GlobalStyle from '../components/GlobalStyles';
 
 /** antd theme config */
 import Layout from '../components/Layout';
-import GlobalStyle from '../components/GlobalStyles';
 import { wrapper } from '../store';
-import { COLOR } from '@autonolas/frontend-library';
 
-
-
-const DESC =
-  'View and manage components, agents and services via the Autonolas on-chain registry.';
+const DESC = 'View and manage components, agents and services via the Autonolas on-chain registry.';
 
 const queryClient = new QueryClient();
 
-export const projectId = process.env.NEXT_PUBLIC_WALLET_PROJECT_ID;
+export const projectId = process.env.NEXT_PUBLIC_WALLET_PROJECT_ID as string;
 
 const metadata = {
   name: 'Autonolas Registry',
@@ -37,9 +30,6 @@ const metadata = {
   icons: ['https://avatars.githubusercontent.com/u/37784886'],
 };
 
-/**
- * @type {import('@web3modal/wagmi').WagmiOptions}
- */
 const wagmiConfig = defaultWagmiConfig({
   chains: SUPPORTED_CHAINS,
   projectId,
@@ -60,8 +50,13 @@ createWeb3Modal({
   },
 });
 
-
-const MyApp = ({ Component, ...rest }) => {
+const MyApp = ({
+  Component,
+  ...rest
+}: {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  Component: any;
+}) => {
   const router = useRouter();
   const isNotLegal = router.pathname === '/not-legal';
   const initialState = cookieToInitialState(wagmiConfig);
@@ -94,8 +89,7 @@ const MyApp = ({ Component, ...rest }) => {
 };
 
 MyApp.propTypes = {
-  Component: PropTypes.oneOfType([PropTypes.func, PropTypes.shape({})])
-    .isRequired,
+  Component: PropTypes.oneOfType([PropTypes.func, PropTypes.shape({})]).isRequired,
   pageProps: PropTypes.shape({}).isRequired,
 };
 

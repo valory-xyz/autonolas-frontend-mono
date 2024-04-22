@@ -1,11 +1,22 @@
 {
   "root": true,
-  "plugins": ["@nx"],
+  "plugins": ["@nx", "prettier"],
   "env": {
     "browser": true,
     "node": true,
     "jest": true,
     "es6": true
+  },
+  "rules": {
+    "prettier/prettier": [
+      "error",
+      {
+        "semi": true,
+        "trailingComma": "all",
+        "singleQuote": true,
+        "endOfLine": "auto"
+      }
+    ]
   },
   "overrides": [
     {

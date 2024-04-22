@@ -13,12 +13,15 @@ import {
   celoAlfajores,
   celo,
   optimism,
-} from 'wagmi/chains';
+  Chain,
+} from '@wagmi/core/chains';
 import { web3 } from '@project-serum/anchor';
 
 import { SOLANA_CHAIN_NAMES, VM_TYPE } from 'util/constants';
+import { Cluster } from '@solana/web3.js';
+import { kebabCase } from 'lodash';
 
-export const SUPPORTED_CHAINS = [
+export const SUPPORTED_CHAINS: [Chain, ...Chain[]] = [
   mainnet,
   goerli,
   gnosis,
@@ -35,7 +38,6 @@ export const SUPPORTED_CHAINS = [
   celoAlfajores,
 ];
 
-
 /**
  * Returns the list of supported chains with more info such as
  * network name, network display name, etc
@@ -47,18 +49,18 @@ export const SUPPORTED_CHAINS = [
  * ]
  */
 export const EVM_SUPPORTED_CHAINS = SUPPORTED_CHAINS.map((chain) => {
-  const { name, network, id } = chain;
+  const { name, id } = chain;
 
   const getNetworkName = () => {
-    if (network === 'homestead') return 'ethereum';
-    if (network === 'chiado') return 'gnosis-chiado';
-    if (network === 'matic') return 'polygon';
-    if (network === 'maticmum') return 'polygon-mumbai';
-    return network;
+    if (name === 'OP Mainnet') return 'optimism';
+    if (name === 'OP Sepolia') return 'optimism-sepolia';
+    if (name === 'Alfajores') return 'celo-alfajores';
+    return kebabCase(name);
   };
 
   const getNetworkDisplayName = () => {
     if (name === 'OP Mainnet') return 'Optimism';
+    if (name === 'OP Sepolia') return 'Optimism Sepolia';
     if (name === 'Alfajores') return 'Celo Alfajores';
     return name;
   };
@@ -71,10 +73,18 @@ export const EVM_SUPPORTED_CHAINS = SUPPORTED_CHAINS.map((chain) => {
   };
 });
 
+type SolanaChain = {
+  id: number | null;
+  networkDisplayName: string;
+  networkName: string;
+  clusterName: Cluster;
+  vmType: keyof typeof VM_TYPE;
+};
+
 /**
  * Solana supported chains
  */
-const SVM_SOLANA_CHAIN = {
+const SVM_SOLANA_CHAIN: SolanaChain = {
   id: null,
   networkDisplayName: 'Solana',
   networkName: SOLANA_CHAIN_NAMES.MAINNET,
@@ -82,15 +92,15 @@ const SVM_SOLANA_CHAIN = {
   vmType: VM_TYPE.SVM,
 };
 
-const SVM_SOLANA_DEVNET_CHAIN = {
+const SVM_SOLANA_DEVNET_CHAIN: SolanaChain = {
   id: null,
   networkDisplayName: 'Solana Devnet',
   networkName: SOLANA_CHAIN_NAMES.DEVNET,
   clusterName: 'devnet',
-  vmType: VM_TYPE.SVM,
+  vmType: 'SVM',
 };
 
-export const SVM_SUPPORTED_CHAINS = [
+export const SVM_SUPPORTED_CHAINS: SolanaChain[] = [
   { ...SVM_SOLANA_CHAIN },
   { ...SVM_SOLANA_DEVNET_CHAIN },
 ];
@@ -104,8 +114,11 @@ const DEFAULT_SVM_CLUSTER = 'mainnet-beta';
  * @param {string} networkName - The network name to get the endpoint for.
  * @returns {string} The endpoint URL associated with the network name.
  */
-export const getSvmEndpoint = (networkName) => {
-  const chain = SVM_SUPPORTED_CHAINS.find((c) => c.networkName === networkName);
+export const getSvmEndpoint = (networkName: string) => {
+  const chain: SolanaChain | undefined = SVM_SUPPORTED_CHAINS.find(
+    (c) => c.networkName === networkName,
+  );
+
   if (chain?.networkName === SOLANA_CHAIN_NAMES.MAINNET) {
     return process.env.NEXT_PUBLIC_SOLANA_MAINNET_BETA_URL;
   }
@@ -122,27 +135,27 @@ export const ALL_SUPPORTED_CHAINS = [
   ...SVM_SUPPORTED_CHAINS,
 ].sort((a, b) => {
   // NOTE: sort in this order only for the purpose of the dropdown
-  const chainOrder = [
-    'ethereum',
-    'gnosis',
-    'polygon',
-    'solana',
-    'arbitrum',
-    'base',
-    'optimism',
-    'celo',
-    'goerli',
-    'gnosis-chiado',
-    'polygon-mumbai',
-    'solana-devnet',
-    'arbitrum-sepolia',
-    'base-sepolia',
-    'optimism-sepolia',
-    'celo-alfajores',
-  ];
+  const chainNameOrder: Chain['name'][] = [
+    'Ethereum',
+    'Gnosis',
+    'Polygon',
+    'Solana',
+    'Arbitrum One',
+    'Base',
+    'Optimism',
+    'Celo',
+    'Goerli',
+    'Gnosis Chiado',
+    'Polygon Mumbai',
+    'Solana Devnet',
+    'Arbitrum Sepolia',
+    'Base Sepolia',
+    'Optimism Sepolia',
+    'Celo Alfajores',
+  ]
 
-  const aIndex = chainOrder.indexOf(a.networkName);
-  const bIndex = chainOrder.indexOf(b.networkName);
+  const aIndex = chainNameOrder.indexOf(a.networkDisplayName);
+  const bIndex = chainNameOrder.indexOf(b.networkDisplayName);
 
   if (aIndex === bIndex) return 0;
   if (aIndex > bIndex) return 1;

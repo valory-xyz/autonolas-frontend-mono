@@ -4,12 +4,7 @@ import PropTypes from 'prop-types';
 import { SwapOutlined } from '@ant-design/icons';
 import { isNil } from 'lodash';
 import { Grid } from 'antd';
-import {
-  useAccount,
-  useBalance,
-  useDisconnect,
-  useSwitchChain,
-} from 'wagmi';
+import { useAccount, useBalance, useDisconnect, useSwitchChain } from 'wagmi';
 import styled from 'styled-components';
 import {
   CannotConnectAddressOfacError,
@@ -42,8 +37,8 @@ export const LoginV2 = ({
   const { isMobile } = useScreen();
   const { disconnect } = useDisconnect();
   const { chainId, isConnectedToWrongNetwork } = useHelpers();
-  const { chain: walletConnectedChain,  } = useAccount();
-  const { switchNetworkAsync, isLoading } = useSwitchChain();
+  const { chain: walletConnectedChain } = useAccount();
+  const { switchChainAsync, isLoading } = useSwitchChain();
 
   const screens = useBreakpoint();
 
@@ -131,11 +126,11 @@ export const LoginV2 = ({
 
   const onSwitchNetwork = useCallback(async () => {
     try {
-      await switchNetworkAsync(chainId);
+      await switchChainAsync({ chainId });
     } catch (error) {
       console.error(error);
     }
-  }, [chainId, switchNetworkAsync]);
+  }, [chainId, switchChainAsync]);
 
   useEffect(() => {
     if (isConnectedToWrongNetwork) {
@@ -163,7 +158,9 @@ export const LoginV2 = ({
             </YellowButton>
           )}
           &nbsp;&nbsp;
-          <w3m-button balance={screens.xs ? 'hide' : 'show'} />
+          <w3m-network-button />
+          &nbsp;&nbsp;
+          <w3m-button balance={screens.xs ? 'hide' : 'show'} icon="hide" />
         </>
       )}
     </LoginContainer>
