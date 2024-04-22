@@ -181,7 +181,7 @@ export const FinishedRegistration = ({
   };
 
   const onFinish = (values) => {
-    const payload = ethers.utils.solidityPack(
+    const payload = ethers.solidityPacked(
       [
         'address',
         'address',

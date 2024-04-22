@@ -3,17 +3,15 @@ import { useDispatch } from 'react-redux';
 import PropTypes from 'prop-types';
 import { SwapOutlined } from '@ant-design/icons';
 import { isNil } from 'lodash';
-import { Web3Modal, Web3Button } from '@web3modal/react';
+import { Grid } from 'antd';
 import {
   useAccount,
   useBalance,
   useDisconnect,
-  useNetwork,
-  useSwitchNetwork,
+  useSwitchChain,
 } from 'wagmi';
 import styled from 'styled-components';
 import {
-  COLOR,
   CannotConnectAddressOfacError,
   notifyError,
   useScreen,
@@ -24,7 +22,8 @@ import { isAddressProhibited } from '../functions';
 import { useHelpers } from '../hooks';
 import { YellowButton } from '../YellowButton';
 import { SolanaWallet } from './SolanaWallet';
-import { projectId, ethereumClient } from './config';
+
+const { useBreakpoint } = Grid;
 
 const LoginContainer = styled.div`
   display: flex;
@@ -43,8 +42,10 @@ export const LoginV2 = ({
   const { isMobile } = useScreen();
   const { disconnect } = useDisconnect();
   const { chainId, isConnectedToWrongNetwork } = useHelpers();
-  const { chain: walletConnectedChain } = useNetwork();
-  const { switchNetworkAsync, isLoading } = useSwitchNetwork();
+  const { chain: walletConnectedChain,  } = useAccount();
+  const { switchNetworkAsync, isLoading } = useSwitchChain();
+
+  const screens = useBreakpoint();
 
   const { address, connector } = useAccount({
     onConnect: ({ address: currentAddress }) => {
@@ -162,17 +163,7 @@ export const LoginV2 = ({
             </YellowButton>
           )}
           &nbsp;&nbsp;
-          <Web3Button avatar="hide" balance="hide" />
-          <Web3Modal
-            projectId={projectId}
-            ethereumClient={ethereumClient}
-            themeMode={theme}
-            themeVariables={{
-              '--w3m-button-border-radius': '5px',
-              '--w3m-accent-color': COLOR.PRIMARY,
-              '--w3m-background-color': COLOR.PRIMARY,
-            }}
-          />
+          <w3m-button balance={screens.xs ? 'hide' : 'show'} />
         </>
       )}
     </LoginContainer>

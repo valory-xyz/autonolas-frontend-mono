@@ -1,10 +1,4 @@
 import {
-  EthereumClient,
-  w3mConnectors,
-  w3mProvider,
-} from '@web3modal/ethereum';
-import { configureChains, createConfig } from 'wagmi';
-import {
   mainnet,
   gnosis,
   polygon,
@@ -20,14 +14,9 @@ import {
   celo,
   optimism,
 } from 'wagmi/chains';
-import { SafeConnector } from 'wagmi/connectors/safe';
-import { jsonRpcProvider } from 'wagmi/providers/jsonRpc';
 import { web3 } from '@project-serum/anchor';
 
-import { SOLANA_CHAIN_NAMES, VM_TYPE } from '../../util/constants';
-import { RPC_URLS } from '../Contracts';
-
-export const projectId = process.env.NEXT_PUBLIC_WALLET_PROJECT_ID;
+import { SOLANA_CHAIN_NAMES, VM_TYPE } from 'util/constants';
 
 export const SUPPORTED_CHAINS = [
   mainnet,
@@ -46,40 +35,6 @@ export const SUPPORTED_CHAINS = [
   celoAlfajores,
 ];
 
-const { publicClient, webSocketPublicClient, chains } = configureChains(
-  SUPPORTED_CHAINS,
-  [
-    jsonRpcProvider({
-      rpc: (chain) => ({
-        http: RPC_URLS[chain.id],
-      }),
-    }),
-    w3mProvider({ projectId }),
-  ],
-);
-
-export const wagmiConfig = createConfig({
-  autoConnect: true,
-  logger: { warn: null },
-  connectors: [
-    ...w3mConnectors({
-      projectId,
-      version: 2, // v2 of wallet connect
-      chains,
-    }),
-    new SafeConnector({
-      chains,
-      options: {
-        allowedDomains: [/gnosis-safe.io$/, /app.safe.global$/],
-        debug: false,
-      },
-    }),
-  ],
-  publicClient,
-  webSocketPublicClient,
-});
-
-export const ethereumClient = new EthereumClient(wagmiConfig, chains);
 
 /**
  * Returns the list of supported chains with more info such as

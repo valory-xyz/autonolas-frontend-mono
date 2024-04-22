@@ -137,7 +137,7 @@ export const handleMultisigSubmit = async ({
       );
 
       // Redeploy the service updating the multisig with new owners and threshold
-      const packedData = ethers.utils.solidityPack(
+      const packedData = ethers.solidityPacked(
         ['address', 'bytes'],
         [multisig, safeExecData],
       );
@@ -231,7 +231,7 @@ export const handleMultisigSubmit = async ({
         ],
       );
 
-      const packedData = ethers.utils.solidityPack(
+      const packedData = ethers.solidityPacked(
         ['address', 'bytes'],
         [multisig, safeExecData],
       );
