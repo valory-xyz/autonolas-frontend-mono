@@ -1,24 +1,26 @@
-import { useCallback, useEffect, useState } from 'react';
-import { ethers } from 'ethers';
+import { Alert, Button, Form, InputNumber, Modal, Tag, Typography } from 'antd';
 import BigNumber from 'bignumber.js';
-import PropTypes from 'prop-types';
+import { ethers } from 'ethers';
 import { isNil } from 'lodash';
-import { Form, InputNumber, Modal, Alert, Button, Typography, Tag } from 'antd';
-import {
-  COLOR,
-  notifyError,
-  notifySuccess,
-  getCommaSeparatedNumber,
-} from '@autonolas/frontend-library';
+import PropTypes from 'prop-types';
+import { useCallback, useEffect, useState } from 'react';
 
 import {
-  parseToWei,
+  COLOR,
+  getCommaSeparatedNumber,
+  notifyError,
+  notifySuccess,
+} from '@autonolas/frontend-library';
+
+import { ONE_ETH_IN_STRING } from 'common-util/constants/numbers';
+import {
+  notifyCustomErrors,
   parseToEth,
   parseToSolDecimals,
-  notifyCustomErrors,
+  parseToWei,
 } from 'common-util/functions';
-import { ONE_ETH_IN_STRING } from 'common-util/constants/numbers';
 import { useHelpers } from 'common-util/hooks/useHelpers';
+
 import { isSvmLpAddress } from '../BondingList/useBondingList';
 import { useDeposit } from './useDeposit';
 
@@ -41,12 +43,8 @@ export const Deposit = ({
 
   const isSvmProduct = isSvmLpAddress(productToken);
 
-  const {
-    getLpBalanceRequest,
-    depositRequest,
-    approveRequest,
-    hasSufficientTokenRequest,
-  } = useDeposit();
+  const { getLpBalanceRequest, depositRequest, approveRequest, hasSufficientTokenRequest } =
+    useDeposit();
 
   useEffect(() => {
     const getData = async () => {
@@ -116,9 +114,7 @@ export const Deposit = ({
             setIsApproveModalVisible(true);
           }
         } catch (error) {
-          notifyError(
-            `Error ocurred on fetching allowance for the product token ${productToken}`,
-          );
+          notifyError(`Error ocurred on fetching allowance for the product token ${productToken}`);
         }
       })
       .catch((info) => {
@@ -136,19 +132,14 @@ export const Deposit = ({
       .multipliedBy(ONE_ETH_IN_STRING)
       .dividedBy(productLpPriceInBg);
 
-    const remainingSupplyInWei = remainingSupply.lt(lpBalance)
-      ? remainingSupply
-      : lpBalance;
+    const remainingSupplyInWei = remainingSupply.lt(lpBalance) ? remainingSupply : lpBalance;
     return parseToEth(remainingSupplyInWei);
   };
 
   const remainingLpSupplyInEth = getRemainingLpSupplyInEth();
   const tokenAmountInputValue = Form.useWatch('tokenAmount', form) || 0;
   const getOlasPayout = () => {
-    if (
-      !tokenAmountInputValue ||
-      tokenAmountInputValue > remainingLpSupplyInEth
-    ) {
+    if (!tokenAmountInputValue || tokenAmountInputValue > remainingLpSupplyInEth) {
       return '--';
     }
 
@@ -156,18 +147,11 @@ export const Deposit = ({
       ? tokenAmountInputValue
       : new BigNumber(parseToWei(tokenAmountInputValue));
 
-    const payoutInBg = new BigNumber(
-      productLpPriceInBg.toString(),
-    ).multipliedBy(tokenAmountValue);
+    const payoutInBg = new BigNumber(productLpPriceInBg.toString()).multipliedBy(tokenAmountValue);
 
     const payout = isSvmProduct
       ? payoutInBg.dividedBy(BigNumber(`1${'0'.repeat(28)}`)).toFixed(2)
-      : Number(
-          payoutInBg
-            .dividedBy(ONE_ETH_IN_STRING)
-            .dividedBy(ONE_ETH_IN_STRING)
-            .toFixed(2),
-        );
+      : Number(payoutInBg.dividedBy(ONE_ETH_IN_STRING).dividedBy(ONE_ETH_IN_STRING).toFixed(2));
 
     return getCommaSeparatedNumber(payout, 4);
   };
@@ -213,14 +197,10 @@ export const Deposit = ({
                 validator(_, value) {
                   if (value === '' || isNil(value)) return Promise.resolve();
                   if (value <= 0) {
-                    return Promise.reject(
-                      new Error('Please input a valid amount'),
-                    );
+                    return Promise.reject(new Error('Please input a valid amount'));
                   }
                   if (value > remainingLpSupplyInEth) {
-                    return Promise.reject(
-                      new Error('Amount cannot be greater than the balance'),
-                    );
+                    return Promise.reject(new Error('Amount cannot be greater than the balance'));
                   }
                   return Promise.resolve();
                 },
@@ -282,10 +262,7 @@ export const Deposit = ({
                   setIsLoading(true);
                   await approveRequest({
                     token: productToken,
-                    amountToApprove: ethers.utils.parseUnits(
-                      `${tokenAmountInputValue}`,
-                      'ether',
-                    ),
+                    amountToApprove: ethers.parseUnits(`${tokenAmountInputValue}`, 'ether'),
                   });
 
                   // once approved, close the modal and call deposit helper

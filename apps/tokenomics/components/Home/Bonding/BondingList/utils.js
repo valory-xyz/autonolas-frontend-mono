@@ -8,8 +8,6 @@ import { ADDRESS_ZERO } from 'common-util/constants/numbers';
 import { ADDRESSES } from 'common-util/constants/addresses';
 import { AUTONOLAS_GRAPH_CLIENTS } from 'common-util/graphql/clients';
 
-const { BigNumber } = ethers;
-
 export const getProductValueFromEvent = (product, events, keyName) => {
   if ((events || []).length === 0) {
     return product[keyName];
@@ -30,8 +28,9 @@ export const getProductValueFromEvent = (product, events, keyName) => {
  * @param {Number | String} discount
  */
 export const getLpTokenWithDiscount = (lpTokenValue, discount) => {
-  const price = ethers.BigNumber.from(lpTokenValue);
-  const discountedPriceInBg = price.add(price.mul(discount).div(100));
+  const priceInBn = ethers.toBigInt(lpTokenValue);
+  const discountInBn = ethers.toBigInt(discount);
+  const discountedPriceInBg = priceInBn + ((priceInBn * discountInBn) / 100n);
   return discountedPriceInBg;
 };
 
@@ -41,10 +40,10 @@ export const getLpTokenWithDiscount = (lpTokenValue, discount) => {
  * @param {Number | String} totalSupply
  */
 export const getSvmCalculatedPriceLp = (reserveOlas, totalSupply) => {
-  const reserveOlasBG = BigNumber.from(reserveOlas.toString());
-  const totalSupplyBG = BigNumber.from(totalSupply.toString());
-  const multiplier = BigNumber.from(`1${'0'.repeat(28)}`);
-  const priceLp = reserveOlasBG.mul(multiplier).div(totalSupplyBG).toString();
+  const reserveOlasBn = ethers.toBigInt(reserveOlas);
+  const totalSupplyBn = ethers.toBigInt(totalSupply);
+  const multiplier = ethers.toBigInt(`1${'0'.repeat(28)}`);
+  const priceLp = ((reserveOlasBn * multiplier) / (totalSupplyBn)).toString();
   return priceLp;
 };
 
