@@ -4,9 +4,6 @@
   "license": "MIT",
   "scripts": {},
   "private": true,
-  "engines": {
-    "node": "^20.10.0"
-  },
   "dependencies": {
     "@balancer-labs/sdk": "^1.1.5",
     "@gnosis.pm/safe-contracts": "^1.3.0",

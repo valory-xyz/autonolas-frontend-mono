@@ -9,7 +9,6 @@ import {
 
 import { ADDRESSES } from 'common-util/constants/addresses';
 import { useHelpers } from 'common-util/hooks/useHelpers';
-import Image from 'next/image';
 import Socials from './Socials';
 import { ContractsInfoContainer } from './styles';
 

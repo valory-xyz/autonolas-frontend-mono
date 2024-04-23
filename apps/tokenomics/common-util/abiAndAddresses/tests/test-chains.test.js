@@ -1,3 +1,4 @@
+/* eslint-disable jest/no-conditional-expect */
 /* eslint-disable jest/no-conditional-in-test */
 /* eslint-disable no-await-in-loop */
 

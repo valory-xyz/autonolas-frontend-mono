@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { getChainId } from 'common-util/functions';
-import { setChainId } from 'store/setup/actions';
+import { setChainId } from 'store/setup';
 
 export const useHelpers = () => {
   const dispatch = useDispatch();
