@@ -31,7 +31,7 @@ module.exports = {
     'components/**/*.{js,jsx}',
 
     // ABI will change frequently on backend deployment hence avoiding.
-    '!common-util/AbiAndAddresses/*.{js,jsx}',
+    '!common-util/abiAndAddresses/*.{js,jsx}',
 
     // Contract objects
     '!common-util/Contracts/*.{js,jsx}',

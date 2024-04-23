@@ -4,8 +4,9 @@ const objects = require('@nx/next');
 
 const { composePlugins, withNx } = objects;
 
-
-/** @type {import('next').NextConfig} */
+/**
+ * @type {import('@nx/next/plugins/with-nx').WithNxOptions}
+ **/
 const nextConfig = {
   nx: {
     // Set this to true if you would like to to use SVGR
