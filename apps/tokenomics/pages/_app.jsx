@@ -1,18 +1,14 @@
-import Head from 'next/head';
-import { Provider } from 'react-redux';
-import { ConfigProvider } from 'antd';
+import { createWrapper } from 'next-redux-wrapper';
 import PropTypes from 'prop-types';
-
-/** wagmi config */
-import { WagmiConfig as WagmiConfigProvider } from 'wagmi';
-import { wagmiConfig } from 'common-util/Login/config';
+import GlobalStyle from 'components/GlobalStyles';
+import Head from 'next/head';
 
 /** antd theme config */
 import Layout from 'components/Layout';
-import GlobalStyle from 'components/GlobalStyles';
-import { THEME_CONFIG } from '@autonolas/frontend-library';
 import { useRouter } from 'next/router';
-import { store } from '../store';
+import { ThemeConfigProvider } from '../context/ConfigProvider';
+import Web3ModalProvider from '../context/Web3ModalProvider';
+import initStore from '../store';
 
 const MyApp = ({ Component, pageProps }) => {
   const router = useRouter();
@@ -20,34 +16,24 @@ const MyApp = ({ Component, pageProps }) => {
 
   return (
     <>
-      <GlobalStyle />
       <Head>
         <title>Olas Tokenomics</title>
         <meta name="title" content="Olas Tokenomics" />
       </Head>
-      <Provider store={store}>
-        <ConfigProvider theme={THEME_CONFIG}>
-          {isNotLegal ? (
-            <Component {...pageProps} />
-          ) : (
-            <WagmiConfigProvider config={wagmiConfig}>
-              <Layout>
-                <Component {...pageProps} />
-              </Layout>
-            </WagmiConfigProvider>
-          )}
-        </ConfigProvider>
-      </Provider>
+      <GlobalStyle />
+      <ThemeConfigProvider>
+        {isNotLegal ? (
+          <Component {...pageProps} />
+        ) : (
+          <Web3ModalProvider>
+            <Layout>
+              <Component {...pageProps} />
+            </Layout>
+          </Web3ModalProvider>
+        )}
+      </ThemeConfigProvider>
     </>
   );
-};
-
-MyApp.getInitialProps = async ({ Component, ctx }) => {
-  const pageProps = Component.getInitialProps
-    ? await Component.getInitialProps(ctx)
-    : {};
-
-  return { pageProps };
 };
 
 MyApp.propTypes = {

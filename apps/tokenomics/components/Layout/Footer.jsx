@@ -7,8 +7,9 @@ import {
   getExplorerURL,
 } from '@autonolas/frontend-library';
 
-import { ADDRESSES } from 'common-util/Contracts';
+import { ADDRESSES } from 'common-util/constants/addresses';
 import { useHelpers } from 'common-util/hooks/useHelpers';
+import Image from 'next/image';
 import Socials from './Socials';
 import { ContractsInfoContainer } from './styles';
 
@@ -18,8 +19,7 @@ const PATHS_NOT_TO_SHOW = ['/docs', '/disclaimer', '/not-legal'];
 
 const ContractInfo = () => {
   const { chainId } = useHelpers();
-  const router = useRouter();
-  const { pathname } = router;
+  const { pathname } = useRouter();
 
   if (!chainId) return <ContractsInfoContainer />;
 
@@ -69,9 +69,8 @@ const ContractInfo = () => {
     </div>
   );
 
-  const {
-    textOne, addressOne, textTwo, addressTwo,
-  } = getCurrentPageAddresses();
+  const { textOne, addressOne, textTwo, addressTwo } =
+    getCurrentPageAddresses();
 
   return (
     <ContractsInfoContainer>

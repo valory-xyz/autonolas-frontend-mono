@@ -23,15 +23,15 @@ jobs:
           fetch-depth: 0
       - uses: actions/setup-node@v3
         with:
-          node-version: 18
+          node-version: '20'
       - name: Install modules
         run: yarn
-      - name: Run ESLint
-        run: yarn nx lint tokenomics
-      - name: Run Test
-        run: yarn nx test tokenomics
+      - name: Lint
+        run: yarn lint
+      - name: Test
+        run: yarn test
   scan:
-    name: gitleaks
+    name: Gitleaks
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3

@@ -3,14 +3,13 @@
     "baseUrl": ".",
     "sourceMap": true,
     "paths": {
-      "common-util": ["./common-util"],
-      "components": ["./components"],
-      "util": ["./util"],
-      "static": ["./static"],
-      "images": ["./public/images"]
+      "common-util/*": ["./common-util/*"],
+      "components/*": ["./components/*"],
+      "util/*": ["./util/*"],
+      "static/*": ["./static/*"],
+      "images/*": ["./public/images/*"],
+      "store/*": ["./store/*"]
     }
   },
-  "exclude": [
-    "node_modules"
-  ]
+  "exclude": ["node_modules"]
 }

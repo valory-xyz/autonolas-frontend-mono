@@ -9,11 +9,13 @@ import {
 } from '@autonolas/frontend-library';
 
 import { DynamicFieldsForm } from 'common-util/DynamicFieldsForm';
+
 import {
   parseToEth,
   parseToWei,
   sortUnitIdsAndTypes,
 } from 'common-util/functions';
+
 import { useHelpers } from 'common-util/hooks/useHelpers';
 import {
   getEpochCounter,
@@ -98,9 +100,8 @@ export const DepositServiceDonation = () => {
         totalAmount,
       };
 
-      const invalidServices = await checkServicesNotTerminatedOrNotDeployed(
-        serviceIds,
-      );
+      const invalidServices =
+        await checkServicesNotTerminatedOrNotDeployed(serviceIds);
 
       // deposit only if all services are deployed or terminated
       if (invalidServices.length === 0) {
@@ -154,7 +155,8 @@ export const DepositServiceDonation = () => {
   };
 
   // disable checkpoint button if expected end time is in the future
-  const isExpectedEndTimeInFuture = (epochDetails?.nextEpochEndTime || 0) * 1000 > Date.now();
+  const isExpectedEndTimeInFuture =
+    (epochDetails?.nextEpochEndTime || 0) * 1000 > Date.now();
 
   return (
     <DonateContainer>
@@ -169,7 +171,7 @@ export const DepositServiceDonation = () => {
         <Alert
           showIcon
           type="info"
-          message={(
+          message={
             <>
               To boost rewards of devs with freshly minted OLAS, you must hold
               at least&nbsp;
@@ -185,7 +187,7 @@ export const DepositServiceDonation = () => {
               </Text>
               &nbsp;of donations is required to trigger boosts.
             </>
-          )}
+          }
           className="mb-16"
         />
 
