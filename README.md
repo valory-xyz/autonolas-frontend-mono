@@ -6,7 +6,7 @@ This mono repo contains the frontend for the Autonolas project. It is based on t
 
 ## Start the app
 
-To start the development server run `npx nx run [app-name]:serve`. Open your browser and navigate to http://localhost:4200/. You will need `node` version "20" and `yarn` version ">=1" installed globally on your machine.
+To start the development server run `npx nx run [app-name]:serve`. Open your browser and navigate to http://localhost:4200/. 
 
 ## Create a new app
 

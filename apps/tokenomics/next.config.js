@@ -1,5 +1,17 @@
+//@ts-check
+
+const objects = require('@nx/next');
+
+const { composePlugins, withNx } = objects;
+
+
 /** @type {import('next').NextConfig} */
-const NextConfig = {
+const nextConfig = {
+  nx: {
+    // Set this to true if you would like to to use SVGR
+    // See: https://github.com/gregberge/svgr
+    svgr: false,
+  },
   reactStrictMode: true,
   compiler: {
     styledComponents: {
@@ -8,13 +20,12 @@ const NextConfig = {
     },
   },
   webpack(config) {
-    // eslint-disable-next-line no-param-reassign
     config.resolve.fallback = {
       fs: false,
     };
     return config;
   },
-  redirects() {
+  redirects: async () => {
     return [
       {
         source: '/',
@@ -54,4 +65,9 @@ const NextConfig = {
     ];
   },
 };
-module.exports = NextConfig;
+const plugins = [
+  // Add more Next.js plugins to this list if needed.
+  withNx,
+];
+
+module.exports = composePlugins(...plugins)(nextConfig);
