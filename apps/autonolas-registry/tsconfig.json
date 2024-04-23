@@ -22,7 +22,8 @@
       "components/*": ["apps/autonolas-registry/components/*"],
       "util/*": ["apps/autonolas-registry/util/*"],
       "static/*": ["apps/autonolas-registry/static/*"],
-      "images/*": ["apps/autonolas-registry/public/images/*"]
+      "images/*": ["apps/autonolas-registry/public/images/*"],
+      "store/*": ["apps/autonolas-registry/store/*"]
     }
   },
   "include": ["**/*.ts", "**/*.tsx", "**/*.js", "**/*.jsx", "next-env.d.ts"],

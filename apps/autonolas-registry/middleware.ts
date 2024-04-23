@@ -1,18 +1,16 @@
-import { NextResponse, userAgent } from 'next/server';
 import nextSafe from 'next-safe';
+import { NextRequest, NextResponse, userAgent } from 'next/server';
+
 import prohibitedCountries from './data/prohibited-countries.json';
 
 const prohibitedCountriesCode = Object.values(prohibitedCountries);
 
 const isDev = process.env.NODE_ENV !== 'production';
 
-const getCspHeader = (browserName) => {
-  const walletconnectSrc = [
-    'https://verify.walletconnect.org',
-    'https://verify.walletconnect.com',
-  ];
+const getCspHeader = (browserName?: string) => {
+  const walletconnectSrc = ['https://verify.walletconnect.org', 'https://verify.walletconnect.com'];
 
-  const connectSrc = [
+  const connectSrc: CSPDirective = [
     "'self'",
     ...walletconnectSrc,
     'https://*.olas.network/',
@@ -47,7 +45,9 @@ const getCspHeader = (browserName) => {
     'https://sepolia.optimism.io/',
     'https://forno.celo.org',
     'https://alfajores-forno.celo-testnet.org',
-    process.env.NEXT_PUBLIC_AUTONOLAS_SUB_GRAPH_URL
+    'https://api.web3modal.com/',
+    'wss://www.walletlink.org/rpc',
+    process.env.NEXT_PUBLIC_AUTONOLAS_SUB_GRAPH_URL as string,
   ];
 
   if (isDev) {
@@ -63,29 +63,36 @@ const getCspHeader = (browserName) => {
     scriptSrc.push("'unsafe-inline'");
   }
 
+  const nextSafeHeaders =
+    typeof nextSafe === 'function'
+      ? // @ts-expect-error: For some reason, TypeScript is not recognizing the function
+        nextSafe({
+          isDev,
+          /**
+           * Content Security Policy
+           * @see https://content-security-policy.com/
+           */
+          contentSecurityPolicy: {
+            'default-src': "'none'",
+            'script-src': scriptSrc,
+            'connect-src': connectSrc,
+            'img-src': [
+              "'self'",
+              'blob:',
+              'data:',
+              'https://*.autonolas.tech/',
+              'https://explorer-api.walletconnect.com/w3m/',
+              ...walletconnectSrc,
+            ],
+            'style-src': ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com/'],
+            'frame-src': ["'self'", ...walletconnectSrc],
+          },
+          permissionsPolicyDirectiveSupport: ['standard'],
+        })
+      : [];
+
   const headers = [
-    ...nextSafe({
-      isDev,
-      /**
-       * Content Security Policy
-       * @see https://content-security-policy.com/
-       */
-      contentSecurityPolicy: {
-        'default-src': "'none'",
-        'script-src': scriptSrc,
-        'connect-src': connectSrc,
-        'img-src': [
-          "'self'",
-          'data:',
-          'https://*.autonolas.tech/',
-          'https://explorer-api.walletconnect.com/w3m/',
-          ...walletconnectSrc,
-        ],
-        'style-src': ["'self'", "'unsafe-inline'"],
-        'frame-src': ["'self'", ...walletconnectSrc],
-      },
-      permissionsPolicyDirectiveSupport: ['standard'],
-    }),
+    ...nextSafeHeaders,
     {
       key: 'Strict-Transport-Security',
       value: 'max-age=31536000; includeSubDomains',
@@ -95,14 +102,8 @@ const getCspHeader = (browserName) => {
   return headers;
 };
 
-/**
- *
- * @param {string} countryName
- * @param {string} pathName
- * @returns {string} redirectUrl
- */
-const getRedirectUrl = (countryName, pathName) => {
-  const isProhibited = prohibitedCountriesCode.includes(countryName);
+const getRedirectUrl = (pathName: string, countryName?: string) => {
+  const isProhibited = countryName ? prohibitedCountriesCode.includes(countryName) : false;
 
   if (pathName === '/not-legal') {
     return isProhibited ? null : '/';
@@ -110,14 +111,9 @@ const getRedirectUrl = (countryName, pathName) => {
   return isProhibited ? '/not-legal' : null;
 };
 
-/**
- * common middleware
- *
- * @param {NextRequest} request
- */
-export default async function middleware(request) {
+export default async function middleware(request: NextRequest) {
   const country = request.geo?.country;
-  const redirectUrl = getRedirectUrl(country, request.nextUrl.pathname);
+  const redirectUrl = getRedirectUrl(request.nextUrl.pathname, country);
 
   const response = redirectUrl
     ? NextResponse.redirect(new URL(redirectUrl, request.nextUrl))

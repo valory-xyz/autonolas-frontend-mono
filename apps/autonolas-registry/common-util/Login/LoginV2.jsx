@@ -1,30 +1,22 @@
+import { SwapOutlined } from '@ant-design/icons';
+import { Grid } from 'antd';
+import { isNil } from 'lodash';
+import PropTypes from 'prop-types';
 import { useCallback, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
-import PropTypes from 'prop-types';
-import { SwapOutlined } from '@ant-design/icons';
-import { isNil } from 'lodash';
-import { Web3Modal, Web3Button } from '@web3modal/react';
-import {
-  useAccount,
-  useBalance,
-  useDisconnect,
-  useNetwork,
-  useSwitchNetwork,
-} from 'wagmi';
 import styled from 'styled-components';
-import {
-  COLOR,
-  CannotConnectAddressOfacError,
-  notifyError,
-  useScreen,
-} from '@autonolas/frontend-library';
+import { useAccount, useBalance, useDisconnect, useSwitchChain } from 'wagmi';
 
-import { setUserBalance } from '../../store/setup';
+import { CannotConnectAddressOfacError, notifyError, useScreen } from '@autonolas/frontend-library';
+
+import { setUserBalance } from 'store/setup';
+
+import { YellowButton } from '../YellowButton';
 import { isAddressProhibited } from '../functions';
 import { useHelpers } from '../hooks';
-import { YellowButton } from '../YellowButton';
 import { SolanaWallet } from './SolanaWallet';
-import { projectId, ethereumClient } from './config';
+
+const { useBreakpoint } = Grid;
 
 const LoginContainer = styled.div`
   display: flex;
@@ -43,8 +35,10 @@ export const LoginV2 = ({
   const { isMobile } = useScreen();
   const { disconnect } = useDisconnect();
   const { chainId, isConnectedToWrongNetwork } = useHelpers();
-  const { chain: walletConnectedChain } = useNetwork();
-  const { switchNetworkAsync, isLoading } = useSwitchNetwork();
+  const { chain: walletConnectedChain } = useAccount();
+  const { switchChainAsync, isLoading } = useSwitchChain();
+
+  const screens = useBreakpoint();
 
   const { address, connector } = useAccount({
     onConnect: ({ address: currentAddress }) => {
@@ -78,8 +72,7 @@ export const LoginV2 = ({
         // This is the initial `provider` that is returned when
         // using web3Modal to connect. Can be MetaMask or WalletConnect.
         const modalProvider =
-          connector?.options?.getProvider?.() ||
-          (await connector?.getProvider?.());
+          connector?.options?.getProvider?.() || (await connector?.getProvider?.());
 
         if (modalProvider) {
           // *******************************************************
@@ -98,10 +91,7 @@ export const LoginV2 = ({
             // cleanup
             return () => {
               if (modalProvider.removeListener) {
-                modalProvider.removeListener(
-                  'chainChanged',
-                  handleChainChanged,
-                );
+                modalProvider.removeListener('chainChanged', handleChainChanged);
               }
             };
           }
@@ -130,11 +120,11 @@ export const LoginV2 = ({
 
   const onSwitchNetwork = useCallback(async () => {
     try {
-      await switchNetworkAsync(chainId);
+      await switchChainAsync({ chainId });
     } catch (error) {
       console.error(error);
     }
-  }, [chainId, switchNetworkAsync]);
+  }, [chainId, switchChainAsync]);
 
   useEffect(() => {
     if (isConnectedToWrongNetwork) {
@@ -142,8 +132,7 @@ export const LoginV2 = ({
     }
   }, [isConnectedToWrongNetwork, onSwitchNetwork]);
 
-  const hideWrongNetwork =
-    isNil(walletConnectedChain?.id) || walletConnectedChain?.id === chainId;
+  const hideWrongNetwork = isNil(walletConnectedChain?.id) || walletConnectedChain?.id === chainId;
 
   return (
     <LoginContainer>
@@ -156,23 +145,12 @@ export const LoginV2 = ({
               loading={isLoading}
               type="default"
               onClick={onSwitchNetwork}
-              icon={<SwapOutlined />}
-            >
+              icon={<SwapOutlined />}>
               {!isMobile && 'Switch network'}
             </YellowButton>
           )}
           &nbsp;&nbsp;
-          <Web3Button avatar="hide" balance="hide" />
-          <Web3Modal
-            projectId={projectId}
-            ethereumClient={ethereumClient}
-            themeMode={theme}
-            themeVariables={{
-              '--w3m-button-border-radius': '5px',
-              '--w3m-accent-color': COLOR.PRIMARY,
-              '--w3m-background-color': COLOR.PRIMARY,
-            }}
-          />
+          <w3m-button balance={screens.xs ? 'hide' : 'show'} />
         </>
       )}
     </LoginContainer>
