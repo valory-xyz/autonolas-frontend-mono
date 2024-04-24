@@ -138,7 +138,7 @@ export const ActiveRegistration = ({
           account,
           chainId,
           serviceId,
-          amountToApprove: ethers.utils.parseUnits(`${totalBonds}`, 'ether'),
+          amountToApprove: ethers.parseUnits(`${totalBonds}`, 'ether'),
         });
       }
 

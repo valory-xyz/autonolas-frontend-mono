@@ -1,18 +1,13 @@
 import { useCallback } from 'react';
-import { ethers } from 'ethers';
-
-import {
-  getEstimatedGasLimit,
-  sendTransaction,
-  getDepositoryContract,
-  getUniswapV2PairContract,
-} from 'common-util/functions';
 
 import { ADDRESSES } from 'common-util/constants/addresses';
-
+import {
+  getDepositoryContract,
+  getEstimatedGasLimit,
+  getUniswapV2PairContract,
+  sendTransaction,
+} from 'common-util/functions';
 import { useHelpers } from 'common-util/hooks/useHelpers';
-
-const { BigNumber } = ethers;
 
 export const useDeposit = () => {
   const { account, chainId } = useHelpers();
@@ -21,15 +16,11 @@ export const useDeposit = () => {
     async ({ token: productToken, tokenAmount }) => {
       const contract = getUniswapV2PairContract(productToken);
       const treasuryAddress = ADDRESSES[chainId].treasury;
-      const response = await contract.methods
-        .allowance(account, treasuryAddress)
-        .call();
+      const response = await contract.methods.allowance(account, treasuryAddress).call();
 
       // if allowance is greater than or equal to token amount
       // then user has sufficient token
-      const hasEnoughAllowance = BigNumber.from(response).gte(
-        BigNumber.from(tokenAmount),
-      );
+      const hasEnoughAllowance = response >= tokenAmount;
       return hasEnoughAllowance;
     },
     [account, chainId],
@@ -51,10 +42,7 @@ export const useDeposit = () => {
     async ({ token, amountToApprove }) => {
       const contract = getUniswapV2PairContract(token);
       const treasuryAddress = ADDRESSES[chainId].treasury;
-      const fnApprove = contract.methods.approve(
-        treasuryAddress,
-        amountToApprove,
-      );
+      const fnApprove = contract.methods.approve(treasuryAddress, amountToApprove);
       const estimatedGas = await getEstimatedGasLimit(fnApprove, account);
       const fn = await fnApprove.send({
         from: account,
@@ -70,9 +58,7 @@ export const useDeposit = () => {
   const depositRequest = useCallback(
     async ({ productId, tokenAmount }) => {
       const contract = getDepositoryContract();
-      const fn = contract.methods
-        .deposit(productId, tokenAmount)
-        .send({ from: account });
+      const fn = contract.methods.deposit(productId, tokenAmount).send({ from: account });
 
       const response = await sendTransaction(fn, account);
       return response?.transactionHash;

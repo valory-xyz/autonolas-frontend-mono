@@ -1,18 +1,18 @@
-import { BigNumber } from 'ethers';
+import { ethers } from 'ethers';
+
 import { notifyError } from '@autonolas/frontend-library';
 
+import { UNIT_TYPES } from 'common-util/enums';
 import {
-  parseToEth,
+  getAgentContract,
+  getBlockTimestamp,
+  getComponentContract,
   getDispenserContract,
   getTokenomicsContract,
   getTreasuryContract,
-  getAgentContract,
-  getComponentContract,
-  getBlockTimestamp,
+  parseToEth,
   sendTransaction,
 } from 'common-util/functions';
-
-import { UNIT_TYPES } from 'common-util/enums';
 
 const fixTo8DecimalPlaces = (value) => {
   const numeralValue = Number(value);
@@ -44,27 +44,15 @@ export const getOwnersForUnits = async ({ unitIds, unitTypes }) => {
   return results;
 };
 
-export const getOwnerIncentivesRequest = async ({
-  address,
-  unitTypes,
-  unitIds,
-}) => {
+export const getOwnerIncentivesRequest = async ({ address, unitTypes, unitIds }) => {
   const contract = getTokenomicsContract();
-  const response = await contract.methods
-    .getOwnerIncentives(address, unitTypes, unitIds)
-    .call();
+  const response = await contract.methods.getOwnerIncentives(address, unitTypes, unitIds).call();
   return response;
 };
 
-export const claimOwnerIncentivesRequest = async ({
-  account,
-  unitTypes,
-  unitIds,
-}) => {
+export const claimOwnerIncentivesRequest = async ({ account, unitTypes, unitIds }) => {
   const contract = getDispenserContract();
-  const fn = contract.methods
-    .claimOwnerIncentives(unitTypes, unitIds)
-    .send({ from: account });
+  const fn = contract.methods.claimOwnerIncentives(unitTypes, unitIds).send({ from: account });
 
   const response = await sendTransaction(fn, account);
   return response?.transactionHash;
@@ -143,11 +131,9 @@ const getActualEpochTimeLength = async () => {
 export const getMapUnitIncentivesRequest = async ({ unitType, unitId }) => {
   const contract = getTokenomicsContract();
 
-  const response = await contract.methods
-    .mapUnitIncentives(unitType, unitId)
-    .call();
+  const response = await contract.methods.mapUnitIncentives(unitType, unitId).call();
 
-  const currentEpochCounter = await getEpochCounter();
+  const currentEpochCounter = ethers.toBigInt(await getEpochCounter());
 
   // Get the unit points of the last epoch
   const componentInfo = await getUnitPointReq({
@@ -170,9 +156,8 @@ export const getMapUnitIncentivesRequest = async ({ unitType, unitId }) => {
   // }
   const { pendingRelativeReward, pendingRelativeTopUp, lastEpoch } = response;
 
-  const rewardInBn = BigNumber.from(pendingRelativeReward);
-  const isCurrentEpochWithReward =
-    currentEpochCounter === Number(lastEpoch) && rewardInBn.gt(0);
+  const rewardInBn = ethers.toBigInt(pendingRelativeReward);
+  const isCurrentEpochWithReward = currentEpochCounter === Number(lastEpoch) && rewardInBn > 0n;
 
   // if the current epoch is not the last epoch, return 0
   if (!isCurrentEpochWithReward) {
@@ -198,36 +183,34 @@ export const getMapUnitIncentivesRequest = async ({ unitType, unitId }) => {
 
   /**
    * for unitType agent(0) & component(1),
-   * the below calulcation is done to get the reward and topup
+   * the below calculation is done to get the reward and topup
    */
-  const componentReward = rewardInBn.mul(cRewardFraction).div(100).toString();
-  const agentReward = rewardInBn.mul(aRewardFraction).div(100).toString();
+  const componentReward = ((rewardInBn * ethers.toBigInt(cRewardFraction)) / 100n).toString();
+  const agentReward = ((rewardInBn * ethers.toBigInt(aRewardFraction)) / 100n).toString();
 
-  let totalIncentives = BigNumber.from(pendingRelativeTopUp);
+  let totalIncentives = ethers.toBigInt(pendingRelativeTopUp);
   let componentTopUp = 0;
   let agentPendingTopUp = 0;
 
   if (pendingRelativeTopUp > 0) {
-    const inflationPerSecond = await contract.methods
-      .inflationPerSecond()
-      .call();
-    const epochLength = await getActualEpochTimeLength();
+    const inflationPerSecond = await contract.methods.inflationPerSecond().call();
+    const inflationPerSecondInBn = ethers.toBigInt(inflationPerSecond);
+    const epochLength = ethers.toBigInt(await getActualEpochTimeLength());
 
-    const totalTopUps = BigNumber.from(inflationPerSecond).mul(epochLength);
-    totalIncentives = totalIncentives.mul(totalTopUps);
+    const totalTopUps = inflationPerSecondInBn * epochLength;
+    totalIncentives = totalIncentives * totalTopUps;
 
-    const componentSumIncentivesInBn =
-      BigNumber.from(cSumUnitTopUpsOLAS).mul(100);
-    const agentSumIncentivesInBn = BigNumber.from(aSumUnitTopUpsOLAS).mul(100);
+    const componentSumIncentivesInBn = ethers.toBigInt(cSumUnitTopUpsOLAS) * 100n;
+    const agentSumIncentivesInBn = ethers.toBigInt(aSumUnitTopUpsOLAS) * 100n;
 
-    componentTopUp = totalIncentives
-      .mul(cTopupFraction)
-      .div(componentSumIncentivesInBn)
-      .toString();
-    agentPendingTopUp = totalIncentives
-      .mul(aTopupFraction)
-      .div(agentSumIncentivesInBn)
-      .toString();
+    componentTopUp = (
+      (totalIncentives * ethers.toBigInt(cTopupFraction)) /
+      componentSumIncentivesInBn
+    ).toString();
+    agentPendingTopUp = (
+      (totalIncentives * ethers.toBigInt(aTopupFraction)) /
+      agentSumIncentivesInBn
+    ).toString();
   }
 
   const pendingRelativeTopUpInEth = parseToEth(
