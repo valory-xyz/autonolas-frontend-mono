@@ -1,40 +1,38 @@
-import { useCallback, useEffect, useState } from 'react';
 import { ethers } from 'ethers';
 import { memoize, round } from 'lodash';
-import { areAddressesEqual, VM_TYPE } from '@autonolas/frontend-library';
+import { useCallback, useEffect, useState } from 'react';
 import { usePublicClient } from 'wagmi';
 
-import { DEX } from 'common-util/enums';
-import { ADDRESS_ZERO, ONE_ETH } from 'common-util/constants/numbers';
-import {
-  getUniswapV2PairContract,
-  getTokenomicsContract,
-  getErc20Contract,
-  getDepositoryContract,
-} from 'common-util/functions/web3';
-
-import { ADDRESSES } from 'common-util/constants/addresses';
-import { notifySpecificError } from 'common-util/functions/errors';
-import { getChainId } from 'common-util/functions/frontend-library';
-import { parseToEth } from 'common-util/functions/ethers';
-import { isL1Network } from 'common-util/functions/chains';
+import { VM_TYPE, areAddressesEqual } from '@autonolas/frontend-library';
 
 import { DEPOSITORY } from 'common-util/abiAndAddresses';
+import { ADDRESSES } from 'common-util/constants/addresses';
+import { ADDRESS_ZERO, ONE_ETH } from 'common-util/constants/numbers';
+import { DEX } from 'common-util/enums';
+import { isL1Network } from 'common-util/functions/chains';
+import { notifySpecificError } from 'common-util/functions/errors';
+import { parseToEth } from 'common-util/functions/ethers';
+import { getChainId } from 'common-util/functions/frontend-library';
+import {
+  getDepositoryContract,
+  getErc20Contract,
+  getTokenomicsContract,
+  getUniswapV2PairContract,
+} from 'common-util/functions/web3';
 import { BALANCER_GRAPH_CLIENTS } from 'common-util/graphql/clients';
 import { balancerGetPoolQuery } from 'common-util/graphql/queries';
 import { useHelpers } from 'common-util/hooks/useHelpers';
-import { useWhirlPoolInformation } from '../TokenManagement/hooks/useWhirlpool';
-import { POSITION } from '../TokenManagement/constants';
-import {
-  getProductValueFromEvent,
-  getLpTokenWithDiscount,
-  getLpTokenLink,
-  getCurrentPriceLpLink,
-  getCreateProductEvents,
-  getCloseProductEvents,
-} from './utils';
 
-const { BigNumber } = ethers;
+import { POSITION } from '../TokenManagement/constants';
+import { useWhirlPoolInformation } from '../TokenManagement/hooks/useWhirlpool';
+import {
+  getCloseProductEvents,
+  getCreateProductEvents,
+  getCurrentPriceLpLink,
+  getLpTokenLink,
+  getLpTokenWithDiscount,
+  getProductValueFromEvent,
+} from './utils';
 
 /**
  *
@@ -50,8 +48,7 @@ const LP_PAIRS = {
     name: 'OLAS-WXDAI',
     originAddress: '0x79C872Ed3Acb3fc5770dd8a0cD9Cd5dB3B3Ac985',
     dex: DEX.BALANCER,
-    poolId:
-      '0x79c872ed3acb3fc5770dd8a0cd9cd5db3b3ac985000200000000000000000067',
+    poolId: '0x79c872ed3acb3fc5770dd8a0cd9cd5db3b3ac985000200000000000000000067',
     guide: 'olas-wxdai-via-balancer-on-gnosis-chain',
   },
   // polygon
@@ -60,8 +57,7 @@ const LP_PAIRS = {
     name: 'OLAS-WMATIC',
     originAddress: '0x62309056c759c36879Cde93693E7903bF415E4Bc',
     dex: DEX.BALANCER,
-    poolId:
-      '0x62309056c759c36879cde93693e7903bf415e4bc000200000000000000000d5f',
+    poolId: '0x62309056c759c36879cde93693e7903bf415e4bc000200000000000000000d5f',
     guide: 'olas-wmatic-via-balancer-on-polygon-pos',
   },
   // arbitrum
@@ -70,8 +66,7 @@ const LP_PAIRS = {
     name: 'OLAS-WETH',
     originAddress: '0xaf8912a3c4f55a8584b67df30ee0ddf0e60e01f8',
     dex: DEX.BALANCER,
-    poolId:
-      '0xaf8912a3c4f55a8584b67df30ee0ddf0e60e01f80002000000000000000004fc',
+    poolId: '0xaf8912a3c4f55a8584b67df30ee0ddf0e60e01f80002000000000000000004fc',
     guide: 'olas-weth-via-balancer-on-arbitrum',
   },
   // optimism
@@ -80,8 +75,7 @@ const LP_PAIRS = {
     name: 'WETH-OLAS',
     originAddress: '0x5bb3e58887264b667f915130fd04bbb56116c278',
     dex: DEX.BALANCER,
-    poolId:
-      '0x5bb3e58887264b667f915130fd04bbb56116c27800020000000000000000012a',
+    poolId: '0x5bb3e58887264b667f915130fd04bbb56116c27800020000000000000000012a',
     guide: 'weth-olas-via-balancer-on-optimism',
   },
   // base
@@ -90,12 +84,11 @@ const LP_PAIRS = {
     name: 'OLAS-USDC',
     originAddress: '0x5332584890d6e415a6dc910254d6430b8aab7e69',
     dex: DEX.BALANCER,
-    poolId:
-      '0x5332584890d6e415a6dc910254d6430b8aab7e69000200000000000000000103',
+    poolId: '0x5332584890d6e415a6dc910254d6430b8aab7e69000200000000000000000103',
     guide: 'olas-usdc-via-balancer-on-base',
   },
   // solana
-  '0x3685b8cc36b8df09ed9e81c1690100306bf23e04': {
+  '0x3685B8cC36B8df09ED9E81C1690100306bF23E04': {
     lpChainId: VM_TYPE.SVM,
     name: 'OLAS-WSOL',
     originAddress: POSITION.toString(),
@@ -106,7 +99,7 @@ const LP_PAIRS = {
 };
 
 export const isSvmLpAddress = (address) =>
-  areAddressesEqual(address, '0x3685b8cc36b8df09ed9e81c1690100306bf23e04');
+  areAddressesEqual(address, '0x3685B8cC36B8df09ED9E81C1690100306bF23E04');
 
 /**
  * fetches the IDF (discount factor) for the product
@@ -132,9 +125,7 @@ const getLastIDFRequest = async () => {
  * @returns {Object} { lpChainId, originAddress, dex, name, poolId }
  */
 const getLpTokenDetails = memoize(async (address) => {
-  const currentLpPairDetails = Object.keys(LP_PAIRS).find(
-    (key) => key === address,
-  );
+  const currentLpPairDetails = Object.keys(LP_PAIRS).find((key) => areAddressesEqual(key, address));
 
   // if the address is in the LP_PAIRS list
   if (currentLpPairDetails) {
@@ -155,10 +146,7 @@ const getLpTokenDetails = memoize(async (address) => {
     );
     tokenSymbol = await erc20Contract.methods.symbol().call();
   } catch (error) {
-    console.error(
-      'Error fetching token0 and token1 from the LP pair contract: ',
-      address,
-    );
+    console.error('Error fetching token0 and token1 from the LP pair contract: ', address);
   }
 
   return {
@@ -176,14 +164,10 @@ const getLpTokenDetails = memoize(async (address) => {
 const getCurrentPriceBalancerFn = memoize(async (tokenAddress) => {
   const { lpChainId, poolId } = await getLpTokenDetails(tokenAddress);
 
-  const { pool } = await BALANCER_GRAPH_CLIENTS[lpChainId].request(
-    balancerGetPoolQuery(poolId),
-  );
+  const { pool } = await BALANCER_GRAPH_CLIENTS[lpChainId].request(balancerGetPoolQuery(poolId));
 
   if (!pool) {
-    throw new Error(
-      `Pool not found on Balancer for poolId: ${poolId} and chainId: ${lpChainId}.`,
-    );
+    throw new Error(`Pool not found on Balancer for poolId: ${poolId} and chainId: ${lpChainId}.`);
   }
 
   const totalSupply = pool.totalShares;
@@ -226,9 +210,7 @@ const useAddCurrentLpPriceToProducts = () => {
           otherRequests[i] = 0;
         } else {
           /* eslint-disable-next-line no-await-in-loop */
-          const { lpChainId, dex } = await getLpTokenDetails(
-            productList[i].token,
-          );
+          const { lpChainId, dex } = await getLpTokenDetails(productList[i].token);
 
           if (isL1Network(lpChainId)) {
             multicallRequests[i] = {
@@ -300,11 +282,7 @@ const getLpTokenNamesForProducts = async (productList, events) => {
   const lpTokenNamePromiseList = [];
 
   for (let i = 0; i < productList.length; i += 1) {
-    const tokenAddress = getProductValueFromEvent(
-      productList[i],
-      events,
-      'token',
-    );
+    const tokenAddress = getProductValueFromEvent(productList[i], events, 'token');
     const tokenDetailsPromise = getLpTokenDetails(tokenAddress);
     lpTokenNamePromiseList.push(tokenDetailsPromise);
   }
@@ -359,25 +337,19 @@ const useAddSupplyLeftToProducts = () =>
 
         // Should not happen but we will warn if it does
         if (!createProductEvent) {
-          window.console.warn(
-            `Product ${product.id} not found in the event list`,
-          );
+          window.console.warn(`Product ${product.id} not found in the event list`);
         }
 
-        const eventSupply = Number(
-          BigNumber.from(createProductEvent.supply).div(ONE_ETH),
-        );
+        const eventSupply = Number(ethers.toBigInt(createProductEvent.supply) / ONE_ETH);
 
         const productSupply = !closeProductEvent
-          ? Number(BigNumber.from(product.supply).div(ONE_ETH))
-          : Number(BigNumber.from(closeProductEvent.supply).div(ONE_ETH));
+          ? Number(ethers.toBigInt(product.supply) / ONE_ETH)
+          : Number(ethers.toBigInt(closeProductEvent.supply) / ONE_ETH);
 
         const supplyLeft = productSupply / Number(eventSupply);
 
         const priceLp =
-          product.token !== ADDRESS_ZERO
-            ? product.priceLp
-            : createProductEvent?.priceLp || 0;
+          product.token !== ADDRESS_ZERO ? product.priceLp : createProductEvent?.priceLp || 0;
 
         return { ...product, supplyLeft, priceLp };
       }),
@@ -401,17 +373,13 @@ const useAddProjectChangeToProducts = () =>
     (productList) =>
       productList.map((record) => {
         // To calculate the price of LP we need to multiply (olasReserve / TotalSupply) by 2
-        const currentPriceLpInBg = BigNumber.from(
-          `${record.currentPriceLp || 0}`,
-        );
-        const doubledCurrentPriceLp = currentPriceLpInBg.mul(2).toString();
+        const currentPriceLpIn = ethers.toBigInt(`${record.currentPriceLp || 0}`);
+        const doubledCurrentPriceLp = (currentPriceLpIn * 2n).toString();
 
         const parsedDoubledCurrentPriceLp =
-          parseToEth(doubledCurrentPriceLp) /
-          (isSvmLpAddress(record.token) ? 10 ** 10 : 1);
+          parseToEth(doubledCurrentPriceLp) / (isSvmLpAddress(record.token) ? 10 ** 10 : 1);
 
-        const fullCurrentPriceLp =
-          Number(round(parsedDoubledCurrentPriceLp, 2)) || '0';
+        const fullCurrentPriceLp = Number(round(parsedDoubledCurrentPriceLp, 2)) || '0';
 
         // get the discounted OLAS per LP token
         const discountedOlasPerLpTokenInBg = getLpTokenWithDiscount(
@@ -421,17 +389,13 @@ const useAddProjectChangeToProducts = () =>
 
         // parse to eth and round to 2 decimal places
         const roundedDiscountedOlasPerLpToken = round(
-          parseToEth(discountedOlasPerLpTokenInBg) /
-            (isSvmLpAddress(record.token) ? 10 ** 10 : 1),
+          parseToEth(discountedOlasPerLpTokenInBg) / (isSvmLpAddress(record.token) ? 10 ** 10 : 1),
           2,
         );
 
         // calculate the projected change
         const difference = roundedDiscountedOlasPerLpToken - fullCurrentPriceLp;
-        const projectedChange = round(
-          (difference / fullCurrentPriceLp) * 100,
-          2,
-        );
+        const projectedChange = round((difference / fullCurrentPriceLp) * 100, 2);
 
         return {
           ...record,
@@ -483,8 +447,7 @@ const useProductDetailsFromIds = () => {
         };
       });
 
-      const listWithCurrentLpPrice =
-        await addCurrentLpPriceToProducts(productList);
+      const listWithCurrentLpPrice = await addCurrentLpPriceToProducts(productList);
 
       const createEventList = await getCreateProductEvents();
       const closedEventList = await getCloseProductEvents();
@@ -504,12 +467,7 @@ const useProductDetailsFromIds = () => {
 
       return listWithProjectedChange;
     },
-    [
-      publicClient,
-      addCurrentLpPriceToProducts,
-      addSupplyLeftToProducts,
-      addProjectedChange,
-    ],
+    [publicClient, addCurrentLpPriceToProducts, addSupplyLeftToProducts, addProjectedChange],
   );
 };
 

@@ -1,18 +1,20 @@
-import { useCallback, useEffect, useState } from 'react';
+import { BN } from '@coral-xyz/anchor';
 import {
-  WhirlpoolContext,
-  buildWhirlpoolClient,
   PoolUtil,
   PriceMath,
+  WhirlpoolContext,
+  buildWhirlpoolClient,
 } from '@orca-so/whirlpools-sdk';
-import { BN } from '@coral-xyz/anchor';
-import { gql, GraphQLClient } from 'graphql-request';
+import { GraphQLClient, gql } from 'graphql-request';
+import { useCallback, useEffect, useState } from 'react';
+
 import { VM_TYPE, areAddressesEqual } from '@autonolas/frontend-library';
 
 import { ADDRESSES } from 'common-util/constants/addresses';
 import { useSvmConnectivity } from 'common-util/hooks/useSvmConnectivity';
+
 import { getSvmCalculatedPriceLp } from '../../BondingList/utils';
-import { WHIRLPOOL, ORCA } from '../constants';
+import { ORCA, WHIRLPOOL } from '../constants';
 
 const whirlpoolQuery = async () => {
   const SHYFT_API_KEY = process.env.NEXT_PUBLIC_SHYFT_API_KEY;
@@ -21,8 +23,7 @@ const whirlpoolQuery = async () => {
       console.error('SHYFT_API_KEY is not available');
       return {};
     }
-    if (process.env.NODE_ENV === 'production')
-      throw new Error('SHYFT_API_KEY is not available');
+    if (process.env.NODE_ENV === 'production') throw new Error('SHYFT_API_KEY is not available');
   }
 
   const endpoint = `https://programs.shyft.to/v0/graphql/?api_key=${SHYFT_API_KEY}`;
@@ -39,12 +40,7 @@ const whirlpoolQuery = async () => {
       $limit: Int
       $offset: Int
     ) {
-      ORCA_WHIRLPOOLS_position(
-        limit: $limit
-        offset: $offset
-        order_by: $orderBy
-        where: $where
-      ) {
+      ORCA_WHIRLPOOLS_position(limit: $limit, offset: $offset, order_by: $orderBy, where: $where) {
         _lamports
         feeGrowthCheckpointA
         feeGrowthCheckpointB
@@ -69,14 +65,10 @@ const whirlpoolQuery = async () => {
     orderBy: { liquidity: 'desc' },
   };
 
-  const result = (await graphQLClient.request(query, variables))
-    .ORCA_WHIRLPOOLS_position;
+  const result = (await graphQLClient.request(query, variables)).ORCA_WHIRLPOOLS_position;
 
   const filteredPositions = result.filter(
-    (e) =>
-      e.tickLowerIndex === -443584 &&
-      e.tickUpperIndex === 443584 &&
-      e.liquidity > 0,
+    (e) => e.tickLowerIndex === -443584 && e.tickUpperIndex === 443584 && e.liquidity > 0,
   );
 
   return filteredPositions;
@@ -145,11 +137,8 @@ export const useWhirlPoolInformation = () => {
 
     const address1 = whirlpoolTokenA.mint.toString();
     const address2 = ADDRESSES[VM_TYPE.SVM].olasAddress;
+    const reserveOlas = areAddressesEqual(address1, address2) ? reserveToken0 : reserveToken1;
 
-    const reserveOlas = areAddressesEqual(address1, address2)
-      ? reserveToken0
-      : reserveToken1;
-
-    return getSvmCalculatedPriceLp(reserveOlas, totalSupply);
+    return getSvmCalculatedPriceLp(reserveOlas.toString(), totalSupply.toString());
   }, [positions, getWhirlpoolData]);
 };

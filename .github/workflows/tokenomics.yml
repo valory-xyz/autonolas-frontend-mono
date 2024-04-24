@@ -26,10 +26,10 @@ jobs:
           node-version: 18
       - name: Install modules
         run: yarn
-      - name: Lint
-        run: yarn lint
-      - name: Test
-        run: yarn test
+      - name: Run ESLint
+        run: yarn nx lint tokenomics
+      - name: Run Test
+        run: yarn nx test tokenomics
   scan:
     name: Gitleaks
     runs-on: ubuntu-latest

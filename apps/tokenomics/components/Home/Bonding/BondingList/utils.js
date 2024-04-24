@@ -1,14 +1,13 @@
 import { ethers } from 'ethers';
-import { VM_TYPE, notifyError } from '@autonolas/frontend-library';
 import { gql } from 'graphql-request';
-import { memoize } from 'lodash';
+import { isNumber, isString, memoize } from 'lodash';
 
-import { DEX } from 'common-util/enums';
-import { ADDRESS_ZERO } from 'common-util/constants/numbers';
+import { VM_TYPE, notifyError } from '@autonolas/frontend-library';
+
 import { ADDRESSES } from 'common-util/constants/addresses';
+import { ADDRESS_ZERO } from 'common-util/constants/numbers';
+import { DEX } from 'common-util/enums';
 import { AUTONOLAS_GRAPH_CLIENTS } from 'common-util/graphql/clients';
-
-const { BigNumber } = ethers;
 
 export const getProductValueFromEvent = (product, events, keyName) => {
   if ((events || []).length === 0) {
@@ -30,8 +29,9 @@ export const getProductValueFromEvent = (product, events, keyName) => {
  * @param {Number | String} discount
  */
 export const getLpTokenWithDiscount = (lpTokenValue, discount) => {
-  const price = ethers.BigNumber.from(lpTokenValue);
-  const discountedPriceInBg = price.add(price.mul(discount).div(100));
+  const priceInBn = ethers.toBigInt(lpTokenValue);
+  const discountInBn = ethers.toBigInt(discount);
+  const discountedPriceInBg = priceInBn + (priceInBn * discountInBn) / 100n;
   return discountedPriceInBg;
 };
 
@@ -41,10 +41,17 @@ export const getLpTokenWithDiscount = (lpTokenValue, discount) => {
  * @param {Number | String} totalSupply
  */
 export const getSvmCalculatedPriceLp = (reserveOlas, totalSupply) => {
-  const reserveOlasBG = BigNumber.from(reserveOlas.toString());
-  const totalSupplyBG = BigNumber.from(totalSupply.toString());
-  const multiplier = BigNumber.from(`1${'0'.repeat(28)}`);
-  const priceLp = reserveOlasBG.mul(multiplier).div(totalSupplyBG).toString();
+  const reserveOlasInBn =
+    isNumber(reserveOlas) || isString(reserveOlas)
+      ? ethers.toBigInt(reserveOlas.toString())
+      : reserveOlas;
+  const totalSupplyInBn =
+    isNumber(totalSupply) || isString(totalSupply)
+      ? ethers.toBigInt(totalSupply.toString())
+      : totalSupply;
+  const multiplier = ethers.toBigInt(`1${'0'.repeat(28)}`);
+
+  const priceLp = ((reserveOlasInBn * multiplier) / totalSupplyInBn).toString();
   return priceLp;
 };
 
@@ -79,7 +86,9 @@ export const getLpTokenLink = ({ lpDex, lpChainId, lpPoolId, productName }) => {
   }
 
   if (lpDex === DEX.SOLANA) {
-    return `https://v1.orca.so/liquidity/browse?tokenMint=${ADDRESSES[VM_TYPE.SVM].olasAddress}&tokenMint=${ADDRESSES[VM_TYPE.SVM].wsolAddress}`;
+    return `https://v1.orca.so/liquidity/browse?tokenMint=${
+      ADDRESSES[VM_TYPE.SVM].olasAddress
+    }&tokenMint=${ADDRESSES[VM_TYPE.SVM].wsolAddress}`;
   }
 
   return new Error('Dex not supported');

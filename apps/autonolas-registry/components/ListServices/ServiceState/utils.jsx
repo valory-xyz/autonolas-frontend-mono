@@ -83,7 +83,7 @@ const hasSufficientTokenRequest = async ({
   const response = await contract.methods
     .allowance(account, ADDRESSES[chainId].serviceRegistryTokenUtility)
     .call();
-  return !(ethers.BigNumber.from(response) < amountToApprove);
+  return !(ethers.getBigInt(response) < amountToApprove);
 };
 
 /**
@@ -142,7 +142,7 @@ export const mintTokenRequest = async ({ account, serviceId }) => {
   const { token } = await getTokenDetailsRequest(serviceId);
   const contract = getGenericErc20Contract(token);
   const fn = contract.methods
-    .mint(account, ethers.utils.parseEther('1000'))
+    .mint(account, ethers.parseEther('1000'))
     .send({ from: account });
   await sendTransaction(fn, account);
   return null;
