@@ -25,9 +25,7 @@ module.exports = {
     }],
     '^(?!.*\\.(js|jsx|ts|tsx|css|json)$)': '@nx/react/plugins/jest',
   },
-  globals: {
-    fetch,
-  },
+  globals: { fetch },
   coverageDirectory: '../../coverage/apps/tokenomics',
   collectCoverageFrom: [
     'common-util/**/*.{js,jsx}',

@@ -31,7 +31,7 @@ jobs:
       - name: Run Test
         run: yarn nx test tokenomics
   scan:
-    name: Gitleaks
+    name: gitleaks
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3

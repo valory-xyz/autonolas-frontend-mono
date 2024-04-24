@@ -26,6 +26,7 @@ module.exports = {
     ],
     '^(?!.*\\.(js|jsx|ts|tsx|css|json)$)': '@nx/react/plugins/jest',
   },
+  globals: { fetch },
   coverageDirectory: '../../coverage/apps/autonolas-registry',
   collectCoverageFrom: [
     'common-util/**/*.{js,jsx}',
