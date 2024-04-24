@@ -113,10 +113,10 @@ export const getEthersProvider = (
 
   // if provider is a string, it is a JSON-RPC provider
   if (typeof provider === 'string') {
-    return new ethers.providers.JsonRpcProvider(provider);
+    return new ethers.JsonRpcProvider(provider);
   }
 
-  return new ethers.providers.Web3Provider(provider, 'any');
+  return new ethers.FallbackProvider(provider, 'any');
 };
 
 /**

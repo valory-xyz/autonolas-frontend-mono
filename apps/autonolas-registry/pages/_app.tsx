@@ -7,6 +7,7 @@ import { useRouter } from 'next/router';
 import PropTypes from 'prop-types';
 import { Provider } from 'react-redux';
 import { WagmiProvider, cookieStorage, cookieToInitialState, createStorage } from 'wagmi';
+import { Chain } from 'wagmi/chains';
 
 import { COLOR } from '@autonolas/frontend-library';
 
@@ -31,7 +32,7 @@ const metadata = {
 };
 
 const wagmiConfig = defaultWagmiConfig({
-  chains: SUPPORTED_CHAINS,
+  chains: SUPPORTED_CHAINS as [Chain, ...Chain[]],
   projectId,
   metadata,
   ssr: false,
