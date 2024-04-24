@@ -24,8 +24,6 @@ const registriesRepo =
 
 describe('test-chains', () => {
   it('check contract addresses and ABIs', async () => {
-    expect.hasAssertions();
-
     // Fetch the actual config
     let response = await fetch(`${registriesRepo}docs/configuration.json`);
     const parsedConfig = await response.json();

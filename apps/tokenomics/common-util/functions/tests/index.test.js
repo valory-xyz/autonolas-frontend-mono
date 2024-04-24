@@ -2,8 +2,6 @@ import { sortUnitIdsAndTypes } from '../units';
 
 describe('sortUnitIdsAndTypes', () => {
   it('should sort unitIds and the same index sort should be applied to unitTypes', () => {
-    expect.hasAssertions();
-
     const unitIds1 = ['95', '20', '5', '45'];
     const unitTypes1 = ['1', '0', '1', '0'];
     const sortedUnitIds1 = ['5', '20', '45', '95'];
