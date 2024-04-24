@@ -1,4 +1,3 @@
-/** wagmi config */
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { createWeb3Modal, defaultWagmiConfig } from '@web3modal/wagmi';
 import { AutonolasThemeProvider } from 'libs/ui-theme/src/lib/ThemeConfig';
@@ -13,17 +12,12 @@ import { COLOR } from '@autonolas/frontend-library';
 
 import { SUPPORTED_CHAINS } from '../common-util/Login/config';
 import GlobalStyle from '../components/GlobalStyles';
-
-/** antd theme config */
 import Layout from '../components/Layout';
 import { wrapper } from '../store';
 
 const DESC = 'View and manage components, agents and services via the Autonolas on-chain registry.';
-
 const queryClient = new QueryClient();
-
-export const projectId = process.env.NEXT_PUBLIC_WALLET_PROJECT_ID as string;
-
+const projectId = process.env.NEXT_PUBLIC_WALLET_PROJECT_ID as string;
 const metadata = {
   name: 'Autonolas Registry',
   description: DESC,
@@ -39,7 +33,6 @@ const wagmiConfig = defaultWagmiConfig({
   storage: createStorage({ storage: cookieStorage }),
 });
 
-// eslint-disable-next-line jest/require-hook
 createWeb3Modal({
   wagmiConfig,
   projectId,
@@ -51,10 +44,11 @@ createWeb3Modal({
   },
 });
 
-const MyApp = ({
+const RegistryApp = ({
   Component,
   ...rest
 }: {
+  // TODO: fix any
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   Component: any;
 }) => {
@@ -89,9 +83,23 @@ const MyApp = ({
   );
 };
 
-MyApp.propTypes = {
+type InitialProps = {
+  Component: {
+    getInitialProps: (ctx: {
+      Component: { getInitialProps: () => Promise<Record<string, never>> };
+    }) => Promise<Record<string, never>>;
+  };
+  ctx: { Component: { getInitialProps: () => Promise<Record<string, never>> } };
+};
+
+RegistryApp.getInitialProps = async ({ Component, ctx }: InitialProps) => {
+  const pageProps = Component.getInitialProps ? await Component.getInitialProps(ctx) : {};
+  return { pageProps };
+};
+
+RegistryApp.propTypes = {
   Component: PropTypes.oneOfType([PropTypes.func, PropTypes.shape({})]).isRequired,
   pageProps: PropTypes.shape({}).isRequired,
 };
 
-export default MyApp;
+export default RegistryApp;

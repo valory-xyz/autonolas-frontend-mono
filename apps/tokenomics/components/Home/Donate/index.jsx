@@ -199,7 +199,8 @@ export const DepositServiceDonation = () => {
             type="primary"
             loading={isCheckpointLoading}
             disabled={isEpochDetailsLoading || isExpectedEndTimeInFuture}
-            onClick={onCheckpoint}>
+            onClick={onCheckpoint}
+          >
             Start new epoch
           </Button>
           <Text type="secondary">New epochs must be manually triggered by community members</Text>

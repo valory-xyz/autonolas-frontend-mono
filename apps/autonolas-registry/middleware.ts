@@ -8,6 +8,8 @@ const prohibitedCountriesCode = Object.values(prohibitedCountries);
 const isDev = process.env.NODE_ENV !== 'production';
 
 const getCspHeader = (browserName?: string) => {
+  if (!process.env.NEXT_PUBLIC_AUTONOLAS_SUB_GRAPH_URL) return [];
+
   const walletconnectSrc = ['https://verify.walletconnect.org', 'https://verify.walletconnect.com'];
 
   const connectSrc: CSPDirective = [
@@ -47,7 +49,7 @@ const getCspHeader = (browserName?: string) => {
     'https://alfajores-forno.celo-testnet.org',
     'https://api.web3modal.com/',
     'wss://www.walletlink.org/rpc',
-    process.env.NEXT_PUBLIC_AUTONOLAS_SUB_GRAPH_URL as string,
+    process.env.NEXT_PUBLIC_AUTONOLAS_SUB_GRAPH_URL,
   ];
 
   if (isDev) {
@@ -65,7 +67,8 @@ const getCspHeader = (browserName?: string) => {
 
   const nextSafeHeaders =
     typeof nextSafe === 'function'
-      ? // @ts-expect-error: For some reason, TypeScript is not recognizing the function
+      ? // TODO
+        // @ts-expect-error: For some reason, TypeScript is not recognizing the function
         nextSafe({
           isDev,
           /**
