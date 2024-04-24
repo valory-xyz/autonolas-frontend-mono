@@ -343,8 +343,8 @@ const useAddSupplyLeftToProducts = () =>
         const eventSupply = Number(ethers.toBigInt(createProductEvent.supply) / ONE_ETH);
 
         const productSupply = !closeProductEvent
-          ? Number(product.supply / ONE_ETH)
-          : Number(closeProductEvent.supply / ONE_ETH);
+          ? Number(ethers.toBigInt(product.supply) / ONE_ETH)
+          : Number(ethers.toBigInt(closeProductEvent.supply) / ONE_ETH);
 
         const supplyLeft = productSupply / Number(eventSupply);
 
@@ -373,8 +373,8 @@ const useAddProjectChangeToProducts = () =>
     (productList) =>
       productList.map((record) => {
         // To calculate the price of LP we need to multiply (olasReserve / TotalSupply) by 2
-        const currentPriceLpInBg = ethers.toBigInt(record.currentPriceLp) || 0n;
-        const doubledCurrentPriceLp = (currentPriceLpInBg * 2).toString();
+        const currentPriceLpIn = ethers.toBigInt(`${record.currentPriceLp}`) || 0n;
+        const doubledCurrentPriceLp = (currentPriceLpIn * 2n).toString();
 
         const parsedDoubledCurrentPriceLp =
           parseToEth(doubledCurrentPriceLp) / (isSvmLpAddress(record.token) ? 10 ** 10 : 1);
