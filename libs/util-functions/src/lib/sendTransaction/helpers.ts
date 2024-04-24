@@ -116,7 +116,7 @@ export const getEthersProvider = (
     return new ethers.JsonRpcProvider(provider);
   }
 
-  return new ethers.FallbackProvider(provider, 'any');
+  return new ethers.FallbackProvider([provider]);
 };
 
 /**

@@ -192,16 +192,10 @@ const useAddCurrentLpPriceToProducts = () => {
     getCurrentPriceBalancerFn,
   ]);
 
-  const getCurrentPriceForSvm = useCallback(async () => {
-    const priceLp = await getCurrentPriceWhirlpool(
-      ADDRESSES[VM_TYPE.SVM].balancerVault, // whirpool address
-    );
-    return priceLp;
-  }, [getCurrentPriceWhirlpool]);
-
   return useCallback(
     async (productList) => {
       const chainId = getChainId();
+      const svmPriceLp = await getCurrentPriceWhirlpool();
       const multicallRequests = {};
       const otherRequests = {};
 
@@ -233,8 +227,7 @@ const useAddCurrentLpPriceToProducts = () => {
               currentLpPrice = getCurrentPriceBalancer(productList[i].token);
               otherRequests[i] = currentLpPrice;
             } else if (dex === DEX.SOLANA) {
-              currentLpPrice = getCurrentPriceForSvm(productList[i].token);
-              otherRequests[i] = currentLpPrice;
+              otherRequests[i] = svmPriceLp;
             } else {
               throw new Error('Dex not supported');
             }
@@ -261,7 +254,7 @@ const useAddCurrentLpPriceToProducts = () => {
         currentPriceLp: resolvedList[index],
       }));
     },
-    [publicClient, getCurrentPriceBalancer, getCurrentPriceForSvm],
+    [publicClient, getCurrentPriceBalancer, getCurrentPriceWhirlpool],
   );
 };
 
