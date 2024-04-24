@@ -373,7 +373,7 @@ const useAddProjectChangeToProducts = () =>
     (productList) =>
       productList.map((record) => {
         // To calculate the price of LP we need to multiply (olasReserve / TotalSupply) by 2
-        const currentPriceLpIn = ethers.toBigInt(`${record.currentPriceLp}`) || 0n;
+        const currentPriceLpIn = ethers.toBigInt(`${record.currentPriceLp || 0}`);
         const doubledCurrentPriceLp = (currentPriceLpIn * 2n).toString();
 
         const parsedDoubledCurrentPriceLp =
