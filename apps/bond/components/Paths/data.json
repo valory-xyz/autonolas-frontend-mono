@@ -1,0 +1,188 @@
+[
+  {
+    "id": "olas-wxdai-via-balancer-on-gnosis-chain",
+    "name": "OLAS-WXDAI via Balancer on Gnosis Chain",
+    "network": "Gnosis Chain",
+    "networkId": "gnosis-chain",
+    "address": "0xcE11e14225575945b8E6Dc0D4F2dD4C570f79d9f",
+    "explorerBaseUrl": "https://gnosisscan.io/token/",
+    "exchange": {
+      "name": "Balancer",
+      "url": "https://app.balancer.fi/#/gnosis-chain/pool/0x79c872ed3acb3fc5770dd8a0cd9cd5db3b3ac985000200000000000000000067",
+      "poolAddress": "0x79c872ed3acb3fc5770dd8a0cd9cd5db3b3ac985"
+    },
+    "bridge": {
+      "name": "Omnibridge",
+      "url": "https://omni.gnosischain.com/bridge"
+    },
+    "bond": {
+      "lpTokenName": "OLAS-WXDAI",
+      "lpPairTokenTicker": "WXDAI",
+      "bridgedLpTokenAddress": "0x27df632fd0dcf191c418c803801d521cd579f18e",
+      "lpTokenBridge": {
+        "name": "Omnibridge",
+        "url": "https://omni.gnosischain.com/bridge"
+      }
+    }
+  },
+  {
+    "id": "olas-weth-via-balancer-on-arbitrum",
+    "name": "OLAS-WETH via Balancer on Arbitrum",
+    "network": "Arbitrum",
+    "networkId": "arbitrum",
+    "address": "0x064f8b858c2a603e1b106a2039f5446d32dc81c1",
+    "explorerBaseUrl": "https://arbiscan.io/token/",
+    "exchange": {
+      "name": "Balancer",
+      "url": "https://app.balancer.fi/#/arbitrum/pool/0xaf8912a3c4f55a8584b67df30ee0ddf0e60e01f80002000000000000000004fc",
+      "poolAddress": "0xaf8912a3c4f55a8584b67df30ee0ddf0e60e01f8"
+    },
+    "bridge": {
+      "name": "Arbitrum Bridge",
+      "url": "https://bridge.arbitrum.io/?destinationChain=arbitrum-one&sourceChain=ethereum"
+    },
+    "bond": {
+      "guideUrl": "https://olas.network/blog/bonding-guide-polygon-arbitrum",
+      "lpTokenName": "OLAS-WETH",
+      "lpPairTokenTicker": "WETH",
+      "bridgedLpTokenAddress": "0x36B203Cb3086269f005a4b987772452243c0767f",
+      "lpTokenBridge": {
+        "name": "Wormhole: Portal Token Bridge",
+        "url": "https://portalbridge.com/advanced-tools/#/transfer"
+      }
+    }
+  },
+  {
+    "id": "olas-wmatic-via-balancer-on-polygon-pos",
+    "name": "OLAS-WMATIC via Balancer on Polygon POS",
+    "network": "Polygon POS",
+    "networkId": "polygon-pos",
+    "address": "0xFEF5d947472e72Efbb2E388c730B7428406F2F95",
+    "explorerBaseUrl": "https://polygonscan.com/token/",
+    "exchange": {
+      "name": "Balancer",
+      "url": "https://app.balancer.fi/#/polygon/pool/0x62309056c759c36879cde93693e7903bf415e4bc000200000000000000000d5f",
+      "poolAddress": "0x62309056c759c36879cde93693e7903bf415e4bc"
+    },
+    "bridge": {
+      "name": "Polygon Portal",
+      "url": "https://portal.polygon.technology/bridge"
+    },
+    "bond": {
+      "guideUrl": "https://olas.network/blog/bonding-guide-polygon-arbitrum",
+      "lpTokenName": "WMATIC-OLAS",
+      "lpPairTokenTicker": "WMATIC",
+      "bridgedLpTokenAddress": "0xf9825A563222f9eFC81e369311DAdb13D68e60a4",
+      "lpTokenBridge": {
+        "name": "Wormhole: Portal Token Bridge",
+        "url": "https://portalbridge.com/advanced-tools/#/transfer"
+      }
+    }
+  },
+  {
+    "id": "olas-eth-via-uniswap-on-ethereum",
+    "name": "OLAS-ETH via Uniswap on Ethereum",
+    "network": "Ethereum",
+    "networkId": "ethereum",
+    "address": "0x0001A500A6B18995B03f44bb040A5fFc28E45CB0",
+    "explorerBaseUrl": "https://etherscan.io/token/",
+    "exchange": {
+      "name": "Uniswap",
+      "url": "https://v2.info.uniswap.org/pair/0x09d1d767edf8fa23a64c51fa559e0688e526812f",
+      "poolAddress": "0x09d1d767edf8fa23a64c51fa559e0688e526812f"
+    },
+    "bridge": null,
+    "bond": {
+      "guideUrl": "https://olas.network/blog/inaugural-bonding-programme-proposal",
+      "lpTokenName": "OLAS-ETH",
+      "lpPairTokenTicker": "ETH",
+      "bridgedLpTokenAddress": null,
+      "bridge": null
+    }
+  },
+  {
+    "id": "weth-olas-via-balancer-on-optimism",
+    "name": "WETH-OLAS via Balancer on Optimism",
+    "network": "Optimism",
+    "networkId": "optimism",
+    "address": "0xFC2E6e6BCbd49ccf3A5f029c79984372DcBFE527",
+    "explorerBaseUrl": "https://optimistic.etherscan.io/token/",
+    "exchange": {
+      "name": "Balancer",
+      "url": "https://app.balancer.fi/#/optimism/pool/0x5bb3e58887264b667f915130fd04bbb56116c27800020000000000000000012a",
+      "poolAddress": "0x5BB3E58887264B667f915130fD04bbB56116C278"
+    },
+    "bridge": {
+      "name": "Optimism Native Bridge",
+      "url": "https://app.optimism.io/bridge/deposit"
+    },
+    "bond": {
+      "guideUrl": "https://olas.network/blog/bonding-guide-optimism",
+      "lpTokenName": "WETH-OLAS",
+      "lpPairTokenTicker": "WETH",
+      "bridgedLpTokenAddress": "0x2FD007a534eB7527b535a1DF35aba6bD2a8b660F",
+      "lpTokenBridge": {
+        "name": "Wormhole: Portal Token Bridge",
+        "url": "https://portalbridge.com/advanced-tools/#/transfer"
+      }
+    }
+  },
+  {
+    "id": "olas-usdc-via-balancer-on-base",
+    "name": "OLAS-USDC via Balancer on Base",
+    "network": "Base",
+    "networkId": "base",
+    "address": "0x54330d28ca3357F294334BDC454a032e7f353416",
+    "explorerBaseUrl": "https://basescan.org/token/",
+    "exchange": {
+      "name": "Balancer",
+      "url": "https://app.balancer.fi/#/base/pool/0x5332584890d6e415a6dc910254d6430b8aab7e69000200000000000000000103",
+      "poolAddress": "0x5332584890d6e415a6dc910254d6430b8aab7e69"
+    },
+    "bridge": {
+      "name": "BaseBridge contract",
+      "url": "https://etherscan.io/address/0x3154cf16ccdb4c6d922629664174b904d80f2c35"
+    },
+    "bond": {
+      "guideUrl": "https://olas.network/blog/bonding-guide-base",
+      "lpTokenName": "OLAS-USDC",
+      "lpPairTokenTicker": "USDC",
+      "lpPairTokenTickerLink": "https://basescan.org/address/0x833589fcd6edb6e08f4c7c32d4f71b54bda02913",
+      "bridgedLpTokenAddress": "0x9946d6FD1210D85EC613Ca956F142D911C97a074",
+      "lpTokenBridge": {
+        "name": "Wormhole: Portal Token Bridge",
+        "url": "https://portalbridge.com/advanced-tools/#/transfer"
+      }
+    }
+  },
+  {
+    "id": "wsol-olas-via-orca-on-solana",
+    "name": "WSOL-OLAS via Orca on Solana",
+    "customSubtitle": "Get WSOL-OLAS LP fungible tokens. Such tokens are a fungible representation of full-range Orca WSOL-OLAS positions. Bridge the fungible tokens to Ethereum and bond into the Olas protocol.",
+    "network": "Solana",
+    "networkId": "solana",
+    "address": "Ez3nzG9ofodYCvEmw73XhQ87LWNYVRM2s7diB5tBZPyM",
+    "explorerBaseUrl": "https://solscan.io/account/",
+    "exchange": {
+      "name": "Orca",
+      "url": "https://www.orca.so/liquidity?address=5dMKUYJDsjZkAD3wiV3ViQkuq9pSmWQ5eAzcQLtDnUT3",
+      "poolAddress": "5dMKUYJDsjZkAD3wiV3ViQkuq9pSmWQ5eAzcQLtDnUT3",
+      "lpTokenExplorer": "https://solscan.io/account/",
+      "lpTokenAddress": "CeZ77ti3nPAmcgRkBkUC1JcoAhR8jRti2DHaCcuyUnzR"
+    },
+    "bridge": {
+      "name": "Wormhole: Portal Token Bridge",
+      "url": "https://portalbridge.com/advanced-tools/#/transfer"
+    },
+    "bond": {
+      "lpTokenName": "WSOL-OLAS",
+      "lpPairTokenTicker": "SOL or WSOL",
+      "bridgedLpTokenAddress": "0x3685b8cc36b8df09ed9e81c1690100306bf23e04",
+      "isFungible": true,
+      "lpTokenBridge": {
+        "name": "Wormhole: Portal Token Bridge",
+        "url": "https://portalbridge.com/advanced-tools/#/transfer"
+      }
+    }
+  }
+]
