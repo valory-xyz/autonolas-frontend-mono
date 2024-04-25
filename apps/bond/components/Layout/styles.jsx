@@ -1,6 +1,8 @@
-import styled from 'styled-components';
 import { Layout } from 'antd';
+
 import { COLOR, MEDIA_QUERY } from '@autonolas/frontend-library';
+
+import styled from 'styled-components';
 
 export const CustomLayout = styled(Layout)`
   margin-bottom: 8rem;
@@ -21,10 +23,6 @@ export const CustomLayout = styled(Layout)`
       }
     }
   }
-  .column-1, .column-2 {
-    display: flex;
-    width: 100%;
-  }
   .column-2 {
     gap: 12px;
     justify-content: flex-end;
@@ -41,7 +39,7 @@ export const CustomLayout = styled(Layout)`
     .column-1 {
       margin-bottom: 12px;
     }
-    
+
     .mech-tabs {
       .ant-tabs-nav {
         flex-direction: column;
@@ -72,7 +70,7 @@ export const CustomLayout = styled(Layout)`
     .column-1 {
       margin-bottom: 12px;
     }
-    
+
     /* footer from autonolas-library */
     main + div {
       flex-direction: column;
@@ -118,3 +116,30 @@ export const ContractsInfoContainer = styled.div`
   }
 `;
 
+export const DocsLink = styled.div`
+  svg {
+    width: 12px;
+    margin-left: 4px;
+    margin-bottom: -1px;
+  }
+`;
+
+export const Logo = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: left;
+  max-width: 248px;
+  margin-left: 0.5rem;
+  margin-right: 1.5rem;
+  font-size: 34px;
+  color: ${COLOR.PRIMARY};
+  cursor: pointer;
+  svg {
+    flex: 60px;
+  }
+  span {
+    margin-left: 1rem;
+    font-weight: bold;
+    line-height: 1.2;
+  }
+`;

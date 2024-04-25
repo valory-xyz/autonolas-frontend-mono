@@ -1,22 +1,22 @@
-import { useEffect, useState } from 'react';
-import { useRouter } from 'next/router';
-import dynamic from 'next/dynamic';
-import PropTypes from 'prop-types';
-import { Layout as AntdLayout, Menu } from 'antd';
 import { ExportOutlined } from '@ant-design/icons';
-import styled from 'styled-components';
-import { COLOR } from '@autonolas/frontend-library';
-import {
-  ConnectionProvider,
-  WalletProvider,
-} from '@solana/wallet-adapter-react';
+import { ConnectionProvider, WalletProvider } from '@solana/wallet-adapter-react';
 import { PhantomWalletAdapter } from '@solana/wallet-adapter-wallets';
+import { Layout as AntdLayout, Menu } from 'antd';
+import dynamic from 'next/dynamic';
+import Link from 'next/link';
+import { useRouter } from 'next/router';
+import PropTypes from 'prop-types';
+import { useEffect, useState } from 'react';
+
+import { COLOR } from '@autonolas/frontend-library';
+
+import styled from 'styled-components';
 
 import { useHelpers } from 'common-util/hooks/useHelpers';
-import Link from 'next/link';
+
 import Login from '../Login';
 import Footer from './Footer';
-import { CustomLayout, Logo, DocsLink } from './styles';
+import { CustomLayout, DocsLink, Logo } from './styles';
 
 const wallets = [new PhantomWalletAdapter()];
 const LogoSvg = dynamic(() => import('common-util/SVGs/logo'));
@@ -45,10 +45,7 @@ const Layout = ({ children }) => {
 
   const handleMenuItemClick = ({ key }) => {
     if (key === 'docs') {
-      window.open(
-        'https://docs.autonolas.network/protocol/tokenomics/',
-        '_blank',
-      );
+      window.open('https://docs.autonolas.network/protocol/tokenomics/', '_blank');
     } else {
       router.push(`/${key}`);
       setSelectedMenu(key);
@@ -92,9 +89,7 @@ const Layout = ({ children }) => {
       </StyledHeader>
 
       <Content className="site-layout">
-        <div className="site-layout-background">
-          {chainId ? children : null}
-        </div>
+        <div className="site-layout-background">{chainId ? children : null}</div>
       </Content>
 
       <Footer />

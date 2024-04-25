@@ -18,6 +18,7 @@
     ],
     "types": ["jest", "node", "react", "react-dom"],
     "paths": {
+      "common-util/*": ["apps/bond/common-util/*"],
       "components/*": ["apps/bond/components/*"],
       "util/*": ["apps/bond/util/*"],
       "images/*": ["apps/bond/public/images/*"],
