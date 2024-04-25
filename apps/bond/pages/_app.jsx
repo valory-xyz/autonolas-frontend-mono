@@ -1,16 +1,14 @@
-import Head from 'next/head';
 import { ConfigProvider } from 'antd';
+import Head from 'next/head';
 import PropTypes from 'prop-types';
+
 import { THEME_CONFIG } from '@autonolas/frontend-library';
 
-/** antd theme config */
-import Layout from 'components/Layout';
 import GlobalStyle from 'components/GlobalStyles';
+import Layout from 'components/Layout';
 import { SITE } from 'util/meta';
 
-const {
-  TITLE, DESCRIPTION, URL, SITE_IMAGE_URL,
-} = SITE;
+const { TITLE, DESCRIPTION, URL, SITE_IMAGE_URL } = SITE;
 
 const BondApp = ({ Component, pageProps }) => (
   <>
@@ -44,16 +42,13 @@ const BondApp = ({ Component, pageProps }) => (
 );
 
 BondApp.getInitialProps = async ({ Component, ctx }) => {
-  const pageProps = Component.getInitialProps
-    ? await Component.getInitialProps(ctx)
-    : {};
+  const pageProps = Component.getInitialProps ? await Component.getInitialProps(ctx) : {};
 
   return { pageProps };
 };
 
 BondApp.propTypes = {
-  Component: PropTypes.oneOfType([PropTypes.func, PropTypes.shape({})])
-    .isRequired,
+  Component: PropTypes.oneOfType([PropTypes.func, PropTypes.shape({})]).isRequired,
   pageProps: PropTypes.shape({}).isRequired,
 };
 
