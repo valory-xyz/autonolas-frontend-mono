@@ -1,8 +1,7 @@
-import { ConfigProvider } from 'antd';
 import Head from 'next/head';
 import PropTypes from 'prop-types';
 
-import { THEME_CONFIG } from '@autonolas/frontend-library';
+import { AutonolasThemeProvider } from 'libs/ui-theme/src/lib/ThemeConfig';
 
 import GlobalStyle from 'components/GlobalStyles';
 import Layout from 'components/Layout';
@@ -34,11 +33,11 @@ const BondApp = ({ Component, pageProps }) => (
     </Head>
     <GlobalStyle />
 
-    <ConfigProvider theme={THEME_CONFIG}>
+    <AutonolasThemeProvider>
       <Layout>
         <Component {...pageProps} />
       </Layout>
-    </ConfigProvider>
+    </AutonolasThemeProvider>
   </>
 );
 

@@ -1,6 +1,5 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { createWeb3Modal, defaultWagmiConfig } from '@web3modal/wagmi';
-import { AutonolasThemeProvider } from 'libs/ui-theme/src/lib/ThemeConfig';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import PropTypes from 'prop-types';
@@ -9,6 +8,8 @@ import { WagmiProvider, cookieStorage, cookieToInitialState, createStorage } fro
 import { Chain } from 'wagmi/chains';
 
 import { COLOR } from '@autonolas/frontend-library';
+
+import { AutonolasThemeProvider } from 'libs/ui-theme/src/lib/ThemeConfig';
 
 import { SUPPORTED_CHAINS } from '../common-util/Login/config';
 import GlobalStyle from '../components/GlobalStyles';

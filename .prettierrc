@@ -8,6 +8,7 @@
   "importOrderSortSpecifiers": true,
   "importOrder": [
     "^@autonolas/(.*)$",
+    "^[libs]",
     "^(store|util|common-util|components|data)/(.*)$",
     "^[./]"
   ]

@@ -1,9 +1,5 @@
 {
-  "extends": [
-    "plugin:@nx/react-typescript",
-    "next/core-web-vitals",
-    "../../.eslintrc.json"
-  ],
+  "extends": ["plugin:@nx/react-typescript", "next/core-web-vitals", "../../.eslintrc.json"],
   "ignorePatterns": ["!**/*", ".next/**/*"],
   "rules": {
     "@nx/enforce-module-boundaries": [
@@ -23,10 +19,7 @@
     {
       "files": ["*.ts", "*.tsx", "*.js", "*.jsx"],
       "rules": {
-        "@next/next/no-html-link-for-pages": [
-          "error",
-          "apps/autonolas-registry/pages"
-        ]
+        "@next/next/no-html-link-for-pages": ["error", "apps/autonolas-registry/pages"]
       }
     },
     {

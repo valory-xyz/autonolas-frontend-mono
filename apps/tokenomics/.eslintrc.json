@@ -6,6 +6,14 @@
     "../../.eslintrc.json"
   ],
   "ignorePatterns": ["!**/*", ".next/**/*"],
+  "rules": {
+    "@nx/enforce-module-boundaries": [
+      "error",
+      {
+        "allow": ["libs*"]
+      }
+    ]
+  },
   "overrides": [
     {
       "files": ["*.*"],
