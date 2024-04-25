@@ -11,10 +11,12 @@ const nextConfig = {
     // See: https://github.com/gregberge/svgr
     svgr: false,
   },
-
+  reactStrictMode: true,
   compiler: {
-    // For other options, see https://styled-components.com/docs/tooling#babel-plugin
-    styledComponents: true,
+    styledComponents: {
+      ssr: true,
+      minify: true,
+    },
   },
   webpack(config) {
     config.resolve.fallback = {

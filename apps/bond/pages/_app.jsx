@@ -12,7 +12,6 @@ const { TITLE, DESCRIPTION, URL, SITE_IMAGE_URL } = SITE;
 
 const BondApp = ({ Component, pageProps }) => (
   <>
-    <GlobalStyle />
     <Head>
       {/* <!-- Primary Meta Tags --> */}
       <title>Bond | Olas</title>
@@ -33,6 +32,8 @@ const BondApp = ({ Component, pageProps }) => (
       <meta property="twitter:description" content={DESCRIPTION} />
       <meta property="twitter:image" content={SITE_IMAGE_URL} />
     </Head>
+    <GlobalStyle />
+
     <ConfigProvider theme={THEME_CONFIG}>
       <Layout>
         <Component {...pageProps} />

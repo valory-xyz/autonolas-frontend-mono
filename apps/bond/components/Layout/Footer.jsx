@@ -1,10 +1,10 @@
-import styled from 'styled-components';
 import { Typography } from 'antd';
-import { COLOR } from '@autonolas/frontend-library';
-// import Link from 'next/link';
+import styled from 'styled-components';
 
-import { OPERATOR_NAME } from 'util/meta';
+import { COLOR } from '@autonolas/frontend-library';
+
 import { PoweredByOlas } from 'components/Branding/PoweredByOlas';
+import { OPERATOR_NAME } from 'util/meta';
 
 const FooterContainer = styled.div`
   text-align: center;
@@ -15,12 +15,7 @@ const FooterContainer = styled.div`
 const Footer = () => (
   <FooterContainer>
     <Typography.Text>
-      ©
-      {' '}
-      {OPERATOR_NAME}
-      {' '}
-      {new Date().getFullYear()}
-      {' '}
+      © {OPERATOR_NAME} {new Date().getFullYear()}{' '}
       {/* •
       {' '}
       <Link href="/disclaimer">Disclaimer</Link>
@@ -28,7 +23,6 @@ const Footer = () => (
       •
       {' '}
       <Link href="/privacy-policy">DAO Constitution</Link> */}
-
       {/* {' '}
       ·
       {' '}
