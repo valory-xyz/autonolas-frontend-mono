@@ -29,6 +29,13 @@ const StyledHeader = styled(Header)`
   border-bottom: 1px solid ${COLOR.BORDER_GREY};
 `;
 
+const ExternalLink = ({ name }) => (
+  <DocsLink>
+    {name}
+    <ExportOutlined />
+  </DocsLink>
+);
+
 const Layout = ({ children }) => {
   const router = useRouter();
   const { chainId } = useHelpers();
@@ -46,6 +53,10 @@ const Layout = ({ children }) => {
   const handleMenuItemClick = ({ key }) => {
     if (key === 'docs') {
       window.open('https://docs.autonolas.network/protocol/tokenomics/', '_blank');
+    } else if (key === 'bonding-products') {
+      window.open('https://bond.olas.network/bonding-products', '_blank');
+    } else if (key === 'my-bonds') {
+      window.open('https://bond.olas.network/my-bonds', '_blank');
     } else {
       router.push(`/${key}`);
       setSelectedMenu(key);
@@ -72,16 +83,11 @@ const Layout = ({ children }) => {
           items={[
             { key: 'donate', label: 'Donate' },
             { key: 'dev-incentives', label: 'Dev Rewards' },
-            { key: 'bonding-products', label: 'Bonding Products' },
-            { key: 'my-bonds', label: 'My Bonds' },
+            { key: 'bonding-products', label: <ExternalLink name="Bonding Products" /> },
+            { key: 'my-bonds', label: <ExternalLink name="My Bonds" /> },
             {
               key: 'docs',
-              label: (
-                <DocsLink>
-                  Docs
-                  <ExportOutlined />
-                </DocsLink>
-              ),
+              label: <ExternalLink name="Docs" />,
             },
           ]}
         />
