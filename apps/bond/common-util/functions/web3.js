@@ -1,14 +1,11 @@
 import Web3 from 'web3';
 import {
   DEPOSITORY,
-  DISPENSER,
-  TREASURY,
   TOKENOMICS,
-  AGENT_REGISTRY,
-  COMPONENT_REGISTRY,
-  SERVICE_REGISTRY,
+  BOND_CALCULATOR,
+  UNISWAP_V2_PAIR_ABI,
   ERC20_ABI,
-} from 'common-util/abiAndAddresses';
+} from 'libs/util-contracts/src/lib/abiAndAddresses';
 
 import { ADDRESSES } from 'common-util/constants/addresses';
 import {
@@ -42,21 +39,14 @@ export const getDepositoryContract = () => {
   return contract;
 };
 
-export const getDispenserContract = () => {
-  const { chainId } = getWeb3Details();
-  const contract = getContract(DISPENSER.abi, ADDRESSES[chainId].dispenser);
-  return contract;
-};
-
-export const getTreasuryContract = () => {
-  const { chainId } = getWeb3Details();
-  const contract = getContract(TREASURY.abi, ADDRESSES[chainId].treasury);
-  return contract;
-};
-
 export const getTokenomicsContract = () => {
   const { chainId } = getWeb3Details();
   const contract = getContract(TOKENOMICS.abi, ADDRESSES[chainId].tokenomics);
+  return contract;
+};
+
+export const getUniswapV2PairContract = (address) => {
+  const contract = getContract(UNISWAP_V2_PAIR_ABI, address);
   return contract;
 };
 
@@ -65,26 +55,11 @@ export const getErc20Contract = (address) => {
   return contract;
 };
 
-export const getAgentContract = () => {
-  const { chainId } = getWeb3Details();
-  const contract = getContract(AGENT_REGISTRY.abi, ADDRESSES[chainId].agent);
-  return contract;
-};
-
-export const getComponentContract = () => {
+export const getGenericBondCalculatorContract = () => {
   const { chainId } = getWeb3Details();
   const contract = getContract(
-    COMPONENT_REGISTRY.abi,
-    ADDRESSES[chainId].component,
-  );
-  return contract;
-};
-
-export const getServiceContract = () => {
-  const { chainId } = getWeb3Details();
-  const contract = getContract(
-    SERVICE_REGISTRY.abi,
-    ADDRESSES[chainId].service,
+    BOND_CALCULATOR.abi,
+    ADDRESSES[chainId].genericBondCalculator,
   );
   return contract;
 };

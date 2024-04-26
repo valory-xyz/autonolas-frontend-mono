@@ -155,7 +155,7 @@ const GlobalStyle = createGlobalStyle`
     padding: 0 2rem;
     margin-top: 56px;
     + div {
-      padding: 1rem 32px;
+      padding: 1.5rem 32px;
     }
   }
   .site-layout-background {
