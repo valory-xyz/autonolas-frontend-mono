@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
-import prohibitedCountries from './data/prohibited-countries.json';
+import prohibitedCountries from 'libs/util-prohibited-data/src/lib/prohibited-countries.json';
+
 
 const prohibitedCountriesCode = Object.values(prohibitedCountries);
 

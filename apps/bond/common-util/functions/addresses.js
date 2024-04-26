@@ -1,5 +1,5 @@
 import toLower from 'lodash/toLower';
-import prohibitedAddresses from '../../data/prohibited-addresses.json';
+import prohibitedAddresses from 'libs/util-prohibited-data/src/lib/prohibited-addresses.json';
 
 export const isAddressProhibited = (address) => {
   const addresses = prohibitedAddresses.map((e) => toLower(e));
