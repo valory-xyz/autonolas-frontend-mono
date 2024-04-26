@@ -1,0 +1,30 @@
+{
+  "name": "util-prohibited-data",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/util-prohibited-data/src",
+  "projectType": "library",
+  "targets": {
+    "build": {
+      "executor": "@nx/js:tsc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/libs/util-prohibited-data",
+        "main": "libs/util-prohibited-data/src/index.ts",
+        "tsConfig": "libs/util-prohibited-data/tsconfig.lib.json",
+        "assets": ["libs/util-prohibited-data/*.md"]
+      }
+    },
+    "lint": {
+      "executor": "@nx/eslint:lint",
+      "outputs": ["{options.outputFile}"]
+    },
+    "test": {
+      "executor": "@nx/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "options": {
+        "jestConfig": "libs/util-prohibited-data/jest.config.ts"
+      }
+    }
+  },
+  "tags": []
+}
