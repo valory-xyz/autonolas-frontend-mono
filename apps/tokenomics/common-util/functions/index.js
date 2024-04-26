@@ -1,5 +1,4 @@
 export * from './addresses';
-export * from './chains';
 export * from './errors';
 export * from './ethers';
 export * from './requests';

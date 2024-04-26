@@ -8,7 +8,7 @@ import {
   COMPONENT_REGISTRY,
   SERVICE_REGISTRY,
   ERC20_ABI,
-} from 'common-util/abiAndAddresses';
+} from 'libs/util-contracts/src/lib/abiAndAddresses';
 
 import { ADDRESSES } from 'common-util/constants/addresses';
 import {

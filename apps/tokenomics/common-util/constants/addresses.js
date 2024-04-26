@@ -8,7 +8,7 @@ import {
   SERVICE_REGISTRY,
   TREASURY,
   TOKENOMICS,
-} from 'common-util/abiAndAddresses';
+} from 'libs/util-contracts/src/lib/abiAndAddresses';
 
 const LOCAL_ADDRESSES = {
   dispenser: '0x4c5859f0F772848b2D91F1D83E2Fe57935348029',
