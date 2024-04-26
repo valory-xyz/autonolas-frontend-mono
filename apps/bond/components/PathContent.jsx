@@ -1,6 +1,9 @@
 import { Flex, List } from 'antd';
+import Link from 'next/link';
 import PropTypes from 'prop-types';
+
 import { COLOR } from '@autonolas/frontend-library';
+
 import styled from 'styled-components';
 
 const StyledLink = styled.a`
@@ -8,83 +11,52 @@ const StyledLink = styled.a`
   color: ${COLOR.GREY_2};
 `;
 
+const NextStyledLink = styled(Link)`
+  text-decoration: underline;
+  color: ${COLOR.GREY_2};
+`;
+
 const SvmDeposit = () => (
   <>
-    Deposit SOL or WSOL and OLAS tokens using the Lockbox via
-    {' '}
-    <StyledLink href="https://tokenomics.olas.network/manage-solana-products" target="_blank" rel="noopener noreferrer">
-      manage Solana products
-    </StyledLink>
-    {' '}
-    to get fungible tokens representing
-    {' '}
-    <StyledLink href="https://www.orca.so/liquidity?address=5dMKUYJDsjZkAD3wiV3ViQkuq9pSmWQ5eAzcQLtDnUT3" target="_blank" rel="noopener noreferrer">
+    Deposit SOL or WSOL and OLAS tokens using the Lockbox via{' '}
+    <NextStyledLink href="/manage-solana-products">manage Solana products</NextStyledLink> to get
+    fungible tokens representing{' '}
+    <StyledLink
+      href="https://www.orca.so/liquidity?address=5dMKUYJDsjZkAD3wiV3ViQkuq9pSmWQ5eAzcQLtDnUT3"
+      target="_blank"
+      rel="noopener noreferrer"
+    >
       full range WSOL-OLAS LP positions on Orca
-    </StyledLink>
-    {' '}
+    </StyledLink>{' '}
     WSOL-OLAS pool.
   </>
 );
 
-const PathContent = ({
-  path: {
-    bond, network, exchange, bridge,
-  },
-  networkId,
-  isEthereumPath,
-}) => {
+const PathContent = ({ path: { bond, network, exchange, bridge }, networkId, isEthereumPath }) => {
   const steps = [
     <>
-      Check if there are
-      {' '}
-      <StyledLink
-        href="https://tokenomics.olas.network/bonding-products"
-        target="_blank"
-        rel="noopener noreferrer"
-      >
-        profitable
-        {' '}
-        {bond.lpTokenName}
-        {' '}
-        products
-      </StyledLink>
-      {' '}
+      Check if there are{' '}
+      <NextStyledLink href="/bonding-products">{` profitable ${bond.lpTokenName} products`}</NextStyledLink>{' '}
       available.
     </>,
     <>
-      Get OLAS on
-      {' '}
-      {network}
-      . You can acquire it on
-      {' '}
+      Get OLAS on {network}. You can acquire it on{' '}
       <StyledLink href={exchange.url} target="_blank" rel="noopener noreferrer">
         {exchange.name}
       </StyledLink>
       {` directly on ${network}, or `}
-      <StyledLink
-        href="https://app.uniswap.org/"
-        target="_blank"
-        rel="noopener noreferrer"
-      >
+      <StyledLink href="https://app.uniswap.org/" target="_blank" rel="noopener noreferrer">
         buy it on Ethereum Uniswap
-      </StyledLink>
-      {' '}
-      and
-      {' '}
+      </StyledLink>{' '}
+      and{' '}
       <StyledLink href={bridge?.url} target="_blank" rel="noopener noreferrer">
-        bridge it with
-        {' '}
-        {bridge?.name}
+        bridge it with {bridge?.name}
       </StyledLink>
       .
       {bond?.guideUrl && (
         <>
           {` For more information on how to bridge with the ${bridge?.name}, see this `}
-          <StyledLink
-            href={bond.guideUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
+          <StyledLink href={bond.guideUrl} target="_blank" rel="noopener noreferrer">
             guide
           </StyledLink>
           .
@@ -92,14 +64,9 @@ const PathContent = ({
       )}
     </>,
     <>
-      Get
-      {' '}
+      Get{' '}
       {bond.lpPairTokenTickerLink ? (
-        <StyledLink
-          href={bond.lpPairTokenTickerLink}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
+        <StyledLink href={bond.lpPairTokenTickerLink} target="_blank" rel="noopener noreferrer">
           {bond.lpPairTokenTicker}
         </StyledLink>
       ) : (
@@ -112,12 +79,7 @@ const PathContent = ({
         <SvmDeposit />
       ) : (
         <>
-          Pool OLAS and
-          {' '}
-          {bond.lpPairTokenTicker}
-          {' '}
-          tokens into the
-          {' '}
+          Pool OLAS and {bond.lpPairTokenTicker} tokens into the{' '}
           <StyledLink href={exchange.url} target="_blank" rel="noopener noreferrer">
             {`${bond.lpTokenName} pool on ${network} ${exchange.name}`}
           </StyledLink>
@@ -125,88 +87,46 @@ const PathContent = ({
         </>
       )}
     </>,
+    <>{`Await receipt of LP tokens representing your stake in the ${bond.lpTokenName} pool.`}</>,
     <>
-      {`Await receipt of LP tokens representing your stake in the ${bond.lpTokenName} pool.`}
-    </>,
-    <>
-      {`Bridge ${bond.lpTokenName} ${bond.isFungible ? 'LP fungible' : ''} tokens from ${network} to Ethereum using `}
-      <StyledLink
-        href={bond.lpTokenBridge?.url}
-        target="_blank"
-        rel="noopener noreferrer"
-      >
+      {`Bridge ${bond.lpTokenName} ${
+        bond.isFungible ? 'LP fungible' : ''
+      } tokens from ${network} to Ethereum using `}
+      <StyledLink href={bond.lpTokenBridge?.url} target="_blank" rel="noopener noreferrer">
         {bond.lpTokenBridge?.name}
       </StyledLink>
       .
     </>,
     <>
-      Bond LP tokens using
-      {' '}
-      <StyledLink
-        href="https://tokenomics.olas.network/bonding-products"
-        target="_blank"
-        rel="noopener noreferrer"
-      >
-        Olas Tokenomics
-      </StyledLink>
+      Bond LP tokens using <NextStyledLink href="/bonding-products">Olas Tokenomics</NextStyledLink>
       .
     </>,
   ];
 
   const ethereumSteps = [
     <>
-      Check if there are
-      {' '}
-      <StyledLink
-        href="https://tokenomics.olas.network/bonding-products"
-        target="_blank"
-        rel="noopener noreferrer"
-      >
-        {` profitable ${bond.lpTokenName} products`}
-      </StyledLink>
-      {' '}
+      Check if there are{' '}
+      <NextStyledLink href="/bonding-products">{` profitable ${bond.lpTokenName} products`}</NextStyledLink>{' '}
       available.
     </>,
     <>
-
       {`Get OLAS on ${network}. You can acquire it on `}
       <StyledLink href={exchange.url} target="_blank" rel="noopener noreferrer">
         {exchange.name}
       </StyledLink>
       {` directly on ${network}.`}
     </>,
+    <>{`Get ${bond.lpPairTokenTicker} on ${network}.`}</>,
     <>
-      {`Get ${bond.lpPairTokenTicker} on ${network}.`}
-    </>,
-    <>
-      Pool OLAS and
-      {' '}
-      {bond.lpPairTokenTicker}
-      {' '}
-      tokens into the
-      {' '}
+      Pool OLAS and {bond.lpPairTokenTicker} tokens into the{' '}
       <StyledLink href={exchange.url} target="_blank" rel="noopener noreferrer">
         {`${bond.lpTokenName} pool on ${network} ${exchange.name}`}
       </StyledLink>
       .
     </>,
+    <>Await receipt of LP tokens representing your stake in the {bond.lpTokenName} pool.</>,
     <>
-      Await receipt of LP tokens representing your stake in the
-      {' '}
-      {bond.lpTokenName}
-      {' '}
-      pool.
-    </>,
-    <>
-      Bond LP tokens using
-      {' '}
-      <StyledLink
-        href="https://tokenomics.olas.network/bonding-products"
-        target="_blank"
-        rel="noopener noreferrer"
-      >
-        Olas Tokenomics
-      </StyledLink>
+      Bond LP tokens using <NextStyledLink href="/bonding-products">Olas Tokenomics</NextStyledLink>
       .
     </>,
   ];
@@ -219,10 +139,7 @@ const PathContent = ({
       renderItem={(item, i) => (
         <List.Item>
           <Flex gap={16} align="top">
-            <span>
-              {i + 1}
-              .
-            </span>
+            <span>{i + 1}.</span>
             <span>{item}</span>
           </Flex>
         </List.Item>

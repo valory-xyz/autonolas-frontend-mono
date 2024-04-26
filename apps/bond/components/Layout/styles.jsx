@@ -5,81 +5,20 @@ import { COLOR, MEDIA_QUERY } from '@autonolas/frontend-library';
 import styled from 'styled-components';
 
 export const CustomLayout = styled(Layout)`
-  margin-bottom: 8rem;
-  .site-layout {
-    padding: 100px 24px 24px 24px;
-  }
-  .mech-tabs {
-    .ant-tabs-extra-content {
-      &:not(:last-child) {
-        .ant-typography {
-          color: ${COLOR.PRIMARY};
-          margin: 0 12px 0 0;
-        }
-      }
-      &:last-child {
-        gap: 12px;
-        display: flex;
-      }
+  ${MEDIA_QUERY.tablet} {
+    .ant-menu.ant-menu-horizontal {
+      width: 100%;
     }
   }
-  .column-2 {
-    gap: 12px;
-    justify-content: flex-end;
-    ${MEDIA_QUERY.tabletL} {
-      justify-content: center;
+  ${MEDIA_QUERY.mobileL} {
+    .footer-center {
+      display: none;
     }
   }
-
-  ${MEDIA_QUERY.tabletL} {
-    .site-layout {
-      padding: 24px;
-    }
-
-    .column-1 {
-      margin-bottom: 12px;
-    }
-
-    .mech-tabs {
-      .ant-tabs-nav {
-        flex-direction: column;
-        align-items: flex-start;
-        justify-content: flex-start;
-        .ant-tabs-extra-content {
-          margin-top: 12px;
-        }
-      }
-      .ant-tabs-nav-wrap {
-        padding-left: 0;
-      }
-      .ant-tabs-nav-list {
-        transform: none !important;
-      }
-    }
-    /* footer from autonolas-library */
-    main + div {
-      padding: 24px;
-    }
-  }
-
-  ${MEDIA_QUERY.mobileS} {
-    .site-layout {
-      padding: 24px;
-    }
-
-    .column-1 {
-      margin-bottom: 12px;
-    }
-
-    /* footer from autonolas-library */
-    main + div {
-      flex-direction: column;
-      align-items: center;
-      gap: 20px;
-      .footer-center {
-        position: relative;
-        left: 0;
-        transform: none;
+  ${MEDIA_QUERY.mobileM} {
+    .ant-layout-header {
+      .ant-menu-overflow-item {
+        line-height: 2;
       }
     }
   }

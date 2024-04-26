@@ -1,7 +1,5 @@
 import { Program } from '@coral-xyz/anchor';
-import idl from 'common-util/abiAndAddresses/liquidityLockbox.json';
 import { DecimalUtil, Percentage } from '@orca-so/common-sdk';
-import Decimal from 'decimal.js';
 import { increaseLiquidityQuoteByInputTokenWithParams } from '@orca-so/whirlpools-sdk';
 import {
   AccountLayout,
@@ -10,27 +8,26 @@ import {
   createSyncNativeInstruction,
   getAssociatedTokenAddress,
 } from '@solana/spl-token';
-import { SystemProgram, Transaction } from '@solana/web3.js';
 import { useWallet } from '@solana/wallet-adapter-react';
+import { SystemProgram, Transaction } from '@solana/web3.js';
+import Decimal from 'decimal.js';
+
 import { notifyError, notifySuccess } from '@autonolas/frontend-library';
 
+import idl from 'libs/util-contracts/src/lib/abiAndAddresses/liquidityLockbox.json';
+
 import { useSvmConnectivity } from 'common-util/hooks/useSvmConnectivity';
+
 import {
-  SVM_EMPTY_ADDRESS,
-  configureAndSendCurrentTransaction,
-  notifySvmSpecificError,
-} from '../utils';
-import { useGetOrCreateAssociatedTokenAccount } from './useGetOrCreateAssociatedTokenAccount';
-import { useWhirlpool } from './useWhirlpool';
-import {
-  SOL,
   BRIDGED_TOKEN_MINT,
+  CONNECT_SVM_WALLET,
   LOCKBOX,
   ORCA,
   PDA_POSITION_ACCOUNT,
   POSITION,
   POSITION_MINT,
   PROGRAM_ID,
+  SOL,
   TICK_ARRAY_LOWER,
   TICK_ARRAY_UPPER,
   TOKEN_VAULT_A,
@@ -38,14 +35,19 @@ import {
   WHIRLPOOL,
   tickLowerIndex,
   tickUpperIndex,
-  CONNECT_SVM_WALLET,
 } from '../constants';
+import {
+  SVM_EMPTY_ADDRESS,
+  configureAndSendCurrentTransaction,
+  notifySvmSpecificError,
+} from '../utils';
+import { useGetOrCreateAssociatedTokenAccount } from './useGetOrCreateAssociatedTokenAccount';
+import { useWhirlpool } from './useWhirlpool';
 
 const getOlasAmount = async (connection, walletPublicKey, tokenAddress) => {
-  const tokenAccounts = await connection.getTokenAccountsByOwner(
-    walletPublicKey,
-    { programId: TOKEN_PROGRAM_ID },
-  );
+  const tokenAccounts = await connection.getTokenAccountsByOwner(walletPublicKey, {
+    programId: TOKEN_PROGRAM_ID,
+  });
 
   let tokenAmount = 0n;
   tokenAccounts.value.forEach((tokenAccount) => {
@@ -59,10 +61,9 @@ const getOlasAmount = async (connection, walletPublicKey, tokenAddress) => {
 };
 
 const getBridgeTokenAmount = async (connection, walletPublicKey) => {
-  const tokenAccounts = await connection.getTokenAccountsByOwner(
-    walletPublicKey,
-    { programId: TOKEN_PROGRAM_ID },
-  );
+  const tokenAccounts = await connection.getTokenAccountsByOwner(walletPublicKey, {
+    programId: TOKEN_PROGRAM_ID,
+  });
 
   let bridgedTokenAmount = 0n;
   tokenAccounts.value.forEach((tokenAccount) => {
@@ -75,11 +76,7 @@ const getBridgeTokenAmount = async (connection, walletPublicKey) => {
   return bridgedTokenAmount;
 };
 
-const createSolTransferTransaction = (
-  walletKey,
-  tokenOwnerAccountA,
-  tokenMaxA,
-) => {
+const createSolTransferTransaction = (walletKey, tokenOwnerAccountA, tokenMaxA) => {
   const solTransferTransaction = [];
   solTransferTransaction.push(
     SystemProgram.transfer({
@@ -103,18 +100,15 @@ const logSolTransferError = (error) => {
 };
 
 export const useWsolDeposit = () => {
-  const { svmWalletPublicKey, connection, anchorProvider } =
-    useSvmConnectivity();
+  const { svmWalletPublicKey, connection, anchorProvider } = useSvmConnectivity();
   const { getWhirlpoolData } = useWhirlpool();
   const { signTransaction } = useWallet();
 
-  const customGetOrCreateAssociatedTokenAccount =
-    useGetOrCreateAssociatedTokenAccount();
+  const customGetOrCreateAssociatedTokenAccount = useGetOrCreateAssociatedTokenAccount();
   const program = new Program(idl, PROGRAM_ID, anchorProvider);
 
   const getDepositIncreaseLiquidityQuote = async ({ sol, slippage }) => {
-    const { whirlpoolData, whirlpoolTokenA, whirlpoolTokenB } =
-      await getWhirlpoolData();
+    const { whirlpoolData, whirlpoolTokenA, whirlpoolTokenB } = await getWhirlpoolData();
     const slippageTolerance = Percentage.fromDecimal(new Decimal(slippage));
     const inputTokenAmount = DecimalUtil.toBN(new Decimal(sol), 9);
 
@@ -134,29 +128,21 @@ export const useWsolDeposit = () => {
   const getDepositTransformedQuote = async (quote) => {
     const { whirlpoolTokenA, whirlpoolTokenB } = await getWhirlpoolData();
 
-    const solMax = DecimalUtil.fromBN(
-      quote.tokenMaxA,
+    const solMax = DecimalUtil.fromBN(quote.tokenMaxA, whirlpoolTokenA.decimals).toFixed(
       whirlpoolTokenA.decimals,
-    ).toFixed(whirlpoolTokenA.decimals);
+    );
 
-    const olasMax = DecimalUtil.fromBN(
-      quote.tokenMaxB,
+    const olasMax = DecimalUtil.fromBN(quote.tokenMaxB, whirlpoolTokenB.decimals).toFixed(
       whirlpoolTokenB.decimals,
-    ).toFixed(whirlpoolTokenB.decimals);
+    );
 
     const liquidity = quote.liquidityAmount.toString();
     return { solMax, olasMax, liquidity };
   };
 
   const checkIfNoEnoughOlas = async (whirlpoolTokenB, olasMax) => {
-    const olasAmount = await getOlasAmount(
-      connection,
-      svmWalletPublicKey,
-      whirlpoolTokenB.mint,
-    );
-    const noEnoughOlas = DecimalUtil.fromBN(olasMax).greaterThan(
-      DecimalUtil.fromBN(olasAmount),
-    );
+    const olasAmount = await getOlasAmount(connection, svmWalletPublicKey, whirlpoolTokenB.mint);
+    const noEnoughOlas = DecimalUtil.fromBN(olasMax).greaterThan(DecimalUtil.fromBN(olasAmount));
     return noEnoughOlas;
   };
 
@@ -199,9 +185,7 @@ export const useWsolDeposit = () => {
       svmWalletPublicKey,
     );
     if (!bridgedTokenAccount) {
-      notifySvmSpecificError(
-        'You do not have the WSOL-OLAS LP account, please try again.',
-      );
+      notifySvmSpecificError('You do not have the WSOL-OLAS LP account, please try again.');
       return null;
     }
 
@@ -235,23 +219,14 @@ export const useWsolDeposit = () => {
           signTransaction,
         );
       } catch (error) {
-        notifySvmSpecificError(
-          'Error creating token account for WSOL ATA',
-          error,
-        );
+        notifySvmSpecificError('Error creating token account for WSOL ATA', error);
         console.error(error);
         return null;
       }
     } else {
       // Check if the user has enough WSOL
-      const wsolAmount = await getOlasAmount(
-        connection,
-        svmWalletPublicKey,
-        whirlpoolTokenA.mint,
-      );
-      const noEnoughWsol = DecimalUtil.fromBN(solMax).greaterThan(
-        DecimalUtil.fromBN(wsolAmount),
-      );
+      const wsolAmount = await getOlasAmount(connection, svmWalletPublicKey, whirlpoolTokenA.mint);
+      const noEnoughWsol = DecimalUtil.fromBN(solMax).greaterThan(DecimalUtil.fromBN(wsolAmount));
 
       if (noEnoughWsol) {
         isWrapRequired = true;
@@ -317,10 +292,7 @@ export const useWsolDeposit = () => {
       return null;
     }
 
-    const bridgedToken = await getBridgeTokenAmount(
-      connection,
-      svmWalletPublicKey,
-    );
+    const bridgedToken = await getBridgeTokenAmount(connection, svmWalletPublicKey);
     return bridgedToken.toString();
   };
 

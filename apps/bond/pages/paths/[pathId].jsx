@@ -1,10 +1,12 @@
 import { Button, Card, Col, Collapse, Flex, Grid, Row, Typography } from 'antd';
 import Head from 'next/head';
 import Image from 'next/image';
+import { useRouter } from 'next/router';
 import { PropTypes } from 'prop-types';
-import styled from 'styled-components';
 
 import { COLOR } from '@autonolas/frontend-library';
+
+import styled from 'styled-components';
 
 import Address from 'components/Address';
 import StyledMain from 'components/GlobalStyles/StyledMain';
@@ -164,23 +166,19 @@ BridgeCollapseItem.propTypes = {
   isEthereumPath: PropTypes.bool.isRequired,
 };
 
-const BondCollapseItem = () => (
+const BondCollapseItem = () => {
+  const router = useRouter();
   <Flex gap={16} vertical>
     <Flex gap={4} vertical>
       <Upcase>Bond LP Token into Olas Protocol</Upcase>
       <Flex gap={8} align="center">
-        <StyledPathButton
-          type="default"
-          href="https://tokenomics.olas.network/bonding-products"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
+        <StyledPathButton type="default" onClick={() => router.push('/bonding-products')}>
           View available products
         </StyledPathButton>
       </Flex>
     </Flex>
-  </Flex>
-);
+  </Flex>;
+};
 
 BondCollapseItem.propTypes = {
   path: PropTypes.shape({
@@ -250,6 +248,8 @@ const PathDetailPage = ({ path: { name, network, id, bond, networkId, customSubt
           </Col>
         </Row>
 
+        <br />
+        <br />
         <Row gutter={[48, 48]}>
           <Col xs={24} lg={12}>
             <Typography.Title className="mt-0 mb-16" level={4}>

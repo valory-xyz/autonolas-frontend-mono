@@ -1,11 +1,6 @@
 import { createGlobalStyle } from 'styled-components';
 import { MEDIA_QUERY, COLOR } from '@autonolas/frontend-library';
 
-const ANTD_COLOR = {
-  borderColor: '#f0f0f0',
-};
-
-// const GlobalStyles = styled.div`
 const GlobalStyle = createGlobalStyle`
   *,
   :after,
@@ -17,69 +12,71 @@ const GlobalStyle = createGlobalStyle`
     width: 100%;
     height: 100%;
     margin: 0;
-    font-family: texgyreheros__regular, sans-serif;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
   }
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    margin-top: 0;
+  }
+
+  html {
+    /* uncomment for dark mode */
+    /* background-color: ${COLOR.WHITE}; */
+    /* filter: invert(1) hue-rotate(180deg); */
+  }
+
+  background-size: 100%;
+  background-color: ${COLOR.WHITE};
 
   /* common */
   .m-0 {
     margin: 0 !important;
   }
-  .mb-0 {
-    margin-bottom: 0px !important;
+  .my-0 {
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
   }
-  .mb-4 {
-    margin-bottom: 4px !important;
+  .mb-0 {
+    margin-bottom: 0 !important;
   }
   .mb-8 {
-    margin-bottom: 8px !important;
-  }
-  .mb-12 {
-    margin-bottom: 12px !important;
+    margin-bottom: 0.5rem;
   }
   .mb-16 {
-    margin-bottom: 16px !important;
+    margin-bottom: 1rem;
   }
-  .mb-24 {
-    margin-bottom: 24px !important;
+  .mr-4 {
+    margin-right: 4px;
   }
-  .mb-128 {
-    margin-bottom: 128px !important;
-  }
-  .mt-0 {
-    margin-top: 0px;
-  }
-  .mt-8 {
-    margin-top: 8px;
-  }
-  .mt-12 {
-    margin-top: 12px;
-  }
-  .mt-48 {
-    margin-top: 48px !important;
+  .mr-8 {
+    margin-right: 8px;
   }
   .mr-12 {
     margin-right: 12px;
   }
-  .mx-auto {
-    margin-left: auto !important;
-    margin-right: auto !important;
+  .mr-24 {
+    margin-right: 24px;
   }
-  .pl-0 {
-    padding-left: 0px !important;
+  .mr-32 {
+    margin-right: 32px;
   }
-  .p-0 {
-    padding: 0px !important;
+  .ml-8 {
+    margin-left: 8px;
   }
-  .p-8 {
-    padding: 8px !important;
+  .ml-16 {
+    margin-left: 16px;
   }
-  .p-16 {
-    padding: 16px !important;
+  .mt-8 {
+    margin-top: 8px;
   }
-  .ant-alert {
-    border-radius: 5px;
+  .mt-16 {
+    margin-top: 16px;
+  }
+  .align-right {
+    text-align: right;
   }
   .show-only-sm {
     display: none;
@@ -87,17 +84,19 @@ const GlobalStyle = createGlobalStyle`
   .hide-only-sm {
     display: initial;
   }
-
-  .text-center {
-    text-align: center !important;
+  .full-width {
+    width: 100%;
   }
 
   /* layout */
+  .ant-layout {
+    background: ${COLOR.WHITE};
+  }
   .ant-layout-header {
     display: flex;
     align-items: center;
     position: fixed;
-    z-index: 10;
+    z-index: 1;
     width: 100%;
     height: 64px;
     line-height: 64px;
@@ -115,19 +114,28 @@ const GlobalStyle = createGlobalStyle`
         font-weight: bold;
       }
     }
+    ${MEDIA_QUERY.mobileM} {
+      &.ant-menu-horizontal {
+        line-height: 2;
+      }
+    }
   }
 
+  /* navigation header menu */
+  .ant-menu-horizontal:not(.ant-menu-dark) > .ant-menu-item,
+  .ant-menu-horizontal:not(.ant-menu-dark) > .ant-menu-submenu {
+    padding: 0 16px;
+  }
 
   /* tabs */
   .ant-tabs-card.ant-tabs-top {
     > .ant-tabs-nav .ant-tabs-tab {
-      padding: 10px 16px;
       border-radius: 18px;
       background-color: transparent;
       border-color: transparent !important;
     }
     > .ant-tabs-nav .ant-tabs-tab-active {
-      border-bottom-color: ${ANTD_COLOR.borderColor};
+      border-bottom-color: ${COLOR.GREY_3};
       background-color: ${COLOR.GREY_1};
       .ant-tabs-tab-btn {
         color: ${COLOR.BLACK};
@@ -140,6 +148,19 @@ const GlobalStyle = createGlobalStyle`
   .ant-tabs-top > div > .ant-tabs-nav::before,
   .ant-tabs-bottom > div > .ant-tabs-nav::before {
     border-bottom: none;
+  }
+
+  /* layout */
+  .site-layout {
+    padding: 0 2rem;
+    margin-top: 56px;
+    + div {
+      padding: 1rem 32px;
+    }
+  }
+  .site-layout-background {
+    padding: 24px 0;
+    min-height: calc(100vh - 8.5rem);
   }
 
   ${MEDIA_QUERY.mobileL} {
@@ -151,9 +172,6 @@ const GlobalStyle = createGlobalStyle`
     }
   }
 
-  background-size: 100%;
-  background-color: ${COLOR.WHITE};
-
   .ant-layout-footer {
     text-align: center;
   }
@@ -161,87 +179,15 @@ const GlobalStyle = createGlobalStyle`
     color: ${COLOR.BLACK};
   }
 
-    /* tabs */
-    .ant-tabs-card.ant-tabs-top {
-    > .ant-tabs-nav .ant-tabs-tab {
-      border-radius: 18px;
-      background-color: transparent;
-      border-color: transparent !important;
-    }
-    > .ant-tabs-nav .ant-tabs-tab-active {
-      border-bottom-color: ${ANTD_COLOR.borderColor};
-      background-color: ${COLOR.GREY_1};
-      .ant-tabs-tab-btn {
-        color: ${COLOR.BLACK};
-      }
-    }
-  }
-
-  .ant-tabs-top > .ant-tabs-nav::before,
-  .ant-tabs-bottom > .ant-tabs-nav::before,
-  .ant-tabs-top > div > .ant-tabs-nav::before,
-  .ant-tabs-bottom > div > .ant-tabs-nav::before {
-    border-bottom: none;
-  }
-
-  /* table */
-  .ant-table {
-    .ant-table-thead {
-      > tr > th {
-        font-weight: normal;
-        padding: 12px 16px;
-        &:not(:last-child):not(.ant-table-selection-column):not(.ant-table-row-expand-icon-cell):not([colspan])::before {
-          background-color: transparent;
-        }
-      }
-    }
-    .ant-table-tbody > tr {
-      > td {
-        padding: 12px 16px;
-        &.underline span {
-          text-decoration: underline;
-        }
-        .ant-btn {
-          &:first-child {
-            padding-left: 0;
-          }
-        }
-      }
-      &:last-child {
-        td {
-          &:first-child {
-            border-bottom-left-radius: 5px;
-          }
-          &:last-child {
-            border-bottom-right-radius: 5px;
-          }
-        }
-      }
-    }
-  }
-
-  .ant-table:not(.ant-table-bordered) {
-    .ant-table-cell:first-child {
-      border-left: 1px solid ${COLOR.BORDER_GREY};
-    }
-    .ant-table-cell:last-child {
-      border-right: 1px solid ${COLOR.BORDER_GREY};
-    }
-    .ant-table-thead {
-      > tr > th {
-        border-top: 1px solid ${COLOR.BORDER_GREY};
-        border-bottom: 1px solid ${COLOR.BORDER_GREY};
-      }
-    }
-  }
-
-
   /* form */
   .ant-form-item-label > label {
     font-weight: bold;
   }
-  .custom-form-item-lock {
+  .custom-form-item-tokenAmount {
     margin-bottom: 4px;
+  }
+  .ant-form-item-extra {
+    font-size: 16px !important; 
   }
 
   /* button */
@@ -249,18 +195,56 @@ const GlobalStyle = createGlobalStyle`
     text-shadow: none;
   }
 
+  /* radio-button for grouping */
+  .choose-type-group.ant-typography {
+    display: flex;
+    align-items: center;
+    .ant-radio-group {
+      margin-left: 2rem;
+      border: 1px solid ${COLOR.BORDER_GREY};
+      padding: 2px 16px;
+    }
+  }
+
+  .ant-tooltip-inner {
+    background-color: ${COLOR.BLACK};
+  }
+
+  .deposit-tag {
+    margin-bottom: 1rem;
+    > * {
+      color: ${COLOR.WHITE} !important;
+    }
+  }
+
   ${MEDIA_QUERY.tablet} {
+    body {
+      padding: 0rem;
+    }
     .ant-layout-header {
       position: relative;
       flex-direction: column;
       height: auto;
       padding: 0;
     }
+    .site-layout-background {
+      padding: 1rem 0;
+      min-height: calc(100vh - 20rem);
+    }
+    .site-layout {
+      margin-top: 0;
+    }
   }
 
-  ${MEDIA_QUERY.mobileM} {
-    .ant-layout-header {
-      padding: 0;
+  ${MEDIA_QUERY.mobileL} {
+    .site-layout {
+      padding: 0 1rem;
+    }
+    .choose-type-group.ant-typography {
+      flex-direction: column;
+      .ant-radio-group {
+        margin-left: 0rem;
+      }
     }
   }
 `;

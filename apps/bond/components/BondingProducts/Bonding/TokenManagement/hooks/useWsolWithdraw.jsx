@@ -1,42 +1,40 @@
-import { useCallback } from 'react';
 import { Program } from '@coral-xyz/anchor';
-import idl from 'common-util/abiAndAddresses/liquidityLockbox.json';
 import { DecimalUtil, Percentage } from '@orca-so/common-sdk';
 import { decreaseLiquidityQuoteByLiquidityWithParams } from '@orca-so/whirlpools-sdk';
-import {
-  AccountLayout,
-  getAssociatedTokenAddress,
-  TOKEN_PROGRAM_ID,
-} from '@solana/spl-token';
+import { AccountLayout, TOKEN_PROGRAM_ID, getAssociatedTokenAddress } from '@solana/spl-token';
 import Decimal from 'decimal.js';
+import { useCallback } from 'react';
+
 import { notifyError, notifySuccess } from '@autonolas/frontend-library';
 
+import idl from 'libs/util-contracts/src/lib/abiAndAddresses/liquidityLockbox.json';
+
 import { useSvmConnectivity } from 'common-util/hooks/useSvmConnectivity';
-import { useGetOrCreateAssociatedTokenAccount } from './useGetOrCreateAssociatedTokenAccount';
-import { useWhirlpool } from './useWhirlpool';
+
 import {
   BRIDGED_TOKEN_MINT,
+  CONNECT_SVM_WALLET,
   FEE_COLLECTOR_TOKEN_OWNER_ACCOUNT_A,
   FEE_COLLECTOR_TOKEN_OWNER_ACCOUNT_B,
   LOCKBOX,
   ORCA,
   PDA_POSITION_ACCOUNT,
   POSITION,
+  POSITION_MINT,
   PROGRAM_ID,
   TICK_ARRAY_LOWER,
   TICK_ARRAY_UPPER,
   TOKEN_VAULT_A,
   TOKEN_VAULT_B,
   WHIRLPOOL,
-  POSITION_MINT,
   tickLowerIndex,
   tickUpperIndex,
-  CONNECT_SVM_WALLET,
 } from '../constants';
 import { notifySvmSpecificError } from '../utils';
+import { useGetOrCreateAssociatedTokenAccount } from './useGetOrCreateAssociatedTokenAccount';
+import { useWhirlpool } from './useWhirlpool';
 
-const TOKEN_MINT_ERROR =
-  'You do not have the correct token account, please try again.';
+const TOKEN_MINT_ERROR = 'You do not have the correct token account, please try again.';
 
 const useBridgedTokenAccount = () => {
   const { svmWalletPublicKey } = useSvmConnectivity();
@@ -57,22 +55,19 @@ export const useWsolWithdraw = () => {
   const { svmWalletPublicKey, anchorProvider } = useSvmConnectivity();
   const { getWhirlpoolData } = useWhirlpool();
   const getBridgedTokenAccount = useBridgedTokenAccount();
-  const customGetOrCreateAssociatedTokenAccount =
-    useGetOrCreateAssociatedTokenAccount();
+  const customGetOrCreateAssociatedTokenAccount = useGetOrCreateAssociatedTokenAccount();
   const program = new Program(idl, PROGRAM_ID, anchorProvider);
 
   const withdrawTransformedQuote = async (quote) => {
     const { whirlpoolTokenA, whirlpoolTokenB } = await getWhirlpoolData();
 
-    const wsolMin = DecimalUtil.fromBN(
-      quote.tokenMinA,
+    const wsolMin = DecimalUtil.fromBN(quote.tokenMinA, whirlpoolTokenA.decimals).toFixed(
       whirlpoolTokenA.decimals,
-    ).toFixed(whirlpoolTokenA.decimals);
+    );
 
-    const olasMin = DecimalUtil.fromBN(
-      quote.tokenMinB,
+    const olasMin = DecimalUtil.fromBN(quote.tokenMinB, whirlpoolTokenB.decimals).toFixed(
       whirlpoolTokenB.decimals,
-    ).toFixed(whirlpoolTokenB.decimals);
+    );
 
     return { wsolMin, olasMin };
   };
@@ -102,11 +97,10 @@ export const useWsolWithdraw = () => {
     const bridgedTokenAccount = await getBridgedTokenAccount();
     if (!bridgedTokenAccount) return null;
 
-    const tokenAccounts =
-      await anchorProvider.connection.getTokenAccountsByOwner(
-        svmWalletPublicKey,
-        { programId: TOKEN_PROGRAM_ID },
-      );
+    const tokenAccounts = await anchorProvider.connection.getTokenAccountsByOwner(
+      svmWalletPublicKey,
+      { programId: TOKEN_PROGRAM_ID },
+    );
 
     let maxAmountInBn = -1n; // initialize to -1
 
@@ -121,9 +115,7 @@ export const useWsolWithdraw = () => {
     });
 
     if (maxAmountInBn === -1n) {
-      notifyError(
-        'You do not have the bridged token account, please try again.',
-      );
+      notifyError('You do not have the bridged token account, please try again.');
       return null;
     }
 

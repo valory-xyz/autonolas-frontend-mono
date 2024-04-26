@@ -66,7 +66,7 @@ const getColumns = (onClick, isActive, acc, depositoryAddress, hideEmptyProducts
       width: 100,
       render: (x) => {
         return (
-          <Link href={`/olas-eth-via-uniswap-on-ethereum`} target="_blank" rel="noreferrer">
+          <Link href={`/paths/olas-eth-via-uniswap-on-ethereum`}>
             Guide ↗
           </Link>
         );
