@@ -28,7 +28,7 @@ To Start Server
 
 ### Visit the app:
 
-`localhost:3000`
+`localhost:4200`
 
 ### To build:
 
