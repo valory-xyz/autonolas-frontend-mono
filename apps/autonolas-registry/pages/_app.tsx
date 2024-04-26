@@ -1,6 +1,5 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { createWeb3Modal, defaultWagmiConfig } from '@web3modal/wagmi';
-import { AutonolasThemeProvider } from 'libs/ui-theme/src/lib/ThemeConfig';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import PropTypes from 'prop-types';
@@ -8,10 +7,13 @@ import { Provider } from 'react-redux';
 import { WagmiProvider, cookieStorage, cookieToInitialState, createStorage } from 'wagmi';
 import { Chain } from 'wagmi/chains';
 
+// TODO: should be able to import from 'libs/ui-theme'
+import { GlobalStyles } from 'libs/ui-theme/src/lib/GlobalStyles';
+import { AutonolasThemeProvider } from 'libs/ui-theme/src/lib/ThemeConfig';
+
 import { COLOR } from '@autonolas/frontend-library';
 
 import { SUPPORTED_CHAINS } from '../common-util/Login/config';
-import GlobalStyle from '../components/GlobalStyles';
 import Layout from '../components/Layout';
 import { wrapper } from '../store';
 
@@ -59,7 +61,7 @@ const RegistryApp = ({
 
   return (
     <>
-      <GlobalStyle />
+      <GlobalStyles />
       <Head>
         <title>Autonolas Registry</title>
         <meta name="description" content={DESC} />

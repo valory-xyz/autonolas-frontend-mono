@@ -1,5 +1,6 @@
-import React, { useEffect, useRef } from 'react';
 import { ConfigProvider, ConfigProviderProps, ThemeConfig } from 'antd';
+import { useEffect, useState } from 'react';
+
 import { COLOR } from './ui-theme';
 
 export const THEME_CONFIG: ThemeConfig = {
@@ -41,18 +42,12 @@ export const THEME_CONFIG: ThemeConfig = {
  * ensure that the theme is only applied once the component has mounted.
  * @param props The props to pass to the `ConfigProvider`.
  */
-export const AutonolasThemeProvider = ({
-  theme = THEME_CONFIG,
-  ...rest
-}: ConfigProviderProps) => {
-  const isMounted = useRef(false);
+export const AutonolasThemeProvider = ({ theme = THEME_CONFIG, ...rest }: ConfigProviderProps) => {
+  const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
-    isMounted.current = true;
-    return () => {
-      isMounted.current = false;
-    };
+    setIsMounted(true);
   }, []);
 
-  return isMounted.current ? <ConfigProvider theme={theme} {...rest} /> : null;
+  return isMounted ? <ConfigProvider theme={theme} {...rest} /> : null;
 };

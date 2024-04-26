@@ -199,7 +199,7 @@ export const isPageWithSolana = (path) => {
   if (!path) return false;
   if (!isString(path)) return false;
 
-  const checkPath = (e) => path.toLowerCase().includes(e.networkName.toLowerCase());
+  const checkPath = (chain) => path.toLowerCase().includes(chain.networkName.toLowerCase());
   return SVM_SUPPORTED_CHAINS.some(checkPath);
 };
 
