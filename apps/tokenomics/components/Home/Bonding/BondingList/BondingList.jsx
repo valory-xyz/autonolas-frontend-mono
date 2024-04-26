@@ -1,33 +1,22 @@
-import { useCallback } from 'react';
-import PropTypes from 'prop-types';
-import {
-  Button,
-  Empty,
-  Popconfirm,
-  Spin,
-  Table,
-  Tag,
-  Tooltip,
-  Typography,
-} from 'antd';
-import { round, isNaN, remove } from 'lodash';
-import {
-  COLOR,
-  NA,
-  VM_TYPE,
-  getNetworkName,
-} from '@autonolas/frontend-library';
 import {
   ExclamationCircleTwoTone,
   QuestionCircleOutlined,
   UnorderedListOutlined,
 } from '@ant-design/icons';
+import { Button, Empty, Popconfirm, Spin, Table, Tag, Tooltip, Typography } from 'antd';
+import Link from 'next/link';
+import PropTypes from 'prop-types';
+import { useCallback } from 'react';
+
+import { COLOR, NA, VM_TYPE, getNetworkName } from '@autonolas/frontend-library';
+
+import { isNaN, remove, round } from 'lodash';
 import styled from 'styled-components';
 
 import { BONDING_PRODUCTS } from 'common-util/enums';
 import { parseToEth } from 'common-util/functions/ethers';
 import { useHelpers } from 'common-util/hooks/useHelpers';
-import { BOND_WEBSITE_URL } from 'common-util/constants';
+
 import { Deposit } from '../Deposit/Deposit';
 import { useProducts } from './useBondingList';
 import { getLpTokenWithDiscount } from './utils';
@@ -53,13 +42,7 @@ const getTitle = (title, tooltipDesc) => (
   </Tooltip>
 );
 
-const getColumns = (
-  onClick,
-  isActive,
-  acc,
-  depositoryAddress,
-  hideEmptyProducts,
-) => {
+const getColumns = (onClick, isActive, acc, depositoryAddress, hideEmptyProducts) => {
   const columns = [
     {
       title: 'ID',
@@ -83,13 +66,9 @@ const getColumns = (
       width: 100,
       render: (x) => {
         return (
-          <a
-            href={`${BOND_WEBSITE_URL}paths/${x || 'olas-eth-via-uniswap-on-ethereum'}`}
-            target="_blank"
-            rel="noreferrer"
-          >
+          <Link href={`/olas-eth-via-uniswap-on-ethereum`} target="_blank" rel="noreferrer">
             Guide ↗
-          </a>
+          </Link>
         );
       },
     },
@@ -111,11 +90,7 @@ const getColumns = (
       key: 'fullCurrentPriceLp',
       width: 140,
       render: (x, details) => (
-        <a
-          href={details.currentPriceLpLink}
-          rel="noopener noreferrer"
-          target="_blank"
-        >
+        <a href={details.currentPriceLpLink} rel="noopener noreferrer" target="_blank">
           {x}
         </a>
       ),
@@ -175,17 +150,12 @@ const getColumns = (
       ),
     },
     {
-      title: getTitle(
-        'OLAS Supply',
-        'Remaining OLAS supply reserved for this bonding product',
-      ),
+      title: getTitle('OLAS Supply', 'Remaining OLAS supply reserved for this bonding product'),
       dataIndex: 'supply',
       key: 'supply',
       width: 200,
       render: (x, row) => {
-        const supplyLeftInPercent = isNaN(row.supplyLeft)
-          ? 0
-          : round(row.supplyLeft * 100, 0);
+        const supplyLeftInPercent = isNaN(row.supplyLeft) ? 0 : round(row.supplyLeft * 100, 0);
         return (
           <>
             <a
@@ -204,10 +174,7 @@ const getColumns = (
       },
     },
     {
-      title: getTitle(
-        'Initiate Bond',
-        'Bond your LP pair to get OLAS at a discount',
-      ),
+      title: getTitle('Initiate Bond', 'Bond your LP pair to get OLAS at a discount'),
       dataIndex: 'bondForOlas',
       key: 'bondForOlas',
       width: 160,
@@ -237,11 +204,7 @@ const getColumns = (
         }
 
         return (
-          <Button
-            type="primary"
-            disabled={isBondButtonDisabled}
-            onClick={() => onClick(row)}
-          >
+          <Button type="primary" disabled={isBondButtonDisabled} onClick={() => onClick(row)}>
             Bond
           </Button>
         );
@@ -251,10 +214,7 @@ const getColumns = (
 
   // should remove the bond button if the product is not active
   if (!isActive) {
-    const withoutCreateBond = remove(
-      [...columns],
-      (x) => x.key !== 'bondForOlas',
-    );
+    const withoutCreateBond = remove([...columns], (x) => x.key !== 'bondForOlas');
     return withoutCreateBond;
   }
 
@@ -286,12 +246,7 @@ const ErrorMessageAndReload = () => (
           <Button onClick={() => window.location.reload()}>Try again</Button>
         </>
       }
-      image={
-        <ExclamationCircleTwoTone
-          style={{ fontSize: '7rem' }}
-          twoToneColor={COLOR.GREY_1}
-        />
-      }
+      image={<ExclamationCircleTwoTone style={{ fontSize: '7rem' }} twoToneColor={COLOR.GREY_1} />}
     />
   </Container>
 );
@@ -335,19 +290,9 @@ export const BondingList = ({ bondingProgramType, hideEmptyProducts }) => {
   return (
     <Container>
       <Table
-        columns={getColumns(
-          onBondClick,
-          isActive,
-          account,
-          depositoryAddress,
-          hideEmptyProducts,
-        )}
+        columns={getColumns(onBondClick, isActive, account, depositoryAddress, hideEmptyProducts)}
         locale={{
-          emptyText: (
-            <div style={{ padding: '5rem' }}>
-              {isLoading ? ' ' : <NoProducts />}
-            </div>
-          ),
+          emptyText: <div style={{ padding: '5rem' }}>{isLoading ? ' ' : <NoProducts />}</div>,
         }}
         dataSource={getProductsDataSource()}
         bordered
