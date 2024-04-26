@@ -1,12 +1,10 @@
-import { MEDIA_QUERY, COLOR } from '@autonolas/frontend-library';
 import { createGlobalStyle } from 'styled-components';
 
-const ANTD_COLOR = {
-  borderColor: '#f0f0f0',
-};
+import { COLOR, MEDIA_QUERY } from '@autonolas/frontend-library';
 
-// const GlobalStyles = styled.div`
-const GlobalStyle = createGlobalStyle`
+import { ANTD_COLOR } from './ui-theme';
+
+export const GlobalStyles = createGlobalStyle`
   *,
   :after,
   :before {
@@ -209,5 +207,3 @@ const GlobalStyle = createGlobalStyle`
     }
   }
 `;
-
-export default GlobalStyle;
