@@ -13,6 +13,13 @@ export const CustomLayout = styled(Layout)`
       display: none;
     }
   }
+  ${MEDIA_QUERY.mobileM} {
+    .ant-layout-header {
+      .ant-menu-overflow-item {
+        line-height: 2;
+      }
+    }
+  }
 `;
 
 export const HeaderContainer = styled.div`

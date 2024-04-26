@@ -1,12 +1,19 @@
 import { useState } from 'react';
 import styled from 'styled-components';
 import {
-  Typography, Radio, Switch, Divider,
+  Typography,
+  Switch,
+  Divider,
+  Radio,
+  Tooltip,
+  Flex,
+  Button,
 } from 'antd';
-
-import { BONDING_PRODUCTS } from 'util/constants';
 import { useScreen } from '@autonolas/frontend-library';
-import { BondingList } from './Bonding/BondingList';
+
+import { BONDING_PRODUCTS } from 'common-util/enums';
+import { useRouter } from 'next/router';
+import { BondingList } from './Bonding/BondingList/BondingList';
 
 const { Title } = Typography;
 
@@ -28,10 +35,17 @@ const SwitchContainer = styled.div`
 const ResponsiveDivider = () => {
   const { isMobile } = useScreen();
 
-  return <StyledDivider isMobile={isMobile} type={isMobile ? 'horizontal' : 'vertical'} />;
+  return (
+    <StyledDivider
+      isMobile={isMobile}
+      type={isMobile ? 'horizontal' : 'vertical'}
+    />
+  );
 };
 
 export const BondingProducts = () => {
+  const router = useRouter();
+
   // if user not connected, show all products
   const [bondingProgramType, setProductType] = useState(
     BONDING_PRODUCTS.ACTIVE,
@@ -50,24 +64,43 @@ export const BondingProducts = () => {
   return (
     <>
       <PageHeader isMobile={isMobile}>
-        <Title level={4} className="mb-0 mt-0">
-          Bonding Products
-        </Title>
-        <ResponsiveDivider />
-        <Radio.Group onChange={onChange} value={bondingProgramType}>
-          <Radio value={BONDING_PRODUCTS.ALL}>All</Radio>
-          <Radio value={BONDING_PRODUCTS.ACTIVE}>Active</Radio>
-          <Radio value={BONDING_PRODUCTS.INACTIVE}>Inactive</Radio>
-        </Radio.Group>
-        <ResponsiveDivider />
-        <SwitchContainer>
-          <Switch
-            checked={hideEmptyProducts}
-            onChange={onToggle}
-            className="mr-8"
-          />
-          Hide empty products
-        </SwitchContainer>
+        <Flex justify="space-between" align="center" style={{ width: '100%' }}>
+          <Flex align="center">
+            <Title level={4} className="mb-0 mt-0">
+              Bonding Products
+            </Title>
+            <ResponsiveDivider />
+
+            <Radio.Group onChange={onChange} value={bondingProgramType}>
+              <Radio value={BONDING_PRODUCTS.ACTIVE}>Active</Radio>
+              <Tooltip title="Currently displaying active products only. To view inactive products, call methods on the Depository contract via Etherscan.">
+                <Radio value={BONDING_PRODUCTS.INACTIVE} disabled>
+                  Inactive
+                </Radio>
+              </Tooltip>
+            </Radio.Group>
+            <ResponsiveDivider />
+
+            <SwitchContainer>
+              <Switch
+                checked={hideEmptyProducts}
+                onChange={onToggle}
+                className="mr-8"
+              />
+              Hide empty products
+            </SwitchContainer>
+          </Flex>
+
+          <Flex>
+            <Button
+              type="primary"
+              ghost
+              onClick={() => router.push('manage-solana-liquidity')}
+            >
+              Manage Solana Liquidity
+            </Button>
+          </Flex>
+        </Flex>
       </PageHeader>
 
       <BondingList

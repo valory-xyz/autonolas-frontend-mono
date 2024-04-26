@@ -1,20 +1,21 @@
+import { PublicKey } from '@solana/web3.js';
 import { ethers } from 'ethers';
 import { isString, toLower } from 'lodash';
+
 import {
-  isValidAddress,
   getChainIdOrDefaultToMainnet as getChainIdOrDefaultToMainnetFn,
   getIsValidChainId as getIsValidChainIdFn,
-  sendTransaction as sendTransactionFn,
-  notifyWarning,
+  isValidAddress,
   notifyError,
+  notifyWarning,
+  sendTransaction as sendTransactionFn,
 } from '@autonolas/frontend-library';
-import { PublicKey } from '@solana/web3.js';
 
+import prohibitedAddresses from '../../data/prohibited-addresses.json';
 import { VM_TYPE } from '../../util/constants';
 import { RPC_URLS } from '../Contracts';
 import { SUPPORTED_CHAINS } from '../Login';
 import { EVM_SUPPORTED_CHAINS, SVM_SUPPORTED_CHAINS } from '../Login/config';
-import prohibitedAddresses from '../../data/prohibited-addresses.json';
 
 export const getModalProvider = () => window?.MODAL_PROVIDER;
 
@@ -24,17 +25,15 @@ export const getChainId = (chainId = null) => {
   if (chainId) return chainId;
 
   // chainId fetched from sessionStorage
-  const chainIdfromSessionStorage =
-    typeof sessionStorage === 'undefined'
-      ? 1
-      : Number(sessionStorage.getItem('chainId'));
+  const chainIdFromSessionStorage =
+    typeof sessionStorage === 'undefined' ? 1 : Number(sessionStorage.getItem('chainId'));
 
   // if chainId is not supported, throw error
-  if (!EVM_SUPPORTED_CHAINS.find((e) => e.id === chainIdfromSessionStorage)) {
+  if (!EVM_SUPPORTED_CHAINS.find((e) => e.id === chainIdFromSessionStorage)) {
     return new Error('Invalid chain id');
   }
 
-  return chainIdfromSessionStorage || 1;
+  return chainIdFromSessionStorage || 1;
 };
 
 export const getProvider = () => {
@@ -47,9 +46,7 @@ export const getProvider = () => {
 
   if (typeof window === 'undefined') {
     /* eslint-disable-next-line no-console */
-    console.warn(
-      'No provider found, fetching RPC URL from first supported chain',
-    );
+    console.warn('No provider found, fetching RPC URL from first supported chain');
     return rpcUrl;
   }
 
@@ -81,14 +78,13 @@ export const getEthersProvider = () => {
 
   // if provider is a string, it is a JSON-RPC provider
   if (typeof provider === 'string') {
-    return new ethers.providers.JsonRpcProvider(provider);
+    return new ethers.JsonRpcProvider(provider);
   }
 
-  return new ethers.providers.Web3Provider(provider, 'any');
+  return new ethers.FallbackProvider([provider]);
 };
 
-export const getIsValidChainId = (chainId) =>
-  getIsValidChainIdFn(SUPPORTED_CHAINS, chainId);
+export const getIsValidChainId = (chainId) => getIsValidChainIdFn(SUPPORTED_CHAINS, chainId);
 
 export const getChainIdOrDefaultToMainnet = (chainId) => {
   const x = getChainIdOrDefaultToMainnetFn(SUPPORTED_CHAINS, chainId);
@@ -108,8 +104,7 @@ const isMethodsBuilderInstance = (builderIns, registryAddress) => {
     throw new Error('sendTransaction: Input must be an object.');
   }
 
-  const programId =
-    '_programId' in builderIns ? builderIns?._programId?.toString() : null; // eslint-disable-line no-underscore-dangle
+  const programId = '_programId' in builderIns ? builderIns?._programId?.toString() : null; // eslint-disable-line no-underscore-dangle
 
   // Check if the programId is the same as the registry address
   const hasProgramId = programId === registryAddress;
@@ -162,8 +157,16 @@ export const addressValidator = () => ({
 
 // check if the provider is gnosis safe
 export const checkIfGnosisSafe = async (account, provider) => {
-  const code = await provider.getCode(account);
-  return code !== '0x';
+  try {
+    if (provider && provider.getCode) {
+      // TODO: getCode has some issues and throws error in console
+      const code = await provider.getCode(account);
+      return code !== '0x';
+    }
+  } catch (error) {
+    console.error(error);
+    return false;
+  }
 };
 
 /**
@@ -196,8 +199,7 @@ export const isPageWithSolana = (path) => {
   if (!path) return false;
   if (!isString(path)) return false;
 
-  const checkPath = (e) =>
-    path.toLowerCase().includes(e.networkName.toLowerCase());
+  const checkPath = (chain) => path.toLowerCase().includes(chain.networkName.toLowerCase());
   return SVM_SUPPORTED_CHAINS.some(checkPath);
 };
 

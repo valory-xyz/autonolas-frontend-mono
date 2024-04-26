@@ -1,8 +1,7 @@
 import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-
+import { getChainId } from 'common-util/functions';
 import { setChainId } from 'store/setup';
-import { getChainId } from '../functions';
 
 export const useHelpers = () => {
   const dispatch = useDispatch();
@@ -18,7 +17,7 @@ export const useHelpers = () => {
     if (currentChainId !== chainId) {
       dispatch(setChainId(currentChainId));
     }
-  }, [currentChainId]);
+  }, [chainId, currentChainId, dispatch]);
 
   return {
     chainId,

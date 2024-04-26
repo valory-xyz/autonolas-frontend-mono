@@ -1,35 +1,28 @@
-import { useState } from 'react';
 import { Typography } from 'antd';
+import { useState } from 'react';
+
 import { notifyError, notifySuccess } from '@autonolas/frontend-library';
 
+import { getServiceManagerContract } from 'common-util/Contracts';
+import { AlertError, AlertSuccess, convertStringToArray } from 'common-util/List/ListCommon';
+import { sendTransaction } from 'common-util/functions';
+import { checkIfERC721Receive, getEstimatedGasLimit } from 'common-util/functions/requests';
+import { useHelpers } from 'common-util/hooks';
+import { useSvmConnectivity } from 'common-util/hooks/useSvmConnectivity';
 import {
   DEFAULT_SERVICE_CREATION_ETH_TOKEN,
   DEFAULT_SERVICE_CREATION_ETH_TOKEN_ZEROS,
 } from 'util/constants';
-import {
-  convertStringToArray,
-  AlertSuccess,
-  AlertError,
-} from 'common-util/List/ListCommon';
-import { getServiceManagerContract } from 'common-util/Contracts';
-import { sendTransaction } from 'common-util/functions';
-import {
-  checkIfERC721Receive,
-  getEstimatedGasLimit,
-} from 'common-util/functions/requests';
-import { useHelpers } from 'common-util/hooks';
-import { useSvmConnectivity } from 'common-util/hooks/useSvmConnectivity';
-import RegisterForm from './helpers/RegisterForm';
-import { getAgentParams } from './utils';
-import { buildSvmArgsToMintOrUpdate } from './helpers/functions';
+
 import { FormContainer } from '../styles';
+import RegisterForm from './helpers/RegisterForm';
+import { buildSvmArgsToMintOrUpdate } from './helpers/functions';
+import { getAgentParams } from './utils';
 
 const { Title } = Typography;
 
 const MintService = () => {
-  const {
-    account, doesNetworkHaveValidServiceManagerToken, vmType, isSvm,
-  } = useHelpers();
+  const { account, doesNetworkHaveValidServiceManagerToken, vmType, isSvm } = useHelpers();
   const { solanaAddresses, program } = useSvmConnectivity();
 
   const [isMinting, setIsMinting] = useState(false);
@@ -43,9 +36,7 @@ const MintService = () => {
     const fn = program.methods
       .create(...args)
       .accounts({ dataAccount: solanaAddresses.storageAccount })
-      .remainingAccounts([
-        { pubkey: ownerAddress, isSigner: true, isWritable: true },
-      ]);
+      .remainingAccounts([{ pubkey: ownerAddress, isSigner: true, isWritable: true }]);
 
     return fn;
   };
@@ -60,12 +51,12 @@ const MintService = () => {
 
     const params = doesNetworkHaveValidServiceManagerToken
       ? [
-        values.owner_address,
-        values.token === DEFAULT_SERVICE_CREATION_ETH_TOKEN_ZEROS
-          ? DEFAULT_SERVICE_CREATION_ETH_TOKEN
-          : values.token,
-        ...commonParams,
-      ]
+          values.owner_address,
+          values.token === DEFAULT_SERVICE_CREATION_ETH_TOKEN_ZEROS
+            ? DEFAULT_SERVICE_CREATION_ETH_TOKEN
+            : values.token,
+          ...commonParams,
+        ]
       : [values.owner_address, ...commonParams];
 
     return params;
@@ -87,10 +78,7 @@ const MintService = () => {
       fn = await buildSvmCreateFn(values);
     } else {
       try {
-        const isValid = await checkIfERC721Receive(
-          account,
-          values.owner_address,
-        );
+        const isValid = await checkIfERC721Receive(account, values.owner_address);
         if (!isValid) {
           setIsMinting(false);
           return;

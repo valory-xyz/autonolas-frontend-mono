@@ -1,29 +1,28 @@
-import { useState, useEffect } from 'react';
-import { ethers } from 'ethers';
-import {
-  Button, Divider, Radio, Form, Input,
-} from 'antd';
-import PropTypes from 'prop-types';
+import { RadioLabel } from '../styles';
+import { useFinishRegistration } from '../useSvmServiceStateManagement';
+import { getServiceAgentInstances, onStep3Deploy } from '../utils';
+import { handleMultisigSubmit } from './utils';
 import { notifyError, notifySuccess } from '@autonolas/frontend-library';
-
-import { SVM_EMPTY_ADDRESS } from 'util/constants';
+import { Button, Divider, Radio, Form, Input } from 'antd';
 import {
   FALLBACK_HANDLER,
   multisigAddresses,
   multisigSameAddresses,
 } from 'common-util/Contracts/addresses';
-import { useHelpers } from 'common-util/hooks';
 import { RegistryForm } from 'common-util/TransactionHelpers/RegistryForm';
 import { SendTransactionButton } from 'common-util/TransactionHelpers/SendTransactionButton';
 import { isValidSolanaPublicKey } from 'common-util/functions';
-import { getServiceAgentInstances, onStep3Deploy } from '../utils';
-import { handleMultisigSubmit } from './utils';
-import { RadioLabel } from '../styles';
-import { useFinishRegistration } from '../useSvmServiceStateManagement';
+import { useHelpers } from 'common-util/hooks';
+import { ethers } from 'ethers';
+import PropTypes from 'prop-types';
+import { useState, useEffect } from 'react';
+import { SVM_EMPTY_ADDRESS } from 'util/constants';
 
 const STEP = 3;
-const OPTION_1 = 'Creates a new service multisig with currently registered agent instances';
-const OPTION_2 = 'Updates an existent service multisig with currently registered agent instances. Please note that the only service multisig owner must be the current service owner address';
+const OPTION_1 =
+  'Creates a new service multisig with currently registered agent instances';
+const OPTION_2 =
+  'Updates an existent service multisig with currently registered agent instances. Please note that the only service multisig owner must be the current service owner address';
 
 const SvmFinishedRegistration = ({
   isOwner,
@@ -181,7 +180,7 @@ export const FinishedRegistration = ({
   };
 
   const onFinish = (values) => {
-    const payload = ethers.utils.solidityPack(
+    const payload = ethers.solidityPacked(
       [
         'address',
         'address',

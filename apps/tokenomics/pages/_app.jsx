@@ -1,17 +1,13 @@
+import PropTypes from 'prop-types';
+import GlobalStyle from 'components/GlobalStyles';
 import Head from 'next/head';
 import { Provider } from 'react-redux';
-import { ConfigProvider } from 'antd';
-import PropTypes from 'prop-types';
-
-/** wagmi config */
-import { WagmiConfig as WagmiConfigProvider } from 'wagmi';
-import { wagmiConfig } from 'common-util/Login/config';
 
 /** antd theme config */
 import Layout from 'components/Layout';
-import GlobalStyle from 'components/GlobalStyles';
-import { THEME_CONFIG } from '@autonolas/frontend-library';
 import { useRouter } from 'next/router';
+import { ThemeConfigProvider } from '../context/ConfigProvider';
+import Web3ModalProvider from '../context/Web3ModalProvider';
 import { store } from '../store';
 
 const MyApp = ({ Component, pageProps }) => {
@@ -20,23 +16,23 @@ const MyApp = ({ Component, pageProps }) => {
 
   return (
     <>
-      <GlobalStyle />
       <Head>
         <title>Olas Tokenomics</title>
         <meta name="title" content="Olas Tokenomics" />
       </Head>
+      <GlobalStyle />
       <Provider store={store}>
-        <ConfigProvider theme={THEME_CONFIG}>
+        <ThemeConfigProvider>
           {isNotLegal ? (
             <Component {...pageProps} />
           ) : (
-            <WagmiConfigProvider config={wagmiConfig}>
+            <Web3ModalProvider>
               <Layout>
                 <Component {...pageProps} />
               </Layout>
-            </WagmiConfigProvider>
+            </Web3ModalProvider>
           )}
-        </ConfigProvider>
+        </ThemeConfigProvider>
       </Provider>
     </>
   );

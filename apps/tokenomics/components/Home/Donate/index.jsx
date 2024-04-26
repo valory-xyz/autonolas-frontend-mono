@@ -1,24 +1,15 @@
-import { useState, useEffect } from 'react';
-import { ethers } from 'ethers';
 import { Alert, Button, Typography } from 'antd';
+import { ethers } from 'ethers';
 import { isNumber } from 'lodash';
-import {
-  getFullFormattedDate,
-  notifySuccess,
-  NA,
-} from '@autonolas/frontend-library';
+import { useEffect, useState } from 'react';
+
+import { NA, getFullFormattedDate, notifySuccess } from '@autonolas/frontend-library';
 
 import { DynamicFieldsForm } from 'common-util/DynamicFieldsForm';
-import {
-  parseToEth,
-  parseToWei,
-  sortUnitIdsAndTypes,
-} from 'common-util/functions';
+import { parseToEth, parseToWei, sortUnitIdsAndTypes } from 'common-util/functions';
 import { useHelpers } from 'common-util/hooks/useHelpers';
-import {
-  getEpochCounter,
-  getLastEpochRequest,
-} from '../DevIncentives/requests';
+
+import { getEpochCounter, getLastEpochRequest } from '../DevIncentives/requests';
 import {
   checkServicesNotTerminatedOrNotDeployed,
   checkpointRequest,
@@ -26,7 +17,7 @@ import {
   getVeOlasThresholdRequest,
   minAcceptedEthRequest,
 } from './requests';
-import { DonateContainer, EpochStatus, EpochCheckpointRow } from './styles';
+import { DonateContainer, EpochCheckpointRow, EpochStatus } from './styles';
 
 const { Title, Paragraph, Text } = Typography;
 
@@ -86,11 +77,9 @@ export const DepositServiceDonation = () => {
       const serviceIds = sortedUnitIds.map((e) => `${e}`);
       const amounts = sortedUnitTypes.map((e) => parseToWei(e));
       const totalAmount = amounts
-        .reduce(
-          (a, b) => ethers.BigNumber.from(a).add(ethers.BigNumber.from(b)),
-          ethers.BigNumber.from(0),
-        )
+        .reduce((a, b) => ethers.toBigInt(a) + ethers.toBigInt(b), 0n)
         .toString();
+
       const params = {
         account,
         serviceIds,
@@ -98,9 +87,7 @@ export const DepositServiceDonation = () => {
         totalAmount,
       };
 
-      const invalidServices = await checkServicesNotTerminatedOrNotDeployed(
-        serviceIds,
-      );
+      const invalidServices = await checkServicesNotTerminatedOrNotDeployed(serviceIds);
 
       // deposit only if all services are deployed or terminated
       if (invalidServices.length === 0) {
@@ -123,9 +110,7 @@ export const DepositServiceDonation = () => {
     },
     {
       text: 'Epoch length',
-      value: isNumber(epochDetails?.epochLen)
-        ? `${epochDetails.epochLen / 3600 / 24} days`
-        : NA,
+      value: isNumber(epochDetails?.epochLen) ? `${epochDetails.epochLen / 3600 / 24} days` : NA,
     },
     {
       text: 'Previous epoch end time',
@@ -161,18 +146,16 @@ export const DepositServiceDonation = () => {
       <div className="donate-section">
         <Title level={2}>Donate</Title>
         <Paragraph>
-          Show appreciation for the value of an autonomous service by making a
-          donation. The protocol will reward devs who have contributed code for
-          that service.
+          Show appreciation for the value of an autonomous service by making a donation. The
+          protocol will reward devs who have contributed code for that service.
         </Paragraph>
 
         <Alert
           showIcon
           type="info"
-          message={(
+          message={
             <>
-              To boost rewards of devs with freshly minted OLAS, you must hold
-              at least&nbsp;
+              To boost rewards of devs with freshly minted OLAS, you must hold at least&nbsp;
               <Text strong>{threshold || NA}</Text>
               &nbsp;veOLAS. Grab your veOLAS by locking OLAS&nbsp;
               <a href="https://member.olas.network/" target="_self">
@@ -185,7 +168,7 @@ export const DepositServiceDonation = () => {
               </Text>
               &nbsp;of donations is required to trigger boosts.
             </>
-          )}
+          }
           className="mb-16"
         />
 
@@ -220,9 +203,7 @@ export const DepositServiceDonation = () => {
           >
             Start new epoch
           </Button>
-          <Text type="secondary">
-            New epochs must be manually triggered by community members
-          </Text>
+          <Text type="secondary">New epochs must be manually triggered by community members</Text>
         </EpochCheckpointRow>
       </div>
     </DonateContainer>

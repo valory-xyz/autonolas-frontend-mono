@@ -50,3 +50,4 @@ Thumbs.db
 ganache_data
 .unlighthouse
 .env.local
+.swc
