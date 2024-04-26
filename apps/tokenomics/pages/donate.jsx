@@ -1,3 +1,3 @@
-import { DepositServiceDonation } from 'components/Home/Donate';
+import { DepositServiceDonation } from 'components/Donate';
 
 export default DepositServiceDonation;

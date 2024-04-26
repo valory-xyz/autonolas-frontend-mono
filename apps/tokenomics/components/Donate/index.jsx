@@ -9,7 +9,7 @@ import { DynamicFieldsForm } from 'common-util/DynamicFieldsForm';
 import { parseToEth, parseToWei, sortUnitIdsAndTypes } from 'common-util/functions';
 import { useHelpers } from 'common-util/hooks/useHelpers';
 
-import { getEpochCounter, getLastEpochRequest } from '../requests';
+import { getEpochCounter, getLastEpochRequest } from 'common-util/functions/contract-functions';
 import {
   checkServicesNotTerminatedOrNotDeployed,
   checkpointRequest,
