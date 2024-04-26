@@ -1,4 +1,5 @@
-import { getDepositoryContract, sendTransaction } from 'common-util/functions';
+import { notifyError } from '@autonolas/frontend-library';
+import { getDepositoryContract, getTokenomicsContract, sendTransaction } from 'common-util/functions';
 
 export const getBondInfoRequest = async (bondList) => {
   const contract = getDepositoryContract();
@@ -75,4 +76,38 @@ export const redeemRequest = async ({ account, bondIds }) => {
   const fn = contract.methods.redeem(bondIds).send({ from: account });
   const response = await sendTransaction(fn, account);
   return response?.transactionHash;
+};
+
+export const getEpochCounter = async () => {
+  const contract = getTokenomicsContract();
+  const response = await contract.methods.epochCounter().call();
+  return parseInt(response, 10);
+};
+
+const getEpochTokenomics = async (epochNum) => {
+  const contract = getTokenomicsContract();
+  const response = await contract.methods.mapEpochTokenomics(epochNum).call();
+  return response;
+};
+
+const getEpochLength = async () => {
+  const contract = getTokenomicsContract();
+  const response = await contract.methods.epochLen().call();
+  return parseInt(response, 10);
+};
+
+export const getLastEpochRequest = async () => {
+  try {
+    const epCounter = await getEpochCounter();
+    const prevEpochPoint = await getEpochTokenomics(Number(epCounter) - 1);
+
+    const prevEpochEndTime = prevEpochPoint.endTime;
+    const epochLen = await getEpochLength();
+    const nextEpochEndTime = parseInt(prevEpochEndTime, 10) + epochLen;
+
+    return { epochLen, prevEpochEndTime, nextEpochEndTime };
+  } catch (error) {
+    notifyError('Error on fetching last epoch');
+    throw error;
+  }
 };

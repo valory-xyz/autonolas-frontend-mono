@@ -1,6 +1,6 @@
 import { Alert, Button, Typography } from 'antd';
 import { ethers } from 'ethers';
-import { isNumber } from 'lodash';
+import isNumber from 'lodash/isNumber';
 import { useEffect, useState } from 'react';
 
 import { NA, getFullFormattedDate, notifySuccess } from '@autonolas/frontend-library';
@@ -9,7 +9,7 @@ import { DynamicFieldsForm } from 'common-util/DynamicFieldsForm';
 import { parseToEth, parseToWei, sortUnitIdsAndTypes } from 'common-util/functions';
 import { useHelpers } from 'common-util/hooks/useHelpers';
 
-import { getEpochCounter, getLastEpochRequest } from '../DevIncentives/requests';
+import { getEpochCounter, getLastEpochRequest } from '../requests';
 import {
   checkServicesNotTerminatedOrNotDeployed,
   checkpointRequest,

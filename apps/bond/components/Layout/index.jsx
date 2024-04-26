@@ -38,7 +38,7 @@ const Layout = ({ children }) => {
   useEffect(() => {
     if (router.pathname) {
       const name = router.pathname.split('/')[1];
-      setSelectedMenu(name || 'veolas');
+      setSelectedMenu(name || 'paths');
     }
   }, [router.pathname]);
 
