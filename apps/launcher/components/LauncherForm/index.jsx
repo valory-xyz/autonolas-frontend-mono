@@ -1,4 +1,5 @@
-import { Button, Divider, Form, Input, Select } from 'antd';
+import { InfoCircleOutlined } from '@ant-design/icons';
+import { Button, Divider, Form, Input, Select, Typography } from 'antd';
 import React, { useState } from 'react';
 
 import { notifySuccess } from '@autonolas/frontend-library';
@@ -8,7 +9,7 @@ import AddServiceContract from './AddServiceContract';
 const initialServiceContracts = [
   {
     implementation: 'option1',
-    name: 'Create Prediction Market',
+    name: 'Available Service Contract 1',
     description: 'description1',
     chainId: '100',
   },
@@ -43,6 +44,11 @@ const LauncherForm = () => {
 
   return (
     <>
+      <Typography.Title style={{ marginTop: 0, marginBottom: 0 }}>Add Service Staking</Typography.Title>
+      <Typography.Paragraph style={{ marginTop: '12px' }}>
+        <InfoCircleOutlined /> Add a service staking to enable voting
+      </Typography.Paragraph>
+
       <Form
         form={form}
         name="basic"

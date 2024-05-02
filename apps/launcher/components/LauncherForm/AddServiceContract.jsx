@@ -24,7 +24,7 @@ const AddServiceContract = ({ isOpen, serviceContracts = [], onClose }) => {
 
   return (
     <Modal
-      title="Available Service Contract"
+      title="Available Services"
       open={isOpen}
       onOk={handleSubmit}
       onCancel={onClose}
