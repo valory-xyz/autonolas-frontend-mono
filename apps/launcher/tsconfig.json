@@ -16,7 +16,15 @@
         "name": "next"
       }
     ],
-    "types": ["jest", "node"]
+    "types": ["jest", "node"],
+    "paths": {
+      "common-util/*": ["apps/launcher/common-util/*"],
+      "components/*": ["apps/launcher/components/*"],
+      "util/*": ["apps/launcher/util/*"],
+      "static/*": ["apps/launcher/static/*"],
+      "images/*": ["apps/launcher/public/images/*"],
+      "store/*": ["apps/launcher/store/*"]
+    }
   },
   "include": ["**/*.ts", "**/*.tsx", "**/*.js", "**/*.jsx", "next-env.d.ts"],
   "exclude": ["node_modules", "jest.config.ts", "src/**/*.spec.ts", "src/**/*.test.ts"]

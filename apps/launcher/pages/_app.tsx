@@ -1,19 +1,107 @@
-import { AppProps } from 'next/app';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { createWeb3Modal, defaultWagmiConfig } from '@web3modal/wagmi';
 import Head from 'next/head';
+import { useRouter } from 'next/router';
+import PropTypes from 'prop-types';
+import { Provider } from 'react-redux';
+import { WagmiProvider, cookieStorage, cookieToInitialState, createStorage } from 'wagmi';
+import { Chain } from 'wagmi/chains';
 
-import './styles.css';
+import { COLOR } from '@autonolas/frontend-library';
 
-function CustomApp({ Component, pageProps }: AppProps) {
+// TODO: should be able to import from 'libs/ui-theme'
+import { GlobalStyles } from 'libs/ui-theme/src/lib/GlobalStyles';
+import { AutonolasThemeProvider } from 'libs/ui-theme/src/lib/ThemeConfig';
+
+import { SUPPORTED_CHAINS } from '../common-util/Login/config';
+import Layout from '../components/Layout';
+import { wrapper } from '../store';
+
+const DESC = 'View and manage components, agents and services via the Autonolas on-chain registry.';
+const queryClient = new QueryClient();
+const projectId = process.env.NEXT_PUBLIC_WALLET_PROJECT_ID as string;
+const metadata = {
+  name: 'Launcher',
+  description: DESC,
+  url: 'https://registry.olas.network/',
+  icons: ['https://avatars.githubusercontent.com/u/37784886'],
+};
+
+const wagmiConfig = defaultWagmiConfig({
+  chains: SUPPORTED_CHAINS as [Chain, ...Chain[]],
+  projectId,
+  metadata,
+  ssr: false,
+  storage: createStorage({ storage: cookieStorage }),
+});
+
+createWeb3Modal({
+  wagmiConfig,
+  projectId,
+  themeMode: 'light',
+  themeVariables: {
+    '--w3m-border-radius-master': '0.7125px',
+    '--w3m-font-size-master': '11px',
+    '--w3m-accent': COLOR.PRIMARY,
+  },
+});
+
+const LauncherApp = ({
+  Component,
+  ...rest
+}: {
+  // TODO: fix any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  Component: any;
+}) => {
+  const router = useRouter();
+  const isNotLegal = router.pathname === '/not-legal';
+  const initialState = cookieToInitialState(wagmiConfig);
+  const { store, props } = wrapper.useWrappedStore(rest);
+
   return (
     <>
+      <GlobalStyles />
       <Head>
-        <title>Welcome to launcher!</title>
+        <title>Launcher</title>
+        <meta name="description" content={DESC} />
       </Head>
-      <main className="app">
-        <Component {...pageProps} />
-      </main>
+      <Provider store={store}>
+        <AutonolasThemeProvider>
+          {isNotLegal ? (
+            <Component {...props.pageProps} />
+          ) : (
+            <WagmiProvider config={wagmiConfig} initialState={initialState}>
+              <QueryClientProvider client={queryClient}>
+                <Layout>
+                  <Component {...props.pageProps} />
+                </Layout>
+              </QueryClientProvider>
+            </WagmiProvider>
+          )}
+        </AutonolasThemeProvider>
+      </Provider>
     </>
   );
-}
+};
 
-export default CustomApp;
+type InitialProps = {
+  Component: {
+    getInitialProps: (ctx: {
+      Component: { getInitialProps: () => Promise<Record<string, never>> };
+    }) => Promise<Record<string, never>>;
+  };
+  ctx: { Component: { getInitialProps: () => Promise<Record<string, never>> } };
+};
+
+LauncherApp.getInitialProps = async ({ Component, ctx }: InitialProps) => {
+  const pageProps = Component.getInitialProps ? await Component.getInitialProps(ctx) : {};
+  return { pageProps };
+};
+
+LauncherApp.propTypes = {
+  Component: PropTypes.oneOfType([PropTypes.func, PropTypes.shape({})]).isRequired,
+  pageProps: PropTypes.shape({}).isRequired,
+};
+
+export default LauncherApp;
