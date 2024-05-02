@@ -136,7 +136,7 @@ const columns = [
 export const AllPage = () => (
   <StyledMain>
     <PathsContainer>
-      <h1>Staking Allocation </h1>
+      <h1>Staking Contracts</h1>
       <div style={{maxWidth: 800}}>
       <Table
           columns={columns}
