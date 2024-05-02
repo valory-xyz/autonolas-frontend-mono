@@ -7,8 +7,8 @@ import { useHelpers } from 'common-util/hooks';
 import { useScreen } from '@autonolas/frontend-library';
 
 const items = [
-  { label: 'All Staking Contracts', key: 'all' },
-  { label: 'Your Staking Contracts', key: 'your' },
+  { label: 'Staking Allocation', key: 'allocation' },
+  { label: 'Staking Contracts', key: 'contracts' },
 ];
 
 
@@ -47,8 +47,8 @@ const NavigationMenu = () => {
   // to set default menu on first render
   useEffect(() => {
     if (pathname) {
-      const name = pathname.split('/')[2];
-      setSelectedMenu(name || null);
+      const name = pathname.split('/')[1];
+      setSelectedMenu(name);
     }
   }, [pathname]);
 
