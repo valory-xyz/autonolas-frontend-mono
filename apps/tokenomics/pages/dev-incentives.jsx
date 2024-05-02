@@ -1,3 +1,3 @@
-import { DevIncentives } from 'components/Home/DevIncentives';
+import { DevIncentives } from 'components/DevIncentives';
 
 export default DevIncentives;

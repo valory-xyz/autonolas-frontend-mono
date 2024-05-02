@@ -4,13 +4,11 @@ import {
   DISPENSER,
   TREASURY,
   TOKENOMICS,
-  BOND_CALCULATOR,
-  UNISWAP_V2_PAIR_ABI,
   AGENT_REGISTRY,
   COMPONENT_REGISTRY,
   SERVICE_REGISTRY,
   ERC20_ABI,
-} from 'common-util/abiAndAddresses';
+} from 'libs/util-contracts/src/lib/abiAndAddresses';
 
 import { ADDRESSES } from 'common-util/constants/addresses';
 import {
@@ -62,22 +60,8 @@ export const getTokenomicsContract = () => {
   return contract;
 };
 
-export const getUniswapV2PairContract = (address) => {
-  const contract = getContract(UNISWAP_V2_PAIR_ABI, address);
-  return contract;
-};
-
 export const getErc20Contract = (address) => {
   const contract = getContract(ERC20_ABI, address);
-  return contract;
-};
-
-export const getGenericBondCalculatorContract = () => {
-  const { chainId } = getWeb3Details();
-  const contract = getContract(
-    BOND_CALCULATOR.abi,
-    ADDRESSES[chainId].genericBondCalculator,
-  );
   return contract;
 };
 

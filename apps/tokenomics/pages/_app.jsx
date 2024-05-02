@@ -1,11 +1,13 @@
-import PropTypes from 'prop-types';
-import GlobalStyle from 'components/GlobalStyles';
 import Head from 'next/head';
+import { useRouter } from 'next/router';
+import PropTypes from 'prop-types';
 import { Provider } from 'react-redux';
+
+import GlobalStyle from 'components/GlobalStyles';
 
 /** antd theme config */
 import Layout from 'components/Layout';
-import { useRouter } from 'next/router';
+
 import { ThemeConfigProvider } from '../context/ConfigProvider';
 import Web3ModalProvider from '../context/Web3ModalProvider';
 import { store } from '../store';
@@ -39,16 +41,13 @@ const MyApp = ({ Component, pageProps }) => {
 };
 
 MyApp.getInitialProps = async ({ Component, ctx }) => {
-  const pageProps = Component.getInitialProps
-    ? await Component.getInitialProps(ctx)
-    : {};
+  const pageProps = Component.getInitialProps ? await Component.getInitialProps(ctx) : {};
 
   return { pageProps };
 };
 
 MyApp.propTypes = {
-  Component: PropTypes.oneOfType([PropTypes.func, PropTypes.shape({})])
-    .isRequired,
+  Component: PropTypes.oneOfType([PropTypes.func, PropTypes.shape({})]).isRequired,
   pageProps: PropTypes.shape({}).isRequired,
 };
 

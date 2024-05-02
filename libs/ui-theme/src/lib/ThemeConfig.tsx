@@ -1,4 +1,4 @@
-import { ConfigProvider, ConfigProviderProps, ThemeConfig } from 'antd';
+import { ConfigProvider as AntdConfigProvider, ConfigProviderProps, ThemeConfig } from 'antd';
 import { useEffect, useState } from 'react';
 
 import { COLOR } from './ui-theme';
@@ -42,12 +42,12 @@ export const THEME_CONFIG: ThemeConfig = {
  * ensure that the theme is only applied once the component has mounted.
  * @param props The props to pass to the `ConfigProvider`.
  */
-export const AutonolasThemeProvider = ({ theme = THEME_CONFIG, ...rest }: ConfigProviderProps) => {
+export const AutonolasThemeProvider = ({ theme = THEME_CONFIG, children }: ConfigProviderProps) => {
   const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
     setIsMounted(true);
   }, []);
 
-  return isMounted ? <ConfigProvider theme={theme} {...rest} /> : null;
+  return <AntdConfigProvider theme={theme}>{isMounted ? children : ''}</AntdConfigProvider>;
 };

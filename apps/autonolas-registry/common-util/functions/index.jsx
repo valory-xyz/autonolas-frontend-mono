@@ -1,6 +1,5 @@
 import { PublicKey } from '@solana/web3.js';
 import { ethers } from 'ethers';
-import { isString, toLower } from 'lodash';
 
 import {
   getChainIdOrDefaultToMainnet as getChainIdOrDefaultToMainnetFn,
@@ -11,7 +10,9 @@ import {
   sendTransaction as sendTransactionFn,
 } from '@autonolas/frontend-library';
 
-import prohibitedAddresses from '../../data/prohibited-addresses.json';
+import prohibitedAddresses from 'libs/util-prohibited-data/src/lib/prohibited-addresses.json';
+import { isString, toLower } from 'lodash';
+
 import { VM_TYPE } from '../../util/constants';
 import { RPC_URLS } from '../Contracts';
 import { SUPPORTED_CHAINS } from '../Login';
