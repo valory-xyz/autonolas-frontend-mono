@@ -39,13 +39,13 @@ const Layout = ({ children }) => {
   const { vmType, isSvm, chainId, chainName } = useHelpers();
   const path = router?.pathname || '';
 
-  const { onHomeClick, updateChainId } = useHandleRoute();
+  // const { onHomeClick, updateChainId } = useHandleRoute();
 
   return (
     <CustomLayout>
       <OlasHeader ismobile={`${isMobile}`}>
         <Logo
-          onClick={onHomeClick}
+          // onClick={onHomeClick}
           data-testid="protocol-logo"
           ismobile={`${isMobile}`}
         >
@@ -59,14 +59,7 @@ const Layout = ({ children }) => {
 
       <Content className="site-layout">
         <div className="site-layout-background">
-          {/* chainId has to be set in redux before rendering any components
-              OR the page doesn't depends on the chain Id
-              OR it is SOLANA */}
-          {chainId ||
-          isSvm ||
-          PAGES_TO_LOAD_WITHOUT_CHAINID.some((e) => e === path)
-            ? children
-            : null}
+          {children}
         </div>
       </Content>
 

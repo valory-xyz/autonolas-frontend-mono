@@ -120,7 +120,7 @@ export const useHandleRoute = () => {
       pathArray.length === 1
     ) {
       router.push(
-        `/${networkNameFromUrl}/${isL1Network ? 'components' : 'services'}`,
+        'all',
       );
       return;
     }
