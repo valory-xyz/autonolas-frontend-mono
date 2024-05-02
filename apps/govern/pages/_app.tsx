@@ -63,22 +63,18 @@ const RegistryApp = ({
     <>
       <GlobalStyles />
       <Head>
-        <title>Autonolas Registry</title>
+        <title>Govern</title>
         <meta name="description" content={DESC} />
       </Head>
       <Provider store={store}>
         <AutonolasThemeProvider>
-          {isNotLegal ? (
-            <Component {...props.pageProps} />
-          ) : (
-            <WagmiProvider config={wagmiConfig} initialState={initialState}>
-              <QueryClientProvider client={queryClient}>
-                <Layout>
-                  <Component {...props.pageProps} />
-                </Layout>
-              </QueryClientProvider>
-            </WagmiProvider>
-          )}
+          <WagmiProvider config={wagmiConfig} initialState={initialState}>
+            <QueryClientProvider client={queryClient}>
+              <Layout>
+                <Component {...props.pageProps} />
+              </Layout>
+            </QueryClientProvider>
+          </WagmiProvider>
         </AutonolasThemeProvider>
       </Provider>
     </>

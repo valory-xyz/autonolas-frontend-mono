@@ -7,8 +7,8 @@ import { useHelpers } from 'common-util/hooks';
 import { useScreen } from '@autonolas/frontend-library';
 
 const items = [
-  { label: 'All Staking Contracts', key: 'All' },
-  { label: 'Your Staking Contracts', key: 'Your' },
+  { label: 'All Staking Contracts', key: 'all' },
+  { label: 'Your Staking Contracts', key: 'your' },
 ];
 
 
@@ -53,7 +53,7 @@ const NavigationMenu = () => {
   }, [pathname]);
 
   const handleMenuItemClick = ({ key }) => {
-    router.push(`/${chainName}/${key}`);
+    router.push(key);
     setSelectedMenu(key);
     setMenuVisible(false); // close the dropdown menu after item click
   };
