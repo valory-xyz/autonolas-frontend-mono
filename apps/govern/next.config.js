@@ -1,7 +1,8 @@
 //@ts-check
 
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const { composePlugins, withNx } = require('@nx/next');
+const objects = require('@nx/next');
+
+const { composePlugins, withNx } = objects;
 
 /**
  * @type {import('@nx/next/plugins/with-nx').WithNxOptions}
@@ -12,11 +13,38 @@ const nextConfig = {
     // See: https://github.com/gregberge/svgr
     svgr: false,
   },
-
   compiler: {
     // For other options, see https://styled-components.com/docs/tooling#babel-plugin
     styledComponents: true,
   },
+  webpack(config) {
+    config.resolve.fallback = {
+      fs: false,
+    };
+    return config;
+  },
+  redirects: async () => [
+    {
+      source: '/',
+      destination: '/ethereum/components',
+      permanent: true,
+    },
+    {
+      source: '/components',
+      destination: '/ethereum/components',
+      permanent: true,
+    },
+    {
+      source: '/agents',
+      destination: '/ethereum/agents',
+      permanent: true,
+    },
+    {
+      source: '/services',
+      destination: '/ethereum/services',
+      permanent: true,
+    },
+  ],
 };
 
 const plugins = [
