@@ -1,5 +1,10 @@
-import { ArrowsAltOutlined, InfoCircleOutlined, WarningOutlined } from '@ant-design/icons';
-import { Button, Col, InputNumber, Row, Slider, Table } from 'antd';
+import {
+  ArrowsAltOutlined,
+  InfoCircleOutlined,
+  PlusOutlined,
+  WarningOutlined,
+} from '@ant-design/icons';
+import { Button, Col, InputNumber, Row, Slider, Table, Modal, Form, Input } from 'antd';
 import { useState } from 'react';
 
 import styled from 'styled-components';
@@ -80,7 +85,6 @@ const columnsUpdating = (allocations, setAllocations) => [
     dataIndex: 'allocation',
     key: 'allocation',
     render: (_, record, index) => {
-      console.log('allocations[row]', allocations[index], allocations, index);
       return (
         <Row>
           <Col span={12}>
@@ -111,15 +115,14 @@ const columnsUpdating = (allocations, setAllocations) => [
   },
 ];
 
-
 export const YourPage = () => {
   const [data, setData] = useState(initialData);
 
-  const initialAllocations = data.map((item) => parseInt(item.allocation, 10))
+  const initialAllocations = data.map((item) => parseInt(item.allocation, 10));
   const [allocations, setAllocations] = useState(initialAllocations);
   const [isUpdating, setIsUpdating] = useState();
 
-  console.log('allocations', allocations);
+  const [form] = Form.useForm();
 
   const updateAllocations = (value, row) => {
     setAllocations((prev) => {
@@ -131,18 +134,52 @@ export const YourPage = () => {
 
   const onSubmit = () => {
     setData((prev) => {
-      console.log('prev', prev)
       const newData = prev.map((item, index) => ({
         ...item,
-        allocation: `${allocations[index]}%`
-    }));
+        allocation: `${allocations[index]}%`,
+      }));
       return newData;
-    })
-  }
+    });
+  };
 
   const onCancel = () => {
     setAllocations(initialAllocations);
-    setIsUpdating(false)
+    setIsUpdating(false);
+  };
+
+
+  /// add contract modal
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const showModal = () => {
+    setIsModalOpen(true);
+  };
+
+  const handleOk = () => {
+    form.submit()
+  };
+
+  const handleCancel = () => {
+    setIsModalOpen(false);
+  };
+
+  const onAddContract = (values) => {
+    setData((prev) => {
+      const newData = [...prev, {
+        title: 'Create Prediction Market',
+        address: values.address,
+        chain: 'Gnosis Chain',
+        allocation: '0%',
+      }]
+      return newData;
+    });
+
+    setAllocations((prev) => {
+      const newAllocations = [...prev, 0];
+      return newAllocations;
+    });
+
+    handleCancel()
   }
 
   return (
@@ -156,15 +193,15 @@ export const YourPage = () => {
                 type="primary"
                 style={{ marginRight: '16px' }}
                 onClick={() => {
-                  onSubmit()
-                  setIsUpdating(false)
+                  onSubmit();
+                  setIsUpdating(false);
                 }}
               >
                 Submit update
               </Button>
               <Button onClick={onCancel}>Cancel</Button>
             </div>
-            <p style={{ marginBottom: '24px', }}>
+            <p style={{ marginBottom: '24px' }}>
               <InfoCircleOutlined /> Updates take effect at the start of the next week
             </p>
             {allocations.reduce((prev, item) => prev + item, 0) > 100 && (
@@ -172,6 +209,55 @@ export const YourPage = () => {
                 <WarningOutlined /> Sum of allocation should be less that 100%
               </p>
             )}
+
+            <Row style={{ marginBottom: '16px' }}>
+              <Col span={5}>
+                <Button
+                  icon={<PlusOutlined />}
+                  onClick={showModal}
+                >
+                  Add another contract
+                </Button>
+                <Modal title="Add Contract" open={isModalOpen} onOk={handleOk} onCancel={handleCancel} footer={[
+                    <Button key="back" onClick={handleCancel}>
+                      Cancel
+                    </Button>,
+                    <Button key="submit" type="button" onClick={handleOk}>
+                      Add
+                    </Button>,
+                  ]}>
+                <Form
+                 form={form}
+                  name="basic"
+                  labelCol={{ span: 5 }}
+                  wrapperCol={{ span: 16 }}
+                  onFinish={onAddContract}
+                  autoComplete="off"
+                  style={{marginTop: '24px'}}
+                  
+                >
+                  <Form.Item
+                    label="Address"
+                    name="address"
+                    rules={[{ required: true }]}
+                  >
+                    <Input />
+                  </Form.Item>
+
+                  <Form.Item
+                    label="Chain Id"
+                    name="chain"
+                    rules={[{ required: true }]}
+                  >
+                    <Input />
+                  </Form.Item>
+                </Form>
+                </Modal>
+              </Col>
+              <Col span={4}>
+                <Button type="link">Explore contracts</Button>
+              </Col>
+            </Row>
           </>
         ) : (
           <Button style={{ marginBottom: '16px' }} onClick={() => setIsUpdating(true)}>
