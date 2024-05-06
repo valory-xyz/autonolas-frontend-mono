@@ -1,7 +1,6 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { createWeb3Modal, defaultWagmiConfig } from '@web3modal/wagmi';
 import Head from 'next/head';
-import { useRouter } from 'next/router';
 import PropTypes from 'prop-types';
 import { Provider } from 'react-redux';
 import { WagmiProvider, cookieStorage, cookieToInitialState, createStorage } from 'wagmi';
@@ -17,6 +16,7 @@ import { SUPPORTED_CHAINS } from '../common-util/Login/config';
 import Layout from '../components/Layout';
 import { wrapper } from '../store';
 
+// TODO: update desc
 const DESC = 'View and manage components, agents and services via the Autonolas on-chain registry.';
 const queryClient = new QueryClient();
 const projectId = process.env.NEXT_PUBLIC_WALLET_PROJECT_ID as string;
@@ -54,8 +54,6 @@ const RegistryApp = ({
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   Component: any;
 }) => {
-  const router = useRouter();
-  const isNotLegal = router.pathname === '/not-legal';
   const initialState = cookieToInitialState(wagmiConfig);
   const { store, props } = wrapper.useWrappedStore(rest);
 
