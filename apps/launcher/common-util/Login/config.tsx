@@ -1,6 +1,3 @@
-import { web3 } from '@project-serum/anchor';
-import { Cluster } from '@solana/web3.js';
-import { kebabCase } from 'lodash';
 import {
   Chain,
   arbitrum,
@@ -19,8 +16,9 @@ import {
   polygonMumbai,
 } from 'wagmi/chains';
 
+import { kebabCase } from 'lodash';
+
 import { RPC_URLS } from 'common-util/Contracts';
-import { SOLANA_CHAIN_NAMES, VM_TYPE } from 'util/constants';
 
 export const SUPPORTED_CHAINS: Chain[] = [
   mainnet,
@@ -79,92 +77,37 @@ export const EVM_SUPPORTED_CHAINS = SUPPORTED_CHAINS.map((chain) => {
     id,
     networkDisplayName: getNetworkDisplayName(),
     networkName: getNetworkName(),
-    vmType: VM_TYPE.EVM,
   };
 });
-
-type SolanaChain = {
-  id: number | null;
-  networkDisplayName: string;
-  networkName: string;
-  clusterName: Cluster;
-  vmType: keyof typeof VM_TYPE;
-};
-
-/**
- * Solana supported chains
- */
-const SVM_SOLANA_CHAIN: SolanaChain = {
-  id: null,
-  networkDisplayName: 'Solana',
-  networkName: SOLANA_CHAIN_NAMES.MAINNET,
-  clusterName: 'mainnet-beta',
-  vmType: VM_TYPE.SVM,
-};
-
-const SVM_SOLANA_DEVNET_CHAIN: SolanaChain = {
-  id: null,
-  networkDisplayName: 'Solana Devnet',
-  networkName: SOLANA_CHAIN_NAMES.DEVNET,
-  clusterName: 'devnet',
-  vmType: 'SVM',
-};
-
-export const SVM_SUPPORTED_CHAINS: SolanaChain[] = [
-  { ...SVM_SOLANA_CHAIN },
-  { ...SVM_SOLANA_DEVNET_CHAIN },
-];
-
-const DEFAULT_SVM_CLUSTER = 'mainnet-beta';
-
-/**
- * Get the endpoint for a given Solana network name.
- * If it's mainnet, directly return the endpoint at process.env.NEXT_PUBLIC_SOLANA_MAINNET_URL.
- * Otherwise, return web3.clusterApiUrl and pass in the devnet cluster name.
- * @param {string} networkName - The network name to get the endpoint for.
- * @returns {string} The endpoint URL associated with the network name.
- */
-export const getSvmEndpoint = (networkName: string) => {
-  const chain: SolanaChain | undefined = SVM_SUPPORTED_CHAINS.find(
-    (c) => c.networkName === networkName,
-  );
-
-  if (chain?.networkName === SOLANA_CHAIN_NAMES.MAINNET) {
-    return process.env.NEXT_PUBLIC_SOLANA_MAINNET_BETA_URL;
-  }
-  return chain ? web3.clusterApiUrl(chain.clusterName) : web3.clusterApiUrl(DEFAULT_SVM_CLUSTER);
-};
 
 /**
  * Returns the list of all supported chains.
  */
-export const ALL_SUPPORTED_CHAINS = [...EVM_SUPPORTED_CHAINS, ...SVM_SUPPORTED_CHAINS].sort(
-  (a, b) => {
-    // NOTE: sort in this order only for the purpose of the dropdown
-    const chainNameOrder: Chain['name'][] = [
-      'Ethereum',
-      'Gnosis',
-      'Polygon',
-      'Solana',
-      'Arbitrum One',
-      'Base',
-      'Optimism',
-      'Celo',
-      'Goerli',
-      'Gnosis Chiado',
-      'Polygon Mumbai',
-      'Solana Devnet',
-      'Arbitrum Sepolia',
-      'Base Sepolia',
-      'Optimism Sepolia',
-      'Celo Alfajores',
-    ];
+export const ALL_SUPPORTED_CHAINS = [...EVM_SUPPORTED_CHAINS].sort((a, b) => {
+  // NOTE: sort in this order only for the purpose of the dropdown
+  const chainNameOrder: Chain['name'][] = [
+    'Ethereum',
+    'Gnosis',
+    'Polygon',
+    'Solana',
+    'Arbitrum One',
+    'Base',
+    'Optimism',
+    'Celo',
+    'Goerli',
+    'Gnosis Chiado',
+    'Polygon Mumbai',
+    'Solana Devnet',
+    'Arbitrum Sepolia',
+    'Base Sepolia',
+    'Optimism Sepolia',
+    'Celo Alfajores',
+  ];
 
-    const aIndex = chainNameOrder.indexOf(a.networkDisplayName);
-    const bIndex = chainNameOrder.indexOf(b.networkDisplayName);
+  const aIndex = chainNameOrder.indexOf(a.networkDisplayName);
+  const bIndex = chainNameOrder.indexOf(b.networkDisplayName);
 
-    if (aIndex === bIndex) return 0;
-    if (aIndex > bIndex) return 1;
-    return -1;
-  },
-);
+  if (aIndex === bIndex) return 0;
+  if (aIndex > bIndex) return 1;
+  return -1;
+});

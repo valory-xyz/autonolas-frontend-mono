@@ -1,15 +1,10 @@
-import { ConnectionProvider, WalletProvider } from '@solana/wallet-adapter-react';
-import { PhantomWalletAdapter } from '@solana/wallet-adapter-wallets';
 import { Layout as AntdLayout } from 'antd';
 import dynamic from 'next/dynamic';
 import { useRouter } from 'next/router';
 import PropTypes from 'prop-types';
-import { useMemo } from 'react';
-import { useSelector } from 'react-redux';
 
-import { VM_TYPE, useScreen } from '@autonolas/frontend-library';
+import { useScreen } from '@autonolas/frontend-library';
 
-import { getSvmEndpoint } from '../../common-util/Login/config';
 import { useHelpers } from '../../common-util/hooks';
 import { PAGES_TO_LOAD_WITHOUT_CHAINID } from '../../util/constants';
 import { LogoIconSvg } from '../Logos';
@@ -66,18 +61,7 @@ Layout.defaultProps = { children: null };
 // NOTE: cannot use useHelpers in this component
 // because Provider needs to be initialized before.
 const LayoutWithWalletProvider = (props) => {
-  const chainName = useSelector((state) => state?.setup?.chainName);
-  const vmType = useSelector((state) => state?.setup?.vmType);
-  const endpoint = getSvmEndpoint(chainName);
-  const wallets = useMemo(() => [new PhantomWalletAdapter()], []);
-
-  return (
-    <ConnectionProvider endpoint={endpoint}>
-      <WalletProvider wallets={wallets} autoConnect={vmType === VM_TYPE.SVM}>
-        <Layout {...props}>{props.children}</Layout>
-      </WalletProvider>
-    </ConnectionProvider>
-  );
+  return <Layout {...props}>{props.children}</Layout>;
 };
 
 LayoutWithWalletProvider.propTypes = { children: PropTypes.element };

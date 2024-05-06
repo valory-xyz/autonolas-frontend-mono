@@ -1,4 +1,3 @@
-import { useAnchorWallet } from '@solana/wallet-adapter-react';
 import { useMemo } from 'react';
 import { useSelector } from 'react-redux';
 import { useAccount } from 'wagmi';
@@ -10,11 +9,10 @@ import {
 
 import { isNumber } from 'lodash';
 
-import { URL, VM_TYPE } from '../../util/constants';
+import { URL } from '../../util/constants';
 import { doesNetworkHaveValidServiceManagerTokenFn } from '../functions';
 
 export const useHelpers = () => {
-  const wallet = useAnchorWallet();
   const { account, vmType, chainId, chainDisplayName, chainName } = useSelector(
     (state) => state?.setup,
   );
@@ -39,8 +37,6 @@ export const useHelpers = () => {
     return chainIdFromWallet !== chainId;
   }, [chainId, chainIdFromWallet]);
 
-  const isSvm = vmType === VM_TYPE.SVM;
-
   return {
     /**
      * @type {string | import("@solana/web3.js").PublicKey}
@@ -48,7 +44,7 @@ export const useHelpers = () => {
      * If SVM, account is the public key of the phantom wallet
      * else account is the address of the selected wallet
      */
-    account: isSvm ? wallet?.publicKey : account,
+    account: account,
     vmType,
     chainId: chainId || chainIdFromWallet,
     chainDisplayName,
@@ -59,6 +55,5 @@ export const useHelpers = () => {
     links: updatedLinks,
     isConnectedToWrongNetwork,
     isMainnet: chainId === 1,
-    isSvm,
   };
 };
