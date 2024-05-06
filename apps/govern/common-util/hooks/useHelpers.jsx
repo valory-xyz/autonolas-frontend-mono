@@ -1,31 +1,33 @@
-import { useMemo } from 'react';
-import { useSelector } from 'react-redux';
-import { isNumber } from 'lodash';
-import { useAccount } from 'wagmi';
 import { useAnchorWallet } from '@solana/wallet-adapter-react';
-import {
-  isL1OnlyNetwork as isL1OnlyNetworkFn,
-  isL1Network as isL1NetworkFn,
-} from '@autonolas/frontend-library';
+import { useEffect, useMemo } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { useAccount } from 'wagmi';
 
-import { URL, VM_TYPE } from '../../util/constants';
-import { doesNetworkHaveValidServiceManagerTokenFn } from '../functions';
+import { getChainId } from '@autonolas/frontend-library';
+
+import { isNumber } from 'lodash';
+import { setChainId } from 'store/setup';
+
+import { SUPPORTED_CHAINS } from 'common-util/Login';
+
+import { VM_TYPE } from '../../util/constants';
 
 export const useHelpers = () => {
+  const dispatch = useDispatch();
   const wallet = useAnchorWallet();
-  const { account, vmType, chainId, chainDisplayName, chainName } = useSelector(
-    (state) => state?.setup,
-  );
+  const { account, vmType, chainId } = useSelector((state) => state?.setup);
   const { chainId: chainIdFromWallet } = useAccount();
 
   /**
-   * Links with chain name
-   * eg. /ethereum/agents, /goerli/agents
+   * Set chainId to redux on page load.
+   * This should be single source of truth for chainId
    */
-  const updatedLinks = Object.entries(URL).reduce((acc, [key, value]) => {
-    acc[key] = `/${chainName}${value}`;
-    return acc;
-  }, {});
+  const currentChainId = getChainId(SUPPORTED_CHAINS);
+  useEffect(() => {
+    if (currentChainId !== chainId) {
+      dispatch(setChainId(currentChainId));
+    }
+  }, [chainId, currentChainId, dispatch]);
 
   /**
    * @returns {boolean} - true if the wallet is connected to wrong network
@@ -47,17 +49,8 @@ export const useHelpers = () => {
      * else account is the address of the selected wallet
      */
     account: isSvm ? wallet?.publicKey : account,
-    vmType,
     chainId,
-    chainDisplayName,
-    chainName,
-    isL1OnlyNetwork: isL1OnlyNetworkFn(chainId),
-    isL1Network: isL1NetworkFn(chainId),
-    doesNetworkHaveValidServiceManagerToken:
-      doesNetworkHaveValidServiceManagerTokenFn(chainId),
-    links: updatedLinks,
     isConnectedToWrongNetwork,
-    isMainnet: chainId === 1,
     isSvm,
   };
 };
