@@ -1,41 +1,10 @@
-import {
-  Chain,
-  arbitrum,
-  arbitrumSepolia,
-  base,
-  baseSepolia,
-  celo,
-  celoAlfajores,
-  gnosis,
-  gnosisChiado,
-  goerli,
-  mainnet,
-  optimism,
-  optimismSepolia,
-  polygon,
-  polygonMumbai,
-} from 'wagmi/chains';
+import { Chain, gnosis, mainnet } from 'wagmi/chains';
 
 import { kebabCase } from 'lodash';
 
 import { RPC_URLS } from 'common-util/Contracts';
 
-export const SUPPORTED_CHAINS: Chain[] = [
-  mainnet,
-  goerli,
-  gnosis,
-  gnosisChiado,
-  polygon,
-  polygonMumbai,
-  arbitrum,
-  arbitrumSepolia,
-  base,
-  baseSepolia,
-  optimism,
-  optimismSepolia,
-  celo,
-  celoAlfajores,
-].map((chain) => {
+export const SUPPORTED_CHAINS: Chain[] = [mainnet, gnosis].map((chain) => {
   const defaultRpc = RPC_URLS[chain.id] || chain.rpcUrls.default.http[0];
   return {
     ...chain,

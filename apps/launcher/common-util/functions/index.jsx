@@ -5,18 +5,16 @@ import {
   getChainIdOrDefaultToMainnet as getChainIdOrDefaultToMainnetFn,
   getIsValidChainId as getIsValidChainIdFn,
   isValidAddress,
-  notifyError,
   notifyWarning,
   sendTransaction as sendTransactionFn,
 } from '@autonolas/frontend-library';
 
 import prohibitedAddresses from 'libs/util-prohibited-data/src/lib/prohibited-addresses.json';
-import { isString, toLower } from 'lodash';
+import { toLower } from 'lodash';
 
-import { VM_TYPE } from '../../util/constants';
 import { RPC_URLS } from '../Contracts';
 import { SUPPORTED_CHAINS } from '../Login';
-import { EVM_SUPPORTED_CHAINS, SVM_SUPPORTED_CHAINS } from '../Login/config';
+import { EVM_SUPPORTED_CHAINS } from '../Login/config';
 
 export const getModalProvider = () => window?.MODAL_PROVIDER;
 
@@ -93,32 +91,6 @@ export const getChainIdOrDefaultToMainnet = (chainId) => {
 };
 
 /**
- * Checks if the provided object is a MethodsBuilder object.
- * A MethodsBuilder object is expected to have certain properties that are
- * used to interact with the blockchain.
- *
- * @param {object} builderIns - The object to check.
- * @returns {boolean} - True if the object is a MethodsBuilder object, false otherwise.
- */
-const isMethodsBuilderInstance = (builderIns, registryAddress) => {
-  if (typeof builderIns !== 'object' || builderIns === null) {
-    throw new Error('sendTransaction: Input must be an object.');
-  }
-
-  const programId = '_programId' in builderIns ? builderIns?._programId?.toString() : null; // eslint-disable-line no-underscore-dangle
-
-  // Check if the programId is the same as the registry address
-  const hasProgramId = programId === registryAddress;
-
-  // Check for a complex property with a specific structure,
-  // eslint-disable-next-line no-underscore-dangle
-  const isArgsArray = Array.isArray(builderIns._args);
-
-  // Return true if both characteristic properties are as expected
-  return hasProgramId && isArgsArray;
-};
-
-/**
  * Sends a transaction using the appropriate method based on the virtual machine type.
  * For SVM (Solana Virtual Machine), it uses the rpc method on the function.
  * For EVM (Ethereum Virtual Machine), it uses a generic sendTransaction function.
@@ -131,17 +103,7 @@ const isMethodsBuilderInstance = (builderIns, registryAddress) => {
  * @param {string} extra.registryAddress - The address of the registry contract.
  *
  */
-export const sendTransaction = (method, account, extra) => {
-  const { vmType, registryAddress } = extra || {};
-  if (vmType === VM_TYPE.SVM) {
-    // Check if something resembling an SVM method is being passed
-    if (!isMethodsBuilderInstance(method, registryAddress)) {
-      notifyError('Invalid method object');
-      throw new Error('Invalid method object');
-    }
-    return method.rpc();
-  }
-
+export const sendTransaction = (method, account) => {
   return sendTransactionFn(method, account, {
     supportedChains: SUPPORTED_CHAINS,
     rpcUrls: RPC_URLS,
@@ -193,15 +155,6 @@ export const doesPathIncludesComponentsOrAgents = (path) => {
 
 export const notifyWrongNetwork = () => {
   notifyWarning('Please switch to the correct network and try again');
-};
-
-// functions for solana
-export const isPageWithSolana = (path) => {
-  if (!path) return false;
-  if (!isString(path)) return false;
-
-  const checkPath = (chain) => path.toLowerCase().includes(chain.networkName.toLowerCase());
-  return SVM_SUPPORTED_CHAINS.some(checkPath);
 };
 
 export const isValidSolanaPublicKey = (publicKey) => {
