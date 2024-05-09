@@ -6,7 +6,8 @@ import {
 } from '@ant-design/icons';
 import { Button, Col, Form, Input, InputNumber, Modal, Row, Slider, Table } from 'antd';
 import { ColumnsType } from 'antd/es/table';
-import { useState } from 'react';
+import { getVoteWeightingContract } from 'common-util/functions/web3';
+import { useEffect, useState } from 'react';
 
 import styled from 'styled-components';
 
@@ -21,32 +22,12 @@ const StyledMain = styled.main`
 `;
 
 interface DataItem {
+  key: string;
   title: string;
   address: string;
   chain: string;
   allocation: string;
 }
-
-const initialData: DataItem[] = [
-  {
-    title: 'Create Prediction Market for Global Economic Indicators',
-    address: '0xa7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5',
-    chain: 'Gnosis Chain',
-    allocation: '38%',
-  },
-  {
-    title: 'Create Prediction Market for Fashion Trends',
-    address: '0xb8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6',
-    chain: 'Gnosis Chain',
-    allocation: '12%',
-  },
-  {
-    title: 'Create Prediction Market for Food Industry Trends',
-    address: '0xa3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1',
-    chain: 'Gnosis Chain',
-    allocation: '5%',
-  },
-];
 
 const columns: ColumnsType<DataItem> = [
   {
@@ -129,7 +110,21 @@ const columnsUpdating = (
 ];
 
 export const AllocationPage = () => {
-  const [data, setData] = useState(initialData);
+  const [data, setData] = useState<DataItem[]>([]);
+
+  useEffect(() => {
+    const contract = getVoteWeightingContract()
+    contract.methods.getAllNominees().call().then((res: {account: string, chainId: string}[]) => {
+      const filteredItems = res.filter(item => item.chainId !== '0').map(item => ({
+          key: item.account,
+          title: 'Create Prediction Market for Food Industry Trends',
+          address: item.account,
+          chain: item.chainId,
+          allocation: '0%',
+      }))
+      setData(filteredItems)
+    })
+  }, [])
 
   const initialAllocations = data.map((item) => parseInt(item.allocation, 10));
   const [allocations, setAllocations] = useState(initialAllocations);
@@ -180,6 +175,7 @@ export const AllocationPage = () => {
       const newData = [
         ...prev,
         {
+          key: values.address,
           title: 'Create Prediction Market',
           address: values.address,
           chain: 'Gnosis Chain',

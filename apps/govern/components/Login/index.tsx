@@ -1,6 +1,5 @@
 import { useCallback, useEffect } from 'react';
 import { ethers } from 'ethers';
-import { Address } from 'viem';
 import { useBalance } from 'wagmi';
 
 import { setChainId, setLogout, setUserAccount, setUserBalance } from 'store/setup';

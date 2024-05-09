@@ -10,3 +10,4 @@ export * from './erc20';
 export * from './bondCalculator';
 export * from './liquidityLockbox.json';
 export * from './whirlpool.json';
+export * from './voteWeighting';

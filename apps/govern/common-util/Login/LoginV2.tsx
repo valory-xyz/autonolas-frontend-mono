@@ -1,5 +1,4 @@
 import { FC, useCallback, useEffect } from 'react';
-import { Address } from 'viem';
 import { useAccountEffect, useConfig, useDisconnect } from 'wagmi';
 import styled from 'styled-components';
 
