@@ -1,12 +1,14 @@
+import { base, gnosis, goerli, mainnet, optimism, polygon } from 'viem/chains';
+
 import {
-  getProvider as getProviderFn,
-  getChainId as getChainIdFn,
   STAGING_CHAIN_ID,
+  getChainId as getChainIdFn,
+  getProvider as getProviderFn,
   notifyError,
 } from '@autonolas/frontend-library';
 
-import { RPC_URLS } from 'common-util/constants/rpcs';
 import { SUPPORTED_CHAINS } from 'common-util/config/wagmi';
+import { RPC_URLS } from 'common-util/constants/rpcs';
 
 const supportedChains =
   process.env.NEXT_PUBLIC_IS_CONNECTED_TO_LOCAL === 'true'
@@ -31,4 +33,14 @@ export const getChainId = (chainId?: number) => {
     return STAGING_CHAIN_ID;
   }
   return getChainIdFn(supportedChains, chainId || '');
+};
+
+export const CHAIN_NAMES: Record<string, string> = {
+  1: mainnet.name,
+  5: goerli.name,
+  10: optimism.name,
+  100: gnosis.name,
+  137: polygon.name,
+  31337: 'Hardhat Local',
+  8453: base.name,
 };

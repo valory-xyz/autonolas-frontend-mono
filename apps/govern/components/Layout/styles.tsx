@@ -5,12 +5,15 @@ import { COLOR, MEDIA_QUERY } from '@autonolas/frontend-library';
 import styled from 'styled-components';
 
 export const CustomLayout = styled(Layout)`
+  background-color: #f2f4f9;
+  min-height: 100vh;
+
   .site-layout {
-    padding: 0 50px;
+    padding: 0 40px;
     margin-top: 64px;
   }
   .site-layout-background {
-    padding: 24px 0;
+    padding: 40px 0;
     min-height: calc(100vh - 140px);
   }
 
@@ -23,6 +26,7 @@ export const CustomLayout = styled(Layout)`
     }
     /* footer from autonolas-library */
     main + div {
+      background-color: #f2f4f9;
       padding: 24px;
     }
   }
@@ -69,7 +73,7 @@ export const RightMenu = styled.div`
 `;
 
 export const OlasHeader = styled(Layout.Header)`
-  padding: 0 1rem;
+  padding: 0 40px;
   border-bottom: 1px solid ${COLOR.BORDER_GREY};
   display: flex;
   align-items: center;

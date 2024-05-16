@@ -1,14 +1,14 @@
+import { GetAccountReturnType, watchAccount } from '@wagmi/core';
 import { FC, useCallback, useEffect } from 'react';
 import { useAccountEffect, useConfig, useDisconnect } from 'wagmi';
+
 import styled from 'styled-components';
 
 import { isAddressProhibited } from '../functions';
-import { GetAccountReturnType, watchAccount } from '@wagmi/core';
 
 interface LoginProps {
   onConnect: (data: { address: `0x${string}` | undefined; chainId: number | undefined }) => void;
   onDisconnect: () => void;
-  isSvm?: boolean;
 }
 
 const LoginContainer = styled.div`
@@ -25,7 +25,8 @@ export const LoginV2: FC<LoginProps> = ({
   const { disconnect } = useDisconnect();
   const config = useConfig();
 
-  const handleConnect = useCallback(({ address, chainId }: Pick<GetAccountReturnType, 'address' | 'chainId'>) => {
+  const handleConnect = useCallback(
+    ({ address, chainId }: Pick<GetAccountReturnType, 'address' | 'chainId'>) => {
       if (isAddressProhibited(address)) {
         disconnect();
         if (onDisconnectCb) onDisconnectCb();
@@ -35,7 +36,9 @@ export const LoginV2: FC<LoginProps> = ({
           chainId,
         });
       }
-  }, [disconnect, onConnectCb, onDisconnectCb])
+    },
+    [disconnect, onConnectCb, onDisconnectCb],
+  );
 
   useAccountEffect({
     onConnect: handleConnect,
@@ -46,17 +49,12 @@ export const LoginV2: FC<LoginProps> = ({
     },
   });
 
-
   useEffect(() => {
     const unwatch = watchAccount(config, {
-      onChange: (
-        account: GetAccountReturnType,
-        prevAccount: GetAccountReturnType,
-      ) => {
+      onChange: (account: GetAccountReturnType, prevAccount: GetAccountReturnType) => {
         if (account.address !== prevAccount.address && account.isConnected) {
-          handleConnect(account)
+          handleConnect(account);
         }
-        
       },
     });
     return () => unwatch();
@@ -64,7 +62,7 @@ export const LoginV2: FC<LoginProps> = ({
 
   return (
     <LoginContainer>
-      <w3m-button balance="hide"/>
+      <w3m-button balance="hide" />
     </LoginContainer>
   );
 };

@@ -11,3 +11,4 @@ export * from './bondCalculator';
 export * from './liquidityLockbox.json';
 export * from './whirlpool.json';
 export * from './voteWeighting';
+export * from './stakingFactory';

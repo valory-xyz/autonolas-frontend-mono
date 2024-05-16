@@ -1,282 +1,402 @@
 import {
-  ArrowsAltOutlined,
+  CheckOutlined,
+  DeleteOutlined,
   InfoCircleOutlined,
   PlusOutlined,
-  WarningOutlined,
+  TableOutlined,
 } from '@ant-design/icons';
-import { Button, Col, Form, Input, InputNumber, Modal, Row, Slider, Table } from 'antd';
+import {
+  Alert,
+  Button,
+  Card,
+  Checkbox,
+  Flex,
+  InputNumber,
+  Modal,
+  Space,
+  Table,
+  Typography,
+  notification,
+} from 'antd';
 import { ColumnsType } from 'antd/es/table';
-import { getVoteWeightingContract } from 'common-util/functions/web3';
-import { useEffect, useState } from 'react';
+import Link from 'next/link';
+import { useState } from 'react';
 
+import { StakingContract } from 'store/govern';
+import { useAppSelector } from 'store/index';
 import styled from 'styled-components';
 
-const PathsContainer = styled.div`
-  margin: auto 0;
-`;
+import { CHAIN_NAMES, voteForNomineeWeights } from 'common-util/functions';
+
+const { Title, Paragraph, Text } = Typography;
+
 const StyledMain = styled.main`
   display: flex;
   flex-direction: column;
-  max-width: 1400px;
   margin: 0 auto;
 `;
 
-interface DataItem {
-  key: string;
-  title: string;
-  address: string;
-  chain: string;
-  allocation: string;
-}
-
-const columns: ColumnsType<DataItem> = [
-  {
-    title: 'Name',
-    dataIndex: 'title',
-    key: 'name',
-    render: (title) => {
-      return <Button type="link">{title}</Button>;
+const getColumns = (
+  isUpdating: boolean,
+  totalSupply: string,
+  onAdd: (contract: StakingContract) => void,
+  allocations: Allocation[],
+): ColumnsType<StakingContract> => {
+  const columns: ColumnsType<StakingContract> = [
+    {
+      title: 'Staking contract',
+      key: 'name',
+      render: (_, record) => (
+        <Space size={2} direction="vertical">
+          <Link href={`/contracts/${record.address}`}>{record.name}</Link>
+          <Text type="secondary">{CHAIN_NAMES[record.chainId] || record.chainId}</Text>
+        </Space>
+      ),
     },
-    width: 400,
+    {
+      title: 'Current weight',
+      key: 'currentWeight',
+      render: (_, record) => (
+        <Space size={2} direction="vertical">
+          <Text>--</Text>
+          <Text type="secondary">{`${record.currentWeight}%`}</Text>
+        </Space>
+      ),
+    },
+    {
+      title: 'Updated weight',
+      key: 'nextWeight',
+      render: (_, record) => (
+        <Space size={2} direction="vertical">
+          <Text>--</Text>
+          <Text type="secondary">{`${record.nextWeight || (0).toFixed(2)}%`}</Text>
+        </Space>
+      ),
+    },
+  ];
+  if (isUpdating) {
+    columns.push({
+      title: 'Actions',
+      key: 'actions',
+      render: (_, record) => {
+        const isAdded = !!allocations.find((item) => item.address === record.address);
+        return (
+          <>
+            <div />
+            <Button
+              icon={isAdded ? <CheckOutlined /> : <PlusOutlined />}
+              type="primary"
+              ghost
+              size="small"
+              onClick={() => onAdd(record)}
+              disabled={isAdded}
+            >
+              {isAdded ? 'Added' : 'Add'}
+            </Button>
+          </>
+        );
+      },
+    });
+  }
+
+  return columns;
+};
+
+const getColumnsUpdating = (
+  allocations: Allocation[],
+  setAllocation: (value: number, index: number) => void,
+  removeAllocation: (index: number) => void,
+): ColumnsType<Allocation> => [
+  {
+    title: 'Contract name',
+    key: 'name',
+    render: (_, record) => <Text>{record.name}</Text>,
+    width: 200,
   },
   {
     title: 'Chain',
-    dataIndex: 'chain',
     key: 'chain',
-    width: 250,
+    render: (_, record) => (
+      <Text type="secondary">{CHAIN_NAMES[record.chainId] || record.chainId}</Text>
+    ),
+    width: 120,
   },
   {
-    title: 'Allocation',
-    dataIndex: 'allocation',
-    key: 'allocation',
-    width: 150,
+    title: 'My voting weight',
+    key: 'weight',
+    render: (_, record, index) => (
+      <Flex gap={16}>
+        <InputNumber
+          addonAfter="%"
+          min={0}
+          max={100}
+          step={0.01}
+          value={allocations[index].weight}
+          onChange={(value) => {
+            if (value) {
+              setAllocation(value, index);
+            }
+          }}
+        />
+        <Button
+          icon={<DeleteOutlined />}
+          onClick={() => removeAllocation(index)}
+          style={{ flex: 'none' }}
+        />
+      </Flex>
+    ),
+    width: 140,
   },
 ];
 
-const columnsUpdating = (
-  allocations: number[],
-  setAllocations: (value: number, index: number) => void,
-): ColumnsType<DataItem> => [
+const getColumnsUpdated = (allocations: Allocation[]): ColumnsType<Allocation> => [
   {
-    title: 'Name',
-    dataIndex: 'title',
+    title: 'Staking contract',
     key: 'name',
-    render: (title: string) => {
-      return <Button icon={<ArrowsAltOutlined style={{ paddingLeft: 12 }} />}>{title}</Button>;
-    },
-    width: 400,
+    render: (_, record) => (
+      <Space size={2} direction="vertical">
+        <Link href={`/contracts/${record.address}`}>{record.name}</Link>
+        <Text type="secondary">{CHAIN_NAMES[record.chainId] || record.chainId}</Text>
+      </Space>
+    ),
+    width: 200,
   },
   {
-    title: 'Chain',
-    dataIndex: 'chain',
-    key: 'chain',
-    width: 150,
+    title: 'Current weight',
+    key: 'weight',
+    render: (_, record) => <Text>{`${0}%`}</Text>,
+    width: 120,
   },
   {
-    title: 'Allocation',
-    dataIndex: 'allocation',
-    key: 'allocation',
-    render: (allocation, row, index) => {
-      return (
-        <Row>
-          <Col span={12}>
-            <Slider
-              min={0}
-              max={100}
-              onChange={(value) => {
-                setAllocations(value, index);
-              }}
-              value={allocations[index]}
-            />
-          </Col>
-          <Col span={4}>
-            <InputNumber
-              min={0}
-              max={100}
-              style={{ margin: '0 16px' }}
-              value={allocations[index]}
-              onChange={(value) => {
-                if (value) {
-                  setAllocations(value, index);
-                }
-              }}
-            />
-          </Col>
-        </Row>
-      );
-    },
-    width: 350,
+    title: 'Updated weight',
+    key: 'updatedWeight',
+    render: (_, record) => <Text>{`${record.weight}%`}</Text>,
+    width: 140,
   },
 ];
 
+type Allocation = {
+  address: StakingContract['address'];
+  name: StakingContract['name'];
+  chainId: StakingContract['chainId'];
+  weight: number;
+};
 export const AllocationPage = () => {
-  const [data, setData] = useState<DataItem[]>([]);
+  const { stakingContracts, totalSupply } = useAppSelector((state) => state.govern);
+  const { account } = useAppSelector((state) => state.setup);
 
-  useEffect(() => {
-    const contract = getVoteWeightingContract()
-    contract.methods.getAllNominees().call().then((res: {account: string, chainId: string}[]) => {
-      const filteredItems = res.filter(item => item.chainId !== '0').map(item => ({
-          key: item.account,
-          title: 'Create Prediction Market for Food Industry Trends',
-          address: item.account,
-          chain: item.chainId,
-          allocation: '0%',
-      }))
-      setData(filteredItems)
-    })
-  }, [])
-
-  const initialAllocations = data.map((item) => parseInt(item.allocation, 10));
-  const [allocations, setAllocations] = useState(initialAllocations);
   const [isUpdating, setIsUpdating] = useState(false);
+  const [allocations, setAllocations] = useState<Allocation[]>([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const [form] = Form.useForm();
+  const [isUpdated, setIsUpdated] = useState(false);
 
-  const updateAllocations = (value: number, index: number) => {
+  const onAdd = (contract: StakingContract) => {
+    setAllocations((prev) => [
+      ...prev,
+      {
+        address: contract.address,
+        name: contract.name,
+        chainId: contract.chainId,
+        weight: 0,
+      },
+    ]);
+  };
+
+  const onCancel = () => {
+    setAllocations([]);
+    setIsUpdating(false);
+  };
+
+  const updateAllocation = (value: number, index: number) => {
     setAllocations((prev) => {
       const newAllocations = [...prev];
-      newAllocations[index] = value;
+      newAllocations[index] = { ...newAllocations[index], weight: value };
       return newAllocations;
     });
   };
 
-  const onSubmit = () => {
-    setData((prev) => {
-      const newData = prev.map((item, index) => ({
-        ...item,
-        allocation: `${allocations[index]}%`,
-      }));
-      return newData;
-    });
+  const removeAllocation = (index: number) => {
+    setAllocations((prev) => prev.filter((_, i) => i !== index));
   };
 
-  const onCancel = () => {
-    setAllocations(initialAllocations);
-    setIsUpdating(false);
-  };
-
-  /// add contract modal
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const totalPower = allocations.reduce((sum, item) => (sum * 100 + item.weight * 100) / 100, 0);
 
   const showModal = () => {
     setIsModalOpen(true);
   };
 
-  const handleOk = () => {
-    form.submit();
-  };
+  const closeModal = () => setIsModalOpen(false);
 
-  const handleCancel = () => {
-    setIsModalOpen(false);
-  };
-
-  const onAddContract = (values: Record<string, string>) => {
-    setData((prev) => {
-      const newData = [
-        ...prev,
-        {
-          key: values.address,
-          title: 'Create Prediction Market',
-          address: values.address,
-          chain: 'Gnosis Chain',
-          allocation: '0%',
-        },
-      ];
-      return newData;
+  const updateVotingWeight = () => {
+    setIsLoading(true);
+    const nominees: string[] = [];
+    const chainIds: string[] = [];
+    const weights: string[] = [];
+    allocations.forEach((item) => {
+      nominees.push(item.address);
+      chainIds.push(item.chainId);
+      weights.push(`${Math.floor(item.weight * 100)}`);
     });
-
-    setAllocations((prev) => {
-      const newAllocations = [...prev, 0];
-      return newAllocations;
-    });
-
-    handleCancel();
+    voteForNomineeWeights({ account, nominees, chainIds, weights })
+      .then(() => {
+        setIsLoading(false);
+        setIsUpdating(false);
+        setIsUpdated(true);
+      })
+      .catch((error) => {
+        setIsLoading(false);
+        notification.error({
+          message: error.message,
+        });
+      });
   };
 
   return (
     <StyledMain>
-      <PathsContainer>
-        <h1>Your Staking Allocation </h1>
-        {isUpdating ? (
-          <>
-            <div style={{ display: 'flex', marginBottom: '16px' }}>
-              <Button
-                type="primary"
-                style={{ marginRight: '16px' }}
-                onClick={() => {
-                  onSubmit();
-                  setIsUpdating(false);
-                }}
-              >
-                Submit update
-              </Button>
-              <Button onClick={onCancel}>Cancel</Button>
-            </div>
-            <p style={{ marginBottom: '24px' }}>
-              <InfoCircleOutlined /> Updates take effect at the start of the next week
-            </p>
-            {allocations.reduce((prev, item) => prev + item, 0) > 100 && (
-              <p style={{ marginBottom: '24px', color: 'red' }}>
-                <WarningOutlined /> Sum of allocation should be less that 100%
-              </p>
-            )}
-
-            <Row style={{ marginBottom: '16px' }}>
-              <Col span={5}>
-                <Button icon={<PlusOutlined />} onClick={showModal}>
-                  Add another contract
-                </Button>
-                <Modal
-                  title="Add Contract"
-                  open={isModalOpen}
-                  onOk={handleOk}
-                  onCancel={handleCancel}
-                  footer={[
-                    <Button key="back" onClick={handleCancel}>
-                      Cancel
-                    </Button>,
-                    <Button key="submit" type="primary" onClick={handleOk}>
-                      Add
-                    </Button>,
-                  ]}
-                >
-                  <Form
-                    form={form}
-                    name="basic"
-                    labelCol={{ span: 5 }}
-                    wrapperCol={{ span: 16 }}
-                    onFinish={onAddContract}
-                    autoComplete="off"
-                    style={{ marginTop: '24px' }}
-                  >
-                    <Form.Item label="Address" name="address" rules={[{ required: true }]}>
-                      <Input />
-                    </Form.Item>
-
-                    <Form.Item label="Chain Id" name="chain" rules={[{ required: true }]}>
-                      <Input />
-                    </Form.Item>
-                  </Form>
-                </Modal>
-              </Col>
-              <Col span={4}>
-                <Button type="link">Explore contracts</Button>
-              </Col>
-            </Row>
-          </>
-        ) : (
-          <Button style={{ marginBottom: '16px' }} onClick={() => setIsUpdating(true)}>
-            Update
-          </Button>
-        )}
-        <div style={{ maxWidth: isUpdating ? 1000 : 800 }}>
+      <Flex gap={24}>
+        <Card style={{ flex: 'auto' }}>
+          <Title level={3} style={{ margin: '0 0 8px' }}>
+            All staking contracts
+          </Title>
+          <Paragraph type="secondary">Relevant description.</Paragraph>
+          <Alert
+            message="Updated voting weights will take effect at the start of next week."
+            showIcon
+            type="info"
+            style={{ margin: '24px 0' }}
+          />
           <Table
-            columns={isUpdating ? columnsUpdating(allocations, updateAllocations) : columns}
-            dataSource={data}
+            columns={getColumns(isUpdating, totalSupply, onAdd, allocations)}
+            dataSource={stakingContracts}
             pagination={false}
           />
-        </div>
-      </PathsContainer>
+        </Card>
+        <Card style={{ flex: 'none', height: 'max-content' }}>
+          <Title level={4} style={{ margin: 0 }}>
+            My voting weight
+          </Title>
+          <Paragraph type="secondary" style={{ margin: '8px 0 24px' }}>
+            Allocate your voting power to direct OLAS emissions to different staking contracts.
+          </Paragraph>
+
+          {totalPower > 100 && (
+            <Alert
+              message="Total voting power entered must not exceed 100%"
+              showIcon
+              type="error"
+              style={{ margin: '24px 0' }}
+            />
+          )}
+          <Text>Voting power used</Text>
+          <Flex gap={16} justify="space-between" align="center">
+            <Text style={{ color: '#1F2229', fontSize: '24px', fontWeight: '700' }}>
+              {`${totalPower}%`}
+            </Text>
+            {isUpdated && (
+              <Flex gap={16} align="center">
+                <Text style={{ color: '#4D596A' }}>
+                  {' '}
+                  <InfoCircleOutlined />
+                  &nbsp; 9d 23h 59m
+                </Text>
+                <Button type="primary" disabled={true}>
+                  Update voting weight
+                </Button>
+              </Flex>
+            )}
+          </Flex>
+          <Space size={'small'} direction="vertical"></Space>
+          {isUpdating ? (
+            <>
+              {allocations.length === 0 ? (
+                <div
+                  style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: 16,
+                    alignItems: 'center',
+                    marginBottom: '32px',
+                  }}
+                >
+                  <TableOutlined style={{ fontSize: '56px', color: '#A3AEBB' }} />
+                  <Paragraph style={{ color: '#4D596A', textAlign: 'center' }}>
+                    You haven’t voted for any staking contracts yet.
+                    <br />
+                    Start by adding contracts from the section on the left
+                  </Paragraph>
+                </div>
+              ) : (
+                <Table
+                  style={{ margin: '16px 0 24px' }}
+                  columns={getColumnsUpdating(allocations, updateAllocation, removeAllocation)}
+                  dataSource={allocations}
+                  pagination={false}
+                />
+              )}
+              <Flex gap={12} justify="flex-end">
+                <Button onClick={onCancel}>Cancel</Button>
+                <Button
+                  type="primary"
+                  onClick={showModal}
+                  disabled={allocations.length === 0 || totalPower === 0 || totalPower > 100}
+                >
+                  Update voting weight
+                </Button>
+              </Flex>
+              <Modal
+                title="Confirm voting weight update"
+                open={isModalOpen}
+                onOk={updateVotingWeight}
+                onCancel={closeModal}
+                cancelText="Cancel"
+                okText="Confirm voting weight"
+                confirmLoading={isLoading}
+              >
+                <p style={{ color: '#4D596A' }}>
+                  Your are going to vote <b style={{ color: '#000' }}>{totalPower}%</b> of your
+                  voting power for <b style={{ color: '#000' }}>{allocations.length}</b> staking
+                  contract{allocations.length > 1 && 's'}. New voting weight will take effect at the
+                  beginning of the next week.
+                </p>
+                <p style={{ color: '#4D596A' }}>
+                  Note that after you submit your voting weights, you won’t be able to update it or
+                  add new contracts to vote <b style={{ color: '#000' }}>for the next 10 days.</b>
+                </p>
+                <Checkbox style={{ marginBottom: '12px' }}>Don’t show this message again</Checkbox>
+              </Modal>
+            </>
+          ) : isUpdated ? (
+            <>
+              <Table
+                style={{ margin: '16px 0 24px' }}
+                columns={getColumnsUpdated(allocations)}
+                dataSource={allocations}
+                pagination={false}
+              />
+            </>
+          ) : (
+            <div
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 16,
+                alignItems: 'center',
+                marginBottom: '32px',
+              }}
+            >
+              <TableOutlined style={{ fontSize: '56px', color: '#A3AEBB' }} />
+              <Paragraph style={{ color: '#4D596A', textAlign: 'center' }}>
+                You haven’t voted for any staking contracts yet.
+              </Paragraph>
+              <Button type="primary" onClick={() => setIsUpdating(() => true)}>
+                Add contracts to vote
+              </Button>
+            </div>
+          )}
+        </Card>
+      </Flex>
     </StyledMain>
   );
 };
