@@ -10,7 +10,8 @@
           "common-util": "./common-util",
           "components": "./components",
           "images": "./public/images",
-          "store": "./store"
+          "store": "./store",
+          "hooks": "./hooks"
         }
       }
     ],

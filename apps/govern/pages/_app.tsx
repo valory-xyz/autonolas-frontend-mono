@@ -14,6 +14,7 @@ import { wagmiConfig } from 'common-util/config/wagmi';
 import Layout from '../components/Layout';
 import Web3ModalProvider from '../context/Web3ModalProvider';
 import { useAppDispatch, useAppSelector, wrapper } from '../store';
+import { useNominees, useNomineesMetadata } from '../hooks';
 
 const oneWeek = 7 * 86400;
 
@@ -22,30 +23,35 @@ const DataProvider: FC<PropsWithChildren> = ({ children }) => {
   const { account } = useAppSelector((state) => state.setup);
   const { allNominees, userVotes } = useAppSelector((state) => state.govern);
 
-  useEffect(() => {
-    // Fetch all nominees and their aggregated weights
-    dispatch(fetchAllNominees()).then((res) => {
-      getBlock(wagmiConfig, {
-        blockTag: 'latest',
-      }).then((block) => {
-        const thisWeek = Math.floor((Number(block.timestamp) + oneWeek) / oneWeek) * oneWeek;
-        console.log('thisWeek', thisWeek);
-        dispatch(fetchNomineesWeights({ nominees: res.payload as string[], time: thisWeek }));
-        // TODO fetch next week:
-        // const nextWeek = Math.floor((Number(block.timestamp) + oneWeek) / oneWeek) * oneWeek;
+  const {data: nominees} = useNominees();
+  const {data: metadataHashes} = useNomineesMetadata(nominees)
+  console.log('data', nominees)
+  console.log('metadataHashes', metadataHashes)
 
-        // TODO: fetch titles
-      });
-    });
-  }, [dispatch]);
+  // useEffect(() => {
+  //   // Fetch all nominees and their aggregated weights
+  //   dispatch(fetchAllNominees()).then((res) => {
+  //     getBlock(wagmiConfig, {
+  //       blockTag: 'latest',
+  //     }).then((block) => {
+  //       const thisWeek = Math.floor((Number(block.timestamp) + oneWeek) / oneWeek) * oneWeek;
+  //       console.log('thisWeek', thisWeek);
+  //       dispatch(fetchNomineesWeights({ nominees: res.payload as string[], time: thisWeek }));
+  //       // TODO fetch next week:
+  //       // const nextWeek = Math.floor((Number(block.timestamp) + oneWeek) / oneWeek) * oneWeek;
 
-  useEffect(() => {
-    if (account && allNominees.length > 0 && Object.values(userVotes).length === 0) {
-      dispatch(fetchUserVotes({ account, nominees: allNominees.map((item) => item.address) }));
-      // todo: fetch voteUserPower, no need to fetchUserVotes if it's zero
-      // todo: fetch lastUserVote, for each non zero user votes
-    }
-  }, [account, allNominees, dispatch, userVotes]);
+  //       // TODO: fetch titles
+  //     });
+  //   });
+  // }, [dispatch]);
+
+  // useEffect(() => {
+  //   if (account && allNominees.length > 0 && Object.values(userVotes).length === 0) {
+  //     dispatch(fetchUserVotes({ account, nominees: allNominees.map((item) => item.address) }));
+  //     // todo: fetch voteUserPower, no need to fetchUserVotes if it's zero
+  //     // todo: fetch lastUserVote, for each non zero user votes
+  //   }
+  // }, [account, allNominees, dispatch, userVotes]);
 
   return <>{children}</>;
 };
