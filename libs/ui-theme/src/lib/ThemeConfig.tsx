@@ -9,6 +9,8 @@ export const THEME_CONFIG: ThemeConfig = {
     colorBgBase: COLOR.WHITE,
     colorLink: COLOR.PRIMARY,
     colorTextPlaceholder: COLOR.GREY_2,
+    colorText: COLOR.TEXT_PRIMARY,
+    colorTextDescription: COLOR.TEXT_SECONDARY,
     fontSize: 18,
     borderRadius: 5,
     controlHeight: 42,

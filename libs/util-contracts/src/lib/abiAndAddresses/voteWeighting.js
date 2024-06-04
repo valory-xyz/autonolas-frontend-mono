@@ -1,8 +1,7 @@
 export const VOTE_WEIGHTING = {
   contractName: 'VoteWeighting',
   addresses: {
-    1: '',
-    31337: '0x54B8d8E2455946f2A5B8982283f2359812e815ce'
+    1: '0xd8135f195dA46D82DF2531a5dC275bF5f725A9e8',
   },
   abi: [
     {

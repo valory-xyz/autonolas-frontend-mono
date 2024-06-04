@@ -59,7 +59,7 @@ const getColumns = (
       render: (_, record) => (
         <Space size={2} direction="vertical">
           <Text>--</Text>
-          <Text type="secondary">{`${record.currentWeight}%`}</Text>
+          <Text type="secondary">{`${record.currentWeight || (0).toFixed(2)}%`}</Text>
         </Space>
       ),
     },
@@ -241,15 +241,19 @@ export const AllocationPage = () => {
     });
     voteForNomineeWeights({ account, nominees, chainIds, weights })
       .then(() => {
-        setIsLoading(false);
-        setIsUpdating(false);
         setIsUpdated(true);
+        closeModal()
+        notification.success({
+          message: "Your votes have been updated",
+        });
       })
       .catch((error) => {
-        setIsLoading(false);
         notification.error({
           message: error.message,
         });
+      }).finally(() => {
+        setIsUpdating(false);
+        setIsLoading(false);
       });
   };
 

@@ -1,14 +1,16 @@
-import { http, createConfig } from 'wagmi';
-import {
-  safe,
-  walletConnect,
-  injected,
-  coinbaseWallet,
-} from 'wagmi/connectors';
-import { RPC_URLS } from 'common-util/constants/rpcs';
-import { Chain, mainnet } from 'wagmi/chains';
+import { createConfig, http } from 'wagmi';
+import { Chain, hardhat, mainnet } from 'wagmi/chains';
+import { coinbaseWallet, injected, safe, walletConnect } from 'wagmi/connectors';
 
-export const SUPPORTED_CHAINS: [Chain, ...Chain[]] = [mainnet, ];
+import { RPC_URLS } from 'common-util/constants/rpcs';
+import { virtualMainnet } from '../../tenderly.config';
+
+const mainnetChain = process.env.NEXT_PUBLIC_IS_CONNECTED_TO_TEST_NET === 'true' ? virtualMainnet : mainnet
+
+export const SUPPORTED_CHAINS: [Chain, ...Chain[]] = [
+  mainnetChain,
+  ...(process.env.NEXT_PUBLIC_IS_CONNECTED_TO_LOCAL === 'true' ? [hardhat] : []),
+];
 
 const walletConnectMetadata = {
   name: 'Govern',
@@ -32,8 +34,7 @@ export const wagmiConfig = createConfig({
     }),
   ],
   transports: SUPPORTED_CHAINS.reduce(
-    (acc, chain) =>
-      Object.assign(acc, { [chain.id]: http(RPC_URLS[chain.id]) }),
+    (acc, chain) => Object.assign(acc, { [chain.id]: http(RPC_URLS[chain.id]) }),
     {},
   ),
 });

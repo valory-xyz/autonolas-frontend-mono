@@ -22,6 +22,9 @@ export const COLOR = {
   // colors used by Ant Design
   ANT_PRIMARY_BG: '#F7E6FF',
   ANT_PRIMARY_BORDER: '#CA7AFF',
+
+  TEXT_PRIMARY: '#1F2229',
+  TEXT_SECONDARY: '#606F85',
 };
 
 // TODO: move to theme

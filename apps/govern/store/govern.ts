@@ -131,7 +131,7 @@ export const governSlice = createSlice({
         state.stakingContracts = state.stakingContracts.map((item) => ({
           ...item,
           // TODO: come up with better rounding
-          currentWeight: action.payload[item.address]
+          nextWeight: action.payload[item.address]
             ? (Number(action.payload[item.address].weight) / 10 ** 16).toFixed(2)
             : '0',
         }));

@@ -8,6 +8,8 @@ import { LogoIconSvg, LogoSvg } from './Logos';
 import { CustomLayout, Logo, OlasHeader, RightMenu } from './styles';
 
 const Login = dynamic(() => import('../Login'), { ssr: false });
+
+const Balance = dynamic(() => import('./Balance'), { ssr: false });
 const NavigationMenu = dynamic(() => import('./Menu'), { ssr: false });
 const Footer = dynamic(() => import('./Footer'), { ssr: false });
 
@@ -28,6 +30,7 @@ const Layout: FC<LayoutProps> = ({ children }) => {
         </Logo>
         <NavigationMenu />
         <RightMenu>
+          <Balance/>
           <Login />
         </RightMenu>
       </OlasHeader>

@@ -51,6 +51,9 @@ export const GlobalStyles = createGlobalStyle`
   .mt-16 {
     margin-top: 16px;
   }
+  .mr-8 {
+    margin-right: 8px;
+  }
   .mr-16 {
     margin-right: 16px;
   }
@@ -158,8 +161,8 @@ export const GlobalStyles = createGlobalStyle`
     }
   }
 
-  .ant-tooltip-inner {
-    text-align: center;
+  .ant-tooltip-content .ant-tooltip-inner {
+    padding: 12px;
   }
 
   /* alert */

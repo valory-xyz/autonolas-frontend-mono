@@ -12,3 +12,4 @@ export * from './liquidityLockbox.json';
 export * from './whirlpool.json';
 export * from './voteWeighting';
 export * from './stakingFactory';
+export * from './veOlas';
