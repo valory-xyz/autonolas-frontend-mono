@@ -1,22 +1,47 @@
+import { ethers } from 'ethers';
+import { useCallback, useEffect, useState } from 'react';
+import { Abi } from 'viem';
 import { useReadContracts } from 'wagmi';
 
 import { STAKING_TOKEN } from 'libs/util-contracts/src/lib/abiAndAddresses';
-import { Abi } from 'viem';
-import { useCallback, useEffect, useState } from 'react';
 
-// TODO: move to constants
-export const HASH_PREFIX = 'f01701220';
-export const GATEWAY_URL = 'https://gateway.autonolas.tech/ipfs/';
+const HASH_PREFIX = 'f01701220';
+const GATEWAY_URL = 'https://gateway.autonolas.tech/ipfs/';
+
+const BATCH_SIZE = 10;
+const CONCURRENCY_LIMIT = 5;
+
+type HashesWithNominees = { nominee: `0x${string}`; hash: string }[];
+type Metadata = { name: string; description: string }
+
+const fetchBatch = async (params: HashesWithNominees) => {
+  const results = [];
+  for (let i = 0; i < params.length; i += CONCURRENCY_LIMIT) {
+    const batch = params.slice(i, i + CONCURRENCY_LIMIT);
+    const responses = await Promise.allSettled(batch.map((item) => fetch(`${GATEWAY_URL}${item.hash}`)));
+    const jsonData = [];
+
+    for (const response of responses) {
+      if (response.status === 'fulfilled' && response.value) {
+        const data = await response.value.json();
+        jsonData.push(data);
+      } else {
+        jsonData.push(null); // or handle error response
+      }
+    }
+    results.push(...jsonData);
+  }
+  return results;
+};
 
 export const useNomineesMetadata = (
-  nominees: { account: `0x${string}`; chainId: number }[] | undefined
+  nominees: { account: `0x${string}`; chainId: number }[],
 ) => {
   const [isLoading, setIsLoading] = useState(false);
-  const [metadata, setMetadata] = useState([])
+  const [contractsMetadata, setContractsMetadata] = useState<Record<string, Metadata> | null>(null);
 
   const contracts = nominees?.map((nominee) => ({
-    // TODO: replace this gracefully 
-    address: nominee.account.replace('000000000000000000000000', '') as `0x${string}`,
+    address: ('0x' + nominee.account.slice(-40)) as `0x${string}`,
     abi: STAKING_TOKEN.abi as Abi,
     functionName: 'metadataHash',
     chainId: Number(nominee.chainId),
@@ -25,31 +50,52 @@ export const useNomineesMetadata = (
   const { data, isFetching } = useReadContracts({
     contracts,
     query: {
-      enabled: nominees && nominees.length > 0,
+      enabled: nominees.length > 0,
       // TODO: move to global config?
       staleTime: Infinity,
     },
   });
 
   const getMetadata = useCallback(async () => {
-    if (!data) return [];
-    
+    if (!data) return;
+
     setIsLoading(true);
 
-    // TODO: resolve types
-    const hashes = data.filter(item => item.status === 'success').map(item => (item.result as string).replace('0x', HASH_PREFIX));
-    // TBD
-  }, [data])
+    try {
+      const hashesWithNominees = data.reduce((res: HashesWithNominees, item, index) => {
+        if (item.status === 'success') {
+          res.push({
+            nominee: nominees[index].account,
+            hash: (item.result as string).replace('0x', HASH_PREFIX),
+          });
+        }
+        return res;
+      }, []);
+
+      const metadataResults: Record<string, Metadata> = {};
+      for (let i = 0; i < hashesWithNominees.length; i += BATCH_SIZE) {
+        const batch = hashesWithNominees.slice(i, i + BATCH_SIZE);
+        const batchResults = await fetchBatch(batch);
+        batch.forEach((item, index) => {
+          if (batchResults[index]) {
+            metadataResults[ethers.zeroPadValue(item.nominee, 32)] = batchResults[index];
+          }
+        });
+      }
+
+      setContractsMetadata(metadataResults);
+      setIsLoading(false);
+    } catch (error) {
+      console.error('Error fetching metadata:', error);
+      setIsLoading(false);
+    }
+  }, [data, nominees]);
 
   useEffect(() => {
-    
-    console.log('data', data, 'isFetching', isFetching)
-    if (data && !isFetching && metadata.length === 0 && !isLoading) {
-      getMetadata().then(res => console.log('res', res.map(item => item.json())))
+    if (data && !isFetching && contractsMetadata === null && !isLoading) {
+      getMetadata();
     }
-  }, [data, isFetching, metadata.length, isLoading, getMetadata])
+  }, [contractsMetadata, data, getMetadata, isFetching, isLoading]);
 
-  console.log('metadataHashes', data)
-
-  return { data, isFetching };
+  return { data: contractsMetadata, isFetching: isFetching || isLoading };
 };

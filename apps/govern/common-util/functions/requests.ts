@@ -1,4 +1,4 @@
-import { Contract, ethers } from 'ethers';
+import { Contract } from 'ethers';
 
 import { executeBatchAsync, getVoteWeightingContract } from './web3';
 
@@ -26,41 +26,41 @@ export const getEstimatedGasLimit = async (
 };
 
 /**
- * Get the list of all nominated for voting staking contracts
- */
+//  * Get the list of all nominated for voting staking contracts
+//  */
 
-export const getAllNominees = async () => {
-  const contract = getVoteWeightingContract();
-  const result: string[] = await contract.methods.getAllNominees().call();
-  // returned set includes the zero-th empty nominee instance, remove it
-  return result.filter((item) => item[0] !== ethers.zeroPadValue(ethers.ZeroAddress, 32));
-};
+// export const getAllNominees = async () => {
+//   const contract = getVoteWeightingContract();
+//   const result: string[] = await contract.methods.getAllNominees().call();
+//   // returned set includes the zero-th empty nominee instance, remove it
+//   return result.filter((item) => item[0] !== ethers.zeroPadValue(ethers.ZeroAddress, 32));
+// };
 
-/**
- * Get all aggregated weights of the staking contracts
- */
-export type GetNomineesWeightsParams = { nominees: string[]; time: number };
-type GetNomineesWeightResponse = { weight: string; totalSum: string };
+// /**
+//  * Get all aggregated weights of the staking contracts
+//  */
+// export type GetNomineesWeightsParams = { nominees: string[]; time: number };
+// type GetNomineesWeightResponse = { weight: string; totalSum: string };
 
-export const getNomineesWeights = async ({ nominees, time }: GetNomineesWeightsParams) => {
-  try {
-    const result: Record<string, GetNomineesWeightResponse> = {};
-    const contract = getVoteWeightingContract();
-    const calls = nominees.map((nominee) =>
-      contract.methods.nomineeRelativeWeight(nominee[0], nominee[1], time).call.request(),
-    );
-    const batchResponse = (await executeBatchAsync(calls)) as GetNomineesWeightResponse[];
+// export const getNomineesWeights = async ({ nominees, time }: GetNomineesWeightsParams) => {
+//   try {
+//     const result: Record<string, GetNomineesWeightResponse> = {};
+//     const contract = getVoteWeightingContract();
+//     const calls = nominees.map((nominee) =>
+//       contract.methods.nomineeRelativeWeight(nominee[0], nominee[1], time).call.request(),
+//     );
+//     const batchResponse = (await executeBatchAsync(calls)) as GetNomineesWeightResponse[];
 
-    batchResponse.forEach(({ weight, totalSum }, index) => {
-      result[nominees[index][0]] = { weight, totalSum };
-    });
+//     batchResponse.forEach(({ weight, totalSum }, index) => {
+//       result[nominees[index][0]] = { weight, totalSum };
+//     });
 
-    return result;
-  } catch (error) {
-    console.log(error);
-    return {};
-  }
-};
+//     return result;
+//   } catch (error) {
+//     console.log(error);
+//     return {};
+//   }
+// };
 
 /**
  * Get all current vote slopes of the user
@@ -95,7 +95,7 @@ export const getUserSlopes = async ({ account, nominees }: GetUserSlopeParams) =
 type VoteForNomineeWeightsParams = {
   account: `0x${string}` | undefined;
   nominees: string[];
-  chainIds: string[];
+  chainIds: number[];
   weights: string[];
 };
 export const voteForNomineeWeights = async ({

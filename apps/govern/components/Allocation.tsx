@@ -38,7 +38,6 @@ const StyledMain = styled.main`
 
 const getColumns = (
   isUpdating: boolean,
-  totalSupply: string,
   onAdd: (contract: StakingContract) => void,
   allocations: Allocation[],
 ): ColumnsType<StakingContract> => {
@@ -48,28 +47,31 @@ const getColumns = (
       key: 'name',
       render: (_, record) => (
         <Space size={2} direction="vertical">
-          <Link href={`/contracts/${record.address}`}>{record.name}</Link>
+          <Link href={`/contracts/${record.address}`}>{record.metadata?.name}</Link>
           <Text type="secondary">{CHAIN_NAMES[record.chainId] || record.chainId}</Text>
         </Space>
       ),
+      width: 420,
     },
     {
       title: 'Current weight',
       key: 'currentWeight',
+      // TODO: replace .toFixed(2) with something smarter
       render: (_, record) => (
         <Space size={2} direction="vertical">
-          <Text>--</Text>
-          <Text type="secondary">{`${record.currentWeight || (0).toFixed(2)}%`}</Text>
+          <Text>{`${(record.currentWeight.percentage).toFixed(2)}%`}</Text>
+          <Text type="secondary">{`${record.currentWeight.value.toFixed(2)} veOlas`}</Text>
         </Space>
       ),
     },
     {
-      title: 'Updated weight',
+      title: 'Next weight',
       key: 'nextWeight',
+      // TODO: replace .toFixed(2) with something smarter
       render: (_, record) => (
         <Space size={2} direction="vertical">
-          <Text>--</Text>
-          <Text type="secondary">{`${record.nextWeight || (0).toFixed(2)}%`}</Text>
+          <Text>{`${(record.nextWeight.percentage).toFixed(2)}%`}</Text>
+          <Text type="secondary">{`${record.nextWeight.value.toFixed(2)} veOlas`}</Text>
         </Space>
       ),
     },
@@ -168,8 +170,8 @@ const getColumnsUpdated = (allocations: Allocation[]): ColumnsType<Allocation> =
     width: 120,
   },
   {
-    title: 'Updated weight',
-    key: 'updatedWeight',
+    title: 'Next weight',
+    key: 'nextWeight',
     render: (_, record) => <Text>{`${record.weight}%`}</Text>,
     width: 140,
   },
@@ -177,12 +179,12 @@ const getColumnsUpdated = (allocations: Allocation[]): ColumnsType<Allocation> =
 
 type Allocation = {
   address: StakingContract['address'];
-  name: StakingContract['name'];
+  name: StakingContract['metadata']['name'];
   chainId: StakingContract['chainId'];
   weight: number;
 };
 export const AllocationPage = () => {
-  const { stakingContracts, totalSupply } = useAppSelector((state) => state.govern);
+  const { stakingContracts,  isStakingContractsLoading } = useAppSelector((state) => state.govern);
   const { account } = useAppSelector((state) => state.setup);
 
   const [isUpdating, setIsUpdating] = useState(false);
@@ -197,7 +199,7 @@ export const AllocationPage = () => {
       ...prev,
       {
         address: contract.address,
-        name: contract.name,
+        name: contract.metadata.name,
         chainId: contract.chainId,
         weight: 0,
       },
@@ -232,7 +234,7 @@ export const AllocationPage = () => {
   const updateVotingWeight = () => {
     setIsLoading(true);
     const nominees: string[] = [];
-    const chainIds: string[] = [];
+    const chainIds: number[] = [];
     const weights: string[] = [];
     allocations.forEach((item) => {
       nominees.push(item.address);
@@ -272,9 +274,10 @@ export const AllocationPage = () => {
             style={{ margin: '24px 0' }}
           />
           <Table
-            columns={getColumns(isUpdating, totalSupply, onAdd, allocations)}
+            columns={getColumns(isUpdating, onAdd, allocations)}
             dataSource={stakingContracts}
             pagination={false}
+            loading={isStakingContractsLoading}
           />
         </Card>
         <Card style={{ flex: 'none', height: 'max-content' }}>

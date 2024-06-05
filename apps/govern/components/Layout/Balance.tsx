@@ -17,11 +17,17 @@ const Balance = () => {
   const { data, isFetching } = useReadContract({
     address: (VE_OLAS.addresses as Record<number, `0x${string}`>)[chainId as number],
     abi: VE_OLAS.abi,
-    functionName: 'balanceOf',
+    functionName: 'getVotes',
     args: [account],
     query: {
       enabled: !!account,
-      select: (data) => ethers.formatUnits(data as string, 18),
+      select: (data) => {
+        const formatted = ethers.formatUnits(data as string, 18)
+        const [integer, decimal] = formatted.split('.')
+
+        // TODO: come up with better rounding
+        return decimal ? `${integer}.${decimal.slice(0,2)}` : integer;
+      },
       staleTime: Infinity,
     },
   });
