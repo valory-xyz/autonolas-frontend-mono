@@ -8,69 +8,56 @@ import { useNominees } from './useNominees';
 import { useNomineesMetadata } from './useNomineesMetadata';
 import { useNomineesWeights } from './useNomineesWeights';
 
-const ONE_WEEK = 7 * 86400;
+const getStartOfNextWeek = () => {
+  const date = new Date();
+  const dayOfWeek = date.getDay();
+  const daysUntilNextWeek = (8 - dayOfWeek) % 7;
+  const nextWeekStartDate = new Date(date);
+  nextWeekStartDate.setDate(date.getDate() + daysUntilNextWeek);
+  nextWeekStartDate.setHours(0, 0, 0, 0);
+  return nextWeekStartDate.getTime() / 1000;
+};
 
 export const useFetchStakingContractsList = () => {
   const dispatch = useAppDispatch();
   const { stakingContracts } = useAppSelector((state) => state.govern);
 
   // Get nominees list
-  const { data: nominees, isFetching: isNomineesFetching } = useNominees();
+  const { data: nominees } = useNominees();
 
-  // Get weights
-  const { data: block } = useBlock({ blockTag: 'latest', query: { staleTime: Infinity } });
+  // Get weights for current and next period
+  const { data: block } = useBlock({ blockTag: 'latest' });
   const now = block ? Number(block.timestamp) : null;
-  const nextWeek = block
-    ? Math.floor((Number(block.timestamp) + ONE_WEEK) / ONE_WEEK) * ONE_WEEK
-    : null;
+  const nextWeek = block ? getStartOfNextWeek() : null;
 
-  const { data: currentWeight, isFetching: isCurrentWeightFetching } = useNomineesWeights(
-    nominees || [],
-    now,
-  );
-  const { data: nextWeight, isFetching: isNextWeightFetching } = useNomineesWeights(
-    nominees || [],
-    nextWeek,
-  );
+  const { data: currentWeight } = useNomineesWeights(nominees || [], now);
+  const { data: nextWeight } = useNomineesWeights(nominees || [], nextWeek);
 
   // Get contracts metadata
-  const { data: metadata, isFetching: isMetadataFetching } = useNomineesMetadata(nominees || []);
+  const { data: metadata } = useNomineesMetadata(nominees || []);
 
+  /**
+   * Sets staking contracts list to the store
+   **/
   useEffect(() => {
     if (
-      // check if all data is loaded
-      !nominees ||
-      isNomineesFetching ||
-      !currentWeight ||
-      isCurrentWeightFetching ||
-      !nextWeight ||
-      isNextWeightFetching ||
-      !metadata ||
-      isMetadataFetching ||
-      // and if it's not in store yet
-      stakingContracts.length > 0
-    )
-      return;
+      // Check if all data is loaded
+      !!nominees &&
+      !!currentWeight &&
+      !!nextWeight &&
+      !!metadata &&
+      // And it's not yet in the store
+      stakingContracts.length === 0
+    ) {
+      const stakingContractsList = nominees.map((item) => ({
+        address: item.account,
+        chainId: Number(item.chainId),
+        currentWeight: currentWeight[item.account],
+        nextWeight: nextWeight[item.account],
+        metadata: metadata[item.account],
+      }));
 
-    const stakingContractsList = nominees.map((item) => ({
-      address: item.account,
-      chainId: Number(item.chainId),
-      currentWeight: currentWeight[item.account],
-      nextWeight: nextWeight[item.account],
-      metadata: metadata[item.account],
-    }));
-
-    dispatch(setStakingContracts(stakingContractsList));
-  }, [
-    currentWeight,
-    dispatch,
-    isCurrentWeightFetching,
-    isMetadataFetching,
-    isNextWeightFetching,
-    isNomineesFetching,
-    metadata,
-    nextWeight,
-    nominees,
-    stakingContracts.length,
-  ]);
+      dispatch(setStakingContracts(stakingContractsList));
+    }
+  }, [currentWeight, dispatch, metadata, nextWeight, nominees, stakingContracts.length]);
 };

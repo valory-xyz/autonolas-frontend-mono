@@ -1,7 +1,7 @@
 import Web3 from 'web3';
 import { AbiItem } from 'web3-utils';
 
-import { STAKING_FACTORY, VOTE_WEIGHTING } from 'libs/util-contracts/src/lib/abiAndAddresses';
+import { VOTE_WEIGHTING } from 'libs/util-contracts/src/lib/abiAndAddresses';
 
 import { getChainId, getProvider } from 'common-util/functions/frontend-library';
 
@@ -25,56 +25,10 @@ const getContract = (abi: AbiItem[], contractAddress: string) => {
   return contract;
 };
 
-// TODO: check if we can provide more specific types. Neither BatchRequest type nor Method is exportable
-// and BatchRequest type doesn't contain everything that the batchRequest provides
-type BatchType = InstanceType<Web3['BatchRequest']> & {
-  requests: ({ format: (value: unknown) => void } & unknown)[];
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  requestManager: any;
-};
-type Method = Parameters<BatchType['add']>[0];
-
-const getBatch = () => {
-  const { web3 } = getWeb3Details();
-  const batch = new web3.BatchRequest();
-  return batch as BatchType;
-};
-
-export const executeBatchAsync = (calls: Method[]): Promise<unknown[]> => {
-  const batch = getBatch();
-  calls.forEach((call) => {
-    batch.add(call);
-  });
-
-  return new Promise((resolve, reject) => {
-    const requests = batch.requests;
-    batch.requestManager?.sendBatch(
-      requests,
-      (err: Error, results: (unknown & { error: Error; result: unknown })[]) => {
-        const response = requests.map((request, index) => {
-          const result = results[index] || {};
-          if (result && result.error) {
-            console.log('error');
-          }
-          return request.format ? request.format(result.result) : result.result;
-        });
-        resolve(response);
-      },
-    );
-  });
-};
-
 export const getVoteWeightingContract = () => {
   const { chainId } = getWeb3Details();
   const abi = VOTE_WEIGHTING.abi as AbiItem[];
   const address = (VOTE_WEIGHTING.addresses as Record<number, string>)[chainId as number];
-  const contract = getContract(abi, address);
-  return contract;
-};
-
-export const getStakingContract = (chainId: number) => {
-  const abi = STAKING_FACTORY.abi as AbiItem[];
-  const address = (STAKING_FACTORY.addresses as Record<number, string>)[chainId as number];
   const contract = getContract(abi, address);
   return contract;
 };

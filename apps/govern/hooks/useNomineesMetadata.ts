@@ -12,13 +12,15 @@ const BATCH_SIZE = 10;
 const CONCURRENCY_LIMIT = 5;
 
 type HashesWithNominees = { nominee: `0x${string}`; hash: string }[];
-type Metadata = { name: string; description: string }
+type Metadata = { name: string; description: string };
 
 const fetchBatch = async (params: HashesWithNominees) => {
   const results = [];
   for (let i = 0; i < params.length; i += CONCURRENCY_LIMIT) {
     const batch = params.slice(i, i + CONCURRENCY_LIMIT);
-    const responses = await Promise.allSettled(batch.map((item) => fetch(`${GATEWAY_URL}${item.hash}`)));
+    const responses = await Promise.allSettled(
+      batch.map((item) => fetch(`${GATEWAY_URL}${item.hash}`)),
+    );
     const jsonData = [];
 
     for (const response of responses) {
@@ -34,25 +36,21 @@ const fetchBatch = async (params: HashesWithNominees) => {
   return results;
 };
 
-export const useNomineesMetadata = (
-  nominees: { account: `0x${string}`; chainId: number }[],
-) => {
+export const useNomineesMetadata = (nominees: { account: `0x${string}`; chainId: number }[]) => {
   const [isLoading, setIsLoading] = useState(false);
   const [contractsMetadata, setContractsMetadata] = useState<Record<string, Metadata> | null>(null);
 
-  const contracts = nominees?.map((nominee) => ({
+  const contracts = nominees.map((nominee) => ({
     address: ('0x' + nominee.account.slice(-40)) as `0x${string}`,
     abi: STAKING_TOKEN.abi as Abi,
-    functionName: 'metadataHash',
     chainId: Number(nominee.chainId),
+    functionName: 'metadataHash',
   }));
 
   const { data, isFetching } = useReadContracts({
     contracts,
     query: {
       enabled: nominees.length > 0,
-      // TODO: move to global config?
-      staleTime: Infinity,
     },
   });
 
@@ -97,5 +95,5 @@ export const useNomineesMetadata = (
     }
   }, [contractsMetadata, data, getMetadata, isFetching, isLoading]);
 
-  return { data: contractsMetadata, isFetching: isFetching || isLoading };
+  return { data: contractsMetadata };
 };

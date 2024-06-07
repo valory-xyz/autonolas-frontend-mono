@@ -10,8 +10,8 @@ interface MenuItem {
 }
 
 const items: MenuItem[] = [
-  { label: 'Staking Contracts', key: '/allocation' },
-  { label: 'Proposals', key: '/contracts' },
+  { label: 'Staking Contracts', key: '/contracts' },
+  { label: 'Proposals', key: '/proposals' },
 ];
 
 interface MenuInstanceProps {

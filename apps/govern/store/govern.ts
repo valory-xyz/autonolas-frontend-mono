@@ -1,33 +1,18 @@
-import { PayloadAction, createAsyncThunk } from '@reduxjs/toolkit';
+import { PayloadAction } from '@reduxjs/toolkit';
 import { createSlice } from '@reduxjs/toolkit';
 
-import {
-  GetUserSlopeParams,
-  getUserSlopes,
-} from 'common-util/functions';
-
-export const fetchUserVotes = createAsyncThunk(
-  'govern/fetchUserVotes',
-  async ({ account, nominees }: GetUserSlopeParams, thunkAPI) => {
-    try {
-      const result = await getUserSlopes({ account, nominees });
-      return result;
-    } catch (error) {
-      return thunkAPI.rejectWithValue(error);
-    }
-  },
-);
-
-type UserSlope = {
-  slope: string;
-  power: string;
-  end: string;
+export type UserVote = {
+  slope: number;
+  power: number;
+  end: number;
 };
+
+export type UserVotes = { current: UserVote; next: UserVote };
 
 type Metadata = {
   name: string;
   description: string;
-}
+};
 
 type Weight = { percentage: number; value: number };
 
@@ -40,19 +25,19 @@ export type StakingContract = {
 };
 
 interface GovernState {
-  voteUserPower: string;
-  userVotes: Record<string, UserSlope>;
-  userVotesStatus: string;
   stakingContracts: StakingContract[];
   isStakingContractsLoading: boolean;
+  userVotes: Record<string, UserVotes>;
+  isUserVotesLoading: boolean;
+  lastUserVote: number | null;
 }
 
 const initialState: GovernState = {
-  voteUserPower: '0',
-  userVotes: {},
-  userVotesStatus: '',
   stakingContracts: [],
   isStakingContractsLoading: true,
+  userVotes: {},
+  isUserVotesLoading: true,
+  lastUserVote: null,
 };
 
 export const governSlice = createSlice({
@@ -63,23 +48,15 @@ export const governSlice = createSlice({
       state.stakingContracts = action.payload;
       state.isStakingContractsLoading = false;
     },
-  },
-  extraReducers: (builder) => {
-    builder
-      .addCase(fetchUserVotes.pending, (state) => {
-        state.userVotesStatus = 'Loading';
-      })
-      .addCase(fetchUserVotes.fulfilled, (state, action) => {
-        state.userVotesStatus = 'Success';
-        state.userVotes = action.payload;
-      })
-      .addCase(fetchUserVotes.rejected, (state) => {
-        state.userVotesStatus = 'Error';
-      });
+    setUserVotes: (state, action: PayloadAction<GovernState['userVotes']>) => {
+      state.userVotes = action.payload;
+      state.isUserVotesLoading = false;
+    },
+    setLastUserVote: (state, action: PayloadAction<GovernState['lastUserVote']>) => {
+      state.lastUserVote = action.payload;
+    },
   },
 });
 
-export const {
-  setStakingContracts,
-} = governSlice.actions;
+export const { setStakingContracts, setUserVotes, setLastUserVote } = governSlice.actions;
 export const governReducer = governSlice.reducer;

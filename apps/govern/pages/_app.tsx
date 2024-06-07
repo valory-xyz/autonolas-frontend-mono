@@ -9,19 +9,12 @@ import { AutonolasThemeProvider } from 'libs/ui-theme/src/lib/ThemeConfig';
 
 import Layout from '../components/Layout';
 import Web3ModalProvider from '../context/Web3ModalProvider';
-import { useFetchStakingContractsList } from '../hooks';
+import { useFetchStakingContractsList, useFetchUserVotes } from '../hooks';
 import { wrapper } from '../store';
 
 const DataProvider: FC<PropsWithChildren> = ({ children }) => {
   useFetchStakingContractsList();
-
-  // useEffect(() => {
-  //   if (account && allNominees.length > 0 && Object.values(userVotes).length === 0) {
-  //     dispatch(fetchUserVotes({ account, nominees: allNominees.map((item) => item.address) }));
-  //     // todo: fetch voteUserPower, no need to fetchUserVotes if it's zero
-  //     // todo: fetch lastUserVote, for each non zero user votes
-  //   }
-  // }, [account, allNominees, dispatch, userVotes]);
+  useFetchUserVotes();
 
   return <>{children}</>;
 };

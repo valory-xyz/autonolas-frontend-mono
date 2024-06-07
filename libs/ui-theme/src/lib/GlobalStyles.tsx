@@ -1,6 +1,6 @@
-import { createGlobalStyle } from 'styled-components';
-
 import { COLOR, MEDIA_QUERY } from '@autonolas/frontend-library';
+
+import { createGlobalStyle } from 'styled-components';
 
 import { ANTD_COLOR } from './ui-theme';
 
@@ -59,6 +59,10 @@ export const GlobalStyles = createGlobalStyle`
   }
   .pl-0 {
     padding-left: 0px !important;
+  }
+
+  .text-center {
+    text-align: center;
   }
 
   /* layout */

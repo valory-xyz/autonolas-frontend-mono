@@ -1,10 +1,8 @@
 import { ArrowUpOutlined, InfoCircleOutlined } from '@ant-design/icons';
 import { Button, Tooltip, Typography } from 'antd';
-import { ethers } from 'ethers';
-import { useReadContract } from 'wagmi';
+import { useVotingPower } from 'hooks/index';
 
 import { COLOR } from 'libs/ui-theme/src/lib/ui-theme';
-import { VE_OLAS } from 'libs/util-contracts/src/lib/abiAndAddresses';
 import { useAppSelector } from 'store/index';
 
 import { GET_VEOLAS_URL } from 'common-util/constants/urls';
@@ -12,25 +10,8 @@ import { GET_VEOLAS_URL } from 'common-util/constants/urls';
 const { Text, Paragraph } = Typography;
 
 const Balance = () => {
-  const { chainId, account } = useAppSelector((state) => state.setup);
-
-  const { data, isFetching } = useReadContract({
-    address: (VE_OLAS.addresses as Record<number, `0x${string}`>)[chainId as number],
-    abi: VE_OLAS.abi,
-    functionName: 'getVotes',
-    args: [account],
-    query: {
-      enabled: !!account,
-      select: (data) => {
-        const formatted = ethers.formatUnits(data as string, 18)
-        const [integer, decimal] = formatted.split('.')
-
-        // TODO: come up with better rounding
-        return decimal ? `${integer}.${decimal.slice(0,2)}` : integer;
-      },
-      staleTime: Infinity,
-    },
-  });
+  const { account } = useAppSelector((state) => state.setup);
+  const { data, isFetching } = useVotingPower(account);
 
   if (isFetching) return null;
   if (data === undefined) return null;

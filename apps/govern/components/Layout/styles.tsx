@@ -9,7 +9,7 @@ export const CustomLayout = styled(Layout)`
   min-height: 100vh;
 
   .site-layout {
-    padding: 0 40px;
+    padding: 0 24px;
     margin-top: 64px;
   }
   .site-layout-background {
