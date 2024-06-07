@@ -22,5 +22,5 @@ export const useVotingPower = (account: `0x${string}` | undefined) => {
     },
   });
 
-  return { data: 0, isFetching };
+  return { data, isFetching };
 };
