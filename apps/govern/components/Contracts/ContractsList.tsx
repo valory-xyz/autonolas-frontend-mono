@@ -111,7 +111,7 @@ export const ContractsList = ({ isUpdating, handleAdd, allocations }: ContractsL
         columns={getColumns({
           handleAdd,
           allocations,
-          actionsVisible: (isUpdating || allocations.length === 0) && !!account,
+          actionsVisible: isUpdating && !!account,
         })}
         dataSource={stakingContracts}
         pagination={false}
