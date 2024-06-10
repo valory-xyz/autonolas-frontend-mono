@@ -1,14 +1,14 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { createWeb3Modal } from '@web3modal/wagmi';
+import { PropsWithChildren } from 'react';
 import { WagmiProvider } from 'wagmi';
 
 import { COLOR } from '@autonolas/frontend-library';
 
 import { wagmiConfig } from 'common-util/config/wagmi';
-import { PropsWithChildren } from 'react';
 
-const queryClient = new QueryClient({
+export const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       staleTime: Infinity,

@@ -1,374 +1,418 @@
 export const STAKING_FACTORY = {
   contractName: 'StakingFactory',
   addresses: {
-    1: '',
-    31337: '0xB7f8BC63BbcaD18155201308C8f3540b07f84F5e'
+    1: '0xC3f601fB1cAA6452fC60eC3887784421d20AE5DB',
+    100: '0x9F3408C6f34bfB6B0eC73F34f2845A8C703374C6',
+    137: '0xdbe987b33321B65695EB54F54ca486994F300FDb',
   },
   abi: [
     {
-      "inputs": [
+      inputs: [
         {
-          "internalType": "address",
-          "name": "_verifier",
-          "type": "address"
-        }
+          internalType: 'address',
+          name: '_verifier',
+          type: 'address',
+        },
       ],
-      "stateMutability": "nonpayable",
-      "type": "constructor"
+      stateMutability: 'nonpayable',
+      type: 'constructor',
     },
     {
-      "inputs": [
+      inputs: [
         {
-          "internalType": "address",
-          "name": "implementation",
-          "type": "address"
-        }
+          internalType: 'address',
+          name: 'implementation',
+          type: 'address',
+        },
       ],
-      "name": "ContractOnly",
-      "type": "error"
+      name: 'ContractOnly',
+      type: 'error',
     },
     {
-      "inputs": [
+      inputs: [
         {
-          "internalType": "uint256",
-          "name": "expected",
-          "type": "uint256"
+          internalType: 'uint256',
+          name: 'expected',
+          type: 'uint256',
         },
         {
-          "internalType": "uint256",
-          "name": "provided",
-          "type": "uint256"
-        }
+          internalType: 'uint256',
+          name: 'provided',
+          type: 'uint256',
+        },
       ],
-      "name": "IncorrectDataLength",
-      "type": "error"
+      name: 'IncorrectDataLength',
+      type: 'error',
     },
     {
-      "inputs": [
+      inputs: [
         {
-          "internalType": "address",
-          "name": "instance",
-          "type": "address"
-        }
+          internalType: 'address',
+          name: 'instance',
+          type: 'address',
+        },
       ],
-      "name": "InitializationFailed",
-      "type": "error"
+      name: 'InitializationFailed',
+      type: 'error',
     },
     {
-      "inputs": [
+      inputs: [
         {
-          "internalType": "address",
-          "name": "sender",
-          "type": "address"
+          internalType: 'address',
+          name: 'sender',
+          type: 'address',
         },
         {
-          "internalType": "address",
-          "name": "owner",
-          "type": "address"
-        }
+          internalType: 'address',
+          name: 'owner',
+          type: 'address',
+        },
       ],
-      "name": "OwnerOnly",
-      "type": "error"
+      name: 'OwnerOnly',
+      type: 'error',
     },
     {
-      "inputs": [
+      inputs: [
         {
-          "internalType": "address",
-          "name": "implementation",
-          "type": "address"
-        }
+          internalType: 'address',
+          name: 'implementation',
+          type: 'address',
+        },
       ],
-      "name": "ProxyCreationFailed",
-      "type": "error"
+      name: 'ProxyCreationFailed',
+      type: 'error',
     },
     {
-      "inputs": [
+      inputs: [],
+      name: 'ReentrancyGuard',
+      type: 'error',
+    },
+    {
+      inputs: [
         {
-          "internalType": "address",
-          "name": "implementation",
-          "type": "address"
-        }
+          internalType: 'address',
+          name: 'implementation',
+          type: 'address',
+        },
       ],
-      "name": "UnverifiedImplementation",
-      "type": "error"
+      name: 'UnverifiedImplementation',
+      type: 'error',
     },
     {
-      "inputs": [
+      inputs: [
         {
-          "internalType": "address",
-          "name": "instance",
-          "type": "address"
-        }
+          internalType: 'address',
+          name: 'instance',
+          type: 'address',
+        },
       ],
-      "name": "UnverifiedProxy",
-      "type": "error"
+      name: 'UnverifiedProxy',
+      type: 'error',
     },
     {
-      "inputs": [],
-      "name": "ZeroAddress",
-      "type": "error"
+      inputs: [],
+      name: 'ZeroAddress',
+      type: 'error',
     },
     {
-      "anonymous": false,
-      "inputs": [
+      anonymous: false,
+      inputs: [
         {
-          "indexed": true,
-          "internalType": "address",
-          "name": "sender",
-          "type": "address"
+          indexed: true,
+          internalType: 'address',
+          name: 'sender',
+          type: 'address',
         },
         {
-          "indexed": true,
-          "internalType": "address",
-          "name": "instance",
-          "type": "address"
+          indexed: true,
+          internalType: 'address',
+          name: 'instance',
+          type: 'address',
         },
         {
-          "indexed": true,
-          "internalType": "address",
-          "name": "implementation",
-          "type": "address"
-        }
+          indexed: true,
+          internalType: 'address',
+          name: 'implementation',
+          type: 'address',
+        },
       ],
-      "name": "InstanceCreated",
-      "type": "event"
+      name: 'InstanceCreated',
+      type: 'event',
     },
     {
-      "anonymous": false,
-      "inputs": [
+      anonymous: false,
+      inputs: [
         {
-          "indexed": true,
-          "internalType": "address",
-          "name": "owner",
-          "type": "address"
-        }
-      ],
-      "name": "OwnerUpdated",
-      "type": "event"
-    },
-    {
-      "anonymous": false,
-      "inputs": [
-        {
-          "indexed": true,
-          "internalType": "address",
-          "name": "verifier",
-          "type": "address"
-        }
-      ],
-      "name": "VerifierUpdated",
-      "type": "event"
-    },
-    {
-      "inputs": [],
-      "name": "SELECTOR_DATA_LENGTH",
-      "outputs": [
-        {
-          "internalType": "uint256",
-          "name": "",
-          "type": "uint256"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "address",
-          "name": "newOwner",
-          "type": "address"
-        }
-      ],
-      "name": "changeOwner",
-      "outputs": [],
-      "stateMutability": "nonpayable",
-      "type": "function"
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "address",
-          "name": "newVerifier",
-          "type": "address"
-        }
-      ],
-      "name": "changeVerifier",
-      "outputs": [],
-      "stateMutability": "nonpayable",
-      "type": "function"
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "address",
-          "name": "implementation",
-          "type": "address"
+          indexed: true,
+          internalType: 'address',
+          name: 'instance',
+          type: 'address',
         },
         {
-          "internalType": "bytes",
-          "name": "initPayload",
-          "type": "bytes"
-        }
+          indexed: false,
+          internalType: 'bool',
+          name: 'isEnabled',
+          type: 'bool',
+        },
       ],
-      "name": "createStakingInstance",
-      "outputs": [
-        {
-          "internalType": "address payable",
-          "name": "instance",
-          "type": "address"
-        }
-      ],
-      "stateMutability": "nonpayable",
-      "type": "function"
+      name: 'InstanceStatusChanged',
+      type: 'event',
     },
     {
-      "inputs": [
+      anonymous: false,
+      inputs: [
         {
-          "internalType": "address",
-          "name": "implementation",
-          "type": "address"
-        }
+          indexed: true,
+          internalType: 'address',
+          name: 'owner',
+          type: 'address',
+        },
       ],
-      "name": "getProxyAddress",
-      "outputs": [
-        {
-          "internalType": "address",
-          "name": "",
-          "type": "address"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
+      name: 'OwnerUpdated',
+      type: 'event',
     },
     {
-      "inputs": [
+      anonymous: false,
+      inputs: [
         {
-          "internalType": "address",
-          "name": "implementation",
-          "type": "address"
+          indexed: true,
+          internalType: 'address',
+          name: 'verifier',
+          type: 'address',
+        },
+      ],
+      name: 'VerifierUpdated',
+      type: 'event',
+    },
+    {
+      inputs: [],
+      name: 'SELECTOR_DATA_LENGTH',
+      outputs: [
+        {
+          internalType: 'uint256',
+          name: '',
+          type: 'uint256',
+        },
+      ],
+      stateMutability: 'view',
+      type: 'function',
+    },
+    {
+      inputs: [
+        {
+          internalType: 'address',
+          name: 'newOwner',
+          type: 'address',
+        },
+      ],
+      name: 'changeOwner',
+      outputs: [],
+      stateMutability: 'nonpayable',
+      type: 'function',
+    },
+    {
+      inputs: [
+        {
+          internalType: 'address',
+          name: 'newVerifier',
+          type: 'address',
+        },
+      ],
+      name: 'changeVerifier',
+      outputs: [],
+      stateMutability: 'nonpayable',
+      type: 'function',
+    },
+    {
+      inputs: [
+        {
+          internalType: 'address',
+          name: 'implementation',
+          type: 'address',
         },
         {
-          "internalType": "uint256",
-          "name": "localNonce",
-          "type": "uint256"
-        }
+          internalType: 'bytes',
+          name: 'initPayload',
+          type: 'bytes',
+        },
       ],
-      "name": "getProxyAddressWithNonce",
-      "outputs": [
+      name: 'createStakingInstance',
+      outputs: [
         {
-          "internalType": "address",
-          "name": "",
-          "type": "address"
-        }
+          internalType: 'address payable',
+          name: 'instance',
+          type: 'address',
+        },
       ],
-      "stateMutability": "view",
-      "type": "function"
+      stateMutability: 'nonpayable',
+      type: 'function',
     },
     {
-      "inputs": [
+      inputs: [
         {
-          "internalType": "address",
-          "name": "",
-          "type": "address"
-        }
+          internalType: 'address',
+          name: 'implementation',
+          type: 'address',
+        },
       ],
-      "name": "mapInstanceParams",
-      "outputs": [
+      name: 'getProxyAddress',
+      outputs: [
         {
-          "internalType": "address",
-          "name": "implementation",
-          "type": "address"
+          internalType: 'address',
+          name: '',
+          type: 'address',
+        },
+      ],
+      stateMutability: 'view',
+      type: 'function',
+    },
+    {
+      inputs: [
+        {
+          internalType: 'address',
+          name: 'implementation',
+          type: 'address',
         },
         {
-          "internalType": "address",
-          "name": "deployer",
-          "type": "address"
+          internalType: 'uint256',
+          name: 'localNonce',
+          type: 'uint256',
+        },
+      ],
+      name: 'getProxyAddressWithNonce',
+      outputs: [
+        {
+          internalType: 'address',
+          name: '',
+          type: 'address',
+        },
+      ],
+      stateMutability: 'view',
+      type: 'function',
+    },
+    {
+      inputs: [
+        {
+          internalType: 'address',
+          name: '',
+          type: 'address',
+        },
+      ],
+      name: 'mapInstanceParams',
+      outputs: [
+        {
+          internalType: 'address',
+          name: 'implementation',
+          type: 'address',
         },
         {
-          "internalType": "bool",
-          "name": "isEnabled",
-          "type": "bool"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [],
-      "name": "nonce",
-      "outputs": [
-        {
-          "internalType": "uint256",
-          "name": "",
-          "type": "uint256"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [],
-      "name": "owner",
-      "outputs": [
-        {
-          "internalType": "address",
-          "name": "",
-          "type": "address"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "address",
-          "name": "instance",
-          "type": "address"
+          internalType: 'address',
+          name: 'deployer',
+          type: 'address',
         },
         {
-          "internalType": "bool",
-          "name": "isEnabled",
-          "type": "bool"
-        }
+          internalType: 'bool',
+          name: 'isEnabled',
+          type: 'bool',
+        },
       ],
-      "name": "setInstanceStatus",
-      "outputs": [],
-      "stateMutability": "nonpayable",
-      "type": "function"
+      stateMutability: 'view',
+      type: 'function',
     },
     {
-      "inputs": [],
-      "name": "verifier",
-      "outputs": [
+      inputs: [],
+      name: 'nonce',
+      outputs: [
         {
-          "internalType": "address",
-          "name": "",
-          "type": "address"
-        }
+          internalType: 'uint256',
+          name: '',
+          type: 'uint256',
+        },
       ],
-      "stateMutability": "view",
-      "type": "function"
+      stateMutability: 'view',
+      type: 'function',
     },
     {
-      "inputs": [
+      inputs: [],
+      name: 'owner',
+      outputs: [
         {
-          "internalType": "address",
-          "name": "instance",
-          "type": "address"
-        }
+          internalType: 'address',
+          name: '',
+          type: 'address',
+        },
       ],
-      "name": "verifyInstance",
-      "outputs": [
+      stateMutability: 'view',
+      type: 'function',
+    },
+    {
+      inputs: [
         {
-          "internalType": "bool",
-          "name": "success",
-          "type": "bool"
-        }
+          internalType: 'address',
+          name: 'instance',
+          type: 'address',
+        },
+        {
+          internalType: 'bool',
+          name: 'isEnabled',
+          type: 'bool',
+        },
       ],
-      "stateMutability": "view",
-      "type": "function"
-    }
+      name: 'setInstanceStatus',
+      outputs: [],
+      stateMutability: 'nonpayable',
+      type: 'function',
+    },
+    {
+      inputs: [],
+      name: 'verifier',
+      outputs: [
+        {
+          internalType: 'address',
+          name: '',
+          type: 'address',
+        },
+      ],
+      stateMutability: 'view',
+      type: 'function',
+    },
+    {
+      inputs: [
+        {
+          internalType: 'address',
+          name: 'instance',
+          type: 'address',
+        },
+      ],
+      name: 'verifyInstance',
+      outputs: [
+        {
+          internalType: 'bool',
+          name: '',
+          type: 'bool',
+        },
+      ],
+      stateMutability: 'view',
+      type: 'function',
+    },
+    {
+      inputs: [
+        {
+          internalType: 'address',
+          name: 'instance',
+          type: 'address',
+        },
+      ],
+      name: 'verifyInstanceAndGetEmissionsAmount',
+      outputs: [
+        {
+          internalType: 'uint256',
+          name: 'amount',
+          type: 'uint256',
+        },
+      ],
+      stateMutability: 'view',
+      type: 'function',
+    },
   ],
 };

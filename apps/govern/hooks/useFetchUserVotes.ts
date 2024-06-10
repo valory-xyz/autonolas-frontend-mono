@@ -4,6 +4,8 @@ import { useBlock } from 'wagmi';
 import { UserVotes, setLastUserVote, setUserVotes } from 'store/govern';
 import { useAppDispatch, useAppSelector } from 'store/index';
 
+import { NEXT_USERS_SLOPES_KEY } from 'common-util/constants/scopeKeys';
+
 import { useLastUserVote } from './useLastUserVote';
 import { useNominees } from './useNominees';
 import { useVoteUserPower } from './useVoteUserPower';
@@ -12,6 +14,7 @@ import { useVoteUserSlopes } from './useVoteUserSlopes';
 // seconds in a week / 12 seconds (approx time
 // when Ethereum blockchain produces a new block)
 const BLOCKS_IN_A_WEEK = 50400;
+// TODO: update when contract is deployed
 const CONTRACT_DEPLOY_BLOCK = 20009990;
 
 const getPrevVotesBlock = (blockNumber: bigint) => {
@@ -22,7 +25,7 @@ const getPrevVotesBlock = (blockNumber: bigint) => {
 export const useFetchUserVotes = () => {
   const dispatch = useAppDispatch();
   const { account } = useAppSelector((state) => state.setup);
-  const { userVotes, lastUserVote, isUserVotesLoading } = useAppSelector((state) => state.govern);
+  const { lastUserVote, isUserVotesLoading } = useAppSelector((state) => state.govern);
 
   const { data: nominees } = useNominees();
   const { data: userPower } = useVoteUserPower(account);
@@ -38,6 +41,7 @@ export const useFetchUserVotes = () => {
     account || null,
     block ? block.number : null,
     userPower ? Number(userPower) !== 0 : false,
+    NEXT_USERS_SLOPES_KEY,
   );
   const { data: lastVoteData } = useLastUserVote(
     nominees || [],
@@ -88,7 +92,15 @@ export const useFetchUserVotes = () => {
       });
       dispatch(setUserVotes(result));
     }
-  }, [dispatch, lastUserVote, nominees, userPower, userSlopesNext, userSlopesCurrent, userVotes]);
+  }, [
+    dispatch,
+    isUserVotesLoading,
+    lastUserVote,
+    nominees,
+    userPower,
+    userSlopesCurrent,
+    userSlopesNext,
+  ]);
 
   /**
    * Sets user last vote timestamp to the store

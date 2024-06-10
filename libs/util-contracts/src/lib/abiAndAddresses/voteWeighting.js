@@ -39,6 +39,22 @@ export const VOTE_WEIGHTING = {
     {
       inputs: [
         {
+          internalType: 'address',
+          name: 'account',
+          type: 'address',
+        },
+        {
+          internalType: 'int128',
+          name: 'slope',
+          type: 'int128',
+        },
+      ],
+      name: 'NegativeSlope',
+      type: 'error',
+    },
+    {
+      inputs: [
+        {
           internalType: 'bytes32',
           name: 'account',
           type: 'bytes32',
@@ -226,6 +242,118 @@ export const VOTE_WEIGHTING = {
         {
           indexed: true,
           internalType: 'address',
+          name: 'sender',
+          type: 'address',
+        },
+        {
+          indexed: false,
+          internalType: 'uint256',
+          name: 'sumBias',
+          type: 'uint256',
+        },
+      ],
+      name: 'Checkpoint',
+      type: 'event',
+    },
+    {
+      anonymous: false,
+      inputs: [
+        {
+          indexed: true,
+          internalType: 'address',
+          name: 'sender',
+          type: 'address',
+        },
+        {
+          indexed: true,
+          internalType: 'bytes32',
+          name: 'nomineeAccount',
+          type: 'bytes32',
+        },
+        {
+          indexed: false,
+          internalType: 'uint256',
+          name: 'chainId',
+          type: 'uint256',
+        },
+        {
+          indexed: false,
+          internalType: 'uint256',
+          name: 'nomineeWeight',
+          type: 'uint256',
+        },
+        {
+          indexed: false,
+          internalType: 'uint256',
+          name: 'totalSum',
+          type: 'uint256',
+        },
+      ],
+      name: 'CheckpointNominee',
+      type: 'event',
+    },
+    {
+      anonymous: false,
+      inputs: [
+        {
+          indexed: true,
+          internalType: 'address',
+          name: 'dispenser',
+          type: 'address',
+        },
+      ],
+      name: 'DispenserUpdated',
+      type: 'event',
+    },
+    {
+      anonymous: false,
+      inputs: [
+        {
+          indexed: true,
+          internalType: 'address',
+          name: 'sender',
+          type: 'address',
+        },
+        {
+          indexed: true,
+          internalType: 'bytes32',
+          name: 'nomineeAccount',
+          type: 'bytes32',
+        },
+        {
+          indexed: false,
+          internalType: 'uint256',
+          name: 'chainId',
+          type: 'uint256',
+        },
+        {
+          indexed: false,
+          internalType: 'uint256',
+          name: 'nomineeWeight',
+          type: 'uint256',
+        },
+        {
+          indexed: false,
+          internalType: 'uint256',
+          name: 'totalSum',
+          type: 'uint256',
+        },
+        {
+          indexed: false,
+          internalType: 'uint256',
+          name: 'relativeWeight',
+          type: 'uint256',
+        },
+      ],
+      name: 'NomineeRelativeWeightWrite',
+      type: 'event',
+    },
+    {
+      anonymous: false,
+      inputs: [
+        {
+          indexed: true,
+          internalType: 'address',
           name: 'owner',
           type: 'address',
         },
@@ -292,6 +420,19 @@ export const VOTE_WEIGHTING = {
     {
       inputs: [],
       name: 'MAX_EVM_CHAIN_ID',
+      outputs: [
+        {
+          internalType: 'uint256',
+          name: '',
+          type: 'uint256',
+        },
+      ],
+      stateMutability: 'view',
+      type: 'function',
+    },
+    {
+      inputs: [],
+      name: 'MAX_NUM_WEEKS',
       outputs: [
         {
           internalType: 'uint256',
@@ -502,7 +643,32 @@ export const VOTE_WEIGHTING = {
             },
           ],
           internalType: 'struct Nominee[]',
-          name: 'nominees',
+          name: '',
+          type: 'tuple[]',
+        },
+      ],
+      stateMutability: 'view',
+      type: 'function',
+    },
+    {
+      inputs: [],
+      name: 'getAllRemovedNominees',
+      outputs: [
+        {
+          components: [
+            {
+              internalType: 'bytes32',
+              name: 'account',
+              type: 'bytes32',
+            },
+            {
+              internalType: 'uint256',
+              name: 'chainId',
+              type: 'uint256',
+            },
+          ],
+          internalType: 'struct Nominee[]',
+          name: '',
           type: 'tuple[]',
         },
       ],
@@ -562,7 +728,7 @@ export const VOTE_WEIGHTING = {
             },
           ],
           internalType: 'struct Nominee',
-          name: 'nominee',
+          name: '',
           type: 'tuple',
         },
       ],
@@ -586,7 +752,7 @@ export const VOTE_WEIGHTING = {
       outputs: [
         {
           internalType: 'uint256',
-          name: 'id',
+          name: '',
           type: 'uint256',
         },
       ],
@@ -618,19 +784,40 @@ export const VOTE_WEIGHTING = {
       type: 'function',
     },
     {
-      inputs: [
+      inputs: [],
+      name: 'getNumNominees',
+      outputs: [
         {
           internalType: 'uint256',
-          name: 'startId',
-          type: 'uint256',
-        },
-        {
-          internalType: 'uint256',
-          name: 'numNominees',
+          name: '',
           type: 'uint256',
         },
       ],
-      name: 'getNominees',
+      stateMutability: 'view',
+      type: 'function',
+    },
+    {
+      inputs: [],
+      name: 'getNumRemovedNominees',
+      outputs: [
+        {
+          internalType: 'uint256',
+          name: '',
+          type: 'uint256',
+        },
+      ],
+      stateMutability: 'view',
+      type: 'function',
+    },
+    {
+      inputs: [
+        {
+          internalType: 'uint256',
+          name: 'id',
+          type: 'uint256',
+        },
+      ],
+      name: 'getRemovedNominee',
       outputs: [
         {
           components: [
@@ -645,17 +832,28 @@ export const VOTE_WEIGHTING = {
               type: 'uint256',
             },
           ],
-          internalType: 'struct Nominee[]',
-          name: 'nominees',
-          type: 'tuple[]',
+          internalType: 'struct Nominee',
+          name: '',
+          type: 'tuple',
         },
       ],
       stateMutability: 'view',
       type: 'function',
     },
     {
-      inputs: [],
-      name: 'getNumNominees',
+      inputs: [
+        {
+          internalType: 'bytes32',
+          name: 'account',
+          type: 'bytes32',
+        },
+        {
+          internalType: 'uint256',
+          name: 'chainId',
+          type: 'uint256',
+        },
+      ],
+      name: 'getRemovedNomineeId',
       outputs: [
         {
           internalType: 'uint256',
@@ -733,9 +931,9 @@ export const VOTE_WEIGHTING = {
       name: 'mapRemovedNominees',
       outputs: [
         {
-          internalType: 'bool',
+          internalType: 'uint256',
           name: '',
-          type: 'bool',
+          type: 'uint256',
         },
       ],
       stateMutability: 'view',
@@ -763,7 +961,7 @@ export const VOTE_WEIGHTING = {
       outputs: [
         {
           internalType: 'uint256',
-          name: 'weight',
+          name: 'relativeWeight',
           type: 'uint256',
         },
         {
@@ -797,7 +995,7 @@ export const VOTE_WEIGHTING = {
       outputs: [
         {
           internalType: 'uint256',
-          name: 'weight',
+          name: 'relativeWeight',
           type: 'uint256',
         },
         {
@@ -906,7 +1104,7 @@ export const VOTE_WEIGHTING = {
           type: 'uint256',
         },
       ],
-      name: 'retrieveRemovedNomineeVotingPower',
+      name: 'revokeRemovedNomineeVotingPower',
       outputs: [],
       stateMutability: 'nonpayable',
       type: 'function',
@@ -920,6 +1118,30 @@ export const VOTE_WEIGHTING = {
         },
       ],
       name: 'setNominees',
+      outputs: [
+        {
+          internalType: 'bytes32',
+          name: 'account',
+          type: 'bytes32',
+        },
+        {
+          internalType: 'uint256',
+          name: 'chainId',
+          type: 'uint256',
+        },
+      ],
+      stateMutability: 'view',
+      type: 'function',
+    },
+    {
+      inputs: [
+        {
+          internalType: 'uint256',
+          name: '',
+          type: 'uint256',
+        },
+      ],
+      name: 'setRemovedNominees',
       outputs: [
         {
           internalType: 'bytes32',

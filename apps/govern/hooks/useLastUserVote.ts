@@ -3,6 +3,7 @@ import { useReadContracts } from 'wagmi';
 
 import { VOTE_WEIGHTING } from 'libs/util-contracts/src/lib/abiAndAddresses';
 
+import { LAST_USER_VOTE_KEY } from 'common-util/constants/scopeKeys';
 import { getNomineeHash } from 'common-util/functions/nominee-hash';
 
 export const useLastUserVote = (
@@ -16,6 +17,7 @@ export const useLastUserVote = (
     chainId: 1,
     functionName: 'lastUserVote',
     args: [account, getNomineeHash(nominee.account, nominee.chainId)],
+    scopeKey: LAST_USER_VOTE_KEY,
   }));
 
   const { data } = useReadContracts({

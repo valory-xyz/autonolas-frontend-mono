@@ -1,5 +1,5 @@
 export const STAKING_TOKEN = {
-  // we need only abi, because this is an implementation and the address may vary
+  // this is a staking contract template, we need only its abi to use with the contracts' address
   abi: [
     {
       inputs: [],

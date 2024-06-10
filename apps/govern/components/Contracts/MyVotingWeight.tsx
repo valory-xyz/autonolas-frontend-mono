@@ -2,7 +2,7 @@ import { LoadingOutlined, TableOutlined, WalletOutlined } from '@ant-design/icon
 import { Button, Card as CardAntd, Flex, Spin, Typography } from 'antd';
 import { useVotingPower } from 'hooks/index';
 import Image from 'next/image';
-import { Dispatch, SetStateAction } from 'react';
+import { Dispatch, SetStateAction, useMemo } from 'react';
 
 import { StakingContract } from 'store/govern';
 import { useAppSelector } from 'store/index';
@@ -92,34 +92,43 @@ export const MyVotingWeight = ({ isUpdating, allocations, setAllocations }: Cont
   const { data: votingPower, isFetching: isVotingPowerLoading } = useVotingPower(account);
   const { userVotes, isUserVotesLoading } = useAppSelector((state) => state.govern);
 
-  let content = null;
-
-  // If the user doesn't connect their wallet, suggest to connect
-  if (!account) {
-    content = <ConnectWallet />;
-  } else if (isVotingPowerLoading) {
-    // Show loader while don't have balance data
-    content = <Loader />;
-  } else {
-    // If the user doesn't have voting power, suggest to get veOlas
-    if (Number(votingPower) === 0) {
-      content = <GetVeOlas />;
-    } else if (!isUserVotesLoading) {
-      if (isUpdating && allocations.length !== 0) {
-        // If the user added something for voting, show edit mode
-        content = <EditVotes allocations={allocations} setAllocations={setAllocations} />;
-      } else if (Object.values(userVotes).length === 0) {
-        // If the user has never voted, show empty state
-        content = <EmptyVotes />;
-      } else {
-        // If the user has voted, and is not updating votes, show their current votes
-        content = <Votes />;
-      }
+  const content = useMemo(() => {
+    // If the user doesn't connect their wallet, suggest to connect
+    if (!account) {
+      return <ConnectWallet />;
+    } else if (isVotingPowerLoading) {
+      // Show loader while don't have balance data
+      return <Loader />;
     } else {
-      // Show loader otherwise
-      content = <Loader />;
+      // If the user doesn't have voting power, suggest to get veOlas
+      if (Number(votingPower) === 0) {
+        return <GetVeOlas />;
+      } else if (!isUserVotesLoading) {
+        if (isUpdating && allocations.length !== 0) {
+          // If the user added something for voting, show edit mode
+          return <EditVotes allocations={allocations} setAllocations={setAllocations} />;
+        } else if (Object.values(userVotes).length === 0) {
+          // If the user has never voted, show empty state
+          return <EmptyVotes />;
+        } else {
+          // If the user has voted, and is not updating votes, show their current votes
+          return <Votes />;
+        }
+      } else {
+        // Show loader otherwise
+        return <Loader />;
+      }
     }
-  }
+  }, [
+    account,
+    allocations,
+    isUpdating,
+    isUserVotesLoading,
+    isVotingPowerLoading,
+    setAllocations,
+    userVotes,
+    votingPower,
+  ]);
 
   return (
     <Card className="flex-none">

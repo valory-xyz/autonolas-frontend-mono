@@ -4,19 +4,12 @@ import { useBlock } from 'wagmi';
 import { setStakingContracts } from 'store/govern';
 import { useAppDispatch, useAppSelector } from 'store/index';
 
+import { NEXT_RELATIVE_WEIGHTS_KEY } from 'common-util/constants/scopeKeys';
+import { getStartOfNextWeek } from 'common-util/functions/time';
+
 import { useNominees } from './useNominees';
 import { useNomineesMetadata } from './useNomineesMetadata';
 import { useNomineesWeights } from './useNomineesWeights';
-
-const getStartOfNextWeek = () => {
-  const date = new Date();
-  const dayOfWeek = date.getDay();
-  const daysUntilNextWeek = (8 - dayOfWeek) % 7;
-  const nextWeekStartDate = new Date(date);
-  nextWeekStartDate.setDate(date.getDate() + daysUntilNextWeek);
-  nextWeekStartDate.setHours(0, 0, 0, 0);
-  return nextWeekStartDate.getTime() / 1000;
-};
 
 export const useFetchStakingContractsList = () => {
   const dispatch = useAppDispatch();
@@ -31,7 +24,11 @@ export const useFetchStakingContractsList = () => {
   const nextWeek = block ? getStartOfNextWeek() : null;
 
   const { data: currentWeight } = useNomineesWeights(nominees || [], now);
-  const { data: nextWeight } = useNomineesWeights(nominees || [], nextWeek);
+  const { data: nextWeight } = useNomineesWeights(
+    nominees || [],
+    nextWeek,
+    NEXT_RELATIVE_WEIGHTS_KEY,
+  );
 
   // Get contracts metadata
   const { data: metadata } = useNomineesMetadata(nominees || []);
