@@ -14,13 +14,7 @@ import {
 import { ColumnsType } from 'antd/es/table';
 import { Dispatch, SetStateAction, useCallback, useState } from 'react';
 
-import {
-  StakingContract,
-  UserVotes,
-  clearLastUserVote,
-  clearStakingContracts,
-  clearUserVotes,
-} from 'store/govern';
+import { StakingContract, UserVotes, clearState } from 'store/govern';
 import { useAppDispatch, useAppSelector } from 'store/index';
 import styled from 'styled-components';
 
@@ -317,9 +311,7 @@ export const EditVotes = ({ allocations, setAllocations }: EditVotesProps) => {
         });
 
         // Reset saved data so it's re-fetched automatically
-        dispatch(clearStakingContracts());
-        dispatch(clearUserVotes());
-        dispatch(clearLastUserVote());
+        dispatch(clearState());
         queryClient.invalidateQueries({
           predicate: (query) =>
             INVALIDATE_AFTER_UPDATE_KEYS.includes(
