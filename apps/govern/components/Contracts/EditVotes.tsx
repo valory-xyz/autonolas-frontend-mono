@@ -2,7 +2,6 @@ import { DeleteOutlined } from '@ant-design/icons';
 import {
   Alert,
   Button,
-  Checkbox,
   Flex,
   InputNumber,
   Modal,
@@ -18,6 +17,7 @@ import { StakingContract, UserVotes, clearState } from 'store/govern';
 import { useAppDispatch, useAppSelector } from 'store/index';
 import styled from 'styled-components';
 
+import { RETAINER_ADDRESS } from 'common-util/constants/addresses';
 import { INVALIDATE_AFTER_UPDATE_KEYS } from 'common-util/constants/scopeKeys';
 import {
   CHAIN_NAMES,
@@ -25,6 +25,7 @@ import {
   checkIfNomineeRemoved,
   checkLockExpired,
   checkNegativeSlope,
+  getBytes32FromAddress,
   voteForNomineeWeights,
 } from 'common-util/functions';
 
@@ -38,7 +39,7 @@ const getRemovedNomineesError = (removedNominees: `0x${string}`[], allocations: 
     <Paragraph>Remove them and try again:</Paragraph>
     <ul>
       {removedNominees.map((item) => (
-        <li key={item}>
+        <li key={item} className="text-start">
           <b>{allocations.find((contract) => contract.address === item)?.metadata.name}</b>
         </li>
       ))}
@@ -121,14 +122,15 @@ const TotalPower = styled(Text)`
   font-size: 24px;
   font-weight: 700;
   line-height: 32px;
-  margin-bottom: 24px;
+  margin-bottom: 16px;
 `;
 
-type Allocation = StakingContract & { weight: number };
+type Allocation = Pick<StakingContract, 'address' | 'chainId' | 'metadata'> & { weight: number };
 
 type EditVotesProps = {
   allocations: Allocation[];
   setAllocations: Dispatch<SetStateAction<Allocation[]>>;
+  setIsUpdating: Dispatch<SetStateAction<boolean>>;
 };
 
 const getColumns = (
@@ -205,22 +207,30 @@ const ConfirmModal = ({
       okText="Confirm voting weight"
       confirmLoading={isLoading}
     >
-      <Paragraph type="secondary">
-        Your are going to vote <Text strong>{totalPower}%</Text> of your voting power for{' '}
-        <Text strong>{allocationsLength}</Text> staking contract
-        {allocationsLength > 1 && 's'}. New voting weight will take effect at the beginning of the
-        next week.
+      <Paragraph>
+        You're allocating {totalPower}% of your voting power to {allocationsLength} staking
+        contracts.
       </Paragraph>
-      <Paragraph type="secondary">
-        Note that after you submit your voting weights, you won’t be able to update it or add new
-        contracts to vote <Text strong>for the next 10 days.</Text>
+      <Paragraph>
+        After you confirm, you'll enter a 10 day cooldown period. You won't be able to update your
+        weights during that time.
       </Paragraph>
-      <Checkbox className="mb-16">Don’t show this message again</Checkbox>
+
+      {totalPower < 10_000 && (
+        <Alert
+          // TODO: add blue info alerts as in Pearl
+          className="mb-16"
+          message={`${parseFloat(
+            ((10_000 - totalPower) / 100).toFixed(2),
+          )}% of your voting power is unallocated - this will be applied to the Rollover Pool and may be used in future epochs.`}
+          showIcon
+        />
+      )}
     </Modal>
   );
 };
 
-export const EditVotes = ({ allocations, setAllocations }: EditVotesProps) => {
+export const EditVotes = ({ allocations, setAllocations, setIsUpdating }: EditVotesProps) => {
   const dispatch = useAppDispatch();
   const { account } = useAppSelector((state) => state.setup);
   const { userVotes, stakingContracts } = useAppSelector((state) => state.govern);
@@ -242,14 +252,16 @@ export const EditVotes = ({ allocations, setAllocations }: EditVotesProps) => {
     setAllocations((prev) => prev.filter((_, i) => i !== index));
   };
 
-  const totalPower = allocations.reduce((sum, item) => (sum * 100 + item.weight * 100) / 100, 0);
-  const isError = totalPower > 100;
+  const totalPower = allocations.reduce((sum, item) => sum + item.weight * 100, 0);
+  const isError = totalPower > 10_000;
 
   const showModal = () => setIsModalOpen(true);
   const closeModal = () => setIsModalOpen(false);
 
   const updateVotingWeight = useCallback(async () => {
     if (!account) return;
+    if (totalPower > 10_000) return;
+
     setIsLoading(true);
 
     // Check if any of the nominees were removed from voting
@@ -290,7 +302,18 @@ export const EditVotes = ({ allocations, setAllocations }: EditVotesProps) => {
       return;
     }
 
-    const votes = getReorderedVotes(allocations, userVotes, stakingContracts);
+    const allocationsWithRetainer = [...allocations];
+    // If not all weight was used, allocate the rest to the retainer
+    if (totalPower < 10_000) {
+      allocationsWithRetainer.push({
+        address: getBytes32FromAddress(RETAINER_ADDRESS),
+        chainId: 1,
+        weight: (10_000 - totalPower) / 100,
+        metadata: { name: 'n/a', description: 'n/a' },
+      });
+    }
+
+    const votes = getReorderedVotes(allocationsWithRetainer, userVotes, stakingContracts);
 
     const nominees: `0x${string}`[] = [];
     const chainIds: number[] = [];
@@ -310,14 +333,15 @@ export const EditVotes = ({ allocations, setAllocations }: EditVotesProps) => {
           message: 'Your votes have been updated',
         });
 
-        // Reset saved data so it's re-fetched automatically
-        dispatch(clearState());
-        queryClient.invalidateQueries({
+        setIsUpdating(false);
+        // Reset previously saved data so it's re-fetched automatically
+        queryClient.removeQueries({
           predicate: (query) =>
             INVALIDATE_AFTER_UPDATE_KEYS.includes(
               (query.queryKey[1] as Record<string, string>)?.scopeKey,
             ),
         });
+        dispatch(clearState());
       })
       .catch((error) => {
         notification.error({
@@ -327,7 +351,7 @@ export const EditVotes = ({ allocations, setAllocations }: EditVotesProps) => {
       .finally(() => {
         setIsLoading(false);
       });
-  }, [account, allocations, dispatch, stakingContracts, userVotes]);
+  }, [account, allocations, dispatch, stakingContracts, totalPower, userVotes, setIsUpdating]);
 
   return (
     <>
@@ -342,13 +366,16 @@ export const EditVotes = ({ allocations, setAllocations }: EditVotesProps) => {
       <Text type="secondary" strong>
         Voting power used
       </Text>
-      <TotalPower>{`${totalPower}%`}</TotalPower>
+      <TotalPower>{`${parseFloat((totalPower / 100).toFixed(2))}%`}</TotalPower>
       <Table
         className="mt-16 mb-16"
         columns={getColumns(allocations, updateAllocation, removeAllocation, isError)}
         dataSource={allocations}
         pagination={false}
       />
+      <Paragraph type="secondary" className="text-end">
+        New voting weight will take effect at the beginning of the next week.
+      </Paragraph>
       <Flex gap={12} justify="flex-end">
         <Button onClick={onCancel}>Cancel</Button>
         <Button

@@ -3,6 +3,8 @@ import { useReadContract } from 'wagmi';
 
 import { VOTE_WEIGHTING } from 'libs/util-contracts/src/lib/abiAndAddresses';
 
+import { getBytes32FromAddress } from 'common-util/functions';
+
 export const useNominees = () => {
   const { data } = useReadContract({
     address: (VOTE_WEIGHTING.addresses as Record<number, `0x${string}`>)[1],
@@ -12,7 +14,7 @@ export const useNominees = () => {
     query: {
       select: (data) =>
         (data as { account: `0x${string}`; chainId: number }[]).filter(
-          (item) => item.account !== ethers.zeroPadValue(ethers.ZeroAddress, 32),
+          (item) => item.account !== getBytes32FromAddress(ethers.ZeroAddress),
         ),
     },
   });

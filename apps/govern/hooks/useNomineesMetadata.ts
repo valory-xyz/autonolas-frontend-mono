@@ -1,9 +1,10 @@
-import { ethers } from 'ethers';
 import { useCallback, useEffect, useState } from 'react';
 import { Abi } from 'viem';
 import { useReadContracts } from 'wagmi';
 
 import { STAKING_TOKEN } from 'libs/util-contracts/src/lib/abiAndAddresses';
+
+import { getAddressFromBytes32, getBytes32FromAddress } from 'common-util/functions';
 
 const HASH_PREFIX = 'f01701220';
 const GATEWAY_URL = 'https://gateway.autonolas.tech/ipfs/';
@@ -41,7 +42,7 @@ export const useNomineesMetadata = (nominees: { account: `0x${string}`; chainId:
   const [contractsMetadata, setContractsMetadata] = useState<Record<string, Metadata> | null>(null);
 
   const contracts = nominees.map((nominee) => ({
-    address: ('0x' + nominee.account.slice(-40)) as `0x${string}`,
+    address: getAddressFromBytes32(nominee.account),
     abi: STAKING_TOKEN.abi as Abi,
     chainId: Number(nominee.chainId),
     functionName: 'metadataHash',
@@ -76,7 +77,7 @@ export const useNomineesMetadata = (nominees: { account: `0x${string}`; chainId:
         const batchResults = await fetchBatch(batch);
         batch.forEach((item, index) => {
           if (batchResults[index]) {
-            metadataResults[ethers.zeroPadValue(item.nominee, 32)] = batchResults[index];
+            metadataResults[getBytes32FromAddress(item.nominee)] = batchResults[index];
           }
         });
       }

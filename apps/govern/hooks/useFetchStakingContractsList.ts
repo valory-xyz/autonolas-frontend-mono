@@ -1,10 +1,12 @@
 import { useEffect } from 'react';
 import { useBlock } from 'wagmi';
 
-import { setStakingContracts } from 'store/govern';
+import { StakingContract, setStakingContracts } from 'store/govern';
 import { useAppDispatch, useAppSelector } from 'store/index';
 
+import { RETAINER_ADDRESS } from 'common-util/constants/addresses';
 import { NEXT_RELATIVE_WEIGHTS_KEY } from 'common-util/constants/scopeKeys';
+import { getBytes32FromAddress } from 'common-util/functions';
 import { getStartOfNextWeek } from 'common-util/functions/time';
 
 import { useNominees } from './useNominees';
@@ -46,13 +48,18 @@ export const useFetchStakingContractsList = () => {
       // And it's not yet in the store
       stakingContracts.length === 0
     ) {
-      const stakingContractsList = nominees.map((item) => ({
-        address: item.account,
-        chainId: Number(item.chainId),
-        currentWeight: currentWeight[item.account],
-        nextWeight: nextWeight[item.account],
-        metadata: metadata[item.account],
-      }));
+      const stakingContractsList: StakingContract[] = [];
+      nominees.forEach((item) => {
+        if (item.account !== getBytes32FromAddress(RETAINER_ADDRESS)) {
+          stakingContractsList.push({
+            address: item.account,
+            chainId: Number(item.chainId),
+            currentWeight: currentWeight[item.account],
+            nextWeight: nextWeight[item.account],
+            metadata: metadata[item.account],
+          });
+        }
+      });
 
       dispatch(setStakingContracts(stakingContractsList));
     }

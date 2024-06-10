@@ -57,12 +57,21 @@ export const GlobalStyles = createGlobalStyle`
   .mr-16 {
     margin-right: 16px;
   }
+  .ml-8 {
+    margin-left: 8px;
+  }
   .pl-0 {
     padding-left: 0px !important;
   }
 
+  .text-start {
+    text-align: start;
+  }
   .text-center {
     text-align: center;
+  }
+  .text-end	{
+    text-align: end;
   }
 
   /* layout */

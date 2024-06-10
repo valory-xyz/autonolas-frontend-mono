@@ -14,12 +14,12 @@ const StyledMain = styled.main`
   margin: 0 auto;
 `;
 
-type Allocation = StakingContract & { weight: number };
+type Allocation = Pick<StakingContract, 'address' | 'chainId' | 'metadata'> & { weight: number };
 
 export const ContractsPage = () => {
   const { userVotes, isUserVotesLoading } = useAppSelector((state) => state.govern);
 
-  const [isUpdating, setIsUpdating] = useState(false);
+  const [isUpdating, setIsUpdating] = useState(true);
   const [allocations, setAllocations] = useState<Allocation[]>([]);
 
   useEffect(() => {
@@ -39,6 +39,7 @@ export const ContractsPage = () => {
         <ContractsList isUpdating={isUpdating} handleAdd={handleAdd} allocations={allocations} />
         <MyVotingWeight
           isUpdating={isUpdating}
+          setIsUpdating={setIsUpdating}
           allocations={allocations}
           setAllocations={setAllocations}
         />

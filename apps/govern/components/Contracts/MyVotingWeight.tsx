@@ -33,10 +33,11 @@ const Card = styled(CardAntd)`
 
 const ICON_STYLE = { fontSize: '56px', color: '#A3AEBB' };
 
-type Allocation = StakingContract & { weight: number };
+type Allocation = Pick<StakingContract, 'address' | 'chainId' | 'metadata'> & { weight: number };
 
-type ContractsListProps = {
+type MyVotingWeightProps = {
   isUpdating: boolean;
+  setIsUpdating: Dispatch<SetStateAction<boolean>>;
   allocations: Allocation[];
   setAllocations: Dispatch<SetStateAction<Allocation[]>>;
 };
@@ -87,13 +88,18 @@ const Loader = () => {
   );
 };
 
-export const MyVotingWeight = ({ isUpdating, allocations, setAllocations }: ContractsListProps) => {
+export const MyVotingWeight = ({
+  isUpdating,
+  setIsUpdating,
+  allocations,
+  setAllocations,
+}: MyVotingWeightProps) => {
   const { account } = useAppSelector((state) => state.setup);
   const { data: votingPower, isFetching: isVotingPowerLoading } = useVotingPower(account);
   const { userVotes, isUserVotesLoading } = useAppSelector((state) => state.govern);
 
   const content = useMemo(() => {
-    // If the user doesn't connect their wallet, suggest to connect
+    // If the user didn't connect their wallet, suggest to connect
     if (!account) {
       return <ConnectWallet />;
     } else if (isVotingPowerLoading) {
@@ -106,7 +112,13 @@ export const MyVotingWeight = ({ isUpdating, allocations, setAllocations }: Cont
       } else if (!isUserVotesLoading) {
         if (isUpdating && allocations.length !== 0) {
           // If the user added something for voting, show edit mode
-          return <EditVotes allocations={allocations} setAllocations={setAllocations} />;
+          return (
+            <EditVotes
+              allocations={allocations}
+              setAllocations={setAllocations}
+              setIsUpdating={setIsUpdating}
+            />
+          );
         } else if (Object.values(userVotes).length === 0) {
           // If the user has never voted, show empty state
           return <EmptyVotes />;
@@ -123,6 +135,7 @@ export const MyVotingWeight = ({ isUpdating, allocations, setAllocations }: Cont
     account,
     allocations,
     isUpdating,
+    setIsUpdating,
     isUserVotesLoading,
     isVotingPowerLoading,
     setAllocations,

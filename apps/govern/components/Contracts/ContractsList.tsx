@@ -16,7 +16,7 @@ const Card = styled(CardAntd)`
 `;
 
 // TODO: organize shared types
-type Allocation = StakingContract & { weight: number };
+type Allocation = Pick<StakingContract, 'address' | 'chainId' | 'metadata'> & { weight: number };
 
 type ContractsListProps = {
   isUpdating: boolean;
@@ -25,11 +25,12 @@ type ContractsListProps = {
 };
 
 const getColumns = ({
-  isUpdating,
   handleAdd,
   allocations,
   actionsVisible,
-}: ContractsListProps & { actionsVisible: boolean }): ColumnsType<StakingContract> => {
+}: Omit<ContractsListProps, 'isUpdating'> & {
+  actionsVisible: boolean;
+}): ColumnsType<StakingContract> => {
   const columns: ColumnsType<StakingContract> = [
     {
       title: 'Staking contract',
@@ -54,7 +55,7 @@ const getColumns = ({
       ),
     },
     {
-      title: 'Next weight',
+      title: 'Next week weight',
       key: 'nextWeight',
       // TODO: replace .toFixed(2) with something smarter
       render: (_, record) => (
@@ -102,13 +103,12 @@ export const ContractsList = ({ isUpdating, handleAdd, allocations }: ContractsL
       <Title level={3} className="m-0">
         All staking contracts
       </Title>
-      <Paragraph type="secondary">
+      <Paragraph type="secondary" className="mt-8">
         Decide which staking contracts receive the most incentives, attract the most agents, and
         grow.
       </Paragraph>
       <Table
         columns={getColumns({
-          isUpdating,
           handleAdd,
           allocations,
           actionsVisible: (isUpdating || allocations.length === 0) && !!account,

@@ -1,12 +1,14 @@
+import { readContracts } from '@wagmi/core';
 import { Contract } from 'ethers';
+import { AbiFunction } from 'viem';
 
+import { STAKING_FACTORY } from 'libs/util-contracts/src/lib/abiAndAddresses';
+
+import { wagmiConfig } from 'common-util/config/wagmi';
+
+import { getAddressFromBytes32 } from './addresses';
 import { getStartOfNextWeek } from './time';
-import {
-  executeBatchAsync,
-  getStakingFactoryContract,
-  getVeOlasContract,
-  getVoteWeightingContract,
-} from './web3';
+import { getVeOlasContract, getVoteWeightingContract } from './web3';
 
 const ESTIMATED_GAS_LIMIT = 500_000;
 
@@ -44,7 +46,6 @@ export const voteForNomineeWeights = async ({
   weights,
 }: VoteForNomineeWeightsParams) => {
   const contract = getVoteWeightingContract();
-  // TODO: sort by weights asc
   const result = await contract.methods
     .voteForNomineeWeightsBatch(nominees, chainIds, weights)
     .send({ from: account });
@@ -71,28 +72,28 @@ export const checkIfNomineeRemoved = async (allocations: { address: `0x${string}
   return [];
 };
 
-type InstanceParams = {
-  deployer: string;
-  implementation: string;
-  isEnabled: boolean;
-};
-
 export const checkIfContractDisabled = async (
   allocations: { address: `0x${string}`; chainId: number }[],
 ) => {
   try {
     const result: `0x${string}`[] = [];
 
-    const calls = allocations.map((item) => {
-      const contract = getStakingFactoryContract(item.chainId);
-      // TODO: make '0x' + nominee.slice(-40) a function
-      return contract.methods.mapInstanceParams('0x' + item.address.slice(-40)).call.request();
+    const response = await readContracts(wagmiConfig, {
+      contracts: allocations.map((item) => ({
+        address: (STAKING_FACTORY.addresses as Record<number, `0x${string}`>)[
+          item.chainId as number
+        ],
+        abi: STAKING_FACTORY.abi as AbiFunction[],
+        functionName: 'verifyInstance',
+        args: [getAddressFromBytes32(item.address)],
+        chainId: item.chainId,
+      })),
     });
 
-    const batchResponse = (await executeBatchAsync(calls)) as InstanceParams[];
-
-    batchResponse.forEach(({ isEnabled }, index) => {
-      if (!isEnabled) result.push(allocations[index].address);
+    response.forEach((response, index) => {
+      if (response.status === 'success' && !response.result) {
+        result.push(allocations[index].address);
+      }
     });
 
     return result;
