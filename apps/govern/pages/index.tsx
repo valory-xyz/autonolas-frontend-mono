@@ -1,3 +1,3 @@
-import { AllocationPage } from '../components/Allocation';
+import { ContractsPage } from '../components/Contracts';
 
-export default AllocationPage;
+export default ContractsPage;

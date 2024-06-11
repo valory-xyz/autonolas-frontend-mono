@@ -3,11 +3,15 @@ import { Chain, gnosis, hardhat, mainnet, polygon } from 'wagmi/chains';
 import { coinbaseWallet, injected, safe, walletConnect } from 'wagmi/connectors';
 
 import { RPC_URLS } from 'common-util/constants/rpcs';
-import { virtualMainnet, virtualGnosis, virtualPolygon } from '../../tenderly.config';
 
-const mainnetChain = process.env.NEXT_PUBLIC_IS_CONNECTED_TO_TEST_NET === 'true' ? virtualMainnet : mainnet
-const gnosisChain = process.env.NEXT_PUBLIC_IS_CONNECTED_TO_TEST_NET === 'true' ? virtualGnosis : gnosis
-const polygonChain = process.env.NEXT_PUBLIC_IS_CONNECTED_TO_TEST_NET === 'true' ? virtualPolygon : polygon
+import { virtualGnosis, virtualMainnet, virtualPolygon } from '../../tenderly.config';
+
+const mainnetChain =
+  process.env.NEXT_PUBLIC_IS_CONNECTED_TO_TEST_NET === 'true' ? virtualMainnet : mainnet;
+const gnosisChain =
+  process.env.NEXT_PUBLIC_IS_CONNECTED_TO_TEST_NET === 'true' ? virtualGnosis : gnosis;
+const polygonChain =
+  process.env.NEXT_PUBLIC_IS_CONNECTED_TO_TEST_NET === 'true' ? virtualPolygon : polygon;
 
 export const SUPPORTED_CHAINS: [Chain, ...Chain[]] = [
   mainnetChain,
