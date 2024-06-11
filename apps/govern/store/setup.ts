@@ -1,12 +1,12 @@
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { PayloadAction, createSlice } from '@reduxjs/toolkit';
+import { Address } from 'types/index';
 
 interface SetupState {
-  account: `0x${string}` | undefined,
-  balance: string | undefined,
-  errorMessage: string | undefined,
-  chainId: number | undefined,
+  account: Address | undefined;
+  balance: string | undefined;
+  errorMessage: string | undefined;
+  chainId: number | undefined;
 }
-
 
 const initialState: SetupState = {
   account: undefined,
@@ -37,11 +37,6 @@ export const setupSlice = createSlice({
   },
 });
 
-export const {
-  setUserAccount,
-  setUserBalance,
-  setChainId,
-  setErrorMessage,
-  setLogout,
-} = setupSlice.actions;
-export const setupReducer = setupSlice.reducer; 
+export const { setUserAccount, setUserBalance, setChainId, setErrorMessage, setLogout } =
+  setupSlice.actions;
+export const setupReducer = setupSlice.reducer;

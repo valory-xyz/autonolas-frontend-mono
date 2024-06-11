@@ -12,6 +12,7 @@ import {
 } from 'antd';
 import { ColumnsType } from 'antd/es/table';
 import { Dispatch, SetStateAction, useCallback, useState } from 'react';
+import { Address } from 'types/index';
 
 import { StakingContract, UserVotes, clearState } from 'store/govern';
 import { useAppDispatch, useAppSelector } from 'store/index';
@@ -34,7 +35,7 @@ import { queryClient } from '../../context/Web3ModalProvider';
 
 const { Paragraph, Text } = Typography;
 
-const getRemovedNomineesError = (removedNominees: `0x${string}`[], allocations: Allocation[]) => (
+const getRemovedNomineesError = (removedNominees: Address[], allocations: Allocation[]) => (
   <Flex align="start" vertical>
     <Paragraph className="m-0">Some of the contracts are no longer available for voting.</Paragraph>
     <Paragraph>Remove them and try again:</Paragraph>
@@ -80,7 +81,7 @@ const getReorderedVotes = (
     ([aKey, aValue], [bKey, bValue]) => bValue.current.power - aValue.current.power,
   );
 
-  const newVotes: { address: `0x${string}`; chainId: number; weight: string }[] = [];
+  const newVotes: { address: Address; chainId: number; weight: string }[] = [];
 
   // Start from old votes
   sortedOldVotes.forEach((oldVote) => {
@@ -100,7 +101,7 @@ const getReorderedVotes = (
       // before voting on the others contacts
       const chainId = stakingContracts.find((item) => item.address === oldVoteAddress)?.chainId;
       if (chainId) {
-        newVotes.unshift({ address: oldVoteAddress as `0x${string}`, chainId, weight: '0' });
+        newVotes.unshift({ address: oldVoteAddress as Address, chainId, weight: '0' });
       }
     }
   });
@@ -316,7 +317,7 @@ export const EditVotes = ({ allocations, setAllocations, setIsUpdating }: EditVo
 
     const votes = getReorderedVotes(allocationsWithRetainer, userVotes, stakingContracts);
 
-    const nominees: `0x${string}`[] = [];
+    const nominees: Address[] = [];
     const chainIds: number[] = [];
     const weights: string[] = [];
 

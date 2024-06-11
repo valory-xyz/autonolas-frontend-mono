@@ -1,5 +1,6 @@
 import { PayloadAction } from '@reduxjs/toolkit';
 import { createSlice } from '@reduxjs/toolkit';
+import { Address } from 'types/index';
 
 export type UserVote = {
   slope: number;
@@ -17,7 +18,7 @@ type Metadata = {
 type Weight = { percentage: number; value: number };
 
 export type StakingContract = {
-  address: `0x${string}`;
+  address: Address;
   chainId: number;
   metadata: Metadata;
   currentWeight: Weight;

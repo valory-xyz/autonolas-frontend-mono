@@ -24,7 +24,8 @@
       "static/*": ["apps/govern/static/*"],
       "images/*": ["apps/govern/public/images/*"],
       "store/*": ["apps/govern/store/*"],
-      "hooks/*": ["apps/govern/hooks/*"]
+      "hooks/*": ["apps/govern/hooks/*"],
+      "types/*": ["apps/govern/types/*"]
     }
   },
   "include": ["**/*.ts", "**/*.tsx", "**/*.js", "**/*.jsx", "next-env.d.ts"],

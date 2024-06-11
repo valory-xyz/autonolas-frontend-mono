@@ -11,7 +11,8 @@
           "components": "./components",
           "images": "./public/images",
           "store": "./store",
-          "hooks": "./hooks"
+          "hooks": "./hooks",
+          "types": "./types"
         }
       }
     ],

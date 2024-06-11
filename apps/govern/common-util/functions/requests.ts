@@ -1,5 +1,6 @@
 import { readContracts } from '@wagmi/core';
 import { Contract } from 'ethers';
+import { Address } from 'types/index';
 import { AbiFunction } from 'viem';
 
 import { STAKING_FACTORY } from 'libs/util-contracts/src/lib/abiAndAddresses';
@@ -17,7 +18,7 @@ const ESTIMATED_GAS_LIMIT = 500_000;
  */
 export const getEstimatedGasLimit = async (
   fn: Contract['methods'],
-  account: `0x${string}` | undefined,
+  account: Address | undefined,
 ) => {
   if (!account) {
     throw new Error('Invalid account passed to estimate gas limit');
@@ -34,7 +35,7 @@ export const getEstimatedGasLimit = async (
 };
 
 type VoteForNomineeWeightsParams = {
-  account: `0x${string}` | undefined;
+  account: Address | undefined;
   nominees: string[];
   chainIds: number[];
   weights: string[];
@@ -52,14 +53,14 @@ export const voteForNomineeWeights = async ({
   return result;
 };
 
-export const checkIfNomineeRemoved = async (allocations: { address: `0x${string}` }[]) => {
+export const checkIfNomineeRemoved = async (allocations: { address: Address }[]) => {
   const contract = getVoteWeightingContract();
-  const result: { account: `0x${string}`; chainId: number }[] = await contract.methods
+  const result: { account: Address; chainId: number }[] = await contract.methods
     .getAllRemovedNominees()
     .call();
 
   if (result) {
-    const removedNominees = result.reduce((acc: `0x${string}`[], removedNominee) => {
+    const removedNominees = result.reduce((acc: Address[], removedNominee) => {
       if (allocations.findIndex((item) => item.address === removedNominee.account) !== -1) {
         acc.push(removedNominee.account);
       }
@@ -73,16 +74,14 @@ export const checkIfNomineeRemoved = async (allocations: { address: `0x${string}
 };
 
 export const checkIfContractDisabled = async (
-  allocations: { address: `0x${string}`; chainId: number }[],
+  allocations: { address: Address; chainId: number }[],
 ) => {
   try {
-    const result: `0x${string}`[] = [];
+    const result: Address[] = [];
 
     const response = await readContracts(wagmiConfig, {
       contracts: allocations.map((item) => ({
-        address: (STAKING_FACTORY.addresses as Record<number, `0x${string}`>)[
-          item.chainId as number
-        ],
+        address: (STAKING_FACTORY.addresses as Record<number, Address>)[item.chainId as number],
         abi: STAKING_FACTORY.abi as AbiFunction[],
         functionName: 'verifyInstance',
         args: [getAddressFromBytes32(item.address)],
@@ -103,7 +102,7 @@ export const checkIfContractDisabled = async (
   }
 };
 
-export const checkNegativeSlope = async (account: `0x${string}`) => {
+export const checkNegativeSlope = async (account: Address) => {
   const contract = getVeOlasContract();
   const result: { slope: string } = await contract.methods.getLastUserPoint(account).call();
 
@@ -114,7 +113,7 @@ export const checkNegativeSlope = async (account: `0x${string}`) => {
   return false;
 };
 
-export const checkLockExpired = async (account: `0x${string}`) => {
+export const checkLockExpired = async (account: Address) => {
   const contract = getVeOlasContract();
   const result: number = await contract.methods.lockedEnd(account).call();
 

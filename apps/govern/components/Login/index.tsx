@@ -1,18 +1,19 @@
-import { useCallback, useEffect } from 'react';
 import { ethers } from 'ethers';
+import { useCallback, useEffect } from 'react';
+import { Address } from 'types/index';
 import { useBalance } from 'wagmi';
 
+import { useAppDispatch, useAppSelector } from 'store/index';
 import { setChainId, setLogout, setUserAccount, setUserBalance } from 'store/setup';
 
 import { LoginV2 } from 'common-util/Login';
-import { useAppDispatch, useAppSelector } from 'store/index';
 
 const Login = () => {
   const dispatch = useAppDispatch();
   const { account } = useAppSelector((state) => state.setup);
 
   const onConnect = useCallback(
-    (response: { address: `0x${string}` | undefined; chainId: number | undefined }) => {
+    (response: { address: Address | undefined; chainId: number | undefined }) => {
       dispatch(setUserAccount(response.address));
       dispatch(setChainId(response.chainId));
     },

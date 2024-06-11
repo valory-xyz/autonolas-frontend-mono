@@ -1,5 +1,6 @@
 import { GetAccountReturnType, watchAccount } from '@wagmi/core';
 import { FC, useCallback, useEffect } from 'react';
+import { Address } from 'types/index';
 import { useAccountEffect, useConfig, useDisconnect } from 'wagmi';
 
 import styled from 'styled-components';
@@ -7,7 +8,7 @@ import styled from 'styled-components';
 import { isAddressProhibited } from '../functions';
 
 interface LoginProps {
-  onConnect: (data: { address: `0x${string}` | undefined; chainId: number | undefined }) => void;
+  onConnect: (data: { address: Address | undefined; chainId: number | undefined }) => void;
   onDisconnect: () => void;
 }
 

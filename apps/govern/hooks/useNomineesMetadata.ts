@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
+import { Address } from 'types/index';
 import { Abi } from 'viem';
 import { useReadContracts } from 'wagmi';
 
@@ -12,7 +13,7 @@ const GATEWAY_URL = 'https://gateway.autonolas.tech/ipfs/';
 const BATCH_SIZE = 10;
 const CONCURRENCY_LIMIT = 5;
 
-type HashesWithNominees = { nominee: `0x${string}`; hash: string }[];
+type HashesWithNominees = { nominee: Address; hash: string }[];
 type Metadata = { name: string; description: string };
 
 const fetchBatch = async (params: HashesWithNominees) => {
@@ -37,7 +38,7 @@ const fetchBatch = async (params: HashesWithNominees) => {
   return results;
 };
 
-export const useNomineesMetadata = (nominees: { account: `0x${string}`; chainId: number }[]) => {
+export const useNomineesMetadata = (nominees: { account: Address; chainId: number }[]) => {
   const [isLoading, setIsLoading] = useState(false);
   const [contractsMetadata, setContractsMetadata] = useState<Record<string, Metadata> | null>(null);
 
