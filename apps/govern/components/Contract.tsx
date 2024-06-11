@@ -1,122 +1,92 @@
-import { Col, Row } from 'antd';
+import { ArrowUpOutlined, LoadingOutlined } from '@ant-design/icons';
+import { Card, Flex, Space, Spin, Typography } from 'antd';
+import { useContractParams } from 'hooks/index';
 import { useRouter } from 'next/router';
+import { useEnsName } from 'wagmi';
 
+import { useAppSelector } from 'store/index';
 import styled from 'styled-components';
+
+import { EXPLORE_URLS } from 'common-util/constants/urls';
+import { CHAIN_NAMES, getAddressFromBytes32, truncateAddress } from 'common-util/functions';
 
 const StyledMain = styled.main`
   display: flex;
   flex-direction: column;
-  max-width: 1400px;
+  max-width: 800px;
   margin: 0 auto;
 `;
 
-const data = [
-  {
-    title: 'Create Prediction Market for Sports Events',
-    address: '0xcf7ed3acca5a467e9e704c703e8d87f634fb0fc9',
-    chain: 'Gnosis Chain',
-    allocation: '5%',
-  },
-  {
-    title: 'Create Prediction Market for Stock Market Trends',
-    address: '0x1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b',
-    chain: 'Gnosis Chain',
-    allocation: '7%',
-  },
-  {
-    title: 'Create Prediction Market for Political Elections',
-    address: '0x9a8b7c6d5e4f3a2b1c0d9e8f7a6b5c4d3e2f1a0',
-    chain: 'Gnosis Chain',
-    allocation: '10%',
-  },
-  {
-    title: 'Create Prediction Market for Cryptocurrency Prices',
-    address: '0xb0a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9',
-    chain: 'Gnosis Chain',
-    allocation: '8%',
-  },
-  {
-    title: 'Create Prediction Market for Weather Forecasts',
-    address: '0xc3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1',
-    chain: 'Gnosis Chain',
-    allocation: '6%',
-  },
-  {
-    title: 'Create Prediction Market for Entertainment Industry Events',
-    address: '0xd4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2',
-    chain: 'Gnosis Chain',
-    allocation: '5%',
-  },
-  {
-    title: 'Create Prediction Market for Technology Trends',
-    address: '0xe5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3',
-    chain: 'Gnosis Chain',
-    allocation: '5%',
-  },
-  {
-    title: 'Create Prediction Market for Gaming Industry Events',
-    address: '0xf6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4',
-    chain: 'Gnosis Chain',
-    allocation: '5%',
-  },
-  {
-    title: 'Create Prediction Market for Global Economic Indicators',
-    address: '0xa7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5',
-    chain: 'Gnosis Chain',
-    allocation: '5%',
-  },
-  {
-    title: 'Create Prediction Market for Fashion Trends',
-    address: '0xb8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6',
-    chain: 'Gnosis Chain',
-    allocation: '5%',
-  },
-  {
-    title: 'Create Prediction Market for Health Industry Developments',
-    address: '0xc9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7',
-    chain: 'Gnosis Chain',
-    allocation: '5%',
-  },
-  {
-    title: 'Create Prediction Market for Environmental Events',
-    address: '0xd0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8',
-    chain: 'Gnosis Chain',
-    allocation: '5%',
-  },
-  {
-    title: 'Create Prediction Market for Cultural Trends',
-    address: '0xe1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9',
-    chain: 'Gnosis Chain',
-    allocation: '5%',
-  },
-  {
-    title: 'Create Prediction Market for Space Exploration Events',
-    address: '0xf2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0',
-    chain: 'Gnosis Chain',
-    allocation: '5%',
-  },
-  {
-    title: 'Create Prediction Market for Food Industry Trends',
-    address: '0xa3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1',
-    chain: 'Gnosis Chain',
-    allocation: '5%',
-  },
-];
+const Title = styled.h1`
+  font-size: 24px;
+  margin: 0 0 24px;
+`;
+
+const { Text, Paragraph } = Typography;
 
 export const ContractPage = () => {
+  const { stakingContracts } = useAppSelector((state) => state.govern);
   const router = useRouter();
-  const address = router?.query?.address;
+  const addressParam = router?.query?.address;
 
-  const contract = data.find((item) => item.address === address);
+  const contract = stakingContracts.find((item) => item.address === addressParam);
+
+  const formattedAddress = contract ? getAddressFromBytes32(contract.address) : '';
+
+  const { data: contractParams } = useContractParams(
+    formattedAddress,
+    contract?.chainId || 0,
+    !!contract,
+  );
+
+  const { data: ensName, isFetching: isEnsNameFetching } = useEnsName({
+    address: contractParams?.deployer,
+    query: { refetchOnWindowFocus: false },
+  });
+
   if (!contract) return null;
+
   return (
     <StyledMain>
-      <Row>
-        <Col span={12}>
-          <h1>{contract.title}</h1>
-        </Col>
-        <Col span={4}>TBD!</Col>
-      </Row>
+      <Card>
+        <Title>{contract.metadata.name}</Title>
+        <Space direction="vertical">
+          <Text type="secondary">Description</Text>
+          <Paragraph>{contract.metadata.description}</Paragraph>
+        </Space>
+        <Flex justify="space-between">
+          <Space direction="vertical">
+            <Text type="secondary">Owner address</Text>
+            {contractParams && !isEnsNameFetching ? (
+              <a
+                href={`${EXPLORE_URLS[contract.chainId]}/address/${contractParams.deployer}`}
+                target="_blank"
+              >
+                {ensName || truncateAddress(contractParams.deployer)}{' '}
+                <ArrowUpOutlined className="ml-8" style={{ rotate: '45deg' }} />
+              </a>
+            ) : (
+              <Text>
+                <Spin indicator={<LoadingOutlined spin />} />
+              </Text>
+            )}
+          </Space>
+          <Space direction="vertical">
+            <Text type="secondary">Chain</Text>
+            <Text>{CHAIN_NAMES[contract.chainId]}</Text>
+          </Space>
+          <Space direction="vertical">
+            <Text type="secondary">Contract address</Text>
+            <a
+              href={`${EXPLORE_URLS[contract.chainId]}/address/${formattedAddress}`}
+              target="_blank"
+            >
+              {truncateAddress(formattedAddress)}
+              <ArrowUpOutlined className="ml-8" style={{ rotate: '45deg' }} />
+            </a>
+          </Space>
+        </Flex>
+      </Card>
     </StyledMain>
   );
 };

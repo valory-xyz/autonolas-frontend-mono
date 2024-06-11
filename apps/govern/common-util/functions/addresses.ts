@@ -15,3 +15,6 @@ export const getAddressFromBytes32 = (address: `0x${string}` | string) => {
 export const getBytes32FromAddress = (address: `0x${string}` | string) => {
   return ethers.zeroPadValue(address, 32) as `0x${string}`;
 };
+
+export const truncateAddress = (address: `0x${string}` | string) =>
+  address ? `${address.substring(0, 7)}...${address.substring(address.length - 5)}` : '--';

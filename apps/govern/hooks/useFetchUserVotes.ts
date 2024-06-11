@@ -17,6 +17,9 @@ const BLOCKS_IN_A_WEEK = 50400;
 // TODO: update when contract is deployed
 const CONTRACT_DEPLOY_BLOCK = 20009990;
 
+// TODO: if voted any time last week, need to consider
+// "prev" as this week's Monday
+// currently it's a week before today
 const getPrevVotesBlock = (blockNumber: bigint) => {
   const lastWeekBlock = Number(blockNumber) - BLOCKS_IN_A_WEEK;
   return BigInt(Math.max(CONTRACT_DEPLOY_BLOCK, lastWeekBlock));
@@ -49,13 +52,10 @@ export const useFetchUserVotes = () => {
     userPower ? Number(userPower) !== 0 : false,
   );
 
-  console.log('block', block);
-
   /**
    * Sets user slopes to the store
    **/
   useEffect(() => {
-    console.log('??', 'isUserVotesLoading', isUserVotesLoading);
     if (
       // check if all data is loaded
       !nominees ||
@@ -65,22 +65,11 @@ export const useFetchUserVotes = () => {
     ) {
       return;
     }
-
-    console.log('after ??', userPower);
-    console.log(
-      'userSlopesNext',
-      userSlopesNext,
-      'userSlopesCurrent',
-      userSlopesCurrent,
-      'lastUserVote',
-      lastUserVote,
-    );
     // If user power is 0, it means user didn't vote
     // set user votes as {} as
     if (Number(userPower) === 0) {
       dispatch(setUserVotes({}));
     } else if (userSlopesNext && userSlopesCurrent && lastUserVote !== undefined) {
-      console.log('update');
       const result: Record<string, UserVotes> = {};
       nominees.forEach((item, index) => {
         if (

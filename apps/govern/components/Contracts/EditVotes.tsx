@@ -26,6 +26,7 @@ import {
   checkLockExpired,
   checkNegativeSlope,
   getBytes32FromAddress,
+  getVoteWeightingContract,
   voteForNomineeWeights,
 } from 'common-util/functions';
 
@@ -208,12 +209,12 @@ const ConfirmModal = ({
       confirmLoading={isLoading}
     >
       <Paragraph>
-        You're allocating {parseFloat((totalPower / 100).toFixed(2))}% of your voting power to{' '}
-        {allocationsLength} staking contracts.
+        {`You're allocating ${parseFloat(
+          (totalPower / 100).toFixed(2),
+        )}% of your voting power to ${allocationsLength} staking contracts.`}
       </Paragraph>
       <Paragraph>
-        After you confirm, you'll enter a 10 day cooldown period. You won't be able to update your
-        weights during that time.
+        {`After you confirm, you'll enter a 10 day cooldown period. You won't be able to update your weights during that time.`}
       </Paragraph>
 
       {totalPower < 10_000 && (
