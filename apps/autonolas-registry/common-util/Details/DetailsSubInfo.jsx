@@ -24,6 +24,7 @@ import {
   ArrowLink,
 } from './styles';
 import { publicClients } from '../clients';
+import { isAddress } from 'viem';
 
 const { Link, Text } = Typography;
 
@@ -127,6 +128,8 @@ export const DetailsSubInfo = ({
   // resolve ens name
   useEffect(() => {
     if (!ownerAddress) return;
+    if (!isAddress(ownerAddress)) return;
+    
     publicClients[1]
       .getEnsName({ address: ownerAddress })
       .then((ensName) => {
