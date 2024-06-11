@@ -27,6 +27,7 @@ const getAllAndMyServicesQuery = (currentPage, ownerAddress = null) => {
         first: ${TOTAL_VIEW_COUNT}, 
         skip: ${TOTAL_VIEW_COUNT * (currentPage - 1)},
         orderBy: serviceId
+        orderDirection: desc
         ${
           ownerAddress
             ? `where: { owner_contains_nocase: "${ownerAddress}" }`
@@ -78,6 +79,7 @@ const getServicesBySearchQuery = (
           ]
         }
         orderBy: serviceId
+        orderDirection: desc
       ) ${SERVICE_FIELDS}
     }
   `;

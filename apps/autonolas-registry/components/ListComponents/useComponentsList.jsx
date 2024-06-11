@@ -27,6 +27,7 @@ const getAllAndMyComponentsQuery = (currentPage, ownerAddress = null) => {
           ${ownerAddress ? `owner_contains_nocase: "${ownerAddress}"` : ''}
         }, 
         orderBy: tokenId
+        orderDirection: desc
       ) ${UNIT_FIELDS}
     }
   `;
@@ -46,6 +47,7 @@ const getComponentsBySearchQuery = (searchValue, ownerAddress = null) => {
           ]
         }
         orderBy: tokenId
+        orderDirection: desc
       ) ${UNIT_FIELDS}
     }
   `;
