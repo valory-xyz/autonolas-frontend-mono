@@ -271,7 +271,7 @@ export const DetailsSubInfo = ({
       });
     }
 
-    serviceDetailsList.push(...commonDetails(), {
+    serviceDetailsList.push(...commonDetails, {
       title: 'Threshold',
       value: serviceThreshold,
     });
