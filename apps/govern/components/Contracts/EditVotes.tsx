@@ -208,8 +208,8 @@ const ConfirmModal = ({
       confirmLoading={isLoading}
     >
       <Paragraph>
-        You're allocating {totalPower}% of your voting power to {allocationsLength} staking
-        contracts.
+        You're allocating {parseFloat((totalPower / 100).toFixed(2))}% of your voting power to{' '}
+        {allocationsLength} staking contracts.
       </Paragraph>
       <Paragraph>
         After you confirm, you'll enter a 10 day cooldown period. You won't be able to update your
@@ -347,6 +347,16 @@ export const EditVotes = ({ allocations, setAllocations, setIsUpdating }: EditVo
         notification.error({
           message: error.message,
         });
+
+        setIsUpdating(false);
+        // Reset previously saved data so it's re-fetched automatically
+        queryClient.removeQueries({
+          predicate: (query) =>
+            INVALIDATE_AFTER_UPDATE_KEYS.includes(
+              (query.queryKey[1] as Record<string, string>)?.scopeKey,
+            ),
+        });
+        dispatch(clearState());
       })
       .finally(() => {
         setIsLoading(false);

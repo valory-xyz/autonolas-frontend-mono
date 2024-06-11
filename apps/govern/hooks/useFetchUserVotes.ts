@@ -4,7 +4,7 @@ import { useBlock } from 'wagmi';
 import { UserVotes, setLastUserVote, setUserVotes } from 'store/govern';
 import { useAppDispatch, useAppSelector } from 'store/index';
 
-import { NEXT_USERS_SLOPES_KEY } from 'common-util/constants/scopeKeys';
+import { LATEST_BLOCK_KEY, NEXT_USERS_SLOPES_KEY } from 'common-util/constants/scopeKeys';
 
 import { useLastUserVote } from './useLastUserVote';
 import { useNominees } from './useNominees';
@@ -29,7 +29,7 @@ export const useFetchUserVotes = () => {
 
   const { data: nominees } = useNominees();
   const { data: userPower } = useVoteUserPower(account);
-  const { data: block } = useBlock({ blockTag: 'latest' });
+  const { data: block } = useBlock({ blockTag: 'latest', scopeKey: LATEST_BLOCK_KEY });
   const { data: userSlopesCurrent } = useVoteUserSlopes(
     nominees || [],
     account || null,
@@ -49,10 +49,13 @@ export const useFetchUserVotes = () => {
     userPower ? Number(userPower) !== 0 : false,
   );
 
+  console.log('block', block);
+
   /**
    * Sets user slopes to the store
    **/
   useEffect(() => {
+    console.log('??', 'isUserVotesLoading', isUserVotesLoading);
     if (
       // check if all data is loaded
       !nominees ||
@@ -62,11 +65,22 @@ export const useFetchUserVotes = () => {
     ) {
       return;
     }
+
+    console.log('after ??', userPower);
+    console.log(
+      'userSlopesNext',
+      userSlopesNext,
+      'userSlopesCurrent',
+      userSlopesCurrent,
+      'lastUserVote',
+      lastUserVote,
+    );
     // If user power is 0, it means user didn't vote
     // set user votes as {} as
     if (Number(userPower) === 0) {
       dispatch(setUserVotes({}));
     } else if (userSlopesNext && userSlopesCurrent && lastUserVote !== undefined) {
+      console.log('update');
       const result: Record<string, UserVotes> = {};
       nominees.forEach((item, index) => {
         if (

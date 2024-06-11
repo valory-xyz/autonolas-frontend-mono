@@ -3,6 +3,7 @@ import { Button, Card as CardAntd, Flex, Spin, Typography } from 'antd';
 import { useVotingPower } from 'hooks/index';
 import Image from 'next/image';
 import { Dispatch, SetStateAction, useMemo } from 'react';
+import { useAccount } from 'wagmi';
 
 import { StakingContract } from 'store/govern';
 import { useAppSelector } from 'store/index';
@@ -94,13 +95,13 @@ export const MyVotingWeight = ({
   allocations,
   setAllocations,
 }: MyVotingWeightProps) => {
-  const { account } = useAppSelector((state) => state.setup);
+  const { isConnected: isAccountConnected, address: account } = useAccount();
   const { data: votingPower, isFetching: isVotingPowerLoading } = useVotingPower(account);
   const { userVotes, isUserVotesLoading } = useAppSelector((state) => state.govern);
 
   const content = useMemo(() => {
     // If the user didn't connect their wallet, suggest to connect
-    if (!account) {
+    if (!isAccountConnected) {
       return <ConnectWallet />;
     } else if (isVotingPowerLoading) {
       // Show loader while don't have balance data
@@ -132,7 +133,7 @@ export const MyVotingWeight = ({
       }
     }
   }, [
-    account,
+    isAccountConnected,
     allocations,
     isUpdating,
     setIsUpdating,

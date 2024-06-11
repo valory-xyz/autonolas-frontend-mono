@@ -5,7 +5,7 @@ import { StakingContract, setStakingContracts } from 'store/govern';
 import { useAppDispatch, useAppSelector } from 'store/index';
 
 import { RETAINER_ADDRESS } from 'common-util/constants/addresses';
-import { NEXT_RELATIVE_WEIGHTS_KEY } from 'common-util/constants/scopeKeys';
+import { LATEST_BLOCK_KEY, NEXT_RELATIVE_WEIGHTS_KEY } from 'common-util/constants/scopeKeys';
 import { getBytes32FromAddress } from 'common-util/functions';
 import { getStartOfNextWeek } from 'common-util/functions/time';
 
@@ -21,7 +21,7 @@ export const useFetchStakingContractsList = () => {
   const { data: nominees } = useNominees();
 
   // Get weights for current and next period
-  const { data: block } = useBlock({ blockTag: 'latest' });
+  const { data: block } = useBlock({ blockTag: 'latest', scopeKey: LATEST_BLOCK_KEY });
   const now = block ? Number(block.timestamp) : null;
   const nextWeek = block ? getStartOfNextWeek() : null;
 
