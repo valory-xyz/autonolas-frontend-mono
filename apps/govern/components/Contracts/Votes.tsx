@@ -55,7 +55,7 @@ const columns: ColumnsType<MyVote> = [
           overlayStyle={{ maxWidth: '500px' }}
           title={
             <Paragraph className="m-0">
-              Unused staking incentives are retained unminted in the Rollover Pool. They can be made
+              Unused staking incentives are kept, unminted in the Rollover Pool. They can be made
               available in a future epoch by calling the <b>retain</b> method.
             </Paragraph>
           }
