@@ -1,4 +1,3 @@
-// Use this file to export React client components (e.g. those with 'use client' directive) or other non-server utilities
-
 export * from './lib/ui-theme';
 export * from './lib/ThemeConfig';
+export * from './lib/GlobalStyles';

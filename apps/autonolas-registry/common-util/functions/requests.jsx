@@ -23,15 +23,10 @@ export const checkIfERC721Receive = async (account, ownerAddress) => {
       const owners = await contract.methods.getOwners().call();
 
       if (Number(threshold) > 0 && owners.length > 0) {
-        const contents = await provider.getStorageAt(
-          account,
-          FALLBACK_HANDLER_STORAGE_SLOT,
-        );
+        const contents = await provider.getStorageAt(account, FALLBACK_HANDLER_STORAGE_SLOT);
 
         const isInvalidContent =
-          !contents ||
-          contents.slice(26) ===
-            DEFAULT_SERVICE_CREATION_ETH_TOKEN_ZEROS.slice(2);
+          !contents || contents.slice(26) === DEFAULT_SERVICE_CREATION_ETH_TOKEN_ZEROS.slice(2);
 
         if (isInvalidContent) {
           notifyError(
@@ -61,11 +56,9 @@ export const getEstimatedGasLimit = async (fn, account) => {
 
   try {
     const estimatedGas = await fn.estimateGas({ from: account });
-    return Math.floor(estimatedGas);
+    return Math.ceil(estimatedGas * 1.2);
   } catch (error) {
-    window.console.warn(
-      `Error occurred on estimating gas, defaulting to ${ESTIMATED_GAS_LIMIT}`,
-    );
+    window.console.warn(`Error occurred on estimating gas, defaulting to ${ESTIMATED_GAS_LIMIT}`);
   }
 
   return ESTIMATED_GAS_LIMIT;

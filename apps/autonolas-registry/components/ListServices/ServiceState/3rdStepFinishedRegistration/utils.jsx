@@ -1,15 +1,11 @@
 /* eslint-disable no-underscore-dangle */
 import { ethers } from 'ethers';
-import {
-  GNOSIS_SAFE_CONTRACT,
-  MULTI_SEND_CONTRACT,
-} from 'common-util/AbiAndAddresses';
-import {
-  RPC_URLS,
-  getServiceOwnerMultisigContract,
-} from 'common-util/Contracts';
+
+import { GNOSIS_SAFE_CONTRACT, MULTI_SEND_CONTRACT } from 'common-util/AbiAndAddresses';
+import { RPC_URLS, getServiceOwnerMultisigContract } from 'common-util/Contracts';
 import { safeMultiSend } from 'common-util/Contracts/addresses';
 import { checkIfGnosisSafe, getEthersProvider } from 'common-util/functions';
+
 import { isHashApproved } from './helpers';
 
 const safeContracts = require('@gnosis.pm/safe-contracts');
@@ -55,10 +51,10 @@ export const handleMultisigSubmit = async ({
 
   // Add the addresses, but keep the threshold the same
   for (let i = 0; i < agentInstances.length; i += 1) {
-    callData[i] = multisigContract.interface.encodeFunctionData(
-      'addOwnerWithThreshold',
-      [agentInstances[i], 1],
-    );
+    callData[i] = multisigContract.interface.encodeFunctionData('addOwnerWithThreshold', [
+      agentInstances[i],
+      1,
+    ]);
     txs[i] = safeContracts.buildSafeTransaction({
       to: multisig,
       data: callData[i],
@@ -87,11 +83,7 @@ export const handleMultisigSubmit = async ({
     ethers.getDefaultProvider(RPC_URLS[chainId]),
   );
 
-  const safeTx = safeContracts.buildMultiSendSafeTx(
-    multiSendContract,
-    txs,
-    nonce,
-  );
+  const safeTx = safeContracts.buildMultiSendSafeTx(multiSendContract, txs, nonce);
 
   const provider = getEthersProvider();
   const isSafe = await checkIfGnosisSafe(account, provider);
@@ -120,27 +112,21 @@ export const handleMultisigSubmit = async ({
       // Get the signature bytes based on the account address, since it had its tx pre-approved
       const signatureBytes = `0x${ZEROS_24}${account.slice(2)}${ZEROS_64}01`;
 
-      const safeExecData = multisigContract.interface.encodeFunctionData(
-        'execTransaction',
-        [
-          safeTx.to,
-          safeTx.value,
-          safeTx.data,
-          safeTx.operation,
-          safeTx.safeTxGas,
-          safeTx.baseGas,
-          safeTx.gasPrice,
-          safeTx.gasToken,
-          safeTx.refundReceiver,
-          signatureBytes,
-        ],
-      );
+      const safeExecData = multisigContract.interface.encodeFunctionData('execTransaction', [
+        safeTx.to,
+        safeTx.value,
+        safeTx.data,
+        safeTx.operation,
+        safeTx.safeTxGas,
+        safeTx.baseGas,
+        safeTx.gasPrice,
+        safeTx.gasToken,
+        safeTx.refundReceiver,
+        signatureBytes,
+      ]);
 
       // Redeploy the service updating the multisig with new owners and threshold
-      const packedData = ethers.utils.solidityPack(
-        ['address', 'bytes'],
-        [multisig, safeExecData],
-      );
+      const packedData = ethers.solidityPacked(['address', 'bytes'], [multisig, safeExecData]);
 
       // Check if the hash was already approved
       const filterOption = { approvedHash: messageHash, owner: account };
@@ -165,11 +151,7 @@ export const handleMultisigSubmit = async ({
 
                 // TODO: use websocket based subscription to fetch real-time event
                 // await until the hash is approved & then deploy
-                await isHashApproved(
-                  multisigContractServiceOwner,
-                  startingBlock,
-                  filterOption,
-                );
+                await isHashApproved(multisigContractServiceOwner, startingBlock, filterOption);
                 handleStep3Deploy(radioValue, packedData);
               })
               .then((information) => window.console.log(information))
@@ -215,26 +197,20 @@ export const handleMultisigSubmit = async ({
 
       const signatureBytes = await getSignatureBytes();
 
-      const safeExecData = multisigContract.interface.encodeFunctionData(
-        'execTransaction',
-        [
-          safeTx.to,
-          safeTx.value,
-          safeTx.data,
-          safeTx.operation,
-          safeTx.safeTxGas,
-          safeTx.baseGas,
-          safeTx.gasPrice,
-          safeTx.gasToken,
-          safeTx.refundReceiver,
-          signatureBytes,
-        ],
-      );
+      const safeExecData = multisigContract.interface.encodeFunctionData('execTransaction', [
+        safeTx.to,
+        safeTx.value,
+        safeTx.data,
+        safeTx.operation,
+        safeTx.safeTxGas,
+        safeTx.baseGas,
+        safeTx.gasPrice,
+        safeTx.gasToken,
+        safeTx.refundReceiver,
+        signatureBytes,
+      ]);
 
-      const packedData = ethers.utils.solidityPack(
-        ['address', 'bytes'],
-        [multisig, safeExecData],
-      );
+      const packedData = ethers.solidityPacked(['address', 'bytes'], [multisig, safeExecData]);
 
       handleStep3Deploy(radioValue, packedData);
     }

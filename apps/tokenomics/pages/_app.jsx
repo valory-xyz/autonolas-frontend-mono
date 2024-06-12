@@ -1,17 +1,15 @@
 import Head from 'next/head';
-import { Provider } from 'react-redux';
-import { ConfigProvider } from 'antd';
+import { useRouter } from 'next/router';
 import PropTypes from 'prop-types';
+import { Provider } from 'react-redux';
 
-/** wagmi config */
-import { WagmiConfig as WagmiConfigProvider } from 'wagmi';
-import { wagmiConfig } from 'common-util/Login/config';
+import GlobalStyle from 'components/GlobalStyles';
 
 /** antd theme config */
 import Layout from 'components/Layout';
-import GlobalStyle from 'components/GlobalStyles';
-import { THEME_CONFIG } from '@autonolas/frontend-library';
-import { useRouter } from 'next/router';
+
+import { ThemeConfigProvider } from '../context/ConfigProvider';
+import Web3ModalProvider from '../context/Web3ModalProvider';
 import { store } from '../store';
 
 const MyApp = ({ Component, pageProps }) => {
@@ -20,39 +18,36 @@ const MyApp = ({ Component, pageProps }) => {
 
   return (
     <>
-      <GlobalStyle />
       <Head>
         <title>Olas Tokenomics</title>
         <meta name="title" content="Olas Tokenomics" />
       </Head>
+      <GlobalStyle />
       <Provider store={store}>
-        <ConfigProvider theme={THEME_CONFIG}>
+        <ThemeConfigProvider>
           {isNotLegal ? (
             <Component {...pageProps} />
           ) : (
-            <WagmiConfigProvider config={wagmiConfig}>
+            <Web3ModalProvider>
               <Layout>
                 <Component {...pageProps} />
               </Layout>
-            </WagmiConfigProvider>
+            </Web3ModalProvider>
           )}
-        </ConfigProvider>
+        </ThemeConfigProvider>
       </Provider>
     </>
   );
 };
 
 MyApp.getInitialProps = async ({ Component, ctx }) => {
-  const pageProps = Component.getInitialProps
-    ? await Component.getInitialProps(ctx)
-    : {};
+  const pageProps = Component.getInitialProps ? await Component.getInitialProps(ctx) : {};
 
   return { pageProps };
 };
 
 MyApp.propTypes = {
-  Component: PropTypes.oneOfType([PropTypes.func, PropTypes.shape({})])
-    .isRequired,
+  Component: PropTypes.oneOfType([PropTypes.func, PropTypes.shape({})]).isRequired,
   pageProps: PropTypes.shape({}).isRequired,
 };
 

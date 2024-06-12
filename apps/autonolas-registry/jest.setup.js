@@ -28,12 +28,6 @@ jest.mock('ipfs-only-hash', () => ({
 
 jest.mock('next/router', () => jest.requireActual('next-router-mock'));
 
-jest.mock('@web3modal/ethereum', () => ({
-  EthereumClient: jest.fn().mockImplementation(() => ({
-    getAgent: jest.fn(),
-  })),
-}));
-
 jest.mock('@solana/wallet-adapter-react', () => ({
   useAnchorWallet: jest.fn(),
   useConnection: () => ({ connection: 'connection' }),

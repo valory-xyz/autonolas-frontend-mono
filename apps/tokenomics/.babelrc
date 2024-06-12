@@ -14,18 +14,6 @@
         }
       }
     ],
-    [
-      "styled-components",
-      {
-        "ssr": true,
-        "displayName": true,
-        "preprocess": false
-      }
-    ],
-    ["inline-react-svg"],
-    [
-      "import",
-      { "libraryName": "antd", "libraryDirectory": "lib", "style": true }
-    ]
+    ["import", { "libraryName": "antd", "libraryDirectory": "lib", "style": true }]
   ]
 }

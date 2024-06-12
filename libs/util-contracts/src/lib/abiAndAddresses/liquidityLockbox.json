@@ -1,0 +1,512 @@
+{
+  "version": "0.1.0",
+  "name": "liquidity_lockbox",
+  "instructions": [
+    {
+      "name": "initialize",
+      "docs": ["Initializes a Lockbox account that stores state data."],
+      "accounts": [
+        {
+          "name": "signer",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "lockbox",
+          "isMut": true,
+          "isSigner": false,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "type": "string",
+                "value": "liquidity_lockbox"
+              }
+            ]
+          }
+        },
+        {
+          "name": "bridgedTokenMint",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "feeCollectorTokenOwnerAccountA",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "feeCollectorTokenOwnerAccountB",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "position",
+          "isMut": false,
+          "isSigner": false,
+          "relations": ["whirlpool", "position_mint"]
+        },
+        {
+          "name": "positionMint",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "pdaPositionAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "whirlpool",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "rent",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "deposit",
+      "docs": [
+        "Deposits SOL and OLAS tokens to be added to the Lockbox position and gets bridged tokens minted in return.",
+        "",
+        "### Parameters",
+        "- `liquidity_amount` - Requested liquidity amount.",
+        "- `token_max_a` - Max amount of SOL token to be added for liquidity.",
+        "- `token_max_b` - Max amount of OLAS token to be added for liquidity."
+      ],
+      "accounts": [
+        {
+          "name": "signer",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "position",
+          "isMut": true,
+          "isSigner": false,
+          "relations": ["whirlpool", "position_mint"]
+        },
+        {
+          "name": "positionMint",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "pdaPositionAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "whirlpool",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "tokenOwnerAccountA",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "tokenOwnerAccountB",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "tokenVaultA",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "tokenVaultB",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "tickArrayLower",
+          "isMut": true,
+          "isSigner": false,
+          "relations": ["whirlpool"]
+        },
+        {
+          "name": "tickArrayUpper",
+          "isMut": true,
+          "isSigner": false,
+          "relations": ["whirlpool"]
+        },
+        {
+          "name": "bridgedTokenMint",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "bridgedTokenAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "lockbox",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "whirlpoolProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "liquidityAmount",
+          "type": "u64"
+        },
+        {
+          "name": "tokenMaxA",
+          "type": "u64"
+        },
+        {
+          "name": "tokenMaxB",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "withdraw",
+      "docs": [
+        "Withdraws a specified amount of liquidity for supplied bridged tokens.",
+        "",
+        "### Parameters",
+        "- `amount` - Amount of bridged tokens corresponding to the position liquidity amount to withdraw.",
+        "- `token_min_a` - The minimum amount of SOL the signer is willing to withdraw.",
+        "- `token_min_b` - The minimum amount of OLAS the signer is willing to withdraw."
+      ],
+      "accounts": [
+        {
+          "name": "whirlpool",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "signer",
+          "isMut": false,
+          "isSigner": true
+        },
+        {
+          "name": "bridgedTokenMint",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "bridgedTokenAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "position",
+          "isMut": true,
+          "isSigner": false,
+          "relations": ["whirlpool", "position_mint"]
+        },
+        {
+          "name": "pdaPositionAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "positionMint",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "tokenOwnerAccountA",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "tokenOwnerAccountB",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "feeCollectorTokenOwnerAccountA",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "feeCollectorTokenOwnerAccountB",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "tokenVaultA",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "tokenVaultB",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "tickArrayLower",
+          "isMut": true,
+          "isSigner": false,
+          "relations": ["whirlpool"]
+        },
+        {
+          "name": "tickArrayUpper",
+          "isMut": true,
+          "isSigner": false,
+          "relations": ["whirlpool"]
+        },
+        {
+          "name": "lockbox",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "whirlpoolProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "amount",
+          "type": "u64"
+        },
+        {
+          "name": "tokenMinA",
+          "type": "u64"
+        },
+        {
+          "name": "tokenMinB",
+          "type": "u64"
+        }
+      ]
+    }
+  ],
+  "accounts": [
+    {
+      "name": "LiquidityLockbox",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "bump",
+            "type": {
+              "array": ["u8", 1]
+            }
+          },
+          {
+            "name": "bridgedTokenMint",
+            "type": "publicKey"
+          },
+          {
+            "name": "feeCollectorTokenOwnerAccountA",
+            "type": "publicKey"
+          },
+          {
+            "name": "feeCollectorTokenOwnerAccountB",
+            "type": "publicKey"
+          },
+          {
+            "name": "position",
+            "type": "publicKey"
+          },
+          {
+            "name": "pdaPositionAccount",
+            "type": "publicKey"
+          },
+          {
+            "name": "totalLiquidity",
+            "type": "u64"
+          }
+        ]
+      }
+    }
+  ],
+  "events": [
+    {
+      "name": "DepositEvent",
+      "fields": [
+        {
+          "name": "signer",
+          "type": "publicKey",
+          "index": true
+        },
+        {
+          "name": "position",
+          "type": "publicKey",
+          "index": true
+        },
+        {
+          "name": "depositLiquidity",
+          "type": "u64",
+          "index": false
+        },
+        {
+          "name": "totalLiquidity",
+          "type": "u64",
+          "index": false
+        }
+      ]
+    },
+    {
+      "name": "WithdrawEvent",
+      "fields": [
+        {
+          "name": "signer",
+          "type": "publicKey",
+          "index": true
+        },
+        {
+          "name": "position",
+          "type": "publicKey",
+          "index": true
+        },
+        {
+          "name": "tokenOwnerAccountA",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "tokenOwnerAccountB",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "withdrawLiquidity",
+          "type": "u64",
+          "index": false
+        },
+        {
+          "name": "totalLiquidity",
+          "type": "u64",
+          "index": false
+        }
+      ]
+    }
+  ],
+  "errors": [
+    {
+      "code": 6000,
+      "name": "LiquidityOverflow",
+      "msg": "Liquidity value overflow"
+    },
+    {
+      "code": 6001,
+      "name": "LiquidityUnderflow",
+      "msg": "Liquidity value underflow"
+    },
+    {
+      "code": 6002,
+      "name": "WrongWhirlpool",
+      "msg": "Wrong whirlpool address"
+    },
+    {
+      "code": 6003,
+      "name": "WrongPositionHeader",
+      "msg": "Wrong position PDA header"
+    },
+    {
+      "code": 6004,
+      "name": "WrongPositionId",
+      "msg": "Wrong position ID"
+    },
+    {
+      "code": 6005,
+      "name": "LiquidityZero",
+      "msg": "Liquidity is zero"
+    },
+    {
+      "code": 6006,
+      "name": "LiquidityNotZero",
+      "msg": "Liquidity is not zero"
+    },
+    {
+      "code": 6007,
+      "name": "DeltaAmountOverflow",
+      "msg": "Delta token amount bigger than the max allowed one"
+    },
+    {
+      "code": 6008,
+      "name": "AmountExceedsPositionLiquidity",
+      "msg": "Requested amount exceeds a position liquidity"
+    },
+    {
+      "code": 6009,
+      "name": "AmountExceedsTotalLiquidity",
+      "msg": "Requested amount exceeds total liquidity"
+    },
+    {
+      "code": 6010,
+      "name": "OutOfRange",
+      "msg": "Tick out of range"
+    },
+    {
+      "code": 6011,
+      "name": "WrongOwner",
+      "msg": "Wrong account owner"
+    },
+    {
+      "code": 6012,
+      "name": "WrongPositionPDA",
+      "msg": "Provided wrong position PDA"
+    },
+    {
+      "code": 6013,
+      "name": "WrongLockboxPDA",
+      "msg": "Provided wrong lockbox PDA"
+    },
+    {
+      "code": 6014,
+      "name": "WrongPositionAccount",
+      "msg": "Provided wrong position ATA"
+    },
+    {
+      "code": 6015,
+      "name": "WrongPDAPositionAccount",
+      "msg": "Provided wrong PDA position ATA"
+    },
+    {
+      "code": 6016,
+      "name": "WrongOrcaAccount",
+      "msg": "Provided wrong Orca program account"
+    },
+    {
+      "code": 6017,
+      "name": "WrongTokenMint",
+      "msg": "Wrong token mint"
+    },
+    {
+      "code": 6018,
+      "name": "WhirlpoolNumberDownCastError",
+      "msg": "Whirlpool number downcast"
+    }
+  ]
+}
