@@ -153,7 +153,7 @@ const getColumns = (
     render: (_, record) => (
       <Text type="secondary">{CHAIN_NAMES[record.chainId] || record.chainId}</Text>
     ),
-    width: 120,
+    width: 80,
   },
   {
     title: 'My voting weight',
@@ -165,6 +165,7 @@ const getColumns = (
           min={0}
           max={100}
           step={0.01}
+          controls={false}
           value={allocations[index].weight}
           status={isError ? 'error' : undefined}
           onChange={(value) => {
@@ -180,7 +181,7 @@ const getColumns = (
         />
       </Flex>
     ),
-    width: 140,
+    width: 180,
   },
 ];
 

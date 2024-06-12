@@ -1,7 +1,6 @@
 import { InfoCircleOutlined } from '@ant-design/icons';
 import { Button, Flex, Space, Statistic, Table, Tooltip, Typography } from 'antd';
 import { ColumnsType } from 'antd/es/table';
-import Link from 'next/link';
 import { useMemo } from 'react';
 
 import { COLOR } from '@autonolas/frontend-library';
@@ -45,7 +44,9 @@ const columns: ColumnsType<MyVote> = [
     render: (_, record) =>
       record.address && record.chainId ? (
         <Space size={2} direction="vertical">
-          <Link href={`/contracts/${record.address}`}>{record.name}</Link>
+          <a href={`/contracts/${record.address}`} target="_blank">
+            {record.name}
+          </a>
           <Text type="secondary">{CHAIN_NAMES[record.chainId] || record.chainId}</Text>
         </Space>
       ) : (
@@ -65,19 +66,26 @@ const columns: ColumnsType<MyVote> = [
           </Text>
         </Tooltip>
       ),
-    width: 200,
+    width: 300,
   },
   {
-    title: 'Current weight',
+    title: 'My current weight',
     key: 'weight',
     render: (_, record) => <Text>{`${record.currentWeight}%`}</Text>,
-    width: 120,
   },
   {
-    title: 'Next weight',
+    title: (
+      <Tooltip
+        color={COLOR.WHITE}
+        title={<Text>Updated voting weights will take effect at the start of next week</Text>}
+      >
+        <Text>
+          My updated weight <InfoCircleOutlined className="ml-8" style={{ color: COLOR.GREY_2 }} />
+        </Text>
+      </Tooltip>
+    ),
     key: 'nextWeight',
     render: (_, record) => <Text>{`${record.nextWeight}%`}</Text>,
-    width: 140,
   },
 ];
 
@@ -129,15 +137,15 @@ export const Votes = () => {
     <VotesRoot>
       {votesBlocked && (
         <Flex gap={16} align="center" justify="end">
-          <Text type="secondary">
-            {lastUserVote !== null && (
+          {lastUserVote !== null && (
+            <Text type="secondary">
               <Countdown
                 prefix={<Text type="secondary">Cooldown period: </Text>}
                 format="D[d] H[h] m[m]"
                 value={lastUserVote + TEN_DAYS_IN_MS}
               />
-            )}
-          </Text>
+            </Text>
+          )}
           <Button type="primary" disabled={votesBlocked}>
             Update voting weight
           </Button>

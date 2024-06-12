@@ -1,10 +1,11 @@
-import { CheckOutlined, PlusOutlined } from '@ant-design/icons';
-import { Button, Card as CardAntd, Space, Table, Typography } from 'antd';
+import { CheckOutlined, InfoCircleOutlined, PlusOutlined } from '@ant-design/icons';
+import { Button, Card as CardAntd, Space, Table, Tooltip, Typography } from 'antd';
 import { ColumnsType } from 'antd/es/table';
 import { useVotingPower } from 'hooks/useVotingPower';
-import Link from 'next/link';
 import { Allocation, StakingContract } from 'types/index';
 import { useAccount } from 'wagmi';
+
+import { COLOR } from '@autonolas/frontend-library';
 
 import { useAppSelector } from 'store/index';
 import styled from 'styled-components';
@@ -38,7 +39,9 @@ const getColumns = ({
       key: 'name',
       render: (_, record) => (
         <Space size={2} direction="vertical">
-          <Link href={`/contracts/${record.address}`}>{record.metadata?.name}</Link>
+          <a href={`/contracts/${record.address}`} target="_blank">
+            {record.metadata?.name}
+          </a>
           <Text type="secondary">{CHAIN_NAMES[record.chainId] || record.chainId}</Text>
         </Space>
       ),
@@ -55,7 +58,14 @@ const getColumns = ({
       ),
     },
     {
-      title: 'Next week weight',
+      title: (
+        <Tooltip
+          color={COLOR.WHITE}
+          title={<Text>Updated voting weights will take effect at the start of next week</Text>}
+        >
+          Next week weight <InfoCircleOutlined className="ml-8" style={{ color: COLOR.GREY_2 }} />
+        </Tooltip>
+      ),
       key: 'nextWeight',
       render: (_, record) => (
         <Space size={2} direction="vertical">
@@ -87,6 +97,7 @@ const getColumns = ({
           </>
         );
       },
+      width: 140,
     });
   }
 

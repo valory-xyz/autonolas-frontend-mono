@@ -59,7 +59,7 @@ const GetVeOlas = () => {
       <Image src={'/images/olas.svg'} alt="Olas" width={48} height={48} />
       <Paragraph type="secondary" className="text-center">
         Only users with veOLAS can vote on staking contracts. <br />
-        Please, lock OLAS for veOLAS to get started.
+        Please lock OLAS for veOLAS to get started.
       </Paragraph>
       <Button type="primary" target="_blank" href={GET_VEOLAS_URL}>
         Get veOLAS

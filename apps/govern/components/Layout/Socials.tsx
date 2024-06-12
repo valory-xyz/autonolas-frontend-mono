@@ -23,7 +23,7 @@ const Socials = () => (
           key={`social-${social.type}`}
           aria-label={`social-${social.type}`}
         >
-          <Image src={src} alt="" width={18} height={16} />
+          <Image src={src} alt="" width={16} height={16} />
         </a>
       );
     })}
