@@ -2,8 +2,8 @@ import { CheckOutlined, PlusOutlined } from '@ant-design/icons';
 import { Button, Card as CardAntd, Space, Table, Typography } from 'antd';
 import { ColumnsType } from 'antd/es/table';
 import Link from 'next/link';
+import { Allocation, StakingContract } from 'types/index';
 
-import { StakingContract } from 'store/govern';
 import { useAppSelector } from 'store/index';
 import styled from 'styled-components';
 
@@ -14,9 +14,6 @@ const { Title, Paragraph, Text } = Typography;
 const Card = styled(CardAntd)`
   flex: auto;
 `;
-
-// TODO: organize shared types
-type Allocation = Pick<StakingContract, 'address' | 'chainId' | 'metadata'> & { weight: number };
 
 type ContractsListProps = {
   isUpdating: boolean;

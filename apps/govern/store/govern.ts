@@ -1,29 +1,6 @@
 import { PayloadAction } from '@reduxjs/toolkit';
 import { createSlice } from '@reduxjs/toolkit';
-import { Address } from 'types/index';
-
-export type UserVote = {
-  slope: number;
-  power: number;
-  end: number;
-};
-
-export type UserVotes = { current: UserVote; next: UserVote };
-
-type Metadata = {
-  name: string;
-  description: string;
-};
-
-type Weight = { percentage: number; value: number };
-
-export type StakingContract = {
-  address: Address;
-  chainId: number;
-  metadata: Metadata;
-  currentWeight: Weight;
-  nextWeight: Weight;
-};
+import { StakingContract, UserVotes } from 'types/index';
 
 interface GovernState {
   stakingContracts: StakingContract[];

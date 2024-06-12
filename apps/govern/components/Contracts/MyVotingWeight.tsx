@@ -3,9 +3,9 @@ import { Button, Card as CardAntd, Flex, Spin, Typography } from 'antd';
 import { useVotingPower } from 'hooks/index';
 import Image from 'next/image';
 import { Dispatch, SetStateAction, useMemo } from 'react';
+import { Allocation } from 'types/index';
 import { useAccount } from 'wagmi';
 
-import { StakingContract } from 'store/govern';
 import { useAppSelector } from 'store/index';
 import styled from 'styled-components';
 
@@ -33,8 +33,6 @@ const Card = styled(CardAntd)`
 `;
 
 const ICON_STYLE = { fontSize: '56px', color: '#A3AEBB' };
-
-type Allocation = Pick<StakingContract, 'address' | 'chainId' | 'metadata'> & { weight: number };
 
 type MyVotingWeightProps = {
   isUpdating: boolean;

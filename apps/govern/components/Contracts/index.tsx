@@ -1,7 +1,7 @@
 import { Flex } from 'antd';
 import { useEffect, useState } from 'react';
+import { Allocation, StakingContract } from 'types/index';
 
-import { StakingContract } from 'store/govern';
 import { useAppSelector } from 'store/index';
 import styled from 'styled-components';
 
@@ -13,8 +13,6 @@ const StyledMain = styled.main`
   flex-direction: column;
   margin: 0 auto;
 `;
-
-type Allocation = Pick<StakingContract, 'address' | 'chainId' | 'metadata'> & { weight: number };
 
 export const ContractsPage = () => {
   const { userVotes, isUserVotesLoading } = useAppSelector((state) => state.govern);

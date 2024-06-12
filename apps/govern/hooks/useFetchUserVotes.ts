@@ -1,7 +1,8 @@
 import { useEffect } from 'react';
+import { UserVotes } from 'types/index';
 import { useBlock } from 'wagmi';
 
-import { UserVotes, setLastUserVote, setUserVotes } from 'store/govern';
+import { setLastUserVote, setUserVotes } from 'store/govern';
 import { useAppDispatch, useAppSelector } from 'store/index';
 
 import { LATEST_BLOCK_KEY, NEXT_USERS_SLOPES_KEY } from 'common-util/constants/scopeKeys';

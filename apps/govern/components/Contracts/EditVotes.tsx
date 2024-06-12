@@ -12,9 +12,9 @@ import {
 } from 'antd';
 import { ColumnsType } from 'antd/es/table';
 import { Dispatch, SetStateAction, useCallback, useState } from 'react';
-import { Address } from 'types/index';
+import { Address, Allocation, StakingContract, UserVotes } from 'types/index';
 
-import { StakingContract, UserVotes, clearState } from 'store/govern';
+import { clearState } from 'store/govern';
 import { useAppDispatch, useAppSelector } from 'store/index';
 import styled from 'styled-components';
 
@@ -27,7 +27,6 @@ import {
   checkLockExpired,
   checkNegativeSlope,
   getBytes32FromAddress,
-  getVoteWeightingContract,
   voteForNomineeWeights,
 } from 'common-util/functions';
 
@@ -126,8 +125,6 @@ const TotalPower = styled(Text)`
   line-height: 32px;
   margin-bottom: 16px;
 `;
-
-type Allocation = Pick<StakingContract, 'address' | 'chainId' | 'metadata'> & { weight: number };
 
 type EditVotesProps = {
   allocations: Allocation[];
