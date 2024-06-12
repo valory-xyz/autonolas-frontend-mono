@@ -17,6 +17,7 @@ const Balance = () => {
 
   if (isFetching) return null;
   if (data === undefined) return null;
+  if (!account) return null;
 
   return (
     <Tooltip

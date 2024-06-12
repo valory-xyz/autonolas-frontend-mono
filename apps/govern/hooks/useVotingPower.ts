@@ -1,15 +1,16 @@
 import { ethers } from 'ethers';
 import { Address } from 'types/index';
+import { mainnet } from 'viem/chains';
 import { useReadContract } from 'wagmi';
 
 import { VE_OLAS } from 'libs/util-contracts/src/lib/abiAndAddresses';
 
 export const useVotingPower = (account: Address | undefined) => {
   const { data, isFetching } = useReadContract({
-    address: (VE_OLAS.addresses as Record<number, Address>)[1],
+    address: (VE_OLAS.addresses as Record<number, Address>)[mainnet.id],
     abi: VE_OLAS.abi,
     functionName: 'getVotes',
-    chainId: 1,
+    chainId: mainnet.id,
     args: [account],
     query: {
       enabled: !!account,

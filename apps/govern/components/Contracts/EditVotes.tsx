@@ -35,6 +35,8 @@ import { queryClient } from '../../context/Web3ModalProvider';
 
 const { Paragraph, Text } = Typography;
 
+const MAX_ALLOCATED_POWER = 10_000;
+
 const getRemovedNomineesError = (removedNominees: Address[], allocations: Allocation[]) => (
   <Flex align="start" vertical>
     <Paragraph className="m-0">Some of the contracts are no longer available for voting.</Paragraph>
@@ -120,7 +122,7 @@ const getReorderedVotes = (
   return newVotes;
 };
 
-const TotalPower = styled(Text)`
+const TotalAllocatedPower = styled(Text)`
   font-size: 24px;
   font-weight: 700;
   line-height: 32px;
@@ -188,14 +190,14 @@ const ConfirmModal = ({
   handleClose,
   isLoading,
   allocationsLength,
-  totalPower,
+  allocatedPower,
 }: {
   isOpen: boolean;
   handleOk: () => void;
   handleClose: () => void;
   isLoading: boolean;
   allocationsLength: number;
-  totalPower: number;
+  allocatedPower: number;
 }) => {
   return (
     <Modal
@@ -209,19 +211,19 @@ const ConfirmModal = ({
     >
       <Paragraph>
         {`You're allocating ${parseFloat(
-          (totalPower / 100).toFixed(2),
+          (allocatedPower / 100).toFixed(2),
         )}% of your voting power to ${allocationsLength} staking contracts.`}
       </Paragraph>
       <Paragraph>
         {`After you confirm, you'll enter a 10 day cooldown period. You won't be able to update your weights during that time.`}
       </Paragraph>
 
-      {totalPower < 10_000 && (
+      {allocatedPower < MAX_ALLOCATED_POWER && (
         <Alert
           // TODO: add blue info alerts as in Pearl
           className="mb-16"
           message={`${parseFloat(
-            ((10_000 - totalPower) / 100).toFixed(2),
+            ((MAX_ALLOCATED_POWER - allocatedPower) / 100).toFixed(2),
           )}% of your voting power is unallocated - this will be applied to the Rollover Pool and may be used in future epochs.`}
           showIcon
         />
@@ -252,15 +254,16 @@ export const EditVotes = ({ allocations, setAllocations, setIsUpdating }: EditVo
     setAllocations((prev) => prev.filter((_, i) => i !== index));
   };
 
-  const totalPower = allocations.reduce((sum, item) => sum + item.weight * 100, 0);
-  const isError = totalPower > 10_000;
+  // Sum of allocated weights, where 1% is represented as 100 (100% = 10,000)
+  const allocatedPower = allocations.reduce((sum, item) => sum + item.weight * 100, 0);
+  const isError = allocatedPower > MAX_ALLOCATED_POWER;
 
   const showModal = () => setIsModalOpen(true);
   const closeModal = () => setIsModalOpen(false);
 
   const updateVotingWeight = useCallback(async () => {
     if (!account) return;
-    if (totalPower > 10_000) return;
+    if (allocatedPower > MAX_ALLOCATED_POWER) return;
 
     setIsLoading(true);
 
@@ -304,11 +307,11 @@ export const EditVotes = ({ allocations, setAllocations, setIsUpdating }: EditVo
 
     const allocationsWithRetainer = [...allocations];
     // If not all weight was used, allocate the rest to the retainer
-    if (totalPower < 10_000) {
+    if (allocatedPower < MAX_ALLOCATED_POWER) {
       allocationsWithRetainer.push({
         address: getBytes32FromAddress(RETAINER_ADDRESS),
         chainId: 1,
-        weight: (10_000 - totalPower) / 100,
+        weight: (MAX_ALLOCATED_POWER - allocatedPower) / 100,
         metadata: { name: 'n/a', description: 'n/a' },
       });
     }
@@ -361,7 +364,7 @@ export const EditVotes = ({ allocations, setAllocations, setIsUpdating }: EditVo
       .finally(() => {
         setIsLoading(false);
       });
-  }, [account, allocations, dispatch, stakingContracts, totalPower, userVotes, setIsUpdating]);
+  }, [account, allocations, dispatch, stakingContracts, allocatedPower, userVotes, setIsUpdating]);
 
   return (
     <>
@@ -376,7 +379,9 @@ export const EditVotes = ({ allocations, setAllocations, setIsUpdating }: EditVo
       <Text type="secondary" strong>
         Voting power used
       </Text>
-      <TotalPower>{`${parseFloat((totalPower / 100).toFixed(2))}%`}</TotalPower>
+      <TotalAllocatedPower>{`${parseFloat(
+        (allocatedPower / 100).toFixed(2),
+      )}%`}</TotalAllocatedPower>
       <Table
         className="mt-16 mb-16"
         columns={getColumns(allocations, updateAllocation, removeAllocation, isError)}
@@ -391,7 +396,7 @@ export const EditVotes = ({ allocations, setAllocations, setIsUpdating }: EditVo
         <Button
           type="primary"
           onClick={showModal}
-          disabled={allocations.length === 0 || totalPower === 0 || isError}
+          disabled={allocations.length === 0 || allocatedPower === 0 || isError}
         >
           Update voting weight
         </Button>
@@ -402,7 +407,7 @@ export const EditVotes = ({ allocations, setAllocations, setIsUpdating }: EditVo
         handleClose={closeModal}
         isLoading={isLoading}
         allocationsLength={allocations.length}
-        totalPower={totalPower}
+        allocatedPower={allocatedPower}
       />
     </>
   );

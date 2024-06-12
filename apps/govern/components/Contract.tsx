@@ -2,6 +2,7 @@ import { LoadingOutlined } from '@ant-design/icons';
 import { Card, Flex, Space, Spin, Typography } from 'antd';
 import { useContractParams } from 'hooks/index';
 import { useRouter } from 'next/router';
+import { mainnet } from 'viem/chains';
 import { useEnsName } from 'wagmi';
 
 import { useAppSelector } from 'store/index';
@@ -42,6 +43,7 @@ export const ContractPage = () => {
 
   const { data: ensName, isFetching: isEnsNameFetching } = useEnsName({
     address: contractParams?.deployer,
+    chainId: mainnet.id,
     query: { refetchOnWindowFocus: false },
   });
 

@@ -34,6 +34,7 @@ export const Logo = styled(Link)`
 
 export const RightMenu = styled.div`
   display: flex;
+  gap: 12px;
   align-items: center;
   margin-left: auto;
 `;
