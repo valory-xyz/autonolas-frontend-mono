@@ -1,4 +1,4 @@
-import { ArrowUpOutlined, LoadingOutlined } from '@ant-design/icons';
+import { LoadingOutlined } from '@ant-design/icons';
 import { Card, Flex, Space, Spin, Typography } from 'antd';
 import { useContractParams } from 'hooks/index';
 import { useRouter } from 'next/router';
@@ -7,6 +7,7 @@ import { useEnsName } from 'wagmi';
 import { useAppSelector } from 'store/index';
 import styled from 'styled-components';
 
+import { UNICODE_SYMBOLS } from 'common-util/constants/unicode';
 import { EXPLORE_URLS } from 'common-util/constants/urls';
 import { CHAIN_NAMES, getAddressFromBytes32, truncateAddress } from 'common-util/functions';
 
@@ -62,8 +63,9 @@ export const ContractPage = () => {
                 href={`${EXPLORE_URLS[contract.chainId]}/address/${contractParams.deployer}`}
                 target="_blank"
               >
-                {ensName || truncateAddress(contractParams.deployer)}{' '}
-                <ArrowUpOutlined className="ml-8" style={{ rotate: '45deg' }} />
+                {`${ensName || truncateAddress(contractParams.deployer)} ${
+                  UNICODE_SYMBOLS.EXTERNAL_LINK
+                }`}
               </a>
             ) : (
               <Text>
@@ -81,8 +83,7 @@ export const ContractPage = () => {
               href={`${EXPLORE_URLS[contract.chainId]}/address/${formattedAddress}`}
               target="_blank"
             >
-              {truncateAddress(formattedAddress)}
-              <ArrowUpOutlined className="ml-8" style={{ rotate: '45deg' }} />
+              {`${truncateAddress(formattedAddress)} ${UNICODE_SYMBOLS.EXTERNAL_LINK}`}
             </a>
           </Space>
         </Flex>

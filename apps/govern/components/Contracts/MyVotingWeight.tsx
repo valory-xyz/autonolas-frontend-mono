@@ -10,7 +10,7 @@ import { useAppSelector } from 'store/index';
 import styled from 'styled-components';
 
 import { GET_VEOLAS_URL } from 'common-util/constants/urls';
-import Login from 'components/Login';
+import { LoginV2 } from 'components/Login';
 
 import { EditVotes } from './EditVotes';
 import { Votes } from './Votes';
@@ -48,7 +48,7 @@ const ConnectWallet = () => {
       <Paragraph type="secondary" className="text-center">
         Connect your wallet to allocate your voting power.
       </Paragraph>
-      <Login />
+      <LoginV2 />
     </Flex>
   );
 };

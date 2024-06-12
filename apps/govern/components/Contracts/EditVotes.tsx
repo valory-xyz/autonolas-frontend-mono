@@ -13,6 +13,7 @@ import {
 import { ColumnsType } from 'antd/es/table';
 import { Dispatch, SetStateAction, useCallback, useState } from 'react';
 import { Address, Allocation, StakingContract, UserVotes } from 'types/index';
+import { useAccount } from 'wagmi';
 
 import { clearState } from 'store/govern';
 import { useAppDispatch, useAppSelector } from 'store/index';
@@ -231,7 +232,7 @@ const ConfirmModal = ({
 
 export const EditVotes = ({ allocations, setAllocations, setIsUpdating }: EditVotesProps) => {
   const dispatch = useAppDispatch();
-  const { account } = useAppSelector((state) => state.setup);
+  const { address: account } = useAccount();
   const { userVotes, stakingContracts } = useAppSelector((state) => state.govern);
 
   const [isModalOpen, setIsModalOpen] = useState(false);

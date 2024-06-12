@@ -3,6 +3,7 @@ import { Button, Card as CardAntd, Space, Table, Typography } from 'antd';
 import { ColumnsType } from 'antd/es/table';
 import Link from 'next/link';
 import { Allocation, StakingContract } from 'types/index';
+import { useAccount } from 'wagmi';
 
 import { useAppSelector } from 'store/index';
 import styled from 'styled-components';
@@ -92,7 +93,7 @@ const getColumns = ({
 };
 
 export const ContractsList = ({ isUpdating, handleAdd, allocations }: ContractsListProps) => {
-  const { account } = useAppSelector((state) => state.setup);
+  const { address: account } = useAccount();
   const { stakingContracts, isStakingContractsLoading } = useAppSelector((state) => state.govern);
 
   return (

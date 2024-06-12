@@ -3,11 +3,9 @@ import { createWrapper } from 'next-redux-wrapper';
 import { TypedUseSelectorHook, useDispatch, useSelector } from 'react-redux';
 
 import { governReducer } from './govern';
-import { setupReducer } from './setup';
 
 export const store = configureStore({
   reducer: {
-    setup: setupReducer,
     govern: governReducer,
   },
 });

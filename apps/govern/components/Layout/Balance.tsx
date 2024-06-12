@@ -1,17 +1,18 @@
-import { ArrowUpOutlined, InfoCircleOutlined } from '@ant-design/icons';
+import { InfoCircleOutlined } from '@ant-design/icons';
 import { Button, Tooltip, Typography } from 'antd';
 import { useVotingPower } from 'hooks/index';
+import { useAccount } from 'wagmi';
 
 import { COLOR } from 'libs/ui-theme/src/lib/ui-theme';
-import { useAppSelector } from 'store/index';
 
+import { UNICODE_SYMBOLS } from 'common-util/constants/unicode';
 import { GET_VEOLAS_URL } from 'common-util/constants/urls';
 import { formatWeiBalance } from 'common-util/functions';
 
 const { Text, Paragraph } = Typography;
 
 const Balance = () => {
-  const { account } = useAppSelector((state) => state.setup);
+  const { address: account } = useAccount();
   const { data, isFetching } = useVotingPower(account);
 
   if (isFetching) return null;
@@ -24,7 +25,7 @@ const Balance = () => {
         <>
           <Paragraph>veOLAS gives you voting power in Autonolas governance.</Paragraph>
           <a href={GET_VEOLAS_URL} target="_blank">
-            Lock OLAS for veOLAS <ArrowUpOutlined style={{ rotate: '45deg' }} />
+            Lock OLAS for veOLAS {UNICODE_SYMBOLS.EXTERNAL_LINK}
           </a>
         </>
       }

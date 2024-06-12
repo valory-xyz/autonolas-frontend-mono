@@ -1,8 +1,6 @@
-import { Button, Dropdown, Menu } from 'antd';
+import { Menu } from 'antd';
 import { useRouter } from 'next/router';
 import { FC, useEffect, useState } from 'react';
-
-import { useScreen } from '@autonolas/frontend-library';
 
 interface MenuItem {
   label: string;
@@ -39,7 +37,6 @@ interface NavigationMenuProps {}
 
 const NavigationMenu: FC<NavigationMenuProps> = () => {
   const router = useRouter();
-  const { isMobile, isTablet } = useScreen();
   const [selectedMenu, setSelectedMenu] = useState('');
   const { pathname } = router;
 
@@ -54,15 +51,6 @@ const NavigationMenu: FC<NavigationMenuProps> = () => {
     router.push(key);
     setSelectedMenu(key);
   };
-
-  if (isMobile || isTablet) {
-    const menuItems = items.map((item) => ({ ...item, onClick: () => handleMenuItemClick(item) }));
-    return (
-      <Dropdown menu={{ items: menuItems }}>
-        <Button>Menu</Button>
-      </Dropdown>
-    );
-  }
 
   return (
     <MenuInstance

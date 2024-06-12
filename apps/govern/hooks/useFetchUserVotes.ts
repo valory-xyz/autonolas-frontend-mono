@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { UserVotes } from 'types/index';
-import { useBlock } from 'wagmi';
+import { useAccount, useBlock } from 'wagmi';
 
 import { setLastUserVote, setUserVotes } from 'store/govern';
 import { useAppDispatch, useAppSelector } from 'store/index';
@@ -28,7 +28,7 @@ const getPrevVotesBlock = (blockNumber: bigint) => {
 
 export const useFetchUserVotes = () => {
   const dispatch = useAppDispatch();
-  const { account } = useAppSelector((state) => state.setup);
+  const { address: account } = useAccount();
   const { lastUserVote, isUserVotesLoading } = useAppSelector((state) => state.govern);
 
   const { data: nominees } = useNominees();
