@@ -1,6 +1,7 @@
 import { CheckOutlined, PlusOutlined } from '@ant-design/icons';
 import { Button, Card as CardAntd, Space, Table, Typography } from 'antd';
 import { ColumnsType } from 'antd/es/table';
+import { useVotingPower } from 'hooks/useVotingPower';
 import Link from 'next/link';
 import { Allocation, StakingContract } from 'types/index';
 import { useAccount } from 'wagmi';
@@ -26,8 +27,10 @@ const getColumns = ({
   handleAdd,
   allocations,
   actionsVisible,
+  actionsDisabled,
 }: Omit<ContractsListProps, 'isUpdating'> & {
   actionsVisible: boolean;
+  actionsDisabled: boolean;
 }): ColumnsType<StakingContract> => {
   const columns: ColumnsType<StakingContract> = [
     {
@@ -44,7 +47,6 @@ const getColumns = ({
     {
       title: 'Current weight',
       key: 'currentWeight',
-      // TODO: replace .toFixed(2) with something smarter
       render: (_, record) => (
         <Space size={2} direction="vertical">
           <Text>{`${record.currentWeight?.percentage.toFixed(2)}%`}</Text>
@@ -55,7 +57,6 @@ const getColumns = ({
     {
       title: 'Next week weight',
       key: 'nextWeight',
-      // TODO: replace .toFixed(2) with something smarter
       render: (_, record) => (
         <Space size={2} direction="vertical">
           <Text>{`${record.nextWeight?.percentage.toFixed(2)}%`}</Text>
@@ -79,7 +80,7 @@ const getColumns = ({
               ghost
               size="small"
               onClick={() => handleAdd(record)}
-              disabled={isAdded}
+              disabled={isAdded || actionsDisabled}
             >
               {isAdded ? 'Added' : 'Add'}
             </Button>
@@ -94,7 +95,13 @@ const getColumns = ({
 
 export const ContractsList = ({ isUpdating, handleAdd, allocations }: ContractsListProps) => {
   const { address: account } = useAccount();
+  const { data: votingPower, isFetching: isVotingPowerLoading } = useVotingPower(account);
+
   const { stakingContracts, isStakingContractsLoading } = useAppSelector((state) => state.govern);
+
+  const isActionsDisabled = !account || isVotingPowerLoading || Number(votingPower) === 0;
+
+  console.log('votingPower', votingPower);
 
   return (
     <Card>
@@ -109,7 +116,8 @@ export const ContractsList = ({ isUpdating, handleAdd, allocations }: ContractsL
         columns={getColumns({
           handleAdd,
           allocations,
-          actionsVisible: isUpdating && !!account,
+          actionsVisible: isUpdating || isActionsDisabled,
+          actionsDisabled: isActionsDisabled,
         })}
         dataSource={stakingContracts}
         pagination={false}
