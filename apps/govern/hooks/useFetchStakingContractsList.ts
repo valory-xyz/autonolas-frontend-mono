@@ -1,7 +1,8 @@
 import { useEffect } from 'react';
+import { StakingContract } from 'types/index';
 import { useBlock } from 'wagmi';
 
-import { StakingContract, setStakingContracts } from 'store/govern';
+import { setStakingContracts } from 'store/govern';
 import { useAppDispatch, useAppSelector } from 'store/index';
 
 import { RETAINER_ADDRESS } from 'common-util/constants/addresses';
