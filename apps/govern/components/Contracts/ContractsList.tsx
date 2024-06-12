@@ -7,7 +7,7 @@ import { Allocation, StakingContract } from 'types/index';
 import { useAppSelector } from 'store/index';
 import styled from 'styled-components';
 
-import { CHAIN_NAMES } from 'common-util/functions';
+import { CHAIN_NAMES, formatWeiBalance } from 'common-util/functions';
 
 const { Title, Paragraph, Text } = Typography;
 
@@ -47,7 +47,7 @@ const getColumns = ({
       render: (_, record) => (
         <Space size={2} direction="vertical">
           <Text>{`${record.currentWeight?.percentage.toFixed(2)}%`}</Text>
-          <Text type="secondary">{`${record.currentWeight?.value.toFixed(2)} veOlas`}</Text>
+          <Text type="secondary">{`${formatWeiBalance(record.currentWeight?.value)} veOlas`}</Text>
         </Space>
       ),
     },
@@ -58,7 +58,7 @@ const getColumns = ({
       render: (_, record) => (
         <Space size={2} direction="vertical">
           <Text>{`${record.nextWeight?.percentage.toFixed(2)}%`}</Text>
-          <Text type="secondary">{`${record.nextWeight?.value.toFixed(2)} veOlas`}</Text>
+          <Text type="secondary">{`${formatWeiBalance(record.nextWeight?.value)} veOlas`}</Text>
         </Space>
       ),
     },

@@ -18,9 +18,9 @@ const BLOCKS_IN_A_WEEK = 50400;
 // TODO: update when contract is deployed
 const CONTRACT_DEPLOY_BLOCK = 20009990;
 
-// TODO: if voted any time last week, need to consider
-// "prev" as this week's Monday
-// currently it's a week before today
+// TODO: important! if voted any time last week, need to consider
+// "prev" as this week's Monday (because votes apply on Monday).
+// Currently it's a week before today, where the data might be not fresh
 const getPrevVotesBlock = (blockNumber: bigint) => {
   const lastWeekBlock = Number(blockNumber) - BLOCKS_IN_A_WEEK;
   return BigInt(Math.max(CONTRACT_DEPLOY_BLOCK, lastWeekBlock));
@@ -32,14 +32,21 @@ export const useFetchUserVotes = () => {
   const { lastUserVote, isUserVotesLoading } = useAppSelector((state) => state.govern);
 
   const { data: nominees } = useNominees();
+
+  // Get user's total allocated power
   const { data: userPower } = useVoteUserPower(account);
+
   const { data: block } = useBlock({ blockTag: 'latest', scopeKey: LATEST_BLOCK_KEY });
+
+  // Get current user's votes for all nominees
   const { data: userSlopesCurrent } = useVoteUserSlopes(
     nominees || [],
     account || null,
     block ? getPrevVotesBlock(block.number) : null,
     userPower ? Number(userPower) !== 0 : false,
   );
+
+  // Get next user's votes for all nominees
   const { data: userSlopesNext } = useVoteUserSlopes(
     nominees || [],
     account || null,
@@ -47,6 +54,8 @@ export const useFetchUserVotes = () => {
     userPower ? Number(userPower) !== 0 : false,
     NEXT_USERS_SLOPES_KEY,
   );
+
+  // Get user's last vote timestamp
   const { data: lastVoteData } = useLastUserVote(
     nominees || [],
     account || null,
@@ -54,7 +63,7 @@ export const useFetchUserVotes = () => {
   );
 
   /**
-   * Sets user slopes to the store
+   * Sets user's slopes to the store
    **/
   useEffect(() => {
     if (

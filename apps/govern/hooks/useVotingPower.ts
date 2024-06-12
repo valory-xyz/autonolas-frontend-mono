@@ -13,13 +13,7 @@ export const useVotingPower = (account: Address | undefined) => {
     args: [account],
     query: {
       enabled: !!account,
-      select: (data) => {
-        const formatted = ethers.formatUnits(data as string, 18);
-        const [integer, decimal] = formatted.split('.');
-
-        // TODO: come up with better rounding
-        return decimal ? `${integer}.${decimal.slice(0, 2)}` : integer;
-      },
+      select: (data) => ethers.formatUnits(data as string, 18),
     },
   });
 

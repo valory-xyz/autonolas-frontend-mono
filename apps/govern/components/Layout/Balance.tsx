@@ -6,6 +6,7 @@ import { COLOR } from 'libs/ui-theme/src/lib/ui-theme';
 import { useAppSelector } from 'store/index';
 
 import { GET_VEOLAS_URL } from 'common-util/constants/urls';
+import { formatWeiBalance } from 'common-util/functions';
 
 const { Text, Paragraph } = Typography;
 
@@ -33,7 +34,7 @@ const Balance = () => {
           <InfoCircleOutlined className="mr-8" />
           Your voting power:
         </Text>
-        <Text strong>{data} veOLAS</Text>
+        <Text strong>{formatWeiBalance(data)} veOLAS</Text>
       </Button>
     </Tooltip>
   );
