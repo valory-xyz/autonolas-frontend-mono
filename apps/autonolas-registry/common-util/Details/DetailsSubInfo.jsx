@@ -108,7 +108,7 @@ export const DetailsSubInfo = ({
   const [tokenAddress, setTokenAddress] = useState(null);
   
   
-  const ownerEnsName = useEnsName({address: ownerAddress, chainId: 1});
+  const {data: ownerEnsName} = useEnsName({address: ownerAddress, chainId: 1});
 
   const {
     hashUrl,
