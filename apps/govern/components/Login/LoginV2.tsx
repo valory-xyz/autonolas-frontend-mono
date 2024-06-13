@@ -2,9 +2,14 @@ import { GetAccountReturnType, watchAccount } from '@wagmi/core';
 import { useCallback, useEffect } from 'react';
 import { useAccountEffect, useConfig, useDisconnect } from 'wagmi';
 
+import { clearUserState } from 'store/govern';
+import { useAppDispatch } from 'store/index';
 import styled from 'styled-components';
 
+import { INVALIDATE_AFTER_ACCOUNT_CHANGE } from 'common-util/constants/scopeKeys';
+
 import { isAddressProhibited } from '../../common-util/functions';
+import { queryClient } from '../../context/Web3ModalProvider';
 
 const LoginContainer = styled.div`
   display: flex;
@@ -16,6 +21,7 @@ const LoginContainer = styled.div`
 export const LoginV2 = () => {
   const { disconnect } = useDisconnect();
   const config = useConfig();
+  const dispatch = useAppDispatch();
 
   const handleConnect = useCallback(
     ({ address }: Pick<GetAccountReturnType, 'address' | 'chainId'>) => {
@@ -26,21 +32,36 @@ export const LoginV2 = () => {
     [disconnect],
   );
 
+  const clearUserData = useCallback(() => {
+    queryClient.removeQueries({
+      predicate: (query) =>
+        INVALIDATE_AFTER_ACCOUNT_CHANGE.includes(
+          (query.queryKey[1] as Record<string, string>)?.scopeKey,
+        ),
+    });
+    dispatch(clearUserState());
+  }, [dispatch]);
+
   useAccountEffect({
     onConnect: handleConnect,
+    onDisconnect: clearUserData,
   });
 
   useEffect(() => {
     const unwatch = watchAccount(config, {
       onChange: (account: GetAccountReturnType, prevAccount: GetAccountReturnType) => {
         if (account.address !== prevAccount.address && account.isConnected) {
-          // TODO: re-fetch account related data
           handleConnect(account);
+
+          // Clear user data if switched from one account to another
+          if (prevAccount.address !== undefined) {
+            clearUserData();
+          }
         }
       },
     });
     return () => unwatch();
-  }, [config, handleConnect]);
+  }, [config, clearUserData, handleConnect]);
 
   return (
     <LoginContainer>

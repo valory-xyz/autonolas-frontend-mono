@@ -4,13 +4,14 @@ import { FC, useEffect, useState } from 'react';
 
 interface MenuItem {
   label: string;
+  key: string;
   path: string;
 }
 
 const items: MenuItem[] = [
-  { label: 'Staking Contracts', path: '/contracts' },
+  { label: 'Staking Contracts', key: 'contracts', path: '/contracts' },
   // TODO: will be added later
-  // { label: 'Proposals', path: '/proposals' },
+  { label: 'Proposals', key: 'proposals', path: '/proposals' },
 ];
 
 interface MenuInstanceProps {
@@ -24,13 +25,10 @@ const MenuInstance: FC<MenuInstanceProps> = ({ selectedMenu, handleMenuItemClick
     <Menu
       theme="light"
       mode={mode}
-      selectedKeys={selectedMenu ? [selectedMenu] : []}
-      onClick={({ key }) => handleMenuItemClick({ label: '', path: key })}
-    >
-      {items.map((item) => (
-        <Menu.Item key={item.path}>{item.label}</Menu.Item>
-      ))}
-    </Menu>
+      selectedKeys={selectedMenu ? [selectedMenu.split('/')[1]] : []}
+      items={items}
+      onClick={({ key }) => handleMenuItemClick({ label: '', key, path: `/${key}` })}
+    />
   );
 };
 

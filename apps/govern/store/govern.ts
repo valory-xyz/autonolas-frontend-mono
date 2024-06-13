@@ -40,9 +40,14 @@ export const governSlice = createSlice({
       state.isUserVotesLoading = true;
       state.lastUserVote = initialState.lastUserVote;
     },
+    clearUserState: (state) => {
+      state.userVotes = initialState.userVotes;
+      state.isUserVotesLoading = true;
+      state.lastUserVote = initialState.lastUserVote;
+    },
   },
 });
 
-export const { setStakingContracts, setUserVotes, setLastUserVote, clearState } =
+export const { setStakingContracts, setUserVotes, setLastUserVote, clearState, clearUserState } =
   governSlice.actions;
 export const governReducer = governSlice.reducer;
