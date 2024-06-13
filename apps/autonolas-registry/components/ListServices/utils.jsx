@@ -43,17 +43,22 @@ export const getServices = async (total, nextPage, fetchAll = false) => {
 
   const existsPromises = [];
 
-  const first = fetchAll ? 1 : (nextPage - 1) * TOTAL_VIEW_COUNT + 1;
-  const last = fetchAll ? total : Math.min(nextPage * TOTAL_VIEW_COUNT, total);
+  const first = total - (fetchAll ? 1 : (nextPage - 1) * TOTAL_VIEW_COUNT);
+  const last = total - (fetchAll ? total : Math.min(nextPage * TOTAL_VIEW_COUNT, total));
 
-  for (let i = first; i <= last; i += 1) {
+  console.log(first, last)
+
+  for (let i = last; i <= first; i += 1) {
     const result = contract.methods.exists(`${i}`).call();
     existsPromises.push(result);
   }
 
+  existsPromises.reverse();
+
   const existsResult = await Promise.allSettled(existsPromises);
   // filter services which don't exists (deleted or destroyed)
   const validTokenIds = [];
+  
   existsResult.forEach((item, index) => {
     const serviceId = `${first + index}`;
     if (item.status === 'fulfilled' && !!item.value) {
@@ -70,7 +75,7 @@ export const getServices = async (total, nextPage, fetchAll = false) => {
     }),
   );
 
-  return results;
+  return results.sort((a, b) => b.id - a.id);
 };
 
 export const getFilteredServices = async (searchValue, account) => {

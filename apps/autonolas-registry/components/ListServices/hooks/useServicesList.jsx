@@ -24,10 +24,10 @@ const getAllAndMyServicesQuery = (currentPage, ownerAddress = null) => {
   return gql`
     {
       services(
-        first: ${TOTAL_VIEW_COUNT}, 
+        first: ${TOTAL_VIEW_COUNT},
         skip: ${TOTAL_VIEW_COUNT * (currentPage - 1)},
-        orderBy: serviceId
-        orderDirection: desc
+        orderBy: serviceId,
+        orderDirection: desc,
         ${
           ownerAddress
             ? `where: { owner_contains_nocase: "${ownerAddress}" }`
