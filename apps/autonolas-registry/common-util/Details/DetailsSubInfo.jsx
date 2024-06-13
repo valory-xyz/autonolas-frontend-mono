@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { Button, Typography, Alert } from 'antd';
 import PropTypes from 'prop-types';
 import { NA } from '@autonolas/frontend-library';
@@ -23,6 +23,7 @@ import {
   ServiceStatusContainer,
   ArrowLink,
 } from './styles';
+import { useEnsName } from 'wagmi';
 
 const { Link, Text } = Typography;
 
@@ -105,6 +106,10 @@ export const DetailsSubInfo = ({
 }) => {
   const { isSvm, doesNetworkHaveValidServiceManagerToken } = useHelpers();
   const [tokenAddress, setTokenAddress] = useState(null);
+  
+  
+  const {data: ownerEnsName} = useEnsName({address: ownerAddress, chainId: 1});
+
   const {
     hashUrl,
     metadataLoadState,
@@ -153,11 +158,11 @@ export const DetailsSubInfo = ({
    * contains common details for agent, component & service
    * ie, description, version, metadata unpinned alert, owner address
    */
-  const getCommonDetails = () => {
-    const commonDetails = [];
+  const commonDetails = useMemo(() => {
+    const details = [];
 
     if (HASH_DETAILS_STATE.LOADED === metadataLoadState) {
-      commonDetails.push(
+      details.push(
         { title: 'Description', dataTestId: 'description', value: description },
         { title: 'Version', dataTestId: 'version', value: version },
       );
@@ -166,20 +171,27 @@ export const DetailsSubInfo = ({
     // If metadata failed, that means it has been unpinned from IPFS
     // and show an alert indicating the user
     if (HASH_DETAILS_STATE.FAILED === metadataLoadState) {
-      commonDetails.push({
+      details.push({
         dataTestId: 'metadata-failed-to-load',
         value: <MetadataUnpinnedMessage />,
       });
     }
 
-    commonDetails.push({
+    details.push({
       title: 'Owner Address',
       dataTestId: 'owner-address',
       value: ownerAddress,
     });
 
-    return commonDetails;
-  };
+    ownerEnsName &&
+      details.push({
+        title: 'Owner ENS Name',
+        dataTestId: 'owner-ens-name',
+        value: ownerEnsName,
+      });
+
+    return details;
+  }, [description, metadataLoadState, ownerAddress, ownerEnsName, version]);
 
   const getComponentAndAgentValues = () => {
     const updateHashButton = isOwner ? (
@@ -214,7 +226,7 @@ export const DetailsSubInfo = ({
           </>
         ),
       },
-      ...getCommonDetails(),
+      ...commonDetails,
       {
         title: 'Component Dependencies',
         dataTestId: 'details-dependency',
@@ -250,7 +262,7 @@ export const DetailsSubInfo = ({
       });
     }
 
-    serviceDetailsList.push(...getCommonDetails(), {
+    serviceDetailsList.push(...commonDetails, {
       title: 'Threshold',
       value: serviceThreshold,
     });
