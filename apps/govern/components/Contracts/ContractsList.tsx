@@ -112,8 +112,6 @@ export const ContractsList = ({ isUpdating, handleAdd, allocations }: ContractsL
 
   const isActionsDisabled = !account || isVotingPowerLoading || Number(votingPower) === 0;
 
-  console.log('votingPower', votingPower);
-
   return (
     <Card>
       <Title level={3} className="m-0">

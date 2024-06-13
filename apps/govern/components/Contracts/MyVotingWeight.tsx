@@ -123,7 +123,7 @@ export const MyVotingWeight = ({
           return <EmptyVotes />;
         } else {
           // If the user has voted, and is not updating votes, show their current votes
-          return <Votes />;
+          return <Votes setIsUpdating={setIsUpdating} setAllocations={setAllocations} />;
         }
       } else {
         // Show loader otherwise

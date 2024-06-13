@@ -1,7 +1,8 @@
 import { InfoCircleOutlined } from '@ant-design/icons';
 import { Button, Flex, Space, Statistic, Table, Tooltip, Typography } from 'antd';
 import { ColumnsType } from 'antd/es/table';
-import { useMemo } from 'react';
+import { Dispatch, SetStateAction, useEffect, useMemo, useState } from 'react';
+import { Allocation } from 'types/index';
 
 import { COLOR } from '@autonolas/frontend-library';
 
@@ -11,7 +12,8 @@ import styled from 'styled-components';
 import { RETAINER_ADDRESS } from 'common-util/constants/addresses';
 import { CHAIN_NAMES, getBytes32FromAddress } from 'common-util/functions';
 
-const TEN_DAYS_IN_MS = 10 * 24 * 60 * 60 * 1000;
+const ONE_DAY_IN_MS = 24 * 60 * 60 * 1000;
+const TEN_DAYS_IN_MS = 10 * ONE_DAY_IN_MS;
 
 const { Countdown: CountdownAntd } = Statistic;
 const { Text, Paragraph } = Typography;
@@ -92,15 +94,40 @@ const rowClassName = (record: MyVote): string => {
   return record.isRetainer ? 'highlight-row' : '';
 };
 
-export const Votes = () => {
+type VotesProps = {
+  setIsUpdating: Dispatch<SetStateAction<boolean>>;
+  setAllocations: Dispatch<SetStateAction<Allocation[]>>;
+};
+
+export const Votes = ({ setIsUpdating, setAllocations }: VotesProps) => {
   const { stakingContracts } = useAppSelector((state) => state.govern);
   const { lastUserVote, userVotes } = useAppSelector((state) => state.govern);
+  const [votesBlocked, setVotesBlocked] = useState(false);
 
-  const votesBlocked = useMemo(
-    // TODO: unblock somehow, once counter is finished
-    () => (lastUserVote !== null ? lastUserVote + TEN_DAYS_IN_MS > Date.now() : false),
-    [lastUserVote],
-  );
+  useEffect(() => {
+    setVotesBlocked(lastUserVote !== null ? lastUserVote + TEN_DAYS_IN_MS > Date.now() : false);
+  }, [lastUserVote]);
+
+  const startEditing = () => {
+    setIsUpdating(true);
+    setAllocations(
+      Object.entries(userVotes).reduce((acc: Allocation[], [key, value]) => {
+        const contract = stakingContracts.find((contract) => contract.address === key);
+        if (contract) {
+          acc.push({
+            address: contract.address,
+            chainId: contract.chainId,
+            metadata: contract.metadata,
+            weight: value.next.power,
+          });
+        }
+        return acc;
+      }, []),
+    );
+  };
+
+  const unblockVoting = () => setVotesBlocked(false);
+  const deadline = lastUserVote ? lastUserVote + TEN_DAYS_IN_MS : undefined;
 
   const data: MyVote[] = useMemo(() => {
     const userVotesArray = Object.entries(userVotes);
@@ -134,22 +161,25 @@ export const Votes = () => {
 
   return (
     <VotesRoot>
-      {votesBlocked && (
-        <Flex gap={16} align="center" justify="end">
-          {lastUserVote !== null && (
-            <Text type="secondary">
-              <Countdown
-                prefix={<Text type="secondary">Cooldown period: </Text>}
-                format="D[d] H[h] m[m]"
-                value={lastUserVote + TEN_DAYS_IN_MS}
-              />
-            </Text>
-          )}
-          <Button type="primary" disabled={votesBlocked}>
-            Update voting weight
-          </Button>
-        </Flex>
-      )}
+      <Flex gap={16} align="center" justify="end">
+        {votesBlocked && lastUserVote !== null && (
+          <Text type="secondary">
+            <Countdown
+              prefix={<Text type="secondary">Cooldown period: </Text>}
+              format={
+                deadline && deadline < Date.now() + ONE_DAY_IN_MS
+                  ? 'H[h] m[m] s[s]'
+                  : 'D[d] H[h] m[m]'
+              }
+              value={deadline}
+              onFinish={unblockVoting}
+            />
+          </Text>
+        )}
+        <Button type="primary" disabled={votesBlocked} onClick={startEditing}>
+          Update voting weight
+        </Button>
+      </Flex>
       <Table<MyVote>
         className="mt-16"
         columns={columns}
