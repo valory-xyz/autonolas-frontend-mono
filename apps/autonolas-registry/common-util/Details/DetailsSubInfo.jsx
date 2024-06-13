@@ -23,8 +23,7 @@ import {
   ServiceStatusContainer,
   ArrowLink,
 } from './styles';
-import { publicClients } from '../clients';
-import { isAddress } from 'viem';
+import { useEnsName } from 'wagmi';
 
 const { Link, Text } = Typography;
 
@@ -107,7 +106,9 @@ export const DetailsSubInfo = ({
 }) => {
   const { isSvm, doesNetworkHaveValidServiceManagerToken } = useHelpers();
   const [tokenAddress, setTokenAddress] = useState(null);
-  const [ownerEnsName, setOwnerEnsName] = useState();
+  
+  
+  const ownerEnsName = useEnsName({address: ownerAddress, chainId: 1});
 
   const {
     hashUrl,
@@ -124,19 +125,6 @@ export const DetailsSubInfo = ({
     operatorWhitelistValue,
     operatorStatusValue,
   } = useOperatorWhitelistComponent(id);
-
-  // resolve ens name
-  useEffect(() => {
-    if (!ownerAddress) return;
-    if (!isAddress(ownerAddress)) return;
-    
-    publicClients[1]
-      .getEnsName({ address: ownerAddress })
-      .then((ensName) => {
-        if (ensName) setOwnerEnsName(ensName);
-      })
-      .catch(console.error);
-  }, [ownerAddress]);
 
   // get token address for service
   useEffect(() => {
