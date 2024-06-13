@@ -6,24 +6,26 @@ import { setLastUserVote, setUserVotes } from 'store/govern';
 import { useAppDispatch, useAppSelector } from 'store/index';
 
 import { LATEST_BLOCK_KEY, NEXT_USERS_SLOPES_KEY } from 'common-util/constants/scopeKeys';
+import { getThisWeekMondayTimestamp } from 'common-util/functions/time';
 
 import { useLastUserVote } from './useLastUserVote';
 import { useNominees } from './useNominees';
 import { useVoteUserPower } from './useVoteUserPower';
 import { useVoteUserSlopes } from './useVoteUserSlopes';
 
-// seconds in a week / 12 seconds (approx time
-// when Ethereum blockchain produces a new block)
-const BLOCKS_IN_A_WEEK = 50400;
+// approx time when Ethereum blockchain produces a new block
+const SECONDS_PER_BLOCK = 12;
 // TODO: update when contract is deployed
 const CONTRACT_DEPLOY_BLOCK = 20009990;
 
-// TODO: important! if voted any time last week, need to consider
-// "prev" as this week's Monday (because votes apply on Monday).
-// Currently it's a week before today, where the data might be not fresh
-const getPrevVotesBlock = (blockNumber: bigint) => {
-  const lastWeekBlock = Number(blockNumber) - BLOCKS_IN_A_WEEK;
-  return BigInt(Math.max(CONTRACT_DEPLOY_BLOCK, lastWeekBlock));
+// Current votes are those that have been applied at the start of the week
+const getCurrVotesBlock = (blockNumber: bigint, blockTimestamp: bigint) => {
+  const mondayBlock =
+    Number(blockNumber) -
+    // Approx number of blocks between current timestamp and this Monday
+    Math.round((Number(blockTimestamp) - getThisWeekMondayTimestamp()) / SECONDS_PER_BLOCK);
+
+  return BigInt(Math.max(CONTRACT_DEPLOY_BLOCK, mondayBlock));
 };
 
 export const useFetchUserVotes = () => {
@@ -42,7 +44,7 @@ export const useFetchUserVotes = () => {
   const { data: userSlopesCurrent } = useVoteUserSlopes(
     nominees || [],
     account || null,
-    block ? getPrevVotesBlock(block.number) : null,
+    block ? getCurrVotesBlock(block.number, block.timestamp) : null,
     userPower ? Number(userPower) !== 0 : false,
   );
 

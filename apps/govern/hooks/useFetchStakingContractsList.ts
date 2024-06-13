@@ -8,7 +8,7 @@ import { useAppDispatch, useAppSelector } from 'store/index';
 import { RETAINER_ADDRESS } from 'common-util/constants/addresses';
 import { LATEST_BLOCK_KEY, NEXT_RELATIVE_WEIGHTS_KEY } from 'common-util/constants/scopeKeys';
 import { getBytes32FromAddress } from 'common-util/functions';
-import { getStartOfNextWeek } from 'common-util/functions/time';
+import { getStartOfNextWeekTimestamp } from 'common-util/functions/time';
 
 import { useNominees } from './useNominees';
 import { useNomineesMetadata } from './useNomineesMetadata';
@@ -23,7 +23,7 @@ export const useFetchStakingContractsList = () => {
 
   const { data: block } = useBlock({ blockTag: 'latest', scopeKey: LATEST_BLOCK_KEY });
   const now = block ? Number(block.timestamp) : null;
-  const nextWeek = block ? getStartOfNextWeek() : null;
+  const nextWeek = block ? getStartOfNextWeekTimestamp() : null;
 
   // Get contracts current weight
   const { data: currentWeight } = useNomineesWeights(nominees || [], now);

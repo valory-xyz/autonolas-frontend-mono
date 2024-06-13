@@ -8,7 +8,7 @@ import { STAKING_FACTORY } from 'libs/util-contracts/src/lib/abiAndAddresses';
 import { wagmiConfig } from 'common-util/config/wagmi';
 
 import { getAddressFromBytes32 } from './addresses';
-import { getStartOfNextWeek } from './time';
+import { getStartOfNextWeekTimestamp } from './time';
 import { getVeOlasContract, getVoteWeightingContract } from './web3';
 
 const ESTIMATED_GAS_LIMIT = 500_000;
@@ -118,7 +118,7 @@ export const checkLockExpired = async (account: Address) => {
   const result: number = await contract.methods.lockedEnd(account).call();
 
   if (result) {
-    const nextWeek = getStartOfNextWeek();
+    const nextWeek = getStartOfNextWeekTimestamp();
     if (nextWeek >= result) {
       return true;
     }
