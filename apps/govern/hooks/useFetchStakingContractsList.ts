@@ -28,12 +28,6 @@ export const useFetchStakingContractsList = () => {
   // Get contracts current weight
   const { data: currentWeight } = useNomineesWeights(nominees || [], now);
 
-  // TODO: important!
-  // There might be cases when there are no votes for some of the contracts
-  // during the week, which means their weights won't be updated in the contract state
-  // for the next week. To fix that and see the actual data, we need
-  // to callStatic checkpointNominee for each nominee.
-
   // Get contracts next weight
   const { data: nextWeight } = useNomineesWeights(
     nominees || [],

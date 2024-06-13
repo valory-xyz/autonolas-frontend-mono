@@ -17,7 +17,10 @@ export const useNomineesWeights = (
     address: (VOTE_WEIGHTING.addresses as Record<number, Address>)[mainnet.id],
     abi: VOTE_WEIGHTING.abi as Abi,
     chainId: mainnet.id,
-    functionName: 'nomineeRelativeWeight',
+    // There may be cases where no one voted on the contract during the week,
+    // meaning their weights won't be in the contract state for the provided timestamp.
+    // Use nomineeRelativeWeightWrite instead of nomineeRelativeWeight for accuracy.
+    functionName: 'nomineeRelativeWeightWrite',
     args: [nominee.account, nominee.chainId, timestamp],
   }));
 
