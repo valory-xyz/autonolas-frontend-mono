@@ -20,12 +20,12 @@ const getAllAndMyComponentsQuery = (currentPage, ownerAddress = null) => {
   return gql`
     {
       units(
-        first: ${TOTAL_VIEW_COUNT}, 
-        skip: ${TOTAL_VIEW_COUNT * (currentPage - 1)},
+        first: ${TOTAL_VIEW_COUNT}
+        skip: ${TOTAL_VIEW_COUNT * (currentPage - 1)}
         where: { 
           ${componentPackageType}
           ${ownerAddress ? `owner_contains_nocase: "${ownerAddress}"` : ''}
-        }, 
+        }
         orderBy: tokenId
         orderDirection: desc
       ) ${UNIT_FIELDS}
