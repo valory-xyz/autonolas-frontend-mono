@@ -7,6 +7,7 @@ module.exports = {
   preset: '../../jest.preset.js',
   testEnvironment: 'jsdom',
   moduleDirectories: ['node_modules'],
+  testTimeout: 10000,
   moduleNameMapper: {
     ...pathsToModuleNameMapper(compilerOptions.paths, { prefix: resolve(__dirname, '../..') }),
     '^util/(.*)$': '<rootDir>/util/$1',
@@ -26,6 +27,7 @@ module.exports = {
     ],
     '^(?!.*\\.(js|jsx|ts|tsx|css|json)$)': '@nx/react/plugins/jest',
   },
+  globals: { fetch },
   coverageDirectory: '../../coverage/apps/autonolas-registry',
   collectCoverageFrom: [
     'common-util/**/*.{js,jsx}',

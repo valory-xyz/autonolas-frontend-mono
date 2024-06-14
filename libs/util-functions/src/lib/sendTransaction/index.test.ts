@@ -55,7 +55,7 @@ describe('sendTransaction', () => {
     mockGetProvider.mockImplementation(() => {
       return {
         getCode: jest.fn(() => Promise.resolve('0x')),
-      } as unknown as ethers.providers.Web3Provider;
+      } as unknown as ethers.FallbackProvider;
     });
 
     // resolving the callback function `sendFn` with a dummy receipt
@@ -75,7 +75,7 @@ describe('sendTransaction', () => {
     mockGetProvider.mockImplementation(() => {
       return {
         getCode: jest.fn(() => Promise.resolve('random-string')),
-      } as unknown as ethers.providers.Web3Provider;
+      } as unknown as ethers.FallbackProvider;
     });
 
     mockChainId.mockImplementation(() => 5);
@@ -109,7 +109,7 @@ describe('sendTransaction', () => {
     mockGetProvider.mockImplementation(() => {
       return {
         getCode: jest.fn(() => Promise.reject(new Error('getCode error'))),
-      } as unknown as ethers.providers.Web3Provider;
+      } as unknown as ethers.FallbackProvider;
     });
 
     // resolving the callback function `sendFn` with `on` function
@@ -128,7 +128,7 @@ describe('sendTransaction', () => {
     mockGetProvider.mockImplementation(() => {
       return {
         getCode: jest.fn(() => Promise.resolve('random-string')),
-      } as unknown as ethers.providers.Web3Provider;
+      } as unknown as ethers.FallbackProvider;
     });
 
     mockChainId.mockImplementation(() => 5);

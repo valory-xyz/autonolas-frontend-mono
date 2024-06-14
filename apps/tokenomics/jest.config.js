@@ -25,13 +25,11 @@ module.exports = {
     }],
     '^(?!.*\\.(js|jsx|ts|tsx|css|json)$)': '@nx/react/plugins/jest',
   },
+  globals: { fetch },
   coverageDirectory: '../../coverage/apps/tokenomics',
   collectCoverageFrom: [
     'common-util/**/*.{js,jsx}',
     'components/**/*.{js,jsx}',
-
-    // ABI will change frequently on backend deployment hence avoiding.
-    '!common-util/AbiAndAddresses/*.{js,jsx}',
 
     // Contract objects
     '!common-util/Contracts/*.{js,jsx}',

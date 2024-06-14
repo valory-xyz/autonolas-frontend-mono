@@ -81,8 +81,8 @@ export const EXTRA_COLORS = {
 
 // These constants define the types of virtual machines supported
 export const VM_TYPE = {
-  EVM: 'evm', // Ethereum Virtual Machine
-  SVM: 'svm', // Solana Virtual Machine
+  EVM: 'EVM', // Ethereum Virtual Machine
+  SVM: 'SVM', // Solana Virtual Machine
 } as const;
 
 /**

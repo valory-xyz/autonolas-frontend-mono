@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { useSelector } from 'react-redux';
 import { isNumber } from 'lodash';
-import { useNetwork } from 'wagmi';
+import { useAccount } from 'wagmi';
 import { useAnchorWallet } from '@solana/wallet-adapter-react';
 import {
   isL1OnlyNetwork as isL1OnlyNetworkFn,
@@ -16,8 +16,7 @@ export const useHelpers = () => {
   const { account, vmType, chainId, chainDisplayName, chainName } = useSelector(
     (state) => state?.setup,
   );
-  const { chain: chainFromWallet } = useNetwork();
-  const chainIdFromWallet = chainFromWallet?.id;
+  const { chainId: chainIdFromWallet } = useAccount();
 
   /**
    * Links with chain name

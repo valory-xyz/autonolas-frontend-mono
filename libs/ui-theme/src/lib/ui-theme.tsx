@@ -51,3 +51,7 @@ export const BORDER_RADIUS = '5px';
 export const BOX_SHADOW = {
   light: '0px 1px 6px rgba(0, 0, 0, 0.15)',
 };
+
+export const ANTD_COLOR = {
+  borderColor: '#f0f0f0',
+};

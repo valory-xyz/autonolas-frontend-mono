@@ -26,11 +26,11 @@ To Run Test Suite:
 
 To Start Server:
 
-`yarn dev`
+`yarn nx run autonolas-registry:serve`
 
 To Visit App:
 
-`localhost:3000`
+`localhost:4200`
 
 Once you're running the app, you can connect to Valory's [Autonolas Registory](https://github.com/valory-xyz/autonolas-registries) through docker
 

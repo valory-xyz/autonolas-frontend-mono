@@ -133,7 +133,7 @@ const Layout = ({ children }) => {
 Layout.propTypes = { children: PropTypes.element };
 Layout.defaultProps = { children: null };
 
-// NOTE: cannout use useHelpers in this component
+// NOTE: cannot use useHelpers in this component
 // because Provider needs to be initialized before.
 const LayoutWithWalletProvider = (props) => {
   const chainName = useSelector((state) => state?.setup?.chainName);
