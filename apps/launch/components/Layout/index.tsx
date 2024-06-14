@@ -4,9 +4,9 @@ import { FC, ReactNode } from 'react';
 
 import { LoginV2 } from 'components/Login';
 
-import Balance from './Balance';
 import { LogoSvg } from './Logos';
 import { CustomLayout, Logo, OlasHeader, RightMenu } from './styles';
+import { SwitchNetworkSelect } from './SwitchNetworkSelect/SwitchNetworkSelect';
 
 const NavigationMenu = dynamic(() => import('./Menu'), { ssr: false });
 const Footer = dynamic(() => import('./Footer'), { ssr: false });
@@ -24,9 +24,9 @@ const Layout: FC<LayoutProps> = ({ children }) => {
         <Logo href="/">
           <LogoSvg />
         </Logo>
+        <SwitchNetworkSelect />
         <NavigationMenu />
         <RightMenu>
-          <Balance />
           <LoginV2 />
         </RightMenu>
       </OlasHeader>

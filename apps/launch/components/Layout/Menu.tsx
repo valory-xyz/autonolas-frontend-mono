@@ -8,7 +8,10 @@ interface MenuItem {
   path: string;
 }
 
-const items: MenuItem[] = [];
+const items: MenuItem[] = [
+  { label: 'My staking contracts', key: 'my-staking-contracts', path: '/my-staking-contracts' },
+  { label: 'Paths', key: 'paths', path: '/proposals' },
+];
 
 interface MenuInstanceProps {
   selectedMenu: string;

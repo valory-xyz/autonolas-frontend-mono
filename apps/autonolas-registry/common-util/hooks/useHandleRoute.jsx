@@ -83,7 +83,7 @@ export const useHandleRoute = () => {
     /**
      * if the network name is invalid, eg.
      * - user navigates to `/random-page` => redirect to `/page-not-found`
-     * - user nagivates to `/random/components` => `/page-not-found`
+     * - user navigates to `/random/components` => `/page-not-found`
      * -
      */
     if (!isValidNetworkName(networkNameFromUrl)) {
