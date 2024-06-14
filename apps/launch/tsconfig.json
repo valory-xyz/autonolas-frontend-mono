@@ -16,7 +16,17 @@
         "name": "next"
       }
     ],
-    "types": ["jest", "node"]
+    "types": ["jest", "node", "react", "react-dom"],
+    "paths": {
+      "common-util/*": ["apps/launch/common-util/*"],
+      "components/*": ["apps/launch/components/*"],
+      "util/*": ["apps/launch/util/*"],
+      "static/*": ["apps/launch/static/*"],
+      "images/*": ["apps/launch/public/images/*"],
+      "store/*": ["apps/launch/store/*"],
+      "hooks/*": ["apps/launch/hooks/*"],
+      "types/*": ["apps/launch/types/*"]
+    }
   },
   "include": ["**/*.ts", "**/*.tsx", "**/*.js", "**/*.jsx", "next-env.d.ts"],
   "exclude": [
