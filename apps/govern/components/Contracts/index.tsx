@@ -17,7 +17,7 @@ const StyledMain = styled.main`
 export const ContractsPage = () => {
   const { userVotes, isUserVotesLoading } = useAppSelector((state) => state.govern);
 
-  const [isUpdating, setIsUpdating] = useState(false);
+  const [isUpdating, setIsUpdating] = useState(true);
   const [allocations, setAllocations] = useState<Allocation[]>([]);
 
   useEffect(() => {

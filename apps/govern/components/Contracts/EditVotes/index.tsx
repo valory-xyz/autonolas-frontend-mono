@@ -1,15 +1,5 @@
 import { DeleteOutlined } from '@ant-design/icons';
-import {
-  Alert,
-  Button,
-  Flex,
-  InputNumber,
-  Modal,
-  Table,
-  Typography,
-  message,
-  notification,
-} from 'antd';
+import { Alert, Button, Flex, InputNumber, Table, Typography, notification } from 'antd';
 import { ColumnsType } from 'antd/es/table';
 import { Dispatch, SetStateAction, useCallback, useState } from 'react';
 import styled from 'styled-components';
@@ -18,109 +8,23 @@ import { useAccount } from 'wagmi';
 
 import { RETAINER_ADDRESS } from 'common-util/constants/addresses';
 import { INVALIDATE_AFTER_UPDATE_KEYS } from 'common-util/constants/scopeKeys';
-import {
-  CHAIN_NAMES,
-  checkIfContractDisabled,
-  checkIfNomineeRemoved,
-  checkLockExpired,
-  checkNegativeSlope,
-  getBytes32FromAddress,
-  voteForNomineeWeights,
-} from 'common-util/functions';
+import { CHAIN_NAMES, getBytes32FromAddress, voteForNomineeWeights } from 'common-util/functions';
 import { clearState } from 'store/govern';
 import { useAppDispatch, useAppSelector } from 'store/index';
-import { Allocation, StakingContract, UserVotes } from 'types/index';
+import { Allocation } from 'types/index';
 
-import { queryClient } from '../../context/Web3ModalProvider';
+import { queryClient } from '../../../context/Web3ModalProvider';
+import { ConfirmModal } from './ConfirmModal';
+import {
+  MAX_ALLOCATED_POWER,
+  checkLockNotExpired,
+  checkNoDisabledContracts,
+  checkNoRemovedNominees,
+  checkNotNegativeSlope,
+  getReorderedVotes,
+} from './utils';
 
 const { Paragraph, Text } = Typography;
-
-const MAX_ALLOCATED_POWER = 10_000;
-
-const getRemovedNomineesError = (removedNominees: Address[], allocations: Allocation[]) => (
-  <Flex align="start" vertical>
-    <Paragraph className="m-0">Some of the contracts are no longer available for voting.</Paragraph>
-    <Paragraph>Remove them and try again:</Paragraph>
-    <ul>
-      {removedNominees.map((item) => (
-        <li key={item} className="text-start">
-          <b>{allocations.find((contract) => contract.address === item)?.metadata.name}</b>
-        </li>
-      ))}
-    </ul>
-  </Flex>
-);
-
-const NO_VEOLAS_ERROR = `You don't have enough veOLAS to vote`;
-
-/**
- * BE stores and checks the user's limit (which is 10_000 = 100%)
- * every time we vote on a contract.
- *
- * Example:
- * The old user's votes are: [{2: 8000}, {3: 1000}, {5: 1000}] - the user's total vote is 10_000.
- * The new votes the user wants to apply are: [{1: 3000}, {2: 1000}, {5: 6000}]
- *
- * The first new vote is 3000, which exceeds the limit of 10,000, causing an Overflow error.
- * To prevent this, we need to reorder the old and new votes as follows:
- * [{3: 0}, {2: 1000}, {5: 6000}, {1: 3000}]
- *
- * First, we need to remove weights from the contracts that the user is no longer voting on.
- * Then, if the user votes on the same contracts as before, we should place the new weights,
- * sorted by ascending weight, at the same positions as the old votes, sorted by descending weight
- * (So the applied new weight is lower that the old one).
- * Finally, we can add the remaining new votes.
- */
-const getReorderedVotes = (
-  allocations: Allocation[],
-  userVotes: Record<string, UserVotes>,
-  stakingContracts: StakingContract[],
-) => {
-  // Sort new allocation by ascending weights
-  const sortedAllocations = [...allocations].sort((a, b) => a.weight - b.weight);
-  // Sort old votes by descending weights
-  const sortedOldVotes = [...Object.entries(userVotes)].sort(
-    ([aKey, aValue], [bKey, bValue]) => bValue.current.power - aValue.current.power,
-  );
-
-  const newVotes: { address: Address; chainId: number; weight: string }[] = [];
-
-  // Start from old votes
-  sortedOldVotes.forEach((oldVote) => {
-    const [oldVoteAddress] = oldVote;
-
-    const newVote = sortedAllocations.find((item) => item.address === oldVoteAddress);
-    // If the user votes for the same contract they already voted on,
-    // keep new weight value at the same position of resorted old votes
-    if (newVote) {
-      newVotes.push({
-        address: newVote.address,
-        chainId: newVote.chainId,
-        weight: `${Math.floor(newVote.weight * 100)}`,
-      });
-    } else {
-      // Otherwise we need to remove weight from that contract
-      // before voting on the others contacts
-      const chainId = stakingContracts.find((item) => item.address === oldVoteAddress)?.chainId;
-      if (chainId) {
-        newVotes.unshift({ address: oldVoteAddress as Address, chainId, weight: '0' });
-      }
-    }
-  });
-
-  // Add remaining new votes to the result
-  sortedAllocations.forEach((newVote) => {
-    if (newVotes.findIndex((item) => item.address === newVote.address) === -1) {
-      newVotes.push({
-        address: newVote.address,
-        chainId: newVote.chainId,
-        weight: `${Math.floor(newVote.weight * 100)}`,
-      });
-    }
-  });
-
-  return newVotes;
-};
 
 const TotalAllocatedPower = styled(Text)`
   font-size: 24px;
@@ -185,54 +89,6 @@ const getColumns = (
   },
 ];
 
-const ConfirmModal = ({
-  isOpen,
-  handleOk,
-  handleClose,
-  isLoading,
-  allocationsLength,
-  allocatedPower,
-}: {
-  isOpen: boolean;
-  handleOk: () => void;
-  handleClose: () => void;
-  isLoading: boolean;
-  allocationsLength: number;
-  allocatedPower: number;
-}) => {
-  return (
-    <Modal
-      title="Confirm voting weight update"
-      open={isOpen}
-      onOk={handleOk}
-      onCancel={handleClose}
-      cancelText="Cancel"
-      okText="Confirm voting weight"
-      confirmLoading={isLoading}
-    >
-      <Paragraph>
-        {`You're allocating ${parseFloat(
-          (allocatedPower / 100).toFixed(2),
-        )}% of your voting power to ${allocationsLength} staking contracts.`}
-      </Paragraph>
-      <Paragraph>
-        {`After you confirm, you'll enter a 10 day cooldown period. You won't be able to update your weights during that time.`}
-      </Paragraph>
-
-      {allocatedPower < MAX_ALLOCATED_POWER && (
-        <Alert
-          // TODO: add blue info alerts as in Pearl
-          className="mb-16"
-          message={`${parseFloat(
-            ((MAX_ALLOCATED_POWER - allocatedPower) / 100).toFixed(2),
-          )}% of your voting power is unallocated - this will be applied to the Rollover Pool and may be used in future epochs.`}
-          showIcon
-        />
-      )}
-    </Modal>
-  );
-};
-
 export const EditVotes = ({ allocations, setAllocations, setIsUpdating }: EditVotesProps) => {
   const dispatch = useAppDispatch();
   const { address: account } = useAccount();
@@ -268,40 +124,13 @@ export const EditVotes = ({ allocations, setAllocations, setIsUpdating }: EditVo
 
     setIsLoading(true);
 
-    // Check if any of the nominees were removed from voting
-    const removedNominees = await checkIfNomineeRemoved(allocations);
-    if (removedNominees.length > 0) {
-      message.error({
-        content: getRemovedNomineesError(removedNominees, allocations),
-        duration: 10,
-      });
-      setIsLoading(false);
-      return;
-    }
-
-    // Check if any of the nominated contracts are disabled
-    const disabledContracts = await checkIfContractDisabled(allocations);
-    if (disabledContracts.length > 0) {
-      message.error({
-        content: getRemovedNomineesError(disabledContracts, allocations),
-        duration: 10,
-      });
-      setIsLoading(false);
-      return;
-    }
-
-    // Check negative slope
-    const isNegativeSlope = await checkNegativeSlope(account);
-    if (isNegativeSlope) {
-      message.error(NO_VEOLAS_ERROR);
-      setIsLoading(false);
-      return;
-    }
-
-    // Check lock expired
-    const isLockExpired = await checkLockExpired(account);
-    if (isLockExpired) {
-      message.error(NO_VEOLAS_ERROR);
+    // Validations
+    if (
+      !(await checkNoRemovedNominees(allocations)) ||
+      !(await checkNoDisabledContracts(allocations)) ||
+      !(await checkNotNegativeSlope(account)) ||
+      !(await checkLockNotExpired(account))
+    ) {
       setIsLoading(false);
       return;
     }
@@ -348,7 +177,7 @@ export const EditVotes = ({ allocations, setAllocations, setIsUpdating }: EditVo
         dispatch(clearState());
       })
       .catch((error) => {
-        message.error({
+        notification.error({
           message: error.message,
         });
 

@@ -3,8 +3,8 @@ import { Button, Tooltip, Typography } from 'antd';
 import { useAccount } from 'wagmi';
 
 import { COLOR } from 'libs/ui-theme/src/lib/ui-theme';
+import { UNICODE_SYMBOLS } from 'libs/util-constants/src';
 
-import { UNICODE_SYMBOLS } from 'common-util/constants/unicode';
 import { GET_VEOLAS_URL } from 'common-util/constants/urls';
 import { formatWeiBalance } from 'common-util/functions';
 import { useVotingPower } from 'hooks/index';

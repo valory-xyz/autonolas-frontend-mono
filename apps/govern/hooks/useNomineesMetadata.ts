@@ -3,12 +3,10 @@ import { Abi } from 'viem';
 import { Address } from 'viem';
 import { useReadContracts } from 'wagmi';
 
+import { GATEWAY_URL, HASH_PREFIX } from 'libs/util-constants/src';
 import { STAKING_TOKEN } from 'libs/util-contracts/src/lib/abiAndAddresses';
 
 import { getAddressFromBytes32, getBytes32FromAddress } from 'common-util/functions';
-
-const HASH_PREFIX = 'f01701220';
-const GATEWAY_URL = 'https://gateway.autonolas.tech/ipfs/';
 
 const BATCH_SIZE = 10;
 const CONCURRENCY_LIMIT = 5;

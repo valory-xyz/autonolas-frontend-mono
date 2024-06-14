@@ -97,8 +97,6 @@ export const checkNegativeSlope = async (account: Address) => {
     args: [account],
   });
 
-  console.log('result', result);
-
   return result ? Number((result as { slope: string }).slope) < 0 : false;
 };
 

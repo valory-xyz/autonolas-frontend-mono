@@ -60,6 +60,9 @@ export const GlobalStyles = createGlobalStyle`
   .ml-8 {
     margin-left: 8px;
   }
+  .p-0 {
+    padding: 0 !important;
+  }
   .pl-0 {
     padding-left: 0px !important;
   }
