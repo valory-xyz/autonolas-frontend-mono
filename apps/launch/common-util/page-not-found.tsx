@@ -1,7 +1,9 @@
 import { Button, Result } from 'antd';
 import { useRouter } from 'next/router';
 
-const PageNotFound = () => {
+import { URL } from 'common-util/constants/url';
+
+export const PageNotFound = () => {
   const router = useRouter();
 
   return (
@@ -10,12 +12,10 @@ const PageNotFound = () => {
       title="404"
       subTitle="Sorry, the page you visited does not exist."
       extra={
-        <Button type="primary" onClick={() => router.push('/ethereum/my-staking-contracts')}>
+        <Button type="primary" onClick={() => router.push(`/ethereum/${URL.myStackingContract}`)}>
           My staking contracts
         </Button>
       }
     />
   );
 };
-
-export default PageNotFound;

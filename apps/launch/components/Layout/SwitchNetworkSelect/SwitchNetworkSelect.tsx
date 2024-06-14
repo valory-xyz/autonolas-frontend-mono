@@ -5,9 +5,8 @@ import { useAccount, useSwitchChain } from 'wagmi';
 
 import { useScreen } from '@autonolas/frontend-library';
 
-import { ALL_SUPPORTED_CHAINS } from './config';
-
-const PAGES_TO_LOAD_WITHOUT_CHAINID = ['disclaimer'];
+import { ALL_SUPPORTED_CHAINS, PAGES_TO_LOAD_WITHOUT_CHAINID } from '../../../common-util/config/supportedChains';
+import { useHandleRoute } from './useHandleRoute';
 
 export const SwitchNetworkSelect: FC = () => {
   const router = useRouter();
@@ -16,6 +15,12 @@ export const SwitchNetworkSelect: FC = () => {
   const { switchChainAsync } = useSwitchChain();
   const path = router?.pathname || '';
 
+  const chainName = router?.query?.network || 'ethereum';
+
+  console.log('chain', router);
+
+  useHandleRoute();
+
   return (
     <div style={{ marginRight: isMobile ? 8 : 0 }}>
       <Select
@@ -23,11 +28,9 @@ export const SwitchNetworkSelect: FC = () => {
         className="show-scrollbar"
         style={{ width: isMobile ? 140 : 200 }}
         listHeight={800}
-        value={chain?.name}
+        value={chainName}
         placeholder="Select Network"
-        // disabled={PAGES_TO_LOAD_WITHOUT_CHAINID.some((e) =>
-        //   path.includes(e),
-        // )}
+        disabled={PAGES_TO_LOAD_WITHOUT_CHAINID.some((e) => path.includes(e))}
         options={ALL_SUPPORTED_CHAINS.map((e) => ({
           label: e.networkDisplayName,
           value: e.networkName,
@@ -45,8 +48,8 @@ export const SwitchNetworkSelect: FC = () => {
             await switchChainAsync({ chainId: currentChainInfo.id });
             router.push(`/${path}`);
           } else {
-            // eg. /values will be redirect to /<chainName>/values, 
-            const replacedPath = router.asPath.replace(chain?.name || '', value);
+            // eg. /values will be redirect to /<chainName>/values,
+            const replacedPath = router.asPath.replace(chainName, value);
 
             // reload the page if vmType is different
             // ie. user switched from svm to eth or vice versa

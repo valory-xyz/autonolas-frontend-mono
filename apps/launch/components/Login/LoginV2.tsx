@@ -1,15 +1,9 @@
 import { GetAccountReturnType, watchAccount } from '@wagmi/core';
 import { useCallback, useEffect } from 'react';
+import styled from 'styled-components';
 import { useAccountEffect, useConfig, useDisconnect } from 'wagmi';
 
-import { clearUserState } from 'store/launch';
-import { useAppDispatch } from 'store/index';
-import styled from 'styled-components';
-
-import { INVALIDATE_AFTER_ACCOUNT_CHANGE } from 'common-util/constants/scopeKeys';
-
 import { isAddressProhibited } from '../../common-util/functions';
-import { queryClient } from '../../context/Web3ModalProvider';
 
 const LoginContainer = styled.div`
   display: flex;
@@ -21,7 +15,6 @@ const LoginContainer = styled.div`
 export const LoginV2 = () => {
   const { disconnect } = useDisconnect();
   const config = useConfig();
-  const dispatch = useAppDispatch();
 
   const handleConnect = useCallback(
     ({ address }: Pick<GetAccountReturnType, 'address' | 'chainId'>) => {
@@ -32,19 +25,11 @@ export const LoginV2 = () => {
     [disconnect],
   );
 
-  const clearUserData = useCallback(() => {
-    queryClient.removeQueries({
-      predicate: (query) =>
-        INVALIDATE_AFTER_ACCOUNT_CHANGE.includes(
-          (query.queryKey[1] as Record<string, string>)?.scopeKey,
-        ),
-    });
-    dispatch(clearUserState());
-  }, [dispatch]);
+  const clearOnDisconnect = useCallback(() => {}, []);
 
   useAccountEffect({
     onConnect: handleConnect,
-    onDisconnect: clearUserData,
+    onDisconnect: clearOnDisconnect,
   });
 
   useEffect(() => {
@@ -52,16 +37,11 @@ export const LoginV2 = () => {
       onChange: (account: GetAccountReturnType, prevAccount: GetAccountReturnType) => {
         if (account.address !== prevAccount.address && account.isConnected) {
           handleConnect(account);
-
-          // Clear user data if switched from one account to another
-          if (prevAccount.address !== undefined) {
-            clearUserData();
-          }
         }
       },
     });
     return () => unwatch();
-  }, [config, clearUserData, handleConnect]);
+  }, [config, clearOnDisconnect, handleConnect]);
 
   return (
     <LoginContainer>

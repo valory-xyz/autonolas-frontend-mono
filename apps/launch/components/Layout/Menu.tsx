@@ -1,17 +1,15 @@
 import { Menu } from 'antd';
 import { useRouter } from 'next/router';
-import { FC, useEffect, useState } from 'react';
+import { FC, useEffect, useMemo, useState } from 'react';
+
+import { URL } from 'common-util/constants/url';
+import { useAppSelector } from 'store/index';
 
 interface MenuItem {
   label: string;
   key: string;
   path: string;
 }
-
-const items: MenuItem[] = [
-  { label: 'My staking contracts', key: 'my-staking-contracts', path: '/my-staking-contracts' },
-  { label: 'Paths', key: 'paths', path: '/proposals' },
-];
 
 interface MenuInstanceProps {
   selectedMenu: string;
@@ -20,13 +18,37 @@ interface MenuInstanceProps {
 }
 
 const MenuInstance: FC<MenuInstanceProps> = ({ selectedMenu, handleMenuItemClick, mode }) => {
+  const { networkName } = useAppSelector((state) => state.network);
+
+  const items: MenuItem[] = [
+    {
+      label: 'My staking contracts',
+      key: 'my-staking-contracts',
+      path: `/${networkName}/my-staking-contracts`,
+    },
+    {
+      label: 'Paths',
+      key: 'paths',
+      path: `/${networkName}/paths`,
+    },
+  ];
+
+  console.log('networkName', items);
+  const selectedMenuKey = useMemo(() => {
+    if (!selectedMenu) return [];
+
+    if (selectedMenu.includes(URL.myStackingContract)) return ['my-staking-contracts'];
+
+    return [selectedMenu.split('/')[1]];
+  }, [selectedMenu]);
+
   return (
     <Menu
       theme="light"
       mode={mode}
-      selectedKeys={selectedMenu ? [selectedMenu.split('/')[1]] : []}
+      selectedKeys={selectedMenuKey}
       items={items}
-      onClick={({ key }) => handleMenuItemClick({ label: '', key, path: `/${key}` })}
+      onClick={({ key }) => handleMenuItemClick({ label: '', key, path: `/${networkName}/${key}` })}
     />
   );
 };
@@ -46,6 +68,8 @@ const NavigationMenu: FC<NavigationMenuProps> = () => {
   }, [pathname]);
 
   const handleMenuItemClick = ({ path }: MenuItem) => {
+    if (!path) return;
+
     router.push(path);
     setSelectedMenu(path);
   };

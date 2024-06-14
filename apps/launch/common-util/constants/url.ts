@@ -1,3 +1,4 @@
 export const URL = {
-  myStackingContract: 'my-stacking-contract',
+  myStackingContract: 'my-staking-contracts',
+  pageNotFound: 'page-not-found',
 };

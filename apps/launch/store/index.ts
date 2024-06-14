@@ -2,11 +2,13 @@ import { configureStore } from '@reduxjs/toolkit';
 import { createWrapper } from 'next-redux-wrapper';
 import { TypedUseSelectorHook, useDispatch, useSelector } from 'react-redux';
 
-import { governReducer } from './launch';
+import { launchReducer } from './launch';
+import { networkReducer } from './network';
 
 export const store = configureStore({
   reducer: {
-    launch: governReducer,
+    launch: launchReducer,
+    network: networkReducer,
   },
 });
 

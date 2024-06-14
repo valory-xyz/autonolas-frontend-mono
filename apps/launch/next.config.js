@@ -23,6 +23,15 @@ const nextConfig = {
     };
     return config;
   },
+  redirects: async () => {
+    return [
+      {
+        source: '/',
+        destination: '/ethereum/my-staking-contracts',
+        permanent: true,
+      },
+    ];
+  },
 };
 
 const plugins = [
