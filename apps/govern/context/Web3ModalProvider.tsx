@@ -30,7 +30,7 @@ createWeb3Modal({
   },
 });
 
-export default function Web3ModalProvider({ children }: PropsWithChildren) {
+export const Web3ModalProvider = ({ children }: PropsWithChildren) => {
   return (
     <WagmiProvider config={wagmiConfig}>
       <QueryClientProvider client={queryClient}>
@@ -39,4 +39,4 @@ export default function Web3ModalProvider({ children }: PropsWithChildren) {
       </QueryClientProvider>
     </WagmiProvider>
   );
-}
+};

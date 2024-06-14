@@ -1,17 +1,17 @@
 import { InfoCircleOutlined } from '@ant-design/icons';
 import { Button, Tooltip, Typography } from 'antd';
-import { useVotingPower } from 'hooks/index';
 import { useAccount } from 'wagmi';
 
 import { COLOR } from 'libs/ui-theme/src/lib/ui-theme';
+import { UNICODE_SYMBOLS } from 'libs/util-constants/src';
 
-import { UNICODE_SYMBOLS } from 'common-util/constants/unicode';
 import { GET_VEOLAS_URL } from 'common-util/constants/urls';
 import { formatWeiBalance } from 'common-util/functions';
+import { useVotingPower } from 'hooks/index';
 
 const { Text, Paragraph } = Typography;
 
-const Balance = () => {
+export const Balance = () => {
   const { address: account } = useAccount();
   const { data, isFetching } = useVotingPower(account);
 
@@ -41,5 +41,3 @@ const Balance = () => {
     </Tooltip>
   );
 };
-
-export default Balance;

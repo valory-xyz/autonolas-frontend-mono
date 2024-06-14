@@ -1,5 +1,5 @@
-import { Address } from 'types/index';
 import { Abi } from 'viem';
+import { Address } from 'viem';
 import { mainnet } from 'viem/chains';
 import { useReadContract } from 'wagmi';
 

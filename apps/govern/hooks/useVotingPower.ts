@@ -1,5 +1,5 @@
 import { ethers } from 'ethers';
-import { Address } from 'types/index';
+import { Address } from 'viem';
 import { mainnet } from 'viem/chains';
 import { useReadContract } from 'wagmi';
 

@@ -1,16 +1,15 @@
 import { CheckOutlined, InfoCircleOutlined, PlusOutlined } from '@ant-design/icons';
 import { Button, Card as CardAntd, Space, Table, Tooltip, Typography } from 'antd';
 import { ColumnsType } from 'antd/es/table';
-import { useVotingPower } from 'hooks/useVotingPower';
-import { Allocation, StakingContract } from 'types/index';
+import styled from 'styled-components';
 import { useAccount } from 'wagmi';
 
 import { COLOR } from '@autonolas/frontend-library';
 
-import { useAppSelector } from 'store/index';
-import styled from 'styled-components';
-
 import { CHAIN_NAMES, formatWeiBalance } from 'common-util/functions';
+import { useVotingPower } from 'hooks/useVotingPower';
+import { useAppSelector } from 'store/index';
+import { Allocation, StakingContract } from 'types/index';
 
 const { Title, Paragraph, Text } = Typography;
 
@@ -50,10 +49,11 @@ const getColumns = ({
     {
       title: 'Current weight',
       key: 'currentWeight',
-      render: (_, record) => (
+      dataIndex: 'currentWeight',
+      render: (currentWeight) => (
         <Space size={2} direction="vertical">
-          <Text>{`${record.currentWeight?.percentage.toFixed(2)}%`}</Text>
-          <Text type="secondary">{`${formatWeiBalance(record.currentWeight?.value)} veOlas`}</Text>
+          <Text>{`${currentWeight?.percentage.toFixed(2)}%`}</Text>
+          <Text type="secondary">{`${formatWeiBalance(currentWeight?.value)} veOlas`}</Text>
         </Space>
       ),
     },
@@ -67,10 +67,11 @@ const getColumns = ({
         </Tooltip>
       ),
       key: 'nextWeight',
-      render: (_, record) => (
+      dataIndex: 'nextWeight',
+      render: (nextWeight) => (
         <Space size={2} direction="vertical">
-          <Text>{`${record.nextWeight?.percentage.toFixed(2)}%`}</Text>
-          <Text type="secondary">{`${formatWeiBalance(record.nextWeight?.value)} veOlas`}</Text>
+          <Text>{`${nextWeight?.percentage.toFixed(2)}%`}</Text>
+          <Text type="secondary">{`${formatWeiBalance(nextWeight?.value)} veOlas`}</Text>
         </Space>
       ),
     },

@@ -1,14 +1,12 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Address } from 'types/index';
 import { Abi } from 'viem';
+import { Address } from 'viem';
 import { useReadContracts } from 'wagmi';
 
+import { GATEWAY_URL, HASH_PREFIX } from 'libs/util-constants/src';
 import { STAKING_TOKEN } from 'libs/util-contracts/src/lib/abiAndAddresses';
 
 import { getAddressFromBytes32, getBytes32FromAddress } from 'common-util/functions';
-
-const HASH_PREFIX = 'f01701220';
-const GATEWAY_URL = 'https://gateway.autonolas.tech/ipfs/';
 
 const BATCH_SIZE = 10;
 const CONCURRENCY_LIMIT = 5;
@@ -23,17 +21,15 @@ const fetchBatch = async (params: HashesWithNominees) => {
     const responses = await Promise.allSettled(
       batch.map((item) => fetch(`${GATEWAY_URL}${item.hash}`)),
     );
-    const jsonData = [];
 
     for (const response of responses) {
       if (response.status === 'fulfilled' && response.value) {
         const data = await response.value.json();
-        jsonData.push(data);
+        results.push(data);
       } else {
-        jsonData.push(null); // or handle error response
+        results.push(null); // or handle error response
       }
     }
-    results.push(...jsonData);
   }
   return results;
 };
@@ -92,7 +88,7 @@ export const useNomineesMetadata = (nominees: { account: Address; chainId: numbe
   }, [data, nominees]);
 
   useEffect(() => {
-    if (data && !isFetching && contractsMetadata === null && !isLoading) {
+    if (data && !isFetching && !contractsMetadata && !isLoading) {
       getMetadata();
     }
   }, [contractsMetadata, data, getMetadata, isFetching, isLoading]);

@@ -1,12 +1,11 @@
 import { useEffect } from 'react';
-import { UserVotes } from 'types/index';
 import { useAccount, useBlock } from 'wagmi';
-
-import { setLastUserVote, setUserVotes } from 'store/govern';
-import { useAppDispatch, useAppSelector } from 'store/index';
 
 import { LATEST_BLOCK_KEY, NEXT_USERS_SLOPES_KEY } from 'common-util/constants/scopeKeys';
 import { getThisWeekMondayTimestamp } from 'common-util/functions/time';
+import { setLastUserVote, setUserVotes } from 'store/govern';
+import { useAppDispatch, useAppSelector } from 'store/index';
+import { UserVotes } from 'types/index';
 
 import { useLastUserVote } from './useLastUserVote';
 import { useNominees } from './useNominees';
@@ -19,7 +18,7 @@ const SECONDS_PER_BLOCK = 12;
 const CONTRACT_DEPLOY_BLOCK = 20009990;
 
 // Current votes are those that have been applied at the start of the week
-const getCurrVotesBlock = (blockNumber: bigint, blockTimestamp: bigint) => {
+const getCurrentVotesBlock = (blockNumber: bigint, blockTimestamp: bigint) => {
   const mondayBlock =
     Number(blockNumber) -
     // Approx number of blocks between current timestamp and this Monday
@@ -44,7 +43,7 @@ export const useFetchUserVotes = () => {
   const { data: userSlopesCurrent } = useVoteUserSlopes(
     nominees || [],
     account || null,
-    block ? getCurrVotesBlock(block.number, block.timestamp) : null,
+    block ? getCurrentVotesBlock(block.number, block.timestamp) : null,
     userPower ? Number(userPower) !== 0 : false,
   );
 
@@ -78,10 +77,10 @@ export const useFetchUserVotes = () => {
       return;
     }
     // If user power is 0, it means user didn't vote
-    // set user votes as {} as
+    // set user votes as {}
     if (Number(userPower) === 0) {
       dispatch(setUserVotes({}));
-    } else if (userSlopesNext && userSlopesCurrent && lastUserVote !== undefined) {
+    } else if (userSlopesNext && userSlopesCurrent && lastUserVote) {
       const result: Record<string, UserVotes> = {};
       nominees.forEach((item, index) => {
         if (

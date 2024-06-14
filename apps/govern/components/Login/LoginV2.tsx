@@ -1,12 +1,11 @@
 import { GetAccountReturnType, watchAccount } from '@wagmi/core';
 import { useCallback, useEffect } from 'react';
+import styled from 'styled-components';
 import { useAccountEffect, useConfig, useDisconnect } from 'wagmi';
 
+import { INVALIDATE_AFTER_ACCOUNT_CHANGE } from 'common-util/constants/scopeKeys';
 import { clearUserState } from 'store/govern';
 import { useAppDispatch } from 'store/index';
-import styled from 'styled-components';
-
-import { INVALIDATE_AFTER_ACCOUNT_CHANGE } from 'common-util/constants/scopeKeys';
 
 import { isAddressProhibited } from '../../common-util/functions';
 import { queryClient } from '../../context/Web3ModalProvider';

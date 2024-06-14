@@ -1,38 +1,19 @@
-import { readContracts } from '@wagmi/core';
-import { Contract } from 'ethers';
-import { Address } from 'types/index';
+import { readContract, readContracts } from '@wagmi/core';
 import { AbiFunction } from 'viem';
+import { Address } from 'viem';
+import { mainnet } from 'viem/chains';
 
-import { STAKING_FACTORY } from 'libs/util-contracts/src/lib/abiAndAddresses';
+import { sendTransaction } from '@autonolas/frontend-library';
 
-import { wagmiConfig } from 'common-util/config/wagmi';
+import { STAKING_FACTORY, VE_OLAS } from 'libs/util-contracts/src/lib/abiAndAddresses';
+import { getEstimatedGasLimit } from 'libs/util-functions/src';
+
+import { SUPPORTED_CHAINS, wagmiConfig } from 'common-util/config/wagmi';
+import { RPC_URLS } from 'common-util/constants/rpcs';
 
 import { getAddressFromBytes32 } from './addresses';
 import { getStartOfNextWeekTimestamp } from './time';
-import { getVeOlasContract, getVoteWeightingContract } from './web3';
-
-const ESTIMATED_GAS_LIMIT = 500_000;
-
-/**
- * function to estimate gas limit
- */
-export const getEstimatedGasLimit = async (
-  fn: Contract['methods'],
-  account: Address | undefined,
-) => {
-  if (!account) {
-    throw new Error('Invalid account passed to estimate gas limit');
-  }
-
-  try {
-    const estimatedGas = await fn.estimateGas({ from: account });
-    return Math.ceil(Number(estimatedGas) * 1.2);
-  } catch (error) {
-    window.console.warn(`Error occurred on estimating gas, defaulting to ${ESTIMATED_GAS_LIMIT}`);
-  }
-
-  return ESTIMATED_GAS_LIMIT;
-};
+import { getVoteWeightingContract } from './web3';
 
 type VoteForNomineeWeightsParams = {
   account: Address | undefined;
@@ -47,9 +28,16 @@ export const voteForNomineeWeights = async ({
   weights,
 }: VoteForNomineeWeightsParams) => {
   const contract = getVoteWeightingContract();
-  const result = await contract.methods
-    .voteForNomineeWeightsBatch(nominees, chainIds, weights)
-    .send({ from: account });
+  const voteFn = contract.methods.voteForNomineeWeightsBatch(nominees, chainIds, weights);
+
+  const estimatedGas = await getEstimatedGasLimit(voteFn, account);
+  const fn = voteFn.send({ from: account, estimatedGas });
+
+  const result = await sendTransaction(fn, account, {
+    supportedChains: SUPPORTED_CHAINS,
+    rpcUrls: RPC_URLS,
+  });
+
   return result;
 };
 
@@ -59,18 +47,16 @@ export const checkIfNomineeRemoved = async (allocations: { address: Address }[])
     .getAllRemovedNominees()
     .call();
 
-  if (result) {
-    const removedNominees = result.reduce((acc: Address[], removedNominee) => {
-      if (allocations.findIndex((item) => item.address === removedNominee.account) !== -1) {
-        acc.push(removedNominee.account);
-      }
-      return acc;
-    }, []);
+  if (!result) return [];
 
-    return removedNominees;
-  }
+  const removedNominees = result.reduce((acc: Address[], removedNominee) => {
+    if (allocations.findIndex((item) => item.address === removedNominee.account) !== -1) {
+      acc.push(removedNominee.account);
+    }
+    return acc;
+  }, []);
 
-  return [];
+  return removedNominees;
 };
 
 export const checkIfContractDisabled = async (
@@ -103,26 +89,27 @@ export const checkIfContractDisabled = async (
 };
 
 export const checkNegativeSlope = async (account: Address) => {
-  const contract = getVeOlasContract();
-  const result: { slope: string } = await contract.methods.getLastUserPoint(account).call();
+  const result = await readContract(wagmiConfig, {
+    abi: VE_OLAS.abi,
+    address: (VE_OLAS.addresses as Record<number, Address>)[mainnet.id],
+    chainId: mainnet.id,
+    functionName: 'getLastUserPoint',
+    args: [account],
+  });
 
-  if (result) {
-    return Number(result.slope) < 0;
-  }
-
-  return false;
+  return result ? Number((result as { slope: string }).slope) < 0 : false;
 };
 
 export const checkLockExpired = async (account: Address) => {
-  const contract = getVeOlasContract();
-  const result: number = await contract.methods.lockedEnd(account).call();
+  const result = await readContract(wagmiConfig, {
+    abi: VE_OLAS.abi,
+    address: (VE_OLAS.addresses as Record<number, Address>)[mainnet.id],
+    chainId: mainnet.id,
+    functionName: 'lockedEnd',
+    args: [account],
+  });
 
-  if (result) {
-    const nextWeek = getStartOfNextWeekTimestamp();
-    if (nextWeek >= result) {
-      return true;
-    }
-  }
+  const nextWeek = getStartOfNextWeekTimestamp();
 
-  return false;
+  return result ? nextWeek >= (result as number) : false;
 };

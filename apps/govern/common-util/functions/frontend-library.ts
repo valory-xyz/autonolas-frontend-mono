@@ -1,4 +1,4 @@
-import { arbitrum, base, celo, gnosis, goerli, mainnet, optimism, polygon } from 'viem/chains';
+import { arbitrum, base, celo, gnosis, mainnet, optimism, polygon } from 'viem/chains';
 
 import {
   getChainId as getChainIdFn,

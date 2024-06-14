@@ -1,4 +1,4 @@
-import { Address } from './Address';
+import { Address } from 'viem';
 
 export type Metadata = {
   name: string;

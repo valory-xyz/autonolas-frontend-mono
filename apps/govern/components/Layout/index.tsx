@@ -1,15 +1,13 @@
 import { Layout as AntdLayout } from 'antd';
-import dynamic from 'next/dynamic';
 import { FC, ReactNode } from 'react';
 
 import { LoginV2 } from 'components/Login';
 
-import Balance from './Balance';
+import { Balance } from './Balance';
+import { Footer } from './Footer';
 import { LogoSvg } from './Logos';
+import { NavigationMenu } from './Menu';
 import { CustomLayout, Logo, OlasHeader, RightMenu } from './styles';
-
-const NavigationMenu = dynamic(() => import('./Menu'), { ssr: false });
-const Footer = dynamic(() => import('./Footer'), { ssr: false });
 
 const { Content } = AntdLayout;
 
@@ -17,7 +15,7 @@ interface LayoutProps {
   children?: ReactNode;
 }
 
-const Layout: FC<LayoutProps> = ({ children }) => {
+export const Layout: FC<LayoutProps> = ({ children }) => {
   return (
     <CustomLayout>
       <OlasHeader>
@@ -39,5 +37,3 @@ const Layout: FC<LayoutProps> = ({ children }) => {
     </CustomLayout>
   );
 };
-
-export default Layout;

@@ -1,5 +1,5 @@
 import { AbiCoder, ethers } from 'ethers';
-import { Address } from 'types/index';
+import { Address } from 'viem';
 
 export const getNomineeHash = (account: Address, chainId: number) => {
   const nomineeEncoded = AbiCoder.defaultAbiCoder().encode(

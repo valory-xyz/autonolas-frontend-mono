@@ -1,5 +1,6 @@
 import { PayloadAction } from '@reduxjs/toolkit';
 import { createSlice } from '@reduxjs/toolkit';
+
 import { StakingContract, UserVotes } from 'types/index';
 
 interface GovernState {
@@ -34,11 +35,7 @@ export const governSlice = createSlice({
       state.lastUserVote = action.payload;
     },
     clearState: (state) => {
-      state.stakingContracts = initialState.stakingContracts;
-      state.isStakingContractsLoading = true;
-      state.userVotes = initialState.userVotes;
-      state.isUserVotesLoading = true;
-      state.lastUserVote = initialState.lastUserVote;
+      state = { ...initialState };
     },
     clearUserState: (state) => {
       state.userVotes = initialState.userVotes;

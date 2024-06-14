@@ -1,9 +1,8 @@
 import { Layout } from 'antd';
 import Link from 'next/link';
+import styled from 'styled-components';
 
 import { COLOR } from '@autonolas/frontend-library';
-
-import styled from 'styled-components';
 
 export const CustomLayout = styled(Layout)`
   background-color: #f2f4f9;
