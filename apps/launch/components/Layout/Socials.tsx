@@ -4,7 +4,7 @@ const SOCIALS = [
   { type: 'web', url: 'https://olas.network' },
   {
     type: 'github',
-    url: 'https://github.com/valory-xyz/autonolas-frontend-mono/tree/main/apps/govern',
+    url: 'https://github.com/valory-xyz/autonolas-frontend-mono/tree/main/apps/launch',
   },
   { type: 'twitter', url: 'https://twitter.com/autonolas' },
 ];

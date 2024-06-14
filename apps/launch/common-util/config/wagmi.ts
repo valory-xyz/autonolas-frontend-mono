@@ -21,9 +21,9 @@ export const SUPPORTED_CHAINS: [Chain, ...Chain[]] = [
 ];
 
 const walletConnectMetadata = {
-  name: 'Govern',
+  name: 'Launch',
   description: '',
-  url: 'https://govern.olas.network',
+  url: 'https://launch.olas.network',
   icons: ['https://avatars.githubusercontent.com/u/37784886'],
 };
 

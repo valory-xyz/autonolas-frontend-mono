@@ -27,7 +27,7 @@ const Title = styled.h1`
 const { Text, Paragraph } = Typography;
 
 export const ContractPage = () => {
-  const { stakingContracts } = useAppSelector((state) => state.govern);
+  const { stakingContracts } = useAppSelector((state) => state.launch);
   const router = useRouter();
   const addressParam = router?.query?.address;
 

@@ -2,7 +2,7 @@ import { PayloadAction } from '@reduxjs/toolkit';
 import { createSlice } from '@reduxjs/toolkit';
 import { StakingContract, UserVotes } from 'types/index';
 
-interface GovernState {
+interface LaunchState {
   stakingContracts: StakingContract[];
   isStakingContractsLoading: boolean;
   userVotes: Record<string, UserVotes>;
@@ -10,7 +10,7 @@ interface GovernState {
   lastUserVote: number | null;
 }
 
-const initialState: GovernState = {
+const initialState: LaunchState = {
   stakingContracts: [],
   isStakingContractsLoading: true,
   userVotes: {},
@@ -19,18 +19,18 @@ const initialState: GovernState = {
 };
 
 export const governSlice = createSlice({
-  name: 'govern',
+  name: 'launch',
   initialState,
   reducers: {
-    setStakingContracts: (state, action: PayloadAction<GovernState['stakingContracts']>) => {
+    setStakingContracts: (state, action: PayloadAction<LaunchState['stakingContracts']>) => {
       state.stakingContracts = action.payload;
       state.isStakingContractsLoading = false;
     },
-    setUserVotes: (state, action: PayloadAction<GovernState['userVotes']>) => {
+    setUserVotes: (state, action: PayloadAction<LaunchState['userVotes']>) => {
       state.userVotes = action.payload;
       state.isUserVotesLoading = false;
     },
-    setLastUserVote: (state, action: PayloadAction<GovernState['lastUserVote']>) => {
+    setLastUserVote: (state, action: PayloadAction<LaunchState['lastUserVote']>) => {
       state.lastUserVote = action.payload;
     },
     clearState: (state) => {

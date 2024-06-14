@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { UserVotes } from 'types/index';
 import { useAccount, useBlock } from 'wagmi';
 
-import { setLastUserVote, setUserVotes } from 'store/govern';
+import { setLastUserVote, setUserVotes } from 'store/launch';
 import { useAppDispatch, useAppSelector } from 'store/index';
 
 import { LATEST_BLOCK_KEY, NEXT_USERS_SLOPES_KEY } from 'common-util/constants/scopeKeys';
@@ -31,7 +31,7 @@ const getCurrVotesBlock = (blockNumber: bigint, blockTimestamp: bigint) => {
 export const useFetchUserVotes = () => {
   const dispatch = useAppDispatch();
   const { address: account } = useAccount();
-  const { lastUserVote, isUserVotesLoading } = useAppSelector((state) => state.govern);
+  const { lastUserVote, isUserVotesLoading } = useAppSelector((state) => state.launch);
 
   const { data: nominees } = useNominees();
 

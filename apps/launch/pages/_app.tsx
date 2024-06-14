@@ -19,14 +19,14 @@ const DataProvider: FC<PropsWithChildren> = ({ children }) => {
   return <>{children}</>;
 };
 
-const GovernApp = ({ Component, ...rest }: AppProps) => {
+const LaunchApp = ({ Component, ...rest }: AppProps) => {
   const { store, props } = wrapper.useWrappedStore(rest);
 
   return (
     <>
       <GlobalStyles />
       <Head>
-        <title>Govern</title>
+        <title>Launch</title>
       </Head>
       <Provider store={store}>
         <AutonolasThemeProvider>
@@ -43,4 +43,4 @@ const GovernApp = ({ Component, ...rest }: AppProps) => {
   );
 };
 
-export default GovernApp;
+export default LaunchApp;

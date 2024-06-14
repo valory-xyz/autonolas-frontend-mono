@@ -2,7 +2,7 @@ import { GetAccountReturnType, watchAccount } from '@wagmi/core';
 import { useCallback, useEffect } from 'react';
 import { useAccountEffect, useConfig, useDisconnect } from 'wagmi';
 
-import { clearUserState } from 'store/govern';
+import { clearUserState } from 'store/launch';
 import { useAppDispatch } from 'store/index';
 import styled from 'styled-components';
 

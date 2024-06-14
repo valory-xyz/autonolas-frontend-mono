@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { StakingContract } from 'types/index';
 import { useBlock } from 'wagmi';
 
-import { setStakingContracts } from 'store/govern';
+import { setStakingContracts } from 'store/launch';
 import { useAppDispatch, useAppSelector } from 'store/index';
 
 import { RETAINER_ADDRESS } from 'common-util/constants/addresses';
@@ -16,7 +16,7 @@ import { useNomineesWeights } from './useNomineesWeights';
 
 export const useFetchStakingContractsList = () => {
   const dispatch = useAppDispatch();
-  const { stakingContracts } = useAppSelector((state) => state.govern);
+  const { stakingContracts } = useAppSelector((state) => state.launch);
 
   // Get nominees list
   const { data: nominees } = useNominees();
