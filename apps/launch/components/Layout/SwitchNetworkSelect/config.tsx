@@ -1,41 +1,18 @@
-import {
-  Chain,
-  arbitrum,
-  arbitrumSepolia,
-  base,
-  baseSepolia,
-  celo,
-  celoAlfajores,
-  gnosis,
-  gnosisChiado,
-  goerli,
-  mainnet,
-  optimism,
-  optimismSepolia,
-  polygon,
-  polygonMumbai,
-} from 'wagmi/chains';
-
 import { kebabCase } from 'lodash';
-import { VM_TYPE,  } from '@autonolas/frontend-library';
+import { Chain, gnosis, gnosisChiado, mainnet, polygon, polygonMumbai } from 'wagmi/chains';
+
+import { VM_TYPE } from '@autonolas/frontend-library';
 
 import { RPC_URLS } from 'common-util/constants/rpcs';
 
+export const PAGES_TO_LOAD_WITHOUT_CHAINID = ['disclaimer'];
+
 export const SUPPORTED_CHAINS: Chain[] = [
   mainnet,
-  goerli,
   gnosis,
   gnosisChiado,
   polygon,
   polygonMumbai,
-  arbitrum,
-  arbitrumSepolia,
-  base,
-  baseSepolia,
-  optimism,
-  optimismSepolia,
-  celo,
-  celoAlfajores,
 ].map((chain) => {
   const defaultRpc = RPC_URLS[chain.id] || chain.rpcUrls.default.http[0];
   return {
@@ -60,28 +37,13 @@ export const SUPPORTED_CHAINS: Chain[] = [
 export const EVM_SUPPORTED_CHAINS = SUPPORTED_CHAINS.map((chain) => {
   const { name, id } = chain;
 
-  const getNetworkName = () => {
-    if (name === 'OP Mainnet') return 'optimism';
-    if (name === 'OP Sepolia') return 'optimism-sepolia';
-    if (name === 'Alfajores') return 'celo-alfajores';
-    return kebabCase(name);
-  };
-
-  const getNetworkDisplayName = () => {
-    if (name === 'OP Mainnet') return 'Optimism';
-    if (name === 'OP Sepolia') return 'Optimism Sepolia';
-    if (name === 'Alfajores') return 'Celo Alfajores';
-    return name;
-  };
-
   return {
     id,
-    networkDisplayName: getNetworkDisplayName(),
-    networkName: getNetworkName(),
+    networkDisplayName: name,
+    networkName: kebabCase(name),
     vmType: VM_TYPE.EVM,
   };
 });
-
 
 /**
  * Returns the list of all supported chains.
