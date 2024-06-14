@@ -43,12 +43,12 @@ export const getServices = async (total, nextPage, fetchAll = false) => {
 
   const existsPromises = [];
 
-  const first = total - (fetchAll ? 1 : (nextPage - 1) * TOTAL_VIEW_COUNT);
-  const last = total - (fetchAll ? total : Math.min(nextPage * TOTAL_VIEW_COUNT, total));
+  const first = fetchAll ? 1 : (nextPage - 1) * TOTAL_VIEW_COUNT + 1;
+  const last = fetchAll ? total : Math.min(nextPage * TOTAL_VIEW_COUNT, total);
 
   console.log(first, last)
 
-  for (let i = last; i <= first; i += 1) {
+  for (let i = first; i <= last; i += 1) {
     const result = contract.methods.exists(`${i}`).call();
     existsPromises.push(result);
   }
@@ -60,7 +60,7 @@ export const getServices = async (total, nextPage, fetchAll = false) => {
   const validTokenIds = [];
   
   existsResult.forEach((item, index) => {
-    const serviceId = `${first + index}`;
+    const serviceId = `${total - (index + first - 1)}`;
     if (item.status === 'fulfilled' && !!item.value) {
       validTokenIds.push(serviceId);
     }
