@@ -1,4 +1,5 @@
 import { Abi } from 'viem';
+import { Address } from 'viem';
 import { mainnet } from 'viem/chains';
 import { useReadContracts } from 'wagmi';
 
@@ -6,7 +7,6 @@ import { VOTE_WEIGHTING } from 'libs/util-contracts/src/lib/abiAndAddresses';
 
 import { LAST_USER_VOTE_KEY } from 'common-util/constants/scopeKeys';
 import { getNomineeHash } from 'common-util/functions/nominee-hash';
-import { Address } from 'types/index';
 
 export const useLastUserVote = (
   nominees: { account: Address; chainId: number }[],

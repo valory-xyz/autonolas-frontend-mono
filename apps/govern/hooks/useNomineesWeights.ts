@@ -1,11 +1,10 @@
 import { ethers } from 'ethers';
 import { Abi } from 'viem';
+import { Address } from 'viem';
 import { mainnet } from 'viem/chains';
 import { useReadContracts } from 'wagmi';
 
 import { VOTE_WEIGHTING } from 'libs/util-contracts/src/lib/abiAndAddresses';
-
-import { Address } from 'types/index';
 
 type Weight = { percentage: number; value: number };
 

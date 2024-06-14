@@ -13,6 +13,7 @@ import {
 import { ColumnsType } from 'antd/es/table';
 import { Dispatch, SetStateAction, useCallback, useState } from 'react';
 import styled from 'styled-components';
+import { Address } from 'viem';
 import { useAccount } from 'wagmi';
 
 import { RETAINER_ADDRESS } from 'common-util/constants/addresses';
@@ -28,7 +29,7 @@ import {
 } from 'common-util/functions';
 import { clearState } from 'store/govern';
 import { useAppDispatch, useAppSelector } from 'store/index';
-import { Address, Allocation, StakingContract, UserVotes } from 'types/index';
+import { Allocation, StakingContract, UserVotes } from 'types/index';
 
 import { queryClient } from '../../context/Web3ModalProvider';
 
@@ -57,8 +58,8 @@ const NO_VEOLAS_ERROR = `You don't have enough veOLAS to vote`;
  * every time we vote on a contract.
  *
  * Example:
- * The old votes are: [{2: 8000}, {3: 1000}, {5: 1000}] - the user's total vote is 10_000.
- * The new votes are: [{1: 3000}, {2: 1000}, {5: 6000}]
+ * The old user's votes are: [{2: 8000}, {3: 1000}, {5: 1000}] - the user's total vote is 10_000.
+ * The new votes the user wants to apply are: [{1: 3000}, {2: 1000}, {5: 6000}]
  *
  * The first new vote is 3000, which exceeds the limit of 10,000, causing an Overflow error.
  * To prevent this, we need to reorder the old and new votes as follows:
@@ -143,15 +144,15 @@ const getColumns = (
   {
     title: 'Contract name',
     key: 'name',
-    render: (_, record) => <Text strong>{record.metadata.name}</Text>,
+    dataIndex: 'metadata',
+    render: (metadata) => <Text strong>{metadata.name}</Text>,
     width: 200,
   },
   {
     title: 'Chain',
     key: 'chain',
-    render: (_, record) => (
-      <Text type="secondary">{CHAIN_NAMES[record.chainId] || record.chainId}</Text>
-    ),
+    dataIndex: 'chainId',
+    render: (chainId) => <Text type="secondary">{CHAIN_NAMES[chainId] || chainId}</Text>,
     width: 80,
   },
   {
@@ -347,7 +348,7 @@ export const EditVotes = ({ allocations, setAllocations, setIsUpdating }: EditVo
         dispatch(clearState());
       })
       .catch((error) => {
-        notification.error({
+        message.error({
           message: error.message,
         });
 

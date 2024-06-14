@@ -11,7 +11,7 @@ import { useVotingPower } from 'hooks/index';
 
 const { Text, Paragraph } = Typography;
 
-const Balance = () => {
+export const Balance = () => {
   const { address: account } = useAccount();
   const { data, isFetching } = useVotingPower(account);
 
@@ -41,5 +41,3 @@ const Balance = () => {
     </Tooltip>
   );
 };
-
-export default Balance;

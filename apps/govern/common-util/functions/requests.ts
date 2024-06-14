@@ -1,18 +1,19 @@
-import { readContracts } from '@wagmi/core';
+import { readContract, readContracts } from '@wagmi/core';
 import { AbiFunction } from 'viem';
+import { Address } from 'viem';
+import { mainnet } from 'viem/chains';
 
 import { sendTransaction } from '@autonolas/frontend-library';
 
-import { STAKING_FACTORY } from 'libs/util-contracts/src/lib/abiAndAddresses';
+import { STAKING_FACTORY, VE_OLAS } from 'libs/util-contracts/src/lib/abiAndAddresses';
 import { getEstimatedGasLimit } from 'libs/util-functions/src';
 
 import { SUPPORTED_CHAINS, wagmiConfig } from 'common-util/config/wagmi';
 import { RPC_URLS } from 'common-util/constants/rpcs';
-import { Address } from 'types/index';
 
 import { getAddressFromBytes32 } from './addresses';
 import { getStartOfNextWeekTimestamp } from './time';
-import { getVeOlasContract, getVoteWeightingContract } from './web3';
+import { getVoteWeightingContract } from './web3';
 
 type VoteForNomineeWeightsParams = {
   account: Address | undefined;
@@ -46,18 +47,16 @@ export const checkIfNomineeRemoved = async (allocations: { address: Address }[])
     .getAllRemovedNominees()
     .call();
 
-  if (result) {
-    const removedNominees = result.reduce((acc: Address[], removedNominee) => {
-      if (allocations.findIndex((item) => item.address === removedNominee.account) !== -1) {
-        acc.push(removedNominee.account);
-      }
-      return acc;
-    }, []);
+  if (!result) return [];
 
-    return removedNominees;
-  }
+  const removedNominees = result.reduce((acc: Address[], removedNominee) => {
+    if (allocations.findIndex((item) => item.address === removedNominee.account) !== -1) {
+      acc.push(removedNominee.account);
+    }
+    return acc;
+  }, []);
 
-  return [];
+  return removedNominees;
 };
 
 export const checkIfContractDisabled = async (
@@ -90,26 +89,29 @@ export const checkIfContractDisabled = async (
 };
 
 export const checkNegativeSlope = async (account: Address) => {
-  const contract = getVeOlasContract();
-  const result: { slope: string } = await contract.methods.getLastUserPoint(account).call();
+  const result = await readContract(wagmiConfig, {
+    abi: VE_OLAS.abi,
+    address: (VE_OLAS.addresses as Record<number, Address>)[mainnet.id],
+    chainId: mainnet.id,
+    functionName: 'getLastUserPoint',
+    args: [account],
+  });
 
-  if (result) {
-    return Number(result.slope) < 0;
-  }
+  console.log('result', result);
 
-  return false;
+  return result ? Number((result as { slope: string }).slope) < 0 : false;
 };
 
 export const checkLockExpired = async (account: Address) => {
-  const contract = getVeOlasContract();
-  const result: number = await contract.methods.lockedEnd(account).call();
+  const result = await readContract(wagmiConfig, {
+    abi: VE_OLAS.abi,
+    address: (VE_OLAS.addresses as Record<number, Address>)[mainnet.id],
+    chainId: mainnet.id,
+    functionName: 'lockedEnd',
+    args: [account],
+  });
 
-  if (result) {
-    const nextWeek = getStartOfNextWeekTimestamp();
-    if (nextWeek >= result) {
-      return true;
-    }
-  }
+  const nextWeek = getStartOfNextWeekTimestamp();
 
-  return false;
+  return result ? nextWeek >= (result as number) : false;
 };

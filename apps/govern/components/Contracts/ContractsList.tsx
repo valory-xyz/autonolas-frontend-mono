@@ -49,10 +49,11 @@ const getColumns = ({
     {
       title: 'Current weight',
       key: 'currentWeight',
-      render: (_, record) => (
+      dataIndex: 'currentWeight',
+      render: (currentWeight) => (
         <Space size={2} direction="vertical">
-          <Text>{`${record.currentWeight?.percentage.toFixed(2)}%`}</Text>
-          <Text type="secondary">{`${formatWeiBalance(record.currentWeight?.value)} veOlas`}</Text>
+          <Text>{`${currentWeight?.percentage.toFixed(2)}%`}</Text>
+          <Text type="secondary">{`${formatWeiBalance(currentWeight?.value)} veOlas`}</Text>
         </Space>
       ),
     },
@@ -66,10 +67,11 @@ const getColumns = ({
         </Tooltip>
       ),
       key: 'nextWeight',
-      render: (_, record) => (
+      dataIndex: 'nextWeight',
+      render: (nextWeight) => (
         <Space size={2} direction="vertical">
-          <Text>{`${record.nextWeight?.percentage.toFixed(2)}%`}</Text>
-          <Text type="secondary">{`${formatWeiBalance(record.nextWeight?.value)} veOlas`}</Text>
+          <Text>{`${nextWeight?.percentage.toFixed(2)}%`}</Text>
+          <Text type="secondary">{`${formatWeiBalance(nextWeight?.value)} veOlas`}</Text>
         </Space>
       ),
     },

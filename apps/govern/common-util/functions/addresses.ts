@@ -1,9 +1,8 @@
 import { ethers } from 'ethers';
 import { toLower } from 'lodash';
+import { Address } from 'viem';
 
 import prohibitedAddresses from 'libs/util-prohibited-data/src/lib/prohibited-addresses.json';
-
-import { Address } from 'types/index';
 
 export const isAddressProhibited = (address: Address | undefined) => {
   const addresses = prohibitedAddresses.map((e) => toLower(e));

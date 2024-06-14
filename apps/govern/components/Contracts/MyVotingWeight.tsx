@@ -100,35 +100,38 @@ export const MyVotingWeight = ({
     // If the user didn't connect their wallet, suggest to connect
     if (!isAccountConnected) {
       return <ConnectWallet />;
-    } else if (isVotingPowerLoading) {
+    }
+    if (isVotingPowerLoading) {
       // Show loader while don't have balance data
       return <Loader />;
-    } else {
-      // If the user doesn't have voting power, suggest to get veOlas
-      if (Number(votingPower) === 0) {
-        return <GetVeOlas />;
-      } else if (!isUserVotesLoading) {
-        if (isUpdating && allocations.length !== 0) {
-          // If the user added something for voting, show edit mode
-          return (
-            <EditVotes
-              allocations={allocations}
-              setAllocations={setAllocations}
-              setIsUpdating={setIsUpdating}
-            />
-          );
-        } else if (Object.values(userVotes).length === 0) {
-          // If the user has never voted, show empty state
-          return <EmptyVotes />;
-        } else {
-          // If the user has voted, and is not updating votes, show their current votes
-          return <Votes setIsUpdating={setIsUpdating} setAllocations={setAllocations} />;
-        }
-      } else {
-        // Show loader otherwise
-        return <Loader />;
-      }
     }
+    // If the user doesn't have voting power, suggest to get veOlas
+    if (Number(votingPower) === 0) {
+      return <GetVeOlas />;
+    }
+
+    if (!isUserVotesLoading) {
+      // If the user added something for voting, show edit mode
+      if (isUpdating && allocations.length !== 0) {
+        return (
+          <EditVotes
+            allocations={allocations}
+            setAllocations={setAllocations}
+            setIsUpdating={setIsUpdating}
+          />
+        );
+      }
+      // If the user has never voted, show empty state
+      if (Object.values(userVotes).length === 0) {
+        return <EmptyVotes />;
+      }
+
+      // If the user has voted, and is not updating votes, show their current votes
+      return <Votes setIsUpdating={setIsUpdating} setAllocations={setAllocations} />;
+    }
+
+    // Show loader otherwise
+    return <Loader />;
   }, [
     isAccountConnected,
     allocations,

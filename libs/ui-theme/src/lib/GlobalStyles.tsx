@@ -1,6 +1,6 @@
-import { COLOR, MEDIA_QUERY } from '@autonolas/frontend-library';
-
 import { createGlobalStyle } from 'styled-components';
+
+import { COLOR, MEDIA_QUERY } from '@autonolas/frontend-library';
 
 import { ANTD_COLOR } from './ui-theme';
 

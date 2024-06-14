@@ -71,7 +71,8 @@ const columns: ColumnsType<MyVote> = [
   {
     title: 'My current weight',
     key: 'weight',
-    render: (_, record) => <Text>{`${record.currentWeight}%`}</Text>,
+    dataIndex: 'currentWeight',
+    render: (currentWeight) => <Text>{`${currentWeight}%`}</Text>,
   },
   {
     title: (
@@ -85,7 +86,8 @@ const columns: ColumnsType<MyVote> = [
       </Tooltip>
     ),
     key: 'nextWeight',
-    render: (_, record) => <Text>{`${record.nextWeight}%`}</Text>,
+    dataIndex: 'nextWeight',
+    render: (nextWeight) => <Text>{`${nextWeight}%`}</Text>,
   },
 ];
 

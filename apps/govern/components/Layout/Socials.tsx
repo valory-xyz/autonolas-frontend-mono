@@ -9,7 +9,7 @@ const SOCIALS = [
   { type: 'twitter', url: 'https://twitter.com/autonolas' },
 ];
 
-const Socials = () => (
+export const Socials = () => (
   <div className="socials">
     {SOCIALS.map((social) => {
       const src = `/images/${social.type}.svg`;
@@ -29,5 +29,3 @@ const Socials = () => (
     })}
   </div>
 );
-
-export default Socials;

@@ -32,9 +32,7 @@ const MenuInstance: FC<MenuInstanceProps> = ({ selectedMenu, handleMenuItemClick
   );
 };
 
-interface NavigationMenuProps {}
-
-const NavigationMenu: FC<NavigationMenuProps> = () => {
+export const NavigationMenu: FC = () => {
   const router = useRouter();
   const [selectedMenu, setSelectedMenu] = useState('');
   const { pathname } = router;
@@ -59,5 +57,3 @@ const NavigationMenu: FC<NavigationMenuProps> = () => {
     />
   );
 };
-
-export default NavigationMenu;

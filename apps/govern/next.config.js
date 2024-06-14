@@ -27,7 +27,7 @@ const nextConfig = {
     {
       source: '/',
       destination: 'contracts',
-      permanent: true,
+      permanent: false,
     },
   ],
 };

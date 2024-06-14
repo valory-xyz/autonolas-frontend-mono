@@ -4,7 +4,7 @@ import { STAKING_FACTORY } from 'libs/util-contracts/src/lib/abiAndAddresses';
 
 import { Address } from 'types/index';
 
-export const useContractParams = (address: string, chainId: number, enabled: boolean) => {
+export const useContractParams = (address: string, chainId: number) => {
   const { data } = useReadContract({
     address: (STAKING_FACTORY.addresses as Record<number, Address>)[chainId],
     abi: STAKING_FACTORY.abi,
@@ -12,7 +12,6 @@ export const useContractParams = (address: string, chainId: number, enabled: boo
     functionName: 'mapInstanceParams',
     args: [address],
     query: {
-      enabled,
       select: (data) => {
         const [implementation, deployer, isEnabled] = data as [Address, Address, boolean];
         return { implementation, deployer, isEnabled };

@@ -10,6 +10,7 @@ import { EXPLORE_URLS } from 'common-util/constants/urls';
 import { CHAIN_NAMES, getAddressFromBytes32, truncateAddress } from 'common-util/functions';
 import { useContractParams } from 'hooks/index';
 import { useAppSelector } from 'store/index';
+import { StakingContract } from 'types/Contract';
 
 const StyledMain = styled.main`
   display: flex;
@@ -25,28 +26,20 @@ const Title = styled.h1`
 
 const { Text, Paragraph } = Typography;
 
-export const ContractPage = () => {
-  const { stakingContracts } = useAppSelector((state) => state.govern);
-  const router = useRouter();
-  const addressParam = router?.query?.address;
+type ContractPageContentProps = {
+  contract: StakingContract;
+};
 
-  const contract = stakingContracts.find((item) => item.address === addressParam);
-
+const ContractPageContent = ({ contract }: ContractPageContentProps) => {
   const formattedAddress = contract ? getAddressFromBytes32(contract.address) : '';
 
-  const { data: contractParams } = useContractParams(
-    formattedAddress,
-    contract?.chainId || 0,
-    !!contract,
-  );
+  const { data: contractParams } = useContractParams(formattedAddress, contract.chainId);
 
   const { data: ensName, isFetching: isEnsNameFetching } = useEnsName({
     address: contractParams?.deployer,
     chainId: mainnet.id,
     query: { refetchOnWindowFocus: false },
   });
-
-  if (!contract) return null;
 
   return (
     <StyledMain>
@@ -91,4 +84,16 @@ export const ContractPage = () => {
       </Card>
     </StyledMain>
   );
+};
+
+export const ContractPage = () => {
+  const { stakingContracts } = useAppSelector((state) => state.govern);
+  const router = useRouter();
+  const addressParam = router?.query?.address;
+
+  const contract = stakingContracts.find((item) => item.address === addressParam);
+
+  if (!contract) return null;
+
+  return <ContractPageContent contract={contract} />;
 };
