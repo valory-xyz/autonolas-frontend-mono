@@ -46,8 +46,6 @@ export const getServices = async (total, nextPage, fetchAll = false) => {
   const first = fetchAll ? 1 : (nextPage - 1) * TOTAL_VIEW_COUNT + 1;
   const last = fetchAll ? total : Math.min(nextPage * TOTAL_VIEW_COUNT, total);
 
-  console.log(first, last)
-
   for (let i = first; i <= last; i += 1) {
     const result = contract.methods.exists(`${i}`).call();
     existsPromises.push(result);

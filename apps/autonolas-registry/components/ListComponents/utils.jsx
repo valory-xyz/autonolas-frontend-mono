@@ -51,13 +51,13 @@ export const getComponents = async (total, nextPage) => {
   const allComponentsPromises = [];
   const { first, last } = getFirstAndLastIndex(total, nextPage);
   for (let i = first; i <= last; i += 1) {
-    allComponentsPromises.push(contract.methods.getUnit(`${i}`).call());
+    allComponentsPromises.push(contract.methods.getUnit(`${total - (i + first - 1)}`).call());
   }
 
   const components = await Promise.allSettled(allComponentsPromises);
   const results = await Promise.all(
     components.map(async (info, i) => {
-      const owner = await getComponentOwner(`${first + i}`);
+      const owner = await getComponentOwner(`${total - (i + first - 1)}`);
       return { ...info.value, owner };
     }),
   );
