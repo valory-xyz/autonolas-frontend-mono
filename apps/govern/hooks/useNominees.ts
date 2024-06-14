@@ -1,11 +1,11 @@
 import { ethers } from 'ethers';
-import { Address } from 'types/index';
 import { mainnet } from 'viem/chains';
 import { useReadContract } from 'wagmi';
 
 import { VOTE_WEIGHTING } from 'libs/util-contracts/src/lib/abiAndAddresses';
 
 import { getBytes32FromAddress } from 'common-util/functions';
+import { Address } from 'types/index';
 
 export const useNominees = () => {
   const { data } = useReadContract({

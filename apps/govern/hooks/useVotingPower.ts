@@ -1,9 +1,10 @@
 import { ethers } from 'ethers';
-import { Address } from 'types/index';
 import { mainnet } from 'viem/chains';
 import { useReadContract } from 'wagmi';
 
 import { VE_OLAS } from 'libs/util-contracts/src/lib/abiAndAddresses';
+
+import { Address } from 'types/index';
 
 export const useVotingPower = (account: Address | undefined) => {
   const { data, isFetching } = useReadContract({

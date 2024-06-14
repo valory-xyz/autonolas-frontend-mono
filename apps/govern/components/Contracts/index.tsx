@@ -1,9 +1,9 @@
 import { Flex } from 'antd';
 import { useEffect, useState } from 'react';
-import { Allocation, StakingContract } from 'types/index';
+import styled from 'styled-components';
 
 import { useAppSelector } from 'store/index';
-import styled from 'styled-components';
+import { Allocation, StakingContract } from 'types/index';
 
 import { ContractsList } from './ContractsList';
 import { MyVotingWeight } from './MyVotingWeight';

@@ -1,7 +1,8 @@
-import { Address } from 'types/index';
 import { useReadContract } from 'wagmi';
 
 import { STAKING_FACTORY } from 'libs/util-contracts/src/lib/abiAndAddresses';
+
+import { Address } from 'types/index';
 
 export const useContractParams = (address: string, chainId: number, enabled: boolean) => {
   const { data } = useReadContract({

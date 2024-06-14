@@ -1,16 +1,15 @@
 import { LoadingOutlined, TableOutlined, WalletOutlined } from '@ant-design/icons';
 import { Button, Card as CardAntd, Flex, Spin, Typography } from 'antd';
-import { useVotingPower } from 'hooks/index';
 import Image from 'next/image';
 import { Dispatch, SetStateAction, useMemo } from 'react';
-import { Allocation } from 'types/index';
-import { useAccount } from 'wagmi';
-
-import { useAppSelector } from 'store/index';
 import styled from 'styled-components';
+import { useAccount } from 'wagmi';
 
 import { GET_VEOLAS_URL } from 'common-util/constants/urls';
 import { LoginV2 } from 'components/Login';
+import { useVotingPower } from 'hooks/index';
+import { useAppSelector } from 'store/index';
+import { Allocation } from 'types/index';
 
 import { EditVotes } from './EditVotes';
 import { Votes } from './Votes';

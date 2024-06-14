@@ -1,11 +1,11 @@
 import { readContracts } from '@wagmi/core';
 import { Contract } from 'ethers';
-import { Address } from 'types/index';
 import { AbiFunction } from 'viem';
 
 import { STAKING_FACTORY } from 'libs/util-contracts/src/lib/abiAndAddresses';
 
 import { wagmiConfig } from 'common-util/config/wagmi';
+import { Address } from 'types/index';
 
 import { getAddressFromBytes32 } from './addresses';
 import { getStartOfNextWeekTimestamp } from './time';

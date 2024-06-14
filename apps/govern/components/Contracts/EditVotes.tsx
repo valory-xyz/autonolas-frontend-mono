@@ -12,12 +12,8 @@ import {
 } from 'antd';
 import { ColumnsType } from 'antd/es/table';
 import { Dispatch, SetStateAction, useCallback, useState } from 'react';
-import { Address, Allocation, StakingContract, UserVotes } from 'types/index';
-import { useAccount } from 'wagmi';
-
-import { clearState } from 'store/govern';
-import { useAppDispatch, useAppSelector } from 'store/index';
 import styled from 'styled-components';
+import { useAccount } from 'wagmi';
 
 import { RETAINER_ADDRESS } from 'common-util/constants/addresses';
 import { INVALIDATE_AFTER_UPDATE_KEYS } from 'common-util/constants/scopeKeys';
@@ -30,6 +26,9 @@ import {
   getBytes32FromAddress,
   voteForNomineeWeights,
 } from 'common-util/functions';
+import { clearState } from 'store/govern';
+import { useAppDispatch, useAppSelector } from 'store/index';
+import { Address, Allocation, StakingContract, UserVotes } from 'types/index';
 
 import { queryClient } from '../../context/Web3ModalProvider';
 

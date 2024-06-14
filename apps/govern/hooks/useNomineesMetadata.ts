@@ -1,11 +1,11 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Address } from 'types/index';
 import { Abi } from 'viem';
 import { useReadContracts } from 'wagmi';
 
 import { STAKING_TOKEN } from 'libs/util-contracts/src/lib/abiAndAddresses';
 
 import { getAddressFromBytes32, getBytes32FromAddress } from 'common-util/functions';
+import { Address } from 'types/index';
 
 const HASH_PREFIX = 'f01701220';
 const GATEWAY_URL = 'https://gateway.autonolas.tech/ipfs/';

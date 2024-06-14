@@ -2,15 +2,14 @@ import { InfoCircleOutlined } from '@ant-design/icons';
 import { Button, Flex, Space, Statistic, Table, Tooltip, Typography } from 'antd';
 import { ColumnsType } from 'antd/es/table';
 import { Dispatch, SetStateAction, useEffect, useMemo, useState } from 'react';
-import { Allocation } from 'types/index';
+import styled from 'styled-components';
 
 import { COLOR } from '@autonolas/frontend-library';
 
-import { useAppSelector } from 'store/index';
-import styled from 'styled-components';
-
 import { RETAINER_ADDRESS } from 'common-util/constants/addresses';
 import { CHAIN_NAMES, getBytes32FromAddress } from 'common-util/functions';
+import { useAppSelector } from 'store/index';
+import { Allocation } from 'types/index';
 
 const ONE_DAY_IN_MS = 24 * 60 * 60 * 1000;
 const TEN_DAYS_IN_MS = 10 * ONE_DAY_IN_MS;

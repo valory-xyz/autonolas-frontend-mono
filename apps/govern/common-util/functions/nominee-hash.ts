@@ -1,4 +1,5 @@
 import { AbiCoder, ethers } from 'ethers';
+
 import { Address } from 'types/index';
 
 export const getNomineeHash = (account: Address, chainId: number) => {

@@ -1,16 +1,15 @@
 import { LoadingOutlined } from '@ant-design/icons';
 import { Card, Flex, Space, Spin, Typography } from 'antd';
-import { useContractParams } from 'hooks/index';
 import { useRouter } from 'next/router';
+import styled from 'styled-components';
 import { mainnet } from 'viem/chains';
 import { useEnsName } from 'wagmi';
-
-import { useAppSelector } from 'store/index';
-import styled from 'styled-components';
 
 import { UNICODE_SYMBOLS } from 'common-util/constants/unicode';
 import { EXPLORE_URLS } from 'common-util/constants/urls';
 import { CHAIN_NAMES, getAddressFromBytes32, truncateAddress } from 'common-util/functions';
+import { useContractParams } from 'hooks/index';
+import { useAppSelector } from 'store/index';
 
 const StyledMain = styled.main`
   display: flex;
