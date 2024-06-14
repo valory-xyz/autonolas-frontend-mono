@@ -4,6 +4,8 @@ import Link from 'next/link';
 import { match } from 'ts-pattern';
 import { useAccount } from 'wagmi';
 
+import { UNICODE_SYMBOLS } from 'libs/util-constants/src';
+
 import { LoginV2 } from '../Login';
 
 const { Title, Paragraph } = Typography;
@@ -28,7 +30,8 @@ export const MyStakingContracts = () => {
   return (
     <>
       <Link href="/my-staking-contracts" target="_blank">
-        Explore all nominated staking contracts on Olas Govern
+        Explore all nominated staking contracts on Olas Govern&nbsp;
+        {UNICODE_SYMBOLS.EXTERNAL_LINK}
       </Link>
 
       <Card className="flex-none mt-24">

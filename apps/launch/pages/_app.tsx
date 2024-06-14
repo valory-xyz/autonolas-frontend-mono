@@ -3,18 +3,15 @@ import Head from 'next/head';
 import { FC, PropsWithChildren } from 'react';
 import { Provider } from 'react-redux';
 
-// TODO: should be able to import from 'libs/ui-theme'
 import { GlobalStyles } from 'libs/ui-theme/src/lib/GlobalStyles';
 import { AutonolasThemeProvider } from 'libs/ui-theme/src/lib/ThemeConfig';
 
 import Layout from '../components/Layout';
 import Web3ModalProvider from '../context/Web3ModalProvider';
-import { useFetchStakingContractsList, useFetchUserVotes } from '../hooks';
 import { wrapper } from '../store';
 
 const DataProvider: FC<PropsWithChildren> = ({ children }) => {
-  useFetchStakingContractsList();
-  useFetchUserVotes();
+  // init data
 
   return <>{children}</>;
 };
@@ -28,6 +25,7 @@ const LaunchApp = ({ Component, ...rest }: AppProps) => {
       <Head>
         <title>Launch</title>
       </Head>
+
       <Provider store={store}>
         <AutonolasThemeProvider>
           <Web3ModalProvider>
