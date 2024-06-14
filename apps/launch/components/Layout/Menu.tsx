@@ -2,7 +2,7 @@ import { Menu } from 'antd';
 import { useRouter } from 'next/router';
 import { FC, useEffect, useMemo, useState } from 'react';
 
-import { URL } from 'common-util/constants/url';
+import { URL } from 'common-util/constants/urls';
 import { useAppSelector } from 'store/index';
 
 interface MenuItem {
@@ -20,25 +20,25 @@ interface MenuInstanceProps {
 const MenuInstance: FC<MenuInstanceProps> = ({ selectedMenu, handleMenuItemClick, mode }) => {
   const { networkName } = useAppSelector((state) => state.network);
 
-  const items: MenuItem[] = [
-    {
-      label: 'My staking contracts',
-      key: 'my-staking-contracts',
-      path: `/${networkName}/my-staking-contracts`,
-    },
-    {
-      label: 'Paths',
-      key: 'paths',
-      path: `/${networkName}/paths`,
-    },
-  ];
+  const items: MenuItem[] = useMemo(
+    () => [
+      {
+        label: 'My staking contracts',
+        key: 'my-staking-contracts',
+        path: `/${networkName}/my-staking-contracts`,
+      },
+      {
+        label: 'Paths',
+        key: 'paths',
+        path: `/${networkName}/paths`,
+      },
+    ],
+    [networkName],
+  );
 
-  console.log('networkName', items);
   const selectedMenuKey = useMemo(() => {
     if (!selectedMenu) return [];
-
     if (selectedMenu.includes(URL.myStackingContract)) return ['my-staking-contracts'];
-
     return [selectedMenu.split('/')[1]];
   }, [selectedMenu]);
 

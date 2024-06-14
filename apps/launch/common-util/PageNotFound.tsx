@@ -1,7 +1,7 @@
 import { Button, Result } from 'antd';
 import { useRouter } from 'next/router';
 
-import { URL } from 'common-util/constants/url';
+import { URL } from 'common-util/constants/urls';
 
 export const PageNotFound = () => {
   const router = useRouter();

@@ -2,15 +2,14 @@ import { toLower } from 'lodash';
 import { useRouter } from 'next/router';
 import { useCallback, useEffect } from 'react';
 
-import { URL } from 'common-util/constants/url';
-import { useGetChainIdFromPath } from 'common-util/hooks/useNetworkHelpers';
-import { useAppDispatch } from 'store/index';
-import { setNetworkId, setNetworkName } from 'store/network';
-
 import {
   ALL_SUPPORTED_CHAINS,
   PAGES_TO_LOAD_WITHOUT_CHAINID,
-} from '../../../common-util/config/supportedChains';
+} from 'common-util/config/supportedChains';
+import { URL } from 'common-util/constants/urls';
+import { useGetChainIdFromPath } from 'common-util/hooks/useNetworkHelpers';
+import { useAppDispatch } from 'store/index';
+import { setNetworkId, setNetworkName } from 'store/network';
 
 const isValidNetworkName = (name?: string) => {
   if (!name) return false;
@@ -23,14 +22,12 @@ const isValidNetworkName = (name?: string) => {
  * Hook to handle the routing
  */
 export const useHandleRoute = () => {
+  const dispatch = useAppDispatch();
   const router = useRouter();
   const path = router?.pathname || '';
   const networkNameFromUrl = router?.query?.network as string | undefined;
+
   const chainIdFromPath = useGetChainIdFromPath(networkNameFromUrl);
-
-  const dispatch = useAppDispatch();
-
-  console.log('networkNameFromUrl', networkNameFromUrl, router, ALL_SUPPORTED_CHAINS);
 
   // updating the blockchain information in redux
   useEffect(() => {
@@ -60,7 +57,6 @@ export const useHandleRoute = () => {
 
     // if networkNameFromUrl is not present then redirect to 404 page
     if (!networkNameFromUrl) {
-      console.log('redirecting to 404 --- 1');
       router.push(`/${URL.pageNotFound}`);
       return;
     }
@@ -81,7 +77,6 @@ export const useHandleRoute = () => {
      * -
      */
     if (!isValidNetworkName(networkNameFromUrl)) {
-      console.log('redirecting to 404 --- 2');
       router.push(`/${URL.pageNotFound}`);
       return;
     }
@@ -97,7 +92,6 @@ export const useHandleRoute = () => {
        * - /random-page => /404
        * - /ethereummmmTypo => /404
        */
-      console.log('redirecting to 404 --- 3');
       router.push(`/${URL.pageNotFound}`);
       return;
     }

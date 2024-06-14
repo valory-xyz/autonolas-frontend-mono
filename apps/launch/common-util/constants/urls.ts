@@ -11,3 +11,9 @@ export const EXPLORE_URLS: Record<string, string> = {
   42_161: arbitrum.blockExplorers.default.url,
   42_220: celo.blockExplorers.default.url,
 };
+
+// all the urls used in the app
+export const URL = {
+  myStackingContract: 'my-staking-contracts',
+  pageNotFound: 'page-not-found',
+};

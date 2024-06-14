@@ -1,24 +1,26 @@
 import { Select } from 'antd';
 import { useRouter } from 'next/router';
 import { FC } from 'react';
-import { useAccount, useSwitchChain } from 'wagmi';
+import { useSwitchChain } from 'wagmi';
 
 import { useScreen } from '@autonolas/frontend-library';
 
-import { ALL_SUPPORTED_CHAINS, PAGES_TO_LOAD_WITHOUT_CHAINID } from '../../../common-util/config/supportedChains';
+import {
+  ALL_SUPPORTED_CHAINS,
+  PAGES_TO_LOAD_WITHOUT_CHAINID,
+} from 'common-util/config/supportedChains';
+
 import { useHandleRoute } from './useHandleRoute';
 
 export const SwitchNetworkSelect: FC = () => {
   const router = useRouter();
   const { isMobile } = useScreen();
-  const { chain } = useAccount();
   const { switchChainAsync } = useSwitchChain();
   const path = router?.pathname || '';
 
-  const chainName = router?.query?.network || 'ethereum';
+  const chainName = (router?.query?.network || 'ethereum') as string;
 
-  console.log('chain', router);
-
+  // handle the routing
   useHandleRoute();
 
   return (
@@ -39,9 +41,6 @@ export const SwitchNetworkSelect: FC = () => {
           const currentChainInfo = ALL_SUPPORTED_CHAINS.find((e) => e.networkName === value);
 
           if (!currentChainInfo) return;
-
-          // update session storage
-          sessionStorage.setItem('chainId', `${currentChainInfo.id}`);
 
           if (PAGES_TO_LOAD_WITHOUT_CHAINID.find((e) => e === path)) {
             // eg. /disclaimer will be redirect to same page ie. /disclaimer

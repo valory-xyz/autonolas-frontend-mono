@@ -1,3 +1,3 @@
-import { PageNotFound } from 'common-util/page-not-found';
+import { PageNotFound } from 'common-util/PageNotFound';
 
 export default PageNotFound;
