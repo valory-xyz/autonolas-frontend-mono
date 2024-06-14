@@ -1,34 +1,46 @@
-import { AppProps } from 'next/app';
+import type { AppProps } from 'next/app';
 import Head from 'next/head';
-import { GlobalStyles } from '@autonolas-frontend-mono/ui-theme';
-import { AutonolasThemeProvider } from '@autonolas-frontend-mono/ui-theme';
-import Layout from '../components/Layout';
-// import Web3ModalProvider from '../context/Web3ModalProvider';
-import { wrapper } from '../store';
+import { FC, PropsWithChildren } from 'react';
 import { Provider } from 'react-redux';
 
-const LaunchApp = ({ Component, ...rest }: AppProps) => {
+// TODO: should be able to import from 'libs/ui-theme'
+import { GlobalStyles } from 'libs/ui-theme/src/lib/GlobalStyles';
+import { AutonolasThemeProvider } from 'libs/ui-theme/src/lib/ThemeConfig';
+
+import Layout from '../components/Layout';
+import Web3ModalProvider from '../context/Web3ModalProvider';
+import { useFetchStakingContractsList, useFetchUserVotes } from '../hooks';
+import { wrapper } from '../store';
+
+const DataProvider: FC<PropsWithChildren> = ({ children }) => {
+  useFetchStakingContractsList();
+  useFetchUserVotes();
+
+  return <>{children}</>;
+};
+
+const GovernApp = ({ Component, ...rest }: AppProps) => {
   const { store, props } = wrapper.useWrappedStore(rest);
 
   return (
     <>
       <GlobalStyles />
       <Head>
-        <title>Launch</title>
+        <title>Govern</title>
       </Head>
       <Provider store={store}>
-      <AutonolasThemeProvider>
-          {/* <Web3ModalProvider> */}
-            {/* <DataProvider> */}
+        <AutonolasThemeProvider>
+          <Web3ModalProvider>
+            <DataProvider>
               <Layout>
                 <Component {...props.pageProps} />
               </Layout>
-            {/* </DataProvider> */}
-          {/* </Web3ModalProvider> */}
+            </DataProvider>
+          </Web3ModalProvider>
         </AutonolasThemeProvider>
       </Provider>
-      </>
+    </>
   );
-}
+};
 
-export default LaunchApp;
+export default GovernApp;

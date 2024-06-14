@@ -2,8 +2,9 @@ import { Layout as AntdLayout } from 'antd';
 import dynamic from 'next/dynamic';
 import { FC, ReactNode } from 'react';
 
-import { LoginV2 } from '../Login';
+import { LoginV2 } from 'components/Login';
 
+import Balance from './Balance';
 import { LogoSvg } from './Logos';
 import { CustomLayout, Logo, OlasHeader, RightMenu } from './styles';
 
@@ -25,6 +26,7 @@ const Layout: FC<LayoutProps> = ({ children }) => {
         </Logo>
         <NavigationMenu />
         <RightMenu>
+          <Balance />
           <LoginV2 />
         </RightMenu>
       </OlasHeader>
