@@ -1,43 +1,32 @@
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/router';
 import { Typography } from 'antd';
-import {
-  notifySuccess,
-  notifyError,
-  Loader,
-} from '@autonolas/frontend-library';
+import { useRouter } from 'next/router';
+import { useEffect, useState } from 'react';
 
+import { Loader, notifyError, notifySuccess } from '@autonolas/frontend-library';
+
+import { getEstimatedGasLimit } from 'libs/util-functions';
+
+import { getServiceManagerContract } from '../../common-util/Contracts';
+import { AlertError, convertStringToArray } from '../../common-util/List/ListCommon';
+import { sendTransaction } from '../../common-util/functions';
+import { useHelpers } from '../../common-util/hooks';
+import { useSvmConnectivity } from '../../common-util/hooks/useSvmConnectivity';
 import {
   DEFAULT_SERVICE_CREATION_ETH_TOKEN,
   DEFAULT_SERVICE_CREATION_ETH_TOKEN_ZEROS,
 } from '../../util/constants';
-import {
-  convertStringToArray,
-  AlertError,
-} from '../../common-util/List/ListCommon';
-import { getEstimatedGasLimit } from '../../common-util/functions/requests';
-import { getServiceManagerContract } from '../../common-util/Contracts';
-import { sendTransaction } from '../../common-util/functions';
-import { useHelpers } from '../../common-util/hooks';
-import { useSvmConnectivity } from '../../common-util/hooks/useSvmConnectivity';
-import RegisterForm from './helpers/RegisterForm';
-import { getAgentParams, getTokenAddressRequest } from './utils';
-import { useGetServiceDetails } from './hooks/useService';
-import { buildSvmArgsToMintOrUpdate } from './helpers/functions';
 import { FormContainer } from '../styles';
+import RegisterForm from './helpers/RegisterForm';
+import { buildSvmArgsToMintOrUpdate } from './helpers/functions';
+import { useGetServiceDetails } from './hooks/useService';
+import { getAgentParams, getTokenAddressRequest } from './utils';
 
 const { Title } = Typography;
 
 const UpdateService = () => {
   const router = useRouter();
-  const {
-    account,
-    chainId,
-    chainName,
-    doesNetworkHaveValidServiceManagerToken,
-    isSvm,
-    vmType,
-  } = useHelpers();
+  const { account, chainId, chainName, doesNetworkHaveValidServiceManagerToken, isSvm, vmType } =
+    useHelpers();
   const { solanaAddresses, program } = useSvmConnectivity();
 
   const id = router?.query?.id;
@@ -71,14 +60,7 @@ const UpdateService = () => {
     };
 
     if (account && id) getData();
-  }, [
-    account,
-    chainId,
-    isSvm,
-    id,
-    doesNetworkHaveValidServiceManagerToken,
-    getDetails,
-  ]);
+  }, [account, chainId, isSvm, id, doesNetworkHaveValidServiceManagerToken, getDetails]);
 
   const buildSvmUpdateFn = async (values) => {
     const args = [...buildSvmArgsToMintOrUpdate(values), `${id}`];
@@ -86,9 +68,7 @@ const UpdateService = () => {
     const fn = program.methods
       .update(...args)
       .accounts({ dataAccount: solanaAddresses.storageAccount })
-      .remainingAccounts([
-        { pubkey: account, isSigner: true, isWritable: true },
-      ]);
+      .remainingAccounts([{ pubkey: account, isSigner: true, isWritable: true }]);
 
     return fn;
   };

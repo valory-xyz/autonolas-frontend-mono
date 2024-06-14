@@ -4,8 +4,8 @@ import { FC, PropsWithChildren } from 'react';
 import { Provider } from 'react-redux';
 
 // TODO: should be able to import from 'libs/ui-theme'
-import { GlobalStyles } from 'libs/ui-theme/src/lib/GlobalStyles';
-import { AutonolasThemeProvider } from 'libs/ui-theme/src/lib/ThemeConfig';
+import { GlobalStyles } from 'libs/ui-theme/src';
+import { AutonolasThemeProvider } from 'libs/ui-theme/src';
 
 import Layout from '../components/Layout';
 import Web3ModalProvider from '../context/Web3ModalProvider';

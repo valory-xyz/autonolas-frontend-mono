@@ -1,9 +1,10 @@
 import { useCallback } from 'react';
 
+import { getEstimatedGasLimit } from 'libs/util-functions';
+
 import { ADDRESSES } from 'common-util/constants/addresses';
 import {
   getDepositoryContract,
-  getEstimatedGasLimit,
   getUniswapV2PairContract,
   sendTransaction,
 } from 'common-util/functions';

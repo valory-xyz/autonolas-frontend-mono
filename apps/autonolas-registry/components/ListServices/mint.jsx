@@ -3,10 +3,12 @@ import { useState } from 'react';
 
 import { notifyError, notifySuccess } from '@autonolas/frontend-library';
 
+import { getEstimatedGasLimit } from 'libs/util-functions';
+
 import { getServiceManagerContract } from 'common-util/Contracts';
 import { AlertError, AlertSuccess, convertStringToArray } from 'common-util/List/ListCommon';
 import { sendTransaction } from 'common-util/functions';
-import { checkIfERC721Receive, getEstimatedGasLimit } from 'common-util/functions/requests';
+import { checkIfERC721Receive } from 'common-util/functions/requests';
 import { useHelpers } from 'common-util/hooks';
 import { useSvmConnectivity } from 'common-util/hooks/useSvmConnectivity';
 import {
