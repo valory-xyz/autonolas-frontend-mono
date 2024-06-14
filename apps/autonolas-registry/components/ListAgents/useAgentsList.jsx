@@ -22,7 +22,7 @@ const getAllAndMyAgentsQuery = (currentPage, ownerAddress = null) => {
         where: { 
           packageType: agent 
           ${ownerAddress ? `owner_contains_nocase: "${ownerAddress}"` : ''}
-        },
+        }
         orderBy: tokenId
         orderDirection: desc
       ) ${UNIT_FIELDS}

@@ -68,7 +68,7 @@ const getServicesBySearchQuery = (
   return gql`
     {
       services (
-        first: ${TOTAL_VIEW_COUNT},
+        first: ${TOTAL_VIEW_COUNT}
         skip: ${TOTAL_VIEW_COUNT * (currentPage - 1)}
         where: {
           and: [
