@@ -3,7 +3,7 @@ import { useState } from 'react';
 
 import { notifyError, notifySuccess } from '@autonolas/frontend-library';
 
-import { getEstimatedGasLimit } from 'libs/util-functions';
+import { getEstimatedGasLimit } from 'libs/util-functions/src';
 
 import { getServiceManagerContract } from 'common-util/Contracts';
 import { AlertError, AlertSuccess, convertStringToArray } from 'common-util/List/ListCommon';

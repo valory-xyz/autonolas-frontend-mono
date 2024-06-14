@@ -1,9 +1,13 @@
 import { readContracts } from '@wagmi/core';
 import { AbiFunction } from 'viem';
 
-import { STAKING_FACTORY } from 'libs/util-contracts/src/lib/abiAndAddresses';
+import { sendTransaction } from '@autonolas/frontend-library';
 
-import { wagmiConfig } from 'common-util/config/wagmi';
+import { STAKING_FACTORY } from 'libs/util-contracts/src/lib/abiAndAddresses';
+import { getEstimatedGasLimit } from 'libs/util-functions/src';
+
+import { SUPPORTED_CHAINS, wagmiConfig } from 'common-util/config/wagmi';
+import { RPC_URLS } from 'common-util/constants/rpcs';
 import { Address } from 'types/index';
 
 import { getAddressFromBytes32 } from './addresses';
@@ -23,9 +27,16 @@ export const voteForNomineeWeights = async ({
   weights,
 }: VoteForNomineeWeightsParams) => {
   const contract = getVoteWeightingContract();
-  const result = await contract.methods
-    .voteForNomineeWeightsBatch(nominees, chainIds, weights)
-    .send({ from: account });
+  const voteFn = contract.methods.voteForNomineeWeightsBatch(nominees, chainIds, weights);
+
+  const estimatedGas = await getEstimatedGasLimit(voteFn, account);
+  const fn = voteFn.send({ from: account, estimatedGas });
+
+  const result = await sendTransaction(fn, account, {
+    supportedChains: SUPPORTED_CHAINS,
+    rpcUrls: RPC_URLS,
+  });
+
   return result;
 };
 

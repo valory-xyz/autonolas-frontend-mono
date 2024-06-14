@@ -1,6 +1,6 @@
 import { useCallback } from 'react';
 
-import { getEstimatedGasLimit } from 'libs/util-functions';
+import { getEstimatedGasLimit } from 'libs/util-functions/src';
 
 import { ADDRESSES } from 'common-util/constants/addresses';
 import {
