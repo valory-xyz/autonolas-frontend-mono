@@ -51,11 +51,14 @@ export const getServices = async (total, nextPage, fetchAll = false) => {
     existsPromises.push(result);
   }
 
+  existsPromises.reverse();
+
   const existsResult = await Promise.allSettled(existsPromises);
   // filter services which don't exists (deleted or destroyed)
   const validTokenIds = [];
+  
   existsResult.forEach((item, index) => {
-    const serviceId = `${first + index}`;
+    const serviceId = `${total - (index + first - 1)}`;
     if (item.status === 'fulfilled' && !!item.value) {
       validTokenIds.push(serviceId);
     }
@@ -70,7 +73,7 @@ export const getServices = async (total, nextPage, fetchAll = false) => {
     }),
   );
 
-  return results;
+  return results.sort((a, b) => b.id - a.id);
 };
 
 export const getFilteredServices = async (searchValue, account) => {
