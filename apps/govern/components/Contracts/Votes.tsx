@@ -6,8 +6,10 @@ import styled from 'styled-components';
 
 import { COLOR } from '@autonolas/frontend-library';
 
+import { CHAIN_NAMES } from 'libs/util-constants/src';
+
 import { RETAINER_ADDRESS } from 'common-util/constants/addresses';
-import { CHAIN_NAMES, getBytes32FromAddress } from 'common-util/functions';
+import { getBytes32FromAddress } from 'common-util/functions';
 import { useAppSelector } from 'store/index';
 import { Allocation } from 'types/index';
 

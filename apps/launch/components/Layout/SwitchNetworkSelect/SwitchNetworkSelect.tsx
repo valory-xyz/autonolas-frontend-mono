@@ -12,6 +12,11 @@ import {
 
 import { useHandleRoute } from './useHandleRoute';
 
+const networkSelectOptions = ALL_SUPPORTED_CHAINS.map((e) => ({
+  label: e.networkDisplayName,
+  value: e.networkName,
+}));
+
 export const SwitchNetworkSelect: FC = () => {
   const router = useRouter();
   const { isMobile } = useScreen();
@@ -33,10 +38,7 @@ export const SwitchNetworkSelect: FC = () => {
         value={chainName}
         placeholder="Select Network"
         disabled={PAGES_TO_LOAD_WITHOUT_CHAINID.some((e) => path.includes(e))}
-        options={ALL_SUPPORTED_CHAINS.map((e) => ({
-          label: e.networkDisplayName,
-          value: e.networkName,
-        }))}
+        options={networkSelectOptions}
         onChange={async (value) => {
           const currentChainInfo = ALL_SUPPORTED_CHAINS.find((e) => e.networkName === value);
 

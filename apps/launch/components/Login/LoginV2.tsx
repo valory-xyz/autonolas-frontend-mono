@@ -3,7 +3,7 @@ import { useCallback, useEffect } from 'react';
 import styled from 'styled-components';
 import { useAccountEffect, useConfig, useDisconnect } from 'wagmi';
 
-import { isAddressProhibited } from '../../common-util/functions';
+import { isAddressProhibited } from 'libs/util-prohibited-data/src/index';
 
 const LoginContainer = styled.div`
   display: flex;

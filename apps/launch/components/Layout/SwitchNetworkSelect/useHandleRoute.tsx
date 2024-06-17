@@ -1,22 +1,11 @@
-import { toLower } from 'lodash';
 import { useRouter } from 'next/router';
 import { useCallback, useEffect } from 'react';
 
-import {
-  ALL_SUPPORTED_CHAINS,
-  PAGES_TO_LOAD_WITHOUT_CHAINID,
-} from 'common-util/config/supportedChains';
+import { PAGES_TO_LOAD_WITHOUT_CHAINID } from 'common-util/config/supportedChains';
 import { URL } from 'common-util/constants/urls';
-import { useGetChainIdFromPath } from 'common-util/hooks/useNetworkHelpers';
+import { isValidNetworkName, getChainIdFromPath } from 'common-util/hooks/useNetworkHelpers';
 import { useAppDispatch } from 'store/index';
 import { setNetworkId, setNetworkName } from 'store/network';
-
-const isValidNetworkName = (name?: string) => {
-  if (!name) return false;
-
-  const isValid = ALL_SUPPORTED_CHAINS.some((e) => toLower(e.networkName) === toLower(name));
-  return isValid;
-};
 
 /**
  * Hook to handle the routing
@@ -27,7 +16,7 @@ export const useHandleRoute = () => {
   const path = router?.pathname || '';
   const networkNameFromUrl = router?.query?.network as string | undefined;
 
-  const chainIdFromPath = useGetChainIdFromPath(networkNameFromUrl);
+  const chainIdFromPath = getChainIdFromPath(networkNameFromUrl);
 
   // updating the blockchain information in redux
   useEffect(() => {

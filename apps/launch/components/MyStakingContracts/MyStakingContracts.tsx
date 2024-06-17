@@ -5,8 +5,8 @@ import { match } from 'ts-pattern';
 import { useAccount } from 'wagmi';
 
 import { UNICODE_SYMBOLS } from 'libs/util-constants/src';
+import { CHAIN_NAMES } from 'libs/util-constants/src';
 
-import { CHAIN_NAMES } from 'common-util/functions';
 import { useAppSelector } from 'store/index';
 
 import { LoginV2 } from '../Login';
