@@ -37,7 +37,7 @@ export const Layout: FC<LayoutProps> = ({ children }) => {
         {isMobile && (
           <Alert
             className="mt-16"
-            message="This page is not optimized for mobile. For best experience, please come back on desktop."
+            message="This page is not optimized for mobile. For the best experience, please come back on desktop."
             showIcon
             type="warning"
           />
