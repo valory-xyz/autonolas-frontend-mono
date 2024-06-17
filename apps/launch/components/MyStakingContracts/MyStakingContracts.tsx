@@ -6,6 +6,9 @@ import { useAccount } from 'wagmi';
 
 import { UNICODE_SYMBOLS } from 'libs/util-constants/src';
 
+import { CHAIN_NAMES } from 'common-util/functions';
+import { useAppSelector } from 'store/index';
+
 import { LoginV2 } from '../Login';
 
 const { Title, Paragraph } = Typography;
@@ -25,6 +28,8 @@ const ConnectWallet = () => {
 };
 
 export const MyStakingContracts = () => {
+  const { networkId } = useAppSelector((state) => state.network);
+
   const { isConnected: isAccountConnected } = useAccount();
 
   return (
@@ -36,8 +41,10 @@ export const MyStakingContracts = () => {
 
       <Card className="flex-none mt-24">
         <Title level={3} className="m-0">
-          My staking contracts on Gnosis
+          My staking contracts
+          {isAccountConnected && networkId && <>&nbsp;on {CHAIN_NAMES[networkId]}</>}
         </Title>
+
         <Paragraph type="secondary" className="mt-8 mb-16">
           Create staking contracts to get agents running in your ecosystem.
         </Paragraph>

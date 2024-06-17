@@ -1,22 +1,8 @@
 import { kebabCase } from 'lodash';
-import { Chain, gnosis, gnosisChiado, mainnet } from 'wagmi/chains';
-
-import { VM_TYPE } from '@autonolas/frontend-library';
-
-import { RPC_URLS } from 'common-util/constants/rpcs';
+import { Chain } from 'wagmi/chains';
+import { SUPPORTED_CHAINS } from './wagmi';
 
 export const PAGES_TO_LOAD_WITHOUT_CHAINID = ['disclaimer'];
-
-export const SUPPORTED_CHAINS: Chain[] = [mainnet, gnosis, gnosisChiado].map((chain) => {
-  const defaultRpc = RPC_URLS[chain.id] || chain.rpcUrls.default.http[0];
-  return {
-    ...chain,
-    rpcUrls: {
-      ...chain.rpcUrls,
-      default: { http: [defaultRpc] },
-    },
-  } as Chain;
-});
 
 /**
  * Returns the list of supported chains with more info such as
@@ -35,7 +21,6 @@ export const EVM_SUPPORTED_CHAINS = SUPPORTED_CHAINS.map((chain) => {
     id,
     networkDisplayName: name,
     networkName: kebabCase(name),
-    vmType: VM_TYPE.EVM,
   };
 });
 

@@ -1,5 +1,5 @@
 import { ethers } from 'ethers';
-import { Address } from 'types/index';
+import { Address } from 'viem';
 
 import prohibitedAddresses from 'libs/util-prohibited-data/src/lib/prohibited-addresses.json';
 import { toLower } from 'lodash';

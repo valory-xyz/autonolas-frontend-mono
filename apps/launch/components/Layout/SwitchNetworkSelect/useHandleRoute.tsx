@@ -50,7 +50,7 @@ export const useHandleRoute = () => {
       return;
     }
 
-    // if already on my-staking-contracts or proposals page then no need to redirect
+    // if already on my-staking-contracts page then no need to redirect
     if ([`/[network]/${URL.myStakingContract}`].includes(router.asPath)) {
       return;
     }
@@ -82,7 +82,7 @@ export const useHandleRoute = () => {
     }
 
     // eg. /ethereum/my-staking-contracts => ['ethereum', 'my-staking-contracts']
-    // eg 1. pathArray = [networkName, my-stacking-contracts]
+    // eg 1. pathArray = [networkName, my-staking-contracts]
     const pathArray = (path?.split('/') || []).filter(Boolean) || [];
 
     const listingPage = pathArray.length >= 2;
@@ -97,9 +97,9 @@ export const useHandleRoute = () => {
     }
 
     /**
-     * - if user navigates to `/ethereum/my-stack-contracts` then no need to redirect
-     * - if user navigates to `/` then redirect to `/ethereum/my-stack-contracts` page
-     * - if user navigates to `/ethereum` then redirect to `/ethereum/my-stack-contracts` page
+     * - if user navigates to `/ethereum/my-staking-contracts` then no need to redirect
+     * - if user navigates to `/` then redirect to `/ethereum/my-staking-contracts` page
+     * - if user navigates to `/ethereum` then redirect to `/ethereum/my-staking-contracts` page
      * - if user navigates to `/random-page` then redirect to `/404`
      */
 
