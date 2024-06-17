@@ -1,0 +1,51 @@
+{
+  "name": "govern",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/govern",
+  "projectType": "application",
+  "targets": {
+    "build": {
+      "executor": "@nx/next:build",
+      "outputs": ["{options.outputPath}"],
+      "defaultConfiguration": "production",
+      "options": {
+        "outputPath": "dist/apps/govern"
+      },
+      "configurations": {
+        "development": {
+          "outputPath": "apps/govern"
+        },
+        "production": {}
+      }
+    },
+    "serve": {
+      "executor": "@nx/next:server",
+      "defaultConfiguration": "development",
+      "options": {
+        "buildTarget": "govern:build",
+        "dev": true
+      },
+      "configurations": {
+        "development": {
+          "buildTarget": "govern:build:development",
+          "dev": true
+        },
+        "production": {
+          "buildTarget": "govern:build:production",
+          "dev": false
+        }
+      }
+    },
+    "export": {
+      "executor": "@nx/next:export",
+      "options": {
+        "buildTarget": "govern:build:production"
+      }
+    },
+    "lint": {
+      "executor": "@nx/eslint:lint",
+      "outputs": ["{options.outputFile}"]
+    }
+  },
+  "tags": ["app"]
+}

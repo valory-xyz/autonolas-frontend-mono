@@ -51,11 +51,30 @@ export const GlobalStyles = createGlobalStyle`
   .mt-16 {
     margin-top: 16px;
   }
+  .mr-8 {
+    margin-right: 8px;
+  }
   .mr-16 {
     margin-right: 16px;
   }
+  .ml-8 {
+    margin-left: 8px;
+  }
+  .p-0 {
+    padding: 0 !important;
+  }
   .pl-0 {
     padding-left: 0px !important;
+  }
+
+  .text-start {
+    text-align: start;
+  }
+  .text-center {
+    text-align: center;
+  }
+  .text-end	{
+    text-align: end;
   }
 
   /* layout */
@@ -158,8 +177,8 @@ export const GlobalStyles = createGlobalStyle`
     }
   }
 
-  .ant-tooltip-inner {
-    text-align: center;
+  .ant-tooltip-content .ant-tooltip-inner {
+    padding: 12px;
   }
 
   /* alert */
