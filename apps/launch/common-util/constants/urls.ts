@@ -2,4 +2,5 @@
 export const URL = {
   myStakingContract: 'my-staking-contracts',
   pageNotFound: 'page-not-found',
+  paths: 'paths',
 };

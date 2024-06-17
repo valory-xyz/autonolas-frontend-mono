@@ -39,6 +39,8 @@ const ConnectWallet = () => {
 
 const StakingContractList = () => {
   const router = useRouter();
+  const { networkName } = useAppSelector((state) => state.network);
+  console.log('networkName', `${networkName}/${URL.myStakingContract}/create`);
 
   return (
     <Flex align="center" vertical gap={16} className="mb-24 mt-48">
@@ -46,7 +48,10 @@ const StakingContractList = () => {
       <Paragraph type="secondary" className="text-center">
         You haven’t created any staking contracts yet.
       </Paragraph>
-      <Button type="primary" onClick={() => router.push(`${URL.myStakingContract}/create`)}>
+      <Button
+        type="primary"
+        onClick={() => router.push(`/${networkName}/${URL.myStakingContract}/create`)}
+      >
         Create staking contract
       </Button>
     </Flex>

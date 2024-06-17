@@ -6,10 +6,10 @@ import {
 } from '@autonolas/frontend-library';
 
 import { SUPPORTED_CHAINS } from 'common-util/config/wagmi';
-import { RPC_URLS } from 'common-util/constants/rpcs';
+import { LAUNCH_RPC_URLS } from 'common-util/constants/rpcs';
 
 export const getProvider = () => {
-  const provider = getProviderFn(SUPPORTED_CHAINS, RPC_URLS);
+  const provider = getProviderFn(SUPPORTED_CHAINS, LAUNCH_RPC_URLS);
   // not connected, return fallback URL
   if (typeof provider === 'string') return provider;
   // coinbase injected multi wallet provider

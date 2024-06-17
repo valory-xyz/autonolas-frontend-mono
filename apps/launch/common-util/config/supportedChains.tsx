@@ -14,7 +14,7 @@ export const PAGES_TO_LOAD_WITH_CHAIN_ID = ['my-staking-contracts'];
  *  // ...
  * ]
  */
-export const EVM_SUPPORTED_CHAINS = SUPPORTED_CHAINS.map((chain) => {
+const SUPPORTED_CHAINS_LIST = SUPPORTED_CHAINS.map((chain) => {
   const { name, id } = chain;
 
   return {
@@ -27,7 +27,7 @@ export const EVM_SUPPORTED_CHAINS = SUPPORTED_CHAINS.map((chain) => {
 /**
  * Returns the list of all supported chains.
  */
-export const ALL_SUPPORTED_CHAINS = [...EVM_SUPPORTED_CHAINS].sort((a, b) => {
+export const ALL_SUPPORTED_CHAINS = [...SUPPORTED_CHAINS_LIST].sort((a, b) => {
   // NOTE: sort in this order only for the purpose of the dropdown
   const chainNameOrder: Chain['name'][] = ['Ethereum', 'Gnosis', 'Gnosis Chiado'];
 

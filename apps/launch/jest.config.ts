@@ -32,22 +32,4 @@ module.exports = {
   },
   globals: { fetch },
   coverageDirectory: '../../coverage/apps/launch',
-  collectCoverageFrom: [
-    'common-util/**/*.{js,jsx}',
-    'components/**/*.{js,jsx}',
-
-    // ABI will change frequently on backend deployment hence avoiding.
-    '!common-util/AbiAndAddresses/*.{js,jsx}',
-
-    // Contract objects
-    '!common-util/Contracts/*.{js,jsx}',
-
-    // styles are not required to be tested
-    '!common-util/**/styles.{js,jsx}',
-    '!components/**/styles.{js,jsx}',
-    '!components/GlobalStyles/*.{js,jsx}',
-
-    // Index page
-    '!components/index/.jsx',
-  ],
 };
