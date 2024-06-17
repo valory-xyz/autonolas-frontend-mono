@@ -1,7 +1,5 @@
 import { Flex } from 'antd';
-
 import styled from 'styled-components';
-
 
 const StyledMain = styled.main`
   display: flex;
@@ -9,12 +7,10 @@ const StyledMain = styled.main`
   margin: 0 auto;
 `;
 
-export const ContractsPage = () => {
+export const PathsPage = () => {
   return (
     <StyledMain>
-      <Flex gap={24}>
-        Hello launch!
-      </Flex>
+      <Flex gap={24}>Hello path!</Flex>
     </StyledMain>
   );
 };

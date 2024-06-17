@@ -2,10 +2,10 @@ import { Layout as AntdLayout } from 'antd';
 import dynamic from 'next/dynamic';
 import { FC, ReactNode } from 'react';
 
-import { LoginV2 } from 'components/Login';
+import { LoginV2 } from '../Login';
 
 import { LogoSvg } from './Logos';
-import { SwitchNetworkSelect } from './SwitchNetworkSelect/SwitchNetworkSelect';
+import { SwitchNetworkSelect } from './SwitchNetworkSelect';
 import { CustomLayout, Logo, OlasHeader, RightMenu } from './styles';
 
 const NavigationMenu = dynamic(() => import('./Menu'), { ssr: false });

@@ -2,7 +2,7 @@ import { kebabCase } from 'lodash';
 import { Chain } from 'wagmi/chains';
 import { SUPPORTED_CHAINS } from './wagmi';
 
-export const PAGES_TO_LOAD_WITHOUT_CHAINID = ['disclaimer'];
+export const PAGES_TO_LOAD_WITH_CHAIN_ID = ['my-staking-contracts'];
 
 /**
  * Returns the list of supported chains with more info such as

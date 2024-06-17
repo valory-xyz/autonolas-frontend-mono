@@ -7,7 +7,7 @@ import { useScreen } from '@autonolas/frontend-library';
 
 import {
   ALL_SUPPORTED_CHAINS,
-  PAGES_TO_LOAD_WITHOUT_CHAINID,
+  PAGES_TO_LOAD_WITH_CHAIN_ID,
 } from 'common-util/config/supportedChains';
 
 import { useHandleRoute } from './useHandleRoute';
@@ -37,18 +37,14 @@ export const SwitchNetworkSelect: FC = () => {
         listHeight={800}
         value={chainName}
         placeholder="Select Network"
-        disabled={PAGES_TO_LOAD_WITHOUT_CHAINID.some((e) => path.includes(e))}
+        disabled={!PAGES_TO_LOAD_WITH_CHAIN_ID.some((e) => path.includes(e))}
         options={networkSelectOptions}
         onChange={async (value) => {
           const currentChainInfo = ALL_SUPPORTED_CHAINS.find((e) => e.networkName === value);
 
           if (!currentChainInfo) return;
 
-          if (PAGES_TO_LOAD_WITHOUT_CHAINID.find((e) => e === path)) {
-            // eg. /disclaimer will be redirect to same page ie. /disclaimer
-            await switchChainAsync({ chainId: currentChainInfo.id });
-            router.push(`/${path}`);
-          } else {
+          if (PAGES_TO_LOAD_WITH_CHAIN_ID.find((e) => e === path)) {
             // eg. /values will be redirect to /<chainName>/values,
             const replacedPath = router.asPath.replace(chainName, value);
 
@@ -57,6 +53,10 @@ export const SwitchNetworkSelect: FC = () => {
             // or if the current chain selected is ethereum
             window.open(replacedPath, '_self');
             // router.push(replacedPath);
+          } else {
+            // eg. /disclaimer will be redirect to same page ie. /disclaimer
+            await switchChainAsync({ chainId: currentChainInfo.id });
+            router.push(`/${path}`);
           }
         }}
         filterOption={(input, option) => {

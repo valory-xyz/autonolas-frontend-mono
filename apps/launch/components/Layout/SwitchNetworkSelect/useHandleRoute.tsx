@@ -1,9 +1,9 @@
 import { useRouter } from 'next/router';
 import { useCallback, useEffect } from 'react';
 
-import { PAGES_TO_LOAD_WITHOUT_CHAINID } from 'common-util/config/supportedChains';
+import { PAGES_TO_LOAD_WITH_CHAIN_ID } from 'common-util/config/supportedChains';
 import { URL } from 'common-util/constants/urls';
-import { isValidNetworkName, getChainIdFromPath } from 'common-util/hooks/useNetworkHelpers';
+import { getChainIdFromPath, isValidNetworkName } from 'common-util/hooks/useNetworkHelpers';
 import { useAppDispatch } from 'store/index';
 import { setNetworkId, setNetworkName } from 'store/network';
 
@@ -30,7 +30,7 @@ export const useHandleRoute = () => {
    * useEffect to handle the routing based on the path
    */
   useEffect(() => {
-    if (PAGES_TO_LOAD_WITHOUT_CHAINID.includes(path)) {
+    if (!PAGES_TO_LOAD_WITH_CHAIN_ID.includes(path)) {
       return;
     }
 
@@ -93,7 +93,7 @@ export const useHandleRoute = () => {
      */
 
     // User navigates to `/[network]`
-    if (!PAGES_TO_LOAD_WITHOUT_CHAINID.includes(router.asPath) && pathArray.length === 1) {
+    if (PAGES_TO_LOAD_WITH_CHAIN_ID.includes(router.asPath) && pathArray.length === 1) {
       router.push(`/${networkNameFromUrl}/${URL.myStakingContract}`);
       return;
     }

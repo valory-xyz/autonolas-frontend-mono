@@ -42,6 +42,12 @@ export const GlobalStyles = createGlobalStyle`
   .mb-16 {
     margin-bottom: 16px;
   }
+  .mb-24 {
+    margin-bottom: 24px;
+  }
+  .mb-48 {
+    margin-bottom: 48px;
+  }
   .mt-0 {
     margin-top: 0px;
   }
@@ -53,6 +59,9 @@ export const GlobalStyles = createGlobalStyle`
   }
   .mt-24 {
     margin-top: 24px;
+  }
+  .mt-48 {
+    margin-top: 48px;
   }
   .mr-8 {
     margin-right: 8px;

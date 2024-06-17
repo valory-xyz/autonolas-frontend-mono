@@ -1,6 +1,7 @@
-import { WalletOutlined } from '@ant-design/icons';
-import { Card, Flex, Typography } from 'antd';
+import { TableOutlined, WalletOutlined } from '@ant-design/icons';
+import { Button, Card, Flex, Typography } from 'antd';
 import Link from 'next/link';
+import styled from 'styled-components';
 import { match } from 'ts-pattern';
 import { useAccount } from 'wagmi';
 
@@ -15,6 +16,13 @@ const { Title, Paragraph } = Typography;
 
 const ICON_STYLE = { fontSize: '56px', color: '#A3AEBB' };
 
+const StyledMain = styled.main`
+  display: flex;
+  flex-direction: column;
+  max-width: 1000px;
+  margin: 0 auto;
+`;
+
 const ConnectWallet = () => {
   return (
     <Flex align="center" vertical gap={16}>
@@ -27,13 +35,26 @@ const ConnectWallet = () => {
   );
 };
 
+// TODO: Tanya to add staking contracts list
+const StakingContractList = () => {
+  return (
+    <Flex align="center" vertical gap={16} className="mb-24 mt-48">
+      <TableOutlined style={ICON_STYLE} />
+      <Paragraph type="secondary" className="text-center">
+        You haven’t created any staking contracts yet.
+      </Paragraph>
+      <Button type="primary">Create staking contract</Button>
+    </Flex>
+  );
+};
+
 export const MyStakingContracts = () => {
   const { networkId } = useAppSelector((state) => state.network);
 
   const { isConnected: isAccountConnected } = useAccount();
 
   return (
-    <>
+    <StyledMain>
       <Link href="/my-staking-contracts" target="_blank">
         Explore all nominated staking contracts on Olas Govern&nbsp;
         {UNICODE_SYMBOLS.EXTERNAL_LINK}
@@ -50,10 +71,10 @@ export const MyStakingContracts = () => {
         </Paragraph>
 
         {match(isAccountConnected)
-          .with(true, () => null)
+          .with(true, () => <StakingContractList />)
           .with(false, () => <ConnectWallet />)
           .exhaustive()}
       </Card>
-    </>
+    </StyledMain>
   );
 };

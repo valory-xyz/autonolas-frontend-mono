@@ -1,9 +1,8 @@
 import { Menu } from 'antd';
 import { useRouter } from 'next/router';
 import { FC, useEffect, useMemo, useState } from 'react';
-import { match } from 'ts-pattern';
 
-import { URL } from 'common-util/constants/urls';
+import { PAGES_TO_LOAD_WITH_CHAIN_ID } from 'common-util/config/supportedChains';
 import { useAppSelector } from 'store/index';
 
 type MenuItem = {
@@ -28,11 +27,7 @@ const MenuInstance: FC<MenuInstanceProps> = ({ selectedMenu, handleMenuItemClick
         key: 'my-staking-contracts',
         path: `/${networkName}/my-staking-contracts`,
       },
-      {
-        label: 'Paths',
-        key: 'paths',
-        path: `/${networkName}/paths`,
-      },
+      { label: 'Paths', key: 'paths', path: `/paths` },
     ],
     [networkName],
   );
@@ -40,9 +35,11 @@ const MenuInstance: FC<MenuInstanceProps> = ({ selectedMenu, handleMenuItemClick
   const selectedMenuKey = useMemo(() => {
     if (!selectedMenu) return [];
 
-    return match(selectedMenu)
-      .with(`/${URL.myStakingContract}`, () => ['my-staking-contracts'])
-      .otherwise(() => [selectedMenu.split('/')[1]]);
+    if (selectedMenu.includes('my-staking-contracts')) {
+      return ['my-staking-contracts'];
+    }
+
+    return [selectedMenu.split('/')[1]];
   }, [selectedMenu]);
 
   return (
@@ -51,7 +48,13 @@ const MenuInstance: FC<MenuInstanceProps> = ({ selectedMenu, handleMenuItemClick
       mode={mode}
       selectedKeys={selectedMenuKey}
       items={items}
-      onClick={({ key }) => handleMenuItemClick({ label: '', key, path: `/${networkName}/${key}` })}
+      onClick={({ key }) =>
+        handleMenuItemClick({
+          label: '',
+          key,
+          path: PAGES_TO_LOAD_WITH_CHAIN_ID.includes(key) ? `/${networkName}/${key}` : `/${key}`,
+        })
+      }
     />
   );
 };
