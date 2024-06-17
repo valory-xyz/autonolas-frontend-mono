@@ -48,13 +48,13 @@ export const getAgents = async (total, nextPage) => {
   const allAgentsPromises = [];
   const { first, last } = getFirstAndLastIndex(total, nextPage);
   for (let i = first; i <= last; i += 1) {
-    allAgentsPromises.push(contract.methods.getUnit(`${i}`).call());
+    allAgentsPromises.push(contract.methods.getUnit(`${total - (i + first - 1)}`).call());
   }
 
   const agents = await Promise.allSettled(allAgentsPromises);
   const results = await Promise.all(
     agents.map(async (info, i) => {
-      const owner = await getAgentOwner(`${first + i}`);
+      const owner = await getAgentOwner(`${total - (i + first - 1)}`);
       return { ...info.value, owner };
     }),
   );

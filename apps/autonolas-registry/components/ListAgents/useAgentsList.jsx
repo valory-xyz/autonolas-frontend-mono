@@ -17,13 +17,14 @@ const getAllAndMyAgentsQuery = (currentPage, ownerAddress = null) => {
   return gql`
     {
       units(
-        first: ${TOTAL_VIEW_COUNT}, 
-        skip: ${TOTAL_VIEW_COUNT * (currentPage - 1)},
+        first: ${TOTAL_VIEW_COUNT}
+        skip: ${TOTAL_VIEW_COUNT * (currentPage - 1)}
         where: { 
           packageType: agent 
           ${ownerAddress ? `owner_contains_nocase: "${ownerAddress}"` : ''}
-        }, 
+        }
         orderBy: tokenId
+        orderDirection: desc
       ) ${UNIT_FIELDS}
     }
   `;
@@ -43,6 +44,7 @@ const getAgentsBySearchQuery = (searchValue, ownerAddress = null) => {
           ]
         }
         orderBy: tokenId
+        orderDirection: desc
       ) ${UNIT_FIELDS}
     }
   `;

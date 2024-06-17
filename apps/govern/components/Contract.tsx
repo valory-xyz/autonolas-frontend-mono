@@ -1,5 +1,4 @@
-import { LoadingOutlined } from '@ant-design/icons';
-import { Card, Flex, Space, Spin, Typography } from 'antd';
+import { Card, Flex, Skeleton, Space, Typography } from 'antd';
 import { useRouter } from 'next/router';
 import styled from 'styled-components';
 import { mainnet } from 'viem/chains';
@@ -63,9 +62,7 @@ const ContractPageContent = ({ contract }: ContractPageContentProps) => {
                 }`}
               </a>
             ) : (
-              <Text>
-                <Spin indicator={<LoadingOutlined spin />} />
-              </Text>
+              <Skeleton.Input active size="small" />
             )}
           </Space>
           <Space direction="vertical">
