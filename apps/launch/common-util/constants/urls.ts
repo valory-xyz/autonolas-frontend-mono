@@ -14,6 +14,6 @@ export const EXPLORE_URLS: Record<string, string> = {
 
 // all the urls used in the app
 export const URL = {
-  myStackingContract: 'my-staking-contracts',
+  myStakingContract: 'my-staking-contracts',
   pageNotFound: 'page-not-found',
 };
