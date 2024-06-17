@@ -1,5 +1,7 @@
-import { Layout as AntdLayout } from 'antd';
+import { Alert, Layout as AntdLayout } from 'antd';
 import { FC, ReactNode } from 'react';
+
+import { useScreen } from 'libs/ui-theme/src';
 
 import { LoginV2 } from 'components/Login';
 
@@ -16,6 +18,8 @@ interface LayoutProps {
 }
 
 export const Layout: FC<LayoutProps> = ({ children }) => {
+  const { isMobile } = useScreen();
+
   return (
     <CustomLayout>
       <OlasHeader>
@@ -30,6 +34,15 @@ export const Layout: FC<LayoutProps> = ({ children }) => {
       </OlasHeader>
 
       <Content className="site-layout">
+        {isMobile && (
+          <Alert
+            className="mt-16"
+            message="This page is not optimized for mobile. For the best experience, please come back on desktop."
+            showIcon
+            type="warning"
+          />
+        )}
+
         <div className="site-layout-background">{children}</div>
       </Content>
 
