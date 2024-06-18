@@ -1,3 +1,3 @@
-import { CreateStakingContracts } from 'components/MyStakingContracts/Create';
+import { CreateStakingContract } from 'components/MyStakingContracts/Create';
 
-export default CreateStakingContracts;
+export default CreateStakingContract;
