@@ -40,7 +40,7 @@ export const useHandleRoute = () => {
     }
 
     // if already on my-staking-contracts page then no need to redirect
-    if ([`/[network]/${URL.myStakingContract}`].includes(router.asPath)) {
+    if ([`/[network]/${URL.myStakingContracts}`].includes(router.asPath)) {
       return;
     }
 
@@ -55,7 +55,7 @@ export const useHandleRoute = () => {
      * redirect to `/ethereum/my-staking-contracts` page
      */
     if (path === '/') {
-      router.push(`/ethereum/${URL.myStakingContract}`);
+      router.push(`/ethereum/${URL.myStakingContracts}`);
       return;
     }
 
@@ -94,16 +94,16 @@ export const useHandleRoute = () => {
 
     // User navigates to `/[network]`
     if (PAGES_TO_LOAD_WITH_CHAIN_ID.includes(router.asPath) && pathArray.length === 1) {
-      router.push(`/${networkNameFromUrl}/${URL.myStakingContract}`);
+      router.push(`/${networkNameFromUrl}/${URL.myStakingContracts}`);
       return;
     }
   }, [path, networkNameFromUrl, router]);
 
   const onHomeClick = useCallback(() => {
     if (networkNameFromUrl) {
-      router.push(`/${networkNameFromUrl}/${URL.myStakingContract}`);
+      router.push(`/${networkNameFromUrl}/${URL.myStakingContracts}`);
     } else {
-      router.push(`/ethereum/${URL.myStakingContract}`);
+      router.push(`/ethereum/${URL.myStakingContracts}`);
     }
   }, [networkNameFromUrl, router]);
 

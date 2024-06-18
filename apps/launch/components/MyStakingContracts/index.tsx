@@ -40,7 +40,7 @@ const ConnectWallet = () => {
 const StakingContractList = () => {
   const router = useRouter();
   const { networkName } = useAppSelector((state) => state.network);
-  console.log('networkName', `${networkName}/${URL.myStakingContract}/create`);
+  console.log('networkName', `${networkName}/${URL.myStakingContracts}/create`);
 
   return (
     <Flex align="center" vertical gap={16} className="mb-24 mt-48">
@@ -50,7 +50,7 @@ const StakingContractList = () => {
       </Paragraph>
       <Button
         type="primary"
-        onClick={() => router.push(`/${networkName}/${URL.myStakingContract}/create`)}
+        onClick={() => router.push(`/${networkName}/${URL.myStakingContracts}/create`)}
       >
         Create staking contract
       </Button>
@@ -65,7 +65,7 @@ export const MyStakingContracts = () => {
 
   return (
     <StyledMain>
-      <Link href="/my-staking-contracts" target="_blank">
+      <Link href={URL.myStakingContracts} target="_blank">
         Explore all nominated staking contracts on Olas Govern&nbsp;
         {UNICODE_SYMBOLS.EXTERNAL_LINK}
       </Link>

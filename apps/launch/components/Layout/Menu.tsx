@@ -3,6 +3,7 @@ import { useRouter } from 'next/router';
 import { FC, useEffect, useMemo, useState } from 'react';
 
 import { PAGES_TO_LOAD_WITH_CHAIN_ID } from 'common-util/config/supportedChains';
+import { URL } from 'common-util/constants/urls';
 import { useAppSelector } from 'store/index';
 
 type MenuItem = {
@@ -24,8 +25,8 @@ const MenuInstance: FC<MenuInstanceProps> = ({ selectedMenu, handleMenuItemClick
     () => [
       {
         label: 'My staking contracts',
-        key: 'my-staking-contracts',
-        path: `/${networkName}/my-staking-contracts`,
+        key: URL.myStakingContracts,
+        path: `/${networkName}/${URL.myStakingContracts}`,
       },
       { label: 'Paths', key: 'paths', path: `/paths` },
     ],
@@ -35,8 +36,8 @@ const MenuInstance: FC<MenuInstanceProps> = ({ selectedMenu, handleMenuItemClick
   const selectedMenuKey = useMemo(() => {
     if (!selectedMenu) return [];
 
-    if (selectedMenu.includes('my-staking-contracts')) {
-      return ['my-staking-contracts'];
+    if (selectedMenu.includes(URL.myStakingContracts)) {
+      return [URL.myStakingContracts];
     }
 
     return [selectedMenu.split('/')[1]];

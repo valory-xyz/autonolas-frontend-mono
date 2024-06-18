@@ -12,7 +12,7 @@ export const PageNotFound = () => {
       title="404"
       subTitle="Sorry, the page you visited does not exist."
       extra={
-        <Button type="primary" onClick={() => router.push(`/ethereum/${URL.myStakingContract}`)}>
+        <Button type="primary" onClick={() => router.push(`/ethereum/${URL.myStakingContracts}`)}>
           My staking contracts
         </Button>
       }
