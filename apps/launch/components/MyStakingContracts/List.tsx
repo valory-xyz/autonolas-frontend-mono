@@ -1,14 +1,33 @@
 import { InfoCircleOutlined } from '@ant-design/icons';
-import { Alert, Button, Flex, Table, Tooltip, Typography } from 'antd';
+import { Alert, Button, Flex, Popover, Table, Typography } from 'antd';
 import type { TableProps } from 'antd';
 import Link from 'next/link';
 import React, { FC, useMemo } from 'react';
 
-import { URL } from 'common-util/constants/urls';
+import { GOVERN_URL, URL } from 'common-util/constants/urls';
 import { useAppSelector } from 'store/index';
 import { MyStakingContract } from 'types/index';
 
 const { Paragraph } = Typography;
+
+const NominatedForIncentivesPopover = () => (
+  <Popover
+    arrow={false}
+    content={
+      <div style={{ maxWidth: 580 }}>
+        Nominate your contract to make it eligible to receive staking incentives. Staking incentives
+        are allocated via&nbsp;
+        <a href={GOVERN_URL} target="_blank" rel="noreferrer">
+          Govern
+        </a>
+        .
+      </div>
+    }
+  >
+    Nominated for incentives?&nbsp;
+    <InfoCircleOutlined />
+  </Popover>
+);
 
 const useColumns = () => {
   const { networkName } = useAppSelector((state) => state.network);
@@ -44,14 +63,7 @@ const useColumns = () => {
         width: '25%',
       },
       {
-        title: (
-          <>
-            Nominated for incentives?&nbsp;
-            <Tooltip title="prompt text">
-              <InfoCircleOutlined />
-            </Tooltip>
-          </>
-        ),
+        title: NominatedForIncentivesPopover,
         key: 'action',
         width: '25%',
         render: (_, record) => (
@@ -87,7 +99,12 @@ export const List: FC = () => {
         />
       )}
 
-      <Table columns={listColumns} dataSource={myStakingContracts} pagination={false} />
+      <Table
+        columns={listColumns}
+        dataSource={myStakingContracts}
+        pagination={false}
+        rowKey={(record) => record.id}
+      />
     </Flex>
   );
 };
