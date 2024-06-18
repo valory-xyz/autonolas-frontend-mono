@@ -1,5 +1,6 @@
-import styled from 'styled-components';
 import { Layout } from 'antd';
+import styled from 'styled-components';
+
 import { COLOR, MEDIA_QUERY } from '@autonolas/frontend-library';
 
 export const CustomLayout = styled(Layout)`
@@ -26,6 +27,20 @@ export const CustomLayout = styled(Layout)`
     }
     .ant-tabs-nav-wrap {
       padding-left: 16px;
+    }
+  }
+
+  /* table */
+  .ant-table {
+    .ant-table-tbody > tr {
+      > td {
+        padding: 8px 16px;
+        .ant-btn {
+          &:first-child {
+            padding-left: 0;
+          }
+        }
+      }
     }
   }
 

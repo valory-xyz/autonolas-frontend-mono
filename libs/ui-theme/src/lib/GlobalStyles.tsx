@@ -81,6 +81,12 @@ export const GlobalStyles = createGlobalStyle`
   .pl-0 {
     padding-left: 0px !important;
   }
+  .pt-24 {
+    padding-top: 24px;
+  }
+  .pt-48 {
+    padding-top: 48px;
+  }
 
   .text-start {
     text-align: start;
@@ -88,7 +94,7 @@ export const GlobalStyles = createGlobalStyle`
   .text-center {
     text-align: center;
   }
-  .text-end	{
+  .text-end {
     text-align: end;
   }
 
@@ -148,6 +154,8 @@ export const GlobalStyles = createGlobalStyle`
     .ant-table-thead {
       > tr > th {
         padding: 12px 16px;
+        color: #4d596a; // TODO: move to theme
+        background-color: #f2f4f9; // TODO: move to theme
         &:not(:last-child):not(.ant-table-selection-column):not(
             .ant-table-row-expand-icon-cell
           ):not([colspan])::before {
@@ -158,11 +166,6 @@ export const GlobalStyles = createGlobalStyle`
     .ant-table-tbody > tr {
       > td {
         padding: 8px 16px;
-        .ant-btn {
-          &:first-child {
-            padding-left: 0;
-          }
-        }
       }
       &:last-child {
         td {
@@ -213,11 +216,11 @@ export const GlobalStyles = createGlobalStyle`
   }
 
   .next-error-h1 {
-    color: ${COLOR.BLACK}; 
+    color: ${COLOR.BLACK};
     border-color: ${COLOR.BLACK} !important;
     + div {
       color: ${COLOR.BLACK};
-    } 
+    }
   }
 
   ${MEDIA_QUERY.mobileL} {
