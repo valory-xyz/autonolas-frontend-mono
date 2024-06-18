@@ -23,7 +23,7 @@ export const useHandleRoute = () => {
     const isValidNetwork = isValidNetworkName(networkNameFromUrl);
 
     dispatch(setNetworkName(isValidNetwork ? networkNameFromUrl : 'ethereum'));
-    dispatch(setNetworkId(isValidNetwork ? chainIdFromPath : 1));
+    dispatch(setNetworkId(isValidNetwork ? Number(chainIdFromPath) : 1));
   }, [dispatch, networkNameFromUrl, chainIdFromPath]);
 
   /**

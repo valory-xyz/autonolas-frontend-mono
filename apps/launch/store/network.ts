@@ -1,7 +1,7 @@
 import { createSlice } from '@reduxjs/toolkit';
 
 type NetworkState = {
-  networkId: null | string;
+  networkId: null | number;
   networkName: null | string;
 };
 
