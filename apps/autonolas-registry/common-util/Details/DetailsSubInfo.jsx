@@ -1,29 +1,30 @@
-import { useEffect, useState, useMemo } from 'react';
-import { Button, Typography, Alert } from 'antd';
+import { Alert, Button, Typography } from 'antd';
 import PropTypes from 'prop-types';
+import { useEffect, useMemo, useState } from 'react';
+import { useEnsName } from 'wagmi';
+
 import { NA } from '@autonolas/frontend-library';
 
 import {
   DEFAULT_SERVICE_CREATION_ETH_TOKEN_ZEROS,
-  NAV_TYPES,
   HASH_DETAILS_STATE,
+  NAV_TYPES,
 } from '../../util/constants';
-import { typePropType } from '../propTypes';
-import { Circle } from '../svg/Circle';
 import { useHelpers } from '../hooks';
 import { useMetadata } from '../hooks/useMetadata';
+import { typePropType } from '../propTypes';
+import { Circle } from '../svg/Circle';
 import { NftImage } from './NFTImage';
-import { getTokenDetailsRequest } from './utils';
 import { useOperatorWhitelistComponent } from './ServiceDetails/useOperatorWhitelistComponent';
 import {
-  SubTitle,
+  ArrowLink,
+  EachSection,
   Info,
   SectionContainer,
-  EachSection,
   ServiceStatusContainer,
-  ArrowLink,
+  SubTitle,
 } from './styles';
-import { useEnsName } from 'wagmi';
+import { getTokenDetailsRequest } from './utils';
 
 const { Link, Text } = Typography;
 
@@ -43,11 +44,7 @@ ServiceStatus.propTypes = { serviceState: PropTypes.bool };
 ServiceStatus.defaultProps = { serviceState: false };
 
 const MetadataUnpinnedMessage = () => (
-  <Alert
-    message="Metadata is unpinned from IPFS server"
-    type="warning"
-    showIcon
-  />
+  <Alert message="Metadata is unpinned from IPFS server" type="warning" showIcon />
 );
 
 /**
@@ -106,25 +103,15 @@ export const DetailsSubInfo = ({
 }) => {
   const { isSvm, doesNetworkHaveValidServiceManagerToken } = useHelpers();
   const [tokenAddress, setTokenAddress] = useState(null);
-  
-  
-  const {data: ownerEnsName} = useEnsName({address: ownerAddress, chainId: 1});
 
-  const {
-    hashUrl,
-    metadataLoadState,
-    codeHref,
-    nftImageUrl,
-    description,
-    version,
-  } = useMetadata(tokenUri);
+  const { data: ownerEnsName } = useEnsName({ address: ownerAddress, chainId: 1 });
+
+  const { hashUrl, metadataLoadState, codeHref, nftImageUrl, description, version } =
+    useMetadata(tokenUri);
 
   // get operator whitelist component
-  const {
-    operatorWhitelistTitle,
-    operatorWhitelistValue,
-    operatorStatusValue,
-  } = useOperatorWhitelistComponent(id);
+  const { operatorWhitelistTitle, operatorWhitelistValue, operatorStatusValue } =
+    useOperatorWhitelistComponent(id);
 
   // get token address for service
   useEffect(() => {
@@ -297,10 +284,7 @@ export const DetailsSubInfo = ({
     return serviceDetailsList;
   };
 
-  const details =
-    type === NAV_TYPES.SERVICE
-      ? getServiceValues()
-      : getComponentAndAgentValues();
+  const details = type === NAV_TYPES.SERVICE ? getServiceValues() : getComponentAndAgentValues();
 
   return (
     <SectionContainer>

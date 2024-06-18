@@ -6,7 +6,9 @@ import { useAccount } from 'wagmi';
 
 import { COLOR } from '@autonolas/frontend-library';
 
-import { CHAIN_NAMES, formatWeiBalance } from 'common-util/functions';
+import { CHAIN_NAMES } from 'libs/util-constants/src';
+
+import { formatWeiBalance } from 'common-util/functions';
 import { useVotingPower } from 'hooks/useVotingPower';
 import { useAppSelector } from 'store/index';
 import { Allocation, StakingContract } from 'types/index';

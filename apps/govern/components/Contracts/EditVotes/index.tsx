@@ -6,9 +6,11 @@ import styled from 'styled-components';
 import { Address } from 'viem';
 import { useAccount } from 'wagmi';
 
+import { CHAIN_NAMES } from 'libs/util-constants/src';
+
 import { RETAINER_ADDRESS } from 'common-util/constants/addresses';
 import { INVALIDATE_AFTER_UPDATE_KEYS } from 'common-util/constants/scopeKeys';
-import { CHAIN_NAMES, getBytes32FromAddress, voteForNomineeWeights } from 'common-util/functions';
+import { getBytes32FromAddress, voteForNomineeWeights } from 'common-util/functions';
 import { clearState } from 'store/govern';
 import { useAppDispatch, useAppSelector } from 'store/index';
 import { Allocation } from 'types/index';

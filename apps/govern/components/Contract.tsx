@@ -4,10 +4,10 @@ import styled from 'styled-components';
 import { mainnet } from 'viem/chains';
 import { useEnsName } from 'wagmi';
 
-import { UNICODE_SYMBOLS } from 'libs/util-constants/src';
+import { CHAIN_NAMES, UNICODE_SYMBOLS } from 'libs/util-constants/src';
 
 import { EXPLORE_URLS } from 'common-util/constants/urls';
-import { CHAIN_NAMES, getAddressFromBytes32, truncateAddress } from 'common-util/functions';
+import { getAddressFromBytes32, truncateAddress } from 'common-util/functions';
 import { useContractParams } from 'hooks/index';
 import { useAppSelector } from 'store/index';
 import { StakingContract } from 'types/Contract';

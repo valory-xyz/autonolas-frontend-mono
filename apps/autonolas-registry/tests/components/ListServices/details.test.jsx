@@ -1,51 +1,56 @@
 import { render, waitFor } from '@testing-library/react';
 
-import { GATEWAY_URL } from 'util/constants';
+import {
+  checkIfServiceRequiresWhitelisting,
+  getTokenDetailsRequest,
+} from 'common-util/Details/utils';
 import { useHelpers } from 'common-util/hooks/useHelpers';
 import { useSvmConnectivity } from 'common-util/hooks/useSvmConnectivity';
+import { useRegisterAgents } from 'components/ListServices/ServiceState/useSvmServiceStateManagement';
 import {
-  getTokenDetailsRequest,
-  checkIfServiceRequiresWhitelisting,
-} from 'common-util/Details/utils';
+  checkIfEth,
+  getAgentInstanceAndOperator,
+  getBonds,
+  getServiceTableDataSource,
+  getTokenBondRequest,
+} from 'components/ListServices/ServiceState/utils';
 import Services from 'components/ListServices/details';
+import { useGetServiceDetails, useGetServiceOwner } from 'components/ListServices/hooks/useService';
 import {
   useAgentInstanceAndOperator,
   useGetSvmServiceDetails,
   useServiceOwner,
-  useTokenUri,
-  useSvmServiceTableDataSource,
   useSvmBonds,
+  useSvmServiceTableDataSource,
+  useTokenUri,
 } from 'components/ListServices/hooks/useSvmService';
-import {
-  getBonds,
-  getServiceTableDataSource,
-  getAgentInstanceAndOperator,
-  checkIfEth,
-  getTokenBondRequest,
-} from 'components/ListServices/ServiceState/utils';
-import { useRegisterAgents } from 'components/ListServices/ServiceState/useSvmServiceStateManagement';
-import {
-  useGetServiceDetails,
-  useGetServiceOwner,
-} from 'components/ListServices/hooks/useService';
+import { GATEWAY_URL } from 'util/constants';
+
 import {
   dummyAddress,
-  wrapProvider,
+  mockCodeUri,
+  mockIpfs,
   mockNftImageHash,
   mockV1Hash,
-  mockIpfs,
-  mockCodeUri,
   svmConnectivityEmptyMock,
-  useHelpersEvmMock,
-  useHelpersSvmMock,
   svmServiceStateMock,
   useHelpersBaseMock,
+  useHelpersEvmMock,
+  useHelpersSvmMock,
+  wrapProvider,
 } from '../../tests-helpers';
 
 jest.mock('next/router', () => ({
   __esModule: true,
   useRouter() {
     return { query: { id: '1' } };
+  },
+}));
+
+jest.mock('wagmi', () => ({
+  __esModule: true,
+  useEnsName() {
+    return { data: 'ENS Value' };
   },
 }));
 
@@ -116,19 +121,16 @@ jest.mock('components/ListServices/hooks/useSvmService', () => ({
   })),
 }));
 
-jest.mock(
-  'components/ListServices/ServiceState/useSvmServiceStateManagement',
-  () => ({
-    useFinishRegistration: jest.fn(),
-    useGetActivateRegistration: jest.fn(),
-    useRegisterAgents: jest.fn(() => ({
-      checkIfAgentInstancesAreValid: jest.fn(),
-      registerAgents: jest.fn(),
-    })),
-    useTerminate: jest.fn(),
-    useUnbond: jest.fn(),
-  }),
-);
+jest.mock('components/ListServices/ServiceState/useSvmServiceStateManagement', () => ({
+  useFinishRegistration: jest.fn(),
+  useGetActivateRegistration: jest.fn(),
+  useRegisterAgents: jest.fn(() => ({
+    checkIfAgentInstancesAreValid: jest.fn(),
+    registerAgents: jest.fn(),
+  })),
+  useTerminate: jest.fn(),
+  useUnbond: jest.fn(),
+}));
 
 jest.mock('components/ListServices/hooks/useService', () => ({
   useGetServiceDetails: jest.fn(),
@@ -155,8 +157,7 @@ const unmockedFetch = global.fetch;
 
 describe('listServices/details.jsx', () => {
   beforeAll(() => {
-    global.fetch = () =>
-      Promise.resolve({ json: () => Promise.resolve(mockIpfs) });
+    global.fetch = () => Promise.resolve({ json: () => Promise.resolve(mockIpfs) });
   });
 
   beforeEach(() => {
@@ -232,29 +233,21 @@ describe('listServices/details.jsx', () => {
       await waitFor(async () => {
         expect(getByText('Some package name')).toBeInTheDocument();
         expect(getByTestId('service-status').textContent).toBe('Inactive');
-        expect(getByTestId('view-hash-link').getAttribute('href')).toBe(
-          `${GATEWAY_URL}12345`,
-        );
+        expect(getByTestId('view-hash-link').getAttribute('href')).toBe(`${GATEWAY_URL}12345`);
         expect(getByTestId('view-code-link').getAttribute('href')).toBe(
           `${GATEWAY_URL}${mockCodeUri}`,
         );
 
         // NFT image (display on left side for services)
-        const displayedImage =
-          getByTestId('service-nft-image').querySelector('img');
+        const displayedImage = getByTestId('service-nft-image').querySelector('img');
         expect(displayedImage.src).toBe(`${GATEWAY_URL}${mockNftImageHash}`);
 
-        expect(getByTestId('description').textContent).toBe(
-          mockIpfs.description,
-        );
-        expect(getByTestId('version').textContent).toBe(
-          mockIpfs.attributes[0].value,
-        );
-        expect(getByTestId('owner-address').textContent).toBe(
-          dummyDetails.owner,
-        );
+        expect(getByTestId('description').textContent).toBe(mockIpfs.description);
+        expect(getByTestId('version').textContent).toBe(mockIpfs.attributes[0].value);
+        expect(getByTestId('owner-address').textContent).toBe(dummyDetails.owner);
         expect(getByText('Threshold')).toBeInTheDocument();
         expect(getByText('Operator Whitelisting')).toBeInTheDocument();
+        expect(getByText('Owner ENS Name')).toBeInTheDocument();
       });
     });
 
@@ -264,9 +257,7 @@ describe('listServices/details.jsx', () => {
       const { container } = render(wrapProvider(<Services />));
       await waitFor(async () => {
         const getTitle = (i) =>
-          container.querySelector(
-            `.ant-steps-item:nth-child(${i}) .ant-steps-item-title`,
-          );
+          container.querySelector(`.ant-steps-item:nth-child(${i}) .ant-steps-item-title`);
         expect(getTitle(1)).toHaveTextContent('Pre-Registration');
         expect(getTitle(2)).toHaveTextContent('Active Registration');
         expect(getTitle(3)).toHaveTextContent('Finished Registration');
@@ -274,18 +265,16 @@ describe('listServices/details.jsx', () => {
         expect(getTitle(5)).toHaveTextContent('Terminated Bonded');
 
         // last step (Terminated Bonded) should be active
-        expect(
-          container.querySelector('.ant-steps-item-active'),
-        ).toHaveTextContent('Terminated Bonded');
+        expect(container.querySelector('.ant-steps-item-active')).toHaveTextContent(
+          'Terminated Bonded',
+        );
       });
     });
 
     it('should display "Update" button for service owner', async () => {
       const mockHandleUpdate = jest.fn();
 
-      const { findByTestId } = render(
-        wrapProvider(<Services handleUpdate={mockHandleUpdate} />),
-      );
+      const { findByTestId } = render(wrapProvider(<Services handleUpdate={mockHandleUpdate} />));
 
       const updateButton = await findByTestId('service-update-button');
 
@@ -395,9 +384,7 @@ describe('listServices/details.jsx', () => {
         expect(getByText('Service Name')).toBeInTheDocument();
         expect(getByText('Service ID 1')).toBeInTheDocument();
         expect(getByTestId('service-status').textContent).toBe('Inactive');
-        expect(getByTestId('view-hash-link').getAttribute('href')).toBe(
-          `${GATEWAY_URL}12345`,
-        );
+        expect(getByTestId('view-hash-link').getAttribute('href')).toBe(`${GATEWAY_URL}12345`);
         expect(getByTestId('view-code-link').getAttribute('href')).toBe(
           `${GATEWAY_URL}${mockCodeUri}`,
         );
@@ -405,15 +392,11 @@ describe('listServices/details.jsx', () => {
         // NFT image should not be displayed for SVM services
         // expect(queryByTestId('service-nft-image')).toBeNull();
 
-        expect(getByTestId('description').textContent).toBe(
-          mockIpfs.description,
-        );
+        expect(getByTestId('description').textContent).toBe(mockIpfs.description);
         // expect(getByTestId('version').textContent).toBe(
         //   mockIpfs.attributes[0].value,
         // );
-        expect(getByTestId('owner-address').textContent).toBe(
-          dummyDetails.owner,
-        );
+        expect(getByTestId('owner-address').textContent).toBe(dummyDetails.owner);
         expect(getByText('Threshold')).toBeInTheDocument();
 
         // Operator Whitelisting should not be displayed for SVM services
@@ -426,9 +409,7 @@ describe('listServices/details.jsx', () => {
 
       await waitFor(async () => {
         const getTitle = (i) =>
-          container.querySelector(
-            `.ant-steps-item:nth-child(${i}) .ant-steps-item-title`,
-          );
+          container.querySelector(`.ant-steps-item:nth-child(${i}) .ant-steps-item-title`);
         expect(getTitle(1)).toHaveTextContent('Pre-Registration');
         expect(getTitle(2)).toHaveTextContent('Active Registration');
         expect(getTitle(3)).toHaveTextContent('Finished Registration');
@@ -440,9 +421,9 @@ describe('listServices/details.jsx', () => {
         expect(getTitle(5)).toHaveTextContent('Terminated Bonded');
 
         // last step (Terminated Bonded) should be active
-        expect(
-          container.querySelector('.ant-steps-item-active'),
-        ).toHaveTextContent('Terminated Bonded');
+        expect(container.querySelector('.ant-steps-item-active')).toHaveTextContent(
+          'Terminated Bonded',
+        );
       });
     });
   });

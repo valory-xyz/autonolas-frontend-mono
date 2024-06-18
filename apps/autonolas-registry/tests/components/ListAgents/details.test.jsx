@@ -1,22 +1,23 @@
 import { render, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
-import { GATEWAY_URL } from '../../../util/constants';
-import AgentDetails from '../../../components/ListAgents/details';
+import AgentDetails from 'components/ListAgents/details';
 import {
   getAgentDetails,
   getAgentHashes,
   getAgentOwner,
   getTokenUri,
-} from '../../../components/ListAgents/utils';
+} from 'components/ListAgents/utils';
+import { GATEWAY_URL } from 'util/constants';
+
 import {
   dummyAddress,
-  wrapProvider,
+  mockCodeUri,
   mockNftImageHash,
   mockV1Hash,
-  mockCodeUri,
   svmConnectivityEmptyMock,
   useHelpersEvmMock,
+  wrapProvider,
 } from '../../tests-helpers';
 
 jest.mock('next/router', () => ({
@@ -26,26 +27,33 @@ jest.mock('next/router', () => ({
   },
 }));
 
-jest.mock('../../../common-util/List/IpfsHashGenerationModal/helpers', () => ({
+jest.mock('wagmi', () => ({
+  __esModule: true,
+  useEnsName() {
+    return { data: 'ENS Value' };
+  },
+}));
+
+jest.mock('common-util/List/IpfsHashGenerationModal/helpers', () => ({
   getIpfsHashHelper: jest.fn(() => mockV1Hash),
 }));
 
-jest.mock('../../../common-util/Details/utils', () => ({
+jest.mock('common-util/Details/utils', () => ({
   checkIfServiceRequiresWhitelisting: jest.fn(() => false),
 }));
 
-jest.mock('../../../components/ListAgents/utils', () => ({
+jest.mock('components/ListAgents/utils', () => ({
   getAgentDetails: jest.fn(),
   getAgentHashes: jest.fn(),
   getAgentOwner: jest.fn(),
   getTokenUri: jest.fn(),
 }));
 
-jest.mock('../../../common-util/hooks/useHelpers', () => ({
+jest.mock('common-util/hooks/useHelpers', () => ({
   useHelpers: () => useHelpersEvmMock,
 }));
 
-jest.mock('../../../common-util/hooks/useSvmConnectivity', () => ({
+jest.mock('common-util/hooks/useSvmConnectivity', () => ({
   useSvmConnectivity: () => svmConnectivityEmptyMock,
 }));
 
@@ -91,45 +99,29 @@ describe('listAgents/details.jsx', () => {
   });
 
   it('should display agent details', async () => {
-    const { getByText, getByTestId, queryByRole } = render(
-      wrapProvider(<AgentDetails />),
-    );
+    const { getByText, getByTestId, queryByRole } = render(wrapProvider(<AgentDetails />));
     await waitFor(async () => {
       // left column content
       expect(getByText('Some package name')).toBeInTheDocument();
-      expect(getByTestId('view-hash-link').getAttribute('href')).toBe(
-        `${GATEWAY_URL}12345`,
-      );
+      expect(getByTestId('view-hash-link').getAttribute('href')).toBe(`${GATEWAY_URL}12345`);
       expect(getByTestId('view-code-link').getAttribute('href')).toBe(
         `${GATEWAY_URL}${mockCodeUri}`,
       );
-      expect(getByTestId('description').textContent).toBe(
-        dummyIpfs.description,
-      );
-      expect(getByTestId('version').textContent).toBe(
-        dummyIpfs.attributes[0].value,
-      );
-      expect(getByTestId('owner-address').textContent).toBe(
-        dummyDetails.developer,
-      );
-      expect(
-        queryByRole('button', { name: 'Update Hash' }),
-      ).toBeInTheDocument();
+      expect(getByTestId('description').textContent).toBe(dummyIpfs.description);
+      expect(getByTestId('version').textContent).toBe(dummyIpfs.attributes[0].value);
+      expect(getByTestId('owner-address').textContent).toBe(dummyDetails.developer);
+      expect(queryByRole('button', { name: 'Update Hash' })).toBeInTheDocument();
       expect(getByTestId('details-dependency')).toBeInTheDocument();
 
       // NFT image
       const nftImage = getByTestId('nft-image').querySelector('.ant-image-img');
-      expect(nftImage.getAttribute('src')).toBe(
-        `${GATEWAY_URL}${mockNftImageHash}`,
-      );
+      expect(nftImage.getAttribute('src')).toBe(`${GATEWAY_URL}${mockNftImageHash}`);
     });
   });
 
   it('should display update hash button only for owner and open the modal when clicked', async () => {
     getAgentOwner.mockResolvedValue(dummyAddress);
-    const { findByRole, findByText, queryByText } = render(
-      wrapProvider(<AgentDetails />),
-    );
+    const { findByRole, findByText, queryByText } = render(wrapProvider(<AgentDetails />));
     const updateHashButton = await findByRole('button', {
       name: 'Update Hash',
     });
