@@ -1,7 +1,5 @@
 import { InfoCircleOutlined } from '@ant-design/icons';
 import { Button, Card, Col, Divider, Flex, Form, Input, Row, Tag, Tooltip, Typography } from 'antd';
-import TextArea from 'antd/es/input/TextArea';
-import React from 'react';
 import styled from 'styled-components';
 
 import { COLOR } from 'libs/ui-theme/src';
@@ -56,15 +54,18 @@ export const CreateStakingContract = () => {
           <Form.Item label={<Text type="secondary">Name</Text>} name="name">
             <Input />
           </Form.Item>
-          <Form.Item label={<Text type="secondary">Description</Text>} name="description">
-            <TextArea rows={4} />
-            <Hint type="secondary">
-              Good descriptions help governors understand the value your contract brings to the
-              ecosystem. Be clear to increase the chance governors allocate rewards to your
-              contract.
-            </Hint>
+          <Form.Item
+            label={<Text type="secondary">Description</Text>}
+            name="description"
+            className="mb-0"
+          >
+            <Input.TextArea rows={4} />
           </Form.Item>
-          <Divider className="mt-8" />
+          <Hint type="secondary">
+            Good descriptions help governors understand the value your contract brings to the
+            ecosystem. Be clear to increase the chance governors allocate rewards to your contract.
+          </Hint>
+          <Divider />
           <TextWithTooltip
             text="Template"
             description="Template contracts must be approved by DAO vote"
@@ -85,7 +86,8 @@ export const CreateStakingContract = () => {
                         How many agents do you need running? Agents can be sovereign or
                         decentralized agents. They join the contract on a first come, first serve
                         basis.
-                        <a href="https://olas.network/learn">
+                        <br />
+                        <a href="https://olas.network/learn" target="_blank">
                           Learn more {UNICODE_SYMBOLS.EXTERNAL_LINK}
                         </a>
                       </>
