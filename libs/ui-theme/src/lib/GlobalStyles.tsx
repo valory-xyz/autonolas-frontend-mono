@@ -164,9 +164,6 @@ export const GlobalStyles = createGlobalStyle`
       }
     }
     .ant-table-tbody > tr {
-      > td {
-        padding: 8px 16px;
-      }
       &:last-child {
         td {
           &:first-child {
