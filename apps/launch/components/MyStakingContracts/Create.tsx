@@ -24,6 +24,7 @@ import { CHAIN_NAMES, EXPLORER_URLS, UNICODE_SYMBOLS } from 'libs/util-constants
 import {
   CONTRACT_TEMPLATES,
   IMPLEMENTATION_ADDRESSES,
+  isSupportedChainId,
 } from 'common-util/constants/stakingContract';
 import {
   createStakingContract,
@@ -65,8 +66,49 @@ const TextWithTooltip = ({
   </Tooltip>
 );
 
+const MaxNumServicesLabel = () => (
+  <TextWithTooltip
+    text="Maximum number of staked agents"
+    description={
+      <>
+        How many agents do you need running? Agents can be sovereign or decentralized agents. They
+        join the contract on a first come, first serve basis.
+        <br />
+        <a href="https://olas.network/learn" target="_blank">
+          Learn more {UNICODE_SYMBOLS.EXTERNAL_LINK}
+        </a>
+      </>
+    }
+  />
+);
+
+const RewardsPerSecondLabel = () => (
+  <TextWithTooltip
+    text="Rewards, OLAS per second"
+    description="Token rewards come from the Olas protocol"
+  />
+);
+
+const WrongNetworkAlert = ({ networkId }: { networkId: number | null }) => (
+  <Alert
+    className="mb-24"
+    message={`Your wallet is connected to the wrong network. Switch the wallet network to ${
+      CHAIN_NAMES[networkId || mainnet.id]
+    } to create a staking contract.`}
+    type="warning"
+    showIcon
+  />
+);
+
 const contractTemplate = CONTRACT_TEMPLATES[0];
 const INPUT_WIDTH_STYLE = { width: '100%' };
+
+type FormValues = {
+  name: string;
+  description: string;
+  maxNumServices: number;
+  rewardsPerSecond: number;
+};
 
 export const CreateStakingContract = () => {
   const { networkId } = useAppSelector((state) => state.network);
@@ -74,14 +116,13 @@ export const CreateStakingContract = () => {
 
   const wrongNetwork = chainId !== networkId;
 
-  const handleCreate = async (values: {
-    name: string;
-    description: string;
-    maxNumServices: number;
-    rewardsPerSecond: number;
-  }) => {
+  const handleCreate = async (values: FormValues) => {
     if (!chainId) return;
     if (!account) return;
+
+    if (!isSupportedChainId(chainId)) {
+      throw new Error('Not supported chainId');
+    }
 
     // TODO: check wrong network, show message
 
@@ -106,16 +147,7 @@ export const CreateStakingContract = () => {
     <StyledMain>
       <Card>
         <Title>Create staking contract on {CHAIN_NAMES[networkId || mainnet.id]}</Title>
-        {wrongNetwork && (
-          <Alert
-            className="mb-24"
-            message={`Your wallet is connected to the wrong network. Switch the wallet network to ${
-              CHAIN_NAMES[networkId || mainnet.id]
-            } to create a staking contract.`}
-            type="warning"
-            showIcon
-          />
-        )}
+        {wrongNetwork && <WrongNetworkAlert networkId={networkId} />}
         <Form layout="vertical" onFinish={handleCreate}>
           <Form.Item label={<Text type="secondary">Name</Text>} name="name">
             <Input />
@@ -150,38 +182,12 @@ export const CreateStakingContract = () => {
           </Button>
           <Row gutter={24}>
             <Col span={12}>
-              <Form.Item
-                label={
-                  <TextWithTooltip
-                    text="Maximum number of staked agents"
-                    description={
-                      <>
-                        How many agents do you need running? Agents can be sovereign or
-                        decentralized agents. They join the contract on a first come, first serve
-                        basis.
-                        <br />
-                        <a href="https://olas.network/learn" target="_blank">
-                          Learn more {UNICODE_SYMBOLS.EXTERNAL_LINK}
-                        </a>
-                      </>
-                    }
-                  />
-                }
-                name="maxNumServices"
-              >
+              <Form.Item label={<MaxNumServicesLabel />} name="maxNumServices">
                 <InputNumber placeholder="e.g. 6" step="1" style={INPUT_WIDTH_STYLE} />
               </Form.Item>
             </Col>
             <Col span={12}>
-              <Form.Item
-                label={
-                  <TextWithTooltip
-                    text="Rewards, OLAS per second"
-                    description="Token rewards come from the Olas protocol"
-                  />
-                }
-                name="rewardsPerSecond"
-              >
+              <Form.Item label={<RewardsPerSecondLabel />} name="rewardsPerSecond">
                 <InputNumber placeholder="e.g. 0.0003" step="0.0001" style={INPUT_WIDTH_STYLE} />
               </Form.Item>
             </Col>

@@ -5,7 +5,7 @@ import { URL } from 'common-util/constants/urls';
 
 import { SUPPORTED_CHAINS } from './wagmi';
 
-export const PAGES_TO_LOAD_WITH_CHAIN_ID = [URL.myStakingContracts, URL.createContract];
+export const PAGES_TO_LOAD_WITH_CHAIN_ID = [URL.myStakingContracts];
 
 /**
  * Returns the list of supported chains with more info such as

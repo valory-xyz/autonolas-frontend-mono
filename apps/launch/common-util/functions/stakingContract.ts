@@ -8,16 +8,18 @@ import { STAKING_TOKEN } from 'libs/util-contracts/src/lib/abiAndAddresses';
 import {
   ACTIVITY_CHECKER_ADDRESSES,
   CONTRACT_COMMON_VALUES,
+  ChainId,
   SERVICE_REGISTRY_ADDRESSES,
   SERVICE_REGISTRY_TOKEN_UTILITY_ADDRESSES,
   STAKING_TOKEN_ADDRESSES,
+  isSupportedChainId,
 } from 'common-util/constants/stakingContract';
 
 type StakingContractValues = {
   metadataHash: string;
   maxNumServices: number;
   rewardsPerSecond: number;
-  chainId: number;
+  chainId: ChainId;
 };
 export const getStakingContractInitPayload = ({
   metadataHash,
@@ -53,6 +55,7 @@ const ipfs = create({
   protocol: 'https',
 });
 
+// TODO: move to shared libs?
 export const getIpfsHash = async ({ name, description }: { name: string; description: string }) => {
   const response = await ipfs.add({ content: JSON.stringify({ name, description }) });
   const hash = response.cid.toV1().toString(base16.encoder);

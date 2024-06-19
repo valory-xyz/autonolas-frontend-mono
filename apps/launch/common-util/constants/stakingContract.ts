@@ -1,5 +1,5 @@
 import { Address } from 'viem';
-import { arbitrum, base, celo, gnosis, mainnet, optimism, polygon } from 'viem/chains';
+import { arbitrum, base, celo, gnosis, goerli, mainnet, optimism, polygon } from 'viem/chains';
 
 export const CONTRACT_TEMPLATES = [
   {
@@ -13,12 +13,12 @@ export const CONTRACT_TEMPLATES = [
 export const CONTRACT_COMMON_VALUES = {
   // Minimum service staking deposit value required for staking
   // TODO: should be able to pass Number('10000000000000000000') but get overflow. Check why
-  minStakingDeposit: 10, // 20 OLAS (10 per operator + 10 per owner)
+  minStakingDeposit: 10,
   // Min number of staking periods before the service can be unstaked
   minNumStakingPeriods: 3,
   // Max number of accumulated inactivity periods after which the service is evicted
   maxNumInactivityPeriods: 2,
-  // Liveness period
+  // Time frame during which the staking contract assesses the activity of the service
   livenessPeriod: 86400, // 1 day
   // Time for emissions
   timeForEmissions: 2592000, // 30 days
@@ -34,8 +34,21 @@ export const CONTRACT_COMMON_VALUES = {
   proxyHash: '0xb89c1b3bdf2cf8827818646bce9a8f6e372885f8c55e5c07acbd307cb133b000',
 };
 
+export type ChainId =
+  | typeof mainnet.id
+  | typeof optimism.id
+  | typeof gnosis.id
+  | typeof polygon.id
+  | typeof base.id
+  | typeof arbitrum.id
+  | typeof celo.id;
+
+type Addresses = {
+  [key in ChainId]: Address;
+};
+
 // TODO: update addresses when real contracts are deployed
-export const IMPLEMENTATION_ADDRESSES: Record<number, Address> = {
+export const IMPLEMENTATION_ADDRESSES: Addresses = {
   [mainnet.id]: '0x94c579253B3780f9fdEA6e7995EDe38142ef85A7',
   [optimism.id]: '' as Address,
   [gnosis.id]: '0x2E90D1049642b3f52d3B7Aa078A7563e58aA4913',
@@ -46,7 +59,7 @@ export const IMPLEMENTATION_ADDRESSES: Record<number, Address> = {
 };
 
 // TODO: update addresses when real contracts are deployed
-export const ACTIVITY_CHECKER_ADDRESSES: Record<number, Address> = {
+export const ACTIVITY_CHECKER_ADDRESSES: Addresses = {
   [mainnet.id]: '0xD87dbF3074A1008394b092c0103E1d03cc73F7E1',
   [optimism.id]: '' as Address,
   [gnosis.id]: '0x0D33999A975323329bFF5351F61453E36F1d34a2',
@@ -56,7 +69,7 @@ export const ACTIVITY_CHECKER_ADDRESSES: Record<number, Address> = {
   [celo.id]: '' as Address,
 };
 
-export const SERVICE_REGISTRY_ADDRESSES: Record<number, Address> = {
+export const SERVICE_REGISTRY_ADDRESSES: Addresses = {
   [mainnet.id]: '0x48b6af7B12C71f09e2fC8aF4855De4Ff54e775cA',
   [optimism.id]: '0x3d77596beb0f130a4415df3D2D8232B3d3D31e44',
   [gnosis.id]: '0x9338b5153AE39BB89f50468E608eD9d764B755fD',
@@ -66,7 +79,7 @@ export const SERVICE_REGISTRY_ADDRESSES: Record<number, Address> = {
   [celo.id]: '0xE3607b00E75f6405248323A9417ff6b39B244b50',
 };
 
-export const SERVICE_REGISTRY_TOKEN_UTILITY_ADDRESSES: Record<number, Address> = {
+export const SERVICE_REGISTRY_TOKEN_UTILITY_ADDRESSES: Addresses = {
   [mainnet.id]: '0x3Fb926116D454b95c669B6Bf2E7c3bad8d19affA',
   [optimism.id]: '0xBb7e1D6Cb6F243D6bdE81CE92a9f2aFF7Fbe7eac',
   [gnosis.id]: '0xa45E64d13A30a51b91ae0eb182e88a40e9b18eD8',
@@ -76,7 +89,7 @@ export const SERVICE_REGISTRY_TOKEN_UTILITY_ADDRESSES: Record<number, Address> =
   [celo.id]: '0x3d77596beb0f130a4415df3D2D8232B3d3D31e44',
 };
 
-export const STAKING_TOKEN_ADDRESSES: Record<number, Address> = {
+export const STAKING_TOKEN_ADDRESSES: Addresses = {
   [mainnet.id]: '0x0001A500A6B18995B03f44bb040A5fFc28E45CB0',
   [optimism.id]: '0xFC2E6e6BCbd49ccf3A5f029c79984372DcBFE527',
   [gnosis.id]: '0xcE11e14225575945b8E6Dc0D4F2dD4C570f79d9f',
@@ -84,4 +97,10 @@ export const STAKING_TOKEN_ADDRESSES: Record<number, Address> = {
   [base.id]: '0x54330d28ca3357F294334BDC454a032e7f353416',
   [arbitrum.id]: '0x3d77596beb0f130a4415df3D2D8232B3d3D31e44',
   [celo.id]: '' as Address,
+};
+
+const validChainIds = Object.keys(IMPLEMENTATION_ADDRESSES);
+
+export const isSupportedChainId = (chainId: number): chainId is ChainId => {
+  return chainId in validChainIds;
 };
