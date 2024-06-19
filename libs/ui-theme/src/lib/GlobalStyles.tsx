@@ -34,7 +34,7 @@ export const GlobalStyles = createGlobalStyle`
     margin-bottom: 0px;
   }
   .mb-8 {
-    margin-bottom: 8px;
+    margin-bottom: 8px !important;
   }
   .mb-12 {
     margin-bottom: 12px;
@@ -71,6 +71,9 @@ export const GlobalStyles = createGlobalStyle`
   }
   .mr-16 {
     margin-right: 16px;
+  }
+  .ml-4 {
+    margin-left: 4px;
   }
   .ml-8 {
     margin-left: 8px;

@@ -9,6 +9,7 @@ const ipfs = create({
   protocol: 'https',
 });
 
+// TODO: move to shared libs?
 export const getIpfsHashHelper = async (info, hashType) => {
   const updatedInfo = {
     ...info,

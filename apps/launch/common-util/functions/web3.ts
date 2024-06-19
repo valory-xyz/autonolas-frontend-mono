@@ -1,8 +1,15 @@
+import { BaseContractMethod, Contract } from 'ethers';
+import { Address } from 'viem';
 import Web3 from 'web3';
 import { AbiItem } from 'web3-utils';
 
-import { VOTE_WEIGHTING } from 'libs/util-contracts/src/lib/abiAndAddresses';
+import { sendTransaction as sendTransactionFn } from '@autonolas/frontend-library';
 
+import { RPC_URLS } from 'libs/util-constants/src';
+import { STAKING_FACTORY, VOTE_WEIGHTING } from 'libs/util-contracts/src/lib/abiAndAddresses';
+import { getEstimatedGasLimit } from 'libs/util-functions/src';
+
+import { SUPPORTED_CHAINS } from 'common-util/config/wagmi';
 import { getChainId, getProvider } from 'common-util/functions/frontend-library';
 
 /**
@@ -31,4 +38,39 @@ export const getVoteWeightingContract = () => {
   const address = (VOTE_WEIGHTING.addresses as Record<number, string>)[chainId as number];
   const contract = getContract(abi, address);
   return contract;
+};
+
+export const getStakingFactoryContract = () => {
+  const { chainId } = getWeb3Details();
+  const abi = STAKING_FACTORY.abi as AbiItem[];
+  const address = (STAKING_FACTORY.addresses as Record<number, string>)[chainId as number];
+  const contract = getContract(abi, address);
+  return contract;
+};
+
+export const sendTransaction = async (methodFn: any, account: Address) => {
+  const estimatedGas = await getEstimatedGasLimit(methodFn, account);
+  const fn = methodFn.send({ from: account, estimatedGas });
+
+  return sendTransactionFn(fn, account, {
+    supportedChains: SUPPORTED_CHAINS,
+    rpcUrls: RPC_URLS,
+  });
+};
+
+type CreateContractParams = {
+  implementation: Address;
+  initPayload: string;
+  account: Address;
+};
+export const createStakingContract = async ({
+  implementation,
+  initPayload,
+  account,
+}: CreateContractParams) => {
+  const contract = getStakingFactoryContract();
+  const createFn = contract.methods.createStakingInstance(implementation, initPayload);
+  const result = await sendTransaction(createFn, account);
+
+  return result;
 };

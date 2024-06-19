@@ -4,9 +4,8 @@ import styled from 'styled-components';
 import { mainnet } from 'viem/chains';
 import { useEnsName } from 'wagmi';
 
-import { CHAIN_NAMES, UNICODE_SYMBOLS } from 'libs/util-constants/src';
+import { CHAIN_NAMES, EXPLORER_URLS, UNICODE_SYMBOLS } from 'libs/util-constants/src';
 
-import { EXPLORE_URLS } from 'common-util/constants/urls';
 import { getAddressFromBytes32, truncateAddress } from 'common-util/functions';
 import { useContractParams } from 'hooks/index';
 import { useAppSelector } from 'store/index';
@@ -54,7 +53,7 @@ const ContractPageContent = ({ contract }: ContractPageContentProps) => {
             <Text type="secondary">Owner address</Text>
             {contractParams && !isEnsNameFetching ? (
               <a
-                href={`${EXPLORE_URLS[contract.chainId]}/address/${contractParams.deployer}`}
+                href={`${EXPLORER_URLS[contract.chainId]}/address/${contractParams.deployer}`}
                 target="_blank"
               >
                 {`${ensName || truncateAddress(contractParams.deployer)} ${
@@ -72,7 +71,7 @@ const ContractPageContent = ({ contract }: ContractPageContentProps) => {
           <Space direction="vertical">
             <Text type="secondary">Contract address</Text>
             <a
-              href={`${EXPLORE_URLS[contract.chainId]}/address/${formattedAddress}`}
+              href={`${EXPLORER_URLS[contract.chainId]}/address/${formattedAddress}`}
               target="_blank"
             >
               {`${truncateAddress(formattedAddress)} ${UNICODE_SYMBOLS.EXTERNAL_LINK}`}
