@@ -1,5 +1,5 @@
-import { InfoCircleOutlined } from '@ant-design/icons';
-import { Alert, Button, Flex, Popover, Table, Typography } from 'antd';
+import { CheckCircleOutlined, InfoCircleOutlined } from '@ant-design/icons';
+import { Alert, Button, Flex, Popover, Table, Tag, Typography } from 'antd';
 import type { TableProps } from 'antd';
 import Link from 'next/link';
 import React, { FC, useMemo } from 'react';
@@ -66,11 +66,20 @@ const useColumns = () => {
         title: NominatedForIncentivesPopover,
         key: 'action',
         width: '25%',
-        render: (_, record) => (
-          <Button type="primary" disabled={record.isNominated}>
-            {record.isNominated ? 'Nominated' : 'Nominate'}
-          </Button>
-        ),
+        render: (_, record) => {
+          return (
+            <Flex justify="center">
+              {record.isNominated ? (
+                <Tag color="success">
+                  <CheckCircleOutlined />
+                  &nbsp;Nominated
+                </Tag>
+              ) : (
+                <Button type="primary">Nominate</Button>
+              )}
+            </Flex>
+          );
+        },
       },
     ],
     [networkName],
