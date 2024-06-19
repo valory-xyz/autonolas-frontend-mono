@@ -11,6 +11,7 @@ import {
   Tag,
   Typography,
 } from 'antd';
+import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { useRouter } from 'next/router';
 import { useState } from 'react';
@@ -46,6 +47,7 @@ import {
   TextWithTooltip,
   Title,
   WrongNetworkAlert,
+  checkImplementationVerified,
 } from './utils';
 
 const { Paragraph, Text } = Typography;
@@ -74,8 +76,6 @@ export const CreateStakingContract = () => {
 
     if (!chain?.id) return;
 
-    console.log('chain', chain.id);
-
     if (!isSupportedChainId(chain.id)) {
       throw new Error('Not supported chainId');
     }
@@ -88,9 +88,8 @@ export const CreateStakingContract = () => {
     setError(null);
     setIsLoading(true);
 
-    // TODO: add validations
-
     const { name, description, maxNumServices, rewardsPerSecond } = values;
+
     try {
       const metadataHash = await getIpfsHash({ name, description });
 
@@ -102,6 +101,11 @@ export const CreateStakingContract = () => {
       });
 
       const implementation = IMPLEMENTATION_ADDRESSES[chain.id];
+
+      // Validations
+      if (!checkImplementationVerified(chain.id, implementation)) {
+        return;
+      }
 
       const result = await createStakingContract({ implementation, initPayload, account });
       setIsLoading(false);
@@ -186,7 +190,9 @@ export const CreateStakingContract = () => {
             </Col>
           </Row>
           <Flex justify="end" gap={12}>
-            <Button>Cancel</Button>
+            <Link href={`/${chainName}/${URL.myStakingContracts}`} passHref>
+              <Button>Cancel</Button>
+            </Link>
             <Button type="primary" htmlType="submit" loading={isLoading}>
               Create contract
             </Button>

@@ -1,10 +1,16 @@
 import { InfoCircleOutlined } from '@ant-design/icons';
-import { Alert, Tooltip, Typography } from 'antd';
+import { readContract } from '@wagmi/core';
+import { Alert, Tooltip, Typography, notification } from 'antd';
+import { ethers } from 'ethers';
 import styled from 'styled-components';
+import { Address } from 'viem';
 import { mainnet } from 'viem/chains';
 
 import { COLOR } from 'libs/ui-theme/src';
 import { CHAIN_NAMES, EXPLORER_URLS, UNICODE_SYMBOLS } from 'libs/util-constants/src';
+import { STAKING_FACTORY, STAKING_VERIFIER } from 'libs/util-contracts/src/lib/abiAndAddresses';
+
+import { wagmiConfig } from 'common-util/config/wagmi';
 
 const { Paragraph, Text } = Typography;
 
@@ -109,3 +115,29 @@ export const ErrorAlert = ({
     }
   />
 );
+
+// Checks if implementation is verified
+export const checkImplementationVerified = async (chainId: number, implementation: Address) => {
+  const verifierAddress = (await readContract(wagmiConfig, {
+    abi: STAKING_FACTORY.abi,
+    address: (STAKING_FACTORY.addresses as Record<number, Address>)[chainId],
+    chainId,
+    functionName: 'verifier',
+  })) as Address;
+
+  if (verifierAddress === ethers.ZeroAddress) return true;
+
+  const result = await readContract(wagmiConfig, {
+    abi: STAKING_VERIFIER.abi,
+    address: verifierAddress,
+    chainId,
+    functionName: 'verifyImplementation',
+    args: [implementation],
+  });
+
+  if (!result) {
+    notification.error({ message: 'Selected implementation is not verified' });
+  }
+
+  return result;
+};
