@@ -2,6 +2,7 @@ import { CheckCircleOutlined, InfoCircleOutlined } from '@ant-design/icons';
 import { Alert, Button, Flex, Popover, Table, Tag, Typography } from 'antd';
 import type { TableProps } from 'antd';
 import Link from 'next/link';
+import { useRouter } from 'next/router';
 import React, { FC, useMemo } from 'react';
 
 import { GOVERN_URL, URL } from 'common-util/constants/urls';
@@ -30,6 +31,7 @@ const NominatedForIncentivesPopover = () => (
 );
 
 const useColumns = () => {
+  const router = useRouter();
   const { networkName } = useAppSelector((state) => state.network);
 
   const columns: TableProps<MyStakingContract>['columns'] = useMemo(
@@ -75,14 +77,16 @@ const useColumns = () => {
                   &nbsp;Nominated
                 </Tag>
               ) : (
-                <Button type="primary">Nominate</Button>
+                <Button type="primary" onClick={() => router.push(`/${URL.nominateContract}`)}>
+                  Nominate
+                </Button>
               )}
             </Flex>
           );
         },
       },
     ],
-    [networkName],
+    [networkName, router],
   );
 
   return columns;
