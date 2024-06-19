@@ -10,7 +10,7 @@ type LaunchState = {
 };
 
 const initialState: LaunchState = {
-  isMyStakingContractsLoading: false,
+  isMyStakingContractsLoading: true,
   myStakingContracts: [],
 };
 
@@ -18,7 +18,7 @@ export const launchSlice = createSlice({
   name: 'launch',
   initialState,
   reducers: {
-    setStakingContracts: (state, action: PayloadAction<LaunchState['myStakingContracts']>) => {
+    setMyStakingContracts: (state, action: PayloadAction<LaunchState['myStakingContracts']>) => {
       state.myStakingContracts = action.payload;
       state.isMyStakingContractsLoading = false;
     },
@@ -26,5 +26,5 @@ export const launchSlice = createSlice({
   },
 });
 
-export const { setStakingContracts, clearState } = launchSlice.actions;
+export const { setMyStakingContracts, clearState } = launchSlice.actions;
 export const launchReducer = launchSlice.reducer;
