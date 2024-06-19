@@ -9,7 +9,7 @@ import { useAccount } from 'wagmi';
 import { UNICODE_SYMBOLS } from 'libs/util-constants/src';
 import { CHAIN_NAMES } from 'libs/util-constants/src';
 
-import { URL } from 'common-util/constants/urls';
+import { GOVERN_URL, URL } from 'common-util/constants/urls';
 import { useAppSelector } from 'store/index';
 
 import { LoginV2 } from '../Login';
@@ -97,7 +97,7 @@ export const MyStakingContracts = () => {
 
   return (
     <StyledMain>
-      <Link href={URL.myStakingContracts} target="_blank">
+      <Link href={GOVERN_URL} target="_blank">
         Explore all nominated staking contracts on Olas Govern&nbsp;
         {UNICODE_SYMBOLS.EXTERNAL_LINK}
       </Link>
