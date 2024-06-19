@@ -1,5 +1,5 @@
 export type MyStakingContract = {
-  id: string; // TODO: check if possible
+  id: string;
   name: string;
   description: string;
   template: string;
