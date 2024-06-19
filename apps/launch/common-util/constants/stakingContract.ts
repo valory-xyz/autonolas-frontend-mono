@@ -99,8 +99,6 @@ export const STAKING_TOKEN_ADDRESSES: Addresses = {
   [celo.id]: '' as Address,
 };
 
-const validChainIds = Object.keys(IMPLEMENTATION_ADDRESSES);
-
 export const isSupportedChainId = (chainId: number): chainId is ChainId => {
-  return chainId in validChainIds;
+  return chainId in IMPLEMENTATION_ADDRESSES;
 };
