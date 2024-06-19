@@ -1,5 +1,5 @@
 import { Address } from 'viem';
-import { arbitrum, base, celo, gnosis, goerli, mainnet, optimism, polygon } from 'viem/chains';
+import { arbitrum, base, celo, gnosis, mainnet, optimism, polygon } from 'viem/chains';
 
 export const CONTRACT_TEMPLATES = [
   {

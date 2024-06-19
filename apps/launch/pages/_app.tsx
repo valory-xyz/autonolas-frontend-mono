@@ -13,7 +13,6 @@ import Web3ModalProvider from '../context/Web3ModalProvider';
 import { wrapper } from '../store';
 
 const DataProvider: FC<PropsWithChildren> = ({ children }) => {
-  // init data
   useGetMyStakingContracts();
 
   return <>{children}</>;

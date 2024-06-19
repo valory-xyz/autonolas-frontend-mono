@@ -1,4 +1,3 @@
-import { ethers } from 'ethers';
 import { kebabCase } from 'lodash';
 import { useEffect, useState } from 'react';
 import { Abi, Address, parseAbiItem } from 'viem';
@@ -11,9 +10,12 @@ import {
   STAKING_TOKEN,
   VOTE_WEIGHTING,
 } from 'libs/util-contracts/src/lib/abiAndAddresses';
+import { getBytes32FromAddress } from 'libs/util-functions/src';
 
+import { SupportedChain } from 'common-util/constants/rpcs';
+import { CONTRACT_TEMPLATES } from 'common-util/constants/stakingContract';
 import { useAppDispatch } from 'store/index';
-import { setStakingContracts } from 'store/launch';
+import { setMyStakingContracts } from 'store/launch';
 import { MyStakingContract } from 'types/index';
 
 type Metadata = { name: string; description: string };
@@ -32,10 +34,6 @@ const getMetadata = async (tokenUri: undefined | null | string) => {
   }
 
   return null;
-};
-
-const getBytes32FromAddress = (address: Address | string) => {
-  return ethers.zeroPadValue(address, 32) as Address;
 };
 
 const useGetAllNominees = () => {
@@ -58,8 +56,8 @@ const useGetAllNominees = () => {
 };
 
 const useGetMyStakingContractsMetadata = (addresses: Address[]) => {
-  const [metadata, setMetadata] = useState<Metadata[]>([]);
   const { chainId } = useAccount();
+  const [metadata, setMetadata] = useState<Metadata[]>([]);
 
   const contracts = addresses.map((address) => ({
     address,
@@ -74,7 +72,7 @@ const useGetMyStakingContractsMetadata = (addresses: Address[]) => {
     query: {
       enabled: addresses.length > 0,
       select: async (list) => {
-        const metadataHashList = list.map((rawData) => rawData.result as string);
+        const metadataHashList = list.map(({ result }) => result as string);
         const metadataPromise = await Promise.allSettled(
           metadataHashList.map(async (hash) => await getMetadata(hash)),
         );
@@ -112,7 +110,7 @@ const useGetInstanceAddresses = () => {
 
   const [instanceAddresses, setInstanceAddresses] = useState<Address[]>([]);
 
-  const currentChainId: 1 | 100 | 137 = chainId as 1 | 100 | 137; // TODO: fix me
+  const currentChainId = chainId as SupportedChain;
 
   useEffect(() => {
     (async () => {
@@ -129,12 +127,9 @@ const useGetInstanceAddresses = () => {
           toBlock: 'latest',
         });
 
-        const updatedLogs = eventLogs.map((log) => {
-          const instanceAddress = log.args[1] as Address;
-          return instanceAddress;
-        });
-
-        setInstanceAddresses(updatedLogs);
+        // log.args[1] is the instance address
+        const addresses = eventLogs.map((log) => log.args[1] as Address);
+        setInstanceAddresses(addresses);
       } catch (e) {
         window.console.error(e);
       }
@@ -157,16 +152,17 @@ export const useGetMyStakingContracts = () => {
   useEffect(() => {
     if (!myStakingContractsMetadata) return;
     if (myStakingContractsMetadata.length === 0) return;
+    if (!nominees) return;
 
     const myStakingContracts: MyStakingContract[] = myStakingContractsMetadata.map((metadata) => ({
       id: kebabCase(metadata.name),
       name: metadata.name,
       description: metadata.description,
-      template: 'staking',
+      template: CONTRACT_TEMPLATES[0].title,
       isNominated:
-        nominees?.some((nominee) => instanceAddressesInBytes32.includes(nominee.account)) ?? false,
+        nominees.some((nominee) => instanceAddressesInBytes32.includes(nominee.account)) ?? false,
     }));
 
-    dispatch(setStakingContracts(myStakingContracts));
+    dispatch(setMyStakingContracts(myStakingContracts));
   }, [dispatch, instanceAddressesInBytes32, nominees, myStakingContractsMetadata]);
 };
