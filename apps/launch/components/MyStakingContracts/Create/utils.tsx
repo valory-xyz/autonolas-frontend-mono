@@ -1,43 +1,10 @@
 import { InfoCircleOutlined } from '@ant-design/icons';
-import {
-  Alert,
-  Button,
-  Card,
-  Col,
-  Divider,
-  Flex,
-  Form,
-  Input,
-  InputNumber,
-  Row,
-  Tag,
-  Tooltip,
-  Typography,
-} from 'antd';
-import { useParams } from 'next/navigation';
-import { useState } from 'react';
+import { Alert, Tooltip, Typography } from 'antd';
 import styled from 'styled-components';
 import { mainnet } from 'viem/chains';
-import { useAccount } from 'wagmi';
 
 import { COLOR } from 'libs/ui-theme/src';
 import { CHAIN_NAMES, EXPLORER_URLS, UNICODE_SYMBOLS } from 'libs/util-constants/src';
-
-import {
-  CONTRACT_TEMPLATES,
-  IMPLEMENTATION_ADDRESSES,
-  isSupportedChainId,
-} from 'common-util/constants/stakingContract';
-import {
-  createStakingContract,
-  getErrorInfo,
-  getIpfsHash,
-  getStakingContractInitPayload,
-  notifyConnectWallet,
-  notifyWrongNetwork,
-} from 'common-util/functions';
-import { getChainIdFromPath } from 'common-util/hooks/useNetworkHelpers';
-import { useAppSelector } from 'store/index';
 
 const { Paragraph, Text } = Typography;
 

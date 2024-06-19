@@ -1,5 +1,4 @@
 import {
-  Alert,
   Button,
   Card,
   Col,
@@ -35,6 +34,7 @@ import {
 import { getChainIdFromPath } from 'common-util/hooks/useNetworkHelpers';
 
 import {
+  ErrorAlert,
   ErrorType,
   FormValues,
   Hint,
@@ -112,30 +112,10 @@ export const CreateStakingContract = () => {
     <StyledMain>
       <Card>
         <Title>Create staking contract on {CHAIN_NAMES[networkId || mainnet.id]}</Title>
+
         {wrongNetwork && <WrongNetworkAlert networkId={networkId} />}
-        {error && (
-          <Alert
-            className="mb-24"
-            message={
-              <>
-                {error.message}
-                {error.transactionHash && (
-                  <>
-                    <br />
-                    <a
-                      href={`${[EXPLORER_URLS[networkId || mainnet.id]]}/tx/${
-                        error.transactionHash
-                      }`}
-                      target="_blank"
-                    >{`Explore transaction hash ${UNICODE_SYMBOLS.EXTERNAL_LINK}`}</a>
-                  </>
-                )}
-              </>
-            }
-            type="error"
-            showIcon
-          />
-        )}
+        {error && <ErrorAlert error={error} networkId={networkId} />}
+
         <Form layout="vertical" onFinish={handleCreate} requiredMark={false}>
           <Form.Item
             label={<Text type="secondary">Name</Text>}
