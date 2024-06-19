@@ -36,7 +36,7 @@ export const CONTRACT_COMMON_VALUES = {
 
 // TODO: update addresses when real contracts are deployed
 export const IMPLEMENTATION_ADDRESSES: Record<number, Address> = {
-  [mainnet.id]: '0xbF722d9B370C52Dcdd7f33207eb85839fC0161f9',
+  [mainnet.id]: '0x94c579253B3780f9fdEA6e7995EDe38142ef85A7',
   [optimism.id]: '' as Address,
   [gnosis.id]: '0x2E90D1049642b3f52d3B7Aa078A7563e58aA4913',
   [polygon.id]: '0x25b54b4f7fE78248079061Cc9bAA092611705a14',
