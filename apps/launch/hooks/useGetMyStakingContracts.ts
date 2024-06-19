@@ -73,17 +73,24 @@ const useGetMyStakingContractsMetadata = (addresses: Address[]) => {
       enabled: addresses.length > 0,
       select: async (list) => {
         const metadataHashList = list.map(({ result }) => result as string);
-        const metadataPromise = await Promise.allSettled(
-          metadataHashList.map(async (hash) => await getMetadata(hash)),
-        );
-        const metadata: Metadata[] = metadataPromise
-          .filter((item) => item.status === 'fulfilled')
-          .map((item) => ({
-            name: item.value['name'],
-            description: item.value['description'],
-          }));
+        try {
+          const metadataList = await Promise.allSettled<Metadata>(
+            metadataHashList.map((hash) => getMetadata(hash)),
+          );
 
-        return metadata;
+          const results: Metadata[] = [];
+          for (const response of metadataList) {
+            if (response.status === 'fulfilled' && response.value) {
+              results.push(response.value);
+            }
+          }
+
+          return results.filter((metadata) => !!metadata);
+        } catch (error) {
+          window.console.error(error);
+        }
+
+        return [];
       },
     },
   });
