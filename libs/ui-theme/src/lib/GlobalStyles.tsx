@@ -43,13 +43,16 @@ export const GlobalStyles = createGlobalStyle`
     margin-bottom: 16px;
   }
   .mb-24 {
-    margin-bottom: 24px;
+    margin-bottom: 24px !important;
   }
   .mb-48 {
     margin-bottom: 48px;
   }
   .mt-0 {
     margin-top: 0px;
+  }
+  .mt-4 {
+    margin-top: 4px;
   }
   .mt-8 {
     margin-top: 8px;
