@@ -28,7 +28,7 @@ export const getStakingContractInitPayload = ({
   const stakingParams = {
     metadataHash,
     maxNumServices,
-    rewardsPerSecond: `${rewardsPerSecond}`,
+    rewardsPerSecond: ethers.parseUnits(`${rewardsPerSecond}`, 18),
     ...CONTRACT_COMMON_VALUES,
     serviceRegistry: SERVICE_REGISTRY_ADDRESSES[chainId],
     activityChecker: ACTIVITY_CHECKER_ADDRESSES[chainId],
