@@ -52,7 +52,7 @@ const Proposal = ({ title, description, imageSrc, button }: Proposal) => {
   return (
     <Card>
       <Card.Meta
-        avatar={<Image src={imageSrc} alt={''} width={24} height={24} className="mt-4" />}
+        avatar={<Image src={imageSrc} alt={title} width={24} height={24} className="mt-4" />}
         title={title}
         description={
           <>
