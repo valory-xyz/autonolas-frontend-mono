@@ -103,7 +103,8 @@ export const CreateStakingContract = () => {
       const implementation = IMPLEMENTATION_ADDRESSES[chain.id];
 
       // Validations
-      if (!checkImplementationVerified(chain.id, implementation)) {
+      if (!(await checkImplementationVerified(chain.id, implementation))) {
+        setIsLoading(false);
         return;
       }
 
