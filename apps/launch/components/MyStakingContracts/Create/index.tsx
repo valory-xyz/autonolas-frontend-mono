@@ -12,6 +12,7 @@ import {
   Typography,
 } from 'antd';
 import { useParams } from 'next/navigation';
+import { useRouter } from 'next/router';
 import { useState } from 'react';
 import { mainnet } from 'viem/chains';
 import { useAccount } from 'wagmi';
@@ -23,6 +24,7 @@ import {
   IMPLEMENTATION_ADDRESSES,
   isSupportedChainId,
 } from 'common-util/constants/stakingContract';
+import { URL } from 'common-util/constants/urls';
 import {
   createStakingContract,
   getErrorInfo,
@@ -52,6 +54,8 @@ const contractTemplate = CONTRACT_TEMPLATES[0];
 const INPUT_WIDTH_STYLE = { width: '100%' };
 
 export const CreateStakingContract = () => {
+  const router = useRouter();
+
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<ErrorType>(null);
   const params = useParams<{ network: string }>();
@@ -70,7 +74,9 @@ export const CreateStakingContract = () => {
 
     if (!chain?.id) return;
 
-    if (!isSupportedChainId(chain?.id)) {
+    console.log('chain', chain.id);
+
+    if (!isSupportedChainId(chain.id)) {
       throw new Error('Not supported chainId');
     }
 
@@ -97,8 +103,14 @@ export const CreateStakingContract = () => {
 
       const implementation = IMPLEMENTATION_ADDRESSES[chain.id];
 
-      await createStakingContract({ implementation, initPayload, account });
+      const result = await createStakingContract({ implementation, initPayload, account });
       setIsLoading(false);
+
+      if (result) {
+        // TODO: once request contracts list task is done, need to get InstanceCreated event
+        // info from the result and add it to the staking contracts list
+        router.push(`/${chainName}/${URL.myStakingContracts}`);
+      }
     } catch (error) {
       console.log(error);
       setIsLoading(false);
