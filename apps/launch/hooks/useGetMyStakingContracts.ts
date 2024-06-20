@@ -1,4 +1,3 @@
-import { kebabCase } from 'lodash';
 import { useEffect, useState } from 'react';
 import { Abi, Address, parseAbiItem } from 'viem';
 import { mainnet } from 'viem/chains';
@@ -53,7 +52,7 @@ const useGetAllNominees = () => {
 
 const useGetMyStakingContractsMetadata = (addresses: Address[]) => {
   const { chainId } = useAccount();
-  const [metadata, setMetadata] = useState<Metadata[]>([]);
+  const [metadata, setMetadata] = useState<(Metadata | null)[]>([]);
 
   const contracts = addresses.map((address) => ({
     address,
@@ -73,14 +72,19 @@ const useGetMyStakingContractsMetadata = (addresses: Address[]) => {
             metadataHashList.map((hash) => getMetadata(hash)),
           );
 
-          const results: Metadata[] = [];
+          const results: (Metadata | null)[] = [];
           for (const response of metadataList) {
             if (response.status === 'fulfilled' && response.value) {
               results.push(response.value);
+            } else {
+              // to maintain the order of the addresses, push null
+              // Eg: if the metadata for the 2nd address is not available or failed to fetch,
+              //  push null at 2nd index
+              results.push(null);
             }
           }
 
-          return results.filter((metadata) => !!metadata);
+          return results;
         } catch (error) {
           window.console.error(error);
         }
@@ -157,24 +161,30 @@ export const useGetMyStakingContracts = () => {
     if (myStakingContractsMetadata.length === 0) return;
     if (!nominees) return;
 
-    // TODO: Mohan to check
     // if myStakingContracts is already set, do not update it
     if (myStakingContracts.length !== 0) return;
 
-    const myStakingContractsList: MyStakingContract[] = myStakingContractsMetadata.map(
-      (metadata) => ({
-        id: kebabCase(metadata.name),
-        name: metadata.name,
-        description: metadata.description,
-        template: CONTRACT_TEMPLATES[0].title,
-        isNominated:
-          nominees.some((nominee) => instanceAddressesInBytes32.includes(nominee.account)) ?? false,
-      }),
-    );
+    const myStakingContractsList: MyStakingContract[] = myStakingContractsMetadata
+      .map((metadata, index) => {
+        if (!metadata) return null;
+
+        return {
+          id: instanceAddresses[index],
+          name: metadata.name,
+          description: metadata.description,
+          template: CONTRACT_TEMPLATES[0].title,
+          isNominated:
+            nominees.some((nominee) => instanceAddressesInBytes32.includes(nominee.account)) ??
+            false,
+        };
+      })
+      // filter out null values (ie. contracts without metadata - failed to fetch or not available)
+      .filter((contract) => contract !== null);
 
     dispatch(setMyStakingContracts(myStakingContractsList));
   }, [
     dispatch,
+    instanceAddresses,
     instanceAddressesInBytes32,
     nominees,
     myStakingContractsMetadata,
