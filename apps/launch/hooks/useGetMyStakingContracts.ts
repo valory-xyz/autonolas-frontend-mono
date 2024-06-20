@@ -179,7 +179,7 @@ export const useGetMyStakingContracts = () => {
         };
       })
       // filter out null values (ie. contracts without metadata - failed to fetch or not available)
-      .filter((contract) => contract !== null);
+      .filter((c): c is MyStakingContract => c !== null);
 
     dispatch(setMyStakingContracts(myStakingContractsList));
   }, [
