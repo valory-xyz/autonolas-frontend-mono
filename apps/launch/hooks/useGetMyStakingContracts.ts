@@ -152,6 +152,8 @@ export const useGetMyStakingContracts = () => {
   const nominees = useGetAllNominees();
   const { myStakingContracts } = useAppSelector((state) => state.launch);
 
+  const { networkId } = useAppSelector((state) => state.network);
+
   const instanceAddressesInBytes32 = instanceAddresses.map((address) =>
     getBytes32FromAddress(address),
   );
@@ -169,7 +171,8 @@ export const useGetMyStakingContracts = () => {
         if (!metadata) return null;
 
         return {
-          id: instanceAddressesInBytes32[index],
+          id: instanceAddresses[index],
+          chainId: networkId,
           name: metadata.name,
           description: metadata.description,
           template: CONTRACT_TEMPLATES[0].title,

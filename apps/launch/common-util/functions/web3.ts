@@ -63,6 +63,7 @@ type CreateContractParams = {
   initPayload: string;
   account: Address;
 };
+
 export const createStakingContract = async ({
   implementation,
   initPayload,
@@ -70,6 +71,20 @@ export const createStakingContract = async ({
 }: CreateContractParams) => {
   const contract = getStakingFactoryContract();
   const createFn = contract.methods.createStakingInstance(implementation, initPayload);
+  const result = await sendTransaction(createFn, account);
+
+  return result;
+};
+
+type AddNomineeParams = {
+  address: Address;
+  chainId: number;
+  account: Address;
+};
+
+export const addNominee = async ({ address, chainId, account }: AddNomineeParams) => {
+  const contract = getVoteWeightingContract();
+  const createFn = contract.methods.addNomineeEVM(address, chainId);
   const result = await sendTransaction(createFn, account);
 
   return result;
