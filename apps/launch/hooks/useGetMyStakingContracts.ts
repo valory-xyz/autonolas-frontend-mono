@@ -14,7 +14,7 @@ import { getBytes32FromAddress } from 'libs/util-functions/src';
 
 import { SupportedChain } from 'common-util/constants/rpcs';
 import { CONTRACT_TEMPLATES } from 'common-util/constants/stakingContract';
-import { useAppDispatch } from 'store/index';
+import { useAppDispatch, useAppSelector } from 'store/index';
 import { setMyStakingContracts } from 'store/launch';
 import { MyStakingContract } from 'types/index';
 
@@ -43,12 +43,8 @@ const useGetAllNominees = () => {
     abi: VOTE_WEIGHTING.abi,
     chainId: mainnet.id,
     functionName: 'getAllNominees',
-    args: [],
     query: {
-      select: (data: unknown) => {
-        const list = data as { account: Address; chainId: bigint }[];
-        return list.filter((nominee) => nominee.chainId === BigInt(mainnet.id));
-      },
+      select: (data: unknown) => data as { account: Address; chainId: bigint }[],
     },
   });
 
@@ -64,7 +60,6 @@ const useGetMyStakingContractsMetadata = (addresses: Address[]) => {
     abi: STAKING_TOKEN.abi as Abi,
     chainId,
     functionName: 'metadataHash',
-    args: [],
   }));
 
   const { data } = useReadContracts({
@@ -113,20 +108,20 @@ const useGetMyStakingContractsMetadata = (addresses: Address[]) => {
 
 const useGetInstanceAddresses = () => {
   const client = usePublicClient();
-  const { chainId } = useAccount();
+  const { networkId } = useAppSelector((state) => state.network);
 
   const [instanceAddresses, setInstanceAddresses] = useState<Address[]>([]);
 
-  const currentChainId = chainId as SupportedChain;
+  const currentNetworkId = networkId as SupportedChain;
 
   useEffect(() => {
     (async () => {
-      if (!currentChainId) return;
+      if (!currentNetworkId) return;
       if (!client) return;
 
       try {
         const eventLogs = await client.getLogs({
-          address: STAKING_FACTORY.addresses[`${currentChainId}`] as Address,
+          address: STAKING_FACTORY.addresses[`${currentNetworkId}`] as Address,
           event: parseAbiItem(
             'event InstanceCreated(address indexed, address indexed, address indexed)',
           ),
@@ -141,7 +136,7 @@ const useGetInstanceAddresses = () => {
         window.console.error(e);
       }
     })();
-  }, [currentChainId, client]);
+  }, [currentNetworkId, client]);
 
   return instanceAddresses;
 };
@@ -151,6 +146,7 @@ export const useGetMyStakingContracts = () => {
   const instanceAddresses = useGetInstanceAddresses();
   const myStakingContractsMetadata = useGetMyStakingContractsMetadata(instanceAddresses);
   const nominees = useGetAllNominees();
+  const { myStakingContracts } = useAppSelector((state) => state.launch);
 
   const instanceAddressesInBytes32 = instanceAddresses.map((address) =>
     getBytes32FromAddress(address),
@@ -161,15 +157,27 @@ export const useGetMyStakingContracts = () => {
     if (myStakingContractsMetadata.length === 0) return;
     if (!nominees) return;
 
-    const myStakingContracts: MyStakingContract[] = myStakingContractsMetadata.map((metadata) => ({
-      id: kebabCase(metadata.name),
-      name: metadata.name,
-      description: metadata.description,
-      template: CONTRACT_TEMPLATES[0].title,
-      isNominated:
-        nominees.some((nominee) => instanceAddressesInBytes32.includes(nominee.account)) ?? false,
-    }));
+    // TODO: Mohan to check
+    // if myStakingContracts is already set, do not update it
+    if (myStakingContracts.length !== 0) return;
 
-    dispatch(setMyStakingContracts(myStakingContracts));
-  }, [dispatch, instanceAddressesInBytes32, nominees, myStakingContractsMetadata]);
+    const myStakingContractsList: MyStakingContract[] = myStakingContractsMetadata.map(
+      (metadata) => ({
+        id: kebabCase(metadata.name),
+        name: metadata.name,
+        description: metadata.description,
+        template: CONTRACT_TEMPLATES[0].title,
+        isNominated:
+          nominees.some((nominee) => instanceAddressesInBytes32.includes(nominee.account)) ?? false,
+      }),
+    );
+
+    dispatch(setMyStakingContracts(myStakingContractsList));
+  }, [
+    dispatch,
+    instanceAddressesInBytes32,
+    nominees,
+    myStakingContractsMetadata,
+    myStakingContracts,
+  ]);
 };
