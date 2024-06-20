@@ -103,11 +103,11 @@ export const isSupportedChainId = (chainId: number): chainId is ChainId => {
   return chainId in IMPLEMENTATION_ADDRESSES;
 };
 
-type BlockNumber = {
+type BlockNumbers = {
   [key in ChainId]: number;
 };
 
-export const blockNumbers: BlockNumber = {
+export const blockNumbers: BlockNumbers = {
   [mainnet.id]: 20009952,
   [optimism.id]: 0,
   [gnosis.id]: 34225443,
