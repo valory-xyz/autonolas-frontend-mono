@@ -2,7 +2,6 @@ import { InfoCircleOutlined } from '@ant-design/icons';
 import { readContract } from '@wagmi/core';
 import { Alert, Tooltip, Typography, notification } from 'antd';
 import { ethers } from 'ethers';
-import styled from 'styled-components';
 import { Address } from 'viem';
 import { mainnet } from 'viem/chains';
 
@@ -13,23 +12,6 @@ import { STAKING_FACTORY, STAKING_VERIFIER } from 'libs/util-contracts/src/lib/a
 import { wagmiConfig } from 'common-util/config/wagmi';
 
 const { Paragraph, Text } = Typography;
-
-export const StyledMain = styled.main`
-  display: flex;
-  flex-direction: column;
-  max-width: 800px;
-  margin: 0 auto;
-`;
-
-export const Title = styled.h1`
-  font-size: 24px;
-  margin: 0 0 24px;
-`;
-
-export const Hint = styled(Paragraph)`
-  margin-top: 4px;
-  font-size: 14px;
-`;
 
 export type FormValues = {
   name: string;

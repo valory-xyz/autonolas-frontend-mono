@@ -36,20 +36,18 @@ import {
 } from 'common-util/functions';
 import { getChainIdFromPath } from 'common-util/hooks/useNetworkHelpers';
 
+import { Hint, StyledMain, Title } from './styles';
 import {
   DESCRIPTION_FIELD_RULES,
   ErrorAlert,
   ErrorType,
   FormValues,
-  Hint,
   MAX_NUM_SERVICES_FIELD_RULES,
   MaxNumServicesLabel,
   NAME_FIELD_RULES,
   REWARDS_PER_SECOND_FIELD_RULES,
   RewardsPerSecondLabel,
-  StyledMain,
   TextWithTooltip,
-  Title,
   WrongNetworkAlert,
   checkImplementationVerified,
 } from './utils';
