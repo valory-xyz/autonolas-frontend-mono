@@ -77,9 +77,9 @@ const useGetMyStakingContractsMetadata = (addresses: Address[]) => {
             if (response.status === 'fulfilled' && response.value) {
               results.push(response.value);
             } else {
-              // to maintain the order of the addresses, push null
+              // To maintain the order of the addresses, push null.
               // Eg: if the metadata for the 2nd address is not available or failed to fetch,
-              //  push null at 2nd index
+              // push null at 2nd index
               results.push(null);
             }
           }
@@ -133,7 +133,7 @@ const useGetInstanceAddresses = () => {
           toBlock: 'latest',
         });
 
-        // log.args[1] is the instance address
+        // log.args[1] = instance address
         const addresses = eventLogs.map((log) => log.args[1] as Address);
         setInstanceAddresses(addresses);
       } catch (e) {
@@ -179,7 +179,7 @@ export const useGetMyStakingContracts = () => {
         };
       })
       // filter out null values (ie. contracts without metadata - failed to fetch or not available)
-      .filter((c): c is MyStakingContract => c !== null);
+      .filter((contract): contract is MyStakingContract => contract !== null);
 
     dispatch(setMyStakingContracts(myStakingContractsList));
   }, [
