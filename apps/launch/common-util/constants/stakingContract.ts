@@ -1,3 +1,4 @@
+import { ethers } from 'ethers';
 import { Address } from 'viem';
 import { arbitrum, base, celo, gnosis, goerli, mainnet, optimism, polygon } from 'viem/chains';
 
@@ -12,8 +13,7 @@ export const CONTRACT_TEMPLATES = [
 
 export const CONTRACT_COMMON_VALUES = {
   // Minimum service staking deposit value required for staking
-  // TODO: should be able to pass Number('10000000000000000000') but get overflow. Check why
-  minStakingDeposit: 10,
+  minStakingDeposit: ethers.parseUnits('10', 18),
   // Min number of staking periods before the service can be unstaked
   minNumStakingPeriods: 3,
   // Max number of accumulated inactivity periods after which the service is evicted
