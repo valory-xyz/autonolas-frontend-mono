@@ -2,7 +2,6 @@ import { CheckCircleOutlined, InfoCircleOutlined } from '@ant-design/icons';
 import { Alert, Button, Flex, Popover, Table, Tag, Typography } from 'antd';
 import type { TableProps } from 'antd';
 import Link from 'next/link';
-import { useRouter } from 'next/router';
 import React, { FC, useMemo } from 'react';
 
 import { GOVERN_URL, URL } from 'common-util/constants/urls';
@@ -41,7 +40,9 @@ const useColumns = () => {
         key: 'name',
         width: '25%',
         render: (text, record) => (
-          <Link href={`/${networkName}/${URL.myStakingContracts}/${record.id}`}>{text}</Link>
+          <Link href={`/${networkName}/${URL.myStakingContracts}/${record.id}`} passHref>
+            {text}
+          </Link>
         ),
       },
       {
