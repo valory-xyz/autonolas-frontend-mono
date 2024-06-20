@@ -11,7 +11,7 @@ import {
 } from 'libs/util-contracts/src/lib/abiAndAddresses';
 import { getBytes32FromAddress } from 'libs/util-functions/src';
 
-import { ChainId } from 'common-util/constants/stakingContract';
+import { ChainId, blockNumbers } from 'common-util/constants/stakingContract';
 import { CONTRACT_TEMPLATES } from 'common-util/constants/stakingContract';
 import { useAppDispatch, useAppSelector } from 'store/index';
 import { setMyStakingContracts } from 'store/launch';
@@ -129,7 +129,7 @@ const useGetInstanceAddresses = () => {
           event: parseAbiItem(
             'event InstanceCreated(address indexed, address indexed, address indexed)',
           ),
-          fromBlock: BigInt(0),
+          fromBlock: BigInt(blockNumbers[currentNetworkId]),
           toBlock: 'latest',
         });
 
