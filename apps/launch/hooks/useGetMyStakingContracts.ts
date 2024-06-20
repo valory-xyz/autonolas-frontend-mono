@@ -11,7 +11,7 @@ import {
 } from 'libs/util-contracts/src/lib/abiAndAddresses';
 import { getBytes32FromAddress } from 'libs/util-functions/src';
 
-import { SupportedChain } from 'common-util/constants/rpcs';
+import { ChainId } from 'common-util/constants/stakingContract';
 import { CONTRACT_TEMPLATES } from 'common-util/constants/stakingContract';
 import { useAppDispatch, useAppSelector } from 'store/index';
 import { setMyStakingContracts } from 'store/launch';
@@ -116,7 +116,7 @@ const useGetInstanceAddresses = () => {
 
   const [instanceAddresses, setInstanceAddresses] = useState<Address[]>([]);
 
-  const currentNetworkId = networkId as SupportedChain;
+  const currentNetworkId = networkId as ChainId;
 
   useEffect(() => {
     (async () => {
