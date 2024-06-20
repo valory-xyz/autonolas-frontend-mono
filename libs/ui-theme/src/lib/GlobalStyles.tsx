@@ -61,7 +61,7 @@ export const GlobalStyles = createGlobalStyle`
     margin-top: 16px;
   }
   .mt-24 {
-    margin-top: 24px;
+    margin-top: 24px !important;
   }
   .mt-48 {
     margin-top: 48px;
