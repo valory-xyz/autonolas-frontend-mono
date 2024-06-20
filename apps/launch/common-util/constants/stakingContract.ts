@@ -1,6 +1,6 @@
 import { ethers } from 'ethers';
 import { Address } from 'viem';
-import { arbitrum, base, celo, gnosis, goerli, mainnet, optimism, polygon } from 'viem/chains';
+import { arbitrum, base, celo, gnosis, mainnet, optimism, polygon } from 'viem/chains';
 
 export const CONTRACT_TEMPLATES = [
   {
@@ -101,4 +101,18 @@ export const STAKING_TOKEN_ADDRESSES: Addresses = {
 
 export const isSupportedChainId = (chainId: number): chainId is ChainId => {
   return chainId in IMPLEMENTATION_ADDRESSES;
+};
+
+type BlockNumbers = {
+  [key in ChainId]: number;
+};
+
+export const blockNumbers: BlockNumbers = {
+  [mainnet.id]: 20009952,
+  [optimism.id]: 0,
+  [gnosis.id]: 34225443,
+  [polygon.id]: 57751430,
+  [base.id]: 0,
+  [arbitrum.id]: 0,
+  [celo.id]: 0,
 };

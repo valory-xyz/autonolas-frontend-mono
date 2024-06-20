@@ -1,9 +1,15 @@
+import { arbitrum, base, celo, gnosis, mainnet, optimism, polygon } from "viem/chains";
+
 export const STAKING_FACTORY = {
   contractName: 'StakingFactory',
   addresses: {
-    1: '0xC3f601fB1cAA6452fC60eC3887784421d20AE5DB',
-    100: '0x9F3408C6f34bfB6B0eC73F34f2845A8C703374C6',
-    137: '0xdbe987b33321B65695EB54F54ca486994F300FDb',
+    [mainnet.id]: '0xC3f601fB1cAA6452fC60eC3887784421d20AE5DB',
+    [optimism.id]: '',
+    [gnosis.id]: '0x9F3408C6f34bfB6B0eC73F34f2845A8C703374C6',
+    [polygon.id]: '0xdbe987b33321B65695EB54F54ca486994F300FDb',
+    [base.id]: '',
+    [arbitrum.id]: '',
+    [celo.id]: '',
   },
   abi: [
     {
