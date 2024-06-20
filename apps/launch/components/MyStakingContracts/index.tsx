@@ -1,7 +1,6 @@
 import { TableOutlined, WalletOutlined } from '@ant-design/icons';
 import { Button, Card, Flex, Spin, Typography } from 'antd';
 import Link from 'next/link';
-import { useRouter } from 'next/router';
 import styled from 'styled-components';
 import { match } from 'ts-pattern';
 import { useAccount } from 'wagmi';
@@ -54,16 +53,11 @@ const CreateContractMessage = () => (
 );
 
 const CreateContractButton = () => {
-  const router = useRouter();
   const { networkName } = useAppSelector((state) => state.network);
-
   return (
-    <Button
-      type="primary"
-      onClick={() => router.push(`/${networkName}/${URL.myStakingContracts}/create`)}
-    >
-      Create staking contract
-    </Button>
+    <Link href={`/${networkName}/${URL.myStakingContracts}/create`} passHref>
+      <Button type="primary">Create staking contract</Button>
+    </Link>
   );
 };
 
@@ -106,7 +100,7 @@ export const MyStakingContracts = () => {
         <Flex justify="space-between">
           <Title level={4} className="m-0">
             My staking contracts
-            {isAccountConnected && networkId && <>&nbsp;on {CHAIN_NAMES[networkId]}</>}
+            {isAccountConnected && networkId ? ` on ${CHAIN_NAMES[networkId]}` : ''}
           </Title>
 
           {myStakingContracts.length > 0 && <CreateContractButton />}
