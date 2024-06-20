@@ -102,3 +102,17 @@ export const STAKING_TOKEN_ADDRESSES: Addresses = {
 export const isSupportedChainId = (chainId: number): chainId is ChainId => {
   return chainId in IMPLEMENTATION_ADDRESSES;
 };
+
+type BlockNumber = {
+  [key in ChainId]: number;
+};
+
+export const blockNumbers: BlockNumber = {
+  [mainnet.id]: 20009952,
+  [optimism.id]: 0,
+  [gnosis.id]: 34225443,
+  [polygon.id]: 57751430,
+  [base.id]: 0,
+  [arbitrum.id]: 0,
+  [celo.id]: 0,
+};
