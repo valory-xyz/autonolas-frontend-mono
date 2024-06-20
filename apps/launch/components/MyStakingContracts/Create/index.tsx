@@ -14,7 +14,7 @@ import {
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { useRouter } from 'next/router';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { mainnet } from 'viem/chains';
 import { useAccount } from 'wagmi';
 
@@ -37,11 +37,15 @@ import {
 import { getChainIdFromPath } from 'common-util/hooks/useNetworkHelpers';
 
 import {
+  DESCRIPTION_FIELD_RULES,
   ErrorAlert,
   ErrorType,
   FormValues,
   Hint,
+  MAX_NUM_SERVICES_FIELD_RULES,
   MaxNumServicesLabel,
+  NAME_FIELD_RULES,
+  REWARDS_PER_SECOND_FIELD_RULES,
   RewardsPerSecondLabel,
   StyledMain,
   TextWithTooltip,
@@ -77,7 +81,7 @@ export const CreateStakingContract = () => {
     if (!chain?.id) return;
 
     if (!isSupportedChainId(chain.id)) {
-      throw new Error('Not supported chainId');
+      throw new Error('Network not supported');
     }
 
     if (wrongNetwork) {
@@ -104,12 +108,10 @@ export const CreateStakingContract = () => {
 
       // Validations
       if (!(await checkImplementationVerified(chain.id, implementation))) {
-        setIsLoading(false);
-        return;
+        throw new Error('Validation failed');
       }
 
       const result = await createStakingContract({ implementation, initPayload, account });
-      setIsLoading(false);
 
       if (result) {
         // TODO: once request contracts list task is done, need to get InstanceCreated event
@@ -118,26 +120,32 @@ export const CreateStakingContract = () => {
       }
     } catch (error) {
       console.log(error);
-      setIsLoading(false);
 
       const { message, transactionHash } = getErrorInfo(error as Error);
       setError({ message, transactionHash });
+    } finally {
+      setIsLoading(false);
     }
   };
+
+  const alertMessage = useMemo(() => {
+    if (wrongNetwork) return <WrongNetworkAlert networkId={networkId} />;
+    if (error) return <ErrorAlert error={error} networkId={networkId} />;
+    return null;
+  }, [wrongNetwork, error, networkId]);
 
   return (
     <StyledMain>
       <Card>
         <Title>Create staking contract on {CHAIN_NAMES[networkId || mainnet.id]}</Title>
 
-        {wrongNetwork && <WrongNetworkAlert networkId={networkId} />}
-        {error && <ErrorAlert error={error} networkId={networkId} />}
+        {alertMessage}
 
         <Form layout="vertical" onFinish={handleCreate} requiredMark={false}>
           <Form.Item
             label={<Text type="secondary">Name</Text>}
             name="name"
-            rules={[{ required: true }]}
+            rules={NAME_FIELD_RULES}
           >
             <Input />
           </Form.Item>
@@ -145,7 +153,7 @@ export const CreateStakingContract = () => {
             label={<Text type="secondary">Description</Text>}
             name="description"
             className="mb-0"
-            rules={[{ required: true }]}
+            rules={DESCRIPTION_FIELD_RULES}
           >
             <Input.TextArea rows={4} />
           </Form.Item>
@@ -175,7 +183,7 @@ export const CreateStakingContract = () => {
               <Form.Item
                 label={<MaxNumServicesLabel />}
                 name="maxNumServices"
-                rules={[{ required: true }]}
+                rules={MAX_NUM_SERVICES_FIELD_RULES}
               >
                 <InputNumber placeholder="e.g. 6" step="1" style={INPUT_WIDTH_STYLE} />
               </Form.Item>
@@ -184,7 +192,7 @@ export const CreateStakingContract = () => {
               <Form.Item
                 label={<RewardsPerSecondLabel />}
                 name="rewardsPerSecond"
-                rules={[{ required: true }]}
+                rules={REWARDS_PER_SECOND_FIELD_RULES}
               >
                 <InputNumber placeholder="e.g. 0.0003" step="0.0001" style={INPUT_WIDTH_STYLE} />
               </Form.Item>

@@ -1,6 +1,4 @@
-import { isObject } from 'lodash';
-import { Address } from 'viem';
-import { TransactionReceipt } from 'viem';
+import { Address, TransactionReceipt } from 'viem';
 
 import {
   getChainId as getChainIdFn,

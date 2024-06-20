@@ -141,3 +141,12 @@ export const checkImplementationVerified = async (chainId: number, implementatio
 
   return result;
 };
+
+export const NAME_FIELD_RULES = [{ required: true, message: 'Please enter Name' }];
+export const DESCRIPTION_FIELD_RULES = [{ required: true, message: 'Please enter Description' }];
+export const MAX_NUM_SERVICES_FIELD_RULES = [
+  { required: true, message: 'Please enter Maximum number of staked agents' },
+];
+export const REWARDS_PER_SECOND_FIELD_RULES = [
+  { required: true, message: 'Please enter Rewards per second' },
+];
