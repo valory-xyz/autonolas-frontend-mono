@@ -112,8 +112,8 @@ export const CreateStakingContract = () => {
       const result = await createStakingContract({ implementation, initPayload, account });
 
       if (result) {
-        // TODO: once request contracts list task is done, need to get InstanceCreated event
-        // info from the result and add it to the staking contracts list
+        // TODO: once request contracts list task is done, need to update
+        // the staking contracts list with result.events.InstanceCreated data
         router.push(`/${chainName}/${URL.myStakingContracts}`);
       }
     } catch (error) {
