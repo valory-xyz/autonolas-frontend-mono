@@ -51,6 +51,9 @@ export const GlobalStyles = createGlobalStyle`
   .mt-0 {
     margin-top: 0px;
   }
+  .mt-4 {
+    margin-top: 4px;
+  }
   .mt-8 {
     margin-top: 8px;
   }

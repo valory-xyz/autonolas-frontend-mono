@@ -10,8 +10,7 @@ interface MenuItem {
 
 const items: MenuItem[] = [
   { label: 'Staking Contracts', key: 'contracts', path: '/contracts' },
-  // TODO: will be added later
-  // { label: 'Proposals', key: 'proposals', path: '/proposals' },
+  { label: 'Proposals', key: 'proposals', path: '/proposals' },
 ];
 
 interface MenuInstanceProps {
