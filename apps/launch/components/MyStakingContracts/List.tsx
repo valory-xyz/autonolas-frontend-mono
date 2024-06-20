@@ -31,7 +31,6 @@ const NominatedForIncentivesPopover = () => (
 );
 
 const useColumns = () => {
-  const router = useRouter();
   const { networkName } = useAppSelector((state) => state.network);
 
   const columns: TableProps<MyStakingContract>['columns'] = useMemo(
@@ -42,9 +41,7 @@ const useColumns = () => {
         key: 'name',
         width: '25%',
         render: (text, record) => (
-          <Link href={`/${networkName}/${URL.myStakingContracts}/${record.id}`} passHref>
-            {text}
-          </Link>
+          <Link href={`/${networkName}/${URL.myStakingContracts}/${record.id}`}>{text}</Link>
         ),
       },
       {
@@ -77,16 +74,18 @@ const useColumns = () => {
                   &nbsp;Nominated
                 </Tag>
               ) : (
-                <Button type="primary" onClick={() => router.push(`/${URL.nominateContract}`)}>
-                  Nominate
-                </Button>
+                <Link href={`/${URL.nominateContract}`} passHref>
+                  <Button type="primary" ghost>
+                    Nominate
+                  </Button>
+                </Link>
               )}
             </Flex>
           );
         },
       },
     ],
-    [networkName, router],
+    [networkName],
   );
 
   return columns;

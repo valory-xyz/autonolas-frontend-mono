@@ -111,6 +111,8 @@ export const CreateStakingContract = () => {
 
       const result = await createStakingContract({ implementation, initPayload, account });
 
+      console.log('result', result);
+
       if (result) {
         // TODO: once request contracts list task is done, need to update
         // the staking contracts list with result.events.InstanceCreated data
