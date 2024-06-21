@@ -3,7 +3,7 @@ import { useCallback, useEffect } from 'react';
 
 import { PAGES_TO_LOAD_WITH_CHAIN_ID } from 'common-util/config/supportedChains';
 import { URL } from 'common-util/constants/urls';
-import { getChainIdFromPath, isValidNetworkName } from 'common-util/hooks/useNetworkHelpers';
+import { getChainIdFromPath, isValidNetworkName } from 'common-util/functions/networkHelpers';
 import { useAppDispatch } from 'store/index';
 import { setNetworkId, setNetworkName } from 'store/network';
 
