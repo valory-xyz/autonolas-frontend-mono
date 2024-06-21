@@ -10,7 +10,13 @@ import { useAppSelector } from 'store/index';
 import { ErrorType, MyStakingContract } from 'types/index';
 
 import { PurpleDot } from './styles';
-import { Container, Loader, SwitchNetworkError } from './utils';
+import {
+  ConnectWalletBeforeNominate,
+  Container,
+  ContractAlreadyNominated,
+  Loader,
+  SwitchNetworkError,
+} from './utils';
 
 const { Title, Paragraph, Text } = Typography;
 
@@ -28,6 +34,8 @@ const NominatedContractContent: FC<NominatedContractContentProps> = ({
 
   const [isFailedToSwitch, setIsFailedToSwitch] = useState(false);
   const [error, setError] = useState<ErrorType>(null);
+
+  const contractAlreadyNominated = contractInfo.isNominated;
 
   const switchNetworkCallback = useCallback(async () => {
     try {
@@ -53,6 +61,7 @@ const NominatedContractContent: FC<NominatedContractContentProps> = ({
   useEffect(() => {
     (async () => {
       if (!account) return;
+      if (contractAlreadyNominated) return;
 
       if (chainId !== mainnet.id) {
         switchNetworkCallback();
@@ -60,10 +69,15 @@ const NominatedContractContent: FC<NominatedContractContentProps> = ({
         addNomineeCallback();
       }
     })();
-  }, [account, chainId, addNomineeCallback, switchNetworkCallback]);
+  }, [account, chainId, contractAlreadyNominated, addNomineeCallback, switchNetworkCallback]);
 
+  if (contractAlreadyNominated) return <ContractAlreadyNominated />;
+  if (!account) return <ConnectWalletBeforeNominate />;
   if (isFailedToSwitch) return <SwitchNetworkError />;
   if (error) return <ErrorAlert error={error} networkId={chainId} />;
+
+  // TODO: add more checks
+
   return (
     <>
       <Title level={4}>Nominating staking contract...</Title>

@@ -32,4 +32,12 @@ export const SwitchNetworkError = () => (
   <Alert message="Please switch to the mainnet to nominate a contract." type="error" showIcon />
 );
 
+export const ContractAlreadyNominated = () => (
+  <Alert message="Contract is already nominated." type="error" showIcon />
+);
+
+export const ConnectWalletBeforeNominate = () => (
+  <Alert message="Please connect your wallet to nominate a contract." type="error" showIcon />
+);
+
 /************************ util functions ************************/

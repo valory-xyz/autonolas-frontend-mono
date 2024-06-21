@@ -13,13 +13,24 @@ export const LogoContainer = styled.div`
   margin: 0;
   text-align: center;
   scale: 1.4;
+  margin-bottom: 24px;
 `;
 
-export const PurpleDot = styled.div`
+const Dot = styled.div`
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background-color: ${COLOR.PRIMARY};
-  display: inline-block;
   margin-right: 8px;
+`;
+
+export const PurpleDot = styled(Dot)`
+  background-color: ${COLOR.PRIMARY};
+`;
+
+export const GreenDot = styled(Dot)`
+  background-color: ${COLOR.GREEN_3};
+`;
+
+export const RedDot = styled(Dot)`
+  background-color: ${COLOR.RED};
 `;
