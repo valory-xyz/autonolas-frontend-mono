@@ -108,7 +108,7 @@ const RewardsSection = ({ reward, topUp }) => {
   return (
     <Row>
       <Col span={24} xl={12}>
-        <RewardsStatistic title={'Claimable Reward'} value={reward} suffix="ETH" />
+        <RewardsStatistic title="Claimable Reward" value={reward} suffix="ETH" />
       </Col>
       <Col span={24} xl={12}>
         <RewardsStatistic title="Claimable Top Up" value={topUp} suffix="OLAS" />
