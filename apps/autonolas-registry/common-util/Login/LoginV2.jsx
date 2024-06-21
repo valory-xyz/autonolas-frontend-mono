@@ -36,7 +36,7 @@ export const LoginV2 = ({
   const { disconnect } = useDisconnect();
   const { chainId, isConnectedToWrongNetwork } = useHelpers();
   const { chain: walletConnectedChain } = useAccount();
-  const { switchChainAsync, isLoading } = useSwitchChain();
+  const { switchChainAsync, isPending } = useSwitchChain();
 
   const screens = useBreakpoint();
 
@@ -142,7 +142,7 @@ export const LoginV2 = ({
         <>
           {!hideWrongNetwork && (
             <YellowButton
-              loading={isLoading}
+              loading={isPending}
               type="default"
               onClick={onSwitchNetwork}
               icon={<SwapOutlined />}>
