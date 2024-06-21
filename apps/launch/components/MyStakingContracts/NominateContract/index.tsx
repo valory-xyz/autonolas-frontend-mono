@@ -1,63 +1,40 @@
-import {
-  // Alert,
-  Card,
-  Flex,
-  Spin,
-  Typography,
-} from 'antd';
+import { Flex, Typography } from 'antd';
 import { useParams } from 'next/navigation';
-import React, { FC, ReactNode, useEffect } from 'react';
+import React, { FC, useEffect, useState } from 'react';
 import { mainnet } from 'viem/chains';
 import { useAccount, useSwitchChain } from 'wagmi';
 
 import { addNominee } from 'common-util/functions';
-import { LogoSvg } from 'components/Layout/Logos';
 import { useAppSelector } from 'store/index';
 import { MyStakingContract } from 'types/index';
 
-import { LogoContainer, PurpleDot, StyledMain } from './styles';
+import { PurpleDot } from './styles';
+import { Container, Loader, SwitchNetworkError } from './utils';
 
 const { Title, Paragraph, Text } = Typography;
 
-const Container = ({ children }: { children: ReactNode }) => {
-  return (
-    <StyledMain>
-      <Card>
-        <LogoContainer>
-          <LogoSvg />
-        </LogoContainer>
-
-        {children}
-      </Card>
-    </StyledMain>
-  );
+type NominatedContractContentProps = {
+  contractIndex: number;
+  contractInfo: MyStakingContract;
 };
 
-const Loader = () => (
-  <Container>
-    <Flex align="center" justify="center" style={{ height: 240 }}>
-      <Spin />
-    </Flex>
-  </Container>
-);
-
-// const SwitchNetworkError = () => (
-//   <Alert message="Please switch to the mainnet to nominate a contract." type="error" showIcon />
-// );
-
-type NominatedContractContentProps = { contractIndex: number; contractInfo: MyStakingContract };
-const NominatedContractContent: FC<NominatedContractContentProps> = ({ contractInfo }) => {
+const NominatedContractContent: FC<NominatedContractContentProps> = ({
+  contractIndex,
+  contractInfo,
+}) => {
   const { chainId, address: account } = useAccount();
   const { switchChainAsync } = useSwitchChain();
-  const params = useParams<{ id: string }>();
-  const id = params?.id;
 
-  const { myStakingContracts } = useAppSelector((state) => state.launch);
-  const contractIndex = myStakingContracts.findIndex((item) => item.id === id);
+  const [isFailedToSwitch, setIsFailedToSwitch] = useState(false);
 
   useEffect(() => {
     if (chainId !== mainnet.id) {
-      switchChainAsync({ chainId: mainnet.id });
+      switchChainAsync({ chainId: mainnet.id })
+        .then((result) => {
+          console.log('result', result);
+          // if (!result) setIsFailedToSwitch(true);
+        })
+        .catch(() => setIsFailedToSwitch(true));
       // TODO: need to do something if user rejects switching, e.g. show alert?
     } else {
       if (!account) return;
@@ -66,6 +43,7 @@ const NominatedContractContent: FC<NominatedContractContentProps> = ({ contractI
     }
   }, [account, chainId, contractInfo, switchChainAsync]);
 
+  if (isFailedToSwitch) return <SwitchNetworkError />;
   return (
     <>
       <Title level={4}>Nominating staking contract...</Title>
@@ -79,7 +57,7 @@ const NominatedContractContent: FC<NominatedContractContentProps> = ({ contractI
   );
 };
 
-export const NominatedContract = () => {
+export const NominateContract = () => {
   const params = useParams<{ id: string }>();
   const id = params?.id;
 
