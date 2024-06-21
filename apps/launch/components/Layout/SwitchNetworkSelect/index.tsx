@@ -10,8 +10,6 @@ import {
   PAGES_TO_LOAD_WITH_CHAIN_ID,
 } from 'common-util/config/supportedChains';
 
-import { useHandleRoute } from './useHandleRoute';
-
 const networkSelectOptions = ALL_SUPPORTED_CHAINS.map((e) => ({
   label: e.networkDisplayName,
   value: e.networkName,
@@ -24,9 +22,6 @@ export const SwitchNetworkSelect: FC = () => {
   const path = router?.pathname || '';
 
   const chainName = (router?.query?.network || 'ethereum') as string;
-
-  // handle the routing
-  useHandleRoute();
 
   return (
     <div style={{ marginRight: isMobile ? 8 : 0 }}>

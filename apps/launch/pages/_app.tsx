@@ -6,6 +6,7 @@ import { Provider } from 'react-redux';
 import { GlobalStyles } from 'libs/ui-theme/src/lib/GlobalStyles';
 import { AutonolasThemeProvider } from 'libs/ui-theme/src/lib/ThemeConfig';
 
+import { useHandleRoute } from 'common-util/hooks/useHandleRoute';
 import { useGetMyStakingContracts } from 'hooks/useGetMyStakingContracts';
 
 import Layout from '../components/Layout';
@@ -13,6 +14,7 @@ import Web3ModalProvider from '../context/Web3ModalProvider';
 import { wrapper } from '../store';
 
 const DataProvider: FC<PropsWithChildren> = ({ children }) => {
+  useHandleRoute();
   useGetMyStakingContracts();
 
   return <>{children}</>;
