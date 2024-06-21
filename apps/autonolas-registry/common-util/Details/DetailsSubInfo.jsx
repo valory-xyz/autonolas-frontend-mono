@@ -1,14 +1,21 @@
-import { Alert, Button, Typography } from 'antd';
+import { Alert, Button, Col, Row, Typography } from 'antd';
 import PropTypes from 'prop-types';
 import { useEffect, useMemo, useState } from 'react';
+import { formatEther } from 'viem';
 import { useEnsName } from 'wagmi';
+import { RewardsStatistic } from 'components/Layout/styles';
 
 import { NA } from '@autonolas/frontend-library';
+
+import { TOKENOMICS } from 'libs/util-contracts/src/lib/abiAndAddresses/tokenomics';
+
+import { getTokenomicsContract } from 'common-util/Contracts';
 
 import {
   DEFAULT_SERVICE_CREATION_ETH_TOKEN_ZEROS,
   HASH_DETAILS_STATE,
   NAV_TYPES,
+  TOKENOMICS_UNIT_TYPES,
 } from '../../util/constants';
 import { useHelpers } from '../hooks';
 import { useMetadata } from '../hooks/useMetadata';
@@ -27,6 +34,18 @@ import {
 import { getTokenDetailsRequest } from './utils';
 
 const { Link, Text } = Typography;
+
+const navTypesForRewards = [NAV_TYPES.COMPONENT, NAV_TYPES.AGENT];
+
+const tokenomicsContract = getTokenomicsContract(TOKENOMICS.addresses['1']);
+
+const getOwnerIncentivesSingle = async (account, unitType, unitId) => {
+  const ownerIncentives = await tokenomicsContract.methods
+    .getOwnerIncentives(account, [unitType], [unitId])
+    .call();
+  console.log(ownerIncentives);
+  return ownerIncentives;
+};
 
 /**
  * Displays "service" status (active/inactive)
@@ -83,6 +102,38 @@ ViewHashAndCode.defaultProps = {
 };
 
 /**
+ * Displays rewards earned and rewards top up
+ */
+const RewardsSection = ({ reward, topUp }) => {
+  return (
+    <Row>
+      <Col span={24} xl={12}>
+        <RewardsStatistic
+          title={"Claimable Reward"}
+          value={reward}
+          suffix="ETH"
+        />
+      </Col>
+      <Col span={24} xl={12}>
+        <RewardsStatistic
+          title="Claimable Top Up"
+          value={topUp}
+          suffix="OLAS"
+        />
+      </Col>
+    </Row>
+  );
+};
+RewardsSection.propTypes = {
+  reward: PropTypes.string,
+  topUp: PropTypes.string,
+};
+RewardsSection.defaultProps = {
+  reward: '0',
+  topUp: '0',
+};
+
+/**
  * Agent | Component | Service - details component
  */
 export const DetailsSubInfo = ({
@@ -103,6 +154,7 @@ export const DetailsSubInfo = ({
 }) => {
   const { isSvm, doesNetworkHaveValidServiceManagerToken } = useHelpers();
   const [tokenAddress, setTokenAddress] = useState(null);
+  const [formattedRewards, setFormattedRewards] = useState(null);
 
   const { data: ownerEnsName } = useEnsName({ address: ownerAddress, chainId: 1 });
 
@@ -113,24 +165,11 @@ export const DetailsSubInfo = ({
   const { operatorWhitelistTitle, operatorWhitelistValue, operatorStatusValue } =
     useOperatorWhitelistComponent(id);
 
-  // get token address for service
-  useEffect(() => {
-    const fetchData = async () => {
-      if (type === NAV_TYPES.SERVICE) {
-        try {
-          const response = await getTokenDetailsRequest(id);
-          setTokenAddress(response.token);
-        } catch (error) {
-          console.error(error);
-        }
-      }
-    };
-
-    // token details is only available for L1 networks
-    if (id && doesNetworkHaveValidServiceManagerToken && !isSvm) {
-      fetchData();
-    }
-  }, [id, type, isSvm, doesNetworkHaveValidServiceManagerToken]);
+  const tokenomicsUnitType = useMemo(() => {
+    if (type === NAV_TYPES.COMPONENT) return TOKENOMICS_UNIT_TYPES.COMPONENT;
+    if (type === NAV_TYPES.AGENT) return TOKENOMICS_UNIT_TYPES.AGENT;
+    return;
+  }, [type]);
 
   const viewHashAndCodeButtons = (
     <ViewHashAndCode
@@ -215,6 +254,11 @@ export const DetailsSubInfo = ({
       },
       ...commonDetails,
       {
+        title: 'Rewards',
+        dataTestId: 'details-rewards',
+        value: formattedRewards,
+      },
+      {
         title: 'Component Dependencies',
         dataTestId: 'details-dependency',
         value: getDependencyList(),
@@ -284,18 +328,70 @@ export const DetailsSubInfo = ({
     return serviceDetailsList;
   };
 
-  const details = type === NAV_TYPES.SERVICE ? getServiceValues() : getComponentAndAgentValues();
+  const detailsValues =
+    type === NAV_TYPES.SERVICE ? getServiceValues() : getComponentAndAgentValues();
 
-  return (
-    <SectionContainer>
-      {details.map(({ title, value, dataTestId }, index) => (
-        <EachSection key={`${type}-details-${index}`}>
-          {title && <SubTitle strong>{title}</SubTitle>}
-          <Info data-testid={dataTestId || ''}>{value}</Info>
-        </EachSection>
-      ))}
-    </SectionContainer>
+  const detailsSections = useMemo(
+    () =>
+      detailsValues.map(({ title, value, dataTestId }, index) => {
+        if (dataTestId === 'details-rewards' && !formattedRewards) return null;
+        if (dataTestId === 'details-rewards')
+          return (
+            <EachSection key={`${type}-details-${index}`}>
+              {title && <SubTitle strong>{title}</SubTitle>}
+              {value && <RewardsSection {...value} />}
+            </EachSection>
+          );
+        return (
+          <EachSection key={`${type}-details-${index}`}>
+            {title && <SubTitle strong>{title}</SubTitle>}
+            {value && <Info data-testid={dataTestId}>{value}</Info>}
+          </EachSection>
+        );
+      }),
+    [detailsValues, formattedRewards, type],
   );
+
+  // get token address for service
+  useEffect(() => {
+    const fetchData = async () => {
+      if (type === NAV_TYPES.SERVICE) {
+        try {
+          const response = await getTokenDetailsRequest(id);
+          setTokenAddress(response.token);
+        } catch (error) {
+          console.error(error);
+        }
+      }
+    };
+
+    // token details is only available for L1 networks
+    if (id && doesNetworkHaveValidServiceManagerToken && !isSvm) {
+      fetchData();
+    }
+  }, [id, type, isSvm, doesNetworkHaveValidServiceManagerToken]);
+
+  // load rewards into reward state
+  useEffect(() => {
+    if (formattedRewards) return;
+    if (!navTypesForRewards.includes(type)) return;
+    if (!ownerAddress) return;
+    if (!id) return;
+
+    getOwnerIncentivesSingle(ownerAddress, tokenomicsUnitType, id).then(({ reward, topUp }) => {
+      const format = (reward) =>
+        parseFloat(formatEther(reward)).toLocaleString('en', {
+          maximumFractionDigits: 4,
+          minimumFractionDigits: 4,
+        });
+
+      setFormattedRewards({
+        reward: format(reward),
+        topUp: format(topUp),
+      });
+    });
+  }, [formattedRewards, id, ownerAddress, tokenomicsUnitType, type]);
+  return <SectionContainer>{detailsSections}</SectionContainer>;
 };
 
 DetailsSubInfo.propTypes = {
