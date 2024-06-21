@@ -1,4 +1,3 @@
-import { BaseContractMethod, Contract } from 'ethers';
 import { Address } from 'viem';
 import Web3 from 'web3';
 import { AbiItem } from 'web3-utils';
@@ -48,6 +47,7 @@ export const getStakingFactoryContract = () => {
   return contract;
 };
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const sendTransaction = async (methodFn: any, account: Address) => {
   const estimatedGas = await getEstimatedGasLimit(methodFn, account);
   const fn = methodFn.send({ from: account, estimatedGas });
