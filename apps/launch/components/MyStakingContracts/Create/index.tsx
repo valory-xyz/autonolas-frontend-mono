@@ -20,6 +20,7 @@ import { useAccount } from 'wagmi';
 
 import { CHAIN_NAMES, EXPLORER_URLS, UNICODE_SYMBOLS } from 'libs/util-constants/src';
 
+import { ErrorAlert } from 'common-util/ErrorAlert';
 import {
   CONTRACT_TEMPLATES,
   IMPLEMENTATION_ADDRESSES,
@@ -34,13 +35,12 @@ import {
   notifyConnectWallet,
   notifyWrongNetwork,
 } from 'common-util/functions';
-import { getChainIdFromPath } from 'common-util/hooks/useNetworkHelpers';
+import { getChainIdFromPath } from 'common-util/functions/networkHelpers';
+import { ErrorType } from 'types/index';
 
 import { Hint, StyledMain, Title } from './styles';
 import {
   DESCRIPTION_FIELD_RULES,
-  ErrorAlert,
-  ErrorType,
   FormValues,
   MAX_NUM_SERVICES_FIELD_RULES,
   MaxNumServicesLabel,
@@ -63,11 +63,11 @@ export const CreateStakingContract = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<ErrorType>(null);
   const params = useParams<{ network: string }>();
-  const chainName = params?.network as string;
+  const networkName = params?.network as string;
 
   const { address: account, chain } = useAccount();
 
-  const networkId = getChainIdFromPath(chainName);
+  const networkId = getChainIdFromPath(networkName);
   const wrongNetwork = chain && networkId ? networkId !== chain.id : false;
 
   const handleCreate = async (values: FormValues) => {
@@ -110,18 +110,15 @@ export const CreateStakingContract = () => {
       }
 
       const result = await createStakingContract({ implementation, initPayload, account });
-
-      console.log('result', result);
-
       if (result) {
         // TODO: once request contracts list task is done, need to update
         // the staking contracts list with result.events.InstanceCreated data
-        router.push(`/${chainName}/${URL.myStakingContracts}`);
+        router.push(`/${networkName}/${URL.myStakingContracts}`);
       }
     } catch (error) {
       console.log(error);
 
-      const { message, transactionHash } = getErrorInfo(error as Error);
+      const { message, transactionHash } = getErrorInfo('create', error as Error);
       setError({ message, transactionHash });
     } finally {
       setIsLoading(false);
@@ -199,7 +196,7 @@ export const CreateStakingContract = () => {
             </Col>
           </Row>
           <Flex justify="end" gap={12}>
-            <Link href={`/${chainName}/${URL.myStakingContracts}`} passHref>
+            <Link href={`/${networkName}/${URL.myStakingContracts}`} passHref>
               <Button>Cancel</Button>
             </Link>
             <Button type="primary" htmlType="submit" loading={isLoading}>

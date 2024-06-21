@@ -8,3 +8,5 @@ export type MyStakingContract = {
   template: string;
   isNominated: boolean;
 };
+
+export type ErrorType = { message: string; transactionHash?: string } | null;

@@ -36,29 +36,49 @@ export const notifyConnectWallet = () => {
   notifyWarning('Please connect your wallet');
 };
 
-const METAMASK_ERRORS: Record<number, string> = {
-  4001: 'Transaction rejected by user. The contract hasn’t been created.',
+type FeatureType = 'create' | 'nominate';
+
+const METAMASK_ERRORS: Record<FeatureType, Record<number, string>> = {
+  create: {
+    4001: 'Transaction rejected by user. The contract hasn’t been created.',
+  },
+  nominate: {
+    4001: 'Transaction rejected by user. The contract can’t be nominated.',
+  },
 };
 
-const EVM_ERRORS = [
-  {
-    errorText: 'Transaction has been reverted by the EVM',
-    displayText: 'Transaction failed. The contract hasn’t been created.',
-  },
-];
+const EVM_ERRORS = {
+  create: [
+    {
+      errorText: 'Transaction has been reverted by the EVM',
+      displayText: 'Transaction failed. The contract hasn’t been created.',
+    },
+  ],
+  nominate: [
+    {
+      errorText: 'Transaction has been reverted by the EVM',
+      displayText: 'Transaction failed. The contract can’t be nominated.',
+    },
+  ],
+};
 
-export const getErrorInfo = (error: Error | { code: number; message: string }) => {
+export const getErrorInfo = (
+  type: FeatureType,
+  error: Error | { code: number; message: string },
+) => {
   const defaultMessage = 'Some error occurred. Please try again';
 
   let message = defaultMessage;
   let transactionHash;
 
-  if ('code' in error && METAMASK_ERRORS[error.code]) {
-    message = METAMASK_ERRORS[error.code];
+  if ('code' in error && METAMASK_ERRORS[type][error.code]) {
+    message = METAMASK_ERRORS[type][error.code];
   }
 
   if ('message' in error) {
-    const foundError = EVM_ERRORS.find((item) => error.message.indexOf(item.errorText) !== -1);
+    const foundError = EVM_ERRORS[type].find(
+      (item) => error.message.indexOf(item.errorText) !== -1,
+    );
     if (foundError) {
       message = foundError.displayText;
     }

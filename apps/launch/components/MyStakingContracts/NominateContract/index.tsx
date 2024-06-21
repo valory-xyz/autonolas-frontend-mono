@@ -1,12 +1,13 @@
 import { Flex, Typography } from 'antd';
 import { useParams } from 'next/navigation';
-import React, { FC, useEffect, useState } from 'react';
+import React, { FC, useCallback, useEffect, useState } from 'react';
 import { mainnet } from 'viem/chains';
 import { useAccount, useSwitchChain } from 'wagmi';
 
-import { addNominee } from 'common-util/functions';
+import { ErrorAlert } from 'common-util/ErrorAlert';
+import { addNominee, getErrorInfo } from 'common-util/functions';
 import { useAppSelector } from 'store/index';
-import { MyStakingContract } from 'types/index';
+import { ErrorType, MyStakingContract } from 'types/index';
 
 import { PurpleDot } from './styles';
 import { Container, Loader, SwitchNetworkError } from './utils';
@@ -26,24 +27,43 @@ const NominatedContractContent: FC<NominatedContractContentProps> = ({
   const { switchChainAsync } = useSwitchChain();
 
   const [isFailedToSwitch, setIsFailedToSwitch] = useState(false);
+  const [error, setError] = useState<ErrorType>(null);
+
+  const switchNetworkCallback = useCallback(async () => {
+    try {
+      const result = await switchChainAsync({ chainId: mainnet.id });
+      console.log('result', result);
+    } catch (error) {
+      console.log('error', error);
+      setIsFailedToSwitch(true);
+    }
+  }, [switchChainAsync]);
+
+  const addNomineeCallback = useCallback(async () => {
+    if (!account) return;
+
+    try {
+      await addNominee({ address: contractInfo.id, chainId: contractInfo.chainId, account });
+    } catch (error) {
+      const errorResult = getErrorInfo('nominate', error as Error);
+      setError(errorResult);
+    }
+  }, [account, contractInfo]);
 
   useEffect(() => {
-    if (chainId !== mainnet.id) {
-      switchChainAsync({ chainId: mainnet.id })
-        .then((result) => {
-          console.log('result', result);
-          // if (!result) setIsFailedToSwitch(true);
-        })
-        .catch(() => setIsFailedToSwitch(true));
-      // TODO: need to do something if user rejects switching, e.g. show alert?
-    } else {
+    (async () => {
       if (!account) return;
 
-      addNominee({ address: contractInfo.id, chainId: contractInfo.chainId, account });
-    }
-  }, [account, chainId, contractInfo, switchChainAsync]);
+      if (chainId !== mainnet.id) {
+        switchNetworkCallback();
+      } else {
+        addNomineeCallback();
+      }
+    })();
+  }, [account, chainId, addNomineeCallback, switchNetworkCallback]);
 
   if (isFailedToSwitch) return <SwitchNetworkError />;
+  if (error) return <ErrorAlert error={error} networkId={chainId} />;
   return (
     <>
       <Title level={4}>Nominating staking contract...</Title>
