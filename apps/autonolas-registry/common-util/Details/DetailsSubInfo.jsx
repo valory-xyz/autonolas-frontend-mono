@@ -43,7 +43,7 @@ const getOwnerIncentivesSingle = async (account, unitType, unitId) => {
   const ownerIncentives = await tokenomicsContract.methods
     .getOwnerIncentives(account, [unitType], [unitId])
     .call();
-  console.log(ownerIncentives);
+    
   return ownerIncentives;
 };
 
