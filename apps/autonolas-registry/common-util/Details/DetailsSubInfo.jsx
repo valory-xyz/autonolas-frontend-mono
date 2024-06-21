@@ -371,15 +371,15 @@ export const DetailsSubInfo = ({
     if (!id) return;
 
     getOwnerIncentivesSingle(ownerAddress, tokenomicsUnitType, id).then(({ reward, topUp }) => {
-      const format = (reward) =>
+      const format = (reward, dp) =>
         parseFloat(formatEther(reward)).toLocaleString('en', {
-          maximumFractionDigits: 4,
-          minimumFractionDigits: 4,
+          maximumFractionDigits: dp,
+          minimumFractionDigits: dp,
         });
 
       setFormattedRewards({
-        reward: format(reward),
-        topUp: format(topUp),
+        reward: format(reward, 4),
+        topUp: format(topUp, 2),
       });
     });
   }, [formattedRewards, id, ownerAddress, tokenomicsUnitType, type]);
