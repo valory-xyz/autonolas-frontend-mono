@@ -1,5 +1,6 @@
-import styled from 'styled-components';
 import { Layout, Statistic } from 'antd';
+import styled from 'styled-components';
+
 import { COLOR, MEDIA_QUERY } from '@autonolas/frontend-library';
 
 export const CustomLayout = styled(Layout)`
@@ -128,20 +129,3 @@ export const OlasHeader = styled(Layout.Header)`
   align-items: center !important;
   justify-content: space-between !important;
 `;
-
-export const RewardsStatistic = styled(Statistic)`  
-  .ant-statistic-title {
-    color: var(--Colors-Neutral-Text-colorTextSecondary, #4D596A);
-    /* Base/Normal */
-    font-size: 14px;
-    line-height: 20px; /* 142.857% */
-  }
-  .ant-statistic-content {
-    color: var(--Colors-Neutral-Text-colorText, #1F2229);
-    font-size: 24px;
-    font-style: normal;
-    font-weight: 700;
-    line-height: 32px; /* 133.333% */
-    letter-spacing: -0.72px;
-  }
-`

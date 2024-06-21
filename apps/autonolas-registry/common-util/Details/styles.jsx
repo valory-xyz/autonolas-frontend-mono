@@ -1,6 +1,7 @@
-import styled from 'styled-components';
-import { Typography, Image } from 'antd';
 import { ArrowRightOutlined } from '@ant-design/icons';
+import { Image, Statistic, Typography } from 'antd';
+import styled from 'styled-components';
+
 import { COLOR } from '@autonolas/frontend-library';
 
 export const DetailsTitle = styled(Typography.Title)`
@@ -81,4 +82,21 @@ export const ArrowLink = styled(ArrowRightOutlined)`
   transform: rotate(320deg);
   position: relative;
   top: -4px;
+`;
+
+export const RewardsStatistic = styled(Statistic)`
+  .ant-statistic-title {
+    color: var(--Colors-Neutral-Text-colorTextSecondary, #4d596a);
+    /* Base/Normal */
+    font-size: 14px;
+    line-height: 20px; /* 142.857% */
+  }
+  .ant-statistic-content {
+    color: var(--Colors-Neutral-Text-colorText, #1f2229);
+    font-size: 24px;
+    font-style: normal;
+    font-weight: 700;
+    line-height: 32px; /* 133.333% */
+    letter-spacing: -0.72px;
+  }
 `;

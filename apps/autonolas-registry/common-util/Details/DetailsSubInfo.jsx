@@ -3,7 +3,6 @@ import PropTypes from 'prop-types';
 import { useEffect, useMemo, useState } from 'react';
 import { formatEther } from 'viem';
 import { useEnsName } from 'wagmi';
-import { RewardsStatistic } from 'components/Layout/styles';
 
 import { NA } from '@autonolas/frontend-library';
 
@@ -23,6 +22,7 @@ import { typePropType } from '../propTypes';
 import { Circle } from '../svg/Circle';
 import { NftImage } from './NFTImage';
 import { useOperatorWhitelistComponent } from './ServiceDetails/useOperatorWhitelistComponent';
+import { RewardsStatistic } from './styles';
 import {
   ArrowLink,
   EachSection,
@@ -108,18 +108,10 @@ const RewardsSection = ({ reward, topUp }) => {
   return (
     <Row>
       <Col span={24} xl={12}>
-        <RewardsStatistic
-          title={"Claimable Reward"}
-          value={reward}
-          suffix="ETH"
-        />
+        <RewardsStatistic title={'Claimable Reward'} value={reward} suffix="ETH" />
       </Col>
       <Col span={24} xl={12}>
-        <RewardsStatistic
-          title="Claimable Top Up"
-          value={topUp}
-          suffix="OLAS"
-        />
+        <RewardsStatistic title="Claimable Top Up" value={topUp} suffix="OLAS" />
       </Col>
     </Row>
   );
