@@ -6,8 +6,8 @@ import { Provider } from 'react-redux';
 import { GlobalStyles } from 'libs/ui-theme/src/lib/GlobalStyles';
 import { AutonolasThemeProvider } from 'libs/ui-theme/src/lib/ThemeConfig';
 
-import { useHandleRoute } from 'common-util/hooks/useHandleRoute';
 import { useGetMyStakingContracts } from 'hooks/useGetMyStakingContracts';
+import { useHandleRoute } from 'hooks/useHandleRoute';
 
 import Layout from '../components/Layout';
 import Web3ModalProvider from '../context/Web3ModalProvider';
