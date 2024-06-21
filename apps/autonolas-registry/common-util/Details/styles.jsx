@@ -86,17 +86,14 @@ export const ArrowLink = styled(ArrowRightOutlined)`
 
 export const RewardsStatistic = styled(Statistic)`
   .ant-statistic-title {
-    color: var(--Colors-Neutral-Text-colorTextSecondary, #4d596a);
-    /* Base/Normal */
     font-size: 14px;
-    line-height: 20px; /* 142.857% */
+    line-height: 20px;
   }
   .ant-statistic-content {
-    color: var(--Colors-Neutral-Text-colorText, #1f2229);
     font-size: 24px;
     font-style: normal;
     font-weight: 700;
-    line-height: 32px; /* 133.333% */
+    line-height: 32px;
     letter-spacing: -0.72px;
   }
 `;
