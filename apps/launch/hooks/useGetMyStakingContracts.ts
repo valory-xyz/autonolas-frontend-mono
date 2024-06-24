@@ -11,6 +11,7 @@ import {
 } from 'libs/util-contracts/src/lib/abiAndAddresses';
 import { getBytes32FromAddress } from 'libs/util-functions/src';
 
+// import { ethConfig } from 'common-util/config/wagmi';
 import { ChainId, blockNumbers } from 'common-util/constants/stakingContract';
 import { CONTRACT_TEMPLATES } from 'common-util/constants/stakingContract';
 import { useAppDispatch, useAppSelector } from 'store/index';
@@ -62,6 +63,7 @@ const useGetMyStakingContractsMetadata = (addresses: Address[]) => {
   }));
 
   const { data } = useReadContracts({
+    // config: ethConfig,
     contracts,
     query: {
       enabled: addresses.length > 0,
@@ -111,12 +113,14 @@ const useGetMyStakingContractsMetadata = (addresses: Address[]) => {
 };
 
 const useGetInstanceAddresses = () => {
-  const client = usePublicClient();
   const { networkId } = useAppSelector((state) => state.network);
+  const client = usePublicClient({ chainId: networkId as ChainId });
 
   const [instanceAddresses, setInstanceAddresses] = useState<Address[]>([]);
 
   const currentNetworkId = networkId as ChainId;
+
+  console.log('currentNetworkId', currentNetworkId);
 
   useEffect(() => {
     (async () => {
@@ -124,6 +128,7 @@ const useGetInstanceAddresses = () => {
       if (!client) return;
 
       try {
+        console.log('blockNumbers[currentNetworkId]', blockNumbers[currentNetworkId]);
         const eventLogs = await client.getLogs({
           address: STAKING_FACTORY.addresses[`${currentNetworkId}`] as Address,
           event: parseAbiItem(
@@ -133,6 +138,8 @@ const useGetInstanceAddresses = () => {
           toBlock: 'latest',
         });
 
+        console.log('eventLogs', eventLogs);
+
         // log.args[1] = instance address
         const addresses = eventLogs.map((log) => log.args[1] as Address);
         setInstanceAddresses(addresses);
@@ -140,7 +147,7 @@ const useGetInstanceAddresses = () => {
         window.console.error(e);
       }
     })();
-  }, [currentNetworkId, client]);
+  }, [currentNetworkId]);
 
   return instanceAddresses;
 };
@@ -150,7 +157,9 @@ export const useGetMyStakingContracts = () => {
   const instanceAddresses = useGetInstanceAddresses();
   const myStakingContractsMetadata = useGetMyStakingContractsMetadata(instanceAddresses);
   const nominees = useGetAllNominees();
-  const { myStakingContracts } = useAppSelector((state) => state.launch);
+  const { myStakingContracts, isMyStakingContractsLoading } = useAppSelector(
+    (state) => state.launch,
+  );
 
   const { networkId } = useAppSelector((state) => state.network);
 
@@ -158,13 +167,20 @@ export const useGetMyStakingContracts = () => {
     getBytes32FromAddress(address),
   );
 
+  console.log('instanceAddresses', {
+    instanceAddresses,
+    instanceAddressesInBytes32,
+    myStakingContractsMetadata,
+    nominees,
+  });
+
   useEffect(() => {
     if (!myStakingContractsMetadata) return;
     if (myStakingContractsMetadata.length === 0) return;
     if (!nominees) return;
 
     // if myStakingContracts is already set, do not update it
-    if (myStakingContracts.length !== 0) return;
+    if (!isMyStakingContractsLoading) return;
 
     const myStakingContractsList: MyStakingContract[] = myStakingContractsMetadata
       .map((metadata, index) => {
@@ -192,5 +208,6 @@ export const useGetMyStakingContracts = () => {
     myStakingContractsMetadata,
     myStakingContracts,
     networkId,
+    isMyStakingContractsLoading
   ]);
 };

@@ -64,6 +64,7 @@ export const LoginV2 = () => {
     return walletConnectedChain?.id !== networkId;
   }, [walletConnectedChain, networkId]);
 
+  // TODO: figure out how to fix "SwitchChainNotSupportedError"
   const onSwitchNetwork = useCallback(async () => {
     if (!networkId) return;
 
