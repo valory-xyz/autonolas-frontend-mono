@@ -1,11 +1,14 @@
 import { useParams } from 'next/navigation';
+import { useRouter } from 'next/router';
 import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
 import { mainnet } from 'viem/chains';
 import { useAccount, useSwitchChain } from 'wagmi';
 
 import { ErrorAlert } from 'common-util/ErrorAlert';
-import { addNominee, getErrorInfo } from 'common-util/functions';
-import { useAppSelector } from 'store/index';
+import { URL } from 'common-util/constants/urls';
+import { Feature, addNominee, getErrorInfo } from 'common-util/functions';
+import { useAppDispatch, useAppSelector } from 'store/index';
+import { setIsNominated } from 'store/launch';
 import { ErrorType, MyStakingContract } from 'types/index';
 
 import {
@@ -29,18 +32,22 @@ const NominatedContractContent: FC<NominatedContractContentProps> = ({
   contractName,
   contractInfo,
 }) => {
+  const router = useRouter();
   const { chainId, address: account } = useAccount();
   const { switchChainAsync } = useSwitchChain();
 
+  const { networkName } = useAppSelector((state) => state.network);
+  const dispatch = useAppDispatch();
+
   const [isFailedToSwitch, setIsFailedToSwitch] = useState(false);
+  const [isPending, setIsPending] = useState(false);
+  const [isSuccessful, setIsSuccessful] = useState(false);
   const [error, setError] = useState<ErrorType>(null);
 
   const switchNetworkCallback = useCallback(async () => {
     try {
-      const result = await switchChainAsync({ chainId: mainnet.id });
-      console.log('result', result);
+      await switchChainAsync({ chainId: mainnet.id });
     } catch (error) {
-      console.log('error', error);
       setIsFailedToSwitch(true);
     }
   }, [switchChainAsync]);
@@ -48,21 +55,26 @@ const NominatedContractContent: FC<NominatedContractContentProps> = ({
   const addNomineeCallback = useCallback(async () => {
     if (!account) return;
     try {
+      setIsPending(true);
       await addNominee({ address: contractInfo.id, chainId: contractInfo.chainId, account });
+
+      setIsSuccessful(true);
+      dispatch(setIsNominated({ id: contractInfo.id }));
+      router.replace(`/${networkName}/${URL.myStakingContracts}`);
     } catch (error) {
-      const errorResult = getErrorInfo('nominate', error as Error);
+      const errorResult = getErrorInfo(Feature.NOMINATE, error as Error);
       setError(errorResult);
+    } finally {
+      setIsPending(false);
     }
   }, [account, contractInfo]);
 
   useEffect(() => {
-    (async () => {
-      if (chainId !== mainnet.id) {
-        switchNetworkCallback();
-      } else {
-        addNomineeCallback();
-      }
-    })();
+    if (chainId !== mainnet.id) {
+      switchNetworkCallback();
+    } else {
+      addNomineeCallback();
+    }
   }, [chainId, addNomineeCallback, switchNetworkCallback]);
 
   const transactionInfo = useMemo(() => {
@@ -70,10 +82,6 @@ const NominatedContractContent: FC<NominatedContractContentProps> = ({
     if (error) return <ErrorAlert error={error} networkId={chainId} />;
     return null;
   }, [isFailedToSwitch, error, chainId]);
-
-  // TODO: check for is successful
-  const isPending = true;
-  const isSuccessful = false;
 
   if (isPending) {
     return <WaitingForTransaction contractName={contractName} />;
@@ -83,7 +91,14 @@ const NominatedContractContent: FC<NominatedContractContentProps> = ({
     return <SuccessfulTransaction contractName={contractName} />;
   }
 
-  return <ErrorTransaction contractName={contractName} errorInfo={transactionInfo} />;
+  return (
+    <ErrorTransaction
+      contractName={contractName}
+      errorInfo={transactionInfo}
+      errorTitle={error?.name}
+      onRetry={addNomineeCallback}
+    />
+  );
 };
 
 export const NominateContract = () => {
@@ -96,6 +111,9 @@ export const NominateContract = () => {
     (state) => state.launch,
   );
 
+  // my contracts are still loading
+  if (isMyStakingContractsLoading) return <Loader />;
+
   // contract does not exist
   const contractIndex = myStakingContracts.findIndex((item) => item.id === id);
   if (contractIndex === -1) return <ContractDoesNotExist />;
@@ -105,12 +123,9 @@ export const NominateContract = () => {
   const contractName = ` #${contractIndex + 1} ${contractInfo.name} on ${networkDisplayName} chain`;
   if (!account) return <ConnectWalletBeforeNominate name={contractName} />;
 
-  // my contracts are still loading
-  if (isMyStakingContractsLoading) return <Loader />;
-
   // contract already nominated
   const contractAlreadyNominated = contractInfo.isNominated;
-  if (!contractAlreadyNominated) return <ContractAlreadyNominated name={contractName} />;
+  if (contractAlreadyNominated) return <ContractAlreadyNominated name={contractName} />;
 
   return (
     <Container>

@@ -9,4 +9,4 @@ export type MyStakingContract = {
   isNominated: boolean;
 };
 
-export type ErrorType = { message: string; transactionHash?: string } | null;
+export type ErrorType = { name?: string; message: string; transactionHash?: string } | null;

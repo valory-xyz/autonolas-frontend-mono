@@ -1,9 +1,10 @@
+import { ReloadOutlined } from '@ant-design/icons';
 import { Alert, Button, Card, Flex, Spin, Typography } from 'antd';
 import React, { FC, ReactNode } from 'react';
 
 import { LogoSvg } from '../../Layout/Logos';
 import { LoginV2 } from '../../Login';
-import { LogoContainer, PurpleDot, RedDot, StyledMain } from './styles';
+import { GreenDot, LogoContainer, PurpleDot, RedDot, StyledMain } from './styles';
 
 const { Title, Text } = Typography;
 
@@ -99,7 +100,7 @@ export const WaitingForTransaction = ({ contractName }: { contractName: string }
     <Title level={4}>Nominating staking contract...</Title>
     <Text>{contractName}</Text>
 
-    <Flex align="center" className='mt-16'>
+    <Flex align="center" className="mt-16">
       <PurpleDot />
       <Text>&nbsp;Waiting for transaction...</Text>
     </Flex>
@@ -111,12 +112,12 @@ export const SuccessfulTransaction = ({ contractName }: { contractName: string }
     <Title level={4}>Contract has been nominated</Title>
     <Text>{contractName}</Text>
 
-    <Flex align="center">
-      <PurpleDot />
+    <Flex align="center" className="mt-16 mb-16">
+      <GreenDot />
       <Text>&nbsp;Transaction successful</Text>
     </Flex>
 
-    <Text type="secondary">&nbsp;You will be redirected to the previous page shortly...</Text>
+    <Text type="secondary">You will be redirected to the previous page shortly...</Text>
   </>
 );
 
@@ -124,11 +125,13 @@ type ErrorTransactionProps = {
   contractName: string;
   errorTitle?: string;
   errorInfo: ReactNode;
+  onRetry: () => void;
 };
 export const ErrorTransaction: FC<ErrorTransactionProps> = ({
   contractName,
   errorTitle,
   errorInfo,
+  onRetry,
 }) => (
   <>
     <Title level={4}>Contract hasn’t been nominated</Title>
@@ -140,6 +143,12 @@ export const ErrorTransaction: FC<ErrorTransactionProps> = ({
     </Flex>
 
     {errorInfo}
+
+    <Flex justify="center">
+      <Button onClick={onRetry} type="primary" ghost>
+        <ReloadOutlined /> Try again
+      </Button>
+    </Flex>
   </>
 );
 

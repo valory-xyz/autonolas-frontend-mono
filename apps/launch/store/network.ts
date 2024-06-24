@@ -18,7 +18,6 @@ export const networkSlice = createSlice({
   initialState,
   reducers: {
     setNetworkDetails: (state, action) => {
-      console.log('action.payload', action.payload);
       state.networkId = action.payload.networkId;
       state.networkName = action.payload.networkName;
       state.networkDisplayName = action.payload.networkDisplayName;

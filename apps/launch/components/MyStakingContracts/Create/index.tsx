@@ -28,6 +28,7 @@ import {
 } from 'common-util/constants/stakingContract';
 import { URL } from 'common-util/constants/urls';
 import {
+  Feature,
   createStakingContract,
   getErrorInfo,
   getIpfsHash,
@@ -118,7 +119,7 @@ export const CreateStakingContract = () => {
     } catch (error) {
       console.log(error);
 
-      const { message, transactionHash } = getErrorInfo('create', error as Error);
+      const { message, transactionHash } = getErrorInfo(Feature.CREATE, error as Error);
       setError({ message, transactionHash });
     } finally {
       setIsLoading(false);
