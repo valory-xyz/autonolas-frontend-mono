@@ -88,9 +88,6 @@ export const ConnectWalletBeforeNominate: FC<{ contractName: string }> = ({ cont
     <Title level={4}>Connect your wallet to nominate...</Title>
     <Flex vertical gap={14}>
       <Text>{contractName}</Text>
-      <Text type="secondary">
-        The contract has already been nominated. You can close this page now.
-      </Text>
     </Flex>
 
     <Alert
