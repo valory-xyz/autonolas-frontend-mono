@@ -3,7 +3,7 @@ import React, { FC, ReactNode } from 'react';
 
 import { LogoSvg } from '../../Layout/Logos';
 import { LoginV2 } from '../../Login';
-import { LogoContainer, StyledMain } from './styles';
+import { LogoContainer, PurpleDot, RedDot, StyledMain } from './styles';
 
 const { Title, Text } = Typography;
 
@@ -92,6 +92,55 @@ export const ConnectWalletBeforeNominate: FC<{ name: string }> = ({ name }) => (
       <LoginV2 />
     </Flex>
   </Container>
+);
+
+export const WaitingForTransaction = ({ contractName }: { contractName: string }) => (
+  <>
+    <Title level={4}>Nominating staking contract...</Title>
+    <Text>{contractName}</Text>
+
+    <Flex align="center" className='mt-16'>
+      <PurpleDot />
+      <Text>&nbsp;Waiting for transaction...</Text>
+    </Flex>
+  </>
+);
+
+export const SuccessfulTransaction = ({ contractName }: { contractName: string }) => (
+  <>
+    <Title level={4}>Contract has been nominated</Title>
+    <Text>{contractName}</Text>
+
+    <Flex align="center">
+      <PurpleDot />
+      <Text>&nbsp;Transaction successful</Text>
+    </Flex>
+
+    <Text type="secondary">&nbsp;You will be redirected to the previous page shortly...</Text>
+  </>
+);
+
+type ErrorTransactionProps = {
+  contractName: string;
+  errorTitle?: string;
+  errorInfo: ReactNode;
+};
+export const ErrorTransaction: FC<ErrorTransactionProps> = ({
+  contractName,
+  errorTitle,
+  errorInfo,
+}) => (
+  <>
+    <Title level={4}>Contract hasn’t been nominated</Title>
+    <Text>{contractName}</Text>
+
+    <Flex align="center" className="mt-20 mb-20">
+      <RedDot />
+      <Text>&nbsp;{errorTitle || 'Transaction failed'}</Text>
+    </Flex>
+
+    {errorInfo}
+  </>
 );
 
 /************************ util functions ************************/

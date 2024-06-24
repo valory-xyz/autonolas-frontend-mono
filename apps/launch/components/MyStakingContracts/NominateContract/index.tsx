@@ -1,6 +1,5 @@
-import { Flex, Typography } from 'antd';
 import { useParams } from 'next/navigation';
-import React, { FC, useCallback, useEffect, useState } from 'react';
+import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
 import { mainnet } from 'viem/chains';
 import { useAccount, useSwitchChain } from 'wagmi';
 
@@ -9,25 +8,25 @@ import { addNominee, getErrorInfo } from 'common-util/functions';
 import { useAppSelector } from 'store/index';
 import { ErrorType, MyStakingContract } from 'types/index';
 
-import { PurpleDot } from './styles';
 import {
   ConnectWalletBeforeNominate,
   Container,
   ContractAlreadyNominated,
   ContractDoesNotExist,
+  ErrorTransaction,
   Loader,
+  SuccessfulTransaction,
   SwitchNetworkError,
+  WaitingForTransaction,
 } from './utils';
 
-const { Title, Paragraph, Text } = Typography;
-
 type NominatedContractContentProps = {
-  contractIndex: number;
+  contractName: string;
   contractInfo: MyStakingContract;
 };
 
 const NominatedContractContent: FC<NominatedContractContentProps> = ({
-  contractIndex,
+  contractName,
   contractInfo,
 }) => {
   const { chainId, address: account } = useAccount();
@@ -66,22 +65,25 @@ const NominatedContractContent: FC<NominatedContractContentProps> = ({
     })();
   }, [chainId, addNomineeCallback, switchNetworkCallback]);
 
-  if (isFailedToSwitch) return <SwitchNetworkError />;
-  if (error) return <ErrorAlert error={error} networkId={chainId} />;
+  const transactionInfo = useMemo(() => {
+    if (isFailedToSwitch) return <SwitchNetworkError />;
+    if (error) return <ErrorAlert error={error} networkId={chainId} />;
+    return null;
+  }, [isFailedToSwitch, error, chainId]);
 
-  // TODO: add more checks
+  // TODO: check for is successful
+  const isPending = true;
+  const isSuccessful = false;
 
-  return (
-    <>
-      <Title level={4}>Nominating staking contract...</Title>
-      <Paragraph>{`Contract #${contractIndex + 1} ${contractInfo.name}`}</Paragraph>
+  if (isPending) {
+    return <WaitingForTransaction contractName={contractName} />;
+  }
 
-      <Flex align="center">
-        <PurpleDot />
-        <Text>&nbsp;Waiting for transaction...</Text>
-      </Flex>
-    </>
-  );
+  if (isSuccessful) {
+    return <SuccessfulTransaction contractName={contractName} />;
+  }
+
+  return <ErrorTransaction contractName={contractName} errorInfo={transactionInfo} />;
 };
 
 export const NominateContract = () => {
@@ -108,12 +110,12 @@ export const NominateContract = () => {
 
   // contract already nominated
   const contractAlreadyNominated = contractInfo.isNominated;
-  if (contractAlreadyNominated) return <ContractAlreadyNominated name={contractName} />;
+  if (!contractAlreadyNominated) return <ContractAlreadyNominated name={contractName} />;
 
   return (
     <Container>
       <NominatedContractContent
-        contractIndex={contractIndex}
+        contractName={contractName}
         contractInfo={myStakingContracts[contractIndex]}
       />
     </Container>
