@@ -14,6 +14,7 @@ import {
   ConnectWalletBeforeNominate,
   Container,
   ContractAlreadyNominated,
+  ContractDoesNotExist,
   Loader,
   SwitchNetworkError,
 } from './utils';
@@ -35,8 +36,6 @@ const NominatedContractContent: FC<NominatedContractContentProps> = ({
   const [isFailedToSwitch, setIsFailedToSwitch] = useState(false);
   const [error, setError] = useState<ErrorType>(null);
 
-  const contractAlreadyNominated = contractInfo.isNominated;
-
   const switchNetworkCallback = useCallback(async () => {
     try {
       const result = await switchChainAsync({ chainId: mainnet.id });
@@ -49,7 +48,6 @@ const NominatedContractContent: FC<NominatedContractContentProps> = ({
 
   const addNomineeCallback = useCallback(async () => {
     if (!account) return;
-
     try {
       await addNominee({ address: contractInfo.id, chainId: contractInfo.chainId, account });
     } catch (error) {
@@ -60,19 +58,14 @@ const NominatedContractContent: FC<NominatedContractContentProps> = ({
 
   useEffect(() => {
     (async () => {
-      if (!account) return;
-      if (contractAlreadyNominated) return;
-
       if (chainId !== mainnet.id) {
         switchNetworkCallback();
       } else {
         addNomineeCallback();
       }
     })();
-  }, [account, chainId, contractAlreadyNominated, addNomineeCallback, switchNetworkCallback]);
+  }, [chainId, addNomineeCallback, switchNetworkCallback]);
 
-  if (contractAlreadyNominated) return <ContractAlreadyNominated />;
-  if (!account) return <ConnectWalletBeforeNominate />;
   if (isFailedToSwitch) return <SwitchNetworkError />;
   if (error) return <ErrorAlert error={error} networkId={chainId} />;
 
@@ -92,27 +85,36 @@ const NominatedContractContent: FC<NominatedContractContentProps> = ({
 };
 
 export const NominateContract = () => {
+  const { address: account } = useAccount();
   const params = useParams<{ id: string }>();
   const id = params?.id;
 
   const { isMyStakingContractsLoading, myStakingContracts } = useAppSelector(
     (state) => state.launch,
   );
-  const contractIndex = myStakingContracts.findIndex((item) => item.id === id);
-  console.log('contractIndex', contractIndex);
 
+  // contract does not exist
+  const contractIndex = myStakingContracts.findIndex((item) => item.id === id);
+  if (contractIndex === -1) return <ContractDoesNotExist />;
+
+  // account is not connected
+  const contractInfo = myStakingContracts[contractIndex];
+  const contractName = ` #${contractIndex + 1} ${contractInfo.name}`;
+  if (!account) return <ConnectWalletBeforeNominate name={contractName} />;
+
+  // my contracts are still loading
   if (isMyStakingContractsLoading) return <Loader />;
+
+  // contract already nominated
+  const contractAlreadyNominated = contractInfo.isNominated;
+  if (contractAlreadyNominated) return <ContractAlreadyNominated name={contractName} />;
 
   return (
     <Container>
-      {contractIndex === -1 ? (
-        <Title level={4}>Contract does not exists, please try again.</Title>
-      ) : (
-        <NominatedContractContent
-          contractIndex={contractIndex}
-          contractInfo={myStakingContracts[contractIndex]}
-        />
-      )}
+      <NominatedContractContent
+        contractIndex={contractIndex}
+        contractInfo={myStakingContracts[contractIndex]}
+      />
     </Container>
   );
 };
