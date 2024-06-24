@@ -46,9 +46,12 @@ const NominatedContractContent: FC<NominatedContractContentProps> = ({
 
   const switchNetworkCallback = useCallback(async () => {
     try {
+      setIsPending(true);
       await switchChainAsync({ chainId: mainnet.id });
     } catch (error) {
       setIsFailedToSwitch(true);
+    } finally {
+      setIsPending(false);
     }
   }, [switchChainAsync]);
 
@@ -75,7 +78,7 @@ const NominatedContractContent: FC<NominatedContractContentProps> = ({
     } else {
       addNomineeCallback();
     }
-  }, [chainId, addNomineeCallback, switchNetworkCallback]);
+  }, [chainId, account, addNomineeCallback, switchNetworkCallback]);
 
   const transactionInfo = useMemo(() => {
     if (isFailedToSwitch) return <SwitchNetworkError />;
@@ -96,7 +99,7 @@ const NominatedContractContent: FC<NominatedContractContentProps> = ({
       contractName={contractName}
       errorInfo={transactionInfo}
       errorTitle={error?.name}
-      onRetry={addNomineeCallback}
+      onRetry={isFailedToSwitch ? undefined : addNomineeCallback}
     />
   );
 };
@@ -120,12 +123,14 @@ export const NominateContract = () => {
 
   // account is not connected
   const contractInfo = myStakingContracts[contractIndex];
-  const contractName = ` #${contractIndex + 1} ${contractInfo.name} on ${networkDisplayName} chain`;
-  if (!account) return <ConnectWalletBeforeNominate name={contractName} />;
+  const contractName = `Contract #${contractIndex + 1} ${
+    contractInfo.name
+  } on ${networkDisplayName} chain`;
+  if (!account) return <ConnectWalletBeforeNominate contractName={contractName} />;
 
   // contract already nominated
   const contractAlreadyNominated = contractInfo.isNominated;
-  if (contractAlreadyNominated) return <ContractAlreadyNominated name={contractName} />;
+  if (contractAlreadyNominated) return <ContractAlreadyNominated contractName={contractName} />;
 
   return (
     <Container>

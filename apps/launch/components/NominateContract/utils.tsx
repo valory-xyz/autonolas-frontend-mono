@@ -1,6 +1,9 @@
 import { ReloadOutlined } from '@ant-design/icons';
 import { Alert, Button, Card, Flex, Spin, Typography } from 'antd';
+import Link from 'next/link';
 import React, { FC, ReactNode } from 'react';
+
+import { useAppSelector } from 'store/index';
 
 import { LogoSvg } from '../Layout/Logos';
 import { LoginV2 } from '../Login';
@@ -32,51 +35,59 @@ export const Loader = () => (
   </Container>
 );
 
-export const ContractDoesNotExist = () => (
-  <Container>
-    <Title level={4}>Contract not found...</Title>
-    <Text>
-      We couldn’t find the staking contract you’re referring to. Go to your staking contracts and
-      try again.
-    </Text>
+export const ContractDoesNotExist = () => {
+  const { networkName } = useAppSelector((state) => state.network);
+  return (
+    <Container>
+      <Title level={4}>Contract not found...</Title>
+      <Text>
+        We couldn’t find the staking contract you’re referring to. Go to your staking contracts and
+        try again.
+      </Text>
 
-    <Flex align="center" justify="center">
-      {/* TODO: Fix redirect */}
-      <Button href="/my-staking-contracts" className="mt-24" type="primary" ghost>
-        View my staking contracts
-      </Button>
-    </Flex>
-  </Container>
-);
+      <Flex align="center" justify="center">
+        <Link href={`/${networkName}/my-staking-contracts`} passHref>
+          <Button className="mt-24" type="primary" ghost>
+            View my staking contracts
+          </Button>
+        </Link>
+      </Flex>
+    </Container>
+  );
+};
 
 export const SwitchNetworkError = () => (
   <Alert message="Please switch to the mainnet to nominate a contract." type="error" showIcon />
 );
 
-export const ContractAlreadyNominated: FC<{ name: string }> = ({ name }) => (
-  <Container>
-    <Title level={4}>Contract has already been nominated</Title>
-    <Flex vertical gap={14}>
-      <Text>Contract {name}</Text>
-      <Text type="secondary">
-        The contract has already been nominated. You can close this page now.
-      </Text>
-    </Flex>
+export const ContractAlreadyNominated: FC<{ contractName: string }> = ({ contractName }) => {
+  const { networkName } = useAppSelector((state) => state.network);
+  return (
+    <Container>
+      <Title level={4}>Contract has already been nominated</Title>
+      <Flex vertical gap={14}>
+        <Text>{contractName}</Text>
+        <Text type="secondary">
+          The contract has already been nominated. You can close this page now.
+        </Text>
+      </Flex>
 
-    {/* TODO: Fix redirect */}
-    <Flex align="center" justify="center">
-      <Button href="/my-staking-contracts" className="mt-24" type="primary" ghost>
-        View my staking contracts
-      </Button>
-    </Flex>
-  </Container>
-);
+      <Flex align="center" justify="center">
+        <Link href={`/${networkName}/my-staking-contracts`} passHref>
+          <Button className="mt-24" type="primary" ghost>
+            View my staking contracts
+          </Button>
+        </Link>
+      </Flex>
+    </Container>
+  );
+};
 
-export const ConnectWalletBeforeNominate: FC<{ name: string }> = ({ name }) => (
+export const ConnectWalletBeforeNominate: FC<{ contractName: string }> = ({ contractName }) => (
   <Container>
     <Title level={4}>Connect your wallet to nominate...</Title>
     <Flex vertical gap={14}>
-      <Text>Contract {name}</Text>
+      <Text>{contractName}</Text>
       <Text type="secondary">
         The contract has already been nominated. You can close this page now.
       </Text>
@@ -125,7 +136,7 @@ type ErrorTransactionProps = {
   contractName: string;
   errorTitle?: string;
   errorInfo: ReactNode;
-  onRetry: () => void;
+  onRetry?: () => void;
 };
 export const ErrorTransaction: FC<ErrorTransactionProps> = ({
   contractName,
@@ -144,11 +155,13 @@ export const ErrorTransaction: FC<ErrorTransactionProps> = ({
 
     {errorInfo}
 
-    <Flex justify="center">
-      <Button onClick={onRetry} type="primary" ghost>
-        <ReloadOutlined /> Try again
-      </Button>
-    </Flex>
+    {onRetry && (
+      <Flex justify="center">
+        <Button onClick={onRetry} type="primary" ghost>
+          <ReloadOutlined /> Try again
+        </Button>
+      </Flex>
+    )}
   </>
 );
 

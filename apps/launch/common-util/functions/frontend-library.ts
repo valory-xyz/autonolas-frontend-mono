@@ -53,7 +53,7 @@ const METAMASK_ERRORS = {
     {
       code: 4001,
       name: 'Transaction rejected by user',
-      message: 'Transaction rejected by user. The contract can’t be nominated.',
+      message: 'Transaction rejected by user. The contract hasn’t been nominated',
     },
   ],
 };
@@ -70,7 +70,7 @@ const EVM_ERRORS = {
     {
       errorText: 'Transaction has been reverted by the EVM',
       name: 'Transaction failed',
-      displayText: 'Transaction failed. The contract can’t be nominated.',
+      displayText: 'Transaction failed. The contract hasn’t been nominated',
     },
   ],
 };
