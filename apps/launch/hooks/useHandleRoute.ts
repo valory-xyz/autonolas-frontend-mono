@@ -3,9 +3,13 @@ import { useCallback, useEffect } from 'react';
 
 import { PAGES_TO_LOAD_WITH_CHAIN_ID } from 'common-util/config/supportedChains';
 import { URL } from 'common-util/constants/urls';
-import { getChainIdFromPath, isValidNetworkName } from 'common-util/functions/networkHelpers';
+import {
+  getChainIdFromPath,
+  getDisplayNameFromPath,
+  isValidNetworkName,
+} from 'common-util/functions/networkHelpers';
 import { useAppDispatch } from 'store/index';
-import { setNetworkId, setNetworkName } from 'store/network';
+import { setNetworkDetails } from 'store/network';
 
 /**
  * Hook to handle the routing
@@ -21,9 +25,15 @@ export const useHandleRoute = () => {
   // updating the blockchain information in redux
   useEffect(() => {
     const isValidNetwork = isValidNetworkName(networkNameFromUrl);
+    const networkName = isValidNetwork ? networkNameFromUrl : 'ethereum';
 
-    dispatch(setNetworkName(isValidNetwork ? networkNameFromUrl : 'ethereum'));
-    dispatch(setNetworkId(isValidNetwork ? Number(chainIdFromPath) : 1));
+    dispatch(
+      setNetworkDetails({
+        networkId: isValidNetwork ? Number(chainIdFromPath) : 1,
+        networkName: networkName,
+        networkDisplayName: networkName ? getDisplayNameFromPath(networkName) : 'Ethereum',
+      }),
+    );
   }, [dispatch, networkNameFromUrl, chainIdFromPath]);
 
   /**

@@ -89,6 +89,7 @@ export const NominateContract = () => {
   const params = useParams<{ id: string }>();
   const id = params?.id;
 
+  const { networkDisplayName } = useAppSelector((state) => state.network);
   const { isMyStakingContractsLoading, myStakingContracts } = useAppSelector(
     (state) => state.launch,
   );
@@ -99,7 +100,7 @@ export const NominateContract = () => {
 
   // account is not connected
   const contractInfo = myStakingContracts[contractIndex];
-  const contractName = ` #${contractIndex + 1} ${contractInfo.name}`;
+  const contractName = ` #${contractIndex + 1} ${contractInfo.name} on ${networkDisplayName} chain`;
   if (!account) return <ConnectWalletBeforeNominate name={contractName} />;
 
   // my contracts are still loading
