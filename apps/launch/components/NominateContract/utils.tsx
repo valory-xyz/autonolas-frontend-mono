@@ -2,8 +2,8 @@ import { ReloadOutlined } from '@ant-design/icons';
 import { Alert, Button, Card, Flex, Spin, Typography } from 'antd';
 import React, { FC, ReactNode } from 'react';
 
-import { LogoSvg } from '../../Layout/Logos';
-import { LoginV2 } from '../../Login';
+import { LogoSvg } from '../Layout/Logos';
+import { LoginV2 } from '../Login';
 import { GreenDot, LogoContainer, PurpleDot, RedDot, StyledMain } from './styles';
 
 const { Title, Text } = Typography;

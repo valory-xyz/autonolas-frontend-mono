@@ -105,8 +105,8 @@ export const List: FC = () => {
       {nonNominatedContracts > 0 && (
         <Alert
           message={`${nonNominatedContracts} contract${
-            nonNominatedContracts === 1 ? '' : 's'
-          } hasn't been nominated to receive staking incentives`}
+            nonNominatedContracts === 1 ? " hasn't" : "s haven't"
+          } been nominated to receive staking incentives`}
           type="info"
           showIcon
         />

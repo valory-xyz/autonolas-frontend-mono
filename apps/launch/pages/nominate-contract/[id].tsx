@@ -1,3 +1,3 @@
-import { NominateContract } from 'components/MyStakingContracts/NominateContract';
+import { NominateContract } from 'components/NominateContract';
 
 export default NominateContract;
