@@ -1,4 +1,4 @@
-import { GATEWAY_URL, HASH_PREFIX } from 'libs/util-constants/src';
+import { GATEWAY_URL, HASH_PREFIX } from 'libs/util-constants/src/lib/ipfs';
 
 import { getListByAccount } from 'common-util/ContractUtils/myList';
 import { getComponentContract, getMechMinterContract } from 'common-util/Contracts';
