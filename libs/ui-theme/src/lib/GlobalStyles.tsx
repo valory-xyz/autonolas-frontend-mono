@@ -42,6 +42,9 @@ export const GlobalStyles = createGlobalStyle`
   .mb-16 {
     margin-bottom: 16px;
   }
+  .mb-20 {
+    margin-bottom: 20px !important;
+  }
   .mb-24 {
     margin-bottom: 24px !important;
   }
@@ -59,6 +62,9 @@ export const GlobalStyles = createGlobalStyle`
   }
   .mt-16 {
     margin-top: 16px;
+  }
+  .mt-20 {
+    margin-top: 20px !important;
   }
   .mt-24 {
     margin-top: 24px !important;

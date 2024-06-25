@@ -6,7 +6,7 @@ import { Address } from 'viem';
 import { mainnet } from 'viem/chains';
 
 import { COLOR } from 'libs/ui-theme/src';
-import { CHAIN_NAMES, EXPLORER_URLS, UNICODE_SYMBOLS } from 'libs/util-constants/src';
+import { CHAIN_NAMES, UNICODE_SYMBOLS } from 'libs/util-constants/src';
 import { STAKING_FACTORY, STAKING_VERIFIER } from 'libs/util-contracts/src/lib/abiAndAddresses';
 
 import { wagmiConfig } from 'common-util/config/wagmi';
@@ -19,8 +19,6 @@ export type FormValues = {
   maxNumServices: number;
   rewardsPerSecond: number;
 };
-
-export type ErrorType = { message: string; transactionHash?: string } | null;
 
 export const TextWithTooltip = ({
   text,
@@ -67,34 +65,6 @@ export const WrongNetworkAlert = ({ networkId }: { networkId?: number | null }) 
     message={`Your wallet is connected to the wrong network. Switch the wallet network to ${
       CHAIN_NAMES[networkId || mainnet.id]
     } to create a staking contract.`}
-  />
-);
-
-export const ErrorAlert = ({
-  error,
-  networkId,
-}: {
-  error: NonNullable<ErrorType>;
-  networkId?: number | null;
-}) => (
-  <Alert
-    className="mb-24"
-    type="error"
-    showIcon
-    message={
-      <>
-        {error.message}
-        {error.transactionHash && (
-          <>
-            <br />
-            <a
-              href={`${[EXPLORER_URLS[networkId || mainnet.id]]}/tx/${error.transactionHash}`}
-              target="_blank"
-            >{`Explore transaction hash ${UNICODE_SYMBOLS.EXTERNAL_LINK}`}</a>
-          </>
-        )}
-      </>
-    }
   />
 );
 

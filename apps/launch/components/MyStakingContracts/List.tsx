@@ -2,7 +2,6 @@ import { CheckCircleOutlined, InfoCircleOutlined } from '@ant-design/icons';
 import { Alert, Button, Flex, Popover, Table, Tag, Typography } from 'antd';
 import type { TableProps } from 'antd';
 import Link from 'next/link';
-import { useRouter } from 'next/router';
 import React, { FC, useMemo } from 'react';
 
 import { GOVERN_URL, URL } from 'common-util/constants/urls';
@@ -31,7 +30,6 @@ const NominatedForIncentivesPopover = () => (
 );
 
 const useColumns = () => {
-  const router = useRouter();
   const { networkName } = useAppSelector((state) => state.network);
 
   const columns: TableProps<MyStakingContract>['columns'] = useMemo(
@@ -77,16 +75,18 @@ const useColumns = () => {
                   &nbsp;Nominated
                 </Tag>
               ) : (
-                <Button type="primary" onClick={() => router.push(`/${URL.nominateContract}`)}>
-                  Nominate
-                </Button>
+                <Link href={`/${URL.nominateContract}/${record.id}`} passHref>
+                  <Button type="primary" ghost size="small">
+                    Nominate
+                  </Button>
+                </Link>
               )}
             </Flex>
           );
         },
       },
     ],
-    [networkName, router],
+    [networkName],
   );
 
   return columns;
@@ -105,8 +105,8 @@ export const List: FC = () => {
       {nonNominatedContracts > 0 && (
         <Alert
           message={`${nonNominatedContracts} contract${
-            nonNominatedContracts === 1 ? '' : 's'
-          } hasn't been nominated to receive staking incentives`}
+            nonNominatedContracts === 1 ? " hasn't" : "s haven't"
+          } been nominated to receive staking incentives`}
           type="info"
           showIcon
         />

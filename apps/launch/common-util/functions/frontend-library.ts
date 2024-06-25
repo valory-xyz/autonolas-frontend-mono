@@ -36,31 +36,65 @@ export const notifyConnectWallet = () => {
   notifyWarning('Please connect your wallet');
 };
 
-const METAMASK_ERRORS: Record<number, string> = {
-  4001: 'Transaction rejected by user. The contract hasn’t been created.',
+export enum Feature {
+  CREATE = 'create',
+  NOMINATE = 'nominate',
+}
+
+const METAMASK_ERRORS = {
+  create: [
+    {
+      code: 4001,
+      name: '',
+      message: 'Transaction rejected by user. The contract hasn’t been created.',
+    },
+  ],
+  nominate: [
+    {
+      code: 4001,
+      name: 'Transaction rejected by user',
+      message: 'Transaction rejected by user. The contract hasn’t been nominated',
+    },
+  ],
 };
 
-const EVM_ERRORS = [
-  {
-    errorText: 'Transaction has been reverted by the EVM',
-    displayText: 'Transaction failed. The contract hasn’t been created.',
-  },
-];
+const EVM_ERRORS = {
+  create: [
+    {
+      errorText: 'Transaction has been reverted by the EVM',
+      name: '',
+      displayText: 'Transaction failed. The contract hasn’t been created.',
+    },
+  ],
+  nominate: [
+    {
+      errorText: 'Transaction has been reverted by the EVM',
+      name: 'Transaction failed',
+      displayText: 'Transaction failed. The contract hasn’t been nominated',
+    },
+  ],
+};
 
-export const getErrorInfo = (error: Error | { code: number; message: string }) => {
+export const getErrorInfo = (type: Feature, error: Error | { code: number; message: string }) => {
   const defaultMessage = 'Some error occurred. Please try again';
 
+  let name;
   let message = defaultMessage;
   let transactionHash;
 
-  if ('code' in error && METAMASK_ERRORS[error.code]) {
-    message = METAMASK_ERRORS[error.code];
+  if ('code' in error) {
+    const metamaskError = METAMASK_ERRORS[type].find((item) => item.code === error.code);
+    if (metamaskError) {
+      name = metamaskError.name;
+      message = metamaskError.message;
+    }
   }
 
   if ('message' in error) {
-    const foundError = EVM_ERRORS.find((item) => error.message.indexOf(item.errorText) !== -1);
-    if (foundError) {
-      message = foundError.displayText;
+    const evmError = EVM_ERRORS[type].find((item) => error.message === item.errorText);
+    if (evmError) {
+      name = evmError.name;
+      message = evmError.displayText;
     }
   }
 
@@ -68,5 +102,5 @@ export const getErrorInfo = (error: Error | { code: number; message: string }) =
     transactionHash = (error.receipt as TransactionReceipt).transactionHash as Address;
   }
 
-  return { message, transactionHash };
+  return { name, message, transactionHash };
 };

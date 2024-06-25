@@ -2,7 +2,7 @@ import { defineChain } from 'viem';
 
 export const virtualMainnet = defineChain({
   id: 1,
-  name: 'Mainnet',
+  name: 'Ethereum',
   nativeCurrency: { name: 'vETH', symbol: 'vETH', decimals: 18 },
   rpcUrls: {
     default: { http: [`${process.env.NEXT_PUBLIC_MAINNET_TEST_RPC}`] },

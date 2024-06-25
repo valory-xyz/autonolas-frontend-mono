@@ -15,3 +15,10 @@ export const getChainIdFromPath = (networkName: string | undefined) => {
   const network = ALL_SUPPORTED_CHAINS.find((e) => toLower(e.networkName) === toLower(networkName));
   return network?.id;
 };
+
+export const getDisplayNameFromPath = (networkName: string | undefined) => {
+  if (!networkName) return null;
+
+  const network = ALL_SUPPORTED_CHAINS.find((e) => toLower(e.networkName) === toLower(networkName));
+  return network?.networkDisplayName;
+};
