@@ -1,11 +1,11 @@
 import { arbitrum, base, celo, gnosis, mainnet, optimism, polygon } from 'viem/chains';
 
-export const EXPLORER_URLS: Record<string, string> = {
-  1: mainnet.blockExplorers.default.url,
-  10: optimism.blockExplorers.default.url,
-  100: gnosis.blockExplorers.default.url,
-  137: polygon.blockExplorers.default.url,
-  8453: base.blockExplorers.default.url,
-  42_161: arbitrum.blockExplorers.default.url,
-  42_220: celo.blockExplorers.default.url,
+export const EXPLORER_URLS = {
+  [mainnet.id]: mainnet.blockExplorers.default.url,
+  [optimism.id]: optimism.blockExplorers.default.url,
+  [gnosis.id]: gnosis.blockExplorers.default.url,
+  [polygon.id]: polygon.blockExplorers.default.url,
+  [base.id]: base.blockExplorers.default.url,
+  [arbitrum.id]: arbitrum.blockExplorers.default.url,
+  [celo.id]: celo.blockExplorers.default.url,
 };
