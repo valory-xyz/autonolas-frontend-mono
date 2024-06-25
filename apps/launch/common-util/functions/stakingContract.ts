@@ -12,7 +12,6 @@ import {
   SERVICE_REGISTRY_ADDRESSES,
   SERVICE_REGISTRY_TOKEN_UTILITY_ADDRESSES,
   STAKING_TOKEN_ADDRESSES,
-  isSupportedChainId,
 } from 'common-util/constants/stakingContract';
 
 type StakingContractValues = {
