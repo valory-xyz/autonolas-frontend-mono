@@ -1,4 +1,3 @@
-import { BaseContractMethod, Contract } from 'ethers';
 import { Address } from 'viem';
 import Web3 from 'web3';
 import { AbiItem } from 'web3-utils';
@@ -48,6 +47,7 @@ export const getStakingFactoryContract = () => {
   return contract;
 };
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const sendTransaction = async (methodFn: any, account: Address) => {
   const estimatedGas = await getEstimatedGasLimit(methodFn, account);
   const fn = methodFn.send({ from: account, estimatedGas });
@@ -63,6 +63,7 @@ type CreateContractParams = {
   initPayload: string;
   account: Address;
 };
+
 export const createStakingContract = async ({
   implementation,
   initPayload,
@@ -70,6 +71,20 @@ export const createStakingContract = async ({
 }: CreateContractParams) => {
   const contract = getStakingFactoryContract();
   const createFn = contract.methods.createStakingInstance(implementation, initPayload);
+  const result = await sendTransaction(createFn, account);
+
+  return result;
+};
+
+type AddNomineeParams = {
+  address: Address;
+  chainId: number;
+  account: Address;
+};
+
+export const addNominee = async ({ address, chainId, account }: AddNomineeParams) => {
+  const contract = getVoteWeightingContract();
+  const createFn = contract.methods.addNomineeEVM(address, chainId);
   const result = await sendTransaction(createFn, account);
 
   return result;

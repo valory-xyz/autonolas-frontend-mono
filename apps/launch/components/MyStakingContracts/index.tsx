@@ -103,7 +103,7 @@ export const MyStakingContracts = () => {
             {isAccountConnected && networkId ? ` on ${CHAIN_NAMES[networkId]}` : ''}
           </Title>
 
-          {myStakingContracts.length > 0 && <CreateContractButton />}
+          {isAccountConnected && myStakingContracts.length > 0 && <CreateContractButton />}
         </Flex>
 
         {match(isAccountConnected)

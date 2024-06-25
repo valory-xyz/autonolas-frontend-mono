@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Abi, Address, parseAbiItem } from 'viem';
 import { mainnet } from 'viem/chains';
-import { useAccount, usePublicClient, useReadContract, useReadContracts } from 'wagmi';
+import { usePublicClient, useReadContract, useReadContracts } from 'wagmi';
 
 import { GATEWAY_URL, HASH_PREFIX } from 'libs/util-constants/src';
 import {
@@ -51,13 +51,13 @@ const useGetAllNominees = () => {
 };
 
 const useGetMyStakingContractsMetadata = (addresses: Address[]) => {
-  const { chainId } = useAccount();
+  const { networkId } = useAppSelector((state) => state.network);
   const [metadata, setMetadata] = useState<(Metadata | null)[]>([]);
 
   const contracts = addresses.map((address) => ({
     address,
     abi: STAKING_TOKEN.abi as Abi,
-    chainId,
+    chainId: networkId as ChainId,
     functionName: 'metadataHash',
   }));
 
@@ -111,8 +111,8 @@ const useGetMyStakingContractsMetadata = (addresses: Address[]) => {
 };
 
 const useGetInstanceAddresses = () => {
-  const client = usePublicClient();
   const { networkId } = useAppSelector((state) => state.network);
+  const client = usePublicClient({ chainId: networkId as ChainId });
 
   const [instanceAddresses, setInstanceAddresses] = useState<Address[]>([]);
 
@@ -140,7 +140,7 @@ const useGetInstanceAddresses = () => {
         window.console.error(e);
       }
     })();
-  }, [currentNetworkId, client]);
+  }, [client, currentNetworkId]);
 
   return instanceAddresses;
 };
@@ -151,6 +151,8 @@ export const useGetMyStakingContracts = () => {
   const myStakingContractsMetadata = useGetMyStakingContractsMetadata(instanceAddresses);
   const nominees = useGetAllNominees();
   const { myStakingContracts } = useAppSelector((state) => state.launch);
+
+  const { networkId } = useAppSelector((state) => state.network);
 
   const instanceAddressesInBytes32 = instanceAddresses.map((address) =>
     getBytes32FromAddress(address),
@@ -170,12 +172,12 @@ export const useGetMyStakingContracts = () => {
 
         return {
           id: instanceAddresses[index],
+          chainId: networkId,
           name: metadata.name,
           description: metadata.description,
           template: CONTRACT_TEMPLATES[0].title,
           isNominated:
-            nominees.some((nominee) => instanceAddressesInBytes32.includes(nominee.account)) ??
-            false,
+            nominees.findIndex((item) => item.account === instanceAddressesInBytes32[index]) !== -1,
         };
       })
       // filter out null values (ie. contracts without metadata - failed to fetch or not available)
@@ -189,5 +191,6 @@ export const useGetMyStakingContracts = () => {
     nominees,
     myStakingContractsMetadata,
     myStakingContracts,
+    networkId,
   ]);
 };

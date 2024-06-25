@@ -7,12 +7,14 @@ import { GlobalStyles } from 'libs/ui-theme/src/lib/GlobalStyles';
 import { AutonolasThemeProvider } from 'libs/ui-theme/src/lib/ThemeConfig';
 
 import { useGetMyStakingContracts } from 'hooks/useGetMyStakingContracts';
+import { useHandleRoute } from 'hooks/useHandleRoute';
 
 import Layout from '../components/Layout';
 import Web3ModalProvider from '../context/Web3ModalProvider';
 import { wrapper } from '../store';
 
 const DataProvider: FC<PropsWithChildren> = ({ children }) => {
+  useHandleRoute();
   useGetMyStakingContracts();
 
   return <>{children}</>;

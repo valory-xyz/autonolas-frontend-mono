@@ -25,6 +25,9 @@ export const COLOR = {
 
   TEXT_PRIMARY: '#1F2229',
   TEXT_SECONDARY: '#606F85',
+
+  YELLOW_PRIMARY: '#eab308', // tailwind orange.500
+  YELLOW_SECONDARY: '#fefce8', // tailwind orange.50
 };
 
 // TODO: move to theme
