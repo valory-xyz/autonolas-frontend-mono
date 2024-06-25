@@ -1,5 +1,5 @@
 import { CheckCircleOutlined, CopyOutlined } from '@ant-design/icons';
-import { Button, Card, Col, Flex, Row, Spin, Tag, Typography } from 'antd';
+import { Button, Card, Col, Flex, Row, Skeleton, Spin, Tag, Typography } from 'antd';
 import { ethers } from 'ethers';
 import { useRouter } from 'next/router';
 import { FC, ReactNode } from 'react';
@@ -39,22 +39,25 @@ const Loader = () => (
   </Container>
 );
 
-// TODO: maybe reuse from staking contract
 const NotFound = () => {
   const router = useRouter();
   const { networkName } = useAppSelector((state) => state.network);
 
   return (
     <Container>
-      <Title level={2}>Contract not found...</Title>
+      <Title level={4} className="mt-0">
+        Contract not found...
+      </Title>
       <Paragraph>
         We couldn’t find the staking contract you’re referring to. Go to your staking contracts and
         try again.
       </Paragraph>
 
-      <Button type="primary" onClick={() => router.push(`/${networkName}/my-staking-contracts`)}>
-        My staking contracts
-      </Button>
+      <Flex justify="center">
+        <Button type="primary" onClick={() => router.push(`/${networkName}/my-staking-contracts`)}>
+          My staking contracts
+        </Button>
+      </Flex>
     </Container>
   );
 };
@@ -124,7 +127,6 @@ const Template: FC<{ template: string }> = ({ template }) => {
   return (
     <Flex vertical gap={4}>
       <Text>{template}</Text>
-
       {networkId ? (
         <Link href={EXPLORER_URLS[networkId]} target="_blank" rel="noreferrer">
           <Text style={{ fontSize: '90%', color: COLOR.PRIMARY }}>View on explorer ↗</Text>
@@ -136,32 +138,38 @@ const Template: FC<{ template: string }> = ({ template }) => {
 
 const MaxNumOfStakedServices: FC<{ address: Address }> = ({ address }) => {
   const { networkId } = useAppSelector((state) => state.network);
-
-  const { data } = useReadContract({
+  const { data, isLoading } = useReadContract({
     address,
     abi: STAKING_TOKEN.abi,
     chainId: networkId as number,
     functionName: 'maxNumServices',
+    query: {
+      enabled: !!networkId,
+      select: (data) => (typeof data === 'bigint' ? data.toString() : '0'),
+    },
   });
 
-  const maxNumServices = typeof data === 'bigint' ? data.toString() : '0';
+  if (!networkId || isLoading) return <Skeleton.Input active size="small" />;
 
-  return <Text>{maxNumServices || NA}</Text>;
+  return <Text>{data || NA}</Text>;
 };
 
 const Rewards: FC<{ address: Address }> = ({ address }) => {
   const { networkId } = useAppSelector((state) => state.network);
-
-  const { data } = useReadContract({
+  const { data, isLoading } = useReadContract({
     address,
     abi: STAKING_TOKEN.abi,
     chainId: networkId as number,
     functionName: 'rewardsPerSecond',
+    query: {
+      enabled: !!networkId,
+      select: (data) => (typeof data === 'bigint' ? ethers.formatEther(data) : '0'),
+    },
   });
 
-  const maxNumServices = typeof data === 'bigint' ? ethers.formatEther(data) : '0';
+  if (!networkId || isLoading) return <Skeleton.Input active size="small" />;
 
-  return <Text>{`${maxNumServices} OLAS` || NA}</Text>;
+  return <Text>{`${data} OLAS` || NA}</Text>;
 };
 
 export const EachStakingContract = () => {
