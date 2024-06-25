@@ -11,7 +11,6 @@ import {
 } from 'libs/util-contracts/src/lib/abiAndAddresses';
 import { getBytes32FromAddress } from 'libs/util-functions/src';
 
-// import { ethConfig } from 'common-util/config/wagmi';
 import { ChainId, blockNumbers } from 'common-util/constants/stakingContract';
 import { CONTRACT_TEMPLATES } from 'common-util/constants/stakingContract';
 import { useAppDispatch, useAppSelector } from 'store/index';
@@ -63,7 +62,6 @@ const useGetMyStakingContractsMetadata = (addresses: Address[]) => {
   }));
 
   const { data } = useReadContracts({
-    // config: ethConfig,
     contracts,
     query: {
       enabled: addresses.length > 0,
@@ -168,7 +166,7 @@ export const useGetMyStakingContracts = () => {
     if (!nominees) return;
 
     // if myStakingContracts is already set, do not update it
-    if (!isMyStakingContractsLoading) return;
+    if (myStakingContracts.length !== 0) return;
 
     const myStakingContractsList: MyStakingContract[] = myStakingContractsMetadata
       .map((metadata, index) => {
