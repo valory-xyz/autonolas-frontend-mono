@@ -1,22 +1,28 @@
-import { CheckCircleOutlined } from '@ant-design/icons';
+import { CheckCircleOutlined, CopyOutlined } from '@ant-design/icons';
 import { Button, Card, Col, Flex, Row, Spin, Tag, Typography } from 'antd';
+import { ethers } from 'ethers';
 import { useRouter } from 'next/router';
-import { Children, FC, ReactNode } from 'react';
+import { FC, ReactNode } from 'react';
 import styled from 'styled-components';
+import { Address } from 'viem';
+import { useReadContract } from 'wagmi';
+
+import { NA } from '@autonolas/frontend-library';
+
+import { COLOR } from 'libs/ui-theme/src';
+import { EXPLORER_URLS } from 'libs/util-constants/src';
+import { STAKING_TOKEN } from 'libs/util-contracts/src/lib/abiAndAddresses';
 
 import { URL } from 'common-util/constants/urls';
-import { useAppDispatch, useAppSelector } from 'store/index';
+import { useAppSelector } from 'store/index';
 
-const { Paragraph, Text, Title } = Typography;
+const { Paragraph, Text, Title, Link } = Typography;
 
 const StyledMain = styled.main`
   display: flex;
   flex-direction: column;
   max-width: 720px;
   margin: 0 auto;
-  /* .ant-card-body {
-    min-height: 300px;
-  } */
 `;
 
 const Container: FC<{ children: ReactNode }> = ({ children }) => (
@@ -53,10 +59,115 @@ const NotFound = () => {
   );
 };
 
+type ColFlexContainerProps = { text: string; content: ReactNode };
+const ColFlexContainer: FC<ColFlexContainerProps> = ({ text, content }) => {
+  return (
+    <Col span={12}>
+      <Flex vertical gap={4} align="flex-start">
+        <Text type="secondary">{text}</Text>
+        {content}
+      </Flex>
+    </Col>
+  );
+};
+
+const NominatedForIncentives: FC<{ isNominated: boolean }> = ({ isNominated }) => {
+  const router = useRouter();
+  const { networkName } = useAppSelector((state) => state.network);
+
+  return isNominated ? (
+    <Tag color="success">
+      <CheckCircleOutlined />
+      &nbsp;Nominated
+    </Tag>
+  ) : (
+    <Button type="primary" onClick={() => router.push(`/${networkName}/${URL.nominateContract}`)}>
+      Nominate
+    </Button>
+  );
+};
+
+const ContractAddress: FC<{ address: string }> = ({ address }) => {
+  const { networkId } = useAppSelector((state) => state.network);
+  const suffixCount = 5;
+  const start = address.slice(0, address.length - suffixCount);
+  const suffix = address.slice(-suffixCount).trim();
+
+  if (!networkId) return null;
+
+  return (
+    <Flex align="flex-start" gap={4}>
+      <Link
+        href={`${EXPLORER_URLS[networkId]}/address/${address}`}
+        target="_blank"
+        rel="noreferrer"
+      >
+        <Text style={{ maxWidth: '140px', color: COLOR.PRIMARY }} ellipsis={{ suffix }}>
+          {start}
+        </Text>
+        &nbsp;↗
+      </Link>
+
+      <Button
+        size="small"
+        icon={<CopyOutlined />}
+        onClick={() => navigator.clipboard.writeText(address)}
+        style={{ margin: '-4px 0 0 8px' }}
+      />
+    </Flex>
+  );
+};
+
+const Template: FC<{ template: string }> = ({ template }) => {
+  const { networkId } = useAppSelector((state) => state.network);
+
+  return (
+    <Flex vertical gap={4}>
+      <Text>{template}</Text>
+
+      {networkId ? (
+        <Link href={EXPLORER_URLS[networkId]} target="_blank" rel="noreferrer">
+          <Text style={{ fontSize: '90%', color: COLOR.PRIMARY }}>View on explorer ↗</Text>
+        </Link>
+      ) : null}
+    </Flex>
+  );
+};
+
+const MaxNumOfStakedServices: FC<{ address: Address }> = ({ address }) => {
+  const { networkId } = useAppSelector((state) => state.network);
+
+  const { data } = useReadContract({
+    address,
+    abi: STAKING_TOKEN.abi,
+    chainId: networkId as number,
+    functionName: 'maxNumServices',
+  });
+
+  const maxNumServices = typeof data === 'bigint' ? data.toString() : '0';
+
+  return <Text>{maxNumServices || NA}</Text>;
+};
+
+const Rewards: FC<{ address: Address }> = ({ address }) => {
+  const { networkId } = useAppSelector((state) => state.network);
+
+  const { data } = useReadContract({
+    address,
+    abi: STAKING_TOKEN.abi,
+    chainId: networkId as number,
+    functionName: 'rewardsPerSecond',
+  });
+
+  const maxNumServices = typeof data === 'bigint' ? ethers.formatEther(data) : '0';
+
+  return <Text>{`${maxNumServices} OLAS` || NA}</Text>;
+};
+
 export const EachStakingContract = () => {
   const router = useRouter();
   const id = router.query.id;
-  const { networkName } = useAppSelector((state) => state.network);
+  const { networkDisplayName } = useAppSelector((state) => state.network);
 
   const { myStakingContracts, isMyStakingContractsLoading } = useAppSelector(
     (state) => state.launch,
@@ -70,12 +181,6 @@ export const EachStakingContract = () => {
   const myStakingContract = myStakingContracts[myStakingContractIndex];
   const name = `Contract #${myStakingContractIndex + 1} ${myStakingContract.name}`;
 
-  // TODO: fix this
-  const maxNumServices = 100;
-
-  // TODO: fix this
-  const rewardsPerSecond = 0;
-
   return (
     <Container>
       <Flex gap={24} vertical>
@@ -84,81 +189,42 @@ export const EachStakingContract = () => {
         </Title>
 
         <Row gutter={24}>
-          <Col span={12}>
-            <Flex vertical gap={4}>
-              <Text type="secondary">Nominated for incentives?</Text>
-              <Text>
-                {myStakingContract.isNominated ? (
-                  <Tag color="success">
-                    <CheckCircleOutlined />
-                    &nbsp;Nominated
-                  </Tag>
-                ) : (
-                  <Button
-                    type="primary"
-                    onClick={() => router.push(`/${networkName}/${URL.nominateContract}`)}
-                  >
-                    Nominate
-                  </Button>
-                )}
-              </Text>
-            </Flex>
-          </Col>
-
-          <Col span={12}>
-            <Flex vertical gap={4}>
-              <Text type="secondary">Address</Text>
-
-              {/* TODO: truncate and link */}
-              <Text>{myStakingContract.id}</Text>
-            </Flex>
-          </Col>
+          <ColFlexContainer
+            text="Nominated for incentives?"
+            content={<NominatedForIncentives isNominated={myStakingContract.isNominated} />}
+          />
+          <ColFlexContainer
+            text="Address"
+            content={<ContractAddress address={myStakingContract.id} />}
+          />
         </Row>
 
         <Flex gap={4} vertical>
           <Text type="secondary">Description</Text>
-          <Paragraph>{myStakingContract.description}</Paragraph>
+          <Paragraph ellipsis={{ rows: 6, expandable: true, symbol: 'Expand description' }}>
+            {myStakingContract.description}
+          </Paragraph>
         </Flex>
 
         <Row gutter={24}>
-          <Col span={12}>
-            <Flex vertical gap={4}>
-              <Text type="secondary">Template</Text>
-              <Text>{myStakingContract.template}</Text>
-              {/* TODO: add link */}
-            </Flex>
-          </Col>
-
-          <Col span={12}>
-            <Flex vertical gap={4}>
-              <Text type="secondary">Chain</Text>
-
-              {/* TODO: change to network display name */}
-              <Text>{networkName}</Text>
-            </Flex>
-          </Col>
+          <ColFlexContainer
+            text="Template"
+            content={<Template template={myStakingContract.template} />}
+          />
+          <ColFlexContainer text="Chain" content={<Text>{networkDisplayName}</Text>} />
         </Row>
 
         <Row gutter={24}>
-          <Col span={12}>
-            <Flex vertical gap={4}>
-              <Text type="secondary">Maximum number of staked services</Text>
-              <Text>{maxNumServices}</Text>
-            </Flex>
-          </Col>
-
-          <Col span={12}>
-            <Flex vertical gap={4}>
-              <Text type="secondary">Rewards, OLAS per second</Text>
-              <Text>{`${rewardsPerSecond} OLAS`}</Text>
-            </Flex>
-          </Col>
+          <ColFlexContainer
+            text="Maximum number of staked services"
+            content={<MaxNumOfStakedServices address={myStakingContract.id} />}
+          />
+          <ColFlexContainer
+            text="Rewards, OLAS per second"
+            content={<Rewards address={myStakingContract.id} />}
+          />
         </Row>
       </Flex>
     </Container>
   );
 };
-
-// https://github.com/valory-xyz/autonolas-frontend-mono/blob/main/libs/util-contracts/src/lib/abiAndAddresses/stakingToken.js#L1015
-
-// https://github.com/valory-xyz/autonolas-frontend-mono/blob/main/libs/util-contracts/src/lib/abiAndAddresses/stakingToken.js#L1127
