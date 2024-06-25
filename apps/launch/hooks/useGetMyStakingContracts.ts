@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Abi, Address, parseAbiItem } from 'viem';
 import { mainnet } from 'viem/chains';
-import { useAccount, usePublicClient, useReadContract, useReadContracts } from 'wagmi';
+import { usePublicClient, useReadContract, useReadContracts } from 'wagmi';
 
 import { GATEWAY_URL, HASH_PREFIX } from 'libs/util-constants/src';
 import {
@@ -52,13 +52,13 @@ const useGetAllNominees = () => {
 };
 
 const useGetMyStakingContractsMetadata = (addresses: Address[]) => {
-  const { chainId } = useAccount();
+  const { networkId } = useAppSelector((state) => state.network);
   const [metadata, setMetadata] = useState<(Metadata | null)[]>([]);
 
   const contracts = addresses.map((address) => ({
     address,
     abi: STAKING_TOKEN.abi as Abi,
-    chainId,
+    chainId: networkId as ChainId,
     functionName: 'metadataHash',
   }));
 
@@ -120,15 +120,12 @@ const useGetInstanceAddresses = () => {
 
   const currentNetworkId = networkId as ChainId;
 
-  console.log('currentNetworkId', currentNetworkId);
-
   useEffect(() => {
     (async () => {
       if (!currentNetworkId) return;
       if (!client) return;
 
       try {
-        console.log('blockNumbers[currentNetworkId]', blockNumbers[currentNetworkId]);
         const eventLogs = await client.getLogs({
           address: STAKING_FACTORY.addresses[`${currentNetworkId}`] as Address,
           event: parseAbiItem(
@@ -138,8 +135,6 @@ const useGetInstanceAddresses = () => {
           toBlock: 'latest',
         });
 
-        console.log('eventLogs', eventLogs);
-
         // log.args[1] = instance address
         const addresses = eventLogs.map((log) => log.args[1] as Address);
         setInstanceAddresses(addresses);
@@ -147,7 +142,7 @@ const useGetInstanceAddresses = () => {
         window.console.error(e);
       }
     })();
-  }, [currentNetworkId]);
+  }, [client, currentNetworkId]);
 
   return instanceAddresses;
 };
@@ -166,13 +161,6 @@ export const useGetMyStakingContracts = () => {
   const instanceAddressesInBytes32 = instanceAddresses.map((address) =>
     getBytes32FromAddress(address),
   );
-
-  console.log('instanceAddresses', {
-    instanceAddresses,
-    instanceAddressesInBytes32,
-    myStakingContractsMetadata,
-    nominees,
-  });
 
   useEffect(() => {
     if (!myStakingContractsMetadata) return;
@@ -208,6 +196,6 @@ export const useGetMyStakingContracts = () => {
     myStakingContractsMetadata,
     myStakingContracts,
     networkId,
-    isMyStakingContractsLoading
+    isMyStakingContractsLoading,
   ]);
 };
