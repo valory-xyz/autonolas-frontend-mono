@@ -15,6 +15,7 @@ import { STAKING_TOKEN } from 'libs/util-contracts/src/lib/abiAndAddresses';
 
 import { URL } from 'common-util/constants/urls';
 import { useAppSelector } from 'store/index';
+import { MyStakingContract } from 'types/index';
 
 const { Paragraph, Text, Title, Link } = Typography;
 
@@ -172,66 +173,75 @@ const Rewards: FC<{ address: Address }> = ({ address }) => {
   return <Text>{`${data} OLAS` || NA}</Text>;
 };
 
-export const EachStakingContract = () => {
-  const router = useRouter();
-  const id = router.query.id;
+const EachStakingContractContent: FC<{ myStakingContract: MyStakingContract }> = ({
+  myStakingContract,
+}) => {
   const { networkDisplayName } = useAppSelector((state) => state.network);
 
+  return (
+    <>
+      <Row gutter={24}>
+        <ColFlexContainer
+          text="Nominated for incentives?"
+          content={<NominatedForIncentives isNominated={myStakingContract.isNominated} />}
+        />
+        <ColFlexContainer
+          text="Address"
+          content={<ContractAddress address={myStakingContract.id} />}
+        />
+      </Row>
+
+      <Flex gap={4} vertical>
+        <Text type="secondary">Description</Text>
+        <Paragraph ellipsis={{ rows: 6, expandable: true, symbol: 'Expand description' }}>
+          {myStakingContract.description}
+        </Paragraph>
+      </Flex>
+
+      <Row gutter={24}>
+        <ColFlexContainer
+          text="Template"
+          content={<Template template={myStakingContract.template} />}
+        />
+        <ColFlexContainer text="Chain" content={<Text>{networkDisplayName}</Text>} />
+      </Row>
+
+      <Row gutter={24}>
+        <ColFlexContainer
+          text="Maximum number of staked services"
+          content={<MaxNumOfStakedServices address={myStakingContract.id} />}
+        />
+        <ColFlexContainer
+          text="Rewards, OLAS per second"
+          content={<Rewards address={myStakingContract.id} />}
+        />
+      </Row>
+    </>
+  );
+};
+
+export const EachStakingContract = () => {
+  const router = useRouter();
   const { myStakingContracts, isMyStakingContractsLoading } = useAppSelector(
     (state) => state.launch,
   );
 
-  const myStakingContractIndex = myStakingContracts.findIndex((contract) => contract.id === id);
+  const myStakingContractIndex = myStakingContracts.findIndex(
+    (contract) => contract.id === router.query.id,
+  );
 
   if (isMyStakingContractsLoading) return <Loader />;
   if (myStakingContractIndex === -1) return <NotFound />;
 
   const myStakingContract = myStakingContracts[myStakingContractIndex];
-  const name = `Contract #${myStakingContractIndex + 1} ${myStakingContract.name}`;
 
   return (
     <Container>
       <Flex gap={24} vertical>
         <Title level={4} className="m-0">
-          {name}
+          {`Contract #${myStakingContractIndex + 1} ${myStakingContract.name}`}
         </Title>
-
-        <Row gutter={24}>
-          <ColFlexContainer
-            text="Nominated for incentives?"
-            content={<NominatedForIncentives isNominated={myStakingContract.isNominated} />}
-          />
-          <ColFlexContainer
-            text="Address"
-            content={<ContractAddress address={myStakingContract.id} />}
-          />
-        </Row>
-
-        <Flex gap={4} vertical>
-          <Text type="secondary">Description</Text>
-          <Paragraph ellipsis={{ rows: 6, expandable: true, symbol: 'Expand description' }}>
-            {myStakingContract.description}
-          </Paragraph>
-        </Flex>
-
-        <Row gutter={24}>
-          <ColFlexContainer
-            text="Template"
-            content={<Template template={myStakingContract.template} />}
-          />
-          <ColFlexContainer text="Chain" content={<Text>{networkDisplayName}</Text>} />
-        </Row>
-
-        <Row gutter={24}>
-          <ColFlexContainer
-            text="Maximum number of staked services"
-            content={<MaxNumOfStakedServices address={myStakingContract.id} />}
-          />
-          <ColFlexContainer
-            text="Rewards, OLAS per second"
-            content={<Rewards address={myStakingContract.id} />}
-          />
-        </Row>
+        <EachStakingContractContent myStakingContract={myStakingContract} />
       </Flex>
     </Container>
   );
