@@ -62,8 +62,12 @@ const NominatedContractContent: FC<NominatedContractContentProps> = ({
       await addNominee({ address: contractInfo.id, chainId: contractInfo.chainId, account });
 
       setIsSuccessful(true);
-      dispatch(setIsNominated({ id: contractInfo.id }));
-      router.replace(`/${networkName}/${URL.myStakingContracts}`);
+
+      // Wait for 2s so the user can see success state
+      setTimeout(() => {
+        dispatch(setIsNominated({ id: contractInfo.id }));
+        router.replace(`/${networkName}/${URL.myStakingContracts}`);
+      }, 2000);
     } catch (error) {
       const errorResult = getErrorInfo(Feature.NOMINATE, error as Error);
       setError(errorResult);

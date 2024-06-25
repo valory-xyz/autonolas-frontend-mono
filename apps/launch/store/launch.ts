@@ -25,9 +25,7 @@ export const launchSlice = createSlice({
     },
     setIsNominated: (state, action: PayloadAction<{ id: Address }>) => {
       const newContracts = state.myStakingContracts.map((item) => {
-        if (item.id === action.payload.id) {
-          return { ...item, isNominated: true };
-        } else return item;
+        return item.id === action.payload.id ? { ...item, isNominated: true } : item;
       });
       state.myStakingContracts = newContracts;
     },

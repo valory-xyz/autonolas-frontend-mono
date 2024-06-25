@@ -83,18 +83,18 @@ export const getErrorInfo = (type: Feature, error: Error | { code: number; messa
   let transactionHash;
 
   if ('code' in error) {
-    const foundMetamaskError = METAMASK_ERRORS[type].find((item) => item.code === error.code);
-    if (foundMetamaskError) {
-      name = foundMetamaskError.name;
-      message = foundMetamaskError.message;
+    const metamaskError = METAMASK_ERRORS[type].find((item) => item.code === error.code);
+    if (metamaskError) {
+      name = metamaskError.name;
+      message = metamaskError.message;
     }
   }
 
   if ('message' in error) {
-    const foundError = EVM_ERRORS[type].find((item) => error.message === item.errorText);
-    if (foundError) {
-      name = foundError.name;
-      message = foundError.displayText;
+    const evmError = EVM_ERRORS[type].find((item) => error.message === item.errorText);
+    if (evmError) {
+      name = evmError.name;
+      message = evmError.displayText;
     }
   }
 
