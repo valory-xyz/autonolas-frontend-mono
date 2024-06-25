@@ -150,9 +150,7 @@ export const useGetMyStakingContracts = () => {
   const instanceAddresses = useGetInstanceAddresses();
   const myStakingContractsMetadata = useGetMyStakingContractsMetadata(instanceAddresses);
   const nominees = useGetAllNominees();
-  const { myStakingContracts, isMyStakingContractsLoading } = useAppSelector(
-    (state) => state.launch,
-  );
+  const { myStakingContracts } = useAppSelector((state) => state.launch);
 
   const { networkId } = useAppSelector((state) => state.network);
 
@@ -194,6 +192,5 @@ export const useGetMyStakingContracts = () => {
     myStakingContractsMetadata,
     myStakingContracts,
     networkId,
-    isMyStakingContractsLoading,
   ]);
 };
