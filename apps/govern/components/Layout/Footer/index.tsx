@@ -2,11 +2,17 @@ import Link from 'next/link';
 
 import { Footer as CommonFooter } from '@autonolas/frontend-library';
 
+import { Onboarding } from './Onboarding';
 import { Socials } from './Socials';
 
 export const Footer = () => (
   <CommonFooter
-    rightContent={<Socials />}
+    rightContent={
+      <>
+        <Socials />
+        <Onboarding />
+      </>
+    }
     centerContent={
       <>
         ©&nbsp;Autonolas DAO&nbsp;
