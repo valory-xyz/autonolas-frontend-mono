@@ -1,6 +1,6 @@
 import { arbitrum, base, celo, gnosis, mainnet, optimism, polygon } from 'viem/chains';
 
-export const EXPLORER_URLS = {
+export const EXPLORER_URLS: Record<string, string> = {
   [mainnet.id]: mainnet.blockExplorers.default.url,
   [optimism.id]: optimism.blockExplorers.default.url,
   [gnosis.id]: gnosis.blockExplorers.default.url,
