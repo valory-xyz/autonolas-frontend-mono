@@ -6,12 +6,11 @@ import { FC, ReactNode } from 'react';
 import { URL } from 'common-util/constants/urls';
 
 import { LoginV2 } from '../Login';
+import { Footer } from './Footer';
 import { LogoSvg } from './Logos';
+import NavigationMenu from './Menu';
 import { SwitchNetworkSelect } from './SwitchNetworkSelect';
 import { CustomLayout, Logo, OlasHeader, RightMenu } from './styles';
-
-const NavigationMenu = dynamic(() => import('./Menu'), { ssr: false });
-const Footer = dynamic(() => import('./Footer'), { ssr: false });
 
 const { Content } = AntdLayout;
 

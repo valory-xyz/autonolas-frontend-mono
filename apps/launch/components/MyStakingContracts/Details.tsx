@@ -9,11 +9,11 @@ import { useReadContract } from 'wagmi';
 
 import { NA } from '@autonolas/frontend-library';
 
-import { EXPLORER_URLS, UNICODE_SYMBOLS } from 'libs/util-constants/src';
+import { EXPLORER_URLS, GOVERN_URL, UNICODE_SYMBOLS } from 'libs/util-constants/src';
 import { STAKING_TOKEN } from 'libs/util-contracts/src/lib/abiAndAddresses';
 import { truncateAddress } from 'libs/util-functions/src';
 
-import { GOVERN_URL, URL } from 'common-util/constants/urls';
+import { URL } from 'common-util/constants/urls';
 import { useAppSelector } from 'store/index';
 import { MyStakingContract } from 'types/index';
 
