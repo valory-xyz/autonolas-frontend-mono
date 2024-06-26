@@ -82,9 +82,7 @@ const columns: ColumnsType<MyVote> = [
         color={COLOR.WHITE}
         title={<Text>Updated voting weights will take effect at the start of next week</Text>}
       >
-        <Text>
-          My updated weight <InfoCircleOutlined className="ml-8" style={{ color: COLOR.GREY_2 }} />
-        </Text>
+        My updated weight <InfoCircleOutlined className="ml-8" style={{ color: COLOR.GREY_2 }} />
       </Tooltip>
     ),
     key: 'nextWeight',

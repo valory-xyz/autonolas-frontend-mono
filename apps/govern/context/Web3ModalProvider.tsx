@@ -35,7 +35,7 @@ export const Web3ModalProvider = ({ children }: PropsWithChildren) => {
     <WagmiProvider config={wagmiConfig}>
       <QueryClientProvider client={queryClient}>
         {children}
-        <ReactQueryDevtools initialIsOpen={false} />
+        <ReactQueryDevtools initialIsOpen={false} buttonPosition="bottom-left" />
       </QueryClientProvider>
     </WagmiProvider>
   );
