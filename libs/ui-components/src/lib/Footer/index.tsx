@@ -1,11 +1,12 @@
 import { Typography } from 'antd';
+import { ReactNode } from 'react';
 
 import { Socials } from './Socials';
 import { FooterContainer } from './styles';
 
 type FooterProps = {
-  leftContent?: JSX.Element;
-  centerContent?: JSX.Element;
+  leftContent?: ReactNode;
+  centerContent?: ReactNode;
   githubUrl: string;
 };
 
