@@ -1,5 +1,5 @@
 import { CheckCircleOutlined, CopyOutlined } from '@ant-design/icons';
-import { Button, Card, Col, Flex, Row, Skeleton, Spin, Tag, Typography } from 'antd';
+import { Alert, Button, Card, Col, Flex, Row, Skeleton, Spin, Tag, Typography } from 'antd';
 import { ethers } from 'ethers';
 import { useRouter } from 'next/router';
 import { FC, ReactNode } from 'react';
@@ -9,15 +9,15 @@ import { useReadContract } from 'wagmi';
 
 import { NA } from '@autonolas/frontend-library';
 
-import { COLOR } from 'libs/ui-theme/src';
-import { EXPLORER_URLS } from 'libs/util-constants/src';
+import { EXPLORER_URLS, UNICODE_SYMBOLS } from 'libs/util-constants/src';
 import { STAKING_TOKEN } from 'libs/util-contracts/src/lib/abiAndAddresses';
+import { truncateAddress } from 'libs/util-functions/src';
 
-import { URL } from 'common-util/constants/urls';
+import { GOVERN_URL, URL } from 'common-util/constants/urls';
 import { useAppSelector } from 'store/index';
 import { MyStakingContract } from 'types/index';
 
-const { Paragraph, Text, Title, Link } = Typography;
+const { Paragraph, Text, Title } = Typography;
 
 const StyledMain = styled.main`
   display: flex;
@@ -63,6 +63,23 @@ const NotFound = () => {
   );
 };
 
+const NominateInfo = () => (
+  <Alert
+    message={
+      <>
+        Nominate your contract to make it eligible to receive staking incentives. Staking incentives
+        are allocated via&nbsp;
+        <a href={GOVERN_URL} target="_blank" rel="noreferrer">
+          Govern {UNICODE_SYMBOLS.EXTERNAL_LINK}
+        </a>
+        .
+      </>
+    }
+    type="info"
+    showIcon
+  />
+);
+
 type ColFlexContainerProps = { text: string; content: ReactNode };
 const ColFlexContainer: FC<ColFlexContainerProps> = ({ text, content }) => {
   return (
@@ -93,24 +110,15 @@ const NominatedForIncentives: FC<{ isNominated: boolean }> = ({ isNominated }) =
 
 const ContractAddress: FC<{ address: string }> = ({ address }) => {
   const { networkId } = useAppSelector((state) => state.network);
-  const suffixCount = 5;
-  const start = address.slice(0, address.length - suffixCount);
-  const suffix = address.slice(-suffixCount).trim();
+  const truncatedAddress = truncateAddress(address);
 
   if (!networkId) return null;
 
   return (
     <Flex align="flex-start" gap={4}>
-      <Link
-        href={`${EXPLORER_URLS[networkId]}/address/${address}`}
-        target="_blank"
-        rel="noreferrer"
-      >
-        <Text style={{ maxWidth: '140px', color: COLOR.PRIMARY }} ellipsis={{ suffix }}>
-          {start}
-        </Text>
-        &nbsp;↗
-      </Link>
+      <a href={`${EXPLORER_URLS[networkId]}/address/${address}`} target="_blank" rel="noreferrer">
+        {`${truncatedAddress} ${UNICODE_SYMBOLS.EXTERNAL_LINK}`}
+      </a>
 
       <Button
         size="small"
@@ -122,16 +130,21 @@ const ContractAddress: FC<{ address: string }> = ({ address }) => {
   );
 };
 
-const Template: FC<{ template: string }> = ({ template }) => {
+const Template: FC<{ address: string; template: string }> = ({ address, template }) => {
   const { networkId } = useAppSelector((state) => state.network);
 
   return (
     <Flex vertical gap={4}>
       <Text>{template}</Text>
       {networkId ? (
-        <Link href={EXPLORER_URLS[networkId]} target="_blank" rel="noreferrer">
-          <Text style={{ fontSize: '90%', color: COLOR.PRIMARY }}>View on explorer ↗</Text>
-        </Link>
+        <a
+          href={`${EXPLORER_URLS[networkId]}/address/${address}`}
+          target="_blank"
+          rel="noreferrer"
+          style={{ fontSize: '90%' }}
+        >
+          View on explorer {UNICODE_SYMBOLS.EXTERNAL_LINK}
+        </a>
       ) : null}
     </Flex>
   );
@@ -180,6 +193,8 @@ const EachStakingContractContent: FC<{ myStakingContract: MyStakingContract }> =
 
   return (
     <>
+      {myStakingContract.isNominated ? null : <NominateInfo />}
+
       <Row gutter={24}>
         <ColFlexContainer
           text="Nominated for incentives?"
@@ -201,7 +216,9 @@ const EachStakingContractContent: FC<{ myStakingContract: MyStakingContract }> =
       <Row gutter={24}>
         <ColFlexContainer
           text="Template"
-          content={<Template template={myStakingContract.template} />}
+          content={
+            <Template address={myStakingContract.id} template={myStakingContract.template} />
+          }
         />
         <ColFlexContainer text="Chain" content={<Text>{networkDisplayName}</Text>} />
       </Row>
