@@ -84,7 +84,7 @@ export const ArrowLink = styled(ArrowRightOutlined)`
   top: -4px;
 `;
 
-export const RewardsStatistic = styled(Statistic)`
+export const RewardsStatistic = styled((props) => <Statistic {...props} />)`
   .ant-statistic-title {
     font-size: 14px;
     line-height: 20px;
@@ -97,3 +97,5 @@ export const RewardsStatistic = styled(Statistic)`
     letter-spacing: -0.72px;
   }
 `;
+
+export default RewardsStatistic;

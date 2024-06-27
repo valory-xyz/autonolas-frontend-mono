@@ -2,7 +2,6 @@ import { Button } from 'antd';
 import { Alert } from 'antd';
 import PropTypes from 'prop-types';
 import { useEffect, useMemo, useState } from 'react';
-import { formatEther } from 'viem';
 import { useEnsName } from 'wagmi';
 
 import { NA } from '@autonolas/frontend-library';
@@ -53,7 +52,7 @@ const DetailsSubInfo = ({
 }) => {
   const { isSvm, doesNetworkHaveValidServiceManagerToken } = useHelpers();
   const [tokenAddress, setTokenAddress] = useState(null);
-  const [formattedRewards, setFormattedRewards] = useState(null);
+  const [rewards, setRewards] = useState(null);
 
   const { data: ownerEnsName } = useEnsName({ address: ownerAddress, chainId: 1 });
 
@@ -152,11 +151,7 @@ const DetailsSubInfo = ({
         ),
       },
       ...commonDetails,
-      {
-        title: 'Rewards',
-        dataTestId: 'details-rewards',
-        value: formattedRewards,
-      },
+      ...(rewards ? [{ title: 'Rewards', dataTestId: 'details-rewards', value: rewards }] : []),
       {
         title: 'Component Dependencies',
         dataTestId: 'details-dependency',
@@ -233,7 +228,7 @@ const DetailsSubInfo = ({
   const detailsSections = useMemo(
     () =>
       detailsValues.map(({ title, value, dataTestId }, index) => {
-        if (dataTestId === 'details-rewards' && !formattedRewards) return null;
+        if (dataTestId === 'details-rewards' && !rewards) return null;
 
         const isRewardSection = dataTestId === 'details-rewards';
 
@@ -242,14 +237,14 @@ const DetailsSubInfo = ({
             {title && <SubTitle strong>{title}</SubTitle>}
             {value &&
               (isRewardSection ? (
-                <RewardsSection {...value} />
+                <RewardsSection {...value} data-testid={dataTestId} />
               ) : (
                 <Info data-testid={dataTestId}>{value}</Info>
               ))}
           </EachSection>
         );
       }),
-    [detailsValues, formattedRewards, type],
+    [detailsValues, rewards, type],
   );
 
   // get token address for service
@@ -273,7 +268,7 @@ const DetailsSubInfo = ({
 
   // load rewards into reward state
   useEffect(() => {
-    if (formattedRewards) return;
+    if (rewards) return;
     if (!navTypesForRewards.includes(type)) return;
     if (!ownerAddress) return;
     if (!id) return;
@@ -282,18 +277,12 @@ const DetailsSubInfo = ({
       .getOwnerIncentives(ownerAddress, [tokenomicsUnitType], [id])
       .call()
       .then(({ reward, topUp }) => {
-        const format = (reward, dp) =>
-          parseFloat(formatEther(reward)).toLocaleString('en', {
-            maximumFractionDigits: dp,
-            minimumFractionDigits: dp,
-          });
-
-        setFormattedRewards({
-          reward: format(reward, 4),
-          topUp: format(topUp, 2),
+        setRewards({
+          reward: reward,
+          topUp: topUp,
         });
       });
-  }, [formattedRewards, id, ownerAddress, tokenomicsUnitType, type]);
+  }, [rewards, id, ownerAddress, tokenomicsUnitType, type]);
   return <SectionContainer>{detailsSections}</SectionContainer>;
 };
 
