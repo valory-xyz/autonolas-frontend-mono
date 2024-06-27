@@ -280,6 +280,7 @@ const DetailsSubInfo = ({
 
     tokenomicsContract.methods
       .getOwnerIncentives(ownerAddress, [tokenomicsUnitType], [id])
+      .call()
       .then(({ reward, topUp }) => {
         const format = (reward, dp) =>
           parseFloat(formatEther(reward)).toLocaleString('en', {
