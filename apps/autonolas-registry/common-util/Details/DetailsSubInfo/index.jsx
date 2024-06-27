@@ -245,15 +245,15 @@ export const DetailsSubInfo = ({
 
         const isRewardSection = dataTestId === 'details-rewards';
 
-        
-              {title && <SubTitle strong>{title}</SubTitle>}
-              {value && }
-           
         return (
           <EachSection key={`${type}-details-${index}`}>
             {title && <SubTitle strong>{title}</SubTitle>}
-            {value && (isRewardSection ? (<RewardsSection {...value} />) : (<Info data-testid={dataTestId}>{value}</Info>))}
-            
+            {value &&
+              (isRewardSection ? (
+                <RewardsSection {...value} />
+              ) : (
+                <Info data-testid={dataTestId}>{value}</Info>
+              ))}
           </EachSection>
         );
       }),
