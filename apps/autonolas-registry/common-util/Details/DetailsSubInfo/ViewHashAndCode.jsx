@@ -30,15 +30,19 @@ const ViewHashAndCode = ({ type, metadataLoadState, hashUrl, codeHref }) => {
     </>
   );
 };
+
 ViewHashAndCode.propTypes = {
   type: typePropType,
   metadataLoadState: PropTypes.string,
   hashUrl: PropTypes.string,
   codeHref: PropTypes.string,
 };
+
 ViewHashAndCode.defaultProps = {
   type: null,
   metadataLoadState: '',
   hashUrl: '',
   codeHref: '',
 };
+
+export default ViewHashAndCode;

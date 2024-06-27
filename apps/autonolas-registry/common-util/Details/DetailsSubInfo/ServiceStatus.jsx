@@ -1,8 +1,8 @@
 import { Typography } from 'antd';
 import { PropTypes } from 'prop-types';
 
-import { Circle } from '../../../svg/Circle';
-import { ServiceStatusContainer } from '../../styles';
+import { Circle } from '../../svg/Circle';
+import { ServiceStatusContainer } from '../styles';
 
 const { Text } = Typography;
 
@@ -20,3 +20,5 @@ const ServiceStatus = ({ serviceState }) => (
 );
 ServiceStatus.propTypes = { serviceState: PropTypes.bool };
 ServiceStatus.defaultProps = { serviceState: false };
+
+export default ServiceStatus;

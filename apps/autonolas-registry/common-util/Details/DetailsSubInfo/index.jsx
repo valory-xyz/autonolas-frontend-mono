@@ -10,7 +10,6 @@ import { NA } from '@autonolas/frontend-library';
 import { TOKENOMICS } from 'libs/util-contracts/src/lib/abiAndAddresses/tokenomics';
 
 import { getTokenomicsContract } from 'common-util/Contracts';
-import { RewardsSection } from 'common-util/Details/DetailsSubInfo/RewardsSection';
 
 import {
   DEFAULT_SERVICE_CREATION_ETH_TOKEN_ZEROS,
@@ -25,8 +24,9 @@ import { NftImage } from '../NFTImage';
 import { useOperatorWhitelistComponent } from '../ServiceDetails/useOperatorWhitelistComponent';
 import { EachSection, Info, SectionContainer, SubTitle } from '../styles';
 import { getTokenDetailsRequest } from '../utils';
-import { ServiceStatus } from './ServiceStatus';
-import { ViewHashAndCode } from './ViewHashAndCode';
+import RewardsSection from './RewardsSection';
+import ServiceStatus from './ServiceStatus';
+import ViewHashAndCode from './ViewHashAndCode';
 
 const navTypesForRewards = [NAV_TYPES.COMPONENT, NAV_TYPES.AGENT];
 
@@ -43,7 +43,7 @@ const getOwnerIncentivesSingle = async (account, unitType, unitId) => {
 /**
  * Agent | Component | Service - details component
  */
-export const DetailsSubInfo = ({
+const DetailsSubInfo = ({
   id,
   isOwner,
   type,
@@ -331,3 +331,5 @@ DetailsSubInfo.defaultProps = {
   openUpdateHashModal: null,
   navigateToDependency: null,
 };
+
+export default DetailsSubInfo;

@@ -1,7 +1,7 @@
 import { Col, Row } from 'antd';
 import PropTypes from 'prop-types';
 
-import { RewardsStatistic } from '../../styles';
+import { RewardsStatistic } from '../styles';
 
 /**
  * Displays rewards earned and rewards top up
@@ -26,3 +26,5 @@ RewardsSection.defaultProps = {
   reward: '0',
   topUp: '0',
 };
+
+export default RewardsSection;
