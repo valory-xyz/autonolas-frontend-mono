@@ -49,6 +49,7 @@ const getCspHeader = (browserName?: string) => {
     'https://alfajores-forno.celo-testnet.org',
     'https://api.web3modal.com/',
     'wss://www.walletlink.org/rpc',
+    'wss://*.pusher.com/',
     process.env.NEXT_PUBLIC_AUTONOLAS_SUB_GRAPH_URL,
   ];
 
@@ -88,7 +89,7 @@ const getCspHeader = (browserName?: string) => {
               ...walletconnectSrc,
             ],
             'style-src': ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com/'],
-            'frame-src': ["'self'", ...walletconnectSrc],
+            'frame-src': ["'self'", 'https://vercel.live/', ...walletconnectSrc],
           },
           permissionsPolicyDirectiveSupport: ['standard'],
         })
