@@ -18,19 +18,19 @@ import { useDetails } from './useDetails';
 const { Text } = Typography;
 
 type DetailsProps = {
-  id: string;
-  type: NavTypesValues;
-  getDetails: (id: string) => Promise<GenericObject>; // TODO: Define the return type
-  getTokenUri?: (id: string) => Promise<string>;
-  getOwner?: (id: string) => Promise<string>;
-  handleUpdate?: () => void;
-  handleHashUpdate?: () => void;
-  navigateToDependency?: (id: string, type: NavTypesValues) => void;
+  id: string,
+  type: NavTypesValues,
+  getDetails: (id: string) => Promise<GenericObject>, // TODO: Define the return type
+  getTokenUri?: (id: string) => Promise<string>,
+  getOwner?: (id: string) => Promise<string>,
+  handleUpdate?: () => void,
+  handleHashUpdate?: () => void,
+  navigateToDependency?: (id: string, type: NavTypesValues) => void,
   renderServiceState?: (props: {
-    isOwner: boolean;
-    details: GenericObject;
-    updateDetails: (details: GenericObject) => void;
-  }) => JSX.Element | null;
+    isOwner: boolean,
+    details: GenericObject,
+    updateDetails: (details: GenericObject) => void,
+  }) => JSX.Element | null,
 };
 
 export const Details: FC<DetailsProps> = ({
