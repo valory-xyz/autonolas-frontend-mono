@@ -32,14 +32,6 @@ const navTypesForRewards = [NAV_TYPES.COMPONENT, NAV_TYPES.AGENT];
 
 const tokenomicsContract = getTokenomicsContract(TOKENOMICS.addresses['1']);
 
-const getOwnerIncentivesSingle = async (account, unitType, unitId) => {
-  const ownerIncentives = await tokenomicsContract.methods
-    .getOwnerIncentives(account, [unitType], [unitId])
-    .call();
-
-  return ownerIncentives;
-};
-
 /**
  * Agent | Component | Service - details component
  */
@@ -286,18 +278,20 @@ const DetailsSubInfo = ({
     if (!ownerAddress) return;
     if (!id) return;
 
-    getOwnerIncentivesSingle(ownerAddress, tokenomicsUnitType, id).then(({ reward, topUp }) => {
-      const format = (reward, dp) =>
-        parseFloat(formatEther(reward)).toLocaleString('en', {
-          maximumFractionDigits: dp,
-          minimumFractionDigits: dp,
-        });
+    tokenomicsContract.methods
+      .getOwnerIncentives(ownerAddress, [tokenomicsUnitType], [id])
+      .then(({ reward, topUp }) => {
+        const format = (reward, dp) =>
+          parseFloat(formatEther(reward)).toLocaleString('en', {
+            maximumFractionDigits: dp,
+            minimumFractionDigits: dp,
+          });
 
-      setFormattedRewards({
-        reward: format(reward, 4),
-        topUp: format(topUp, 2),
+        setFormattedRewards({
+          reward: format(reward, 4),
+          topUp: format(topUp, 2),
+        });
       });
-    });
   }, [formattedRewards, id, ownerAddress, tokenomicsUnitType, type]);
   return <SectionContainer>{detailsSections}</SectionContainer>;
 };
