@@ -87,8 +87,6 @@ export const MyStakingContracts = () => {
   const { isConnected: isAccountConnected } = useAccount();
   const { networkId } = useAppSelector((state) => state.network);
 
-  console.log('isAccountConnected', isAccountConnected);
-
   return (
     <StyledMain>
       <Link href={GOVERN_URL} target="_blank">

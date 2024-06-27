@@ -98,8 +98,6 @@ const useGetMyStakingContractsMetadata = (addresses: Address[]) => {
     (async () => {
       if (!data) return;
 
-      console.log('data', data);
-
       try {
         const result = await data;
         setMetadata(result);
