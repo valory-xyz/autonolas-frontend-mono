@@ -3,17 +3,18 @@ import userEvent from '@testing-library/user-event';
 
 import { getServiceManagerContract } from 'common-util/Contracts';
 import { useHelpers } from 'common-util/hooks';
-import MintService from 'components/ListServices/mint';
 import { FORM_NAME } from 'components/ListServices/helpers/RegisterForm';
-import { fillIpfsGenerationModal } from '../../tests-helpers/prefillForm';
+import MintService from 'components/ListServices/mint';
+
 import {
-  wrapProvider,
   dummyAddress,
   mockV1Hash,
   svmConnectivityEmptyMock,
   useHelpersEvmMock,
   useHelpersSvmMock,
+  wrapProvider,
 } from '../../tests-helpers';
+import { fillIpfsGenerationModal } from '../../tests-helpers/prefillForm';
 
 const NEW_SERVICE = { name: 'New Service One' };
 
@@ -45,9 +46,7 @@ describe('listServices/mint.jsx', () => {
   });
 
   it('should submit the form successfully', async () => {
-    const { container, getByText, getByRole, getByTestId } = render(
-      wrapProvider(<MintService />),
-    );
+    const { container, getByText, getByRole, getByTestId } = render(wrapProvider(<MintService />));
     // title
     expect(getByText(/Mint Service/i)).toBeInTheDocument();
 
@@ -62,15 +61,9 @@ describe('listServices/mint.jsx', () => {
     fillIpfsGenerationModal();
 
     // other fields
-    userEvent.type(
-      container.querySelector(`#${FORM_NAME}_owner_address`),
-      dummyAddress,
-    );
+    userEvent.type(container.querySelector(`#${FORM_NAME}_owner_address`), dummyAddress);
     userEvent.type(container.querySelector(`#${FORM_NAME}_agent_ids`), '1');
-    userEvent.type(
-      container.querySelector(`#${FORM_NAME}_agent_num_slots`),
-      '1',
-    );
+    userEvent.type(container.querySelector(`#${FORM_NAME}_agent_num_slots`), '1');
     userEvent.type(container.querySelector(`#${FORM_NAME}_bonds`), '1');
     userEvent.type(container.querySelector(`#${FORM_NAME}_threshold`), '1');
 

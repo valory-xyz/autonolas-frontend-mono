@@ -23,9 +23,17 @@
       "util/*": ["apps/autonolas-registry/util/*"],
       "static/*": ["apps/autonolas-registry/static/*"],
       "images/*": ["apps/autonolas-registry/public/images/*"],
-      "store/*": ["apps/autonolas-registry/store/*"]
+      "store/*": ["apps/autonolas-registry/store/*"],
+      "types/*": ["apps/autonolas-registry/types/*"]
     }
   },
-  "include": ["**/*.ts", "**/*.tsx", "**/*.js", "**/*.jsx", "next-env.d.ts"],
+  "include": [
+    "**/*.ts",
+    "**/*.tsx",
+    "**/*.js",
+    "**/*.jsx",
+    "next-env.d.ts",
+    "common-util/Details/DetailsSubInfo"
+  ],
   "exclude": ["node_modules", "jest.config.js", "src/**/*.spec.ts", "src/**/*.test.ts"]
 }

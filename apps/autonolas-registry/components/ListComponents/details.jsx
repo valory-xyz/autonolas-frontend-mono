@@ -1,13 +1,13 @@
-import { useCallback } from 'react';
 import { useRouter } from 'next/router';
+import { useCallback } from 'react';
 
 import Details from '../../common-util/Details';
 import { useHelpers } from '../../common-util/hooks';
 import {
   getComponentDetails,
-  updateComponentHashes,
   getComponentOwner,
   getTokenUri as getComponentTokenUri,
+  updateComponentHashes,
 } from './utils';
 
 const Component = () => {

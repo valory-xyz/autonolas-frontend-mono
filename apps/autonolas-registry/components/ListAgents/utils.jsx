@@ -1,6 +1,6 @@
-import { getMechMinterContract, getAgentContract } from '../../common-util/Contracts';
-import { getFirstAndLastIndex } from '../../common-util/List/functions';
 import { getListByAccount } from '../../common-util/ContractUtils/myList';
+import { getAgentContract, getMechMinterContract } from '../../common-util/Contracts';
+import { getFirstAndLastIndex } from '../../common-util/List/functions';
 import { sendTransaction } from '../../common-util/functions';
 
 // --------- HELPER METHODS ---------

@@ -1,36 +1,32 @@
 import Web3 from 'web3';
+
 import { isL1Network } from '@autonolas/frontend-library';
 
+import { TOKENOMICS } from 'libs/util-contracts/src/lib/abiAndAddresses/tokenomics';
+
 import {
-  REGISTRIES_MANAGER_CONTRACT,
   AGENT_REGISTRY_CONTRACT,
   COMPONENT_REGISTRY_CONTRACT,
+  GENERIC_ERC20_CONTRACT,
+  GNOSIS_SAFE_CONTRACT,
+  MULTI_SEND_CONTRACT,
+  OPERATOR_WHITELIST_CONTRACT,
+  REGISTRIES_MANAGER_CONTRACT,
   SERVICE_MANAGER_CONTRACT,
-  SERVICE_REGISTRY_CONTRACT,
   SERVICE_MANAGER_TOKEN_CONTRACT,
+  SERVICE_REGISTRY_CONTRACT,
   SERVICE_REGISTRY_L2,
   SERVICE_REGISTRY_TOKEN_UTILITY_CONTRACT,
   SIGN_MESSAGE_LIB_CONTRACT,
-  GNOSIS_SAFE_CONTRACT,
-  MULTI_SEND_CONTRACT,
-  GENERIC_ERC20_CONTRACT,
-  OPERATOR_WHITELIST_CONTRACT,
 } from 'common-util/AbiAndAddresses';
 import {
+  doesNetworkHaveValidServiceManagerTokenFn,
   getChainId,
   getProvider,
-  doesNetworkHaveValidServiceManagerTokenFn,
 } from 'common-util/functions';
-import {
-  LOCAL_FORK_ID,
-  LOCAL_FORK_ID_GNOSIS,
-  LOCAL_FORK_ID_POLYGON,
-} from 'util/constants';
-import { ADDRESSES } from './addresses';
+import { LOCAL_FORK_ID, LOCAL_FORK_ID_GNOSIS, LOCAL_FORK_ID_POLYGON } from 'util/constants';
 
-import {
-  TOKENOMICS
-} from 'libs/util-contracts/src/lib/abiAndAddresses/tokenomics'
+import { ADDRESSES } from './addresses';
 
 export const RPC_URLS = {
   1: process.env.NEXT_PUBLIC_MAINNET_URL,
@@ -82,10 +78,7 @@ export const getComponentContract = () => {
   const { address } = getWeb3Details();
   const { componentRegistry } = address;
 
-  const contract = getContract(
-    COMPONENT_REGISTRY_CONTRACT.abi,
-    componentRegistry,
-  );
+  const contract = getContract(COMPONENT_REGISTRY_CONTRACT.abi, componentRegistry);
   return contract;
 };
 
@@ -105,10 +98,7 @@ export const getAgentContract = () => {
 export const getMechMinterContract = () => {
   const { address } = getWeb3Details();
   const { registriesManager } = address;
-  const contract = getContract(
-    REGISTRIES_MANAGER_CONTRACT.abi,
-    registriesManager,
-  );
+  const contract = getContract(REGISTRIES_MANAGER_CONTRACT.abi, registriesManager);
 
   return contract;
 };
@@ -121,10 +111,7 @@ export const getServiceContract = () => {
   const { address, chainId } = getWeb3Details();
   if (isL1Network(chainId)) {
     const { serviceRegistry } = address;
-    const contract = getContract(
-      SERVICE_REGISTRY_CONTRACT.abi,
-      serviceRegistry,
-    );
+    const contract = getContract(SERVICE_REGISTRY_CONTRACT.abi, serviceRegistry);
     return contract;
   }
 
@@ -140,10 +127,7 @@ export const getServiceManagerContract = () => {
   const { address, chainId } = getWeb3Details();
   if (doesNetworkHaveValidServiceManagerTokenFn(chainId)) {
     const { serviceManagerToken } = address;
-    const contract = getContract(
-      SERVICE_MANAGER_TOKEN_CONTRACT.abi,
-      serviceManagerToken,
-    );
+    const contract = getContract(SERVICE_MANAGER_TOKEN_CONTRACT.abi, serviceManagerToken);
     return contract;
   }
 
@@ -171,10 +155,7 @@ export const getServiceRegistryTokenUtilityContract = () => {
 export const getOperatorWhitelistContract = () => {
   const { address } = getWeb3Details();
   const { operatorWhitelist } = address;
-  const contract = getContract(
-    OPERATOR_WHITELIST_CONTRACT.abi,
-    operatorWhitelist,
-  );
+  const contract = getContract(OPERATOR_WHITELIST_CONTRACT.abi, operatorWhitelist);
   return contract;
 };
 

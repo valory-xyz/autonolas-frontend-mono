@@ -1,3 +1,5 @@
+import BigNumber from "bignumber.js";
+
 export const URL = {
   AGENTS: '/agents',
   COMPONENTS: '/components',
@@ -12,15 +14,6 @@ export const URL = {
   PAGE_NOT_FOUND: '/page-not-found',
   NOT_LEGAL: '/not-legal',
 } as const;
-
-export const NAV_TYPES = {
-  COMPONENT: 'component',
-  AGENT: 'agent',
-  SERVICE: 'service',
-} as const;
-
-export type NavTypesKeys = keyof typeof NAV_TYPES;
-export type NavTypesValues = (typeof NAV_TYPES)[NavTypesKeys];
 
 export const SERVICE_STATE = {
   0: 'Non Existent',
@@ -92,19 +85,13 @@ export const SOLANA_CHAIN_NAMES = {
   DEVNET: 'solana-devnet',
 } as const;
 
-/**
- * Constants for the different types of Hash Details states
- */
-export const HASH_DETAILS_STATE = {
-  IS_LOADING: 'IS_LOADING',
-  LOADED: 'LOADED',
-  FAILED: 'FAILED',
-} as const;
+
+
 
 /**
- * Constants for Tokenomics unitTypes
+ * Enum for Tokenomics units
  */
-export const TOKENOMICS_UNIT_TYPES = {
-  COMPONENT: 0,
-  AGENT: 1,
-} as const;
+export const TOKENOMICS_UNITS = {
+  COMPONENT: BigNumber(0),
+  AGENT: BigNumber(1),
+} as const

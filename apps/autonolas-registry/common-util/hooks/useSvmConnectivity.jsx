@@ -1,22 +1,17 @@
-import { useMemo } from 'react';
-import { useAnchorWallet, useConnection } from '@solana/wallet-adapter-react';
-import { Program, AnchorProvider } from '@project-serum/anchor';
-import { Keypair, PublicKey } from '@solana/web3.js';
+import { setProvider, web3 } from '@coral-xyz/anchor';
+import { AnchorProvider, Program } from '@project-serum/anchor';
 import NodeWallet from '@project-serum/anchor/dist/cjs/nodewallet';
-import { web3, setProvider } from '@coral-xyz/anchor';
+import { useAnchorWallet, useConnection } from '@solana/wallet-adapter-react';
+import { Keypair, PublicKey } from '@solana/web3.js';
+import { useMemo } from 'react';
 
 import { SOLANA_CHAIN_NAMES } from '../../util/constants';
 import idl from '../AbiAndAddresses/ServiceRegistrySolana.json';
-import {
-  SOLANA_ADDRESSES,
-  SOLANA_DEVNET_ADDRESSES,
-} from '../Contracts/addresses';
+import { SOLANA_ADDRESSES, SOLANA_DEVNET_ADDRESSES } from '../Contracts/addresses';
 import { useHelpers } from './index';
 
 const NODE_WALLET = new NodeWallet(Keypair.generate());
-const TEMP_PUBLIC_KEY = new web3.PublicKey(
-  process.env.NEXT_PUBLIC_SVM_PUBLIC_KEY,
-);
+const TEMP_PUBLIC_KEY = new web3.PublicKey(process.env.NEXT_PUBLIC_SVM_PUBLIC_KEY);
 
 /**
  * hook to get svm info
@@ -30,9 +25,7 @@ export const useSvmConnectivity = () => {
 
   // program addresses
   const solanaAddresses = useMemo(
-    () => (chainName === SOLANA_CHAIN_NAMES.MAINNET
-      ? SOLANA_ADDRESSES
-      : SOLANA_DEVNET_ADDRESSES),
+    () => (chainName === SOLANA_CHAIN_NAMES.MAINNET ? SOLANA_ADDRESSES : SOLANA_DEVNET_ADDRESSES),
     [chainName],
   );
 
@@ -63,10 +56,7 @@ export const useSvmConnectivity = () => {
     [customProvider, programId],
   );
 
-  const walletPublicKey = useMemo(
-    () => actualWallet || TEMP_PUBLIC_KEY,
-    [actualWallet],
-  );
+  const walletPublicKey = useMemo(() => actualWallet || TEMP_PUBLIC_KEY, [actualWallet]);
 
   return {
     walletPublicKey,

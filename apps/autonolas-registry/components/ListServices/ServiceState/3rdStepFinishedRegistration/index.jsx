@@ -1,9 +1,10 @@
-import { RadioLabel } from '../styles';
-import { useFinishRegistration } from '../useSvmServiceStateManagement';
-import { getServiceAgentInstances, onStep3Deploy } from '../utils';
-import { handleMultisigSubmit } from './utils';
+import { Button, Divider, Form, Input, Radio } from 'antd';
+import { ethers } from 'ethers';
+import PropTypes from 'prop-types';
+import { useEffect, useState } from 'react';
+
 import { notifyError, notifySuccess } from '@autonolas/frontend-library';
-import { Button, Divider, Radio, Form, Input } from 'antd';
+
 import {
   FALLBACK_HANDLER,
   multisigAddresses,
@@ -13,14 +14,15 @@ import { RegistryForm } from 'common-util/TransactionHelpers/RegistryForm';
 import { SendTransactionButton } from 'common-util/TransactionHelpers/SendTransactionButton';
 import { isValidSolanaPublicKey } from 'common-util/functions';
 import { useHelpers } from 'common-util/hooks';
-import { ethers } from 'ethers';
-import PropTypes from 'prop-types';
-import { useState, useEffect } from 'react';
 import { SVM_EMPTY_ADDRESS } from 'util/constants';
 
+import { RadioLabel } from '../styles';
+import { useFinishRegistration } from '../useSvmServiceStateManagement';
+import { getServiceAgentInstances, onStep3Deploy } from '../utils';
+import { handleMultisigSubmit } from './utils';
+
 const STEP = 3;
-const OPTION_1 =
-  'Creates a new service multisig with currently registered agent instances';
+const OPTION_1 = 'Creates a new service multisig with currently registered agent instances';
 const OPTION_2 =
   'Updates an existent service multisig with currently registered agent instances. Please note that the only service multisig owner must be the current service owner address';
 
@@ -73,15 +75,11 @@ const SvmFinishedRegistration = ({
             {
               validator: async (_, value) => {
                 if (!value || value === SVM_EMPTY_ADDRESS) {
-                  return Promise.reject(
-                    new Error('Please enter multisig address'),
-                  );
+                  return Promise.reject(new Error('Please enter multisig address'));
                 }
 
                 if (!isValidSolanaPublicKey(value)) {
-                  return Promise.reject(
-                    new Error('Not a valid multisig address'),
-                  );
+                  return Promise.reject(new Error('Not a valid multisig address'));
                 }
 
                 return Promise.resolve();
@@ -181,15 +179,7 @@ export const FinishedRegistration = ({
 
   const onFinish = (values) => {
     const payload = ethers.solidityPacked(
-      [
-        'address',
-        'address',
-        'address',
-        'address',
-        'uint256',
-        'uint256',
-        'bytes',
-      ],
+      ['address', 'address', 'address', 'address', 'uint256', 'uint256', 'bytes'],
       [
         values.addressTo,
         values.addressFallbackHandler,
@@ -208,9 +198,7 @@ export const FinishedRegistration = ({
     console.log('Failed:', errorInfo); /* eslint-disable-line no-console */
   };
 
-  const otherAddress = canShowMultisigSameAddress
-    ? multisigSameAddresses[chainId] || []
-    : [];
+  const otherAddress = canShowMultisigSameAddress ? multisigSameAddresses[chainId] || [] : [];
   const options = [...(multisigAddresses[chainId] || []), ...otherAddress];
   const isMultiSig = (multisigAddresses[chainId] || [])[0];
   const btnProps = getOtherBtnProps(STEP);
@@ -304,9 +292,7 @@ export const FinishedRegistration = ({
           <Form.Item
             label="Fallback Handler"
             name="addressFallbackHandler"
-            rules={[
-              { required: true, message: 'Please input Fallback Handler' },
-            ]}
+            rules={[{ required: true, message: 'Please input Fallback Handler' }]}
             initialValue={FALLBACK_HANDLER[chainId]}
           >
             <Input />
@@ -330,12 +316,7 @@ export const FinishedRegistration = ({
             <Input />
           </Form.Item>
 
-          <Form.Item
-            label="Payment"
-            name="payment"
-            rules={[{ required: false }]}
-            initialValue={0}
-          >
+          <Form.Item label="Payment" name="payment" rules={[{ required: false }]} initialValue={0}>
             <Input />
           </Form.Item>
 
@@ -348,12 +329,7 @@ export const FinishedRegistration = ({
             <Input />
           </Form.Item>
 
-          <Form.Item
-            label="Payload"
-            name="payload"
-            rules={[{ required: false }]}
-            initialValue="0x"
-          >
+          <Form.Item label="Payload" name="payload" rules={[{ required: false }]} initialValue="0x">
             <Input />
           </Form.Item>
 
@@ -422,8 +398,7 @@ FinishedRegistration.propTypes = {
   serviceId: PropTypes.string.isRequired,
   multisig: PropTypes.string.isRequired,
   owner: PropTypes.string.isRequired,
-  threshold: PropTypes.oneOfType([PropTypes.string, PropTypes.number])
-    .isRequired,
+  threshold: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
   handleTerminate: PropTypes.func.isRequired,
   getButton: PropTypes.func.isRequired,
   canShowMultisigSameAddress: PropTypes.bool,

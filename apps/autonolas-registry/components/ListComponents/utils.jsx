@@ -1,8 +1,5 @@
-import {
-  getMechMinterContract,
-  getComponentContract,
-} from 'common-util/Contracts';
 import { getListByAccount } from 'common-util/ContractUtils/myList';
+import { getComponentContract, getMechMinterContract } from 'common-util/Contracts';
 import { getFirstAndLastIndex } from 'common-util/List/functions';
 import { sendTransaction } from 'common-util/functions';
 

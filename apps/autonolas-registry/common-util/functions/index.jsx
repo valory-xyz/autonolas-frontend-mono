@@ -1,5 +1,6 @@
 import { PublicKey } from '@solana/web3.js';
 import { ethers } from 'ethers';
+import { isString, toLower } from 'lodash';
 
 import {
   getChainIdOrDefaultToMainnet as getChainIdOrDefaultToMainnetFn,
@@ -11,7 +12,6 @@ import {
 } from '@autonolas/frontend-library';
 
 import prohibitedAddresses from 'libs/util-prohibited-data/src/lib/prohibited-addresses.json';
-import { isString, toLower } from 'lodash';
 
 import { VM_TYPE } from '../../util/constants';
 import { RPC_URLS } from '../Contracts';
@@ -131,7 +131,7 @@ const isMethodsBuilderInstance = (builderIns, registryAddress) => {
  * @param {string} extra.registryAddress - The address of the registry contract.
  *
  */
-export const sendTransaction = (method, account, extra) => {
+export const sendTransaction = (method, account, extra = null) => {
   const { vmType, registryAddress } = extra || {};
   if (vmType === VM_TYPE.SVM) {
     // Check if something resembling an SVM method is being passed

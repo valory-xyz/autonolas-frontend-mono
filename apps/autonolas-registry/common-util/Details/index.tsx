@@ -1,10 +1,8 @@
-import { useState, useCallback, FC } from 'react';
+import { useState, useCallback } from 'react';
 import { Row, Col, Button, Typography } from 'antd';
 import capitalize from 'lodash/capitalize';
-import get from 'lodash/get';
-import { GenericObject, Loader, NA } from '@autonolas/frontend-library';
+import { GenericObject, Loader } from '@autonolas/frontend-library';
 
-import { NAV_TYPES, NavTypesValues } from 'util/constants';
 import { useMetadata } from '../hooks/useMetadata';
 import { useHelpers } from '../hooks';
 import { IpfsHashGenerationModal } from '../List/IpfsHashGenerationModal';
@@ -13,25 +11,29 @@ import { NftImage } from './NFTImage';
 import { DetailsSubInfo } from './DetailsSubInfo';
 import { Header, DetailsTitle } from './styles';
 
+import { NavType } from 'util/enum';
+import { Address } from 'viem';
+import BigNumber from 'bignumber.js';
+
 const { Text } = Typography;
 
 type DetailsProps = {
-  id: string;
-  type: NavTypesValues;
-  getDetails: (id: string) => Promise<GenericObject>; // TODO: Define the return type
-  getTokenUri?: (id: string) => Promise<string>;
-  getOwner?: (id: string) => Promise<string>;
-  handleUpdate?: () => void;
-  handleHashUpdate?: () => void;
-  navigateToDependency?: (id: string, type: NavTypesValues) => void;
-  renderServiceState?: (props: {
+  id: BigNumber;
+  type: NavType;
+  getDetails: (id: BigNumber) => Promise<GenericObject>; // TODO: Define the return type
+  getTokenUri: (id: BigNumber) => Promise<string>;
+  getOwner: (id: BigNumber) => Promise<Address>;
+  handleUpdate: () => void;
+  handleHashUpdate: () => void;
+  navigateToDependency: (id: BigNumber, type: NavType) => void;
+  renderServiceState: (props: {
     isOwner: boolean;
     details: GenericObject;
     updateDetails: (details: GenericObject) => void;
   }) => JSX.Element | null;
 };
 
-export const Details: FC<DetailsProps> = ({
+export const Details = ({
   id,
   type,
   getDetails,
@@ -41,7 +43,7 @@ export const Details: FC<DetailsProps> = ({
   handleHashUpdate,
   navigateToDependency,
   renderServiceState,
-}) => {
+}: DetailsProps) => {
   const [isModalVisible, setIsModalVisible] = useState(false);
 
   const { isMainnet } = useHelpers();
@@ -58,7 +60,7 @@ export const Details: FC<DetailsProps> = ({
   // Update button to be show only if the connected account is the owner
   // and only for services
   const canShowUpdateBtn =
-    isOwner && type === NAV_TYPES.SERVICE && !!handleUpdate;
+    isOwner && type === NavType.SERVICE && !!handleUpdate;
 
   const openUpdateHashModal = useCallback(() => {
     setIsModalVisible(true);
@@ -105,10 +107,10 @@ export const Details: FC<DetailsProps> = ({
             isOwner={isOwner}
             type={type}
             tokenUri={tokenUri}
-            ownerAddress={ownerAddress || NA}
-            componentAndAgentDependencies={get(info, 'dependencies')}
-            serviceThreshold={get(info, 'threshold') || NA}
-            serviceCurrentState={get(info, 'state') || NA}
+            ownerAddress={ownerAddress}
+            componentAndAgentDependencies={info?.dependencies ?? []}
+            serviceThreshold={info?.threshold ?? []}
+            serviceCurrentState={info?.state ?? []}
             handleHashUpdate={handleHashUpdate}
             openUpdateHashModal={openUpdateHashModal}
             navigateToDependency={navigateToDependency}
@@ -116,7 +118,7 @@ export const Details: FC<DetailsProps> = ({
         </Col>
 
         <Col md={12} xs={24}>
-          {type === NAV_TYPES.SERVICE ? (
+          {type === NavType.SERVICE ? (
             <>
               {renderServiceState
                 ? renderServiceState({ isOwner, details: info, updateDetails })

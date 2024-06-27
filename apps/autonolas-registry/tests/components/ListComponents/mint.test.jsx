@@ -1,14 +1,15 @@
 import { render, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+
 import { getMechMinterContract } from '../../../common-util/Contracts';
-import MintComponent from '../../../components/ListComponents/mint';
 import { FORM_NAME } from '../../../common-util/List/RegisterForm';
+import MintComponent from '../../../components/ListComponents/mint';
 import {
-  wrapProvider,
   dummyAddress,
   mockV1Hash,
   svmConnectivityEmptyMock,
   useHelpersEvmMock,
+  wrapProvider,
 } from '../../tests-helpers';
 import { fillIpfsGenerationModal } from '../../tests-helpers/prefillForm';
 
@@ -40,9 +41,7 @@ describe('listComponents/mint.jsx', () => {
       },
     }));
 
-    const { container, getByText, getByRole } = render(
-      wrapProvider(<MintComponent />),
-    );
+    const { container, getByText, getByRole } = render(wrapProvider(<MintComponent />));
 
     // title
     expect(getByText(/Mint Component/i)).toBeInTheDocument();
@@ -58,17 +57,9 @@ describe('listComponents/mint.jsx', () => {
     fillIpfsGenerationModal();
 
     // other fields
-    expect(
-      getByRole('button', { name: 'Prefill Address' }),
-    ).toBeInTheDocument();
-    userEvent.type(
-      container.querySelector(`#${FORM_NAME}_owner_address`),
-      dummyAddress,
-    );
-    userEvent.type(
-      container.querySelector(`#${FORM_NAME}_dependencies`),
-      '1, 2',
-    );
+    expect(getByRole('button', { name: 'Prefill Address' })).toBeInTheDocument();
+    userEvent.type(container.querySelector(`#${FORM_NAME}_owner_address`), dummyAddress);
+    userEvent.type(container.querySelector(`#${FORM_NAME}_dependencies`), '1, 2');
 
     const submitButton = getByRole('button', { name: 'Submit' });
     expect(submitButton).toBeInTheDocument();

@@ -1,17 +1,15 @@
-import { useState, useEffect } from 'react';
 import { Tabs } from 'antd';
 import { useRouter } from 'next/router';
+import { useEffect, useState } from 'react';
+
 import { notifyError } from '@autonolas/frontend-library';
 
-import { NAV_TYPES } from 'util/constants';
-import { isMyTab } from 'common-util/List/ListTable/helpers';
 import { ListTable, useExtraTabContent } from 'common-util/List/ListTable';
+import { isMyTab } from 'common-util/List/ListTable/helpers';
 import { useHelpers } from 'common-util/hooks';
-import {
-  useAllComponents,
-  useMyComponents,
-  useSearchComponents,
-} from './useComponentsList';
+import { NavType } from 'util/enum';
+
+import { useAllComponents, useMyComponents, useSearchComponents } from './useComponentsList';
 import {
   getComponents,
   getFilteredComponents,
@@ -25,12 +23,9 @@ const MY_COMPONENTS = 'my-components';
 const ListComponents = () => {
   const router = useRouter();
 
-  const [currentTab, setCurrentTab] = useState(
-    isMyTab(router) ? MY_COMPONENTS : ALL_COMPONENTS,
-  );
+  const [currentTab, setCurrentTab] = useState(isMyTab(router) ? MY_COMPONENTS : ALL_COMPONENTS);
 
-  const { account, chainId, links, isL1OnlyNetwork, isSvm, isMainnet } =
-    useHelpers();
+  const { account, chainId, links, isL1OnlyNetwork, isSvm, isMainnet } = useHelpers();
 
   const getAllComponents = useAllComponents();
   const getMyComponents = useMyComponents();
@@ -163,17 +158,10 @@ const ListComponents = () => {
         setIsLoading(false);
       }
     })();
-  }, [
-    account,
-    searchValue,
-    currentTab,
-    currentPage,
-    getComponentsBySearch,
-    isMainnet,
-  ]);
+  }, [account, searchValue, currentTab, currentPage, getComponentsBySearch, isMainnet]);
 
   const tableCommonProps = {
-    type: NAV_TYPES.COMPONENT,
+    type: NavType.COMPONENT,
     isLoading,
     total,
     currentPage,
@@ -210,11 +198,7 @@ const ListComponents = () => {
           label: 'All',
           disabled: isLoading,
           children: (
-            <ListTable
-              {...tableCommonProps}
-              list={list}
-              tableDataTestId="all-components-table"
-            />
+            <ListTable {...tableCommonProps} list={list} tableDataTestId="all-components-table" />
           ),
         },
         {

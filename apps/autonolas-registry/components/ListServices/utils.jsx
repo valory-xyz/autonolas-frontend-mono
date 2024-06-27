@@ -1,12 +1,12 @@
+import { filterByOwner } from 'common-util/ContractUtils/myList';
+import { getServiceContract } from 'common-util/Contracts';
+import { getTokenDetailsRequest } from 'common-util/Details/utils';
+import { convertStringToArray } from 'common-util/List/ListCommon';
 import {
   DEFAULT_SERVICE_CREATION_ETH_TOKEN,
-  TOTAL_VIEW_COUNT,
   DEFAULT_SERVICE_CREATION_ETH_TOKEN_ZEROS,
+  TOTAL_VIEW_COUNT,
 } from 'util/constants';
-import { getServiceContract } from 'common-util/Contracts';
-import { convertStringToArray } from 'common-util/List/ListCommon';
-import { filterByOwner } from 'common-util/ContractUtils/myList';
-import { getTokenDetailsRequest } from 'common-util/Details/utils';
 
 // --------- HELPER METHODS ---------
 export const getServiceOwner = async (id) => {
@@ -56,7 +56,7 @@ export const getServices = async (total, nextPage, fetchAll = false) => {
   const existsResult = await Promise.allSettled(existsPromises);
   // filter services which don't exists (deleted or destroyed)
   const validTokenIds = [];
-  
+
   existsResult.forEach((item, index) => {
     const serviceId = `${total - (index + first - 1)}`;
     if (item.status === 'fulfilled' && !!item.value) {
@@ -78,11 +78,7 @@ export const getServices = async (total, nextPage, fetchAll = false) => {
 
 export const getFilteredServices = async (searchValue, account) => {
   const total = await getTotalForAllServices();
-  const list = await getServices(
-    total,
-    Math.round(total / TOTAL_VIEW_COUNT + 1),
-    true,
-  );
+  const list = await getServices(total, Math.round(total / TOTAL_VIEW_COUNT + 1), true);
 
   return new Promise((resolve) => {
     const filteredList = filterByOwner(list, { searchValue, account });

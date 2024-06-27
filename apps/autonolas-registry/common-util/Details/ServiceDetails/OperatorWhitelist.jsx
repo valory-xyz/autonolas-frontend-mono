@@ -15,7 +15,7 @@ import { DynamicFieldsForm } from '../../DynamicFieldsForm';
 import {
   checkIfServiceIsWhitelisted,
   setOperatorsStatusesRequest,
-} from '../utils';
+} from '../DetailsSubInfo/utils';
 
 const { Text } = Typography;
 

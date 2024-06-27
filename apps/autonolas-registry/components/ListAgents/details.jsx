@@ -1,18 +1,20 @@
-import { useCallback } from 'react';
+import BigNumber from 'bignumber.js';
 import { useRouter } from 'next/router';
+import { useCallback } from 'react';
 
 import { Details } from 'common-util/Details';
 import { useHelpers } from 'common-util/hooks';
+
 import {
   getAgentDetails,
-  updateAgentHashes,
   getAgentOwner,
   getTokenUri as getAgentTokenUri,
+  updateAgentHashes,
 } from './utils';
 
 const Agent = () => {
   const router = useRouter();
-  const id = router?.query?.id;
+  const id = BigNumber(router?.query?.id);
   const { account, links } = useHelpers();
 
   const getDetails = useCallback(async () => getAgentDetails(id), [id]);

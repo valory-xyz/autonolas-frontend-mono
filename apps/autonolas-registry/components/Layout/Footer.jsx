@@ -1,14 +1,13 @@
-import { useRouter } from 'next/router';
-import Link from 'next/link';
 import Image from 'next/image';
-import {
-  Footer as CommonFooter,
-  getExplorerURL,
-} from '@autonolas/frontend-library';
+import Link from 'next/link';
+import { useRouter } from 'next/router';
 
-import { PAGES_TO_LOAD_WITHOUT_CHAINID } from 'util/constants';
+import { Footer as CommonFooter, getExplorerURL } from '@autonolas/frontend-library';
+
 import { ADDRESSES } from 'common-util/Contracts/addresses';
 import { useHelpers } from 'common-util/hooks';
+import { PAGES_TO_LOAD_WITHOUT_CHAINID } from 'util/constants';
+
 import Socials from './Socials';
 import { ContractsInfoContainer } from './styles';
 
@@ -45,9 +44,7 @@ const ContractInfo = () => {
       return {
         registryText: 'ServiceRegistry',
         managerText: 'ServiceManager',
-        registry: isL1Network
-          ? addresses.serviceRegistry
-          : addresses.serviceRegistryL2,
+        registry: isL1Network ? addresses.serviceRegistry : addresses.serviceRegistryL2,
         manager: doesNetworkHaveValidServiceManagerToken
           ? addresses.serviceManagerToken
           : addresses.serviceManager,
@@ -75,21 +72,14 @@ const ContractInfo = () => {
     </div>
   );
 
-  const {
-    registry, manager, managerText, registryText,
-  } = getCurrentPageAddresses();
+  const { registry, manager, managerText, registryText } = getCurrentPageAddresses();
 
   return (
     <ContractsInfoContainer>
       {!PAGES_TO_LOAD_WITHOUT_CHAINID.includes(pathname) && (
         <>
           <div>
-            <Image
-              src="/images/etherscan-logo.svg"
-              width={18}
-              height={18}
-              alt="Etherscan link"
-            />
+            <Image src="/images/etherscan-logo.svg" width={18} height={18} alt="Etherscan link" />
             <span>Contracts</span>
           </div>
           {getContractInfo(registryText, registry)}
@@ -104,7 +94,7 @@ const Footer = () => (
   <CommonFooter
     leftContent={<ContractInfo />}
     rightContent={<Socials />}
-    centerContent={(
+    centerContent={
       <>
         ©&nbsp;Autonolas DAO&nbsp;
         {new Date().getFullYear()}
@@ -119,7 +109,7 @@ const Footer = () => (
           DAO Constitution
         </a>
       </>
-    )}
+    }
   />
 );
 

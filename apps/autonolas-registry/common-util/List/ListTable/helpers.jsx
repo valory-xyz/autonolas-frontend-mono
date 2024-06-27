@@ -1,29 +1,18 @@
-import { Space, Button } from 'antd';
-import {
-  AddressLink,
-  areAddressesEqual,
-  NA,
-} from '@autonolas/frontend-library';
+import { Button, Space } from 'antd';
+
+import { AddressLink, NA, areAddressesEqual } from '@autonolas/frontend-library';
 
 import {
   HASH_PREFIX,
-  NAV_TYPES,
   SERVICE_STATE,
   SERVICE_STATE_KEY_MAP,
   TOTAL_VIEW_COUNT,
 } from '../../../util/constants';
+import { NavType } from '../../../util/enum';
 
 export const getTableColumns = (
   type,
-  {
-    onViewClick,
-    onUpdateClick,
-    isMobile,
-    chainName,
-    account,
-    chainId,
-    isMainnet,
-  },
+  { onViewClick, onUpdateClick, isMobile, chainName, account, chainId, isMainnet },
 ) => {
   const addressLinkProps = {
     chainId,
@@ -41,7 +30,7 @@ export const getTableColumns = (
     title: 'Name',
     dataIndex: 'packageName',
     key: 'packageName',
-    width: type === NAV_TYPES.SERVICE ? 200 : 180,
+    width: type === NavType.SERVICE ? 200 : 180,
     render: (text, record) => {
       if (!text || text === NA) return NA;
       return (
@@ -71,13 +60,11 @@ export const getTableColumns = (
     render: (text) => {
       if (!text || text === NA) return NA;
       const updatedText = text.replace(HASH_PREFIX, '0x'); // .toUpperCase();
-      return (
-        <AddressLink {...addressLinkProps} text={updatedText} isIpfsLink />
-      );
+      return <AddressLink {...addressLinkProps} text={updatedText} isIpfsLink />;
     },
   };
 
-  if (type === NAV_TYPES.COMPONENT || type === NAV_TYPES.AGENT) {
+  if (type === NavType.COMPONENT || type === NavType.AGENT) {
     const dependencyColumn = {
       title: 'No. of component dependencies',
       dataIndex: 'dependency',
@@ -102,7 +89,7 @@ export const getTableColumns = (
       : [tokenIdColumn, ownerColumn, dependencyColumn, actionColumn];
   }
 
-  if (type === NAV_TYPES.SERVICE) {
+  if (type === NavType.SERVICE) {
     const stateColumn = {
       title: 'State',
       dataIndex: 'state',
@@ -159,36 +146,19 @@ export const getTableColumns = (
       width: 200,
       render: (text) => {
         if (!text || text === NA) return NA;
-        return (
-          <AddressLink
-            {...addressLinkProps}
-            text={text}
-            chainName={chainName}
-          />
-        );
+        return <AddressLink {...addressLinkProps} text={text} chainName={chainName} />;
       },
     };
 
     return isMainnet
-      ? [
-          tokenIdColumn,
-          packageName,
-          ownerColumn,
-          hashColumn,
-          stateColumn,
-          actionAndUpdateColumn,
-        ]
+      ? [tokenIdColumn, packageName, ownerColumn, hashColumn, stateColumn, actionAndUpdateColumn]
       : [idColumn, nonMainnetOwnerColumn, stateColumn, actionAndUpdateColumn];
   }
 
   return [];
 };
 
-export const convertTableRawData = (
-  type,
-  rawData,
-  { currentPage, isMainnet },
-) => {
+export const convertTableRawData = (type, rawData, { currentPage, isMainnet }) => {
   /**
    * @example
    * TOTAL_VIEW_COUNT = 10, current = 1
@@ -204,7 +174,7 @@ export const convertTableRawData = (
 
   // for mainnet
   if (isMainnet) {
-    if (type === NAV_TYPES.COMPONENT || type === NAV_TYPES.AGENT) {
+    if (type === NavType.COMPONENT || type === NavType.AGENT) {
       return rawData.map((item) => ({
         id: item.tokenId,
         tokenId: item.tokenId,
@@ -215,7 +185,7 @@ export const convertTableRawData = (
       }));
     }
 
-    if (type === NAV_TYPES.SERVICE) {
+    if (type === NavType.SERVICE) {
       return rawData.map((item) => ({
         id: item.serviceId,
         tokenId: item.serviceId,
@@ -229,7 +199,7 @@ export const convertTableRawData = (
   }
 
   // non-mainnet chain
-  if (type === NAV_TYPES.COMPONENT) {
+  if (type === NavType.COMPONENT) {
     return rawData.map((item, index) => ({
       id: item.id || `${startIndex + index}`,
       description: item.description || NA,
@@ -240,7 +210,7 @@ export const convertTableRawData = (
     }));
   }
 
-  if (type === NAV_TYPES.AGENT) {
+  if (type === NavType.AGENT) {
     return rawData.map((item, index) => ({
       id: item.id || `${startIndex + index}`,
       description: item.description || NA,
@@ -251,7 +221,7 @@ export const convertTableRawData = (
     }));
   }
 
-  if (type === NAV_TYPES.SERVICE) {
+  if (type === NavType.SERVICE) {
     return rawData.map((item, index) => ({
       id: item.id || `${startIndex + index}`,
       developer: item.developer || NA,

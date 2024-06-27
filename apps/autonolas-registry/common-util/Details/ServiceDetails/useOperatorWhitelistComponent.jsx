@@ -4,7 +4,7 @@ import { Switch } from 'antd';
 import {
   checkIfServiceRequiresWhitelisting,
   setOperatorsCheckRequest,
-} from '../utils';
+} from '../DetailsSubInfo/utils';
 import { useHelpers } from '../../hooks';
 import { OperatorWhitelist, SetOperatorStatus } from './OperatorWhitelist';
 

@@ -1,11 +1,12 @@
+import { useAnchorWallet } from '@solana/wallet-adapter-react';
+import { isNumber } from 'lodash';
 import { useMemo } from 'react';
 import { useSelector } from 'react-redux';
-import { isNumber } from 'lodash';
 import { useAccount } from 'wagmi';
-import { useAnchorWallet } from '@solana/wallet-adapter-react';
+
 import {
-  isL1OnlyNetwork as isL1OnlyNetworkFn,
   isL1Network as isL1NetworkFn,
+  isL1OnlyNetwork as isL1OnlyNetworkFn,
 } from '@autonolas/frontend-library';
 
 import { URL, VM_TYPE } from '../../util/constants';
@@ -53,8 +54,7 @@ export const useHelpers = () => {
     chainName,
     isL1OnlyNetwork: isL1OnlyNetworkFn(chainId),
     isL1Network: isL1NetworkFn(chainId),
-    doesNetworkHaveValidServiceManagerToken:
-      doesNetworkHaveValidServiceManagerTokenFn(chainId),
+    doesNetworkHaveValidServiceManagerToken: doesNetworkHaveValidServiceManagerTokenFn(chainId),
     links: updatedLinks,
     isConnectedToWrongNetwork,
     isMainnet: chainId === 1,

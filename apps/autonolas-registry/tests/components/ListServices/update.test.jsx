@@ -1,23 +1,17 @@
-import { useRouter } from 'next/router';
 import { render, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { useRouter } from 'next/router';
 
-import Update from '../../../components/ListServices/update';
+import { getServiceContract, getServiceManagerContract } from '../../../common-util/Contracts';
 import { FORM_NAME } from '../../../components/ListServices/helpers/RegisterForm';
+import Update from '../../../components/ListServices/update';
+import { getServiceDetails, getServiceOwner } from '../../../components/ListServices/utils';
 import {
-  getServiceContract,
-  getServiceManagerContract,
-} from '../../../common-util/Contracts';
-import {
-  getServiceDetails,
-  getServiceOwner,
-} from '../../../components/ListServices/utils';
-import {
-  wrapProvider,
   dummyAddress,
   mockV1Hash,
   svmConnectivityEmptyMock,
   useHelpersEvmMock,
+  wrapProvider,
 } from '../../tests-helpers';
 
 jest.mock('../../../common-util/List/IpfsHashGenerationModal/helpers', () => ({
@@ -50,8 +44,7 @@ const SERVICE_1 = {
   agentParams: [['1', '1000']],
   threshold: '5',
   id: 1,
-  configHash:
-    '0x1348530ee33734f1d85cf0cdab13181c8c18c051a589a185f52fc0c740a4d5fa',
+  configHash: '0x1348530ee33734f1d85cf0cdab13181c8c18c051a589a185f52fc0c740a4d5fa',
 };
 
 // TODO: fix with antd form
@@ -85,27 +78,15 @@ describe.skip('listServices/service.jsx', () => {
   });
 
   it('should update the service successfully', async () => {
-    const { container, getByRole } = render(
-      wrapProvider(<Update isUpdateForm />),
-    );
+    const { container, getByRole } = render(wrapProvider(<Update isUpdateForm />));
 
     await waitFor(async () => {
-      expect(container.querySelector(`#${FORM_NAME}_owner_address`).value).toBe(
-        dummyAddress,
-      );
-      expect(container.querySelector(`#${FORM_NAME}_agent_ids`).value).toBe(
-        '1',
-      );
-      expect(
-        container.querySelector(`#${FORM_NAME}_agent_num_slots`).value,
-      ).toBe('1');
-      expect(container.querySelector(`#${FORM_NAME}_hash`).value).toBe(
-        SERVICE_1.configHash,
-      );
+      expect(container.querySelector(`#${FORM_NAME}_owner_address`).value).toBe(dummyAddress);
+      expect(container.querySelector(`#${FORM_NAME}_agent_ids`).value).toBe('1');
+      expect(container.querySelector(`#${FORM_NAME}_agent_num_slots`).value).toBe('1');
+      expect(container.querySelector(`#${FORM_NAME}_hash`).value).toBe(SERVICE_1.configHash);
       expect(container.querySelector(`#${FORM_NAME}_bonds`).value).toBe('1000');
-      expect(container.querySelector(`#${FORM_NAME}_threshold`).value).toBe(
-        '5',
-      );
+      expect(container.querySelector(`#${FORM_NAME}_threshold`).value).toBe('5');
 
       const submitButton = getByRole('button', { name: 'Submit' });
       expect(submitButton).toBeInTheDocument();

@@ -1,14 +1,16 @@
-import { useState } from 'react';
-import { useRouter } from 'next/router';
 import { Typography } from 'antd';
+import { useRouter } from 'next/router';
+import { useState } from 'react';
+
 import { notifyError, notifySuccess } from '@autonolas/frontend-library';
 
-import RegisterForm from 'common-util/List/RegisterForm';
-import { AlertSuccess, AlertError } from 'common-util/List/ListCommon';
 import { getMechMinterContract } from 'common-util/Contracts';
+import { AlertError, AlertSuccess } from 'common-util/List/ListCommon';
+import RegisterForm from 'common-util/List/RegisterForm';
 import { sendTransaction } from 'common-util/functions';
 import { checkIfERC721Receive } from 'common-util/functions/requests';
 import { useHelpers } from 'common-util/hooks';
+
 import { FormContainer } from '../styles';
 
 const { Title } = Typography;
@@ -29,10 +31,7 @@ const MintComponent = () => {
       setInformation(null);
 
       try {
-        const isValid = await checkIfERC721Receive(
-          account,
-          values.owner_address,
-        );
+        const isValid = await checkIfERC721Receive(account, values.owner_address);
         if (!isValid) {
           setIsMinting(false);
           return;

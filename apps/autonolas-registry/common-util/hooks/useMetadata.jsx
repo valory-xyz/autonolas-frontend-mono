@@ -1,11 +1,13 @@
-import { useState, useEffect, useMemo } from 'react';
-import { notifyError, NA } from '@autonolas/frontend-library';
+import { useEffect, useMemo, useState } from 'react';
 
-import { GATEWAY_URL, HASH_DETAILS_STATE } from '../../util/constants';
+import { NA, notifyError } from '@autonolas/frontend-library';
+
+import { HashDetailsState } from 'util/enum';
+
+import { GATEWAY_URL } from '../../util/constants';
 
 const pattern = /https:\/\/localhost\/(agent|component|service)\/+/g;
-const getAutonolasTokenUri = (tokenUri) =>
-  (tokenUri || '').replace(pattern, GATEWAY_URL);
+const getAutonolasTokenUri = (tokenUri) => (tokenUri || '').replace(pattern, GATEWAY_URL);
 
 /**
  * NFT details: hook to fetch metadata from IPFS
@@ -13,22 +15,20 @@ const getAutonolasTokenUri = (tokenUri) =>
  */
 export const useMetadata = (tokenUri) => {
   const [metadata, setMetadata] = useState(null);
-  const [metadataLoadState, setMetadataState] = useState(
-    HASH_DETAILS_STATE.IS_LOADING,
-  );
+  const [metadataLoadState, setMetadataState] = useState(HashDetailsState.IS_LOADING);
 
   // fetch metadata from IPFS
   useEffect(() => {
     const getMetadata = async () => {
-      setMetadataState(HASH_DETAILS_STATE.IS_LOADING);
+      setMetadataState(HashDetailsState.IS_LOADING);
       try {
         const ipfsUrl = getAutonolasTokenUri(tokenUri);
         const response = await fetch(ipfsUrl);
         const json = await response.json();
         setMetadata(json);
-        setMetadataState(HASH_DETAILS_STATE.LOADED);
+        setMetadataState(HashDetailsState.LOADED);
       } catch (e) {
-        setMetadataState(HASH_DETAILS_STATE.FAILED);
+        setMetadataState(HashDetailsState.FAILED);
         console.error(e);
         notifyError('Error fetching metadata from IPFS');
       }
