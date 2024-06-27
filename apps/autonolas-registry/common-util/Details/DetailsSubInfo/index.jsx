@@ -1,4 +1,5 @@
-import { Alert, Button, Col, Row, Typography } from 'antd';
+import { Button } from 'antd';
+import { Alert } from 'antd';
 import PropTypes from 'prop-types';
 import { useEffect, useMemo, useState } from 'react';
 import { formatEther } from 'viem';
@@ -9,31 +10,23 @@ import { NA } from '@autonolas/frontend-library';
 import { TOKENOMICS } from 'libs/util-contracts/src/lib/abiAndAddresses/tokenomics';
 
 import { getTokenomicsContract } from 'common-util/Contracts';
+import { RewardsSection } from 'common-util/Details/DetailsSubInfo/RewardsSection';
 
 import {
   DEFAULT_SERVICE_CREATION_ETH_TOKEN_ZEROS,
   HASH_DETAILS_STATE,
   NAV_TYPES,
   TOKENOMICS_UNIT_TYPES,
-} from '../../util/constants';
-import { useHelpers } from '../hooks';
-import { useMetadata } from '../hooks/useMetadata';
-import { typePropType } from '../propTypes';
-import { Circle } from '../svg/Circle';
-import { NftImage } from './NFTImage';
-import { useOperatorWhitelistComponent } from './ServiceDetails/useOperatorWhitelistComponent';
-import { RewardsStatistic } from './styles';
-import {
-  ArrowLink,
-  EachSection,
-  Info,
-  SectionContainer,
-  ServiceStatusContainer,
-  SubTitle,
-} from './styles';
-import { getTokenDetailsRequest } from './utils';
-
-const { Link, Text } = Typography;
+} from '../../../util/constants';
+import { useHelpers } from '../../hooks';
+import { useMetadata } from '../../hooks/useMetadata';
+import { typePropType } from '../../propTypes';
+import { NftImage } from '../NFTImage';
+import { useOperatorWhitelistComponent } from '../ServiceDetails/useOperatorWhitelistComponent';
+import { EachSection, Info, SectionContainer, SubTitle } from '../styles';
+import { getTokenDetailsRequest } from '../utils';
+import { ServiceStatus } from './ServiceStatus';
+import { ViewHashAndCode } from './ViewHashAndCode';
 
 const navTypesForRewards = [NAV_TYPES.COMPONENT, NAV_TYPES.AGENT];
 
@@ -43,86 +36,8 @@ const getOwnerIncentivesSingle = async (account, unitType, unitId) => {
   const ownerIncentives = await tokenomicsContract.methods
     .getOwnerIncentives(account, [unitType], [unitId])
     .call();
-    
+
   return ownerIncentives;
-};
-
-/**
- * Displays "service" status (active/inactive)
- */
-const ServiceStatus = ({ serviceState }) => (
-  <ServiceStatusContainer
-    className={serviceState ? 'active' : 'inactive'}
-    data-testid="service-status"
-  >
-    <Circle size={8} />
-    <Text>{serviceState ? 'Active' : 'Inactive'}</Text>
-  </ServiceStatusContainer>
-);
-ServiceStatus.propTypes = { serviceState: PropTypes.bool };
-ServiceStatus.defaultProps = { serviceState: false };
-
-const MetadataUnpinnedMessage = () => (
-  <Alert message="Metadata is unpinned from IPFS server" type="warning" showIcon />
-);
-
-/**
- * Displays view hash and view code buttons redirecting to
- * links respectively
- */
-const ViewHashAndCode = ({ type, metadataLoadState, hashUrl, codeHref }) => {
-  if (HASH_DETAILS_STATE.LOADED !== metadataLoadState) return null;
-
-  return (
-    <>
-      {type === NAV_TYPES.SERVICE && <>&nbsp;•&nbsp;</>}
-      <Link target="_blank" data-testid="view-hash-link" href={hashUrl}>
-        View Hash&nbsp;
-        <ArrowLink />
-      </Link>
-      &nbsp;•&nbsp;
-      <Link target="_blank" data-testid="view-code-link" href={codeHref}>
-        View Code&nbsp;
-        <ArrowLink />
-      </Link>
-    </>
-  );
-};
-ViewHashAndCode.propTypes = {
-  type: typePropType,
-  metadataLoadState: PropTypes.string,
-  hashUrl: PropTypes.string,
-  codeHref: PropTypes.string,
-};
-ViewHashAndCode.defaultProps = {
-  type: null,
-  metadataLoadState: '',
-  hashUrl: '',
-  codeHref: '',
-};
-
-/**
- * Displays rewards earned and rewards top up
- */
-const RewardsSection = ({ reward, topUp }) => {
-  return (
-    <Row>
-      <Col span={24} xl={12}>
-        <RewardsStatistic title="Claimable Reward" value={reward} suffix="ETH" />
-      </Col>
-      <Col span={24} xl={12}>
-        <RewardsStatistic title="Claimable Top Up" value={topUp} suffix="OLAS" />
-      </Col>
-    </Row>
-  );
-};
-RewardsSection.propTypes = {
-  reward: PropTypes.string,
-  topUp: PropTypes.string,
-};
-RewardsSection.defaultProps = {
-  reward: '0',
-  topUp: '0',
 };
 
 /**
@@ -191,7 +106,7 @@ export const DetailsSubInfo = ({
     if (HASH_DETAILS_STATE.FAILED === metadataLoadState) {
       details.push({
         dataTestId: 'metadata-failed-to-load',
-        value: <MetadataUnpinnedMessage />,
+        value: <Alert message="Metadata is unpinned from IPFS server" type="warning" showIcon />,
       });
     }
 
@@ -327,17 +242,18 @@ export const DetailsSubInfo = ({
     () =>
       detailsValues.map(({ title, value, dataTestId }, index) => {
         if (dataTestId === 'details-rewards' && !formattedRewards) return null;
-        if (dataTestId === 'details-rewards')
-          return (
-            <EachSection key={`${type}-details-${index}`}>
+
+        const isRewardSection = dataTestId === 'details-rewards';
+
+        
               {title && <SubTitle strong>{title}</SubTitle>}
-              {value && <RewardsSection {...value} />}
-            </EachSection>
-          );
+              {value && }
+           
         return (
           <EachSection key={`${type}-details-${index}`}>
             {title && <SubTitle strong>{title}</SubTitle>}
-            {value && <Info data-testid={dataTestId}>{value}</Info>}
+            {value && (isRewardSection ? (<RewardsSection {...value} />) : (<Info data-testid={dataTestId}>{value}</Info>))}
+            
           </EachSection>
         );
       }),

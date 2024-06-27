@@ -1,18 +1,11 @@
-import {
-  useState, useEffect, useCallback, useMemo,
-} from 'react';
-import {
-  notifyError,
-  NA,
-  areAddressesEqual,
-} from '@autonolas/frontend-library';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+
+import { NA, areAddressesEqual, notifyError } from '@autonolas/frontend-library';
 
 import { useHelpers } from '../hooks';
 import { useSvmConnectivity } from '../hooks/useSvmConnectivity';
 
-export const useDetails = ({
-  id, type, getDetails, getOwner, getTokenUri,
-}) => {
+export const useDetails = ({ id, type, getDetails, getOwner, getTokenUri }) => {
   const { account, chainId, isSvm } = useHelpers();
   const { walletPublicKey } = useSvmConnectivity();
 
