@@ -86,7 +86,8 @@ const StakingContractList = () => {
 export const MyStakingContracts = () => {
   const { isConnected: isAccountConnected } = useAccount();
   const { networkId } = useAppSelector((state) => state.network);
-  const { myStakingContracts } = useAppSelector((state) => state.launch);
+
+  console.log('isAccountConnected', isAccountConnected);
 
   return (
     <StyledMain>
@@ -102,7 +103,7 @@ export const MyStakingContracts = () => {
             {isAccountConnected && networkId ? ` on ${CHAIN_NAMES[networkId]}` : ''}
           </Title>
 
-          {isAccountConnected && myStakingContracts.length > 0 && <CreateContractButton />}
+          {isAccountConnected && <CreateContractButton />}
         </Flex>
 
         {match(isAccountConnected)

@@ -1,6 +1,6 @@
 import { SwapOutlined } from '@ant-design/icons';
 import { GetAccountReturnType, watchAccount } from '@wagmi/core';
-import { isNil, isNumber } from 'lodash';
+import { isNumber } from 'lodash';
 import { useCallback, useEffect, useMemo } from 'react';
 import styled from 'styled-components';
 import { useAccount, useAccountEffect, useConfig, useDisconnect, useSwitchChain } from 'wagmi';
@@ -80,12 +80,9 @@ export const LoginV2 = () => {
     }
   }, [isConnectedToWrongNetwork, onSwitchNetwork]);
 
-  const hideWrongNetwork =
-    isNil(walletConnectedChain?.id) || walletConnectedChain?.id === networkId;
-
   return (
     <LoginContainer>
-      {!hideWrongNetwork && (
+      {isConnectedToWrongNetwork && (
         <YellowButton
           loading={isPending}
           type="default"

@@ -23,15 +23,21 @@ export const launchSlice = createSlice({
       state.myStakingContracts = action.payload;
       state.isMyStakingContractsLoading = false;
     },
+    addStakingContract: (state, action: PayloadAction<MyStakingContract>) => {
+      state.myStakingContracts = [...state.myStakingContracts, action.payload];
+    },
     setIsNominated: (state, action: PayloadAction<{ id: Address }>) => {
       const newContracts = state.myStakingContracts.map((item) => {
         return item.id === action.payload.id ? { ...item, isNominated: true } : item;
       });
       state.myStakingContracts = newContracts;
     },
-    clearState: (state) => {},
+    setContractsLoading: (state) => {
+      state.isMyStakingContractsLoading = true;
+    },
   },
 });
 
-export const { setMyStakingContracts, setIsNominated, clearState } = launchSlice.actions;
+export const { setMyStakingContracts, addStakingContract, setIsNominated, setContractsLoading } =
+  launchSlice.actions;
 export const launchReducer = launchSlice.reducer;

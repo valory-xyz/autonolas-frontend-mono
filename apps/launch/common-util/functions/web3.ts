@@ -1,3 +1,4 @@
+import { ContractTransactionReceipt, EventLog } from 'ethers';
 import { Address } from 'viem';
 import Web3 from 'web3';
 import { AbiItem } from 'web3-utils';
@@ -64,6 +65,14 @@ type CreateContractParams = {
   account: Address;
 };
 
+type InstanceCreatedEvent = {
+  returnValues: {
+    implementation: Address;
+    instance: Address;
+    sender: Address;
+  };
+} & EventLog;
+
 export const createStakingContract = async ({
   implementation,
   initPayload,
@@ -73,7 +82,9 @@ export const createStakingContract = async ({
   const createFn = contract.methods.createStakingInstance(implementation, initPayload);
   const result = await sendTransaction(createFn, account);
 
-  return result;
+  return result as ContractTransactionReceipt & {
+    events?: { InstanceCreated: InstanceCreatedEvent };
+  };
 };
 
 type AddNomineeParams = {
