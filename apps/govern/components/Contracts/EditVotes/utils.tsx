@@ -1,4 +1,5 @@
 import { Flex, Typography, notification } from 'antd';
+import { Allocation, StakingContract, UserVotes } from 'types';
 import { Address } from 'viem';
 
 import {
@@ -7,7 +8,6 @@ import {
   checkLockExpired,
   checkNegativeSlope,
 } from 'common-util/functions';
-import { Allocation, StakingContract, UserVotes } from 'types/index';
 
 const { Paragraph } = Typography;
 
@@ -44,6 +44,7 @@ export const getReorderedVotes = (
   );
 
   const newVotes: { address: Address; chainId: number; weight: string }[] = [];
+  const resetVotes: { address: Address; chainId: number; weight: string }[] = [];
 
   // Start from old votes
   sortedOldVotes.forEach((oldVote) => {
@@ -63,10 +64,14 @@ export const getReorderedVotes = (
       // before voting on the others contacts
       const chainId = stakingContracts.find((item) => item.address === oldVoteAddress)?.chainId;
       if (chainId) {
-        newVotes.unshift({ address: oldVoteAddress as Address, chainId, weight: '0' });
+        // Use new array to keep the order
+        resetVotes.push({ address: oldVoteAddress as Address, chainId, weight: '0' });
       }
     }
   });
+
+  // Add old votes that we need to reset the power from
+  newVotes.unshift(...resetVotes);
 
   // Add remaining new votes to the result
   sortedAllocations.forEach((newVote) => {
@@ -78,6 +83,8 @@ export const getReorderedVotes = (
       });
     }
   });
+
+  console.log('newVotes', newVotes);
 
   return newVotes;
 };

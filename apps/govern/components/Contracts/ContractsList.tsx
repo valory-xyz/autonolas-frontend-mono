@@ -2,6 +2,7 @@ import { CheckOutlined, InfoCircleOutlined, PlusOutlined } from '@ant-design/ico
 import { Button, Card as CardAntd, Space, Table, Tooltip, Typography } from 'antd';
 import { ColumnsType } from 'antd/es/table';
 import styled from 'styled-components';
+import { Allocation, StakingContract } from 'types';
 import { useAccount } from 'wagmi';
 
 import { COLOR } from '@autonolas/frontend-library';
@@ -11,7 +12,6 @@ import { CHAIN_NAMES } from 'libs/util-constants/src';
 import { formatWeiBalance } from 'common-util/functions';
 import { useVotingPower } from 'hooks/useVotingPower';
 import { useAppSelector } from 'store/index';
-import { Allocation, StakingContract } from 'types/index';
 
 const { Title, Paragraph, Text } = Typography;
 
