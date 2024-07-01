@@ -59,11 +59,9 @@ const CenterContent = () => (
 );
 
 export const Footer = () => (
-  <>
-    <CommonFooter
-      leftContent={<LeftContent />}
-      centerContent={<CenterContent />}
-      githubUrl={LAUNCH_REPO_URL}
-    />
-  </>
+  <CommonFooter
+    leftContent={<LeftContent />}
+    centerContent={<CenterContent />}
+    githubUrl={LAUNCH_REPO_URL}
+  />
 );
