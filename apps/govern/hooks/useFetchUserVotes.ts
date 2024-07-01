@@ -1,11 +1,11 @@
 import { useEffect } from 'react';
+import { UserVotes } from 'types';
 import { useAccount, useBlock } from 'wagmi';
 
 import { LATEST_BLOCK_KEY, NEXT_USERS_SLOPES_KEY } from 'common-util/constants/scopeKeys';
 import { getThisWeekMondayTimestamp } from 'common-util/functions/time';
 import { setLastUserVote, setUserVotes } from 'store/govern';
 import { useAppDispatch, useAppSelector } from 'store/index';
-import { UserVotes } from 'types/index';
 
 import { useLastUserVote } from './useLastUserVote';
 import { useNominees } from './useNominees';

@@ -3,6 +3,7 @@ import { Alert, Button, Flex, InputNumber, Table, Typography, notification } fro
 import { ColumnsType } from 'antd/es/table';
 import { Dispatch, SetStateAction, useCallback, useState } from 'react';
 import styled from 'styled-components';
+import { Allocation } from 'types';
 import { Address } from 'viem';
 import { useAccount } from 'wagmi';
 
@@ -11,11 +12,10 @@ import { CHAIN_NAMES } from 'libs/util-constants/src';
 import { RETAINER_ADDRESS } from 'common-util/constants/addresses';
 import { INVALIDATE_AFTER_UPDATE_KEYS } from 'common-util/constants/scopeKeys';
 import { getBytes32FromAddress, voteForNomineeWeights } from 'common-util/functions';
+import { queryClient } from 'context/Web3ModalProvider';
 import { clearState } from 'store/govern';
 import { useAppDispatch, useAppSelector } from 'store/index';
-import { Allocation } from 'types/index';
 
-import { queryClient } from '../../../context/Web3ModalProvider';
 import { ConfirmModal } from './ConfirmModal';
 import {
   MAX_ALLOCATED_POWER,

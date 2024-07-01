@@ -1,7 +1,6 @@
 import { PayloadAction } from '@reduxjs/toolkit';
 import { createSlice } from '@reduxjs/toolkit';
-
-import { StakingContract, UserVotes } from 'types/index';
+import { StakingContract, UserVotes } from 'types';
 
 interface GovernState {
   stakingContracts: StakingContract[];

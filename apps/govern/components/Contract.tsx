@@ -1,6 +1,7 @@
 import { Card, Flex, Skeleton, Space, Typography } from 'antd';
 import { useRouter } from 'next/router';
 import styled from 'styled-components';
+import { StakingContract } from 'types';
 import { mainnet } from 'viem/chains';
 import { useEnsName } from 'wagmi';
 
@@ -9,7 +10,6 @@ import { CHAIN_NAMES, EXPLORER_URLS, UNICODE_SYMBOLS } from 'libs/util-constants
 import { getAddressFromBytes32, truncateAddress } from 'common-util/functions';
 import { useContractParams } from 'hooks/index';
 import { useAppSelector } from 'store/index';
-import { StakingContract } from 'types/Contract';
 
 const StyledMain = styled.main`
   display: flex;

@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { StakingContract } from 'types';
 import { useBlock } from 'wagmi';
 
 import { RETAINER_ADDRESS } from 'common-util/constants/addresses';
@@ -7,7 +8,6 @@ import { getBytes32FromAddress } from 'common-util/functions';
 import { getStartOfNextWeekTimestamp } from 'common-util/functions/time';
 import { setStakingContracts } from 'store/govern';
 import { useAppDispatch, useAppSelector } from 'store/index';
-import { StakingContract } from 'types/index';
 
 import { useNominees } from './useNominees';
 import { useNomineesMetadata } from './useNomineesMetadata';
