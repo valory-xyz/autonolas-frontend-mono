@@ -6,6 +6,3 @@ export const URL = {
   paths: 'paths',
   pageNotFound: 'page-not-found',
 };
-
-export const REPO_URL =
-  'https://github.com/valory-xyz/autonolas-frontend-mono/tree/main/apps/launch';

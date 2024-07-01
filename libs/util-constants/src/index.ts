@@ -5,3 +5,4 @@ export * from './lib/chains';
 export * from './lib/tenderly.config';
 export * from './lib/rpcUrls';
 export * from './lib/appUrls';
+export * from './lib/repoUrls';

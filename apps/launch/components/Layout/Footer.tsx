@@ -4,11 +4,10 @@ import { Fragment } from 'react';
 import { mainnet } from 'viem/chains';
 
 import { Footer as CommonFooter } from 'libs/ui-components/src';
-import { EXPLORER_URLS } from 'libs/util-constants/src';
+import { EXPLORER_URLS, LAUNCH_REPO_URL } from 'libs/util-constants/src';
 import { STAKING_FACTORY, VOTE_WEIGHTING } from 'libs/util-contracts/src/lib/abiAndAddresses';
 
 import { ChainId } from 'common-util/constants/stakingContract';
-import { REPO_URL } from 'common-util/constants/urls';
 import { useAppSelector } from 'store/index';
 
 const getContracts = (chainId: ChainId) => [
@@ -33,7 +32,7 @@ const LeftContent = () => {
     <Typography.Text type="secondary">
       {`Contracts: `}
       {contracts.map((item, index) => (
-        <Fragment>
+        <Fragment key={index}>
           {index !== 0 && ' • '}
           <a href={item.link} target="_blank" rel="noopener noreferrer">
             {item.name}
@@ -64,7 +63,7 @@ export const Footer = () => (
     <CommonFooter
       leftContent={<LeftContent />}
       centerContent={<CenterContent />}
-      githubUrl={REPO_URL}
+      githubUrl={LAUNCH_REPO_URL}
     />
   </>
 );
