@@ -1,6 +1,7 @@
-import styled from 'styled-components';
-import { Typography, Image } from 'antd';
 import { ArrowRightOutlined } from '@ant-design/icons';
+import { Image, Statistic, Typography } from 'antd';
+import styled from 'styled-components';
+
 import { COLOR } from '@autonolas/frontend-library';
 
 export const DetailsTitle = styled(Typography.Title)`
@@ -82,3 +83,19 @@ export const ArrowLink = styled(ArrowRightOutlined)`
   position: relative;
   top: -4px;
 `;
+
+export const RewardsStatistic = styled((props) => <Statistic {...props} />)`
+  .ant-statistic-title {
+    font-size: 14px;
+    line-height: 20px;
+  }
+  .ant-statistic-content {
+    font-size: 24px;
+    font-style: normal;
+    font-weight: 700;
+    line-height: 32px;
+    letter-spacing: -0.72px;
+  }
+`;
+
+export default RewardsStatistic;

@@ -28,6 +28,10 @@ import {
 } from 'util/constants';
 import { ADDRESSES } from './addresses';
 
+import {
+  TOKENOMICS
+} from 'libs/util-contracts/src/lib/abiAndAddresses/tokenomics'
+
 export const RPC_URLS = {
   1: process.env.NEXT_PUBLIC_MAINNET_URL,
   5: process.env.NEXT_PUBLIC_GOERLI_URL,
@@ -203,5 +207,13 @@ export const getServiceOwnerMultisigContract = (address) => {
  */
 export const getMultiSendContract = (address) => {
   const contract = getContract(MULTI_SEND_CONTRACT.abi, address);
+  return contract;
+};
+
+/**
+ * @returns tokenomics proxy contract
+ */
+export const getTokenomicsContract = (address) => {
+  const contract = getContract(TOKENOMICS.abi, address);
   return contract;
 };

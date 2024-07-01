@@ -20,7 +20,7 @@ export const NAV_TYPES = {
 } as const;
 
 export type NavTypesKeys = keyof typeof NAV_TYPES;
-export type NavTypesValues = typeof NAV_TYPES[NavTypesKeys];
+export type NavTypesValues = (typeof NAV_TYPES)[NavTypesKeys];
 
 export const SERVICE_STATE = {
   0: 'Non Existent',
@@ -58,8 +58,7 @@ export const GATEWAY_URL = 'https://gateway.autonolas.tech/ipfs/';
 // max components/agents/service to be shown in a single view
 export const TOTAL_VIEW_COUNT = 10;
 
-export const DEFAULT_SERVICE_CREATION_ETH_TOKEN =
-  '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE';
+export const DEFAULT_SERVICE_CREATION_ETH_TOKEN = '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE';
 
 export const DEFAULT_SERVICE_CREATION_ETH_TOKEN_ZEROS =
   '0x0000000000000000000000000000000000000000';
@@ -100,4 +99,12 @@ export const HASH_DETAILS_STATE = {
   IS_LOADING: 'IS_LOADING',
   LOADED: 'LOADED',
   FAILED: 'FAILED',
+} as const;
+
+/**
+ * Constants for Tokenomics unitTypes
+ */
+export const TOKENOMICS_UNIT_TYPES = {
+  COMPONENT: 0,
+  AGENT: 1,
 } as const;
