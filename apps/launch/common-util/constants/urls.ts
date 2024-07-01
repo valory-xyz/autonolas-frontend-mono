@@ -6,5 +6,3 @@ export const URL = {
   paths: 'paths',
   pageNotFound: 'page-not-found',
 };
-
-export const GOVERN_URL = 'https://govern.olas.network';

@@ -9,11 +9,12 @@ import { useReadContract } from 'wagmi';
 
 import { NA } from '@autonolas/frontend-library';
 
-import { EXPLORER_URLS, UNICODE_SYMBOLS } from 'libs/util-constants/src';
+import { EXPLORER_URLS, GOVERN_URL, UNICODE_SYMBOLS } from 'libs/util-constants/src';
 import { STAKING_TOKEN } from 'libs/util-contracts/src/lib/abiAndAddresses';
 import { truncateAddress } from 'libs/util-functions/src';
 
-import { GOVERN_URL, URL } from 'common-util/constants/urls';
+import { ChainId, IMPLEMENTATION_ADDRESSES } from 'common-util/constants/stakingContract';
+import { URL } from 'common-util/constants/urls';
 import { useAppSelector } from 'store/index';
 import { MyStakingContract } from 'types/index';
 
@@ -130,7 +131,7 @@ const ContractAddress: FC<{ address: string }> = ({ address }) => {
   );
 };
 
-const Template: FC<{ address: string; template: string }> = ({ address, template }) => {
+const Template: FC<{ template: string }> = ({ template }) => {
   const { networkId } = useAppSelector((state) => state.network);
 
   return (
@@ -138,7 +139,9 @@ const Template: FC<{ address: string; template: string }> = ({ address, template
       <Text>{template}</Text>
       {networkId ? (
         <a
-          href={`${EXPLORER_URLS[networkId]}/address/${address}`}
+          href={`${EXPLORER_URLS[networkId]}/address/${
+            IMPLEMENTATION_ADDRESSES[networkId as ChainId]
+          }`}
           target="_blank"
           rel="noreferrer"
           style={{ fontSize: '90%' }}
@@ -216,9 +219,7 @@ const EachStakingContractContent: FC<{ myStakingContract: MyStakingContract }> =
       <Row gutter={24}>
         <ColFlexContainer
           text="Template"
-          content={
-            <Template address={myStakingContract.id} template={myStakingContract.template} />
-          }
+          content={<Template template={myStakingContract.template} />}
         />
         <ColFlexContainer text="Chain" content={<Text>{networkDisplayName}</Text>} />
       </Row>

@@ -3,9 +3,8 @@ import { Button, Tooltip, Typography } from 'antd';
 import { useAccount } from 'wagmi';
 
 import { COLOR } from 'libs/ui-theme/src/lib/ui-theme';
-import { UNICODE_SYMBOLS } from 'libs/util-constants/src';
+import { MEMBER_URL, UNICODE_SYMBOLS } from 'libs/util-constants/src';
 
-import { GET_VEOLAS_URL } from 'common-util/constants/urls';
 import { formatWeiBalance } from 'common-util/functions';
 import { useVotingPower } from 'hooks/index';
 
@@ -25,7 +24,7 @@ export const Balance = () => {
       title={
         <>
           <Paragraph>veOLAS gives you voting power in Autonolas governance.</Paragraph>
-          <a href={GET_VEOLAS_URL} target="_blank">
+          <a href={MEMBER_URL} target="_blank">
             Lock OLAS for veOLAS {UNICODE_SYMBOLS.EXTERNAL_LINK}
           </a>
         </>

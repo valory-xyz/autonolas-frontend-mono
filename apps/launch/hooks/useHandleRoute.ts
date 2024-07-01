@@ -24,14 +24,13 @@ export const useHandleRoute = () => {
 
   // updating the blockchain information in redux
   useEffect(() => {
-    const isValidNetwork = isValidNetworkName(networkNameFromUrl);
-    const networkName = isValidNetwork ? networkNameFromUrl : 'ethereum';
+    if (!networkNameFromUrl) return;
 
     dispatch(
       setNetworkDetails({
-        networkId: isValidNetwork ? Number(chainIdFromPath) : 1,
-        networkName: networkName,
-        networkDisplayName: networkName ? getDisplayNameFromPath(networkName) : 'Ethereum',
+        networkId: Number(chainIdFromPath),
+        networkName: networkNameFromUrl,
+        networkDisplayName: getDisplayNameFromPath(networkNameFromUrl),
       }),
     );
   }, [dispatch, networkNameFromUrl, chainIdFromPath]);

@@ -5,10 +5,9 @@ import styled from 'styled-components';
 import { match } from 'ts-pattern';
 import { useAccount } from 'wagmi';
 
-import { UNICODE_SYMBOLS } from 'libs/util-constants/src';
-import { CHAIN_NAMES } from 'libs/util-constants/src';
+import { CHAIN_NAMES, GOVERN_URL, UNICODE_SYMBOLS } from 'libs/util-constants/src';
 
-import { GOVERN_URL, URL } from 'common-util/constants/urls';
+import { URL } from 'common-util/constants/urls';
 import { useAppSelector } from 'store/index';
 
 import { LoginV2 } from '../Login';
@@ -87,7 +86,6 @@ const StakingContractList = () => {
 export const MyStakingContracts = () => {
   const { isConnected: isAccountConnected } = useAccount();
   const { networkId } = useAppSelector((state) => state.network);
-  const { myStakingContracts } = useAppSelector((state) => state.launch);
 
   return (
     <StyledMain>
@@ -103,7 +101,7 @@ export const MyStakingContracts = () => {
             {isAccountConnected && networkId ? ` on ${CHAIN_NAMES[networkId]}` : ''}
           </Title>
 
-          {isAccountConnected && myStakingContracts.length > 0 && <CreateContractButton />}
+          {isAccountConnected && <CreateContractButton />}
         </Flex>
 
         {match(isAccountConnected)

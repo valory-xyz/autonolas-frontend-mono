@@ -6,7 +6,8 @@ import styled from 'styled-components';
 import { Allocation } from 'types';
 import { useAccount } from 'wagmi';
 
-import { GET_VEOLAS_URL } from 'common-util/constants/urls';
+import { MEMBER_URL } from 'libs/util-constants/src';
+
 import { LoginV2 } from 'components/Login';
 import { useVotingPower } from 'hooks/index';
 import { useAppSelector } from 'store/index';
@@ -60,7 +61,7 @@ const GetVeOlas = () => {
         Only veOLAS holders can vote on staking contracts. <br />
         Please lock OLAS for veOLAS to get started.
       </Paragraph>
-      <Button type="primary" target="_blank" href={GET_VEOLAS_URL}>
+      <Button type="primary" target="_blank" href={MEMBER_URL}>
         Get veOLAS
       </Button>
     </Flex>
