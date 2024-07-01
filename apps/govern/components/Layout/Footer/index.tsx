@@ -4,10 +4,8 @@ import { Fragment } from 'react';
 import { mainnet } from 'viem/chains';
 
 import { Footer as CommonFooter } from 'libs/ui-components/src';
-import { EXPLORER_URLS } from 'libs/util-constants/src';
+import { EXPLORER_URLS, GOVERN_REPO_URL } from 'libs/util-constants/src';
 import { VE_OLAS, VOTE_WEIGHTING } from 'libs/util-contracts/src/lib/abiAndAddresses';
-
-import { REPO_URL } from 'common-util/constants/urls';
 
 import { Onboarding } from './Onboarding';
 
@@ -26,7 +24,7 @@ const LeftContent = () => (
   <Typography.Text type="secondary">
     {`Contracts: `}
     {contracts.map((item, index) => (
-      <Fragment>
+      <Fragment key={index}>
         {index !== 0 && ' • '}
         <a href={item.link} target="_blank" rel="noopener noreferrer">
           {item.name}
@@ -56,7 +54,7 @@ export const Footer = () => (
     <CommonFooter
       leftContent={<LeftContent />}
       centerContent={<CenterContent />}
-      githubUrl={REPO_URL}
+      githubUrl={GOVERN_REPO_URL}
     />
     <Onboarding />
   </>

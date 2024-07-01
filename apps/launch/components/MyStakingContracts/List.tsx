@@ -4,7 +4,9 @@ import type { TableProps } from 'antd';
 import Link from 'next/link';
 import React, { FC, useMemo } from 'react';
 
-import { GOVERN_URL, URL } from 'common-util/constants/urls';
+import { GOVERN_URL } from 'libs/util-constants/src';
+
+import { URL } from 'common-util/constants/urls';
 import { useAppSelector } from 'store/index';
 import { MyStakingContract } from 'types/index';
 

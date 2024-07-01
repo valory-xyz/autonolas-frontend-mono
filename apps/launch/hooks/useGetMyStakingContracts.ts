@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
-import { Abi, Address, parseAbiItem } from 'viem';
+import { Abi, Address } from 'viem';
 import { mainnet } from 'viem/chains';
-import { usePublicClient, useReadContract, useReadContracts } from 'wagmi';
+import { useAccount, usePublicClient, useReadContract, useReadContracts } from 'wagmi';
 
 import { GATEWAY_URL, HASH_PREFIX } from 'libs/util-constants/src';
 import {
@@ -61,7 +61,7 @@ const useGetMyStakingContractsMetadata = (addresses: Address[]) => {
     functionName: 'metadataHash',
   }));
 
-  const { data } = useReadContracts({
+  const { data, isFetching } = useReadContracts({
     contracts,
     query: {
       enabled: addresses.length > 0,
@@ -107,14 +107,16 @@ const useGetMyStakingContractsMetadata = (addresses: Address[]) => {
     })();
   }, [data, addresses]);
 
-  return metadata;
+  return { metadata, isFetching };
 };
 
 const useGetInstanceAddresses = () => {
   const { networkId } = useAppSelector((state) => state.network);
   const client = usePublicClient({ chainId: networkId as ChainId });
+  const { address: account } = useAccount();
 
   const [instanceAddresses, setInstanceAddresses] = useState<Address[]>([]);
+  const [isFetching, setIsFetching] = useState(false);
 
   const currentNetworkId = networkId as ChainId;
 
@@ -122,56 +124,67 @@ const useGetInstanceAddresses = () => {
     (async () => {
       if (!currentNetworkId) return;
       if (!client) return;
+      if (!account) return;
+
+      setIsFetching(true);
 
       try {
         const eventLogs = await client.getLogs({
           address: STAKING_FACTORY.addresses[`${currentNetworkId}`] as Address,
-          event: parseAbiItem(
-            'event InstanceCreated(address indexed, address indexed, address indexed)',
-          ),
-          fromBlock: BigInt(blockNumbers[currentNetworkId]),
+          event: {
+            type: 'event',
+            name: 'InstanceCreated',
+            inputs: [
+              { type: 'address', indexed: true, name: 'sender' },
+              { type: 'address', indexed: true, name: 'instance' },
+              { type: 'address', indexed: true, name: 'implementation' },
+            ],
+          },
+          args: { sender: account },
+          fromBlock: blockNumbers[currentNetworkId]
+            ? BigInt(blockNumbers[currentNetworkId])
+            : undefined,
           toBlock: 'latest',
         });
 
-        // log.args[1] = instance address
-        const addresses = eventLogs.map((log) => log.args[1] as Address);
+        const addresses = eventLogs.map((log) => log.args?.instance as Address);
         setInstanceAddresses(addresses);
       } catch (e) {
         window.console.error(e);
+      } finally {
+        setIsFetching(false);
       }
     })();
-  }, [client, currentNetworkId]);
+  }, [client, currentNetworkId, account]);
 
-  return instanceAddresses;
+  return { instanceAddresses, isFetching };
 };
 
 export const useGetMyStakingContracts = () => {
   const dispatch = useAppDispatch();
-  const instanceAddresses = useGetInstanceAddresses();
-  const myStakingContractsMetadata = useGetMyStakingContractsMetadata(instanceAddresses);
+  const { instanceAddresses, isFetching: isInstancesFetching } = useGetInstanceAddresses();
+  const { metadata: myStakingContractsMetadata, isFetching: isMetadataFetching } =
+    useGetMyStakingContractsMetadata(instanceAddresses);
   const nominees = useGetAllNominees();
-  const { myStakingContracts } = useAppSelector((state) => state.launch);
 
   const { networkId } = useAppSelector((state) => state.network);
 
-  const instanceAddressesInBytes32 = instanceAddresses.map((address) =>
-    getBytes32FromAddress(address),
-  );
-
   useEffect(() => {
-    if (!myStakingContractsMetadata) return;
-    if (myStakingContractsMetadata.length === 0) return;
+    if (isMetadataFetching || isInstancesFetching) return;
     if (!nominees) return;
 
-    // if myStakingContracts is already set, do not update it
-    if (myStakingContracts.length !== 0) return;
+    const instanceAddressesInBytes32 = instanceAddresses.map((address) =>
+      getBytes32FromAddress(address),
+    );
 
-    const myStakingContractsList: MyStakingContract[] = myStakingContractsMetadata
-      .map((metadata, index) => {
+    const myStakingContractsList: MyStakingContract[] = instanceAddresses
+      .map((address, index) => {
+        const metadata = myStakingContractsMetadata[index];
+
         if (!metadata) return null;
 
         return {
-          id: instanceAddresses[index],
+          id: address,
           chainId: networkId,
           name: metadata.name,
           description: metadata.description,
@@ -187,10 +200,10 @@ export const useGetMyStakingContracts = () => {
   }, [
     dispatch,
     instanceAddresses,
-    instanceAddressesInBytes32,
     nominees,
     myStakingContractsMetadata,
-    myStakingContracts,
+    isMetadataFetching,
+    isInstancesFetching,
     networkId,
   ]);
 };

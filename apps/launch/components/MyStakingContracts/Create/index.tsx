@@ -11,6 +11,7 @@ import {
   Tag,
   Typography,
 } from 'antd';
+import { ContractTransactionReceipt, TransactionResponse } from 'ethers';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { useRouter } from 'next/router';
@@ -37,6 +38,8 @@ import {
   notifyWrongNetwork,
 } from 'common-util/functions';
 import { getChainIdFromPath } from 'common-util/functions/networkHelpers';
+import { useAppDispatch } from 'store/index';
+import { addStakingContract } from 'store/launch';
 import { ErrorType } from 'types/index';
 
 import { Hint, StyledMain, Title } from './styles';
@@ -60,6 +63,7 @@ const INPUT_WIDTH_STYLE = { width: '100%' };
 
 export const CreateStakingContract = () => {
   const router = useRouter();
+  const dispatch = useAppDispatch();
 
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<ErrorType>(null);
@@ -112,8 +116,20 @@ export const CreateStakingContract = () => {
 
       const result = await createStakingContract({ implementation, initPayload, account });
       if (result) {
-        // TODO: once request contracts list task is done, need to update
-        // the staking contracts list with result.events.InstanceCreated data
+        const eventLog = result.events?.InstanceCreated?.returnValues;
+
+        if (eventLog) {
+          dispatch(
+            addStakingContract({
+              id: eventLog.instance,
+              chainId: chain.id,
+              name,
+              description,
+              template: contractTemplate.title,
+              isNominated: false,
+            }),
+          );
+        }
         router.push(`/${networkName}/${URL.myStakingContracts}`);
       }
     } catch (error) {
