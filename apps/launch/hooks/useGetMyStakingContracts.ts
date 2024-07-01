@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Abi, Address, parseAbiItem } from 'viem';
+import { Abi, Address } from 'viem';
 import { mainnet } from 'viem/chains';
 import { useAccount, usePublicClient, useReadContract, useReadContracts } from 'wagmi';
 
@@ -140,10 +140,10 @@ const useGetInstanceAddresses = () => {
               { type: 'address', indexed: true, name: 'implementation' },
             ],
           },
-          args: {
-            sender: account,
-          },
-          fromBlock: BigInt(blockNumbers[currentNetworkId]),
+          args: { sender: account },
+          fromBlock: blockNumbers[currentNetworkId]
+            ? BigInt(blockNumbers[currentNetworkId])
+            : undefined,
           toBlock: 'latest',
         });
 
@@ -204,5 +204,6 @@ export const useGetMyStakingContracts = () => {
     myStakingContractsMetadata,
     isMetadataFetching,
     isInstancesFetching,
+    networkId,
   ]);
 };
