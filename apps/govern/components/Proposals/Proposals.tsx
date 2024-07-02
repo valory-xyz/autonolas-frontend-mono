@@ -4,6 +4,8 @@ import styled from 'styled-components';
 
 import { UNICODE_SYMBOLS } from 'libs/util-constants/src';
 
+const { Paragraph } = Typography;
+
 const StyledMain = styled.main`
   display: flex;
   flex-direction: column;
@@ -16,16 +18,11 @@ const Title = styled.h1`
   margin: 0 0 8px;
 `;
 
-const { Paragraph } = Typography;
-
 type Proposal = {
   title: string;
   description: string;
   imageSrc: string;
-  button: {
-    title: string;
-    href: string;
-  };
+  button: { title: string; href: string };
 };
 const proposals: Proposal[] = [
   {
@@ -75,6 +72,7 @@ export const ProposalsPage = () => {
         <Paragraph type="secondary" className="mb-24">
           Participate in the Autonolas DAO governance by voting on proposals.
         </Paragraph>
+
         <Row gutter={24}>
           {proposals.map((item, index) => (
             <Col key={index} span={12}>

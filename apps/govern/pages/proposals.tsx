@@ -1,3 +1,3 @@
-import { ProposalsPage } from 'components/Proposals';
+import { ProposalsPage } from 'components/Proposals/Proposals';
 
 export default ProposalsPage;

@@ -29,6 +29,7 @@ const GovernApp = ({ Component, ...rest }: AppProps) => {
       <Head>
         <title>Govern</title>
       </Head>
+
       <Provider store={store}>
         <AutonolasThemeProvider>
           <Web3ModalProvider>
