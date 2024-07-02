@@ -1,6 +1,6 @@
 /* eslint-disable */
 export default {
-  displayName: 'goverm',
+  displayName: 'govern',
   preset: '../../jest.preset.js',
   testEnvironment: 'jsdom',
   setupFilesAfterEnv: ['<rootDir>/jest.setup.ts'],
