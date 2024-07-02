@@ -6,35 +6,36 @@ import { formatEther } from 'viem';
 import { RewardsStatistic } from '../styles';
 
 /**
- * Displays rewards earned and rewards top up
+ * Formats reward values to required decimal places
  */
-
 const rewardsFormatter = (reward, dp) =>
   parseFloat(formatEther(reward)).toLocaleString('en', {
     maximumFractionDigits: dp,
     minimumFractionDigits: dp,
   });
 
-const RewardColumn = ({ title, statisticValue }) => (
+const RewardColumn = ({ title, statisticString }) => (
   <Col span={24} xl={12}>
-    <RewardsStatistic title={title} value={statisticValue} />
+    <RewardsStatistic title={title} value={statisticString} />
   </Col>
 );
+
 RewardColumn.propTypes = {
   title: PropTypes.string,
-  statisticValue: PropTypes.string,
+  statisticString: PropTypes.string,
 };
 
 const RewardsSection = memo(function RewardsSection({ reward, topUp }) {
-  const statisticValue = {
+
+  const statistics = {
     reward: `${rewardsFormatter(reward, 4)} ETH`,
     topUp: `${rewardsFormatter(topUp, 2)} OLAS`,
   };
 
   return (
     <Row>
-      <RewardColumn title={'Claimable Reward'} statisticString={statisticValue.reward} />
-      <RewardColumn title={'Claimable Top-Up'} statisticString={statisticValue.topUp} />
+      <RewardColumn title={'Claimable Reward'} statisticString={statistics.reward} />
+      <RewardColumn title={'Claimable Top-Up'} statisticString={statistics.topUp} />
     </Row>
   );
 });
