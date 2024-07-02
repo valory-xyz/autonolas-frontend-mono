@@ -29,8 +29,6 @@ import ViewHashAndCode from './ViewHashAndCode';
 
 const navTypesForRewards = [NAV_TYPES.COMPONENT, NAV_TYPES.AGENT];
 
-const tokenomicsContract = getTokenomicsContract(TOKENOMICS.addresses['1']);
-
 /**
  * Agent | Component | Service - details component
  */
@@ -50,7 +48,7 @@ const DetailsSubInfo = ({
   handleHashUpdate,
   navigateToDependency,
 }) => {
-  const { isSvm, doesNetworkHaveValidServiceManagerToken } = useHelpers();
+  const { isSvm, doesNetworkHaveValidServiceManagerToken, chainId } = useHelpers();
   const [tokenAddress, setTokenAddress] = useState(null);
   const [rewards, setRewards] = useState(null);
 
@@ -68,6 +66,9 @@ const DetailsSubInfo = ({
     if (type === NAV_TYPES.AGENT) return TOKENOMICS_UNIT_TYPES.AGENT;
     return;
   }, [type]);
+
+  const tokenomicsContract =
+    type === NAV_TYPES.SERVICE || isSvm ? null : getTokenomicsContract(TOKENOMICS.addresses[1]);
 
   const viewHashAndCodeButtons = (
     <ViewHashAndCode
@@ -230,13 +231,13 @@ const DetailsSubInfo = ({
       detailsValues.map(({ title, value, dataTestId }, index) => {
         if (dataTestId === 'details-rewards' && !rewards) return null;
 
-        const isRewardSection = dataTestId === 'details-rewards';
+        const isRewards = dataTestId === 'details-rewards';
 
         return (
           <EachSection key={`${type}-details-${index}`}>
             {title && <SubTitle strong>{title}</SubTitle>}
             {value &&
-              (isRewardSection ? (
+              (isRewards ? (
                 <RewardsSection {...value} data-testid={dataTestId} />
               ) : (
                 <Info data-testid={dataTestId}>{value}</Info>
@@ -266,14 +267,16 @@ const DetailsSubInfo = ({
     }
   }, [id, type, isSvm, doesNetworkHaveValidServiceManagerToken]);
 
-  // load rewards into reward state
+  // Load rewards into state on Ethereum
   useEffect(() => {
+    if (chainId !== 1) return;
+    
     if (rewards) return;
     if (!navTypesForRewards.includes(type)) return;
     if (!ownerAddress) return;
     if (!id) return;
 
-    tokenomicsContract.methods
+    tokenomicsContract?.methods
       .getOwnerIncentives(ownerAddress, [tokenomicsUnitType], [id])
       .call()
       .then(({ reward, topUp }) => {
@@ -282,7 +285,7 @@ const DetailsSubInfo = ({
           topUp: topUp,
         });
       });
-  }, [rewards, id, ownerAddress, tokenomicsUnitType, type]);
+  }, [rewards, id, ownerAddress, tokenomicsUnitType, type, tokenomicsContract, chainId]);
   return <SectionContainer>{detailsSections}</SectionContainer>;
 };
 
