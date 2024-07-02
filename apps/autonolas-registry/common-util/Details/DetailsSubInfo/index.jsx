@@ -1,5 +1,4 @@
-import { Button } from 'antd';
-import { Alert } from 'antd';
+import { Alert, Button } from 'antd';
 import PropTypes from 'prop-types';
 import { useEffect, useMemo, useState } from 'react';
 import { useEnsName } from 'wagmi';
@@ -270,7 +269,7 @@ const DetailsSubInfo = ({
   // Load rewards into state on Ethereum
   useEffect(() => {
     if (chainId !== 1) return;
-    
+
     if (rewards) return;
     if (!navTypesForRewards.includes(type)) return;
     if (!ownerAddress) return;
