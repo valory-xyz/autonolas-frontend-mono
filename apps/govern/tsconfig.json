@@ -25,6 +25,7 @@
       "images/*": ["apps/govern/public/images/*"],
       "store/*": ["apps/govern/store/*"],
       "hooks/*": ["apps/govern/hooks/*"],
+      "context/*": ["apps/govern/context/*"],
       "types": ["apps/govern/types"]
     }
   },

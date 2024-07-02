@@ -12,7 +12,8 @@
           "images": "./public/images",
           "store": "./store",
           "hooks": "./hooks",
-          "types": "./types"
+          "types": "./types",
+          "context": "./context"
         }
       }
     ],
