@@ -1,4 +1,4 @@
-import { Card, Flex, Skeleton, Space, Typography } from 'antd';
+import { Alert, Card, Flex, Skeleton, Space, Typography } from 'antd';
 import { useRouter } from 'next/router';
 import styled from 'styled-components';
 import { StakingContract } from 'types';
@@ -41,56 +41,79 @@ const ContractPageContent = ({ contract }: ContractPageContentProps) => {
   });
 
   return (
-    <StyledMain>
-      <Card>
-        <Title>{contract.metadata.name}</Title>
+    <>
+      <Title>{contract.metadata.name}</Title>
+      <Space direction="vertical">
+        <Text type="secondary">Description</Text>
+        <Paragraph>{contract.metadata.description}</Paragraph>
+      </Space>
+
+      <Flex justify="space-between">
         <Space direction="vertical">
-          <Text type="secondary">Description</Text>
-          <Paragraph>{contract.metadata.description}</Paragraph>
-        </Space>
-        <Flex justify="space-between">
-          <Space direction="vertical">
-            <Text type="secondary">Owner address</Text>
-            {contractParams && !isEnsNameFetching ? (
-              <a
-                href={`${EXPLORER_URLS[contract.chainId]}/address/${contractParams.deployer}`}
-                target="_blank"
-              >
-                {`${ensName || truncateAddress(contractParams.deployer)} ${
-                  UNICODE_SYMBOLS.EXTERNAL_LINK
-                }`}
-              </a>
-            ) : (
-              <Skeleton.Input active size="small" />
-            )}
-          </Space>
-          <Space direction="vertical">
-            <Text type="secondary">Chain</Text>
-            <Text>{CHAIN_NAMES[contract.chainId]}</Text>
-          </Space>
-          <Space direction="vertical">
-            <Text type="secondary">Contract address</Text>
+          <Text type="secondary">Owner address</Text>
+          {contractParams && !isEnsNameFetching ? (
             <a
-              href={`${EXPLORER_URLS[contract.chainId]}/address/${formattedAddress}`}
+              href={`${EXPLORER_URLS[contract.chainId]}/address/${contractParams.deployer}`}
               target="_blank"
             >
-              {`${truncateAddress(formattedAddress)} ${UNICODE_SYMBOLS.EXTERNAL_LINK}`}
+              {`${ensName || truncateAddress(contractParams.deployer)} ${
+                UNICODE_SYMBOLS.EXTERNAL_LINK
+              }`}
             </a>
-          </Space>
-        </Flex>
-      </Card>
-    </StyledMain>
+          ) : (
+            <Skeleton.Input active size="small" />
+          )}
+        </Space>
+
+        <Space direction="vertical">
+          <Text type="secondary">Chain</Text>
+          <Text>{CHAIN_NAMES[contract.chainId]}</Text>
+        </Space>
+
+        <Space direction="vertical">
+          <Text type="secondary">Contract address</Text>
+          <a
+            href={`${EXPLORER_URLS[contract.chainId]}/address/${formattedAddress}`}
+            target="_blank"
+          >
+            {`${truncateAddress(formattedAddress)} ${UNICODE_SYMBOLS.EXTERNAL_LINK}`}
+          </a>
+        </Space>
+      </Flex>
+    </>
   );
 };
 
-export const ContractPage = () => {
-  const { stakingContracts } = useAppSelector((state) => state.govern);
+export const ContractContent = () => {
+  const { isStakingContractsLoading, stakingContracts } = useAppSelector((state) => state.govern);
   const router = useRouter();
   const addressParam = router?.query?.address;
 
   const contract = stakingContracts.find((item) => item.address === addressParam);
 
-  if (!contract) return null;
+  if (isStakingContractsLoading) {
+    return <Skeleton active />;
+  }
 
+  if (!contract) {
+    return (
+      <Alert
+        message="Contract not found"
+        description="The contract you are looking for does not exist."
+        type="error"
+        showIcon
+      />
+    );
+  }
   return <ContractPageContent contract={contract} />;
+};
+
+export const ContractPage = () => {
+  return (
+    <StyledMain>
+      <Card>
+        <ContractContent />
+      </Card>
+    </StyledMain>
+  );
 };
