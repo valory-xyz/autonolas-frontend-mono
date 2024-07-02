@@ -71,9 +71,9 @@ export const ProposalsPage = () => (
         Participate in the Autonolas DAO governance by voting on proposals.
       </Paragraph>
 
-      <Row gutter={24}>
+      <Row gutter={24} >
         {proposals.map((item, index) => (
-          <Col key={index} span={12}>
+          <Col key={index} md={12} xs={24}>
             <Proposal {...item} />
           </Col>
         ))}
