@@ -7,7 +7,7 @@ import { useEnsName } from 'wagmi';
 
 import { CHAIN_NAMES, EXPLORER_URLS, UNICODE_SYMBOLS } from 'libs/util-constants/src';
 
-import { getAddressFromBytes32, truncateAddress } from 'common-util/functions';
+import { getAddressFromBytes32, truncateAddress } from 'common-util/functions/addresses';
 import { useContractParams } from 'hooks/index';
 import { useAppSelector } from 'store/index';
 
@@ -33,7 +33,6 @@ const ContractPageContent = ({ contract }: ContractPageContentProps) => {
   const formattedAddress = contract ? getAddressFromBytes32(contract.address) : '';
 
   const { data: contractParams } = useContractParams(formattedAddress, contract.chainId);
-
   const { data: ensName, isFetching: isEnsNameFetching } = useEnsName({
     address: contractParams?.deployer,
     chainId: mainnet.id,
@@ -55,6 +54,7 @@ const ContractPageContent = ({ contract }: ContractPageContentProps) => {
             <a
               href={`${EXPLORER_URLS[contract.chainId]}/address/${contractParams.deployer}`}
               target="_blank"
+              data-testid="owner-address"
             >
               {`${ensName || truncateAddress(contractParams.deployer)} ${
                 UNICODE_SYMBOLS.EXTERNAL_LINK
@@ -75,6 +75,7 @@ const ContractPageContent = ({ contract }: ContractPageContentProps) => {
           <a
             href={`${EXPLORER_URLS[contract.chainId]}/address/${formattedAddress}`}
             target="_blank"
+            data-testid="contract-address"
           >
             {`${truncateAddress(formattedAddress)} ${UNICODE_SYMBOLS.EXTERNAL_LINK}`}
           </a>
@@ -84,7 +85,7 @@ const ContractPageContent = ({ contract }: ContractPageContentProps) => {
   );
 };
 
-export const ContractContent = () => {
+const ContractContent = () => {
   const { isStakingContractsLoading, stakingContracts } = useAppSelector((state) => state.govern);
   const router = useRouter();
   const addressParam = router?.query?.address;
@@ -105,15 +106,14 @@ export const ContractContent = () => {
       />
     );
   }
+
   return <ContractPageContent contract={contract} />;
 };
 
-export const ContractPage = () => {
-  return (
-    <StyledMain>
-      <Card>
-        <ContractContent />
-      </Card>
-    </StyledMain>
-  );
-};
+export const ContractPage = () => (
+  <StyledMain>
+    <Card>
+      <ContractContent />
+    </Card>
+  </StyledMain>
+);
