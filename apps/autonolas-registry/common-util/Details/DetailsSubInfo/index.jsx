@@ -22,9 +22,9 @@ import { NftImage } from '../NFTImage';
 import { useOperatorWhitelistComponent } from '../ServiceDetails/useOperatorWhitelistComponent';
 import { EachSection, Info, SectionContainer, SubTitle } from '../styles';
 import { getTokenDetailsRequest } from '../utils';
-import RewardsSection from './RewardsSection';
-import ServiceStatus from './ServiceStatus';
-import ViewHashAndCode from './ViewHashAndCode';
+import { RewardsSection } from './RewardsSection';
+import { ServiceStatus } from './ServiceStatus';
+import { ViewHashAndCode } from './ViewHashAndCode';
 
 const navTypesForRewards = [NAV_TYPES.COMPONENT, NAV_TYPES.AGENT];
 
