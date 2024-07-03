@@ -97,5 +97,3 @@ export const RewardsStatistic = styled((props) => <Statistic {...props} />)`
     letter-spacing: -0.72px;
   }
 `;
-
-export default RewardsStatistic;

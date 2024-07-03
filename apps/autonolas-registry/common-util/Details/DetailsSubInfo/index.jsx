@@ -31,7 +31,7 @@ const navTypesForRewards = [NAV_TYPES.COMPONENT, NAV_TYPES.AGENT];
 /**
  * Agent | Component | Service - details component
  */
-const DetailsSubInfo = ({
+export const DetailsSubInfo = ({
   id,
   isOwner,
   type,
@@ -317,5 +317,3 @@ DetailsSubInfo.defaultProps = {
   openUpdateHashModal: null,
   navigateToDependency: null,
 };
-
-export default DetailsSubInfo;
