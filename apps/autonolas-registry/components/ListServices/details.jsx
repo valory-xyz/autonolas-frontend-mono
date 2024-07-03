@@ -1,5 +1,5 @@
-import { useCallback } from 'react';
 import { useRouter } from 'next/router';
+import { useCallback } from 'react';
 
 import { Details } from 'common-util/Details';
 import { useHelpers } from 'common-util/hooks';
@@ -42,12 +42,7 @@ const Service = () => {
       handleUpdate={handleUpdate}
       navigateToDependency={navigateToDependency}
       renderServiceState={({ isOwner, details, updateDetails }) => (
-        <ServiceState
-          isOwner={isOwner}
-          id={id}
-          details={details}
-          updateDetails={updateDetails}
-        />
+        <ServiceState isOwner={isOwner} id={id} details={details} updateDetails={updateDetails} />
       )}
     />
   );

@@ -1,17 +1,19 @@
-import { useState, useCallback, FC } from 'react';
-import { Row, Col, Button, Typography } from 'antd';
+import { Button, Col, Row, Typography } from 'antd';
 import capitalize from 'lodash/capitalize';
 import get from 'lodash/get';
+import { FC, useCallback, useState } from 'react';
+
 import { GenericObject, Loader, NA } from '@autonolas/frontend-library';
 
 import { NAV_TYPES, NavTypesValues } from 'util/constants';
-import { useMetadata } from '../hooks/useMetadata';
-import { useHelpers } from '../hooks';
+
 import { IpfsHashGenerationModal } from '../List/IpfsHashGenerationModal';
-import { useDetails } from './useDetails';
-import { NftImage } from './NFTImage';
+import { useHelpers } from '../hooks';
+import { useMetadata } from '../hooks/useMetadata';
 import { DetailsSubInfo } from './DetailsSubInfo';
-import { Header, DetailsTitle } from './styles';
+import { NftImage } from './NFTImage';
+import { DetailsTitle, Header } from './styles';
+import { useDetails } from './useDetails';
 
 const { Text } = Typography;
 
@@ -45,20 +47,18 @@ export const Details: FC<DetailsProps> = ({
   const [isModalVisible, setIsModalVisible] = useState(false);
 
   const { isMainnet } = useHelpers();
-  const { isLoading, isOwner, info, ownerAddress, tokenUri, updateDetails } =
-    useDetails({
-      id,
-      type,
-      getDetails,
-      getOwner,
-      getTokenUri,
-    });
+  const { isLoading, isOwner, info, ownerAddress, tokenUri, updateDetails } = useDetails({
+    id,
+    type,
+    getDetails,
+    getOwner,
+    getTokenUri,
+  });
   const { nftImageUrl, packageName } = useMetadata(tokenUri);
 
   // Update button to be show only if the connected account is the owner
   // and only for services
-  const canShowUpdateBtn =
-    isOwner && type === NAV_TYPES.SERVICE && !!handleUpdate;
+  const canShowUpdateBtn = isOwner && type === NAV_TYPES.SERVICE && !!handleUpdate;
 
   const openUpdateHashModal = useCallback(() => {
     setIsModalVisible(true);
@@ -77,21 +77,14 @@ export const Details: FC<DetailsProps> = ({
           ) : (
             <>
               <Text strong>{`${capitalize(type)} Name`}</Text>
-              <DetailsTitle level={2}>
-                {`${capitalize(type)} ID ${id}`}
-              </DetailsTitle>
+              <DetailsTitle level={2}>{`${capitalize(type)} ID ${id}`}</DetailsTitle>
             </>
           )}
         </div>
 
         <div className="right-content">
           {canShowUpdateBtn && (
-            <Button
-              type="primary"
-              ghost
-              onClick={handleUpdate}
-              data-testid="service-update-button"
-            >
+            <Button type="primary" ghost onClick={handleUpdate} data-testid="service-update-button">
               Update
             </Button>
           )}

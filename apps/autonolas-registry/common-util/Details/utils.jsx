@@ -1,14 +1,9 @@
-import {
-  getOperatorWhitelistContract,
-  getServiceRegistryTokenUtilityContract,
-} from '../Contracts';
+import { getOperatorWhitelistContract, getServiceRegistryTokenUtilityContract } from '../Contracts';
 import { sendTransaction } from '../functions';
 
 export const getTokenDetailsRequest = async (serviceId) => {
   const contract = getServiceRegistryTokenUtilityContract();
-  const deposit = await contract.methods
-    .mapServiceIdTokenDeposit(serviceId)
-    .call();
+  const deposit = await contract.methods.mapServiceIdTokenDeposit(serviceId).call();
   return deposit;
 };
 
@@ -17,32 +12,19 @@ export const checkIfServiceRequiresWhitelisting = async (serviceId) => {
   const contract = getOperatorWhitelistContract();
   // if true: it is whitelisted by default
   // else we can whitelist using the input field
-  const response = await contract.methods
-    .mapServiceIdOperatorsCheck(serviceId)
-    .call();
+  const response = await contract.methods.mapServiceIdOperatorsCheck(serviceId).call();
   return response;
 };
 
-export const checkIfServiceIsWhitelisted = async (
-  serviceId,
-  operatorAddress,
-) => {
+export const checkIfServiceIsWhitelisted = async (serviceId, operatorAddress) => {
   const contract = getOperatorWhitelistContract();
-  const response = await contract.methods
-    .isOperatorWhitelisted(serviceId, operatorAddress)
-    .call();
+  const response = await contract.methods.isOperatorWhitelisted(serviceId, operatorAddress).call();
   return response;
 };
 
-export const setOperatorsCheckRequest = async ({
-  account,
-  serviceId,
-  isChecked,
-}) => {
+export const setOperatorsCheckRequest = async ({ account, serviceId, isChecked }) => {
   const contract = getOperatorWhitelistContract();
-  const fn = contract.methods
-    .setOperatorsCheck(serviceId, isChecked)
-    .send({ from: account });
+  const fn = contract.methods.setOperatorsCheck(serviceId, isChecked).send({ from: account });
   const response = await sendTransaction(fn, account);
   return response;
 };

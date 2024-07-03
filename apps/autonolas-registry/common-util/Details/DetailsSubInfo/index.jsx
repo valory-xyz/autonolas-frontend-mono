@@ -1,86 +1,32 @@
-import { Alert, Button, Typography } from 'antd';
+import { Alert, Button } from 'antd';
 import PropTypes from 'prop-types';
 import { useEffect, useMemo, useState } from 'react';
 import { useEnsName } from 'wagmi';
 
 import { NA } from '@autonolas/frontend-library';
 
+import { TOKENOMICS } from 'libs/util-contracts/src/lib/abiAndAddresses/tokenomics';
+
+import { getTokenomicsContract } from 'common-util/Contracts';
+
 import {
   DEFAULT_SERVICE_CREATION_ETH_TOKEN_ZEROS,
   HASH_DETAILS_STATE,
   NAV_TYPES,
-} from '../../util/constants';
-import { useHelpers } from '../hooks';
-import { useMetadata } from '../hooks/useMetadata';
-import { typePropType } from '../propTypes';
-import { Circle } from '../svg/Circle';
-import { NftImage } from './NFTImage';
-import { useOperatorWhitelistComponent } from './ServiceDetails/useOperatorWhitelistComponent';
-import {
-  ArrowLink,
-  EachSection,
-  Info,
-  SectionContainer,
-  ServiceStatusContainer,
-  SubTitle,
-} from './styles';
-import { getTokenDetailsRequest } from './utils';
+  TOKENOMICS_UNIT_TYPES,
+} from '../../../util/constants';
+import { useHelpers } from '../../hooks';
+import { useMetadata } from '../../hooks/useMetadata';
+import { typePropType } from '../../propTypes';
+import { NftImage } from '../NFTImage';
+import { useOperatorWhitelistComponent } from '../ServiceDetails/useOperatorWhitelistComponent';
+import { EachSection, Info, SectionContainer, SubTitle } from '../styles';
+import { getTokenDetailsRequest } from '../utils';
+import { RewardsSection } from './RewardsSection';
+import { ServiceStatus } from './ServiceStatus';
+import { ViewHashAndCode } from './ViewHashAndCode';
 
-const { Link, Text } = Typography;
-
-/**
- * Displays "service" status (active/inactive)
- */
-const ServiceStatus = ({ serviceState }) => (
-  <ServiceStatusContainer
-    className={serviceState ? 'active' : 'inactive'}
-    data-testid="service-status"
-  >
-    <Circle size={8} />
-    <Text>{serviceState ? 'Active' : 'Inactive'}</Text>
-  </ServiceStatusContainer>
-);
-ServiceStatus.propTypes = { serviceState: PropTypes.bool };
-ServiceStatus.defaultProps = { serviceState: false };
-
-const MetadataUnpinnedMessage = () => (
-  <Alert message="Metadata is unpinned from IPFS server" type="warning" showIcon />
-);
-
-/**
- * Displays view hash and view code buttons redirecting to
- * links respectively
- */
-const ViewHashAndCode = ({ type, metadataLoadState, hashUrl, codeHref }) => {
-  if (HASH_DETAILS_STATE.LOADED !== metadataLoadState) return null;
-
-  return (
-    <>
-      {type === NAV_TYPES.SERVICE && <>&nbsp;•&nbsp;</>}
-      <Link target="_blank" data-testid="view-hash-link" href={hashUrl}>
-        View Hash&nbsp;
-        <ArrowLink />
-      </Link>
-      &nbsp;•&nbsp;
-      <Link target="_blank" data-testid="view-code-link" href={codeHref}>
-        View Code&nbsp;
-        <ArrowLink />
-      </Link>
-    </>
-  );
-};
-ViewHashAndCode.propTypes = {
-  type: typePropType,
-  metadataLoadState: PropTypes.string,
-  hashUrl: PropTypes.string,
-  codeHref: PropTypes.string,
-};
-ViewHashAndCode.defaultProps = {
-  type: null,
-  metadataLoadState: '',
-  hashUrl: '',
-  codeHref: '',
-};
+const navTypesForRewards = [NAV_TYPES.COMPONENT, NAV_TYPES.AGENT];
 
 /**
  * Agent | Component | Service - details component
@@ -101,8 +47,9 @@ export const DetailsSubInfo = ({
   handleHashUpdate,
   navigateToDependency,
 }) => {
-  const { isSvm, doesNetworkHaveValidServiceManagerToken } = useHelpers();
+  const { isSvm, doesNetworkHaveValidServiceManagerToken, chainId } = useHelpers();
   const [tokenAddress, setTokenAddress] = useState(null);
+  const [rewards, setRewards] = useState(null);
 
   const { data: ownerEnsName } = useEnsName({ address: ownerAddress, chainId: 1 });
 
@@ -113,24 +60,14 @@ export const DetailsSubInfo = ({
   const { operatorWhitelistTitle, operatorWhitelistValue, operatorStatusValue } =
     useOperatorWhitelistComponent(id);
 
-  // get token address for service
-  useEffect(() => {
-    const fetchData = async () => {
-      if (type === NAV_TYPES.SERVICE) {
-        try {
-          const response = await getTokenDetailsRequest(id);
-          setTokenAddress(response.token);
-        } catch (error) {
-          console.error(error);
-        }
-      }
-    };
+  const tokenomicsUnitType = useMemo(() => {
+    if (type === NAV_TYPES.COMPONENT) return TOKENOMICS_UNIT_TYPES.COMPONENT;
+    if (type === NAV_TYPES.AGENT) return TOKENOMICS_UNIT_TYPES.AGENT;
+    return;
+  }, [type]);
 
-    // token details is only available for L1 networks
-    if (id && doesNetworkHaveValidServiceManagerToken && !isSvm) {
-      fetchData();
-    }
-  }, [id, type, isSvm, doesNetworkHaveValidServiceManagerToken]);
+  const tokenomicsContract =
+    type === NAV_TYPES.SERVICE || isSvm ? null : getTokenomicsContract(TOKENOMICS.addresses[1]);
 
   const viewHashAndCodeButtons = (
     <ViewHashAndCode
@@ -160,7 +97,7 @@ export const DetailsSubInfo = ({
     if (HASH_DETAILS_STATE.FAILED === metadataLoadState) {
       details.push({
         dataTestId: 'metadata-failed-to-load',
-        value: <MetadataUnpinnedMessage />,
+        value: <Alert message="Metadata is unpinned from IPFS server" type="warning" showIcon />,
       });
     }
 
@@ -214,6 +151,7 @@ export const DetailsSubInfo = ({
         ),
       },
       ...commonDetails,
+      ...(rewards ? [{ title: 'Rewards', dataTestId: 'details-rewards', value: rewards }] : []),
       {
         title: 'Component Dependencies',
         dataTestId: 'details-dependency',
@@ -284,18 +222,70 @@ export const DetailsSubInfo = ({
     return serviceDetailsList;
   };
 
-  const details = type === NAV_TYPES.SERVICE ? getServiceValues() : getComponentAndAgentValues();
+  const detailsValues =
+    type === NAV_TYPES.SERVICE ? getServiceValues() : getComponentAndAgentValues();
 
-  return (
-    <SectionContainer>
-      {details.map(({ title, value, dataTestId }, index) => (
-        <EachSection key={`${type}-details-${index}`}>
-          {title && <SubTitle strong>{title}</SubTitle>}
-          <Info data-testid={dataTestId || ''}>{value}</Info>
-        </EachSection>
-      ))}
-    </SectionContainer>
+  const detailsSections = useMemo(
+    () =>
+      detailsValues.map(({ title, value, dataTestId }, index) => {
+        if (dataTestId === 'details-rewards' && !rewards) return null;
+
+        const isRewards = dataTestId === 'details-rewards';
+
+        return (
+          <EachSection key={`${type}-details-${index}`}>
+            {title && <SubTitle strong>{title}</SubTitle>}
+            {value &&
+              (isRewards ? (
+                <RewardsSection {...value} data-testid={dataTestId} />
+              ) : (
+                <Info data-testid={dataTestId}>{value}</Info>
+              ))}
+          </EachSection>
+        );
+      }),
+    [detailsValues, rewards, type],
   );
+
+  // get token address for service
+  useEffect(() => {
+    const fetchData = async () => {
+      if (type === NAV_TYPES.SERVICE) {
+        try {
+          const response = await getTokenDetailsRequest(id);
+          setTokenAddress(response.token);
+        } catch (error) {
+          console.error(error);
+        }
+      }
+    };
+
+    // token details is only available for L1 networks
+    if (id && doesNetworkHaveValidServiceManagerToken && !isSvm) {
+      fetchData();
+    }
+  }, [id, type, isSvm, doesNetworkHaveValidServiceManagerToken]);
+
+  // Load rewards into state on Ethereum
+  useEffect(() => {
+    if (chainId !== 1) return;
+
+    if (rewards) return;
+    if (!navTypesForRewards.includes(type)) return;
+    if (!ownerAddress) return;
+    if (!id) return;
+
+    tokenomicsContract?.methods
+      .getOwnerIncentives(ownerAddress, [tokenomicsUnitType], [id])
+      .call()
+      .then(({ reward, topUp }) => {
+        setRewards({
+          reward: reward,
+          topUp: topUp,
+        });
+      });
+  }, [rewards, id, ownerAddress, tokenomicsUnitType, type, tokenomicsContract, chainId]);
+  return <SectionContainer>{detailsSections}</SectionContainer>;
 };
 
 DetailsSubInfo.propTypes = {
