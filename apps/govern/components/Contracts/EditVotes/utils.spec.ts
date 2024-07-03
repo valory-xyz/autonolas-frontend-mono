@@ -72,7 +72,7 @@ const stakingContracts: StakingContract[] = [
   },
 ];
 
-describe('getReorderedVotes', () => {
+describe('getReorderedVotes()', () => {
   it('should reorder votes correctly', () => {
     const result = getReorderedVotes(allocations, userVotes, stakingContracts);
     expect(result).toEqual([

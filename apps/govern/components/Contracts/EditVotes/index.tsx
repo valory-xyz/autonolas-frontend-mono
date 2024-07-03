@@ -23,8 +23,8 @@ import {
   checkNoDisabledContracts,
   checkNoRemovedNominees,
   checkNotNegativeSlope,
-  getReorderedVotes,
-} from './utils';
+} from './requests';
+import { getReorderedVotes } from './utils';
 
 const { Paragraph, Text } = Typography;
 
@@ -51,7 +51,7 @@ const getColumns = (
     title: 'Contract name',
     key: 'name',
     dataIndex: 'metadata',
-    render: (metadata) => <Text strong>{metadata.name}</Text>,
+    render: (metadata) => <Text strong>{metadata?.name || 'NA'}</Text>,
     width: 200,
   },
   {
@@ -64,7 +64,7 @@ const getColumns = (
   {
     title: 'My voting weight',
     key: 'weight',
-    render: (_, record, index) => (
+    render: (_, _record, index) => (
       <Flex gap={16}>
         <InputNumber
           addonAfter="%"
@@ -208,18 +208,22 @@ export const EditVotes = ({ allocations, setAllocations, setIsUpdating }: EditVo
           type="error"
         />
       )}
+
       <Text type="secondary" strong>
         Voting power used
       </Text>
       <TotalAllocatedPower>{`${parseFloat(
         (allocatedPower / 100).toFixed(2),
       )}%`}</TotalAllocatedPower>
+
       <Table
         className="mt-16 mb-16"
         columns={getColumns(allocations, updateAllocation, removeAllocation, isError)}
         dataSource={allocations}
         pagination={false}
+        rowKey={(record) => record.address}
       />
+
       <Paragraph type="secondary" className="text-end">
         New voting weight will take effect at the beginning of the next week.
       </Paragraph>
@@ -233,6 +237,7 @@ export const EditVotes = ({ allocations, setAllocations, setIsUpdating }: EditVo
           Update voting weight
         </Button>
       </Flex>
+
       <ConfirmModal
         isOpen={isModalOpen}
         handleOk={updateVotingWeight}

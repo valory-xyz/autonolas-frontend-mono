@@ -132,32 +132,33 @@ export const Votes = ({ setIsUpdating, setAllocations }: VotesProps) => {
 
   const data: MyVote[] = useMemo(() => {
     const userVotesArray = Object.entries(userVotes);
-    if (userVotesArray.length > 0 && stakingContracts.length > 0) {
-      return userVotesArray.reduce((res: MyVote[], [key, value]) => {
-        const contract = stakingContracts.find((item) => item.address === key);
-        if (contract) {
-          res.push({
-            address: contract.address,
-            name: contract.metadata?.name,
-            chainId: contract.chainId,
-            currentWeight: value.current.power,
-            nextWeight: value.next.power,
-          });
-        }
 
-        if (key === getBytes32FromAddress(RETAINER_ADDRESS)) {
-          res.push({
-            name: 'Rollover pool',
-            currentWeight: value.current.power,
-            nextWeight: value.next.power,
-            isRetainer: true,
-          });
-        }
-        return res;
-      }, []);
-    } else {
+    if (userVotesArray.length === 0 || stakingContracts.length === 0) {
       return [];
     }
+
+    return userVotesArray.reduce((res: MyVote[], [key, value]) => {
+      const contract = stakingContracts.find((item) => item.address === key);
+      if (contract) {
+        res.push({
+          address: contract.address,
+          name: contract.metadata?.name,
+          chainId: contract.chainId,
+          currentWeight: value.current.power,
+          nextWeight: value.next.power,
+        });
+      }
+
+      if (key === getBytes32FromAddress(RETAINER_ADDRESS)) {
+        res.push({
+          name: 'Rollover pool',
+          currentWeight: value.current.power,
+          nextWeight: value.next.power,
+          isRetainer: true,
+        });
+      }
+      return res;
+    }, []);
   }, [userVotes, stakingContracts]);
 
   return (
@@ -187,6 +188,7 @@ export const Votes = ({ setIsUpdating, setAllocations }: VotesProps) => {
         dataSource={data}
         pagination={false}
         rowClassName={rowClassName}
+        rowKey={(record) => record.address || record.name}
       />
     </VotesRoot>
   );
