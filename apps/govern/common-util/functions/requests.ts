@@ -83,7 +83,7 @@ export const checkIfContractDisabled = async (
 
     return result;
   } catch (error) {
-    console.log(error);
+    console.error(error);
     return [];
   }
 };

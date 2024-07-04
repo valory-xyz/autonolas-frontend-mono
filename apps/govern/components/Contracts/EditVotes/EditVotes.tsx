@@ -103,8 +103,6 @@ export const EditVotes = ({ allocations, setAllocations, setIsUpdating }: EditVo
 
   const onCancel = () => setAllocations([]);
 
-  console.log({ allocations, userVotes, stakingContracts });
-
   const updateAllocation = (value: number, index: number) => {
     setAllocations((prev) => {
       const newAllocations = [...prev];

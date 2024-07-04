@@ -19,9 +19,8 @@ jest.mock('store/index', () => ({
         address: '0x0000000000000000000000007248d855a3d4d17c32eb0d996a528f7520d2f4a3',
         chainId: 1,
         metadata: {
-          name: 'Implement Governance Solutions',
-          description:
-            'Establish frameworks and mechanisms to manage and regulate decentralized systems or organizations effectively.',
+          name: 'Staking Contract Name 1',
+          description: 'Some good contract description.',
         },
       },
     ],
@@ -46,12 +45,8 @@ describe('<ContractPage />', () => {
   it('should display contract name and description', () => {
     render(<ContractPage />);
 
-    expect(screen.getByText(/Implement Governance Solutions/)).toBeInTheDocument();
-    expect(
-      screen.getByText(
-        /Establish frameworks and mechanisms to manage and regulate decentralized systems or organizations effectively./,
-      ),
-    ).toBeInTheDocument();
+    expect(screen.getByText(/Staking Contract Name 1/)).toBeInTheDocument();
+    expect(screen.getByText(/Some good contract description./)).toBeInTheDocument();
   });
 
   it('should display contract owner address', () => {

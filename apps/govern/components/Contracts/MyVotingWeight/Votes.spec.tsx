@@ -20,9 +20,8 @@ jest.mock('store/index', () => ({
         currentWeight: { percentage: 0.0001837161934499, value: 5.590708218931387 },
         nextWeight: { percentage: 0.000181297889076, value: 5.489994520303767 },
         metadata: {
-          name: 'Implement Governance Solutions',
-          description:
-            'Establish frameworks and mechanisms to manage and regulate decentralized systems or organizations effectively.',
+          name: 'Staking Contract Name 1',
+          description: 'Some good contract description.',
         },
       },
     ],
@@ -59,7 +58,7 @@ describe('<Votes/>', () => {
   it('should display votes rows', () => {
     render(<VotesExample />);
 
-    expect(screen.getByText(/Implement Governance Solutions/)).toBeInTheDocument();
+    expect(screen.getByText(/Staking Contract Name 1/)).toBeInTheDocument();
     expect(screen.getByText(/Ethereum/)).toBeInTheDocument();
     expect(screen.getByText(/5%/)).toBeInTheDocument();
     expect(screen.getByText(/50%/)).toBeInTheDocument();

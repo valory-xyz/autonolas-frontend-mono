@@ -95,11 +95,7 @@ export const MyVotingWeight = ({
 }: MyVotingWeightProps) => {
   const { isConnected: isAccountConnected, address: account } = useAccount();
 
-  console.log({ account });
   const { data: votingPower, isFetching: isVotingPowerLoading } = useVotingPower(account);
-
-  console.log({ votingPower });
-
   const { userVotes, isUserVotesLoading } = useAppSelector((state) => state.govern);
 
   const content = useMemo(() => {

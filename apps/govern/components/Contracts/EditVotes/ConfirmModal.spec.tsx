@@ -1,7 +1,7 @@
 import '@testing-library/jest-dom';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import React, { FC } from 'react';
+import { FC } from 'react';
 
 import { ConfirmModal } from './ConfirmModal';
 
@@ -22,7 +22,7 @@ const EditVotesExample: FC<{
 };
 
 describe('<ConfirmModal/>', () => {
-  it('should display confirm details', () => {
+  it('should display confirm modal details', () => {
     render(<EditVotesExample />);
 
     expect(screen.getByText(/Confirm voting weight update/)).toBeInTheDocument();

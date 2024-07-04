@@ -86,11 +86,10 @@ const ContractPageContent = ({ contract }: ContractPageContentProps) => {
 };
 
 const ContractContent = () => {
-  const { isStakingContractsLoading, stakingContracts } = useAppSelector((state) => state.govern);
   const router = useRouter();
-  const addressParam = router?.query?.address;
+  const { isStakingContractsLoading, stakingContracts } = useAppSelector((state) => state.govern);
 
-  const contract = stakingContracts.find((item) => item.address === addressParam);
+  const contract = stakingContracts.find((item) => item.address === router?.query?.address);
 
   if (isStakingContractsLoading) {
     return <Skeleton active />;

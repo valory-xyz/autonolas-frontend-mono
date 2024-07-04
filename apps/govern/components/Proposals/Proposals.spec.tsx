@@ -5,7 +5,7 @@ import { UNICODE_SYMBOLS } from 'libs/util-constants/src';
 
 import { ProposalsPage, proposals } from './Proposals';
 
-describe('Proposals', () => {
+describe('<Proposals />', () => {
   it('should display the page title and description', () => {
     render(<ProposalsPage />);
     const pageTitle = screen.getByText('Proposals');

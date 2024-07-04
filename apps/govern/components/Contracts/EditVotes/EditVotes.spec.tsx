@@ -1,12 +1,25 @@
 import '@testing-library/jest-dom';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import React, { FC } from 'react';
+import { FC } from 'react';
 import { Allocation, StakingContract } from 'types';
 
 import { useAppSelector } from 'store/index';
 
 import { EditVotes } from './EditVotes';
+
+jest.mock('wagmi', () => ({
+  useAccount: jest.fn().mockReturnValue({ address: '0x1234', isConnected: true }),
+}));
+jest.mock('common-util/functions/requests', () => ({ voteForNomineeWeights: jest.fn() }));
+jest.mock('context/Web3ModalProvider', () => ({
+  queryClient: jest.fn().mockReturnValue({ removeQueries: jest.fn() }),
+}));
+jest.mock('hooks/index', () => ({ useVotingPower: jest.fn() }));
+jest.mock('store/index', () => ({
+  useAppSelector: jest.fn(),
+  useAppDispatch: jest.fn().mockReturnValue(jest.fn()),
+}));
 
 const mockContract1 = {
   address: '0x0000000000000000000000007248d855a3d4d17c32eb0d996a528f7520d2f4a3',
@@ -14,9 +27,8 @@ const mockContract1 = {
   currentWeight: { percentage: 0.0001837161934499, value: 5.590708218931387 },
   nextWeight: { percentage: 0.000181297889076, value: 5.489994520303767 },
   metadata: {
-    name: 'Implement Governance Solutions',
-    description:
-      'Establish frameworks and mechanisms to manage and regulate decentralized systems or organizations effectively.',
+    name: 'Staking Contract Name 1',
+    description: 'Some good contract description.',
   },
 } as StakingContract;
 
@@ -34,30 +46,6 @@ const mockContract2 = {
 } as StakingContract;
 
 const multipleContractsMock = [mockContract1, mockContract2];
-
-jest.mock('wagmi', () => ({
-  useAccount: jest.fn().mockReturnValue({
-    address: '0x1234',
-    isConnected: true,
-  }),
-}));
-
-jest.mock('common-util/functions/requests', () => ({
-  voteForNomineeWeights: jest.fn(),
-}));
-
-jest.mock('context/Web3ModalProvider', () => ({
-  queryClient: jest.fn().mockReturnValue({
-    removeQueries: jest.fn(),
-  }),
-}));
-
-jest.mock('hooks/index', () => ({ useVotingPower: jest.fn() }));
-
-jest.mock('store/index', () => ({
-  useAppSelector: jest.fn(),
-  useAppDispatch: jest.fn().mockReturnValue(jest.fn()),
-}));
 
 const EditVotesExample: FC<{
   allocationsMock?: Allocation[];
@@ -126,6 +114,7 @@ describe('<MyVotingWeight/>', () => {
 
       const removeButton = screen.getByTestId('remove-allocation-button-0');
       expect(removeButton).toBeInTheDocument();
+
       await userEvent.click(removeButton);
       expect(setAllocationsMock).toHaveBeenCalledTimes(1);
     });
@@ -139,10 +128,8 @@ describe('<MyVotingWeight/>', () => {
       userEvent.clear(votingWeightInput);
       userEvent.type(votingWeightInput, '10');
 
-      const updateButton = screen.getByRole('button', {
-        name: 'Update voting weight',
-      }) as HTMLButtonElement;
-      expect(updateButton).toBeEnabled();
+      const updateButton = screen.getByRole('button', { name: 'Update voting weight' });
+      expect(updateButton as HTMLButtonElement).toBeEnabled();
     });
 
     describe('Voting weight error', () => {
@@ -168,10 +155,8 @@ describe('<MyVotingWeight/>', () => {
         const errorMessage = screen.getByText(/Total voting power entered must not exceed 100%/);
         expect(errorMessage).toBeInTheDocument();
 
-        const updateButton = screen.getByRole('button', {
-          name: 'Update voting weight',
-        }) as HTMLButtonElement;
-        expect(updateButton).toBeDisabled();
+        const updateButton = screen.getByRole('button', { name: 'Update voting weight' });
+        expect(updateButton as HTMLButtonElement).toBeDisabled();
       });
     });
   });
