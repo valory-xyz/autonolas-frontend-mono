@@ -18,19 +18,7 @@ jest.mock('hooks/index', () => ({
 jest.mock('store/index', () => ({
   useAppSelector: jest.fn().mockReturnValue({
     userVotes: {},
-    // stakingContracts: [
-    //   {
-    //     address: '0x00000000000000000000000014d28bfcc328e12732551efbb771384261761ac6',
-    //     chainId: 1,
-    //     currentWeight: { percentage: 10.123456, value: 298892.4460914383 },
-    //     nextWeight: { percentage: 25.55555, value: 297434.39744027395 },
-    //     metadata: {
-    //       name: 'Explore Decentralized Finance (DeFi)',
-    //       description:
-    //         'Dive into the world of decentralized financial instruments and protocols, offering alternative ways to borrow, lend, trade, and invest without traditional intermediaries.',
-    //     },
-    //   },
-    // ],
+    stakingContracts: [],
   }),
 }));
 
@@ -38,18 +26,7 @@ jest.mock('components/Login', () => ({ LoginV2: 'Login' }));
 jest.mock('../EditVotes', () => ({ EditVotes: 'EditVotes' }));
 jest.mock('./Votes', () => ({ Votes: 'Votes' }));
 
-const allocationsMock: Allocation[] = [
-  {
-    address: '0x0000000000000000000000007248d855a3d4d17c32eb0d996a528f7520d2f4a3',
-    chainId: 100,
-    metadata: {
-      name: 'Implement Governance Solutions',
-      description:
-        'Establish frameworks and mechanisms to manage and regulate decentralized systems or organizations effectively.',
-    },
-    weight: 50,
-  },
-];
+const allocationsMock: Allocation[] = [];
 
 const MyVotingWeightExample = () => {
   return (
@@ -81,7 +58,15 @@ describe('<MyVotingWeight/>', () => {
     ).toBeInTheDocument();
   });
 
-  // it('should display "Voting power used"', () => {
+  it('should display no staking contracts to vote message', () => {
+    render(<MyVotingWeightExample />);
+
+    expect(
+      screen.getByText(/You haven't added any staking contracts to vote on yet./),
+    ).toBeInTheDocument();
+  });
+
+  // it('should display voting power', () => {
   //   render(<MyVotingWeightExample />);
 
   //   expect(screen.getByText('Voting power used')).toBeInTheDocument();

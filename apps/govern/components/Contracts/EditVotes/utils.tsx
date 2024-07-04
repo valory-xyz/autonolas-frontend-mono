@@ -74,7 +74,5 @@ export const getReorderedVotes = (
     }
   });
 
-  console.log('newVotes', newVotes);
-
   return newVotes;
 };
