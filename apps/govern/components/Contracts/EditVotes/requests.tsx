@@ -11,8 +11,6 @@ import {
 
 const { Paragraph } = Typography;
 
-export const MAX_ALLOCATED_POWER = 10_000;
-
 const getRemovedNomineesError = (removedNominees: Address[], allocations: Allocation[]) => (
   <Flex align="start" vertical>
     <Paragraph className="m-0">Some of the contracts are no longer available for voting.</Paragraph>

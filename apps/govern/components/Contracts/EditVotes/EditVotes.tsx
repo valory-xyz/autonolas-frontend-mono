@@ -19,13 +19,12 @@ import { useAppDispatch, useAppSelector } from 'store/index';
 
 import { ConfirmModal } from './ConfirmModal';
 import {
-  MAX_ALLOCATED_POWER,
   checkLockNotExpired,
   checkNoDisabledContracts,
   checkNoRemovedNominees,
   checkNotNegativeSlope,
 } from './requests';
-import { getReorderedVotes } from './utils';
+import { MAX_ALLOCATED_POWER, getReorderedVotes } from './utils';
 
 const { Paragraph, Text } = Typography;
 

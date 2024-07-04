@@ -1,6 +1,6 @@
 import { Alert, Modal, Typography } from 'antd';
 
-import { MAX_ALLOCATED_POWER } from './requests';
+import { MAX_ALLOCATED_POWER } from './utils';
 
 const { Paragraph } = Typography;
 

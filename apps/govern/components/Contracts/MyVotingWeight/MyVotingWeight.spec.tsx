@@ -23,7 +23,7 @@ jest.mock('store/index', () => ({
 }));
 
 jest.mock('components/Login', () => ({ LoginV2: 'Login' }));
-jest.mock('../EditVotes', () => ({ EditVotes: 'EditVotes' }));
+jest.mock('../EditVotes/EditVotes', () => ({ EditVotes: 'EditVotes' }));
 jest.mock('./Votes', () => ({ Votes: 'Votes' }));
 
 const allocationsMock: Allocation[] = [];
