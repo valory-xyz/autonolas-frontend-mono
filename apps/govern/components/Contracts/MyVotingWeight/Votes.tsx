@@ -10,7 +10,7 @@ import { COLOR } from '@autonolas/frontend-library';
 import { CHAIN_NAMES } from 'libs/util-constants/src';
 
 import { RETAINER_ADDRESS } from 'common-util/constants/addresses';
-import { getBytes32FromAddress } from 'common-util/functions';
+import { getBytes32FromAddress } from 'common-util/functions/addresses';
 import { useAppSelector } from 'store/index';
 
 const ONE_DAY_IN_MS = 24 * 60 * 60 * 1000;

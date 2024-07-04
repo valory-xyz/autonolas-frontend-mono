@@ -3,18 +3,19 @@ import { createSlice } from '@reduxjs/toolkit';
 import { StakingContract, UserVotes } from 'types';
 
 interface GovernState {
-  stakingContracts: StakingContract[];
   isStakingContractsLoading: boolean;
-  userVotes: Record<string, UserVotes>;
+  stakingContracts: StakingContract[];
   isUserVotesLoading: boolean;
+  userVotes: Record<string, UserVotes>;
+  /** The timestamp of the last user vote */
   lastUserVote: number | null;
 }
 
 const initialState: GovernState = {
-  stakingContracts: [],
   isStakingContractsLoading: true,
-  userVotes: {},
+  stakingContracts: [],
   isUserVotesLoading: true,
+  userVotes: {},
   lastUserVote: null,
 };
 
