@@ -94,7 +94,12 @@ export const MyVotingWeight = ({
   setAllocations,
 }: MyVotingWeightProps) => {
   const { isConnected: isAccountConnected, address: account } = useAccount();
+
+  console.log({ account });
   const { data: votingPower, isFetching: isVotingPowerLoading } = useVotingPower(account);
+
+  console.log({ votingPower });
+
   const { userVotes, isUserVotesLoading } = useAppSelector((state) => state.govern);
 
   const content = useMemo(() => {
@@ -102,10 +107,12 @@ export const MyVotingWeight = ({
     if (!isAccountConnected) {
       return <ConnectWallet />;
     }
+
     if (isVotingPowerLoading) {
       // Show loader while don't have balance data
       return <Loader />;
     }
+
     // If the user doesn't have voting power, suggest to get veOlas
     if (Number(votingPower) === 0) {
       return <GetVeOlas />;
@@ -122,6 +129,7 @@ export const MyVotingWeight = ({
           />
         );
       }
+
       // If the user has never voted, show empty state
       if (Object.values(userVotes).length === 0) {
         return <EmptyVotes />;

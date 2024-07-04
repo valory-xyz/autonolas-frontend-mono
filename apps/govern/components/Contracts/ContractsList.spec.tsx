@@ -1,11 +1,10 @@
 import '@testing-library/jest-dom';
-import { render, screen } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { FC } from 'react';
 import { Allocation } from 'types';
 
-
-
 import { ContractsList } from './ContractsList';
-
 
 jest.mock('wagmi', () => ({
   useAccount: jest.fn().mockReturnValue({ address: '0x1234' }),
@@ -58,8 +57,8 @@ const allocationsMock: Allocation[] = [
   },
 ];
 
-const ContractListExample = () => {
-  return <ContractsList isUpdating={true} handleAdd={() => {}} allocations={allocationsMock} />;
+const ContractListExample: FC<{ handleAdd?: () => void }> = ({ handleAdd = () => {} }) => {
+  return <ContractsList isUpdating={true} handleAdd={handleAdd} allocations={allocationsMock} />;
 };
 
 describe('<ContractsList />', () => {
@@ -83,6 +82,7 @@ describe('<ContractsList />', () => {
     expect(screen.getByText(/Actions/)).toBeInTheDocument();
   });
 
+  // checking 2nd row of the table
   it('should display staking contracts row in table', () => {
     render(<ContractListExample />);
 
@@ -97,10 +97,36 @@ describe('<ContractsList />', () => {
     // next weight column
     expect(screen.getByText(/25.56%/)).toBeInTheDocument();
     expect(screen.getByText(/297.4k veOlas/)).toBeInTheDocument();
+  });
 
-    // actions column
-    const addBtn = screen.getByText("Add");
-    expect(addBtn).toBeInTheDocument();
-    expect(addBtn).toBeEnabled();
+  describe('Already voted', () => {
+    it('should display already voted message', () => {
+      render(<ContractListExample />);
+
+      const firstRow = screen.getByText('Implement Governance Solutions').closest('tr');
+      if (!firstRow) throw new Error('Row not found');
+
+      // check if the button is disabled
+      const addBtn = within(firstRow).getByText('Added').closest('button');
+      expect(addBtn).toBeInTheDocument();
+      expect(addBtn).toBeDisabled();
+    });
+  });
+
+  describe('Yet to vote', () => {
+    it('should display add button', async () => {
+      const handleAddFn = jest.fn();
+      render(<ContractListExample handleAdd={handleAddFn} />);
+
+      const secondRow = screen.getByText('Explore Decentralized Finance (DeFi)').closest('tr');
+      if (!secondRow) throw new Error('Row not found');
+
+      // check if the button is enabled
+      const addBtn = within(secondRow).getByText('Add').closest('button');
+
+      if (!addBtn) throw new Error('Add button not found');
+      await userEvent.click(addBtn);
+      expect(handleAddFn).toHaveBeenCalledTimes(1);
+    });
   });
 });
