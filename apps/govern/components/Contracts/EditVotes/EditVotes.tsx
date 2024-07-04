@@ -11,7 +11,8 @@ import { CHAIN_NAMES } from 'libs/util-constants/src';
 
 import { RETAINER_ADDRESS } from 'common-util/constants/addresses';
 import { INVALIDATE_AFTER_UPDATE_KEYS } from 'common-util/constants/scopeKeys';
-import { getBytes32FromAddress, voteForNomineeWeights } from 'common-util/functions';
+import { getBytes32FromAddress } from 'common-util/functions/addresses';
+import { voteForNomineeWeights } from 'common-util/functions/requests';
 import { queryClient } from 'context/Web3ModalProvider';
 import { clearState } from 'store/govern';
 import { useAppDispatch, useAppSelector } from 'store/index';
@@ -79,11 +80,13 @@ const getColumns = (
               setAllocation(value, index);
             }
           }}
+          data-testid={`my-voting-weight-input-${index}`}
         />
         <Button
           icon={<DeleteOutlined />}
           onClick={() => removeAllocation(index)}
           style={{ flex: 'none' }}
+          data-testid={`remove-allocation-button-${index}`}
         />
       </Flex>
     ),
@@ -100,6 +103,8 @@ export const EditVotes = ({ allocations, setAllocations, setIsUpdating }: EditVo
   const [isLoading, setIsLoading] = useState(false);
 
   const onCancel = () => setAllocations([]);
+
+  console.log({ allocations, userVotes, stakingContracts });
 
   const updateAllocation = (value: number, index: number) => {
     setAllocations((prev) => {
@@ -198,6 +203,8 @@ export const EditVotes = ({ allocations, setAllocations, setIsUpdating }: EditVo
       });
   }, [account, allocations, dispatch, stakingContracts, allocatedPower, userVotes, setIsUpdating]);
 
+  const totalAllocatedPower = parseFloat((allocatedPower / 100).toFixed(2));
+
   return (
     <>
       {isError && (
@@ -212,9 +219,7 @@ export const EditVotes = ({ allocations, setAllocations, setIsUpdating }: EditVo
       <Text type="secondary" strong>
         Voting power used
       </Text>
-      <TotalAllocatedPower>{`${parseFloat(
-        (allocatedPower / 100).toFixed(2),
-      )}%`}</TotalAllocatedPower>
+      <TotalAllocatedPower data-testid="total-allocated-power">{`${totalAllocatedPower}%`}</TotalAllocatedPower>
 
       <Table
         className="mt-16 mb-16"
