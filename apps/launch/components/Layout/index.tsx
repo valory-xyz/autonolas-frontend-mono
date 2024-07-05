@@ -1,11 +1,11 @@
 import { Layout as AntdLayout } from 'antd';
-import dynamic from 'next/dynamic';
 import { useRouter } from 'next/router';
 import { FC, ReactNode } from 'react';
 
 import { URL } from 'common-util/constants/urls';
 
 import { LoginV2 } from '../Login';
+import { SwitchNetworkButton } from '../Login/SwitchNetworkButton';
 import { Footer } from './Footer';
 import { LogoSvg } from './Logos';
 import NavigationMenu from './Menu';
@@ -33,6 +33,7 @@ const Layout: FC<LayoutProps> = ({ children }) => {
           </Logo>
           <NavigationMenu />
           <RightMenu>
+            <SwitchNetworkButton />
             <SwitchNetworkSelect />
             <LoginV2 />
           </RightMenu>

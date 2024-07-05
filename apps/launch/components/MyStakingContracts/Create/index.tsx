@@ -163,6 +163,7 @@ export const CreateStakingContract = () => {
           >
             <Input />
           </Form.Item>
+
           <Form.Item
             label={<Text type="secondary">Description</Text>}
             name="description"
@@ -175,6 +176,7 @@ export const CreateStakingContract = () => {
             Good descriptions help governors understand the value your contract brings to the
             ecosystem. Be clear to increase the chance governors allocate rewards to your contract.
           </Hint>
+
           <Divider />
           <TextWithTooltip
             text="Template"
@@ -184,7 +186,9 @@ export const CreateStakingContract = () => {
             <Text>{contractTemplate.title}</Text>
             <Tag color="default">More templates coming soon</Tag>
           </Flex>
-          <Paragraph className="mb-8">{contractTemplate.description}</Paragraph>
+          <Flex className="mb-8">
+            <Text type="secondary">{contractTemplate.description}</Text>
+          </Flex>
           <Button
             type="link"
             className="p-0 mb-16"
@@ -192,6 +196,7 @@ export const CreateStakingContract = () => {
           >
             {`View template on explorer ${UNICODE_SYMBOLS.EXTERNAL_LINK}`}
           </Button>
+
           <Row gutter={24}>
             <Col span={12}>
               <Form.Item
@@ -199,7 +204,7 @@ export const CreateStakingContract = () => {
                 name="maxNumServices"
                 rules={MAX_NUM_SERVICES_FIELD_RULES}
               >
-                <InputNumber placeholder="e.g. 6" step="1" style={INPUT_WIDTH_STYLE} />
+                <InputNumber placeholder="e.g. 100" step="1" style={INPUT_WIDTH_STYLE} />
               </Form.Item>
             </Col>
             <Col span={12}>
