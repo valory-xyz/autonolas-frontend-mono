@@ -1,22 +1,21 @@
 import { CheckCircleOutlined, CopyOutlined } from '@ant-design/icons';
 import { Alert, Button, Card, Col, Flex, Row, Skeleton, Spin, Tag, Typography } from 'antd';
-import { ethers } from 'ethers';
 import { useRouter } from 'next/router';
 import { FC, ReactNode } from 'react';
 import styled from 'styled-components';
 import { Address } from 'viem';
-import { useReadContract } from 'wagmi';
 
 import { NA } from '@autonolas/frontend-library';
 
 import { EXPLORER_URLS, GOVERN_URL, UNICODE_SYMBOLS } from 'libs/util-constants/src';
-import { STAKING_TOKEN } from 'libs/util-contracts/src/lib/abiAndAddresses';
 import { truncateAddress } from 'libs/util-functions/src';
 
 import { ChainId, IMPLEMENTATION_ADDRESSES } from 'common-util/constants/stakingContract';
 import { URL } from 'common-util/constants/urls';
 import { useAppSelector } from 'store/index';
 import { MyStakingContract } from 'types/index';
+
+import { useMaxNumServices, useRewardsPerSecond } from './requests';
 
 const { Paragraph, Text, Title } = Typography;
 
@@ -69,7 +68,7 @@ const NominateInfo = () => (
     message={
       <>
         Nominate your contract to make it eligible to receive staking incentives. Staking incentives
-        are allocated via&nbsp;
+        are allocated via{' '}
         <a href={GOVERN_URL} target="_blank" rel="noreferrer">
           Govern {UNICODE_SYMBOLS.EXTERNAL_LINK}
         </a>
@@ -78,6 +77,7 @@ const NominateInfo = () => (
     }
     type="info"
     showIcon
+    data-testid="nominate-info"
   />
 );
 
@@ -155,16 +155,7 @@ const Template: FC<{ template: string }> = ({ template }) => {
 
 const MaxNumOfStakedServices: FC<{ address: Address }> = ({ address }) => {
   const { networkId } = useAppSelector((state) => state.network);
-  const { data, isLoading } = useReadContract({
-    address,
-    abi: STAKING_TOKEN.abi,
-    chainId: networkId as number,
-    functionName: 'maxNumServices',
-    query: {
-      enabled: !!networkId,
-      select: (data) => (typeof data === 'bigint' ? data.toString() : '0'),
-    },
-  });
+  const { data, isLoading } = useMaxNumServices({ address });
 
   if (!networkId || isLoading) return <Skeleton.Input active size="small" />;
 
@@ -173,16 +164,7 @@ const MaxNumOfStakedServices: FC<{ address: Address }> = ({ address }) => {
 
 const Rewards: FC<{ address: Address }> = ({ address }) => {
   const { networkId } = useAppSelector((state) => state.network);
-  const { data, isLoading } = useReadContract({
-    address,
-    abi: STAKING_TOKEN.abi,
-    chainId: networkId as number,
-    functionName: 'rewardsPerSecond',
-    query: {
-      enabled: !!networkId,
-      select: (data) => (typeof data === 'bigint' ? ethers.formatEther(data) : '0'),
-    },
-  });
+  const { data, isLoading } = useRewardsPerSecond({ address });
 
   if (!networkId || isLoading) return <Skeleton.Input active size="small" />;
 
@@ -238,7 +220,7 @@ const EachStakingContractContent: FC<{ myStakingContract: MyStakingContract }> =
   );
 };
 
-export const EachStakingContract = () => {
+export const Details = () => {
   const router = useRouter();
   const { myStakingContracts, isMyStakingContractsLoading } = useAppSelector(
     (state) => state.launch,
