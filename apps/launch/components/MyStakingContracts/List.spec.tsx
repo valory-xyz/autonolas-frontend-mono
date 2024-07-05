@@ -6,6 +6,7 @@ import { List } from './List';
 
 jest.mock('store/index', () => ({
   useAppSelector: jest.fn().mockReturnValue({
+    networkName: 'ethereum',
     myStakingContracts: [
       {
         id: '0x1111',
@@ -45,6 +46,11 @@ describe('<List />', () => {
     if (!firstRow) throw new Error('No row found');
 
     expect(within(firstRow).getByText('My contract one')).toBeInTheDocument();
+    expect(within(firstRow).getByText('My contract one')).toHaveAttribute(
+      'href',
+      '/ethereum/my-staking-contracts/0x1111',
+    );
+
     expect(within(firstRow).getByText('Some good description one')).toBeInTheDocument();
     expect(within(firstRow).getByText('Staking Token')).toBeInTheDocument();
   });
