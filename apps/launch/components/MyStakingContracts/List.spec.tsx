@@ -1,5 +1,5 @@
 import '@testing-library/jest-dom';
-import { render, screen } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
 
 // import userEvent from '@testing-library/user-event';
 import { List } from './List';
@@ -8,12 +8,20 @@ jest.mock('store/index', () => ({
   useAppSelector: jest.fn().mockReturnValue({
     myStakingContracts: [
       {
-        id: '0x1234',
+        id: '0x1111',
         chainId: 1,
-        name: 'Iron man',
-        description: 'Lorem Ipsum is simply dummy text of the printing and typesetting industry.',
+        name: 'My contract one',
+        description: 'Some good description one',
         template: 'Staking Token',
         isNominated: false,
+      },
+      {
+        id: '0x2222',
+        chainId: 1,
+        name: 'My contract two',
+        description: 'Some good description two',
+        template: 'Staking Token',
+        isNominated: true,
       },
     ],
   }),
@@ -27,29 +35,39 @@ describe('<List />', () => {
     expect(screen.getByText('Description')).toBeInTheDocument();
     expect(screen.getByText('Template')).toBeInTheDocument();
     expect(screen.getByText('Nominated for incentives?')).toBeInTheDocument();
-
-    // expect(rows).toHaveLength(2);
-
-    // const [firstRow, secondRow] = rows;
-
-    // expect(firstRow).toHaveTextContent('Staking Contract Name 1');
-    // expect(firstRow).toHaveTextContent('Some good contract description.');
-    // expect(firstRow).toHaveTextContent('Nominated');
-
-    // expect(secondRow).toHaveTextContent('Another Contract Name');
-    // expect(secondRow).toHaveTextContent('Another contract description.');
-    // expect(secondRow).toHaveTextContent('Nominate');
   });
 
-  // it('should navigate to the nominated contract', () => {
-  //   render(<List />);
+  it('should display my staking contracts', () => {
+    render(<List />);
 
-  //   const nominateButton = screen.getByRole('button', { name: /nominate/i });
+    const firstRow = screen.getByText('My contract one').closest('tr');
 
-  //   userEvent.click(nominateButton);
+    if (!firstRow) throw new Error('No row found');
 
-  //   expect(window.location.pathname).toBe(
-  //     '/nominate/0x0000000000000000000000007248d855a3d4d17c32eb0d996a528f7520d2f4a3',
-  //   );
-  // });
+    expect(within(firstRow).getByText('My contract one')).toBeInTheDocument();
+    expect(within(firstRow).getByText('Some good description one')).toBeInTheDocument();
+    expect(within(firstRow).getByText('Staking Token')).toBeInTheDocument();
+  });
+
+  it('should display nominate button if the staking contract is NOT nominated', () => {
+    render(<List />);
+
+    const yetToNominateBtn = screen.getByText('My contract one').closest('tr');
+
+    if (!yetToNominateBtn) throw new Error('No row found');
+
+    const nominateBtn = within(yetToNominateBtn).getByText('Nominate').closest('button');
+    expect(nominateBtn).toBeEnabled();
+  });
+
+  it('should display nominated text if the staking contract is nominated', () => {
+    render(<List />);
+
+    const nominatedRow = screen.getByText('My contract two').closest('tr');
+
+    if (!nominatedRow) throw new Error('No row found');
+
+    const nominateBtn = within(nominatedRow).getByText('Nominated');
+    expect(nominateBtn).toBeInTheDocument();
+  });
 });
