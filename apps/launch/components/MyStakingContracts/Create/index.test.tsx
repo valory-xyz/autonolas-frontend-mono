@@ -43,20 +43,35 @@ describe('<CreateStakingContract />', () => {
     expect(screen.getByText(/Create staking contract on Ethereum/i)).toBeInTheDocument();
   });
 
-  it('should display form fields for creating staking contract', () => {
+  it('should display `Name` field as required and able to fill the `Name` field', async () => {
     render(<CreateStakingContract />);
 
-    expect(screen.getByText('Name')).toBeInTheDocument();
+    const nameInput = screen.getByLabelText('Name');
+    expect(nameInput).toBeRequired();
 
-    // description
-    expect(screen.getByText('Description')).toBeInTheDocument();
+    await userEvent.type(nameInput, 'My Staking Contract');
+    expect(nameInput).toHaveValue('My Staking Contract');
+  });
+
+  it('should display `Description` field as required (including sub info) and able to fill the `Description` field', async () => {
+    render(<CreateStakingContract />);
+
+    const descriptionInput = screen.getByLabelText('Description');
+    expect(descriptionInput).toBeRequired();
+
     expect(
       screen.getByText(
         /Good descriptions help governors understand the value your contract brings to the ecosystem. Be clear to increase the chance governors allocate rewards to your contract./,
       ),
     ).toBeInTheDocument();
 
-    // template
+    await userEvent.type(descriptionInput, 'This is a staking contract');
+    expect(descriptionInput).toHaveValue('This is a staking contract');
+  });
+
+  it('should display `Template` field with the default template', () => {
+    render(<CreateStakingContract />);
+
     expect(screen.getByText('Template')).toBeInTheDocument();
     expect(screen.getByText('More templates coming soon')).toBeInTheDocument();
     expect(screen.getByText('Staking Token')).toBeInTheDocument();
@@ -66,9 +81,26 @@ describe('<CreateStakingContract />', () => {
       ),
     ).toBeInTheDocument();
     expect(screen.getByText('View template on explorer ↗')).toBeInTheDocument();
+  });
 
-    expect(screen.getByText('Maximum number of staked agents')).toBeInTheDocument();
-    expect(screen.getByText('Rewards, OLAS per second')).toBeInTheDocument();
+  it('should display `Maximum number of staked agents` field as required and able to fill the field', async () => {
+    render(<CreateStakingContract />);
+
+    const maxNumServicesInput = screen.getByLabelText('Maximum number of staked agents');
+    expect(maxNumServicesInput).toBeRequired();
+
+    await userEvent.type(maxNumServicesInput, '10');
+    expect(maxNumServicesInput).toHaveValue('10');
+  });
+
+  it('should display `Rewards, OLAS per second` field as required and able to fill the `Rewards, OLAS per second` field', async () => {
+    render(<CreateStakingContract />);
+
+    const rewardsPerSecondInput = screen.getByLabelText('Rewards, OLAS per second');
+    expect(rewardsPerSecondInput).toBeRequired();
+
+    await userEvent.type(rewardsPerSecondInput, '100');
+    expect(rewardsPerSecondInput).toHaveValue('100');
   });
 
   it('should display cancel & create contract button', () => {
@@ -76,26 +108,5 @@ describe('<CreateStakingContract />', () => {
 
     expect(screen.getByRole('button', { name: 'Cancel' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Create contract' })).toBeInTheDocument();
-  });
-
-  it('should be able to fill the form and submit', async() => {
-    render(<CreateStakingContract />);
-
-    const nameInput = screen.getByLabelText('Name');
-    await userEvent.type(nameInput, 'My Staking Contract');
-
-    const createContractBtn = screen.getByRole('button', { name: 'Create contract' });
-
-    // submit the form
-    createContractBtn.click();
-    screen.debug();
-
-    expect(screen.getByText('Name')).toBeInTheDocument();
-    // expect no error in the form
-    // expect(screen.queryByText('Description is required')).toBeInTheDocument();
-
-
-    // expect(nameInput).toHaveValue('My Staking Contract');
-    // expect(descriptionInput).toHaveValue('This is a staking contract');
   });
 });
