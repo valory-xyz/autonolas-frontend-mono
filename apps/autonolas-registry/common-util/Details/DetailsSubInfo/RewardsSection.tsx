@@ -1,6 +1,8 @@
-import { Col, Row } from 'antd';
-import { memo } from 'react';
+import { Col, Flex, Row } from 'antd';
+import { FC, memo } from 'react';
 import { formatEther } from 'viem';
+
+import { UNICODE_SYMBOLS } from 'libs/util-constants/src/lib/symbols';
 
 import { RewardsStatistic } from '../styles';
 
@@ -19,17 +21,22 @@ const RewardColumn = ({ title, statistic }: { title: string; statistic: string }
   </Col>
 );
 
-export const RewardsSection = memo(function RewardsSection({
+type RewardsSectionProps = { reward: bigint; topUp: bigint };
+export const RewardsSection: FC<RewardsSectionProps> = memo(function RewardsSection({
   reward,
   topUp,
-}: {
-  reward: bigint;
-  topUp: bigint;
 }) {
   return (
-    <Row>
-      <RewardColumn title={'Claimable Reward'} statistic={`${rewardsFormatter(reward, 4)} ETH`} />
-      <RewardColumn title={'Claimable Top-Up'} statistic={`${rewardsFormatter(topUp, 2)} OLAS`} />
-    </Row>
+    <Flex vertical gap={4}>
+      <Row>
+        <RewardColumn title={'Claimable Reward'} statistic={`${rewardsFormatter(reward, 4)} ETH`} />
+        <RewardColumn title={'Claimable Top-Up'} statistic={`${rewardsFormatter(topUp, 2)} OLAS`} />
+      </Row>
+      <Row>
+        <a href="https://tokenomics.olas.network/donate">
+          Make donation {UNICODE_SYMBOLS.EXTERNAL_LINK}
+        </a>
+      </Row>
+    </Flex>
   );
 });

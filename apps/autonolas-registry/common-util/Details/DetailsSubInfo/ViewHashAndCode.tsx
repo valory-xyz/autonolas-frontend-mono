@@ -1,37 +1,38 @@
-import { Typography } from 'antd';
+import Link from 'next/link';
 
-import { ArrowLink } from 'common-util/Details/styles';
+import { UNICODE_SYMBOLS } from 'libs/util-constants/src/lib/symbols';
+
 import { HASH_DETAILS_STATE, NavTypesValues } from 'util/constants';
 import { NAV_TYPES } from 'util/constants';
-
-const { Link } = Typography;
-
 
 type ViewHashAndCodeProps = {
   type: NavTypesValues;
   metadataLoadState: string;
   hashUrl: string;
   codeHref: string;
-}
+};
 
 /**
  * Displays view hash and view code buttons redirecting to
  * links respectively
  */
-export const ViewHashAndCode = ({ type, metadataLoadState, hashUrl, codeHref }: ViewHashAndCodeProps) => {
+export const ViewHashAndCode = ({
+  type,
+  metadataLoadState,
+  hashUrl,
+  codeHref,
+}: ViewHashAndCodeProps) => {
   if (HASH_DETAILS_STATE.LOADED !== metadataLoadState) return null;
 
   return (
     <>
       {type === NAV_TYPES.SERVICE && <>&nbsp;•&nbsp;</>}
       <Link target="_blank" data-testid="view-hash-link" href={hashUrl}>
-        View Hash&nbsp;
-        <ArrowLink />
+        View Hash {UNICODE_SYMBOLS.EXTERNAL_LINK}
       </Link>
       &nbsp;•&nbsp;
       <Link target="_blank" data-testid="view-code-link" href={codeHref}>
-        View Code&nbsp;
-        <ArrowLink />
+        View Code {UNICODE_SYMBOLS.EXTERNAL_LINK}
       </Link>
     </>
   );
