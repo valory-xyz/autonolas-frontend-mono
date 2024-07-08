@@ -6,7 +6,8 @@ import { useAccount, useSwitchChain } from 'wagmi';
 
 import { ErrorAlert } from 'common-util/ErrorAlert';
 import { URL } from 'common-util/constants/urls';
-import { Feature, addNominee, getErrorInfo } from 'common-util/functions';
+import { Feature, getErrorInfo } from 'common-util/functions/frontend-library';
+import { addNominee } from 'common-util/functions/web3';
 import { useAppDispatch, useAppSelector } from 'store/index';
 import { setIsNominated } from 'store/launch';
 import { ErrorType, MyStakingContract } from 'types/index';
@@ -74,7 +75,7 @@ const NominatedContractContent: FC<NominatedContractContentProps> = ({
     } finally {
       setIsPending(false);
     }
-  }, [account, contractInfo]);
+  }, [account, contractInfo, dispatch, networkName, router]);
 
   useEffect(() => {
     if (chainId !== mainnet.id) {
@@ -120,6 +121,9 @@ export const NominateContract = () => {
 
   // my contracts are still loading
   if (isMyStakingContractsLoading) return <Loader />;
+
+  if (!id || !myStakingContracts || myStakingContracts.length === 0)
+    return <ContractDoesNotExist />;
 
   // contract does not exist
   const contractIndex = myStakingContracts.findIndex((item) => item.id === id);
