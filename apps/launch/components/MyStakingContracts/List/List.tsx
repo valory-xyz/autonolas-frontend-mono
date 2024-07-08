@@ -102,8 +102,6 @@ export const List: FC = () => {
     (contract) => !contract.isNominated,
   ).length;
 
-  console.log('myStakingContracts', myStakingContracts);
-
   return (
     <Flex className="pt-24" gap={24} vertical align="stretch">
       {nonNominatedContracts > 0 && (

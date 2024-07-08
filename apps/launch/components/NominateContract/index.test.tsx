@@ -8,14 +8,11 @@ import { NominateContract } from './index';
 
 jest.mock('wagmi', () => ({
   useAccount: jest.fn(),
-  useSwitchChain: jest.fn().mockReturnValue({
-    switchChainAsync: jest.fn(),
-  }),
+  useSwitchChain: jest.fn().mockReturnValue({ switchChainAsync: jest.fn() }),
 }));
 jest.mock('next/navigation', () => ({
   useParams: jest.fn().mockReturnValue({ id: '0x12345' }),
 }));
-
 jest.mock('next/router', () => ({
   useRouter: jest.fn().mockReturnValue({
     router: {
@@ -23,13 +20,10 @@ jest.mock('next/router', () => ({
     },
   }),
 }));
+
 jest.mock('libs/util-constants/src', () => ({
-  EXPLORER_URLS: {
-    1: 'https://etherscan.io',
-  },
-  RPC_URLS: {
-    1: 'https://eth-mainnet.alchemyapi.io/v2/your-api-key',
-  },
+  EXPLORER_URLS: { 1: 'https://etherscan.io' },
+  RPC_URLS: { 1: 'https://eth-mainnet.alchemyapi.io/v2/your-api-key' },
 }));
 
 jest.mock('common-util/config/wagmi', () => ({
@@ -82,7 +76,7 @@ describe('<NominateContract/>', () => {
       ).toBeInTheDocument();
     });
 
-    it('should show error message if contract is not found', () => {
+    it('should show error message if invalid contract is requested', () => {
       (useAppSelector as jest.Mock).mockReturnValue({
         networkDisplayName: 'Ethereum',
         myStakingContracts: [{ id: '0xRandomAddress' }],
@@ -99,83 +93,77 @@ describe('<NominateContract/>', () => {
     });
   });
 
-  describe('Account not connected', () => {
-    it('should show connect wallet message if account is not connected', () => {
-      (useAccount as jest.Mock).mockReturnValue({
-        address: '',
-      });
-
-      (useAppSelector as jest.Mock).mockReturnValue({
-        networkDisplayName: 'Ethereum',
-        myStakingContracts: [{ id: '0x12345' }],
-      });
-
-      render(<NominateContract />);
-
-      expect(screen.getByText(/Connect your wallet to nominate.../)).toBeInTheDocument();
-      expect(
-        screen.getByText(/Connect the wallet to nominate the staking contract./),
-      ).toBeInTheDocument();
+  it('should show connect wallet message if account is not connected', () => {
+    (useAccount as jest.Mock).mockReturnValue({
+      address: '',
     });
+
+    (useAppSelector as jest.Mock).mockReturnValue({
+      networkDisplayName: 'Ethereum',
+      myStakingContracts: [{ id: '0x12345' }],
+    });
+
+    render(<NominateContract />);
+
+    expect(screen.getByText(/Connect your wallet to nominate.../)).toBeInTheDocument();
+    expect(
+      screen.getByText(/Connect the wallet to nominate the staking contract./),
+    ).toBeInTheDocument();
   });
 
-  describe('Contract already nominated', () => {
-    it('should show contract already nominated message if contract is already nominated', () => {
-      (useAccount as jest.Mock).mockReturnValue({
-        address: '0x12345',
-      });
-
-      (useAppSelector as jest.Mock).mockReturnValue({
-        networkDisplayName: 'Ethereum',
-        networkName: 'ethereum',
-        myStakingContracts: [
-          {
-            id: '0x12345',
-            name: 'My Staking Contract',
-            isNominated: true,
-          },
-        ],
-      });
-
-      render(<NominateContract />);
-
-      expect(screen.getByText(/Contract has already been nominated/)).toBeInTheDocument();
-      expect(
-        screen.getByText('The contract has already been nominated. You can close this page now.'),
-      ).toBeInTheDocument();
-
-      const viewMyStakingContractsButton = screen.getByText(/View my staking contracts/);
-      if (!viewMyStakingContractsButton)
-        throw new Error('View my staking contracts button not found');
-      expect(viewMyStakingContractsButton.closest('a')).toHaveAttribute(
-        'href',
-        '/ethereum/my-staking-contracts',
-      );
+  it('should show contract already nominated message if contract is already nominated', () => {
+    (useAccount as jest.Mock).mockReturnValue({
+      address: '0x12345',
     });
+
+    (useAppSelector as jest.Mock).mockReturnValue({
+      networkDisplayName: 'Ethereum',
+      networkName: 'ethereum',
+      myStakingContracts: [
+        {
+          id: '0x12345',
+          name: 'My Staking Contract',
+          isNominated: true,
+        },
+      ],
+    });
+
+    render(<NominateContract />);
+
+    expect(screen.getByText(/Contract has already been nominated/)).toBeInTheDocument();
+    expect(
+      screen.getByText('The contract has already been nominated. You can close this page now.'),
+    ).toBeInTheDocument();
+
+    const viewMyStakingContractsButton = screen.getByText(/View my staking contracts/);
+    if (!viewMyStakingContractsButton)
+      throw new Error('View my staking contracts button not found');
+    expect(viewMyStakingContractsButton.closest('a')).toHaveAttribute(
+      'href',
+      '/ethereum/my-staking-contracts',
+    );
   });
 
-  describe('Waiting for user to nominate contract', () => {
-    it('should wait for nominating', async () => {
-      (useAccount as jest.Mock).mockReturnValue({
-        address: '0xMyAddress',
-      });
-
-      (useAppSelector as jest.Mock).mockReturnValue({
-        networkDisplayName: 'Ethereum',
-        networkName: 'ethereum',
-        myStakingContracts: [
-          {
-            id: '0x12345',
-            name: 'My Staking Contract',
-            isNominated: false,
-          },
-        ],
-      });
-
-      render(<NominateContract />);
-
-      expect(screen.getByText(/Nominating staking contract.../)).toBeInTheDocument();
-      expect(screen.getByText(/Waiting for transaction.../)).toBeInTheDocument();
+  it('should wait for nominating', async () => {
+    (useAccount as jest.Mock).mockReturnValue({
+      address: '0xMyAddress',
     });
+
+    (useAppSelector as jest.Mock).mockReturnValue({
+      networkDisplayName: 'Ethereum',
+      networkName: 'ethereum',
+      myStakingContracts: [
+        {
+          id: '0x12345',
+          name: 'My Staking Contract',
+          isNominated: false,
+        },
+      ],
+    });
+
+    render(<NominateContract />);
+
+    expect(screen.getByText(/Nominating staking contract.../)).toBeInTheDocument();
+    expect(screen.getByText(/Waiting for transaction.../)).toBeInTheDocument();
   });
 });
