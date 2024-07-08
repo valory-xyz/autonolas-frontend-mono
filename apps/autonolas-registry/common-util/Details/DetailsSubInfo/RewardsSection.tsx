@@ -1,5 +1,4 @@
 import { Col, Flex, Row } from 'antd';
-import Link from 'next/link';
 import { FC, memo } from 'react';
 import { formatEther } from 'viem';
 
@@ -34,9 +33,9 @@ export const RewardsSection: FC<RewardsSectionProps> = memo(function RewardsSect
         <RewardColumn title={'Claimable Top-Up'} statistic={`${rewardsFormatter(topUp, 2)} OLAS`} />
       </Row>
       <Row>
-        <Link href="https://tokenomics.olas.network/donate">
+        <a href="https://tokenomics.olas.network/donate">
           Make donation {UNICODE_SYMBOLS.EXTERNAL_LINK}
-        </Link>
+        </a>
       </Row>
     </Flex>
   );
