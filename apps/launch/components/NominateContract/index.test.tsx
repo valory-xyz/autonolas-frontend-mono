@@ -26,9 +26,6 @@ jest.mock('libs/util-constants/src', () => ({
   RPC_URLS: { 1: 'https://eth-mainnet.alchemyapi.io/v2/your-api-key' },
 }));
 
-jest.mock('common-util/config/wagmi', () => ({
-  SUPPORTED_CHAINS: [{ name: 'ethereum', chainId: 1 }],
-}));
 jest.mock('store/index', () => ({
   useAppDispatch: jest.fn().mockReturnValue(jest.fn()),
   useAppSelector: jest.fn(),

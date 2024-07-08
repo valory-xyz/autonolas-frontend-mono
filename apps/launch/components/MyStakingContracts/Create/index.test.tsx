@@ -19,10 +19,6 @@ jest.mock('next/router', () => ({
   useRouter: jest.fn().mockReturnValue({ push: jest.fn() }),
 }));
 
-jest.mock('common-util/config/wagmi', () => ({
-  SUPPORTED_CHAINS: [{ name: 'ethereum', chainId: 1 }],
-}));
-
 jest.mock('common-util/functions/stakingContract', () => ({
   getStakingContractInitPayload: jest.fn().mockReturnValue('encodedPayload'),
 }));
