@@ -1,4 +1,3 @@
-import { ArrowRightOutlined } from '@ant-design/icons';
 import { Image, Statistic, Typography } from 'antd';
 import styled from 'styled-components';
 
@@ -75,13 +74,6 @@ export const SectionContainer = styled.div`
   .ant-form-item-label > label {
     left: -4px;
   }
-`;
-
-export const ArrowLink = styled(ArrowRightOutlined)`
-  width: 14px;
-  transform: rotate(320deg);
-  position: relative;
-  top: -4px;
 `;
 
 export const RewardsStatistic = styled((props) => <Statistic {...props} />)`
