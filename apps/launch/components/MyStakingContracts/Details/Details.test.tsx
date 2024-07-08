@@ -10,11 +10,6 @@ jest.mock('next/router', () => ({
   }),
 }));
 
-jest.mock('../requests', () => ({
-  useMaxNumServices: jest.fn().mockReturnValue({ data: 200 }),
-  useRewardsPerSecond: jest.fn().mockReturnValue({ data: 0.003 }),
-}));
-
 jest.mock('store/index', () => ({
   useAppSelector: jest.fn().mockReturnValue({
     networkId: 1,
@@ -31,6 +26,11 @@ jest.mock('store/index', () => ({
       },
     ],
   }),
+}));
+
+jest.mock('./hooks', () => ({
+  useMaxNumServices: jest.fn().mockReturnValue({ data: 200 }),
+  useRewardsPerSecond: jest.fn().mockReturnValue({ data: 0.003 }),
 }));
 
 describe('<Details />', () => {
