@@ -15,7 +15,7 @@ import { URL } from 'common-util/constants/urls';
 import { useAppSelector } from 'store/index';
 import { MyStakingContract } from 'types/index';
 
-import { useMaxNumServices, useRewardsPerSecond } from './requests';
+import { useMaxNumServices, useRewardsPerSecond } from '../requests';
 
 const { Paragraph, Text, Title } = Typography;
 

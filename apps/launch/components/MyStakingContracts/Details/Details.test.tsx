@@ -10,7 +10,7 @@ jest.mock('next/router', () => ({
   }),
 }));
 
-jest.mock('./requests', () => ({
+jest.mock('../requests', () => ({
   useMaxNumServices: jest.fn().mockReturnValue({ data: 200 }),
   useRewardsPerSecond: jest.fn().mockReturnValue({ data: 0.003 }),
 }));
