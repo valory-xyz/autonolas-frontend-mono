@@ -1,6 +1,6 @@
 import Link from 'next/link';
 
-import { UNICODE_SYMBOLS } from 'libs/util-constants/src';
+import { UNICODE_SYMBOLS } from 'libs/util-constants/src/lib/symbols';
 
 import { HASH_DETAILS_STATE, NavTypesValues } from 'util/constants';
 import { NAV_TYPES } from 'util/constants';

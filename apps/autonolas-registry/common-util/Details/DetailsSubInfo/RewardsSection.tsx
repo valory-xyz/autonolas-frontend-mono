@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { FC, memo } from 'react';
 import { formatEther } from 'viem';
 
-import { UNICODE_SYMBOLS } from 'libs/util-constants/src';
+import { UNICODE_SYMBOLS } from 'libs/util-constants/src/lib/symbols';
 
 import { RewardsStatistic } from '../styles';
 
