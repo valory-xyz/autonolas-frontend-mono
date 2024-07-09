@@ -20,7 +20,7 @@ const NextWeekTitle = () => (
     color={COLOR.WHITE}
     title={<Text>Updated voting weights will take effect at the start of next week</Text>}
   >
-    Next week weight <InfoCircleOutlined className="ml-8" style={{ color: COLOR.GREY_2 }} />
+    {"Next week's weight"} <InfoCircleOutlined className="ml-8" style={{ color: COLOR.GREY_2 }} />
   </Tooltip>
 );
 

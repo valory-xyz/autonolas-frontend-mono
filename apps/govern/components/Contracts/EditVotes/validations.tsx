@@ -13,7 +13,7 @@ const { Paragraph } = Typography;
 
 const getRemovedNomineesError = (removedNominees: Address[], allocations: Allocation[]) => (
   <Flex align="start" vertical>
-    <Paragraph className="m-0">Some of the contracts are no longer available for voting.</Paragraph>
+    <Paragraph className="m-0">Some contracts are no longer available for voting.</Paragraph>
     <Paragraph>Remove them and try again:</Paragraph>
     <ul className="m-0 p-0">
       {removedNominees.map((item) => (

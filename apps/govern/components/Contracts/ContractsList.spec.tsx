@@ -75,7 +75,7 @@ describe('<ContractsList />', () => {
 
     expect(screen.getByText(/Staking contract/)).toBeInTheDocument();
     expect(screen.getByText(/Current weight/)).toBeInTheDocument();
-    expect(screen.getByText(/Next week weight/)).toBeInTheDocument();
+    expect(screen.getByText(/Next week's weight/)).toBeInTheDocument();
     expect(screen.getByText(/Actions/)).toBeInTheDocument();
   });
 

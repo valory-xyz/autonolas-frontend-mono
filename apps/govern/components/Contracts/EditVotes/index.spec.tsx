@@ -6,7 +6,7 @@ import { Allocation, StakingContract } from 'types';
 
 import { useAppSelector } from 'store/index';
 
-import { EditVotes } from './EditVotes';
+import { EditVotes } from '.';
 
 jest.mock('wagmi', () => ({
   useAccount: jest.fn().mockReturnValue({ address: '0x1234', isConnected: true }),

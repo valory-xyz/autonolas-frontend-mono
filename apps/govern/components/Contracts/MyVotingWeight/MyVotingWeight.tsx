@@ -12,7 +12,7 @@ import { LoginV2 } from 'components/Login';
 import { useVotingPower } from 'hooks/index';
 import { useAppSelector } from 'store/index';
 
-import { EditVotes } from '../EditVotes/EditVotes';
+import { EditVotes } from '../EditVotes';
 import { Votes } from './Votes';
 
 const { Title, Paragraph } = Typography;
