@@ -1,7 +1,7 @@
 import '@testing-library/jest-dom';
 import { render, screen, within } from '@testing-library/react';
 
-import { List } from './List';
+import { List } from '.';
 
 jest.mock('store/index', () => ({
   useAppSelector: jest.fn().mockReturnValue({

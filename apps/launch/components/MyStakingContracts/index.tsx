@@ -11,7 +11,7 @@ import { URL } from 'common-util/constants/urls';
 import { useAppSelector } from 'store/index';
 
 import { LoginV2 } from '../Login';
-import { List } from './List/List';
+import { List } from './List';
 
 const { Title, Paragraph } = Typography;
 

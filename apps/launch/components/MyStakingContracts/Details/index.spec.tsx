@@ -1,7 +1,7 @@
 import '@testing-library/jest-dom';
 import { render, screen } from '@testing-library/react';
 
-import { Details } from './Details';
+import { Details } from '.';
 
 jest.mock('next/router', () => ({
   useRouter: jest.fn().mockReturnValue({
