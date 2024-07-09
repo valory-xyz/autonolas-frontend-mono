@@ -4,11 +4,10 @@ import styled from 'styled-components';
 import { useAccountEffect, useConfig, useDisconnect } from 'wagmi';
 
 import { INVALIDATE_AFTER_ACCOUNT_CHANGE } from 'common-util/constants/scopeKeys';
+import { isAddressProhibited } from 'common-util/functions';
+import { queryClient } from 'context/Web3ModalProvider';
 import { clearUserState } from 'store/govern';
 import { useAppDispatch } from 'store/index';
-
-import { isAddressProhibited } from '../../common-util/functions';
-import { queryClient } from '../../context/Web3ModalProvider';
 
 const LoginContainer = styled.div`
   display: flex;

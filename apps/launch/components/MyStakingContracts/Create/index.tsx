@@ -11,7 +11,6 @@ import {
   Tag,
   Typography,
 } from 'antd';
-import { ContractTransactionReceipt, TransactionResponse } from 'ethers';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { useRouter } from 'next/router';
@@ -20,6 +19,7 @@ import { mainnet } from 'viem/chains';
 import { useAccount } from 'wagmi';
 
 import { CHAIN_NAMES, EXPLORER_URLS, UNICODE_SYMBOLS } from 'libs/util-constants/src';
+import { notifyWarning } from 'libs/util-functions/src';
 
 import { ErrorAlert } from 'common-util/ErrorAlert';
 import {
@@ -28,16 +28,9 @@ import {
   isSupportedChainId,
 } from 'common-util/constants/stakingContract';
 import { URL } from 'common-util/constants/urls';
-import {
-  Feature,
-  createStakingContract,
-  getErrorInfo,
-  getIpfsHash,
-  getStakingContractInitPayload,
-  notifyConnectWallet,
-  notifyWrongNetwork,
-} from 'common-util/functions';
+import { Feature, createStakingContract, getErrorInfo, getIpfsHash } from 'common-util/functions';
 import { getChainIdFromPath } from 'common-util/functions/networkHelpers';
+import { getStakingContractInitPayload } from 'common-util/functions/stakingContract';
 import { useAppDispatch } from 'store/index';
 import { addStakingContract } from 'store/launch';
 import { ErrorType } from 'types/index';
@@ -77,7 +70,7 @@ export const CreateStakingContract = () => {
 
   const handleCreate = async (values: FormValues) => {
     if (!account) {
-      notifyConnectWallet();
+      notifyWarning('Please connect your wallet');
       return;
     }
 
@@ -88,7 +81,7 @@ export const CreateStakingContract = () => {
     }
 
     if (wrongNetwork) {
-      notifyWrongNetwork();
+      notifyWarning('Please switch to the correct network and try again');
       return;
     }
 

@@ -3,15 +3,15 @@ import { Button, Flex, Space, Statistic, Table, Tooltip, Typography } from 'antd
 import { ColumnsType } from 'antd/es/table';
 import { Dispatch, SetStateAction, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
+import { Allocation } from 'types';
 
 import { COLOR } from '@autonolas/frontend-library';
 
 import { CHAIN_NAMES } from 'libs/util-constants/src';
 
 import { RETAINER_ADDRESS } from 'common-util/constants/addresses';
-import { getBytes32FromAddress } from 'common-util/functions';
+import { getBytes32FromAddress } from 'common-util/functions/addresses';
 import { useAppSelector } from 'store/index';
-import { Allocation } from 'types/index';
 
 const ONE_DAY_IN_MS = 24 * 60 * 60 * 1000;
 const TEN_DAYS_IN_MS = 10 * ONE_DAY_IN_MS;
@@ -132,32 +132,33 @@ export const Votes = ({ setIsUpdating, setAllocations }: VotesProps) => {
 
   const data: MyVote[] = useMemo(() => {
     const userVotesArray = Object.entries(userVotes);
-    if (userVotesArray.length > 0 && stakingContracts.length > 0) {
-      return userVotesArray.reduce((res: MyVote[], [key, value]) => {
-        const contract = stakingContracts.find((item) => item.address === key);
-        if (contract) {
-          res.push({
-            address: contract.address,
-            name: contract.metadata?.name,
-            chainId: contract.chainId,
-            currentWeight: value.current.power,
-            nextWeight: value.next.power,
-          });
-        }
 
-        if (key === getBytes32FromAddress(RETAINER_ADDRESS)) {
-          res.push({
-            name: 'Rollover pool',
-            currentWeight: value.current.power,
-            nextWeight: value.next.power,
-            isRetainer: true,
-          });
-        }
-        return res;
-      }, []);
-    } else {
+    if (userVotesArray.length === 0 || stakingContracts.length === 0) {
       return [];
     }
+
+    return userVotesArray.reduce((res: MyVote[], [key, value]) => {
+      const contract = stakingContracts.find((item) => item.address === key);
+      if (contract) {
+        res.push({
+          address: contract.address,
+          name: contract.metadata?.name,
+          chainId: contract.chainId,
+          currentWeight: value.current.power,
+          nextWeight: value.next.power,
+        });
+      }
+
+      if (key === getBytes32FromAddress(RETAINER_ADDRESS)) {
+        res.push({
+          name: 'Rollover pool',
+          currentWeight: value.current.power,
+          nextWeight: value.next.power,
+          isRetainer: true,
+        });
+      }
+      return res;
+    }, []);
   }, [userVotes, stakingContracts]);
 
   return (
@@ -187,6 +188,7 @@ export const Votes = ({ setIsUpdating, setAllocations }: VotesProps) => {
         dataSource={data}
         pagination={false}
         rowClassName={rowClassName}
+        rowKey={(record) => record.address || record.name}
       />
     </VotesRoot>
   );

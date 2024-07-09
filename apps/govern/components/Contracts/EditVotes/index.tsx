@@ -3,6 +3,7 @@ import { Alert, Button, Flex, InputNumber, Table, Typography, notification } fro
 import { ColumnsType } from 'antd/es/table';
 import { Dispatch, SetStateAction, useCallback, useState } from 'react';
 import styled from 'styled-components';
+import { Allocation } from 'types';
 import { Address } from 'viem';
 import { useAccount } from 'wagmi';
 
@@ -10,21 +11,20 @@ import { CHAIN_NAMES } from 'libs/util-constants/src';
 
 import { RETAINER_ADDRESS } from 'common-util/constants/addresses';
 import { INVALIDATE_AFTER_UPDATE_KEYS } from 'common-util/constants/scopeKeys';
-import { getBytes32FromAddress, voteForNomineeWeights } from 'common-util/functions';
+import { getBytes32FromAddress } from 'common-util/functions/addresses';
+import { voteForNomineeWeights } from 'common-util/functions/requests';
+import { queryClient } from 'context/Web3ModalProvider';
 import { clearState } from 'store/govern';
 import { useAppDispatch, useAppSelector } from 'store/index';
-import { Allocation } from 'types/index';
 
-import { queryClient } from '../../../context/Web3ModalProvider';
 import { ConfirmModal } from './ConfirmModal';
 import {
-  MAX_ALLOCATED_POWER,
   checkLockNotExpired,
   checkNoDisabledContracts,
   checkNoRemovedNominees,
   checkNotNegativeSlope,
-  getReorderedVotes,
-} from './utils';
+} from './validations';
+import { MAX_ALLOCATED_POWER, getReorderedVotes } from './utils';
 
 const { Paragraph, Text } = Typography;
 
@@ -51,7 +51,7 @@ const getColumns = (
     title: 'Contract name',
     key: 'name',
     dataIndex: 'metadata',
-    render: (metadata) => <Text strong>{metadata.name}</Text>,
+    render: (metadata) => <Text strong>{metadata?.name || 'NA'}</Text>,
     width: 200,
   },
   {
@@ -64,7 +64,7 @@ const getColumns = (
   {
     title: 'My voting weight',
     key: 'weight',
-    render: (_, record, index) => (
+    render: (_, _record, index) => (
       <Flex gap={16}>
         <InputNumber
           addonAfter="%"
@@ -79,11 +79,13 @@ const getColumns = (
               setAllocation(value, index);
             }
           }}
+          data-testid={`my-voting-weight-input-${index}`}
         />
         <Button
           icon={<DeleteOutlined />}
           onClick={() => removeAllocation(index)}
           style={{ flex: 'none' }}
+          data-testid={`remove-allocation-button-${index}`}
         />
       </Flex>
     ),
@@ -198,6 +200,8 @@ export const EditVotes = ({ allocations, setAllocations, setIsUpdating }: EditVo
       });
   }, [account, allocations, dispatch, stakingContracts, allocatedPower, userVotes, setIsUpdating]);
 
+  const totalAllocatedPower = parseFloat((allocatedPower / 100).toFixed(2));
+
   return (
     <>
       {isError && (
@@ -208,18 +212,20 @@ export const EditVotes = ({ allocations, setAllocations, setIsUpdating }: EditVo
           type="error"
         />
       )}
+
       <Text type="secondary" strong>
         Voting power used
       </Text>
-      <TotalAllocatedPower>{`${parseFloat(
-        (allocatedPower / 100).toFixed(2),
-      )}%`}</TotalAllocatedPower>
+      <TotalAllocatedPower data-testid="total-allocated-power">{`${totalAllocatedPower}%`}</TotalAllocatedPower>
+
       <Table
         className="mt-16 mb-16"
         columns={getColumns(allocations, updateAllocation, removeAllocation, isError)}
         dataSource={allocations}
         pagination={false}
+        rowKey={(record) => record.address}
       />
+
       <Paragraph type="secondary" className="text-end">
         New voting weight will take effect at the beginning of the next week.
       </Paragraph>
@@ -233,6 +239,7 @@ export const EditVotes = ({ allocations, setAllocations, setIsUpdating }: EditVo
           Update voting weight
         </Button>
       </Flex>
+
       <ConfirmModal
         isOpen={isModalOpen}
         handleOk={updateVotingWeight}

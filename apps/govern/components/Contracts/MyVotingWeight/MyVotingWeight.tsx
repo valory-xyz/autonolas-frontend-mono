@@ -3,6 +3,7 @@ import { Button, Card as CardAntd, Flex, Spin, Typography } from 'antd';
 import Image from 'next/image';
 import { Dispatch, SetStateAction, useMemo } from 'react';
 import styled from 'styled-components';
+import { Allocation } from 'types';
 import { useAccount } from 'wagmi';
 
 import { MEMBER_URL } from 'libs/util-constants/src';
@@ -10,9 +11,8 @@ import { MEMBER_URL } from 'libs/util-constants/src';
 import { LoginV2 } from 'components/Login';
 import { useVotingPower } from 'hooks/index';
 import { useAppSelector } from 'store/index';
-import { Allocation } from 'types/index';
 
-import { EditVotes } from './EditVotes';
+import { EditVotes } from '../EditVotes';
 import { Votes } from './Votes';
 
 const { Title, Paragraph } = Typography;
@@ -94,6 +94,7 @@ export const MyVotingWeight = ({
   setAllocations,
 }: MyVotingWeightProps) => {
   const { isConnected: isAccountConnected, address: account } = useAccount();
+
   const { data: votingPower, isFetching: isVotingPowerLoading } = useVotingPower(account);
   const { userVotes, isUserVotesLoading } = useAppSelector((state) => state.govern);
 
@@ -102,10 +103,12 @@ export const MyVotingWeight = ({
     if (!isAccountConnected) {
       return <ConnectWallet />;
     }
+
     if (isVotingPowerLoading) {
       // Show loader while don't have balance data
       return <Loader />;
     }
+
     // If the user doesn't have voting power, suggest to get veOlas
     if (Number(votingPower) === 0) {
       return <GetVeOlas />;
@@ -122,6 +125,7 @@ export const MyVotingWeight = ({
           />
         );
       }
+
       // If the user has never voted, show empty state
       if (Object.values(userVotes).length === 0) {
         return <EmptyVotes />;

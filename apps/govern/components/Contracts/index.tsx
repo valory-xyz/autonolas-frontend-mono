@@ -1,12 +1,12 @@
 import { Flex } from 'antd';
 import { useEffect, useState } from 'react';
 import styled from 'styled-components';
+import { Allocation, StakingContract } from 'types';
 
 import { useAppSelector } from 'store/index';
-import { Allocation, StakingContract } from 'types/index';
 
 import { ContractsList } from './ContractsList';
-import { MyVotingWeight } from './MyVotingWeight';
+import { MyVotingWeight } from './MyVotingWeight/MyVotingWeight';
 
 const StyledMain = styled.main`
   display: flex;

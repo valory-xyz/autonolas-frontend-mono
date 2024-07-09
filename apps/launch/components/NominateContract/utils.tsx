@@ -30,7 +30,7 @@ export const Container = ({ children }: { children: ReactNode }) => {
 export const Loader = () => (
   <Container>
     <Flex align="center" justify="center" style={{ height: 240 }}>
-      <Spin />
+      <Spin data-testid="nominate-contract-loader" />
     </Flex>
   </Container>
 );

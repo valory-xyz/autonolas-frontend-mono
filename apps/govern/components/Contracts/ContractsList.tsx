@@ -2,18 +2,27 @@ import { CheckOutlined, InfoCircleOutlined, PlusOutlined } from '@ant-design/ico
 import { Button, Card as CardAntd, Space, Table, Tooltip, Typography } from 'antd';
 import { ColumnsType } from 'antd/es/table';
 import styled from 'styled-components';
+import { Allocation, StakingContract } from 'types';
 import { useAccount } from 'wagmi';
 
 import { COLOR } from '@autonolas/frontend-library';
 
 import { CHAIN_NAMES } from 'libs/util-constants/src';
 
-import { formatWeiBalance } from 'common-util/functions';
+import { formatWeiBalance } from 'common-util/functions/balance';
 import { useVotingPower } from 'hooks/useVotingPower';
 import { useAppSelector } from 'store/index';
-import { Allocation, StakingContract } from 'types/index';
 
 const { Title, Paragraph, Text } = Typography;
+
+const NextWeekTitle = () => (
+  <Tooltip
+    color={COLOR.WHITE}
+    title={<Text>Updated voting weights will take effect at the start of next week</Text>}
+  >
+    {"Next week's weight"} <InfoCircleOutlined className="ml-8" style={{ color: COLOR.GREY_2 }} />
+  </Tooltip>
+);
 
 const Card = styled(CardAntd)`
   flex: auto;
@@ -38,15 +47,20 @@ const getColumns = ({
     {
       title: 'Staking contract',
       key: 'name',
+      width: actionsVisible ? 420 : 520,
       render: (_, record) => (
         <Space size={2} direction="vertical">
-          <a href={`/contracts/${record.address}`} target="_blank">
-            {record.metadata?.name}
-          </a>
+          {record.metadata?.name ? (
+            <a href={`/contracts/${record.address}`} target="_blank">
+              {record.metadata?.name}
+            </a>
+          ) : (
+            'NA'
+          )}
+
           <Text type="secondary">{CHAIN_NAMES[record.chainId] || record.chainId}</Text>
         </Space>
       ),
-      width: actionsVisible ? 420 : 520,
     },
     {
       title: 'Current weight',
@@ -60,14 +74,7 @@ const getColumns = ({
       ),
     },
     {
-      title: (
-        <Tooltip
-          color={COLOR.WHITE}
-          title={<Text>Updated voting weights will take effect at the start of next week</Text>}
-        >
-          Next week weight <InfoCircleOutlined className="ml-8" style={{ color: COLOR.GREY_2 }} />
-        </Tooltip>
-      ),
+      title: <NextWeekTitle />,
       key: 'nextWeight',
       dataIndex: 'nextWeight',
       render: (nextWeight) => (
@@ -78,6 +85,7 @@ const getColumns = ({
       ),
     },
   ];
+
   if (actionsVisible) {
     columns.push({
       title: 'Actions',
@@ -85,19 +93,16 @@ const getColumns = ({
       render: (_, record) => {
         const isAdded = !!allocations.find((item) => item.address === record.address);
         return (
-          <>
-            <div />
-            <Button
-              icon={isAdded ? <CheckOutlined /> : <PlusOutlined />}
-              type="primary"
-              ghost
-              size="small"
-              onClick={() => handleAdd(record)}
-              disabled={isAdded || actionsDisabled}
-            >
-              {isAdded ? 'Added' : 'Add'}
-            </Button>
-          </>
+          <Button
+            icon={isAdded ? <CheckOutlined /> : <PlusOutlined />}
+            type="primary"
+            ghost
+            size="small"
+            onClick={() => handleAdd(record)}
+            disabled={isAdded || actionsDisabled}
+          >
+            {isAdded ? 'Added' : 'Add'}
+          </Button>
         );
       },
       width: 140,
@@ -110,7 +115,6 @@ const getColumns = ({
 export const ContractsList = ({ isUpdating, handleAdd, allocations }: ContractsListProps) => {
   const { address: account } = useAccount();
   const { data: votingPower, isFetching: isVotingPowerLoading } = useVotingPower(account);
-
   const { stakingContracts, isStakingContractsLoading } = useAppSelector((state) => state.govern);
 
   const isActionsDisabled = !account || isVotingPowerLoading || Number(votingPower) === 0;
@@ -134,6 +138,7 @@ export const ContractsList = ({ isUpdating, handleAdd, allocations }: ContractsL
         dataSource={stakingContracts}
         pagination={false}
         loading={isStakingContractsLoading}
+        rowKey={(record) => record.address}
       />
     </Card>
   );

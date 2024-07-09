@@ -7,8 +7,9 @@ import { Provider } from 'react-redux';
 import { GlobalStyles } from 'libs/ui-theme/src';
 import { AutonolasThemeProvider } from 'libs/ui-theme/src';
 
+import { Web3ModalProvider } from 'context/Web3ModalProvider';
+
 import { Layout } from '../components/Layout';
-import { Web3ModalProvider } from '../context/Web3ModalProvider';
 import { useFetchStakingContractsList, useFetchUserVotes } from '../hooks';
 import { wrapper } from '../store';
 
@@ -28,6 +29,7 @@ const GovernApp = ({ Component, ...rest }: AppProps) => {
       <Head>
         <title>Govern</title>
       </Head>
+
       <Provider store={store}>
         <AutonolasThemeProvider>
           <Web3ModalProvider>

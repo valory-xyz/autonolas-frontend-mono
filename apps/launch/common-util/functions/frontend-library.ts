@@ -6,8 +6,6 @@ import {
   notifyError,
 } from '@autonolas/frontend-library';
 
-import { notifyWarning } from 'libs/util-functions/src';
-
 import { SUPPORTED_CHAINS } from 'common-util/config/wagmi';
 import { LAUNCH_RPC_URLS } from 'common-util/constants/rpcs';
 
@@ -26,14 +24,6 @@ export const getProvider = () => {
 
 export const getChainId = (chainId?: number) => {
   return getChainIdFn(SUPPORTED_CHAINS, chainId || '');
-};
-
-export const notifyWrongNetwork = () => {
-  notifyWarning('Please switch to the correct network and try again');
-};
-
-export const notifyConnectWallet = () => {
-  notifyWarning('Please connect your wallet');
 };
 
 export enum Feature {
