@@ -32,15 +32,18 @@ const VotesExample = () => {
   return <Votes setIsUpdating={() => {}} setAllocations={() => {}} />;
 };
 
-describe('<Votes/>', () => {
+describe('<Votes />', () => {
   it('should display countdown if voting is blocked', () => {
     render(<VotesExample />);
 
     expect(screen.getByText(/Cooldown period/)).toBeInTheDocument();
     expect(screen.getByText(/9d 23h 59m/)).toBeInTheDocument();
+
+    const updateBtn = screen.getByRole('button', { name: /Update voting weight/ });
+    expect(updateBtn).toBeDisabled();
   });
 
-  it('should be display "Update voting weight" button', () => {
+  it('should display "Update voting weight" button', () => {
     render(<VotesExample />);
 
     const updateBtn = screen.getByRole('button', { name: /Update voting weight/ });

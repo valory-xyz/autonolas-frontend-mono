@@ -22,49 +22,11 @@ Object.defineProperty(window, 'matchMedia', {
 });
 
 
+const { gnosis, mainnet, polygon } = require('viem/chains');
+
 jest.mock('wagmi/chains', () => ({
-  gnosis: {
-    chainId: 1,
-    name: 'Gnosis',
-    symbol: 'GNO',
-    rpc: 'https://rpc.gnosis.io',
-    explorer: 'https://explorer.gnosis.io',
-    chain: 'gnosis',
-    rpcUrls: {
-      default: {
-        http: ['https://rpc.gnosischain.com'],
-        webSocket: ['wss://rpc.gnosischain.com/wss'],
-      },
-    },
-  },
-
-  mainnet: {
-    chainId: 1,
-    name: 'Ethereum',
-    symbol: 'ETH',
-    rpc: 'https://mainnet.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161',
-    explorer: 'https://etherscan.io',
-    chain: 'mainnet',
-    rpcUrls: {
-      default: {
-        http: ['https://mainnet.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161'],
-        webSocket: ['wss://mainnet.infura.io/ws/v3/9aa3d95b3bc440fa88ea12eaa4456161'],
-      },
-    },
-  },
-
-  polygon: {
-    chainId: 137,
-    name: 'Polygon',
-    symbol: 'MATIC',
-    rpc: 'https://rpc-mainnet.maticvigil.com',
-    explorer: 'https://polygonscan.com',
-    chain: 'polygon',
-    rpcUrls: {
-      default: {
-        http: ['https://rpc-mainnet.maticvigil.com'],
-        webSocket: ['wss://rpc-mainnet.maticvigil.com'],
-      },
-    },
-  }
+  gnosis,
+  mainnet,
+  polygon,
 }));
+

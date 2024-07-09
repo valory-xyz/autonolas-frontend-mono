@@ -23,7 +23,7 @@ import {
   checkNoDisabledContracts,
   checkNoRemovedNominees,
   checkNotNegativeSlope,
-} from './requests';
+} from './validations';
 import { MAX_ALLOCATED_POWER, getReorderedVotes } from './utils';
 
 const { Paragraph, Text } = Typography;

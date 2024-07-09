@@ -63,7 +63,7 @@ const EditVotesExample: FC<{
   );
 };
 
-describe('<MyVotingWeight/>', () => {
+describe('<EditVotes />', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
@@ -131,33 +131,33 @@ describe('<MyVotingWeight/>', () => {
       const updateButton = screen.getByRole('button', { name: 'Update voting weight' });
       expect(updateButton as HTMLButtonElement).toBeEnabled();
     });
+  });
 
-    describe('Voting weight error', () => {
-      beforeEach(() => {
-        jest.clearAllMocks();
+  describe('Voting weight error', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
 
-        (useAppSelector as jest.Mock).mockReturnValue({
-          stakingContracts: multipleContractsMock,
-          userVotes: {},
-        });
+      (useAppSelector as jest.Mock).mockReturnValue({
+        stakingContracts: multipleContractsMock,
+        userVotes: {},
       });
+    });
 
-      it('should show error if voting weight is more than 100% and update button should be disabled', async () => {
-        render(
-          <EditVotesExample
-            allocationsMock={[
-              { ...mockContract1, weight: 100 } as Allocation,
-              { ...mockContract2, weight: 150 } as Allocation,
-            ]}
-          />,
-        );
+    it('should show error if voting weight is more than 100% and update button should be disabled', async () => {
+      render(
+        <EditVotesExample
+          allocationsMock={[
+            { ...mockContract1, weight: 100 } as Allocation,
+            { ...mockContract2, weight: 150 } as Allocation,
+          ]}
+        />,
+      );
 
-        const errorMessage = screen.getByText(/Total voting power entered must not exceed 100%/);
-        expect(errorMessage).toBeInTheDocument();
+      const errorMessage = screen.getByText(/Total voting power entered must not exceed 100%/);
+      expect(errorMessage).toBeInTheDocument();
 
-        const updateButton = screen.getByRole('button', { name: 'Update voting weight' });
-        expect(updateButton as HTMLButtonElement).toBeDisabled();
-      });
+      const updateButton = screen.getByRole('button', { name: 'Update voting weight' });
+      expect(updateButton as HTMLButtonElement).toBeDisabled();
     });
   });
 });
