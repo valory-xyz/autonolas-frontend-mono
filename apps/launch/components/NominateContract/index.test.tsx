@@ -39,9 +39,7 @@ describe('<NominateContract/>', () => {
 
   describe('Contract not found', () => {
     beforeEach(() => {
-      (useAccount as jest.Mock).mockReturnValue({
-        address: '0x12345',
-      });
+      (useAccount as jest.Mock).mockReturnValue({ address: '0x12345' });
     });
 
     it('should show loader when fetching contract', () => {
@@ -91,9 +89,7 @@ describe('<NominateContract/>', () => {
   });
 
   it('should show connect wallet message if account is not connected', () => {
-    (useAccount as jest.Mock).mockReturnValue({
-      address: '',
-    });
+    (useAccount as jest.Mock).mockReturnValue({ address: '' });
 
     (useAppSelector as jest.Mock).mockReturnValue({
       networkDisplayName: 'Ethereum',
@@ -109,9 +105,7 @@ describe('<NominateContract/>', () => {
   });
 
   it('should show contract already nominated message if contract is already nominated', () => {
-    (useAccount as jest.Mock).mockReturnValue({
-      address: '0x12345',
-    });
+    (useAccount as jest.Mock).mockReturnValue({ address: '0x12345' });
 
     (useAppSelector as jest.Mock).mockReturnValue({
       networkDisplayName: 'Ethereum',
@@ -142,9 +136,7 @@ describe('<NominateContract/>', () => {
   });
 
   it('should wait for nominating', async () => {
-    (useAccount as jest.Mock).mockReturnValue({
-      address: '0xMyAddress',
-    });
+    (useAccount as jest.Mock).mockReturnValue({ address: '0xMyAddress' });
 
     (useAppSelector as jest.Mock).mockReturnValue({
       networkDisplayName: 'Ethereum',

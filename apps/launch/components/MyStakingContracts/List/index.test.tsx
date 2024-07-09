@@ -49,7 +49,6 @@ describe('<List />', () => {
       'href',
       '/ethereum/my-staking-contracts/0x1111',
     );
-
     expect(within(firstRow).getByText('Some good description one')).toBeInTheDocument();
     expect(within(firstRow).getByText('Staking Token')).toBeInTheDocument();
   });

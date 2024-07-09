@@ -122,8 +122,10 @@ export const NominateContract = () => {
   // my contracts are still loading
   if (isMyStakingContractsLoading) return <Loader />;
 
-  if (!id || !myStakingContracts || myStakingContracts.length === 0)
+  // contract list is empty
+  if (!id || !myStakingContracts || myStakingContracts.length === 0) {
     return <ContractDoesNotExist />;
+  }
 
   // contract does not exist
   const contractIndex = myStakingContracts.findIndex((item) => item.id === id);
