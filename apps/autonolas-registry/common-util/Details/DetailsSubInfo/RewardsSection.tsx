@@ -27,16 +27,37 @@ export const RewardsSection: FC<RewardsSectionProps> = memo(function RewardsSect
   topUp,
 }) {
   return (
-    <Flex vertical gap={4}>
-      <Row>
-        <RewardColumn title={'Claimable Reward'} statistic={`${rewardsFormatter(reward, 4)} ETH`} />
-        <RewardColumn title={'Claimable Top-Up'} statistic={`${rewardsFormatter(topUp, 2)} OLAS`} />
-      </Row>
-      <Row>
-        <a href="https://tokenomics.olas.network/donate">
-          Make donation {UNICODE_SYMBOLS.EXTERNAL_LINK}
-        </a>
-      </Row>
+    <Flex gap={4} vertical>
+      <Flex vertical gap={4}>
+        <Row>
+          <RewardColumn
+            title={'Claimable Reward'}
+            statistic={`${rewardsFormatter(reward, 4)} ETH`}
+          />
+          <RewardColumn
+            title={'Claimable Top-Up'}
+            statistic={`${rewardsFormatter(topUp, 2)} OLAS`}
+          />
+        </Row>
+      </Flex>
+
+      <Flex vertical gap={4}>
+        <Row>
+          <RewardColumn
+            title={'Next Claimable Reward'}
+            statistic={`${rewardsFormatter(reward, 4)} ETH`}
+          />
+          <RewardColumn
+            title={'Next Claimable Top-Up'}
+            statistic={`${rewardsFormatter(topUp, 2)} OLAS`}
+          />
+        </Row>
+        <Row>
+          <a href="https://tokenomics.olas.network/donate">
+            Make donation {UNICODE_SYMBOLS.EXTERNAL_LINK}
+          </a>
+        </Row>
+      </Flex>
     </Flex>
   );
 });
