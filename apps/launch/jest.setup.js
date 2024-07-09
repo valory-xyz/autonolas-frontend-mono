@@ -21,7 +21,6 @@ Object.defineProperty(window, 'matchMedia', {
   })),
 });
 
-
 jest.mock('wagmi/chains', () => ({
   gnosis: {
     chainId: 1,
@@ -66,5 +65,9 @@ jest.mock('wagmi/chains', () => ({
         webSocket: ['wss://rpc-mainnet.maticvigil.com'],
       },
     },
-  }
+  },
+}));
+
+jest.mock('common-util/config/wagmi', () => ({
+  SUPPORTED_CHAINS: [{ name: 'ethereum', chainId: 1 }],
 }));

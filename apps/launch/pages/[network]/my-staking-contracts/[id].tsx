@@ -1,3 +1,3 @@
-import { EachStakingContract } from 'components/MyStakingContracts/Details';
+import { Details } from 'components/MyStakingContracts/Details';
 
-export default EachStakingContract;
+export default Details;
