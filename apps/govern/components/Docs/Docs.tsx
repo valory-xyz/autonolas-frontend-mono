@@ -3,6 +3,7 @@ import Image from 'next/image';
 import styled from 'styled-components';
 
 import { COLOR } from 'libs/ui-theme/src';
+import { UNICODE_SYMBOLS } from 'libs/util-constants/src';
 
 const { Paragraph, Title, Text } = Typography;
 
@@ -81,7 +82,10 @@ const DirectOlasEmissions = () => (
       autonomous services at scale through targeted OLAS emissions. In other words, Olas Govern
       enables the full power of the Proof-of-Active-Agent (PoAA) mechanism in the context of Olas
       Staking. You can learn more about Olas Staking and PoAA mechanism in the{' '}
-      <a href="https://staking.olas.network/poaa-whitepaper.pdf">official whitepaper</a>.
+      <a href="https://staking.olas.network/poaa-whitepaper.pdf" target="_blank">
+        official whitepaper {UNICODE_SYMBOLS.EXTERNAL_LINK}
+      </a>
+      .
     </Paragraph>
     <Paragraph>
       The DAO may choose to invest into autonomous services owned by anyone, for example aligned or
