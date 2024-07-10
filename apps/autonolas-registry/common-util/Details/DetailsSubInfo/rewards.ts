@@ -1,26 +1,27 @@
 // TODO: move to common-util
+import { ethers } from 'ethers';
+
+import { TOKENOMICS } from 'libs/util-contracts/src/lib/abiAndAddresses/tokenomics';
 
 import { getTokenomicsContract as getTokenomicsContractHelper } from 'common-util/Contracts';
-import { ethers } from 'ethers';
-import { TOKENOMICS } from 'libs/util-contracts/src/lib/abiAndAddresses/tokenomics';
 
 const UNIT_TYPES = {
   COMPONENT: '0',
   AGENT: '1',
 };
 
-const fixTo8DecimalPlaces = (value) => {
+const fixTo8DecimalPlaces = (value: number | string) => {
   const numeralValue = Number(value);
-  if (Number.isNaN(numeralValue)) return "0";
-  return numeralValue > 0 ? numeralValue.toFixed(8) : "0";
+  if (Number.isNaN(numeralValue)) return '0';
+  return numeralValue > 0 ? numeralValue.toFixed(8) : '0';
 };
 
-const getTokenomicsContract = () => getTokenomicsContractHelper(
-  TOKENOMICS.addresses[1],
-);
+const getTokenomicsContract = () => getTokenomicsContractHelper(TOKENOMICS.addresses[1]);
 
 const getBlockTimestamp = async (block = 'latest') => {
-  const temp = await window?.WEB3_PROVIDER.eth.getBlock(block);
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore
+  const temp = await (window?.WEB3_PROVIDER ? window.WEB3_PROVIDER.eth.getBlock(block) : undefined);
   return temp.timestamp * 1;
 };
 
@@ -30,7 +31,7 @@ const getEpochLength = async () => {
   return parseInt(response, 10);
 };
 
-const getEpochTokenomics = async (epochNum) => {
+const getEpochTokenomics = async (epochNum: number) => {
   const contract = getTokenomicsContract();
   const response = await contract.methods.mapEpochTokenomics(epochNum).call();
   return response;
@@ -57,7 +58,7 @@ const getActualEpochTimeLength = async () => {
   return 0;
 };
 
-const getUnitPointReq = async ({ lastPoint, num }) => {
+const getUnitPointReq = async ({ lastPoint, num }: { lastPoint: number; num: number }) => {
   const contract = getTokenomicsContract();
   const response = await contract.methods.getUnitPoint(lastPoint, num).call();
   return response;
@@ -69,7 +70,14 @@ const getEpochCounter = async () => {
   return parseInt(response, 10);
 };
 
-export const getMapUnitIncentivesRequest = async ({ unitType, unitId }) => {
+const BIG_INT_ZERO = BigInt(0);
+const BIG_INT_HUNDRED = BigInt(100);
+
+type MapUnitIncentivesRequestArgs = { unitType: string; unitId: number };
+export const getMapUnitIncentivesRequest = async ({
+  unitType,
+  unitId,
+}: MapUnitIncentivesRequestArgs) => {
   const contract = getTokenomicsContract();
 
   const response = await contract.methods.mapUnitIncentives(unitType, unitId).call();
@@ -98,22 +106,21 @@ export const getMapUnitIncentivesRequest = async ({ unitType, unitId }) => {
   const { pendingRelativeReward, pendingRelativeTopUp, lastEpoch } = response;
 
   const rewardInBn = ethers.toBigInt(pendingRelativeReward);
-  const isCurrentEpochWithReward = currentEpochCounter === Number(lastEpoch) && rewardInBn > 0n;
+  const isCurrentEpochWithReward =
+    currentEpochCounter === Number(lastEpoch) && rewardInBn > BIG_INT_ZERO;
 
   console.log({
     isCurrentEpochWithReward,
     currentEpochCounter,
     lastEpoch: Number(lastEpoch),
     rewardInBn,
-
-
   });
 
   // if the current epoch is not the last epoch, return 0
   if (!isCurrentEpochWithReward) {
     return {
-      pendingRelativeReward: "0.00",
-      pendingRelativeTopUp: "0.00",
+      pendingRelativeReward: '0.00',
+      pendingRelativeTopUp: '0.00',
     };
   }
 
@@ -133,12 +140,18 @@ export const getMapUnitIncentivesRequest = async ({ unitType, unitId }) => {
    * for unitType agent(0) & component(1),
    * the below calculation is done to get the reward and topup
    */
-  const componentReward = ((rewardInBn * ethers.toBigInt(cRewardFraction)) / 100n).toString();
-  const agentReward = ((rewardInBn * ethers.toBigInt(aRewardFraction)) / 100n).toString();
+  const componentReward = (
+    (rewardInBn * ethers.toBigInt(cRewardFraction)) /
+    BIG_INT_HUNDRED
+  ).toString();
+  const agentReward = (
+    (rewardInBn * ethers.toBigInt(aRewardFraction)) /
+    BIG_INT_HUNDRED
+  ).toString();
 
   let totalIncentives = ethers.toBigInt(pendingRelativeTopUp);
-  let componentTopUp = 0;
-  let agentPendingTopUp = 0;
+  let componentTopUp = '0';
+  let agentPendingTopUp = '0';
 
   if (pendingRelativeTopUp > 0) {
     const inflationPerSecond = await contract.methods.inflationPerSecond().call();
@@ -148,8 +161,8 @@ export const getMapUnitIncentivesRequest = async ({ unitType, unitId }) => {
     const totalTopUps = inflationPerSecondInBn * epochLength;
     totalIncentives = totalIncentives * totalTopUps;
 
-    const componentSumIncentivesInBn = ethers.toBigInt(cSumUnitTopUpsOLAS) * 100n;
-    const agentSumIncentivesInBn = ethers.toBigInt(aSumUnitTopUpsOLAS) * 100n;
+    const componentSumIncentivesInBn = ethers.toBigInt(cSumUnitTopUpsOLAS) * BIG_INT_HUNDRED;
+    const agentSumIncentivesInBn = ethers.toBigInt(aSumUnitTopUpsOLAS) * BIG_INT_HUNDRED;
 
     componentTopUp = (
       (totalIncentives * ethers.toBigInt(cTopupFraction)) /
