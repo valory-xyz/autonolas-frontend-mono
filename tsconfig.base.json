@@ -27,6 +27,9 @@
     "noFallthroughCasesInSwitch": true,
     "strictNullChecks": true,
     "paths": {
+      "@autonolas-frontend-mono/common-contract-functions": [
+        "libs/common-contract-functions/src/index.ts"
+      ],
       "@autonolas-frontend-mono/feature-service-status-info": [
         "libs/feature-service-status-info/src/index.ts"
       ],
