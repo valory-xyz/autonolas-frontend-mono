@@ -6,17 +6,23 @@ import { COLOR } from 'libs/ui-theme/src';
 
 const { Paragraph, Title, Text } = Typography;
 
+const HERO_MAX_WIDTH = 1312;
+const CONTENT_MAX_WIDTH = 720;
+
+const DIVIDER_STYLE = { margin: '40px 0' };
+const TAG_STYLE = { width: 'max-content' };
+
 const Hero = styled.div`
   display: flex;
   flex-direction: column;
-  max-width: 1312px;
+  max-width: ${HERO_MAX_WIDTH}px;
   margin: 0 auto;
 `;
 
 const ContentWrapper = styled.div`
   padding: 16px 0 40px;
-  border-top: 1px solid #d7ddea;
-  border-bottom: 1px solid #d7ddea;
+  border-top: 1px solid ${COLOR.BORDER_GREY_2};
+  border-bottom: 1px solid ${COLOR.BORDER_GREY_2};
   background-color: ${COLOR.WHITE};
   display: flex;
   flex-direction: column;
@@ -26,12 +32,9 @@ const ContentWrapper = styled.div`
 const Content = styled.div`
   display: flex;
   flex-direction: column;
-  max-width: 720px;
+  max-width: ${CONTENT_MAX_WIDTH}px;
   margin: 0 auto;
 `;
-
-const DIVIDER_STYLE = { margin: '40px 0' };
-const TAG_STYLE = { width: 'max-content' };
 
 const HeroSection = () => (
   <Hero>
@@ -43,7 +46,7 @@ const HeroSection = () => (
     </Flex>
     <Image
       src={'/images/docs/header.png'}
-      width={1312}
+      width={HERO_MAX_WIDTH}
       height={603}
       alt="Govern App"
       className="mb-24"
@@ -97,7 +100,7 @@ const Step1 = () => (
     <figure className="m-0 mb-24">
       <Image
         src={'/images/docs/step1.png'}
-        width={720}
+        width={CONTENT_MAX_WIDTH}
         height={280}
         alt="Fig 1"
         className="mb-12"
@@ -133,7 +136,13 @@ const Step1 = () => (
 
 const Step2 = () => (
   <>
-    <Image src={'/images/docs/step2.png'} width={720} height={292} alt="Fig 2" className="mb-24" />
+    <Image
+      src={'/images/docs/step2.png'}
+      width={CONTENT_MAX_WIDTH}
+      height={292}
+      alt="Fig 2"
+      className="mb-24"
+    />
     <Tag style={TAG_STYLE}>Step 2</Tag>
     <Title level={4} className="mt-16">
       Allocate your voting power to different staking contracts
@@ -152,7 +161,13 @@ const Step2 = () => (
 
 const Step3 = () => (
   <>
-    <Image src={'/images/docs/step3.png'} width={720} height={316} alt="Fig 2" className="mb-24" />
+    <Image
+      src={'/images/docs/step3.png'}
+      width={CONTENT_MAX_WIDTH}
+      height={316}
+      alt="Fig 2"
+      className="mb-24"
+    />
     <Tag style={TAG_STYLE}>Step 3</Tag>
     <Title level={4} className="mt-16">
       Browse contracts, add them to your list and set your vote weights
