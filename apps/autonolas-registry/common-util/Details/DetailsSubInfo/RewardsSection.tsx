@@ -2,16 +2,18 @@
 import { Col, Flex, Row } from 'antd';
 import { FC, useEffect, useState } from 'react';
 
-import { useClaimableIncentives } from 'libs/common-contract-functions/src';
+import {
+  PendingReward,
+  getPendingIncentives,
+  useClaimableIncentives,
+} from 'libs/common-contract-functions/src';
 import { UNICODE_SYMBOLS } from 'libs/util-constants/src/lib/symbols';
+import { TOKENOMICS } from 'libs/util-contracts/src';
+
+import { getEthersProviderForEthereum, getTokenomicsEthersContract } from 'common-util/Contracts';
 
 import { RewardsStatistic } from '../styles';
 import { useTokenomicsUnitType } from './hooks';
-import { getPendingIncentives, usePendingIncentives } from './rewards';
-
-// import { useClaimableIncentives } from './rewards';
-
-type PendingReward = { reward: bigint; topUp: bigint };
 
 type RewardsColumnProps = { title: string; statistic: null | string; loading?: boolean };
 
@@ -29,9 +31,8 @@ type RewardsSectionProps = {
 };
 
 export const RewardsSection: FC<RewardsSectionProps> = ({ ownerAddress, id, type, dataTestId }) => {
+  const [isPendingIncentivesLoading, setIsPendingIncentivesLoading] = useState<boolean>(true);
   const [pendingIncentives, setPendingIncentives] = useState<PendingReward | null>(null);
-
-  // usePendingIncentives(type, id);
 
   const tokenomicsUnitType = useTokenomicsUnitType(type);
   const {
@@ -41,9 +42,13 @@ export const RewardsSection: FC<RewardsSectionProps> = ({ ownerAddress, id, type
   } = useClaimableIncentives(ownerAddress, id, tokenomicsUnitType);
 
   useEffect(() => {
-    const data = getPendingIncentives(`${tokenomicsUnitType}`, id);
-    // setPendingIncentives(data);
-    console.log(data);
+    const provider = getEthersProviderForEthereum();
+    const contract = getTokenomicsEthersContract(TOKENOMICS.addresses[1]);
+
+    getPendingIncentives(provider, contract, `${tokenomicsUnitType}`, id)
+      .then((data) => setPendingIncentives(data))
+      .catch((error) => console.error(error))
+      .finally(() => setIsPendingIncentivesLoading(false));
   }, [ownerAddress, id, tokenomicsUnitType]);
 
   return (
@@ -67,10 +72,12 @@ export const RewardsSection: FC<RewardsSectionProps> = ({ ownerAddress, id, type
           <RewardColumn
             title="Pending Reward"
             statistic={pendingIncentives ? `${pendingIncentives?.reward} ETH` : null}
+            loading={isPendingIncentivesLoading}
           />
           <RewardColumn
             title="Pending Top Up"
             statistic={pendingIncentives ? `${pendingIncentives?.topUp} OLAS` : null}
+            loading={isPendingIncentivesLoading}
           />
         </Row>
 

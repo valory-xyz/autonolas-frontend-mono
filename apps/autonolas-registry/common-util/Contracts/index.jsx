@@ -1,3 +1,4 @@
+import { ethers } from 'ethers';
 import Web3 from 'web3';
 
 import { isL1Network } from '@autonolas/frontend-library';
@@ -195,6 +196,18 @@ export const getMultiSendContract = (address) => {
  * @returns tokenomics proxy contract
  */
 export const getTokenomicsContract = (address) => {
-  const contract = getContract(TOKENOMICS.abi, address);
+  const web3 = new Web3(getProvider());
+  const contract = new web3.eth.Contract(TOKENOMICS.abi, address);
+  return contract;
+};
+
+export const getEthersProviderForEthereum = () => {
+  const provider = new ethers.JsonRpcProvider(RPC_URLS[1]);
+  return provider;
+};
+
+export const getTokenomicsEthersContract = (address) => {
+  const provider = getEthersProviderForEthereum();
+  const contract = new ethers.Contract(address, TOKENOMICS.abi, provider);
   return contract;
 };

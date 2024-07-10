@@ -1800,4 +1800,4 @@ export const TOKENOMICS = {
       type: 'function',
     },
   ],
-};
+} as const;
