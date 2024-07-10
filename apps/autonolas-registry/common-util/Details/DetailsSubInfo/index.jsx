@@ -13,7 +13,6 @@ import {
   DEFAULT_SERVICE_CREATION_ETH_TOKEN_ZEROS,
   HASH_DETAILS_STATE,
   NAV_TYPES,
-  TOKENOMICS_UNIT_TYPES,
 } from '../../../util/constants';
 import { useHelpers } from '../../hooks';
 import { useMetadata } from '../../hooks/useMetadata';
@@ -25,6 +24,7 @@ import { getTokenDetailsRequest } from '../utils';
 import { RewardsSection } from './RewardsSection';
 import { ServiceStatus } from './ServiceStatus';
 import { ViewHashAndCode } from './ViewHashAndCode';
+import { useTokenomicsUnitType } from './hooks';
 
 const navTypesForRewards = [NAV_TYPES.COMPONENT, NAV_TYPES.AGENT];
 
@@ -60,11 +60,7 @@ export const DetailsSubInfo = ({
   const { operatorWhitelistTitle, operatorWhitelistValue, operatorStatusValue } =
     useOperatorWhitelistComponent(id);
 
-  const tokenomicsUnitType = useMemo(() => {
-    if (type === NAV_TYPES.COMPONENT) return TOKENOMICS_UNIT_TYPES.COMPONENT;
-    if (type === NAV_TYPES.AGENT) return TOKENOMICS_UNIT_TYPES.AGENT;
-    return;
-  }, [type]);
+  const tokenomicsUnitType = useTokenomicsUnitType(type);
 
   const tokenomicsContract =
     type === NAV_TYPES.SERVICE || isSvm ? null : getTokenomicsContract(TOKENOMICS.addresses[1]);
@@ -101,18 +97,11 @@ export const DetailsSubInfo = ({
       });
     }
 
-    details.push({
-      title: 'Owner Address',
-      dataTestId: 'owner-address',
-      value: ownerAddress,
-    });
+    details.push({ title: 'Owner Address', dataTestId: 'owner-address', value: ownerAddress });
 
-    ownerEnsName &&
-      details.push({
-        title: 'Owner ENS Name',
-        dataTestId: 'owner-ens-name',
-        value: ownerEnsName,
-      });
+    if (ownerEnsName) {
+      details.push({ title: 'Owner ENS Name', dataTestId: 'owner-ens-name', value: ownerEnsName });
+    }
 
     return details;
   }, [description, metadataLoadState, ownerAddress, ownerEnsName, version]);
@@ -274,14 +263,15 @@ export const DetailsSubInfo = ({
     if (!navTypesForRewards.includes(type)) return;
     if (!ownerAddress) return;
     if (!id) return;
+    if (!tokenomicsContract) return;
 
-    tokenomicsContract?.methods
+    tokenomicsContract.methods
       .getOwnerIncentives(ownerAddress, [tokenomicsUnitType], [id])
       .call()
-      .then(({ reward, topUp }) => {
-        setRewards({ reward: reward, topUp: topUp });
-      });
+      .then(({ reward, topUp }) => setRewards({ reward, topUp }))
+      .catch((error) => console.error(error));
   }, [rewards, id, ownerAddress, tokenomicsUnitType, type, tokenomicsContract, chainId]);
+
   return <SectionContainer>{detailsSections}</SectionContainer>;
 };
 
