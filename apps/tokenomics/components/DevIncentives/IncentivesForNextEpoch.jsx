@@ -1,18 +1,10 @@
+import { Button, Col, Form, Grid, InputNumber, Radio, Row, Table, Typography } from 'antd';
 import { useState } from 'react';
-import {
-  Radio,
-  Form,
-  Button,
-  InputNumber,
-  Typography,
-  Row,
-  Col,
-  Grid,
-  Table,
-} from 'antd';
 
 import { notifyError } from '@autonolas/frontend-library';
+
 import { useHelpers } from 'common-util/hooks/useHelpers';
+
 import { getMapUnitIncentivesRequest } from './requests';
 import { MapPendingIncentivesContainer } from './styles';
 
@@ -48,7 +40,7 @@ export const IncentivesForNextEpoch = () => {
         unitType: values.unitType,
         unitId: `${values.unitId}`,
       });
-      setPendingIncentives([response]);
+      setPendingIncentives([{ ...response, id: '0', key: '0' }]);
     } catch (error) {
       notifyError('Error on fetching incentives');
       console.error(error);
@@ -61,8 +53,8 @@ export const IncentivesForNextEpoch = () => {
     <MapPendingIncentivesContainer>
       <Title level={3}>Estimate rewards for next epoch</Title>
       <Paragraph style={{ maxWidth: 550 }}>
-        Note that the rewards claimable from the next epoch are estimated, as
-        they might eventually change during the epoch due to other donations.
+        Note that the rewards claimable from the next epoch are estimated, as they might eventually
+        change during the epoch due to other donations.
       </Paragraph>
 
       <Row>
@@ -94,12 +86,7 @@ export const IncentivesForNextEpoch = () => {
             </Form.Item>
 
             <Form.Item>
-              <Button
-                type="primary"
-                htmlType="submit"
-                loading={isLoading}
-                disabled={!account}
-              >
+              <Button type="primary" htmlType="submit" loading={isLoading} disabled={!account}>
                 Estimate
               </Button>
 
@@ -107,9 +94,7 @@ export const IncentivesForNextEpoch = () => {
                 <Text
                   className="ml-8"
                   type="secondary"
-                  style={
-                    screens.xs ? { display: 'block' } : { display: 'inline' }
-                  }
+                  style={screens.xs ? { display: 'block' } : { display: 'inline' }}
                 >
                   To check rewards, connect a wallet
                 </Text>

@@ -164,8 +164,6 @@ export const getMapUnitIncentivesRequest = async ({ unitType, unitId }) => {
     return {
       pendingRelativeReward: 0,
       pendingRelativeTopUp: 0,
-      id: '0',
-      key: '0',
     };
   }
 
@@ -223,8 +221,6 @@ export const getMapUnitIncentivesRequest = async ({ unitType, unitId }) => {
   return {
     pendingRelativeReward: fixTo8DecimalPlaces(pendingRelativeTopUpInEth),
     pendingRelativeTopUp: fixTo8DecimalPlaces(componentTopUpInEth),
-    id: '0',
-    key: '0',
   };
 };
 
