@@ -230,7 +230,7 @@ export const DetailsSubInfo = ({
                   id={id}
                   type={type}
                   ownerAddress={ownerAddress}
-                  data-testid={dataTestId}
+                  dataTestId={dataTestId}
                 />
               ) : (
                 <Info data-testid={dataTestId}>{value}</Info>

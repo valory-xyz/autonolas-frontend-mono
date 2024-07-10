@@ -1,8 +1,10 @@
 // TODO: move to common-util
 import { ethers } from 'ethers';
+import { isNumber } from 'lodash';
+import { useEffect } from 'react';
 import { Address, formatEther } from 'viem';
 import { mainnet } from 'viem/chains';
-import { useReadContract } from 'wagmi';
+import { useBlock, useBlockNumber, useReadContract } from 'wagmi';
 
 import { TOKENOMICS } from 'libs/util-contracts/src/lib/abiAndAddresses/tokenomics';
 
@@ -78,14 +80,9 @@ const getEpochCounter = async () => {
 const BIG_INT_ZERO = BigInt(0);
 const BIG_INT_HUNDRED = BigInt(100);
 
-type MapUnitIncentivesRequestArgs = { unitType: string; unitId: number };
-export const getMapUnitIncentivesRequest = async ({
-  unitType,
-  unitId,
-}: MapUnitIncentivesRequestArgs) => {
+type MapUnitIncentivesRequestArgs = { unitType: string; unitId: string };
+const getMapUnitIncentivesRequest = async ({ unitType, unitId }: MapUnitIncentivesRequestArgs) => {
   const contract = getTokenomicsContract();
-
-  const response = await contract.methods.mapUnitIncentives(unitType, unitId).call();
 
   const currentEpochCounter = Number(await getEpochCounter());
 
@@ -100,6 +97,7 @@ export const getMapUnitIncentivesRequest = async ({
     num: 1,
   });
 
+  const response = await contract.methods.mapUnitIncentives(unitType, unitId).call();
   // Struct for component / agent incentive balances
   // struct IncentiveBalances {
   //   uint96 reward;                // Reward in ETH [0]
@@ -192,14 +190,7 @@ export const getMapUnitIncentivesRequest = async ({
   };
 };
 
-export const getRewards = async (ownerAddress: string, type: string, id: string) => {
-  const contract = getTokenomicsContract();
-
-  const response = await contract.methods.getOwnerIncentives(ownerAddress, [type], [id]).call();
-  return { rewards: response.reward, topUp: response.topUp };
-};
-
-export const useGetPendingIncentives = async (unitType: string, unitId: number) => {
+export const getPendingIncentives = async (unitType: string, unitId: string) => {
   const { pendingRelativeReward, pendingRelativeTopUp } = await getMapUnitIncentivesRequest({
     unitType,
     unitId,
@@ -211,6 +202,93 @@ export const useGetPendingIncentives = async (unitType: string, unitId: number) 
   };
 };
 
+// --------------------------------------------------
+// const useUnitPointReq = ({ lastPoint, num }: { lastPoint?: number; num: number }) => {
+//   const { data, isFetching } = useReadContract({
+//     address: TOKENOMICS.addresses[mainnet.id] as Address,
+//     abi: TOKENOMICS.abi,
+//     functionName: 'getUnitPoint',
+//     chainId: mainnet.id,
+//     args: [lastPoint, num],
+//     query: {
+//       enabled: isNumber(lastPoint) && isNumber(num),
+//       refetchOnWindowFocus: false,
+
+//       select: (data) => {
+//         const { rewardUnitFraction, topUpUnitFraction, sumUnitTopUpsOLAS } = data as {
+//           rewardUnitFraction: bigint;
+//           topUpUnitFraction: bigint;
+//           sumUnitTopUpsOLAS: bigint;
+//         };
+//         return { rewardUnitFraction, topUpUnitFraction, sumUnitTopUpsOLAS };
+//       },
+//     },
+//   });
+
+//   return { isFetching, ...data };
+// };
+
+// const useEpochCounter = () => {
+//   const { data, isFetching } = useReadContract({
+//     address: TOKENOMICS.addresses[mainnet.id] as Address,
+//     abi: TOKENOMICS.abi,
+//     functionName: 'epochCounter',
+//     chainId: mainnet.id,
+//     query: {
+//       enabled: true,
+//       refetchOnWindowFocus: false,
+//       select: (data) => Number(data),
+//     },
+//   });
+
+//   return { isFetching, epochCounter: data };
+// };
+
+// const useMapUnitIncentives = ({ unitType, unitId }: MapUnitIncentivesRequestArgs) => {
+//   const { data, isFetching } = useReadContract({
+//     address: TOKENOMICS.addresses[mainnet.id] as Address,
+//     abi: TOKENOMICS.abi,
+//     functionName: 'mapUnitIncentives',
+//     chainId: mainnet.id,
+//     args: [unitType, unitId],
+//     query: {
+//       enabled: !!unitType && !!unitId,
+//       select: (data) => {
+//         const { pendingRelativeReward, pendingRelativeTopUp,lastEpoch } = data as  {
+//           pendingRelativeReward: bigint;
+//           pendingRelativeTopUp: bigint;
+//           lastEpoch: number;
+//         }
+//         return { pendingRelativeReward, pendingRelativeTopUp };
+//       },
+//       refetchOnWindowFocus: false,
+//     },
+//   });
+
+//   return { isFetching, ...data };
+// };
+
+// export const usePendingIncentives = (unitType: string, unitId: string) => {
+//   const blockInfo = useBlock();
+//   console.log({ blockInfo });
+
+//   const { epochCounter } = useEpochCounter();
+//   console.log({ epochCounter });
+
+//   const componentInfo = useUnitPointReq({ lastPoint: epochCounter, num: 0 });
+//   const agentInfo = useUnitPointReq({ lastPoint: epochCounter, num: 1 });
+
+//   const { isFetching, pendingRelativeReward, pendingRelativeTopUp, lastEpoch } = useMapUnitIncentives({
+//     unitType,
+//     unitId,
+//   });
+
+//   // useEffect(() => {
+//   //   getPendingIncentives(unitType, unitId);
+//   // }, [unitType, unitId]);
+// };
+
+// --------------------------------------------------
 const rewardsFormatter = (value: bigint, dp: number = 4) =>
   parseFloat(formatEther(value)).toLocaleString('en', {
     maximumFractionDigits: dp,
@@ -230,7 +308,7 @@ export const useClaimableIncentives = (ownerAddress: string, type: string, id: s
       enabled: !!ownerAddress && !!type && !!id,
       select: (data) => {
         const [reward, topup] = data as [bigint, bigint];
-        return { reward: rewardsFormatter(reward), topUp: rewardsFormatter(topup) };
+        return { reward: rewardsFormatter(reward, 4), topUp: rewardsFormatter(topup, 2) };
       },
       refetchOnWindowFocus: false,
     },

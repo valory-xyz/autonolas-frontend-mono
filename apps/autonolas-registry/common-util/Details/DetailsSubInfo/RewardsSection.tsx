@@ -1,10 +1,15 @@
+// import { useClaimableIncentives } from '@autonolas-frontend-mono/common-contract-functions';
 import { Col, Flex, Row } from 'antd';
-import { FC, memo, useState } from 'react';
+import { FC, useEffect, useState } from 'react';
 
+import { useClaimableIncentives } from 'libs/common-contract-functions/src';
 import { UNICODE_SYMBOLS } from 'libs/util-constants/src/lib/symbols';
 
 import { RewardsStatistic } from '../styles';
-import { useClaimableIncentives } from './rewards';
+import { useTokenomicsUnitType } from './hooks';
+import { getPendingIncentives, usePendingIncentives } from './rewards';
+
+// import { useClaimableIncentives } from './rewards';
 
 type PendingReward = { reward: bigint; topUp: bigint };
 
@@ -20,23 +25,29 @@ type RewardsSectionProps = {
   ownerAddress: string;
   id: string;
   type: string;
+  dataTestId: string;
 };
 
-export const RewardsSection: FC<RewardsSectionProps> = memo(function RewardsSection({
-  ownerAddress,
-  id,
-  type,
-}) {
+export const RewardsSection: FC<RewardsSectionProps> = ({ ownerAddress, id, type, dataTestId }) => {
   const [pendingIncentives, setPendingIncentives] = useState<PendingReward | null>(null);
 
+  // usePendingIncentives(type, id);
+
+  const tokenomicsUnitType = useTokenomicsUnitType(type);
   const {
     isFetching,
     reward: claimableReward,
     topUp: claimableTopup,
-  } = useClaimableIncentives(ownerAddress, type, id);
+  } = useClaimableIncentives(ownerAddress, id, tokenomicsUnitType);
+
+  useEffect(() => {
+    const data = getPendingIncentives(`${tokenomicsUnitType}`, id);
+    // setPendingIncentives(data);
+    console.log(data);
+  }, [ownerAddress, id, tokenomicsUnitType]);
 
   return (
-    <Flex gap={4} vertical>
+    <Flex gap={4} vertical data-testid={dataTestId}>
       <Flex vertical gap={4}>
         <Row>
           <RewardColumn
@@ -71,4 +82,4 @@ export const RewardsSection: FC<RewardsSectionProps> = memo(function RewardsSect
       </Flex>
     </Flex>
   );
-});
+};
