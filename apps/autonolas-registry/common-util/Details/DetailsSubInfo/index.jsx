@@ -49,7 +49,7 @@ export const DetailsSubInfo = ({
 }) => {
   const { isSvm, doesNetworkHaveValidServiceManagerToken, chainId } = useHelpers();
   const [tokenAddress, setTokenAddress] = useState(null);
-  const [rewards, setRewards] = useState(null);
+  const [canShowRewards, setCanShowRewards] = useState(null);
 
   const { data: ownerEnsName } = useEnsName({ address: ownerAddress, chainId: 1 });
 
@@ -140,7 +140,9 @@ export const DetailsSubInfo = ({
         ),
       },
       ...commonDetails,
-      ...(rewards ? [{ title: 'Rewards', dataTestId: 'details-rewards', value: rewards }] : []),
+      ...(canShowRewards
+        ? [{ title: 'Rewards', dataTestId: 'details-rewards', value: canShowRewards }]
+        : []),
       {
         title: 'Component Dependencies',
         dataTestId: 'details-dependency',
@@ -217,8 +219,6 @@ export const DetailsSubInfo = ({
   const detailsSections = useMemo(
     () =>
       detailsValues.map(({ title, value, dataTestId }, index) => {
-        if (dataTestId === 'details-rewards' && !rewards) return null;
-
         const isRewards = dataTestId === 'details-rewards';
 
         return (
@@ -226,14 +226,19 @@ export const DetailsSubInfo = ({
             {title && <SubTitle strong>{title}</SubTitle>}
             {value &&
               (isRewards ? (
-                <RewardsSection {...value} data-testid={dataTestId} />
+                <RewardsSection
+                  id={id}
+                  type={type}
+                  ownerAddress={ownerAddress}
+                  data-testid={dataTestId}
+                />
               ) : (
                 <Info data-testid={dataTestId}>{value}</Info>
               ))}
           </EachSection>
         );
       }),
-    [detailsValues, rewards, type],
+    [detailsValues, ownerAddress, id, type],
   );
 
   // get token address for service
@@ -259,18 +264,13 @@ export const DetailsSubInfo = ({
   useEffect(() => {
     if (chainId !== 1) return;
 
-    if (rewards) return;
     if (!navTypesForRewards.includes(type)) return;
     if (!ownerAddress) return;
     if (!id) return;
     if (!tokenomicsContract) return;
 
-    tokenomicsContract.methods
-      .getOwnerIncentives(ownerAddress, [tokenomicsUnitType], [id])
-      .call()
-      .then(({ reward, topUp }) => setRewards({ reward, topUp }))
-      .catch((error) => console.error(error));
-  }, [rewards, id, ownerAddress, tokenomicsUnitType, type, tokenomicsContract, chainId]);
+    setCanShowRewards(true);
+  }, [id, ownerAddress, tokenomicsUnitType, type, tokenomicsContract, chainId]);
 
   return <SectionContainer>{detailsSections}</SectionContainer>;
 };

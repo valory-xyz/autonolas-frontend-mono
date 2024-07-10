@@ -1,71 +1,68 @@
 import { Col, Flex, Row } from 'antd';
-import { FC, memo, useEffect, useState } from 'react';
-import { formatEther } from 'viem';
+import { FC, memo, useState } from 'react';
 
 import { UNICODE_SYMBOLS } from 'libs/util-constants/src/lib/symbols';
 
 import { RewardsStatistic } from '../styles';
-import { getMapUnitIncentivesRequest } from './rewards';
+import { useClaimableIncentives } from './rewards';
 
-type PendingReward = { reward: string; topUp: string };
+type PendingReward = { reward: bigint; topUp: bigint };
 
-/**
- * Formats reward values to required decimal places
- */
-const rewardsFormatter = (value: bigint, dp: number = 4) =>
-  parseFloat(formatEther(value)).toLocaleString('en', {
-    maximumFractionDigits: dp,
-    minimumFractionDigits: dp,
-  });
+type RewardsColumnProps = { title: string; statistic: null | string; loading?: boolean };
 
-const RewardColumn = ({ title, statistic }: { title: string; statistic: string }) => (
+const RewardColumn: FC<RewardsColumnProps> = ({ title, statistic, loading }) => (
   <Col span={24} xl={12}>
-    <RewardsStatistic title={title} value={statistic} />
+    <RewardsStatistic title={title} value={statistic || '--'} loading={!!loading} />
   </Col>
 );
 
-type RewardsSectionProps = { reward: bigint; topUp: bigint };
-export const RewardsSection: FC<RewardsSectionProps> = memo(function RewardsSection({
-  reward,
-  topUp,
-}) {
-  const [pendingIncentives, setPendingIncentives] = useState<PendingReward | null>({
-    reward: '0.00',
-    topUp: '0.00',
-  });
+type RewardsSectionProps = {
+  ownerAddress: string;
+  id: string;
+  type: string;
+};
 
-  useEffect(() => {
-    // TODO: Fetch pending incentives
-    getMapUnitIncentivesRequest({ unitId: 1, unitType: '0' })
-      .then((response) =>
-        setPendingIncentives({
-          topUp: response.pendingRelativeTopUp,
-          reward: response.pendingRelativeTopUp,
-        }),
-      )
-      .catch((e) => console.error(e));
-  }, []);
+export const RewardsSection: FC<RewardsSectionProps> = memo(function RewardsSection({
+  ownerAddress,
+  id,
+  type,
+}) {
+  const [pendingIncentives, setPendingIncentives] = useState<PendingReward | null>(null);
+
+  const {
+    isFetching,
+    reward: claimableReward,
+    topUp: claimableTopup,
+  } = useClaimableIncentives(ownerAddress, type, id);
 
   return (
     <Flex gap={4} vertical>
       <Flex vertical gap={4}>
         <Row>
           <RewardColumn
-            title={'Claimable Reward'}
-            statistic={`${rewardsFormatter(reward, 4)} ETH`}
+            title="Claimable Reward"
+            statistic={claimableReward ? `${claimableReward} ETH` : null}
+            loading={isFetching}
           />
           <RewardColumn
-            title={'Claimable Top Up'}
-            statistic={`${rewardsFormatter(topUp, 2)} OLAS`}
+            title="Claimable Top Up"
+            statistic={claimableTopup ? `${claimableTopup} OLAS` : null}
           />
         </Row>
       </Flex>
 
       <Flex vertical gap={4}>
         <Row>
-          <RewardColumn title={'Pending Reward'} statistic={`${pendingIncentives?.reward} ETH`} />
-          <RewardColumn title={'Pending Top Up'} statistic={`${pendingIncentives?.topUp} OLAS`} />
+          <RewardColumn
+            title="Pending Reward"
+            statistic={pendingIncentives ? `${pendingIncentives?.reward} ETH` : null}
+          />
+          <RewardColumn
+            title="Pending Top Up"
+            statistic={pendingIncentives ? `${pendingIncentives?.topUp} OLAS` : null}
+          />
         </Row>
+
         <Row>
           <a href="https://tokenomics.olas.network/donate">
             Make donation {UNICODE_SYMBOLS.EXTERNAL_LINK}

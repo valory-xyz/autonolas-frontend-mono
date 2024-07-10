@@ -88,4 +88,11 @@ export const RewardsStatistic = styled((props) => <Statistic {...props} />)`
     line-height: 32px;
     letter-spacing: -0.72px;
   }
+  .ant-skeleton-title {
+    margin: 0;
+    max-width: 200px;
+  }
+  .ant-statistic-skeleton {
+    padding-top: 12px;
+  }
 `;

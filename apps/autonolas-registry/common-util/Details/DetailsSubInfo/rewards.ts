@@ -1,9 +1,14 @@
 // TODO: move to common-util
 import { ethers } from 'ethers';
+import { Address, formatEther } from 'viem';
+import { mainnet } from 'viem/chains';
+import { useReadContract } from 'wagmi';
 
 import { TOKENOMICS } from 'libs/util-contracts/src/lib/abiAndAddresses/tokenomics';
 
 import { getTokenomicsContract as getTokenomicsContractHelper } from 'common-util/Contracts';
+
+import { useTokenomicsUnitType } from './hooks';
 
 const UNIT_TYPES = {
   COMPONENT: '0',
@@ -185,4 +190,51 @@ export const getMapUnitIncentivesRequest = async ({
     pendingRelativeReward: fixTo8DecimalPlaces(pendingRelativeTopUpInEth),
     pendingRelativeTopUp: fixTo8DecimalPlaces(componentTopUpInEth),
   };
+};
+
+export const getRewards = async (ownerAddress: string, type: string, id: string) => {
+  const contract = getTokenomicsContract();
+
+  const response = await contract.methods.getOwnerIncentives(ownerAddress, [type], [id]).call();
+  return { rewards: response.reward, topUp: response.topUp };
+};
+
+export const useGetPendingIncentives = async (unitType: string, unitId: number) => {
+  const { pendingRelativeReward, pendingRelativeTopUp } = await getMapUnitIncentivesRequest({
+    unitType,
+    unitId,
+  });
+
+  return {
+    pendingRelativeReward,
+    pendingRelativeTopUp,
+  };
+};
+
+const rewardsFormatter = (value: bigint, dp: number = 4) =>
+  parseFloat(formatEther(value)).toLocaleString('en', {
+    maximumFractionDigits: dp,
+    minimumFractionDigits: dp,
+  });
+
+export const useClaimableIncentives = (ownerAddress: string, type: string, id: string) => {
+  const tokenomicsUnitType = useTokenomicsUnitType(type);
+
+  const { data, isFetching } = useReadContract({
+    address: TOKENOMICS.addresses[mainnet.id] as Address,
+    abi: TOKENOMICS.abi,
+    functionName: 'getOwnerIncentives',
+    chainId: mainnet.id,
+    args: [ownerAddress, [tokenomicsUnitType], [id]],
+    query: {
+      enabled: !!ownerAddress && !!type && !!id,
+      select: (data) => {
+        const [reward, topup] = data as [bigint, bigint];
+        return { reward: rewardsFormatter(reward), topUp: rewardsFormatter(topup) };
+      },
+      refetchOnWindowFocus: false,
+    },
+  });
+
+  return { isFetching, ...data };
 };
