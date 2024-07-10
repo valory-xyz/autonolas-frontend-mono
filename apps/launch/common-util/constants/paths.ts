@@ -17,3 +17,9 @@ export const PATHS: Path[] = [
     description: 'Take your market insight and turn it into a full-fledged service.',
   },
 ];
+
+export const YOUR_OWN_PATH = {
+  name: 'Add your own path',
+  description: 'Submit a PR to the repo to guide Launchers towards valuable services.',
+  link: 'https://github.com/valory-xyz/autonolas-launch-frontend?tab=readme-ov-file#add-your-own-path',
+};

@@ -29,6 +29,7 @@ const MenuInstance: FC<MenuInstanceProps> = ({ selectedMenu, handleMenuItemClick
         path: `/${networkName}/${URL.myStakingContracts}`,
       },
       { label: 'Paths', key: 'paths', path: `/paths` },
+      { label: 'Docs', key: 'docs', path: '/docs' },
     ],
     [networkName],
   );
