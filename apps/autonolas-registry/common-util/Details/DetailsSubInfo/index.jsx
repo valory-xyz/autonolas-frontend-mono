@@ -279,10 +279,7 @@ export const DetailsSubInfo = ({
       .getOwnerIncentives(ownerAddress, [tokenomicsUnitType], [id])
       .call()
       .then(({ reward, topUp }) => {
-        setRewards({
-          reward: reward,
-          topUp: topUp,
-        });
+        setRewards({ reward: reward, topUp: topUp });
       });
   }, [rewards, id, ownerAddress, tokenomicsUnitType, type, tokenomicsContract, chainId]);
   return <SectionContainer>{detailsSections}</SectionContainer>;

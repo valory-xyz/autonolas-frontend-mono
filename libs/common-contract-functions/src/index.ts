@@ -1,1 +1,1 @@
-export * from './lib/common-contract-functions';
+export * from './lib/rewards';

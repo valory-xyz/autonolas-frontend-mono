@@ -1,6 +1,6 @@
 # common-contract-functions
 
-This library was generated with [Nx](https://nx.dev).
+Library of common contract functions used across multiple apps.
 
 ## Running unit tests
 
