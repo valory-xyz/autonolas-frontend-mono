@@ -15,6 +15,7 @@ export const COLOR = {
   GREY_3: '#f0f0f0',
   GREY_4: '#C6C6C6',
   BORDER_GREY: '#E3E3E3',
+  BORDER_GREY_2: '#D7DDEA',
 
   BLACK: '#000000',
   TABLE_BLACK: '#1B1B1B',

@@ -5,7 +5,7 @@ import styled from 'styled-components';
 
 import { COLOR } from 'libs/ui-theme/src';
 
-import { PATHS, Path } from 'common-util/constants/paths';
+import { PATHS, Path, YOUR_OWN_PATH } from 'common-util/constants/paths';
 
 const StyledMain = styled.main`
   max-width: 1400px;
@@ -117,16 +117,14 @@ export const PathsPage = () => {
               <Col xs={24} md={14} style={{ padding: '2rem' }}>
                 {!md && <PathImage name="Add your own" id="add-your-own" />}
                 <Typography.Title className="mt-0 mb-4" level={4}>
-                  Add your own path
+                  {YOUR_OWN_PATH.name}
                 </Typography.Title>
                 <div className="mb-16">
-                  <Typography.Text type="secondary">
-                    Submit a PR to the repo to guide Launchers towards valuable services.
-                  </Typography.Text>
+                  <Typography.Text type="secondary">{YOUR_OWN_PATH.description}</Typography.Text>
                 </div>
                 <Button
                   type="default"
-                  href="https://github.com/valory-xyz/autonolas-launch-frontend?tab=readme-ov-file#add-your-own-path"
+                  href={YOUR_OWN_PATH.link}
                   target="_blank"
                   rel="noopener noreferrer"
                 >
