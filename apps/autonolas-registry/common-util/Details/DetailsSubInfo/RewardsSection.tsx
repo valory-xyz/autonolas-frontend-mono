@@ -1,6 +1,7 @@
 // import { useClaimableIncentives } from '@autonolas-frontend-mono/common-contract-functions';
 import { Col, Flex, Row } from 'antd';
 import { FC, useEffect, useState } from 'react';
+import { Address } from 'viem';
 
 import {
   PendingReward,
@@ -24,7 +25,7 @@ const RewardColumn: FC<RewardsColumnProps> = ({ title, statistic, loading }) => 
 );
 
 type RewardsSectionProps = {
-  ownerAddress: string;
+  ownerAddress: Address;
   id: string;
   type: string;
   dataTestId: string;
@@ -39,7 +40,13 @@ export const RewardsSection: FC<RewardsSectionProps> = ({ ownerAddress, id, type
     isFetching,
     reward: claimableReward,
     topUp: claimableTopup,
-  } = useClaimableIncentives(ownerAddress, id, tokenomicsUnitType);
+  } = useClaimableIncentives(
+    TOKENOMICS.addresses[1],
+    TOKENOMICS.abi,
+    ownerAddress,
+    id,
+    tokenomicsUnitType,
+  );
 
   useEffect(() => {
     const provider = getEthersProviderForEthereum();
