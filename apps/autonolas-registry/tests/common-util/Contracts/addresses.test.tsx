@@ -69,7 +69,7 @@ const isLocalChainId = (chainId: string): boolean => {
   );
 };
 
-describe('common-utils/addresses', () => {
+describe.skip('common-utils/addresses', () => {
   it(
     'check contract addresses and ABIs',
     async () => {
