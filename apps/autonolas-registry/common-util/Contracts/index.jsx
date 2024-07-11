@@ -201,11 +201,18 @@ export const getTokenomicsContract = (address) => {
   return contract;
 };
 
+/**
+ * @returns ethers provider for ethereum
+ */
 export const getEthersProviderForEthereum = () => {
   const provider = new ethers.JsonRpcProvider(RPC_URLS[1]);
   return provider;
 };
 
+/**
+ * TODO: Remove this function once migrated to hooks
+ * @returns tokenomics ethers contract
+ */
 export const getTokenomicsEthersContract = (address) => {
   const provider = getEthersProviderForEthereum();
   const contract = new ethers.Contract(address, TOKENOMICS.abi, provider);

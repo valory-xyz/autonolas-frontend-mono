@@ -3,9 +3,12 @@ import { useState } from 'react';
 
 import { notifyError } from '@autonolas/frontend-library';
 
+import { getPendingIncentives } from 'libs/common-contract-functions/src';
+import { TOKENOMICS } from 'libs/util-contracts/src';
+
+import { getEthersProviderForEthereum, getTokenomicsEthersContract } from 'common-util/functions';
 import { useHelpers } from 'common-util/hooks/useHelpers';
 
-import { getMapUnitIncentivesRequest } from './requests';
 import { MapPendingIncentivesContainer } from './styles';
 
 const { Title, Paragraph, Text } = Typography;
@@ -36,11 +39,23 @@ export const IncentivesForNextEpoch = () => {
     try {
       setIsLoading(true);
 
-      const response = await getMapUnitIncentivesRequest({
-        unitType: values.unitType,
-        unitId: `${values.unitId}`,
-      });
-      setPendingIncentives([{ ...response, id: '0', key: '0' }]);
+      const provider = getEthersProviderForEthereum();
+      const contract = getTokenomicsEthersContract(TOKENOMICS.addresses[1]);
+
+      const { reward, topUp } = await getPendingIncentives(
+        provider,
+        contract,
+        values.unitType,
+        values.unitId,
+      );
+      setPendingIncentives([
+        {
+          pendingRelativeReward: reward,
+          pendingRelativeTopUp: topUp,
+          id: '0',
+          key: '0',
+        },
+      ]);
     } catch (error) {
       notifyError('Error on fetching incentives');
       console.error(error);

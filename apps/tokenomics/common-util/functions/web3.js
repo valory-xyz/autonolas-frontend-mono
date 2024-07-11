@@ -1,4 +1,5 @@
 import Web3 from 'web3';
+import { ethers } from 'ethers';
 import {
   DEPOSITORY,
   DISPENSER,
@@ -15,6 +16,7 @@ import {
   getChainId,
   getProvider,
 } from 'common-util/functions/frontend-library';
+import { RPC_URLS } from 'common-util/constants/rpcs';
 
 /**
  * returns the web3 details
@@ -86,5 +88,25 @@ export const getServiceContract = () => {
     SERVICE_REGISTRY.abi,
     ADDRESSES[chainId].service,
   );
+  return contract;
+};
+
+
+/**
+ *
+ * @returns ethers provider for ethereum
+ */
+export const getEthersProviderForEthereum = () => {
+  const provider = new ethers.JsonRpcProvider(RPC_URLS[1]);
+  return provider;
+};
+
+/**
+ * TODO: Remove this function once migrated to hooks
+ * @returns tokenomics ethers contract
+ */
+export const getTokenomicsEthersContract = (address) => {
+  const provider = getEthersProviderForEthereum();
+  const contract = new ethers.Contract(address, TOKENOMICS.abi, provider);
   return contract;
 };
