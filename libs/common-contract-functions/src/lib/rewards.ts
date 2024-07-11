@@ -1,14 +1,10 @@
 import { Contract, Provider, ethers } from 'ethers';
 
+import { rewardsFormatter } from './utils';
+
 const UNIT_TYPES = { COMPONENT: '0', AGENT: '1' } as const;
 const BIG_INT_ZERO = BigInt(0);
 const BIG_INT_HUNDRED = BigInt(100);
-
-const fixTo8DecimalPlaces = (value: number | string) => {
-  const numeralValue = Number(value);
-  if (Number.isNaN(numeralValue)) return '0';
-  return numeralValue > 0 ? numeralValue.toFixed(8) : '0';
-};
 
 const getEpochCounter = async (contract: Contract) => {
   const response = await contract.epochCounter();
@@ -70,7 +66,7 @@ const getMapUnitIncentivesRequest = async ({
   // if the current epoch is not the last epoch, return 0
   if (!isCurrentEpochWithReward) {
     return {
-      pendingRelativeReward: '0.00',
+      pendingRelativeReward: '0.0000',
       pendingRelativeTopUp: '0.00',
     };
   }
@@ -137,8 +133,8 @@ const getMapUnitIncentivesRequest = async ({
   );
 
   return {
-    pendingRelativeReward: fixTo8DecimalPlaces(pendingRelativeTopUpInEth),
-    pendingRelativeTopUp: fixTo8DecimalPlaces(componentTopUpInEth),
+    pendingRelativeReward: rewardsFormatter(BigInt(pendingRelativeTopUpInEth), 4),
+    pendingRelativeTopUp: rewardsFormatter(BigInt(componentTopUpInEth), 2),
   };
 };
 
