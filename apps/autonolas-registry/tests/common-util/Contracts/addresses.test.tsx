@@ -69,7 +69,7 @@ const isLocalChainId = (chainId: string): boolean => {
   );
 };
 
-describe.skip('common-utils/addresses', () => {
+describe('common-utils/addresses', () => {
   it(
     'check contract addresses and ABIs',
     async () => {
@@ -127,7 +127,7 @@ describe.skip('common-utils/addresses', () => {
             const lowLetter =
               localArtifact.contractName.charAt(0).toLowerCase() +
               localArtifact.contractName.slice(1);
-            // Need to stringify and then convert tstringain to access the address field
+            // Need to stringify and then convert then parse to access the address field
             const addressStruct = JSON.stringify(ADDRESSES[chainId]);
             const addressStructJSON = JSON.parse(addressStruct);
             const localAddress = addressStructJSON[lowLetter];
@@ -139,7 +139,7 @@ describe.skip('common-utils/addresses', () => {
     2 * 60 * 1000,
   );
 
-  it('should ensure `safeMultiSend` matches between remote and local sources', async () => {
+  it.skip('should ensure `safeMultiSend` matches between remote and local sources', async () => {
     const remoteResponseRaw = await fetch(
       `${REGISTRIES_SAFE_URL}/multi_send_call_only.json`,
     );
@@ -164,7 +164,7 @@ describe.skip('common-utils/addresses', () => {
     });
   });
 
-  it('should ensure FALLBACK_HANDLER matches between remote and local sources', async () => {
+  it.skip('should ensure FALLBACK_HANDLER matches between remote and local sources', async () => {
     const fallbackHandlerResponse = await fetch(
       `${REGISTRIES_SAFE_URL}/compatibility_fallback_handler.json`,
     );
