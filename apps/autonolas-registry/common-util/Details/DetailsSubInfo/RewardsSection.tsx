@@ -3,11 +3,7 @@ import { Col, Flex, Row } from 'antd';
 import { FC, useEffect, useState } from 'react';
 import { Address } from 'viem';
 
-import {
-  PendingReward,
-  getPendingIncentives,
-  useClaimableIncentives,
-} from 'libs/common-contract-functions/src';
+import { getPendingIncentives, useClaimableIncentives } from 'libs/common-contract-functions/src';
 import { UNICODE_SYMBOLS } from 'libs/util-constants/src/lib/symbols';
 import { TOKENOMICS } from 'libs/util-contracts/src';
 
@@ -33,7 +29,10 @@ type RewardsSectionProps = {
 
 export const RewardsSection: FC<RewardsSectionProps> = ({ ownerAddress, id, type, dataTestId }) => {
   const [isPendingIncentivesLoading, setIsPendingIncentivesLoading] = useState<boolean>(true);
-  const [pendingIncentives, setPendingIncentives] = useState<PendingReward | null>(null);
+  const [pendingIncentives, setPendingIncentives] = useState<{
+    reward: string;
+    topUp: string;
+  } | null>(null);
 
   const tokenomicsUnitType = useTokenomicsUnitType(type);
   const {

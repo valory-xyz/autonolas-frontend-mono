@@ -34,6 +34,17 @@ jest.mock('wagmi', () => ({
   },
 }));
 
+jest.mock('libs/common-contract-functions/src', () => ({
+  useClaimableIncentives: jest.fn().mockReturnValue({
+    reward: '0.85',
+    topUp: '222,777.30',
+  }),
+  getPendingIncentives: jest.fn().mockResolvedValue({
+    reward: '0.95555',
+    topUp: '200,500.65',
+  }),
+}));
+
 jest.mock('common-util/List/IpfsHashGenerationModal/helpers', () => ({
   getIpfsHashHelper: jest.fn(() => mockV1Hash),
 }));
@@ -42,11 +53,9 @@ jest.mock('common-util/Details/utils', () => ({
   checkIfServiceRequiresWhitelisting: jest.fn(() => false),
 }));
 
-jest.mock('components/ListAgents/utils', () => ({
-  getAgentDetails: jest.fn(),
-  getAgentHashes: jest.fn(),
-  getAgentOwner: jest.fn(),
-  getTokenUri: jest.fn(),
+jest.mock('common-util/Contracts', () => ({
+  getTokenomicsEthersContract: () => jest.fn(),
+  getEthersProviderForEthereum: () => jest.fn(),
 }));
 
 jest.mock('common-util/hooks/useHelpers', () => ({
@@ -55,6 +64,13 @@ jest.mock('common-util/hooks/useHelpers', () => ({
 
 jest.mock('common-util/hooks/useSvmConnectivity', () => ({
   useSvmConnectivity: () => svmConnectivityEmptyMock,
+}));
+
+jest.mock('components/ListAgents/utils', () => ({
+  getAgentDetails: jest.fn(),
+  getAgentHashes: jest.fn(),
+  getAgentOwner: jest.fn(),
+  getTokenUri: jest.fn(),
 }));
 
 const dummyDetails = {
@@ -116,6 +132,21 @@ describe('listAgents/details.jsx', () => {
       // NFT image
       const nftImage = getByTestId('nft-image').querySelector('.ant-image-img');
       expect(nftImage.getAttribute('src')).toBe(`${GATEWAY_URL}${mockNftImageHash}`);
+    });
+  });
+
+  it('should display rewards section', async () => {
+    const { getByText } = render(wrapProvider(<AgentDetails />));
+    await waitFor(() => {
+      expect(getByText('Claimable Reward')).toBeInTheDocument();
+      expect(getByText('Claimable Top Up')).toBeInTheDocument();
+      expect(getByText('0.85 ETH')).toBeInTheDocument();
+      expect(getByText('222,777.30 OLAS')).toBeInTheDocument();
+
+      expect(getByText('Pending Reward')).toBeInTheDocument();
+      expect(getByText('Pending Top Up')).toBeInTheDocument();
+      expect(getByText('0.95555 ETH')).toBeInTheDocument();
+      expect(getByText('200,500.65 OLAS')).toBeInTheDocument();
     });
   });
 

@@ -167,14 +167,12 @@ const getMapUnitIncentivesRequest = async ({
   };
 };
 
-export type PendingReward = { reward: string; topUp: string };
-
 export const getPendingIncentives = async (
   provider: Provider,
   contract: Contract,
   unitType: string,
   unitId: string,
-): Promise<PendingReward> => {
+): Promise<{ reward: string; topUp: string }> => {
   const { pendingRelativeReward, pendingRelativeTopUp } = await getMapUnitIncentivesRequest({
     provider,
     contract,

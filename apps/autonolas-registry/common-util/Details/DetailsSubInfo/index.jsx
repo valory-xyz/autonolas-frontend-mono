@@ -5,10 +5,6 @@ import { useEnsName } from 'wagmi';
 
 import { NA } from '@autonolas/frontend-library';
 
-import { TOKENOMICS } from 'libs/util-contracts/src/lib/abiAndAddresses/tokenomics';
-
-import { getTokenomicsContract } from 'common-util/Contracts';
-
 import {
   DEFAULT_SERVICE_CREATION_ETH_TOKEN_ZEROS,
   HASH_DETAILS_STATE,
@@ -61,9 +57,6 @@ export const DetailsSubInfo = ({
     useOperatorWhitelistComponent(id);
 
   const tokenomicsUnitType = useTokenomicsUnitType(type);
-
-  const tokenomicsContract =
-    type === NAV_TYPES.SERVICE || isSvm ? null : getTokenomicsContract(TOKENOMICS.addresses[1]);
 
   const viewHashAndCodeButtons = (
     <ViewHashAndCode
@@ -267,10 +260,9 @@ export const DetailsSubInfo = ({
     if (!navTypesForRewards.includes(type)) return;
     if (!ownerAddress) return;
     if (!id) return;
-    if (!tokenomicsContract) return;
 
     setCanShowRewards(true);
-  }, [id, ownerAddress, tokenomicsUnitType, type, tokenomicsContract, chainId]);
+  }, [id, ownerAddress, tokenomicsUnitType, type, chainId]);
 
   return <SectionContainer>{detailsSections}</SectionContainer>;
 };
