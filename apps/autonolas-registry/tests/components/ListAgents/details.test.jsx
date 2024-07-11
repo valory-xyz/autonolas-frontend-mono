@@ -53,11 +53,6 @@ jest.mock('common-util/Details/utils', () => ({
   checkIfServiceRequiresWhitelisting: jest.fn(() => false),
 }));
 
-jest.mock('common-util/Contracts', () => ({
-  getTokenomicsEthersContract: () => jest.fn(),
-  getEthersProviderForEthereum: () => jest.fn(),
-}));
-
 jest.mock('common-util/hooks/useHelpers', () => ({
   useHelpers: () => useHelpersEvmMock,
 }));

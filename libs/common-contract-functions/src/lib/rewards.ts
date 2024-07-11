@@ -1,9 +1,8 @@
 import { Contract, Provider, ethers } from 'ethers';
 
-const UNIT_TYPES = {
-  COMPONENT: '0',
-  AGENT: '1',
-};
+const UNIT_TYPES = { COMPONENT: '0', AGENT: '1' } as const;
+const BIG_INT_ZERO = BigInt(0);
+const BIG_INT_HUNDRED = BigInt(100);
 
 const fixTo8DecimalPlaces = (value: number | string) => {
   const numeralValue = Number(value);
@@ -19,26 +18,20 @@ const getEpochCounter = async (contract: Contract) => {
 const getEpochDetails = async (provider: Provider, contract: Contract) => {
   const epCounter = await getEpochCounter(contract);
 
+  // epoch tokenomics
   const epTokenomics = await contract.mapEpochTokenomics(Number(epCounter) - 1);
 
-  const response = await contract.epochLen();
-  const epochLen = parseInt(response, 10);
+  // epoch length
+  const epochLenInStr = await contract.epochLen();
+  const epochLen = parseInt(epochLenInStr, 10);
 
+  // get the block number and timestamp
   const blockNumber = await provider.getBlockNumber();
   const blockTimestamp = (await provider.getBlock(blockNumber))?.timestamp || 0;
   const timeDiff = blockTimestamp - epTokenomics.endTime;
 
   return { timeDiff, epochLen };
 };
-
-type GetUnitPointReqArgs = { contract: Contract; lastPoint: number; num: number };
-const getUnitPointReq = async ({ contract, lastPoint, num }: GetUnitPointReqArgs) => {
-  const response = await contract.getUnitPoint(lastPoint, num);
-  return response;
-};
-
-const BIG_INT_ZERO = BigInt(0);
-const BIG_INT_HUNDRED = BigInt(100);
 
 type MapUnitIncentivesRequestArgs = {
   provider: Provider;
@@ -55,20 +48,9 @@ const getMapUnitIncentivesRequest = async ({
 }: MapUnitIncentivesRequestArgs) => {
   const currentEpochCounter = Number(await getEpochCounter(contract));
 
-  console.log({ contract, currentEpochCounter });
-
   // Get the unit points of the last epoch
-  const componentInfo = await getUnitPointReq({
-    contract,
-    lastPoint: currentEpochCounter,
-    num: 0,
-  });
-
-  const agentInfo = await getUnitPointReq({
-    contract,
-    lastPoint: currentEpochCounter,
-    num: 1,
-  });
+  const componentInfo = await contract.getUnitPoint(currentEpochCounter, 0);
+  const agentInfo = await contract.getUnitPoint(currentEpochCounter, 1);
 
   const response = await contract.mapUnitIncentives(unitType, unitId);
   // Struct for component / agent incentive balances
@@ -84,13 +66,6 @@ const getMapUnitIncentivesRequest = async ({
   const rewardInBn = ethers.toBigInt(pendingRelativeReward);
   const isCurrentEpochWithReward =
     currentEpochCounter === Number(lastEpoch) && rewardInBn > BIG_INT_ZERO;
-
-  console.log({
-    isCurrentEpochWithReward,
-    currentEpochCounter,
-    lastEpoch: Number(lastEpoch),
-    rewardInBn,
-  });
 
   // if the current epoch is not the last epoch, return 0
   if (!isCurrentEpochWithReward) {
@@ -167,6 +142,8 @@ const getMapUnitIncentivesRequest = async ({
   };
 };
 
+// TODO: unable to import TOKENOMICS from util-contracts as of now
+// once the import is fixed, remove provider and contract from the function signature
 export const getPendingIncentives = async (
   provider: Provider,
   contract: Contract,
@@ -179,8 +156,6 @@ export const getPendingIncentives = async (
     unitType,
     unitId,
   });
-
-  console.log({ pendingRelativeReward, pendingRelativeTopUp });
 
   return {
     reward: pendingRelativeReward,
