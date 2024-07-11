@@ -1,4 +1,3 @@
-// TODO: figure out how to import TOKENOMICS from util-contracts
 import { isNumber } from 'lodash';
 import { Address, formatEther } from 'viem';
 import { mainnet } from 'viem/chains';
@@ -11,6 +10,7 @@ const rewardsFormatter = (value: bigint, dp: number = 4) =>
   });
 
 export const useClaimableIncentives = (
+  // TODO: figure out how to import TOKENOMICS from util-contracts
   contractAddress: Address,
   contractAbi: readonly unknown[],
   ownerAddress: Address,

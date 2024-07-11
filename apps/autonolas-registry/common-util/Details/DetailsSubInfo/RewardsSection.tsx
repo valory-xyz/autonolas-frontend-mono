@@ -1,4 +1,3 @@
-// import { useClaimableIncentives } from '@autonolas-frontend-mono/common-contract-functions';
 import { Col, Flex, Row } from 'antd';
 import { FC, useEffect, useState } from 'react';
 import { Address } from 'viem';
