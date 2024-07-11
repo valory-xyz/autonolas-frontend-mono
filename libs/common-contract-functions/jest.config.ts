@@ -8,4 +8,5 @@ export default {
   },
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx'],
   coverageDirectory: '../../coverage/libs/common-contract-functions',
+  setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
 };
