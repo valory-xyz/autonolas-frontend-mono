@@ -59,8 +59,8 @@ const WhatIsOlasGovern = () => (
   <>
     <Title level={3}>What is Olas Govern?</Title>
     <Paragraph className="mb-8">
-      <b>Olas Govern</b> is a web application designed for Olas DAO members to streamline governance
-      operations. Its core functionality comes down to two main features:
+      The Olas Govern app is a web application designed for Olas DAO members to streamline
+      governance operations. Its core functionality comes down to two main features:
     </Paragraph>
     <ul className="m-0">
       <li className="mb-8">
@@ -86,11 +86,6 @@ const DirectOlasEmissions = () => (
         official whitepaper {UNICODE_SYMBOLS.EXTERNAL_LINK}
       </a>
       .
-    </Paragraph>
-    <Paragraph>
-      The DAO may choose to invest into autonomous services owned by anyone, for example aligned or
-      collaborating ecosystem builders. Additionally, the DAO can direct OLAS emissions to
-      autonomous services it owns (Protocol-Owned Services, or PoSes).
     </Paragraph>
     <Paragraph className="mb-0">
       Here are three simple steps that explain how governors can use Olas Govern to direct OLAS
@@ -124,7 +119,7 @@ const Step1 = () => (
       emissions coming from the Olas protocol to the desired staking contracts.
     </Paragraph>
     <Paragraph>
-      Agent operators can earn staking rewards by operating active agents within autonomous services
+      Agent operators can earn staking rewards by operating active agents within agent economies
       participating in the staking programs.
     </Paragraph>
     <Paragraph>
@@ -140,13 +135,20 @@ const Step1 = () => (
 
 const Step2 = () => (
   <>
-    <Image
-      src={'/images/docs/step2.png'}
-      width={CONTENT_MAX_WIDTH}
-      height={292}
-      alt="Fig 2"
-      className="mb-24"
-    />
+    <figure className="m-0 mb-24">
+      <Image
+        src={'/images/docs/step2.png'}
+        width={CONTENT_MAX_WIDTH}
+        height={292}
+        alt="Fig 2"
+        className="mb-12"
+      />
+      <figcaption className="text-center">
+        <Text type="secondary">
+          Fig 2. Allocating voting power directs OLAS emissions to different staking contracts
+        </Text>
+      </figcaption>
+    </figure>
     <Tag style={TAG_STYLE}>Step 2</Tag>
     <Title level={4} className="mt-16">
       Allocate your voting power to different staking contracts
@@ -165,13 +167,18 @@ const Step2 = () => (
 
 const Step3 = () => (
   <>
-    <Image
-      src={'/images/docs/step3.png'}
-      width={CONTENT_MAX_WIDTH}
-      height={316}
-      alt="Fig 2"
-      className="mb-24"
-    />
+    <figure className="m-0 mb-24">
+      <Image
+        src={'/images/docs/step3.png'}
+        width={CONTENT_MAX_WIDTH}
+        height={316}
+        alt="Fig 3"
+        className="mb-12"
+      />
+      <figcaption className="text-center">
+        <Text type="secondary">Fig 3. Allocate your voting power with the Olas Govern app</Text>
+      </figcaption>
+    </figure>
     <Tag style={TAG_STYLE}>Step 3</Tag>
     <Title level={4} className="mt-16">
       Browse contracts, add them to your list and set your vote weights
