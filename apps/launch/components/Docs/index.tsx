@@ -44,7 +44,7 @@ const HeroSection = () => (
   <Hero>
     <Flex align="center" vertical gap={16} className="mb-24">
       <Title className="m-0">Docs</Title>
-      <Paragraph type="secondary">Get agents reliably doing work for your organisation</Paragraph>
+      <Paragraph type="secondary">Get agents reliably doing work for your organization</Paragraph>
     </Flex>
     <Image
       src={'/images/docs/header.png'}
@@ -61,8 +61,8 @@ const MyStakingContracts = () => (
     <Title level={3}>My staking contracts</Title>
     <Paragraph className="mb-8">
       The Olas Launch app allows anyone to launch staking contracts. Staking contracts implement the
-      mechanism to reward agents actively working towards KPIs defined in a specific staking
-      contract. You can learn more about the mechanism in the{' '}
+      mechanism to reward agents actively working towards KPIs. You can learn more about the
+      mechanism in the{' '}
       <a href="https://staking.olas.network/poaa-whitepaper.pdf" target="_blank">
         official whitepaper {UNICODE_SYMBOLS.EXTERNAL_LINK}
       </a>
@@ -75,7 +75,7 @@ const MyStakingContracts = () => (
         Nominate staking contracts to make them eligible to receive incentives from the Olas
         protocol.
       </li>
-      <li>Track staking contracts performance.</li>
+      <li>Track staking contract performance.</li>
     </ul>
     <Paragraph className="mb-0">
       Here are three simple steps that explain how to create staking contracts and get agents to do
@@ -91,21 +91,19 @@ const Step1 = () => (
       Support different parts of the Olas agent economy
     </Title>
     <Paragraph>
-      The Launch app allows anyone (from individuals to companies or other DAOs) to commission
-      autonomous services aligned with their goals, defining success via KPIs, and have a chance at
-      earning emissions from the Olas protocol.
+      The Launch app allows anyone (from individuals to companies or other DAOs) to commission agent
+      activity aligned with their goals, defining success via KPIs, and have a chance at attracting
+      incentives from the Olas protocol.
     </Paragraph>
     <Paragraph>
-      Any user can create a staking contract based on specific configurations, also known as
-      templates. Currently, the app only offers one template. However, more templates will be
-      available soon, and this process is regulated by the Olas DAO.
+      Any user can create a staking contract based on specific configurations, known as templates.
     </Paragraph>
     <Paragraph>
       The flexibility of staking contracts lies in the variability of their activity check, which
       can be customized to suit the specific requirements of different agents and agent economies.
-      For instance, for the Trader agent, activity can be determined by the number of Mech requests
-      made on-chain, while for the Market Creator agent, activity could be assessed based on the
-      number of markets created within a given timeframe.
+      For instance, for the prediction Trader, activity can be determined by the number of Mech
+      requests made on-chain, while for the Market Creator agent, activity could be assessed based
+      on the number of markets created within a given timeframe.
     </Paragraph>
     <Paragraph className="mb-0">
       Staking contracts can only be configured during deployment, implying immutability once
@@ -138,18 +136,8 @@ const Step2 = () => (
     <Paragraph>
       Each staking contract should be added to the voting process on Govern to make it eligible for
       staking incentives from the Olas protocol. This process is called nomination, and it allows
-      the Olas DAO to bootstrap agent economies at scale through targeted OLAS emissions. The DAO
-      may choose to invest in autonomous services owned by anyone, for example, aligned or
-      collaborating ecosystem builders.
+      the Olas DAO to bootstrap agent economies at scale through targeted OLAS emissions.
     </Paragraph>
-    <ul className="m-0">
-      <li className="mb-8">Create staking contracts on supported chains.</li>
-      <li className="mb-8">
-        Nominate staking contracts to make them eligible to receive incentives from the Olas
-        protocol.
-      </li>
-      <li>Track staking contracts performance.</li>
-    </ul>
   </>
 );
 
@@ -175,10 +163,10 @@ const Step3 = () => (
       Promote contract to community
     </Title>
     <Paragraph className="mb-0">
-      After successful nomination, you should promote your staking contracts to Olas DAO members.
-      DAO members then vote for the most promising staking contracts, making them attractive to
-      agents and operators. The more voting weight your contract has, the better the rewards it
-      receives.
+      After successful nomination, you should promote your staking contracts to veOLAS holders.
+      veOLAS holders then vote for the most promising staking contracts, making them attractive to
+      agents and operators. The more voting weight your contract has, the more rewards it receives,
+      and the more agents will be incentivized to fulfil your activity goals.
     </Paragraph>
   </>
 );
