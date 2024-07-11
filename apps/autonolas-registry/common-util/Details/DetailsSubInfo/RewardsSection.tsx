@@ -13,7 +13,7 @@ import { useTokenomicsUnitType } from './hooks';
 
 type RewardsColumnProps = { title: string; statistic: null | string; loading?: boolean };
 
-const RewardColumn: FC<RewardsColumnProps> = ({ title, statistic, loading }) => (
+const RewardColumn = ({ title, statistic, loading }: RewardsColumnProps) => (
   <Col span={24} xl={12}>
     <RewardsStatistic title={title} value={statistic || '--'} loading={!!loading} />
   </Col>

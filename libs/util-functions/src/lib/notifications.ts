@@ -8,7 +8,7 @@ export const notifySuccess = (
 ) => notification.success({ message, description, key });
 
 export const notifyError = (
-  message: ReactNode = 'Some error ocurred',
+  message: ReactNode = 'Some error occurred',
   description: ReactNode = '',
   key?: string
 ) => {
@@ -16,7 +16,7 @@ export const notifyError = (
 };
 
 export const notifyWarning = (
-  message: ReactNode = 'Some error ocurred',
+  message: ReactNode = 'Some error occurred',
   description: ReactNode = '',
   key?: string
 ) => notification.warning({ message, description, key });
