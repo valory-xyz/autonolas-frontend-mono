@@ -7,24 +7,26 @@ const BIG_INT_ZERO = BigInt(0);
 const BIG_INT_HUNDRED = BigInt(100);
 
 const getEpochCounter = async (contract: Contract) => {
-  const response = await contract.epochCounter();
-  return parseInt(response, 10);
+  const response: bigint = await contract.epochCounter();
+  return response;
 };
 
 const getEpochDetails = async (provider: Provider, contract: Contract) => {
   const epCounter = await getEpochCounter(contract);
 
   // epoch tokenomics
-  const epTokenomics = await contract.mapEpochTokenomics(Number(epCounter) - 1);
+  const epTokenomics: { endTime: bigint } = await contract.mapEpochTokenomics(
+    epCounter - BigInt(1),
+  );
 
   // epoch length
-  const epochLenInStr = await contract.epochLen();
-  const epochLen = parseInt(epochLenInStr, 10);
+  const epochLen: bigint = await contract.epochLen();
 
   // get the block number and timestamp
   const blockNumber = await provider.getBlockNumber();
+
   const blockTimestamp = (await provider.getBlock(blockNumber))?.timestamp || 0;
-  const timeDiff = blockTimestamp - epTokenomics.endTime;
+  const timeDiff = ethers.toBigInt(blockTimestamp) - epTokenomics.endTime;
 
   return { timeDiff, epochLen };
 };
@@ -42,13 +44,29 @@ const getMapUnitIncentivesRequest = async ({
   unitType,
   unitId,
 }: MapUnitIncentivesRequestArgs) => {
-  const currentEpochCounter = Number(await getEpochCounter(contract));
+  const currentEpochCounter = await getEpochCounter(contract);
 
   // Get the unit points of the last epoch
-  const componentInfo = await contract.getUnitPoint(currentEpochCounter, 0);
-  const agentInfo = await contract.getUnitPoint(currentEpochCounter, 1);
+  const componentInfo: {
+    rewardUnitFraction: bigint;
+    topUpUnitFraction: bigint;
+    sumUnitTopUpsOLAS: bigint;
+  } = await contract.getUnitPoint(currentEpochCounter, 0);
+  const agentInfo: {
+    rewardUnitFraction: bigint;
+    topUpUnitFraction: bigint;
+    sumUnitTopUpsOLAS: bigint;
+  } = await contract.getUnitPoint(currentEpochCounter, 1);
 
-  const response = await contract.mapUnitIncentives(unitType, unitId);
+  const {
+    pendingRelativeReward,
+    pendingRelativeTopUp,
+    lastEpoch,
+  }: {
+    pendingRelativeReward: bigint;
+    pendingRelativeTopUp: bigint;
+    lastEpoch: bigint;
+  } = await contract.mapUnitIncentives(unitType, unitId);
   // Struct for component / agent incentive balances
   // struct IncentiveBalances {
   //   uint96 reward;                // Reward in ETH [0]
@@ -57,11 +75,10 @@ const getMapUnitIncentivesRequest = async ({
   //   uint96 pendingRelativeTopUp;  // Pending relative top-up [3]
   //   uint32 lastEpoch;             // Last epoch number the information was updated [4]
   // }
-  const { pendingRelativeReward, pendingRelativeTopUp, lastEpoch } = response;
 
   const rewardInBn = ethers.toBigInt(pendingRelativeReward);
   const isCurrentEpochWithReward =
-    currentEpochCounter === Number(lastEpoch) && rewardInBn > BIG_INT_ZERO;
+    currentEpochCounter === lastEpoch && pendingRelativeReward > BIG_INT_ZERO;
 
   // if the current epoch is not the last epoch, return 0
   if (!isCurrentEpochWithReward) {
@@ -87,54 +104,36 @@ const getMapUnitIncentivesRequest = async ({
    * for unitType agent(0) & component(1),
    * the below calculation is done to get the reward and topup
    */
-  const componentReward = (
-    (rewardInBn * ethers.toBigInt(cRewardFraction)) /
-    BIG_INT_HUNDRED
-  ).toString();
-  const agentReward = (
-    (rewardInBn * ethers.toBigInt(aRewardFraction)) /
-    BIG_INT_HUNDRED
-  ).toString();
+  const componentReward = (rewardInBn * cRewardFraction) / BIG_INT_HUNDRED;
+  const agentReward = (rewardInBn * aRewardFraction) / BIG_INT_HUNDRED;
 
-  let totalIncentives = ethers.toBigInt(pendingRelativeTopUp);
-  let componentTopUp = '0';
-  let agentPendingTopUp = '0';
+  let totalIncentives = pendingRelativeTopUp;
+  let componentTopUp = BigInt(0);
+  let agentPendingTopUp = BigInt(0);
 
-  if (pendingRelativeTopUp > 0) {
-    const inflationPerSecond = await contract.inflationPerSecond();
-    const inflationPerSecondInBn = ethers.toBigInt(inflationPerSecond);
+  if (pendingRelativeTopUp > BIG_INT_ZERO) {
+    const inflationPerSecond: bigint = await contract.inflationPerSecond();
 
     const { timeDiff, epochLen } = await getEpochDetails(provider, contract);
-    const actualEpochTimeLength = timeDiff > epochLen ? timeDiff : epochLen;
+    const epochLength = timeDiff > epochLen ? timeDiff : epochLen;
 
-    const epochLength = ethers.toBigInt(actualEpochTimeLength);
-
-    const totalTopUps = inflationPerSecondInBn * epochLength;
+    const totalTopUps = inflationPerSecond * epochLength;
     totalIncentives = totalIncentives * totalTopUps;
 
-    const componentSumIncentivesInBn = ethers.toBigInt(cSumUnitTopUpsOLAS) * BIG_INT_HUNDRED;
-    const agentSumIncentivesInBn = ethers.toBigInt(aSumUnitTopUpsOLAS) * BIG_INT_HUNDRED;
+    const componentSumIncentivesInBn = cSumUnitTopUpsOLAS * BIG_INT_HUNDRED;
+    const agentSumIncentivesInBn = aSumUnitTopUpsOLAS * BIG_INT_HUNDRED;
 
-    componentTopUp = (
-      (totalIncentives * ethers.toBigInt(cTopupFraction)) /
-      componentSumIncentivesInBn
-    ).toString();
-    agentPendingTopUp = (
-      (totalIncentives * ethers.toBigInt(aTopupFraction)) /
-      agentSumIncentivesInBn
-    ).toString();
+    componentTopUp = (totalIncentives * cTopupFraction) / componentSumIncentivesInBn;
+    agentPendingTopUp = (totalIncentives * aTopupFraction) / agentSumIncentivesInBn;
   }
 
-  const pendingRelativeTopUpInEth = ethers.formatEther(
-    unitType === UNIT_TYPES.COMPONENT ? componentReward : agentReward,
-  );
-  const componentTopUpInEth = ethers.formatEther(
-    unitType === UNIT_TYPES.COMPONENT ? componentTopUp : agentPendingTopUp,
-  );
+  const isComponent = unitType === UNIT_TYPES.COMPONENT;
+  const pendingRelativeTopUpInEth = isComponent ? componentReward : agentReward;
+  const componentTopUpInEth = isComponent ? componentTopUp : agentPendingTopUp;
 
   return {
-    pendingRelativeReward: rewardsFormatter(BigInt(pendingRelativeTopUpInEth), 4),
-    pendingRelativeTopUp: rewardsFormatter(BigInt(componentTopUpInEth), 2),
+    pendingRelativeReward: rewardsFormatter(pendingRelativeTopUpInEth, 4),
+    pendingRelativeTopUp: rewardsFormatter(componentTopUpInEth, 2),
   };
 };
 
