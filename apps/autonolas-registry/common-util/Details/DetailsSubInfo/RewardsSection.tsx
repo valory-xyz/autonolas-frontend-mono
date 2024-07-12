@@ -57,7 +57,7 @@ export const RewardsSection: FC<RewardsSectionProps> = ({ ownerAddress, id, type
   }, [ownerAddress, id, tokenomicsUnitType]);
 
   return (
-    <Flex gap={4} vertical data-testid={dataTestId}>
+    <Flex gap={16} vertical className="mt-12" data-testid={dataTestId}>
       <Flex vertical gap={4}>
         <Row>
           <RewardColumn
@@ -72,7 +72,7 @@ export const RewardsSection: FC<RewardsSectionProps> = ({ ownerAddress, id, type
         </Row>
       </Flex>
 
-      <Flex vertical gap={4}>
+      <Flex vertical gap={12}>
         <Row>
           <RewardColumn
             title="Pending Reward"
