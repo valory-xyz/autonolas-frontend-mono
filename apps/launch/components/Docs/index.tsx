@@ -3,10 +3,15 @@ import Image from 'next/image';
 import Link from 'next/link';
 import styled from 'styled-components';
 
+
+
 import { COLOR } from 'libs/ui-theme/src';
 import { UNICODE_SYMBOLS } from 'libs/util-constants/src';
 
+
+
 import { PATHS, YOUR_OWN_PATH } from 'common-util/constants/paths';
+
 
 const { Paragraph, Title, Text } = Typography;
 
@@ -86,6 +91,20 @@ const MyStakingContracts = () => (
 
 const Step1 = () => (
   <>
+    <figure className="m-0 mb-24">
+      <Image
+        src={'/images/docs/step1.png'}
+        width={CONTENT_MAX_WIDTH}
+        height={253}
+        alt="Fig 2"
+        className="mb-12"
+      />
+      <figcaption className="text-center">
+        <Text type="secondary">
+          Fig 1. Launcher user can create staking contract based on a specific configuration
+        </Text>
+      </figcaption>
+    </figure>
     <Tag style={TAG_STYLE}>Step 1</Tag>
     <Title level={4} className="mt-16">
       Support different parts of the Olas agent economy
