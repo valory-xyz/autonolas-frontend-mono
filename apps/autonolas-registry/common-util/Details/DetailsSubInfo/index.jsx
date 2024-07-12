@@ -5,15 +5,10 @@ import { useEnsName } from 'wagmi';
 
 import { NA } from '@autonolas/frontend-library';
 
-import { TOKENOMICS } from 'libs/util-contracts/src/lib/abiAndAddresses/tokenomics';
-
-import { getTokenomicsContract } from 'common-util/Contracts';
-
 import {
   DEFAULT_SERVICE_CREATION_ETH_TOKEN_ZEROS,
   HASH_DETAILS_STATE,
   NAV_TYPES,
-  TOKENOMICS_UNIT_TYPES,
 } from '../../../util/constants';
 import { useHelpers } from '../../hooks';
 import { useMetadata } from '../../hooks/useMetadata';
@@ -25,6 +20,7 @@ import { getTokenDetailsRequest } from '../utils';
 import { RewardsSection } from './RewardsSection';
 import { ServiceStatus } from './ServiceStatus';
 import { ViewHashAndCode } from './ViewHashAndCode';
+import { useTokenomicsUnitType } from './hooks';
 
 const navTypesForRewards = [NAV_TYPES.COMPONENT, NAV_TYPES.AGENT];
 
@@ -49,7 +45,7 @@ export const DetailsSubInfo = ({
 }) => {
   const { isSvm, doesNetworkHaveValidServiceManagerToken, chainId } = useHelpers();
   const [tokenAddress, setTokenAddress] = useState(null);
-  const [rewards, setRewards] = useState(null);
+  const [canShowRewards, setCanShowRewards] = useState(null);
 
   const { data: ownerEnsName } = useEnsName({ address: ownerAddress, chainId: 1 });
 
@@ -60,14 +56,7 @@ export const DetailsSubInfo = ({
   const { operatorWhitelistTitle, operatorWhitelistValue, operatorStatusValue } =
     useOperatorWhitelistComponent(id);
 
-  const tokenomicsUnitType = useMemo(() => {
-    if (type === NAV_TYPES.COMPONENT) return TOKENOMICS_UNIT_TYPES.COMPONENT;
-    if (type === NAV_TYPES.AGENT) return TOKENOMICS_UNIT_TYPES.AGENT;
-    return;
-  }, [type]);
-
-  const tokenomicsContract =
-    type === NAV_TYPES.SERVICE || isSvm ? null : getTokenomicsContract(TOKENOMICS.addresses[1]);
+  const tokenomicsUnitType = useTokenomicsUnitType(type);
 
   const viewHashAndCodeButtons = (
     <ViewHashAndCode
@@ -101,18 +90,11 @@ export const DetailsSubInfo = ({
       });
     }
 
-    details.push({
-      title: 'Owner Address',
-      dataTestId: 'owner-address',
-      value: ownerAddress,
-    });
+    details.push({ title: 'Owner Address', dataTestId: 'owner-address', value: ownerAddress });
 
-    ownerEnsName &&
-      details.push({
-        title: 'Owner ENS Name',
-        dataTestId: 'owner-ens-name',
-        value: ownerEnsName,
-      });
+    if (ownerEnsName) {
+      details.push({ title: 'Owner ENS Name', dataTestId: 'owner-ens-name', value: ownerEnsName });
+    }
 
     return details;
   }, [description, metadataLoadState, ownerAddress, ownerEnsName, version]);
@@ -151,7 +133,9 @@ export const DetailsSubInfo = ({
         ),
       },
       ...commonDetails,
-      ...(rewards ? [{ title: 'Rewards', dataTestId: 'details-rewards', value: rewards }] : []),
+      ...(canShowRewards
+        ? [{ title: 'Rewards', dataTestId: 'details-rewards', value: canShowRewards }]
+        : []),
       {
         title: 'Component Dependencies',
         dataTestId: 'details-dependency',
@@ -228,8 +212,6 @@ export const DetailsSubInfo = ({
   const detailsSections = useMemo(
     () =>
       detailsValues.map(({ title, value, dataTestId }, index) => {
-        if (dataTestId === 'details-rewards' && !rewards) return null;
-
         const isRewards = dataTestId === 'details-rewards';
 
         return (
@@ -237,14 +219,19 @@ export const DetailsSubInfo = ({
             {title && <SubTitle strong>{title}</SubTitle>}
             {value &&
               (isRewards ? (
-                <RewardsSection {...value} data-testid={dataTestId} />
+                <RewardsSection
+                  id={id}
+                  type={type}
+                  ownerAddress={ownerAddress}
+                  dataTestId={dataTestId}
+                />
               ) : (
                 <Info data-testid={dataTestId}>{value}</Info>
               ))}
           </EachSection>
         );
       }),
-    [detailsValues, rewards, type],
+    [detailsValues, ownerAddress, id, type],
   );
 
   // get token address for service
@@ -270,21 +257,13 @@ export const DetailsSubInfo = ({
   useEffect(() => {
     if (chainId !== 1) return;
 
-    if (rewards) return;
     if (!navTypesForRewards.includes(type)) return;
     if (!ownerAddress) return;
     if (!id) return;
 
-    tokenomicsContract?.methods
-      .getOwnerIncentives(ownerAddress, [tokenomicsUnitType], [id])
-      .call()
-      .then(({ reward, topUp }) => {
-        setRewards({
-          reward: reward,
-          topUp: topUp,
-        });
-      });
-  }, [rewards, id, ownerAddress, tokenomicsUnitType, type, tokenomicsContract, chainId]);
+    setCanShowRewards(true);
+  }, [id, ownerAddress, tokenomicsUnitType, type, chainId]);
+
   return <SectionContainer>{detailsSections}</SectionContainer>;
 };
 

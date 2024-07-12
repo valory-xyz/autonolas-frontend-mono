@@ -1,22 +1,23 @@
 /* eslint-disable jest/no-conditional-expect */
 import fetch from 'node-fetch';
+
 import {
-  COMPONENT_REGISTRY_CONTRACT,
   AGENT_REGISTRY_CONTRACT,
+  COMPONENT_REGISTRY_CONTRACT,
+  OPERATOR_WHITELIST_CONTRACT,
   REGISTRIES_MANAGER_CONTRACT,
-  SERVICE_REGISTRY_CONTRACT,
-  SERVICE_REGISTRY_TOKEN_UTILITY_CONTRACT,
-  SERVICE_REGISTRY_L2,
   SERVICE_MANAGER_CONTRACT,
   SERVICE_MANAGER_TOKEN_CONTRACT,
-  OPERATOR_WHITELIST_CONTRACT,
+  SERVICE_REGISTRY_CONTRACT,
+  SERVICE_REGISTRY_L2,
+  SERVICE_REGISTRY_TOKEN_UTILITY_CONTRACT,
 } from '../../../common-util/AbiAndAddresses';
 import {
   ADDRESSES,
-  multisigAddresses,
-  multisigSameAddresses,
   ChainIds,
   FALLBACK_HANDLER,
+  multisigAddresses,
+  multisigSameAddresses,
   safeMultiSend,
 } from '../../../common-util/Contracts/addresses';
 import {
@@ -55,18 +56,13 @@ type Chain = {
 
 const chainIds = Object.keys(ADDRESSES);
 
-const isValidKey = (
-  object: object,
-  value: string,
-): value is keyof typeof object => {
+const isValidKey = (object: object, value: string): value is keyof typeof object => {
   return Object.keys(object).includes(value);
 };
 
 const isLocalChainId = (chainId: string): boolean => {
   const id = Number(chainId);
-  return [LOCAL_FORK_ID, LOCAL_FORK_ID_GNOSIS, LOCAL_FORK_ID_POLYGON].includes(
-    id,
-  );
+  return [LOCAL_FORK_ID, LOCAL_FORK_ID_GNOSIS, LOCAL_FORK_ID_POLYGON].includes(id);
 };
 
 describe('common-utils/addresses', () => {
@@ -75,9 +71,7 @@ describe('common-utils/addresses', () => {
     async () => {
       // Registries repository
       // Fetch the actual config
-      const response = await fetch(
-        `${REGISTRIES_REPO_URL}docs/configuration.json`,
-      );
+      const response = await fetch(`${REGISTRIES_REPO_URL}docs/configuration.json`);
       const parsedConfig: Chain[] = await response.json();
 
       // Loop over chains
@@ -98,16 +92,12 @@ describe('common-utils/addresses', () => {
           // for (let k = 0; k < LOCAL_ARTIFACTS.length; k += 1) {
           if (currentContract.name === 'GnosisSafeMultisig') {
             // Check for the GnosisSafeMultisig address
-            const multisigAddressesChainId =
-              chainId as keyof typeof multisigAddresses;
+            const multisigAddressesChainId = chainId as keyof typeof multisigAddresses;
 
-            expect(currentContract.address).toBe(
-              multisigAddresses[multisigAddressesChainId][0],
-            );
+            expect(currentContract.address).toBe(multisigAddresses[multisigAddressesChainId][0]);
           } else if (currentContract.name === 'GnosisSafeSameAddressMultisig') {
             // Check for the GnosisSafeSameAddressMultisig address
-            const multisigSameAddressesChainId =
-              chainId as keyof typeof multisigSameAddresses;
+            const multisigSameAddressesChainId = chainId as keyof typeof multisigSameAddresses;
 
             expect(currentContract.address).toBe(
               multisigSameAddresses[multisigSameAddressesChainId][0],
@@ -127,7 +117,7 @@ describe('common-utils/addresses', () => {
             const lowLetter =
               localArtifact.contractName.charAt(0).toLowerCase() +
               localArtifact.contractName.slice(1);
-            // Need to stringify and then convert tstringain to access the address field
+            // Need to stringify and then convert then parse to access the address field
             const addressStruct = JSON.stringify(ADDRESSES[chainId]);
             const addressStructJSON = JSON.parse(addressStruct);
             const localAddress = addressStructJSON[lowLetter];
@@ -140,12 +130,10 @@ describe('common-utils/addresses', () => {
   );
 
   it('should ensure `safeMultiSend` matches between remote and local sources', async () => {
-    const remoteResponseRaw = await fetch(
-      `${REGISTRIES_SAFE_URL}/multi_send_call_only.json`,
-    );
-    const remoteResponse = await remoteResponseRaw.json();
+    const remoteResponseRaw = await fetch(`${REGISTRIES_SAFE_URL}/multi_send_call_only.json`);
+    const fallbackHandler = await remoteResponseRaw.json();
 
-    if (!remoteResponse.networkAddresses) {
+    if (!fallbackHandler.networkAddresses) {
       throw new Error(`Invalid ${name} remoteResponse`);
     }
 
@@ -157,7 +145,16 @@ describe('common-utils/addresses', () => {
       // no need to check local chainIds
       if (isLocalChainId(chainId)) return;
 
-      const remoteMultisigAddress = remoteResponse.networkAddresses[chainId];
+      const remoteFallbackHandlerAddressKey = fallbackHandler.networkAddresses[chainId];
+
+      // could be an array or a string
+      // eg. 'canonical' or 'eip155' or ['eip155', 'canonical']
+      const keyName = Array.isArray(remoteFallbackHandlerAddressKey)
+        ? remoteFallbackHandlerAddressKey[0]
+        : remoteFallbackHandlerAddressKey;
+
+      // fetch the remote fallback handler address from `deployments` dictionary
+      const { address: remoteMultisigAddress } = fallbackHandler.deployments[keyName];
       const localMultisigAddress = safeMultiSend[chainId][0];
 
       expect(remoteMultisigAddress).toBe(localMultisigAddress);
@@ -182,11 +179,20 @@ describe('common-utils/addresses', () => {
       // no need to check local chainIds
       if (isLocalChainId(chainId)) return;
 
+      const remoteFallbackHandlerAddressKey = fallbackHandler.networkAddresses[chainId];
+
+      // could be an array or a string
+      // eg. 'canonical' or 'eip155' or ['eip155', 'canonical']
+      const keyName = Array.isArray(remoteFallbackHandlerAddressKey)
+        ? remoteFallbackHandlerAddressKey[0]
+        : remoteFallbackHandlerAddressKey;
+
+      // fetch the remote fallback handler address from `deployments` dictionary
+      const { address: remoteAddress } = fallbackHandler.deployments[keyName];
+
       // check if the remote fallback handler address matches the local one
-      const remoteFallbackHandlerAddress =
-        fallbackHandler.networkAddresses[chainId];
       const localFallbackHandlerAddress = FALLBACK_HANDLER[chainId];
-      expect(remoteFallbackHandlerAddress).toBe(localFallbackHandlerAddress);
+      expect(remoteAddress).toBe(localFallbackHandlerAddress);
     });
   });
 });

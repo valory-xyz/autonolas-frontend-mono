@@ -1,6 +1,6 @@
 # util-contracts
 
-This library was generated with [Nx](https://nx.dev).
+Library of contracts used across multiple apps.
 
 ## Running unit tests
 

@@ -1,21 +1,21 @@
-import React, { useState, useEffect, ReactNode } from 'react';
-import { Typography, Statistic, Button, Grid } from 'antd';
 import ShrinkOutlined from '@ant-design/icons/ShrinkOutlined';
-import { isUndefined, isNil } from 'lodash';
-
 import { AutonolasThemeProvider } from '@autonolas-frontend-mono/ui-theme';
-import { PoweredBy, PoweredByForSmallDevice } from './helpers/PoweredBySvg';
+import { Button, Grid, Statistic, Typography } from 'antd';
+import { isNil, isUndefined } from 'lodash';
+import React, { ReactNode, useEffect, useState } from 'react';
+
 import { MinimizedStatus } from './helpers/MinimizedStatus';
-import { DotSpace, LinksSection } from './utils';
-import { AppType } from './types';
+import { PoweredBy, PoweredByForSmallDevice } from './helpers/PoweredBySvg';
 import {
-  ContractsInfoContainer,
   Badge,
+  ContractsInfoContainer,
+  ExtraContent,
+  MobileOffChainContainer,
   NextUpdateTimer,
   OffChainContainer,
-  MobileOffChainContainer,
-  ExtraContent,
 } from './styles';
+import { AppType } from './types';
+import { DotSpace, LinksSection } from './utils';
 
 const { Text } = Typography;
 const { Countdown } = Statistic;
@@ -41,9 +41,7 @@ type ServiceStatusInfoDetails = {
 };
 
 const timerStyle = { minWidth: '36px' };
-const Dash = () => (
-  <span style={{ display: 'inline-block', ...timerStyle }}>--</span>
-);
+const Dash = () => <span style={{ display: 'inline-block', ...timerStyle }}>--</span>;
 
 export const ServiceStatusInfo = ({
   isHealthy,
@@ -74,8 +72,6 @@ export const ServiceStatusInfo = ({
       suffix="s"
       key={`service-status-counter-${countdownKey}`}
       onFinish={async () => {
-        window.console.log('timer completed!');
-
         setCountdownKey(countdownKey + 1);
 
         if (typeof onTimerFinish === 'function') {
@@ -90,8 +86,7 @@ export const ServiceStatusInfo = ({
    * show operations status (status, timer)
    * even if one of them is defined (hide if both are not defined)
    */
-  const showOperationStatus =
-    !isUndefined(isHealthy) || !isUndefined(secondsLeftReceived);
+  const showOperationStatus = !isUndefined(isHealthy) || !isUndefined(secondsLeftReceived);
 
   const actualStatus = isHealthy ? (
     <>
@@ -119,10 +114,7 @@ export const ServiceStatusInfo = ({
 
   return (
     <AutonolasThemeProvider>
-      <ContractsInfoContainer
-        className="service-status-maximized"
-        canMinimize={canMinimize}
-      >
+      <ContractsInfoContainer className="service-status-maximized" canMinimize={canMinimize}>
         <Badge canMinimize={canMinimize}>
           <a href="https://autonolas.network" target="_blank" rel="noreferrer">
             {canMinimize ? <PoweredByForSmallDevice /> : <PoweredBy />}
@@ -144,9 +136,7 @@ export const ServiceStatusInfo = ({
           <>
             {showOperationStatus && (
               <OffChainContainer>
-                <Text className="status-sub-header">
-                  Off-chain Service Status
-                </Text>
+                <Text className="status-sub-header">Off-chain Service Status</Text>
                 <div className="status-sub-content">
                   {!isUndefined(isHealthy) && <div>{actualStatus}</div>}
 

@@ -1,5 +1,3 @@
-import { ethers } from 'ethers';
-
 import { notifyError } from '@autonolas/frontend-library';
 
 import { UNIT_TYPES } from 'common-util/enums';
@@ -10,15 +8,9 @@ import {
   getDispenserContract,
   getTokenomicsContract,
   getTreasuryContract,
-  parseToEth,
   sendTransaction,
 } from 'common-util/functions';
 
-const fixTo8DecimalPlaces = (value) => {
-  const numeralValue = Number(value);
-  if (Number.isNaN(numeralValue)) return 0;
-  return numeralValue > 0 ? numeralValue.toFixed(8) : 0;
-};
 /**
  * fetches the owners of the units
  */
@@ -77,19 +69,6 @@ const getEpochTokenomics = async (epochNum) => {
   return response;
 };
 
-// Structure for component / agent point with tokenomics-related statistics
-// struct UnitPoint {
-//   uint96 sumUnitTopUpsOLAS; // [0]
-//   uint32 numNewUnits;       // Number of new units [1]
-//   uint8 rewardUnitFraction; // Reward component / agent fraction [2]
-//   uint8 topUpUnitFraction;  // Top-up component / agent fraction [3]
-// }
-const getUnitPointReq = async ({ lastPoint, num }) => {
-  const contract = getTokenomicsContract();
-  const response = await contract.methods.getUnitPoint(lastPoint, num).call();
-  return response;
-};
-
 const getEpochLength = async () => {
   const contract = getTokenomicsContract();
   const response = await contract.methods.epochLen().call();
@@ -115,117 +94,6 @@ export const canShowCheckpoint = async () => {
   }
 
   return false;
-};
-
-const getActualEpochTimeLength = async () => {
-  try {
-    const { timeDiff, epochLen } = await getEpochDetails();
-    return timeDiff > epochLen ? timeDiff : epochLen;
-  } catch (error) {
-    console.error(error);
-  }
-
-  return 0;
-};
-
-export const getMapUnitIncentivesRequest = async ({ unitType, unitId }) => {
-  const contract = getTokenomicsContract();
-
-  const response = await contract.methods.mapUnitIncentives(unitType, unitId).call();
-
-  const currentEpochCounter = ethers.toBigInt(await getEpochCounter());
-
-  // Get the unit points of the last epoch
-  const componentInfo = await getUnitPointReq({
-    lastPoint: currentEpochCounter,
-    num: 0,
-  });
-
-  const agentInfo = await getUnitPointReq({
-    lastPoint: currentEpochCounter,
-    num: 1,
-  });
-
-  // Struct for component / agent incentive balances
-  // struct IncentiveBalances {
-  //   uint96 reward;                // Reward in ETH [0]
-  //   uint96 pendingRelativeReward; // Pending relative reward in ETH [1]
-  //   uint96 topUp;                 // Top-up in OLAS [2]
-  //   uint96 pendingRelativeTopUp;  // Pending relative top-up [3]
-  //   uint32 lastEpoch;             // Last epoch number the information was updated [4]
-  // }
-  const { pendingRelativeReward, pendingRelativeTopUp, lastEpoch } = response;
-
-  const rewardInBn = ethers.toBigInt(pendingRelativeReward);
-  const isCurrentEpochWithReward = currentEpochCounter === Number(lastEpoch) && rewardInBn > 0n;
-
-  // if the current epoch is not the last epoch, return 0
-  if (!isCurrentEpochWithReward) {
-    return {
-      pendingRelativeReward: 0,
-      pendingRelativeTopUp: 0,
-      id: '0',
-      key: '0',
-    };
-  }
-
-  // if the current epoch is the last epoch, calculate the incentives
-  const {
-    rewardUnitFraction: cRewardFraction,
-    topUpUnitFraction: cTopupFraction,
-    sumUnitTopUpsOLAS: cSumUnitTopUpsOLAS,
-  } = componentInfo;
-  const {
-    rewardUnitFraction: aRewardFraction,
-    topUpUnitFraction: aTopupFraction,
-    sumUnitTopUpsOLAS: aSumUnitTopUpsOLAS,
-  } = agentInfo;
-
-  /**
-   * for unitType agent(0) & component(1),
-   * the below calculation is done to get the reward and topup
-   */
-  const componentReward = ((rewardInBn * ethers.toBigInt(cRewardFraction)) / 100n).toString();
-  const agentReward = ((rewardInBn * ethers.toBigInt(aRewardFraction)) / 100n).toString();
-
-  let totalIncentives = ethers.toBigInt(pendingRelativeTopUp);
-  let componentTopUp = 0;
-  let agentPendingTopUp = 0;
-
-  if (pendingRelativeTopUp > 0) {
-    const inflationPerSecond = await contract.methods.inflationPerSecond().call();
-    const inflationPerSecondInBn = ethers.toBigInt(inflationPerSecond);
-    const epochLength = ethers.toBigInt(await getActualEpochTimeLength());
-
-    const totalTopUps = inflationPerSecondInBn * epochLength;
-    totalIncentives = totalIncentives * totalTopUps;
-
-    const componentSumIncentivesInBn = ethers.toBigInt(cSumUnitTopUpsOLAS) * 100n;
-    const agentSumIncentivesInBn = ethers.toBigInt(aSumUnitTopUpsOLAS) * 100n;
-
-    componentTopUp = (
-      (totalIncentives * ethers.toBigInt(cTopupFraction)) /
-      componentSumIncentivesInBn
-    ).toString();
-    agentPendingTopUp = (
-      (totalIncentives * ethers.toBigInt(aTopupFraction)) /
-      agentSumIncentivesInBn
-    ).toString();
-  }
-
-  const pendingRelativeTopUpInEth = parseToEth(
-    unitType === UNIT_TYPES.COMPONENT ? componentReward : agentReward,
-  );
-  const componentTopUpInEth = parseToEth(
-    unitType === UNIT_TYPES.COMPONENT ? componentTopUp : agentPendingTopUp,
-  );
-
-  return {
-    pendingRelativeReward: fixTo8DecimalPlaces(pendingRelativeTopUpInEth),
-    pendingRelativeTopUp: fixTo8DecimalPlaces(componentTopUpInEth),
-    id: '0',
-    key: '0',
-  };
 };
 
 export const getPausedValueRequest = async () => {

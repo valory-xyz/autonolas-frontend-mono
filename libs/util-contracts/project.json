@@ -3,7 +3,7 @@
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "libs/util-contracts/src",
   "projectType": "library",
-  "tags": [],
+  "tags": ["scope:autonolas-ui", "type:feature"],
   "targets": {
     "lint": {
       "executor": "@nx/eslint:lint",

@@ -60,6 +60,9 @@ export const GlobalStyles = createGlobalStyle`
   .mt-8 {
     margin-top: 8px;
   }
+  .mt-12 {
+    margin-top: 12px;
+  }
   .mt-16 {
     margin-top: 16px;
   }

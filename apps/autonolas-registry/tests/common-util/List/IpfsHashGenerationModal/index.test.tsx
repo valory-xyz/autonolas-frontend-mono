@@ -1,17 +1,15 @@
 import '@testing-library/jest-dom';
 import { render } from '@testing-library/react';
 
-import { IpfsHashGenerationModal } from '../../../../common-util/List/IpfsHashGenerationModal';
-import { wrapProvider, mockV1Hash } from '../../../tests-helpers';
+import { IpfsHashGenerationModal } from 'common-util/List/IpfsHashGenerationModal';
 
-jest.mock(
-  '../../../../common-util/List/IpfsHashGenerationModal/helpers',
-  () => ({
-    getIpfsHashHelper: jest.fn(() => mockV1Hash),
-  }),
-);
+import { mockV1Hash, wrapProvider } from '../../../tests-helpers';
 
-jest.mock('../../../../common-util/hooks', () => ({
+jest.mock('common-util/List/IpfsHashGenerationModal/helpers', () => ({
+  getIpfsHashHelper: jest.fn(() => mockV1Hash),
+}));
+
+jest.mock('common-util/hooks', () => ({
   useHelpers: jest.fn(() => ({ isConnectedToWrongNetwork: false })),
   useSvmConnectivity: jest.fn(),
 }));
@@ -33,8 +31,6 @@ describe('<IpfsHashGenerationModal />', () => {
       ),
     );
 
-    expect(
-      getByText('Generate IPFS Hash of Metadata File'),
-    ).toBeInTheDocument();
+    expect(getByText('Generate IPFS Hash of Metadata File')).toBeInTheDocument();
   });
 });
