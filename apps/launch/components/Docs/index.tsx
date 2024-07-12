@@ -3,15 +3,10 @@ import Image from 'next/image';
 import Link from 'next/link';
 import styled from 'styled-components';
 
-
-
 import { COLOR } from 'libs/ui-theme/src';
 import { UNICODE_SYMBOLS } from 'libs/util-constants/src';
 
-
-
 import { PATHS, YOUR_OWN_PATH } from 'common-util/constants/paths';
-
 
 const { Paragraph, Title, Text } = Typography;
 
