@@ -86,6 +86,20 @@ const MyStakingContracts = () => (
 
 const Step1 = () => (
   <>
+    <figure className="m-0 mb-24">
+      <Image
+        src={'/images/docs/step1.png'}
+        width={CONTENT_MAX_WIDTH}
+        height={253}
+        alt="Fig 2"
+        className="mb-12"
+      />
+      <figcaption className="text-center">
+        <Text type="secondary">
+          Fig 1. Launcher user can create staking contract based on a specific configuration
+        </Text>
+      </figcaption>
+    </figure>
     <Tag style={TAG_STYLE}>Step 1</Tag>
     <Title level={4} className="mt-16">
       Support different parts of the Olas agent economy
