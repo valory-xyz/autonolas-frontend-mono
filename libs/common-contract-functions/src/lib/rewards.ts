@@ -3,8 +3,8 @@ import { Contract, Provider, ethers } from 'ethers';
 import { rewardsFormatter } from './utils';
 
 const UNIT_TYPES = { COMPONENT: '0', AGENT: '1' } as const;
-const BIG_INT_ZERO = BigInt(0);
-const BIG_INT_HUNDRED = BigInt(100);
+const BIG_INT_0 = BigInt(0);
+const BIG_INT_100 = BigInt(100);
 
 const getEpochCounter = async (contract: Contract) => {
   const response: bigint = await contract.epochCounter();
@@ -76,9 +76,8 @@ const getMapUnitIncentivesRequest = async ({
   //   uint32 lastEpoch;             // Last epoch number the information was updated [4]
   // }
 
-  const rewardInBn = ethers.toBigInt(pendingRelativeReward);
   const isCurrentEpochWithReward =
-    currentEpochCounter === lastEpoch && pendingRelativeReward > BIG_INT_ZERO;
+    currentEpochCounter === lastEpoch && pendingRelativeReward > BIG_INT_0;
 
   // if the current epoch is not the last epoch, return 0
   if (!isCurrentEpochWithReward) {
@@ -104,14 +103,14 @@ const getMapUnitIncentivesRequest = async ({
    * for unitType agent(0) & component(1),
    * the below calculation is done to get the reward and topup
    */
-  const componentReward = (rewardInBn * cRewardFraction) / BIG_INT_HUNDRED;
-  const agentReward = (rewardInBn * aRewardFraction) / BIG_INT_HUNDRED;
+  const componentReward = (pendingRelativeReward * cRewardFraction) / BIG_INT_100;
+  const agentReward = (pendingRelativeReward * aRewardFraction) / BIG_INT_100;
 
   let totalIncentives = pendingRelativeTopUp;
   let componentTopUp = BigInt(0);
   let agentPendingTopUp = BigInt(0);
 
-  if (pendingRelativeTopUp > BIG_INT_ZERO) {
+  if (pendingRelativeTopUp > BIG_INT_0) {
     const inflationPerSecond: bigint = await contract.inflationPerSecond();
 
     const { timeDiff, epochLen } = await getEpochDetails(provider, contract);
@@ -120,20 +119,17 @@ const getMapUnitIncentivesRequest = async ({
     const totalTopUps = inflationPerSecond * epochLength;
     totalIncentives = totalIncentives * totalTopUps;
 
-    const componentSumIncentivesInBn = cSumUnitTopUpsOLAS * BIG_INT_HUNDRED;
-    const agentSumIncentivesInBn = aSumUnitTopUpsOLAS * BIG_INT_HUNDRED;
-
-    componentTopUp = (totalIncentives * cTopupFraction) / componentSumIncentivesInBn;
-    agentPendingTopUp = (totalIncentives * aTopupFraction) / agentSumIncentivesInBn;
+    componentTopUp = (totalIncentives * cTopupFraction) / (cSumUnitTopUpsOLAS * BIG_INT_100);
+    agentPendingTopUp = (totalIncentives * aTopupFraction) / (aSumUnitTopUpsOLAS * BIG_INT_100);
   }
 
   const isComponent = unitType === UNIT_TYPES.COMPONENT;
-  const pendingRelativeTopUpInEth = isComponent ? componentReward : agentReward;
-  const componentTopUpInEth = isComponent ? componentTopUp : agentPendingTopUp;
+  const pendingRelativeTopUpInWei = isComponent ? componentReward : agentReward;
+  const componentTopUpInWei = isComponent ? componentTopUp : agentPendingTopUp;
 
   return {
-    pendingRelativeReward: rewardsFormatter(pendingRelativeTopUpInEth, 4),
-    pendingRelativeTopUp: rewardsFormatter(componentTopUpInEth, 2),
+    pendingRelativeReward: rewardsFormatter(pendingRelativeTopUpInWei, 4),
+    pendingRelativeTopUp: rewardsFormatter(componentTopUpInWei, 2),
   };
 };
 
