@@ -30,7 +30,7 @@ const NO_VEOLAS_ERROR = `You don't have enough veOLAS to vote`;
 // Checks if any of the nominees were removed from voting
 export const checkNoRemovedNominees = async (allocations: Allocation[]) => {
   const removedNominees = await checkIfNomineeRemoved(allocations);
-  if (removedNominees.length === 0) {
+  if (removedNominees.length > 0) {
     notification.error({
       message: getRemovedNomineesError([allocations[0].address], allocations),
       duration: 10,
