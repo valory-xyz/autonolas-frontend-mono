@@ -184,16 +184,6 @@ export const EditVotes = ({ allocations, setAllocations, setIsUpdating }: EditVo
         notification.error({
           message: error.message,
         });
-
-        setIsUpdating(false);
-        // Reset previously saved data so it's re-fetched automatically
-        queryClient.removeQueries({
-          predicate: (query) =>
-            INVALIDATE_AFTER_UPDATE_KEYS.includes(
-              (query.queryKey[1] as Record<string, string>)?.scopeKey,
-            ),
-        });
-        dispatch(clearState());
       })
       .finally(() => {
         setIsLoading(false);
