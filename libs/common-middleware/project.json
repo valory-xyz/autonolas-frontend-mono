@@ -1,7 +1,7 @@
 {
-  "name": "next-middleware",
+  "name": "common-middleware",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
-  "sourceRoot": "libs/next-middleware/src",
+  "sourceRoot": "libs/common-middleware/src",
   "projectType": "library",
   "tags": [],
   "targets": {

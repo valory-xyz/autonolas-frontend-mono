@@ -1,4 +1,4 @@
-import { config, middleware } from 'libs/next-middleware/src/server';
+import { config, middleware } from 'libs/common-middleware/src';
 
 export default middleware;
 export { config };
