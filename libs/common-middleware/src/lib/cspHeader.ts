@@ -61,37 +61,41 @@ export const cspHeader = (browserName?: string) => {
     scriptSrc.push("'unsafe-inline'");
   }
 
-  const nextSafeHeaders =
-    typeof nextSafe === 'function'
-      ? // TODO
-        // @ts-expect-error: For some reason, TypeScript is not recognizing the function
-        nextSafe({
-          isDev,
-          /**
-           * Content Security Policy
-           * @see https://content-security-policy.com/
-           */
-          contentSecurityPolicy: {
-            'default-src': "'none'",
-            'script-src': scriptSrc,
-            'connect-src': connectSrc,
-            'img-src': [
-              "'self'",
-              'blob:',
-              'data:',
-              'https://*.autonolas.tech/',
-              'https://explorer-api.walletconnect.com/w3m/',
-              ...walletconnectSrc,
-            ],
-            'style-src': ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com/'],
-            'frame-src': ["'self'", 'https://vercel.live/', ...walletconnectSrc],
-          },
-          permissionsPolicyDirectiveSupport: ['standard'],
-        })
-      : [];
+  const getNextSafeHeaders = () => {
+    if (typeof nextSafe !== 'function') return [];
+    // @ts-expect-error: For some reason, TypeScript is not recognizing the function
 
+    return nextSafe({
+      isDev,
+      /**
+       * Content Security Policy
+       * @see https://content-security-policy.com/
+       */
+      contentSecurityPolicy: {
+        'default-src': "'none'",
+        'script-src': scriptSrc,
+        'connect-src': connectSrc,
+        'img-src': [
+          "'self'",
+          'blob:',
+          'data:',
+          'https://*.autonolas.tech/',
+          'https://explorer-api.walletconnect.com/w3m/',
+          ...walletconnectSrc,
+        ],
+        'style-src': ["'self'", 'https://fonts.googleapis.com/'],
+        'frame-src': ["'self'", 'https://vercel.live/', ...walletconnectSrc],
+      },
+      permissionsPolicyDirectiveSupport: ['standard'],
+    });
+  };
+
+  /**
+   * Some headers might throw warnings in the console - they are safe to ignore.
+   * https://trezy.gitbook.io/next-safe/usage/troubleshooting#why-do-i-see-so-many-unrecognized-feature-warnings
+   */
   const headers = [
-    ...nextSafeHeaders,
+    ...getNextSafeHeaders(),
     {
       key: 'Strict-Transport-Security',
       value: 'max-age=31536000; includeSubDomains',
