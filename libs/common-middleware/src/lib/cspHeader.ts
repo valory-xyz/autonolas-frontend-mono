@@ -61,8 +61,7 @@ const SCRIPT_SRC = ["'self'", 'https://vercel.live/', 'https://fonts.googleapis.
 export const cspHeader = () => {
   if (!process.env.NEXT_PUBLIC_AUTONOLAS_SUB_GRAPH_URL) return [];
 
-  // const nonce = Buffer.from(crypto.randomUUID()).toString('base64');
-
+  const nonce = Buffer.from(crypto.randomUUID()).toString('base64');
   const connectSrc: CSPDirective = [
     ...ALLOWED_ORIGINS,
 
@@ -95,14 +94,16 @@ export const cspHeader = () => {
           'data:',
           'https://*.autonolas.tech/',
           'https://explorer-api.walletconnect.com/w3m/',
+          'https://vercel.com/',
           ...WALLET_CONNECT_LINKS,
         ],
         'style-src': [
           "'self'",
           'https://fonts.googleapis.com/',
-          // `nonce-${nonce}`,
+          `nonce-${nonce}`,
           // "'unsafe-inline'"
         ],
+        'font-src': ['self', 'https://fonts.gstatic.com'],
         'frame-src': ["'self'", 'https://vercel.live/', ...WALLET_CONNECT_LINKS],
       },
       permissionsPolicyDirectiveSupport: ['standard'],
@@ -116,7 +117,7 @@ export const cspHeader = () => {
   const headers = [
     ...getNextSafeHeaders(),
     { key: 'Strict-Transport-Security', value: 'max-age=31536000; includeSubDomains' },
-    // { key: 'x-nonce', value: nonce },
+    { key: 'x-nonce', value: nonce },
   ];
 
   return headers;
