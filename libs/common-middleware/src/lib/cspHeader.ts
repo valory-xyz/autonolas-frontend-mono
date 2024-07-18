@@ -68,9 +68,9 @@ export const cspHeader = (browserName?: string) => {
 
   // Firefox blocks inline scripts by default and it's an issue with Metamask
   // reference: https://github.com/MetaMask/metamask-extension/issues/3133
-  if (browserName === 'Firefox') {
-    scriptSrc.push("'unsafe-inline'");
-  }
+  // if (browserName === 'Firefox') {
+  //   scriptSrc.push("'unsafe-inline'");
+  // }
 
   const getNextSafeHeaders = () => {
     if (typeof nextSafe !== 'function') return [];
