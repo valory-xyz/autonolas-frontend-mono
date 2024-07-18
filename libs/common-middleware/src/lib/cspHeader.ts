@@ -66,12 +66,6 @@ export const cspHeader = (browserName?: string) => {
 
   const scriptSrc = ["'self'", 'https://vercel.live/', 'https://fonts.googleapis.com/'];
 
-  // Firefox blocks inline scripts by default and it's an issue with Metamask
-  // reference: https://github.com/MetaMask/metamask-extension/issues/3133
-  // if (browserName === 'Firefox') {
-  //   scriptSrc.push("'unsafe-inline'");
-  // }
-
   const getNextSafeHeaders = () => {
     if (typeof nextSafe !== 'function') return [];
     // @ts-expect-error: For some reason, TypeScript is not recognizing the function
@@ -95,9 +89,7 @@ export const cspHeader = (browserName?: string) => {
           ...walletconnectSrc,
         ],
         'style-src': ["'self'", 'https://fonts.googleapis.com/', "'unsafe-inline'"],
-        'font-src': ["'self'", 'https://fonts.gstatic.com/'],
         'frame-src': ["'self'", 'https://vercel.live/', ...walletconnectSrc],
-        'object-src': "'none'",
       },
       permissionsPolicyDirectiveSupport: ['standard'],
     });
