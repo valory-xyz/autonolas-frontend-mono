@@ -2,60 +2,67 @@ import nextSafe from 'next-safe';
 
 const isDev = process.env.NODE_ENV !== 'production';
 
-export const cspHeader = (browserName?: string) => {
+const WALLET_CONNECT_LINKS = [
+  'https://verify.walletconnect.org',
+  'https://verify.walletconnect.com',
+];
+
+const ALLOWED_ORIGINS = [
+  // internal
+  "'self'",
+  'https://*.olas.network/',
+  'https://*.autonolas.tech/',
+
+  // web3modal and wallet connect
+  ...WALLET_CONNECT_LINKS,
+  'https://rpc.walletconnect.com/',
+  'wss://relay.walletconnect.org/',
+  'wss://relay.walletconnect.com/',
+  'https://explorer-api.walletconnect.com/',
+  'wss://*.pusher.com/',
+  'wss://www.walletlink.org/rpc',
+
+  // gnosis safe
+  'https://safe-transaction-mainnet.safe.global/api/v1/',
+  'https://safe-transaction-goerli.safe.global/api/',
+  'https://safe-transaction-gnosis-chain.safe.global/api/',
+  'https://safe-transaction-polygon.safe.global/api/',
+
+  // vercel
+  'https://vercel.live/',
+
+  // chains
+  'https://eth-mainnet.g.alchemy.com/v2/',
+  'https://eth-goerli.g.alchemy.com/v2/',
+  'https://gno.getblock.io/',
+  'https://polygon-mainnet.g.alchemy.com/v2/',
+  'https://polygon-mumbai-bor.publicnode.com/',
+  'https://rpc.chiado.gnosis.gateway.fm/',
+  'https://api.devnet.solana.com/',
+  'wss://api.devnet.solana.com/',
+  'https://api.mainnet-beta.solana.com/',
+  'wss://api.mainnet-beta.solana.com/',
+  'https://holy-convincing-bird.solana-mainnet.quiknode.pro/',
+  'wss://holy-convincing-bird.solana-mainnet.quiknode.pro/',
+  'https://arb1.arbitrum.io/rpc/',
+  'https://sepolia-rollup.arbitrum.io/rpc',
+  'https://rpc.gnosischain.com/',
+  'https://mainnet.base.org/',
+  'https://sepolia.base.org/',
+  'https://mainnet.optimism.io',
+  'https://sepolia.optimism.io/',
+  'https://forno.celo.org',
+  'https://alfajores-forno.celo-testnet.org',
+  'https://api.web3modal.com/',
+];
+
+export const cspHeader = () => {
   if (!process.env.NEXT_PUBLIC_AUTONOLAS_SUB_GRAPH_URL) return [];
 
-  const walletconnectSrc = ['https://verify.walletconnect.org', 'https://verify.walletconnect.com'];
-
   const connectSrc: CSPDirective = [
-    // internal
-    "'self'",
-    'https://*.olas.network/',
-    'https://*.autonolas.tech/',
+    ...ALLOWED_ORIGINS,
 
-    // web3modal and wallet connect
-    ...walletconnectSrc,
-    'https://rpc.walletconnect.com/',
-    'wss://relay.walletconnect.org/',
-    'wss://relay.walletconnect.com/',
-    'https://explorer-api.walletconnect.com/',
-    'wss://*.pusher.com/',
-    'wss://www.walletlink.org/rpc',
-
-    // gnosis safe
-    'https://safe-transaction-mainnet.safe.global/api/v1/',
-    'https://safe-transaction-goerli.safe.global/api/',
-    'https://safe-transaction-gnosis-chain.safe.global/api/',
-    'https://safe-transaction-polygon.safe.global/api/',
-
-    // vercel
-    'https://vercel.live/',
-
-    // chains
-    'https://eth-mainnet.g.alchemy.com/v2/',
-    'https://eth-goerli.g.alchemy.com/v2/',
-    'https://gno.getblock.io/',
-    'https://polygon-mainnet.g.alchemy.com/v2/',
-    'https://polygon-mumbai-bor.publicnode.com/',
-    'https://rpc.chiado.gnosis.gateway.fm/',
-    'https://api.devnet.solana.com/',
-    'wss://api.devnet.solana.com/',
-    'https://api.mainnet-beta.solana.com/',
-    'wss://api.mainnet-beta.solana.com/',
-    'https://holy-convincing-bird.solana-mainnet.quiknode.pro/',
-    'wss://holy-convincing-bird.solana-mainnet.quiknode.pro/',
-    'https://arb1.arbitrum.io/rpc/',
-    'https://sepolia-rollup.arbitrum.io/rpc',
-    'https://rpc.gnosischain.com/',
-    'https://mainnet.base.org/',
-    'https://sepolia.base.org/',
-    'https://mainnet.optimism.io',
-    'https://sepolia.optimism.io/',
-    'https://forno.celo.org',
-    'https://alfajores-forno.celo-testnet.org',
-    'https://api.web3modal.com/',
-
-    // others
+    // env variables
     process.env.NEXT_PUBLIC_AUTONOLAS_SUB_GRAPH_URL,
   ];
 
@@ -68,8 +75,8 @@ export const cspHeader = (browserName?: string) => {
 
   const getNextSafeHeaders = () => {
     if (typeof nextSafe !== 'function') return [];
-    // @ts-expect-error: For some reason, TypeScript is not recognizing the function
 
+    // @ts-expect-error: For some reason, TypeScript is not recognizing the function
     return nextSafe({
       isDev,
       /**
@@ -86,10 +93,10 @@ export const cspHeader = (browserName?: string) => {
           'data:',
           'https://*.autonolas.tech/',
           'https://explorer-api.walletconnect.com/w3m/',
-          ...walletconnectSrc,
+          ...WALLET_CONNECT_LINKS,
         ],
         'style-src': ["'self'", 'https://fonts.googleapis.com/', "'unsafe-inline'"],
-        'frame-src': ["'self'", 'https://vercel.live/', ...walletconnectSrc],
+        'frame-src': ["'self'", 'https://vercel.live/', ...WALLET_CONNECT_LINKS],
       },
       permissionsPolicyDirectiveSupport: ['standard'],
     });

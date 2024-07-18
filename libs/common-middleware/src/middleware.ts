@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse, userAgent } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 
 import { cspHeader } from './lib/cspHeader';
 import { getRedirectUrl } from './lib/prohibitedCountries';
@@ -11,8 +11,7 @@ export const middleware = async (request: NextRequest) => {
     ? NextResponse.redirect(new URL(redirectUrl, request.nextUrl))
     : NextResponse.next();
 
-  const browserName = userAgent(request)?.browser.name;
-  const cspHeaders = cspHeader(browserName);
+  const cspHeaders = cspHeader();
 
   // apply CSP headers
   // https://nextjs.org/docs/app/building-your-application/routing/middleware#setting-headers
