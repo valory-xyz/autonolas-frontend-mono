@@ -56,8 +56,12 @@ const ALLOWED_ORIGINS = [
   'https://api.web3modal.com/',
 ];
 
+const SCRIPT_SRC = ["'self'", 'https://vercel.live/', 'https://fonts.googleapis.com/'];
+
 export const cspHeader = () => {
   if (!process.env.NEXT_PUBLIC_AUTONOLAS_SUB_GRAPH_URL) return [];
+
+  // const nonce = Buffer.from(crypto.randomUUID()).toString('base64');
 
   const connectSrc: CSPDirective = [
     ...ALLOWED_ORIGINS,
@@ -71,8 +75,6 @@ export const cspHeader = () => {
     connectSrc.push('ws://localhost');
   }
 
-  const scriptSrc = ["'self'", 'https://vercel.live/', 'https://fonts.googleapis.com/'];
-
   const getNextSafeHeaders = () => {
     if (typeof nextSafe !== 'function') return [];
 
@@ -85,7 +87,7 @@ export const cspHeader = () => {
        */
       contentSecurityPolicy: {
         'default-src': "'none'",
-        'script-src': scriptSrc,
+        'script-src': SCRIPT_SRC,
         'connect-src': connectSrc,
         'img-src': [
           "'self'",
@@ -95,7 +97,12 @@ export const cspHeader = () => {
           'https://explorer-api.walletconnect.com/w3m/',
           ...WALLET_CONNECT_LINKS,
         ],
-        'style-src': ["'self'", 'https://fonts.googleapis.com/', "'unsafe-inline'"],
+        'style-src': [
+          "'self'",
+          'https://fonts.googleapis.com/',
+          // `nonce-${nonce}`,
+          // "'unsafe-inline'"
+        ],
         'frame-src': ["'self'", 'https://vercel.live/', ...WALLET_CONNECT_LINKS],
       },
       permissionsPolicyDirectiveSupport: ['standard'],
@@ -108,10 +115,8 @@ export const cspHeader = () => {
    */
   const headers = [
     ...getNextSafeHeaders(),
-    {
-      key: 'Strict-Transport-Security',
-      value: 'max-age=31536000; includeSubDomains',
-    },
+    { key: 'Strict-Transport-Security', value: 'max-age=31536000; includeSubDomains' },
+    // { key: 'x-nonce', value: nonce },
   ];
 
   return headers;
