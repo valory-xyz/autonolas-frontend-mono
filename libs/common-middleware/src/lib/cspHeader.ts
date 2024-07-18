@@ -8,25 +8,36 @@ export const cspHeader = (browserName?: string) => {
   const walletconnectSrc = ['https://verify.walletconnect.org', 'https://verify.walletconnect.com'];
 
   const connectSrc: CSPDirective = [
+    // internal
     "'self'",
-    ...walletconnectSrc,
     'https://*.olas.network/',
     'https://*.autonolas.tech/',
+
+    // web3modal and wallet connect
+    ...walletconnectSrc,
     'https://rpc.walletconnect.com/',
     'wss://relay.walletconnect.org/',
     'wss://relay.walletconnect.com/',
     'https://explorer-api.walletconnect.com/',
+    'wss://*.pusher.com/',
+    'wss://www.walletlink.org/rpc',
+
+    // gnosis safe
+    'https://safe-transaction-mainnet.safe.global/api/v1/',
+    'https://safe-transaction-goerli.safe.global/api/',
+    'https://safe-transaction-gnosis-chain.safe.global/api/',
+    'https://safe-transaction-polygon.safe.global/api/',
+
+    // vercel
+    'https://vercel.live/',
+
+    // chains
     'https://eth-mainnet.g.alchemy.com/v2/',
     'https://eth-goerli.g.alchemy.com/v2/',
     'https://gno.getblock.io/',
     'https://polygon-mainnet.g.alchemy.com/v2/',
     'https://polygon-mumbai-bor.publicnode.com/',
     'https://rpc.chiado.gnosis.gateway.fm/',
-    'https://safe-transaction-mainnet.safe.global/api/v1/',
-    'https://safe-transaction-goerli.safe.global/api/',
-    'https://safe-transaction-gnosis-chain.safe.global/api/',
-    'https://safe-transaction-polygon.safe.global/api/',
-    'https://vercel.live/',
     'https://api.devnet.solana.com/',
     'wss://api.devnet.solana.com/',
     'https://api.mainnet-beta.solana.com/',
@@ -43,8 +54,8 @@ export const cspHeader = (browserName?: string) => {
     'https://forno.celo.org',
     'https://alfajores-forno.celo-testnet.org',
     'https://api.web3modal.com/',
-    'wss://www.walletlink.org/rpc',
-    'wss://*.pusher.com/',
+
+    // others
     process.env.NEXT_PUBLIC_AUTONOLAS_SUB_GRAPH_URL,
   ];
 
@@ -85,6 +96,7 @@ export const cspHeader = (browserName?: string) => {
         ],
         'style-src': ["'self'", 'https://fonts.googleapis.com/'],
         'frame-src': ["'self'", 'https://vercel.live/', ...walletconnectSrc],
+        'object-src': "'none'",
       },
       permissionsPolicyDirectiveSupport: ['standard'],
     });
