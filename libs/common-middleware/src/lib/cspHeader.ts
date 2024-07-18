@@ -55,6 +55,9 @@ const ALLOWED_ORIGINS = [
   'https://alfajores-forno.celo-testnet.org',
   'https://api.web3modal.com/',
 
+  // tenderly
+  'https://virtual.mainnet.rpc.tenderly.co/',
+
   // others
   'https://api.thegraph.com/',
 ];
