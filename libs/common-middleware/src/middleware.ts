@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-import { cspHeader } from './lib/cspHeader';
+import { getCspHeaders } from './lib/cspHeader';
 import { getRedirectUrl } from './lib/prohibitedCountries';
 
 export const middleware = async (request: NextRequest) => {
@@ -11,10 +11,12 @@ export const middleware = async (request: NextRequest) => {
     ? NextResponse.redirect(new URL(redirectUrl, request.nextUrl))
     : NextResponse.next();
 
-  const cspHeaders = cspHeader();
+  const cspHeaders = getCspHeaders();
 
-  // apply CSP headers
-  // https://nextjs.org/docs/app/building-your-application/routing/middleware#setting-headers
+  /**
+   * apply CSP headers
+   * @see https://nextjs.org/docs/app/building-your-application/routing/middleware#setting-headers
+   */
   cspHeaders.forEach((header) => {
     const { key, value } = header;
     response.headers.set(key, value);

@@ -64,7 +64,7 @@ const ALLOWED_ORIGINS = [
 
 const SCRIPT_SRC = ["'self'", 'https://vercel.live/', 'https://fonts.googleapis.com/'];
 
-export const cspHeader = () => {
+export const getCspHeaders = () => {
   if (!process.env.NEXT_PUBLIC_AUTONOLAS_SUB_GRAPH_URL) return [];
 
   const connectSrc: CSPDirective = [
@@ -107,7 +107,7 @@ export const cspHeader = () => {
          * @see https://scotthelme.co.uk/can-you-get-pwned-with-css/
          */
         'style-src': ["'self'", 'https://fonts.googleapis.com/', "'unsafe-inline'"],
-        'font-src': ['self', 'https://fonts.gstatic.com'],
+        'font-src': ["'self", 'https://fonts.gstatic.com'],
         'frame-src': ["'self'", 'https://vercel.live/', ...WALLET_CONNECT_LINKS],
       },
       permissionsPolicyDirectiveSupport: ['standard'],
