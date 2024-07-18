@@ -54,6 +54,9 @@ const ALLOWED_ORIGINS = [
   'https://forno.celo.org',
   'https://alfajores-forno.celo-testnet.org',
   'https://api.web3modal.com/',
+
+  // others
+  'https://api.thegraph.com/',
 ];
 
 const SCRIPT_SRC = ["'self'", 'https://vercel.live/', 'https://fonts.googleapis.com/'];
