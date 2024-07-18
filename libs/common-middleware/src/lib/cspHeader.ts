@@ -61,7 +61,6 @@ const SCRIPT_SRC = ["'self'", 'https://vercel.live/', 'https://fonts.googleapis.
 export const cspHeader = () => {
   if (!process.env.NEXT_PUBLIC_AUTONOLAS_SUB_GRAPH_URL) return [];
 
-  const nonce = Buffer.from(crypto.randomUUID()).toString('base64');
   const connectSrc: CSPDirective = [
     ...ALLOWED_ORIGINS,
 
@@ -97,12 +96,11 @@ export const cspHeader = () => {
           'https://vercel.com/',
           ...WALLET_CONNECT_LINKS,
         ],
-        'style-src': [
-          "'self'",
-          'https://fonts.googleapis.com/',
-          `nonce-${nonce}`,
-          // "'unsafe-inline'"
-        ],
+        /**
+         * It is less harmful to allow 'unsafe-inline' in style-src, please read the article below
+         * @see https://scotthelme.co.uk/can-you-get-pwned-with-css/
+         */
+        'style-src': ["'self'", 'https://fonts.googleapis.com/', "'unsafe-inline'"],
         'font-src': ['self', 'https://fonts.gstatic.com'],
         'frame-src': ["'self'", 'https://vercel.live/', ...WALLET_CONNECT_LINKS],
       },
@@ -112,12 +110,11 @@ export const cspHeader = () => {
 
   /**
    * Some headers might throw warnings in the console - they are safe to ignore.
-   * https://trezy.gitbook.io/next-safe/usage/troubleshooting#why-do-i-see-so-many-unrecognized-feature-warnings
+   * @see https://trezy.gitbook.io/next-safe/usage/troubleshooting#why-do-i-see-so-many-unrecognized-feature-warnings
    */
   const headers = [
     ...getNextSafeHeaders(),
     { key: 'Strict-Transport-Security', value: 'max-age=31536000; includeSubDomains' },
-    { key: 'x-nonce', value: nonce },
   ];
 
   return headers;
