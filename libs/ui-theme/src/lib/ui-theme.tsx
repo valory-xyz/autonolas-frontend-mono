@@ -1,6 +1,6 @@
 // TODO: move to theme
 export const COLOR = {
-  PRIMARY: '#7A00F4',
+  PRIMARY: '#7e22ce',
   RED: '#EA3324',
   WHITE: '#FFFFFF',
   ORANGE: ' #FF9400',
