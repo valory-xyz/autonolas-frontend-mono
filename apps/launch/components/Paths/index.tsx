@@ -76,7 +76,7 @@ const PathCard = ({ path }: { path: Path }) => {
             </Typography.Paragraph>
           </div>
           <Link href={`/paths/${id}`} passHref>
-            <Button type="primary" className="mb-8">
+            <Button size="large" type="primary" className="mb-8">
               View Path
             </Button>
           </Link>
@@ -123,6 +123,7 @@ export const PathsPage = () => {
                   <Typography.Text type="secondary">{YOUR_OWN_PATH.description}</Typography.Text>
                 </div>
                 <Button
+                  size="large"
                   type="default"
                   href={YOUR_OWN_PATH.link}
                   target="_blank"

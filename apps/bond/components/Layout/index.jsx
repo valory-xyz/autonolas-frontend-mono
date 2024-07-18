@@ -6,10 +6,9 @@ import Link from 'next/link';
 import { useRouter } from 'next/router';
 import PropTypes from 'prop-types';
 import { useEffect, useState } from 'react';
-
-import { COLOR } from '@autonolas/frontend-library';
-
 import styled from 'styled-components';
+
+import { COLOR } from 'libs/ui-theme/src';
 
 import { useHelpers } from 'common-util/hooks/useHelpers';
 import { Logo as LogoSvg } from 'components/Branding/Logo';

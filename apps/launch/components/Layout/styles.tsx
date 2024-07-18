@@ -1,12 +1,10 @@
 import { Layout } from 'antd';
 import Link from 'next/link';
-
-import { COLOR } from '@autonolas/frontend-library';
-
 import styled from 'styled-components';
 
+import { COLOR } from 'libs/ui-theme/src';
+
 export const CustomLayout = styled(Layout)`
-  background-color: #f2f4f9;
   min-height: 100vh;
 
   .site-layout {

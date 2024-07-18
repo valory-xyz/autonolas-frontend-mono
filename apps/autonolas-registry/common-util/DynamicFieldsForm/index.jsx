@@ -1,8 +1,8 @@
-import PropTypes from 'prop-types';
 import { Button, Form, Typography } from 'antd';
+import PropTypes from 'prop-types';
 
-import { useHelpers } from '../hooks';
 import { RegistryForm } from '../TransactionHelpers/RegistryForm';
+import { useHelpers } from '../hooks';
 import { FormList } from './FormList';
 import { DynamicFormContainer } from './styles';
 
@@ -30,12 +30,7 @@ export const DynamicFieldsForm = ({
 
   return (
     <DynamicFormContainer>
-      <RegistryForm
-        form={form}
-        name="dynamic_form_complex"
-        onFinish={onFinish}
-        autoComplete="off"
-      >
+      <RegistryForm form={form} name="dynamic_form_complex" onFinish={onFinish} autoComplete="off">
         <FormList
           inputOneLabel={inputOneLabel}
           inputTwoLabel={inputTwoLabel}
@@ -44,6 +39,7 @@ export const DynamicFieldsForm = ({
 
         <Form.Item>
           <Button
+            size="large"
             type="primary"
             htmlType="submit"
             loading={isLoading}

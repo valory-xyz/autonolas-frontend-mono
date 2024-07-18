@@ -5,8 +5,7 @@ import styled from 'styled-components';
 import { Allocation, StakingContract } from 'types';
 import { useAccount } from 'wagmi';
 
-import { COLOR } from '@autonolas/frontend-library';
-
+import { COLOR } from 'libs/ui-theme/src';
 import { CHAIN_NAMES } from 'libs/util-constants/src';
 
 import { formatWeiBalance } from 'common-util/functions/balance';
@@ -97,7 +96,6 @@ const getColumns = ({
             icon={isAdded ? <CheckOutlined /> : <PlusOutlined />}
             type="primary"
             ghost
-            size="small"
             onClick={() => handleAdd(record)}
             disabled={isAdded || actionsDisabled}
           >

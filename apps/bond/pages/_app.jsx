@@ -3,8 +3,9 @@ import { useRouter } from 'next/router';
 import PropTypes from 'prop-types';
 import { Provider } from 'react-redux';
 
-import { AutonolasThemeProvider } from 'libs/ui-theme/src/lib/ThemeConfig';
+import { AutonolasThemeProvider } from 'libs/ui-theme/src';
 
+// TODO: should be imported from libs/ui-theme/src
 import GlobalStyle from 'components/GlobalStyles';
 import Layout from 'components/Layout';
 import { SITE } from 'util/meta';

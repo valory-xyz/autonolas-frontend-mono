@@ -7,11 +7,8 @@ import { Provider } from 'react-redux';
 import { WagmiProvider, cookieStorage, cookieToInitialState, createStorage } from 'wagmi';
 import { Chain } from 'wagmi/chains';
 
-import { COLOR } from '@autonolas/frontend-library';
-
 // TODO: should be able to import from 'libs/ui-theme'
-import { GlobalStyles } from 'libs/ui-theme/src/lib/GlobalStyles';
-import { AutonolasThemeProvider } from 'libs/ui-theme/src/lib/ThemeConfig';
+import { AutonolasThemeProvider, COLOR, GlobalStyles, W3M_BORDER_RADIUS } from 'libs/ui-theme/src';
 
 import { SUPPORTED_CHAINS } from '../common-util/Login/config';
 import Layout from '../components/Layout';
@@ -40,7 +37,7 @@ createWeb3Modal({
   projectId,
   themeMode: 'light',
   themeVariables: {
-    '--w3m-border-radius-master': '0.7125px',
+    '--w3m-border-radius-master': W3M_BORDER_RADIUS,
     '--w3m-font-size-master': '11px',
     '--w3m-accent': COLOR.PRIMARY,
   },

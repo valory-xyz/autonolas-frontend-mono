@@ -53,7 +53,8 @@ export const MEDIA_QUERY = {
   desktop: `@media only screen and (max-width: ${BREAK_POINT.xxl})`,
 };
 
-export const BORDER_RADIUS = '5px';
+export const BORDER_RADIUS = 8;
+export const W3M_BORDER_RADIUS = '1.4px';
 
 export const BOX_SHADOW = {
   light: '0px 1px 6px rgba(0, 0, 0, 0.15)',

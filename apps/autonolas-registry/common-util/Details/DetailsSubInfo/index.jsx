@@ -104,7 +104,7 @@ export const DetailsSubInfo = ({
       <>
         &nbsp;•&nbsp;
         {handleHashUpdate && (
-          <Button type="primary" ghost onClick={openUpdateHashModal}>
+          <Button size="large" type="primary" ghost onClick={openUpdateHashModal}>
             Update Hash
           </Button>
         )}
@@ -115,7 +115,7 @@ export const DetailsSubInfo = ({
       if ((componentAndAgentDependencies || []).length === 0) return 'None';
       return componentAndAgentDependencies.map((e) => (
         <li key={`${type}-dependency-${e}`}>
-          <Button type="link" onClick={() => navigateToDependency(e)}>
+          <Button size="large" type="link" onClick={() => navigateToDependency(e)}>
             {e}
           </Button>
         </li>

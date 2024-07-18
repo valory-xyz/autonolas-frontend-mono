@@ -1,10 +1,9 @@
 import { Flex, List } from 'antd';
 import Link from 'next/link';
 import PropTypes from 'prop-types';
-
-import { COLOR } from '@autonolas/frontend-library';
-
 import styled from 'styled-components';
+
+import { COLOR } from 'libs/ui-theme/src';
 
 const StyledLink = styled.a`
   text-decoration: underline;

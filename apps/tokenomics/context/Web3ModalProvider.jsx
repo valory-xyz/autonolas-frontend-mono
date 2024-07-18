@@ -1,10 +1,10 @@
-import { createWeb3Modal } from '@web3modal/wagmi';
-
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-
+import { createWeb3Modal } from '@web3modal/wagmi';
 import { WagmiProvider } from 'wagmi';
+
+import { COLOR, W3M_BORDER_RADIUS } from 'libs/ui-theme/src';
+
 import { wagmiConfig } from 'common-util/config/wagmi';
-import { COLOR } from '@autonolas/frontend-library';
 
 const queryClient = new QueryClient();
 
@@ -16,7 +16,7 @@ createWeb3Modal({
     '--w3m-font-family':
       "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji'",
     '--w3m-accent': COLOR.PRIMARY,
-    '--w3m-border-radius-master': '0.7125px',
+    '--w3m-border-radius-master': W3M_BORDER_RADIUS,
     '--w3m-font-size-master': '11px',
   },
 });

@@ -3,10 +3,9 @@ import Head from 'next/head';
 import Image from 'next/image';
 import { useRouter } from 'next/router';
 import { PropTypes } from 'prop-types';
-
-import { COLOR } from '@autonolas/frontend-library';
-
 import styled from 'styled-components';
+
+import { COLOR } from 'libs/ui-theme/src';
 
 import Address from 'components/Address';
 import StyledMain from 'components/GlobalStyles/StyledMain';

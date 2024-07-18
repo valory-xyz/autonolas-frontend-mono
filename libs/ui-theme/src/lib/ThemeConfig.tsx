@@ -1,10 +1,7 @@
 import { ConfigProvider as AntdConfigProvider, ConfigProviderProps, ThemeConfig } from 'antd';
 import { useEffect, useState } from 'react';
 
-
-
-import { COLOR } from './ui-theme';
-
+import { BORDER_RADIUS, COLOR } from './ui-theme';
 
 export const THEME_CONFIG: ThemeConfig = {
   token: {
@@ -30,9 +27,9 @@ export const THEME_CONFIG: ThemeConfig = {
     colorBgLayout: '#f2f4f9',
     colorBgSpotlight: '#132039d9',
     colorBgMask: '#1b263233',
-    borderRadius: 8,
+    borderRadius: BORDER_RADIUS,
     borderRadiusXS: 4,
-    borderRadiusLG: 12,
+    borderRadiusLG: BORDER_RADIUS,
     boxShadow:
       '0px 1px 2px 0px rgba(0, 0, 0, 0.03), 0px 1px 6px -1px rgba(0, 0, 0, 0.02), 0px 2px 4px 0px rgba(0, 0, 0, 0.02)',
     boxShadowSecondary:
@@ -70,7 +67,17 @@ export const THEME_CONFIG: ThemeConfig = {
     },
     Layout: {
       headerBg: COLOR.WHITE,
-      bodyBg: COLOR.WHITE,
+    },
+    Button: {
+      contentFontSizeLG: 16,
+    },
+    Input: {
+      paddingBlock: 8,
+      paddingInline: 12,
+    },
+    InputNumber: {
+      paddingBlock: 8,
+      paddingInline: 12,
     },
   },
 };

@@ -1,16 +1,15 @@
-import { useState } from 'react';
-import { Button, Form, InputNumber, Flex, Typography, Spin, Alert } from 'antd';
-import pDebounce from 'p-debounce';
+import { Alert, Button, Flex, Form, InputNumber, Spin, Typography } from 'antd';
 import { isNumber } from 'lodash';
-import {
-  getCommaSeparatedNumber,
-  notifyError,
-} from '@autonolas/frontend-library';
+import pDebounce from 'p-debounce';
+import { useState } from 'react';
+
+import { getCommaSeparatedNumber, notifyError } from '@autonolas/frontend-library';
 
 import { useSvmConnectivity } from 'common-util/hooks/useSvmConnectivity';
+
+import { SVM_AMOUNT_DIVISOR } from './constants';
 import { useWsolDeposit } from './hooks/useWsolDeposit';
 import { DEFAULT_SLIPPAGE, slippageValidator } from './utils';
-import { SVM_AMOUNT_DIVISOR } from './constants';
 
 const { Text } = Typography;
 
@@ -71,42 +70,25 @@ export const WsolDeposit = () => {
     }
   };
 
-  const isDepositButtonDisabled =
-    isEstimating || isDepositing || !isSvmWalletConnected;
+  const isDepositButtonDisabled = isEstimating || isDepositing || !isSvmWalletConnected;
   const estimatedOutput =
-    getCommaSeparatedNumber(
-      (estimatedQuote?.liquidity || 0) / SVM_AMOUNT_DIVISOR,
-    ) || '--';
+    getCommaSeparatedNumber((estimatedQuote?.liquidity || 0) / SVM_AMOUNT_DIVISOR) || '--';
 
   return (
     <>
-      <Form
-        form={form}
-        name="manage"
-        layout="vertical"
-        className="mt-16"
-        onFinish={handleDeposit}
-      >
+      <Form form={form} name="manage" layout="vertical" className="mt-16" onFinish={handleDeposit}>
         <Form.Item
           name="sol"
           label="SOL (WSOL)"
-          rules={[
-            { required: true, message: 'Please input a valid amount of SOL' },
-          ]}
+          rules={[{ required: true, message: 'Please input a valid amount of SOL' }]}
         >
-          <InputNumber
-            min={0}
-            className="full-width"
-            onChange={onWsolAndSlippageChange}
-          />
+          <InputNumber min={0} className="full-width" onChange={onWsolAndSlippageChange} />
         </Form.Item>
 
         <Form.Item
           name="olas"
           label="OLAS"
-          rules={[
-            { required: true, message: 'Please input a valid amount of OLAS' },
-          ]}
+          rules={[{ required: true, message: 'Please input a valid amount of OLAS' }]}
         >
           <InputNumber disabled className="full-width" />
         </Form.Item>
@@ -142,6 +124,7 @@ export const WsolDeposit = () => {
           </Spin>
 
           <Button
+            size="large"
             type="primary"
             htmlType="submit"
             loading={isDepositing}
@@ -157,9 +140,7 @@ export const WsolDeposit = () => {
           message={
             <>
               You received
-              <Text strong>
-                {` ${getCommaSeparatedNumber(bridgedTokenAmount)} WSOL-OLAS LP`}
-              </Text>
+              <Text strong>{` ${getCommaSeparatedNumber(bridgedTokenAmount)} WSOL-OLAS LP`}</Text>
             </>
           }
           type="success"

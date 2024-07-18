@@ -55,7 +55,11 @@ const NotFound = () => {
       </Paragraph>
 
       <Flex justify="center">
-        <Button type="primary" onClick={() => router.push(`/${networkName}/my-staking-contracts`)}>
+        <Button
+          size="large"
+          type="primary"
+          onClick={() => router.push(`/${networkName}/my-staking-contracts`)}
+        >
           My staking contracts
         </Button>
       </Flex>
@@ -122,7 +126,6 @@ const ContractAddress: FC<{ address: string }> = ({ address }) => {
       </a>
 
       <Button
-        size="small"
         icon={<CopyOutlined />}
         onClick={() => navigator.clipboard.writeText(address)}
         style={{ margin: '-4px 0 0 8px' }}

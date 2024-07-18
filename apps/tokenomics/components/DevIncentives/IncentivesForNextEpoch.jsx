@@ -101,7 +101,13 @@ export const IncentivesForNextEpoch = () => {
             </Form.Item>
 
             <Form.Item>
-              <Button type="primary" htmlType="submit" loading={isLoading} disabled={!account}>
+              <Button
+                size="large"
+                type="primary"
+                htmlType="submit"
+                loading={isLoading}
+                disabled={!account}
+              >
                 Estimate
               </Button>
 

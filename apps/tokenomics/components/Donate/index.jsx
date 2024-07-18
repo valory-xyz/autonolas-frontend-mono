@@ -7,9 +7,9 @@ import { NA, getFullFormattedDate, notifySuccess } from '@autonolas/frontend-lib
 
 import { DynamicFieldsForm } from 'common-util/DynamicFieldsForm';
 import { parseToEth, parseToWei, sortUnitIdsAndTypes } from 'common-util/functions';
+import { getEpochCounter, getLastEpochRequest } from 'common-util/functions/contract-functions';
 import { useHelpers } from 'common-util/hooks/useHelpers';
 
-import { getEpochCounter, getLastEpochRequest } from 'common-util/functions/contract-functions';
 import {
   checkServicesNotTerminatedOrNotDeployed,
   checkpointRequest,
@@ -196,6 +196,7 @@ export const DepositServiceDonation = () => {
 
         <EpochCheckpointRow>
           <Button
+            size="large"
             type="primary"
             loading={isCheckpointLoading}
             disabled={isEpochDetailsLoading || isExpectedEndTimeInFuture}

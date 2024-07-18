@@ -21,7 +21,6 @@ const { useBreakpoint } = Grid;
 const LoginContainer = styled.div`
   display: flex;
   align-items: center;
-  font-size: 18px;
   line-height: normal;
 `;
 
@@ -145,7 +144,8 @@ export const LoginV2 = ({
               loading={isPending}
               type="default"
               onClick={onSwitchNetwork}
-              icon={<SwapOutlined />}>
+              icon={<SwapOutlined />}
+            >
               {!isMobile && 'Switch network'}
             </YellowButton>
           )}

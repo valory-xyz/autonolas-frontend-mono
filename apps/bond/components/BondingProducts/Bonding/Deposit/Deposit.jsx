@@ -215,6 +215,7 @@ export const Deposit = ({
               LP balance:&nbsp;
               {getCommaSeparatedNumber(remainingLpSupplyInEth, 4)}
               <Button
+                size="large"
                 htmlType="button"
                 type="link"
                 onClick={() => {
@@ -249,6 +250,7 @@ export const Deposit = ({
           <br />
           <div className="align-right">
             <Button
+              size="large"
               type="primary"
               htmlType="submit"
               loading={isLoading}

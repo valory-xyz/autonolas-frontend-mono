@@ -54,7 +54,7 @@ const Proposal = ({ title, description, imageSrc, button }: Proposal) => (
       description={
         <>
           <Paragraph type="secondary">{description}</Paragraph>
-          <Button type="primary" ghost href={button.href} target="_blank">
+          <Button size="large" type="primary" ghost href={button.href} target="_blank">
             {`${button.title} ${UNICODE_SYMBOLS.EXTERNAL_LINK}`}
           </Button>
         </>

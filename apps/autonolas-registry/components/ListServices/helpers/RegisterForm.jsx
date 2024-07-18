@@ -1,18 +1,20 @@
-import { useEffect, useState } from 'react';
-import { useRouter } from 'next/router';
-import useDeepCompareEffect from 'use-deep-compare-effect';
-import PropTypes from 'prop-types';
 import { Button, Form, Input } from 'antd';
+import { useRouter } from 'next/router';
+import PropTypes from 'prop-types';
+import { useEffect, useState } from 'react';
+import useDeepCompareEffect from 'use-deep-compare-effect';
+
 import { isValidAddress, notifyError } from '@autonolas/frontend-library';
 
-import { DEFAULT_SERVICE_CREATION_ETH_TOKEN } from 'util/constants';
-import { commaMessage, DependencyLabel } from 'common-util/List/ListCommon';
-import { FormItemHash } from 'common-util/List/RegisterForm/helpers';
 import { IpfsHashGenerationModal } from 'common-util/List/IpfsHashGenerationModal';
+import { DependencyLabel, commaMessage } from 'common-util/List/ListCommon';
+import { FormItemHash } from 'common-util/List/RegisterForm/helpers';
 import { ComplexLabel } from 'common-util/List/styles';
 import { RegistryForm } from 'common-util/TransactionHelpers/RegistryForm';
 import { isValidSolanaPublicKey } from 'common-util/functions';
 import { useHelpers } from 'common-util/hooks';
+import { DEFAULT_SERVICE_CREATION_ETH_TOKEN } from 'util/constants';
+
 import { ThresholdInput } from './ThresholdInput';
 
 export const FORM_NAME = 'serviceRegisterForm';
@@ -33,9 +35,7 @@ const agentIdValidator = (form, value) => {
   const bondsLength = value.split(',').length;
 
   if (agentIdsLength !== bondsLength) {
-    return Promise.reject(
-      new Error('Must have same number of items as "Canonical agent Ids"'),
-    );
+    return Promise.reject(new Error('Must have same number of items as "Canonical agent Ids"'));
   }
 
   return Promise.resolve();
@@ -49,17 +49,13 @@ const validateOwnerAddress = async (isSvm, listType, value) => {
     if (isValidSolanaPublicKey(value)) return Promise.resolve();
 
     return Promise.reject(
-      new Error(
-        `Please input a valid SVM public key for the ${listType} Owner`,
-      ),
+      new Error(`Please input a valid SVM public key for the ${listType} Owner`),
     );
   }
 
   if (isValidAddress(value)) return Promise.resolve();
 
-  return Promise.reject(
-    new Error(`Please input a valid address for the ${listType} Owner`),
-  );
+  return Promise.reject(new Error(`Please input a valid address for the ${listType} Owner`));
 };
 
 /**
@@ -73,8 +69,7 @@ const RegisterForm = ({
   ethTokenAddress,
   handleSubmit,
 }) => {
-  const { account, doesNetworkHaveValidServiceManagerToken, isSvm } =
-    useHelpers();
+  const { account, doesNetworkHaveValidServiceManagerToken, isSvm } = useHelpers();
 
   const [form] = Form.useForm();
   const [isModalVisible, setIsModalVisible] = useState(false);
@@ -102,15 +97,11 @@ const RegisterForm = ({
       // eg: agentParams: [[1, 2, 1], [5000000000000, 5000000000000, 5000000000000]]
       const agentNumSlots = isSvm
         ? formInitialValues.slots?.join(', ')
-        : (formInitialValues.agentParams || [])
-            .map((param) => param[0])
-            .join(', ');
+        : (formInitialValues.agentParams || []).map((param) => param[0]).join(', ');
 
       const bonds = isSvm
         ? formInitialValues.bonds?.join(', ')
-        : (formInitialValues.agentParams || [])
-            .map((param) => param[1])
-            .join(', ');
+        : (formInitialValues.agentParams || []).map((param) => param[1]).join(', ');
 
       setFields([
         { name: ['owner_address'], value: formInitialValues.owner || null },
@@ -122,9 +113,7 @@ const RegisterForm = ({
         },
         {
           name: ['agent_ids'],
-          value: formInitialValues.agentIds
-            ? formInitialValues.agentIds.join(', ')
-            : null,
+          value: formInitialValues.agentIds ? formInitialValues.agentIds.join(', ') : null,
         },
         { name: ['agent_num_slots'], value: agentNumSlots },
         { name: ['bonds'], value: bonds },
@@ -198,19 +187,16 @@ const RegisterForm = ({
               message: `Please input the address of the ${listType} Owner`,
             },
             () => ({
-              validator: (_, value) =>
-                validateOwnerAddress(isSvm, listType, value),
+              validator: (_, value) => validateOwnerAddress(isSvm, listType, value),
             }),
           ]}
         >
-          <Input
-            placeholder={isSvm ? 'pWK1v…' : '0x862…'}
-            disabled={isUpdateForm}
-          />
+          <Input placeholder={isSvm ? 'pWK1v…' : '0x862…'} disabled={isUpdateForm} />
         </Form.Item>
 
         <Form.Item className="mb-0">
           <Button
+            size="large"
             htmlType="button"
             type="link"
             onClick={handlePrefillAddress}
@@ -230,9 +216,7 @@ const RegisterForm = ({
               tooltip="Generic ERC20 token address to secure the service (ETH by default)"
               // dedicated address for standard ETH secured service creation
               // user can change it if they want to use a different generic token
-              initialValue={
-                ethTokenAddress || DEFAULT_SERVICE_CREATION_ETH_TOKEN
-              }
+              initialValue={ethTokenAddress || DEFAULT_SERVICE_CREATION_ETH_TOKEN}
               className="mb-0"
               rules={[
                 {
@@ -242,9 +226,7 @@ const RegisterForm = ({
                 () => ({
                   validator(_, value) {
                     if (isValidAddress(value)) return Promise.resolve();
-                    return Promise.reject(
-                      new Error('Please input a valid address'),
-                    );
+                    return Promise.reject(new Error('Please input a valid address'));
                   },
                 }),
               ]}
@@ -253,6 +235,7 @@ const RegisterForm = ({
             </Form.Item>
             <Form.Item className="mb-0">
               <Button
+                size="large"
                 htmlType="button"
                 type="link"
                 onClick={() =>
@@ -282,6 +265,7 @@ const RegisterForm = ({
         <FormItemHash listType={listType} hashValue={hashValue} />
 
         <Button
+          size="large"
           type="primary"
           ghost
           onClick={() => setIsModalVisible(true)}
@@ -324,9 +308,8 @@ const RegisterForm = ({
             <ComplexLabel>
               No. of slots to canonical agent Ids
               <div className="label-helper-text">
-                Specify the number of agent instances for each canonical agent
-                listed above. Each canonical agent must have at least one
-                instance.&nbsp;
+                Specify the number of agent instances for each canonical agent listed above. Each
+                canonical agent must have at least one instance.&nbsp;
                 {commaMessage}
               </div>
             </ComplexLabel>
@@ -367,6 +350,7 @@ const RegisterForm = ({
 
         <Form.Item>
           <Button
+            size="large"
             type="primary"
             htmlType="submit"
             loading={isLoading}
@@ -396,20 +380,14 @@ RegisterForm.propTypes = {
     name: PropTypes.string,
     description: PropTypes.string,
     configHash: PropTypes.string,
-    agentIds: PropTypes.arrayOf(
-      PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-    ),
+    agentIds: PropTypes.arrayOf(PropTypes.oneOfType([PropTypes.string, PropTypes.number])),
     agentNumSlots: PropTypes.arrayOf(PropTypes.string),
     agentParams: PropTypes.arrayOf(PropTypes.shape({})),
     threshold: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
 
     // the values below are present for SVM only 👇
-    bonds: PropTypes.arrayOf(
-      PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-    ),
-    slots: PropTypes.arrayOf(
-      PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-    ),
+    bonds: PropTypes.arrayOf(PropTypes.oneOfType([PropTypes.string, PropTypes.number])),
+    slots: PropTypes.arrayOf(PropTypes.oneOfType([PropTypes.string, PropTypes.number])),
   }),
   handleSubmit: PropTypes.func.isRequired,
   ethTokenAddress: PropTypes.string,

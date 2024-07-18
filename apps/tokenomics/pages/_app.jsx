@@ -5,6 +5,7 @@ import { Provider } from 'react-redux';
 
 import { AutonolasThemeProvider } from 'libs/ui-theme/src';
 
+// TODO: should be imported from libs/ui-theme/src
 import GlobalStyle from 'components/GlobalStyles';
 
 /** antd theme config */

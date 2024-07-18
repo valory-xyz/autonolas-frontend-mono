@@ -1,6 +1,7 @@
-import styled from 'styled-components';
 import { Layout } from 'antd';
-import { COLOR, MEDIA_QUERY } from '@autonolas/frontend-library';
+import styled from 'styled-components';
+
+import { COLOR, MEDIA_QUERY } from 'libs/ui-theme/src';
 
 export const CustomLayout = styled(Layout)`
   ${MEDIA_QUERY.tablet} {

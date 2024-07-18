@@ -47,7 +47,7 @@ export const ContractDoesNotExist = () => {
 
       <Flex align="center" justify="center">
         <Link href={`/${networkName}/my-staking-contracts`} passHref>
-          <Button className="mt-24" type="primary" ghost>
+          <Button size="large" className="mt-24" type="primary" ghost>
             View my staking contracts
           </Button>
         </Link>
@@ -74,7 +74,7 @@ export const ContractAlreadyNominated: FC<{ contractName: string }> = ({ contrac
 
       <Flex align="center" justify="center">
         <Link href={`/${networkName}/my-staking-contracts`} passHref>
-          <Button className="mt-24" type="primary" ghost>
+          <Button size="large" className="mt-24" type="primary" ghost>
             View my staking contracts
           </Button>
         </Link>
@@ -154,7 +154,7 @@ export const ErrorTransaction: FC<ErrorTransactionProps> = ({
 
     {onRetry && (
       <Flex justify="center">
-        <Button onClick={onRetry} type="primary" ghost>
+        <Button size="large" onClick={onRetry} type="primary" ghost>
           <ReloadOutlined /> Try again
         </Button>
       </Flex>
