@@ -94,7 +94,7 @@ export const cspHeader = (browserName?: string) => {
           'https://explorer-api.walletconnect.com/w3m/',
           ...walletconnectSrc,
         ],
-        'style-src': ["'self'", 'https://fonts.googleapis.com/'],
+        'style-src': ["'self'", 'https://fonts.googleapis.com/', "'unsafe-inline'"],
         'font-src': ["'self'", 'https://fonts.gstatic.com/'],
         'frame-src': ["'self'", 'https://vercel.live/', ...walletconnectSrc],
         'object-src': "'none'",
