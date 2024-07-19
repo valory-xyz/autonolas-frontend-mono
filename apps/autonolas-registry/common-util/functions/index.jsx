@@ -1,5 +1,6 @@
 import { PublicKey } from '@solana/web3.js';
 import { ethers } from 'ethers';
+import { isString } from 'lodash';
 
 import {
   getChainIdOrDefaultToMainnet as getChainIdOrDefaultToMainnetFn,
@@ -9,9 +10,6 @@ import {
   notifyWarning,
   sendTransaction as sendTransactionFn,
 } from '@autonolas/frontend-library';
-
-import prohibitedAddresses from 'libs/util-prohibited-data/src/lib/prohibited-addresses.json';
-import { isString, toLower } from 'lodash';
 
 import { VM_TYPE } from '../../util/constants';
 import { RPC_URLS } from '../Contracts';
@@ -177,11 +175,6 @@ export const checkIfGnosisSafe = async (account, provider) => {
  * defaults to true BUT can be overridden for specific networks in the future.
  */
 export const doesNetworkHaveValidServiceManagerTokenFn = (chainId) => !!chainId;
-
-export const isAddressProhibited = (address) => {
-  const addresses = prohibitedAddresses.map((e) => toLower(e));
-  return addresses.includes(toLower(address));
-};
 
 const doesPathIncludesComponents = (path) => !!path?.includes('components');
 const doesPathIncludesAgents = (path) => !!path?.includes('agents');

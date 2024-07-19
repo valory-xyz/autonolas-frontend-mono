@@ -1,23 +1,21 @@
+import { Grid } from 'antd';
+import PropTypes from 'prop-types';
 import { useEffect } from 'react';
 import { useDispatch } from 'react-redux';
-import Web3 from 'web3';
-import PropTypes from 'prop-types';
-import { Grid } from 'antd';
-import { useAccount, useBalance, useDisconnect } from 'wagmi';
 import styled from 'styled-components';
+import { useAccount, useBalance, useDisconnect } from 'wagmi';
+import Web3 from 'web3';
+
 import {
   CannotConnectAddressOfacError,
   MEDIA_QUERY,
   notifyError,
 } from '@autonolas/frontend-library';
 
-import { setChainId, setUserBalance } from 'store/setup';
-import {
-  getChainId,
-  getChainIdOrDefaultToMainnet,
-} from 'common-util/functions/frontend-library';
+import { isAddressProhibited } from 'libs/util-prohibited-data/src/index';
 
-import { isAddressProhibited } from 'common-util/functions/addresses';
+import { getChainId, getChainIdOrDefaultToMainnet } from 'common-util/functions/frontend-library';
+import { setChainId, setUserBalance } from 'store/setup';
 
 const LoginContainer = styled.div`
   display: flex;
@@ -31,10 +29,7 @@ const LoginContainer = styled.div`
 
 const { useBreakpoint } = Grid;
 
-export const LoginV2 = ({
-  onConnect: onConnectCb,
-  onDisconnect: onDisconnectCb,
-}) => {
+export const LoginV2 = ({ onConnect: onConnectCb, onDisconnect: onDisconnectCb }) => {
   const dispatch = useDispatch();
   const { disconnect } = useDisconnect();
   const { chainId } = useAccount();
@@ -87,8 +82,7 @@ export const LoginV2 = ({
         // This is the initial `provider` that is returned when
         // using web3Modal to connect. Can be MetaMask or WalletConnect.
         const modalProvider =
-          connector?.options?.getProvider?.() ||
-          (await connector?.getProvider?.());
+          connector?.options?.getProvider?.() || (await connector?.getProvider?.());
 
         if (modalProvider) {
           // We plug the initial `provider` and get back
@@ -113,10 +107,7 @@ export const LoginV2 = ({
             // cleanup
             return () => {
               if (modalProvider.removeListener) {
-                modalProvider.removeListener(
-                  'chainChanged',
-                  handleChainChanged,
-                );
+                modalProvider.removeListener('chainChanged', handleChainChanged);
               }
             };
           }

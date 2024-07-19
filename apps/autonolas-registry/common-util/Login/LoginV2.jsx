@@ -9,10 +9,11 @@ import { useAccount, useBalance, useDisconnect, useSwitchChain } from 'wagmi';
 
 import { CannotConnectAddressOfacError, notifyError, useScreen } from '@autonolas/frontend-library';
 
+import { isAddressProhibited } from 'libs/util-prohibited-data/src/index';
+
 import { setUserBalance } from 'store/setup';
 
 import { YellowButton } from '../YellowButton';
-import { isAddressProhibited } from '../functions';
 import { useHelpers } from '../hooks';
 import { SolanaWallet } from './SolanaWallet';
 
@@ -145,7 +146,8 @@ export const LoginV2 = ({
               loading={isPending}
               type="default"
               onClick={onSwitchNetwork}
-              icon={<SwapOutlined />}>
+              icon={<SwapOutlined />}
+            >
               {!isMobile && 'Switch network'}
             </YellowButton>
           )}
