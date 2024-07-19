@@ -1,4 +1,3 @@
-export * from './addresses';
 export * from './errors';
 export * from './ethers';
 export * from './time';
