@@ -107,7 +107,7 @@ export const getCspHeaders = () => {
          * @see https://scotthelme.co.uk/can-you-get-pwned-with-css/
          */
         'style-src': ["'self'", 'https://fonts.googleapis.com/', "'unsafe-inline'"],
-        'font-src': ["'self", 'https://fonts.gstatic.com'],
+        'font-src': ["'self'", 'https://fonts.gstatic.com'],
         'frame-src': ["'self'", 'https://vercel.live/', ...WALLET_CONNECT_LINKS],
       },
       permissionsPolicyDirectiveSupport: ['standard'],
