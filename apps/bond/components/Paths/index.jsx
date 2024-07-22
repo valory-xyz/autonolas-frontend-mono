@@ -9,7 +9,6 @@ import { COLOR } from 'libs/ui-theme/src';
 import pathData from './data.json';
 
 const StyledCard = styled(Card)`
-  border-color: ${COLOR.BORDER_GREY};
   width: 100%;
   .ant-card-body {
     padding: 32px;

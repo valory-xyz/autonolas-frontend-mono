@@ -5,12 +5,10 @@ import { useRouter } from 'next/router';
 import { PropTypes } from 'prop-types';
 import styled from 'styled-components';
 
-import { COLOR } from 'libs/ui-theme/src';
-
 import Address from 'components/Address';
-import StyledMain from 'components/GlobalStyles/StyledMain';
 import PathContent from 'components/PathContent';
 import pathData from 'components/Paths/data.json';
+import { StyledMain } from 'components/StyledMain';
 import { OLAS_ETHEREUM_TOKEN_ADDRESS } from 'util/constants';
 import { SITE } from 'util/meta';
 
@@ -23,7 +21,6 @@ const Upcase = styled(Typography.Text)`
 `;
 
 const StyledCard = styled(Card)`
-  border-color: ${COLOR.BORDER_GREY};
   width: 100%;
   .ant-card-body {
     padding: 32px;
@@ -247,7 +244,6 @@ const PathDetailPage = ({ path: { name, network, id, bond, networkId, customSubt
           </Col>
         </Row>
 
-        <br />
         <br />
         <Row gutter={[48, 48]}>
           <Col xs={24} lg={12}>

@@ -121,7 +121,7 @@ export const MyBonds = () => {
 
   return (
     <div>
-      <Title level={2} className="choose-type-group">
+      <Title level={2} className="mt-0 choose-type-group">
         My Bonds
         <Radio.Group
           onChange={(e) => setMaturityType(e.target.value)}

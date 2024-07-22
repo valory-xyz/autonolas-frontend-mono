@@ -4,12 +4,9 @@ import Image from 'next/image';
 import { useState } from 'react';
 import styled from 'styled-components';
 
-import { COLOR } from 'libs/ui-theme/src';
-
 const { useBreakpoint } = Grid;
 
 const StyledCard = styled(Card)`
-  border-color: ${COLOR.BORDER_GREY};
   width: 100%;
   margin-bottom: 24px;
   .ant-card-body {

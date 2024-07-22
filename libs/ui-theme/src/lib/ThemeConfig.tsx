@@ -15,11 +15,11 @@ export const THEME_CONFIG: ThemeConfig = {
     colorLink: COLOR.PRIMARY,
     colorInfoHover: '#4096ff',
     colorText: '#1f2229',
-    colorTextSecondary: '#4d596a',
+    colorTextSecondary: COLOR.SECONDARY,
     colorTextTertiary: '#606f85',
     colorTextQuaternary: '#a3aebb',
-    colorBorder: '#c2cbd7',
-    colorBorderSecondary: '#dfe5ee',
+    colorBorder: COLOR.BORDER_GREY,
+    colorBorderSecondary: COLOR.BORDER_GREY_2,
     colorFill: '#0b1e4126',
     colorFillSecondary: '#0b1e410f',
     colorFillTertiary: '#0b1e410a',
@@ -78,6 +78,12 @@ export const THEME_CONFIG: ThemeConfig = {
     InputNumber: {
       paddingBlock: 8,
       paddingInline: 12,
+    },
+    List: {
+      colorBorder: COLOR.BORDER_GREY_2,
+    },
+    Collapse: {
+      colorBorder: COLOR.BORDER_GREY_2,
     },
   },
 };

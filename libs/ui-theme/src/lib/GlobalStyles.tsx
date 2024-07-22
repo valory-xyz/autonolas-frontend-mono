@@ -33,6 +33,9 @@ export const GlobalStyles = createGlobalStyle`
   .mb-0 {
     margin-bottom: 0px !important;
   }
+  .mb-4 {
+    margin-bottom: 4px !important;
+  }
   .mb-8 {
     margin-bottom: 8px !important;
   }
@@ -108,6 +111,10 @@ export const GlobalStyles = createGlobalStyle`
   }
   .text-end {
     text-align: end;
+  }
+
+  .full-width {
+    width: 100%;
   }
 
   /* layout */

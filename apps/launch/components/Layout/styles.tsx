@@ -39,7 +39,7 @@ export const RightMenu = styled.div`
 
 export const OlasHeader = styled(Layout.Header)`
   padding: 0 40px;
-  border-bottom: 1px solid ${COLOR.BORDER_GREY};
+  border-bottom: 1px solid ${COLOR.BORDER_GREY_2};
   display: flex;
   align-items: center;
 `;

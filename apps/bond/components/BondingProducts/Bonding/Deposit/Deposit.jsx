@@ -183,7 +183,7 @@ export const Deposit = ({
           </Tag>
 
           <Form.Item
-            className="custom-form-item-tokenAmount"
+            className="mb-4"
             label="LP Token Amount"
             name="tokenAmount"
             extra={
@@ -248,7 +248,7 @@ export const Deposit = ({
           />
 
           <br />
-          <div className="align-right">
+          <div className="text-end">
             <Button
               size="large"
               type="primary"

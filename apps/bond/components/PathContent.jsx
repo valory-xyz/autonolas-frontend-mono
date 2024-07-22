@@ -7,12 +7,12 @@ import { COLOR } from 'libs/ui-theme/src';
 
 const StyledLink = styled.a`
   text-decoration: underline;
-  color: ${COLOR.GREY_2};
+  color: ${COLOR.SECONDARY};
 `;
 
 const NextStyledLink = styled(Link)`
   text-decoration: underline;
-  color: ${COLOR.GREY_2};
+  color: ${COLOR.SECONDARY};
 `;
 
 const SvmDeposit = () => (
