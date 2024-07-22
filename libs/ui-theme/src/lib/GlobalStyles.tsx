@@ -84,6 +84,9 @@ export const GlobalStyles = createGlobalStyle`
   .mr-16 {
     margin-right: 16px;
   }
+  .mr-24 {
+    margin-right: 24px;
+  }
   .ml-4 {
     margin-left: 4px;
   }

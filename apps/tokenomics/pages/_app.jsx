@@ -3,10 +3,7 @@ import { useRouter } from 'next/router';
 import PropTypes from 'prop-types';
 import { Provider } from 'react-redux';
 
-import { AutonolasThemeProvider } from 'libs/ui-theme/src';
-
-// TODO: should be imported from libs/ui-theme/src
-import GlobalStyle from 'components/GlobalStyles';
+import { AutonolasThemeProvider, GlobalStyles } from 'libs/ui-theme/src';
 
 /** antd theme config */
 import Layout from 'components/Layout';
@@ -24,7 +21,7 @@ const MyApp = ({ Component, pageProps }) => {
         <title>Olas Tokenomics</title>
         <meta name="title" content="Olas Tokenomics" />
       </Head>
-      <GlobalStyle />
+      <GlobalStyles />
       <Provider store={store}>
         <AutonolasThemeProvider>
           {isNotLegal ? (

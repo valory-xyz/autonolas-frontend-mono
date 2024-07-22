@@ -25,7 +25,7 @@ const { Header, Content } = AntdLayout;
 const endpoint = process.env.NEXT_PUBLIC_SOLANA_MAINNET_BETA_URL;
 
 const StyledHeader = styled(Header)`
-  border-bottom: 1px solid ${COLOR.BORDER_GREY};
+  border-bottom: 1px solid ${COLOR.BORDER_GREY_2};
 `;
 
 const ExternalLink = ({ name }) => (

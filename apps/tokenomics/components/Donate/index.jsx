@@ -144,7 +144,9 @@ export const DepositServiceDonation = () => {
   return (
     <DonateContainer>
       <div className="donate-section">
-        <Title level={2}>Donate</Title>
+        <Title level={2} className="mt-0">
+          Donate
+        </Title>
         <Paragraph>
           Show appreciation for the value of an autonomous service by making a donation. The
           protocol will reward devs who have contributed code for that service.
@@ -185,7 +187,9 @@ export const DepositServiceDonation = () => {
       </div>
 
       <div className="last-epoch-section">
-        <Title level={2}>Epoch Status</Title>
+        <Title level={2} className="mt-0">
+          Epoch Status
+        </Title>
 
         {epochStatusList.map((e, index) => (
           <EpochStatus key={`epoch-section-${index}`}>

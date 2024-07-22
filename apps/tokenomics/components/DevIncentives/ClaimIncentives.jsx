@@ -60,7 +60,7 @@ export const ClaimIncentives = () => {
     <>
       {pauseValue === '0' ? null : (
         <>
-          <Divider style={{ backgroundColor: COLOR.BORDER_GREY }} />
+          <Divider style={{ backgroundColor: COLOR.BORDER_GREY_2 }} />
 
           <Title level={3}>Claim Rewards</Title>
 

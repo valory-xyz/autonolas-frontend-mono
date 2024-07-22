@@ -10,7 +10,7 @@ export const DonateContainer = styled.div`
   .last-epoch-section {
     padding-left: 1rem;
     margin-left: 1rem;
-    border-left: 1px solid ${COLOR.BORDER_GREY};
+    border-left: 1px solid ${COLOR.BORDER_GREY_2};
   }
 
   ${MEDIA_QUERY.mobileL} {
