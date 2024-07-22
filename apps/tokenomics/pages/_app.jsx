@@ -3,12 +3,11 @@ import { useRouter } from 'next/router';
 import PropTypes from 'prop-types';
 import { Provider } from 'react-redux';
 
-import GlobalStyle from 'components/GlobalStyles';
+import { AutonolasThemeProvider, GlobalStyles } from 'libs/ui-theme/src';
 
 /** antd theme config */
 import Layout from 'components/Layout';
 
-import { ThemeConfigProvider } from '../context/ConfigProvider';
 import Web3ModalProvider from '../context/Web3ModalProvider';
 import { store } from '../store';
 
@@ -22,9 +21,9 @@ const MyApp = ({ Component, pageProps }) => {
         <title>Olas Tokenomics</title>
         <meta name="title" content="Olas Tokenomics" />
       </Head>
-      <GlobalStyle />
+      <GlobalStyles />
       <Provider store={store}>
-        <ThemeConfigProvider>
+        <AutonolasThemeProvider>
           {isNotLegal ? (
             <Component {...pageProps} />
           ) : (
@@ -34,7 +33,7 @@ const MyApp = ({ Component, pageProps }) => {
               </Layout>
             </Web3ModalProvider>
           )}
-        </ThemeConfigProvider>
+        </AutonolasThemeProvider>
       </Provider>
     </>
   );

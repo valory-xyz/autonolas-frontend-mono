@@ -84,7 +84,13 @@ export const Details: FC<DetailsProps> = ({
 
         <div className="right-content">
           {canShowUpdateBtn && (
-            <Button type="primary" ghost onClick={handleUpdate} data-testid="service-update-button">
+            <Button
+              size="large"
+              type="primary"
+              ghost
+              onClick={handleUpdate}
+              data-testid="service-update-button"
+            >
               Update
             </Button>
           )}

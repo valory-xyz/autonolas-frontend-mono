@@ -78,7 +78,7 @@ const useColumns = () => {
                 </Tag>
               ) : (
                 <Link href={`/${URL.nominateContract}/${record.id}`} passHref>
-                  <Button type="primary" ghost size="small">
+                  <Button type="primary" ghost>
                     Nominate
                   </Button>
                 </Link>

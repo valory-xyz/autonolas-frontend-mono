@@ -1,19 +1,21 @@
-import { useState, useEffect, useCallback } from 'react';
-import PropTypes from 'prop-types';
-import { Button, Steps, Tooltip, Image } from 'antd';
+import { Button, Image, Steps, Tooltip } from 'antd';
 import get from 'lodash/get';
+import PropTypes from 'prop-types';
+import { useCallback, useEffect, useState } from 'react';
+
 import { notifyError, notifySuccess } from '@autonolas/frontend-library';
 
 import { useHelpers } from 'common-util/hooks';
-import { getServiceTableDataSource, checkIfEth } from './utils';
+
+import { useSvmServiceTableDataSource } from '../hooks/useSvmService';
 import { PreRegistration } from './1StepPreRegistration';
 import { ActiveRegistration } from './2StepActiveRegistration';
 import { FinishedRegistration } from './3rdStepFinishedRegistration';
 import { Deployed } from './4thStepDeployed';
 import { Unbond } from './5StepUnbond';
-import { useSvmServiceTableDataSource } from '../hooks/useSvmService';
+import { GenericLabel, InfoSubHeader, ServiceStateContainer } from './styles';
 import { useTerminate } from './useSvmServiceStateManagement';
-import { InfoSubHeader, GenericLabel, ServiceStateContainer } from './styles';
+import { checkIfEth, getServiceTableDataSource } from './utils';
 
 const SERVICE_STATE_HELPER_LABELS = {
   'pre-registration': 'The service has just been minted.',
@@ -34,7 +36,7 @@ const ServiceStateHeader = () => {
     <>
       <InfoSubHeader>
         State
-        <Button type="link" size="large" onClick={onLearnAbout}>
+        <Button size="large" type="link" onClick={onLearnAbout}>
           Learn about service states
         </Button>
       </InfoSubHeader>
@@ -58,8 +60,7 @@ const ServiceStateHeader = () => {
 };
 
 export const ServiceState = ({ isOwner, id, details, updateDetails }) => {
-  const { account, chainId, isSvm, doesNetworkHaveValidServiceManagerToken } =
-    useHelpers();
+  const { account, chainId, isSvm, doesNetworkHaveValidServiceManagerToken } = useHelpers();
   const [currentStep, setCurrentStep] = useState(1);
   const [dataSource, setDataSource] = useState([]);
   const onTerminate = useTerminate();
@@ -80,8 +81,7 @@ export const ServiceState = ({ isOwner, id, details, updateDetails }) => {
   const threshold = get(details, 'threshold') || '';
   const owner = get(details, 'owner') || '';
   const securityDeposit = get(details, 'securityDeposit');
-  const canShowMultisigSameAddress =
-    get(details, 'multisig') !== `0x${'0'.repeat(40)}`;
+  const canShowMultisigSameAddress = get(details, 'multisig') !== `0x${'0'.repeat(40)}`;
 
   // get service table data source and check if it's an eth token
   useEffect(() => {

@@ -20,7 +20,6 @@ import { setChainId, setUserBalance } from 'store/setup';
 const LoginContainer = styled.div`
   display: flex;
   align-items: center;
-  font-size: 18px;
   line-height: normal;
   ${MEDIA_QUERY.mobileL} {
     margin-top: 0.5rem;

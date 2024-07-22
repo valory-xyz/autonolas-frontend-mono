@@ -18,13 +18,13 @@ import { clearState } from 'store/govern';
 import { useAppDispatch, useAppSelector } from 'store/index';
 
 import { ConfirmModal } from './ConfirmModal';
+import { MAX_ALLOCATED_POWER, getReorderedVotes } from './utils';
 import {
   checkLockNotExpired,
   checkNoDisabledContracts,
   checkNoRemovedNominees,
   checkNotNegativeSlope,
 } from './validations';
-import { MAX_ALLOCATED_POWER, getReorderedVotes } from './utils';
 
 const { Paragraph, Text } = Typography;
 
@@ -82,6 +82,7 @@ const getColumns = (
           data-testid={`my-voting-weight-input-${index}`}
         />
         <Button
+          size="large"
           icon={<DeleteOutlined />}
           onClick={() => removeAllocation(index)}
           style={{ flex: 'none' }}
@@ -220,8 +221,11 @@ export const EditVotes = ({ allocations, setAllocations, setIsUpdating }: EditVo
         New voting weight will take effect at the beginning of the next week.
       </Paragraph>
       <Flex gap={12} justify="flex-end">
-        <Button onClick={onCancel}>Cancel</Button>
+        <Button size="large" onClick={onCancel}>
+          Cancel
+        </Button>
         <Button
+          size="large"
           type="primary"
           onClick={showModal}
           disabled={allocations.length === 0 || allocatedPower === 0 || isError}

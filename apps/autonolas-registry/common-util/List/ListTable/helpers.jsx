@@ -1,9 +1,6 @@
-import { Space, Button } from 'antd';
-import {
-  AddressLink,
-  areAddressesEqual,
-  NA,
-} from '@autonolas/frontend-library';
+import { Button, Space } from 'antd';
+
+import { AddressLink, NA, areAddressesEqual } from '@autonolas/frontend-library';
 
 import {
   HASH_PREFIX,
@@ -15,15 +12,7 @@ import {
 
 export const getTableColumns = (
   type,
-  {
-    onViewClick,
-    onUpdateClick,
-    isMobile,
-    chainName,
-    account,
-    chainId,
-    isMainnet,
-  },
+  { onViewClick, onUpdateClick, isMobile, chainName, account, chainId, isMainnet },
 ) => {
   const addressLinkProps = {
     chainId,
@@ -45,7 +34,7 @@ export const getTableColumns = (
     render: (text, record) => {
       if (!text || text === NA) return NA;
       return (
-        <Button type="link" onClick={() => onViewClick(record.id)}>
+        <Button size="large" type="link" onClick={() => onViewClick(record.id)}>
           {text}
         </Button>
       );
@@ -71,9 +60,7 @@ export const getTableColumns = (
     render: (text) => {
       if (!text || text === NA) return NA;
       const updatedText = text.replace(HASH_PREFIX, '0x'); // .toUpperCase();
-      return (
-        <AddressLink {...addressLinkProps} text={updatedText} isIpfsLink />
-      );
+      return <AddressLink {...addressLinkProps} text={updatedText} isIpfsLink />;
     },
   };
 
@@ -91,7 +78,7 @@ export const getTableColumns = (
       key: 'action',
       fixed: 'right',
       render: (_text, record) => (
-        <Button type="link" onClick={() => onViewClick(record.id)}>
+        <Button size="large" type="link" onClick={() => onViewClick(record.id)}>
           View
         </Button>
       ),
@@ -128,6 +115,7 @@ export const getTableColumns = (
         return (
           <Space size="middle">
             <Button
+              size="large"
               type="link"
               onClick={() => onViewClick(record.id)}
               disabled={record.owner === NA}
@@ -136,7 +124,7 @@ export const getTableColumns = (
             </Button>
 
             {canUpdate && onUpdateClick && (
-              <Button type="link" onClick={() => onUpdateClick(record.id)}>
+              <Button size="large" type="link" onClick={() => onUpdateClick(record.id)}>
                 Update
               </Button>
             )}
@@ -159,36 +147,19 @@ export const getTableColumns = (
       width: 200,
       render: (text) => {
         if (!text || text === NA) return NA;
-        return (
-          <AddressLink
-            {...addressLinkProps}
-            text={text}
-            chainName={chainName}
-          />
-        );
+        return <AddressLink {...addressLinkProps} text={text} chainName={chainName} />;
       },
     };
 
     return isMainnet
-      ? [
-          tokenIdColumn,
-          packageName,
-          ownerColumn,
-          hashColumn,
-          stateColumn,
-          actionAndUpdateColumn,
-        ]
+      ? [tokenIdColumn, packageName, ownerColumn, hashColumn, stateColumn, actionAndUpdateColumn]
       : [idColumn, nonMainnetOwnerColumn, stateColumn, actionAndUpdateColumn];
   }
 
   return [];
 };
 
-export const convertTableRawData = (
-  type,
-  rawData,
-  { currentPage, isMainnet },
-) => {
+export const convertTableRawData = (type, rawData, { currentPage, isMainnet }) => {
   /**
    * @example
    * TOTAL_VIEW_COUNT = 10, current = 1

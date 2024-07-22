@@ -27,6 +27,7 @@ export const SwitchNetworkSelect: FC = () => {
   return (
     <div style={{ marginRight: isMobile ? 8 : 0 }}>
       <Select
+        size="large"
         showSearch
         className="show-scrollbar"
         style={{ width: isMobile ? 140 : 200 }}

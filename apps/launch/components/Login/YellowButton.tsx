@@ -17,6 +17,6 @@ export const YellowButton: FC<YellowButtonProps> = ({ children, ...props }) => (
       },
     }}
   >
-    <Button {...props}>{children}</Button>
+    <Button {...props} size="large">{children}</Button>
   </ConfigProvider>
 );

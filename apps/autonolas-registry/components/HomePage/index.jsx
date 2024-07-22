@@ -1,11 +1,10 @@
-import {
-  Button, Col, Row, Typography,
-} from 'antd';
-import Link from 'next/link';
+import { Button, Col, Row, Typography } from 'antd';
 import Image from 'next/image';
+import Link from 'next/link';
 
-import { useScreen } from 'common-util/hooks/useScreen';
 import { useHelpers } from 'common-util/hooks/useHelpers';
+import { useScreen } from 'common-util/hooks/useScreen';
+
 import { AutonolasServicesArchitected } from './AutonolasServicesArchitected';
 import { Container, HeaderRow } from './styles';
 
@@ -26,19 +25,13 @@ const HomePage = () => {
         <Row>
           <Col span={14} offset={2}>
             <Title className="hero-title">
-              {` Mint and manage your services${
-                isL1Network ? ', agents and components' : ''
-              }.`}
+              {` Mint and manage your services${isL1Network ? ', agents and components' : ''}.`}
             </Title>
             <Text className="lead">
               The easiest way to interact with the Autonolas on-chain registry.
             </Text>
-            <Link
-              href={isL1Network ? links.COMPONENTS : links.SERVICES}
-              passHref
-              legacyBehavior
-            >
-              <Button type="primary" size="large">
+            <Link href={isL1Network ? links.COMPONENTS : links.SERVICES} passHref legacyBehavior>
+              <Button size="large" type="primary">
                 Get started →
               </Button>
             </Link>

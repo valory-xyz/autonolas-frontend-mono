@@ -1,7 +1,7 @@
-import { useState } from 'react';
-import { Input, Button, Typography, Tooltip } from 'antd';
-import { SearchOutlined, InfoCircleOutlined } from '@ant-design/icons';
+import { InfoCircleOutlined, SearchOutlined } from '@ant-design/icons';
+import { Button, Input, Tooltip, Typography } from 'antd';
 import { useRouter } from 'next/router';
+import { useState } from 'react';
 import styled from 'styled-components';
 
 import { useHelpers } from '../../hooks';
@@ -52,9 +52,7 @@ export const useExtraTabContent = ({
               placeholder="Search..."
               value={value}
               onChange={(e) => setValue(e.target.value)}
-              onKeyDown={(e) =>
-                e.key === 'Enter' && setSearchValue(value || '')
-              }
+              onKeyDown={(e) => e.key === 'Enter' && setSearchValue(value || '')}
               suffix={
                 <Tooltip
                   title={
@@ -74,17 +72,13 @@ export const useExtraTabContent = ({
               }
             />
 
-            <Button
-              ghost
-              type="primary"
-              onClick={() => setSearchValue(value || '')}
-            >
+            <Button size="large" ghost type="primary" onClick={() => setSearchValue(value || '')}>
               Search
             </Button>
           </>
         )}
 
-        <Button type="primary" onClick={onRegisterClick}>
+        <Button size="large" type="primary" onClick={onRegisterClick}>
           Mint
         </Button>
       </>

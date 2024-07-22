@@ -1,9 +1,10 @@
-import { useEffect } from 'react';
+import { Button, Form, Input, Typography } from 'antd';
 import PropTypes from 'prop-types';
-import { Button, Form, Typography, Input } from 'antd';
+import { useEffect } from 'react';
 import styled from 'styled-components';
 
 import { FORM_TYPES } from 'common-util/enums';
+
 import { useHelpers } from '../hooks/useHelpers';
 import { FormList } from './FormList';
 
@@ -59,12 +60,7 @@ export const DynamicFieldsForm = ({
 
   return (
     <DynamicFormContainer>
-      <Form
-        form={form}
-        name="dynamic_form_complex"
-        onFinish={onFinish}
-        autoComplete="off"
-      >
+      <Form form={form} name="dynamic_form_complex" onFinish={onFinish} autoComplete="off">
         {/* address input is only visible for claimable incentives */}
         {dynamicFormType === FORM_TYPES.CLAIMABLE_INCENTIVES && (
           <Form.Item
@@ -86,6 +82,7 @@ export const DynamicFieldsForm = ({
 
         <Form.Item>
           <Button
+            size="large"
             type="primary"
             htmlType="submit"
             loading={isLoading}

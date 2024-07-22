@@ -40,6 +40,7 @@ export const Socials = ({ githubUrl }: { githubUrl: string }) => (
 
       return (
         <Button
+          size="large"
           href={href}
           className={social.type}
           target="_blank"

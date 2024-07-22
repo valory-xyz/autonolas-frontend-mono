@@ -1,6 +1,6 @@
 import { createGlobalStyle } from 'styled-components';
 
-import { COLOR, MEDIA_QUERY } from '@autonolas/frontend-library';
+import { COLOR, MEDIA_QUERY } from 'libs/ui-theme/src';
 
 import { ANTD_COLOR } from './ui-theme';
 
@@ -32,6 +32,9 @@ export const GlobalStyles = createGlobalStyle`
   }
   .mb-0 {
     margin-bottom: 0px !important;
+  }
+  .mb-4 {
+    margin-bottom: 4px !important;
   }
   .mb-8 {
     margin-bottom: 8px !important;
@@ -81,6 +84,9 @@ export const GlobalStyles = createGlobalStyle`
   .mr-16 {
     margin-right: 16px;
   }
+  .mr-24 {
+    margin-right: 24px;
+  }
   .ml-4 {
     margin-left: 4px;
   }
@@ -108,6 +114,10 @@ export const GlobalStyles = createGlobalStyle`
   }
   .text-end {
     text-align: end;
+  }
+
+  .full-width {
+    width: 100%;
   }
 
   /* layout */
@@ -166,8 +176,6 @@ export const GlobalStyles = createGlobalStyle`
     .ant-table-thead {
       > tr > th {
         padding: 12px 16px;
-        color: #4d596a; // TODO: move to theme
-        background-color: #f2f4f9; // TODO: move to theme
         &:not(:last-child):not(.ant-table-selection-column):not(
             .ant-table-row-expand-icon-cell
           ):not([colspan])::before {
@@ -191,15 +199,15 @@ export const GlobalStyles = createGlobalStyle`
 
   .ant-table:not(.ant-table-bordered) {
     .ant-table-cell:first-child {
-      border-left: 1px solid ${COLOR.BORDER_GREY};
+      border-left: 1px solid ${COLOR.BORDER_GREY_2};
     }
     .ant-table-cell:last-child {
-      border-right: 1px solid ${COLOR.BORDER_GREY};
+      border-right: 1px solid ${COLOR.BORDER_GREY_2};
     }
     .ant-table-thead {
       > tr > th {
-        border-top: 1px solid ${COLOR.BORDER_GREY};
-        border-bottom: 1px solid ${COLOR.BORDER_GREY};
+        border-top: 1px solid ${COLOR.BORDER_GREY_2};
+        border-bottom: 1px solid ${COLOR.BORDER_GREY_2};
       }
     }
   }

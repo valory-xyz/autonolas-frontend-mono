@@ -21,7 +21,7 @@ export const SendTransactionButton = ({ onClick, children, ...rest }) => {
   };
 
   return (
-    <Button {...rest} onClick={handleClick}>
+    <Button {...rest} size="large" onClick={handleClick}>
       {children}
     </Button>
   );

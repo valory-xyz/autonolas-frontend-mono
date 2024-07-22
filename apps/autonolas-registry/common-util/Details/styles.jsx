@@ -1,7 +1,7 @@
 import { Image, Statistic, Typography } from 'antd';
 import styled from 'styled-components';
 
-import { COLOR } from '@autonolas/frontend-library';
+import { COLOR } from 'libs/ui-theme/src';
 
 export const DetailsTitle = styled(Typography.Title)`
   text-transform: capitalize;

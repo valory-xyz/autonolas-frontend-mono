@@ -4,14 +4,15 @@ import {
   UnorderedListOutlined,
 } from '@ant-design/icons';
 import { Button, Empty, Popconfirm, Spin, Table, Tag, Tooltip, Typography } from 'antd';
+import { isNaN, remove, round } from 'lodash';
 import Link from 'next/link';
 import PropTypes from 'prop-types';
 import { useCallback } from 'react';
-
-import { COLOR, NA, VM_TYPE, getNetworkName } from '@autonolas/frontend-library';
-
-import { isNaN, remove, round } from 'lodash';
 import styled from 'styled-components';
+
+import { NA, VM_TYPE, getNetworkName } from '@autonolas/frontend-library';
+
+import { COLOR } from 'libs/ui-theme/src';
 
 import { BONDING_PRODUCTS } from 'common-util/enums';
 import { parseToEth } from 'common-util/functions/ethers';
@@ -65,11 +66,7 @@ const getColumns = (onClick, isActive, acc, depositoryAddress, hideEmptyProducts
       key: 'guide',
       width: 100,
       render: (x) => {
-        return (
-          <Link href={`/paths/olas-eth-via-uniswap-on-ethereum`}>
-            Guide ↗
-          </Link>
-        );
+        return <Link href={`/paths/olas-eth-via-uniswap-on-ethereum`}>Guide ↗</Link>;
       },
     },
     {
@@ -196,7 +193,7 @@ const getColumns = (onClick, isActive, acc, depositoryAddress, hideEmptyProducts
               disabled={isBondButtonDisabled}
               onConfirm={() => onClick(row)}
             >
-              <Button type="primary" disabled={isBondButtonDisabled}>
+              <Button size="large" type="primary" disabled={isBondButtonDisabled}>
                 Bond
               </Button>
             </Popconfirm>
@@ -204,7 +201,12 @@ const getColumns = (onClick, isActive, acc, depositoryAddress, hideEmptyProducts
         }
 
         return (
-          <Button type="primary" disabled={isBondButtonDisabled} onClick={() => onClick(row)}>
+          <Button
+            size="large"
+            type="primary"
+            disabled={isBondButtonDisabled}
+            onClick={() => onClick(row)}
+          >
             Bond
           </Button>
         );
@@ -243,7 +245,9 @@ const ErrorMessageAndReload = () => (
         <>
           <Text className="mb-8">Couldn&apos;t fetch products</Text>
           <br />
-          <Button onClick={() => window.location.reload()}>Try again</Button>
+          <Button size="large" onClick={() => window.location.reload()}>
+            Try again
+          </Button>
         </>
       }
       image={<ExclamationCircleTwoTone style={{ fontSize: '7rem' }} twoToneColor={COLOR.GREY_1} />}

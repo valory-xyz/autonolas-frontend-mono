@@ -6,10 +6,9 @@ import Link from 'next/link';
 import { useRouter } from 'next/router';
 import PropTypes from 'prop-types';
 import { useEffect, useState } from 'react';
-
-import { COLOR } from '@autonolas/frontend-library';
-
 import styled from 'styled-components';
+
+import { COLOR } from 'libs/ui-theme/src';
 
 import { useHelpers } from 'common-util/hooks/useHelpers';
 import { Logo as LogoSvg } from 'components/Branding/Logo';
@@ -25,7 +24,7 @@ const { Header, Content } = AntdLayout;
 const endpoint = process.env.NEXT_PUBLIC_SOLANA_MAINNET_BETA_URL;
 
 const StyledHeader = styled(Header)`
-  border-bottom: 1px solid ${COLOR.BORDER_GREY};
+  border-bottom: 1px solid ${COLOR.BORDER_GREY_2};
 `;
 
 const Layout = ({ children }) => {

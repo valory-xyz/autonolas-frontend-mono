@@ -1,21 +1,13 @@
-import { useEffect, useState } from 'react';
-import {
-  Button, Typography, Input, Form,
-} from 'antd';
+import { Button, Form, Input, Typography } from 'antd';
 import PropTypes from 'prop-types';
-import {
-  notifyError,
-  notifySuccess,
-  notifyWarning,
-} from '@autonolas/frontend-library';
+import { useEffect, useState } from 'react';
 
+import { notifyError, notifySuccess, notifyWarning } from '@autonolas/frontend-library';
+
+import { DynamicFieldsForm } from '../../DynamicFieldsForm';
 import { addressValidator } from '../../functions';
 import { useHelpers } from '../../hooks';
-import { DynamicFieldsForm } from '../../DynamicFieldsForm';
-import {
-  checkIfServiceIsWhitelisted,
-  setOperatorsStatusesRequest,
-} from '../utils';
+import { checkIfServiceIsWhitelisted, setOperatorsStatusesRequest } from '../utils';
 
 const { Text } = Typography;
 
@@ -36,14 +28,9 @@ export const OperatorWhitelist = ({ id, isWhiteListed, setOpWhitelist }) => {
   const onCheck = async (values) => {
     try {
       setIsCheckLoading(true);
-      const isValid = await checkIfServiceIsWhitelisted(
-        id,
-        values.operatorAddress,
-      );
+      const isValid = await checkIfServiceIsWhitelisted(id, values.operatorAddress);
 
-      const message = `Operator ${values.operatorAddress} is ${
-        isValid ? '' : 'NOT'
-      } whitelisted`;
+      const message = `Operator ${values.operatorAddress} is ${isValid ? '' : 'NOT'} whitelisted`;
       if (isValid) notifySuccess(message);
       else notifyWarning(message);
     } catch (error) {
@@ -67,20 +54,13 @@ export const OperatorWhitelist = ({ id, isWhiteListed, setOpWhitelist }) => {
         <Form.Item
           label="Operator Address"
           name="operatorAddress"
-          rules={[
-            { required: true, message: 'Please input the address' },
-            addressValidator,
-          ]}
+          rules={[{ required: true, message: 'Please input the address' }, addressValidator]}
         >
           <Input />
         </Form.Item>
 
         <Form.Item>
-          <Button
-            htmlType="submit"
-            loading={isCheckLoading}
-            disabled={!account}
-          >
+          <Button size="large" htmlType="submit" loading={isCheckLoading} disabled={!account}>
             Check
           </Button>
         </Form.Item>
@@ -129,9 +109,7 @@ export const SetOperatorStatus = ({ id, setOpWhitelist }) => {
         onSubmit={onSubmit}
         submitButtonText="Submit"
       />
-      <Text type="secondary">
-        By submitting will instantly enable whitelisting
-      </Text>
+      <Text type="secondary">By submitting will instantly enable whitelisting</Text>
     </>
   );
 };

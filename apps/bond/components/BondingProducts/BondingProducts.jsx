@@ -1,18 +1,12 @@
+import { Button, Divider, Flex, Radio, Switch, Tooltip, Typography } from 'antd';
+import { useRouter } from 'next/router';
 import { useState } from 'react';
 import styled from 'styled-components';
-import {
-  Typography,
-  Switch,
-  Divider,
-  Radio,
-  Tooltip,
-  Flex,
-  Button,
-} from 'antd';
+
 import { useScreen } from '@autonolas/frontend-library';
 
 import { BONDING_PRODUCTS } from 'common-util/enums';
-import { useRouter } from 'next/router';
+
 import { BondingList } from './Bonding/BondingList/BondingList';
 
 const { Title } = Typography;
@@ -35,21 +29,14 @@ const SwitchContainer = styled.div`
 const ResponsiveDivider = () => {
   const { isMobile } = useScreen();
 
-  return (
-    <StyledDivider
-      isMobile={isMobile}
-      type={isMobile ? 'horizontal' : 'vertical'}
-    />
-  );
+  return <StyledDivider isMobile={isMobile} type={isMobile ? 'horizontal' : 'vertical'} />;
 };
 
 export const BondingProducts = () => {
   const router = useRouter();
 
   // if user not connected, show all products
-  const [bondingProgramType, setProductType] = useState(
-    BONDING_PRODUCTS.ACTIVE,
-  );
+  const [bondingProgramType, setProductType] = useState(BONDING_PRODUCTS.ACTIVE);
   const [hideEmptyProducts, setHideEmptyProducts] = useState(true);
   const { isMobile } = useScreen();
 
@@ -82,17 +69,14 @@ export const BondingProducts = () => {
             <ResponsiveDivider />
 
             <SwitchContainer>
-              <Switch
-                checked={hideEmptyProducts}
-                onChange={onToggle}
-                className="mr-8"
-              />
+              <Switch checked={hideEmptyProducts} onChange={onToggle} className="mr-8" />
               Hide empty products
             </SwitchContainer>
           </Flex>
 
           <Flex>
             <Button
+              size="large"
               type="primary"
               ghost
               onClick={() => router.push('manage-solana-liquidity')}
@@ -103,10 +87,7 @@ export const BondingProducts = () => {
         </Flex>
       </PageHeader>
 
-      <BondingList
-        bondingProgramType={bondingProgramType}
-        hideEmptyProducts={hideEmptyProducts}
-      />
+      <BondingList bondingProgramType={bondingProgramType} hideEmptyProducts={hideEmptyProducts} />
     </>
   );
 };

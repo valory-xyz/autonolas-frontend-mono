@@ -30,7 +30,7 @@ export const Balance = () => {
         </>
       }
     >
-      <Button type="text">
+      <Button size="large" type="text">
         <Text type="secondary" className="mr-8">
           <InfoCircleOutlined className="mr-8" />
           Your voting power:

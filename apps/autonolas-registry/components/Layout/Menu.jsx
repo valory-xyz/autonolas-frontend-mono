@@ -1,10 +1,11 @@
-import { useState, useEffect, useMemo } from 'react';
-import { useRouter } from 'next/router';
 import { Button, Dropdown, Menu } from 'antd';
+import { useRouter } from 'next/router';
 import PropTypes from 'prop-types';
+import { useEffect, useMemo, useState } from 'react';
+
+import { useScreen } from '@autonolas/frontend-library';
 
 import { useHelpers } from 'common-util/hooks';
-import { useScreen } from '@autonolas/frontend-library';
 
 const items = [
   { label: 'Components', key: 'components' },
@@ -76,25 +77,22 @@ const NavigationMenu = () => {
     return (
       <Dropdown
         trigger={['click']}
-        overlay={(
+        overlay={
           <MenuInstance
             selectedMenu={selectedMenu}
             handleMenuItemClick={handleMenuItemClick}
             mode="vertical"
           />
-        )}
+        }
       >
-        <Button onClick={handleMenuButtonClick}>Menu</Button>
+        <Button size="large" onClick={handleMenuButtonClick}>
+          Menu
+        </Button>
       </Dropdown>
     );
   }
 
-  return (
-    <MenuInstance
-      selectedMenu={selectedMenu}
-      handleMenuItemClick={handleMenuItemClick}
-    />
-  );
+  return <MenuInstance selectedMenu={selectedMenu} handleMenuItemClick={handleMenuItemClick} />;
 };
 
 export default NavigationMenu;

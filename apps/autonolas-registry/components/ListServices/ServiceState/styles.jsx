@@ -1,6 +1,7 @@
-import styled from 'styled-components';
 import { Typography } from 'antd';
-import { MEDIA_QUERY, COLOR } from '@autonolas/frontend-library';
+import styled from 'styled-components';
+
+import { COLOR, MEDIA_QUERY } from 'libs/ui-theme/src';
 
 const { Text } = Typography;
 
@@ -107,7 +108,4 @@ export const InfoSubHeader = styled.div`
   font-weight: 700;
   margin-bottom: 0.25rem;
   color: ${COLOR.BLACK};
-  .ant-btn {
-    font-size: 18px;
-  }
 `;

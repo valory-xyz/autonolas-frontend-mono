@@ -1,6 +1,7 @@
 // TODO: move to theme
 export const COLOR = {
-  PRIMARY: '#7A00F4',
+  PRIMARY: '#7e22ce',
+  SECONDARY: '#4d596a',
   RED: '#EA3324',
   WHITE: '#FFFFFF',
   ORANGE: ' #FF9400',
@@ -14,8 +15,8 @@ export const COLOR = {
   GREY_2: '#9A9A9A',
   GREY_3: '#f0f0f0',
   GREY_4: '#C6C6C6',
-  BORDER_GREY: '#E3E3E3',
-  BORDER_GREY_2: '#D7DDEA',
+  BORDER_GREY: '#c2cbd7',
+  BORDER_GREY_2: '#dfe5ee',
 
   BLACK: '#000000',
   TABLE_BLACK: '#1B1B1B',
@@ -53,7 +54,8 @@ export const MEDIA_QUERY = {
   desktop: `@media only screen and (max-width: ${BREAK_POINT.xxl})`,
 };
 
-export const BORDER_RADIUS = '5px';
+export const BORDER_RADIUS = 8;
+export const W3M_BORDER_RADIUS = '1.4px';
 
 export const BOX_SHADOW = {
   light: '0px 1px 6px rgba(0, 0, 0, 0.15)',

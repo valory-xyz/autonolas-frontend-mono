@@ -55,7 +55,9 @@ const CreateContractButton = () => {
   const { networkName } = useAppSelector((state) => state.network);
   return (
     <Link href={`/${networkName}/${URL.myStakingContracts}/create`} passHref>
-      <Button type="primary">Create staking contract</Button>
+      <Button size="large" type="primary">
+        Create staking contract
+      </Button>
     </Link>
   );
 };
