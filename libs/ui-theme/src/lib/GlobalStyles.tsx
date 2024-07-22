@@ -173,8 +173,6 @@ export const GlobalStyles = createGlobalStyle`
     .ant-table-thead {
       > tr > th {
         padding: 12px 16px;
-        color: #4d596a; // TODO: move to theme
-        background-color: #f2f4f9; // TODO: move to theme
         &:not(:last-child):not(.ant-table-selection-column):not(
             .ant-table-row-expand-icon-cell
           ):not([colspan])::before {
@@ -198,15 +196,15 @@ export const GlobalStyles = createGlobalStyle`
 
   .ant-table:not(.ant-table-bordered) {
     .ant-table-cell:first-child {
-      border-left: 1px solid ${COLOR.BORDER_GREY};
+      border-left: 1px solid ${COLOR.BORDER_GREY_2};
     }
     .ant-table-cell:last-child {
-      border-right: 1px solid ${COLOR.BORDER_GREY};
+      border-right: 1px solid ${COLOR.BORDER_GREY_2};
     }
     .ant-table-thead {
       > tr > th {
-        border-top: 1px solid ${COLOR.BORDER_GREY};
-        border-bottom: 1px solid ${COLOR.BORDER_GREY};
+        border-top: 1px solid ${COLOR.BORDER_GREY_2};
+        border-bottom: 1px solid ${COLOR.BORDER_GREY_2};
       }
     }
   }
