@@ -1,14 +1,16 @@
-import React, { Fragment, useState } from 'react';
-import PropTypes from 'prop-types';
+import { Button, Form, Input, Select } from 'antd';
 import isNil from 'lodash/isNil';
-import { Form, Input, Button, Select } from 'antd';
+import PropTypes from 'prop-types';
+import React, { Fragment, useState } from 'react';
+
 import { notifyError, notifySuccess } from '@autonolas/frontend-library';
 
 import { HASH_PREFIXES } from 'util/constants';
-import { useHelpers } from '../../hooks';
+
 import { notifyWrongNetwork } from '../../functions';
-import { getIpfsHashHelper } from './helpers';
+import { useHelpers } from '../../hooks';
 import { CustomModal } from '../styles';
+import { getIpfsHashHelper } from './helpers';
 
 export const FORM_NAME = 'ipfs_creation_form';
 
@@ -129,20 +131,19 @@ export const IpfsHashGenerationModal = ({
       onCancel={handleCancel}
       footer={[
         <Fragment key="footer-1">
-          <Button type="default" onClick={onModalClose}>
+          <Button size="large" type="default" onClick={onModalClose}>
             Cancel
           </Button>
 
           <Button
+            size="large"
             form="myForm"
             htmlType="submit"
             type="primary"
             loading={isHashLoading}
             onClick={handleHashUpdate ? handleUpdate : handleOk}
           >
-            {handleHashUpdate
-              ? 'Save File & Update Hash'
-              : 'Save File & Generate Hash'}
+            {handleHashUpdate ? 'Save File & Update Hash' : 'Save File & Generate Hash'}
           </Button>
         </Fragment>,
       ]}
@@ -160,9 +161,7 @@ export const IpfsHashGenerationModal = ({
         <Form.Item
           label="Name"
           name="name"
-          rules={[
-            { required: true, message: `Please input the name of the ${type}` },
-          ]}
+          rules={[{ required: true, message: `Please input the name of the ${type}` }]}
         >
           <Input />
         </Form.Item>
@@ -211,12 +210,8 @@ export const IpfsHashGenerationModal = ({
                 className="select-before"
                 onChange={(e) => setHashType(e)}
               >
-                <Select.Option value={HASH_PREFIXES.type1}>
-                  {HASH_PREFIXES.type1}
-                </Select.Option>
-                <Select.Option value={HASH_PREFIXES.type2}>
-                  {HASH_PREFIXES.type2}
-                </Select.Option>
+                <Select.Option value={HASH_PREFIXES.type1}>{HASH_PREFIXES.type1}</Select.Option>
+                <Select.Option value={HASH_PREFIXES.type2}>{HASH_PREFIXES.type2}</Select.Option>
               </Select>
             }
           />

@@ -183,7 +183,7 @@ export const Deposit = ({
           </Tag>
 
           <Form.Item
-            className="custom-form-item-tokenAmount"
+            className="mb-4"
             label="LP Token Amount"
             name="tokenAmount"
             extra={
@@ -215,6 +215,7 @@ export const Deposit = ({
               LP balance:&nbsp;
               {getCommaSeparatedNumber(remainingLpSupplyInEth, 4)}
               <Button
+                size="large"
                 htmlType="button"
                 type="link"
                 onClick={() => {
@@ -247,8 +248,9 @@ export const Deposit = ({
           />
 
           <br />
-          <div className="align-right">
+          <div className="text-end">
             <Button
+              size="large"
               type="primary"
               htmlType="submit"
               loading={isLoading}

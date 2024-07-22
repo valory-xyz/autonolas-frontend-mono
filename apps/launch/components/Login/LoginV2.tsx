@@ -8,7 +8,6 @@ import { isAddressProhibited } from 'libs/util-prohibited-data/src/index';
 const LoginContainer = styled.div`
   display: flex;
   align-items: center;
-  font-size: 18px;
   line-height: normal;
 `;
 

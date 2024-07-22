@@ -2,10 +2,9 @@ import { Layout } from 'antd';
 import Link from 'next/link';
 import styled from 'styled-components';
 
-import { COLOR } from '@autonolas/frontend-library';
+import { COLOR } from 'libs/ui-theme/src';
 
 export const CustomLayout = styled(Layout)`
-  background-color: #f2f4f9;
   min-height: 100vh;
 
   .site-layout {
@@ -40,7 +39,7 @@ export const RightMenu = styled.div`
 
 export const OlasHeader = styled(Layout.Header)`
   padding: 0 40px;
-  border-bottom: 1px solid ${COLOR.BORDER_GREY};
+  border-bottom: 1px solid ${COLOR.BORDER_GREY_2};
   display: flex;
   align-items: center;
 `;

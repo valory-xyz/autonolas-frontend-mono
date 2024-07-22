@@ -1,6 +1,7 @@
-import styled from 'styled-components';
-import { COLOR } from '@autonolas/frontend-library';
 import { Modal } from 'antd';
+import styled from 'styled-components';
+
+import { COLOR } from 'libs/ui-theme/src';
 
 export const RegisterFooter = styled.div`
   display: flex;

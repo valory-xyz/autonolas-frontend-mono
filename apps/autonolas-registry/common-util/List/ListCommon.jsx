@@ -1,8 +1,8 @@
-import { useMemo } from 'react';
-import PropTypes from 'prop-types';
-import Link from 'next/link';
-import { Alert, Button } from 'antd';
 import { ExportOutlined } from '@ant-design/icons';
+import { Alert, Button } from 'antd';
+import Link from 'next/link';
+import PropTypes from 'prop-types';
+import { useMemo } from 'react';
 
 import { EmptyMessage, RegisterFooter } from '../../components/styles';
 import { useHelpers } from '../hooks';
@@ -13,8 +13,7 @@ import { useHelpers } from '../hooks';
  * @param {String}
  * @returns {Array}
  */
-export const convertStringToArray = (str) =>
-  str ? str.split(',').map((e) => e.trim()) : str;
+export const convertStringToArray = (str) => (str ? str.split(',').map((e) => e.trim()) : str);
 
 // ----------- components -----------
 export const MyLink = ({ children, href, ...linkProps }) => (
@@ -27,8 +26,7 @@ MyLink.propTypes = {
   href: PropTypes.string.isRequired,
 };
 
-export const commaMessage =
-  'Each comma must be followed by a space ("1, 2" not "1,2").';
+export const commaMessage = 'Each comma must be followed by a space ("1, 2" not "1,2").';
 
 export const DependencyLabel = ({ type }) => {
   const { isL1Network, isSvm } = useHelpers();
@@ -42,15 +40,13 @@ export const DependencyLabel = ({ type }) => {
         <>
           {!isL1Network && (
             <>
-              (Make sure your agent ID is already registered in the Agent
-              Registry on&nbsp;
+              (Make sure your agent ID is already registered in the Agent Registry on&nbsp;
               {isSvm ? 'Solana' : 'Ethereum'}
               )
               <br />
             </>
           )}
-          Comma-separated list of agent IDs which this service requires. Find
-          IDs on&nbsp;
+          Comma-separated list of agent IDs which this service requires. Find IDs on&nbsp;
           <MyLink href="/agents">
             Agents
             <ExportOutlined style={{ width: 14 }} />
@@ -82,7 +78,7 @@ export const RegisterMessage = ({ handleCancel }) => (
   <RegisterFooter>
     <p>To mint, connect to wallet</p>
     {handleCancel && (
-      <Button type="default" onClick={handleCancel}>
+      <Button size="large" type="default" onClick={handleCancel}>
         Cancel
       </Button>
     )}
@@ -146,14 +142,7 @@ export const AlertSuccess = ({ type, information }) => {
 
   if (!information) return null;
 
-  return (
-    <Alert
-      message={message}
-      type="success"
-      data-testid="alert-info-container"
-      showIcon
-    />
-  );
+  return <Alert message={message} type="success" data-testid="alert-info-container" showIcon />;
 };
 AlertSuccess.propTypes = {
   information: PropTypes.shape({}),
@@ -168,12 +157,7 @@ AlertSuccess.defaultProps = {
 export const AlertError = ({ error }) => {
   if (!error) return null;
   return (
-    <Alert
-      message={error.message}
-      data-testid="alert-error-container"
-      type="error"
-      showIcon
-    />
+    <Alert message={error.message} data-testid="alert-error-container" type="error" showIcon />
   );
 };
 AlertError.propTypes = {

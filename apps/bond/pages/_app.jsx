@@ -3,9 +3,8 @@ import { useRouter } from 'next/router';
 import PropTypes from 'prop-types';
 import { Provider } from 'react-redux';
 
-import { AutonolasThemeProvider } from 'libs/ui-theme/src/lib/ThemeConfig';
+import { AutonolasThemeProvider, GlobalStyles } from 'libs/ui-theme/src';
 
-import GlobalStyle from 'components/GlobalStyles';
 import Layout from 'components/Layout';
 import { SITE } from 'util/meta';
 
@@ -40,7 +39,7 @@ const BondApp = ({ Component, pageProps }) => {
         <meta property="twitter:description" content={DESCRIPTION} />
         <meta property="twitter:image" content={SITE_IMAGE_URL} />
       </Head>
-      <GlobalStyle />
+      <GlobalStyles />
 
       <Provider store={store}>
         <AutonolasThemeProvider>

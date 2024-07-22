@@ -1,15 +1,14 @@
 /* eslint-disable react/prop-types */
-import React, { useContext, useEffect, useRef } from 'react';
-import PropTypes from 'prop-types';
-import {
-  Form, Input, Table, Button,
-} from 'antd';
+import { Button, Form, Input, Table } from 'antd';
 import { useRouter } from 'next/router';
-import { isValidAddress } from '@autonolas/frontend-library';
+import PropTypes from 'prop-types';
+import React, { useContext, useEffect, useRef } from 'react';
 import styled from 'styled-components';
 
-import { useHelpers } from 'common-util/hooks';
+import { isValidAddress } from '@autonolas/frontend-library';
+
 import { isValidSolanaPublicKey } from 'common-util/functions';
+import { useHelpers } from 'common-util/hooks';
 
 const TableContainer = styled.div`
   .ant-form-item-explain-error {
@@ -82,63 +81,59 @@ const EditableCell = ({
   };
 
   if (editable) {
-    childNode = slots > 0 ? (
-      <Form.Item
-        className="m-0"
-        name={dataIndex}
-        rules={[
-          {
-            required: !hasAtleastOneAgentInstanceAddress,
-            message: `${title} is required.`,
-          },
-          () => ({
-            validator(_, value) {
-              // even if one agent instance address is present,
-              // resolve if the value is empty
-              if (hasAtleastOneAgentInstanceAddress && !value) {
-                return Promise.resolve();
-              }
-
-              // array of addresses. Eg. ['0x123', '0x456']
-              const addressList = value?.split(',').map((v) => v.trim());
-
-              // check if all addresses are valid
-              const areAllAddressesValid = addressList?.every((address) => (isSvm
-                ? isValidSolanaPublicKey(address)
-                : isValidAddress(address)));
-
-              // check if there are any duplicate addresses
-              const uniqueAddresses = [...new Set(addressList)];
-              if (uniqueAddresses.length !== addressList.length) {
-                return Promise.reject(
-                  new Error('Please enter unique addresses.'),
-                );
-              }
-
-              return areAllAddressesValid
-                ? Promise.resolve()
-                : Promise.reject(new Error('Please enter valid addresses.'));
+    childNode =
+      slots > 0 ? (
+        <Form.Item
+          className="m-0"
+          name={dataIndex}
+          rules={[
+            {
+              required: !hasAtleastOneAgentInstanceAddress,
+              message: `${title} is required.`,
             },
-          }),
-        ]}
-      >
-        <Input.TextArea
-          disabled={isInputDisabled}
-          ref={inputRef}
-          onChange={onSave}
-          placeholder={[...new Array(slots)]
-            .map((_i, index) => `Address ${index + 1}`)
-            .join(', ')}
-        />
-      </Form.Item>
-    ) : (
-      <div
-        className="editable-cell-value-wrap"
-        style={{ paddingRight: 24, minHeight: 64 }}
-      >
-        {children}
-      </div>
-    );
+            () => ({
+              validator(_, value) {
+                // even if one agent instance address is present,
+                // resolve if the value is empty
+                if (hasAtleastOneAgentInstanceAddress && !value) {
+                  return Promise.resolve();
+                }
+
+                // array of addresses. Eg. ['0x123', '0x456']
+                const addressList = value?.split(',').map((v) => v.trim());
+
+                // check if all addresses are valid
+                const areAllAddressesValid = addressList?.every((address) =>
+                  isSvm ? isValidSolanaPublicKey(address) : isValidAddress(address),
+                );
+
+                // check if there are any duplicate addresses
+                const uniqueAddresses = [...new Set(addressList)];
+                if (uniqueAddresses.length !== addressList.length) {
+                  return Promise.reject(new Error('Please enter unique addresses.'));
+                }
+
+                return areAllAddressesValid
+                  ? Promise.resolve()
+                  : Promise.reject(new Error('Please enter valid addresses.'));
+              },
+            }),
+          ]}
+        >
+          <Input.TextArea
+            disabled={isInputDisabled}
+            ref={inputRef}
+            onChange={onSave}
+            placeholder={[...new Array(slots)]
+              .map((_i, index) => `Address ${index + 1}`)
+              .join(', ')}
+          />
+        </Form.Item>
+      ) : (
+        <div className="editable-cell-value-wrap" style={{ paddingRight: 24, minHeight: 64 }}>
+          {children}
+        </div>
+      );
   }
 
   return <td {...restProps}>{childNode}</td>;
@@ -174,6 +169,7 @@ export const ActiveRegistrationTable = ({
       width: 60,
       render: (text) => (
         <Button
+          size="large"
           type="link"
           disabled={!isL1Network}
           onClick={() => router.push(`${links.AGENTS}/${text}`)}
@@ -250,9 +246,7 @@ export const ActiveRegistrationTable = ({
 };
 
 ActiveRegistrationTable.propTypes = {
-  data: PropTypes.arrayOf(
-    PropTypes.oneOfType([PropTypes.array, PropTypes.object]),
-  ).isRequired,
+  data: PropTypes.arrayOf(PropTypes.oneOfType([PropTypes.array, PropTypes.object])).isRequired,
 };
 
 ActiveRegistrationTable.defaultProps = {};

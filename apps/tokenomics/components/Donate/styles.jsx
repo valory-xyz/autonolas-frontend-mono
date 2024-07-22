@@ -1,5 +1,6 @@
 import styled from 'styled-components';
-import { COLOR, MEDIA_QUERY } from '@autonolas/frontend-library';
+
+import { COLOR, MEDIA_QUERY } from 'libs/ui-theme/src';
 
 export const DonateContainer = styled.div`
   display: flex;
@@ -9,7 +10,7 @@ export const DonateContainer = styled.div`
   .last-epoch-section {
     padding-left: 1rem;
     margin-left: 1rem;
-    border-left: 1px solid ${COLOR.BORDER_GREY};
+    border-left: 1px solid ${COLOR.BORDER_GREY_2};
   }
 
   ${MEDIA_QUERY.mobileL} {

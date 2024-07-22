@@ -5,8 +5,7 @@ import { Dispatch, SetStateAction, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import { Allocation } from 'types';
 
-import { COLOR } from '@autonolas/frontend-library';
-
+import { COLOR } from 'libs/ui-theme/src';
 import { CHAIN_NAMES } from 'libs/util-constants/src';
 
 import { RETAINER_ADDRESS } from 'common-util/constants/addresses';
@@ -178,7 +177,7 @@ export const Votes = ({ setIsUpdating, setAllocations }: VotesProps) => {
             />
           </Text>
         )}
-        <Button type="primary" disabled={votesBlocked} onClick={startEditing}>
+        <Button size="large" type="primary" disabled={votesBlocked} onClick={startEditing}>
           Update voting weight
         </Button>
       </Flex>

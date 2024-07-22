@@ -1,8 +1,6 @@
-import PropTypes from 'prop-types';
-import {
-  Button, Form, Input, Space, Radio,
-} from 'antd';
 import { MinusCircleOutlined, PlusOutlined } from '@ant-design/icons';
+import { Button, Form, Input, Radio, Space } from 'antd';
+import PropTypes from 'prop-types';
 
 import { addressValidator } from '../functions';
 
@@ -48,9 +46,7 @@ export const FormList = ({ inputOneLabel, inputTwoLabel, buttonText }) => (
               {...field}
               label={inputTwoLabel}
               name={[field.name, 'status']}
-              rules={[
-                { required: true, message: `Please add ${inputTwoLabel}` },
-              ]}
+              rules={[{ required: true, message: `Please add ${inputTwoLabel}` }]}
             >
               <Radio.Group>
                 <Radio value="true">True</Radio>
@@ -58,16 +54,14 @@ export const FormList = ({ inputOneLabel, inputTwoLabel, buttonText }) => (
               </Radio.Group>
             </Form.Item>
 
-            {fields.length > 1 && (
-              <MinusCircleOutlined onClick={() => remove(field.name)} />
-            )}
+            {fields.length > 1 && <MinusCircleOutlined onClick={() => remove(field.name)} />}
           </Space>
         ))}
 
         <Form.ErrorList errors={errors} />
 
         <Form.Item wrapperCol={{ span: 6 }}>
-          <Button onClick={() => add()} block icon={<PlusOutlined />}>
+          <Button size="large" onClick={() => add()} block icon={<PlusOutlined />}>
             {buttonText}
           </Button>
         </Form.Item>

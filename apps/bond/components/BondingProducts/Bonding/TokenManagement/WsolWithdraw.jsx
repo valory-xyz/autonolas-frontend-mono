@@ -1,13 +1,15 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Button, Form, InputNumber, Spin } from 'antd';
-import pDebounce from 'p-debounce';
 import { isNil, isNumber } from 'lodash';
+import pDebounce from 'p-debounce';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+
 import { notifyError } from '@autonolas/frontend-library';
 
 import { useSvmConnectivity } from 'common-util/hooks/useSvmConnectivity';
+
+import { SVM_AMOUNT_DIVISOR } from './constants';
 import { useWsolWithdraw } from './hooks/useWsolWithdraw';
 import { DEFAULT_SLIPPAGE, slippageValidator } from './utils';
-import { SVM_AMOUNT_DIVISOR } from './constants';
 
 export const WsolWithDraw = () => {
   const [form] = Form.useForm();
@@ -129,9 +131,7 @@ export const WsolWithDraw = () => {
               if (!isSvmWalletConnected) return Promise.resolve();
 
               if (value > maxAmount) {
-                return Promise.reject(
-                  new Error('Amount cannot exceed the maximum limit'),
-                );
+                return Promise.reject(new Error('Amount cannot exceed the maximum limit'));
               }
 
               return Promise.resolve();
@@ -142,7 +142,6 @@ export const WsolWithDraw = () => {
           <>
             WSOL-OLAS LP
             <Button
-              size="small"
               type="primary"
               ghost
               className="ml-8"
@@ -154,10 +153,7 @@ export const WsolWithDraw = () => {
           </>
         }
       >
-        <InputNumber
-          className="full-width"
-          onChange={onAmountAndSlippageChange}
-        />
+        <InputNumber className="full-width" onChange={onAmountAndSlippageChange} />
       </Form.Item>
 
       <Form.Item
@@ -197,6 +193,7 @@ export const WsolWithDraw = () => {
 
       <Form.Item>
         <Button
+          size="large"
           type="primary"
           htmlType="submit"
           loading={isWithdrawing}

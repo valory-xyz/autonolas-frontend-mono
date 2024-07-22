@@ -1,14 +1,14 @@
+import { Alert, Divider, Typography } from 'antd';
 import { useEffect, useState } from 'react';
-import { Typography, Alert, Divider } from 'antd';
-import { COLOR, notifySuccess } from '@autonolas/frontend-library';
+
+import { notifySuccess } from '@autonolas/frontend-library';
+
+import { COLOR } from 'libs/ui-theme/src';
 
 import { DynamicFieldsForm } from 'common-util/DynamicFieldsForm';
-import {
-  notifySpecificError,
-  sortUnitIdsAndTypes,
-} from 'common-util/functions';
-
+import { notifySpecificError, sortUnitIdsAndTypes } from 'common-util/functions';
 import { useHelpers } from 'common-util/hooks/useHelpers';
+
 import { claimOwnerIncentivesRequest, getPausedValueRequest } from './requests';
 
 const { Title } = Typography;
@@ -60,7 +60,7 @@ export const ClaimIncentives = () => {
     <>
       {pauseValue === '0' ? null : (
         <>
-          <Divider style={{ backgroundColor: COLOR.BORDER_GREY }} />
+          <Divider style={{ backgroundColor: COLOR.BORDER_GREY_2 }} />
 
           <Title level={3}>Claim Rewards</Title>
 

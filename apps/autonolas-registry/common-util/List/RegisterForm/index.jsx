@@ -1,21 +1,20 @@
-import { useState } from 'react';
-import PropTypes from 'prop-types';
 import { Button, Form, Input } from 'antd';
 import isNil from 'lodash/isNil';
+import PropTypes from 'prop-types';
+import { useState } from 'react';
+
 import { isValidAddress } from '@autonolas/frontend-library';
 
-import { useHelpers } from '../../hooks';
 import { RegistryForm } from '../../TransactionHelpers/RegistryForm';
+import { useHelpers } from '../../hooks';
 import { IpfsHashGenerationModal } from '../IpfsHashGenerationModal';
 import { DependencyLabel } from '../ListCommon';
+import { ComplexLabel, RegisterFooter } from '../styles';
 import { FormItemHash } from './helpers';
-import { RegisterFooter, ComplexLabel } from '../styles';
 
 export const FORM_NAME = 'register_form';
 
-const RegisterForm = ({
-  isLoading, listType, handleSubmit, handleCancel,
-}) => {
+const RegisterForm = ({ isLoading, listType, handleSubmit, handleCancel }) => {
   const { account } = useHelpers();
 
   const [form] = Form.useForm();
@@ -72,9 +71,7 @@ const RegisterForm = ({
               validator(_, value) {
                 if (isValidAddress(value)) return Promise.resolve();
                 return Promise.reject(
-                  new Error(
-                    `Please input a valid address of the ${listType} Owner`,
-                  ),
+                  new Error(`Please input a valid address of the ${listType} Owner`),
                 );
               },
             }),
@@ -86,6 +83,7 @@ const RegisterForm = ({
 
         <Form.Item className="mb-0">
           <Button
+            size="large"
             htmlType="button"
             type="link"
             onClick={prefillOwnerAddress}
@@ -98,6 +96,7 @@ const RegisterForm = ({
         <FormItemHash listType={listType} hashValue={hashValue} />
 
         <Button
+          size="large"
           type="primary"
           ghost
           onClick={() => setIsModalVisible(true)}
@@ -107,12 +106,12 @@ const RegisterForm = ({
         </Button>
 
         <Form.Item
-          label={(
+          label={
             <ComplexLabel>
               Dependencies
               <DependencyLabel type={listType} />
             </ComplexLabel>
-          )}
+          }
           name="dependencies"
           validateFirst
           rules={[
@@ -150,7 +149,7 @@ const RegisterForm = ({
 
         {account ? (
           <Form.Item>
-            <Button type="primary" htmlType="submit" loading={isLoading}>
+            <Button size="large" type="primary" htmlType="submit" loading={isLoading}>
               Submit
             </Button>
           </Form.Item>
@@ -158,7 +157,7 @@ const RegisterForm = ({
           <RegisterFooter>
             <p>To mint, connect to wallet</p>
             {handleCancel && (
-              <Button type="default" onClick={handleCancel}>
+              <Button size="large" type="default" onClick={handleCancel}>
                 Cancel
               </Button>
             )}

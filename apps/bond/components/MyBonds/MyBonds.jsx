@@ -1,16 +1,15 @@
-import { useEffect, useState } from 'react';
-import { Typography, Radio, Table, Button, ConfigProvider, Empty } from 'antd';
-import { round } from 'lodash';
 import { CheckOutlined, CloseOutlined } from '@ant-design/icons';
-import {
-  COLOR,
-  notifyError,
-  notifySuccess,
-  getFormattedDate,
-} from '@autonolas/frontend-library';
+import { Button, ConfigProvider, Empty, Radio, Table, Typography } from 'antd';
+import { round } from 'lodash';
+import { useEffect, useState } from 'react';
 
-import { useHelpers } from 'common-util/hooks/useHelpers';
+import { getFormattedDate, notifyError, notifySuccess } from '@autonolas/frontend-library';
+
+import { COLOR } from 'libs/ui-theme/src';
+
 import { parseToEth } from 'common-util/functions/ethers';
+import { useHelpers } from 'common-util/hooks/useHelpers';
+
 import { getAllBondsRequest, redeemRequest } from './requests';
 
 const { Title } = Typography;
@@ -86,9 +85,7 @@ export const MyBonds = () => {
         setMaturedBondList(maturedBonds);
         setNonMaturedBondList(nonMaturedBonds);
 
-        setMaturityType(
-          maturedBonds.length > 0 ? BONDS.MATURED : BONDS.NOT_MATURED,
-        );
+        setMaturityType(maturedBonds.length > 0 ? BONDS.MATURED : BONDS.NOT_MATURED);
       } catch (error) {
         window.console.error(error);
       } finally {
@@ -124,7 +121,7 @@ export const MyBonds = () => {
 
   return (
     <div>
-      <Title level={2} className="choose-type-group">
+      <Title level={2} className="mt-0 choose-type-group">
         My Bonds
         <Radio.Group
           onChange={(e) => setMaturityType(e.target.value)}
@@ -147,21 +144,12 @@ export const MyBonds = () => {
             return 'No bonds found';
           };
 
-          return (
-            <Empty
-              description={getDesc()}
-              image={Empty.PRESENTED_IMAGE_SIMPLE}
-            />
-          );
+          return <Empty description={getDesc()} image={Empty.PRESENTED_IMAGE_SIMPLE} />;
         }}
       >
         <Table
           columns={getBondsColumns()}
-          dataSource={
-            maturityType === BONDS.MATURED
-              ? maturedBondList
-              : nonMaturedBondList
-          }
+          dataSource={maturityType === BONDS.MATURED ? maturedBondList : nonMaturedBondList}
           bordered
           loading={isLoading}
           pagination={false}
@@ -188,6 +176,7 @@ export const MyBonds = () => {
       {maturityType === BONDS.MATURED && (
         <div style={{ textAlign: 'right', marginTop: '1rem' }}>
           <Button
+            size="large"
             disabled={!account || selectedBondIds.length === 0}
             type="primary"
             onClick={onRedeem}

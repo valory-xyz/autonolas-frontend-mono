@@ -1,9 +1,11 @@
 import { Layout } from 'antd';
 import styled from 'styled-components';
 
-import { COLOR, MEDIA_QUERY } from '@autonolas/frontend-library';
+import { COLOR, MEDIA_QUERY } from 'libs/ui-theme/src';
 
 export const CustomLayout = styled(Layout)`
+  background-color: ${COLOR.WHITE};
+
   .site-layout {
     padding: 0 50px;
     margin-top: 64px;
@@ -39,6 +41,9 @@ export const CustomLayout = styled(Layout)`
           &:first-child {
             padding-left: 0;
           }
+        }
+        .ant-btn-link {
+          font-size: 16px;
         }
       }
     }

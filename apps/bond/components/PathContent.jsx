@@ -1,19 +1,18 @@
 import { Flex, List } from 'antd';
 import Link from 'next/link';
 import PropTypes from 'prop-types';
-
-import { COLOR } from '@autonolas/frontend-library';
-
 import styled from 'styled-components';
+
+import { COLOR } from 'libs/ui-theme/src';
 
 const StyledLink = styled.a`
   text-decoration: underline;
-  color: ${COLOR.GREY_2};
+  color: ${COLOR.SECONDARY};
 `;
 
 const NextStyledLink = styled(Link)`
   text-decoration: underline;
-  color: ${COLOR.GREY_2};
+  color: ${COLOR.SECONDARY};
 `;
 
 const SvmDeposit = () => (

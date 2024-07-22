@@ -212,9 +212,9 @@ export const CreateStakingContract = () => {
           </Row>
           <Flex justify="end" gap={12}>
             <Link href={`/${networkName}/${URL.myStakingContracts}`} passHref>
-              <Button>Cancel</Button>
+              <Button size="large">Cancel</Button>
             </Link>
-            <Button type="primary" htmlType="submit" loading={isLoading}>
+            <Button size="large" type="primary" htmlType="submit" loading={isLoading}>
               Create contract
             </Button>
           </Flex>

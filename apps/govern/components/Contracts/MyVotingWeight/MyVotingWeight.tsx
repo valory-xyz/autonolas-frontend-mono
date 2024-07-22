@@ -61,7 +61,7 @@ const GetVeOlas = () => {
         Only veOLAS holders can vote on staking contracts. <br />
         Please lock OLAS for veOLAS to get started.
       </Paragraph>
-      <Button type="primary" target="_blank" href={MEMBER_URL}>
+      <Button size="large" type="primary" target="_blank" href={MEMBER_URL}>
         Get veOLAS
       </Button>
     </Flex>

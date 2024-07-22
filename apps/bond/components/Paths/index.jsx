@@ -2,15 +2,13 @@ import { Button, Card, Col, Row, Typography } from 'antd';
 import Image from 'next/image';
 import { useRouter } from 'next/router';
 import PropTypes from 'prop-types';
-
-import { COLOR } from '@autonolas/frontend-library';
-
 import styled from 'styled-components';
+
+import { COLOR } from 'libs/ui-theme/src';
 
 import pathData from './data.json';
 
 const StyledCard = styled(Card)`
-  border-color: ${COLOR.BORDER_GREY};
   width: 100%;
   .ant-card-body {
     padding: 32px;
