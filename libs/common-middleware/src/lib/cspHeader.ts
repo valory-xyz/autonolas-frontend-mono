@@ -10,10 +10,11 @@ const WALLET_CONNECT_LINKS = [
 const VERCEL_LINKS = ['https://vercel.com', 'https://vercel.live/'];
 
 const GATEWAY_LINKS = [
-  'https://gateway.pinata.cloud/ipfs/',
+  'https://gateway.autonolas.tech/ipfs/*',
+  'https://gateway.pinata.cloud/ipfs/*',
+  'https://*.arweave.net/',
   'https://i.seadn.io/s/raw/files/',
   'https://www.askjimmy.xyz/images/',
-  'https://*.arweave.net/',
 ];
 
 const ALLOWED_ORIGINS = [

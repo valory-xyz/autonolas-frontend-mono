@@ -1,4 +1,4 @@
-import { Button, Form, Input, Select } from 'antd';
+import { Button, Flex, Form, Input, Select } from 'antd';
 import isNil from 'lodash/isNil';
 import PropTypes from 'prop-types';
 import React, { Fragment, useState } from 'react';
@@ -220,7 +220,21 @@ export const IpfsHashGenerationModal = ({
         <Form.Item
           label="NFT Image URL"
           name="image"
-          extra="Represents your NFT on marketplaces such as OpenSea"
+          extra={
+            <Flex vertical>
+              <span>
+                Represents your NFT on marketplaces such as OpenSea. Current supported domains are:
+              </span>
+              <span>
+                {/* TODO: fetch from middleware constant */}
+                <ul style={{ margin: 0 }}>
+                  <li>https://gateway.autonolas.tech/ipfs/*</li>
+                  <li>https://gateway.pinata.cloud/ipfs/*</li>
+                  <li>https://*.arweave.net/</li>
+                </ul>
+              </span>
+            </Flex>
+          }
         >
           <Input />
         </Form.Item>
