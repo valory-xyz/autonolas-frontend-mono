@@ -9,6 +9,13 @@ const WALLET_CONNECT_LINKS = [
 
 const VERCEL_LINKS = ['https://vercel.com', 'https://vercel.live/'];
 
+const GATEWAY_LINKS = [
+  'https://gateway.pinata.cloud/ipfs/',
+  'https://i.seadn.io/s/raw/files/',
+  'https://www.askjimmy.xyz/images/',
+  'https://*.arweave.net/',
+];
+
 const ALLOWED_ORIGINS = [
   // internal
   "'self'",
@@ -59,6 +66,7 @@ const ALLOWED_ORIGINS = [
 
   // others
   'https://api.thegraph.com/',
+  'https://sockjs-us3.pusher.com/',
 
   ...VERCEL_LINKS,
 ];
@@ -100,14 +108,20 @@ export const getCspHeaders = () => {
           'data:',
           'https://*.autonolas.tech/',
           'https://explorer-api.walletconnect.com/w3m/',
-          ...VERCEL_LINKS,
           ...WALLET_CONNECT_LINKS,
+          ...GATEWAY_LINKS,
+          ...VERCEL_LINKS,
         ],
         /**
          * It is less harmful to allow 'unsafe-inline' in style-src, please read the article below
          * @see https://scotthelme.co.uk/can-you-get-pwned-with-css/
          */
-        'style-src': ["'self'", 'https://fonts.googleapis.com/', "'unsafe-inline'"],
+        'style-src': [
+          "'self'",
+          'https://fonts.googleapis.com/',
+          "'unsafe-inline'",
+          'https://vercel.live/fonts',
+        ],
         'font-src': ["'self'", 'https://fonts.gstatic.com'],
         'frame-src': ["'self'", 'https://vercel.live/', ...WALLET_CONNECT_LINKS],
       },
