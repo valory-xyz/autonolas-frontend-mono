@@ -7,6 +7,8 @@ const WALLET_CONNECT_LINKS = [
   'https://verify.walletconnect.com',
 ];
 
+const VERCEL_LINKS = ['https://vercel.com', 'https://vercel.live/'];
+
 const ALLOWED_ORIGINS = [
   // internal
   "'self'",
@@ -27,9 +29,6 @@ const ALLOWED_ORIGINS = [
   'https://safe-transaction-goerli.safe.global/api/',
   'https://safe-transaction-gnosis-chain.safe.global/api/',
   'https://safe-transaction-polygon.safe.global/api/',
-
-  // vercel
-  'https://vercel.live/',
 
   // chains
   'https://eth-mainnet.g.alchemy.com/v2/',
@@ -60,6 +59,8 @@ const ALLOWED_ORIGINS = [
 
   // others
   'https://api.thegraph.com/',
+
+  ...VERCEL_LINKS,
 ];
 
 const SCRIPT_SRC = ["'self'", 'https://vercel.live/', 'https://fonts.googleapis.com/'];
@@ -99,7 +100,7 @@ export const getCspHeaders = () => {
           'data:',
           'https://*.autonolas.tech/',
           'https://explorer-api.walletconnect.com/w3m/',
-          'https://vercel.com/',
+          ...VERCEL_LINKS,
           ...WALLET_CONNECT_LINKS,
         ],
         /**
