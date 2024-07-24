@@ -47,23 +47,22 @@ type Addresses = {
   [key in ChainId]: Address;
 };
 
-// TODO: update addresses when real contracts are deployed
 export const IMPLEMENTATION_ADDRESSES: Addresses = {
-  [mainnet.id]: '0x94c579253B3780f9fdEA6e7995EDe38142ef85A7',
-  [optimism.id]: '' as Address,
-  [gnosis.id]: '0x2E90D1049642b3f52d3B7Aa078A7563e58aA4913',
-  [polygon.id]: '0x25b54b4f7fE78248079061Cc9bAA092611705a14',
-  [base.id]: '' as Address,
-  [arbitrum.id]: '' as Address,
-  [celo.id]: '' as Address,
+  [mainnet.id]: '0x0Dc23eEf3bC64CF3cbd8f9329B57AE4C4f28d5d2',
+  [optimism.id]: '0x63C2c53c09dE534Dd3bc0b7771bf976070936bAC',
+  [gnosis.id]: '0xEa00be6690a871827fAfD705440D20dd75e67AB1',
+  [polygon.id]: '0x4aba1Cf7a39a51D75cBa789f5f21cf4882162519',
+  [base.id]: '0xEB5638eefE289691EcE01943f768EDBF96258a80',
+  [arbitrum.id]: '0x04b0007b2aFb398015B76e5f22993a1fddF83644',
+  [celo.id]: '0xe1E1B286EbE95b39F785d8069f2248ae9C41b7a9',
 };
 
 // TODO: update addresses when real contracts are deployed
 export const ACTIVITY_CHECKER_ADDRESSES: Addresses = {
-  [mainnet.id]: '0xD87dbF3074A1008394b092c0103E1d03cc73F7E1',
+  [mainnet.id]: '0x0Dc23eEf3bC64CF3cbd8f9329B57AE4C4f28d5d2' as Address,
   [optimism.id]: '' as Address,
-  [gnosis.id]: '0x0D33999A975323329bFF5351F61453E36F1d34a2',
-  [polygon.id]: '0xE81261ed4f723c7389c066aC2D55dCD2e9f8BA59',
+  [gnosis.id]: '' as Address,
+  [polygon.id]: '' as Address,
   [base.id]: '' as Address,
   [arbitrum.id]: '' as Address,
   [celo.id]: '' as Address,
@@ -96,7 +95,7 @@ export const STAKING_TOKEN_ADDRESSES: Addresses = {
   [polygon.id]: '0xFEF5d947472e72Efbb2E388c730B7428406F2F95',
   [base.id]: '0x54330d28ca3357F294334BDC454a032e7f353416',
   [arbitrum.id]: '0x3d77596beb0f130a4415df3D2D8232B3d3D31e44',
-  [celo.id]: '' as Address,
+  [celo.id]: '0xaCFfAe8e57Ec6E394Eb1b41939A8CF7892DbDc51',
 };
 
 export const isSupportedChainId = (chainId: number): chainId is ChainId => {
@@ -108,11 +107,11 @@ type BlockNumbers = {
 };
 
 export const blockNumbers: BlockNumbers = {
-  [mainnet.id]: 20009952,
-  [optimism.id]: 0,
-  [gnosis.id]: 34225443,
-  [polygon.id]: 57751430,
-  [base.id]: 0,
-  [arbitrum.id]: 0,
-  [celo.id]: 0,
+  [mainnet.id]: 20342524,
+  [optimism.id]: 122903952,
+  [gnosis.id]: 35047282,
+  [polygon.id]: 59560456,
+  [base.id]: 17310019,
+  [arbitrum.id]: 233883523,
+  [celo.id]: 26748574,
 };

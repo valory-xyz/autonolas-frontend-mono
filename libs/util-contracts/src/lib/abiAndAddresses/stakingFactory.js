@@ -1,15 +1,15 @@
-import { arbitrum, base, celo, gnosis, mainnet, optimism, polygon } from "viem/chains";
+import { arbitrum, base, celo, gnosis, mainnet, optimism, polygon } from 'viem/chains';
 
 export const STAKING_FACTORY = {
   contractName: 'StakingFactory',
   addresses: {
-    [mainnet.id]: '0xC3f601fB1cAA6452fC60eC3887784421d20AE5DB',
-    [optimism.id]: '',
-    [gnosis.id]: '0x9F3408C6f34bfB6B0eC73F34f2845A8C703374C6',
-    [polygon.id]: '0xdbe987b33321B65695EB54F54ca486994F300FDb',
-    [base.id]: '',
-    [arbitrum.id]: '',
-    [celo.id]: '',
+    [mainnet.id]: '0xEBdde456EA288b49f7D5975E7659bA1Ccf607efc',
+    [optimism.id]: '0xa45E64d13A30a51b91ae0eb182e88a40e9b18eD8',
+    [gnosis.id]: '0xb0228CA253A88Bc8eb4ca70BCAC8f87b381f4700',
+    [polygon.id]: '0x46C0D07F55d4F9B5Eed2Fc9680B5953e5fd7b461',
+    [base.id]: '0x1cEe30D08943EB58EFF84DD1AB44a6ee6FEff63a',
+    [arbitrum.id]: '0xEB5638eefE289691EcE01943f768EDBF96258a80',
+    [celo.id]: '0x1c2cD884127b080F940b7546c1e9aaf525b1FA55',
   },
   abi: [
     {

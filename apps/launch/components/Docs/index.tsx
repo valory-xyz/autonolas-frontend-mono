@@ -168,7 +168,7 @@ const Step3 = () => (
       <figcaption className="text-center">
         <Text type="secondary">
           Fig 3. Promotion increases your chances to get more OLAS emissions directed by DAO members
-          and attract more agents working towards the contract's KPIs.
+          and attract more agents working towards the contract&apos;s KPIs.
         </Text>
       </figcaption>
     </figure>

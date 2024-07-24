@@ -1,5 +1,15 @@
 import { createConfig, http } from 'wagmi';
-import { Chain, gnosis, hardhat, mainnet, polygon } from 'wagmi/chains';
+import {
+  Chain,
+  arbitrum,
+  base,
+  celo,
+  gnosis,
+  hardhat,
+  mainnet,
+  optimism,
+  polygon,
+} from 'wagmi/chains';
 import { coinbaseWallet, injected, safe, walletConnect } from 'wagmi/connectors';
 
 import { LAUNCH_RPC_URLS } from 'common-util/constants/rpcs';
@@ -17,12 +27,16 @@ export const SUPPORTED_CHAINS: [Chain, ...Chain[]] = [
   mainnetChain,
   gnosisChain,
   polygonChain,
+  optimism,
+  base,
+  arbitrum,
+  celo,
   ...(process.env.NEXT_PUBLIC_IS_CONNECTED_TO_LOCAL === 'true' ? [hardhat] : []),
 ];
 
 const walletConnectMetadata = {
-  name: 'Launch',
-  description: '',
+  name: 'OLAS Launch',
+  description: 'OLAS Launch Web3 Modal',
   url: 'https://launch.olas.network',
   icons: ['https://avatars.githubusercontent.com/u/37784886'],
 };

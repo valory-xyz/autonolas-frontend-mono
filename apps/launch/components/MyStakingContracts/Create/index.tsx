@@ -49,7 +49,7 @@ import {
   checkImplementationVerified,
 } from './utils';
 
-const { Paragraph, Text } = Typography;
+const { Text } = Typography;
 
 const contractTemplate = CONTRACT_TEMPLATES[0];
 const INPUT_WIDTH_STYLE = { width: '100%' };

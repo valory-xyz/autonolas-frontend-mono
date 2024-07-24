@@ -40,7 +40,7 @@ export const PathDetailPage = () => {
       }
     };
     fetchMarkdown();
-  }, [pathData]);
+  }, [pathData, id]);
 
   useEffect(() => {
     if (id) {
