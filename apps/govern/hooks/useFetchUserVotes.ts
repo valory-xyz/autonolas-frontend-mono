@@ -14,8 +14,7 @@ import { useVoteUserSlopes } from './useVoteUserSlopes';
 
 // approx time when Ethereum blockchain produces a new block
 const SECONDS_PER_BLOCK = 12;
-// TODO: update when contract is deployed
-const CONTRACT_DEPLOY_BLOCK = 20009990;
+const CONTRACT_DEPLOY_BLOCK = 20312875;
 
 // Current votes are those that have been applied at the start of the week
 const getCurrentVotesBlock = (blockNumber: bigint, blockTimestamp: bigint) => {

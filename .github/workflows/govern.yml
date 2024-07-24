@@ -1,0 +1,32 @@
+# TODO: figure out how to trigger workflow from vercel for nx
+
+name: Govern
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'apps/govern/**'
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'apps/govern/**'
+
+jobs:
+  build:
+    continue-on-error: False
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+      - name: Install modules
+        run: yarn
+      - name: Run ESLint
+        run: yarn nx lint govern
+      - name: Run Test
+        run: yarn nx test govern
