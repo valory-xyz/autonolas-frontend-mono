@@ -3,8 +3,9 @@ import { useCallback, useEffect } from 'react';
 import styled from 'styled-components';
 import { useAccountEffect, useConfig, useDisconnect } from 'wagmi';
 
+import { isAddressProhibited } from 'libs/util-prohibited-data/src/index';
+
 import { INVALIDATE_AFTER_ACCOUNT_CHANGE } from 'common-util/constants/scopeKeys';
-import { isAddressProhibited } from 'common-util/functions';
 import { queryClient } from 'context/Web3ModalProvider';
 import { clearUserState } from 'store/govern';
 import { useAppDispatch } from 'store/index';

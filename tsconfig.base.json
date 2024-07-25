@@ -33,6 +33,8 @@
       "@autonolas-frontend-mono/feature-service-status-info": [
         "libs/feature-service-status-info/src/index.ts"
       ],
+      "@autonolas-frontend-mono/common-middleware": ["libs/common-middleware/src/index.ts"],
+      "@autonolas-frontend-mono/common-middleware/server": ["libs/common-middleware/src/server.ts"],
       "@autonolas-frontend-mono/service-status-info": ["libs/service-status-info/src/index.ts"],
       "@autonolas-frontend-mono/ui-theme": ["libs/ui-theme/src/index.ts"],
       "@autonolas-frontend-mono/util-contracts": ["libs/util-contracts/src/index.ts"],

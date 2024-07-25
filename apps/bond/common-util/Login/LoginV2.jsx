@@ -12,7 +12,8 @@ import {
   notifyError,
 } from '@autonolas/frontend-library';
 
-import { isAddressProhibited } from 'common-util/functions/addresses';
+import { isAddressProhibited } from 'libs/util-prohibited-data/src/index';
+
 import { getChainId, getChainIdOrDefaultToMainnet } from 'common-util/functions/frontend-library';
 import { setChainId, setUserBalance } from 'store/setup';
 
