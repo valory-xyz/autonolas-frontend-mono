@@ -23,6 +23,7 @@ import { notifyWarning } from 'libs/util-functions/src';
 
 import { ErrorAlert } from 'common-util/ErrorAlert';
 import {
+  CONTRACT_DEFAULT_VALUES,
   CONTRACT_TEMPLATES,
   IMPLEMENTATION_ADDRESSES,
   isSupportedChainId,
@@ -37,16 +38,14 @@ import { ErrorType } from 'types/index';
 
 import { Hint, StyledMain, Title } from './styles';
 import {
-  DESCRIPTION_FIELD_RULES,
   FormValues,
-  MAX_NUM_SERVICES_FIELD_RULES,
+  LABELS,
   MaxNumServicesLabel,
-  NAME_FIELD_RULES,
-  REWARDS_PER_SECOND_FIELD_RULES,
   RewardsPerSecondLabel,
   TextWithTooltip,
   WrongNetworkAlert,
   checkImplementationVerified,
+  getFieldRules,
 } from './utils';
 
 const { Text } = Typography;
@@ -88,7 +87,22 @@ export const CreateStakingContract = () => {
     setError(null);
     setIsLoading(true);
 
-    const { name, description, maxNumServices, rewardsPerSecond } = values;
+    const {
+      name,
+      description,
+      maxNumServices,
+      rewardsPerSecond,
+      minStakingDeposit,
+      minNumStakingPeriods,
+      maxNumInactivityPeriods,
+      livenessPeriod,
+      timeForEmissions,
+      numAgentInstances,
+      agentIds,
+      threshold,
+      configHash,
+      activityChecker,
+    } = values;
 
     try {
       const metadataHash = await getIpfsHash({ name, description });
@@ -97,6 +111,16 @@ export const CreateStakingContract = () => {
         metadataHash,
         maxNumServices,
         rewardsPerSecond,
+        minStakingDeposit,
+        minNumStakingPeriods,
+        maxNumInactivityPeriods,
+        livenessPeriod,
+        timeForEmissions,
+        numAgentInstances,
+        agentIds,
+        threshold,
+        configHash,
+        activityChecker,
         chainId: chain.id,
       });
 
@@ -148,20 +172,25 @@ export const CreateStakingContract = () => {
 
         {alertMessage}
 
-        <Form layout="vertical" onFinish={handleCreate} requiredMark={false}>
+        <Form
+          layout="vertical"
+          onFinish={handleCreate}
+          requiredMark={false}
+          initialValues={{ ...CONTRACT_DEFAULT_VALUES }}
+        >
           <Form.Item
-            label={<Text type="secondary">Name</Text>}
+            label={<Text type="secondary">{LABELS.name}</Text>}
             name="name"
-            rules={NAME_FIELD_RULES}
+            rules={getFieldRules(LABELS.name)}
           >
             <Input />
           </Form.Item>
 
           <Form.Item
-            label={<Text type="secondary">Description</Text>}
+            label={<Text type="secondary">{LABELS.description}</Text>}
             name="description"
             className="mb-0"
-            rules={DESCRIPTION_FIELD_RULES}
+            rules={getFieldRules(LABELS.description)}
           >
             <Input.TextArea rows={4} />
           </Form.Item>
@@ -195,7 +224,7 @@ export const CreateStakingContract = () => {
               <Form.Item
                 label={<MaxNumServicesLabel />}
                 name="maxNumServices"
-                rules={MAX_NUM_SERVICES_FIELD_RULES}
+                rules={getFieldRules(LABELS.maxNumServices)}
               >
                 <InputNumber placeholder="e.g. 100" step="1" style={INPUT_WIDTH_STYLE} />
               </Form.Item>
@@ -204,12 +233,94 @@ export const CreateStakingContract = () => {
               <Form.Item
                 label={<RewardsPerSecondLabel />}
                 name="rewardsPerSecond"
-                rules={REWARDS_PER_SECOND_FIELD_RULES}
+                rules={getFieldRules(LABELS.rewardsPerSecond)}
               >
                 <InputNumber placeholder="e.g. 0.0003" step="0.0001" style={INPUT_WIDTH_STYLE} />
               </Form.Item>
             </Col>
           </Row>
+          <Row gutter={24}>
+            <Col span={12}>
+              <Form.Item
+                label={<Text type="secondary">{LABELS.minStakingDeposit}</Text>}
+                name="minStakingDeposit"
+                rules={getFieldRules(LABELS.minStakingDeposit)}
+              >
+                <InputNumber step="1" style={INPUT_WIDTH_STYLE} />
+              </Form.Item>
+            </Col>
+            <Col span={12}>
+              <Form.Item
+                label={<Text type="secondary">{LABELS.minNumStakingPeriods}</Text>}
+                name="minNumStakingPeriods"
+                rules={getFieldRules(LABELS.minNumStakingPeriods)}
+              >
+                <InputNumber step="1" style={INPUT_WIDTH_STYLE} />
+              </Form.Item>
+            </Col>
+          </Row>
+          <Row gutter={24}>
+            <Col span={12}>
+              <Form.Item
+                label={<Text type="secondary">{LABELS.maxNumInactivityPeriods}</Text>}
+                name="maxNumInactivityPeriods"
+                rules={getFieldRules(LABELS.maxNumInactivityPeriods)}
+              >
+                <InputNumber step="1" style={INPUT_WIDTH_STYLE} />
+              </Form.Item>
+            </Col>
+            <Col span={12}>
+              <Form.Item
+                label={<Text type="secondary">{LABELS.livenessPeriod}</Text>}
+                name="livenessPeriod"
+                rules={getFieldRules(LABELS.livenessPeriod)}
+              >
+                <InputNumber step="1" style={INPUT_WIDTH_STYLE} />
+              </Form.Item>
+            </Col>
+          </Row>
+          <Row gutter={24}>
+            <Col span={12}>
+              <Form.Item
+                label={<Text type="secondary">{LABELS.timeForEmissions}</Text>}
+                name="timeForEmissions"
+                rules={getFieldRules(LABELS.timeForEmissions)}
+              >
+                <InputNumber step="1" style={INPUT_WIDTH_STYLE} />
+              </Form.Item>
+            </Col>
+            <Col span={12}>
+              <Form.Item
+                label={<Text type="secondary">{LABELS.numAgentInstances}</Text>}
+                name="numAgentInstances"
+                rules={getFieldRules(LABELS.numAgentInstances)}
+              >
+                <InputNumber step="1" style={INPUT_WIDTH_STYLE} />
+              </Form.Item>
+            </Col>
+          </Row>
+          <Row gutter={24}>
+            <Col span={12}>
+              <Form.Item label={<Text type="secondary">{LABELS.agentIds}</Text>} name="agentIds">
+                <Input style={INPUT_WIDTH_STYLE} placeholder="14,25" />
+              </Form.Item>
+            </Col>
+            <Col span={12}>
+              <Form.Item label={<Text type="secondary">{LABELS.threshold}</Text>} name="threshold">
+                <InputNumber step="1" style={INPUT_WIDTH_STYLE} />
+              </Form.Item>
+            </Col>
+          </Row>
+          <Form.Item label={<Text type="secondary">{LABELS.configHash}</Text>} name="configHash">
+            <Input />
+          </Form.Item>
+          <Form.Item
+            label={<Text type="secondary">{LABELS.activityChecker}</Text>}
+            name="activityChecker"
+            rules={getFieldRules(LABELS.activityChecker)}
+          >
+            <Input />
+          </Form.Item>
           <Flex justify="end" gap={12}>
             <Link href={`/${networkName}/${URL.myStakingContracts}`} passHref>
               <Button size="large">Cancel</Button>
