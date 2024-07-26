@@ -37,7 +37,7 @@ export const LABELS = {
   rewardsPerSecond: 'Rewards, OLAS per second',
   minStakingDeposit: 'Minimum service staking deposit, OLAS',
   minNumStakingPeriods: 'Minimum number of staking periods',
-  maxNumInactivityPeriods: 'Minimum number of accumulated inactivity periods',
+  maxNumInactivityPeriods: 'Maximum number of inactivity periods',
   livenessPeriod: 'Liveness period',
   timeForEmissions: 'Time for emissions',
   numAgentInstances: 'Number of agent instances',
