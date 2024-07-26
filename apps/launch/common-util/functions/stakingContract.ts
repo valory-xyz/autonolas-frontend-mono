@@ -6,8 +6,7 @@ import { HASH_PREFIX } from 'libs/util-constants/src';
 import { STAKING_TOKEN } from 'libs/util-contracts/src/lib/abiAndAddresses';
 
 import {
-  ACTIVITY_CHECKER_ADDRESSES,
-  CONTRACT_COMMON_VALUES,
+  CONTRACT_DEFAULT_VALUES,
   ChainId,
   SERVICE_REGISTRY_ADDRESSES,
   SERVICE_REGISTRY_TOKEN_UTILITY_ADDRESSES,
@@ -18,21 +17,50 @@ type StakingContractValues = {
   metadataHash: string;
   maxNumServices: number;
   rewardsPerSecond: number;
+  minStakingDeposit: number;
+  minNumStakingPeriods: number;
+  maxNumInactivityPeriods: number;
+  livenessPeriod: number;
+  timeForEmissions: number;
+  numAgentInstances: number;
+  agentIds: string;
+  threshold: number;
+  configHash: string;
+  activityChecker: string;
   chainId: ChainId;
 };
 export const getStakingContractInitPayload = ({
   metadataHash,
   maxNumServices,
   rewardsPerSecond,
+  minStakingDeposit,
+  minNumStakingPeriods,
+  maxNumInactivityPeriods,
+  livenessPeriod,
+  timeForEmissions,
+  numAgentInstances,
+  agentIds,
+  threshold,
+  configHash,
+  activityChecker,
   chainId,
 }: StakingContractValues) => {
   const stakingParams = {
     metadataHash,
     maxNumServices,
-    rewardsPerSecond: ethers.parseUnits(`${rewardsPerSecond}`, 18),
-    ...CONTRACT_COMMON_VALUES,
+    rewardsPerSecond: `${rewardsPerSecond * 10 ** 18}`,
+    minStakingDeposit: `${minStakingDeposit * 10 ** 18}`,
+    minNumStakingPeriods,
+    maxNumInactivityPeriods,
+    livenessPeriod,
+    timeForEmissions,
+    numAgentInstances,
+    agentIds: agentIds.split(/,\s?/).map((agentId) => Number(agentId)),
+    threshold,
+    configHash,
+    activityChecker,
+    proxyHash: CONTRACT_DEFAULT_VALUES.proxyHash,
     serviceRegistry: SERVICE_REGISTRY_ADDRESSES[chainId],
-    activityChecker: ACTIVITY_CHECKER_ADDRESSES[chainId],
   };
 
   const contractInterface = new ethers.Interface(STAKING_TOKEN.abi);

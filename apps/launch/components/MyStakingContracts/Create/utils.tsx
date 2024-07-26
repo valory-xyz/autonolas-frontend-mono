@@ -18,6 +18,33 @@ export type FormValues = {
   description: string;
   maxNumServices: number;
   rewardsPerSecond: number;
+  minStakingDeposit: number;
+  minNumStakingPeriods: number;
+  maxNumInactivityPeriods: number;
+  livenessPeriod: number;
+  timeForEmissions: number;
+  numAgentInstances: number;
+  agentIds: string;
+  threshold: number;
+  configHash: string;
+  activityChecker: string;
+};
+
+export const LABELS = {
+  name: 'Name',
+  description: 'Description',
+  maxNumServices: 'Maximum number of staked agents',
+  rewardsPerSecond: 'Rewards, OLAS per second',
+  minStakingDeposit: 'Minimum service staking deposit, OLAS',
+  minNumStakingPeriods: 'Minimum number of staking periods',
+  maxNumInactivityPeriods: 'Minimum number of accumulated inactivity periods',
+  livenessPeriod: 'Liveness period',
+  timeForEmissions: 'Time for emissions',
+  numAgentInstances: 'Number of agent instances',
+  agentIds: 'Agent Ids',
+  threshold: 'Multisig threshold',
+  configHash: 'Service configuration hash',
+  activityChecker: 'Activity checker address',
 };
 
 export const TextWithTooltip = ({
@@ -36,7 +63,7 @@ export const TextWithTooltip = ({
 
 export const MaxNumServicesLabel = () => (
   <TextWithTooltip
-    text="Maximum number of staked agents"
+    text={LABELS.maxNumServices}
     description={
       <>
         How many agents do you need running? Agents can be sovereign or decentralized agents. They
@@ -52,7 +79,7 @@ export const MaxNumServicesLabel = () => (
 
 export const RewardsPerSecondLabel = () => (
   <TextWithTooltip
-    text="Rewards, OLAS per second"
+    text={LABELS.rewardsPerSecond}
     description="Token rewards come from the Olas protocol"
   />
 );
@@ -94,11 +121,6 @@ export const checkImplementationVerified = async (chainId: number, implementatio
   return result;
 };
 
-export const NAME_FIELD_RULES = [{ required: true, message: 'Please enter Name' }];
-export const DESCRIPTION_FIELD_RULES = [{ required: true, message: 'Please enter Description' }];
-export const MAX_NUM_SERVICES_FIELD_RULES = [
-  { required: true, message: 'Please enter Maximum number of staked agents' },
-];
-export const REWARDS_PER_SECOND_FIELD_RULES = [
-  { required: true, message: 'Please enter Rewards per second' },
+export const getFieldRules = (label: string) => [
+  { required: true, message: `Please enter ${label}` },
 ];

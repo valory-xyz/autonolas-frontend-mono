@@ -1,4 +1,3 @@
-import { ethers } from 'ethers';
 import { Address } from 'viem';
 import { arbitrum, base, celo, gnosis, mainnet, optimism, polygon } from 'viem/chains';
 
@@ -11,9 +10,9 @@ export const CONTRACT_TEMPLATES = [
   },
 ];
 
-export const CONTRACT_COMMON_VALUES = {
+export const CONTRACT_DEFAULT_VALUES = {
   // Minimum service staking deposit value required for staking
-  minStakingDeposit: ethers.parseUnits('10', 18),
+  minStakingDeposit: 10,
   // Min number of staking periods before the service can be unstaked
   minNumStakingPeriods: 3,
   // Max number of accumulated inactivity periods after which the service is evicted
@@ -24,8 +23,6 @@ export const CONTRACT_COMMON_VALUES = {
   timeForEmissions: 2592000, // 30 days
   // Number of agent instances in the service
   numAgentInstances: 1,
-  // Optional agent Ids requirement
-  agentIds: [14],
   // Optional service multisig threshold requirement
   threshold: 0,
   // Optional service configuration hash requirement
@@ -55,17 +52,6 @@ export const IMPLEMENTATION_ADDRESSES: Addresses = {
   [base.id]: '0xEB5638eefE289691EcE01943f768EDBF96258a80',
   [arbitrum.id]: '0x04b0007b2aFb398015B76e5f22993a1fddF83644',
   [celo.id]: '0xe1E1B286EbE95b39F785d8069f2248ae9C41b7a9',
-};
-
-// TODO: update addresses when real contracts are deployed
-export const ACTIVITY_CHECKER_ADDRESSES: Addresses = {
-  [mainnet.id]: '0x0Dc23eEf3bC64CF3cbd8f9329B57AE4C4f28d5d2' as Address,
-  [optimism.id]: '' as Address,
-  [gnosis.id]: '' as Address,
-  [polygon.id]: '' as Address,
-  [base.id]: '' as Address,
-  [arbitrum.id]: '' as Address,
-  [celo.id]: '' as Address,
 };
 
 export const SERVICE_REGISTRY_ADDRESSES: Addresses = {
