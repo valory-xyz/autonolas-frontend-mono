@@ -36,17 +36,16 @@ import { useAppDispatch } from 'store/index';
 import { addStakingContract } from 'store/launch';
 import { ErrorType } from 'types/index';
 
-import { Hint, StyledMain, Title } from './styles';
 import {
   FormValues,
   LABELS,
   MaxNumServicesLabel,
   RewardsPerSecondLabel,
-  TextWithTooltip,
-  WrongNetworkAlert,
-  checkImplementationVerified,
+  TemplateInfo,
   getFieldRules,
-} from './utils';
+} from './FormLabels';
+import { Hint, StyledMain, Title } from './styles';
+import { WrongNetworkAlert, checkImplementationVerified } from './utils';
 
 const { Text } = Typography;
 
@@ -123,17 +122,23 @@ export const CreateStakingContract = () => {
         activityChecker,
         chainId: chain.id,
       });
+      console.log('initPayload: ', initPayload);
 
       const implementation = IMPLEMENTATION_ADDRESSES[chain.id];
+      console.log('implementation: ', implementation);
 
       // Validations
       if (!(await checkImplementationVerified(chain.id, implementation))) {
         throw new Error('Validation failed');
       }
+      console.log('account: ', account);
 
       const result = await createStakingContract({ implementation, initPayload, account });
+      console.log('createStakingContract result: ', result);
+
       if (result) {
         const eventLog = result.events?.InstanceCreated?.returnValues;
+        console.log('eventLog: ', eventLog);
 
         if (eventLog) {
           dispatch(
@@ -200,10 +205,7 @@ export const CreateStakingContract = () => {
           </Hint>
 
           <Divider />
-          <TextWithTooltip
-            text="Template"
-            description="Template contracts must be approved by DAO vote"
-          />
+          <TemplateInfo />
           <Flex className="mt-4 mb-8" gap={16}>
             <Text>{contractTemplate.title}</Text>
             <Tag color="default">More templates coming soon</Tag>
