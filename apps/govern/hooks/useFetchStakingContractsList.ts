@@ -1,17 +1,29 @@
 import { useEffect } from 'react';
 import { StakingContract } from 'types';
-import { useBlock } from 'wagmi';
+import { Address } from 'viem';
+import { mainnet } from 'viem/chains';
+import { useReadContract } from 'wagmi';
+
+import { VOTE_WEIGHTING } from 'libs/util-contracts/src/lib/abiAndAddresses';
 
 import { RETAINER_ADDRESS } from 'common-util/constants/addresses';
-import { LATEST_BLOCK_KEY, NEXT_RELATIVE_WEIGHTS_KEY } from 'common-util/constants/scopeKeys';
+import { NEXT_RELATIVE_WEIGHTS_KEY } from 'common-util/constants/scopeKeys';
 import { getBytes32FromAddress } from 'common-util/functions';
-import { getStartOfNextWeekTimestamp } from 'common-util/functions/time';
 import { setStakingContracts } from 'store/govern';
 import { useAppDispatch, useAppSelector } from 'store/index';
 
 import { useNominees } from './useNominees';
 import { useNomineesMetadata } from './useNomineesMetadata';
 import { useNomineesWeights } from './useNomineesWeights';
+
+const WEEK_IN_SECONDS = 604_800;
+
+const getCurrentWeightTimestamp = (timeSum: number | undefined) => {
+  if (!timeSum) return null;
+  // If timeSum is in the future, subtract a week from it
+  if (timeSum * 1000 > Date.now()) return timeSum - WEEK_IN_SECONDS;
+  return timeSum;
+};
 
 export const useFetchStakingContractsList = () => {
   const dispatch = useAppDispatch();
@@ -20,17 +32,28 @@ export const useFetchStakingContractsList = () => {
   // Get nominees list
   const { data: nominees } = useNominees();
 
-  const { data: block } = useBlock({ blockTag: 'latest', scopeKey: LATEST_BLOCK_KEY });
-  const now = block ? Number(block.timestamp) : null;
-  const nextWeek = block ? getStartOfNextWeekTimestamp() : null;
+  // Get last scheduled time (next week) from the contract
+  // Has the timestamp when the last votes should be applied
+  const { data: timeSum } = useReadContract({
+    address: (VOTE_WEIGHTING.addresses as Record<number, Address>)[mainnet.id],
+    abi: VOTE_WEIGHTING.abi,
+    chainId: mainnet.id,
+    functionName: 'timeSum',
+    query: {
+      select: (data) => Number(data),
+    },
+  });
 
-  // Get contracts current weight
-  const { data: currentWeight } = useNomineesWeights(nominees || [], now);
+  // Get contracts current week weights
+  const { data: currentWeight } = useNomineesWeights(
+    nominees || [],
+    getCurrentWeightTimestamp(timeSum),
+  );
 
-  // Get contracts next weight
+  // Get contracts next week weights
   const { data: nextWeight } = useNomineesWeights(
     nominees || [],
-    nextWeek,
+    timeSum || null,
     NEXT_RELATIVE_WEIGHTS_KEY,
   );
 

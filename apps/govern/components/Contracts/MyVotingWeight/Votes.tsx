@@ -10,6 +10,7 @@ import { CHAIN_NAMES } from 'libs/util-constants/src';
 
 import { RETAINER_ADDRESS } from 'common-util/constants/addresses';
 import { getBytes32FromAddress } from 'common-util/functions/addresses';
+import { NextWeekTooltip } from 'components/NextWeekTooltip';
 import { useAppSelector } from 'store/index';
 
 const ONE_DAY_IN_MS = 24 * 60 * 60 * 1000;
@@ -77,12 +78,9 @@ const columns: ColumnsType<MyVote> = [
   },
   {
     title: (
-      <Tooltip
-        color={COLOR.WHITE}
-        title={<Text>Updated voting weights will take effect at the start of next week</Text>}
-      >
+      <NextWeekTooltip>
         My updated weight <InfoCircleOutlined className="ml-8" style={{ color: COLOR.GREY_2 }} />
-      </Tooltip>
+      </NextWeekTooltip>
     ),
     key: 'nextWeight',
     dataIndex: 'nextWeight',
@@ -156,7 +154,10 @@ export const Votes = ({ setIsUpdating, setAllocations }: VotesProps) => {
           isRetainer: true,
         });
       }
-      return res;
+      return res.sort((item) =>
+        // put Rollover address at the end
+        item.address === getBytes32FromAddress(RETAINER_ADDRESS) ? 1 : -1,
+      );
     }, []);
   }, [userVotes, stakingContracts]);
 
