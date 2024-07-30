@@ -1,13 +1,15 @@
 import { InfoCircleOutlined } from '@ant-design/icons';
 import { Tooltip, Typography } from 'antd';
+import { ReactNode } from 'react';
 
 import { COLOR } from 'libs/ui-theme/src';
 import { UNICODE_SYMBOLS } from 'libs/util-constants/src';
+import { Rule } from 'antd/es/form';
 
 const { Paragraph, Text } = Typography;
 
 export type FormValues = {
-  name: string;
+  contractName: string;
   description: string;
   maxNumServices: number;
   rewardsPerSecond: number;
@@ -32,7 +34,10 @@ export const getFieldRules = (label: string) => [
   { required: true, message: `Please enter ${label}` },
 ];
 
-export const LABELS = {
+export const LABELS: Record<
+  keyof FormValues,
+  { name: string; desc?: string | ReactNode; rules?: Rule[] | undefined }
+> = {
   contractName: { name: 'Name', desc: null, rules: [] },
   description: { name: 'Description', desc: null },
   maxNumServices: {
@@ -50,12 +55,12 @@ export const LABELS = {
   },
   rewardsPerSecond: {
     name: 'Rewards, OLAS per second',
-    desc: 'Token rewards come from the Olas protocol',
+    desc: null, // TODO
     rules: getFieldRules('Rewards, OLAS per second'),
   },
   minStakingDeposit: {
     name: 'Minimum service staking deposit, OLAS',
-    desc: 'Minimum amount of OLAS that operators need to stake to participate in the staking program',
+    desc: null, // TODO
     rules: getFieldRules('Minimum service staking deposit, OLAS'),
   },
   minNumStakingPeriods: {
@@ -83,12 +88,24 @@ export const LABELS = {
     desc: null, // TODO
     rules: getFieldRules('Number of agent instances'),
   },
-  agentIds: { name: 'Agent Ids', desc: null, rules: null },
-  threshold: { name: 'Multisig threshold', desc: null, rules: null },
-  configHash: { name: 'Service configuration hash', desc: null, rules: null },
+  agentIds: {
+    name: 'Agent Ids',
+    desc: null, // TODO
+    rules: undefined,
+  },
+  threshold: {
+    name: 'Multisig threshold',
+    desc: null, // TODO
+    rules: undefined,
+  },
+  configHash: {
+    name: 'Service configuration hash',
+    desc: null, // TODO
+    rules: undefined,
+  },
   activityChecker: {
     name: 'Activity checker address',
-    desc: null,
+    desc: null, // TODO
     rules: getFieldRules('Activity checker address'),
   },
 } as const;

@@ -99,7 +99,7 @@ export const CreateStakingContract = () => {
     setIsLoading(true);
 
     const {
-      name,
+      contractName,
       description,
       maxNumServices,
       rewardsPerSecond,
@@ -116,7 +116,7 @@ export const CreateStakingContract = () => {
     } = values;
 
     try {
-      const metadataHash = await getIpfsHash({ name, description });
+      const metadataHash = await getIpfsHash({ name: contractName, description });
 
       const initPayload = getStakingContractInitPayload({
         metadataHash,
@@ -157,7 +157,7 @@ export const CreateStakingContract = () => {
             addStakingContract({
               id: eventLog.instance,
               chainId: chain.id,
-              name,
+              name: contractName,
               description,
               template: contractTemplate.title,
               isNominated: false,
@@ -197,7 +197,7 @@ export const CreateStakingContract = () => {
         >
           <Form.Item
             label={<NameLabel />}
-            name="name"
+            name="contractName"
             rules={getFieldRules(LABELS.contractName.name)}
           >
             <Input />
