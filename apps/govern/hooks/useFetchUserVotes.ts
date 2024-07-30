@@ -3,7 +3,7 @@ import { UserVotes } from 'types';
 import { useAccount, useBlock } from 'wagmi';
 
 import { LATEST_BLOCK_KEY, NEXT_USERS_SLOPES_KEY } from 'common-util/constants/scopeKeys';
-import { getThisWeekMondayTimestamp } from 'common-util/functions/time';
+import { getUnixWeekStartTimestamp } from 'common-util/functions/time';
 import { setLastUserVote, setUserVotes } from 'store/govern';
 import { useAppDispatch, useAppSelector } from 'store/index';
 
@@ -16,12 +16,13 @@ import { useVoteUserSlopes } from './useVoteUserSlopes';
 const SECONDS_PER_BLOCK = 12;
 const CONTRACT_DEPLOY_BLOCK = 20312875;
 
-// Current votes are those that have been applied at the start of the week
+// Current votes are those that have been applied at the start of the week (unix time)
 const getCurrentVotesBlock = (blockNumber: bigint, blockTimestamp: bigint) => {
   const mondayBlock =
     Number(blockNumber) -
-    // Approx number of blocks between current timestamp and this Monday
-    Math.round((Number(blockTimestamp) - getThisWeekMondayTimestamp()) / SECONDS_PER_BLOCK);
+    // Approximate number of blocks between the current timestamp and
+    // the start of the current week by Unix time
+    Math.round((Number(blockTimestamp) - getUnixWeekStartTimestamp()) / SECONDS_PER_BLOCK);
 
   return BigInt(Math.max(CONTRACT_DEPLOY_BLOCK, mondayBlock));
 };

@@ -66,6 +66,7 @@ const ALLOWED_ORIGINS = [
   'https://virtual.mainnet.rpc.tenderly.co/',
   'https://virtual.gnosis.rpc.tenderly.co/',
   'https://virtual.polygon.rpc.tenderly.co/',
+  'https://rpc.tenderly.co/fork/',
 
   // others
   'https://api.thegraph.com/',

@@ -89,11 +89,11 @@ describe('<ContractsList />', () => {
 
     // current weight column
     expect(screen.getByText(/10.12%/)).toBeInTheDocument();
-    expect(screen.getByText(/298.8k veOlas/)).toBeInTheDocument();
+    expect(screen.getByText(/298.8k veOLAS/)).toBeInTheDocument();
 
     // next weight column
     expect(screen.getByText(/25.56%/)).toBeInTheDocument();
-    expect(screen.getByText(/297.4k veOlas/)).toBeInTheDocument();
+    expect(screen.getByText(/297.4k veOLAS/)).toBeInTheDocument();
   });
 
   describe('Already voted', () => {
