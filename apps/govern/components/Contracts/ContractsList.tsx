@@ -67,7 +67,7 @@ const getColumns = ({
     {
       title: (
         <NextWeekTooltip>
-          {`Next week's weight`}{' '}
+          Next week&apos;s weight
           <InfoCircleOutlined className="ml-8" style={{ color: COLOR.GREY_2 }} />
         </NextWeekTooltip>
       ),

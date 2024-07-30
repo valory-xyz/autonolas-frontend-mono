@@ -5,11 +5,11 @@ export const getUnixNextWeekStartTimestamp = () => {
   const dayOfWeek = now.getDay();
   const daysUntilNextThursday = (4 - dayOfWeek + 7) % 7;
 
-  const nextThursday = new Date(now);
-  nextThursday.setDate(now.getDate() + daysUntilNextThursday);
-  nextThursday.setHours(0, 0, 0, 0);
+  const result = new Date(now);
+  result.setDate(now.getDate() + daysUntilNextThursday);
+  result.setHours(0, 0, 0, 0);
 
-  return nextThursday.getTime() / 1000;
+  return result.getTime() / 1000;
 };
 
 // Returns the closest Thursday in the past
@@ -18,10 +18,10 @@ export const getUnixWeekStartTimestamp = () => {
   const now = new Date();
   const dayOfWeek = now.getDay();
   const daysSinceThursday = ((dayOfWeek + 2) % 7) + 1;
-  const thursday = new Date(now);
+  const result = new Date(now);
 
-  thursday.setDate(now.getDate() - daysSinceThursday);
-  thursday.setHours(0, 0, 0, 0);
+  result.setDate(now.getDate() - daysSinceThursday);
+  result.setHours(0, 0, 0, 0);
 
-  return thursday.getTime() / 1000;
+  return result.getTime() / 1000;
 };

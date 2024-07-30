@@ -16,7 +16,14 @@ import { useNominees } from './useNominees';
 import { useNomineesMetadata } from './useNomineesMetadata';
 import { useNomineesWeights } from './useNomineesWeights';
 
-const WEEK = 604_800;
+const WEEK_IN_SECONDS = 604_800;
+
+const getCurrentWeightTimestamp = (timeSum: number | undefined) => {
+  if (!timeSum) return null;
+  // If timeSum is in the future, subtract a week from it
+  if (timeSum * 1000 > Date.now()) return timeSum - WEEK_IN_SECONDS;
+  return timeSum;
+};
 
 export const useFetchStakingContractsList = () => {
   const dispatch = useAppDispatch();
@@ -26,6 +33,7 @@ export const useFetchStakingContractsList = () => {
   const { data: nominees } = useNominees();
 
   // Get last scheduled time (next week) from the contract
+  // Has the timestamp when the last votes should be applied
   const { data: timeSum } = useReadContract({
     address: (VOTE_WEIGHTING.addresses as Record<number, Address>)[mainnet.id],
     abi: VOTE_WEIGHTING.abi,
@@ -39,12 +47,7 @@ export const useFetchStakingContractsList = () => {
   // Get contracts current week weights
   const { data: currentWeight } = useNomineesWeights(
     nominees || [],
-    timeSum
-      ? // If timeSum is in the future, subtract a week from it
-        timeSum * 1000 > Date.now()
-        ? timeSum - WEEK
-        : timeSum
-      : null,
+    getCurrentWeightTimestamp(timeSum),
   );
 
   // Get contracts next week weights
