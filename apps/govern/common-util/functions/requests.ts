@@ -12,7 +12,7 @@ import { SUPPORTED_CHAINS, wagmiConfig } from 'common-util/config/wagmi';
 import { RPC_URLS } from 'common-util/constants/rpcs';
 
 import { getAddressFromBytes32 } from './addresses';
-import { getStartOfNextWeekTimestamp } from './time';
+import { getUnixNextWeekStartTimestamp } from './time';
 import { getVoteWeightingContract } from './web3';
 
 type VoteForNomineeWeightsParams = {
@@ -109,7 +109,7 @@ export const checkLockExpired = async (account: Address) => {
     args: [account],
   });
 
-  const nextWeek = getStartOfNextWeekTimestamp();
+  const nextWeek = getUnixNextWeekStartTimestamp();
 
   return result ? nextWeek >= (result as number) : false;
 };

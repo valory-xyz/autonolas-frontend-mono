@@ -25,7 +25,7 @@ const getRemovedNomineesError = (removedNominees: Address[], allocations: Alloca
   </Flex>
 );
 
-const NO_VEOLAS_ERROR = `You don't have enough veOLAS to vote`;
+const NO_veOLAS_ERROR = `You don't have enough veOLAS to vote`;
 
 // Checks if any of the nominees were removed from voting
 export const checkNoRemovedNominees = async (allocations: Allocation[]) => {
@@ -59,7 +59,7 @@ export const checkNoDisabledContracts = async (allocations: Allocation[]) => {
 export const checkNotNegativeSlope = async (account: Address) => {
   const isNegativeSlope = await checkNegativeSlope(account);
   if (isNegativeSlope) {
-    notification.error({ message: NO_VEOLAS_ERROR });
+    notification.error({ message: NO_veOLAS_ERROR });
     return false;
   }
 
@@ -70,7 +70,7 @@ export const checkNotNegativeSlope = async (account: Address) => {
 export const checkLockNotExpired = async (account: Address) => {
   const isLockExpired = await checkLockExpired(account);
   if (isLockExpired) {
-    notification.error({ message: NO_VEOLAS_ERROR });
+    notification.error({ message: NO_veOLAS_ERROR });
     return false;
   }
 

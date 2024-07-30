@@ -1,5 +1,5 @@
 import { CheckOutlined, InfoCircleOutlined, PlusOutlined } from '@ant-design/icons';
-import { Button, Card as CardAntd, Space, Table, Tooltip, Typography } from 'antd';
+import { Button, Card as CardAntd, Space, Table, Typography } from 'antd';
 import { ColumnsType } from 'antd/es/table';
 import styled from 'styled-components';
 import { Allocation, StakingContract } from 'types';
@@ -9,19 +9,11 @@ import { COLOR } from 'libs/ui-theme/src';
 import { CHAIN_NAMES } from 'libs/util-constants/src';
 
 import { formatWeiBalance } from 'common-util/functions/balance';
+import { NextWeekTooltip } from 'components/NextWeekTooltip';
 import { useVotingPower } from 'hooks/useVotingPower';
 import { useAppSelector } from 'store/index';
 
 const { Title, Paragraph, Text } = Typography;
-
-const NextWeekTitle = () => (
-  <Tooltip
-    color={COLOR.WHITE}
-    title={<Text>Updated voting weights will take effect at the start of next week</Text>}
-  >
-    {"Next week's weight"} <InfoCircleOutlined className="ml-8" style={{ color: COLOR.GREY_2 }} />
-  </Tooltip>
-);
 
 const Card = styled(CardAntd)`
   flex: auto;
@@ -68,18 +60,23 @@ const getColumns = ({
       render: (currentWeight) => (
         <Space size={2} direction="vertical">
           <Text>{`${currentWeight?.percentage.toFixed(2)}%`}</Text>
-          <Text type="secondary">{`${formatWeiBalance(currentWeight?.value)} veOlas`}</Text>
+          <Text type="secondary">{`${formatWeiBalance(currentWeight?.value)} veOLAS`}</Text>
         </Space>
       ),
     },
     {
-      title: <NextWeekTitle />,
+      title: (
+        <NextWeekTooltip>
+          {`Next week's weight`}{' '}
+          <InfoCircleOutlined className="ml-8" style={{ color: COLOR.GREY_2 }} />
+        </NextWeekTooltip>
+      ),
       key: 'nextWeight',
       dataIndex: 'nextWeight',
       render: (nextWeight) => (
         <Space size={2} direction="vertical">
           <Text>{`${nextWeight?.percentage.toFixed(2)}%`}</Text>
-          <Text type="secondary">{`${formatWeiBalance(nextWeight?.value)} veOlas`}</Text>
+          <Text type="secondary">{`${formatWeiBalance(nextWeight?.value)} veOLAS`}</Text>
         </Space>
       ),
     },

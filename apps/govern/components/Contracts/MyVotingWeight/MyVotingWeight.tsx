@@ -109,7 +109,7 @@ export const MyVotingWeight = ({
       return <Loader />;
     }
 
-    // If the user doesn't have voting power, suggest to get veOlas
+    // If the user doesn't have voting power, suggest to get veOLAS
     if (Number(votingPower) === 0) {
       return <GetVeOlas />;
     }

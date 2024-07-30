@@ -1,23 +1,27 @@
-export const getStartOfNextWeekTimestamp = () => {
-  const date = new Date();
-  const dayOfWeek = date.getDay();
-  const daysUntilNextWeek = dayOfWeek === 1 ? 7 : (8 - dayOfWeek) % 7;
-
-  const nextWeekStartDate = new Date(date);
-  nextWeekStartDate.setDate(date.getDate() + daysUntilNextWeek);
-  nextWeekStartDate.setHours(0, 0, 0, 0);
-
-  return nextWeekStartDate.getTime() / 1000;
-};
-
-export const getThisWeekMondayTimestamp = () => {
+// Returns the closest Thursday in the future
+// which is the start of the next week by Unix time
+export const getUnixNextWeekStartTimestamp = () => {
   const now = new Date();
   const dayOfWeek = now.getDay();
-  const daysToMonday = (dayOfWeek + 6) % 7;
-  const monday = new Date(now);
+  const daysUntilNextThursday = (4 - dayOfWeek + 7) % 7;
 
-  monday.setDate(now.getDate() - daysToMonday);
-  monday.setHours(0, 0, 0, 0);
+  const nextThursday = new Date(now);
+  nextThursday.setDate(now.getDate() + daysUntilNextThursday);
+  nextThursday.setHours(0, 0, 0, 0);
 
-  return monday.getTime() / 1000;
+  return nextThursday.getTime() / 1000;
+};
+
+// Returns the closest Thursday in the past
+// which is the start of the current week by Unix time
+export const getUnixWeekStartTimestamp = () => {
+  const now = new Date();
+  const dayOfWeek = now.getDay();
+  const daysSinceThursday = ((dayOfWeek + 2) % 7) + 1;
+  const thursday = new Date(now);
+
+  thursday.setDate(now.getDate() - daysSinceThursday);
+  thursday.setHours(0, 0, 0, 0);
+
+  return thursday.getTime() / 1000;
 };
