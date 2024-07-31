@@ -37,25 +37,25 @@ import { addStakingContract } from 'store/launch';
 import { ErrorType } from 'types/index';
 
 import {
-  ActivityCheckerLabel,
+  ActivityCheckerAddressLabel,
   AgentIdsLabel,
-  ConfigHashLabel,
+  ServiceConfigHashLabel,
   DescriptionLabel,
   FormValues,
   LABELS,
   LivenessPeriodLabel,
-  MaxNumInactivityPeriodsLabel,
-  MaxNumServicesLabel,
-  MinNumStakingPeriodsLabel,
+  MaximumInactivityPeriodsLabel,
+  MaximumStakedAgentsLabel,
+  MinimumStakingPeriodsLabel,
   MinimumStakingDepositLabel,
   NameLabel,
-  NumAgentInstancesLabel,
+  AgentInstancesLabel,
   RewardsPerSecondLabel,
   TemplateInfo,
-  ThresholdLabel,
+  MultisigThresholdLabel,
   TimeForEmissionsLabel,
   getFieldRules,
-} from './FormLabels';
+} from '../FormLabels';
 import { Hint, StyledMain, Title } from './styles';
 import { WrongNetworkAlert, checkImplementationVerified } from './utils';
 
@@ -236,7 +236,7 @@ export const CreateStakingContract = () => {
           <Row gutter={24}>
             <Col span={12}>
               <Form.Item
-                label={<MaxNumServicesLabel />}
+                label={<MaximumStakedAgentsLabel />}
                 name="maxNumServices"
                 rules={getFieldRules(LABELS.maxNumServices.name)}
               >
@@ -265,7 +265,7 @@ export const CreateStakingContract = () => {
             </Col>
             <Col span={12}>
               <Form.Item
-                label={<MinNumStakingPeriodsLabel />}
+                label={<MinimumStakingPeriodsLabel />}
                 name="minNumStakingPeriods"
                 rules={LABELS.minNumStakingPeriods.rules}
               >
@@ -276,7 +276,7 @@ export const CreateStakingContract = () => {
           <Row gutter={24}>
             <Col span={12}>
               <Form.Item
-                label={<MaxNumInactivityPeriodsLabel />}
+                label={<MaximumInactivityPeriodsLabel />}
                 name="maxNumInactivityPeriods"
                 rules={LABELS.maxNumInactivityPeriods.rules}
               >
@@ -306,7 +306,7 @@ export const CreateStakingContract = () => {
             </Col>
             <Col span={12}>
               <Form.Item
-                label={<NumAgentInstancesLabel />}
+                label={<AgentInstancesLabel />}
                 name="numAgentInstances"
                 rules={LABELS.numAgentInstances.rules}
               >
@@ -322,17 +322,17 @@ export const CreateStakingContract = () => {
               </Form.Item>
             </Col>
             <Col span={12}>
-              <Form.Item label={<ThresholdLabel />} name="threshold">
+              <Form.Item label={<MultisigThresholdLabel />} name="threshold">
                 <InputNumber step="1" style={INPUT_WIDTH_STYLE} />
               </Form.Item>
             </Col>
           </Row>
 
-          <Form.Item label={<ConfigHashLabel />} name="configHash">
+          <Form.Item label={<ServiceConfigHashLabel />} name="configHash">
             <Input />
           </Form.Item>
           <Form.Item
-            label={<ActivityCheckerLabel />}
+            label={<ActivityCheckerAddressLabel />}
             name="activityChecker"
             rules={LABELS.activityChecker.rules}
           >

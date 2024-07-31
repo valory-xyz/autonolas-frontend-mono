@@ -89,7 +89,7 @@ export const LABELS: Record<
     rules: getFieldRules('Number of agent instances'),
   },
   agentIds: {
-    name: 'Agent Ids',
+    name: 'Agent IDs',
     desc: null, // TODO
     rules: undefined,
   },
@@ -132,7 +132,7 @@ export const NameLabel = () => <TextWithTooltip text={LABELS.contractName.name} 
 
 export const DescriptionLabel = () => <TextWithTooltip text={LABELS.description.name} />;
 
-export const MaxNumServicesLabel = () => (
+export const MaximumStakedAgentsLabel = () => (
   <TextWithTooltip text={LABELS.maxNumServices.name} description={LABELS.maxNumServices.desc} />
 );
 
@@ -151,14 +151,14 @@ export const MinimumStakingDepositLabel = () => (
   />
 );
 
-export const MinNumStakingPeriodsLabel = () => (
+export const MinimumStakingPeriodsLabel = () => (
   <TextWithTooltip
     text={LABELS.minNumStakingPeriods.name}
     description={LABELS.minNumStakingPeriods.desc}
   />
 );
 
-export const MaxNumInactivityPeriodsLabel = () => (
+export const MaximumInactivityPeriodsLabel = () => (
   <TextWithTooltip
     text={LABELS.maxNumInactivityPeriods.name}
     description={LABELS.maxNumInactivityPeriods.desc}
@@ -173,7 +173,7 @@ export const TimeForEmissionsLabel = () => (
   <TextWithTooltip text={LABELS.timeForEmissions.name} description={LABELS.timeForEmissions.desc} />
 );
 
-export const NumAgentInstancesLabel = () => (
+export const AgentInstancesLabel = () => (
   <TextWithTooltip
     text={LABELS.numAgentInstances.name}
     description={LABELS.numAgentInstances.desc}
@@ -184,15 +184,15 @@ export const AgentIdsLabel = () => (
   <TextWithTooltip text={LABELS.agentIds.name} description={LABELS.agentIds.desc} />
 );
 
-export const ThresholdLabel = () => (
+export const MultisigThresholdLabel = () => (
   <TextWithTooltip text={LABELS.threshold.name} description={LABELS.threshold.desc} />
 );
 
-export const ConfigHashLabel = () => (
+export const ServiceConfigHashLabel = () => (
   <TextWithTooltip text={LABELS.configHash.name} description={LABELS.configHash.desc} />
 );
 
-export const ActivityCheckerLabel = () => (
+export const ActivityCheckerAddressLabel = () => (
   <TextWithTooltip text={LABELS.activityChecker.name} description={LABELS.activityChecker.desc} />
 );
 
