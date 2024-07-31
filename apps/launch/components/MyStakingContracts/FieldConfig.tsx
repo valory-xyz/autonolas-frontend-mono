@@ -1,10 +1,10 @@
 import { InfoCircleOutlined } from '@ant-design/icons';
-import { Tooltip, Typography } from 'antd';
+import { Flex, Tooltip, Typography } from 'antd';
+import { Rule } from 'antd/es/form';
 import { ReactNode } from 'react';
 
 import { COLOR } from 'libs/ui-theme/src';
 import { UNICODE_SYMBOLS } from 'libs/util-constants/src';
-import { Rule } from 'antd/es/form';
 
 const { Paragraph, Text } = Typography;
 
@@ -30,7 +30,7 @@ export type FormValues = {
  * @param label
  * @returns
  */
-export const getFieldRules = (label: string) => [
+export const getGenericFieldRules = (label: string) => [
   { required: true, message: `Please enter ${label}` },
 ];
 
@@ -56,57 +56,84 @@ export const LABELS: Record<
   rewardsPerSecond: {
     name: 'Rewards, OLAS per second',
     desc: null, // TODO
-    rules: getFieldRules('Rewards, OLAS per second'),
+    rules: getGenericFieldRules('Rewards, OLAS per second'),
   },
   minStakingDeposit: {
     name: 'Minimum service staking deposit, OLAS',
-    desc: null, // TODO
-    rules: getFieldRules('Minimum service staking deposit, OLAS'),
+    desc: (
+      <Flex gap={8} vertical>
+        <span>
+          The established value of minimal non-slashable security deposit and minimal slashable
+          operator bonds required for staking.
+        </span>
+
+        <span> Operators need to stake:this × the number of agent instances + 1.</span>
+      </Flex>
+    ),
+    rules: getGenericFieldRules('Minimum service staking deposit, OLAS'),
   },
   minNumStakingPeriods: {
     name: 'Minimum number of staking periods',
-    desc: null, // TODO
-    rules: getFieldRules('Minimum number of staking periods'),
+    desc: 'Minimum number of staking periods before the service can be unstaked',
+    rules: getGenericFieldRules('Minimum number of staking periods'),
   },
   maxNumInactivityPeriods: {
     name: 'Maximum number of inactivity periods',
-    desc: null, // TODO
-    rules: getFieldRules('Maximum number of inactivity periods'),
+    desc: 'Maximum duration of inactivity permitted for the agent before facing eviction.',
+    rules: getGenericFieldRules('Maximum number of inactivity periods'),
   },
   livenessPeriod: {
     name: 'Liveness period',
-    desc: null, // TODO
-    rules: getFieldRules('Liveness period'),
+    desc: (
+      <Flex gap={8} vertical>
+        <span>
+          Time frame in seconds during which the staking contract assesses the activity of the
+          service.
+        </span>
+
+        <span>24 hours - 86400 seconds</span>
+      </Flex>
+    ),
+    rules: getGenericFieldRules('Liveness period'),
   },
   timeForEmissions: {
     name: 'Time for emissions',
-    desc: null, // TODO
-    rules: getFieldRules('Time for emissions'),
+    desc: (
+      <Flex gap={8} vertical>
+        <span>
+          Time for which staking emissions are requested in order to feed a staking contract
+          considering that all the service slots are filled and all services are active.
+        </span>
+
+        <span>30 days - 2592000 seconds</span>
+      </Flex>
+    ),
+    rules: getGenericFieldRules('Time for emissions'),
   },
   numAgentInstances: {
     name: 'Number of agent instances',
-    desc: null, // TODO
-    rules: getFieldRules('Number of agent instances'),
+    desc: 'Quantity of agent instances associated with an autonomous service registered in the staking contract.',
+    rules: getGenericFieldRules('Number of agent instances'),
   },
   agentIds: {
     name: 'Agent IDs',
-    desc: null, // TODO
+    desc: 'If set, serves as a requirement for a service to be comprised of agent Ids specified.',
     rules: undefined,
   },
   threshold: {
     name: 'Multisig threshold',
-    desc: null, // TODO
+    desc: 'Service multisig threshold requirement. 0 - no threshold is enforced',
     rules: undefined,
   },
   configHash: {
     name: 'Service configuration hash',
-    desc: null, // TODO
+    desc: 'Service configuration hash requirement',
     rules: undefined,
   },
   activityChecker: {
     name: 'Activity checker address',
-    desc: null, // TODO
-    rules: getFieldRules('Activity checker address'),
+    desc: 'Activity checker handles the logic to monitor whether a specific service activity has been performed.',
+    rules: getGenericFieldRules('Activity checker address'),
   },
 } as const;
 
@@ -147,7 +174,7 @@ export const TemplateInfo = () => (
 export const MinimumStakingDepositLabel = () => (
   <TextWithTooltip
     text={LABELS.minStakingDeposit.name}
-    description="Minimum amount of OLAS that operators need to stake to participate in the staking program"
+    description={LABELS.minStakingDeposit.desc}
   />
 );
 
@@ -197,19 +224,19 @@ export const ActivityCheckerAddressLabel = () => (
 );
 
 // type FormNames = keyof FormValues;
-// export const Rules: Record<FormNames, ReturnType<typeof getFieldRules>> = {
-//   name: getFieldRules(LABELS.contractName.name),
-//   description: getFieldRules(LABELS.description.name),
-//   maxNumServices: getFieldRules(LABELS.maxNumServices.name),
-//   rewardsPerSecond: getFieldRules(LABELS.rewardsPerSecond.name),
-//   minStakingDeposit: getFieldRules(LABELS.minStakingDeposit.name),
-//   minNumStakingPeriods: getFieldRules(LABELS.minNumStakingPeriods),
-//   maxNumInactivityPeriods: getFieldRules(LABELS.maxNumInactivityPeriods),
-//   livenessPeriod: getFieldRules(LABELS.livenessPeriod),
-//   timeForEmissions: getFieldRules(LABELS.timeForEmissions),
-//   numAgentInstances: getFieldRules(LABELS.numAgentInstances),
-//   agentIds: getFieldRules(LABELS.agentIds),
-//   threshold: getFieldRules(LABELS.threshold),
-//   configHash: getFieldRules(LABELS.configHash),
-//   activityChecker: getFieldRules(LABELS.activityChecker),
+// export const Rules: Record<FormNames, ReturnType<typeof getGenericFieldRules>> = {
+//   name: getGenericFieldRules(LABELS.contractName.name),
+//   description: getGenericFieldRules(LABELS.description.name),
+//   maxNumServices: getGenericFieldRules(LABELS.maxNumServices.name),
+//   rewardsPerSecond: getGenericFieldRules(LABELS.rewardsPerSecond.name),
+//   minStakingDeposit: getGenericFieldRules(LABELS.minStakingDeposit.name),
+//   minNumStakingPeriods: getGenericFieldRules(LABELS.minNumStakingPeriods),
+//   maxNumInactivityPeriods: getGenericFieldRules(LABELS.maxNumInactivityPeriods),
+//   livenessPeriod: getGenericFieldRules(LABELS.livenessPeriod),
+//   timeForEmissions: getGenericFieldRules(LABELS.timeForEmissions),
+//   numAgentInstances: getGenericFieldRules(LABELS.numAgentInstances),
+//   agentIds: getGenericFieldRules(LABELS.agentIds),
+//   threshold: getGenericFieldRules(LABELS.threshold),
+//   configHash: getGenericFieldRules(LABELS.configHash),
+//   activityChecker: getGenericFieldRules(LABELS.activityChecker),
 // };

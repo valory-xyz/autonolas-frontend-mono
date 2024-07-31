@@ -36,7 +36,7 @@ import {
   RewardsPerSecondLabel,
   ServiceConfigHashLabel,
   TimeForEmissionsLabel,
-} from '../FormLabels';
+} from '../FieldConfig';
 import { ColFlexContainer } from './helpers';
 import { useMaxNumServices, useRewardsPerSecond } from './hooks';
 

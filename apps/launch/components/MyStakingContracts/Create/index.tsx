@@ -39,23 +39,23 @@ import { ErrorType } from 'types/index';
 import {
   ActivityCheckerAddressLabel,
   AgentIdsLabel,
-  ServiceConfigHashLabel,
+  AgentInstancesLabel,
   DescriptionLabel,
   FormValues,
   LABELS,
   LivenessPeriodLabel,
   MaximumInactivityPeriodsLabel,
   MaximumStakedAgentsLabel,
-  MinimumStakingPeriodsLabel,
   MinimumStakingDepositLabel,
-  NameLabel,
-  AgentInstancesLabel,
-  RewardsPerSecondLabel,
-  TemplateInfo,
+  MinimumStakingPeriodsLabel,
   MultisigThresholdLabel,
+  NameLabel,
+  RewardsPerSecondLabel,
+  ServiceConfigHashLabel,
+  TemplateInfo,
   TimeForEmissionsLabel,
-  getFieldRules,
-} from '../FormLabels';
+  getGenericFieldRules,
+} from '../FieldConfig';
 import { Hint, StyledMain, Title } from './styles';
 import { WrongNetworkAlert, checkImplementationVerified } from './utils';
 
@@ -198,7 +198,7 @@ export const CreateStakingContract = () => {
           <Form.Item
             label={<NameLabel />}
             name="contractName"
-            rules={getFieldRules(LABELS.contractName.name)}
+            rules={getGenericFieldRules(LABELS.contractName.name)}
           >
             <Input />
           </Form.Item>
@@ -207,7 +207,7 @@ export const CreateStakingContract = () => {
             label={<DescriptionLabel />}
             name="description"
             className="mb-0"
-            rules={getFieldRules(LABELS.description.name)}
+            rules={getGenericFieldRules(LABELS.description.name)}
           >
             <Input.TextArea rows={4} />
           </Form.Item>
@@ -238,7 +238,7 @@ export const CreateStakingContract = () => {
               <Form.Item
                 label={<MaximumStakedAgentsLabel />}
                 name="maxNumServices"
-                rules={getFieldRules(LABELS.maxNumServices.name)}
+                rules={getGenericFieldRules(LABELS.maxNumServices.name)}
               >
                 <InputNumber placeholder="e.g. 100" step="1" style={INPUT_WIDTH_STYLE} />
               </Form.Item>
@@ -249,7 +249,11 @@ export const CreateStakingContract = () => {
                 name="rewardsPerSecond"
                 rules={LABELS.rewardsPerSecond.rules}
               >
-                <InputNumber placeholder="e.g. 0.000001649305555557" step="0.0001" style={INPUT_WIDTH_STYLE} />
+                <InputNumber
+                  placeholder="e.g. 0.000001649305555557"
+                  step="0.0001"
+                  style={INPUT_WIDTH_STYLE}
+                />
               </Form.Item>
             </Col>
           </Row>
