@@ -249,7 +249,7 @@ export const CreateStakingContract = () => {
                 name="rewardsPerSecond"
                 rules={LABELS.rewardsPerSecond.rules}
               >
-                <InputNumber placeholder="e.g. 0.0003" step="0.0001" style={INPUT_WIDTH_STYLE} />
+                <InputNumber placeholder="e.g. 0.000001649305555557" step="0.0001" style={INPUT_WIDTH_STYLE} />
               </Form.Item>
             </Col>
           </Row>
