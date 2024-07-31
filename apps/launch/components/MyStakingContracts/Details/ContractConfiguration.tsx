@@ -1,33 +1,37 @@
 import { Row, Skeleton, Typography } from 'antd';
-import { FC } from 'react';
+import { FC, ReactNode } from 'react';
 import { Address } from 'viem';
 
 import { NA } from '@autonolas/frontend-library';
 
-import { useGetLivenessPeriod } from 'hooks/useGetStakingConstants';
+import { EXPLORER_URLS, UNICODE_SYMBOLS } from 'libs/util-constants/src';
+import { truncateAddress } from 'libs/util-functions/src';
+
+import {
+  useGetActivityChecker,
+  useGetLivenessPeriod,
+  useGetMinimumStakingDeposit,
+} from 'hooks/useGetStakingConstants';
 import { useAppSelector } from 'store/index';
 import { MyStakingContract } from 'types/index';
 
 import {
-  ActivityCheckerAddressLabel,
-  AgentIdsLabel,
-  AgentInstancesLabel,
+  ActivityCheckerAddressLabel, // AgentIdsLabel,
+  // AgentInstancesLabel,
   LivenessPeriodLabel,
   MaximumInactivityPeriodsLabel,
   MaximumStakedAgentsLabel,
   MinimumStakingDepositLabel,
-  MinimumStakingPeriodsLabel,
-  MultisigThresholdLabel,
-  RewardsPerSecondLabel,
-  ServiceConfigHashLabel,
-  TimeForEmissionsLabel,
+  MinimumStakingPeriodsLabel, // MultisigThresholdLabel,
+  RewardsPerSecondLabel, // ServiceConfigHashLabel,
+  // TimeForEmissionsLabel,
 } from '../FormLabels';
 import { ColFlexContainer } from './helpers';
 import { useMaxNumServices, useRewardsPerSecond } from './hooks';
 
 const { Text } = Typography;
 
-const ShowContent = ({ isLoading, data }: { isLoading: boolean; data?: string }) => {
+const ShowContent = ({ isLoading, data }: { isLoading: boolean; data?: string | ReactNode }) => {
   const { networkId } = useAppSelector((state) => state.network);
 
   if (!networkId || isLoading) return <Skeleton.Input active size="small" />;
@@ -44,9 +48,38 @@ const Rewards: FC<{ address: Address }> = ({ address }) => {
   return <ShowContent isLoading={isLoading} data={`${data} OLAS` || NA} />;
 };
 
+const MinimumStakingDeposit: FC<{ address: Address }> = ({ address }) => {
+  const { data, isLoading } = useGetMinimumStakingDeposit({ address });
+  console.log('MinimumStakingDeposit', data);
+  return <ShowContent isLoading={isLoading} data={data} />;
+};
+
 const LivenessPeriod: FC<{ address: Address }> = ({ address }) => {
   const { data, isLoading } = useGetLivenessPeriod({ address });
   return <ShowContent isLoading={isLoading} data={data ? `${data} seconds` : NA} />;
+};
+
+const ActivityCheckerAddress: FC<{ address: Address }> = ({ address }) => {
+  const { networkId } = useAppSelector((state) => state.network);
+  const { data: checkerAddress, isLoading } = useGetActivityChecker({ address });
+  const truncatedAddress = checkerAddress ? truncateAddress(checkerAddress) : NA;
+
+  return (
+    <ShowContent
+      isLoading={isLoading}
+      data={
+        networkId ? (
+          <a
+            href={`${EXPLORER_URLS[networkId]}/address/${checkerAddress}`}
+            target="_blank"
+            rel="noreferrer"
+          >
+            {`${truncatedAddress} ${UNICODE_SYMBOLS.EXTERNAL_LINK}`}
+          </a>
+        ) : null
+      }
+    />
+  );
 };
 
 export const ContractConfiguration: FC<{ myStakingContract: MyStakingContract }> = ({
@@ -66,7 +99,10 @@ export const ContractConfiguration: FC<{ myStakingContract: MyStakingContract }>
       </Row>
 
       <Row gutter={24}>
-        <ColFlexContainer text={<MinimumStakingDepositLabel />} content={<>TODO</>} />
+        <ColFlexContainer
+          text={<MinimumStakingDepositLabel />}
+          content={<MinimumStakingDeposit address={myStakingContract.id} />}
+        />
         <ColFlexContainer text={<MinimumStakingPeriodsLabel />} content={<>TODO</>} />
       </Row>
 
@@ -78,19 +114,22 @@ export const ContractConfiguration: FC<{ myStakingContract: MyStakingContract }>
         />
       </Row>
 
-      <Row gutter={24}>
+      {/* <Row gutter={24}>
         <ColFlexContainer text={<TimeForEmissionsLabel />} content={<>TODO</>} />
         <ColFlexContainer text={<AgentInstancesLabel />} content={<>TODO</>} />
-      </Row>
+      </Row> */}
 
-      <Row gutter={24}>
+      {/* <Row gutter={24}>
         <ColFlexContainer text={<AgentIdsLabel />} content={<>TODO</>} />
         <ColFlexContainer text={<MultisigThresholdLabel />} content={<>TODO</>} />
-      </Row>
+      </Row> */}
 
       <Row gutter={24}>
-        <ColFlexContainer text={<ServiceConfigHashLabel />} content={<>TODO</>} />
-        <ColFlexContainer text={<ActivityCheckerAddressLabel />} content={<>TODO</>} />
+        {/* <ColFlexContainer text={<ServiceConfigHashLabel />} content={<>TODO</>} /> */}
+        <ColFlexContainer
+          text={<ActivityCheckerAddressLabel />}
+          content={<ActivityCheckerAddress address={myStakingContract.id} />}
+        />
       </Row>
     </>
   );
