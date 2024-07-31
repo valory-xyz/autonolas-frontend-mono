@@ -4,6 +4,7 @@ import { Address } from 'viem';
 
 import { NA } from '@autonolas/frontend-library';
 
+import { useGetLivenessPeriod } from 'hooks/useGetStakingConstants';
 import { useAppSelector } from 'store/index';
 import { MyStakingContract } from 'types/index';
 
@@ -26,22 +27,26 @@ import { useMaxNumServices, useRewardsPerSecond } from './hooks';
 
 const { Text } = Typography;
 
-const MaximumStakedAgents: FC<{ address: Address }> = ({ address }) => {
+const ShowContent = ({ isLoading, data }: { isLoading: boolean; data?: string }) => {
   const { networkId } = useAppSelector((state) => state.network);
-  const { data, isLoading } = useMaxNumServices({ address });
 
   if (!networkId || isLoading) return <Skeleton.Input active size="small" />;
-
   return <Text>{data || NA}</Text>;
 };
 
+const MaximumStakedAgents: FC<{ address: Address }> = ({ address }) => {
+  const { data, isLoading } = useMaxNumServices({ address });
+  return <ShowContent isLoading={isLoading} data={data} />;
+};
+
 const Rewards: FC<{ address: Address }> = ({ address }) => {
-  const { networkId } = useAppSelector((state) => state.network);
   const { data, isLoading } = useRewardsPerSecond({ address });
+  return <ShowContent isLoading={isLoading} data={`${data} OLAS` || NA} />;
+};
 
-  if (!networkId || isLoading) return <Skeleton.Input active size="small" />;
-
-  return <Text>{`${data} OLAS` || NA}</Text>;
+const LivenessPeriod: FC<{ address: Address }> = ({ address }) => {
+  const { data, isLoading } = useGetLivenessPeriod({ address });
+  return <ShowContent isLoading={isLoading} data={data ? `${data} seconds` : NA} />;
 };
 
 export const ContractConfiguration: FC<{ myStakingContract: MyStakingContract }> = ({
@@ -67,7 +72,10 @@ export const ContractConfiguration: FC<{ myStakingContract: MyStakingContract }>
 
       <Row gutter={24}>
         <ColFlexContainer text={<MaximumInactivityPeriodsLabel />} content={<>TODO</>} />
-        <ColFlexContainer text={<LivenessPeriodLabel />} content={<>TODO</>} />
+        <ColFlexContainer
+          text={<LivenessPeriodLabel />}
+          content={<LivenessPeriod address={myStakingContract.id} />}
+        />
       </Row>
 
       <Row gutter={24}>

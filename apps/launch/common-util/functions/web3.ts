@@ -86,9 +86,6 @@ export const createStakingContract = async ({
   const createFn = contract.methods.createStakingInstance(implementation, initPayload);
   const result = await sendTransaction(createFn, account);
 
-  console.log('createStakingContract contract: ', contract);
-  console.log('createStakingContract result: ', result);
-
   return result as ContractTransactionReceipt & {
     events?: { InstanceCreated: InstanceCreatedEvent };
   };
