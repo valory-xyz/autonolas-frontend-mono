@@ -1,11 +1,10 @@
-import { CheckOutlined, InfoCircleOutlined, PlusOutlined } from '@ant-design/icons';
+import { CheckOutlined, PlusOutlined } from '@ant-design/icons';
 import { Button, Card as CardAntd, Space, Table, Typography } from 'antd';
 import { ColumnsType } from 'antd/es/table';
 import styled from 'styled-components';
 import { Allocation, StakingContract } from 'types';
 import { useAccount } from 'wagmi';
 
-import { COLOR } from 'libs/ui-theme/src';
 import { CHAIN_NAMES } from 'libs/util-constants/src';
 
 import { formatWeiBalance } from 'common-util/functions/balance';
@@ -65,12 +64,7 @@ const getColumns = ({
       ),
     },
     {
-      title: (
-        <NextWeekTooltip>
-          Next week&apos;s weight
-          <InfoCircleOutlined className="ml-8" style={{ color: COLOR.GREY_2 }} />
-        </NextWeekTooltip>
-      ),
+      title: <NextWeekTooltip>Next week&apos;s weight</NextWeekTooltip>,
       key: 'nextWeight',
       dataIndex: 'nextWeight',
       render: (nextWeight) => (

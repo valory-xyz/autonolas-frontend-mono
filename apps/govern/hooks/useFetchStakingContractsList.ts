@@ -7,7 +7,7 @@ import { useReadContract } from 'wagmi';
 import { VOTE_WEIGHTING } from 'libs/util-contracts/src/lib/abiAndAddresses';
 
 import { RETAINER_ADDRESS } from 'common-util/constants/addresses';
-import { NEXT_RELATIVE_WEIGHTS_KEY } from 'common-util/constants/scopeKeys';
+import { NEXT_RELATIVE_WEIGHTS_KEY, TIME_SUM_KEY } from 'common-util/constants/scopeKeys';
 import { getBytes32FromAddress } from 'common-util/functions';
 import { setStakingContracts } from 'store/govern';
 import { useAppDispatch, useAppSelector } from 'store/index';
@@ -39,6 +39,7 @@ export const useFetchStakingContractsList = () => {
     abi: VOTE_WEIGHTING.abi,
     chainId: mainnet.id,
     functionName: 'timeSum',
+    scopeKey: TIME_SUM_KEY,
     query: {
       select: (data) => Number(data),
     },

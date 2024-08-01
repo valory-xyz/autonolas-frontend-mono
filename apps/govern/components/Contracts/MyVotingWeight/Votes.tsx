@@ -77,11 +77,7 @@ const columns: ColumnsType<MyVote> = [
     render: (currentWeight) => <Text>{`${currentWeight}%`}</Text>,
   },
   {
-    title: (
-      <NextWeekTooltip>
-        My updated weight <InfoCircleOutlined className="ml-8" style={{ color: COLOR.GREY_2 }} />
-      </NextWeekTooltip>
-    ),
+    title: <NextWeekTooltip>My updated weight</NextWeekTooltip>,
     key: 'nextWeight',
     dataIndex: 'nextWeight',
     render: (nextWeight) => <Text>{`${nextWeight}%`}</Text>,
@@ -155,8 +151,8 @@ export const Votes = ({ setIsUpdating, setAllocations }: VotesProps) => {
         });
       }
       return res.sort((item) =>
-        // put Rollover address at the end
-        item.address === getBytes32FromAddress(RETAINER_ADDRESS) ? 1 : -1,
+        // put Rollover pool at the end
+        item.isRetainer ? 1 : -1,
       );
     }, []);
   }, [userVotes, stakingContracts]);

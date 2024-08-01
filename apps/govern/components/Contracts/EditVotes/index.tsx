@@ -218,7 +218,7 @@ export const EditVotes = ({ allocations, setAllocations, setIsUpdating }: EditVo
       />
 
       <Paragraph type="secondary" className="text-end">
-        New voting weight will take effect at the beginning of the next week.
+        Updated voting weights will take effect at the start of next week (according to Unix time).
       </Paragraph>
       <Flex gap={12} justify="flex-end">
         <Button size="large" onClick={onCancel}>

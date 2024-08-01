@@ -34,9 +34,7 @@ export const governSlice = createSlice({
     setLastUserVote: (state, action: PayloadAction<GovernState['lastUserVote']>) => {
       state.lastUserVote = action.payload;
     },
-    clearState: (state) => {
-      state = { ...initialState };
-    },
+    clearState: () => initialState,
     clearUserState: (state) => {
       state.userVotes = initialState.userVotes;
       state.isUserVotesLoading = true;
