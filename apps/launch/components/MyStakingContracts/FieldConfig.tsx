@@ -5,6 +5,7 @@ import { ReactNode } from 'react';
 
 import { COLOR } from 'libs/ui-theme/src';
 import { UNICODE_SYMBOLS } from 'libs/util-constants/src';
+import { FORM_VALIDATION } from 'libs/util-functions/src';
 
 import {
   useMinStakingDepositLimit,
@@ -252,8 +253,6 @@ export const useStakingDepositRules = (): StakingDepositRules => {
         },
       ],
     },
-
-    // TODOs
     rewardsPerSecond: { rules: getGenericFieldRules(FieldConfig.rewardsPerSecond.name) },
     minStakingDeposit: {
       rules: [
@@ -296,9 +295,16 @@ export const useStakingDepositRules = (): StakingDepositRules => {
       ],
     },
     numAgentInstances: { rules: getGenericFieldRules(FieldConfig.numAgentInstances.name) },
-    agentIds: { rules: undefined },
+    agentIds: {
+      rules: [{ ...FORM_VALIDATION.validateCommaSeparatedList }],
+    },
     threshold: { rules: undefined },
     configHash: { rules: undefined },
-    activityChecker: { rules: getGenericFieldRules(FieldConfig.activityChecker.name) },
+    activityChecker: {
+      rules: [
+        ...getGenericFieldRules(FieldConfig.activityChecker.name),
+        { ...FORM_VALIDATION.validateAddress },
+      ],
+    },
   };
 };

@@ -268,7 +268,7 @@ export const CreateStakingContract = () => {
                 rules={rulesConfig.minStakingDeposit.rules}
                 validateFirst
               >
-                <InputNumber step="1" style={INPUT_WIDTH_STYLE} />
+                <InputNumber step="1" min={1} style={INPUT_WIDTH_STYLE} />
               </Form.Item>
             </Col>
             <Col span={12}>
@@ -299,7 +299,7 @@ export const CreateStakingContract = () => {
                 name="livenessPeriod"
                 rules={rulesConfig.livenessPeriod.rules}
               >
-                <InputNumber step="1" min={1} style={INPUT_WIDTH_STYLE} />
+                <InputNumber step="1" min={86400} style={INPUT_WIDTH_STYLE} />
               </Form.Item>
             </Col>
           </Row>
@@ -327,13 +327,17 @@ export const CreateStakingContract = () => {
 
           <Row gutter={24}>
             <Col span={12}>
-              <Form.Item label={<AgentIdsLabel />} name="agentIds">
+              <Form.Item
+                label={<AgentIdsLabel />}
+                name="agentIds"
+                rules={rulesConfig.agentIds.rules}
+              >
                 <Input style={INPUT_WIDTH_STYLE} placeholder="14,25" />
               </Form.Item>
             </Col>
             <Col span={12}>
               <Form.Item label={<MultisigThresholdLabel />} name="threshold">
-                <InputNumber step="1" style={INPUT_WIDTH_STYLE} />
+                <InputNumber step="1" min={1} style={INPUT_WIDTH_STYLE} />
               </Form.Item>
             </Col>
           </Row>

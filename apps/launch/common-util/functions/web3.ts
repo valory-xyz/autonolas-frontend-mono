@@ -36,7 +36,6 @@ export const getVoteWeightingContract = () => {
   const { chainId } = getWeb3Details();
   const abi = VOTE_WEIGHTING.abi as AbiItem[];
   const address = (VOTE_WEIGHTING.addresses as Record<number, string>)[chainId as number];
-
   const contract = getContract(abi, address);
   return contract;
 };

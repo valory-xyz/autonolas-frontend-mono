@@ -13,12 +13,8 @@ export const getEstimatedGasLimit = async (
     throw new Error('Invalid account passed to estimate gas limit');
   }
 
-  console.log('fn: ', { fn, account });
-
   try {
     const estimatedGas = await fn.estimateGas({ from: account });
-    console.log('estimatedGas: ', { estimatedGas });
-
     return Math.ceil(Number(estimatedGas) * 1.2);
   } catch (error) {
     window.console.warn(`Error occurred on estimating gas, defaulting to ${ESTIMATED_GAS_LIMIT}`);
