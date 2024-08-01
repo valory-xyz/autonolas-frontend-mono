@@ -4,7 +4,7 @@ import { Address } from 'viem';
 
 import { GATEWAY_URL, NA } from '@autonolas/frontend-library';
 
-import { EXPLORER_URLS, HASH_PREFIX, UNICODE_SYMBOLS } from 'libs/util-constants/src';
+import { EXPLORER_URLS, HASH_PREFIX, REGISTRY_URL, UNICODE_SYMBOLS } from 'libs/util-constants/src';
 import { truncateAddress } from 'libs/util-functions/src';
 
 import { CONTRACT_DEFAULT_VALUES } from 'common-util/constants/stakingContract';
@@ -56,7 +56,6 @@ const ShowNetworkAddress = ({ address }: { address: Address }) => {
   if (!address) return null;
 
   const truncatedAddress = truncateAddress(address);
-
   return (
     <a href={`${EXPLORER_URLS[networkId]}/address/${address}`} target="_blank" rel="noreferrer">
       {`${truncatedAddress} ${UNICODE_SYMBOLS.EXTERNAL_LINK}`}
@@ -76,7 +75,6 @@ const Rewards: FC<{ address: Address }> = ({ address }) => {
 
 const MinimumStakingDeposit: FC<{ address: Address }> = ({ address }) => {
   const { data, isLoading } = useGetMinimumStakingDeposit({ address });
-  console.log('MinimumStakingDeposit', data);
   return <ShowContent isLoading={isLoading} data={data} />;
 };
 
@@ -96,7 +94,7 @@ const MinimumStakingPeriods: FC<{ address: Address }> = ({ address }) => {
     if (!minimumStakingPeriods) return NA;
 
     const minStakingDuration = Number(minimumStakingPeriods) / Number(livenessPeriod);
-    return `${minStakingDuration}`;
+    return minStakingDuration;
   }, [livenessPeriod, minimumStakingPeriods]);
 
   return <ShowContent isLoading={isLoading} data={data} />;
@@ -124,9 +122,23 @@ const AgentInstances: FC<{ address: Address }> = ({ address }) => {
 
 const AgentIds: FC<{ address: Address }> = ({ address }) => {
   const { data, isLoading } = useGetAgentIds({ address });
-  return (
-    <ShowContent isLoading={isLoading} data={!data || data?.length === 0 ? NA : data.join(', ')} />
-  );
+  const { networkName } = useAppSelector((state) => state.network);
+
+  const ids = useMemo(() => {
+    if (!data || data.length === 0) return NA;
+    return data.map((id) => (
+      <a
+        key={id}
+        href={`${REGISTRY_URL}${networkName}/services/${id}`}
+        target="_blank"
+        rel="noreferrer"
+      >
+        {id}
+      </a>
+    ));
+  }, [data, networkName]);
+
+  return <ShowContent isLoading={isLoading} data={ids} />;
 };
 
 const MultisigThreshold: FC<{ address: Address }> = ({ address }) => {
@@ -142,6 +154,8 @@ const ConfigHash: FC<{ address: Address }> = ({ address }) => {
     if (!configHash) return NA;
 
     const truncateConfigHash = truncateAddress(configHash);
+
+    // if configHash is zero address, no need to show external link
     if (isZeroAddress) return truncateConfigHash;
 
     const uri = `${HASH_PREFIX}${configHash.substring(2)}`;

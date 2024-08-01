@@ -71,7 +71,10 @@ const FieldConfig: Record<keyof FormValues, { name: string; desc?: string | Reac
           operator bonds required for staking.
         </span>
 
-        <span> Operators need to stake:this × the number of agent instances + 1.</span>
+        <span>
+          Operators need to stake:
+          <Text strong>this × the number of agent instances + 1.</Text>
+        </span>
       </Flex>
     ),
   },
@@ -234,7 +237,7 @@ export const ActivityCheckerAddressLabel = () => (
 
 /** ******* RULES ******* */
 type StakingDepositRules = { [K in keyof FormValues]: { rules: Rule[] | undefined } };
-export const useStakingDepositRules = (): StakingDepositRules => {
+export const useCreateStakingContractRules = (): StakingDepositRules => {
   const { data: numServicesLimit } = useNumServicesLimit();
   const { data: minStakingDepositLimit } = useMinStakingDepositLimit();
   const { data: timeForEmissionsLimit } = useTimeForEmissionsLimit();

@@ -77,18 +77,3 @@ export const useGetConfigHash = ({ address }: { address: Address }) =>
 
 export const useGetActivityChecker = ({ address }: { address: Address }) =>
   useStakingContractConstant({ address, name: 'activityChecker' });
-
-// export const useGetLivenessPeriod = ({ address }: { address: Address }) => {
-//   const { networkId } = useAppSelector((state) => state.network);
-
-//   return useReadContract({
-//     address,
-//     abi: STAKING_TOKEN.abi,
-//     chainId: networkId as number,
-//     functionName: 'livenessPeriod',
-//     query: {
-//       enabled: !!networkId,
-//       select: (data) => (typeof data === 'bigint' ? data.toString() : '0'),
-//     },
-//   });
-// };

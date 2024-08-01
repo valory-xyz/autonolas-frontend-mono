@@ -53,7 +53,7 @@ import {
   ServiceConfigHashLabel,
   TemplateInfo,
   TimeForEmissionsLabel,
-  useStakingDepositRules,
+  useCreateStakingContractRules,
 } from '../FieldConfig';
 import { Hint, StyledMain, Title } from './styles';
 import { WrongNetworkAlert, checkImplementationVerified } from './utils';
@@ -93,7 +93,7 @@ const TemplateInfoContent = ({ id }: { id: number }) => {
 export const CreateStakingContract = () => {
   const router = useRouter();
   const dispatch = useAppDispatch();
-  const rulesConfig = useStakingDepositRules();
+  const rulesConfig = useCreateStakingContractRules();
 
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<ErrorType>(null);

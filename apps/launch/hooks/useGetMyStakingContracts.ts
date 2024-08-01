@@ -191,7 +191,6 @@ export const useGetMyStakingContracts = () => {
           template: CONTRACT_TEMPLATES[0].title,
           isNominated:
             nominees.findIndex((item) => item.account === instanceAddressesInBytes32[index]) !== -1,
-          // TODO: fetch the rest of the information
         };
       })
       // filter out null values (ie. contracts without metadata - failed to fetch or not available)
