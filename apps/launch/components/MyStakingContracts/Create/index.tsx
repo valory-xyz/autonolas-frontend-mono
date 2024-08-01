@@ -63,10 +63,36 @@ const { Text } = Typography;
 const contractTemplate = CONTRACT_TEMPLATES[0];
 const INPUT_WIDTH_STYLE = { width: '100%' };
 
+const TemplateInfoContent = ({ id }: { id: number }) => {
+  return (
+    <>
+      <Hint type="secondary">
+        Good descriptions help governors understand the value your contract brings to the ecosystem.
+        Be clear to increase the chance governors allocate rewards to your contract.
+      </Hint>
+
+      <Divider />
+      <TemplateInfo />
+      <Flex className="mt-4 mb-8" gap={16}>
+        <Text>{contractTemplate.title}</Text>
+        <Tag color="default">More templates coming soon</Tag>
+      </Flex>
+      <Flex className="mb-8">
+        <Text type="secondary">{contractTemplate.description}</Text>
+      </Flex>
+      <Button type="link" className="p-0 mb-16" href={`${EXPLORER_URLS[id]}/address/TBD`}>
+        {`View template on explorer ${UNICODE_SYMBOLS.EXTERNAL_LINK}`}
+      </Button>
+    </>
+  );
+};
+
+/**
+ * Create staking contract
+ */
 export const CreateStakingContract = () => {
   const router = useRouter();
   const dispatch = useAppDispatch();
-  useStakingDepositRules();
   const rulesConfig = useStakingDepositRules();
 
   const [isLoading, setIsLoading] = useState(false);
@@ -141,14 +167,10 @@ export const CreateStakingContract = () => {
       if (!(await checkImplementationVerified(chain.id, implementation))) {
         throw new Error('Validation failed');
       }
-      console.log('account: ', account);
 
       const result = await createStakingContract({ implementation, initPayload, account });
-      console.log('createStakingContract result: ', result);
-
       if (result) {
         const eventLog = result.events?.InstanceCreated?.returnValues;
-        console.log('eventLog: ', eventLog);
 
         if (eventLog) {
           dispatch(
@@ -193,39 +215,23 @@ export const CreateStakingContract = () => {
           requiredMark={false}
           initialValues={{ ...CONTRACT_DEFAULT_VALUES }}
         >
-          <Form.Item label={<NameLabel />} name="contractName" rules={rulesConfig.contractName.rules}>
+          <Form.Item
+            name="contractName"
+            label={<NameLabel />}
+            rules={rulesConfig.contractName.rules}
+          >
             <Input />
           </Form.Item>
 
           <Form.Item
-            label={<DescriptionLabel />}
             name="description"
-            className="mb-0"
+            label={<DescriptionLabel />}
             rules={rulesConfig.description.rules}
+            className="mb-0"
           >
             <Input.TextArea rows={4} />
           </Form.Item>
-          <Hint type="secondary">
-            Good descriptions help governors understand the value your contract brings to the
-            ecosystem. Be clear to increase the chance governors allocate rewards to your contract.
-          </Hint>
-
-          <Divider />
-          <TemplateInfo />
-          <Flex className="mt-4 mb-8" gap={16}>
-            <Text>{contractTemplate.title}</Text>
-            <Tag color="default">More templates coming soon</Tag>
-          </Flex>
-          <Flex className="mb-8">
-            <Text type="secondary">{contractTemplate.description}</Text>
-          </Flex>
-          <Button
-            type="link"
-            className="p-0 mb-16"
-            href={`${EXPLORER_URLS[networkId || mainnet.id]}/address/TBD`}
-          >
-            {`View template on explorer ${UNICODE_SYMBOLS.EXTERNAL_LINK}`}
-          </Button>
+          <TemplateInfoContent id={networkId || mainnet.id} />
 
           <Row gutter={24}>
             <Col span={12}>
@@ -233,8 +239,9 @@ export const CreateStakingContract = () => {
                 label={<MaximumStakedAgentsLabel />}
                 name="maxNumServices"
                 rules={rulesConfig.maxNumServices.rules}
+                validateFirst
               >
-                <InputNumber placeholder="e.g. 100" step="1" style={INPUT_WIDTH_STYLE} />
+                <InputNumber placeholder="e.g. 100" step="1" min={1} style={INPUT_WIDTH_STYLE} />
               </Form.Item>
             </Col>
             <Col span={12}>
@@ -246,17 +253,20 @@ export const CreateStakingContract = () => {
                 <InputNumber
                   placeholder="e.g. 0.000001649305555557"
                   step="0.0001"
+                  min={0.0001}
                   style={INPUT_WIDTH_STYLE}
                 />
               </Form.Item>
             </Col>
           </Row>
+
           <Row gutter={24}>
             <Col span={12}>
               <Form.Item
                 label={<MinimumStakingDepositLabel />}
                 name="minStakingDeposit"
                 rules={rulesConfig.minStakingDeposit.rules}
+                validateFirst
               >
                 <InputNumber step="1" style={INPUT_WIDTH_STYLE} />
               </Form.Item>
@@ -266,11 +276,13 @@ export const CreateStakingContract = () => {
                 label={<MinimumStakingPeriodsLabel />}
                 name="minNumStakingPeriods"
                 rules={rulesConfig.minNumStakingPeriods.rules}
+                validateFirst
               >
-                <InputNumber step="1" style={INPUT_WIDTH_STYLE} />
+                <InputNumber step="1" min={1} style={INPUT_WIDTH_STYLE} />
               </Form.Item>
             </Col>
           </Row>
+
           <Row gutter={24}>
             <Col span={12}>
               <Form.Item
@@ -287,7 +299,7 @@ export const CreateStakingContract = () => {
                 name="livenessPeriod"
                 rules={rulesConfig.livenessPeriod.rules}
               >
-                <InputNumber step="1" style={INPUT_WIDTH_STYLE} />
+                <InputNumber step="1" min={1} style={INPUT_WIDTH_STYLE} />
               </Form.Item>
             </Col>
           </Row>
@@ -299,7 +311,7 @@ export const CreateStakingContract = () => {
                 name="timeForEmissions"
                 rules={rulesConfig.timeForEmissions.rules}
               >
-                <InputNumber step="1" style={INPUT_WIDTH_STYLE} />
+                <InputNumber step="1" min={1} style={INPUT_WIDTH_STYLE} />
               </Form.Item>
             </Col>
             <Col span={12}>
@@ -308,7 +320,7 @@ export const CreateStakingContract = () => {
                 name="numAgentInstances"
                 rules={rulesConfig.numAgentInstances.rules}
               >
-                <InputNumber step="1" style={INPUT_WIDTH_STYLE} />
+                <InputNumber step="1" min={1} style={INPUT_WIDTH_STYLE} />
               </Form.Item>
             </Col>
           </Row>

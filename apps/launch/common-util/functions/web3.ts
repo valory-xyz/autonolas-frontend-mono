@@ -37,7 +37,6 @@ export const getVoteWeightingContract = () => {
   const abi = VOTE_WEIGHTING.abi as AbiItem[];
   const address = (VOTE_WEIGHTING.addresses as Record<number, string>)[chainId as number];
 
-  console.log('VOTE_WEIGHTING address: ', address);
   const contract = getContract(abi, address);
   return contract;
 };
@@ -54,8 +53,6 @@ export const getStakingFactoryContract = () => {
 export const sendTransaction = async (methodFn: any, account: Address) => {
   const estimatedGas = await getEstimatedGasLimit(methodFn, account);
   const fn = methodFn.send({ from: account, estimatedGas });
-
-  console.log('sendTransaction estimatedGas: ', { estimatedGas, SUPPORTED_CHAINS, RPC_URLS });
 
   return await sendTransactionFn(fn, account, {
     supportedChains: SUPPORTED_CHAINS,

@@ -1,21 +1,17 @@
-// import { ethers } from 'ethers';
-import { useMemo } from 'react';
+import { ethers } from 'ethers';
 import { Address } from 'viem';
 import { useReadContract } from 'wagmi';
 
-import {
-  STAKING_FACTORY,
-  STAKING_VERIFIER,
-} from 'libs/util-contracts/src/lib/abiAndAddresses';
+import { STAKING_FACTORY, STAKING_VERIFIER } from 'libs/util-contracts/src/lib/abiAndAddresses';
 
 import { useAppSelector } from 'store/index';
 
 export const useStakingContractVerifierHelper = <T>({
   name = 'timeForEmissionsLimit',
-}: // select,
-{
+  select,
+}: {
   name: string;
-  // select?: (data: unknown) => T;
+  select: (data: unknown) => T;
 }) => {
   const { networkId } = useAppSelector((state) => state.network);
 
@@ -33,27 +29,36 @@ export const useStakingContractVerifierHelper = <T>({
     functionName: name,
     query: {
       enabled: !!verifierAddress,
-      // select:
-      //   select ||
-      //   (((data) => {
-      //     if (typeof data === 'bigint') return data.toString();
-      //     return data;
-      //   }) as (data: unknown) => T),
+      select,
     },
   });
 
   return { data, isLoading };
 };
 
-export const useTimeForEmissionsLimit = () => {
-  const { data, ...rest } = useStakingContractVerifierHelper<number>({
-    name: 'timeForEmissionsLimit',
+export const useNumServicesLimit = () =>
+  useStakingContractVerifierHelper<number>({
+    name: 'numServicesLimit',
+    select: (data) => {
+      if (typeof data === 'bigint') return Number(data);
+      return 0;
+    },
   });
 
-  const timeForEmissionsLimit = useMemo(() => {
-    if (typeof data === 'bigint') return Number(data);
-    return 0;
-  }, [data]);
+export const useMinStakingDepositLimit = () =>
+  useStakingContractVerifierHelper<number>({
+    name: 'minStakingDepositLimit',
+    select: (data) => {
+      if (typeof data === 'bigint') return Number(ethers.formatEther(data));
+      return 0;
+    },
+  });
 
-  return { timeForEmissionsLimit, ...rest };
-};
+export const useTimeForEmissionsLimit = () =>
+  useStakingContractVerifierHelper<number>({
+    name: 'timeForEmissionsLimit',
+    select: (data) => {
+      if (typeof data === 'bigint') return Number(data);
+      return 0;
+    },
+  });

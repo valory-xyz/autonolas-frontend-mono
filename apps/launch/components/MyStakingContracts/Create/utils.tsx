@@ -29,8 +29,6 @@ export const checkImplementationVerified = async (chainId: number, implementatio
     functionName: 'verifier',
   })) as Address;
 
-  console.log('verifierAddress: ', verifierAddress);
-
   if (verifierAddress === ethers.ZeroAddress) return true;
 
   const result = await readContract(wagmiConfig, {
@@ -40,8 +38,6 @@ export const checkImplementationVerified = async (chainId: number, implementatio
     functionName: 'verifyImplementation',
     args: [implementation],
   });
-
-  console.log('result: ', result);
 
   if (!result) {
     notification.error({ message: 'Selected implementation is not verified' });

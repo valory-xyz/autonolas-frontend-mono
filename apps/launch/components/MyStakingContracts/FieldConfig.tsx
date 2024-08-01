@@ -6,7 +6,11 @@ import { ReactNode } from 'react';
 import { COLOR } from 'libs/ui-theme/src';
 import { UNICODE_SYMBOLS } from 'libs/util-constants/src';
 
-import { useTimeForEmissionsLimit } from 'hooks/useStakingVerifier';
+import {
+  useMinStakingDepositLimit,
+  useNumServicesLimit,
+  useTimeForEmissionsLimit,
+} from 'hooks/useStakingVerifier';
 
 const { Paragraph, Text } = Typography;
 
@@ -230,12 +234,26 @@ export const ActivityCheckerAddressLabel = () => (
 /** ******* RULES ******* */
 type StakingDepositRules = { [K in keyof FormValues]: { rules: Rule[] | undefined } };
 export const useStakingDepositRules = (): StakingDepositRules => {
-  const { timeForEmissionsLimit } = useTimeForEmissionsLimit();
+  const { data: numServicesLimit } = useNumServicesLimit();
+  const { data: minStakingDepositLimit } = useMinStakingDepositLimit();
+  const { data: timeForEmissionsLimit } = useTimeForEmissionsLimit();
 
   return {
     contractName: { rules: getGenericFieldRules(FieldConfig.contractName.name) },
     description: { rules: getGenericFieldRules(FieldConfig.description.name) },
-    maxNumServices: { rules: getGenericFieldRules(FieldConfig.maxNumServices.name) },
+    maxNumServices: {
+      rules: [
+        ...getGenericFieldRules(FieldConfig.maxNumServices.name),
+        {
+          type: 'number',
+          min: 1,
+          max: numServicesLimit,
+          message: `Maximum number of staked agents must be at least 1 and at most ${numServicesLimit}`,
+        },
+      ],
+    },
+
+    // TODOs
     rewardsPerSecond: { rules: getGenericFieldRules(FieldConfig.rewardsPerSecond.name) },
     minStakingDeposit: {
       rules: [
@@ -243,7 +261,8 @@ export const useStakingDepositRules = (): StakingDepositRules => {
         {
           type: 'number',
           min: 1,
-          message: `Minimum service staking deposit, OLAS must be at least 1`,
+          max: minStakingDepositLimit,
+          message: `Minimum service staking deposit, OLAS must be at least 1 and at most ${minStakingDepositLimit}`,
         },
       ],
     },
