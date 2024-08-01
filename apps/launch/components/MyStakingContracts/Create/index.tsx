@@ -337,7 +337,7 @@ export const CreateStakingContract = () => {
             </Col>
             <Col span={12}>
               <Form.Item label={<MultisigThresholdLabel />} name="threshold">
-                <InputNumber step="1" min={1} style={INPUT_WIDTH_STYLE} />
+                <InputNumber step="1" min={0} style={INPUT_WIDTH_STYLE} />
               </Form.Item>
             </Col>
           </Row>
@@ -349,6 +349,7 @@ export const CreateStakingContract = () => {
             label={<ActivityCheckerAddressLabel />}
             name="activityChecker"
             rules={rulesConfig.activityChecker.rules}
+            validateFirst
           >
             <Input />
           </Form.Item>
