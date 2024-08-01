@@ -11,24 +11,17 @@ const { Text } = Typography;
 
 const TOOLTIP_STYLE = { maxWidth: '350px' };
 
-export const NextWeekTooltip = ({
-  children,
-  hideDescription = false,
-}: {
-  children: ReactNode;
-  hideDescription?: boolean;
-}) => {
+export const NextWeekTooltip = ({ children }: { children: ReactNode }) => {
   return (
     <Tooltip
       color={COLOR.WHITE}
       overlayStyle={TOOLTIP_STYLE}
       title={
         <Space direction="vertical">
-          {!hideDescription && (
-            <Text>
-              Updated voting weights will take effect at the start of next Unix time week.
-            </Text>
-          )}
+          <Text>
+            Updated voting weights will take effect at the start of next week (according to Unix
+            time).
+          </Text>
           <a
             href={`https://etherscan.io/address/${
               VOTE_WEIGHTING.addresses[mainnet.id]
