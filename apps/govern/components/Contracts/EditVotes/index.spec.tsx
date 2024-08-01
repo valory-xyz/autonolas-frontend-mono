@@ -88,8 +88,9 @@ describe('<EditVotes />', () => {
     expect(screen.getByText('My voting weight')).toBeInTheDocument();
 
     expect(
-      screen.getByText(/New voting weight will take effect at the beginning of the next week./),
+      screen.getByText(/Updated voting weights will take effect at the start of/),
     ).toBeInTheDocument();
+    expect(screen.getByText(/next Unix time week./)).toBeInTheDocument();
   });
 
   describe('Voting contract row', () => {

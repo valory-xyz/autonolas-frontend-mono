@@ -1,3 +1,4 @@
+import { InfoCircleOutlined } from '@ant-design/icons';
 import { Space, Tooltip, Typography } from 'antd';
 import { ReactNode } from 'react';
 import { mainnet } from 'viem/chains';
@@ -10,14 +11,24 @@ const { Text } = Typography;
 
 const TOOLTIP_STYLE = { maxWidth: '350px' };
 
-export const NextWeekTooltip = ({ children }: { children: ReactNode }) => {
+export const NextWeekTooltip = ({
+  children,
+  hideDescription = false,
+}: {
+  children: ReactNode;
+  hideDescription?: boolean;
+}) => {
   return (
     <Tooltip
       color={COLOR.WHITE}
       overlayStyle={TOOLTIP_STYLE}
       title={
         <Space direction="vertical">
-          <Text>Updated voting weights will take effect at the start of next week Unix time.</Text>
+          {!hideDescription && (
+            <Text>
+              Updated voting weights will take effect at the start of next Unix time week.
+            </Text>
+          )}
           <a
             href={`https://etherscan.io/address/${
               VOTE_WEIGHTING.addresses[mainnet.id]
@@ -31,6 +42,7 @@ export const NextWeekTooltip = ({ children }: { children: ReactNode }) => {
       }
     >
       {children}
+      <InfoCircleOutlined className="ml-8" style={{ color: COLOR.GREY_2 }} />
     </Tooltip>
   );
 };

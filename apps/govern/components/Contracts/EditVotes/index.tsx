@@ -13,6 +13,7 @@ import { RETAINER_ADDRESS } from 'common-util/constants/addresses';
 import { INVALIDATE_AFTER_UPDATE_KEYS } from 'common-util/constants/scopeKeys';
 import { getBytes32FromAddress } from 'common-util/functions/addresses';
 import { voteForNomineeWeights } from 'common-util/functions/requests';
+import { NextWeekTooltip } from 'components/NextWeekTooltip';
 import { queryClient } from 'context/Web3ModalProvider';
 import { clearState } from 'store/govern';
 import { useAppDispatch, useAppSelector } from 'store/index';
@@ -218,7 +219,8 @@ export const EditVotes = ({ allocations, setAllocations, setIsUpdating }: EditVo
       />
 
       <Paragraph type="secondary" className="text-end">
-        New voting weight will take effect at the beginning of the next week.
+        Updated voting weights will take effect at the start of&nbsp;
+        <NextWeekTooltip hideDescription>next Unix time week.</NextWeekTooltip>
       </Paragraph>
       <Flex gap={12} justify="flex-end">
         <Button size="large" onClick={onCancel}>
