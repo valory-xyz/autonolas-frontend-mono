@@ -42,7 +42,6 @@ import {
   AgentInstancesLabel,
   DescriptionLabel,
   FormValues,
-  LABELS,
   LivenessPeriodLabel,
   MaximumInactivityPeriodsLabel,
   MaximumStakedAgentsLabel,
@@ -54,7 +53,7 @@ import {
   ServiceConfigHashLabel,
   TemplateInfo,
   TimeForEmissionsLabel,
-  getGenericFieldRules,
+  useStakingDepositRules,
 } from '../FieldConfig';
 import { Hint, StyledMain, Title } from './styles';
 import { WrongNetworkAlert, checkImplementationVerified } from './utils';
@@ -67,6 +66,8 @@ const INPUT_WIDTH_STYLE = { width: '100%' };
 export const CreateStakingContract = () => {
   const router = useRouter();
   const dispatch = useAppDispatch();
+  useStakingDepositRules();
+  const rulesConfig = useStakingDepositRules();
 
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<ErrorType>(null);
@@ -118,6 +119,7 @@ export const CreateStakingContract = () => {
     try {
       const metadataHash = await getIpfsHash({ name: contractName, description });
 
+      const implementation = IMPLEMENTATION_ADDRESSES[chain.id];
       const initPayload = getStakingContractInitPayload({
         metadataHash,
         maxNumServices,
@@ -134,10 +136,6 @@ export const CreateStakingContract = () => {
         activityChecker,
         chainId: chain.id,
       });
-      console.log('initPayload: ', initPayload);
-
-      const implementation = IMPLEMENTATION_ADDRESSES[chain.id];
-      console.log('implementation: ', implementation);
 
       // Validations
       if (!(await checkImplementationVerified(chain.id, implementation))) {
@@ -189,17 +187,13 @@ export const CreateStakingContract = () => {
 
         {alertMessage}
 
-        <Form
+        <Form<FormValues>
           layout="vertical"
           onFinish={handleCreate}
           requiredMark={false}
           initialValues={{ ...CONTRACT_DEFAULT_VALUES }}
         >
-          <Form.Item
-            label={<NameLabel />}
-            name="contractName"
-            rules={getGenericFieldRules(LABELS.contractName.name)}
-          >
+          <Form.Item label={<NameLabel />} name="contractName" rules={rulesConfig.contractName.rules}>
             <Input />
           </Form.Item>
 
@@ -207,7 +201,7 @@ export const CreateStakingContract = () => {
             label={<DescriptionLabel />}
             name="description"
             className="mb-0"
-            rules={getGenericFieldRules(LABELS.description.name)}
+            rules={rulesConfig.description.rules}
           >
             <Input.TextArea rows={4} />
           </Form.Item>
@@ -238,7 +232,7 @@ export const CreateStakingContract = () => {
               <Form.Item
                 label={<MaximumStakedAgentsLabel />}
                 name="maxNumServices"
-                rules={getGenericFieldRules(LABELS.maxNumServices.name)}
+                rules={rulesConfig.maxNumServices.rules}
               >
                 <InputNumber placeholder="e.g. 100" step="1" style={INPUT_WIDTH_STYLE} />
               </Form.Item>
@@ -247,7 +241,7 @@ export const CreateStakingContract = () => {
               <Form.Item
                 label={<RewardsPerSecondLabel />}
                 name="rewardsPerSecond"
-                rules={LABELS.rewardsPerSecond.rules}
+                rules={rulesConfig.rewardsPerSecond.rules}
               >
                 <InputNumber
                   placeholder="e.g. 0.000001649305555557"
@@ -262,7 +256,7 @@ export const CreateStakingContract = () => {
               <Form.Item
                 label={<MinimumStakingDepositLabel />}
                 name="minStakingDeposit"
-                rules={LABELS.minStakingDeposit.rules}
+                rules={rulesConfig.minStakingDeposit.rules}
               >
                 <InputNumber step="1" style={INPUT_WIDTH_STYLE} />
               </Form.Item>
@@ -271,7 +265,7 @@ export const CreateStakingContract = () => {
               <Form.Item
                 label={<MinimumStakingPeriodsLabel />}
                 name="minNumStakingPeriods"
-                rules={LABELS.minNumStakingPeriods.rules}
+                rules={rulesConfig.minNumStakingPeriods.rules}
               >
                 <InputNumber step="1" style={INPUT_WIDTH_STYLE} />
               </Form.Item>
@@ -282,7 +276,7 @@ export const CreateStakingContract = () => {
               <Form.Item
                 label={<MaximumInactivityPeriodsLabel />}
                 name="maxNumInactivityPeriods"
-                rules={LABELS.maxNumInactivityPeriods.rules}
+                rules={rulesConfig.maxNumInactivityPeriods.rules}
               >
                 <InputNumber step="1" style={INPUT_WIDTH_STYLE} />
               </Form.Item>
@@ -291,7 +285,7 @@ export const CreateStakingContract = () => {
               <Form.Item
                 label={<LivenessPeriodLabel />}
                 name="livenessPeriod"
-                rules={LABELS.livenessPeriod.rules}
+                rules={rulesConfig.livenessPeriod.rules}
               >
                 <InputNumber step="1" style={INPUT_WIDTH_STYLE} />
               </Form.Item>
@@ -303,7 +297,7 @@ export const CreateStakingContract = () => {
               <Form.Item
                 label={<TimeForEmissionsLabel />}
                 name="timeForEmissions"
-                rules={LABELS.timeForEmissions.rules}
+                rules={rulesConfig.timeForEmissions.rules}
               >
                 <InputNumber step="1" style={INPUT_WIDTH_STYLE} />
               </Form.Item>
@@ -312,7 +306,7 @@ export const CreateStakingContract = () => {
               <Form.Item
                 label={<AgentInstancesLabel />}
                 name="numAgentInstances"
-                rules={LABELS.numAgentInstances.rules}
+                rules={rulesConfig.numAgentInstances.rules}
               >
                 <InputNumber step="1" style={INPUT_WIDTH_STYLE} />
               </Form.Item>
@@ -338,7 +332,7 @@ export const CreateStakingContract = () => {
           <Form.Item
             label={<ActivityCheckerAddressLabel />}
             name="activityChecker"
-            rules={LABELS.activityChecker.rules}
+            rules={rulesConfig.activityChecker.rules}
           >
             <Input />
           </Form.Item>

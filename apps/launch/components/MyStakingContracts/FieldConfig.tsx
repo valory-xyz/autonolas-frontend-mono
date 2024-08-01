@@ -6,6 +6,8 @@ import { ReactNode } from 'react';
 import { COLOR } from 'libs/ui-theme/src';
 import { UNICODE_SYMBOLS } from 'libs/util-constants/src';
 
+import { useTimeForEmissionsLimit } from 'hooks/useStakingVerifier';
+
 const { Paragraph, Text } = Typography;
 
 export type FormValues = {
@@ -26,19 +28,17 @@ export type FormValues = {
 };
 
 /**
- * function to get field rules
- * @param label
- * @returns
+ * function to get generic field rules
  */
-export const getGenericFieldRules = (label: string) => [
+const getGenericFieldRules = (label: string) => [
   { required: true, message: `Please enter ${label}` },
 ];
 
-export const LABELS: Record<
-  keyof FormValues,
-  { name: string; desc?: string | ReactNode; rules?: Rule[] | undefined }
-> = {
-  contractName: { name: 'Name', desc: null, rules: [] },
+/**
+ * List of FieldConfig for form fields
+ */
+const FieldConfig: Record<keyof FormValues, { name: string; desc?: string | ReactNode }> = {
+  contractName: { name: 'Name', desc: null },
   description: { name: 'Description', desc: null },
   maxNumServices: {
     name: 'Maximum number of staked agents',
@@ -55,8 +55,7 @@ export const LABELS: Record<
   },
   rewardsPerSecond: {
     name: 'Rewards, OLAS per second',
-    desc: null, // TODO
-    rules: getGenericFieldRules('Rewards, OLAS per second'),
+    desc: 'Token rewards come from the Olas protocol',
   },
   minStakingDeposit: {
     name: 'Minimum service staking deposit, OLAS',
@@ -70,17 +69,14 @@ export const LABELS: Record<
         <span> Operators need to stake:this × the number of agent instances + 1.</span>
       </Flex>
     ),
-    rules: getGenericFieldRules('Minimum service staking deposit, OLAS'),
   },
   minNumStakingPeriods: {
     name: 'Minimum number of staking periods',
     desc: 'Minimum number of staking periods before the service can be unstaked',
-    rules: getGenericFieldRules('Minimum number of staking periods'),
   },
   maxNumInactivityPeriods: {
     name: 'Maximum number of inactivity periods',
     desc: 'Maximum duration of inactivity permitted for the agent before facing eviction.',
-    rules: getGenericFieldRules('Maximum number of inactivity periods'),
   },
   livenessPeriod: {
     name: 'Liveness period',
@@ -94,7 +90,6 @@ export const LABELS: Record<
         <span>24 hours - 86400 seconds</span>
       </Flex>
     ),
-    rules: getGenericFieldRules('Liveness period'),
   },
   timeForEmissions: {
     name: 'Time for emissions',
@@ -108,32 +103,26 @@ export const LABELS: Record<
         <span>30 days - 2592000 seconds</span>
       </Flex>
     ),
-    rules: getGenericFieldRules('Time for emissions'),
   },
   numAgentInstances: {
     name: 'Number of agent instances',
     desc: 'Quantity of agent instances associated with an autonomous service registered in the staking contract.',
-    rules: getGenericFieldRules('Number of agent instances'),
   },
   agentIds: {
     name: 'Agent IDs',
     desc: 'If set, serves as a requirement for a service to be comprised of agent Ids specified.',
-    rules: undefined,
   },
   threshold: {
     name: 'Multisig threshold',
     desc: 'Service multisig threshold requirement. 0 - no threshold is enforced',
-    rules: undefined,
   },
   configHash: {
     name: 'Service configuration hash',
     desc: 'Service configuration hash requirement',
-    rules: undefined,
   },
   activityChecker: {
     name: 'Activity checker address',
     desc: 'Activity checker handles the logic to monitor whether a specific service activity has been performed.',
-    rules: getGenericFieldRules('Activity checker address'),
   },
 } as const;
 
@@ -155,16 +144,22 @@ const TextWithTooltip = ({
   );
 };
 
-export const NameLabel = () => <TextWithTooltip text={LABELS.contractName.name} />;
+export const NameLabel = () => <TextWithTooltip text={FieldConfig.contractName.name} />;
 
-export const DescriptionLabel = () => <TextWithTooltip text={LABELS.description.name} />;
+export const DescriptionLabel = () => <TextWithTooltip text={FieldConfig.description.name} />;
 
 export const MaximumStakedAgentsLabel = () => (
-  <TextWithTooltip text={LABELS.maxNumServices.name} description={LABELS.maxNumServices.desc} />
+  <TextWithTooltip
+    text={FieldConfig.maxNumServices.name}
+    description={FieldConfig.maxNumServices.desc}
+  />
 );
 
 export const RewardsPerSecondLabel = () => (
-  <TextWithTooltip text={LABELS.rewardsPerSecond.name} description={LABELS.rewardsPerSecond.desc} />
+  <TextWithTooltip
+    text={FieldConfig.rewardsPerSecond.name}
+    description={FieldConfig.rewardsPerSecond.desc}
+  />
 );
 
 export const TemplateInfo = () => (
@@ -173,70 +168,118 @@ export const TemplateInfo = () => (
 
 export const MinimumStakingDepositLabel = () => (
   <TextWithTooltip
-    text={LABELS.minStakingDeposit.name}
-    description={LABELS.minStakingDeposit.desc}
+    text={FieldConfig.minStakingDeposit.name}
+    description={FieldConfig.minStakingDeposit.desc}
   />
 );
 
 export const MinimumStakingPeriodsLabel = () => (
   <TextWithTooltip
-    text={LABELS.minNumStakingPeriods.name}
-    description={LABELS.minNumStakingPeriods.desc}
+    text={FieldConfig.minNumStakingPeriods.name}
+    description={FieldConfig.minNumStakingPeriods.desc}
   />
 );
 
 export const MaximumInactivityPeriodsLabel = () => (
   <TextWithTooltip
-    text={LABELS.maxNumInactivityPeriods.name}
-    description={LABELS.maxNumInactivityPeriods.desc}
+    text={FieldConfig.maxNumInactivityPeriods.name}
+    description={FieldConfig.maxNumInactivityPeriods.desc}
   />
 );
 
 export const LivenessPeriodLabel = () => (
-  <TextWithTooltip text={LABELS.livenessPeriod.name} description={LABELS.livenessPeriod.desc} />
+  <TextWithTooltip
+    text={FieldConfig.livenessPeriod.name}
+    description={FieldConfig.livenessPeriod.desc}
+  />
 );
 
 export const TimeForEmissionsLabel = () => (
-  <TextWithTooltip text={LABELS.timeForEmissions.name} description={LABELS.timeForEmissions.desc} />
+  <TextWithTooltip
+    text={FieldConfig.timeForEmissions.name}
+    description={FieldConfig.timeForEmissions.desc}
+  />
 );
 
 export const AgentInstancesLabel = () => (
   <TextWithTooltip
-    text={LABELS.numAgentInstances.name}
-    description={LABELS.numAgentInstances.desc}
+    text={FieldConfig.numAgentInstances.name}
+    description={FieldConfig.numAgentInstances.desc}
   />
 );
 
 export const AgentIdsLabel = () => (
-  <TextWithTooltip text={LABELS.agentIds.name} description={LABELS.agentIds.desc} />
+  <TextWithTooltip text={FieldConfig.agentIds.name} description={FieldConfig.agentIds.desc} />
 );
 
 export const MultisigThresholdLabel = () => (
-  <TextWithTooltip text={LABELS.threshold.name} description={LABELS.threshold.desc} />
+  <TextWithTooltip text={FieldConfig.threshold.name} description={FieldConfig.threshold.desc} />
 );
 
 export const ServiceConfigHashLabel = () => (
-  <TextWithTooltip text={LABELS.configHash.name} description={LABELS.configHash.desc} />
+  <TextWithTooltip text={FieldConfig.configHash.name} description={FieldConfig.configHash.desc} />
 );
 
 export const ActivityCheckerAddressLabel = () => (
-  <TextWithTooltip text={LABELS.activityChecker.name} description={LABELS.activityChecker.desc} />
+  <TextWithTooltip
+    text={FieldConfig.activityChecker.name}
+    description={FieldConfig.activityChecker.desc}
+  />
 );
 
-// type FormNames = keyof FormValues;
-// export const Rules: Record<FormNames, ReturnType<typeof getGenericFieldRules>> = {
-//   name: getGenericFieldRules(LABELS.contractName.name),
-//   description: getGenericFieldRules(LABELS.description.name),
-//   maxNumServices: getGenericFieldRules(LABELS.maxNumServices.name),
-//   rewardsPerSecond: getGenericFieldRules(LABELS.rewardsPerSecond.name),
-//   minStakingDeposit: getGenericFieldRules(LABELS.minStakingDeposit.name),
-//   minNumStakingPeriods: getGenericFieldRules(LABELS.minNumStakingPeriods),
-//   maxNumInactivityPeriods: getGenericFieldRules(LABELS.maxNumInactivityPeriods),
-//   livenessPeriod: getGenericFieldRules(LABELS.livenessPeriod),
-//   timeForEmissions: getGenericFieldRules(LABELS.timeForEmissions),
-//   numAgentInstances: getGenericFieldRules(LABELS.numAgentInstances),
-//   agentIds: getGenericFieldRules(LABELS.agentIds),
-//   threshold: getGenericFieldRules(LABELS.threshold),
-//   configHash: getGenericFieldRules(LABELS.configHash),
-//   activityChecker: getGenericFieldRules(LABELS.activityChecker),
-// };
+/** ******* RULES ******* */
+type StakingDepositRules = { [K in keyof FormValues]: { rules: Rule[] | undefined } };
+export const useStakingDepositRules = (): StakingDepositRules => {
+  const { timeForEmissionsLimit } = useTimeForEmissionsLimit();
+
+  return {
+    contractName: { rules: getGenericFieldRules(FieldConfig.contractName.name) },
+    description: { rules: getGenericFieldRules(FieldConfig.description.name) },
+    maxNumServices: { rules: getGenericFieldRules(FieldConfig.maxNumServices.name) },
+    rewardsPerSecond: { rules: getGenericFieldRules(FieldConfig.rewardsPerSecond.name) },
+    minStakingDeposit: {
+      rules: [
+        ...getGenericFieldRules(FieldConfig.minStakingDeposit.name),
+        {
+          type: 'number',
+          min: 1,
+          message: `Minimum service staking deposit, OLAS must be at least 1`,
+        },
+      ],
+    },
+    minNumStakingPeriods: { rules: getGenericFieldRules(FieldConfig.minNumStakingPeriods.name) },
+    maxNumInactivityPeriods: {
+      rules: getGenericFieldRules(FieldConfig.maxNumInactivityPeriods.name),
+    },
+    livenessPeriod: {
+      rules: [
+        ...getGenericFieldRules(FieldConfig.livenessPeriod.name),
+        {
+          type: 'number',
+          min: 86400,
+          max: 86400 * 30,
+          message: `Liveness period must be between 24 hours and 30 days`,
+        },
+      ],
+    },
+    timeForEmissions: {
+      rules: [
+        {
+          required: true,
+          message: `Please enter Time for emissions`,
+        },
+        {
+          type: 'number',
+          min: 1,
+          max: timeForEmissionsLimit,
+          message: `Time for emissions must be between 1 and ${timeForEmissionsLimit} seconds`,
+        },
+      ],
+    },
+    numAgentInstances: { rules: getGenericFieldRules(FieldConfig.numAgentInstances.name) },
+    agentIds: { rules: undefined },
+    threshold: { rules: undefined },
+    configHash: { rules: undefined },
+    activityChecker: { rules: getGenericFieldRules(FieldConfig.activityChecker.name) },
+  };
+};

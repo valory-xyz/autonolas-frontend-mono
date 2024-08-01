@@ -1,7 +1,4 @@
 export const STAKING_VERIFIER = {
-  _format: 'hh-sol-artifact-1',
-  contractName: 'StakingVerifier',
-  sourceName: 'contracts/staking/StakingVerifier.sol',
   abi: [
     {
       inputs: [
@@ -457,8 +454,4 @@ export const STAKING_VERIFIER = {
       type: 'function',
     },
   ],
-  bytecode: '',
-  deployedBytecode: '',
-  linkReferences: {},
-  deployedLinkReferences: {},
 };
