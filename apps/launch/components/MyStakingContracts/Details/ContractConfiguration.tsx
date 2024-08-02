@@ -192,10 +192,12 @@ export const ContractConfiguration: FC<{ myStakingContract: MyStakingContract }>
         <ColFlexContainer
           text={<MaximumStakedAgentsLabel />}
           content={<MaximumStakedAgents address={myStakingContract.id} />}
+          data-testid="maximum-staked-agents"
         />
         <ColFlexContainer
           text={<RewardsPerSecondLabel />}
           content={<Rewards address={myStakingContract.id} />}
+          data-testid="rewards-per-second"
         />
       </Row>
 
@@ -203,10 +205,12 @@ export const ContractConfiguration: FC<{ myStakingContract: MyStakingContract }>
         <ColFlexContainer
           text={<MinimumStakingDepositLabel />}
           content={<MinimumStakingDeposit address={myStakingContract.id} />}
+          data-testid="minimum-staking-deposit"
         />
         <ColFlexContainer
           text={<MinimumStakingPeriodsLabel />}
           content={<MinimumStakingPeriods address={myStakingContract.id} />}
+          data-testid="minimum-staking-periods"
         />
       </Row>
 
@@ -214,10 +218,12 @@ export const ContractConfiguration: FC<{ myStakingContract: MyStakingContract }>
         <ColFlexContainer
           text={<MaximumInactivityPeriodsLabel />}
           content={<MaximumInactivityPeriods address={myStakingContract.id} />}
+          data-testid="maximum-inactivity-periods"
         />
         <ColFlexContainer
           text={<LivenessPeriodLabel />}
           content={<LivenessPeriod address={myStakingContract.id} />}
+          data-testid="liveness-period"
         />
       </Row>
 
@@ -225,10 +231,12 @@ export const ContractConfiguration: FC<{ myStakingContract: MyStakingContract }>
         <ColFlexContainer
           text={<TimeForEmissionsLabel />}
           content={<TimeForEmissions address={myStakingContract.id} />}
+          data-testid="time-for-emissions"
         />
         <ColFlexContainer
           text={<AgentInstancesLabel />}
           content={<NumAgentInstances address={myStakingContract.id} />}
+          data-testid="num-agent-instances"
         />
       </Row>
 
@@ -236,10 +244,12 @@ export const ContractConfiguration: FC<{ myStakingContract: MyStakingContract }>
         <ColFlexContainer
           text={<AgentIdsLabel />}
           content={<AgentIds address={myStakingContract.id} />}
+          data-testid="agent-ids"
         />
         <ColFlexContainer
           text={<MultisigThresholdLabel />}
           content={<MultisigThreshold address={myStakingContract.id} />}
+          data-testid="multisig-threshold"
         />
       </Row>
 
@@ -247,10 +257,12 @@ export const ContractConfiguration: FC<{ myStakingContract: MyStakingContract }>
         <ColFlexContainer
           text={<ServiceConfigHashLabel />}
           content={<ConfigHash address={myStakingContract.id} />}
+          data-testid="service-config-hash"
         />
         <ColFlexContainer
           text={<ActivityCheckerAddressLabel />}
           content={<ActivityCheckerAddress address={myStakingContract.id} />}
+          data-testid="activity-checker-address"
         />
       </Row>
     </>
