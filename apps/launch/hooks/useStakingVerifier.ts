@@ -62,3 +62,12 @@ export const useTimeForEmissionsLimit = () =>
       return 0;
     },
   });
+
+export const useApyLimit = () =>
+  useStakingContractVerifierHelper<number>({
+    name: 'apyLimit',
+    select: (data) => {
+      if (typeof data === 'bigint') return Number(data);
+      return 0;
+    },
+  });

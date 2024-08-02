@@ -44,7 +44,7 @@ export const useGetMinimumStakingDeposit = ({ address }: { address: Address }) =
     select: (data) => (typeof data === 'bigint' ? `${Number(ethers.formatEther(data))}` : '0'),
   });
 
-export const useGetMinimumStakingPeriods = ({ address }: { address: Address }) =>
+export const useGetMinimumStakingDuration = ({ address }: { address: Address }) =>
   useStakingContractConstant<string>({ address, name: 'minStakingDuration' });
 
 export const useGetMaximumInactivityPeriods = ({ address }: { address: Address }) =>
@@ -56,7 +56,7 @@ export const useGetLivenessPeriod = ({ address }: { address: Address }) =>
 export const useTimeForEmissions = ({ address }: { address: Address }) =>
   useStakingContractConstant<string>({ address, name: 'timeForEmissions' });
 
-export const useAgentInstances = ({ address }: { address: Address }) =>
+export const useNumberOfAgentInstances = ({ address }: { address: Address }) =>
   useStakingContractConstant<string>({ address, name: 'numAgentInstances' });
 
 export const useGetAgentIds = ({ address }: { address: Address }) =>

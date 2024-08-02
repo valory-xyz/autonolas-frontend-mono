@@ -9,15 +9,15 @@ import { truncateAddress } from 'libs/util-functions/src';
 
 import { CONTRACT_DEFAULT_VALUES } from 'common-util/constants/stakingContract';
 import {
-  useAgentInstances,
   useGetActivityChecker,
   useGetAgentIds,
   useGetConfigHash,
   useGetLivenessPeriod,
   useGetMaximumInactivityPeriods,
   useGetMinimumStakingDeposit,
-  useGetMinimumStakingPeriods,
+  useGetMinimumStakingDuration,
   useGetMultisigThreshold,
+  useNumberOfAgentInstances,
   useTimeForEmissions,
 } from 'hooks/useGetStakingConstants';
 import { useAppSelector } from 'store/index';
@@ -83,7 +83,7 @@ const MinimumStakingPeriods: FC<{ address: Address }> = ({ address }) => {
     address,
   });
   const { isLoading: isMinimumStakingPeriodsLoading, data: minimumStakingPeriods } =
-    useGetMinimumStakingPeriods({ address });
+    useGetMinimumStakingDuration({ address });
 
   const isLoading = useMemo(
     () => isLivenessPeriodLoading || isMinimumStakingPeriodsLoading,
@@ -115,8 +115,8 @@ const TimeForEmissions: FC<{ address: Address }> = ({ address }) => {
   return <ShowContent isLoading={isLoading} data={data} />;
 };
 
-const AgentInstances: FC<{ address: Address }> = ({ address }) => {
-  const { data, isLoading } = useAgentInstances({ address });
+const NumAgentInstances: FC<{ address: Address }> = ({ address }) => {
+  const { data, isLoading } = useNumberOfAgentInstances({ address });
   return <ShowContent isLoading={isLoading} data={data} />;
 };
 
@@ -228,7 +228,7 @@ export const ContractConfiguration: FC<{ myStakingContract: MyStakingContract }>
         />
         <ColFlexContainer
           text={<AgentInstancesLabel />}
-          content={<AgentInstances address={myStakingContract.id} />}
+          content={<NumAgentInstances address={myStakingContract.id} />}
         />
       </Row>
 

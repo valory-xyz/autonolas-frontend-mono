@@ -241,7 +241,7 @@ export const CreateStakingContract = () => {
                 rules={rulesConfig.maxNumServices.rules}
                 validateFirst
               >
-                <InputNumber placeholder="e.g. 100" step="1" min={1} style={INPUT_WIDTH_STYLE} />
+                <InputNumber placeholder="e.g. 100" step="1" style={INPUT_WIDTH_STYLE} />
               </Form.Item>
             </Col>
             <Col span={12}>
@@ -253,7 +253,6 @@ export const CreateStakingContract = () => {
                 <InputNumber
                   placeholder="e.g. 0.000001649305555557"
                   step="0.0001"
-                  min={0.0001}
                   style={INPUT_WIDTH_STYLE}
                 />
               </Form.Item>
@@ -268,7 +267,7 @@ export const CreateStakingContract = () => {
                 rules={rulesConfig.minStakingDeposit.rules}
                 validateFirst
               >
-                <InputNumber step="1" min={1} style={INPUT_WIDTH_STYLE} />
+                <InputNumber step="1" style={INPUT_WIDTH_STYLE} />
               </Form.Item>
             </Col>
             <Col span={12}>
@@ -278,7 +277,7 @@ export const CreateStakingContract = () => {
                 rules={rulesConfig.minNumStakingPeriods.rules}
                 validateFirst
               >
-                <InputNumber step="1" min={1} style={INPUT_WIDTH_STYLE} />
+                <InputNumber step="1" style={INPUT_WIDTH_STYLE} />
               </Form.Item>
             </Col>
           </Row>
@@ -299,7 +298,7 @@ export const CreateStakingContract = () => {
                 name="livenessPeriod"
                 rules={rulesConfig.livenessPeriod.rules}
               >
-                <InputNumber step="1" min={86400} style={INPUT_WIDTH_STYLE} />
+                <InputNumber step="1" style={INPUT_WIDTH_STYLE} />
               </Form.Item>
             </Col>
           </Row>
@@ -311,7 +310,7 @@ export const CreateStakingContract = () => {
                 name="timeForEmissions"
                 rules={rulesConfig.timeForEmissions.rules}
               >
-                <InputNumber step="1" min={1} style={INPUT_WIDTH_STYLE} />
+                <InputNumber step="1" style={INPUT_WIDTH_STYLE} />
               </Form.Item>
             </Col>
             <Col span={12}>
@@ -320,7 +319,7 @@ export const CreateStakingContract = () => {
                 name="numAgentInstances"
                 rules={rulesConfig.numAgentInstances.rules}
               >
-                <InputNumber step="1" min={1} style={INPUT_WIDTH_STYLE} />
+                <InputNumber step="1" style={INPUT_WIDTH_STYLE} />
               </Form.Item>
             </Col>
           </Row>
@@ -332,7 +331,7 @@ export const CreateStakingContract = () => {
                 name="agentIds"
                 rules={rulesConfig.agentIds.rules}
               >
-                <Input style={INPUT_WIDTH_STYLE} placeholder="14,25" />
+                <Input style={INPUT_WIDTH_STYLE} placeholder="separated by comma: 14, 25" />
               </Form.Item>
             </Col>
             <Col span={12}>
@@ -351,7 +350,7 @@ export const CreateStakingContract = () => {
             rules={rulesConfig.activityChecker.rules}
             validateFirst
           >
-            <Input />
+            <Input placeholder="0x00..." />
           </Form.Item>
 
           <Flex justify="end" gap={12}>

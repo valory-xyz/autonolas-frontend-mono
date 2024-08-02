@@ -8,12 +8,15 @@ import { UNICODE_SYMBOLS } from 'libs/util-constants/src';
 import { FORM_VALIDATION } from 'libs/util-functions/src';
 
 import {
+  useApyLimit,
   useMinStakingDepositLimit,
   useNumServicesLimit,
   useTimeForEmissionsLimit,
 } from 'hooks/useStakingVerifier';
 
 const { Paragraph, Text } = Typography;
+
+const ONE_YEAR = 1 * 24 * 60 * 60 * 365;
 
 export type FormValues = {
   contractName: string;
@@ -241,6 +244,7 @@ export const useCreateStakingContractRules = (): StakingDepositRules => {
   const { data: numServicesLimit } = useNumServicesLimit();
   const { data: minStakingDepositLimit } = useMinStakingDepositLimit();
   const { data: timeForEmissionsLimit } = useTimeForEmissionsLimit();
+  const { data: apyLimit } = useApyLimit();
 
   return {
     contractName: { rules: getGenericFieldRules(FieldConfig.contractName.name) },
@@ -256,7 +260,26 @@ export const useCreateStakingContractRules = (): StakingDepositRules => {
         },
       ],
     },
-    rewardsPerSecond: { rules: getGenericFieldRules(FieldConfig.rewardsPerSecond.name) },
+    rewardsPerSecond: {
+      rules: [
+        ...getGenericFieldRules(FieldConfig.rewardsPerSecond.name),
+        {
+          // BE validation from https://github.com/valory-xyz/autonolas-registries/blob/main/contracts/staking/StakingVerifier
+          validator: async (_, value) => {
+            if (!minStakingDepositLimit) return Promise.resolve();
+            if (!apyLimit) return Promise.resolve();
+
+            const rewardsPerYear = value * ONE_YEAR;
+            const apy = (rewardsPerYear * 1e18) / 1000;
+
+            // 0.00009512937595
+            if (apy > apyLimit) {
+              return Promise.reject('The rewards per second must be below the allowed limit');
+            }
+          },
+        },
+      ],
+    },
     minStakingDeposit: {
       rules: [
         ...getGenericFieldRules(FieldConfig.minStakingDeposit.name),
@@ -285,10 +308,7 @@ export const useCreateStakingContractRules = (): StakingDepositRules => {
     },
     timeForEmissions: {
       rules: [
-        {
-          required: true,
-          message: `Please enter Time for emissions`,
-        },
+        ...getGenericFieldRules(FieldConfig.timeForEmissions.name),
         {
           type: 'number',
           min: 1,
@@ -299,7 +319,10 @@ export const useCreateStakingContractRules = (): StakingDepositRules => {
     },
     numAgentInstances: { rules: getGenericFieldRules(FieldConfig.numAgentInstances.name) },
     agentIds: {
-      rules: [{ ...FORM_VALIDATION.validateCommaSeparatedList }],
+      rules: [
+        ...getGenericFieldRules(FieldConfig.agentIds.name),
+        { ...FORM_VALIDATION.validateCommaSeparatedList },
+      ],
     },
     threshold: { rules: undefined },
     configHash: { rules: undefined },
