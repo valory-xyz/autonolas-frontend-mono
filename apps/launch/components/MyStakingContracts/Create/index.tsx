@@ -36,12 +36,12 @@ import { useAppDispatch } from 'store/index';
 import { addStakingContract } from 'store/launch';
 import { ErrorType } from 'types/index';
 
+import { FormValues } from '../FieldConfig';
 import {
   ActivityCheckerAddressLabel,
   AgentIdsLabel,
   AgentInstancesLabel,
   DescriptionLabel,
-  FormValues,
   LivenessPeriodLabel,
   MaximumInactivityPeriodsLabel,
   MaximumStakedAgentsLabel,
@@ -53,9 +53,9 @@ import {
   ServiceConfigHashLabel,
   TemplateInfo,
   TimeForEmissionsLabel,
-  useCreateStakingContractRules,
-} from '../FieldConfig';
+} from '../FieldLabels';
 import { Hint, StyledMain, Title } from './styles';
+import { useFieldRules } from './useFieldRules';
 import { WrongNetworkAlert, checkImplementationVerified } from './utils';
 
 const { Text } = Typography;
@@ -93,7 +93,7 @@ const TemplateInfoContent = ({ id }: { id: number }) => {
 export const CreateStakingContract = () => {
   const router = useRouter();
   const dispatch = useAppDispatch();
-  const rulesConfig = useCreateStakingContractRules();
+  const rulesConfig = useFieldRules();
 
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<ErrorType>(null);
