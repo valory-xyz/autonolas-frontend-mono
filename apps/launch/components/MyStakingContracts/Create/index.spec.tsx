@@ -19,6 +19,13 @@ jest.mock('next/router', () => ({
   useRouter: jest.fn().mockReturnValue({ push: jest.fn() }),
 }));
 
+jest.mock('hooks/useStakingVerifier', () => ({
+  useNumServicesLimit: jest.fn().mockReturnValue({ data: 100 }),
+  useMinStakingDepositLimit: jest.fn().mockReturnValue({ data: 1000 }),
+  useTimeForEmissionsLimit: jest.fn().mockReturnValue({ data: 259200 }),
+  useApyLimit: jest.fn().mockReturnValue({ data: 3000000000000000000 }),
+}));
+
 jest.mock('common-util/functions/stakingContract', () => ({
   getStakingContractInitPayload: jest.fn().mockReturnValue('encodedPayload'),
 }));
