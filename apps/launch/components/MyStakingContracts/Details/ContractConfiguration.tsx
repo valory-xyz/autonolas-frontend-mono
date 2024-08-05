@@ -82,7 +82,7 @@ const MinimumStakingPeriods: FC<{ address: Address }> = ({ address }) => {
   const { isLoading: isLivenessPeriodLoading, data: livenessPeriod } = useGetLivenessPeriod({
     address,
   });
-  const { isLoading: isMinimumStakingPeriodsLoading, data: minimumStakingPeriods } =
+  const { isLoading: isMinimumStakingPeriodsLoading, data: minimumStakingDuration } =
     useGetMinimumStakingDuration({ address });
 
   const isLoading = useMemo(
@@ -91,11 +91,11 @@ const MinimumStakingPeriods: FC<{ address: Address }> = ({ address }) => {
   );
   const data = useMemo(() => {
     if (!livenessPeriod) return NA;
-    if (!minimumStakingPeriods) return NA;
+    if (!minimumStakingDuration) return NA;
 
-    const minStakingDuration = Number(minimumStakingPeriods) / Number(livenessPeriod);
-    return minStakingDuration;
-  }, [livenessPeriod, minimumStakingPeriods]);
+    const minimumStakingPeriods = Number(minimumStakingDuration) / Number(livenessPeriod);
+    return minimumStakingPeriods;
+  }, [livenessPeriod, minimumStakingDuration]);
 
   return <ShowContent isLoading={isLoading} data={data} />;
 };
