@@ -1,5 +1,4 @@
-import { ethers } from 'ethers';
-import { Address } from 'viem';
+import { Address, formatEther } from 'viem';
 import { useReadContract } from 'wagmi';
 
 import { STAKING_FACTORY, STAKING_VERIFIER } from 'libs/util-contracts/src/lib/abiAndAddresses';
@@ -20,6 +19,9 @@ export const useStakingContractVerifierHelper = <T>({
     abi: STAKING_FACTORY.abi,
     chainId: networkId as number,
     functionName: 'verifier',
+    query: {
+      enabled: !!networkId,
+    },
   });
 
   const { data, isLoading } = useReadContract({
@@ -28,7 +30,7 @@ export const useStakingContractVerifierHelper = <T>({
     chainId: networkId as number,
     functionName: name,
     query: {
-      enabled: !!verifierAddress,
+      enabled: !!verifierAddress && !!name && !!networkId,
       select,
     },
   });
@@ -49,7 +51,7 @@ export const useMinStakingDepositLimit = () =>
   useStakingContractVerifierHelper<number>({
     name: 'minStakingDepositLimit',
     select: (data) => {
-      if (typeof data === 'bigint') return Number(ethers.formatEther(data));
+      if (typeof data === 'bigint') return Number(formatEther(data));
       return 0;
     },
   });

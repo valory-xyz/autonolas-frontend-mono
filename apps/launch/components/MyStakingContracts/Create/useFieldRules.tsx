@@ -20,7 +20,6 @@ const getGenericFieldRules = (label: string) => [
   { required: true, message: `Please enter ${label}` },
 ];
 
-/** ******* RULES ******* */
 type StakingDepositRules = { [K in keyof FormValues]: { rules: Rule[] | undefined } };
 export const useFieldRules = (): StakingDepositRules => {
   const { data: numServicesLimit } = useNumServicesLimit();
@@ -54,7 +53,6 @@ export const useFieldRules = (): StakingDepositRules => {
             const rewardsPerYear = value * ONE_YEAR;
             const apy = (rewardsPerYear * 1e18) / 1000;
 
-            // 0.00009512937595
             if (apy > apyLimit) {
               return Promise.reject('The rewards per second must be below the allowed limit');
             }
@@ -80,12 +78,13 @@ export const useFieldRules = (): StakingDepositRules => {
     livenessPeriod: {
       rules: [
         ...getGenericFieldRules(FieldConfig.livenessPeriod.name),
-        {
-          type: 'number',
-          min: 86400,
-          max: 86400 * 30,
-          message: `Liveness period must be between 24 hours and 30 days`,
-        },
+        // TODO: any comments on this validation? 
+        // {
+        //   type: 'number',
+        //   min: 86400,
+        //   max: 86400 * 30,
+        //   message: `Liveness period must be between 24 hours and 30 days`,
+        // },
       ],
     },
     timeForEmissions: {

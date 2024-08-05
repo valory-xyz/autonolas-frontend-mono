@@ -150,7 +150,7 @@ const ConfigHash: FC<{ address: Address }> = ({ address }) => {
   const { data: configHash, isLoading } = useGetConfigHash({ address });
   const isZeroAddress = configHash === CONTRACT_DEFAULT_VALUES.configHash;
 
-  const getConfigHash = () => {
+  const calculatedConfigHash = useMemo(() => {
     if (!configHash) return NA;
 
     const truncateConfigHash = truncateAddress(configHash);
@@ -165,9 +165,9 @@ const ConfigHash: FC<{ address: Address }> = ({ address }) => {
         {truncateConfigHash} {UNICODE_SYMBOLS.EXTERNAL_LINK}
       </a>
     );
-  };
+  }, [configHash, isZeroAddress]);
 
-  return <ShowContent isLoading={isLoading} data={getConfigHash()} />;
+  return <ShowContent isLoading={isLoading} data={calculatedConfigHash} />;
 };
 
 const ActivityCheckerAddress: FC<{ address: Address }> = ({ address }) => {

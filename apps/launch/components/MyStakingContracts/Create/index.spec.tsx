@@ -104,7 +104,6 @@ describe('<CreateStakingContract />', () => {
     await userEvent.type(maxNumServicesInput, '100000000');
     expect(maxNumServicesInput).toHaveValue('100000000');
 
-    // Click create contract button to see the error message
     await clickCreateContractButton();
     expect(
       screen.getByText('Maximum number of staked agents must be at least 1 and at most 100'),
@@ -121,7 +120,6 @@ describe('<CreateStakingContract />', () => {
     await userEvent.type(rewardsPerSecondInput, '100');
     expect(rewardsPerSecondInput).toHaveValue('100');
 
-    // Click create contract button to see the error message
     await clickCreateContractButton();
     expect(
       screen.getByText('The rewards per second must be below the allowed limit'),

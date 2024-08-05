@@ -1,5 +1,4 @@
-import { ethers } from 'ethers';
-import { Address } from 'viem';
+import { Address, formatEther } from 'viem';
 import { useReadContract } from 'wagmi';
 
 import { STAKING_TOKEN } from 'libs/util-contracts/src/lib/abiAndAddresses';
@@ -41,7 +40,7 @@ export const useGetMinimumStakingDeposit = ({ address }: { address: Address }) =
   useStakingContractConstant({
     address,
     name: 'minStakingDeposit',
-    select: (data) => (typeof data === 'bigint' ? `${Number(ethers.formatEther(data))}` : '0'),
+    select: (data) => (typeof data === 'bigint' ? `${Number(formatEther(data))}` : '0'),
   });
 
 export const useGetMinimumStakingDuration = ({ address }: { address: Address }) =>
