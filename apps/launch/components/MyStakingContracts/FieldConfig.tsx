@@ -70,7 +70,7 @@ export const FieldConfig: Record<keyof FormValues, { name: string; desc?: string
     desc: 'Maximum duration of inactivity permitted for the agent before facing eviction.',
   },
   livenessPeriod: {
-    name: 'Liveness period',
+    name: 'Liveness period (sec)',
     desc: (
       <Flex gap={8} vertical>
         <span>
@@ -83,7 +83,7 @@ export const FieldConfig: Record<keyof FormValues, { name: string; desc?: string
     ),
   },
   timeForEmissions: {
-    name: 'Time for emissions',
+    name: 'Time for emissions (sec)',
     desc: (
       <Flex gap={8} vertical>
         <span>
