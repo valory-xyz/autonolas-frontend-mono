@@ -168,7 +168,7 @@ describe('<CreateStakingContract />', () => {
   it('should display `Liveness period` field as required and able to fill the field', async () => {
     render(<CreateStakingContract />);
 
-    const livenessPeriodInput = screen.getByLabelText('Liveness period');
+    const livenessPeriodInput = screen.getByLabelText('Liveness period (sec)');
     expect(livenessPeriodInput).toBeRequired();
 
     expect(livenessPeriodInput).toHaveValue('86400'); // default value
@@ -178,7 +178,7 @@ describe('<CreateStakingContract />', () => {
   it('should display `Time for emissions` field as required, able to fill and see the error message when the value is out of range', async () => {
     render(<CreateStakingContract />);
 
-    const timeForEmissionsInput = screen.getByLabelText('Time for emissions');
+    const timeForEmissionsInput = screen.getByLabelText('Time for emissions (sec)');
     expect(timeForEmissionsInput).toBeRequired();
 
     expect(timeForEmissionsInput).toHaveValue('2592000'); // default value

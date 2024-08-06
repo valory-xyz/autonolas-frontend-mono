@@ -136,12 +136,12 @@ describe('<Details />', () => {
     },
     {
       testId: 'liveness-period',
-      title: 'Liveness period',
+      title: 'Liveness period (sec)',
       value: '86400 seconds',
     },
     {
       testId: 'time-for-emissions',
-      title: 'Time for emissions',
+      title: 'Time for emissions (sec)',
       value: '2592000',
     },
     {
