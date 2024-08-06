@@ -8,8 +8,18 @@ export const STAKING_VERIFIER = {
           type: 'address',
         },
         {
+          internalType: 'address',
+          name: '_serviceRegistry',
+          type: 'address',
+        },
+        {
+          internalType: 'address',
+          name: '_serviceRegistryTokenUtility',
+          type: 'address',
+        },
+        {
           internalType: 'uint256',
-          name: '_rewardsPerSecondLimit',
+          name: '_minStakingDepositLimit',
           type: 'uint256',
         },
         {
@@ -20,6 +30,11 @@ export const STAKING_VERIFIER = {
         {
           internalType: 'uint256',
           name: '_numServicesLimit',
+          type: 'uint256',
+        },
+        {
+          internalType: 'uint256',
+          name: '_apyLimit',
           type: 'uint256',
         },
       ],
@@ -125,7 +140,7 @@ export const STAKING_VERIFIER = {
         {
           indexed: false,
           internalType: 'uint256',
-          name: 'rewardsPerSecondLimit',
+          name: 'minStakingDepositLimit',
           type: 'uint256',
         },
         {
@@ -137,18 +152,44 @@ export const STAKING_VERIFIER = {
         {
           indexed: false,
           internalType: 'uint256',
-          name: '_numServicesLimit',
+          name: 'numServicesLimit',
           type: 'uint256',
         },
         {
           indexed: false,
           internalType: 'uint256',
-          name: 'emissionsLimit',
+          name: 'apyLimit',
           type: 'uint256',
         },
       ],
       name: 'StakingLimitsUpdated',
       type: 'event',
+    },
+    {
+      inputs: [],
+      name: 'ONE_YEAR',
+      outputs: [
+        {
+          internalType: 'uint256',
+          name: '',
+          type: 'uint256',
+        },
+      ],
+      stateMutability: 'view',
+      type: 'function',
+    },
+    {
+      inputs: [],
+      name: 'apyLimit',
+      outputs: [
+        {
+          internalType: 'uint256',
+          name: '',
+          type: 'uint256',
+        },
+      ],
+      stateMutability: 'view',
+      type: 'function',
     },
     {
       inputs: [
@@ -167,7 +208,7 @@ export const STAKING_VERIFIER = {
       inputs: [
         {
           internalType: 'uint256',
-          name: '_rewardsPerSecondLimit',
+          name: '_minStakingDepositLimit',
           type: 'uint256',
         },
         {
@@ -180,6 +221,11 @@ export const STAKING_VERIFIER = {
           name: '_numServicesLimit',
           type: 'uint256',
         },
+        {
+          internalType: 'uint256',
+          name: '_apyLimit',
+          type: 'uint256',
+        },
       ],
       name: 'changeStakingLimits',
       outputs: [],
@@ -187,23 +233,10 @@ export const STAKING_VERIFIER = {
       type: 'function',
     },
     {
-      inputs: [],
-      name: 'emissionsLimit',
-      outputs: [
-        {
-          internalType: 'uint256',
-          name: '',
-          type: 'uint256',
-        },
-      ],
-      stateMutability: 'view',
-      type: 'function',
-    },
-    {
       inputs: [
         {
           internalType: 'address',
-          name: '',
+          name: 'instance',
           type: 'address',
         },
       ],
@@ -211,7 +244,7 @@ export const STAKING_VERIFIER = {
       outputs: [
         {
           internalType: 'uint256',
-          name: '',
+          name: 'amount',
           type: 'uint256',
         },
       ],
@@ -245,6 +278,19 @@ export const STAKING_VERIFIER = {
           internalType: 'bool',
           name: '',
           type: 'bool',
+        },
+      ],
+      stateMutability: 'view',
+      type: 'function',
+    },
+    {
+      inputs: [],
+      name: 'minStakingDepositLimit',
+      outputs: [
+        {
+          internalType: 'uint256',
+          name: '',
+          type: 'uint256',
         },
       ],
       stateMutability: 'view',
@@ -291,12 +337,25 @@ export const STAKING_VERIFIER = {
     },
     {
       inputs: [],
-      name: 'rewardsPerSecondLimit',
+      name: 'serviceRegistry',
       outputs: [
         {
-          internalType: 'uint256',
+          internalType: 'address',
           name: '',
-          type: 'uint256',
+          type: 'address',
+        },
+      ],
+      stateMutability: 'view',
+      type: 'function',
+    },
+    {
+      inputs: [],
+      name: 'serviceRegistryTokenUtility',
+      outputs: [
+        {
+          internalType: 'address',
+          name: '',
+          type: 'address',
         },
       ],
       stateMutability: 'view',

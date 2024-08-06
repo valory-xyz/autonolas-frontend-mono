@@ -1,5 +1,5 @@
 import '@testing-library/jest-dom';
-import { render, screen } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
 
 import { Details } from './index';
 
@@ -26,6 +26,23 @@ jest.mock('store/index', () => ({
       },
     ],
   }),
+}));
+
+jest.mock('hooks/useGetStakingConstants', () => ({
+  useGetActivityChecker: jest
+    .fn()
+    .mockReturnValue({ data: '0x0000000000000000000000000000000000000000' }),
+  useGetAgentIds: jest.fn().mockReturnValue({ data: ['25'] }),
+  useGetConfigHash: jest.fn().mockReturnValue({
+    data: '0x0000000000000000000000000000000000000000000000000000000000000000',
+  }),
+  useGetLivenessPeriod: jest.fn().mockReturnValue({ data: '86400' }),
+  useGetMaximumInactivityPeriods: jest.fn().mockReturnValue({ data: '2' }),
+  useGetMinimumStakingDuration: jest.fn().mockReturnValue({ data: '259200' }),
+  useTimeForEmissions: jest.fn().mockReturnValue({ data: '2592000' }),
+  useNumberOfAgentInstances: jest.fn().mockReturnValue({ data: '1' }),
+  useGetMultisigThreshold: jest.fn().mockReturnValue({ data: '1' }),
+  useGetMinimumStakingDeposit: jest.fn().mockReturnValue({ data: '20' }),
 }));
 
 jest.mock('./hooks', () => ({
@@ -84,13 +101,79 @@ describe('<Details />', () => {
     expect(screen.getByText('Ethereum')).toBeInTheDocument();
   });
 
-  it('should display max num services and rewards per second', () => {
+  // Contract configuration
+  it('should display contract configuration', () => {
     render(<Details />);
 
-    expect(screen.getByText('Maximum number of staked services')).toBeInTheDocument();
-    expect(screen.getByText('200')).toBeInTheDocument();
+    expect(screen.getByText('Contract configuration')).toBeInTheDocument();
+  });
 
-    expect(screen.getByText('Rewards, OLAS per second')).toBeInTheDocument();
-    expect(screen.getByText('0.003 OLAS')).toBeInTheDocument();
+  it.each([
+    {
+      testId: 'maximum-staked-agents',
+      title: 'Maximum number of staked agents',
+      value: '200',
+    },
+    {
+      testId: 'rewards-per-second',
+      title: 'Rewards, OLAS per second',
+      value: '0.003 OLAS',
+    },
+    {
+      testId: 'minimum-staking-deposit',
+      title: 'Minimum service staking deposit, OLAS',
+      value: '20',
+    },
+    {
+      testId: 'minimum-staking-periods',
+      title: 'Minimum number of staking periods',
+      value: '3',
+    },
+    {
+      testId: 'maximum-inactivity-periods',
+      title: 'Maximum number of inactivity periods',
+      value: '2',
+    },
+    {
+      testId: 'liveness-period',
+      title: 'Liveness period (sec)',
+      value: '86400 seconds',
+    },
+    {
+      testId: 'time-for-emissions',
+      title: 'Time for emissions (sec)',
+      value: '2592000',
+    },
+    {
+      testId: 'num-agent-instances',
+      title: 'Number of agent instances',
+      value: '1',
+    },
+    {
+      testId: 'agent-ids',
+      title: 'Agent IDs',
+      value: '25',
+    },
+    {
+      testId: 'multisig-threshold',
+      title: 'Multisig threshold',
+      value: '1',
+    },
+    {
+      testId: 'service-config-hash',
+      title: 'Service configuration hash',
+      value: '0x00000...00000',
+    },
+    {
+      testId: 'activity-checker-address',
+      title: 'Activity checker address',
+      value: '0x00000...00000 ↗',
+    },
+  ])('should display $title', async ({ testId, title, value }) => {
+    render(<Details />);
+    const minStakingDepositSection = await screen.findByTestId(testId);
+
+    expect(within(minStakingDepositSection).getByText(title)).toBeInTheDocument();
+    expect(within(minStakingDepositSection).getByText(value)).toBeInTheDocument();
   });
 });

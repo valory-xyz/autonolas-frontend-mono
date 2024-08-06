@@ -1,11 +1,8 @@
 import { CheckCircleOutlined, CopyOutlined } from '@ant-design/icons';
-import { Alert, Button, Card, Col, Flex, Row, Skeleton, Spin, Tag, Typography } from 'antd';
+import { Alert, Button, Card, Flex, Row, Spin, Tag, Typography } from 'antd';
 import { useRouter } from 'next/router';
 import { FC, ReactNode } from 'react';
 import styled from 'styled-components';
-import { Address } from 'viem';
-
-import { NA } from '@autonolas/frontend-library';
 
 import { EXPLORER_URLS, GOVERN_URL, UNICODE_SYMBOLS } from 'libs/util-constants/src';
 import { truncateAddress } from 'libs/util-functions/src';
@@ -15,7 +12,8 @@ import { URL } from 'common-util/constants/urls';
 import { useAppSelector } from 'store/index';
 import { MyStakingContract } from 'types/index';
 
-import { useMaxNumServices, useRewardsPerSecond } from './hooks';
+import { ContractConfiguration } from './ContractConfiguration';
+import { ColFlexContainer } from './helpers';
 
 const { Paragraph, Text, Title } = Typography;
 
@@ -85,18 +83,6 @@ const NominateInfo = () => (
   />
 );
 
-type ColFlexContainerProps = { text: string; content: ReactNode };
-const ColFlexContainer: FC<ColFlexContainerProps> = ({ text, content }) => {
-  return (
-    <Col span={12}>
-      <Flex vertical gap={4} align="flex-start">
-        <Text type="secondary">{text}</Text>
-        {content}
-      </Flex>
-    </Col>
-  );
-};
-
 const NominatedForIncentives: FC<{ isNominated: boolean }> = ({ isNominated }) => {
   const router = useRouter();
   const { networkName } = useAppSelector((state) => state.network);
@@ -156,24 +142,6 @@ const Template: FC<{ template: string }> = ({ template }) => {
   );
 };
 
-const MaxNumOfStakedServices: FC<{ address: Address }> = ({ address }) => {
-  const { networkId } = useAppSelector((state) => state.network);
-  const { data, isLoading } = useMaxNumServices({ address });
-
-  if (!networkId || isLoading) return <Skeleton.Input active size="small" />;
-
-  return <Text>{data || NA}</Text>;
-};
-
-const Rewards: FC<{ address: Address }> = ({ address }) => {
-  const { networkId } = useAppSelector((state) => state.network);
-  const { data, isLoading } = useRewardsPerSecond({ address });
-
-  if (!networkId || isLoading) return <Skeleton.Input active size="small" />;
-
-  return <Text>{`${data} OLAS` || NA}</Text>;
-};
-
 const EachStakingContractContent: FC<{ myStakingContract: MyStakingContract }> = ({
   myStakingContract,
 }) => {
@@ -196,7 +164,10 @@ const EachStakingContractContent: FC<{ myStakingContract: MyStakingContract }> =
 
       <Flex gap={4} vertical>
         <Text type="secondary">Description</Text>
-        <Paragraph ellipsis={{ rows: 6, expandable: true, symbol: 'Expand description' }}>
+        <Paragraph
+          ellipsis={{ rows: 6, expandable: true, symbol: 'Expand description' }}
+          className="mb-0"
+        >
           {myStakingContract.description}
         </Paragraph>
       </Flex>
@@ -207,17 +178,6 @@ const EachStakingContractContent: FC<{ myStakingContract: MyStakingContract }> =
           content={<Template template={myStakingContract.template} />}
         />
         <ColFlexContainer text="Chain" content={<Text>{networkDisplayName}</Text>} />
-      </Row>
-
-      <Row gutter={24}>
-        <ColFlexContainer
-          text="Maximum number of staked services"
-          content={<MaxNumOfStakedServices address={myStakingContract.id} />}
-        />
-        <ColFlexContainer
-          text="Rewards, OLAS per second"
-          content={<Rewards address={myStakingContract.id} />}
-        />
       </Row>
     </>
   );
@@ -239,13 +199,26 @@ export const Details = () => {
   const myStakingContract = myStakingContracts[myStakingContractIndex];
 
   return (
-    <Container>
-      <Flex gap={24} vertical>
-        <Title level={4} className="m-0">
-          {`Contract #${myStakingContractIndex + 1} ${myStakingContract.name}`}
-        </Title>
-        <EachStakingContractContent myStakingContract={myStakingContract} />
-      </Flex>
-    </Container>
+    <>
+      <Container>
+        <Flex gap={24} vertical>
+          <Title level={4} className="m-0">
+            {`Contract #${myStakingContractIndex + 1} ${myStakingContract.name}`}
+          </Title>
+          <EachStakingContractContent myStakingContract={myStakingContract} />
+        </Flex>
+      </Container>
+
+      <br />
+
+      <Container>
+        <Flex gap={24} vertical>
+          <Title level={5} className="m-0">
+            Contract configuration
+          </Title>
+          <ContractConfiguration myStakingContract={myStakingContract} />
+        </Flex>
+      </Container>
+    </>
   );
 };

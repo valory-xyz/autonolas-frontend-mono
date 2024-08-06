@@ -36,26 +36,64 @@ import { useAppDispatch } from 'store/index';
 import { addStakingContract } from 'store/launch';
 import { ErrorType } from 'types/index';
 
-import { Hint, StyledMain, Title } from './styles';
+import { FormValues } from '../FieldConfig';
 import {
-  FormValues,
-  LABELS,
-  MaxNumServicesLabel,
+  ActivityCheckerAddressLabel,
+  AgentIdsLabel,
+  AgentInstancesLabel,
+  DescriptionLabel,
+  LivenessPeriodLabel,
+  MaximumInactivityPeriodsLabel,
+  MaximumStakedAgentsLabel,
+  MinimumStakingDepositLabel,
+  MinimumStakingPeriodsLabel,
+  MultisigThresholdLabel,
+  NameLabel,
   RewardsPerSecondLabel,
-  TextWithTooltip,
-  WrongNetworkAlert,
-  checkImplementationVerified,
-  getFieldRules,
-} from './utils';
+  ServiceConfigHashLabel,
+  TemplateInfo,
+  TimeForEmissionsLabel,
+} from '../FieldLabels';
+import { Hint, StyledMain, Title } from './styles';
+import { useFieldRules } from './useFieldRules';
+import { WrongNetworkAlert, checkImplementationVerified } from './utils';
 
 const { Text } = Typography;
 
 const contractTemplate = CONTRACT_TEMPLATES[0];
 const INPUT_WIDTH_STYLE = { width: '100%' };
 
+const TemplateInfoContent = ({ id }: { id: number }) => {
+  return (
+    <>
+      <Hint type="secondary">
+        Good descriptions help governors understand the value your contract brings to the ecosystem.
+        Be clear to increase the chance governors allocate rewards to your contract.
+      </Hint>
+
+      <Divider />
+      <TemplateInfo />
+      <Flex className="mt-4 mb-8" gap={16}>
+        <Text>{contractTemplate.title}</Text>
+        <Tag color="default">More templates coming soon</Tag>
+      </Flex>
+      <Flex className="mb-8">
+        <Text type="secondary">{contractTemplate.description}</Text>
+      </Flex>
+      <Button type="link" className="p-0 mb-16" href={`${EXPLORER_URLS[id]}/address/TBD`}>
+        {`View template on explorer ${UNICODE_SYMBOLS.EXTERNAL_LINK}`}
+      </Button>
+    </>
+  );
+};
+
+/**
+ * Create staking contract
+ */
 export const CreateStakingContract = () => {
   const router = useRouter();
   const dispatch = useAppDispatch();
+  const rulesConfig = useFieldRules();
 
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<ErrorType>(null);
@@ -88,7 +126,7 @@ export const CreateStakingContract = () => {
     setIsLoading(true);
 
     const {
-      name,
+      contractName,
       description,
       maxNumServices,
       rewardsPerSecond,
@@ -105,8 +143,9 @@ export const CreateStakingContract = () => {
     } = values;
 
     try {
-      const metadataHash = await getIpfsHash({ name, description });
+      const metadataHash = await getIpfsHash({ name: contractName, description });
 
+      const implementation = IMPLEMENTATION_ADDRESSES[chain.id];
       const initPayload = getStakingContractInitPayload({
         metadataHash,
         maxNumServices,
@@ -124,8 +163,6 @@ export const CreateStakingContract = () => {
         chainId: chain.id,
       });
 
-      const implementation = IMPLEMENTATION_ADDRESSES[chain.id];
-
       // Validations
       if (!(await checkImplementationVerified(chain.id, implementation))) {
         throw new Error('Validation failed');
@@ -140,7 +177,7 @@ export const CreateStakingContract = () => {
             addStakingContract({
               id: eventLog.instance,
               chainId: chain.id,
-              name,
+              name: contractName,
               description,
               template: contractTemplate.title,
               isNominated: false,
@@ -172,59 +209,37 @@ export const CreateStakingContract = () => {
 
         {alertMessage}
 
-        <Form
+        <Form<FormValues>
           layout="vertical"
           onFinish={handleCreate}
           requiredMark={false}
           initialValues={{ ...CONTRACT_DEFAULT_VALUES }}
         >
           <Form.Item
-            label={<Text type="secondary">{LABELS.name}</Text>}
-            name="name"
-            rules={getFieldRules(LABELS.name)}
+            name="contractName"
+            label={<NameLabel />}
+            rules={rulesConfig.contractName.rules}
           >
             <Input />
           </Form.Item>
 
           <Form.Item
-            label={<Text type="secondary">{LABELS.description}</Text>}
             name="description"
+            label={<DescriptionLabel />}
+            rules={rulesConfig.description.rules}
             className="mb-0"
-            rules={getFieldRules(LABELS.description)}
           >
             <Input.TextArea rows={4} />
           </Form.Item>
-          <Hint type="secondary">
-            Good descriptions help governors understand the value your contract brings to the
-            ecosystem. Be clear to increase the chance governors allocate rewards to your contract.
-          </Hint>
-
-          <Divider />
-          <TextWithTooltip
-            text="Template"
-            description="Template contracts must be approved by DAO vote"
-          />
-          <Flex className="mt-4 mb-8" gap={16}>
-            <Text>{contractTemplate.title}</Text>
-            <Tag color="default">More templates coming soon</Tag>
-          </Flex>
-          <Flex className="mb-8">
-            <Text type="secondary">{contractTemplate.description}</Text>
-          </Flex>
-          <Button
-            type="link"
-            className="p-0 mb-16"
-            href={`${EXPLORER_URLS[networkId || mainnet.id]}/address/TBD`}
-          >
-            {`View template on explorer ${UNICODE_SYMBOLS.EXTERNAL_LINK}`}
-          </Button>
+          <TemplateInfoContent id={networkId || mainnet.id} />
 
           <Row gutter={24}>
             <Col span={12}>
               <Form.Item
-                label={<MaxNumServicesLabel />}
+                label={<MaximumStakedAgentsLabel />}
                 name="maxNumServices"
-                rules={getFieldRules(LABELS.maxNumServices)}
+                rules={rulesConfig.maxNumServices.rules}
+                validateFirst
               >
                 <InputNumber placeholder="e.g. 100" step="1" style={INPUT_WIDTH_STYLE} />
               </Form.Item>
@@ -233,94 +248,111 @@ export const CreateStakingContract = () => {
               <Form.Item
                 label={<RewardsPerSecondLabel />}
                 name="rewardsPerSecond"
-                rules={getFieldRules(LABELS.rewardsPerSecond)}
+                rules={rulesConfig.rewardsPerSecond.rules}
               >
-                <InputNumber placeholder="e.g. 0.0003" step="0.0001" style={INPUT_WIDTH_STYLE} />
+                <InputNumber
+                  placeholder="e.g. 0.000001649305555557"
+                  step="0.0001"
+                  style={INPUT_WIDTH_STYLE}
+                />
               </Form.Item>
             </Col>
           </Row>
+
           <Row gutter={24}>
             <Col span={12}>
               <Form.Item
-                label={<Text type="secondary">{LABELS.minStakingDeposit}</Text>}
+                label={<MinimumStakingDepositLabel />}
                 name="minStakingDeposit"
-                rules={getFieldRules(LABELS.minStakingDeposit)}
+                rules={rulesConfig.minStakingDeposit.rules}
+                validateFirst
               >
                 <InputNumber step="1" style={INPUT_WIDTH_STYLE} />
               </Form.Item>
             </Col>
             <Col span={12}>
               <Form.Item
-                label={<Text type="secondary">{LABELS.minNumStakingPeriods}</Text>}
+                label={<MinimumStakingPeriodsLabel />}
                 name="minNumStakingPeriods"
-                rules={getFieldRules(LABELS.minNumStakingPeriods)}
+                rules={rulesConfig.minNumStakingPeriods.rules}
+                validateFirst
               >
                 <InputNumber step="1" style={INPUT_WIDTH_STYLE} />
               </Form.Item>
             </Col>
           </Row>
+
           <Row gutter={24}>
             <Col span={12}>
               <Form.Item
-                label={<Text type="secondary">{LABELS.maxNumInactivityPeriods}</Text>}
+                label={<MaximumInactivityPeriodsLabel />}
                 name="maxNumInactivityPeriods"
-                rules={getFieldRules(LABELS.maxNumInactivityPeriods)}
+                rules={rulesConfig.maxNumInactivityPeriods.rules}
               >
                 <InputNumber step="1" style={INPUT_WIDTH_STYLE} />
               </Form.Item>
             </Col>
             <Col span={12}>
               <Form.Item
-                label={<Text type="secondary">{LABELS.livenessPeriod}</Text>}
+                label={<LivenessPeriodLabel />}
                 name="livenessPeriod"
-                rules={getFieldRules(LABELS.livenessPeriod)}
+                rules={rulesConfig.livenessPeriod.rules}
               >
                 <InputNumber step="1" style={INPUT_WIDTH_STYLE} />
               </Form.Item>
             </Col>
           </Row>
+
           <Row gutter={24}>
             <Col span={12}>
               <Form.Item
-                label={<Text type="secondary">{LABELS.timeForEmissions}</Text>}
+                label={<TimeForEmissionsLabel />}
                 name="timeForEmissions"
-                rules={getFieldRules(LABELS.timeForEmissions)}
+                rules={rulesConfig.timeForEmissions.rules}
               >
                 <InputNumber step="1" style={INPUT_WIDTH_STYLE} />
               </Form.Item>
             </Col>
             <Col span={12}>
               <Form.Item
-                label={<Text type="secondary">{LABELS.numAgentInstances}</Text>}
+                label={<AgentInstancesLabel />}
                 name="numAgentInstances"
-                rules={getFieldRules(LABELS.numAgentInstances)}
+                rules={rulesConfig.numAgentInstances.rules}
               >
                 <InputNumber step="1" style={INPUT_WIDTH_STYLE} />
               </Form.Item>
             </Col>
           </Row>
+
           <Row gutter={24}>
             <Col span={12}>
-              <Form.Item label={<Text type="secondary">{LABELS.agentIds}</Text>} name="agentIds">
-                <Input style={INPUT_WIDTH_STYLE} placeholder="14,25" />
+              <Form.Item
+                label={<AgentIdsLabel />}
+                name="agentIds"
+                rules={rulesConfig.agentIds.rules}
+              >
+                <Input style={INPUT_WIDTH_STYLE} placeholder="separated by comma: 14, 25" />
               </Form.Item>
             </Col>
             <Col span={12}>
-              <Form.Item label={<Text type="secondary">{LABELS.threshold}</Text>} name="threshold">
+              <Form.Item label={<MultisigThresholdLabel />} name="threshold">
                 <InputNumber step="1" style={INPUT_WIDTH_STYLE} />
               </Form.Item>
             </Col>
           </Row>
-          <Form.Item label={<Text type="secondary">{LABELS.configHash}</Text>} name="configHash">
+
+          <Form.Item label={<ServiceConfigHashLabel />} name="configHash">
             <Input />
           </Form.Item>
           <Form.Item
-            label={<Text type="secondary">{LABELS.activityChecker}</Text>}
+            label={<ActivityCheckerAddressLabel />}
             name="activityChecker"
-            rules={getFieldRules(LABELS.activityChecker)}
+            rules={rulesConfig.activityChecker.rules}
+            validateFirst
           >
-            <Input />
+            <Input placeholder="0x00..." />
           </Form.Item>
+
           <Flex justify="end" gap={12}>
             <Link href={`/${networkName}/${URL.myStakingContracts}`} passHref>
               <Button size="large">Cancel</Button>

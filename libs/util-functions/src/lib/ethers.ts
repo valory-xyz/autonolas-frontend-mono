@@ -4,3 +4,5 @@ import { Address } from 'viem';
 export const getBytes32FromAddress = (address: Address | string) => {
   return ethers.zeroPadValue(address, 32) as Address;
 };
+
+export const isValidAddress = (address: string) => ethers.isAddress(address);

@@ -53,7 +53,7 @@ export const sendTransaction = async (methodFn: any, account: Address) => {
   const estimatedGas = await getEstimatedGasLimit(methodFn, account);
   const fn = methodFn.send({ from: account, estimatedGas });
 
-  return sendTransactionFn(fn, account, {
+  return await sendTransactionFn(fn, account, {
     supportedChains: SUPPORTED_CHAINS,
     rpcUrls: RPC_URLS,
   });
