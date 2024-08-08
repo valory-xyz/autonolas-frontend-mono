@@ -85,6 +85,9 @@ export const THEME_CONFIG: ThemeConfig = {
     Collapse: {
       colorBorder: COLOR.BORDER_GREY_2,
     },
+    Modal: {
+      titleFontSize: 24,
+    },
   },
 };
 

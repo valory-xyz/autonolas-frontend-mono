@@ -6,7 +6,7 @@ import { useReadContract } from 'wagmi';
 import { VE_OLAS } from 'libs/util-contracts/src/lib/abiAndAddresses';
 
 export const useVotingPower = (account: Address | undefined) => {
-  const { data, isFetching } = useReadContract({
+  const { data, isFetching, refetch } = useReadContract({
     address: (VE_OLAS.addresses as Record<number, Address>)[mainnet.id],
     abi: VE_OLAS.abi,
     functionName: 'getVotes',
@@ -18,5 +18,5 @@ export const useVotingPower = (account: Address | undefined) => {
     },
   });
 
-  return { data, isFetching };
+  return { data, isFetching, refetch };
 };

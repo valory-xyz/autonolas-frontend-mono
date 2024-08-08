@@ -7,7 +7,7 @@ import { useAccount } from 'wagmi';
 
 import { CHAIN_NAMES } from 'libs/util-constants/src';
 
-import { formatWeiBalance } from 'common-util/functions/balance';
+import { formatWeiNumber } from 'common-util/functions/balance';
 import { NextWeekTooltip } from 'components/NextWeekTooltip';
 import { useVotingPower } from 'hooks/useVotingPower';
 import { useAppSelector } from 'store/index';
@@ -59,7 +59,9 @@ const getColumns = ({
       render: (currentWeight) => (
         <Space size={2} direction="vertical">
           <Text>{`${currentWeight?.percentage.toFixed(2)}%`}</Text>
-          <Text type="secondary">{`${formatWeiBalance(currentWeight?.value)} veOLAS`}</Text>
+          <Text type="secondary">{`${formatWeiNumber({
+            value: currentWeight?.value,
+          })} veOLAS`}</Text>
         </Space>
       ),
     },
@@ -70,7 +72,7 @@ const getColumns = ({
       render: (nextWeight) => (
         <Space size={2} direction="vertical">
           <Text>{`${nextWeight?.percentage.toFixed(2)}%`}</Text>
-          <Text type="secondary">{`${formatWeiBalance(nextWeight?.value)} veOLAS`}</Text>
+          <Text type="secondary">{`${formatWeiNumber({ value: nextWeight?.value })} veOLAS`}</Text>
         </Space>
       ),
     },

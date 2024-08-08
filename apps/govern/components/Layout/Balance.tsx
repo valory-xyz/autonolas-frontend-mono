@@ -5,7 +5,7 @@ import { useAccount } from 'wagmi';
 import { COLOR } from 'libs/ui-theme/src/lib/ui-theme';
 import { MEMBER_URL, UNICODE_SYMBOLS } from 'libs/util-constants/src';
 
-import { formatWeiBalance } from 'common-util/functions';
+import { formatWeiNumber } from 'common-util/functions';
 import { useVotingPower } from 'hooks/index';
 
 const { Text, Paragraph } = Typography;
@@ -35,7 +35,7 @@ export const Balance = () => {
           <InfoCircleOutlined className="mr-8" />
           Your voting power:
         </Text>
-        <Text strong>{formatWeiBalance(data)} veOLAS</Text>
+        <Text strong>{formatWeiNumber({ value: data })} veOLAS</Text>
       </Button>
     </Tooltip>
   );

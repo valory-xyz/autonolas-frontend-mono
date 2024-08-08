@@ -1,4 +1,6 @@
-export const VE_OLAS = {
+import { Contract } from './types';
+
+export const VE_OLAS: Contract = {
   contractName: 'veOLAS',
   addresses: {
     1: '0x7e01A500805f8A52Fad229b3015AD130A332B7b3',
