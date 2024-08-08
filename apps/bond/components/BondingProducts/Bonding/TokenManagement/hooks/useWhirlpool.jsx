@@ -6,7 +6,7 @@ import {
   buildWhirlpoolClient,
 } from '@orca-so/whirlpools-sdk';
 import { GraphQLClient, gql } from 'graphql-request';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback } from 'react';
 
 import { VM_TYPE, areAddressesEqual } from '@autonolas/frontend-library';
 
@@ -75,17 +75,10 @@ const whirlpoolQuery = async () => {
 };
 
 const useWhirlpoolQuery = () => {
-  const [queryResult, setQueryResult] = useState(null);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      const result = await whirlpoolQuery();
-      setQueryResult(result);
-    };
-    fetchData();
+  return useCallback(async () => {
+    const result = await whirlpoolQuery();
+    return result;
   }, []);
-
-  return queryResult;
 };
 
 /**
@@ -110,13 +103,40 @@ export const useWhirlpool = () => {
 };
 
 export const useWhirlPoolInformation = () => {
-  const positions = useWhirlpoolQuery();
+  const getPositions = useWhirlpoolQuery();
   const { getWhirlpoolData } = useWhirlpool();
 
   return useCallback(async () => {
+    const positions = await getPositions();
+
     if (!positions) return null;
 
-    const { whirlpoolData, whirlpoolTokenA } = await getWhirlpoolData();
+    let whirlpoolData;
+    let whirlpoolTokenA;
+
+    const fetchWhirlpoolDataWithRetry = async () => {
+      try {
+        const data = await getWhirlpoolData();
+
+        if (data) {
+          whirlpoolData = data.whirlpoolData;
+          whirlpoolTokenA = data.whirlpoolTokenA;
+        }
+
+        if (!whirlpoolData || !whirlpoolTokenA) {
+          /* eslint-disable-next-line no-console */
+          console.log('Invalid whirlpool data, retrying in 2 seconds');
+          setTimeout(fetchWhirlpoolDataWithRetry, 2000);
+        }
+      } catch (error) {
+        /* eslint-disable-next-line no-console */
+        console.warn('Error fetching whirlpool data, retrying in 2 seconds');
+        setTimeout(fetchWhirlpoolDataWithRetry, 2000);
+      }
+    };
+
+    await fetchWhirlpoolDataWithRetry();
+
     let reserveToken0 = new BN(0);
     let reserveToken1 = new BN(0);
     let totalSupply = new BN(0);
@@ -137,8 +157,12 @@ export const useWhirlPoolInformation = () => {
 
     const address1 = whirlpoolTokenA.mint.toString();
     const address2 = ADDRESSES[VM_TYPE.SVM].olasAddress;
-    const reserveOlas = areAddressesEqual(address1, address2) ? reserveToken0 : reserveToken1;
 
-    return getSvmCalculatedPriceLp(reserveOlas.toString(), totalSupply.toString());
-  }, [positions, getWhirlpoolData]);
+    const reserveOlas = areAddressesEqual(address1, address2)
+      ? reserveToken0.toString()
+      : reserveToken1.toString();
+
+    const svmPriceLp = getSvmCalculatedPriceLp(reserveOlas, totalSupply.toString());
+    return svmPriceLp;
+  }, [getPositions, getWhirlpoolData]);
 };

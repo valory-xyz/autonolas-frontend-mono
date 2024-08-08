@@ -1,8 +1,6 @@
 import { createGlobalStyle } from 'styled-components';
 
-import { COLOR, MEDIA_QUERY } from 'libs/ui-theme/src';
-
-import { ANTD_COLOR } from './ui-theme';
+import { ANTD_COLOR, COLOR, MEDIA_QUERY } from './ui-theme';
 
 export const GlobalStyles = createGlobalStyle`
   *,

@@ -5,12 +5,9 @@ import { isNil } from 'lodash';
 import PropTypes from 'prop-types';
 import { useCallback, useEffect, useState } from 'react';
 
-import {
-  COLOR,
-  getCommaSeparatedNumber,
-  notifyError,
-  notifySuccess,
-} from '@autonolas/frontend-library';
+import { getCommaSeparatedNumber, notifyError, notifySuccess } from '@autonolas/frontend-library';
+
+import { COLOR } from 'libs/ui-theme/src';
 
 import { ONE_ETH_IN_STRING } from 'common-util/constants/numbers';
 import {
@@ -30,7 +27,7 @@ const fullWidth = { width: '100%' };
 export const Deposit = ({
   productId,
   productToken,
-  productLpPriceInBg,
+  productLpPriceAfterDiscount,
   productSupply,
   getProducts,
   closeModal,
@@ -42,6 +39,9 @@ export const Deposit = ({
   const [lpBalance, setLpBalance] = useState(0);
 
   const isSvmProduct = isSvmLpAddress(productToken);
+
+  // convert to BigNumber of bignumber.js and not ethers
+  const productLpPriceAfterDiscountInBg = new BigNumber(productLpPriceAfterDiscount);
 
   const { getLpBalanceRequest, depositRequest, approveRequest, hasSufficientTokenRequest } =
     useDeposit();
@@ -126,13 +126,14 @@ export const Deposit = ({
   };
 
   const getRemainingLpSupplyInEth = () => {
-    const supplyInWei = new BigNumber(productSupply || '0');
+    const productSupplyInWei = new BigNumber(productSupply || '0');
+    const lpBalanceInBg = new BigNumber(lpBalance);
 
-    const remainingSupply = supplyInWei
+    const remainingSupply = productSupplyInWei
       .multipliedBy(ONE_ETH_IN_STRING)
-      .dividedBy(productLpPriceInBg);
+      .dividedBy(productLpPriceAfterDiscountInBg);
 
-    const remainingSupplyInWei = remainingSupply.lt(lpBalance) ? remainingSupply : lpBalance;
+    const remainingSupplyInWei = remainingSupply.lt(lpBalanceInBg) ? remainingSupply : lpBalance;
     return parseToEth(remainingSupplyInWei);
   };
 
@@ -147,8 +148,7 @@ export const Deposit = ({
       ? tokenAmountInputValue
       : new BigNumber(parseToWei(tokenAmountInputValue));
 
-    const payoutInBg = new BigNumber(productLpPriceInBg.toString()).multipliedBy(tokenAmountValue);
-
+    const payoutInBg = productLpPriceAfterDiscountInBg.multipliedBy(tokenAmountValue);
     const payout = isSvmProduct
       ? payoutInBg.dividedBy(BigNumber(`1${'0'.repeat(28)}`)).toFixed(2)
       : Number(payoutInBg.dividedBy(ONE_ETH_IN_STRING).dividedBy(ONE_ETH_IN_STRING).toFixed(2));
@@ -178,7 +178,11 @@ export const Deposit = ({
           autoComplete="off"
           className="mt-16"
         >
-          <Tag color={COLOR.PRIMARY} className="deposit-tag">
+          <Tag
+            color={COLOR.PRIMARY}
+            className="deposit-tag"
+            style={{  color: COLOR.WHITE, }}
+          >
             <Text>{`Bonding Product ID: ${productId}`}</Text>
           </Tag>
 
@@ -222,7 +226,6 @@ export const Deposit = ({
                   form.setFieldsValue({ tokenAmount: remainingLpSupplyInEth });
                   form.validateFields(['tokenAmount']);
                 }}
-                className="pl-0"
               >
                 Max
               </Button>
@@ -291,8 +294,11 @@ export const Deposit = ({
 Deposit.propTypes = {
   productId: PropTypes.string,
   productToken: PropTypes.string,
-  productSupply: PropTypes.string,
-  productLpPriceInBg: PropTypes.shape({}),
+  productSupply: PropTypes.oneOfType([
+    PropTypes.instanceOf(PropTypes.string),
+    PropTypes.instanceOf(BigNumber),
+  ]),
+  productLpPriceAfterDiscount: PropTypes.shape({}),
   closeModal: PropTypes.func,
   getProducts: PropTypes.func,
 };
@@ -300,7 +306,7 @@ Deposit.propTypes = {
 Deposit.defaultProps = {
   productId: undefined,
   productToken: null,
-  productLpPriceInBg: null,
+  productLpPriceAfterDiscount: null,
   productSupply: null,
   closeModal: () => {},
   getProducts: () => {},

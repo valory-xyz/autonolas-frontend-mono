@@ -3,7 +3,7 @@ import {
   QuestionCircleOutlined,
   UnorderedListOutlined,
 } from '@ant-design/icons';
-import { Button, Empty, Popconfirm, Spin, Table, Tag, Tooltip, Typography } from 'antd';
+import { Button, Empty, Popconfirm, Skeleton, Spin, Table, Tag, Tooltip, Typography } from 'antd';
 import { isNaN, remove, round } from 'lodash';
 import Link from 'next/link';
 import PropTypes from 'prop-types';
@@ -32,6 +32,10 @@ const Container = styled.div`
     padding: 16px 10px;
   }
 `;
+
+const Loader = () => <Skeleton.Button size="small" style={{ width: '100%' }} active block />;
+
+const isCurrentPriceLpZero = (currentPrice) => Number(currentPrice) === 0;
 
 const getTitle = (title, tooltipDesc) => (
   <Tooltip title={tooltipDesc}>
@@ -86,11 +90,17 @@ const getColumns = (onClick, isActive, acc, depositoryAddress, hideEmptyProducts
       dataIndex: 'fullCurrentPriceLp',
       key: 'fullCurrentPriceLp',
       width: 140,
-      render: (x, details) => (
-        <a href={details.currentPriceLpLink} rel="noopener noreferrer" target="_blank">
-          {x}
-        </a>
-      ),
+      render: (x, details) => {
+        if (isCurrentPriceLpZero(x)) {
+          return <Loader />;
+        }
+
+        return (
+          <a href={details.currentPriceLpLink} rel="noopener noreferrer" target="_blank">
+            {x}
+          </a>
+        );
+      },
     },
     {
       title: getTitle(
@@ -223,8 +233,16 @@ const getColumns = (onClick, isActive, acc, depositoryAddress, hideEmptyProducts
   return columns;
 };
 
-const sortList = (list) =>
+const sortProducts = (list) =>
   list.sort((a, b) => {
+    // if the current price of the LP token is zero, then move it to the end of the list
+    // NOTE: It can be zero because
+    // - the API returns zero (shouldn't happen) OR
+    // - has error OR
+    // - not fetched yet
+    const isSvm = a.lpChainId === VM_TYPE.SVM || b.lpChainId === VM_TYPE.SVM;
+    if (isSvm && isCurrentPriceLpZero(a.fullCurrentPriceLp)) return 1;
+
     if (isNaN(a.projectedChange)) return 1;
     if (isNaN(b.projectedChange)) return -1;
     return b.projectedChange - a.projectedChange;
@@ -282,7 +300,7 @@ export const BondingList = ({ bondingProgramType, hideEmptyProducts }) => {
   }, [handleProductDetails]);
 
   const getProductsDataSource = useCallback(() => {
-    const sortedList = sortList(filteredProducts);
+    const sortedList = sortProducts(filteredProducts);
     const processedList = hideEmptyProducts
       ? sortedList.filter((x) => x.supplyLeft > 0.00001)
       : sortedList;
@@ -308,16 +326,17 @@ export const BondingList = ({ bondingProgramType, hideEmptyProducts }) => {
         pagination={false}
         scroll={{ x: 400 }}
         className="mb-16"
+        rowHoverable={false}
       />
 
       {!!productDetails && (
         <Deposit
           productId={productDetails?.id}
           productToken={productDetails?.token}
-          productLpPriceInBg={getLpTokenWithDiscount(
+          productLpPriceAfterDiscount={getLpTokenWithDiscount(
             productDetails?.priceLp,
             productDetails?.discount,
-          )}
+          ).toString()}
           productSupply={productDetails?.supply}
           getProducts={refetch}
           closeModal={handleModalClose}
