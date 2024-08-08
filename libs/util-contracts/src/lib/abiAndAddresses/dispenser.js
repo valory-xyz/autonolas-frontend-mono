@@ -9,6 +9,11 @@ export const DISPENSER = {
       inputs: [
         {
           internalType: 'address',
+          name: '_olas',
+          type: 'address',
+        },
+        {
+          internalType: 'address',
           name: '_tokenomics',
           type: 'address',
         },
@@ -17,25 +22,39 @@ export const DISPENSER = {
           name: '_treasury',
           type: 'address',
         },
-      ],
-      stateMutability: 'nonpayable',
-      type: 'constructor',
-    },
-    {
-      inputs: [],
-      name: 'AlreadyInitialized',
-      type: 'error',
-    },
-    {
-      inputs: [
+        {
+          internalType: 'address',
+          name: '_voteWeighting',
+          type: 'address',
+        },
+        {
+          internalType: 'bytes32',
+          name: '_retainer',
+          type: 'bytes32',
+        },
         {
           internalType: 'uint256',
-          name: 'bondId',
+          name: '_maxNumClaimingEpochs',
+          type: 'uint256',
+        },
+        {
+          internalType: 'uint256',
+          name: '_maxNumStakingTargets',
+          type: 'uint256',
+        },
+        {
+          internalType: 'uint256',
+          name: '_defaultMinStakingWeight',
+          type: 'uint256',
+        },
+        {
+          internalType: 'uint256',
+          name: '_defaultMaxStakingIncentive',
           type: 'uint256',
         },
       ],
-      name: 'BondNotRedeemable',
-      type: 'error',
+      stateMutability: 'nonpayable',
+      type: 'constructor',
     },
     {
       inputs: [
@@ -59,51 +78,19 @@ export const DISPENSER = {
       type: 'error',
     },
     {
-      inputs: [],
-      name: 'DelegatecallOnly',
-      type: 'error',
-    },
-    {
       inputs: [
         {
           internalType: 'address',
-          name: 'account',
+          name: 'sender',
+          type: 'address',
+        },
+        {
+          internalType: 'address',
+          name: 'depositProcessor',
           type: 'address',
         },
       ],
-      name: 'DonatorBlacklisted',
-      type: 'error',
-    },
-    {
-      inputs: [
-        {
-          internalType: 'uint256',
-          name: 'provided',
-          type: 'uint256',
-        },
-        {
-          internalType: 'uint256',
-          name: 'expected',
-          type: 'uint256',
-        },
-      ],
-      name: 'InsufficientAllowance',
-      type: 'error',
-    },
-    {
-      inputs: [
-        {
-          internalType: 'uint256',
-          name: 'provided',
-          type: 'uint256',
-        },
-        {
-          internalType: 'uint256',
-          name: 'expected',
-          type: 'uint256',
-        },
-      ],
-      name: 'LowerThan',
+      name: 'DepositProcessorOnly',
       type: 'error',
     },
     {
@@ -120,11 +107,6 @@ export const DISPENSER = {
         },
       ],
       name: 'ManagerOnly',
-      type: 'error',
-    },
-    {
-      inputs: [],
-      name: 'NonZeroValue',
       type: 'error',
     },
     {
@@ -165,146 +147,19 @@ export const DISPENSER = {
       type: 'error',
     },
     {
-      inputs: [
-        {
-          internalType: 'uint256',
-          name: 'productId',
-          type: 'uint256',
-        },
-      ],
-      name: 'ProductClosed',
-      type: 'error',
-    },
-    {
-      inputs: [
-        {
-          internalType: 'address',
-          name: 'tokenAddress',
-          type: 'address',
-        },
-        {
-          internalType: 'uint256',
-          name: 'productId',
-          type: 'uint256',
-        },
-        {
-          internalType: 'uint256',
-          name: 'deadline',
-          type: 'uint256',
-        },
-        {
-          internalType: 'uint256',
-          name: 'curTime',
-          type: 'uint256',
-        },
-      ],
-      name: 'ProductExpired',
-      type: 'error',
-    },
-    {
-      inputs: [
-        {
-          internalType: 'address',
-          name: 'tokenAddress',
-          type: 'address',
-        },
-        {
-          internalType: 'uint256',
-          name: 'productId',
-          type: 'uint256',
-        },
-        {
-          internalType: 'uint256',
-          name: 'requested',
-          type: 'uint256',
-        },
-        {
-          internalType: 'uint256',
-          name: 'actual',
-          type: 'uint256',
-        },
-      ],
-      name: 'ProductSupplyLow',
-      type: 'error',
-    },
-    {
       inputs: [],
       name: 'ReentrancyGuard',
       type: 'error',
     },
     {
-      inputs: [],
-      name: 'SameBlockNumberViolation',
-      type: 'error',
-    },
-    {
       inputs: [
         {
-          internalType: 'uint256',
-          name: 'serviceId',
-          type: 'uint256',
+          internalType: 'bytes32',
+          name: 'account',
+          type: 'bytes32',
         },
       ],
-      name: 'ServiceDoesNotExist',
-      type: 'error',
-    },
-    {
-      inputs: [
-        {
-          internalType: 'uint256',
-          name: 'serviceId',
-          type: 'uint256',
-        },
-      ],
-      name: 'ServiceNeverDeployed',
-      type: 'error',
-    },
-    {
-      inputs: [
-        {
-          internalType: 'address',
-          name: 'token',
-          type: 'address',
-        },
-        {
-          internalType: 'address',
-          name: 'from',
-          type: 'address',
-        },
-        {
-          internalType: 'address',
-          name: 'to',
-          type: 'address',
-        },
-        {
-          internalType: 'uint256',
-          name: 'amount',
-          type: 'uint256',
-        },
-      ],
-      name: 'TransferFailed',
-      type: 'error',
-    },
-    {
-      inputs: [
-        {
-          internalType: 'uint256',
-          name: 'epochNumber',
-          type: 'uint256',
-        },
-      ],
-      name: 'TreasuryRebalanceFailed',
-      type: 'error',
-    },
-    {
-      inputs: [
-        {
-          internalType: 'address',
-          name: 'tokenAddress',
-          type: 'address',
-        },
-      ],
-      name: 'UnauthorizedToken',
+      name: 'WrongAccount',
       type: 'error',
     },
     {
@@ -342,33 +197,12 @@ export const DISPENSER = {
     {
       inputs: [
         {
-          internalType: 'address',
-          name: 'provided',
-          type: 'address',
-        },
-        {
-          internalType: 'address',
-          name: 'expected',
-          type: 'address',
-        },
-      ],
-      name: 'WrongTokenAddress',
-      type: 'error',
-    },
-    {
-      inputs: [
-        {
           internalType: 'uint256',
-          name: 'unitId',
-          type: 'uint256',
-        },
-        {
-          internalType: 'uint256',
-          name: 'unitType',
+          name: 'chainId',
           type: 'uint256',
         },
       ],
-      name: 'WrongUnitId',
+      name: 'WrongChainId',
       type: 'error',
     },
     {
@@ -380,6 +214,19 @@ export const DISPENSER = {
       inputs: [],
       name: 'ZeroValue',
       type: 'error',
+    },
+    {
+      anonymous: false,
+      inputs: [
+        {
+          indexed: true,
+          internalType: 'bytes32',
+          name: 'nomineeHash',
+          type: 'bytes32',
+        },
+      ],
+      name: 'AddNomineeHash',
+      type: 'event',
     },
     {
       anonymous: false,
@@ -402,6 +249,18 @@ export const DISPENSER = {
           name: 'topUp',
           type: 'uint256',
         },
+        {
+          indexed: false,
+          internalType: 'uint256[]',
+          name: 'unitTypes',
+          type: 'uint256[]',
+        },
+        {
+          indexed: false,
+          internalType: 'uint256[]',
+          name: 'unitIds',
+          type: 'uint256[]',
+        },
       ],
       name: 'IncentivesClaimed',
       type: 'event',
@@ -417,6 +276,181 @@ export const DISPENSER = {
         },
       ],
       name: 'OwnerUpdated',
+      type: 'event',
+    },
+    {
+      anonymous: false,
+      inputs: [
+        {
+          indexed: false,
+          internalType: 'enum Dispenser.Pause',
+          name: 'pauseState',
+          type: 'uint8',
+        },
+      ],
+      name: 'PauseDispenser',
+      type: 'event',
+    },
+    {
+      anonymous: false,
+      inputs: [
+        {
+          indexed: true,
+          internalType: 'bytes32',
+          name: 'nomineeHash',
+          type: 'bytes32',
+        },
+      ],
+      name: 'RemoveNomineeHash',
+      type: 'event',
+    },
+    {
+      anonymous: false,
+      inputs: [
+        {
+          indexed: true,
+          internalType: 'address',
+          name: 'account',
+          type: 'address',
+        },
+        {
+          indexed: false,
+          internalType: 'uint256',
+          name: 'returnAmount',
+          type: 'uint256',
+        },
+      ],
+      name: 'Retained',
+      type: 'event',
+    },
+    {
+      anonymous: false,
+      inputs: [
+        {
+          indexed: false,
+          internalType: 'address[]',
+          name: 'depositProcessors',
+          type: 'address[]',
+        },
+        {
+          indexed: false,
+          internalType: 'uint256[]',
+          name: 'chainIds',
+          type: 'uint256[]',
+        },
+      ],
+      name: 'SetDepositProcessorChainIds',
+      type: 'event',
+    },
+    {
+      anonymous: false,
+      inputs: [
+        {
+          indexed: true,
+          internalType: 'address',
+          name: 'account',
+          type: 'address',
+        },
+        {
+          indexed: false,
+          internalType: 'uint256[]',
+          name: 'chainIds',
+          type: 'uint256[]',
+        },
+        {
+          indexed: false,
+          internalType: 'bytes32[][]',
+          name: 'stakingTargets',
+          type: 'bytes32[][]',
+        },
+        {
+          indexed: false,
+          internalType: 'uint256[][]',
+          name: 'stakingIncentives',
+          type: 'uint256[][]',
+        },
+        {
+          indexed: false,
+          internalType: 'uint256',
+          name: 'totalStakingIncentive',
+          type: 'uint256',
+        },
+        {
+          indexed: false,
+          internalType: 'uint256',
+          name: 'totalTransferAmount',
+          type: 'uint256',
+        },
+        {
+          indexed: false,
+          internalType: 'uint256',
+          name: 'totalReturnAmount',
+          type: 'uint256',
+        },
+      ],
+      name: 'StakingIncentivesBatchClaimed',
+      type: 'event',
+    },
+    {
+      anonymous: false,
+      inputs: [
+        {
+          indexed: true,
+          internalType: 'address',
+          name: 'account',
+          type: 'address',
+        },
+        {
+          indexed: false,
+          internalType: 'uint256',
+          name: 'chainId',
+          type: 'uint256',
+        },
+        {
+          indexed: false,
+          internalType: 'bytes32',
+          name: 'stakingTarget',
+          type: 'bytes32',
+        },
+        {
+          indexed: false,
+          internalType: 'uint256',
+          name: 'stakingIncentive',
+          type: 'uint256',
+        },
+        {
+          indexed: false,
+          internalType: 'uint256',
+          name: 'transferAmount',
+          type: 'uint256',
+        },
+        {
+          indexed: false,
+          internalType: 'uint256',
+          name: 'returnAmount',
+          type: 'uint256',
+        },
+      ],
+      name: 'StakingIncentivesClaimed',
+      type: 'event',
+    },
+    {
+      anonymous: false,
+      inputs: [
+        {
+          indexed: false,
+          internalType: 'uint256',
+          name: 'maxNumClaimingEpochs',
+          type: 'uint256',
+        },
+        {
+          indexed: false,
+          internalType: 'uint256',
+          name: 'maxNumStakingTargets',
+          type: 'uint256',
+        },
+      ],
+      name: 'StakingParamsUpdated',
       type: 'event',
     },
     {
@@ -446,6 +480,125 @@ export const DISPENSER = {
       type: 'event',
     },
     {
+      anonymous: false,
+      inputs: [
+        {
+          indexed: true,
+          internalType: 'address',
+          name: 'voteWeighting',
+          type: 'address',
+        },
+      ],
+      name: 'VoteWeightingUpdated',
+      type: 'event',
+    },
+    {
+      anonymous: false,
+      inputs: [
+        {
+          indexed: false,
+          internalType: 'uint256',
+          name: 'chainId',
+          type: 'uint256',
+        },
+        {
+          indexed: false,
+          internalType: 'uint256',
+          name: 'amount',
+          type: 'uint256',
+        },
+        {
+          indexed: false,
+          internalType: 'uint256',
+          name: 'updatedWithheldAmount',
+          type: 'uint256',
+        },
+        {
+          indexed: true,
+          internalType: 'bytes32',
+          name: 'batchHash',
+          type: 'bytes32',
+        },
+      ],
+      name: 'WithheldAmountSynced',
+      type: 'event',
+    },
+    {
+      inputs: [],
+      name: 'MAX_EVM_CHAIN_ID',
+      outputs: [
+        {
+          internalType: 'uint256',
+          name: '',
+          type: 'uint256',
+        },
+      ],
+      stateMutability: 'view',
+      type: 'function',
+    },
+    {
+      inputs: [
+        {
+          internalType: 'bytes32',
+          name: 'nomineeHash',
+          type: 'bytes32',
+        },
+      ],
+      name: 'addNominee',
+      outputs: [],
+      stateMutability: 'nonpayable',
+      type: 'function',
+    },
+    {
+      inputs: [
+        {
+          internalType: 'uint256',
+          name: 'numClaimedEpochs',
+          type: 'uint256',
+        },
+        {
+          internalType: 'uint256',
+          name: 'chainId',
+          type: 'uint256',
+        },
+        {
+          internalType: 'bytes32',
+          name: 'stakingTarget',
+          type: 'bytes32',
+        },
+        {
+          internalType: 'uint256',
+          name: 'bridgingDecimals',
+          type: 'uint256',
+        },
+      ],
+      name: 'calculateStakingIncentives',
+      outputs: [
+        {
+          internalType: 'uint256',
+          name: 'totalStakingIncentive',
+          type: 'uint256',
+        },
+        {
+          internalType: 'uint256',
+          name: 'totalReturnAmount',
+          type: 'uint256',
+        },
+        {
+          internalType: 'uint256',
+          name: 'lastClaimedEpoch',
+          type: 'uint256',
+        },
+        {
+          internalType: 'bytes32',
+          name: 'nomineeHash',
+          type: 'bytes32',
+        },
+      ],
+      stateMutability: 'nonpayable',
+      type: 'function',
+    },
+    {
       inputs: [
         {
           internalType: 'address',
@@ -455,6 +608,11 @@ export const DISPENSER = {
         {
           internalType: 'address',
           name: '_treasury',
+          type: 'address',
+        },
+        {
+          internalType: 'address',
+          name: '_voteWeighting',
           type: 'address',
         },
       ],
@@ -472,6 +630,24 @@ export const DISPENSER = {
         },
       ],
       name: 'changeOwner',
+      outputs: [],
+      stateMutability: 'nonpayable',
+      type: 'function',
+    },
+    {
+      inputs: [
+        {
+          internalType: 'uint256',
+          name: '_maxNumClaimingEpochs',
+          type: 'uint256',
+        },
+        {
+          internalType: 'uint256',
+          name: '_maxNumStakingTargets',
+          type: 'uint256',
+        },
+      ],
+      name: 'changeStakingParams',
       outputs: [],
       stateMutability: 'nonpayable',
       type: 'function',
@@ -506,6 +682,227 @@ export const DISPENSER = {
       type: 'function',
     },
     {
+      inputs: [
+        {
+          internalType: 'uint256',
+          name: 'numClaimedEpochs',
+          type: 'uint256',
+        },
+        {
+          internalType: 'uint256',
+          name: 'chainId',
+          type: 'uint256',
+        },
+        {
+          internalType: 'bytes32',
+          name: 'stakingTarget',
+          type: 'bytes32',
+        },
+        {
+          internalType: 'bytes',
+          name: 'bridgePayload',
+          type: 'bytes',
+        },
+      ],
+      name: 'claimStakingIncentives',
+      outputs: [],
+      stateMutability: 'payable',
+      type: 'function',
+    },
+    {
+      inputs: [
+        {
+          internalType: 'uint256',
+          name: 'numClaimedEpochs',
+          type: 'uint256',
+        },
+        {
+          internalType: 'uint256[]',
+          name: 'chainIds',
+          type: 'uint256[]',
+        },
+        {
+          internalType: 'bytes32[][]',
+          name: 'stakingTargets',
+          type: 'bytes32[][]',
+        },
+        {
+          internalType: 'bytes[]',
+          name: 'bridgePayloads',
+          type: 'bytes[]',
+        },
+        {
+          internalType: 'uint256[]',
+          name: 'valueAmounts',
+          type: 'uint256[]',
+        },
+      ],
+      name: 'claimStakingIncentivesBatch',
+      outputs: [],
+      stateMutability: 'payable',
+      type: 'function',
+    },
+    {
+      inputs: [],
+      name: 'defaultMaxStakingIncentive',
+      outputs: [
+        {
+          internalType: 'uint256',
+          name: '',
+          type: 'uint256',
+        },
+      ],
+      stateMutability: 'view',
+      type: 'function',
+    },
+    {
+      inputs: [],
+      name: 'defaultMinStakingWeight',
+      outputs: [
+        {
+          internalType: 'uint256',
+          name: '',
+          type: 'uint256',
+        },
+      ],
+      stateMutability: 'view',
+      type: 'function',
+    },
+    {
+      inputs: [
+        {
+          internalType: 'uint256',
+          name: '',
+          type: 'uint256',
+        },
+      ],
+      name: 'mapChainIdDepositProcessors',
+      outputs: [
+        {
+          internalType: 'address',
+          name: '',
+          type: 'address',
+        },
+      ],
+      stateMutability: 'view',
+      type: 'function',
+    },
+    {
+      inputs: [
+        {
+          internalType: 'uint256',
+          name: '',
+          type: 'uint256',
+        },
+      ],
+      name: 'mapChainIdWithheldAmounts',
+      outputs: [
+        {
+          internalType: 'uint256',
+          name: '',
+          type: 'uint256',
+        },
+      ],
+      stateMutability: 'view',
+      type: 'function',
+    },
+    {
+      inputs: [
+        {
+          internalType: 'bytes32',
+          name: '',
+          type: 'bytes32',
+        },
+      ],
+      name: 'mapLastClaimedStakingEpochs',
+      outputs: [
+        {
+          internalType: 'uint256',
+          name: '',
+          type: 'uint256',
+        },
+      ],
+      stateMutability: 'view',
+      type: 'function',
+    },
+    {
+      inputs: [
+        {
+          internalType: 'bytes32',
+          name: '',
+          type: 'bytes32',
+        },
+      ],
+      name: 'mapRemovedNomineeEpochs',
+      outputs: [
+        {
+          internalType: 'uint256',
+          name: '',
+          type: 'uint256',
+        },
+      ],
+      stateMutability: 'view',
+      type: 'function',
+    },
+    {
+      inputs: [
+        {
+          internalType: 'uint256',
+          name: '',
+          type: 'uint256',
+        },
+      ],
+      name: 'mapZeroWeightEpochRefunded',
+      outputs: [
+        {
+          internalType: 'bool',
+          name: '',
+          type: 'bool',
+        },
+      ],
+      stateMutability: 'view',
+      type: 'function',
+    },
+    {
+      inputs: [],
+      name: 'maxNumClaimingEpochs',
+      outputs: [
+        {
+          internalType: 'uint256',
+          name: '',
+          type: 'uint256',
+        },
+      ],
+      stateMutability: 'view',
+      type: 'function',
+    },
+    {
+      inputs: [],
+      name: 'maxNumStakingTargets',
+      outputs: [
+        {
+          internalType: 'uint256',
+          name: '',
+          type: 'uint256',
+        },
+      ],
+      stateMutability: 'view',
+      type: 'function',
+    },
+    {
+      inputs: [],
+      name: 'olas',
+      outputs: [
+        {
+          internalType: 'address',
+          name: '',
+          type: 'address',
+        },
+      ],
+      stateMutability: 'view',
+      type: 'function',
+    },
+    {
       inputs: [],
       name: 'owner',
       outputs: [
@@ -516,6 +913,142 @@ export const DISPENSER = {
         },
       ],
       stateMutability: 'view',
+      type: 'function',
+    },
+    {
+      inputs: [],
+      name: 'paused',
+      outputs: [
+        {
+          internalType: 'enum Dispenser.Pause',
+          name: '',
+          type: 'uint8',
+        },
+      ],
+      stateMutability: 'view',
+      type: 'function',
+    },
+    {
+      inputs: [
+        {
+          internalType: 'bytes32',
+          name: 'nomineeHash',
+          type: 'bytes32',
+        },
+      ],
+      name: 'removeNominee',
+      outputs: [],
+      stateMutability: 'nonpayable',
+      type: 'function',
+    },
+    {
+      inputs: [],
+      name: 'retain',
+      outputs: [],
+      stateMutability: 'nonpayable',
+      type: 'function',
+    },
+    {
+      inputs: [],
+      name: 'retainer',
+      outputs: [
+        {
+          internalType: 'bytes32',
+          name: '',
+          type: 'bytes32',
+        },
+      ],
+      stateMutability: 'view',
+      type: 'function',
+    },
+    {
+      inputs: [],
+      name: 'retainerHash',
+      outputs: [
+        {
+          internalType: 'bytes32',
+          name: '',
+          type: 'bytes32',
+        },
+      ],
+      stateMutability: 'view',
+      type: 'function',
+    },
+    {
+      inputs: [
+        {
+          internalType: 'address[]',
+          name: 'depositProcessors',
+          type: 'address[]',
+        },
+        {
+          internalType: 'uint256[]',
+          name: 'chainIds',
+          type: 'uint256[]',
+        },
+      ],
+      name: 'setDepositProcessorChainIds',
+      outputs: [],
+      stateMutability: 'nonpayable',
+      type: 'function',
+    },
+    {
+      inputs: [
+        {
+          internalType: 'enum Dispenser.Pause',
+          name: 'pauseState',
+          type: 'uint8',
+        },
+      ],
+      name: 'setPauseState',
+      outputs: [],
+      stateMutability: 'nonpayable',
+      type: 'function',
+    },
+    {
+      inputs: [
+        {
+          internalType: 'uint256',
+          name: 'chainId',
+          type: 'uint256',
+        },
+        {
+          internalType: 'uint256',
+          name: 'amount',
+          type: 'uint256',
+        },
+        {
+          internalType: 'bytes32',
+          name: 'batchHash',
+          type: 'bytes32',
+        },
+      ],
+      name: 'syncWithheldAmount',
+      outputs: [],
+      stateMutability: 'nonpayable',
+      type: 'function',
+    },
+    {
+      inputs: [
+        {
+          internalType: 'uint256',
+          name: 'chainId',
+          type: 'uint256',
+        },
+        {
+          internalType: 'uint256',
+          name: 'amount',
+          type: 'uint256',
+        },
+        {
+          internalType: 'bytes32',
+          name: 'batchHash',
+          type: 'bytes32',
+        },
+      ],
+      name: 'syncWithheldAmountMaintenance',
+      outputs: [],
+      stateMutability: 'nonpayable',
       type: 'function',
     },
     {
@@ -534,6 +1067,19 @@ export const DISPENSER = {
     {
       inputs: [],
       name: 'treasury',
+      outputs: [
+        {
+          internalType: 'address',
+          name: '',
+          type: 'address',
+        },
+      ],
+      stateMutability: 'view',
+      type: 'function',
+    },
+    {
+      inputs: [],
+      name: 'voteWeighting',
       outputs: [
         {
           internalType: 'address',
