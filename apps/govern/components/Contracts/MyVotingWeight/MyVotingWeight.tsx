@@ -1,12 +1,11 @@
 import { LoadingOutlined, TableOutlined, WalletOutlined } from '@ant-design/icons';
 import { Button, Card as CardAntd, Flex, Spin, Typography } from 'antd';
 import Image from 'next/image';
+import { useRouter } from 'next/router';
 import { Dispatch, SetStateAction, useMemo } from 'react';
 import styled from 'styled-components';
 import { Allocation } from 'types';
 import { useAccount } from 'wagmi';
-
-import { MEMBER_URL } from 'libs/util-constants/src';
 
 import { LoginV2 } from 'components/Login';
 import { useVotingPower } from 'hooks/index';
@@ -54,6 +53,11 @@ const ConnectWallet = () => {
 };
 
 const GetVeOlas = () => {
+  const router = useRouter();
+
+  const handleOpenVeOlas = () => {
+    router.push('/veolas');
+  };
   return (
     <Flex align="center" justify="center" vertical gap={16}>
       <Image src={'/images/olas.svg'} alt="Olas" width={48} height={48} />
@@ -61,7 +65,8 @@ const GetVeOlas = () => {
         Only veOLAS holders can vote on staking contracts. <br />
         Please lock OLAS for veOLAS to get started.
       </Paragraph>
-      <Button size="large" type="primary" target="_blank" href={MEMBER_URL}>
+
+      <Button size="large" type="primary" onClick={handleOpenVeOlas}>
         Get veOLAS
       </Button>
     </Flex>

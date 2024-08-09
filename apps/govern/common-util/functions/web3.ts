@@ -1,7 +1,8 @@
+import { mainnet } from 'viem/chains';
 import Web3 from 'web3';
 import { AbiItem } from 'web3-utils';
 
-import { VOTE_WEIGHTING } from 'libs/util-contracts/src/lib/abiAndAddresses';
+import { OLAS, VE_OLAS, VOTE_WEIGHTING } from 'libs/util-contracts/src/lib/abiAndAddresses';
 
 import { getChainId, getProvider } from 'common-util/functions/frontend-library';
 
@@ -26,9 +27,22 @@ const getContract = (abi: AbiItem[], contractAddress: string, chainId?: number) 
 };
 
 export const getVoteWeightingContract = () => {
-  const { chainId } = getWeb3Details();
   const abi = VOTE_WEIGHTING.abi as AbiItem[];
-  const address = (VOTE_WEIGHTING.addresses as Record<number, string>)[chainId as number];
+  const address = (VOTE_WEIGHTING.addresses as Record<number, string>)[mainnet.id];
+  const contract = getContract(abi, address);
+  return contract;
+};
+
+export const getOlasContract = () => {
+  const abi = OLAS.abi as AbiItem[];
+  const address = (OLAS.addresses as Record<number, string>)[mainnet.id];
+  const contract = getContract(abi, address);
+  return contract;
+};
+
+export const getVeOlasContract = () => {
+  const abi = VE_OLAS.abi as AbiItem[];
+  const address = (VE_OLAS.addresses as Record<number, string>)[mainnet.id];
   const contract = getContract(abi, address);
   return contract;
 };

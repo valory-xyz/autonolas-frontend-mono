@@ -15,3 +15,4 @@ export * from './stakingFactory';
 export * from './veOlas';
 export * from './stakingToken';
 export * from './stakingVerifier';
+export * from './olas';

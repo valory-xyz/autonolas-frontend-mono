@@ -106,6 +106,10 @@ export const GlobalStyles = createGlobalStyle`
     padding-top: 48px;
   }
 
+  .block {
+    display: block;
+  }
+
   .text-start {
     text-align: start;
   }
