@@ -74,13 +74,6 @@ const whirlpoolQuery = async () => {
   return filteredPositions;
 };
 
-const useWhirlpoolQuery = () => {
-  return useCallback(async () => {
-    const result = await whirlpoolQuery();
-    return result;
-  }, []);
-};
-
 /**
  * Hook to get the data from the whirlpool
  */
@@ -103,11 +96,10 @@ export const useWhirlpool = () => {
 };
 
 export const useWhirlPoolInformation = () => {
-  const getPositions = useWhirlpoolQuery();
   const { getWhirlpoolData } = useWhirlpool();
 
   return useCallback(async () => {
-    const positions = await getPositions();
+    const positions = await whirlpoolQuery();
 
     if (!positions) return null;
 
@@ -164,5 +156,5 @@ export const useWhirlPoolInformation = () => {
 
     const svmPriceLp = getSvmCalculatedPriceLp(reserveOlas, totalSupply.toString());
     return svmPriceLp;
-  }, [getPositions, getWhirlpoolData]);
+  }, [getWhirlpoolData]);
 };
