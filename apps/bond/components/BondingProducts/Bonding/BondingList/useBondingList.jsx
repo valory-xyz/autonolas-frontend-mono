@@ -6,6 +6,7 @@ import { usePublicClient } from 'wagmi';
 import { VM_TYPE, areAddressesEqual } from '@autonolas/frontend-library';
 
 import { DEPOSITORY } from 'libs/util-contracts/src/lib/abiAndAddresses';
+
 import { ADDRESSES } from 'common-util/constants/addresses';
 import { ADDRESS_ZERO, ONE_ETH } from 'common-util/constants/numbers';
 import { DEX } from 'common-util/enums';

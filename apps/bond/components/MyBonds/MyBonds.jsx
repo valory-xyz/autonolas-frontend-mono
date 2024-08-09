@@ -170,6 +170,7 @@ export const MyBonds = () => {
                 }
               : undefined
           }
+          rowHoverable={false}
         />
       </ConfigProvider>
 

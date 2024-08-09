@@ -1,4 +1,3 @@
-// TODO: move to theme
 export const COLOR = {
   PRIMARY: '#7e22ce',
   SECONDARY: '#4d596a',
@@ -32,7 +31,6 @@ export const COLOR = {
   YELLOW_SECONDARY: '#fefce8', // tailwind orange.50
 };
 
-// TODO: move to theme
 export const BREAK_POINT = {
   xxs: '375px',
   xs: '480px',
@@ -43,7 +41,6 @@ export const BREAK_POINT = {
   xxl: '1600px',
 };
 
-// TODO: move to theme
 export const MEDIA_QUERY = {
   mobileS: `@media only screen and (max-width: ${BREAK_POINT.xxs})`,
   mobileM: `@media only screen and (max-width: ${BREAK_POINT.xs})`,

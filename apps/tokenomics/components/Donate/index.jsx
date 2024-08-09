@@ -1,4 +1,4 @@
-import { Alert, Button, Typography } from 'antd';
+import { Alert, Button, Skeleton, Typography } from 'antd';
 import { ethers } from 'ethers';
 import isNumber from 'lodash/isNumber';
 import { useEffect, useState } from 'react';
@@ -194,7 +194,11 @@ export const DepositServiceDonation = () => {
         {epochStatusList.map((e, index) => (
           <EpochStatus key={`epoch-section-${index}`}>
             <Title level={5}>{`${e.text}:`}</Title>
-            <Paragraph>{e.value}</Paragraph>
+            {isEpochDetailsLoading ? (
+              <Skeleton.Input size="small" active />
+            ) : (
+              <Paragraph>{e.value}</Paragraph>
+            )}
           </EpochStatus>
         ))}
 

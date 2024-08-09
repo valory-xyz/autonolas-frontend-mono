@@ -5,12 +5,10 @@ import { isNil } from 'lodash';
 import PropTypes from 'prop-types';
 import { useCallback, useEffect, useState } from 'react';
 
-import {
-  COLOR,
-  getCommaSeparatedNumber,
-  notifyError,
-  notifySuccess,
-} from '@autonolas/frontend-library';
+import { getCommaSeparatedNumber } from '@autonolas/frontend-library';
+
+import { COLOR } from 'libs/ui-theme/src';
+import { notifyError, notifySuccess } from 'libs/util-functions/src';
 
 import { ONE_ETH_IN_STRING } from 'common-util/constants/numbers';
 import {
@@ -30,7 +28,7 @@ const fullWidth = { width: '100%' };
 export const Deposit = ({
   productId,
   productToken,
-  productLpPriceInBg,
+  productLpPriceAfterDiscount,
   productSupply,
   getProducts,
   closeModal,
@@ -42,6 +40,9 @@ export const Deposit = ({
   const [lpBalance, setLpBalance] = useState(0);
 
   const isSvmProduct = isSvmLpAddress(productToken);
+
+  // convert to BigNumber of bignumber.js and not ethers
+  const productLpPriceAfterDiscountInBg = new BigNumber(productLpPriceAfterDiscount);
 
   const { getLpBalanceRequest, depositRequest, approveRequest, hasSufficientTokenRequest } =
     useDeposit();
@@ -82,7 +83,7 @@ export const Deposit = ({
       notifySuccess('Deposited successfully!', `Transaction Hash: ${txHash}`);
 
       // fetch the products details again
-      getProducts();
+      await getProducts();
 
       // close the modal after successful deposit
       closeModal();
@@ -126,13 +127,14 @@ export const Deposit = ({
   };
 
   const getRemainingLpSupplyInEth = () => {
-    const supplyInWei = new BigNumber(productSupply || '0');
+    const productSupplyInWei = new BigNumber(productSupply || '0');
+    const lpBalanceInBg = new BigNumber(lpBalance);
 
-    const remainingSupply = supplyInWei
+    const remainingSupply = productSupplyInWei
       .multipliedBy(ONE_ETH_IN_STRING)
-      .dividedBy(productLpPriceInBg);
+      .dividedBy(productLpPriceAfterDiscountInBg);
 
-    const remainingSupplyInWei = remainingSupply.lt(lpBalance) ? remainingSupply : lpBalance;
+    const remainingSupplyInWei = remainingSupply.lt(lpBalanceInBg) ? remainingSupply : lpBalance;
     return parseToEth(remainingSupplyInWei);
   };
 
@@ -147,8 +149,7 @@ export const Deposit = ({
       ? tokenAmountInputValue
       : new BigNumber(parseToWei(tokenAmountInputValue));
 
-    const payoutInBg = new BigNumber(productLpPriceInBg.toString()).multipliedBy(tokenAmountValue);
-
+    const payoutInBg = productLpPriceAfterDiscountInBg.multipliedBy(tokenAmountValue);
     const payout = isSvmProduct
       ? payoutInBg.dividedBy(BigNumber(`1${'0'.repeat(28)}`)).toFixed(2)
       : Number(payoutInBg.dividedBy(ONE_ETH_IN_STRING).dividedBy(ONE_ETH_IN_STRING).toFixed(2));
@@ -178,8 +179,8 @@ export const Deposit = ({
           autoComplete="off"
           className="mt-16"
         >
-          <Tag color={COLOR.PRIMARY} className="deposit-tag">
-            <Text>{`Bonding Product ID: ${productId}`}</Text>
+          <Tag color={COLOR.PRIMARY} className="deposit-tag mb-12">
+            {`Bonding Product ID: ${productId}`}
           </Tag>
 
           <Form.Item
@@ -222,7 +223,6 @@ export const Deposit = ({
                   form.setFieldsValue({ tokenAmount: remainingLpSupplyInEth });
                   form.validateFields(['tokenAmount']);
                 }}
-                className="pl-0"
               >
                 Max
               </Button>
@@ -255,12 +255,12 @@ export const Deposit = ({
               htmlType="submit"
               loading={isLoading}
               onClick={async () => {
-                try {
-                  if (!account) {
-                    notifyError('Please connect your wallet');
-                    return;
-                  }
+                if (!account) {
+                  notifyError('Please connect your wallet');
+                  return;
+                }
 
+                try {
                   setIsLoading(true);
                   await approveRequest({
                     token: productToken,
@@ -291,8 +291,14 @@ export const Deposit = ({
 Deposit.propTypes = {
   productId: PropTypes.string,
   productToken: PropTypes.string,
-  productSupply: PropTypes.string,
-  productLpPriceInBg: PropTypes.shape({}),
+  productSupply: PropTypes.oneOfType([
+    PropTypes.instanceOf(PropTypes.string),
+    PropTypes.instanceOf(BigInt),
+  ]),
+  productLpPriceAfterDiscount: PropTypes.oneOfType([
+    PropTypes.instanceOf(PropTypes.string),
+    PropTypes.instanceOf(BigInt),
+  ]),
   closeModal: PropTypes.func,
   getProducts: PropTypes.func,
 };
@@ -300,7 +306,7 @@ Deposit.propTypes = {
 Deposit.defaultProps = {
   productId: undefined,
   productToken: null,
-  productLpPriceInBg: null,
+  productLpPriceAfterDiscount: null,
   productSupply: null,
   closeModal: () => {},
   getProducts: () => {},

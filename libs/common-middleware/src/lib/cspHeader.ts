@@ -70,7 +70,10 @@ const ALLOWED_ORIGINS = [
 
   // others
   'https://api.thegraph.com/',
+  'https://api.studio.thegraph.com/',
   'https://sockjs-us3.pusher.com/',
+  'https://programs.shyft.to/',
+  'https://*.network.thegraph.com/',
 
   ...VERCEL_LINKS,
 ];

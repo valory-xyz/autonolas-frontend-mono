@@ -4,7 +4,6 @@ import styled from 'styled-components';
 import { COLOR, MEDIA_QUERY } from 'libs/ui-theme/src';
 
 export const CustomLayout = styled(Layout)`
-  background-color: ${COLOR.WHITE};
   min-height: 100vh;
 
   /* layout */
@@ -58,6 +57,15 @@ export const CustomLayout = styled(Layout)`
       margin-left: 2rem;
       border: 1px solid ${COLOR.BORDER_GREY};
       padding: 2px 16px;
+    }
+  }
+
+  .ant-table {
+    .ant-table-thead > tr > th.ant-table-cell {
+      background-color: ${COLOR.WHITE};
+    }
+    .ant-table-tbody > tr > td {
+      padding: 10px;
     }
   }
 
