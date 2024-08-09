@@ -43,30 +43,12 @@ export const useDeposit = () => {
   const approveRequest = useCallback(
     async ({ token, amountToApprove }) => {
       const contract = getUniswapV2PairContract(token);
-      console.log('contract', contract);
-
       const treasuryAddress = ADDRESSES[chainId].treasury;
-      console.log('treasuryAddress', treasuryAddress);
+      const fnApprove = contract.methods.approve(treasuryAddress, amountToApprove);
+      const estimatedGas = await getEstimatedGasLimit(fnApprove, account);
+      const fn = await fnApprove.send({ from: account, gasLimit: estimatedGas });
 
-      const fnApprove = contract.methods
-        .approve(treasuryAddress, amountToApprove)
-        .send({ from: account });
-      console.log('fnApprove', fnApprove);
-
-      // const estimatedGas = await getEstimatedGasLimit(fnApprove, account);
-      // console.log('estimatedGas', estimatedGas);
-
-      // const fn = fnApprove.send({
-      //   from: account,
-      //   gasLimit: estimatedGas,
-      // });
-      // console.log('fn', fn);
-
-      // const response = await sendTransaction(fnApprove, account);
-      // console.log('response', response);
-
-      const response = await fnApprove;
-
+      const response = await sendTransaction(fn, account);
       return response;
     },
     [account, chainId],
@@ -74,22 +56,12 @@ export const useDeposit = () => {
 
   const depositRequest = useCallback(
     async ({ productId, tokenAmount }) => {
-      console.log('inside deposit Request');
-
       const contract = getDepositoryContract();
-      console.log('contract', contract);
+      const fnDeposit = contract.methods.deposit(productId, tokenAmount);
+      const estimatedGas = await getEstimatedGasLimit(fnDeposit, account);
+      const fn = fnDeposit.send({ from: account, gasLimit: estimatedGas });
 
-      const fnDeposit = contract.methods.deposit(productId, tokenAmount).send({ from: account });
-      console.log('fnDeposit', fnDeposit);
-
-      // const estimatedGas = await getEstimatedGasLimit(fnDeposit, account);
-      // console.log('estimatedGas', estimatedGas);
-
-      // const fn = fnDeposit.send({ from: account, gasLimit: estimatedGas });
-      // console.log('fn', fn);
-
-      const response = await fnDeposit;
-      // const response = await sendTransaction(fnDeposit, account);
+      const response = await sendTransaction(fn, account);
       return response?.transactionHash;
     },
     [account],

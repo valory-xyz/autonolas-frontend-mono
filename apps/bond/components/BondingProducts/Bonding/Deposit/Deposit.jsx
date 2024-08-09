@@ -82,7 +82,7 @@ export const Deposit = ({
       notifySuccess('Deposited successfully!', `Transaction Hash: ${txHash}`);
 
       // fetch the products details again
-      getProducts();
+      await getProducts();
 
       // close the modal after successful deposit
       closeModal();
@@ -254,12 +254,12 @@ export const Deposit = ({
               htmlType="submit"
               loading={isLoading}
               onClick={async () => {
-                try {
-                  if (!account) {
-                    notifyError('Please connect your wallet');
-                    return;
-                  }
+                if (!account) {
+                  notifyError('Please connect your wallet');
+                  return;
+                }
 
+                try {
                   setIsLoading(true);
                   await approveRequest({
                     token: productToken,
