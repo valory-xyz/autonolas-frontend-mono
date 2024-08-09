@@ -1,9 +1,10 @@
 import { InfoCircleOutlined } from '@ant-design/icons';
 import { Button, Tooltip, Typography } from 'antd';
+import Link from 'next/link';
 import { useAccount } from 'wagmi';
 
 import { COLOR } from 'libs/ui-theme/src/lib/ui-theme';
-import { MEMBER_URL, UNICODE_SYMBOLS } from 'libs/util-constants/src';
+import { UNICODE_SYMBOLS } from 'libs/util-constants/src';
 
 import { formatWeiNumber } from 'common-util/functions';
 import { useVotingPower } from 'hooks/index';
@@ -24,9 +25,7 @@ export const Balance = () => {
       title={
         <>
           <Paragraph>veOLAS gives you voting power in Autonolas governance.</Paragraph>
-          <a href={MEMBER_URL} target="_blank">
-            Lock OLAS for veOLAS {UNICODE_SYMBOLS.EXTERNAL_LINK}
-          </a>
+          <Link href="/veolas">Lock OLAS for veOLAS {UNICODE_SYMBOLS.EXTERNAL_LINK}</Link>
         </>
       }
     >

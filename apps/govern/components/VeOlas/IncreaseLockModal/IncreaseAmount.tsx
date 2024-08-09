@@ -11,7 +11,7 @@ import { ApproveOlasModal } from '../ApproveOlasModal';
 import { MaxButton } from '../MaxButton';
 import { OlasAmountInput } from '../OlasAmountInput';
 import { ProjectedVeOlas } from '../ProjectedVeOlas';
-import { useVeolasComponents } from '../useVeolasComponents';
+import { LockedAmountComponent } from '../VeOlasComponents';
 
 type IncreaseAmountProps = {
   closeModal: () => void;
@@ -23,34 +23,46 @@ type FormValues = {
 
 export const IncreaseAmount = ({ closeModal }: IncreaseAmountProps) => {
   const [form] = Form.useForm();
-  const { account, lockedEnd, olasBalance, veOlasBalance, refetch } = useFetchBalances();
-  const { getLockedAmountComponent } = useVeolasComponents();
+  const {
+    isLoading: isBalancesLoading,
+    account,
+    lockedEnd,
+    olasBalance,
+    veOlasBalance,
+    refetch,
+  } = useFetchBalances();
 
   const [isLoading, setIsLoading] = useState(false);
   const [isApproveModalVisible, setIsApproveModalVisible] = useState(false);
 
   const amountInEth = Form.useWatch('amount', form);
 
-  const onIncreaseAmount = async () => {
+  const handleIncreaseAmount = async () => {
     if (!account) return;
 
-    setIsLoading(true);
+    try {
+      setIsLoading(true);
 
-    const txHash = await updateIncreaseAmount({
-      amount: ethers.parseUnits(`${amountInEth}`, 18).toString(),
-      account,
-    });
+      const txHash = await updateIncreaseAmount({
+        amount: ethers.parseUnits(`${amountInEth}`, 18).toString(),
+        account,
+      });
 
-    notifySuccess('Amount increased successfully!', `Transaction Hash: ${txHash}`);
+      notifySuccess('Amount increased successfully!', `Transaction Hash: ${txHash}`);
 
-    // once the amount is increased, refetch the data
-    refetch();
+      // once the amount is increased, refetch the data
+      refetch();
 
-    closeModal();
-    setIsLoading(false);
+      closeModal();
+    } catch (error) {
+      window.console.error(error);
+      notifyError();
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const onFinish = async ({ amount }: FormValues) => {
+  const handleFinish = async ({ amount }: FormValues) => {
     if (!account) return;
     if (!veOlasBalance) return;
 
@@ -69,7 +81,7 @@ export const IncreaseAmount = ({ closeModal }: IncreaseAmountProps) => {
         return;
       }
 
-      await onIncreaseAmount();
+      await handleIncreaseAmount();
     } catch (error) {
       window.console.error(error);
       notifyError();
@@ -92,9 +104,9 @@ export const IncreaseAmount = ({ closeModal }: IncreaseAmountProps) => {
         autoComplete="off"
         name="increase-amount-form"
         requiredMark={false}
-        onFinish={onFinish}
+        onFinish={handleFinish}
       >
-        {getLockedAmountComponent()}
+        <LockedAmountComponent isLoading={isBalancesLoading} veOlasBalance={veOlasBalance} />
 
         <Divider className="mt-8" />
 
@@ -137,7 +149,7 @@ export const IncreaseAmount = ({ closeModal }: IncreaseAmountProps) => {
         isModalVisible={isApproveModalVisible}
         setIsModalVisible={setIsApproveModalVisible}
         amountInEth={amountInEth}
-        onApprove={onIncreaseAmount}
+        onApprove={handleIncreaseAmount}
       />
     </>
   );

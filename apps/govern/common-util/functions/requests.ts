@@ -1,6 +1,6 @@
 import { readContract, readContracts } from '@wagmi/core';
 import { ethers } from 'ethers';
-import { AbiFunction, TransactionReceipt } from 'viem';
+import { AbiFunction, TransactionReceipt, parseUnits } from 'viem';
 import { Address } from 'viem';
 import { mainnet } from 'viem/chains';
 
@@ -118,61 +118,61 @@ export const checkLockExpired = async (account: Address) => {
 /**
  * Approve amount of OLAS to be used
  */
-export const approveOlasByOwner = ({ account, amount }: { account: Address; amount: bigint }) =>
-  new Promise((resolve, reject) => {
+export const approveOlasByOwner = async ({
+  account,
+  amount,
+}: {
+  account: Address;
+  amount: bigint;
+}) => {
+  try {
     const contract = getOlasContract();
     const spender = (VE_OLAS.addresses as Record<number, string>)[mainnet.id];
     const fn = contract.methods.approve(spender, amount).send({ from: account });
 
-    sendTransaction(fn, account, {
+    const response = await sendTransaction(fn, account, {
       supportedChains: SUPPORTED_CHAINS,
       rpcUrls: RPC_URLS,
-    })
-      .then((response) => {
-        resolve(response);
-      })
-      .catch((e) => {
-        window.console.log('Error occurred on approving OLAS by owner');
-        reject(e);
-      });
-  });
+    });
+
+    return response;
+  } catch (error) {
+    window.console.log('Error occurred on approving OLAS by owner');
+    throw error;
+  }
+};
 
 /**
  * Check if `Approve` button can be clicked; `allowance` should be greater than or equal to the amount
  */
-export const hasSufficientTokensRequest = ({
+export const hasSufficientTokensRequest = async ({
   account,
   amount,
 }: {
   account: Address;
   amount: number;
-}) =>
-  new Promise((resolve, reject) => {
+}) => {
+  try {
     const contract = getOlasContract();
     const spender = (VE_OLAS.addresses as Record<number, string>)[mainnet.id];
 
-    contract.methods
-      .allowance(account, spender)
-      .call()
-      .then((response: bigint) => {
-        const responseInBg = ethers.toBigInt(response);
+    const response = await contract.methods.allowance(account, spender).call();
+    const responseInBg = ethers.toBigInt(response);
 
-        // Resolve false if the response amount is zero
-        if (responseInBg === ethers.toBigInt(0)) {
-          resolve(false);
-          return;
-        }
+    // Resolve false if the response amount is zero
+    if (responseInBg === ethers.toBigInt(0)) {
+      return false;
+    }
 
-        const amountBN = ethers.parseUnits(`${amount}`);
+    const amountBN = parseUnits(`${amount}`, 18);
 
-        // check if the allowance is greater than or equal to the amount input
-        resolve(responseInBg >= amountBN);
-      })
-      .catch((e: Error) => {
-        window.console.log('Error occurred on calling `allowance` method');
-        reject(e);
-      });
-  });
+    // Check if the allowance is greater than or equal to the amount input
+    return responseInBg >= amountBN;
+  } catch (error) {
+    window.console.log('Error occurred on calling `allowance` method');
+    throw error;
+  }
+};
 
 /**
  * Create lock for veOLAS

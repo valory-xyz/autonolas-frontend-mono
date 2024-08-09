@@ -1,25 +1,32 @@
 import { Button, Col, Row } from 'antd';
 import { useState } from 'react';
 
-import { notifySuccess } from '@autonolas/frontend-library';
-
-import { notifyError } from 'libs/util-functions/src';
+import { notifyError, notifySuccess } from 'libs/util-functions/src';
 
 import { withdrawVeolasRequest } from 'common-util/functions';
 import { useFetchBalances } from 'hooks/index';
 
-import { useVeolasComponents } from './useVeolasComponents';
+import {
+  BalanceComponent,
+  LockedAmountComponent,
+  UnlockTimeComponent,
+  UnlockedAmountComponent,
+  VotingPercentComponent,
+  VotingPowerComponent,
+} from './VeOlasComponents';
 
 export const VeOlasManage = () => {
-  const { isLoading, canWithdrawVeolas, account, refetch } = useFetchBalances();
   const {
-    getBalanceComponent,
-    getVotingPowerComponent,
-    getVotingPercentComponent,
-    getLockedAmountComponent,
-    getUnlockTimeComponent,
-    getUnlockedAmountComponent,
-  } = useVeolasComponents();
+    isLoading,
+    olasBalance,
+    votingPower,
+    totalSupply,
+    veOlasBalance,
+    lockedEnd,
+    canWithdrawVeolas,
+    account,
+    refetch,
+  } = useFetchBalances();
 
   const [isWithdrawLoading, setIsWithdrawLoading] = useState(false);
 
@@ -43,16 +50,28 @@ export const VeOlasManage = () => {
   return (
     <>
       <Row>
-        <Col span={8}>{getBalanceComponent()}</Col>
-
-        <Col span={8}>{getVotingPowerComponent()}</Col>
-
-        <Col span={8}>{getVotingPercentComponent()}</Col>
-
-        <Col span={8}>{getLockedAmountComponent()}</Col>
+        <Col span={8}>
+          <BalanceComponent isLoading={isLoading} olasBalance={olasBalance} />
+        </Col>
 
         <Col span={8}>
-          {getUnlockTimeComponent()}
+          <VotingPowerComponent isLoading={isLoading} votingPower={votingPower} />
+        </Col>
+
+        <Col span={8}>
+          <VotingPercentComponent
+            isLoading={isLoading}
+            votingPower={votingPower}
+            totalSupply={totalSupply}
+          />
+        </Col>
+
+        <Col span={8}>
+          <LockedAmountComponent isLoading={isLoading} veOlasBalance={veOlasBalance} />
+        </Col>
+
+        <Col span={8}>
+          <UnlockTimeComponent isLoading={isLoading} lockedEnd={lockedEnd} />
 
           {!isLoading && canWithdrawVeolas && (
             <Button htmlType="submit" onClick={onWithdraw} loading={isWithdrawLoading}>
@@ -61,7 +80,13 @@ export const VeOlasManage = () => {
           )}
         </Col>
 
-        <Col span={8}>{getUnlockedAmountComponent()}</Col>
+        <Col span={8}>
+          <UnlockedAmountComponent
+            isLoading={isLoading}
+            veOlasBalance={veOlasBalance}
+            canWithdrawVeolas={canWithdrawVeolas}
+          />
+        </Col>
       </Row>
     </>
   );

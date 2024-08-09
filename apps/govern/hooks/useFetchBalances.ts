@@ -84,10 +84,10 @@ export const useFetchBalances = () => {
       await refetchVotingPower();
       await refetchBlock();
       await refetchBalances();
+      return Promise.resolve();
     } catch (error) {
       return Promise.reject(error);
     }
-    return Promise.resolve();
   };
 
   return {

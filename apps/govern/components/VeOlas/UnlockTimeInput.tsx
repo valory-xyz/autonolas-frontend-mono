@@ -1,6 +1,5 @@
 import { DatePicker, DatePickerProps, Form, Typography } from 'antd';
 import range from 'lodash/range';
-import React from 'react';
 
 const { Text } = Typography;
 

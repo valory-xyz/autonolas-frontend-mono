@@ -42,27 +42,33 @@ export const CreateLockModal = ({ isModalVisible, setIsModalVisible }: CreateLoc
     setIsModalVisible(false);
   };
 
-  const onCreateLock = async () => {
+  const handleCreateLock = async () => {
     if (!account) return;
 
-    setIsLoading(true);
+    try {
+      setIsLoading(true);
 
-    const txHash = await createLockRequest({
-      amount: ethers.parseUnits(`${amountInEth}`, 18).toString(),
-      unlockTime: getRemainingTimeInSeconds(unlockTime),
-      account,
-    });
+      const txHash = await createLockRequest({
+        amount: ethers.parseUnits(`${amountInEth}`, 18).toString(),
+        unlockTime: getRemainingTimeInSeconds(unlockTime),
+        account,
+      });
 
-    notifySuccess('Lock created successfully!', `Transaction Hash: ${txHash}`);
+      notifySuccess('Lock created successfully!', `Transaction Hash: ${txHash}`);
 
-    // once the lock is created, refetch the data
-    refetch();
+      // once the lock is created, refetch the data
+      refetch();
 
-    handleClose();
-    setIsLoading(false);
+      handleClose();
+    } catch (error) {
+      window.console.error(error);
+      notifyError();
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const onFinish = async ({ amount }: FormValues) => {
+  const handleFinish = async ({ amount }: FormValues) => {
     if (!account) return;
 
     try {
@@ -79,7 +85,7 @@ export const CreateLockModal = ({ isModalVisible, setIsModalVisible }: CreateLoc
         return;
       }
 
-      await onCreateLock();
+      await handleCreateLock();
     } catch (error) {
       window.console.error(error);
       notifyError();
@@ -104,7 +110,7 @@ export const CreateLockModal = ({ isModalVisible, setIsModalVisible }: CreateLoc
         autoComplete="off"
         name="create-lock-form"
         requiredMark={false}
-        onFinish={onFinish}
+        onFinish={handleFinish}
       >
         <div className="mb-24">
           <OlasAmountInput olasBalance={olasBalance} />
@@ -159,7 +165,7 @@ export const CreateLockModal = ({ isModalVisible, setIsModalVisible }: CreateLoc
         isModalVisible={isApproveModalVisible}
         setIsModalVisible={setIsApproveModalVisible}
         amountInEth={amountInEth}
-        onApprove={onCreateLock}
+        onApprove={handleCreateLock}
       />
     </Modal>
   );

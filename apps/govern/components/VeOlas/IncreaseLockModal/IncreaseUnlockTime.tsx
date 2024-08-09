@@ -12,7 +12,7 @@ import { useFetchBalances } from 'hooks/useFetchBalances';
 
 import { ProjectedVeOlas } from '../ProjectedVeOlas';
 import { UnlockTimeInput } from '../UnlockTimeInput';
-import { useVeolasComponents } from '../useVeolasComponents';
+import { UnlockTimeComponent } from '../VeOlasComponents';
 
 type IncreaseUnlockTimeProps = {
   closeModal: () => void;
@@ -24,14 +24,20 @@ type FormValues = {
 
 export const IncreaseUnlockTime = ({ closeModal }: IncreaseUnlockTimeProps) => {
   const [form] = Form.useForm();
-  const { account, lockedEnd, olasBalance, veOlasBalance, refetch } = useFetchBalances();
-  const { getUnlockTimeComponent } = useVeolasComponents();
+  const {
+    isLoading: isBalancesLoading,
+    account,
+    lockedEnd,
+    olasBalance,
+    veOlasBalance,
+    refetch,
+  } = useFetchBalances();
 
   const [isLoading, setIsLoading] = useState(false);
 
   const unlockTime = dateInMs(Form.useWatch('unlockTime', form));
 
-  const onFinish = async ({ unlockTime }: FormValues) => {
+  const handleFinish = async ({ unlockTime }: FormValues) => {
     if (!account) return;
     if (!veOlasBalance) return;
 
@@ -71,9 +77,9 @@ export const IncreaseUnlockTime = ({ closeModal }: IncreaseUnlockTimeProps) => {
       autoComplete="off"
       name="increase-unlock-time-form"
       requiredMark={false}
-      onFinish={onFinish}
+      onFinish={handleFinish}
     >
-      {getUnlockTimeComponent()}
+      <UnlockTimeComponent isLoading={isBalancesLoading} lockedEnd={lockedEnd} />
 
       <Divider className="mt-8" />
 
