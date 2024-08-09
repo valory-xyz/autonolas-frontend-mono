@@ -178,12 +178,8 @@ export const Deposit = ({
           autoComplete="off"
           className="mt-16"
         >
-          <Tag
-            color={COLOR.PRIMARY}
-            className="deposit-tag"
-            style={{  color: COLOR.WHITE, }}
-          >
-            <Text>{`Bonding Product ID: ${productId}`}</Text>
+          <Tag color={COLOR.PRIMARY} className="deposit-tag mb-12">
+            {`Bonding Product ID: ${productId}`}
           </Tag>
 
           <Form.Item
@@ -296,9 +292,12 @@ Deposit.propTypes = {
   productToken: PropTypes.string,
   productSupply: PropTypes.oneOfType([
     PropTypes.instanceOf(PropTypes.string),
-    PropTypes.instanceOf(BigNumber),
+    PropTypes.instanceOf(BigInt),
   ]),
-  productLpPriceAfterDiscount: PropTypes.shape({}),
+  productLpPriceAfterDiscount: PropTypes.oneOfType([
+    PropTypes.instanceOf(PropTypes.string),
+    PropTypes.instanceOf(BigInt),
+  ]),
   closeModal: PropTypes.func,
   getProducts: PropTypes.func,
 };
