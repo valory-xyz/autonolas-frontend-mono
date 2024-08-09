@@ -29,7 +29,6 @@ export const useDeposit = () => {
 
   const getLpBalanceRequest = useCallback(
     async ({ token }) => {
-      console.log('token', token);
       const contract = getUniswapV2PairContract(token);
       const response = await contract.methods.balanceOf(account).call();
       return response.toString();
@@ -57,9 +56,7 @@ export const useDeposit = () => {
   const depositRequest = useCallback(
     async ({ productId, tokenAmount }) => {
       const contract = getDepositoryContract();
-      const fnDeposit = contract.methods.deposit(productId, tokenAmount);
-      const estimatedGas = await getEstimatedGasLimit(fnDeposit, account);
-      const fn = fnDeposit.send({ from: account, gasLimit: estimatedGas });
+      const fn = contract.methods.deposit(productId, tokenAmount).send({ from: account });
 
       const response = await sendTransaction(fn, account);
       return response?.transactionHash;
