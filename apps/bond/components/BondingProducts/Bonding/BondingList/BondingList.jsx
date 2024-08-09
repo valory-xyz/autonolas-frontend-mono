@@ -33,7 +33,7 @@ const Container = styled.div`
   }
 `;
 
-const Loader = () => <Skeleton.Button size="small" style={{ width: '100%' }} active block />;
+const Loader = () => <Skeleton.Button size="small" className="full-width" active block />;
 
 const isCurrentPriceLpZero = (currentPrice) => Number(currentPrice) === 0;
 
@@ -90,14 +90,14 @@ const getColumns = (onClick, isActive, acc, depositoryAddress, hideEmptyProducts
       dataIndex: 'fullCurrentPriceLp',
       key: 'fullCurrentPriceLp',
       width: 140,
-      render: (x, details) => {
-        if (isCurrentPriceLpZero(x)) {
+      render: (currentPriceLp, details) => {
+        if (isCurrentPriceLpZero(currentPriceLp)) {
           return <Loader />;
         }
 
         return (
           <a href={details.currentPriceLpLink} rel="noopener noreferrer" target="_blank">
-            {x}
+            {currentPriceLp}
           </a>
         );
       },

@@ -1,7 +1,7 @@
 export const DISPENSER = {
   contractName: 'Dispenser',
   addresses: {
-    1: '0xeED0000fE94d7cfeF4Dc0CA86a223f0F603A61B8',
+    1: '0x5650300fCBab43A0D7D02F8Cb5d0f039402593f0',
     5: '0xeDd71796B90eaCc56B074C39BAC90ED2Ca6D93Ee',
   },
   abi: [
