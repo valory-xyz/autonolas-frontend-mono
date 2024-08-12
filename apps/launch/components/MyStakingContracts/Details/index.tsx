@@ -12,8 +12,7 @@ import { URL } from 'common-util/constants/urls';
 import { useAppSelector } from 'store/index';
 import { MyStakingContract } from 'types/index';
 
-import { ContractConfiguration } from './ContractConfiguration';
-import { ColFlexContainer } from './helpers';
+import { ColFlexContainer, ContractConfiguration } from './ContractConfiguration';
 
 const { Paragraph, Text, Title } = Typography;
 

@@ -55,7 +55,7 @@ export const FieldConfig: Record<keyof FormValues, { name: string; desc?: string
         </span>
 
         <span>
-          Operators need to stake:
+          Operators need to stake:&nbsp;
           <Text strong>this × the number of agent instances + 1.</Text>
         </span>
       </Flex>
@@ -70,7 +70,7 @@ export const FieldConfig: Record<keyof FormValues, { name: string; desc?: string
     desc: 'Maximum duration of inactivity permitted for the agent before facing eviction.',
   },
   livenessPeriod: {
-    name: 'Liveness period (sec)',
+    name: 'Liveness period, seconds',
     desc: (
       <Flex gap={8} vertical>
         <span>
@@ -83,7 +83,7 @@ export const FieldConfig: Record<keyof FormValues, { name: string; desc?: string
     ),
   },
   timeForEmissions: {
-    name: 'Time for emissions (sec)',
+    name: 'Time for emissions, seconds',
     desc: (
       <Flex gap={8} vertical>
         <span>

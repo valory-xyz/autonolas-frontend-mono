@@ -1,4 +1,4 @@
-import { Row, Skeleton, Typography } from 'antd';
+import { Col, Flex, Row, Skeleton, Typography } from 'antd';
 import { FC, ReactNode, useMemo } from 'react';
 import { Address } from 'viem';
 
@@ -17,7 +17,9 @@ import {
   useGetMinimumStakingDeposit,
   useGetMinimumStakingDuration,
   useGetMultisigThreshold,
+  useMaxNumServices,
   useNumberOfAgentInstances,
+  useRewardsPerSecond,
   useTimeForEmissions,
 } from 'hooks/useGetStakingConstants';
 import { useAppSelector } from 'store/index';
@@ -37,8 +39,6 @@ import {
   ServiceConfigHashLabel,
   TimeForEmissionsLabel,
 } from '../FieldLabels';
-import { ColFlexContainer } from './helpers';
-import { useMaxNumServices, useRewardsPerSecond } from './hooks';
 
 const { Text } = Typography;
 
@@ -70,7 +70,7 @@ const MaximumStakedAgents: FC<{ address: Address }> = ({ address }) => {
 
 const Rewards: FC<{ address: Address }> = ({ address }) => {
   const { data, isLoading } = useRewardsPerSecond({ address });
-  return <ShowContent isLoading={isLoading} data={`${data} OLAS` || NA} />;
+  return <ShowContent isLoading={isLoading} data={data || NA} />;
 };
 
 const MinimumStakingDeposit: FC<{ address: Address }> = ({ address }) => {
@@ -107,7 +107,7 @@ const MaximumInactivityPeriods: FC<{ address: Address }> = ({ address }) => {
 
 const LivenessPeriod: FC<{ address: Address }> = ({ address }) => {
   const { data, isLoading } = useGetLivenessPeriod({ address });
-  return <ShowContent isLoading={isLoading} data={data ? `${data} seconds` : NA} />;
+  return <ShowContent isLoading={isLoading} data={data || NA} />;
 };
 
 const TimeForEmissions: FC<{ address: Address }> = ({ address }) => {
@@ -177,6 +177,19 @@ const ActivityCheckerAddress: FC<{ address: Address }> = ({ address }) => {
       isLoading={isLoading}
       data={<ShowNetworkAddress address={checkerAddress as Address} />}
     />
+  );
+};
+
+type ColFlexContainerProps = { text: string | ReactNode; content: ReactNode };
+
+export const ColFlexContainer = ({ text, content, ...rest }: ColFlexContainerProps) => {
+  return (
+    <Col span={12} {...rest}>
+      <Flex vertical gap={4} align="flex-start">
+        {typeof text === 'string' ? <Text type="secondary">{text}</Text> : text}
+        {content}
+      </Flex>
+    </Col>
   );
 };
 
