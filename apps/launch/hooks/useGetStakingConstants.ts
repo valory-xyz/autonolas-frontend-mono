@@ -36,6 +36,19 @@ const useStakingContractConstant = <T>({
   });
 };
 
+export const useMaxNumServices = ({ address }: { address: Address }) =>
+  useStakingContractConstant<string>({
+    address,
+    name: 'maxNumServices',
+  });
+
+export const useRewardsPerSecond = ({ address }: { address: Address }) =>
+  useStakingContractConstant({
+    address,
+    name: 'rewardsPerSecond',
+    select: (data) => (typeof data === 'bigint' ? `${Number(formatEther(data))}` : '0'),
+  });
+
 export const useGetMinimumStakingDeposit = ({ address }: { address: Address }) =>
   useStakingContractConstant({
     address,

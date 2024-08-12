@@ -1,3 +1,3 @@
-import { ContractPage } from 'components/Contract/Contract';
+import { ContractPage } from 'components/Contract';
 
 export default ContractPage;

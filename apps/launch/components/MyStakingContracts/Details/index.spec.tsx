@@ -43,9 +43,6 @@ jest.mock('hooks/useGetStakingConstants', () => ({
   useNumberOfAgentInstances: jest.fn().mockReturnValue({ data: '1' }),
   useGetMultisigThreshold: jest.fn().mockReturnValue({ data: '1' }),
   useGetMinimumStakingDeposit: jest.fn().mockReturnValue({ data: '20' }),
-}));
-
-jest.mock('./hooks', () => ({
   useMaxNumServices: jest.fn().mockReturnValue({ data: 200 }),
   useRewardsPerSecond: jest.fn().mockReturnValue({ data: 0.003 }),
 }));
@@ -117,7 +114,7 @@ describe('<Details />', () => {
     {
       testId: 'rewards-per-second',
       title: 'Rewards, OLAS per second',
-      value: '0.003 OLAS',
+      value: '0.003',
     },
     {
       testId: 'minimum-staking-deposit',
@@ -136,12 +133,12 @@ describe('<Details />', () => {
     },
     {
       testId: 'liveness-period',
-      title: 'Liveness period (sec)',
-      value: '86400 seconds',
+      title: 'Liveness period, seconds',
+      value: '86400',
     },
     {
       testId: 'time-for-emissions',
-      title: 'Time for emissions (sec)',
+      title: 'Time for emissions, seconds',
       value: '2592000',
     },
     {
