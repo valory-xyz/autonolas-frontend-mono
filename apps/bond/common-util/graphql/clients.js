@@ -3,7 +3,6 @@ import {
   arbitrum,
   base,
   gnosis,
-  goerli,
   mainnet,
   optimism,
   polygon,
@@ -27,10 +26,6 @@ export const AUTONOLAS_GRAPH_CLIENTS = {
 export const BALANCER_GRAPH_CLIENTS = {
   [mainnet.id]: new GraphQLClient(
     process.env.NEXT_PUBLIC_MAINNET_BALANCER_URL,
-    requestConfig,
-  ),
-  [goerli.id]: new GraphQLClient(
-    'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-goerli-v2',
     requestConfig,
   ),
   [optimism.id]: new GraphQLClient(
