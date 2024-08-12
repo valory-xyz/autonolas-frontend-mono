@@ -14,11 +14,11 @@ const { Title } = Typography;
 const PageHeader = styled.div`
   align-items: center;
   margin-bottom: 12px;
-  display: ${(props) => (props.isMobile ? 'block' : 'flex')};
+  display: ${(props) => (props.is_mobile === 'true' ? 'block' : 'flex')};
 `;
 
 const StyledDivider = styled(Divider)`
-  margin: ${(props) => (props.isMobile ? '12px 0 ' : '0 12px')};
+  margin: ${(props) => (props.is_mobile === 'true' ? '12px 0 ' : '0 12px')};
 `;
 
 const SwitchContainer = styled.div`
@@ -26,10 +26,16 @@ const SwitchContainer = styled.div`
   display: flex;
 `;
 
+const manageSolanaLiquidityBtnCss = {
+  width: '160px',
+  whiteSpace: 'normal',
+  height: 'auto',
+};
+
 const ResponsiveDivider = () => {
   const { isMobile } = useScreen();
 
-  return <StyledDivider isMobile={isMobile} type={isMobile ? 'horizontal' : 'vertical'} />;
+  return <StyledDivider is_mobile={`${isMobile}`} type={isMobile ? 'horizontal' : 'vertical'} />;
 };
 
 export const BondingProducts = () => {
@@ -50,9 +56,9 @@ export const BondingProducts = () => {
 
   return (
     <>
-      <PageHeader isMobile={isMobile}>
+      <PageHeader is_mobile={`${isMobile}`}>
         <Flex justify="space-between" align="center" style={{ width: '100%' }}>
-          <Flex align="center">
+          <Flex align="center" vertical={isMobile}>
             <Title level={4} className="mb-0 mt-0">
               Bonding Products
             </Title>
@@ -80,6 +86,7 @@ export const BondingProducts = () => {
               type="primary"
               ghost
               onClick={() => router.push('manage-solana-liquidity')}
+              style={isMobile ? manageSolanaLiquidityBtnCss : undefined}
             >
               Manage Solana Liquidity
             </Button>

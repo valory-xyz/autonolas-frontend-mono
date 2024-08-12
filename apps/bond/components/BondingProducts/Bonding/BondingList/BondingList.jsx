@@ -90,14 +90,14 @@ const getColumns = (onClick, isActive, acc, depositoryAddress, hideEmptyProducts
       dataIndex: 'fullCurrentPriceLp',
       key: 'fullCurrentPriceLp',
       width: 140,
-      render: (currentPriceLp, details) => {
-        if (isCurrentPriceLpZero(currentPriceLp)) {
+      render: (text, details) => {
+        if (isCurrentPriceLpZero(text)) {
           return <Loader />;
         }
 
         return (
           <a href={details.currentPriceLpLink} rel="noopener noreferrer" target="_blank">
-            {currentPriceLp}
+            {text}
           </a>
         );
       },
@@ -338,6 +338,7 @@ export const BondingList = ({ bondingProgramType, hideEmptyProducts }) => {
             productDetails?.discount,
           ).toString()}
           productSupply={productDetails?.supply}
+          productLpTokenName={productDetails?.lpTokenName}
           getProducts={refetch}
           closeModal={handleModalClose}
         />

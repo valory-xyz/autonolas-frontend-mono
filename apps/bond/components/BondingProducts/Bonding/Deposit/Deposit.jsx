@@ -28,6 +28,7 @@ const fullWidth = { width: '100%' };
 export const Deposit = ({
   productId,
   productToken,
+  productLpTokenName,
   productLpPriceAfterDiscount,
   productSupply,
   getProducts,
@@ -238,12 +239,12 @@ export const Deposit = ({
       {isApproveModalVisible && (
         <Modal
           title="Approve OLAS"
-          visible={isApproveModalVisible}
+          open={isApproveModalVisible}
           footer={null}
           onCancel={() => setIsApproveModalVisible(false)}
         >
           <Alert
-            message="Before depositing to the bonding product, an approval for OLAS is required. Please approve OLAS to proceed."
+            message={`Before depositing to the bonding product, an approval for ${productLpTokenName} is required. Please approve ${productLpTokenName} to proceed.`}
             type="warning"
           />
 
@@ -291,6 +292,7 @@ export const Deposit = ({
 Deposit.propTypes = {
   productId: PropTypes.string,
   productToken: PropTypes.string,
+  productLpTokenName: PropTypes.string,
   productSupply: PropTypes.oneOfType([
     PropTypes.instanceOf(PropTypes.string),
     PropTypes.instanceOf(BigInt),
@@ -306,6 +308,7 @@ Deposit.propTypes = {
 Deposit.defaultProps = {
   productId: undefined,
   productToken: null,
+  productLpTokenName: null,
   productLpPriceAfterDiscount: null,
   productSupply: null,
   closeModal: () => {},
