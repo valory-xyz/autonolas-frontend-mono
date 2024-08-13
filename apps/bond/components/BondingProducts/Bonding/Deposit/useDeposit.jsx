@@ -45,7 +45,7 @@ export const useDeposit = () => {
       const treasuryAddress = ADDRESSES[chainId].treasury;
       const fnApprove = contract.methods.approve(treasuryAddress, amountToApprove);
       const estimatedGas = await getEstimatedGasLimit(fnApprove, account);
-      const fn = await fnApprove.send({ from: account, gasLimit: estimatedGas });
+      const fn = fnApprove.send({ from: account, gasLimit: estimatedGas });
 
       const response = await sendTransaction(fn, account);
       return response;

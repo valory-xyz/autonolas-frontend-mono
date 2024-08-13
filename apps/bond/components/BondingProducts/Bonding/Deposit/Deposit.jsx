@@ -293,12 +293,9 @@ Deposit.propTypes = {
   productId: PropTypes.string,
   productToken: PropTypes.string,
   productLpTokenName: PropTypes.string,
-  productSupply: PropTypes.oneOfType([
-    PropTypes.instanceOf(PropTypes.string),
-    PropTypes.instanceOf(BigInt),
-  ]),
+  productSupply: PropTypes.oneOfType([PropTypes.string, PropTypes.instanceOf(BigInt)]),
   productLpPriceAfterDiscount: PropTypes.oneOfType([
-    PropTypes.instanceOf(PropTypes.string),
+    PropTypes.string,
     PropTypes.instanceOf(BigInt),
   ]),
   closeModal: PropTypes.func,
