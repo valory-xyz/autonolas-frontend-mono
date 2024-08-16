@@ -31,7 +31,7 @@ export const useDeposit = () => {
     async ({ token }) => {
       const contract = getUniswapV2PairContract(token);
       const response = await contract.methods.balanceOf(account).call();
-      return response.toString();
+      return response;
     },
     [account],
   );

@@ -10,7 +10,7 @@ import { getCommaSeparatedNumber } from '@autonolas/frontend-library';
 import { COLOR } from 'libs/ui-theme/src';
 import { notifyError, notifySuccess } from 'libs/util-functions/src';
 
-import { ONE_ETH_IN_STRING } from 'common-util/constants/numbers';
+import { ONE_ETH, ONE_ETH_IN_STRING } from 'common-util/constants/numbers';
 import {
   notifyCustomErrors,
   parseToEth,
@@ -34,11 +34,19 @@ export const Deposit = ({
   getProducts,
   closeModal,
 }) => {
+  console.log({
+    productId,
+    productToken,
+    productLpTokenName,
+    productLpPriceAfterDiscount,
+    productSupply,
+  });
+
   const { account } = useHelpers();
   const [form] = Form.useForm();
   const [isLoading, setIsLoading] = useState(false);
   const [isApproveModalVisible, setIsApproveModalVisible] = useState(false);
-  const [lpBalance, setLpBalance] = useState(0);
+  const [lpBalance, setLpBalance] = useState(0n);
 
   const isSvmProduct = isSvmLpAddress(productToken);
 
@@ -128,15 +136,13 @@ export const Deposit = ({
   };
 
   const getRemainingLpSupplyInEth = () => {
-    const productSupplyInWei = new BigNumber(productSupply || '0');
-    const lpBalanceInBg = new BigNumber(lpBalance);
-
-    const remainingSupply = productSupplyInWei
-      .multipliedBy(ONE_ETH_IN_STRING)
-      .dividedBy(productLpPriceAfterDiscountInBg);
-
-    const remainingSupplyInWei = remainingSupply.lt(lpBalanceInBg) ? remainingSupply : lpBalance;
-    return parseToEth(remainingSupplyInWei);
+    const totalProductSupplyInWei = productSupply || 0n;
+    const lpBalanceInWei = BigInt(lpBalance);
+    const maxRedeemableSupply =
+      (totalProductSupplyInWei * ONE_ETH) / BigInt(productLpPriceAfterDiscount);
+    const remainingLPSupply =
+      maxRedeemableSupply < lpBalanceInWei ? maxRedeemableSupply : lpBalanceInWei;
+    return parseToEth(remainingLPSupply);
   };
 
   const remainingLpSupplyInEth = getRemainingLpSupplyInEth();
@@ -164,9 +170,7 @@ export const Deposit = ({
         open
         title="Bond LP tokens for OLAS"
         okText="Bond"
-        okButtonProps={{
-          disabled: !account || lpBalance === new BigNumber(0),
-        }}
+        okButtonProps={{ disabled: !account || lpBalance === 0n }}
         cancelText="Cancel"
         onCancel={closeModal}
         onOk={onCreate}
