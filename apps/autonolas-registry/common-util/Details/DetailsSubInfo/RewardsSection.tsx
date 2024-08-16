@@ -1,23 +1,20 @@
-import { Col, Flex, Row } from 'antd';
-import { FC, useEffect, useState } from 'react';
+import { Button, Flex, Table, Typography } from 'antd';
+import { ColumnsType } from 'antd/es/table';
+import { FC, useCallback, useEffect, useMemo, useState } from 'react';
 import { Address } from 'viem';
 
 import { getPendingIncentives, useClaimableIncentives } from 'libs/common-contract-functions/src';
 import { UNICODE_SYMBOLS } from 'libs/util-constants/src/lib/symbols';
 import { TOKENOMICS } from 'libs/util-contracts/src';
+import { notifyError, notifySuccess } from 'libs/util-functions/src';
 
 import { getEthersProviderForEthereum, getTokenomicsEthersContract } from 'common-util/Contracts';
+import { claimOwnerIncentivesRequest } from 'common-util/functions/requests';
+import { useHelpers } from 'common-util/hooks';
 
-import { RewardsStatistic } from '../styles';
-import { useTokenomicsUnitType } from './hooks';
+import { getTokenomicsUnitType } from './utils';
 
-type RewardsColumnProps = { title: string; statistic: null | string; loading?: boolean };
-
-const RewardColumn = ({ title, statistic, loading }: RewardsColumnProps) => (
-  <Col span={24} xl={12}>
-    <RewardsStatistic title={title} value={statistic || '--'} loading={!!loading} />
-  </Col>
-);
+const { Text } = Typography;
 
 type RewardsSectionProps = {
   ownerAddress: Address;
@@ -26,18 +23,66 @@ type RewardsSectionProps = {
   dataTestId: string;
 };
 
+type DataSourceItem = {
+  id: 'claimable' | 'pending';
+  label: string;
+  donations: string;
+  topUps: string;
+};
+const getColumns = (
+  canClaim: boolean,
+  handleClaim: () => void,
+  isClaimLoading: boolean,
+): ColumnsType<DataSourceItem> => [
+  {
+    title: 'Type',
+    key: 'type',
+    dataIndex: 'label',
+    render: (label, { id }) => (
+      <Flex gap={16} align="center">
+        <Text>{label}</Text>
+        {id === 'claimable' && canClaim && (
+          <Button type="primary" onClick={handleClaim} loading={isClaimLoading}>
+            Claim
+          </Button>
+        )}
+      </Flex>
+    ),
+    width: '40%',
+  },
+  {
+    title: 'Donations',
+    key: 'donations',
+    dataIndex: 'donations',
+    render: (donations) => <Text>{`${donations} ETH`}</Text>,
+  },
+  {
+    title: 'Top Ups',
+    key: 'topUps',
+    dataIndex: 'topUps',
+    render: (topUps) => <Text>{`${topUps} OLAS`}</Text>,
+  },
+];
+
 export const RewardsSection: FC<RewardsSectionProps> = ({ ownerAddress, id, type, dataTestId }) => {
+  const { account } = useHelpers();
+
+  const [isClaimLoading, setIsClaimLoading] = useState(false);
   const [isPendingIncentivesLoading, setIsPendingIncentivesLoading] = useState<boolean>(true);
   const [pendingIncentives, setPendingIncentives] = useState<{
-    reward: string;
-    topUp: string;
+    pendingReward: string;
+    pendingTopUp: string;
   } | null>(null);
 
-  const tokenomicsUnitType = useTokenomicsUnitType(type);
+  const tokenomicsUnitType = getTokenomicsUnitType(type);
+
   const {
-    isFetching,
     reward: claimableReward,
-    topUp: claimableTopup,
+    rewardEth: claimableRewardEth,
+    topUp: claimableTopUp,
+    topUpEth: claimableTopUpEth,
+    isFetching: isClaimableIncentivesLoading,
+    refetch,
   } = useClaimableIncentives(
     TOKENOMICS.addresses[1],
     TOKENOMICS.abi,
@@ -46,52 +91,99 @@ export const RewardsSection: FC<RewardsSectionProps> = ({ ownerAddress, id, type
     tokenomicsUnitType,
   );
 
-  useEffect(() => {
+  const fetchPendingIncentives = useCallback(async () => {
     const provider = getEthersProviderForEthereum();
     const contract = getTokenomicsEthersContract(TOKENOMICS.addresses[1]);
 
-    getPendingIncentives(provider, contract, `${tokenomicsUnitType}`, id)
-      .then((data) => setPendingIncentives(data))
-      .catch((error) => console.error(error))
-      .finally(() => setIsPendingIncentivesLoading(false));
-  }, [ownerAddress, id, tokenomicsUnitType]);
+    try {
+      const incentives = await getPendingIncentives({
+        provider,
+        contract,
+        unitType: `${tokenomicsUnitType}`,
+        unitId: id,
+      });
+      setPendingIncentives(incentives);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setIsPendingIncentivesLoading(false);
+    }
+  }, [tokenomicsUnitType, id]);
+
+  useEffect(() => {
+    fetchPendingIncentives();
+  }, [fetchPendingIncentives]);
+
+  const rewards = useMemo(() => {
+    if (isClaimableIncentivesLoading || isPendingIncentivesLoading) return [];
+    if (claimableReward == undefined || claimableTopUp === undefined || pendingIncentives === null)
+      return [];
+
+    return [
+      {
+        id: 'claimable',
+        label: 'Claimable',
+        donations: claimableReward,
+        topUps: claimableTopUp,
+      },
+      {
+        id: 'pending',
+        label: 'Pending, next epoch',
+        donations: pendingIncentives.pendingReward,
+        topUps: pendingIncentives.pendingTopUp,
+      },
+    ] as DataSourceItem[];
+  }, [
+    isClaimableIncentivesLoading,
+    isPendingIncentivesLoading,
+    claimableReward,
+    claimableTopUp,
+    pendingIncentives,
+  ]);
+
+  const canClaim = useMemo(() => {
+    if (account !== ownerAddress) return false;
+    if (claimableRewardEth === undefined || claimableTopUpEth === undefined) return false;
+
+    return claimableRewardEth > 0 || claimableTopUpEth > 0;
+  }, [account, ownerAddress, claimableRewardEth, claimableTopUpEth]);
+
+  const handleClaim = useCallback(async () => {
+    if (!account) return;
+    if (!canClaim) return;
+
+    try {
+      setIsClaimLoading(true);
+      const params = {
+        account: account as Address,
+        unitIds: [id],
+        unitTypes: [id],
+      };
+
+      await claimOwnerIncentivesRequest(params);
+      notifySuccess('Rewards claimed');
+      refetch();
+      fetchPendingIncentives();
+    } catch (error) {
+      notifyError();
+      console.error(error);
+    } finally {
+      setIsClaimLoading(false);
+    }
+  }, [account, id, canClaim, fetchPendingIncentives, refetch]);
 
   return (
     <Flex gap={16} vertical className="mt-12" data-testid={dataTestId}>
-      <Flex vertical gap={4}>
-        <Row>
-          <RewardColumn
-            title="Claimable Reward"
-            statistic={claimableReward ? `${claimableReward} ETH` : null}
-            loading={isFetching}
-          />
-          <RewardColumn
-            title="Claimable Top Up"
-            statistic={claimableTopup ? `${claimableTopup} OLAS` : null}
-          />
-        </Row>
-      </Flex>
-
-      <Flex vertical gap={12}>
-        <Row>
-          <RewardColumn
-            title="Pending Reward"
-            statistic={pendingIncentives ? `${pendingIncentives?.reward} ETH` : null}
-            loading={isPendingIncentivesLoading}
-          />
-          <RewardColumn
-            title="Pending Top Up"
-            statistic={pendingIncentives ? `${pendingIncentives?.topUp} OLAS` : null}
-            loading={isPendingIncentivesLoading}
-          />
-        </Row>
-
-        <Row>
-          <a href="https://tokenomics.olas.network/donate">
-            Make donation {UNICODE_SYMBOLS.EXTERNAL_LINK}
-          </a>
-        </Row>
-      </Flex>
+      <Table
+        columns={getColumns(canClaim, handleClaim, isClaimLoading)}
+        dataSource={rewards}
+        loading={isClaimableIncentivesLoading || isPendingIncentivesLoading}
+        pagination={false}
+        style={{ maxWidth: '550px' }}
+      />
+      <a href="https://tokenomics.olas.network/donate">
+        Make donation {UNICODE_SYMBOLS.EXTERNAL_LINK}
+      </a>
     </Flex>
   );
 };

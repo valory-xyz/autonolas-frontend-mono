@@ -27,7 +27,12 @@ export const useClaimableIncentives = (
       enabled: !!ownerAddress && !!id && isNumber(tokenomicsUnitType),
       select: (data) => {
         const [reward, topup] = data as [bigint, bigint];
-        return { reward: rewardsFormatter(reward, 4), topUp: rewardsFormatter(topup, 2) };
+        return {
+          reward: rewardsFormatter(reward, 4),
+          rewardEth: reward,
+          topUp: rewardsFormatter(topup, 2),
+          topUpEth: topup,
+        };
       },
       refetchOnWindowFocus: false,
     },

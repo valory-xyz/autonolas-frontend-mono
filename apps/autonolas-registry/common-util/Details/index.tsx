@@ -14,15 +14,16 @@ import { DetailsSubInfo } from './DetailsSubInfo';
 import { NftImage } from './NFTImage';
 import { DetailsTitle, Header } from './styles';
 import { useDetails } from './useDetails';
+import { Address } from 'viem';
 
 const { Text } = Typography;
 
 type DetailsProps = {
   id: string;
   type: NavTypesValues;
-  getDetails: (id: string) => Promise<GenericObject>; // TODO: Define the return type
-  getTokenUri?: (id: string) => Promise<string>;
-  getOwner?: (id: string) => Promise<string>;
+  getDetails: (id: string) => Promise<{ unitHash: Address, dependencies: string[]}>;
+  getTokenUri: (id: string) => Promise<string>;
+  getOwner: (id: string) => Promise<string>;
   handleUpdate?: () => void;
   handleHashUpdate?: () => void;
   navigateToDependency?: (id: string, type: NavTypesValues) => void;

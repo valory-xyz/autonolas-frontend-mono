@@ -1,20 +1,26 @@
+// TODO: provide all the rest types
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-nocheck
 import { PublicKey } from '@solana/web3.js';
-import { ethers } from 'ethers';
+import { Contract, ethers } from 'ethers';
 import { isString } from 'lodash';
+import { Address } from 'viem';
 
-import {
-  getChainIdOrDefaultToMainnet as getChainIdOrDefaultToMainnetFn,
-  getIsValidChainId as getIsValidChainIdFn,
-  isValidAddress,
-  notifyError,
-  notifyWarning,
-  sendTransaction as sendTransactionFn,
-} from '@autonolas/frontend-library';
+
+
+import { getChainIdOrDefaultToMainnet as getChainIdOrDefaultToMainnetFn, getIsValidChainId as getIsValidChainIdFn, isValidAddress, notifyError, notifyWarning } from '@autonolas/frontend-library';
+
+
+
+import { sendTransaction as sendTransactionFn } from 'libs/util-functions/src';
+
+
 
 import { VM_TYPE } from '../../util/constants';
 import { RPC_URLS } from '../Contracts';
 import { SUPPORTED_CHAINS } from '../Login';
 import { EVM_SUPPORTED_CHAINS, SVM_SUPPORTED_CHAINS } from '../Login/config';
+
 
 export const getModalProvider = () => window?.MODAL_PROVIDER;
 
@@ -83,9 +89,10 @@ export const getEthersProvider = () => {
   return new ethers.FallbackProvider([provider]);
 };
 
-export const getIsValidChainId = (chainId) => getIsValidChainIdFn(SUPPORTED_CHAINS, chainId);
+export const getIsValidChainId = (chainId: string | number) =>
+  getIsValidChainIdFn(SUPPORTED_CHAINS, chainId);
 
-export const getChainIdOrDefaultToMainnet = (chainId) => {
+export const getChainIdOrDefaultToMainnet = (chainId: string | number) => {
   const x = getChainIdOrDefaultToMainnetFn(SUPPORTED_CHAINS, chainId);
   return x;
 };
@@ -129,7 +136,11 @@ const isMethodsBuilderInstance = (builderIns, registryAddress) => {
  * @param {string} extra.registryAddress - The address of the registry contract.
  *
  */
-export const sendTransaction = (method, account, extra) => {
+export const sendTransaction = (
+  method: Contract,
+  account: Address,
+  extra?: { vmType: string; registryAddress: string },
+) => {
   const { vmType, registryAddress } = extra || {};
   if (vmType === VM_TYPE.SVM) {
     // Check if something resembling an SVM method is being passed
