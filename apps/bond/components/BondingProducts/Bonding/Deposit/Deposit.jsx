@@ -3,7 +3,7 @@ import BigNumber from 'bignumber.js';
 import { ethers } from 'ethers';
 import { isNil } from 'lodash';
 import PropTypes from 'prop-types';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { getCommaSeparatedNumber } from '@autonolas/frontend-library';
 
@@ -34,24 +34,12 @@ export const Deposit = ({
   getProducts,
   closeModal,
 }) => {
-  console.log({
-    productId,
-    productToken,
-    productLpTokenName,
-    productLpPriceAfterDiscount,
-    productSupply,
-  });
-
   const { account } = useHelpers();
   const [form] = Form.useForm();
   const [isLoading, setIsLoading] = useState(false);
   const [isApproveModalVisible, setIsApproveModalVisible] = useState(false);
   const [lpBalance, setLpBalance] = useState(0n);
-
   const isSvmProduct = isSvmLpAddress(productToken);
-
-  // convert to BigNumber of bignumber.js and not ethers
-  const productLpPriceAfterDiscountInBg = new BigNumber(productLpPriceAfterDiscount);
 
   const { getLpBalanceRequest, depositRequest, approveRequest, hasSufficientTokenRequest } =
     useDeposit();
@@ -135,7 +123,9 @@ export const Deposit = ({
       });
   };
 
-  const getRemainingLpSupplyInEth = () => {
+  const tokenAmountInputValue = Form.useWatch('tokenAmount', form) || 0;
+
+  const remainingLpSupplyInEth = useMemo(() => {
     const totalProductSupplyInWei = productSupply || 0n;
     const lpBalanceInWei = BigInt(lpBalance);
     const maxRedeemableSupply =
@@ -143,11 +133,9 @@ export const Deposit = ({
     const remainingLPSupply =
       maxRedeemableSupply < lpBalanceInWei ? maxRedeemableSupply : lpBalanceInWei;
     return parseToEth(remainingLPSupply);
-  };
+  }, [lpBalance, productSupply, productLpPriceAfterDiscount]);
 
-  const remainingLpSupplyInEth = getRemainingLpSupplyInEth();
-  const tokenAmountInputValue = Form.useWatch('tokenAmount', form) || 0;
-  const getOlasPayout = () => {
+  const olasPayout = useMemo(() => {
     if (!tokenAmountInputValue || tokenAmountInputValue > remainingLpSupplyInEth) {
       return '--';
     }
@@ -156,13 +144,13 @@ export const Deposit = ({
       ? tokenAmountInputValue
       : new BigNumber(parseToWei(tokenAmountInputValue));
 
-    const payoutInBg = productLpPriceAfterDiscountInBg.multipliedBy(tokenAmountValue);
+    const payoutInBg = new BigNumber(productLpPriceAfterDiscount).multipliedBy(tokenAmountValue);
     const payout = isSvmProduct
       ? payoutInBg.dividedBy(BigNumber(`1${'0'.repeat(28)}`)).toFixed(2)
       : Number(payoutInBg.dividedBy(ONE_ETH_IN_STRING).dividedBy(ONE_ETH_IN_STRING).toFixed(2));
 
     return getCommaSeparatedNumber(payout, 4);
-  };
+  }, [tokenAmountInputValue, remainingLpSupplyInEth, productLpPriceAfterDiscount, isSvmProduct]);
 
   return (
     <>
@@ -235,7 +223,7 @@ export const Deposit = ({
           </div>
 
           <div>
-            <Text>{`OLAS Payout: ${getOlasPayout()}`}</Text>
+            <Text>{`OLAS Payout: ${olasPayout}`}</Text>
           </div>
         </Form>
       </Modal>
