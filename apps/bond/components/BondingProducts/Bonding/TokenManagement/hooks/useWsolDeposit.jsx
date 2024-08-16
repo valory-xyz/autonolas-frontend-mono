@@ -153,6 +153,8 @@ export const useWsolDeposit = () => {
     }
 
     const { whirlpoolTokenA, whirlpoolTokenB } = await getWhirlpoolData();
+    console.log({ whirlpoolTokenA, whirlpoolTokenB });
+
     const quote = await getDepositIncreaseLiquidityQuote({ sol, slippage });
     const { solMax, olasMax } = await getDepositTransformedQuote(quote);
 
@@ -161,8 +163,11 @@ export const useWsolDeposit = () => {
       whirlpoolTokenB.mint,
       svmWalletPublicKey,
     );
+    console.log({ tokenOwnerAccountB });
 
     const accountInfo = await connection.getAccountInfo(tokenOwnerAccountB);
+    console.log({ accountInfo });
+
     if (!accountInfo) {
       notifyError('OLAS Associated token account does not exist');
       return null;
