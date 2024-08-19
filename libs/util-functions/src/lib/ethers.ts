@@ -1,4 +1,5 @@
 import { ethers } from 'ethers';
+import toLower from 'lodash/toLower';
 import { Address } from 'viem';
 
 export const getAddressFromBytes32 = (address: Address | string) => {
@@ -10,3 +11,6 @@ export const getBytes32FromAddress = (address: Address | string) => {
 };
 
 export const isValidAddress = (address: string) => ethers.isAddress(address);
+
+export const areAddressesEqual = (a1: string | Address, a2: string | Address) =>
+  toLower(a1) === toLower(a2);

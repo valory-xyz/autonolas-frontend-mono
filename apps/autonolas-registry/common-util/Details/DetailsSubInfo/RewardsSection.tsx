@@ -6,7 +6,7 @@ import { Address } from 'viem';
 import { getPendingIncentives, useClaimableIncentives } from 'libs/common-contract-functions/src';
 import { UNICODE_SYMBOLS } from 'libs/util-constants/src/lib/symbols';
 import { TOKENOMICS } from 'libs/util-contracts/src';
-import { notifyError, notifySuccess } from 'libs/util-functions/src';
+import { areAddressesEqual, notifyError, notifySuccess } from 'libs/util-functions/src';
 
 import { getEthersProviderForEthereum, getTokenomicsEthersContract } from 'common-util/Contracts';
 import { claimOwnerIncentivesRequest } from 'common-util/functions/requests';
@@ -78,9 +78,9 @@ export const RewardsSection: FC<RewardsSectionProps> = ({ ownerAddress, id, type
 
   const {
     reward: claimableReward,
-    rewardEth: claimableRewardEth,
+    rewardWei: claimableRewardWei,
     topUp: claimableTopUp,
-    topUpEth: claimableTopUpEth,
+    topUpWei: claimableTopUpWei,
     isFetching: isClaimableIncentivesLoading,
     refetch,
   } = useClaimableIncentives(
@@ -142,11 +142,11 @@ export const RewardsSection: FC<RewardsSectionProps> = ({ ownerAddress, id, type
   ]);
 
   const canClaim = useMemo(() => {
-    if (account !== ownerAddress) return false;
-    if (claimableRewardEth === undefined || claimableTopUpEth === undefined) return false;
+    if (!areAddressesEqual(account.toString(), ownerAddress)) return false;
+    if (claimableRewardWei === undefined || claimableTopUpWei === undefined) return false;
 
-    return claimableRewardEth > 0 || claimableTopUpEth > 0;
-  }, [account, ownerAddress, claimableRewardEth, claimableTopUpEth]);
+    return claimableRewardWei > 0 || claimableTopUpWei > 0;
+  }, [account, ownerAddress, claimableRewardWei, claimableTopUpWei]);
 
   const handleClaim = useCallback(async () => {
     if (!account) return;
@@ -181,7 +181,7 @@ export const RewardsSection: FC<RewardsSectionProps> = ({ ownerAddress, id, type
         pagination={false}
         style={{ maxWidth: '550px' }}
       />
-      <a href="https://tokenomics.olas.network/donate">
+      <a href="https://tokenomics.olas.network/donate" target="_blank" rel="noopener noreferrer">
         Make donation {UNICODE_SYMBOLS.EXTERNAL_LINK}
       </a>
     </Flex>

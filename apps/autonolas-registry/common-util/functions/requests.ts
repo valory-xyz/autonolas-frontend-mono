@@ -1,8 +1,6 @@
-import { Address, TransactionReceipt } from 'viem';
+import { Address } from 'viem';
 
-import { notifyError, sendTransaction } from '@autonolas/frontend-library';
-
-import { getEstimatedGasLimit } from 'libs/util-functions/src';
+import { getEstimatedGasLimit, notifyError, sendTransaction } from 'libs/util-functions/src';
 
 import { SUPPORTED_CHAINS } from 'common-util/Login';
 
@@ -72,7 +70,7 @@ export const claimOwnerIncentivesRequest = async ({
       supportedChains: SUPPORTED_CHAINS,
       rpcUrls: RPC_URLS as Record<string, string>,
     });
-    return (response as TransactionReceipt)?.transactionHash;
+    return response?.transactionHash;
   } catch (error) {
     window.console.log('Error occurred on claiming owner incentives');
     throw error;

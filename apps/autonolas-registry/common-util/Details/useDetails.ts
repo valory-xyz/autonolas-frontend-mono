@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Address } from 'viem';
 
-import { NA, areAddressesEqual, notifyError } from '@autonolas/frontend-library';
+import { NA } from 'libs/util-constants/src/lib/symbols';
+import { areAddressesEqual, notifyError } from 'libs/util-functions/src';
 
 import { NavTypesValues } from 'util/constants';
 
@@ -38,7 +39,6 @@ export const useDetails = ({
 
       try {
         const tempDetails = await getDetails(id);
-        console.log('tempDetails', tempDetails);
         setInfo(tempDetails);
 
         const ownerAccount = await getOwner(id);
@@ -73,13 +73,13 @@ export const useDetails = ({
   const isOwner = useMemo(() => {
     if (isSvm) {
       if (walletPublicKey && ownerAddress) {
-        return areAddressesEqual(`${walletPublicKey}`, ownerAddress);
+        return areAddressesEqual(walletPublicKey.toString(), ownerAddress);
       }
       return false;
     }
 
     if (account && ownerAddress) {
-      return areAddressesEqual(`${account}`, ownerAddress);
+      return areAddressesEqual(account.toString(), ownerAddress);
     }
 
     return false;

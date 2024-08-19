@@ -29,9 +29,9 @@ export const useClaimableIncentives = (
         const [reward, topup] = data as [bigint, bigint];
         return {
           reward: rewardsFormatter(reward, 4),
-          rewardEth: reward,
+          rewardWei: reward,
           topUp: rewardsFormatter(topup, 2),
-          topUpEth: topup,
+          topUpWei: topup,
         };
       },
       refetchOnWindowFocus: false,

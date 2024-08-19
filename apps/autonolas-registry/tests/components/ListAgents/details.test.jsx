@@ -37,9 +37,9 @@ jest.mock('wagmi', () => ({
 jest.mock('libs/common-contract-functions/src', () => ({
   useClaimableIncentives: jest.fn().mockReturnValue({
     reward: '0.85',
-    rewardEth: 850000000000000000,
+    rewardWei: 850000000000000000,
     topUp: '222,777.30',
-    topUpEth: 222777300000000000000000000,
+    topUpWei: 222777300000000000000000000,
   }),
   getPendingIncentives: jest.fn().mockResolvedValue({
     pendingReward: '0.95555',

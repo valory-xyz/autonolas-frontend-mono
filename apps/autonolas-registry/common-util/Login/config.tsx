@@ -83,7 +83,7 @@ export const EVM_SUPPORTED_CHAINS = SUPPORTED_CHAINS.map((chain) => {
   };
 });
 
-type SolanaChain = {
+export type SolanaChain = {
   id: number | null;
   networkDisplayName: string;
   networkName: string;
