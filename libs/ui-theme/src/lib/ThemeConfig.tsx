@@ -59,7 +59,7 @@ export const THEME_CONFIG: ThemeConfig = {
       headerSortActiveBg: COLOR.BORDER_GREY_2,
       headerSortHoverBg: '#c2cbd7',
       headerSplitColor: COLOR.BORDER_GREY_2,
-      rowSelectedBg: '#faf0ff',
+      rowSelectedBg: COLOR.PRIMARY_BG,
       rowSelectedHoverBg: '#efcfff',
     },
     Alert: {

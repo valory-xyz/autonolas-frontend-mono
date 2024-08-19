@@ -23,12 +23,12 @@ const MenuInstance: FC<MenuInstanceProps> = ({ selectedMenu, handleMenuItemClick
 
   const items: MenuItem[] = useMemo(
     () => [
+      { label: 'Path', key: 'path', path: `/path` },
       {
         label: 'My staking contracts',
         key: URL.myStakingContracts,
         path: `/${networkName}/${URL.myStakingContracts}`,
       },
-      { label: 'Paths', key: 'paths', path: `/paths` },
       { label: 'Docs', key: 'docs', path: '/docs' },
     ],
     [networkName],

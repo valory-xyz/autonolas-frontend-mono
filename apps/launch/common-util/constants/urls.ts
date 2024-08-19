@@ -3,6 +3,6 @@ export const URL = {
   myStakingContracts: 'my-staking-contracts',
   createContract: 'my-staking-contracts/create',
   nominateContract: 'nominate-contract',
-  paths: 'paths',
+  path: 'path',
   pageNotFound: 'page-not-found',
 };

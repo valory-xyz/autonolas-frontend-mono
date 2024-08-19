@@ -6,6 +6,8 @@ export const COLOR = {
   WHITE: '#FFFFFF',
   ORANGE: ' #FF9400',
 
+  PRIMARY_BG: '#FAF0FF',
+
   GREEN_1: '#00FC82',
   GREEN_2: '#00F422',
   GREEN_3: '#33FF00',
