@@ -2,7 +2,7 @@ import { Card, Flex, Steps } from 'antd';
 import { useState } from 'react';
 import styled from 'styled-components';
 
-import { steps } from './constants';
+import { LAST_STEP_KEY, steps } from './constants';
 import { SetNextStep, SetPrevStep, StepComponentProps } from './types';
 import { BREAK_POINT } from 'libs/ui-theme/src';
 
@@ -27,17 +27,20 @@ const renderStep = (
 ) => <StepComponent onPrev={setPrevStep} onNext={setNextStep} isLastStep={isLastStep} />;
 
 export const PathPage = () => {
-  const [step, setStep] = useState(0);
+  const [step, setStep] = useState(Number(sessionStorage.getItem(LAST_STEP_KEY) || '0'));
 
   const isLastStep = step === steps.length - 1;
 
-  const setPrevStep = () => setStep((prev) => (prev === 0 ? prev : prev - 1));
-  const setNextStep = () =>
-    setStep((prev) =>
-      // If on the last step, loop back to the first
-      // otherwise go next
-      prev === steps.length - 1 ? 0 : prev + 1,
-    );
+  const setPrevStep = () => {
+    const prevStep = step === 0 ? step : step - 1;
+    setStep(prevStep)
+    sessionStorage.setItem(LAST_STEP_KEY, prevStep.toString());
+  };
+  const setNextStep = () => {
+    const nextStep = isLastStep ? 0 : step + 1;
+    setStep(nextStep);
+    sessionStorage.setItem(LAST_STEP_KEY, nextStep.toString());
+  }
 
   return (
     <StyledMain>
