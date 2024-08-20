@@ -224,6 +224,7 @@ export const DetailsSubInfo = ({
                   type={type}
                   ownerAddress={ownerAddress}
                   dataTestId={dataTestId}
+                  isOwner={isOwner}
                 />
               ) : (
                 <Info data-testid={dataTestId}>{value}</Info>
@@ -231,7 +232,7 @@ export const DetailsSubInfo = ({
           </EachSection>
         );
       }),
-    [detailsValues, ownerAddress, id, type],
+    [detailsValues, ownerAddress, isOwner, id, type],
   );
 
   // get token address for service

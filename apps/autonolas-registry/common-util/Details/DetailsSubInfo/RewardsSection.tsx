@@ -6,7 +6,7 @@ import { Address } from 'viem';
 import { getPendingIncentives, useClaimableIncentives } from 'libs/common-contract-functions/src';
 import { UNICODE_SYMBOLS } from 'libs/util-constants/src/lib/symbols';
 import { TOKENOMICS } from 'libs/util-contracts/src';
-import { areAddressesEqual, notifyError, notifySuccess } from 'libs/util-functions/src';
+import { notifyError, notifySuccess } from 'libs/util-functions/src';
 
 import { getEthersProviderForEthereum, getTokenomicsEthersContract } from 'common-util/Contracts';
 import { claimOwnerIncentivesRequest } from 'common-util/functions/requests';
@@ -18,6 +18,7 @@ const { Text } = Typography;
 
 type RewardsSectionProps = {
   ownerAddress: Address;
+  isOwner: boolean;
   id: string;
   type: string;
   dataTestId: string;
@@ -64,7 +65,7 @@ const getColumns = (
   },
 ];
 
-export const RewardsSection: FC<RewardsSectionProps> = ({ ownerAddress, id, type, dataTestId }) => {
+export const RewardsSection: FC<RewardsSectionProps> = ({ ownerAddress, isOwner, id, type, dataTestId }) => {
   const { account } = useHelpers();
 
   const [isClaimLoading, setIsClaimLoading] = useState(false);
@@ -142,11 +143,11 @@ export const RewardsSection: FC<RewardsSectionProps> = ({ ownerAddress, id, type
   ]);
 
   const canClaim = useMemo(() => {
-    if (!areAddressesEqual(account.toString(), ownerAddress)) return false;
+    if (!isOwner) return false;
     if (claimableRewardWei === undefined || claimableTopUpWei === undefined) return false;
 
     return claimableRewardWei > 0 || claimableTopUpWei > 0;
-  }, [account, ownerAddress, claimableRewardWei, claimableTopUpWei]);
+  }, [isOwner, claimableRewardWei, claimableTopUpWei]);
 
   const handleClaim = useCallback(async () => {
     if (!account) return;
