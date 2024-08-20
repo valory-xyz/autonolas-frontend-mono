@@ -4,7 +4,7 @@ import styled from 'styled-components';
 
 import { BREAK_POINT } from 'libs/ui-theme/src';
 
-import { LAST_STEP_KEY, steps } from './constants';
+import { steps } from './constants';
 import { SetNextStep, SetPrevStep, StepComponentProps } from './types';
 
 const StyledMain = styled.main`
@@ -18,7 +18,8 @@ const StyledMain = styled.main`
   }
 `;
 
-const StepContentStyle = { maxWidth: '720px', width: '100%' };
+const STEP_CONTENT_STYLE = { maxWidth: '720px', width: '100%' };
+const LAST_STEP_KEY = 'path_last_step';
 
 const renderStep = (
   StepComponent: React.ComponentType<StepComponentProps>,
@@ -53,7 +54,7 @@ export const PathPage = () => {
         <Card>
           <Steps direction="vertical" current={step} items={steps} onChange={onChangeStep} />
         </Card>
-        <Card style={StepContentStyle}>
+        <Card style={STEP_CONTENT_STYLE}>
           {renderStep(steps[step].content, setPrevStep, setNextStep, isLastStep)}
         </Card>
       </Flex>

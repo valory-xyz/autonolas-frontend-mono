@@ -27,7 +27,7 @@ const MenuInstance: FC<MenuInstanceProps> = ({ selectedMenu, handleMenuItemClick
       {
         label: 'My staking contracts',
         key: URL.myStakingContracts,
-        path: `/${networkName}/${URL.myStakingContracts}`,
+        path: `/${networkName || 'ethereum'}/${URL.myStakingContracts}`,
       },
       { label: 'Docs', key: 'docs', path: '/docs' },
     ],
@@ -54,7 +54,7 @@ const MenuInstance: FC<MenuInstanceProps> = ({ selectedMenu, handleMenuItemClick
         handleMenuItemClick({
           label: '',
           key,
-          path: PAGES_TO_LOAD_WITH_CHAIN_ID.includes(key) ? `/${networkName}/${key}` : `/${key}`,
+          path: PAGES_TO_LOAD_WITH_CHAIN_ID.includes(key) ? `/${networkName || 'ethereum'}/${key}` : `/${key}`,
         })
       }
     />

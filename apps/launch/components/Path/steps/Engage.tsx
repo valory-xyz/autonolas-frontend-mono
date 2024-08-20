@@ -1,11 +1,11 @@
 import { CodeOutlined } from '@ant-design/icons';
 import { Divider, Typography } from 'antd';
 import Link from 'next/link';
-import { useParams } from 'next/navigation';
 
 import { UNICODE_SYMBOLS } from 'libs/util-constants/src';
 
 import { URL } from 'common-util/constants/urls';
+import { useAppSelector } from 'store/index';
 
 import { StepContent, StepList } from '../StepContent';
 import { StepComponentProps } from '../types';
@@ -40,8 +40,8 @@ const developData = {
 };
 
 export const Engage = ({ onPrev, onNext, isLastStep }: StepComponentProps) => {
-  const params = useParams<{ network: string }>();
-  const networkName = params?.network as string;
+  const { networkName } = useAppSelector((state) => state.network);
+
   return (
     <StepContent
       icon={CodeOutlined}
@@ -53,7 +53,7 @@ export const Engage = ({ onPrev, onNext, isLastStep }: StepComponentProps) => {
       <StepList title={developData.title} items={developData.items} />
       <Divider className="m-0" />
       <Text>
-        <Link href={`/${networkName}/${URL.myStakingContracts}`}>
+        <Link href={`/${networkName || 'ethereum'}/${URL.myStakingContracts}`}>
           Create the Olas staking contract{' '}
         </Link>{' '}
         and embed the KPIs for autonomous AI agents to hit.

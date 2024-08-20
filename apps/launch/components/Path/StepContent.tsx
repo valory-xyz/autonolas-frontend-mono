@@ -16,6 +16,18 @@ const IconContainer = styled.div`
   background: ${COLOR.PRIMARY_BG};
 `;
 
+const StyledUl = styled.ul`
+  list-style-type: square;
+  margin: 0;
+  padding-left: 24px;
+  li {
+    padding-left: 8px;
+    &::marker {
+      color: #b972e8;
+    }
+  }
+`;
+
 type StepIconProps = {
   icon: React.ForwardRefExoticComponent<
     Omit<AntdIconProps, 'ref'> & React.RefAttributes<HTMLSpanElement>
@@ -28,17 +40,6 @@ const StepIcon = ({ icon: Icon }: StepIconProps) => (
   </IconContainer>
 );
 
-const StyledUl = styled.ul`
-  list-style-type: square;
-  margin: 0;
-  padding-left: 24px;
-  li {
-    padding-left: 8px;
-    &::marker {
-      color: #b972e8;
-    }
-  }
-`;
 
 type StepListProps = {
   title: string;

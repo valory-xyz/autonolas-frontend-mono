@@ -13,5 +13,3 @@ export const steps = [
   { title: 'Promote, co-market & observe', content: Promote },
   { title: 'Watch your metrics grow', content: Watch },
 ];
-
-export const LAST_STEP_KEY = 'path_last_step';
