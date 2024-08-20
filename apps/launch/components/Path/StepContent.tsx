@@ -85,9 +85,11 @@ export const StepContent = ({
       <Button size="large" onClick={onPrev}>
         Prev step
       </Button>
-      <Button type="primary" size="large" onClick={onNext}>
-        {isLast ? 'Finish' : 'Next step'}
-      </Button>
+      {!isLast && (
+        <Button type="primary" size="large" onClick={onNext}>
+          Next step
+        </Button>
+      )}
     </Flex>
   </Flex>
 );

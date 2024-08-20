@@ -18,8 +18,8 @@ export const Promote = ({ onPrev, onNext, isLastStep }: StepComponentProps) => {
       <Text>Showcase your agent economy and how it all works.</Text>
       <Divider className="m-0" />
       <Text>
-        Market your agent economy by engaging with the broad and diverse Olas community of builders,
-        operators, and others.
+        Market your agent economy by engaging with the broad and diverse Olas community of Builders,
+        Operators, and others.
       </Text>
       <Divider className="m-0" />
       <Text>Enable and incentivize operators to run your agent economy.</Text>
