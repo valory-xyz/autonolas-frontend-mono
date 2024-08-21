@@ -1,3 +1,3 @@
-import { PathDetailPage } from 'components/Paths/PathDetail';
+import { PathDetailPage } from 'components/PathDetail';
 
 export default PathDetailPage;

@@ -23,12 +23,12 @@ const MenuInstance: FC<MenuInstanceProps> = ({ selectedMenu, handleMenuItemClick
 
   const items: MenuItem[] = useMemo(
     () => [
+      { label: 'Path', key: 'path', path: `/path` },
       {
         label: 'My staking contracts',
         key: URL.myStakingContracts,
-        path: `/${networkName}/${URL.myStakingContracts}`,
+        path: `/${networkName || 'ethereum'}/${URL.myStakingContracts}`,
       },
-      { label: 'Paths', key: 'paths', path: `/paths` },
       { label: 'Docs', key: 'docs', path: '/docs' },
     ],
     [networkName],
@@ -54,7 +54,7 @@ const MenuInstance: FC<MenuInstanceProps> = ({ selectedMenu, handleMenuItemClick
         handleMenuItemClick({
           label: '',
           key,
-          path: PAGES_TO_LOAD_WITH_CHAIN_ID.includes(key) ? `/${networkName}/${key}` : `/${key}`,
+          path: PAGES_TO_LOAD_WITH_CHAIN_ID.includes(key) ? `/${networkName || 'ethereum'}/${key}` : `/${key}`,
         })
       }
     />

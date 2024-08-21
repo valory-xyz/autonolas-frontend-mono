@@ -27,8 +27,8 @@ const nextConfig = {
     return [
       {
         source: '/',
-        destination: '/ethereum/my-staking-contracts',
-        permanent: true,
+        destination: '/path',
+        permanent: false,
       },
     ];
   },
