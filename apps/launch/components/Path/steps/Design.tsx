@@ -1,7 +1,5 @@
 import { FileDoneOutlined } from '@ant-design/icons';
 
-import { UNICODE_SYMBOLS } from 'libs/util-constants/src';
-
 import { StepContent, StepList } from '../StepContent';
 import { StepComponentProps } from '../types';
 
@@ -11,17 +9,18 @@ const putTogetherData = {
   items: [
     'What do you want the individual agents to do?',
     'How many agent instances of each type are required?',
-    <>
-      Translate KPI definitions in a staking contract specification. See the{' '}
-      <a
-        href="https://github.com/valory-xyz/autonolas-aip/blob/aip-2/docs/OlasAutomate.pdf"
-        target="_blank"
-        rel="noopener noreferrer"
-      >
-        Olas Predict Specification Document {UNICODE_SYMBOLS.EXTERNAL_LINK}
-      </a>{' '}
-      example.
-    </>,
+    // TODO: uncomment once it's clear what the link should be
+    // <>
+    //   Translate KPI definitions in a staking contract specification. See the{' '}
+    //   <a
+    //     href="https://github.com/valory-xyz/autonolas-aip/blob/aip-2/docs/OlasAutomate.pdf"
+    //     target="_blank"
+    //     rel="noopener noreferrer"
+    //   >
+    //     Olas Predict Specification Document {UNICODE_SYMBOLS.EXTERNAL_LINK}
+    //   </a>{' '}
+    //   example.
+    // </>,
   ],
 };
 
