@@ -118,7 +118,7 @@ export const useStakingContractsList = () => {
           stakeRequired,
           availableOn: AVAILABLE_ON[item.account] || null,
         };
-      });
+      }) as StakingContract[];
     }
     return [];
   }, [
