@@ -6,9 +6,8 @@ import styled from 'styled-components';
 import { Allocation } from 'types';
 
 import { COLOR } from 'libs/ui-theme/src';
-import { CHAIN_NAMES } from 'libs/util-constants/src';
+import { CHAIN_NAMES, RETAINER_ADDRESS } from 'libs/util-constants/src';
 
-import { RETAINER_ADDRESS } from 'common-util/constants/addresses';
 import { getBytes32FromAddress } from 'common-util/functions/addresses';
 import { NextWeekTooltip } from 'components/NextWeekTooltip';
 import { useAppSelector } from 'store/index';

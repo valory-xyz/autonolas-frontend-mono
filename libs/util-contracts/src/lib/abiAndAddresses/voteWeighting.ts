@@ -1,4 +1,6 @@
-export const VOTE_WEIGHTING = {
+import { Contract } from './types';
+
+export const VOTE_WEIGHTING: Contract = {
   contractName: 'VoteWeighting',
   addresses: {
     1: '0x95418b46d5566D3d1ea62C12Aea91227E566c5c1',

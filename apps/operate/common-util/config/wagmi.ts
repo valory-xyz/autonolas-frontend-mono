@@ -1,11 +1,17 @@
 import { createConfig, http } from 'wagmi';
-import { Chain, mainnet } from 'wagmi/chains';
+import { Chain, arbitrum, base, celo, gnosis, mainnet, optimism, polygon } from 'wagmi/chains';
 
-export const SUPPORTED_CHAINS: [Chain, ...Chain[]] = [mainnet];
+import { RPC_URLS } from 'libs/util-constants/src';
 
-export const RPC_URLS: Record<number, string> = {
-  1: process.env.NEXT_PUBLIC_MAINNET_URL ?? mainnet.rpcUrls.default.http[0],
-};
+export const SUPPORTED_CHAINS: [Chain, ...Chain[]] = [
+  mainnet,
+  gnosis,
+  polygon,
+  optimism,
+  base,
+  arbitrum,
+  celo,
+];
 
 export const wagmiConfig = createConfig({
   chains: SUPPORTED_CHAINS,

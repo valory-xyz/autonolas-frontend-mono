@@ -4,16 +4,15 @@ import { Address } from 'viem';
 import { mainnet } from 'viem/chains';
 import { useReadContract } from 'wagmi';
 
+import { useNominees, useNomineesMetadata } from 'libs/common-contract-functions/src';
+import { RETAINER_ADDRESS } from 'libs/util-constants/src';
 import { VOTE_WEIGHTING } from 'libs/util-contracts/src/lib/abiAndAddresses';
 
-import { RETAINER_ADDRESS } from 'common-util/constants/addresses';
 import { NEXT_RELATIVE_WEIGHTS_KEY, TIME_SUM_KEY } from 'common-util/constants/scopeKeys';
 import { getBytes32FromAddress } from 'common-util/functions';
 import { setStakingContracts } from 'store/govern';
 import { useAppDispatch, useAppSelector } from 'store/index';
 
-import { useNominees } from './useNominees';
-import { useNomineesMetadata } from './useNomineesMetadata';
 import { useNomineesWeights } from './useNomineesWeights';
 
 const WEEK_IN_SECONDS = 604_800;

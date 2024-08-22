@@ -2,10 +2,13 @@ import { DownOutlined, RightOutlined } from '@ant-design/icons';
 import { Button, Card, Flex, Table, TableColumnsType, Tag, Typography } from 'antd';
 import Image from 'next/image';
 import styled from 'styled-components';
+import { StakingContract } from 'types';
 
 import { Caption, TextWithTooltip } from 'libs/ui-components/src';
 import { BREAK_POINT } from 'libs/ui-theme/src';
-import { CHAIN_NAMES, GOVERN_URL, UNICODE_SYMBOLS } from 'libs/util-constants/src';
+import { CHAIN_NAMES, GOVERN_URL, NA, UNICODE_SYMBOLS } from 'libs/util-constants/src';
+
+import { useStakingContractsList } from './hooks';
 
 const StyledMain = styled.main`
   display: flex;
@@ -16,20 +19,7 @@ const StyledMain = styled.main`
 
 const { Title, Paragraph, Text } = Typography;
 
-interface DataType {
-  key: React.Key;
-  name: string;
-  address: string;
-  chainId: number;
-  availableSlots: number;
-  maxSlots: number;
-  apy: number;
-  stakeRequired: number;
-  availableOn: string;
-  description: string;
-}
-
-const getAvailableOnData = (availableOn: string) => {
+const getAvailableOnData = (availableOn: StakingContract['availableOn']) => {
   let icon;
   let text;
   let href;
@@ -53,12 +43,12 @@ const getAvailableOnData = (availableOn: string) => {
   return { icon, text, href };
 };
 
-const columns: TableColumnsType<DataType> = [
+const columns: TableColumnsType<StakingContract> = [
   {
     title: 'Contract',
-    dataIndex: 'name',
-    key: 'name',
-    render: (name) => <Text strong>{name}</Text>,
+    dataIndex: 'metadata',
+    key: 'metadata',
+    render: (metadata) => <Text strong>{metadata.name || NA}</Text>,
   },
   {
     title: 'Chain',
@@ -122,85 +112,47 @@ const columns: TableColumnsType<DataType> = [
   },
 ];
 
-const data: DataType[] = [
-  {
-    key: 1,
-    name: 'Pearl Beta',
-    address: '',
-    chainId: 100,
-    availableSlots: 80,
-    maxSlots: 100,
-    apy: 10,
-    stakeRequired: 40,
-    availableOn: 'pearl',
-    description:
-      'The Pearl Beta staking contract offers 100 slots for operators running Olas Predict agents with Pearl. It is designed as a step up from Pearl Alpha, requiring 40 rather than 20 OLAS for staking. The rewards are also more attractive than with Pearl Alpha.',
-  },
-  {
-    key: 2,
-    name: 'Quickstart Beta - Hobbyist',
-    address: '',
-    chainId: 100,
-    availableSlots: 92,
-    maxSlots: 100,
-    apy: 15,
-    stakeRequired: 500,
-    availableOn: 'quickstart',
-    description:
-      'The Pearl Beta staking contract offers 100 slots for operators running Olas Predict agents with Pearl. It is designed as a step up from Pearl Alpha, requiring 40 rather than 20 OLAS for staking. The rewards are also more attractive than with Pearl Alpha.',
-  },
-  {
-    key: 3,
-    name: 'Quickstart Beta - Expert',
-    address: '',
-    chainId: 100,
-    availableSlots: 10,
-    maxSlots: 100,
-    apy: 15,
-    stakeRequired: 1000,
-    availableOn: '',
-    description:
-      'The Pearl Beta staking contract offers 100 slots for operators running Olas Predict agents with Pearl. It is designed as a step up from Pearl Alpha, requiring 40 rather than 20 OLAS for staking. The rewards are also more attractive than with Pearl Alpha.',
-  },
-];
-
-export const ContractsPage = () => (
-  <StyledMain>
-    <Card>
-      <Title level={3} className="mt-0 mb-8">
-        Staking contracts
-      </Title>
-      <Caption className="block mb-24">
-        Browse staking opportunities. Make a selection and start running them via Pearl or
-        Quickstart for the opportunity to earn OLAS rewards.
-      </Caption>
-      <Table
-        columns={columns}
-        pagination={false}
-        expandable={{
-          expandIcon: ({ expanded, onExpand, record }) => {
-            const Icon = expanded ? DownOutlined : RightOutlined;
-            return (
-              <Icon
-                style={{ fontSize: '14px', color: '#606F85' }}
-                onClick={(e) => onExpand(record, e)}
-              />
-            );
-          },
-          expandedRowRender: (record) => (
-            <>
-              <Caption>Contract description</Caption>
-              <Paragraph className="mb-12" style={{ maxWidth: 500 }}>
-                {record.description}
-              </Paragraph>
-              <a href={`${GOVERN_URL}/contracts/${record.address}`} target="_blank">
-                View full contract details {UNICODE_SYMBOLS.EXTERNAL_LINK}
-              </a>
-            </>
-          ),
-        }}
-        dataSource={data}
-      />
-    </Card>
-  </StyledMain>
-);
+export const ContractsPage = () => {
+  const { contracts, isLoading } = useStakingContractsList();
+  return (
+    <StyledMain>
+      <Card>
+        <Title level={3} className="mt-0 mb-8">
+          Staking contracts
+        </Title>
+        <Caption className="block mb-24">
+          Browse staking opportunities. Make a selection and start running them via Pearl or
+          Quickstart for the opportunity to earn OLAS rewards.
+        </Caption>
+        <Table
+          columns={columns}
+          pagination={false}
+          loading={isLoading}
+          dataSource={contracts}
+          expandable={{
+            expandIcon: ({ expanded, onExpand, record }) => {
+              const Icon = expanded ? DownOutlined : RightOutlined;
+              return (
+                <Icon
+                  style={{ fontSize: '14px', color: '#606F85' }}
+                  onClick={(e) => onExpand(record, e)}
+                />
+              );
+            },
+            expandedRowRender: (record) => (
+              <>
+                <Caption>Contract description</Caption>
+                <Paragraph className="mb-12" style={{ maxWidth: 500 }}>
+                  {record.metadata ? record.metadata.description : NA}
+                </Paragraph>
+                <a href={`${GOVERN_URL}/contracts/${record.address}`} target="_blank">
+                  View full contract details {UNICODE_SYMBOLS.EXTERNAL_LINK}
+                </a>
+              </>
+            ),
+          }}
+        />
+      </Card>
+    </StyledMain>
+  );
+};

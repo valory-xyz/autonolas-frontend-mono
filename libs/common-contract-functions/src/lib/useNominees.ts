@@ -3,12 +3,11 @@ import { Address } from 'viem';
 import { mainnet } from 'viem/chains';
 import { useReadContract } from 'wagmi';
 
-import { VOTE_WEIGHTING } from 'libs/util-contracts/src/lib/abiAndAddresses';
-
-import { getBytes32FromAddress } from 'common-util/functions';
+import { VOTE_WEIGHTING } from 'libs/util-contracts/src';
+import { getBytes32FromAddress } from 'libs/util-functions/src';
 
 export const useNominees = () => {
-  const { data } = useReadContract({
+  const { data, isFetching } = useReadContract({
     address: (VOTE_WEIGHTING.addresses as Record<number, Address>)[mainnet.id],
     abi: VOTE_WEIGHTING.abi,
     chainId: mainnet.id,
@@ -21,5 +20,5 @@ export const useNominees = () => {
     },
   });
 
-  return { data };
+  return { data, isFetching };
 };
