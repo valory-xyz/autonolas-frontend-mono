@@ -40,10 +40,10 @@ export const GlobalStyles = createGlobalStyle`
     margin-bottom: 8px !important;
   }
   .mb-12 {
-    margin-bottom: 12px;
+    margin-bottom: 12px !important;
   }
   .mb-16 {
-    margin-bottom: 16px;
+    margin-bottom: 16px !important;
   }
   .mb-20 {
     margin-bottom: 20px !important;
@@ -52,22 +52,22 @@ export const GlobalStyles = createGlobalStyle`
     margin-bottom: 24px !important;
   }
   .mb-48 {
-    margin-bottom: 48px;
+    margin-bottom: 48px !important;
   }
   .mt-0 {
-    margin-top: 0px;
+    margin-top: 0px !important;
   }
   .mt-4 {
-    margin-top: 4px;
+    margin-top: 4px !important;
   }
   .mt-8 {
-    margin-top: 8px;
+    margin-top: 8px !important;
   }
   .mt-12 {
-    margin-top: 12px;
+    margin-top: 12px !important;
   }
   .mt-16 {
-    margin-top: 16px;
+    margin-top: 16px !important;
   }
   .mt-20 {
     margin-top: 20px !important;
@@ -76,22 +76,22 @@ export const GlobalStyles = createGlobalStyle`
     margin-top: 24px !important;
   }
   .mt-48 {
-    margin-top: 48px;
+    margin-top: 48px !important;
   }
   .mr-8 {
-    margin-right: 8px;
+    margin-right: 8px !important;
   }
   .mr-16 {
-    margin-right: 16px;
+    margin-right: 16px !important;
   }
   .mr-24 {
-    margin-right: 24px;
+    margin-right: 24px !important;
   }
   .ml-4 {
-    margin-left: 4px;
+    margin-left: 4px !important;
   }
   .ml-8 {
-    margin-left: 8px;
+    margin-left: 8px !important;
   }
   .p-0 {
     padding: 0 !important;
@@ -100,10 +100,10 @@ export const GlobalStyles = createGlobalStyle`
     padding-left: 0px !important;
   }
   .pt-24 {
-    padding-top: 24px;
+    padding-top: 24px !important;
   }
   .pt-48 {
-    padding-top: 48px;
+    padding-top: 48px !important;
   }
 
   .block {
