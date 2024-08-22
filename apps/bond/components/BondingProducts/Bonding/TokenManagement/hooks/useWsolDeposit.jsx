@@ -179,10 +179,8 @@ export const useWsolDeposit = () => {
     );
 
     const accountInfo = await connection.getAccountInfo(tokenOwnerAccountB);
-
-    if (accountInfo) {
+    if (!accountInfo) {
       // If the user has no associated token account, they need to get some OLAS first
-      // from orca
       notifyError(<GetSomeOlas />);
       return null;
     }

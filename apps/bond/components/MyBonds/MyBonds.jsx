@@ -21,7 +21,7 @@ const getBondsColumns = () => {
       dataIndex: 'payout',
       key: 'payout',
       render: (value) => {
-        const parseValue = `${parseToEth(value)}`;
+        const parseValue = parseToEth(value);
         return (
           <Tooltip title={parseValue} placement="right">
             {round(parseValue, 4)}
