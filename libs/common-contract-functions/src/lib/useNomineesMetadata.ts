@@ -4,9 +4,8 @@ import { Address } from 'viem';
 import { useReadContracts } from 'wagmi';
 
 import { GATEWAY_URL, HASH_PREFIX } from 'libs/util-constants/src';
-import { STAKING_TOKEN } from 'libs/util-contracts/src/lib/abiAndAddresses';
-
-import { getAddressFromBytes32, getBytes32FromAddress } from 'common-util/functions';
+import { STAKING_TOKEN } from 'libs/util-contracts/src';
+import { getAddressFromBytes32, getBytes32FromAddress } from 'libs/util-functions/src';
 
 const BATCH_SIZE = 10;
 const CONCURRENCY_LIMIT = 5;
@@ -93,5 +92,5 @@ export const useNomineesMetadata = (nominees: { account: Address; chainId: numbe
     }
   }, [contractsMetadata, data, getMetadata, isFetching, isLoading]);
 
-  return { data: contractsMetadata };
+  return { data: contractsMetadata, isLoading };
 };

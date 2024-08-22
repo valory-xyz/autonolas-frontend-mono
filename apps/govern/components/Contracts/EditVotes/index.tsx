@@ -7,9 +7,8 @@ import { Allocation } from 'types';
 import { Address } from 'viem';
 import { useAccount } from 'wagmi';
 
-import { CHAIN_NAMES } from 'libs/util-constants/src';
+import { CHAIN_NAMES, RETAINER_ADDRESS } from 'libs/util-constants/src';
 
-import { RETAINER_ADDRESS } from 'common-util/constants/addresses';
 import { INVALIDATE_AFTER_UPDATE_KEYS } from 'common-util/constants/scopeKeys';
 import { getBytes32FromAddress } from 'common-util/functions/addresses';
 import { voteForNomineeWeights } from 'common-util/functions/requests';
