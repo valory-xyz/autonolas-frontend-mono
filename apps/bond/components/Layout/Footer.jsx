@@ -1,19 +1,25 @@
-import { useRouter } from 'next/router';
 import { Grid } from 'antd';
 import Image from 'next/image';
-import {
-  Footer as CommonFooter,
-  getExplorerURL,
-} from '@autonolas/frontend-library';
+import { useRouter } from 'next/router';
+
+import { Footer as CommonFooter, getExplorerURL } from '@autonolas/frontend-library';
 
 import { ADDRESSES } from 'common-util/constants/addresses';
 import { useHelpers } from 'common-util/hooks/useHelpers';
-import { ContractsInfoContainer } from './styles';
 import { OPERATOR_NAME } from 'util/meta';
+
+import { ContractsInfoContainer } from './styles';
 
 const { useBreakpoint } = Grid;
 
-const PATHS_NOT_TO_SHOW = ['/docs', '/disclaimer', '/not-legal'];
+const PATHS_NOT_TO_SHOW = [
+  '/',
+  '/paths',
+  '/manage-solana-liquidity',
+  '/docs',
+  '/disclaimer',
+  '/not-legal',
+];
 
 const ContractInfo = () => {
   const { chainId } = useHelpers();
@@ -51,19 +57,13 @@ const ContractInfo = () => {
     </div>
   );
 
-  const { textOne, addressOne, textTwo, addressTwo } =
-    getCurrentPageAddresses();
+  const { textOne, addressOne, textTwo, addressTwo } = getCurrentPageAddresses();
 
   return (
     <ContractsInfoContainer>
       {!PATHS_NOT_TO_SHOW.includes(pathname) && (
         <>
-          <Image
-            alt="Etherscan link"
-            width={18}
-            height={18}
-            src="/images/etherscan-logo.svg"
-          />
+          <Image alt="Etherscan link" width={18} height={18} src="/images/etherscan-logo.svg" />
           <span>Contracts</span>
           &nbsp;•&nbsp;
           {getContractInfo(textOne, addressOne)}
