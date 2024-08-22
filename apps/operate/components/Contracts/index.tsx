@@ -1,5 +1,6 @@
 import { DownOutlined, RightOutlined } from '@ant-design/icons';
-import { Button, Card, Flex, Table, TableColumnsType, Tag, Typography } from 'antd';
+import { Button, Card, Flex, Table, Tag, Typography } from 'antd';
+import { ColumnsType } from 'antd/es/table';
 import Image from 'next/image';
 import styled from 'styled-components';
 import { StakingContract } from 'types';
@@ -43,11 +44,11 @@ const getAvailableOnData = (availableOn: StakingContract['availableOn']) => {
   return { icon, text, href };
 };
 
-const columns: TableColumnsType<StakingContract> = [
+const columns: ColumnsType<StakingContract> = [
   {
     title: 'Contract',
     dataIndex: 'metadata',
-    key: 'metadata',
+    key: 'address',
     render: (metadata) => <Text strong>{metadata.name || NA}</Text>,
   },
   {

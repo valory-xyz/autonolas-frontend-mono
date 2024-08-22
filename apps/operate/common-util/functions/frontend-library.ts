@@ -4,7 +4,9 @@ import {
   notifyError,
 } from '@autonolas/frontend-library';
 
-import { RPC_URLS, SUPPORTED_CHAINS } from 'common-util/config/wagmi';
+import { RPC_URLS } from 'libs/util-constants/src';
+
+import { SUPPORTED_CHAINS } from 'common-util/config/wagmi';
 
 export const getProvider = () => {
   const provider = getProviderFn(SUPPORTED_CHAINS, RPC_URLS);
