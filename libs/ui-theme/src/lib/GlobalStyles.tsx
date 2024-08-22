@@ -96,6 +96,9 @@ export const GlobalStyles = createGlobalStyle`
   .p-0 {
     padding: 0 !important;
   }
+  .p-16 {
+    padding: 16px !important;
+  }
   .pl-0 {
     padding-left: 0px !important;
   }
