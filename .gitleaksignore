@@ -155,3 +155,4 @@ c286a015e94a4abfa474749e6d0d38d944b25e8b:apps/govern/common-util/Contracts/addre
 19198deff3574e55dbb56fba98533722a641c6e7:apps/launcher/common-util/Contracts/addresses.tsx:generic-api-key:31
 19198deff3574e55dbb56fba98533722a641c6e7:apps/launcher/common-util/Contracts/addresses.tsx:generic-api-key:29
 c286a015e94a4abfa474749e6d0d38d944b25e8b:apps/govern/common-util/Contracts/addresses.tsx:generic-api-key:74
+6cf8d7df061c4bdb1e3ccbb8dbf3585b715ad874:apps/bond/components/BondingProducts/Bonding/TokenManagement/hooks/useWsolDeposit.jsx:generic-api-key:53
