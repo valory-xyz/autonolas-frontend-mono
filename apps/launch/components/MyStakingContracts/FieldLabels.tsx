@@ -1,109 +1,89 @@
-import { InfoCircleOutlined } from '@ant-design/icons';
-import { Tooltip, Typography } from 'antd';
-import { ReactNode } from 'react';
+import { Typography } from 'antd';
 
-import { COLOR } from 'libs/ui-theme/src';
+import { LabelWithTooltip } from 'libs/ui-components/src';
 
 import { FieldConfig } from './FieldConfig';
 
-const { Paragraph, Text } = Typography;
+const { Text } = Typography;
 
-const TextWithTooltip = ({
-  text,
-  description,
-}: {
-  text: string;
-  description?: string | ReactNode;
-}) => {
-  if (!description) return <Text type="secondary">{text}</Text>;
+export const NameLabel = () => <Text type="secondary">{FieldConfig.contractName.name}</Text>;
 
-  return (
-    <Tooltip color={COLOR.WHITE} title={<Paragraph className="m-0">{description}</Paragraph>}>
-      <Text type="secondary">
-        {text} <InfoCircleOutlined className="ml-4" />
-      </Text>
-    </Tooltip>
-  );
-};
-
-export const NameLabel = () => <TextWithTooltip text={FieldConfig.contractName.name} />;
-
-export const DescriptionLabel = () => <TextWithTooltip text={FieldConfig.description.name} />;
+export const DescriptionLabel = () => <Text type="secondary">{FieldConfig.description.name}</Text>;
 
 export const MaximumStakedAgentsLabel = () => (
-  <TextWithTooltip
+  <LabelWithTooltip
     text={FieldConfig.maxNumServices.name}
     description={FieldConfig.maxNumServices.desc}
   />
 );
 
 export const RewardsPerSecondLabel = () => (
-  <TextWithTooltip
+  <LabelWithTooltip
     text={FieldConfig.rewardsPerSecond.name}
     description={FieldConfig.rewardsPerSecond.desc}
   />
 );
 
 export const TemplateInfo = () => (
-  <TextWithTooltip text="Template" description="Template contracts must be approved by DAO vote" />
+  <LabelWithTooltip text="Template" description="Template contracts must be approved by DAO vote" />
 );
 
 export const MinimumStakingDepositLabel = () => (
-  <TextWithTooltip
+  <LabelWithTooltip
     text={FieldConfig.minStakingDeposit.name}
     description={FieldConfig.minStakingDeposit.desc}
   />
 );
 
 export const MinimumStakingPeriodsLabel = () => (
-  <TextWithTooltip
+  <LabelWithTooltip
     text={FieldConfig.minNumStakingPeriods.name}
     description={FieldConfig.minNumStakingPeriods.desc}
   />
 );
 
 export const MaximumInactivityPeriodsLabel = () => (
-  <TextWithTooltip
+  <LabelWithTooltip
     text={FieldConfig.maxNumInactivityPeriods.name}
     description={FieldConfig.maxNumInactivityPeriods.desc}
   />
 );
 
 export const LivenessPeriodLabel = () => (
-  <TextWithTooltip
+  <LabelWithTooltip
     text={FieldConfig.livenessPeriod.name}
     description={FieldConfig.livenessPeriod.desc}
   />
 );
 
 export const TimeForEmissionsLabel = () => (
-  <TextWithTooltip
+  <LabelWithTooltip
     text={FieldConfig.timeForEmissions.name}
     description={FieldConfig.timeForEmissions.desc}
   />
 );
 
 export const AgentInstancesLabel = () => (
-  <TextWithTooltip
+  <LabelWithTooltip
     text={FieldConfig.numAgentInstances.name}
     description={FieldConfig.numAgentInstances.desc}
   />
 );
 
 export const AgentIdsLabel = () => (
-  <TextWithTooltip text={FieldConfig.agentIds.name} description={FieldConfig.agentIds.desc} />
+  <LabelWithTooltip text={FieldConfig.agentIds.name} description={FieldConfig.agentIds.desc} />
 );
 
 export const MultisigThresholdLabel = () => (
-  <TextWithTooltip text={FieldConfig.threshold.name} description={FieldConfig.threshold.desc} />
+  <LabelWithTooltip text={FieldConfig.threshold.name} description={FieldConfig.threshold.desc} />
 );
 
 export const ServiceConfigHashLabel = () => (
-  <TextWithTooltip text={FieldConfig.configHash.name} description={FieldConfig.configHash.desc} />
+  <LabelWithTooltip text={FieldConfig.configHash.name} description={FieldConfig.configHash.desc} />
 );
 
 export const ActivityCheckerAddressLabel = () => (
-  <TextWithTooltip
+  <LabelWithTooltip
     text={FieldConfig.activityChecker.name}
     description={FieldConfig.activityChecker.desc}
   />

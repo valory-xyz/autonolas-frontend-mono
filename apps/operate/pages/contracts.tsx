@@ -1,3 +1,3 @@
-import { HomePage } from 'components/Home';
+import { ContractsPage } from 'components/Contracts';
 
-export default HomePage;
+export default ContractsPage;
