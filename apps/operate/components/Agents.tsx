@@ -67,7 +67,6 @@ const agents: Agent[] = [
 
 const AgentCard = ({ agent }: { agent: Agent }) => {
   const { id, name, description, imageFilename, urls, comingSoon } = agent;
-
   const { run, learnMore, gpt } = urls;
 
   return (
