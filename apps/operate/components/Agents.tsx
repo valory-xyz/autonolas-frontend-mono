@@ -1,9 +1,12 @@
-import { BulbFilled, PlayCircleOutlined, RobotOutlined } from '@ant-design/icons';
-import { Button, Card, Col, Row, Typography } from 'antd';
+import { BulbFilled, RobotOutlined } from '@ant-design/icons';
+import { Button, Card, Col, Flex, Row, Typography } from 'antd';
 import Image from 'next/image';
 import styled from 'styled-components';
+import { StakingContract } from 'types';
 
 import { BREAK_POINT, COLOR } from 'libs/ui-theme/src';
+
+import { RunAgentButton } from './RunAgentButton';
 
 const { Title, Paragraph } = Typography;
 
@@ -46,6 +49,7 @@ type Agent = {
   name: string;
   description: string;
   comingSoon: boolean;
+  availableOn: StakingContract['availableOn'][];
   urls: Record<string, string>;
   imageFilename: string;
 };
@@ -56,8 +60,8 @@ const agents: Agent[] = [
     name: 'Prediction Agent',
     description: 'Participates in prediction markets according to your strategy.',
     comingSoon: false,
+    availableOn: ['pearl', 'quickstart'],
     urls: {
-      run: 'https://github.com/valory-xyz/trader-quickstart?tab=readme-ov-file#trader-quickstart',
       learnMore: 'https://olas.network/services/prediction-agents',
       gpt: 'https://chat.openai.com/g/g-6y88mEBzS-olas-trader-agent-guide',
     },
@@ -66,8 +70,8 @@ const agents: Agent[] = [
 ];
 
 const AgentCard = ({ agent }: { agent: Agent }) => {
-  const { id, name, description, imageFilename, urls, comingSoon } = agent;
-  const { run, learnMore, gpt } = urls;
+  const { id, name, description, imageFilename, urls, comingSoon, availableOn } = agent;
+  const { learnMore, gpt } = urls;
 
   return (
     <Col xs={24} sm={18} md={12} key={id} style={{ margin: '0 auto' }}>
@@ -92,20 +96,13 @@ const AgentCard = ({ agent }: { agent: Agent }) => {
             </Button>
           ) : (
             <>
-              {run && (
-                <Button
-                  type="primary"
-                  size="large"
-                  block
-                  icon={<PlayCircleOutlined />}
-                  href={run}
-                  target="_blank"
-                  className="mb-8"
-                >
-                  Run Agent
-                </Button>
+              {availableOn && (
+                <Flex gap={8} justify="space-between" className="mb-8">
+                  {availableOn.map((type) => (
+                    <RunAgentButton availableOn={type} type="default" key={type} className='full-width'/>
+                  ))}
+                </Flex>
               )}
-              <br />
               {learnMore && (
                 <Button
                   type="default"
