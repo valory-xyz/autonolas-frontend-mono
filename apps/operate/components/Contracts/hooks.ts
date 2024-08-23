@@ -1,4 +1,3 @@
-import { ethers } from 'ethers';
 import { useMemo } from 'react';
 import { StakingContract } from 'types';
 import { Abi, Address, formatEther } from 'viem';

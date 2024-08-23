@@ -1,17 +1,11 @@
-import {
-  BulbFilled,
-  DownOutlined,
-  PlayCircleOutlined,
-  RightOutlined,
-  RobotOutlined,
-} from '@ant-design/icons';
+import { BulbFilled, PlayCircleOutlined, RobotOutlined } from '@ant-design/icons';
 import { Button, Card, Col, Row, Typography } from 'antd';
 import Image from 'next/image';
 import styled from 'styled-components';
 
 import { BREAK_POINT, COLOR } from 'libs/ui-theme/src';
 
-const { Title, Paragraph, Text } = Typography;
+const { Title, Paragraph } = Typography;
 
 const StyledMain = styled.main`
   display: flex;
