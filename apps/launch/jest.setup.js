@@ -21,12 +21,16 @@ Object.defineProperty(window, 'matchMedia', {
   })),
 });
 
-const { gnosis, mainnet, polygon } = require('viem/chains');
+const { mainnet, optimism, gnosis, polygon, base, arbitrum, celo } = require('viem/chains');
 
 jest.mock('wagmi/chains', () => ({
-  gnosis,
   mainnet,
+  optimism,
+  gnosis,
   polygon,
+  base,
+  arbitrum,
+  celo,
 }));
 
 jest.mock('common-util/config/wagmi', () => ({
