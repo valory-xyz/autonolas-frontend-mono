@@ -34,10 +34,20 @@ const nextConfig = {
         permanent: false,
       },
       {
-        source: '/manage-solana-products',
-        destination: '/manage-solana-liquidity',
+        source: '/bonding-products',
+        destination: 'https://bond.olas.network/bonding-products',
         permanent: true,
       },
+      {
+        source: '/manage-solana-products',
+        destination: 'https://bond.olas.network/manage-solana-liquidity',
+        permanent: true,
+      },
+      {
+        source: '/manage-solana-liquidity',
+        destination: 'https://bond.olas.network/manage-solana-liquidity',
+        permanent: true,
+      }
     ];
   },
 };
