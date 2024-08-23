@@ -21,18 +21,12 @@ Object.defineProperty(window, 'matchMedia', {
   })),
 });
 
-const { mainnet, optimism, gnosis, polygon, base, arbitrum, celo } = require('viem/chains');
+
+const { gnosis, mainnet, polygon } = require('viem/chains');
 
 jest.mock('wagmi/chains', () => ({
-  mainnet,
-  optimism,
   gnosis,
+  mainnet,
   polygon,
-  base,
-  arbitrum,
-  celo,
 }));
 
-jest.mock('common-util/config/wagmi', () => ({
-  SUPPORTED_CHAINS: [{ name: 'ethereum', chainId: 1 }],
-}));

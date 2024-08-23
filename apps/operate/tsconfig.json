@@ -18,7 +18,12 @@
     ],
     "types": ["jest", "node", "react", "react-dom"],
     "paths": {
-      "libs/*": ["libs/*"]
+      "common-util/*": ["apps/operate/common-util/*"],
+      "components/*": ["apps/operate/components/*"],
+      "images/*": ["apps/operate/public/images/*"],
+      "hooks/*": ["apps/operate/hooks/*"],
+      "context/*": ["apps/operate/context/*"],
+      "types": ["apps/operate/types"]
     }
   },
   "include": ["**/*.ts", "**/*.tsx", "**/*.js", "**/*.jsx", "next-env.d.ts"],

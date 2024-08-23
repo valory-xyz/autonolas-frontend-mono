@@ -60,6 +60,7 @@ export const THEME_CONFIG: ThemeConfig = {
       headerSortHoverBg: '#c2cbd7',
       headerSplitColor: COLOR.BORDER_GREY_2,
       rowSelectedBg: COLOR.PRIMARY_BG,
+      rowExpandedBg: COLOR.WHITE,
       rowSelectedHoverBg: '#efcfff',
     },
     Alert: {

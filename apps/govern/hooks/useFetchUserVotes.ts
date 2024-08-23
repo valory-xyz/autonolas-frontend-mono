@@ -2,13 +2,14 @@ import { useEffect } from 'react';
 import { UserVotes } from 'types';
 import { useAccount, useBlock } from 'wagmi';
 
+import { useNominees } from 'libs/common-contract-functions/src';
+
 import { LATEST_BLOCK_KEY, NEXT_USERS_SLOPES_KEY } from 'common-util/constants/scopeKeys';
 import { getUnixWeekStartTimestamp } from 'common-util/functions/time';
 import { setLastUserVote, setUserVotes } from 'store/govern';
 import { useAppDispatch, useAppSelector } from 'store/index';
 
 import { useLastUserVote } from './useLastUserVote';
-import { useNominees } from './useNominees';
 import { useVoteUserPower } from './useVoteUserPower';
 import { useVoteUserSlopes } from './useVoteUserSlopes';
 
