@@ -12,7 +12,7 @@ export type StakingContract = {
   metadata: Metadata;
   availableSlots: number;
   maxSlots: number;
-  apy: string;
+  apy: number;
   stakeRequired: string;
   availableOn: 'pearl' | 'quickstart' | null;
 };

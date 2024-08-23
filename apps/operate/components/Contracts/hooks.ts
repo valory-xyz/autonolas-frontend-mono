@@ -16,10 +16,14 @@ const AVAILABLE_ON: Record<Address, StakingContract['availableOn']> = {
   '0x0000000000000000000000005344b7dd311e5d3dddd46a4f71481bd7b05aaa3e': 'quickstart',
 };
 
-const getApy = (rewardsPerSecond: bigint, minStakingDeposit: bigint) => {
+const getApy = (
+  rewardsPerSecond: bigint,
+  minStakingDeposit: bigint,
+  maxNumAgentInstances: bigint,
+) => {
   const rewardsPerYear = rewardsPerSecond * BigInt(ONE_YEAR);
   const apy = (rewardsPerYear * BigInt(100)) / minStakingDeposit;
-  return (Number(apy) / 100).toFixed(2);
+  return Number(apy) / (1 + Number(maxNumAgentInstances));
 };
 
 const getStakeRequired = (minStakingDeposit: bigint, numAgentInstances: bigint) => {
@@ -103,7 +107,7 @@ export const useStakingContractsList = () => {
         const minStakingDeposit = minStakingDepositList[index] as bigint;
         const numAgentInstances = numAgentInstancesList[index] as bigint;
 
-        const apy = getApy(rewardsPerSecond, minStakingDeposit);
+        const apy = getApy(rewardsPerSecond, minStakingDeposit, numAgentInstances);
         const stakeRequired = getStakeRequired(minStakingDeposit, numAgentInstances);
 
         return {
