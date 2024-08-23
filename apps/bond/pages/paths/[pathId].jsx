@@ -1,7 +1,7 @@
 import { Button, Card, Col, Collapse, Flex, Grid, Row, Typography } from 'antd';
 import Head from 'next/head';
 import Image from 'next/image';
-import { useRouter } from 'next/router';
+import Link from 'next/link';
 import { PropTypes } from 'prop-types';
 import styled from 'styled-components';
 
@@ -162,19 +162,18 @@ BridgeCollapseItem.propTypes = {
   isEthereumPath: PropTypes.bool.isRequired,
 };
 
-const BondCollapseItem = () => {
-  const router = useRouter();
+const BondCollapseItem = () => (
   <Flex gap={16} vertical>
     <Flex gap={4} vertical>
       <Upcase>Bond LP Token into Olas Protocol</Upcase>
       <Flex gap={8} align="center">
-        <StyledPathButton type="default" onClick={() => router.push('/bonding-products')}>
-          View available products
-        </StyledPathButton>
+        <Link href="/bonding-products" passHref>
+          <StyledPathButton type="default">View available products</StyledPathButton>
+        </Link>
       </Flex>
     </Flex>
-  </Flex>;
-};
+  </Flex>
+);
 
 BondCollapseItem.propTypes = {
   path: PropTypes.shape({

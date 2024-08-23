@@ -1,7 +1,7 @@
 import { CheckOutlined, CloseOutlined } from '@ant-design/icons';
-import { Button, ConfigProvider, Empty, Radio, Table, Typography } from 'antd';
+import { Button, ConfigProvider, Empty, Radio, Table, Tooltip, Typography } from 'antd';
 import { round } from 'lodash';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 import { getFormattedDate, notifyError, notifySuccess } from '@autonolas/frontend-library';
 
@@ -20,7 +20,14 @@ const getBondsColumns = () => {
       title: 'Payout in OLAS',
       dataIndex: 'payout',
       key: 'payout',
-      render: (value) => `${round(parseToEth(value), 4)}`,
+      render: (value) => {
+        const parseValue = parseToEth(value);
+        return (
+          <Tooltip title={parseValue} placement="right">
+            {round(parseValue, 4)}
+          </Tooltip>
+        );
+      },
     },
     {
       title: 'Matured?',
@@ -57,7 +64,7 @@ export const MyBonds = () => {
   const [nonMaturedBondList, setNonMaturedBondList] = useState([]);
   const [selectedBondIds, setSelectedBondIds] = useState([]);
 
-  const getBondsListHelper = async () => {
+  const getBondsListHelper = useCallback(async () => {
     try {
       setIsLoading(true);
 
@@ -71,7 +78,7 @@ export const MyBonds = () => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [account]);
 
   // on load, get the list of bonds & set the maturity type radio button
   useEffect(() => {
@@ -103,7 +110,7 @@ export const MyBonds = () => {
     if (account && chainId) {
       getBondsListHelper();
     }
-  }, [account, chainId, maturityType]);
+  }, [account, chainId, maturityType, getBondsListHelper]);
 
   const onRedeem = async () => {
     try {
@@ -170,6 +177,7 @@ export const MyBonds = () => {
                 }
               : undefined
           }
+          rowHoverable={false}
         />
       </ConfigProvider>
 

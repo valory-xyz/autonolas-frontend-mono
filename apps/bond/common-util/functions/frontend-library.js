@@ -1,10 +1,10 @@
+import { notifyError } from 'libs/util-functions/src';
 import {
   getProvider as getProviderFn,
   getChainId as getChainIdFn,
   getChainIdOrDefaultToMainnet as getChainIdOrDefaultToMainnetFn,
-  sendTransaction as sendTransactionFn,
   LOCAL_FORK_ID,
-  notifyError,
+  sendTransaction as sendTransactionFn,
 } from '@autonolas/frontend-library';
 
 import { RPC_URLS } from 'common-util/constants/rpcs';
@@ -39,7 +39,4 @@ export const getChainId = (chainId) => {
 };
 
 export const sendTransaction = (fn, account) =>
-  sendTransactionFn(fn, account, {
-    supportedChains,
-    rpcUrls: RPC_URLS,
-  });
+  sendTransactionFn(fn, account, { supportedChains, rpcUrls: RPC_URLS });

@@ -1,4 +1,12 @@
 import { GraphQLClient } from 'graphql-request';
+import {
+  arbitrum,
+  base,
+  gnosis,
+  mainnet,
+  optimism,
+  polygon,
+} from 'viem/chains';
 
 const requestConfig = {
   jsonSerializer: {
@@ -16,32 +24,28 @@ export const AUTONOLAS_GRAPH_CLIENTS = {
 
 // https://docs.balancer.fi/reference/subgraph/ for future subgraph endpoints
 export const BALANCER_GRAPH_CLIENTS = {
-  1: new GraphQLClient(
-    'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-v2',
+  [mainnet.id]: new GraphQLClient(
+    process.env.NEXT_PUBLIC_MAINNET_BALANCER_URL,
     requestConfig,
   ),
-  5: new GraphQLClient(
-    'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-goerli-v2',
+  [optimism.id]: new GraphQLClient(
+    process.env.NEXT_PUBLIC_OPTIMISM_BALANCER_URL,
     requestConfig,
   ),
-  10: new GraphQLClient(
-    'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-optimism-v2',
+  [gnosis.id]: new GraphQLClient(
+    process.env.NEXT_PUBLIC_GNOSIS_BALANCER_URL,
     requestConfig,
   ),
-  100: new GraphQLClient(
-    'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-gnosis-chain-v2',
+  [polygon.id]: new GraphQLClient(
+    process.env.NEXT_PUBLIC_POLYGON_BALANCER_URL,
     requestConfig,
   ),
-  137: new GraphQLClient(
-    'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-polygon-v2',
-    requestConfig,
-  ),
-  8453: new GraphQLClient(
+  [base.id]: new GraphQLClient(
     'https://api.studio.thegraph.com/query/24660/balancer-base-v2/version/latest',
     requestConfig,
   ),
-  42161: new GraphQLClient(
-    'https://api.thegraph.com/subgraphs/name/balancer-labs/balancer-arbitrum-v2',
+  [arbitrum.id]: new GraphQLClient(
+    process.env.NEXT_PUBLIC_ARBITRUM_BALANCER_URL,
     requestConfig,
   ),
 };

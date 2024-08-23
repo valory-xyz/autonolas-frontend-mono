@@ -16,38 +16,6 @@ export const TOKENOMICS = {
       type: 'error',
     },
     {
-      inputs: [
-        {
-          internalType: 'uint256',
-          name: 'bondId',
-          type: 'uint256',
-        },
-      ],
-      name: 'BondNotRedeemable',
-      type: 'error',
-    },
-    {
-      inputs: [
-        {
-          internalType: 'address',
-          name: 'account',
-          type: 'address',
-        },
-        {
-          internalType: 'uint256',
-          name: 'reward',
-          type: 'uint256',
-        },
-        {
-          internalType: 'uint256',
-          name: 'topUp',
-          type: 'uint256',
-        },
-      ],
-      name: 'ClaimIncentivesFailed',
-      type: 'error',
-    },
-    {
       inputs: [],
       name: 'DelegatecallOnly',
       type: 'error',
@@ -61,22 +29,6 @@ export const TOKENOMICS = {
         },
       ],
       name: 'DonatorBlacklisted',
-      type: 'error',
-    },
-    {
-      inputs: [
-        {
-          internalType: 'uint256',
-          name: 'provided',
-          type: 'uint256',
-        },
-        {
-          internalType: 'uint256',
-          name: 'expected',
-          type: 'uint256',
-        },
-      ],
-      name: 'InsufficientAllowance',
       type: 'error',
     },
     {
@@ -109,11 +61,6 @@ export const TOKENOMICS = {
         },
       ],
       name: 'ManagerOnly',
-      type: 'error',
-    },
-    {
-      inputs: [],
-      name: 'NonZeroValue',
       type: 'error',
     },
     {
@@ -198,79 +145,6 @@ export const TOKENOMICS = {
     },
     {
       inputs: [],
-      name: 'Paused',
-      type: 'error',
-    },
-    {
-      inputs: [
-        {
-          internalType: 'uint256',
-          name: 'productId',
-          type: 'uint256',
-        },
-      ],
-      name: 'ProductClosed',
-      type: 'error',
-    },
-    {
-      inputs: [
-        {
-          internalType: 'address',
-          name: 'tokenAddress',
-          type: 'address',
-        },
-        {
-          internalType: 'uint256',
-          name: 'productId',
-          type: 'uint256',
-        },
-        {
-          internalType: 'uint256',
-          name: 'deadline',
-          type: 'uint256',
-        },
-        {
-          internalType: 'uint256',
-          name: 'curTime',
-          type: 'uint256',
-        },
-      ],
-      name: 'ProductExpired',
-      type: 'error',
-    },
-    {
-      inputs: [
-        {
-          internalType: 'address',
-          name: 'tokenAddress',
-          type: 'address',
-        },
-        {
-          internalType: 'uint256',
-          name: 'productId',
-          type: 'uint256',
-        },
-        {
-          internalType: 'uint256',
-          name: 'requested',
-          type: 'uint256',
-        },
-        {
-          internalType: 'uint256',
-          name: 'actual',
-          type: 'uint256',
-        },
-      ],
-      name: 'ProductSupplyLow',
-      type: 'error',
-    },
-    {
-      inputs: [],
-      name: 'ReentrancyGuard',
-      type: 'error',
-    },
-    {
-      inputs: [],
       name: 'SameBlockNumberViolation',
       type: 'error',
     },
@@ -299,49 +173,12 @@ export const TOKENOMICS = {
     {
       inputs: [
         {
-          internalType: 'address',
-          name: 'token',
-          type: 'address',
-        },
-        {
-          internalType: 'address',
-          name: 'from',
-          type: 'address',
-        },
-        {
-          internalType: 'address',
-          name: 'to',
-          type: 'address',
-        },
-        {
-          internalType: 'uint256',
-          name: 'amount',
-          type: 'uint256',
-        },
-      ],
-      name: 'TransferFailed',
-      type: 'error',
-    },
-    {
-      inputs: [
-        {
           internalType: 'uint256',
           name: 'epochNumber',
           type: 'uint256',
         },
       ],
       name: 'TreasuryRebalanceFailed',
-      type: 'error',
-    },
-    {
-      inputs: [
-        {
-          internalType: 'address',
-          name: 'tokenAddress',
-          type: 'address',
-        },
-      ],
-      name: 'UnauthorizedToken',
       type: 'error',
     },
     {
@@ -374,22 +211,6 @@ export const TOKENOMICS = {
         },
       ],
       name: 'WrongArrayLength',
-      type: 'error',
-    },
-    {
-      inputs: [
-        {
-          internalType: 'address',
-          name: 'provided',
-          type: 'address',
-        },
-        {
-          internalType: 'address',
-          name: 'expected',
-          type: 'address',
-        },
-      ],
-      name: 'WrongTokenAddress',
       type: 'error',
     },
     {
@@ -487,6 +308,12 @@ export const TOKENOMICS = {
       anonymous: false,
       inputs: [
         {
+          indexed: true,
+          internalType: 'uint256',
+          name: 'epochNumber',
+          type: 'uint256',
+        },
+        {
           indexed: false,
           internalType: 'uint256',
           name: 'effectiveBond',
@@ -534,6 +361,24 @@ export const TOKENOMICS = {
           indexed: false,
           internalType: 'uint256',
           name: 'accountTopUps',
+          type: 'uint256',
+        },
+        {
+          indexed: false,
+          internalType: 'uint256',
+          name: 'effectiveBond',
+          type: 'uint256',
+        },
+        {
+          indexed: false,
+          internalType: 'uint256',
+          name: 'returnedStakingIncentive',
+          type: 'uint256',
+        },
+        {
+          indexed: false,
+          internalType: 'uint256',
+          name: 'totalStakingIncentive',
           type: 'uint256',
         },
       ],
@@ -592,6 +437,12 @@ export const TOKENOMICS = {
           name: 'topUpAgentFraction',
           type: 'uint256',
         },
+        {
+          indexed: false,
+          internalType: 'uint256',
+          name: 'stakingFraction',
+          type: 'uint256',
+        },
       ],
       name: 'IncentiveFractionsUpdateRequested',
       type: 'event',
@@ -633,6 +484,63 @@ export const TOKENOMICS = {
         },
       ],
       name: 'ServiceRegistryUpdated',
+      type: 'event',
+    },
+    {
+      anonymous: false,
+      inputs: [
+        {
+          indexed: true,
+          internalType: 'uint256',
+          name: 'epochNumber',
+          type: 'uint256',
+        },
+        {
+          indexed: false,
+          internalType: 'uint256',
+          name: 'maxStakingIncentive',
+          type: 'uint256',
+        },
+        {
+          indexed: false,
+          internalType: 'uint256',
+          name: 'minStakingWeight',
+          type: 'uint256',
+        },
+      ],
+      name: 'StakingParamsUpdateRequested',
+      type: 'event',
+    },
+    {
+      anonymous: false,
+      inputs: [
+        {
+          indexed: true,
+          internalType: 'uint256',
+          name: 'epochNumber',
+          type: 'uint256',
+        },
+      ],
+      name: 'StakingParamsUpdated',
+      type: 'event',
+    },
+    {
+      anonymous: false,
+      inputs: [
+        {
+          indexed: true,
+          internalType: 'uint256',
+          name: 'epochNumber',
+          type: 'uint256',
+        },
+        {
+          indexed: false,
+          internalType: 'uint256',
+          name: 'amount',
+          type: 'uint256',
+        },
+      ],
+      name: 'StakingRefunded',
       type: 'event',
     },
     {
@@ -716,6 +624,32 @@ export const TOKENOMICS = {
       ],
       name: 'TreasuryUpdated',
       type: 'event',
+    },
+    {
+      inputs: [],
+      name: 'MAX_EPOCH_LENGTH',
+      outputs: [
+        {
+          internalType: 'uint256',
+          name: '',
+          type: 'uint256',
+        },
+      ],
+      stateMutability: 'view',
+      type: 'function',
+    },
+    {
+      inputs: [],
+      name: 'MAX_STAKING_WEIGHT',
+      outputs: [
+        {
+          internalType: 'uint256',
+          name: '',
+          type: 'uint256',
+        },
+      ],
+      stateMutability: 'view',
+      type: 'function',
     },
     {
       inputs: [],
@@ -869,6 +803,11 @@ export const TOKENOMICS = {
           name: '_topUpAgentFraction',
           type: 'uint256',
         },
+        {
+          internalType: 'uint256',
+          name: '_stakingFraction',
+          type: 'uint256',
+        },
       ],
       name: 'changeIncentiveFractions',
       outputs: [],
@@ -930,6 +869,24 @@ export const TOKENOMICS = {
         },
       ],
       name: 'changeRegistries',
+      outputs: [],
+      stateMutability: 'nonpayable',
+      type: 'function',
+    },
+    {
+      inputs: [
+        {
+          internalType: 'uint256',
+          name: '_maxStakingIncentive',
+          type: 'uint256',
+        },
+        {
+          internalType: 'uint256',
+          name: '_minStakingWeight',
+          type: 'uint256',
+        },
+      ],
+      name: 'changeStakingParams',
       outputs: [],
       stateMutability: 'nonpayable',
       type: 'function',
@@ -1144,11 +1101,11 @@ export const TOKENOMICS = {
           type: 'uint256',
         },
       ],
-      name: 'getIDF',
+      name: 'getEpochEndTime',
       outputs: [
         {
           internalType: 'uint256',
-          name: 'idf',
+          name: '',
           type: 'uint256',
         },
       ],
@@ -1176,24 +1133,11 @@ export const TOKENOMICS = {
     },
     {
       inputs: [],
-      name: 'getInflationPerEpoch',
-      outputs: [
-        {
-          internalType: 'uint256',
-          name: 'inflationPerEpoch',
-          type: 'uint256',
-        },
-      ],
-      stateMutability: 'view',
-      type: 'function',
-    },
-    {
-      inputs: [],
       name: 'getLastIDF',
       outputs: [
         {
           internalType: 'uint256',
-          name: 'idf',
+          name: '',
           type: 'uint256',
         },
       ],
@@ -1292,7 +1236,7 @@ export const TOKENOMICS = {
             },
           ],
           internalType: 'struct UnitPoint',
-          name: 'up',
+          name: '',
           type: 'tuple',
         },
       ],
@@ -1378,6 +1322,40 @@ export const TOKENOMICS = {
           internalType: 'uint32',
           name: '',
           type: 'uint32',
+        },
+      ],
+      stateMutability: 'view',
+      type: 'function',
+    },
+    {
+      inputs: [
+        {
+          internalType: 'uint256',
+          name: '',
+          type: 'uint256',
+        },
+      ],
+      name: 'mapEpochStakingPoints',
+      outputs: [
+        {
+          internalType: 'uint96',
+          name: 'stakingIncentive',
+          type: 'uint96',
+        },
+        {
+          internalType: 'uint96',
+          name: 'maxStakingIncentive',
+          type: 'uint96',
+        },
+        {
+          internalType: 'uint16',
+          name: 'minStakingWeight',
+          type: 'uint16',
+        },
+        {
+          internalType: 'uint8',
+          name: 'stakingFraction',
+          type: 'uint8',
         },
       ],
       stateMutability: 'view',
@@ -1657,6 +1635,19 @@ export const TOKENOMICS = {
         },
       ],
       name: 'refundFromBondProgram',
+      outputs: [],
+      stateMutability: 'nonpayable',
+      type: 'function',
+    },
+    {
+      inputs: [
+        {
+          internalType: 'uint256',
+          name: 'amount',
+          type: 'uint256',
+        },
+      ],
+      name: 'refundFromStaking',
       outputs: [],
       stateMutability: 'nonpayable',
       type: 'function',

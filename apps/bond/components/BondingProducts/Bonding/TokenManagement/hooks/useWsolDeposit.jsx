@@ -11,9 +11,11 @@ import {
 import { useWallet } from '@solana/wallet-adapter-react';
 import { SystemProgram, Transaction } from '@solana/web3.js';
 import Decimal from 'decimal.js';
+import Link from 'next/link';
 
 import { notifyError, notifySuccess } from '@autonolas/frontend-library';
 
+import { UNICODE_SYMBOLS } from 'libs/util-constants/src/lib/symbols';
 import idl from 'libs/util-contracts/src/lib/abiAndAddresses/liquidityLockbox.json';
 
 import { useSvmConnectivity } from 'common-util/hooks/useSvmConnectivity';
@@ -43,6 +45,19 @@ import {
 } from '../utils';
 import { useGetOrCreateAssociatedTokenAccount } from './useGetOrCreateAssociatedTokenAccount';
 import { useWhirlpool } from './useWhirlpool';
+
+const GetSomeOlas = () => (
+  <>
+    OLAS Associated token account does not exist.&nbsp;
+    <Link
+      href="https://www.orca.so/?tokenIn=So11111111111111111111111111111111111111112&tokenOut=Ez3nzG9ofodYCvEmw73XhQ87LWNYVRM2s7diB5tBZPyM"
+      target="_blank"
+      rel="noreferrer noopener"
+    >
+      Get some OLAS first {UNICODE_SYMBOLS.EXTERNAL_LINK}.
+    </Link>
+  </>
+);
 
 const getOlasAmount = async (connection, walletPublicKey, tokenAddress) => {
   const tokenAccounts = await connection.getTokenAccountsByOwner(walletPublicKey, {
@@ -153,6 +168,7 @@ export const useWsolDeposit = () => {
     }
 
     const { whirlpoolTokenA, whirlpoolTokenB } = await getWhirlpoolData();
+
     const quote = await getDepositIncreaseLiquidityQuote({ sol, slippage });
     const { solMax, olasMax } = await getDepositTransformedQuote(quote);
 
@@ -164,7 +180,8 @@ export const useWsolDeposit = () => {
 
     const accountInfo = await connection.getAccountInfo(tokenOwnerAccountB);
     if (!accountInfo) {
-      notifyError('OLAS Associated token account does not exist');
+      // If the user has no associated token account, they need to get some OLAS first
+      notifyError(<GetSomeOlas />);
       return null;
     }
 

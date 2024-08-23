@@ -3,16 +3,14 @@ import BigNumber from 'bignumber.js';
 import { ethers } from 'ethers';
 import { isNil } from 'lodash';
 import PropTypes from 'prop-types';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
-import {
-  COLOR,
-  getCommaSeparatedNumber,
-  notifyError,
-  notifySuccess,
-} from '@autonolas/frontend-library';
+import { getCommaSeparatedNumber } from '@autonolas/frontend-library';
 
-import { ONE_ETH_IN_STRING } from 'common-util/constants/numbers';
+import { COLOR } from 'libs/ui-theme/src';
+import { notifyError, notifySuccess } from 'libs/util-functions/src';
+
+import { ONE_ETH, ONE_ETH_IN_STRING } from 'common-util/constants/numbers';
 import {
   notifyCustomErrors,
   parseToEth,
@@ -30,7 +28,8 @@ const fullWidth = { width: '100%' };
 export const Deposit = ({
   productId,
   productToken,
-  productLpPriceInBg,
+  productLpTokenName,
+  productLpPriceAfterDiscount,
   productSupply,
   getProducts,
   closeModal,
@@ -39,8 +38,7 @@ export const Deposit = ({
   const [form] = Form.useForm();
   const [isLoading, setIsLoading] = useState(false);
   const [isApproveModalVisible, setIsApproveModalVisible] = useState(false);
-  const [lpBalance, setLpBalance] = useState(0);
-
+  const [lpBalance, setLpBalance] = useState(0n);
   const isSvmProduct = isSvmLpAddress(productToken);
 
   const { getLpBalanceRequest, depositRequest, approveRequest, hasSufficientTokenRequest } =
@@ -82,7 +80,7 @@ export const Deposit = ({
       notifySuccess('Deposited successfully!', `Transaction Hash: ${txHash}`);
 
       // fetch the products details again
-      getProducts();
+      await getProducts();
 
       // close the modal after successful deposit
       closeModal();
@@ -125,20 +123,19 @@ export const Deposit = ({
       });
   };
 
-  const getRemainingLpSupplyInEth = () => {
-    const supplyInWei = new BigNumber(productSupply || '0');
-
-    const remainingSupply = supplyInWei
-      .multipliedBy(ONE_ETH_IN_STRING)
-      .dividedBy(productLpPriceInBg);
-
-    const remainingSupplyInWei = remainingSupply.lt(lpBalance) ? remainingSupply : lpBalance;
-    return parseToEth(remainingSupplyInWei);
-  };
-
-  const remainingLpSupplyInEth = getRemainingLpSupplyInEth();
   const tokenAmountInputValue = Form.useWatch('tokenAmount', form) || 0;
-  const getOlasPayout = () => {
+
+  const remainingLpSupplyInEth = useMemo(() => {
+    const totalProductSupplyInWei = productSupply || 0n;
+    const lpBalanceInWei = BigInt(lpBalance);
+    const maxRedeemableSupply =
+      (totalProductSupplyInWei * ONE_ETH) / BigInt(productLpPriceAfterDiscount);
+    const remainingLPSupply =
+      maxRedeemableSupply < lpBalanceInWei ? maxRedeemableSupply : lpBalanceInWei;
+    return parseToEth(remainingLPSupply);
+  }, [lpBalance, productSupply, productLpPriceAfterDiscount]);
+
+  const olasPayout = useMemo(() => {
     if (!tokenAmountInputValue || tokenAmountInputValue > remainingLpSupplyInEth) {
       return '--';
     }
@@ -147,14 +144,13 @@ export const Deposit = ({
       ? tokenAmountInputValue
       : new BigNumber(parseToWei(tokenAmountInputValue));
 
-    const payoutInBg = new BigNumber(productLpPriceInBg.toString()).multipliedBy(tokenAmountValue);
-
+    const payoutInBg = new BigNumber(productLpPriceAfterDiscount).multipliedBy(tokenAmountValue);
     const payout = isSvmProduct
       ? payoutInBg.dividedBy(BigNumber(`1${'0'.repeat(28)}`)).toFixed(2)
       : Number(payoutInBg.dividedBy(ONE_ETH_IN_STRING).dividedBy(ONE_ETH_IN_STRING).toFixed(2));
 
     return getCommaSeparatedNumber(payout, 4);
-  };
+  }, [tokenAmountInputValue, remainingLpSupplyInEth, productLpPriceAfterDiscount, isSvmProduct]);
 
   return (
     <>
@@ -162,9 +158,7 @@ export const Deposit = ({
         open
         title="Bond LP tokens for OLAS"
         okText="Bond"
-        okButtonProps={{
-          disabled: !account || lpBalance === new BigNumber(0),
-        }}
+        okButtonProps={{ disabled: !account || lpBalance === 0n }}
         cancelText="Cancel"
         onCancel={closeModal}
         onOk={onCreate}
@@ -178,8 +172,8 @@ export const Deposit = ({
           autoComplete="off"
           className="mt-16"
         >
-          <Tag color={COLOR.PRIMARY} className="deposit-tag">
-            <Text>{`Bonding Product ID: ${productId}`}</Text>
+          <Tag color={COLOR.PRIMARY} className="deposit-tag mb-12">
+            {`Bonding Product ID: ${productId}`}
           </Tag>
 
           <Form.Item
@@ -222,7 +216,6 @@ export const Deposit = ({
                   form.setFieldsValue({ tokenAmount: remainingLpSupplyInEth });
                   form.validateFields(['tokenAmount']);
                 }}
-                className="pl-0"
               >
                 Max
               </Button>
@@ -230,7 +223,7 @@ export const Deposit = ({
           </div>
 
           <div>
-            <Text>{`OLAS Payout: ${getOlasPayout()}`}</Text>
+            <Text>{`OLAS Payout: ${olasPayout}`}</Text>
           </div>
         </Form>
       </Modal>
@@ -238,12 +231,12 @@ export const Deposit = ({
       {isApproveModalVisible && (
         <Modal
           title="Approve OLAS"
-          visible={isApproveModalVisible}
+          open={isApproveModalVisible}
           footer={null}
           onCancel={() => setIsApproveModalVisible(false)}
         >
           <Alert
-            message="Before depositing to the bonding product, an approval for OLAS is required. Please approve OLAS to proceed."
+            message={`Before depositing to the bonding product, an approval for ${productLpTokenName} is required. Please approve ${productLpTokenName} to proceed.`}
             type="warning"
           />
 
@@ -255,12 +248,12 @@ export const Deposit = ({
               htmlType="submit"
               loading={isLoading}
               onClick={async () => {
-                try {
-                  if (!account) {
-                    notifyError('Please connect your wallet');
-                    return;
-                  }
+                if (!account) {
+                  notifyError('Please connect your wallet');
+                  return;
+                }
 
+                try {
                   setIsLoading(true);
                   await approveRequest({
                     token: productToken,
@@ -291,8 +284,12 @@ export const Deposit = ({
 Deposit.propTypes = {
   productId: PropTypes.string,
   productToken: PropTypes.string,
-  productSupply: PropTypes.string,
-  productLpPriceInBg: PropTypes.shape({}),
+  productLpTokenName: PropTypes.string,
+  productSupply: PropTypes.oneOfType([PropTypes.string, PropTypes.instanceOf(BigInt)]),
+  productLpPriceAfterDiscount: PropTypes.oneOfType([
+    PropTypes.string,
+    PropTypes.instanceOf(BigInt),
+  ]),
   closeModal: PropTypes.func,
   getProducts: PropTypes.func,
 };
@@ -300,7 +297,8 @@ Deposit.propTypes = {
 Deposit.defaultProps = {
   productId: undefined,
   productToken: null,
-  productLpPriceInBg: null,
+  productLpTokenName: null,
+  productLpPriceAfterDiscount: null,
   productSupply: null,
   closeModal: () => {},
   getProducts: () => {},
