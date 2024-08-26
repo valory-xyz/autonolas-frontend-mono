@@ -71,7 +71,7 @@ export const Deployed = ({
 
   return (
     <div className="step-4-deployed" data-testid="step-deployed">
-      <Space direction="vertical" size={10}>
+      <Space direction="vertical" size={10} className="full-width">
         {isShowAgentInstanceVisible && (
           <Table
             dataSource={data}
@@ -84,12 +84,14 @@ export const Deployed = ({
                 dataIndex: 'agentInstance',
                 key: 'agentInstance',
                 render: (text) => <AddressLink text={text} {...addressLinkProps} />,
+                width: '50%',
               },
               {
                 title: 'Operators',
                 dataIndex: 'operatorAddress',
                 key: 'operatorAddress',
                 render: (text) => <AddressLink text={text} {...addressLinkProps} />,
+                width: '50%',
               },
             ]}
           />
