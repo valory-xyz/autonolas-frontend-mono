@@ -54,6 +54,17 @@ jest.mock('wagmi', () => ({
   },
 }));
 
+jest.mock('libs/common-contract-functions/src', () => ({
+  useClaimableIncentives: jest.fn().mockReturnValue({
+    reward: '0.25',
+    topUp: '111,555.70',
+  }),
+  getPendingIncentives: jest.fn().mockResolvedValue({
+    reward: '0.5',
+    topUp: '100,800.25',
+  }),
+}));
+
 jest.mock('common-util/List/IpfsHashGenerationModal/helpers', () => ({
   getIpfsHashHelper: jest.fn(() => mockV1Hash),
 }));
