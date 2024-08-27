@@ -4,26 +4,27 @@ import { Abi, AbiFunction, TransactionReceipt, parseUnits } from 'viem';
 import { Address } from 'viem';
 import { mainnet } from 'viem/chains';
 
-
-
 import { sendTransaction } from '@autonolas/frontend-library';
 
-
-
-import { SERVICE_REGISTRY, STAKING_FACTORY, VE_OLAS } from 'libs/util-contracts/src/lib/abiAndAddresses';
+import {
+  SERVICE_REGISTRY,
+  STAKING_FACTORY,
+  VE_OLAS,
+} from 'libs/util-contracts/src/lib/abiAndAddresses';
 import { getEstimatedGasLimit } from 'libs/util-functions/src';
-
-
 
 import { SUPPORTED_CHAINS, wagmiConfig } from 'common-util/config/wagmi';
 import { RPC_URLS } from 'common-util/constants/rpcs';
 
-
-
 import { getAddressFromBytes32 } from './addresses';
 import { getUnixNextWeekStartTimestamp } from './time';
-import { getOlasContract, getTokenomicsContract, getTreasuryContract, getVeOlasContract, getVoteWeightingContract } from './web3';
-
+import {
+  getOlasContract,
+  getTokenomicsContract,
+  getTreasuryContract,
+  getVeOlasContract,
+  getVoteWeightingContract,
+} from './web3';
 
 type VoteForNomineeWeightsParams = {
   account: Address | undefined;
@@ -323,7 +324,6 @@ export const checkpointRequest = async ({ account }: { account: Address }) => {
 /**
  * Check services are eligible for donating
  */
-
 export const checkServicesTerminatedOrNotDeployed = async (ids: string[]) => {
   const invalidServiceIds: string[] = [];
 
@@ -355,7 +355,6 @@ export const checkServicesTerminatedOrNotDeployed = async (ids: string[]) => {
 /**
  * Donate to services
  */
-
 export const depositServiceDonationRequest = async ({
   account,
   serviceIds,

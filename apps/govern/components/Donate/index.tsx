@@ -1,4 +1,4 @@
-import { Alert, Button, Skeleton, Typography } from 'antd';
+import { Alert, Button, Card, Skeleton, Typography } from 'antd';
 import { ethers } from 'ethers';
 import isNumber from 'lodash/isNumber';
 import Link from 'next/link';
@@ -54,9 +54,7 @@ export const DonatePage = () => {
       setIsDonationLoading(true);
 
       const [sortedUnitIds, sortedAmounts] = sortUnitIdsAndAmounts(values.unitIds, values.amounts);
-
       const serviceIds = sortedUnitIds.map((e) => `${e}`);
-
       const invalidServices = await checkServicesTerminatedOrNotDeployed(serviceIds);
 
       // deposit only if all services are deployed or not terminated
@@ -110,8 +108,7 @@ export const DonatePage = () => {
       notifySuccess('Started new epoch');
     } catch (error) {
       console.error(error);
-      const errorMessage = (error as Error).message || 'Error occurred on starting new epoch';
-      notifyError(errorMessage);
+      notifyError('Error occurred on starting new epoch');
     } finally {
       setIsCheckpointLoading(false);
     }
@@ -141,7 +138,7 @@ export const DonatePage = () => {
 
   return (
     <DonateContainer>
-      <div className="donate-section">
+      <Card className="donate-section">
         <Title level={2} className="mt-0">
           Donate
         </Title>
@@ -170,9 +167,9 @@ export const DonatePage = () => {
         />
 
         <DonateForm isLoading={isDonationLoading} onSubmit={onDepositServiceDonationSubmit} />
-      </div>
+      </Card>
 
-      <div className="last-epoch-section">
+      <Card className="last-epoch-section">
         <Title level={2} className="mt-0">
           Epoch Status
         </Title>
@@ -200,7 +197,7 @@ export const DonatePage = () => {
           </Button>
           <Text type="secondary">New epochs must be manually triggered by community members</Text>
         </EpochCheckpointRow>
-      </div>
+      </Card>
     </DonateContainer>
   );
 };

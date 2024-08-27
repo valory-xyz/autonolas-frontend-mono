@@ -1,21 +1,19 @@
 import styled from 'styled-components';
 
-import { COLOR, MEDIA_QUERY } from 'libs/ui-theme/src';
+import { MEDIA_QUERY } from 'libs/ui-theme/src';
 
 export const DonateContainer = styled.div`
   display: flex;
-  padding: 0 16px;
+  gap: 16px;
 
   .donate-section {
     width: 720px;
   }
   .last-epoch-section {
-    padding-left: 1rem;
-    margin-left: 1rem;
-    border-left: 1px solid ${COLOR.BORDER_GREY_2};
+    flex: auto;
   }
 
-  ${MEDIA_QUERY.mobileL} {
+  ${MEDIA_QUERY.tabletL} {
     flex-direction: column;
     .donate-section {
       width: 100%;

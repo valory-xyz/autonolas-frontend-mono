@@ -2,14 +2,15 @@ import { mainnet } from 'viem/chains';
 import Web3 from 'web3';
 import { AbiItem } from 'web3-utils';
 
-
-
-import { OLAS, TOKENOMICS, TREASURY, VE_OLAS, VOTE_WEIGHTING } from 'libs/util-contracts/src/lib/abiAndAddresses';
-
-
+import {
+  OLAS,
+  TOKENOMICS,
+  TREASURY,
+  VE_OLAS,
+  VOTE_WEIGHTING,
+} from 'libs/util-contracts/src/lib/abiAndAddresses';
 
 import { getChainId, getProvider } from 'common-util/functions/frontend-library';
-
 
 /**
  * returns the web3 details

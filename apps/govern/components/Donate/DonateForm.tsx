@@ -26,17 +26,15 @@ export const DonateForm = ({ isLoading, onSubmit }: DonateFormProps) => {
   const inputStyle = screens.xs ? { width: '140px' } : { width: 'auto' };
 
   const onFinish = async (values: { units: { unitId: number; amount: number }[] }) => {
-    if (onSubmit) {
-      try {
-        await onSubmit({
-          unitIds: values.units.map((unit) => unit.unitId),
-          amounts: values.units.map((unit) => unit.amount),
-        });
+    try {
+      await onSubmit({
+        unitIds: values.units.map((unit) => unit.unitId),
+        amounts: values.units.map((unit) => unit.amount),
+      });
 
-        form.resetFields();
-      } catch (error) {
-        window.console.error(error);
-      }
+      form.resetFields();
+    } catch (error) {
+      window.console.error(error);
     }
   };
 
@@ -103,7 +101,7 @@ export const DonateForm = ({ isLoading, onSubmit }: DonateFormProps) => {
               <Form.ErrorList errors={errors} />
 
               <Form.Item wrapperCol={{ span: 6 }}>
-                <Button size="large" onClick={() => add()} block icon={<PlusOutlined />}>
+                <Button size="large" onClick={add} block icon={<PlusOutlined />}>
                   Add row
                 </Button>
               </Form.Item>
@@ -111,7 +109,7 @@ export const DonateForm = ({ isLoading, onSubmit }: DonateFormProps) => {
           )}
         </Form.List>
 
-        <Form.Item>
+        <Form.Item className="mb-0">
           <Button
             size="large"
             type="primary"

@@ -3,10 +3,7 @@ import { useCallback, useMemo } from 'react';
 import { mainnet } from 'viem/chains';
 import { useReadContract } from 'wagmi';
 
-
-
 import { TOKENOMICS, TREASURY } from 'libs/util-contracts/src/lib/abiAndAddresses';
-
 
 const useVeOLASThreshold = () =>
   useReadContract({
@@ -56,12 +53,26 @@ const useEpochLength = () =>
   });
 
 export const useThresholdData = () => {
-  const { data: veOLASThreshold, isFetching: isVeOLASThresholdFetching, refetch: refetchVeOLASThreshold } = useVeOLASThreshold();
-  const { data: minAcceptedETH, isFetching: isMinAcceptedETHFetching, refetch: refetchMinAcceptedETH } = useMinAcceptedETH();
-  const { data: epochCounter, isFetching: isEpochCounterFetching, refetch: refetchEpochCounter } = useEpochCounter();
-  const { data: prevEpochPoint, isFetching: isPrevEpochPointFetching, refetch: refetchPrevEpochPoint } = useEpochTokenomics(
-    epochCounter !== undefined ? Number(epochCounter) - 1 : undefined,
-  );
+  const {
+    data: veOLASThreshold,
+    isFetching: isVeOLASThresholdFetching,
+    refetch: refetchVeOLASThreshold,
+  } = useVeOLASThreshold();
+  const {
+    data: minAcceptedETH,
+    isFetching: isMinAcceptedETHFetching,
+    refetch: refetchMinAcceptedETH,
+  } = useMinAcceptedETH();
+  const {
+    data: epochCounter,
+    isFetching: isEpochCounterFetching,
+    refetch: refetchEpochCounter,
+  } = useEpochCounter();
+  const {
+    data: prevEpochPoint,
+    isFetching: isPrevEpochPointFetching,
+    refetch: refetchPrevEpochPoint,
+  } = useEpochTokenomics(epochCounter !== undefined ? Number(epochCounter) - 1 : undefined);
   const {
     data: epochLength,
     isFetching: isEpochLengthFetching,
@@ -83,8 +94,14 @@ export const useThresholdData = () => {
       refetchEpochLength(),
     ];
 
-   return Promise.all(promises);
-  }, []);
+    return Promise.all(promises);
+  }, [
+    refetchVeOLASThreshold,
+    refetchMinAcceptedETH,
+    refetchEpochCounter,
+    refetchPrevEpochPoint,
+    refetchEpochLength,
+  ]);
 
   return {
     veOLASThreshold,
@@ -99,6 +116,6 @@ export const useThresholdData = () => {
       isEpochCounterFetching ||
       isPrevEpochPointFetching ||
       isEpochLengthFetching,
-    refetchData
+    refetchData,
   };
 };
