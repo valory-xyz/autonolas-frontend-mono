@@ -8,6 +8,11 @@ jest.mock('../../../common-util/Contracts', () => ({
   getAgentContract: jest.fn(),
 }));
 
+// TODO: mock updateAgentHashes instead
+jest.mock('libs/util-constants/src', () => ({
+  TOKENOMICS_UNIT_TYPES: { COMPONENT: '0', AGENT: '1' },
+}));
+
 describe('listAgents/utils.jsx', () => {
   it('getFilteredAgents: Promise resolved', async () => {
     getAgentContract.mockImplementation(() => ({

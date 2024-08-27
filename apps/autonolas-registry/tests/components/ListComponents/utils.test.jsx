@@ -12,6 +12,11 @@ jest.mock('../../../common-util/Contracts', () => ({
   getComponentContract: jest.fn(),
 }));
 
+// TODO: mock updateComponentHashes instead
+jest.mock('libs/util-constants/src', () => ({
+  TOKENOMICS_UNIT_TYPES: { COMPONENT: '0', AGENT: '1' },
+}));
+
 describe('listComponents/utils.jsx', () => {
   it('getComponentDetails: Promise resolved', async () => {
     getComponentContract.mockImplementation(() => ({

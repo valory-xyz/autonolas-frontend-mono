@@ -74,6 +74,11 @@ jest.mock('common-util/Details/utils', () => ({
   checkIfServiceRequiresWhitelisting: jest.fn(),
 }));
 
+jest.mock('common-util/Details/DetailsSubInfo/utils', () => ({
+  getTokenomicsUnitType: jest.fn(() => 1),
+}));
+
+
 jest.mock('common-util/hooks/useSvmConnectivity', () => ({
   useSvmConnectivity: jest.fn(),
 }));

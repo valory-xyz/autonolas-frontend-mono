@@ -1,6 +1,6 @@
 import { notifyError } from '@autonolas/frontend-library';
+import { TOKENOMICS_UNIT_TYPES } from 'libs/util-constants/src';
 
-import { UNIT_TYPES } from 'common-util/enums';
 import {
   getAgentContract,
   getBlockTimestamp,
@@ -22,7 +22,7 @@ export const getOwnersForUnits = async ({ unitIds, unitTypes }) => {
 
   for (let i = 0; i < unitIds.length; i += 1) {
     // 1 = agent, 0 = component
-    if (unitTypes[i] === UNIT_TYPES.AGENT) {
+    if (unitTypes[i] === TOKENOMICS_UNIT_TYPES.AGENT) {
       const result = agentContract.methods.ownerOf(unitIds[i]).call();
       ownersList.push(result);
     } else {

@@ -71,6 +71,10 @@ jest.mock('components/ListComponents/utils', () => ({
   getTokenUri: jest.fn(),
 }));
 
+jest.mock('common-util/Details/DetailsSubInfo/utils', () => ({
+  getTokenomicsUnitType: jest.fn(() => 1),
+}));
+
 const dummyDetails = {
   owner: dummyAddress,
   developer: dummyAddress,
