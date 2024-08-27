@@ -1,5 +1,6 @@
 import { Contract, Provider, ethers } from 'ethers';
-import { UNIT_TYPES } from 'libs/util-constants/src';
+
+import { TOKENOMICS_UNIT_TYPES } from 'libs/util-constants/src';
 
 import { rewardsFormatter } from './utils';
 
@@ -123,7 +124,7 @@ const getMapUnitIncentivesRequest = async ({
     agentPendingTopUp = (totalIncentives * aTopupFraction) / (aSumUnitTopUpsOLAS * BIG_INT_100);
   }
 
-  const isComponent = unitType === UNIT_TYPES.COMPONENT;
+  const isComponent = unitType === TOKENOMICS_UNIT_TYPES.COMPONENT;
   const pendingRelativeTopUpInWei = isComponent ? componentReward : agentReward;
   const componentTopUpInWei = isComponent ? componentTopUp : agentPendingTopUp;
 

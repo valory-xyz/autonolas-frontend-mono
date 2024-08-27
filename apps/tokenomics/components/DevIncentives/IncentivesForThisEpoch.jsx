@@ -4,7 +4,7 @@ import { useState } from 'react';
 
 import { notifyError } from '@autonolas/frontend-library';
 
-import { UNIT_TYPES } from 'libs/util-constants/src';
+import { TOKENOMICS_UNIT_TYPES } from 'libs/util-constants/src';
 
 import { DynamicFieldsForm } from 'common-util/DynamicFieldsForm';
 import { FORM_TYPES } from 'common-util/enums';
@@ -32,8 +32,10 @@ const columns = [
 ];
 
 const checkIfHasDuplicate = (unitIds, unitTypes) => {
-  const agentIds = unitIds.filter((e, index) => unitTypes[index] === UNIT_TYPES.AGENT);
-  const componentIds = unitIds.filter((e, index) => unitTypes[index] === UNIT_TYPES.COMPONENT);
+  const agentIds = unitIds.filter((e, index) => unitTypes[index] === TOKENOMICS_UNIT_TYPES.AGENT);
+  const componentIds = unitIds.filter(
+    (e, index) => unitTypes[index] === TOKENOMICS_UNIT_TYPES.COMPONENT,
+  );
 
   const uniqueAgentIds = [...new Set(agentIds)];
   const uniqueComponentIds = [...new Set(componentIds)];
@@ -86,7 +88,8 @@ export const IncentivesForThisEpoch = () => {
         if (indexesWithDifferentOwner.length !== 0) {
           const ids = indexesWithDifferentOwner
             .map((e) => {
-              const type = unitTypes[e] === UNIT_TYPES.AGENT ? 'Agent ID' : 'Component ID';
+              const type =
+                unitTypes[e] === TOKENOMICS_UNIT_TYPES.AGENT ? 'Agent ID' : 'Component ID';
               return `${type} ${unitIds[e]}`;
             })
             .join(', ');

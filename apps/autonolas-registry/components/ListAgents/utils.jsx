@@ -1,4 +1,4 @@
-import { UNIT_TYPES } from 'libs/util-constants/src';
+import { TOKENOMICS_UNIT_TYPES } from 'libs/util-constants/src';
 
 import { getListByAccount } from '../../common-util/ContractUtils/myList';
 import { getAgentContract, getMechMinterContract } from '../../common-util/Contracts';
@@ -73,7 +73,7 @@ export const getAgentHashes = async (id) => {
 export const updateAgentHashes = async (account, id, newHash) => {
   const contract = getMechMinterContract();
 
-  const fn = contract.methods.updateHash(UNIT_TYPES.AGENT, id, `0x${newHash}`).send({
+  const fn = contract.methods.updateHash(TOKENOMICS_UNIT_TYPES.AGENT, id, `0x${newHash}`).send({
     from: account,
   });
   await sendTransaction(fn, account);

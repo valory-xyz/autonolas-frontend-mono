@@ -1,4 +1,4 @@
-import { UNIT_TYPES } from 'libs/util-constants/src';
+import { TOKENOMICS_UNIT_TYPES } from 'libs/util-constants/src';
 import { GATEWAY_URL, HASH_PREFIX } from 'libs/util-constants/src/lib/ipfs';
 
 import { getListByAccount } from 'common-util/ContractUtils/myList';
@@ -74,8 +74,7 @@ export const getComponentHashes = async (id) => {
 export const updateComponentHashes = async (account, id, newHash) => {
   const contract = getMechMinterContract();
 
-  // 0 to indicate `components`
-  const fn = contract.methods.updateHash(UNIT_TYPES.COMPONENT, id, `0x${newHash}`).send({
+  const fn = contract.methods.updateHash(TOKENOMICS_UNIT_TYPES.COMPONENT, id, `0x${newHash}`).send({
     from: account,
   });
   await sendTransaction(fn, account);
