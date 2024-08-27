@@ -1,6 +1,8 @@
-import { getMechMinterContract, getAgentContract } from '../../common-util/Contracts';
-import { getFirstAndLastIndex } from '../../common-util/List/functions';
+import { UNIT_TYPES } from 'libs/util-constants/src';
+
 import { getListByAccount } from '../../common-util/ContractUtils/myList';
+import { getAgentContract, getMechMinterContract } from '../../common-util/Contracts';
+import { getFirstAndLastIndex } from '../../common-util/List/functions';
 import { sendTransaction } from '../../common-util/functions';
 
 // --------- HELPER METHODS ---------
@@ -72,7 +74,7 @@ export const updateAgentHashes = async (account, id, newHash) => {
   const contract = getMechMinterContract();
 
   // 0 to indicate `agents`
-  const fn = contract.methods.updateHash('0', id, `0x${newHash}`).send({
+  const fn = contract.methods.updateHash(UNIT_TYPES.AGENT, id, `0x${newHash}`).send({
     from: account,
   });
   await sendTransaction(fn, account);

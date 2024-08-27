@@ -1,8 +1,8 @@
 import { Contract, Provider, ethers } from 'ethers';
+import { UNIT_TYPES } from 'libs/util-constants/src';
 
 import { rewardsFormatter } from './utils';
 
-const UNIT_TYPES = { COMPONENT: '0', AGENT: '1' } as const;
 const BIG_INT_0 = BigInt(0);
 const BIG_INT_100 = BigInt(100);
 
