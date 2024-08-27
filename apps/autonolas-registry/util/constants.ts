@@ -100,11 +100,3 @@ export const HASH_DETAILS_STATE = {
   LOADED: 'LOADED',
   FAILED: 'FAILED',
 } as const;
-
-/**
- * Constants for Tokenomics unitTypes
- */
-export const TOKENOMICS_UNIT_TYPES = {
-  COMPONENT: 0,
-  AGENT: 1,
-} as const;
