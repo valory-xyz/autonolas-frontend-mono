@@ -1,13 +1,14 @@
-import { ContractTransactionReceipt, EventLog } from 'ethers';
+import { BaseContract, EventLog } from 'ethers';
 import { Address } from 'viem';
 import Web3 from 'web3';
 import { AbiItem } from 'web3-utils';
 
-import { sendTransaction as sendTransactionFn } from '@autonolas/frontend-library';
-
 import { RPC_URLS } from 'libs/util-constants/src';
 import { STAKING_FACTORY, VOTE_WEIGHTING } from 'libs/util-contracts/src/lib/abiAndAddresses';
-import { getEstimatedGasLimit } from 'libs/util-functions/src';
+import {
+  getEstimatedGasLimit,
+  sendTransaction as sendTransactionFn,
+} from 'libs/util-functions/src';
 
 import { SUPPORTED_CHAINS } from 'common-util/config/wagmi';
 import { getChainId, getProvider } from 'common-util/functions/frontend-library';
@@ -82,7 +83,7 @@ export const createStakingContract = async ({
   const createFn = contract.methods.createStakingInstance(implementation, initPayload);
   const result = await sendTransaction(createFn, account);
 
-  return result as ContractTransactionReceipt & {
+  return result as BaseContract & {
     events?: { InstanceCreated: InstanceCreatedEvent };
   };
 };

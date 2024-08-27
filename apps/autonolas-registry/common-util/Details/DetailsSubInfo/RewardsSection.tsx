@@ -158,7 +158,7 @@ export const RewardsSection: FC<RewardsSectionProps> = ({ ownerAddress, isOwner,
       const params = {
         account: account as Address,
         unitIds: [id],
-        unitTypes: [id],
+        unitTypes: [`${tokenomicsUnitType}`],
       };
 
       await claimOwnerIncentivesRequest(params);
@@ -171,7 +171,7 @@ export const RewardsSection: FC<RewardsSectionProps> = ({ ownerAddress, isOwner,
     } finally {
       setIsClaimLoading(false);
     }
-  }, [account, id, canClaim, fetchPendingIncentives, refetch]);
+  }, [account, id, tokenomicsUnitType, canClaim, fetchPendingIncentives, refetch]);
 
   return (
     <Flex gap={16} vertical className="mt-12" data-testid={dataTestId}>

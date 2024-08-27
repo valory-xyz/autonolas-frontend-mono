@@ -1,11 +1,11 @@
 import { Address } from 'viem';
 
-import { getEstimatedGasLimit, notifyError, sendTransaction } from 'libs/util-functions/src';
+import { getEstimatedGasLimit, notifyError } from 'libs/util-functions/src';
 
-import { SUPPORTED_CHAINS } from 'common-util/Login';
+import { sendTransaction } from 'common-util/functions';
 
 import { DEFAULT_SERVICE_CREATION_ETH_TOKEN_ZEROS } from '../../util/constants';
-import { RPC_URLS, getDispenserContract, getServiceOwnerMultisigContract } from '../Contracts';
+import { getDispenserContract, getServiceOwnerMultisigContract } from '../Contracts';
 import { checkIfGnosisSafe, getEthersProvider } from './index';
 
 const FALLBACK_HANDLER_STORAGE_SLOT =
@@ -66,10 +66,7 @@ export const claimOwnerIncentivesRequest = async ({
     const estimatedGas = await getEstimatedGasLimit(claimFn, account);
     const fn = claimFn.send({ from: account, gasLimit: estimatedGas });
 
-    const response = await sendTransaction(fn, account, {
-      supportedChains: SUPPORTED_CHAINS,
-      rpcUrls: RPC_URLS as Record<string, string>,
-    });
+    const response = await sendTransaction(fn, account);
     return response?.transactionHash;
   } catch (error) {
     window.console.log('Error occurred on claiming owner incentives');
