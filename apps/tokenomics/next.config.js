@@ -30,8 +30,13 @@ const nextConfig = {
     return [
       {
         source: '/',
-        destination: '/donate',
+        destination: '/dev-incentives',
         permanent: false,
+      },
+       {
+        source: '/donate',
+        destination: 'https://govern.olas.network/donate',
+        permanent: true,
       },
       {
         source: '/bonding-products',

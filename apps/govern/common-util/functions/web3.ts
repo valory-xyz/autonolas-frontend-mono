@@ -2,7 +2,13 @@ import { mainnet } from 'viem/chains';
 import Web3 from 'web3';
 import { AbiItem } from 'web3-utils';
 
-import { OLAS, VE_OLAS, VOTE_WEIGHTING } from 'libs/util-contracts/src/lib/abiAndAddresses';
+import {
+  OLAS,
+  TOKENOMICS,
+  TREASURY,
+  VE_OLAS,
+  VOTE_WEIGHTING,
+} from 'libs/util-contracts/src/lib/abiAndAddresses';
 
 import { getChainId, getProvider } from 'common-util/functions/frontend-library';
 
@@ -43,6 +49,20 @@ export const getOlasContract = () => {
 export const getVeOlasContract = () => {
   const abi = VE_OLAS.abi as AbiItem[];
   const address = (VE_OLAS.addresses as Record<number, string>)[mainnet.id];
+  const contract = getContract(abi, address);
+  return contract;
+};
+
+export const getTokenomicsContract = () => {
+  const abi = TOKENOMICS.abi as unknown as AbiItem[];
+  const address = TOKENOMICS.addresses[mainnet.id];
+  const contract = getContract(abi, address);
+  return contract;
+};
+
+export const getTreasuryContract = () => {
+  const abi = TREASURY.abi as AbiItem[];
+  const address = TREASURY.addresses[mainnet.id];
   const contract = getContract(abi, address);
   return contract;
 };
