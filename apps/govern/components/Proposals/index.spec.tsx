@@ -3,7 +3,7 @@ import { render, screen } from '@testing-library/react';
 
 import { UNICODE_SYMBOLS } from 'libs/util-constants/src';
 
-import { ProposalsPage, proposals } from './Proposals';
+import { ProposalsPage, proposals } from './index';
 
 describe('<Proposals />', () => {
   it('should display the page title and description', () => {

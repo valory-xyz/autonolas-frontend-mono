@@ -12,6 +12,7 @@ const items: MenuItem[] = [
   { label: 'Staking contracts', key: 'contracts', path: '/contracts' },
   { label: 'Proposals', key: 'proposals', path: '/proposals' },
   { label: 'veOLAS', key: 'veolas', path: '/veolas' },
+  { label: 'Donate', key: 'donate', path: '/donate' },
   { label: 'Docs', key: 'docs', path: '/docs' },
 ];
 
