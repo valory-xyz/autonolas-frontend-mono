@@ -26,7 +26,7 @@ export const useClaimableIncentives = (
     chainId: mainnet.id,
     args: [ownerAddress, [BigInt(tokenomicsUnitType || '0')], [BigInt(id)]],
     query: {
-      enabled: !!ownerAddress && !!id && isNumber(tokenomicsUnitType),
+      enabled: !!ownerAddress && !!id && tokenomicsUnitType !== undefined,
       select: (data) => {
         const [reward, topup] = data as [bigint, bigint];
         return {
