@@ -3,7 +3,7 @@ import { Address, formatEther } from 'viem';
 import { mainnet } from 'viem/chains';
 import { useReadContract } from 'wagmi';
 
-import { TokenomicsUniTypes } from 'libs/util-constants/src';
+import { TokenomicsUnitTypes } from 'libs/util-constants/src';
 
 const rewardsFormatter = (value: bigint, dp: number = 4) =>
   parseFloat(formatEther(value)).toLocaleString('en', {
@@ -17,7 +17,7 @@ export const useClaimableIncentives = (
   contractAbi: readonly unknown[],
   ownerAddress: Address,
   id: string,
-  tokenomicsUnitType?: TokenomicsUniTypes,
+  tokenomicsUnitType?: TokenomicsUnitTypes,
 ) => {
   const { isFetching, data, refetch } = useReadContract({
     address: contractAddress,
