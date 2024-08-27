@@ -53,6 +53,10 @@ jest.mock('common-util/Details/utils', () => ({
   checkIfServiceRequiresWhitelisting: jest.fn(() => false),
 }));
 
+jest.mock('common-util/Details/DetailsSubInfo/hooks', () => ({
+  useTokenomicsUnitType: jest.fn(() => 1),
+}));
+
 jest.mock('common-util/hooks/useHelpers', () => ({
   useHelpers: () => useHelpersEvmMock,
 }));
@@ -66,6 +70,7 @@ jest.mock('components/ListAgents/utils', () => ({
   getAgentHashes: jest.fn(),
   getAgentOwner: jest.fn(),
   getTokenUri: jest.fn(),
+  updateAgentHashes: jest.fn(),
 }));
 
 const dummyDetails = {

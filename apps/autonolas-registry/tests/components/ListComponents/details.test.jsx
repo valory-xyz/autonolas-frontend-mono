@@ -69,6 +69,10 @@ jest.mock('components/ListComponents/utils', () => ({
   getTokenUri: jest.fn(),
 }));
 
+jest.mock('common-util/Details/DetailsSubInfo/hooks', () => ({
+  useTokenomicsUnitType: jest.fn(() => 1),
+}));
+
 const dummyDetails = {
   owner: dummyAddress,
   developer: dummyAddress,
@@ -122,7 +126,6 @@ describe('listComponents/details.jsx', () => {
       expect(nftImage.getAttribute('src')).toBe(`${GATEWAY_URL}${mockNftImageHash}`);
     });
   });
-
 
   it('should display rewards section', async () => {
     const { getByText } = render(wrapProvider(<Component />));
