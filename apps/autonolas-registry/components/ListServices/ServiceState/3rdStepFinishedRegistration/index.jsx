@@ -254,7 +254,7 @@ export const FinishedRegistration = ({
           className="mt-8"
         >
           {options.map((multisigAddress) => (
-            <div className="mb-12" key={`mutisig-${multisigAddress}`}>
+            <div className="mb-12" key={`multisig-${multisigAddress}`}>
               <RadioLabel disabled={btnProps.disabled}>
                 {multisigAddress === isMultiSig && OPTION_1}
                 {multisigAddress !== isMultiSig && OPTION_2}
@@ -377,6 +377,7 @@ export const FinishedRegistration = ({
                   console.error(error);
                 } finally {
                   setIsSubmitting(false);
+                  notifyError('Error occurred while updating multisig. Please try again.');
                 }
               }}
               {...getOtherBtnProps(STEP, {

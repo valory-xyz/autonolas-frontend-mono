@@ -1,13 +1,15 @@
-import { useEffect, useMemo, useState } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
+import { Space, Table } from 'antd';
 import PropTypes from 'prop-types';
-import { Table, Space } from 'antd';
+import { useEffect, useMemo, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+
 import { AddressLink } from '@autonolas/frontend-library';
 
-import { setAgentInstancesAndOperators } from '../../../../store/service';
-import { useScreen } from 'common-util/hooks/useScreen';
-import { useHelpers } from 'common-util/hooks/useHelpers';
 import { SendTransactionButton } from 'common-util/TransactionHelpers/SendTransactionButton';
+import { useHelpers } from 'common-util/hooks/useHelpers';
+import { useScreen } from 'common-util/hooks/useScreen';
+
+import { setAgentInstancesAndOperators } from '../../../../store/service';
 import { useAgentInstanceAndOperator } from '../../hooks/useSvmService';
 import { getAgentInstanceAndOperator } from '../utils';
 
@@ -24,9 +26,7 @@ export const Deployed = ({
   const dispatch = useDispatch();
   const { account, chainId, isSvm, chainName } = useHelpers();
   const { isMobile } = useScreen();
-  const data = useSelector(
-    (state) => state?.service?.agentInstancesAndOperators,
-  );
+  const data = useSelector((state) => state?.service?.agentInstancesAndOperators);
   const [isTerminating, setIsTerminating] = useState(false);
   const { getSvmAgentInstanceAndOperator } = useAgentInstanceAndOperator();
 
@@ -47,14 +47,7 @@ export const Deployed = ({
     return () => {
       isMounted = false;
     };
-  }, [
-    serviceId,
-    chainId,
-    isSvm,
-    currentStep,
-    dispatch,
-    getSvmAgentInstanceAndOperator,
-  ]);
+  }, [serviceId, chainId, isSvm, currentStep, dispatch, getSvmAgentInstanceAndOperator]);
 
   const onTerminate = async () => {
     try {
@@ -78,7 +71,7 @@ export const Deployed = ({
 
   return (
     <div className="step-4-deployed" data-testid="step-deployed">
-      <Space direction="vertical" size={10}>
+      <Space direction="vertical" size={10} className="full-width">
         {isShowAgentInstanceVisible && (
           <Table
             dataSource={data}
@@ -90,23 +83,22 @@ export const Deployed = ({
                 title: 'Agent Instances',
                 dataIndex: 'agentInstance',
                 key: 'agentInstance',
-                render: (text) => (
-                  <AddressLink text={text} {...addressLinkProps} />
-                ),
+                render: (text) => <AddressLink text={text} {...addressLinkProps} />,
+                width: '50%',
               },
               {
                 title: 'Operators',
                 dataIndex: 'operatorAddress',
                 key: 'operatorAddress',
-                render: (text) => (
-                  <AddressLink text={text} {...addressLinkProps} />
-                ),
+                render: (text) => <AddressLink text={text} {...addressLinkProps} />,
+                width: '50%',
               },
             ]}
           />
         )}
         <div>
-          {`${isSvm ? 'Squads' : 'Safe'} contract address: ${multisig}`}
+          {`${isSvm ? 'Squads' : 'Safe'} contract address:`}
+          <AddressLink text={multisig} {...addressLinkProps} />
         </div>
         {getButton(
           <SendTransactionButton

@@ -228,6 +228,7 @@ export const IpfsHashGenerationModal = ({
               <span>
                 {/* TODO: fetch from middleware constant */}
                 <ul style={{ margin: 0 }}>
+                  <li>{'ipfs://{IPFS_HASH}'}</li>
                   <li>https://gateway.autonolas.tech/ipfs/*</li>
                   <li>https://gateway.pinata.cloud/ipfs/*</li>
                   <li>https://*.arweave.net/</li>
@@ -236,7 +237,7 @@ export const IpfsHashGenerationModal = ({
             </Flex>
           }
         >
-          <Input />
+          <Input placeholder="ipfs://" />
         </Form.Item>
       </Form>
     </CustomModal>

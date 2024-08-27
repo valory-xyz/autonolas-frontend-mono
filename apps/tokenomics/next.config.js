@@ -47,6 +47,11 @@ const nextConfig = {
         source: '/manage-solana-liquidity',
         destination: 'https://bond.olas.network/manage-solana-liquidity',
         permanent: true,
+      },
+      {
+        source: '/my-bonds',
+        destination: 'https://bond.olas.network/my-bonds',
+        permanent: true,
       }
     ];
   },
