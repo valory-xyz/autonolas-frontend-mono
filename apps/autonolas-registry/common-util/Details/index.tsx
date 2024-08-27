@@ -2,6 +2,7 @@ import { Button, Col, Row, Typography } from 'antd';
 import capitalize from 'lodash/capitalize';
 import get from 'lodash/get';
 import { FC, useCallback, useState } from 'react';
+import { Address } from 'viem';
 
 import { GenericObject, Loader, NA } from '@autonolas/frontend-library';
 
@@ -20,9 +21,9 @@ const { Text } = Typography;
 type DetailsProps = {
   id: string;
   type: NavTypesValues;
-  getDetails: (id: string) => Promise<GenericObject>; // TODO: Define the return type
-  getTokenUri?: (id: string) => Promise<string>;
-  getOwner?: (id: string) => Promise<string>;
+  getDetails: (id: string) => Promise<{ unitHash: Address; dependencies: string[] }>;
+  getTokenUri: (id: string) => Promise<string>;
+  getOwner: (id: string) => Promise<string>;
   handleUpdate?: () => void;
   handleHashUpdate?: () => void;
   navigateToDependency?: (id: string, type: NavTypesValues) => void;

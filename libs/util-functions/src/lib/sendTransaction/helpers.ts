@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { ethers } from 'ethers';
+
 import { getUrl } from './index';
 import { Chain, RpcUrl } from './types';
 
@@ -37,10 +38,7 @@ export const pollTransactionDetails = async (hash: string, chainId: number) => {
  * i/p: getIsValidChainId(1);
  * o/p: true
  */
-export const getIsValidChainId = (
-  SUPPORTED_CHAINS: Chain[],
-  chainId: number | string
-) => {
+export const getIsValidChainId = (SUPPORTED_CHAINS: Chain[], chainId: number | string) => {
   if (!chainId) return false;
 
   return SUPPORTED_CHAINS.some((e) => e.id === Number(chainId));
@@ -69,9 +67,7 @@ export const getProvider = (supportedChains: Chain[], rpcUrls: RpcUrl) => {
   }
 
   if (typeof window === 'undefined') {
-    console.warn(
-      'No provider found, fetching RPC URL from first supported chain'
-    );
+    console.warn('No provider found, fetching RPC URL from first supported chain');
     return rpcUrl;
   }
 
@@ -82,9 +78,7 @@ export const getProvider = (supportedChains: Chain[], rpcUrls: RpcUrl) => {
 
     // if logged in via wallet-connect but chainId is not supported,
     // default to mainnet (ie. Use JSON-RPC provider)
-    return getIsValidChainId(supportedChains, walletConnectChainId)
-      ? walletProvider
-      : rpcUrl;
+    return getIsValidChainId(supportedChains, walletConnectChainId) ? walletProvider : rpcUrl;
   }
 
   // NOT logged in but has wallet installed (eg. Metamask).
@@ -92,9 +86,7 @@ export const getProvider = (supportedChains: Chain[], rpcUrls: RpcUrl) => {
   const windowEthereum = getWindowEthereum();
   if (windowEthereum?.chainId) {
     const walletChainId = Number(windowEthereum.chainId);
-    return getIsValidChainId(supportedChains, walletChainId)
-      ? windowEthereum
-      : rpcUrl;
+    return getIsValidChainId(supportedChains, walletChainId) ? windowEthereum : rpcUrl;
   }
 
   // fallback to mainnet JSON RPC provider
@@ -105,10 +97,7 @@ export const getProvider = (supportedChains: Chain[], rpcUrls: RpcUrl) => {
  * gets ethers provider from the connected wallet or
  * installed wallet or fallback to mainnet
  */
-export const getEthersProvider = (
-  supportedChains: Chain[],
-  rpcUrls: RpcUrl
-) => {
+export const getEthersProvider = (supportedChains: Chain[], rpcUrls: RpcUrl) => {
   const provider = getProvider(supportedChains, rpcUrls);
 
   // if provider is a string, it is a JSON-RPC provider
@@ -116,7 +105,7 @@ export const getEthersProvider = (
     return new ethers.JsonRpcProvider(provider);
   }
 
-  return new ethers.FallbackProvider([provider]);
+  return new ethers.BrowserProvider(provider);
 };
 
 /**
@@ -126,16 +115,14 @@ export const getEthersProvider = (
  */
 export const getChainIdOrDefaultToMainnet = (
   SUPPORTED_CHAINS: Chain[],
-  chainIdPassed: string | number
+  chainIdPassed: string | number,
 ) => {
   if (!chainIdPassed) {
     throw new Error('chainId is not provided');
   }
 
   const chain = Number(chainIdPassed);
-  return getIsValidChainId(SUPPORTED_CHAINS, chain)
-    ? chain
-    : SUPPORTED_CHAINS[0].id;
+  return getIsValidChainId(SUPPORTED_CHAINS, chain) ? chain : SUPPORTED_CHAINS[0].id;
 };
 
 /**
@@ -143,7 +130,7 @@ export const getChainIdOrDefaultToMainnet = (
  */
 export const getChainIdOrDefaultToFirstSupportedChain = (
   SUPPORTED_CHAINS: Chain[],
-  chainIdPassed: string | number
+  chainIdPassed: string | number,
 ) => {
   return getChainIdOrDefaultToMainnet(SUPPORTED_CHAINS, chainIdPassed);
 };
@@ -152,10 +139,7 @@ export const getChainIdOrDefaultToFirstSupportedChain = (
  * get chainId from the providers or fallback to default chainId (mainnet)
  * first element of supportedChains is the default chainId
  */
-export const getChainId = (
-  supportedChains: Chain[],
-  chainId?: string | number | null
-) => {
+export const getChainId = (supportedChains: Chain[], chainId?: string | number | null) => {
   // if window is undefined, we are in server side
   // return undefined
   if (typeof window === 'undefined') {
@@ -172,10 +156,7 @@ export const getChainId = (
   const walletProvider = getModalProvider();
   if (walletProvider?.chainId) {
     const walletConnectChainId = walletProvider.chainId;
-    return getChainIdOrDefaultToFirstSupportedChain(
-      supportedChains,
-      walletConnectChainId
-    );
+    return getChainIdOrDefaultToFirstSupportedChain(supportedChains, walletConnectChainId);
   }
 
   // NOT logged in but has wallet installed (eg. metamask).
@@ -183,10 +164,7 @@ export const getChainId = (
   const windowEthereum = getWindowEthereum();
   if (windowEthereum?.chainId) {
     const walletChainId = windowEthereum.chainId;
-    return getChainIdOrDefaultToFirstSupportedChain(
-      supportedChains,
-      walletChainId
-    );
+    return getChainIdOrDefaultToFirstSupportedChain(supportedChains, walletChainId);
   }
 
   // has no wallet (eg. incognito mode or no wallet installed)

@@ -1,17 +1,15 @@
 import { readContract, readContracts } from '@wagmi/core';
 import { ethers } from 'ethers';
-import { Abi, AbiFunction, TransactionReceipt, parseUnits } from 'viem';
+import { Abi, AbiFunction, parseUnits } from 'viem';
 import { Address } from 'viem';
 import { mainnet } from 'viem/chains';
-
-import { sendTransaction } from '@autonolas/frontend-library';
 
 import {
   SERVICE_REGISTRY,
   STAKING_FACTORY,
   VE_OLAS,
 } from 'libs/util-contracts/src/lib/abiAndAddresses';
-import { getEstimatedGasLimit } from 'libs/util-functions/src';
+import { getEstimatedGasLimit, sendTransaction } from 'libs/util-functions/src';
 
 import { SUPPORTED_CHAINS, wagmiConfig } from 'common-util/config/wagmi';
 import { RPC_URLS } from 'common-util/constants/rpcs';
@@ -208,7 +206,7 @@ export const createLockRequest = async ({
       rpcUrls: RPC_URLS,
     });
 
-    return (response as TransactionReceipt)?.transactionHash;
+    return response?.transactionHash;
   } catch (error) {
     window.console.log('Error occurred on creating lock for veOLAS');
     throw error;
@@ -237,7 +235,7 @@ export const updateIncreaseAmount = async ({
       rpcUrls: RPC_URLS,
     });
 
-    return (response as TransactionReceipt)?.transactionHash;
+    return response?.transactionHash;
   } catch (e) {
     window.console.log('Error occurred on increasing amount with estimated gas');
     throw e;
@@ -269,7 +267,7 @@ export const updateIncreaseUnlockTime = async ({
       rpcUrls: RPC_URLS,
     });
 
-    return (response as TransactionReceipt)?.transactionHash;
+    return response?.transactionHash;
   } catch (error) {
     window.console.log('Error occurred on increasing unlock time');
     throw error;
@@ -292,7 +290,7 @@ export const withdrawVeolasRequest = async ({ account }: { account: Address }) =
       rpcUrls: RPC_URLS,
     });
 
-    return (response as TransactionReceipt)?.transactionHash;
+    return response?.transactionHash;
   } catch (error) {
     window.console.log('Error occurred on withdrawing veOlas');
     throw error;
@@ -314,7 +312,7 @@ export const checkpointRequest = async ({ account }: { account: Address }) => {
       rpcUrls: RPC_URLS,
     });
 
-    return (response as TransactionReceipt)?.transactionHash;
+    return response?.transactionHash;
   } catch (error) {
     window.console.log('Error occurred on starting new epoch');
     throw error;
@@ -378,7 +376,7 @@ export const depositServiceDonationRequest = async ({
       rpcUrls: RPC_URLS,
     });
 
-    return (response as TransactionReceipt)?.transactionHash;
+    return response?.transactionHash;
   } catch (error) {
     window.console.log('Error occurred on depositing service donation');
     throw error;
