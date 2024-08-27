@@ -73,7 +73,6 @@ export const getAgentHashes = async (id) => {
 export const updateAgentHashes = async (account, id, newHash) => {
   const contract = getMechMinterContract();
 
-  // 0 to indicate `agents`
   const fn = contract.methods.updateHash(UNIT_TYPES.AGENT, id, `0x${newHash}`).send({
     from: account,
   });

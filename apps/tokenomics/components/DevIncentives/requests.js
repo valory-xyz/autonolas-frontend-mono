@@ -1,6 +1,6 @@
 import { notifyError } from '@autonolas/frontend-library';
+import { UNIT_TYPES } from 'libs/util-constants/src';
 
-import { UNIT_TYPES } from 'common-util/enums';
 import {
   getAgentContract,
   getBlockTimestamp,

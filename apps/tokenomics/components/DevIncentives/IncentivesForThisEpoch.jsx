@@ -1,15 +1,18 @@
-import { useState } from 'react';
-import { Row, Col, Table, Typography, Alert } from 'antd';
+import { Alert, Col, Row, Table, Typography } from 'antd';
 import { round, toLower } from 'lodash';
+import { useState } from 'react';
+
 import { notifyError } from '@autonolas/frontend-library';
 
-import { FORM_TYPES, UNIT_TYPES } from 'common-util/enums';
-import { DynamicFieldsForm } from 'common-util/DynamicFieldsForm';
+import { UNIT_TYPES } from 'libs/util-constants/src';
 
+import { DynamicFieldsForm } from 'common-util/DynamicFieldsForm';
+import { FORM_TYPES } from 'common-util/enums';
 import { notifySpecificError } from 'common-util/functions/errors';
-import { sortUnitIdsAndTypes } from 'common-util/functions/units';
 import { parseToEth } from 'common-util/functions/ethers';
+import { sortUnitIdsAndTypes } from 'common-util/functions/units';
 import { useHelpers } from 'common-util/hooks/useHelpers';
+
 import { getOwnerIncentivesRequest, getOwnersForUnits } from './requests';
 import { RewardAndTopUpContainer } from './styles';
 
@@ -29,12 +32,8 @@ const columns = [
 ];
 
 const checkIfHasDuplicate = (unitIds, unitTypes) => {
-  const agentIds = unitIds.filter(
-    (e, index) => unitTypes[index] === UNIT_TYPES.AGENT,
-  );
-  const componentIds = unitIds.filter(
-    (e, index) => unitTypes[index] === UNIT_TYPES.COMPONENT,
-  );
+  const agentIds = unitIds.filter((e, index) => unitTypes[index] === UNIT_TYPES.AGENT);
+  const componentIds = unitIds.filter((e, index) => unitTypes[index] === UNIT_TYPES.COMPONENT);
 
   const uniqueAgentIds = [...new Set(agentIds)];
   const uniqueComponentIds = [...new Set(componentIds)];
@@ -87,21 +86,14 @@ export const IncentivesForThisEpoch = () => {
         if (indexesWithDifferentOwner.length !== 0) {
           const ids = indexesWithDifferentOwner
             .map((e) => {
-              const type =
-                unitTypes[e] === UNIT_TYPES.AGENT ? 'Agent ID' : 'Component ID';
+              const type = unitTypes[e] === UNIT_TYPES.AGENT ? 'Agent ID' : 'Component ID';
               return `${type} ${unitIds[e]}`;
             })
             .join(', ');
 
-          notifyError(
-            'Provided address is not the owner of the following units: ',
-            ids,
-          );
+          notifyError('Provided address is not the owner of the following units: ', ids);
         } else {
-          const [sortedUnitIds, sortedUnitTypes] = sortUnitIdsAndTypes(
-            unitIds,
-            unitTypes,
-          );
+          const [sortedUnitIds, sortedUnitTypes] = sortUnitIdsAndTypes(unitIds, unitTypes);
 
           try {
             const params = {
@@ -163,12 +155,7 @@ export const IncentivesForThisEpoch = () => {
         <Col lg={10} xs={24}>
           {rewardAndTopUp.length > 0 && (
             <RewardAndTopUpContainer>
-              <Table
-                columns={columns}
-                dataSource={rewardAndTopUp}
-                bordered
-                pagination={false}
-              />
+              <Table columns={columns} dataSource={rewardAndTopUp} bordered pagination={false} />
             </RewardAndTopUpContainer>
           )}
         </Col>
