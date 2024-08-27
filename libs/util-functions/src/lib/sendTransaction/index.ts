@@ -1,7 +1,8 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+import { Contract } from 'ethers';
+
 import { notifyError, notifyWarning } from '../notifications';
 import { getChainId, getEthersProvider, pollTransactionDetails } from './helpers';
-import { Chain, RpcUrl, Web3ReceiptType } from './types';
+import { Chain, RpcUrl } from './types';
 
 export const SAFE_API_MAINNET =
   'https://safe-transaction-mainnet.safe.global/api/v1/multisig-transactions';
@@ -36,7 +37,7 @@ export const getUrl = (hash: string, chainId: number) => {
  * poll until the hash has been approved
  */
 export const sendTransaction = async (
-  sendFn: any,
+  sendFn: Contract,
   account = (window as any)?.MODAL_PROVIDER?.accounts[0],
   { supportedChains, rpcUrls }: { supportedChains: Chain[]; rpcUrls: RpcUrl },
 ) => {
@@ -87,8 +88,7 @@ export const sendTransaction = async (
       });
     } else {
       // usual send function
-      const receipt: Web3ReceiptType = await sendFn();
-      return receipt;
+      return sendFn;
     }
   } catch (e) {
     notifyError('Error occurred while sending transaction');

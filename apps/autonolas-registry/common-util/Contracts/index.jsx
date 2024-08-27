@@ -1,9 +1,10 @@
 import { ethers } from 'ethers';
+import { mainnet } from 'viem/chains';
 import Web3 from 'web3';
 
 import { isL1Network } from '@autonolas/frontend-library';
 
-import { TOKENOMICS } from 'libs/util-contracts/src/lib/abiAndAddresses/tokenomics';
+import { DISPENSER, TOKENOMICS } from 'libs/util-contracts/src/lib/abiAndAddresses';
 
 import {
   AGENT_REGISTRY_CONTRACT,
@@ -216,5 +217,15 @@ export const getEthersProviderForEthereum = () => {
 export const getTokenomicsEthersContract = (address) => {
   const provider = getEthersProviderForEthereum();
   const contract = new ethers.Contract(address, TOKENOMICS.abi, provider);
+  return contract;
+};
+
+/**
+ * @returns dispenser contract
+ */
+export const getDispenserContract = () => {
+  const abi = DISPENSER.abi;
+  const address = DISPENSER.addresses[mainnet.id];
+  const contract = getContract(abi, address);
   return contract;
 };

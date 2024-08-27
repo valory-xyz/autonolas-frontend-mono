@@ -45,12 +45,14 @@ const Layout = ({ children }) => {
   useEffect(() => {
     if (router.pathname) {
       const name = router.pathname.split('/')[1];
-      setSelectedMenu(name || 'veolas');
+      setSelectedMenu(name || 'dev-incentives');
     }
   }, [router.pathname]);
 
   const handleMenuItemClick = ({ key }) => {
-    if (key === 'docs') {
+    if (key === 'donate') {
+      window.open('https://govern.olas.network/donate', '_blank');
+    } else if (key === 'docs') {
       window.open('https://docs.autonolas.network/protocol/tokenomics/', '_blank');
     } else if (key === 'bonding-products') {
       window.open('https://bond.olas.network/bonding-products', '_blank');
@@ -80,8 +82,8 @@ const Layout = ({ children }) => {
           selectedKeys={[selectedMenu]}
           onClick={handleMenuItemClick}
           items={[
-            { key: 'donate', label: 'Donate' },
             { key: 'dev-incentives', label: 'Dev Rewards' },
+            { key: 'donate', label: <ExternalLink name="Donate" /> },
             { key: 'bonding-products', label: <ExternalLink name="Bonding Products" /> },
             { key: 'my-bonds', label: <ExternalLink name="My Bonds" /> },
             {

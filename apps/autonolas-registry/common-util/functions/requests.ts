@@ -1,7 +1,11 @@
-import { notifyError } from '@autonolas/frontend-library';
+import { Address } from 'viem';
+
+import { getEstimatedGasLimit, notifyError } from 'libs/util-functions/src';
+
+import { sendTransaction } from 'common-util/functions';
 
 import { DEFAULT_SERVICE_CREATION_ETH_TOKEN_ZEROS } from '../../util/constants';
-import { getServiceOwnerMultisigContract } from '../Contracts';
+import { getDispenserContract, getServiceOwnerMultisigContract } from '../Contracts';
 import { checkIfGnosisSafe, getEthersProvider } from './index';
 
 const FALLBACK_HANDLER_STORAGE_SLOT =
@@ -12,7 +16,7 @@ const FALLBACK_HANDLER_STORAGE_SLOT =
  * BE code: https://github.com/valory-xyz/autonolas-registries/pull/54#discussion_r1031510182
  * @returns {Promise<boolean>} true if the owner address can mint
  */
-export const checkIfERC721Receive = async (account, ownerAddress) => {
+export const checkIfERC721Receive = async (account: Address, ownerAddress: Address) => {
   const provider = getEthersProvider();
   const isSafe = await checkIfGnosisSafe(account, provider);
 
@@ -23,6 +27,9 @@ export const checkIfERC721Receive = async (account, ownerAddress) => {
       const owners = await contract.methods.getOwners().call();
 
       if (Number(threshold) > 0 && owners.length > 0) {
+        // TODO: check and fix error: Property 'getStorageAt' does not exist on type 'JsonRpcProvider | FallbackProvider'.
+        // Did you mean 'getStorage'?
+        // @ts-expect-error next-line
         const contents = await provider.getStorageAt(account, FALLBACK_HANDLER_STORAGE_SLOT);
 
         const isInvalidContent =
@@ -42,4 +49,27 @@ export const checkIfERC721Receive = async (account, ownerAddress) => {
   }
 
   return true;
+};
+
+export const claimOwnerIncentivesRequest = async ({
+  account,
+  unitTypes,
+  unitIds,
+}: {
+  account: Address;
+  unitTypes: string[];
+  unitIds: string[];
+}) => {
+  const contract = getDispenserContract();
+  try {
+    const claimFn = contract.methods.claimOwnerIncentives(unitTypes, unitIds);
+    const estimatedGas = await getEstimatedGasLimit(claimFn, account);
+    const fn = claimFn.send({ from: account, gasLimit: estimatedGas });
+
+    const response = await sendTransaction(fn, account);
+    return response?.transactionHash;
+  } catch (error) {
+    window.console.log('Error occurred on claiming owner incentives');
+    throw error;
+  }
 };

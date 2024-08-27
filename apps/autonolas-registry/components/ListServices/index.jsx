@@ -1,25 +1,18 @@
-import { useState, useEffect } from 'react';
 import { Tabs } from 'antd';
 import { useRouter } from 'next/router';
+import { useEffect, useState } from 'react';
+
 import { notifyError } from '@autonolas/frontend-library';
 
-import { NAV_TYPES } from '../../util/constants';
-import {
-  ListTable,
-  useExtraTabContent,
-  isMyTab,
-} from '../../common-util/List/ListTable';
 import { getMyListOnPagination } from '../../common-util/ContractUtils/myList';
+import { ListTable, isMyTab, useExtraTabContent } from '../../common-util/List/ListTable';
 import { useHelpers } from '../../common-util/hooks';
-import {
-  useAllServices,
-  useMyServices,
-  useSearchServices,
-} from './hooks/useServicesList';
+import { NAV_TYPES } from '../../util/constants';
+import { useAllServices, useMyServices, useSearchServices } from './hooks/useServicesList';
 import { useServiceInfo } from './hooks/useSvmService';
 import {
-  getServices,
   getFilteredServices,
+  getServices,
   getTotalForAllServices,
   getTotalForMyServices,
 } from './utils';
@@ -29,9 +22,7 @@ const MY_SERVICES = 'my-services';
 
 const ListServices = () => {
   const router = useRouter();
-  const [currentTab, setCurrentTab] = useState(
-    isMyTab(router) ? MY_SERVICES : ALL_SERVICES,
-  );
+  const [currentTab, setCurrentTab] = useState(isMyTab(router) ? MY_SERVICES : ALL_SERVICES);
 
   const { account, links, isSvm, chainId, isMainnet } = useHelpers();
 
@@ -58,12 +49,8 @@ const ListServices = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [list, setList] = useState([]);
 
-  const {
-    getTotalForAllSvmServices,
-    getTotalForMySvmServices,
-    getSvmServices,
-    getMySvmServices,
-  } = useServiceInfo();
+  const { getTotalForAllSvmServices, getTotalForMySvmServices, getSvmServices, getMySvmServices } =
+    useServiceInfo();
 
   // fetch total (All services & My services)
   useEffect(() => {
@@ -72,9 +59,7 @@ const ListServices = () => {
         let totalTemp = null;
 
         if (currentTab === ALL_SERVICES) {
-          totalTemp = isSvm
-            ? await getTotalForAllSvmServices()
-            : await getTotalForAllServices();
+          totalTemp = isSvm ? await getTotalForAllSvmServices() : await getTotalForAllServices();
         } else if (currentTab === MY_SERVICES && account) {
           totalTemp = isSvm
             ? await getTotalForMySvmServices(account)
@@ -207,15 +192,7 @@ const ListServices = () => {
         setIsLoading(false);
       }
     })();
-  }, [
-    account,
-    searchValue,
-    currentTab,
-    currentPage,
-    getServicesBySearch,
-    isMainnet,
-    chainId,
-  ]);
+  }, [account, searchValue, currentTab, currentPage, getServicesBySearch, isMainnet, chainId]);
 
   const tableCommonProps = {
     type: NAV_TYPES.SERVICE,
@@ -225,16 +202,13 @@ const ListServices = () => {
     setCurrentPage,
     onViewClick,
     searchValue,
-    onUpdateClick: (serviceId) =>
-      router.push(`${links.UPDATE_SERVICE}/${serviceId}`),
+    onUpdateClick: (serviceId) => router.push(`${links.UPDATE_SERVICE}/${serviceId}`),
   };
 
   const getMyServiceList = () => {
     if (isMainnet) return list;
 
-    return searchValue
-      ? list
-      : getMyListOnPagination({ total, nextPage: currentPage, list });
+    return searchValue ? list : getMyListOnPagination({ total, nextPage: currentPage, list });
   };
 
   return (
@@ -265,11 +239,7 @@ const ListServices = () => {
           label: 'All',
           disabled: isLoading,
           children: (
-            <ListTable
-              {...tableCommonProps}
-              list={list}
-              tableDataTestId="all-services-table"
-            />
+            <ListTable {...tableCommonProps} list={list} tableDataTestId="all-services-table" />
           ),
         },
         {

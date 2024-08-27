@@ -1,4 +1,6 @@
-export const TREASURY = {
+import { Contract } from "./types";
+
+export const TREASURY: Contract = {
   contractName: 'Treasury',
   addresses: {
     1: '0xa0DA53447C0f6C4987964d8463da7e6628B30f82',

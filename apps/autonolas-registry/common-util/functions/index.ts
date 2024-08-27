@@ -1,6 +1,9 @@
 import { PublicKey } from '@solana/web3.js';
-import { ethers } from 'ethers';
+import { RuleObject } from 'antd/es/form';
+import { StoreValue } from 'antd/es/form/interface';
+import { Contract, FallbackProvider, JsonRpcProvider, ethers } from 'ethers';
 import { isString } from 'lodash';
+import { Address } from 'viem';
 
 import {
   getChainIdOrDefaultToMainnet as getChainIdOrDefaultToMainnetFn,
@@ -8,17 +11,23 @@ import {
   isValidAddress,
   notifyError,
   notifyWarning,
-  sendTransaction as sendTransactionFn,
 } from '@autonolas/frontend-library';
+
+import { sendTransaction as sendTransactionFn } from 'libs/util-functions/src';
+import { RpcUrl } from 'libs/util-functions/src/lib/sendTransaction/types';
 
 import { VM_TYPE } from '../../util/constants';
 import { RPC_URLS } from '../Contracts';
 import { SUPPORTED_CHAINS } from '../Login';
-import { EVM_SUPPORTED_CHAINS, SVM_SUPPORTED_CHAINS } from '../Login/config';
+import { EVM_SUPPORTED_CHAINS, SVM_SUPPORTED_CHAINS, SolanaChain } from '../Login/config';
 
-export const getModalProvider = () => window?.MODAL_PROVIDER;
+// TODO: provide types for MODAL_PROVIDER
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const getModalProvider = () => (window as any)?.MODAL_PROVIDER;
 
-export const getWindowEthereum = () => window?.ethereum;
+// TODO: provide types for ethereum
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const getWindowEthereum = () => (window as any)?.ethereum;
 
 export const getChainId = (chainId = null) => {
   if (chainId) return chainId;
@@ -37,7 +46,7 @@ export const getChainId = (chainId = null) => {
 
 export const getProvider = () => {
   const defaultChainId = getChainId();
-  const rpcUrl = RPC_URLS[defaultChainId];
+  const rpcUrl = typeof defaultChainId === 'number' ? (RPC_URLS as RpcUrl)[defaultChainId] : null;
 
   if (!rpcUrl) {
     throw new Error(`No RPC URL found for chainId: ${defaultChainId}`);
@@ -83,9 +92,10 @@ export const getEthersProvider = () => {
   return new ethers.FallbackProvider([provider]);
 };
 
-export const getIsValidChainId = (chainId) => getIsValidChainIdFn(SUPPORTED_CHAINS, chainId);
+export const getIsValidChainId = (chainId: string | number) =>
+  getIsValidChainIdFn(SUPPORTED_CHAINS, chainId);
 
-export const getChainIdOrDefaultToMainnet = (chainId) => {
+export const getChainIdOrDefaultToMainnet = (chainId: string | number) => {
   const x = getChainIdOrDefaultToMainnetFn(SUPPORTED_CHAINS, chainId);
   return x;
 };
@@ -98,7 +108,11 @@ export const getChainIdOrDefaultToMainnet = (chainId) => {
  * @param {object} builderIns - The object to check.
  * @returns {boolean} - True if the object is a MethodsBuilder object, false otherwise.
  */
-const isMethodsBuilderInstance = (builderIns, registryAddress) => {
+const isMethodsBuilderInstance = (
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  builderIns: object & { _args?: any }, // TODO: provide better type
+  registryAddress: Address,
+) => {
   if (typeof builderIns !== 'object' || builderIns === null) {
     throw new Error('sendTransaction: Input must be an object.');
   }
@@ -129,9 +143,13 @@ const isMethodsBuilderInstance = (builderIns, registryAddress) => {
  * @param {string} extra.registryAddress - The address of the registry contract.
  *
  */
-export const sendTransaction = (method, account, extra) => {
+export const sendTransaction = (
+  method: Contract,
+  account: Address,
+  extra?: { vmType: string; registryAddress: Address },
+) => {
   const { vmType, registryAddress } = extra || {};
-  if (vmType === VM_TYPE.SVM) {
+  if (vmType === VM_TYPE.SVM && registryAddress) {
     // Check if something resembling an SVM method is being passed
     if (!isMethodsBuilderInstance(method, registryAddress)) {
       notifyError('Invalid method object');
@@ -142,12 +160,12 @@ export const sendTransaction = (method, account, extra) => {
 
   return sendTransactionFn(method, account, {
     supportedChains: SUPPORTED_CHAINS,
-    rpcUrls: RPC_URLS,
+    rpcUrls: RPC_URLS as RpcUrl,
   });
 };
 
 export const addressValidator = () => ({
-  validator(_, value) {
+  validator(_: RuleObject, value: StoreValue) {
     return isValidAddress(value)
       ? Promise.resolve()
       : Promise.reject(new Error('Please enter valid addresses.'));
@@ -155,7 +173,10 @@ export const addressValidator = () => ({
 });
 
 // check if the provider is gnosis safe
-export const checkIfGnosisSafe = async (account, provider) => {
+export const checkIfGnosisSafe = async (
+  account: Address,
+  provider: JsonRpcProvider | FallbackProvider,
+) => {
   try {
     if (provider && provider.getCode) {
       // TODO: getCode has some issues and throws error in console
@@ -166,6 +187,7 @@ export const checkIfGnosisSafe = async (account, provider) => {
     console.error(error);
     return false;
   }
+  return false;
 };
 
 /**
@@ -174,12 +196,12 @@ export const checkIfGnosisSafe = async (account, provider) => {
  * but now all networks have service manager token. Hence, this function
  * defaults to true BUT can be overridden for specific networks in the future.
  */
-export const doesNetworkHaveValidServiceManagerTokenFn = (chainId) => !!chainId;
+export const doesNetworkHaveValidServiceManagerTokenFn = (chainId: number) => !!chainId;
 
-const doesPathIncludesComponents = (path) => !!path?.includes('components');
-const doesPathIncludesAgents = (path) => !!path?.includes('agents');
-export const doesPathIncludesServices = (path) => !!path?.includes('services');
-export const doesPathIncludesComponentsOrAgents = (path) => {
+const doesPathIncludesComponents = (path: string) => !!path?.includes('components');
+const doesPathIncludesAgents = (path: string) => !!path?.includes('agents');
+export const doesPathIncludesServices = (path: string) => !!path?.includes('services');
+export const doesPathIncludesComponentsOrAgents = (path: string) => {
   if (!path) return false;
   return doesPathIncludesComponents(path) || doesPathIncludesAgents(path);
 };
@@ -189,15 +211,16 @@ export const notifyWrongNetwork = () => {
 };
 
 // functions for solana
-export const isPageWithSolana = (path) => {
+export const isPageWithSolana = (path: string) => {
   if (!path) return false;
   if (!isString(path)) return false;
 
-  const checkPath = (chain) => path.toLowerCase().includes(chain.networkName.toLowerCase());
+  const checkPath = (chain: SolanaChain) =>
+    path.toLowerCase().includes(chain.networkName.toLowerCase());
   return SVM_SUPPORTED_CHAINS.some(checkPath);
 };
 
-export const isValidSolanaPublicKey = (publicKey) => {
+export const isValidSolanaPublicKey = (publicKey: PublicKey) => {
   try {
     const isValid = PublicKey.isOnCurve(publicKey);
     return isValid;

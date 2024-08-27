@@ -1,20 +1,28 @@
 import { readContract, readContracts } from '@wagmi/core';
 import { ethers } from 'ethers';
-import { AbiFunction, TransactionReceipt, parseUnits } from 'viem';
+import { Abi, AbiFunction, parseUnits } from 'viem';
 import { Address } from 'viem';
 import { mainnet } from 'viem/chains';
 
-import { sendTransaction } from '@autonolas/frontend-library';
-
-import { STAKING_FACTORY, VE_OLAS } from 'libs/util-contracts/src/lib/abiAndAddresses';
-import { getEstimatedGasLimit } from 'libs/util-functions/src';
+import {
+  SERVICE_REGISTRY,
+  STAKING_FACTORY,
+  VE_OLAS,
+} from 'libs/util-contracts/src/lib/abiAndAddresses';
+import { getEstimatedGasLimit, sendTransaction } from 'libs/util-functions/src';
 
 import { SUPPORTED_CHAINS, wagmiConfig } from 'common-util/config/wagmi';
 import { RPC_URLS } from 'common-util/constants/rpcs';
 
 import { getAddressFromBytes32 } from './addresses';
 import { getUnixNextWeekStartTimestamp } from './time';
-import { getOlasContract, getVeOlasContract, getVoteWeightingContract } from './web3';
+import {
+  getOlasContract,
+  getTokenomicsContract,
+  getTreasuryContract,
+  getVeOlasContract,
+  getVoteWeightingContract,
+} from './web3';
 
 type VoteForNomineeWeightsParams = {
   account: Address | undefined;
@@ -198,7 +206,7 @@ export const createLockRequest = async ({
       rpcUrls: RPC_URLS,
     });
 
-    return (response as TransactionReceipt)?.transactionHash;
+    return response?.transactionHash;
   } catch (error) {
     window.console.log('Error occurred on creating lock for veOLAS');
     throw error;
@@ -227,7 +235,7 @@ export const updateIncreaseAmount = async ({
       rpcUrls: RPC_URLS,
     });
 
-    return (response as TransactionReceipt)?.transactionHash;
+    return response?.transactionHash;
   } catch (e) {
     window.console.log('Error occurred on increasing amount with estimated gas');
     throw e;
@@ -259,7 +267,7 @@ export const updateIncreaseUnlockTime = async ({
       rpcUrls: RPC_URLS,
     });
 
-    return (response as TransactionReceipt)?.transactionHash;
+    return response?.transactionHash;
   } catch (error) {
     window.console.log('Error occurred on increasing unlock time');
     throw error;
@@ -282,9 +290,95 @@ export const withdrawVeolasRequest = async ({ account }: { account: Address }) =
       rpcUrls: RPC_URLS,
     });
 
-    return (response as TransactionReceipt)?.transactionHash;
+    return response?.transactionHash;
   } catch (error) {
     window.console.log('Error occurred on withdrawing veOlas');
+    throw error;
+  }
+};
+
+/**
+ * Start new epoch
+ */
+export const checkpointRequest = async ({ account }: { account: Address }) => {
+  const contract = getTokenomicsContract();
+  try {
+    const checkpointFn = contract.methods.checkpoint();
+    const estimatedGas = await getEstimatedGasLimit(checkpointFn, account);
+    const fn = checkpointFn.send({ from: account, gasLimit: estimatedGas });
+
+    const response = await sendTransaction(fn, account, {
+      supportedChains: SUPPORTED_CHAINS,
+      rpcUrls: RPC_URLS,
+    });
+
+    return response?.transactionHash;
+  } catch (error) {
+    window.console.log('Error occurred on starting new epoch');
+    throw error;
+  }
+};
+
+/**
+ * Check services are eligible for donating
+ */
+export const checkServicesTerminatedOrNotDeployed = async (ids: string[]) => {
+  const invalidServiceIds: string[] = [];
+
+  try {
+    const response = await readContracts(wagmiConfig, {
+      contracts: ids.map((id) => ({
+        abi: SERVICE_REGISTRY.abi as Abi,
+        address: (SERVICE_REGISTRY.addresses as Record<number, Address>)[mainnet.id],
+        chainId: mainnet.id,
+        functionName: 'getService',
+        args: [id],
+      })),
+    });
+
+    response.forEach((service, index) => {
+      const serviceData = service.result as { state: number } | null;
+      if (serviceData && serviceData.state !== 4 && serviceData.state !== 5) {
+        invalidServiceIds.push(ids[index]);
+      }
+    });
+  } catch (error) {
+    window.console.log('Error on checking service status');
+    throw error;
+  }
+
+  return invalidServiceIds;
+};
+
+/**
+ * Donate to services
+ */
+export const depositServiceDonationRequest = async ({
+  account,
+  serviceIds,
+  amounts,
+  totalAmount,
+}: {
+  account: Address;
+  serviceIds: string[];
+  amounts: string[];
+  totalAmount: string;
+}) => {
+  const contract = getTreasuryContract();
+
+  try {
+    const depositFn = contract.methods.depositServiceDonationsETH(serviceIds, amounts);
+    const estimatedGas = await getEstimatedGasLimit(depositFn, account, totalAmount);
+    const fn = depositFn.send({ from: account, value: totalAmount, gasLimit: estimatedGas });
+
+    const response = await sendTransaction(fn, account, {
+      supportedChains: SUPPORTED_CHAINS,
+      rpcUrls: RPC_URLS,
+    });
+
+    return response?.transactionHash;
+  } catch (error) {
+    window.console.log('Error occurred on depositing service donation');
     throw error;
   }
 };

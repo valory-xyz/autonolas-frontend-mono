@@ -20,7 +20,7 @@ import { getTokenDetailsRequest } from '../utils';
 import { RewardsSection } from './RewardsSection';
 import { ServiceStatus } from './ServiceStatus';
 import { ViewHashAndCode } from './ViewHashAndCode';
-import { useTokenomicsUnitType } from './hooks';
+import { getTokenomicsUnitType } from './utils';
 
 const navTypesForRewards = [NAV_TYPES.COMPONENT, NAV_TYPES.AGENT];
 
@@ -56,7 +56,7 @@ export const DetailsSubInfo = ({
   const { operatorWhitelistTitle, operatorWhitelistValue, operatorStatusValue } =
     useOperatorWhitelistComponent(id);
 
-  const tokenomicsUnitType = useTokenomicsUnitType(type);
+  const tokenomicsUnitType = getTokenomicsUnitType(type);
 
   const viewHashAndCodeButtons = (
     <ViewHashAndCode
@@ -224,6 +224,7 @@ export const DetailsSubInfo = ({
                   type={type}
                   ownerAddress={ownerAddress}
                   dataTestId={dataTestId}
+                  isOwner={isOwner}
                 />
               ) : (
                 <Info data-testid={dataTestId}>{value}</Info>
@@ -231,7 +232,7 @@ export const DetailsSubInfo = ({
           </EachSection>
         );
       }),
-    [detailsValues, ownerAddress, id, type],
+    [detailsValues, ownerAddress, isOwner, id, type],
   );
 
   // get token address for service

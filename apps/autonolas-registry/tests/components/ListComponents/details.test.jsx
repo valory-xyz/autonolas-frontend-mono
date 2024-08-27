@@ -38,11 +38,13 @@ jest.mock('wagmi', () => ({
 jest.mock('libs/common-contract-functions/src', () => ({
   useClaimableIncentives: jest.fn().mockReturnValue({
     reward: '0.25',
+    rewardWei: 250000000000000000,
     topUp: '111,555.70',
+    topUpWei: 111555700000000000000000000,
   }),
   getPendingIncentives: jest.fn().mockResolvedValue({
-    reward: '0.5',
-    topUp: '100,800.25',
+    pendingReward: '0.5',
+    pendingTopUp: '100,800.25',
   }),
 }));
 
@@ -128,15 +130,15 @@ describe('listComponents/details.jsx', () => {
   });
 
   it('should display rewards section', async () => {
-    const { getByText } = render(wrapProvider(<Component />));
+    const { getByText, queryByRole } = render(wrapProvider(<Component />));
     await waitFor(() => {
-      expect(getByText('Claimable Reward')).toBeInTheDocument();
-      expect(getByText('Claimable Top Up')).toBeInTheDocument();
+      expect(getByText('Claimable')).toBeInTheDocument();
       expect(getByText('0.25 ETH')).toBeInTheDocument();
       expect(getByText('111,555.70 OLAS')).toBeInTheDocument();
+      const claimButton = queryByRole('button', { name: 'Claim' });
+      expect(claimButton).toBeInTheDocument();
 
-      expect(getByText('Pending Reward')).toBeInTheDocument();
-      expect(getByText('Pending Top Up')).toBeInTheDocument();
+      expect(getByText('Pending, next epoch')).toBeInTheDocument();
       expect(getByText('0.5 ETH')).toBeInTheDocument();
       expect(getByText('100,800.25 OLAS')).toBeInTheDocument();
     });
