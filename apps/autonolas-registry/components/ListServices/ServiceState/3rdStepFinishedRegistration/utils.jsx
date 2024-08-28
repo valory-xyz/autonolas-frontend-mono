@@ -1,5 +1,5 @@
 /* eslint-disable no-underscore-dangle */
-import { ethers } from 'ethers';
+import { ethers } from 'ethers-v5';
 
 import { GNOSIS_SAFE_CONTRACT, MULTI_SEND_CONTRACT } from 'common-util/AbiAndAddresses';
 import { RPC_URLS, getServiceOwnerMultisigContract } from 'common-util/Contracts';
@@ -45,7 +45,8 @@ export const handleMultisigSubmit = async ({
   );
 
   const nonce = await multisigContract.nonce();
-
+  console.log({ nonce });
+  
   const callData = [];
   const txs = [];
 
@@ -83,6 +84,7 @@ export const handleMultisigSubmit = async ({
     ethers.getDefaultProvider(RPC_URLS[chainId]),
   );
 
+  console.log({ safeContracts, multisig, txs, account, chainId });
   const safeTx = safeContracts.buildMultiSendSafeTx(multiSendContract, txs, nonce);
 
   const provider = getEthersProvider();
