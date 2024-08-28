@@ -134,5 +134,8 @@
     "util": "^0.12.5",
     "vite": "^5.0.0",
     "vitest": "^1.0.4"
+  },
+  "resolutions": {
+    "@gnosis.pm/safe-contracts/ethers": "^5.7.0"
   }
 }
