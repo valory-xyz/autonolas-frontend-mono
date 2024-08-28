@@ -258,7 +258,6 @@ export const getServiceAgentInstances = async (id) => {
 export const onStep3Deploy = async (account, id, radioValue, payload = '0x') => {
   const contract = getServiceManagerContract();
 
-  console.log({ account, id, radioValue, payload });
   const fn = contract.methods.deploy(id, radioValue, payload).send({ from: account });
   const response = await sendTransaction(fn, account, { isLegacy: true });
   return response;
