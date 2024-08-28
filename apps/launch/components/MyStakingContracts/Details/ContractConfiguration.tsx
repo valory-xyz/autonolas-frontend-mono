@@ -129,7 +129,8 @@ const AgentIds: FC<{ address: Address }> = ({ address }) => {
     return data.map((id) => (
       <a
         key={id}
-        href={`${REGISTRY_URL}${networkName}/services/${id}`}
+        href={`${REGISTRY_URL}ethereum/agents/${id}`}
+        className="mr-8"
         target="_blank"
         rel="noreferrer"
       >
