@@ -48,8 +48,8 @@ export const getStakingContractInitPayload = ({
   const stakingParams = {
     metadataHash,
     maxNumServices,
-    rewardsPerSecond: `${rewardsPerSecond * 10 ** 18}`,
-    minStakingDeposit: `${minStakingDeposit * 10 ** 18}`,
+    rewardsPerSecond: ethers.parseUnits(`${rewardsPerSecond}`, 18),
+    minStakingDeposit: ethers.parseUnits(`${minStakingDeposit}`, 18),
     minNumStakingPeriods,
     maxNumInactivityPeriods,
     livenessPeriod,
