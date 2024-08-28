@@ -375,9 +375,9 @@ export const FinishedRegistration = ({
                   });
                 } catch (error) {
                   console.error(error);
+                  notifyError('Error occurred while updating multisig. Please try again.');
                 } finally {
                   setIsSubmitting(false);
-                  notifyError('Error occurred while updating multisig. Please try again.');
                 }
               }}
               {...getOtherBtnProps(STEP, {

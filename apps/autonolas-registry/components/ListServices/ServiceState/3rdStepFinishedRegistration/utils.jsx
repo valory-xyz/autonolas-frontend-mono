@@ -1,8 +1,19 @@
 /**
  * NOTE: Legacy code, needs to be refactored once gnosis.pm/safe-contracts is updated.
- * 
+ *
  * How to test `handleMultisigSubmit` function (step 3 in service)
- * 
+ * - Firstly, you will need 2 accounts, let's call them `account1` and `account2`.
+ * - create a service with `account1` as the owner with 1 agent.
+ * - navigate to the newly created service
+ * - Start with the first step and click "Activate Registration" button.
+ * - In the second step, change to `account2` and add `account` as the "Agent instance address".
+ * - In the third step, change to `account1` and select 1st radio button and click "Submit" button.
+ * - In the fourth step, use `account1` and "Terminate" the service.
+ * - In the fifth step, switch to `account2` and "Unbond" the service.
+ * NOW, start from the 1st step to test the multisig update functionality.
+ * - In the first step, switch to `account1` click "Activate Registration" button.
+ * - In the second step, switch to `account2` and add any valid address (from the same chain) as the "Agent instance address".
+ * - In the third step, switch to `account1` and select 2nd radio button and click "Submit" button - this will trigger the `handleMultisigSubmit` function.
  */
 import { ethers } from 'ethers-v5';
 
@@ -116,12 +127,18 @@ export const handleMultisigSubmit = async ({
         safeTx.refundReceiver,
         nonce,
       );
+      console.log({ messageHash });
 
       const multisigContractServiceOwner = getServiceOwnerMultisigContract(multisig);
+      console.log({ multisigContractServiceOwner });
+
       const startingBlock = await provider.getBlockNumber();
+      console.log({ startingBlock });
+
 
       // Get the signature bytes based on the account address, since it had its tx pre-approved
       const signatureBytes = `0x${ZEROS_24}${account.slice(2)}${ZEROS_64}01`;
+      console.log({ signatureBytes });
 
       const safeExecData = multisigContract.interface.encodeFunctionData('execTransaction', [
         safeTx.to,
@@ -135,9 +152,11 @@ export const handleMultisigSubmit = async ({
         safeTx.refundReceiver,
         signatureBytes,
       ]);
+      console.log({ safeExecData });
 
       // Redeploy the service updating the multisig with new owners and threshold
       const packedData = ethers.utils.solidityPack(['address', 'bytes'], [multisig, safeExecData]);
+      console.log({ packedData });
 
       // Check if the hash was already approved
       const filterOption = { approvedHash: messageHash, owner: account };
@@ -170,7 +189,7 @@ export const handleMultisigSubmit = async ({
       );
     }
 
-    // logic to deal with metamask
+    // logic to deal with metamask like wallets
     else {
       const signer = provider.getSigner();
 

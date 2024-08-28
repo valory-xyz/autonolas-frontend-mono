@@ -18,9 +18,10 @@ export const SAFE_API_POLYGON =
 /**
  * returns the gnosis-safe API url based on the chainId.
  * Here is the ist of available gnosis safe transaction service
- * https://docs.safe.global/safe-core-api/available-services
+ * @see https://docs.safe.global/core-api/transaction-service-supported-networks
  */
 export const getUrl = (hash: string, chainId: number) => {
+  // TODO: update the URL for supported chains
   switch (chainId) {
     case 5:
       return `${process.env['NEXT_PUBLIC_GNOSIS_SAFE_API_GOERLI'] || SAFE_API_GOERLI}/${hash}`;
