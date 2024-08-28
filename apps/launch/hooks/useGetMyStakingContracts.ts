@@ -150,8 +150,10 @@ const useGetInstanceAddresses = () => {
           ? BigInt(blockNumbers[currentNetworkId])
           : undefined;
 
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         let eventLogs: any[] = [];
 
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const params: any = {
           address: STAKING_FACTORY.addresses[`${currentNetworkId}`] as Address,
           event: {
