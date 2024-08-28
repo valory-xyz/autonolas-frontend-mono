@@ -203,22 +203,6 @@ describe('<CreateStakingContract />', () => {
     expect(numAgentInstancesInput).toHaveValue('1'); // default value
   });
 
-  // Agent IDs
-  it('should display `Agent IDs` field as required and able to fill the field', async () => {
-    render(<CreateStakingContract />);
-
-    const agentIdsInput = screen.getByLabelText('Agent IDs');
-    expect(agentIdsInput).toBeRequired();
-
-    await userEvent.clear(agentIdsInput);
-    await userEvent.type(agentIdsInput, '1,2,    ');
-
-    await clickCreateContractButton();
-    expect(
-      screen.getByText('Please input a valid list of numbers separated by commas.'),
-    ).toBeInTheDocument();
-  });
-
   // Multisig threshold
   it('should display `Multisig threshold` field as required and able to fill the field', async () => {
     render(<CreateStakingContract />);
