@@ -12,7 +12,7 @@ import {
 } from 'wagmi/chains';
 import { coinbaseWallet, injected, safe, walletConnect } from 'wagmi/connectors';
 
-import { LAUNCH_RPC_URLS } from 'common-util/constants/rpcs';
+import { RPC_URLS } from 'libs/util-constants/src';
 
 import { virtualGnosis, virtualMainnet, virtualPolygon } from '../../tenderly.config';
 
@@ -56,7 +56,7 @@ export const wagmiConfig = createConfig({
     }),
   ],
   transports: SUPPORTED_CHAINS.reduce(
-    (acc, chain) => Object.assign(acc, { [chain.id]: http(LAUNCH_RPC_URLS[chain.id]) }),
+    (acc, chain) => Object.assign(acc, { [chain.id]: http(RPC_URLS[chain.id]) }),
     {},
   ),
 });
