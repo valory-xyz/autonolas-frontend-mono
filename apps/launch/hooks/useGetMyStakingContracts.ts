@@ -129,6 +129,8 @@ const useGetInstanceAddresses = () => {
       setIsFetching(true);
 
       try {
+        const block = await client.getBlock();
+
         const eventLogs = await client.getLogs({
           address: STAKING_FACTORY.addresses[`${currentNetworkId}`] as Address,
           event: {
@@ -144,7 +146,7 @@ const useGetInstanceAddresses = () => {
           fromBlock: blockNumbers[currentNetworkId]
             ? BigInt(blockNumbers[currentNetworkId])
             : undefined,
-          toBlock: 'latest',
+          toBlock: block.number,
         });
 
         const addresses = eventLogs.map((log) => log.args?.instance as Address);
