@@ -55,7 +55,7 @@ export const getStakingContractInitPayload = ({
     livenessPeriod,
     timeForEmissions,
     numAgentInstances,
-    agentIds: agentIds.split(/,\s?/).map((agentId) => Number(agentId)),
+    agentIds: agentIds ? agentIds.split(/,\s?/).map((agentId) => Number(agentId)) : [],
     threshold,
     configHash,
     activityChecker,

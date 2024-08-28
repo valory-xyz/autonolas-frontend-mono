@@ -101,7 +101,6 @@ export const useFieldRules = (): StakingDepositRules => {
     numAgentInstances: { rules: getGenericFieldRules(FieldConfig.numAgentInstances.name) },
     agentIds: {
       rules: [
-        ...getGenericFieldRules(FieldConfig.agentIds.name),
         { ...FORM_VALIDATION.validateCommaSeparatedList },
       ],
     },
