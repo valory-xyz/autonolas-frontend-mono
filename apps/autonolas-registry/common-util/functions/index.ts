@@ -2,6 +2,7 @@ import { PublicKey } from '@solana/web3.js';
 import { RuleObject } from 'antd/es/form';
 import { StoreValue } from 'antd/es/form/interface';
 import { Contract, FallbackProvider, JsonRpcProvider, ethers } from 'ethers';
+import { Contract as ContractV5 } from 'ethers-v5';
 import { isString } from 'lodash';
 import { Address } from 'viem';
 
@@ -11,6 +12,7 @@ import {
   isValidAddress,
   notifyError,
   notifyWarning,
+  sendTransaction as sendTransactionLegacyFn,
 } from '@autonolas/frontend-library';
 
 import { sendTransaction as sendTransactionFn } from 'libs/util-functions/src';
@@ -144,11 +146,11 @@ const isMethodsBuilderInstance = (
  *
  */
 export const sendTransaction = (
-  method: Contract,
+  method: Contract | ContractV5,
   account: Address,
-  extra?: { vmType: string; registryAddress: Address },
+  extra?: { vmType: string; registryAddress: Address; isLegacy?: boolean },
 ) => {
-  const { vmType, registryAddress } = extra || {};
+  const { vmType, registryAddress, isLegacy } = extra || {};
   if (vmType === VM_TYPE.SVM && registryAddress) {
     // Check if something resembling an SVM method is being passed
     if (!isMethodsBuilderInstance(method, registryAddress)) {
@@ -158,7 +160,14 @@ export const sendTransaction = (
     return method.rpc();
   }
 
-  return sendTransactionFn(method, account, {
+  if (isLegacy) {
+    return sendTransactionLegacyFn(method as ContractV5, account, {
+      supportedChains: SUPPORTED_CHAINS,
+      rpcUrls: RPC_URLS as RpcUrl,
+    });
+  }
+
+  return sendTransactionFn(method as Contract, account, {
     supportedChains: SUPPORTED_CHAINS,
     rpcUrls: RPC_URLS as RpcUrl,
   });

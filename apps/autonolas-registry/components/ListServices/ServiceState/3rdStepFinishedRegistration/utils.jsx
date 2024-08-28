@@ -1,10 +1,18 @@
-/* eslint-disable no-underscore-dangle */
+/**
+ * NOTE: Legacy code, needs to be refactored once gnosis.pm/safe-contracts is updated.
+ * 
+ * How to test `handleMultisigSubmit` function (step 3 in service)
+ * 
+ */
 import { ethers } from 'ethers-v5';
+
+import { getEthersProvider as getEthersV5Provider } from '@autonolas/frontend-library';
 
 import { GNOSIS_SAFE_CONTRACT, MULTI_SEND_CONTRACT } from 'common-util/AbiAndAddresses';
 import { RPC_URLS, getServiceOwnerMultisigContract } from 'common-util/Contracts';
 import { safeMultiSend } from 'common-util/Contracts/addresses';
-import { checkIfGnosisSafe, getEthersProvider } from 'common-util/functions';
+import { SUPPORTED_CHAINS } from 'common-util/Login';
+import { checkIfGnosisSafe } from 'common-util/functions';
 
 import { isHashApproved } from './helpers';
 
@@ -46,7 +54,7 @@ export const handleMultisigSubmit = async ({
 
   const nonce = await multisigContract.nonce();
   console.log({ nonce });
-  
+
   const callData = [];
   const txs = [];
 
@@ -84,14 +92,15 @@ export const handleMultisigSubmit = async ({
     ethers.getDefaultProvider(RPC_URLS[chainId]),
   );
 
-  console.log({ safeContracts, multisig, txs, account, chainId });
   const safeTx = safeContracts.buildMultiSendSafeTx(multiSendContract, txs, nonce);
+  console.log({ safeTx });
 
-  const provider = getEthersProvider();
+  const provider = getEthersV5Provider(SUPPORTED_CHAINS, RPC_URLS);
   const isSafe = await checkIfGnosisSafe(account, provider);
 
+  console.log({ isSafe });
+
   try {
-    // TODO: check if we are dealing with safe in future!
     // logic to deal with gnosis-safe
     if (isSafe) {
       // Create a message hash from the multisend transaction
@@ -128,7 +137,7 @@ export const handleMultisigSubmit = async ({
       ]);
 
       // Redeploy the service updating the multisig with new owners and threshold
-      const packedData = ethers.solidityPacked(['address', 'bytes'], [multisig, safeExecData]);
+      const packedData = ethers.utils.solidityPack(['address', 'bytes'], [multisig, safeExecData]);
 
       // Check if the hash was already approved
       const filterOption = { approvedHash: messageHash, owner: account };
@@ -139,10 +148,10 @@ export const handleMultisigSubmit = async ({
           fromBlock: 0,
           toBlock: 'latest',
         },
-        (_error, events) => {
+        async (_error, events) => {
           // if hash was already approved, call the deploy function right away.
           if (events.length > 0) {
-            handleStep3Deploy(radioValue, packedData);
+            await handleStep3Deploy(radioValue, packedData);
           } else {
             // else wait until the hash is approved and then call deploy function
             multisigContractServiceOwner.methods
@@ -151,20 +160,18 @@ export const handleMultisigSubmit = async ({
               .on('transactionHash', async (hash) => {
                 window.console.log('safeTx', hash);
 
-                // TODO: use websocket based subscription to fetch real-time event
-                // await until the hash is approved & then deploy
                 await isHashApproved(multisigContractServiceOwner, startingBlock, filterOption);
-                handleStep3Deploy(radioValue, packedData);
+                await handleStep3Deploy(radioValue, packedData);
               })
               .then((information) => window.console.log(information))
-              .catch((e) => {
-                console.error(e);
-              });
+              .catch((e) => console.error(e));
           }
         },
       );
-    } else {
-      // logic to deal with metamask
+    }
+
+    // logic to deal with metamask
+    else {
       const signer = provider.getSigner();
 
       const getSignatureBytes = async () => {
@@ -174,12 +181,14 @@ export const handleMultisigSubmit = async ({
           EIP712_SAFE_TX_TYPE,
           safeTx,
         );
+        console.log({ signatureBytes });
 
         // take last 2 characters
         const last2Char = signatureBytes.slice(-2);
 
         // check if the last2Char is less than 2
         const value = parseInt(last2Char, 16);
+        console.log({ value });
 
         // if less than 2, add chainId * 2 + 35
         if (value < 2) {
@@ -191,6 +200,8 @@ export const handleMultisigSubmit = async ({
 
           // update the last 2 char
           const updatedSignatureBytes = signatureBytes.slice(0, -2) + updatedLast2Char;
+          console.log({ updatedSignatureBytes });
+
           return updatedSignatureBytes;
         }
 
@@ -198,7 +209,6 @@ export const handleMultisigSubmit = async ({
       };
 
       const signatureBytes = await getSignatureBytes();
-
       const safeExecData = multisigContract.interface.encodeFunctionData('execTransaction', [
         safeTx.to,
         safeTx.value,
@@ -211,13 +221,20 @@ export const handleMultisigSubmit = async ({
         safeTx.refundReceiver,
         signatureBytes,
       ]);
+      const packedData = ethers.utils.solidityPack(['address', 'bytes'], [multisig, safeExecData]);
+      console.log({ packedData });
 
-      const packedData = ethers.solidityPacked(['address', 'bytes'], [multisig, safeExecData]);
-
-      handleStep3Deploy(radioValue, packedData);
+      await handleStep3Deploy(radioValue, packedData);
     }
   } catch (error) {
     window.console.log('Error in signing:');
     console.error(error);
   }
 };
+
+/**
+ * 
+ * 
+ * 
+ 
+ */
