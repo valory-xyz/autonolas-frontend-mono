@@ -123,7 +123,7 @@ PathCard.propTypes = {
     service: PropTypes.shape({
       name: PropTypes.string.isRequired,
       url: PropTypes.string,
-    }).isRequired,
+    }),
     images: PropTypes.shape({
       homepageCard: PropTypes.string,
       description: PropTypes.string,
