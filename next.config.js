@@ -43,4 +43,11 @@ module.exports = {
       },
     ];
   },
+  redirects: async () => [
+    {
+      source: '/',
+      destination: '/paths',
+      permanent: false,
+    },
+  ],
 };

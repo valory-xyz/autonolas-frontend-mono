@@ -87,6 +87,9 @@ const GlobalStyle = createGlobalStyle`
   .hide-only-sm {
     display: initial;
   }
+  .max-w-max {
+    max-width: max-content;
+  }
 
   /* layout */
   .ant-layout-header {

@@ -10,6 +10,9 @@
     "airbnb",
     "plugin:jest/all"
   ],
+  "globals": {
+    "BigInt": true
+  },
   "settings": {
     "react": {
       "version": "detect"

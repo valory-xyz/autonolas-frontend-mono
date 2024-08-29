@@ -7,81 +7,68 @@ export const CustomLayout = styled(Layout)`
   .site-layout {
     padding: 100px 24px 24px 24px;
   }
-  .mech-tabs {
-    .ant-tabs-extra-content {
-      &:not(:last-child) {
-        .ant-typography {
-          color: ${COLOR.PRIMARY};
-          margin: 0 12px 0 0;
-        }
-      }
-      &:last-child {
-        gap: 12px;
-        display: flex;
-      }
-    }
-  }
-  .column-1, .column-2 {
+
+  .logo-link {
     display: flex;
+  }
+
+  .ant-layout-header {
+    display: flex;
+    align-items: center;
+    position: fixed;
+    z-index: 1;
     width: 100%;
-  }
-  .column-2 {
-    gap: 12px;
-    justify-content: flex-end;
-    ${MEDIA_QUERY.tabletL} {
-      justify-content: center;
-    }
-  }
-
-  ${MEDIA_QUERY.tabletL} {
-    .site-layout {
-      padding: 24px;
-    }
-
-    .column-1 {
-      margin-bottom: 12px;
-    }
-    
-    .mech-tabs {
-      .ant-tabs-nav {
-        flex-direction: column;
-        align-items: flex-start;
-        justify-content: flex-start;
-        .ant-tabs-extra-content {
-          margin-top: 12px;
-        }
+    height: 64px;
+    line-height: 64px;
+    padding: 0 2rem;
+    gap: 0 16px;
+    .ant-menu {
+      flex: 1;
+      &.ant-menu-horizontal {
+        border: none;
       }
-      .ant-tabs-nav-wrap {
-        padding-left: 0;
+      &.ant-menu-horizontal > .ant-menu-item::after,
+      .ant-menu-horizontal > .ant-menu-submenu::after {
+        border-bottom: none !important;
       }
-      .ant-tabs-nav-list {
-        transform: none !important;
+      .ant-menu-item-selected {
+        font-weight: bold;
       }
     }
-    /* footer from autonolas-library */
-    main + div {
-      padding: 24px;
+    ${MEDIA_QUERY.mobileM} {
+      &.ant-menu-horizontal {
+        line-height: 2;
+      }
     }
   }
 
-  ${MEDIA_QUERY.mobileS} {
-    .site-layout {
-      padding: 24px;
-    }
-
-    .column-1 {
-      margin-bottom: 12px;
-    }
-    
-    /* footer from autonolas-library */
-    main + div {
+  ${MEDIA_QUERY.tablet} {
+    .ant-layout-header {
+      position: relative;
       flex-direction: column;
-      align-items: center;
-      gap: 20px;
-      .footer-center {
-        position: relative;
-        left: 0;
-        transform: none;
+      height: auto;
+      padding: 0;
+    }
+    .site-layout {
+      margin-top: 0;
+    }
+    .ant-menu.ant-menu-horizontal {
+      justify-content: center;
+      width: 100%;
+    }
+  }
+  ${MEDIA_QUERY.mobileL} {
+    .site-layout {
+      padding: 0 1rem;
+    }
+    .footer-center {
+      display: none;
+    }
+  }
+  ${MEDIA_QUERY.mobileM} {
+    .ant-layout-header {
+      .ant-menu-overflow-item {
+        line-height: 2;
       }
     }
   }
