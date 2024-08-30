@@ -37,6 +37,7 @@ const ALLOWED_ORIGINS = [
   'https://safe-transaction-goerli.safe.global/api/',
   'https://safe-transaction-gnosis-chain.safe.global/api/',
   'https://safe-transaction-polygon.safe.global/api/',
+  'https://cloudflare-eth.com/',
 
   // chains
   'https://eth-mainnet.g.alchemy.com/v2/',
