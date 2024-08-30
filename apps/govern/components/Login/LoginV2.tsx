@@ -22,9 +22,15 @@ export const LoginV2 = () => {
   const dispatch = useAppDispatch();
 
   const handleConnect = useCallback(
-    ({ address }: Pick<GetAccountReturnType, 'address' | 'chainId'>) => {
+    async ({ address, connector }: Pick<GetAccountReturnType, 'address' | 'connector'>) => {
       if (isAddressProhibited(address)) {
         disconnect();
+      }
+
+      if (connector) {
+        const modalProvider = await connector.getProvider();
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (window as any).MODAL_PROVIDER = modalProvider;
       }
     },
     [disconnect],

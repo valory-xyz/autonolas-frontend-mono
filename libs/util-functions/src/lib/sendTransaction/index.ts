@@ -49,10 +49,7 @@ export const sendTransaction = async (
       if (!provider) return false;
 
       try {
-        const getCodeFn = provider?.provider?.getCode;
-        if (!getCodeFn) return false;
-
-        const code = await getCodeFn(account);
+        const code = await provider.getCode(account);
         return code !== '0x';
       } catch (error) {
         console.error(error);
@@ -69,7 +66,7 @@ export const sendTransaction = async (
        */
       notifyWarning('Please submit the transaction in your safe app.');
 
-      sendFn.on('transactionHash', async (safeTx: string) => {
+      return sendFn.on('transactionHash', async (safeTx: string) => {
         window.console.log('safeTx', safeTx);
 
         /**
@@ -95,6 +92,4 @@ export const sendTransaction = async (
     notifyError('Error occurred while sending transaction');
     throw e;
   }
-
-  return null;
 };
