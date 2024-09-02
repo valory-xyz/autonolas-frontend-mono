@@ -300,7 +300,7 @@ const RegisterForm = ({
                 if (!isEqual(agentIdsArray, sortBy(agentIdsArray))) {
                   return Promise.reject(
                     new Error(
-                      'Please input a sorted agent Ids and update the slots and bonds accordingly',
+                      'Agent IDs should be sorted from low to high.',
                     ),
                   );
                 }
