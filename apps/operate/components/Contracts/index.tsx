@@ -8,8 +8,9 @@ import { Caption, TextWithTooltip } from 'libs/ui-components/src';
 import { BREAK_POINT } from 'libs/ui-theme/src';
 import { CHAIN_NAMES, GOVERN_URL, NA, UNICODE_SYMBOLS } from 'libs/util-constants/src';
 
-import { useStakingContractsList } from './hooks';
 import { RunAgentButton } from 'components/RunAgentButton';
+
+import { useStakingContractsList } from './hooks';
 
 const StyledMain = styled.main`
   display: flex;
@@ -31,6 +32,7 @@ const columns: ColumnsType<StakingContract> = [
     title: 'Chain',
     dataIndex: 'chainId',
     key: 'chainId',
+    width: 120,
     render: (chainId) => <Text type="secondary">{CHAIN_NAMES[chainId] || chainId}</Text>,
   },
   {
@@ -52,6 +54,13 @@ const columns: ColumnsType<StakingContract> = [
     render: (stakeRequired) => <Text>{stakeRequired}</Text>,
   },
   {
+    title: 'Minimum operating balance required',
+    dataIndex: 'minOperatingBalance',
+    key: 'minOperatingBalance',
+    width: 180,
+    render: (minOperatingBalance) => <Text>{minOperatingBalance || NA}</Text>,
+  },
+  {
     title: () => (
       <TextWithTooltip
         text="Available on"
@@ -67,7 +76,7 @@ const columns: ColumnsType<StakingContract> = [
     ),
     dataIndex: 'availableOn',
     key: 'availableOn',
-    render: (availableOn) => <RunAgentButton availableOn={availableOn}/>,
+    render: (availableOn) => <RunAgentButton availableOn={availableOn} />,
   },
 ];
 
@@ -110,6 +119,7 @@ export const ContractsPage = () => {
               </>
             ),
           }}
+          scroll={{ x: 768 }}
         />
       </Card>
     </StyledMain>
