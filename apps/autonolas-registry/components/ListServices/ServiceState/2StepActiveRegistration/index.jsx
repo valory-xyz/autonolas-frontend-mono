@@ -1,21 +1,18 @@
-import { useState, useEffect } from 'react';
-import PropTypes from 'prop-types';
-import { ethers } from 'ethers';
 import { Divider, Typography } from 'antd';
-import {
-  convertToEth,
-  notifyError,
-  notifySuccess,
-} from '@autonolas/frontend-library';
+import { ethers } from 'ethers';
 import { isArray } from 'lodash';
+import PropTypes from 'prop-types';
+import { useEffect, useState } from 'react';
 
-import { useHelpers } from '../../../../common-util/hooks';
+import { convertToEth, notifyError, notifySuccess } from '@autonolas/frontend-library';
+
 import { SendTransactionButton } from '../../../../common-util/TransactionHelpers/SendTransactionButton';
-import { useSvmBonds } from '../../hooks/useSvmService';
-import { getBonds, getTokenBondRequest, checkAndApproveToken } from '../utils';
+import { useHelpers } from '../../../../common-util/hooks';
 import { getNumberOfAgentAddress } from '../../helpers/functions';
-import { ActiveRegistrationTable } from './ActiveRegistrationTable';
+import { useSvmBonds } from '../../hooks/useSvmService';
 import { useRegisterAgents } from '../useSvmServiceStateManagement';
+import { checkAndApproveToken, getBonds, getTokenBondRequest } from '../utils';
+import { ActiveRegistrationTable } from './ActiveRegistrationTable';
 
 const { Text } = Typography;
 const STEP = 2;
@@ -30,9 +27,7 @@ const getIdsAndAgentInstances = (dataSource) => {
   const ids = [];
 
   // filter out instances that are empty
-  const filteredDataSource = dataSource.filter(
-    ({ agentAddresses }) => !!agentAddresses,
-  );
+  const filteredDataSource = dataSource.filter(({ agentAddresses }) => !!agentAddresses);
 
   const instances = filteredDataSource.map(({ agentAddresses, agentId }) => {
     /**
@@ -68,8 +63,7 @@ export const ActiveRegistration = ({
   isEthToken,
   updateDetails,
 }) => {
-  const { isSvm, account, chainId, doesNetworkHaveValidServiceManagerToken } =
-    useHelpers();
+  const { isSvm, account, chainId, doesNetworkHaveValidServiceManagerToken } = useHelpers();
   const { getSvmBonds } = useSvmBonds();
 
   const [totalBonds, setTotalBond] = useState(null);
@@ -101,12 +95,7 @@ export const ActiveRegistration = ({
         }
       }
 
-      if (
-        serviceId &&
-        !isEthToken &&
-        doesNetworkHaveValidServiceManagerToken &&
-        !isSvm
-      ) {
+      if (serviceId && !isEthToken && doesNetworkHaveValidServiceManagerToken && !isSvm) {
         const response = await getTokenBondRequest(serviceId, dataSource);
         setEthTokenBonds(response);
       }
@@ -169,16 +158,15 @@ export const ActiveRegistration = ({
   };
 
   const btnProps = getOtherBtnProps(STEP);
-  const totalBondEthToken = convertToEth((totalBonds || 0).toString()) || '--';
+  const totalBondEthToken = totalBonds ? convertToEth(totalBonds.toString()) : '--';
 
   let totalTokenBonds = 0;
   isArray(ethTokenBonds) &&
     ethTokenBonds.forEach((bond, index) => {
-      const addressCount = getNumberOfAgentAddress(
-        dataSource[index].agentAddresses,
-      );
+      const addressCount = getNumberOfAgentAddress(dataSource[index].agentAddresses);
       totalTokenBonds += addressCount * bond;
     });
+  const totalTokenBondsEth = totalTokenBonds ? convertToEth(totalTokenBonds.toString()) : '--';
 
   return (
     <div className="step-2-active-registration">
@@ -194,11 +182,7 @@ export const ActiveRegistration = ({
       {!isSvm && (
         <Text type="secondary">
           {`Adding instances will cause a bond of ${totalBondEthToken} ETH`}
-          {!isEthToken && (
-            <>
-              {` and ${convertToEth((totalTokenBonds || 0).toString())} token`}
-            </>
-          )}
+          {!isEthToken && <>{` and ${totalTokenBondsEth} token`}</>}
         </Text>
       )}
 
@@ -238,9 +222,8 @@ export const ActiveRegistration = ({
 
 ActiveRegistration.propTypes = {
   serviceId: PropTypes.string,
-  dataSource: PropTypes.arrayOf(
-    PropTypes.oneOfType([PropTypes.array, PropTypes.object]),
-  ).isRequired,
+  dataSource: PropTypes.arrayOf(PropTypes.oneOfType([PropTypes.array, PropTypes.object]))
+    .isRequired,
   setDataSource: PropTypes.func.isRequired,
   getOtherBtnProps: PropTypes.func.isRequired,
   handleTerminate: PropTypes.func.isRequired,
