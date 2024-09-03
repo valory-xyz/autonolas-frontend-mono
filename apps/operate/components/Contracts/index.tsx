@@ -8,8 +8,9 @@ import { Caption, TextWithTooltip } from 'libs/ui-components/src';
 import { BREAK_POINT } from 'libs/ui-theme/src';
 import { CHAIN_NAMES, GOVERN_URL, NA, UNICODE_SYMBOLS } from 'libs/util-constants/src';
 
-import { useStakingContractsList } from './hooks';
 import { RunAgentButton } from 'components/RunAgentButton';
+
+import { useStakingContractsList } from './hooks';
 
 const StyledMain = styled.main`
   display: flex;
@@ -25,7 +26,7 @@ const columns: ColumnsType<StakingContract> = [
     title: 'Contract',
     dataIndex: 'metadata',
     key: 'address',
-    render: (metadata) => <Text strong>{metadata.name || NA}</Text>,
+    render: (metadata) => <Text strong>{metadata?.name || NA}</Text>,
   },
   {
     title: 'Chain',
@@ -67,7 +68,7 @@ const columns: ColumnsType<StakingContract> = [
     ),
     dataIndex: 'availableOn',
     key: 'availableOn',
-    render: (availableOn) => <RunAgentButton availableOn={availableOn}/>,
+    render: (availableOn) => <RunAgentButton availableOn={availableOn} />,
   },
 ];
 
