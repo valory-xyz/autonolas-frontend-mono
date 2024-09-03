@@ -14,6 +14,7 @@ type StakingContractDetailsInfo = {
   availableOn?: StakingContract['availableOn'];
   minOperatingBalance?: number;
   minOperatingBalanceToken?: string;
+  convertUsdToEth?: boolean;
 };
 
 const STAKING_CONTRACT_DETAILS: Record<Address, StakingContractDetailsInfo> = {
@@ -54,8 +55,9 @@ const STAKING_CONTRACT_DETAILS: Record<Address, StakingContractDetailsInfo> = {
   },
   '0x00000000000000000000000088996bbde7f982d93214881756840ce2c77c4992': {
     availableOn: null,
-    minOperatingBalance: 0.00391,
+    minOperatingBalance: 10,
     minOperatingBalanceToken: 'ETH (OP)',
+    convertUsdToEth: true,
   },
   '0x000000000000000000000000daf34ec46298b53a3d24cbcb431e84ebd23927da': {
     availableOn: null,
@@ -171,13 +173,6 @@ export const useStakingContractsList = () => {
         const stakeRequired = getStakeRequired(minStakingDeposit, numAgentInstances);
         const details = STAKING_CONTRACT_DETAILS[item.account];
 
-        const getMinRequiredBalance = () => {
-          if (!details.minOperatingBalance) return null;
-          const prefix = Number(item.chainId) === 10 ? '~' : '';
-          const suffix = details.minOperatingBalanceToken || '';
-          return `${prefix} ${details.minOperatingBalance} ${suffix}`.trim();
-        };
-
         return {
           key: item.account,
           address: item.account,
@@ -188,7 +183,9 @@ export const useStakingContractsList = () => {
           apy,
           stakeRequired,
           availableOn: details?.availableOn || null,
-          minOperatingBalanceRequired: getMinRequiredBalance(),
+          minOperatingBalance: details.minOperatingBalance,
+          minOperatingBalanceToken: details?.minOperatingBalanceToken || null,
+          convertUsdToEth: details?.convertUsdToEth || false,
         };
       }) as StakingContract[];
     }
@@ -201,6 +198,7 @@ export const useStakingContractsList = () => {
     rewardsPerSecondList,
     minStakingDepositList,
     numAgentInstancesList,
+    availableRewardsList,
   ]);
 
   return {

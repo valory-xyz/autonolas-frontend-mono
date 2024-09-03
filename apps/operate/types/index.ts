@@ -15,4 +15,7 @@ export type StakingContract = {
   apy: number;
   stakeRequired: string;
   availableOn: 'pearl' | 'quickstart' | null;
+  minOperatingBalance: number | null;
+  minOperatingBalanceToken: string | null;
+  convertUsdToEth: boolean;
 };
