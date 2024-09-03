@@ -18,6 +18,7 @@ const StyledMain = styled.main`
 `;
 
 const StyledCard = styled(Card)`
+  height: 100%;
   border-color: ${COLOR.BORDER_GREY};
   width: 100%;
   .ant-card-body {
@@ -26,22 +27,21 @@ const StyledCard = styled(Card)`
 `;
 
 const CardBody = styled.div`
-  padding: 16px;
+  padding: 24px;
 `;
 
 const StyledImage = styled(Image)`
-  border-bottom: 1px solid ${COLOR.BORDER_GREY};
-  border-top-left-radius: 5px;
-  border-top-right-radius: 5px;
+  padding: 8px;
   display: block;
   object-fit: cover;
 `;
 
+const AddImageContainer = styled.div`
+  min-height: 224px;
+`;
+
 const StyledAddImage = styled(StyledImage)`
-  border-top-right-radius: 0px;
-  border-bottom-left-radius: 5px;
-  border-bottom: 0;
-  border-right: 1px solid ${COLOR.BORDER_GREY};
+  border-radius: 8px;
 `;
 
 type Agent = {
@@ -67,6 +67,19 @@ const agents: Agent[] = [
     },
     imageFilename: 'prediction-agent.png',
   },
+  {
+    id: '2c2b2e69-ad26-4c94-b6a0-b62ed25e144b',
+    name: 'Optimus Agent',
+    description:
+      'Streamlines your DeFi experience by intelligently managing your assets across the Superchain.',
+    comingSoon: false,
+    availableOn: ['optimusQuickstart'],
+    urls: {
+      // uncomment when the content is ready
+      // learnMore: 'https://olas.network/services/babydegen',
+    },
+    imageFilename: 'optimus-agent.png',
+  },
 ];
 
 const AgentCard = ({ agent }: { agent: Agent }) => {
@@ -80,15 +93,17 @@ const AgentCard = ({ agent }: { agent: Agent }) => {
           alt={name}
           src={`/images/${imageFilename}`}
           layout="responsive"
-          width={400}
-          height={400}
+          width={352}
+          height={344}
         />
         <CardBody>
           <Title className="mt-0" level={4}>
             {name}
           </Title>
           <div className="mb-12">
-            <Paragraph ellipsis={{ rows: 3, expandable: true }}>{description}</Paragraph>
+            <Paragraph ellipsis={{ rows: 3, expandable: true }} type="secondary">
+              {description}
+            </Paragraph>
           </div>
           {comingSoon ? (
             <Button block disabled>
@@ -99,7 +114,12 @@ const AgentCard = ({ agent }: { agent: Agent }) => {
               {availableOn && (
                 <Flex gap={8} justify="space-between" className="mb-8">
                   {availableOn.map((type) => (
-                    <RunAgentButton availableOn={type} type="default" key={type} className='full-width'/>
+                    <RunAgentButton
+                      availableOn={type}
+                      type="default"
+                      key={type}
+                      className="full-width"
+                    />
                   ))}
                 </Flex>
               )}
@@ -139,18 +159,20 @@ export const AgentsPage = () => {
           <StyledCard styles={{ body: { padding: 0 } }}>
             <Row>
               <Col span={7} className="p-0">
-                <StyledAddImage
-                  alt="baby robot surfing a wave, having an idea"
-                  src="/images/add-your-own.png"
-                  layout="fill"
-                  objectFit="cover"
-                />
+                <AddImageContainer>
+                  <StyledAddImage
+                    alt="baby robot surfing a wave, having an idea"
+                    src="/images/add-your-own.png"
+                    layout="fill"
+                    objectFit="cover"
+                  />
+                </AddImageContainer>
               </Col>
               <Col span={17} className="p-16">
-                <Title className="mt-0" level={4}>
+                <Title className="mt-0 mb-16" level={4}>
                   Want people to run <b>your</b> agent?
                 </Title>
-                <Paragraph>
+                <Paragraph type="secondary" className="mb-24">
                   Build an autonomous service using Open Autonomy. Then, simply submit a pull
                   request including the quickstart.
                 </Paragraph>
