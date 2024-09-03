@@ -183,7 +183,7 @@ export const useStakingContractsList = () => {
           apy,
           stakeRequired,
           availableOn: details?.availableOn || null,
-          minOperatingBalance: details.minOperatingBalance,
+          minOperatingBalance: details?.minOperatingBalance,
           minOperatingBalanceToken: details?.minOperatingBalanceToken || null,
           convertUsdToEth: details?.convertUsdToEth || false,
         };

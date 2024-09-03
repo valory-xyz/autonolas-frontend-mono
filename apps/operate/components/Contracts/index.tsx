@@ -44,9 +44,10 @@ const ConvertedMinOperatingBalance = ({ value, token }: ConvertedMinOperatingBal
     };
 
     convert();
-  }, [value, token]);
+  }, [value]);
 
   if (isConverting) return <Skeleton.Input active />;
+  if (!convertedValue) return <Text>{NA}</Text>;
   return <Text>{`~${convertedValue} ${token || ''}`.trim()}</Text>;
 };
 
@@ -75,7 +76,7 @@ const columns: ColumnsType<StakingContract> = [
     title: () => <TextWithTooltip text="APY" description="Annual percentage yield" />,
     dataIndex: 'apy',
     key: 'apy',
-    render: (apy) => <Tag color="purple">{`${apy}%`}</Tag>,
+    render: (apy) => <Tag color="purple" className="m-0">{`${apy}%`}</Tag>,
     className: 'text-end',
   },
   {
@@ -90,19 +91,21 @@ const columns: ColumnsType<StakingContract> = [
     title: 'Minimum operating balance required',
     dataIndex: 'minOperatingBalance',
     key: 'minOperatingBalance',
-    render: (minOperatingBalance, contract) => {
-      const { convertUsdToEth } = contract;
-      if (!convertUsdToEth) {
-        const value = `${minOperatingBalance} ${contract.minOperatingBalanceToken}`.trim();
+    render: (_, contract) => {
+      const { convertUsdToEth, minOperatingBalance, minOperatingBalanceToken } = contract;
+      if (!minOperatingBalance) return <Text>{NA}</Text>;
+
+      if (convertUsdToEth) {
+        return (
+          <ConvertedMinOperatingBalance
+            value={minOperatingBalance}
+            token={minOperatingBalanceToken}
+          />
+        );
+      } else {
+        const value = `${minOperatingBalance} ${minOperatingBalanceToken}`;
         return <Text>{value}</Text>;
       }
-
-      return (
-        <ConvertedMinOperatingBalance
-          value={minOperatingBalance}
-          token={contract.minOperatingBalanceToken}
-        />
-      );
     },
     className: 'text-end',
     width: 200,
@@ -139,6 +142,7 @@ export const ContractsPage = () => {
           Browse staking opportunities. Make a selection and start running them via Pearl or
           Quickstart for the opportunity to earn OLAS rewards.
         </Caption>
+
         <Table
           columns={columns}
           pagination={false}
