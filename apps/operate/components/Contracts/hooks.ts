@@ -10,10 +10,28 @@ import { getAddressFromBytes32, getBytes32FromAddress } from 'libs/util-function
 
 const ONE_YEAR = 1 * 24 * 60 * 60 * 365;
 
-const AVAILABLE_ON: Record<Address, StakingContract['availableOn']> = {
-  '0x000000000000000000000000ef44fb0842ddef59d37f85d61a1ef492bba6135d': 'pearl',
-  '0x000000000000000000000000389b46c259631acd6a69bde8b6cee218230bae8c': 'quickstart',
-  '0x0000000000000000000000005344b7dd311e5d3dddd46a4f71481bd7b05aaa3e': 'quickstart',
+type StakingContractDetailsInfo = {
+  availableOn: StakingContract['availableOn'];
+  minOperatingBalance?: number;
+  minOperatingBalanceToken?: string;
+};
+
+const STAKING_CONTRACT_DETAILS: Record<Address, StakingContractDetailsInfo> = {
+  '0x000000000000000000000000ef44fb0842ddef59d37f85d61a1ef492bba6135d': {
+    availableOn: 'pearl',
+    minOperatingBalance: 11.5,
+    minOperatingBalanceToken: 'xDAI',
+  },
+  '0x000000000000000000000000389b46c259631acd6a69bde8b6cee218230bae8c': {
+    availableOn: 'quickstart',
+    minOperatingBalance: 90,
+    minOperatingBalanceToken: 'xDAI',
+  },
+  '0x0000000000000000000000005344b7dd311e5d3dddd46a4f71481bd7b05aaa3e': {
+    availableOn: 'quickstart',
+    minOperatingBalance: 90,
+    minOperatingBalanceToken: 'xDAI',
+  },
 };
 
 const getApy = (
@@ -109,6 +127,7 @@ export const useStakingContractsList = () => {
 
         const apy = getApy(rewardsPerSecond, minStakingDeposit, numAgentInstances);
         const stakeRequired = getStakeRequired(minStakingDeposit, numAgentInstances);
+        const details = STAKING_CONTRACT_DETAILS[item.account];
 
         return {
           key: item.account,
@@ -119,7 +138,10 @@ export const useStakingContractsList = () => {
           maxSlots,
           apy,
           stakeRequired,
-          availableOn: AVAILABLE_ON[item.account] || null,
+          availableOn: details.availableOn || null,
+          minOperatingBalanceRequired: details.minOperatingBalance
+            ? `${details.minOperatingBalance} ${details.minOperatingBalanceToken}`
+            : null,
         };
       }) as StakingContract[];
     }

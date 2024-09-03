@@ -46,19 +46,23 @@ const columns: ColumnsType<StakingContract> = [
     dataIndex: 'apy',
     key: 'apy',
     render: (apy) => <Tag color="purple">{`${apy}%`}</Tag>,
+    className: 'text-end',
   },
   {
     title: 'Stake required, OLAS',
     dataIndex: 'stakeRequired',
     key: 'stakeRequired',
     render: (stakeRequired) => <Text>{stakeRequired}</Text>,
+    className: 'text-end',
+    width: 148,
   },
   {
     title: 'Minimum operating balance required',
-    dataIndex: 'minOperatingBalance',
-    key: 'minOperatingBalance',
-    width: 180,
+    dataIndex: 'minOperatingBalanceRequired',
+    key: 'minOperatingBalanceRequired',
     render: (minOperatingBalance) => <Text>{minOperatingBalance || NA}</Text>,
+    className: 'text-end',
+    width: 180,
   },
   {
     title: () => (
@@ -120,6 +124,7 @@ export const ContractsPage = () => {
             ),
           }}
           scroll={{ x: 768 }}
+          rowHoverable={false}
         />
       </Card>
     </StyledMain>
