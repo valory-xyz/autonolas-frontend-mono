@@ -131,6 +131,11 @@ export const useStakingContractsList = () => {
     nominees,
     'rewardsPerSecond',
   );
+  // Get available rewards
+  const { data: availableRewardsList, isFetching: isAvailableRewardsLoading } = useContractDetails(
+    nominees,
+    'availableRewards',
+  );
   // Get minStakingDeposit
   const { data: minStakingDepositList, isFetching: isMinStakingDepositLoading } =
     useContractDetails(nominees, 'minStakingDeposit');
@@ -149,13 +154,15 @@ export const useStakingContractsList = () => {
       !!maxNumServicesList &&
       !!serviceIdsList &&
       !!rewardsPerSecondList &&
+      !!availableRewardsList &&
       !!minStakingDepositList &&
       !!numAgentInstancesList
     ) {
       return nominees.map((item, index) => {
         const maxSlots = Number(maxNumServicesList[index]);
         const servicesLength = ((serviceIdsList[index] as string[]) || []).length;
-        const availableSlots = maxSlots > 0 && servicesLength > 0 ? maxSlots - servicesLength : 0;
+        const availableRewards = availableRewardsList[index] as bigint;
+        const availableSlots = availableRewards > 0 && maxSlots > 0 ? maxSlots - servicesLength : 0;
         const rewardsPerSecond = rewardsPerSecondList[index] as bigint;
         const minStakingDeposit = minStakingDepositList[index] as bigint;
         const numAgentInstances = numAgentInstancesList[index] as bigint;
@@ -204,6 +211,7 @@ export const useStakingContractsList = () => {
       isMaxNumServicesLoading ||
       isServiceIdsLoading ||
       isRewardsPerSecondLoading ||
+      isAvailableRewardsLoading ||
       isMinStakingDepositLoading ||
       isNumAgentInstancesLoading,
   };

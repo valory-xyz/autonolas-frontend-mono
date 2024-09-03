@@ -26,8 +26,7 @@ const columns: ColumnsType<StakingContract> = [
     title: 'Contract',
     dataIndex: 'metadata',
     key: 'address',
-    render: (metadata) => <Text strong>{metadata.name || NA}</Text>,
-    width: 240,
+    render: (metadata) => <Text strong>{metadata?.name || NA}</Text>,
   },
   {
     title: 'Chain',
