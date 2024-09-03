@@ -56,7 +56,7 @@ const STAKING_CONTRACT_DETAILS: Record<Address, StakingContractDetailsInfo> = {
   '0x00000000000000000000000088996bbde7f982d93214881756840ce2c77c4992': {
     availableOn: null,
     minOperatingBalance: 10,
-    minOperatingBalanceToken: 'ETH (OP)',
+    minOperatingBalanceToken: 'ETH',
     convertUsdToEth: true,
   },
   '0x000000000000000000000000daf34ec46298b53a3d24cbcb431e84ebd23927da': {

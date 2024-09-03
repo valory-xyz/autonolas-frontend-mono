@@ -1,5 +1,5 @@
 import { DownOutlined, RightOutlined } from '@ant-design/icons';
-import { Card, Skeleton, Table, Tag, Typography } from 'antd';
+import { Card, Flex, Skeleton, Table, Tag, Typography } from 'antd';
 import { ColumnsType } from 'antd/es/table';
 import { useEffect, useState } from 'react';
 import styled from 'styled-components';
@@ -23,8 +23,17 @@ const StyledMain = styled.main`
 
 const { Title, Paragraph, Text } = Typography;
 
-type ConvertedMinOperatingBalanceProps = { value: number; token: string | null };
-const ConvertedMinOperatingBalance = ({ value, token }: ConvertedMinOperatingBalanceProps) => {
+const getMinOperatingSuffix = (chain: number) => {
+  if (chain === 10) return '(On Optimism)';
+  return null;
+};
+
+type ConvertedMinOperatingBalanceProps = { value: number; token: string | null; chainId: number };
+const ConvertedMinOperatingBalance = ({
+  value,
+  token,
+  chainId,
+}: ConvertedMinOperatingBalanceProps) => {
   const [isConverting, setIsConverting] = useState<boolean>(false);
   const [convertedValue, setConvertedValue] = useState<number | null>(null);
 
@@ -48,7 +57,17 @@ const ConvertedMinOperatingBalance = ({ value, token }: ConvertedMinOperatingBal
 
   if (isConverting) return <Skeleton.Input active />;
   if (!convertedValue) return <Text>{NA}</Text>;
-  return <Text>{`~${convertedValue} ${token || ''}`.trim()}</Text>;
+
+  const textToDisplay = `~${convertedValue} ${token || ''}`.trim();
+  const suffix = getMinOperatingSuffix(chainId);
+
+  if (!suffix) return <Text>{textToDisplay}</Text>;
+  return (
+    <Flex vertical>
+      <Text>{textToDisplay}</Text>
+      <Text>{suffix}</Text>
+    </Flex>
+  );
 };
 
 const columns: ColumnsType<StakingContract> = [
@@ -92,7 +111,7 @@ const columns: ColumnsType<StakingContract> = [
     dataIndex: 'minOperatingBalance',
     key: 'minOperatingBalance',
     render: (_, contract) => {
-      const { convertUsdToEth, minOperatingBalance, minOperatingBalanceToken } = contract;
+      const { convertUsdToEth, minOperatingBalance, minOperatingBalanceToken, chainId } = contract;
       if (!minOperatingBalance) return <Text>{NA}</Text>;
 
       if (convertUsdToEth) {
@@ -100,6 +119,7 @@ const columns: ColumnsType<StakingContract> = [
           <ConvertedMinOperatingBalance
             value={minOperatingBalance}
             token={minOperatingBalanceToken}
+            chainId={chainId}
           />
         );
       } else {
@@ -108,7 +128,7 @@ const columns: ColumnsType<StakingContract> = [
       }
     },
     className: 'text-end',
-    width: 200,
+    width: 180,
   },
   {
     title: () => (
