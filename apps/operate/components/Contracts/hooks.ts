@@ -54,7 +54,7 @@ const STAKING_CONTRACT_DETAILS: Record<Address, StakingContractDetailsInfo> = {
     minOperatingBalanceToken: 'xDAI',
   },
   '0x00000000000000000000000088996bbde7f982d93214881756840ce2c77c4992': {
-    availableOn: null,
+    availableOn: 'optimusQuickstart',
     minOperatingBalance: 10,
     minOperatingBalanceToken: 'ETH',
     convertUsdToEth: true,
