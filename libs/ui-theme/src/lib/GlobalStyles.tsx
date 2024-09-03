@@ -118,7 +118,7 @@ export const GlobalStyles = createGlobalStyle`
     text-align: center;
   }
   .text-end {
-    text-align: end;
+    text-align: end !important;
   }
 
   .full-width {

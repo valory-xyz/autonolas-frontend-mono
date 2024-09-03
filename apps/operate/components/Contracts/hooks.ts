@@ -10,10 +10,65 @@ import { getAddressFromBytes32, getBytes32FromAddress } from 'libs/util-function
 
 const ONE_YEAR = 1 * 24 * 60 * 60 * 365;
 
-const AVAILABLE_ON: Record<Address, StakingContract['availableOn']> = {
-  '0x000000000000000000000000ef44fb0842ddef59d37f85d61a1ef492bba6135d': 'pearl',
-  '0x000000000000000000000000389b46c259631acd6a69bde8b6cee218230bae8c': 'quickstart',
-  '0x0000000000000000000000005344b7dd311e5d3dddd46a4f71481bd7b05aaa3e': 'quickstart',
+type StakingContractDetailsInfo = {
+  availableOn?: StakingContract['availableOn'];
+  minOperatingBalance?: number;
+  minOperatingBalanceToken?: string;
+  convertUsdToEth?: boolean;
+};
+
+const STAKING_CONTRACT_DETAILS: Record<Address, StakingContractDetailsInfo> = {
+  '0x000000000000000000000000ef44fb0842ddef59d37f85d61a1ef492bba6135d': {
+    availableOn: 'pearl',
+    minOperatingBalance: 11.5,
+    minOperatingBalanceToken: 'xDAI',
+  },
+  '0x000000000000000000000000389b46c259631acd6a69bde8b6cee218230bae8c': {
+    availableOn: 'quickstart',
+    minOperatingBalance: 90,
+    minOperatingBalanceToken: 'xDAI',
+  },
+  '0x0000000000000000000000005344b7dd311e5d3dddd46a4f71481bd7b05aaa3e': {
+    availableOn: 'quickstart',
+    minOperatingBalance: 90,
+    minOperatingBalanceToken: 'xDAI',
+  },
+  '0x000000000000000000000000b964e44c126410df341ae04b13ab10a985fe3513': {
+    availableOn: null,
+    minOperatingBalance: 90,
+    minOperatingBalanceToken: 'xDAI',
+  },
+  '0x00000000000000000000000080fad33cadb5f53f9d29f02db97d682e8b101618': {
+    availableOn: null,
+    minOperatingBalance: 90,
+    minOperatingBalanceToken: 'xDAI',
+  },
+  '0x0000000000000000000000001c2f82413666d2a3fd8bc337b0268e62ddf67434': {
+    availableOn: null,
+    minOperatingBalance: 11.5,
+    minOperatingBalanceToken: 'xDAI',
+  },
+  '0x000000000000000000000000238eb6993b90a978ec6aad7530d6429c949c08da': {
+    availableOn: null,
+    minOperatingBalance: 45,
+    minOperatingBalanceToken: 'xDAI',
+  },
+  '0x00000000000000000000000088996bbde7f982d93214881756840ce2c77c4992': {
+    availableOn: null,
+    minOperatingBalance: 10,
+    minOperatingBalanceToken: 'ETH',
+    convertUsdToEth: true,
+  },
+  '0x000000000000000000000000daf34ec46298b53a3d24cbcb431e84ebd23927da': {
+    availableOn: null,
+    minOperatingBalance: 11.5,
+    minOperatingBalanceToken: 'xDAI',
+  },
+  '0x000000000000000000000000998defafd094817ef329f6dc79c703f1cf18bc90': {
+    availableOn: null,
+    minOperatingBalance: 45,
+    minOperatingBalanceToken: 'xDAI',
+  },
 };
 
 const getApy = (
@@ -116,6 +171,7 @@ export const useStakingContractsList = () => {
 
         const apy = getApy(rewardsPerSecond, minStakingDeposit, numAgentInstances);
         const stakeRequired = getStakeRequired(minStakingDeposit, numAgentInstances);
+        const details = STAKING_CONTRACT_DETAILS[item.account];
 
         return {
           key: item.account,
@@ -126,7 +182,10 @@ export const useStakingContractsList = () => {
           maxSlots,
           apy,
           stakeRequired,
-          availableOn: AVAILABLE_ON[item.account] || null,
+          availableOn: details?.availableOn || null,
+          minOperatingBalance: details?.minOperatingBalance,
+          minOperatingBalanceToken: details?.minOperatingBalanceToken || null,
+          convertUsdToEth: details?.convertUsdToEth || false,
         };
       }) as StakingContract[];
     }
@@ -139,6 +198,7 @@ export const useStakingContractsList = () => {
     rewardsPerSecondList,
     minStakingDepositList,
     numAgentInstancesList,
+    availableRewardsList,
   ]);
 
   return {

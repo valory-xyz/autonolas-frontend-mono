@@ -1,12 +1,14 @@
 import { DownOutlined, RightOutlined } from '@ant-design/icons';
-import { Card, Table, Tag, Typography } from 'antd';
+import { Card, Flex, Skeleton, Table, Tag, Typography } from 'antd';
 import { ColumnsType } from 'antd/es/table';
+import { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { StakingContract } from 'types';
 
 import { Caption, TextWithTooltip } from 'libs/ui-components/src';
 import { BREAK_POINT } from 'libs/ui-theme/src';
 import { CHAIN_NAMES, GOVERN_URL, NA, UNICODE_SYMBOLS } from 'libs/util-constants/src';
+import { convertUsdToEth } from 'libs/util-functions/src';
 
 import { RunAgentButton } from 'components/RunAgentButton';
 
@@ -21,6 +23,53 @@ const StyledMain = styled.main`
 
 const { Title, Paragraph, Text } = Typography;
 
+const getMinOperatingSuffix = (chain: number) => {
+  if (chain === 10) return '(On Optimism)';
+  return null;
+};
+
+type ConvertedMinOperatingBalanceProps = { value: number; token: string | null; chainId: number };
+const ConvertedMinOperatingBalance = ({
+  value,
+  token,
+  chainId,
+}: ConvertedMinOperatingBalanceProps) => {
+  const [isConverting, setIsConverting] = useState<boolean>(false);
+  const [convertedValue, setConvertedValue] = useState<number | null>(null);
+
+  useEffect(() => {
+    const convert = async () => {
+      if (!value) return;
+
+      setIsConverting(true);
+      try {
+        const temp = await convertUsdToEth(value, 6);
+        setConvertedValue(temp);
+      } catch (error) {
+        console.error('Error converting token:', error);
+      } finally {
+        setIsConverting(false);
+      }
+    };
+
+    convert();
+  }, [value]);
+
+  if (isConverting) return <Skeleton.Input active />;
+  if (!convertedValue) return <Text>{NA}</Text>;
+
+  const textToDisplay = `~${convertedValue} ${token || ''}`.trim();
+  const suffix = getMinOperatingSuffix(chainId);
+
+  if (!suffix) return <Text>{textToDisplay}</Text>;
+  return (
+    <Flex vertical>
+      <Text>{textToDisplay}</Text>
+      <Text>{suffix}</Text>
+    </Flex>
+  );
+};
+
 const columns: ColumnsType<StakingContract> = [
   {
     title: 'Contract',
@@ -32,6 +81,7 @@ const columns: ColumnsType<StakingContract> = [
     title: 'Chain',
     dataIndex: 'chainId',
     key: 'chainId',
+    width: 120,
     render: (chainId) => <Text type="secondary">{CHAIN_NAMES[chainId] || chainId}</Text>,
   },
   {
@@ -39,18 +89,46 @@ const columns: ColumnsType<StakingContract> = [
     dataIndex: 'availableSlots',
     key: 'availableSlots',
     render: (availableSlots, record) => <Text>{`${availableSlots} / ${record.maxSlots}`}</Text>,
+    className: 'text-end',
   },
   {
     title: () => <TextWithTooltip text="APY" description="Annual percentage yield" />,
     dataIndex: 'apy',
     key: 'apy',
-    render: (apy) => <Tag color="purple">{`${apy}%`}</Tag>,
+    render: (apy) => <Tag color="purple" className="m-0">{`${apy}%`}</Tag>,
+    className: 'text-end',
   },
   {
     title: 'Stake required, OLAS',
     dataIndex: 'stakeRequired',
     key: 'stakeRequired',
     render: (stakeRequired) => <Text>{stakeRequired}</Text>,
+    className: 'text-end',
+    width: 148,
+  },
+  {
+    title: 'Minimum operating balance required',
+    dataIndex: 'minOperatingBalance',
+    key: 'minOperatingBalance',
+    render: (_, contract) => {
+      const { convertUsdToEth, minOperatingBalance, minOperatingBalanceToken, chainId } = contract;
+      if (!minOperatingBalance) return <Text>{NA}</Text>;
+
+      if (convertUsdToEth) {
+        return (
+          <ConvertedMinOperatingBalance
+            value={minOperatingBalance}
+            token={minOperatingBalanceToken}
+            chainId={chainId}
+          />
+        );
+      } else {
+        const value = `${minOperatingBalance} ${minOperatingBalanceToken}`;
+        return <Text>{value}</Text>;
+      }
+    },
+    className: 'text-end',
+    width: 180,
   },
   {
     title: () => (
@@ -84,6 +162,7 @@ export const ContractsPage = () => {
           Browse staking opportunities. Make a selection and start running them via Pearl or
           Quickstart for the opportunity to earn OLAS rewards.
         </Caption>
+
         <Table
           columns={columns}
           pagination={false}
@@ -111,6 +190,8 @@ export const ContractsPage = () => {
               </>
             ),
           }}
+          scroll={{ x: 1000 }}
+          rowHoverable={false}
         />
       </Card>
     </StyledMain>

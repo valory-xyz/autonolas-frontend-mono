@@ -8,7 +8,7 @@ const WALLET_CONNECT_LINKS = [
 ];
 
 const VERCEL_LINKS = ['https://vercel.com', 'https://vercel.live/'];
-
+const APIS = ['https://api.coingecko.com/api/'];
 const GATEWAY_LINKS = [
   'https://gateway.autonolas.tech/ipfs/*',
   'https://gateway.pinata.cloud/ipfs/*',
@@ -16,7 +16,6 @@ const GATEWAY_LINKS = [
   'https://i.seadn.io/s/raw/files/',
   'https://www.askjimmy.xyz/images/',
 ];
-
 const ALLOWED_ORIGINS = [
   // internal
   "'self'",
@@ -78,9 +77,10 @@ const ALLOWED_ORIGINS = [
   'https://*.network.thegraph.com/',
 
   ...VERCEL_LINKS,
+  ...APIS,
 ];
 
-const SCRIPT_SRC = ["'self'", 'https://vercel.live/', 'https://fonts.googleapis.com/'];
+const SCRIPT_SRC = ["'self'", ...VERCEL_LINKS, 'https://fonts.googleapis.com/', ...APIS];
 
 export const getCspHeaders = () => {
   if (!process.env.NEXT_PUBLIC_AUTONOLAS_SUB_GRAPH_URL) return [];
