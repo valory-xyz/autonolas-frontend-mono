@@ -27,6 +27,7 @@ const columns: ColumnsType<StakingContract> = [
     dataIndex: 'metadata',
     key: 'address',
     render: (metadata) => <Text strong>{metadata.name || NA}</Text>,
+    width: 240,
   },
   {
     title: 'Chain',
@@ -40,6 +41,7 @@ const columns: ColumnsType<StakingContract> = [
     dataIndex: 'availableSlots',
     key: 'availableSlots',
     render: (availableSlots, record) => <Text>{`${availableSlots} / ${record.maxSlots}`}</Text>,
+    className: 'text-end',
   },
   {
     title: () => <TextWithTooltip text="APY" description="Annual percentage yield" />,
@@ -123,7 +125,7 @@ export const ContractsPage = () => {
               </>
             ),
           }}
-          scroll={{ x: 768 }}
+          scroll={{ x: 1000 }}
           rowHoverable={false}
         />
       </Card>

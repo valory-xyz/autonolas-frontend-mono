@@ -114,8 +114,6 @@ export const useStakingContractsList = () => {
     (nominee) => nominee.account !== getBytes32FromAddress(RETAINER_ADDRESS),
   );
 
-  console.log(nominees);
-
   // Get contracts metadata
   const { data: metadata, isLoading: isMetadataLoading } = useNomineesMetadata(nominees);
   // Get maxNumServices
