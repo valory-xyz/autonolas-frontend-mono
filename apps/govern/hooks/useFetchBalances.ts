@@ -66,7 +66,7 @@ export const useFetchBalances = () => {
           olasBalance: ethers.formatUnits(olasBalanceData.result as bigint, 18),
           veOlasBalance: ethers.formatUnits(veOlasBalance as bigint, 18),
           totalSupplyLocked: ethers.formatUnits(totalSupplyLockedData.result as bigint, 18),
-          lockedEnd: Number(lockedEnd) * 1000,
+          lockedEnd,
         };
       },
     },
@@ -97,7 +97,7 @@ export const useFetchBalances = () => {
     totalSupply: balanceData?.totalSupplyLocked,
     olasBalance: balanceData?.olasBalance,
     veOlasBalance: balanceData?.veOlasBalance,
-    lockedEnd: balanceData?.lockedEnd,
+    lockedEnd: balanceData ? Number(balanceData.lockedEnd) * 1000 : undefined,
     canWithdrawVeolas,
     canIncreaseAmountOrUnlock: balanceData ? Number(balanceData.veOlasBalance) > 0 : false,
     refetch,
