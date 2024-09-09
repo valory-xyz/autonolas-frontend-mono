@@ -1,13 +1,16 @@
+import { celo } from 'viem/chains';
+
 import { LOCAL_FORK_ID, VM_TYPE } from '@autonolas/frontend-library';
+
 import {
-  DISPENSER,
-  DEPOSITORY,
-  BOND_CALCULATOR,
   AGENT_REGISTRY,
+  BOND_CALCULATOR,
   COMPONENT_REGISTRY,
+  DEPOSITORY,
+  DISPENSER,
   SERVICE_REGISTRY,
-  TREASURY,
   TOKENOMICS,
+  TREASURY,
 } from 'libs/util-contracts/src/lib/abiAndAddresses';
 
 const LOCAL_ADDRESSES = {
@@ -91,6 +94,11 @@ export const ADDRESSES = {
     olasAddress: 'Ez3nzG9ofodYCvEmw73XhQ87LWNYVRM2s7diB5tBZPyM',
     balancerVault: '5dMKUYJDsjZkAD3wiV3ViQkuq9pSmWQ5eAzcQLtDnUT3', // whirpool address
     wsolAddress: 'So11111111111111111111111111111111111111112',
+  },
+  
+  // celo
+  [celo.id]: {
+    olasAddress: '0xaCFfAe8e57Ec6E394Eb1b41939A8CF7892DbDc51',
   },
 
   [LOCAL_CHAIN_ID]: LOCAL_ADDRESSES,

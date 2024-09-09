@@ -1,6 +1,7 @@
 import { ethers } from 'ethers';
 import { memoize, round } from 'lodash';
 import { useCallback, useEffect, useState } from 'react';
+import { arbitrum, base, celo, gnosis, optimism, polygon } from 'viem/chains';
 import { usePublicClient } from 'wagmi';
 
 import { VM_TYPE, areAddressesEqual } from '@autonolas/frontend-library';
@@ -19,6 +20,7 @@ import {
   getErc20Contract,
   getTokenomicsContract,
   getUniswapV2PairContract,
+  getUniswapV2PairContractByChain,
 } from 'common-util/functions/web3';
 import { BALANCER_GRAPH_CLIENTS } from 'common-util/graphql/clients';
 import { balancerGetPoolQuery } from 'common-util/graphql/queries';
@@ -45,7 +47,7 @@ import {
 const LP_PAIRS = {
   // gnosis-chain
   '0x27df632fd0dcf191C418c803801D521cd579F18e': {
-    lpChainId: 100,
+    lpChainId: gnosis.id,
     name: 'OLAS-WXDAI',
     originAddress: '0x79C872Ed3Acb3fc5770dd8a0cD9Cd5dB3B3Ac985',
     dex: DEX.BALANCER,
@@ -54,7 +56,7 @@ const LP_PAIRS = {
   },
   // polygon
   '0xf9825A563222f9eFC81e369311DAdb13D68e60a4': {
-    lpChainId: 137,
+    lpChainId: polygon.id,
     name: 'OLAS-WMATIC',
     originAddress: '0x62309056c759c36879Cde93693E7903bF415E4Bc',
     dex: DEX.BALANCER,
@@ -63,7 +65,7 @@ const LP_PAIRS = {
   },
   // arbitrum
   '0x36B203Cb3086269f005a4b987772452243c0767f': {
-    lpChainId: 42161,
+    lpChainId: arbitrum.id,
     name: 'OLAS-WETH',
     originAddress: '0xaf8912a3c4f55a8584b67df30ee0ddf0e60e01f8',
     dex: DEX.BALANCER,
@@ -72,7 +74,7 @@ const LP_PAIRS = {
   },
   // optimism
   '0x2FD007a534eB7527b535a1DF35aba6bD2a8b660F': {
-    lpChainId: 10,
+    lpChainId: optimism.id,
     name: 'WETH-OLAS',
     originAddress: '0x5bb3e58887264b667f915130fd04bbb56116c278',
     dex: DEX.BALANCER,
@@ -81,7 +83,7 @@ const LP_PAIRS = {
   },
   // base
   '0x9946d6FD1210D85EC613Ca956F142D911C97a074': {
-    lpChainId: 8453,
+    lpChainId: base.id,
     name: 'OLAS-USDC',
     originAddress: '0x5332584890d6e415a6dc910254d6430b8aab7e69',
     dex: DEX.BALANCER,
@@ -96,6 +98,14 @@ const LP_PAIRS = {
     dex: DEX.SOLANA,
     poolId: ADDRESSES[VM_TYPE.SVM].balancerVault, // whirpool address
     guide: 'wsol-olas-via-orca-on-solana',
+  },
+  // celo
+  '0xC085F31E4ca659fF8A17042dDB26f1dcA2fBdAB4': {
+    lpChainId: celo.id,
+    name: 'CELO-OLAS',
+    originAddress: '0x2976Fa805141b467BCBc6334a69AffF4D914d96A',
+    dex: DEX.UNISWAP,
+    guide: 'celo-olas-via-ubeswap-on-celo',
   },
 };
 
@@ -183,6 +193,31 @@ const getCurrentPriceBalancerFn = memoize(async (tokenAddress) => {
 });
 
 /**
+ * Fetches the current "price of the LP token" from UniswapV2Pair contract
+ */
+const getCurrentPriceUniswapFn = memoize(async (tokenAddress) => {
+  const chainId = LP_PAIRS[tokenAddress]?.lpChainId;
+  if (!chainId) {
+    throw new Error(`Chain id not found for provided token address: ${tokenAddress}`);
+  }
+
+  const contract = getUniswapV2PairContractByChain(tokenAddress, chainId);
+
+  const [totalSupply, reserves, token0] = await Promise.all([
+    contract.read.totalSupply(),
+    contract.read.getReserves(),
+    contract.read.token0(),
+  ]);
+
+  const [reserve0, reserve1] = reserves;
+
+  const olasTokenAddress = ADDRESSES[chainId].olasAddress;
+  const reservesOlas = areAddressesEqual(token0, olasTokenAddress) ? reserve0 : reserve1;
+  const priceLp = ethers.parseUnits(`${reservesOlas / totalSupply}`, 'ether');
+  return priceLp;
+});
+
+/**
  * hook to add the current LP price to the products
  */
 const useAddCurrentLpPriceToProducts = () => {
@@ -192,6 +227,7 @@ const useAddCurrentLpPriceToProducts = () => {
   const getCurrentPriceBalancer = useCallback(getCurrentPriceBalancerFn, [
     getCurrentPriceBalancerFn,
   ]);
+  const getCurrentPriceUniswap = useCallback(getCurrentPriceUniswapFn, [getCurrentPriceUniswapFn]);
 
   return useCallback(
     async (productList) => {
@@ -216,15 +252,10 @@ const useAddCurrentLpPriceToProducts = () => {
             };
           } else {
             let currentLpPrice = null;
-            // NOTE: It could be uniswap for other chains hence this if case.
-            // (commented for now)
-            // if (dex === DEX.UNISWAP) {
-            //   currentLpPricePromise = contract.methods
-            //     .getCurrentPriceUniswap(originAddress)
-            //     .call();
-            //   currentLpPricePromiseList.push(currentLpPricePromise);
-            // } else
-            if (dex === DEX.BALANCER) {
+            if (dex === DEX.UNISWAP) {
+              currentLpPrice = getCurrentPriceUniswap(productList[i].token);
+              otherRequests[i] = currentLpPrice;
+            } else if (dex === DEX.BALANCER) {
               currentLpPrice = getCurrentPriceBalancer(productList[i].token);
               otherRequests[i] = currentLpPrice;
             } else if (dex === DEX.SOLANA) {
@@ -255,7 +286,7 @@ const useAddCurrentLpPriceToProducts = () => {
         currentPriceLp: resolvedList[index],
       }));
     },
-    [publicClient, getCurrentPriceBalancer, getCurrentPriceWhirlpool],
+    [publicClient, getCurrentPriceBalancer, getCurrentPriceUniswap, getCurrentPriceWhirlpool],
   );
 };
 

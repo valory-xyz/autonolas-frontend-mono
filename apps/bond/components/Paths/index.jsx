@@ -4,8 +4,6 @@ import { useRouter } from 'next/router';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 
-import { COLOR } from 'libs/ui-theme/src';
-
 import pathData from './data.json';
 
 const StyledCard = styled(Card)`

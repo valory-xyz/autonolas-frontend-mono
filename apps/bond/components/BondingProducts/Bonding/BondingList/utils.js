@@ -1,6 +1,7 @@
 import { ethers } from 'ethers';
 import { gql } from 'graphql-request';
 import { isNumber, isString, memoize } from 'lodash';
+import { celo } from 'viem/chains';
 
 import { VM_TYPE, notifyError } from '@autonolas/frontend-library';
 
@@ -59,6 +60,10 @@ export const getSvmCalculatedPriceLp = (reserveOlas, totalSupply) => {
  * Function to get the link to the LP token
  */
 export const getLpTokenLink = ({ lpDex, lpChainId, lpPoolId, productName }) => {
+  if (lpChainId === celo.id) {
+    return `https://celoscan.io/address/${productName}`;
+  }
+
   if (lpDex === DEX.UNISWAP) {
     return `https://v2.info.uniswap.org/pair/${productName}`;
   }
