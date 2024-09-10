@@ -184,5 +184,32 @@
         "url": "https://portalbridge.com/advanced-tools/#/transfer"
       }
     }
+  },
+  {
+    "id": "celo-olas-via-ubeswap-on-celo",
+    "name": "CELO-OLAS via Ubeswap on Celo",
+    "network": "Celo",
+    "networkId": "celo",
+    "address": "0xaCFfAe8e57Ec6E394Eb1b41939A8CF7892DbDc51",
+    "explorerBaseUrl": "https://celoscan.io/token/",
+    "exchange": {
+      "name": "Ubeswap",
+      "url": "https://app.ubeswap.org/#/swap?inputCurrency=0x471ece3750da237f93b8e339c536989b8978a438&outputCurrency=0xacffae8e57ec6e394eb1b41939a8cf7892dbdc51",
+      "poolAddress": "0x2976Fa805141b467BCBc6334a69AffF4D914d96A"
+    },
+    "bridge": {
+      "name": "Wormhole: Portal Token Bridge",
+      "url": "https://portalbridge.com/advanced-tools/#/transfer"
+    },
+    "bond": {
+      "guideUrl": "https://olas.network/blog/bonding-guide-base",
+      "lpTokenName": "CELO-OLAS",
+      "lpPairTokenTicker": "CELO",
+      "bridgedLpTokenAddress": "0xC085F31E4ca659fF8A17042dDB26f1dcA2fBdAB4",
+      "lpTokenBridge": {
+        "name": "Wormhole: Portal Token Bridge",
+        "url": "https://portalbridge.com/advanced-tools/#/transfer"
+      }
+    }
   }
 ]

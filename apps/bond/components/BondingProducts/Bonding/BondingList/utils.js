@@ -1,6 +1,7 @@
 import { ethers } from 'ethers';
 import { gql } from 'graphql-request';
 import { isNumber, isString, memoize } from 'lodash';
+import { celo } from 'viem/chains';
 
 import { VM_TYPE, notifyError } from '@autonolas/frontend-library';
 
@@ -58,9 +59,13 @@ export const getSvmCalculatedPriceLp = (reserveOlas, totalSupply) => {
 /**
  * Function to get the link to the LP token
  */
-export const getLpTokenLink = ({ lpDex, lpChainId, lpPoolId, productName }) => {
+export const getLpTokenLink = ({ lpDex, lpChainId, lpPoolId, lpAddress }) => {
+  if (lpChainId === celo.id) {
+    return `https://celoscan.io/address/${lpAddress}`;
+  }
+
   if (lpDex === DEX.UNISWAP) {
-    return `https://v2.info.uniswap.org/pair/${productName}`;
+    return `https://v2.info.uniswap.org/pair/${lpAddress}`;
   }
 
   if (lpDex === DEX.BALANCER) {
@@ -97,7 +102,11 @@ export const getLpTokenLink = ({ lpDex, lpChainId, lpPoolId, productName }) => {
 /**
  * Function to get the exchange link for the LP token
  */
-export const getCurrentPriceLpLink = ({ lpDex, lpChainId }) => {
+export const getCurrentPriceLpLink = ({ lpDex, lpChainId, lpAddress }) => {
+  if (lpChainId === celo.id) {
+    return `https://celoscan.io/address/${lpAddress}#readContract#F8`;
+  }
+
   if (lpDex === DEX.UNISWAP) {
     const depositoryAddress = ADDRESSES[lpChainId].depository;
     return `https://etherscan.io/address/${depositoryAddress}#readContract#F7`;

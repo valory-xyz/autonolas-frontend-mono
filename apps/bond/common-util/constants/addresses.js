@@ -1,13 +1,27 @@
-import { LOCAL_FORK_ID, VM_TYPE } from '@autonolas/frontend-library';
 import {
-  DISPENSER,
-  DEPOSITORY,
-  BOND_CALCULATOR,
+  arbitrum,
+  base,
+  celo,
+  gnosis,
+  gnosisChiado,
+  goerli,
+  mainnet,
+  optimism,
+  polygon,
+  polygonMumbai,
+} from 'viem/chains';
+
+import { LOCAL_FORK_ID, VM_TYPE } from '@autonolas/frontend-library';
+
+import {
   AGENT_REGISTRY,
+  BOND_CALCULATOR,
   COMPONENT_REGISTRY,
+  DEPOSITORY,
+  DISPENSER,
   SERVICE_REGISTRY,
-  TREASURY,
   TOKENOMICS,
+  TREASURY,
 } from 'libs/util-contracts/src/lib/abiAndAddresses';
 
 const LOCAL_ADDRESSES = {
@@ -37,8 +51,8 @@ const MAINNET_ADDRESSES = {
 const LOCAL_CHAIN_ID = 31337;
 
 export const ADDRESSES = {
-  1: MAINNET_ADDRESSES,
-  5: {
+  [mainnet.id]: MAINNET_ADDRESSES,
+  [goerli.id]: {
     dispenser: DISPENSER.addresses[5],
     depository: DEPOSITORY.addresses[5],
     treasury: TREASURY.addresses[5],
@@ -50,49 +64,42 @@ export const ADDRESSES = {
     olasAddress: '0xEdfc28215B1Eb6eb0be426f1f529cf691A5C2400',
   },
   // NOTE: Except 1 & 5 other addresses are used for LP pairs
-  // gnosis and gnosis testnet
-  100: {
+  [gnosis.id]: {
     olasAddress: '0xcE11e14225575945b8E6Dc0D4F2dD4C570f79d9f',
     balancerVault: '0xBA12222222228d8Ba445958a75a0704d566BF2C8',
   },
-  10200: {
+  [gnosisChiado.id]: {
     olasAddress: '0xE40AE73aa0Ed3Ec35fdAF56e01FCd0D1Ff1d9AB6',
   },
-
-  // polygon and mumbai
-  137: {
+  [polygon.id]: {
     olasAddress: '0xFEF5d947472e72Efbb2E388c730B7428406F2F95',
     balancerVault: '0xBA12222222228d8Ba445958a75a0704d566BF2C8',
   },
-  80001: {
+  [polygonMumbai.id]: {
     olasAddress: '0x81e7Ac2D5aCA991aef9187a34C0A536FA526dD0F',
   },
-
-  // arbitrum
-  42161: {
+  [arbitrum.id]: {
     olasAddress: '0x064f8b858c2a603e1b106a2039f5446d32dc81c1',
     balancerVault: '0xBA12222222228d8Ba445958a75a0704d566BF2C8',
   },
-
-  // optimism
-  10: {
+  [optimism.id]: {
     olasAddress: '0xFC2E6e6BCbd49ccf3A5f029c79984372DcBFE527',
     balancerVault: '0xBA12222222228d8Ba445958a75a0704d566BF2C8',
   },
 
-  // base
-  8453: {
+  [base.id]: {
     olasAddress: '0x54330d28ca3357F294334BDC454a032e7f353416',
     balancerVault: '0xBA12222222228d8Ba445958a75a0704d566BF2C8',
   },
-
+  [celo.id]: {
+    olasAddress: '0xaCFfAe8e57Ec6E394Eb1b41939A8CF7892DbDc51',
+  },
   // solana
   [VM_TYPE.SVM]: {
     olasAddress: 'Ez3nzG9ofodYCvEmw73XhQ87LWNYVRM2s7diB5tBZPyM',
     balancerVault: '5dMKUYJDsjZkAD3wiV3ViQkuq9pSmWQ5eAzcQLtDnUT3', // whirpool address
     wsolAddress: 'So11111111111111111111111111111111111111112',
   },
-
   [LOCAL_CHAIN_ID]: LOCAL_ADDRESSES,
   [LOCAL_FORK_ID]: MAINNET_ADDRESSES,
 };
