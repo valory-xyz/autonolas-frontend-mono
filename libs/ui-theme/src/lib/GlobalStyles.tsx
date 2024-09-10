@@ -217,6 +217,7 @@ export const GlobalStyles = createGlobalStyle`
     }
   }
 
+  /* tooltip */
   .ant-tooltip-content .ant-tooltip-inner {
     padding: 12px;
   }
