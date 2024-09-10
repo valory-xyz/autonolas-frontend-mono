@@ -3,14 +3,14 @@ import { FC, ReactNode } from 'react';
 
 import { Footer } from './Footer';
 import { LogoSvg } from './Logos';
-import { CustomLayout, Logo, OlasHeader } from './styles';
 import { NavigationMenu } from './Menu';
+import { CustomLayout, Logo, OlasHeader } from './styles';
 
 const { Content } = AntdLayout;
 
-interface LayoutProps {
+type LayoutProps = {
   children?: ReactNode;
-}
+};
 
 export const Layout: FC<LayoutProps> = ({ children }) => {
   return (
