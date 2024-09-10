@@ -5,7 +5,7 @@ export const CHAIN_NAMES: Record<string, string> = {
   10: optimism.name,
   100: gnosis.name,
   137: polygon.name,
-  8453: base.name,
+  8_453: base.name,
   42_161: arbitrum.name,
   42_220: celo.name,
 };
@@ -15,7 +15,7 @@ export const CHAINS: Record<string, Chain> = {
   10: optimism,
   100: gnosis,
   137: polygon,
-  8453: base,
+  8_453: base,
   42_161: arbitrum,
   42_220: celo,
 };

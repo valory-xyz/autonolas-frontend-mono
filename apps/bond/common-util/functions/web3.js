@@ -1,4 +1,4 @@
-import { createPublicClient, getContract as getWagmiContract, http } from 'viem';
+import { createPublicClient, getContract as getViemContract, http } from 'viem';
 import Web3 from 'web3';
 
 import { CHAINS, RPC_URLS } from 'libs/util-constants/src';
@@ -61,7 +61,7 @@ export const getUniswapV2PairContractByChain = (address, chainId) => {
     transport: http(RPC_URLS[chainId] || chain.rpcUrls[0].http),
   });
 
-  const contract = getWagmiContract({
+  const contract = getViemContract({
     address: address,
     abi: UNISWAP_V2_PAIR_ABI,
     client: publicClient,

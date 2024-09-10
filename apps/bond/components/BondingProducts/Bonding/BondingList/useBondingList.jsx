@@ -90,6 +90,14 @@ const LP_PAIRS = {
     poolId: '0x5332584890d6e415a6dc910254d6430b8aab7e69000200000000000000000103',
     guide: 'olas-usdc-via-balancer-on-base',
   },
+  // celo
+  '0xC085F31E4ca659fF8A17042dDB26f1dcA2fBdAB4': {
+    lpChainId: celo.id,
+    name: 'CELO-OLAS',
+    originAddress: '0x2976Fa805141b467BCBc6334a69AffF4D914d96A',
+    dex: DEX.UNISWAP,
+    guide: 'celo-olas-via-ubeswap-on-celo',
+  },
   // solana
   '0x3685B8cC36B8df09ED9E81C1690100306bF23E04': {
     lpChainId: VM_TYPE.SVM,
@@ -98,14 +106,6 @@ const LP_PAIRS = {
     dex: DEX.SOLANA,
     poolId: ADDRESSES[VM_TYPE.SVM].balancerVault, // whirpool address
     guide: 'wsol-olas-via-orca-on-solana',
-  },
-  // celo
-  '0xC085F31E4ca659fF8A17042dDB26f1dcA2fBdAB4': {
-    lpChainId: celo.id,
-    name: 'CELO-OLAS',
-    originAddress: '0x2976Fa805141b467BCBc6334a69AffF4D914d96A',
-    dex: DEX.UNISWAP,
-    guide: 'celo-olas-via-ubeswap-on-celo',
   },
 };
 
@@ -320,11 +320,12 @@ const getLpTokenNamesForProducts = async (productList, events) => {
       lpDex: lpTokenDetailsList[index].dex,
       lpChainId,
       lpPoolId: poolId,
-      productName: component.token,
+      lpAddress: component.token,
     });
     const currentPriceLpLink = getCurrentPriceLpLink({
       lpDex: lpTokenDetailsList[index].dex,
       lpChainId,
+      lpAddress: component.token,
     });
 
     return {
