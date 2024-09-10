@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Abi, Address } from 'viem';
-import { mainnet } from 'viem/chains';
+import { arbitrum, base, celo, gnosis, mainnet, optimism, polygon } from 'viem/chains';
 import { useAccount, usePublicClient, useReadContract, useReadContracts } from 'wagmi';
 
 import { GATEWAY_URL, HASH_PREFIX } from 'libs/util-constants/src';
@@ -110,6 +110,20 @@ const useGetMyStakingContractsMetadata = (addresses: Address[]) => {
   return { metadata, isFetching };
 };
 
+const BATCH_SIZES: Record<string, number | null> = {
+  [mainnet.id]: null, // No batching
+  [gnosis.id]: null,
+  [polygon.id]: null,
+  [optimism.id]: 10000,
+  [base.id]: null,
+  [arbitrum.id]: null,
+  [celo.id]: null,
+};
+
+function delay(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
 const useGetInstanceAddresses = () => {
   const { networkId } = useAppSelector((state) => state.network);
   const client = usePublicClient({ chainId: networkId as ChainId });
@@ -129,7 +143,18 @@ const useGetInstanceAddresses = () => {
       setIsFetching(true);
 
       try {
-        const eventLogs = await client.getLogs({
+        const block = await client.getBlock();
+
+        const batchSize = BATCH_SIZES[currentNetworkId];
+        const fromBlock = blockNumbers[currentNetworkId]
+          ? BigInt(blockNumbers[currentNetworkId])
+          : undefined;
+
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        let eventLogs: any[] = [];
+
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const params: any = {
           address: STAKING_FACTORY.addresses[`${currentNetworkId}`] as Address,
           event: {
             type: 'event',
@@ -141,11 +166,28 @@ const useGetInstanceAddresses = () => {
             ],
           },
           args: { sender: account },
-          fromBlock: blockNumbers[currentNetworkId]
-            ? BigInt(blockNumbers[currentNetworkId])
-            : undefined,
-          toBlock: 'latest',
-        });
+          fromBlock,
+          toBlock: block.number,
+        };
+
+        if (batchSize) {
+          // Batching by blocks
+          let currentFromBlock = fromBlock || BigInt(0);
+          while (currentFromBlock <= block.number) {
+            const currentToBlock = currentFromBlock + BigInt(batchSize) - BigInt(1);
+            const logs = await client.getLogs({
+              ...params,
+              fromBlock: currentFromBlock,
+              toBlock: currentToBlock < block.number ? currentToBlock : block.number,
+            });
+            eventLogs = [...eventLogs, ...logs];
+            currentFromBlock = currentToBlock + BigInt(1);
+            await delay(1000);
+          }
+        } else {
+          // No batching needed
+          eventLogs = await client.getLogs(params);
+        }
 
         const addresses = eventLogs.map((log) => log.args?.instance as Address);
         setInstanceAddresses(addresses);
