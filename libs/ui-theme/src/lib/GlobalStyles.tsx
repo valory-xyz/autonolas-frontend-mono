@@ -18,8 +18,8 @@ export const GlobalStyles = createGlobalStyle`
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
+  /* uncomment for dark mode */
   html {
-    /* uncomment for dark mode */
     /* background-color: ${COLOR.WHITE}; */
     /* filter: invert(0.85) hue-rotate(180deg); */
   }

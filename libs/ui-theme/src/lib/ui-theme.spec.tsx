@@ -6,6 +6,7 @@ import { AutonolasThemeProvider } from './ThemeConfig';
 describe('<AutonolasThemeProvider />', () => {
   it('should render successfully', () => {
     const { baseElement } = render(<AutonolasThemeProvider />);
+
     expect(baseElement).toBeTruthy();
   });
 });
