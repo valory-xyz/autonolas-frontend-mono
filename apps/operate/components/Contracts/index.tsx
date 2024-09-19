@@ -90,6 +90,7 @@ const columns: ColumnsType<StakingContract> = [
     key: 'availableSlots',
     render: (availableSlots, record) => <Text>{`${availableSlots} / ${record.maxSlots}`}</Text>,
     className: 'text-end',
+    width: 80,
   },
   {
     title: () => <TextWithTooltip text="APY" description="Annual percentage yield" />,
@@ -128,7 +129,7 @@ const columns: ColumnsType<StakingContract> = [
       }
     },
     className: 'text-end',
-    width: 180,
+    width: 200,
   },
   {
     title: () => (
