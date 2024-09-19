@@ -63,21 +63,18 @@ const columns: ColumnsType<StakingContract> = [
     dataIndex: 'minOperatingBalance',
     key: 'minOperatingBalance',
     render: (_, contract) => {
-      const { isVariousChain, minOperatingBalance, minOperatingBalanceToken } = contract;
+      const { minOperatingBalanceHint, minOperatingBalance, minOperatingBalanceToken } = contract;
       if (!minOperatingBalance) return <Text>{NA}</Text>;
 
       const value = `${minOperatingBalance} ${minOperatingBalanceToken}`;
+      if (!minOperatingBalanceHint) return <Text>{value}</Text>;
 
-      if (isVariousChain) {
-        return (
-          <Flex vertical>
-            <Text>{`~${value}`}</Text>
-            <Text>(Total Various Chains)</Text>
-          </Flex>
-        );
-      }
-
-      return <Text>{value}</Text>;
+      return (
+        <Flex vertical>
+          <Text>{`~${value}`}</Text>
+          <Text>{minOperatingBalanceHint}</Text>
+        </Flex>
+      );
     },
     className: 'text-end',
     width: 200,

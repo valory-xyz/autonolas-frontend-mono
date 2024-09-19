@@ -14,7 +14,7 @@ type StakingContractDetailsInfo = {
   availableOn?: StakingContract['availableOn'];
   minOperatingBalance?: number;
   minOperatingBalanceToken?: string;
-  isVariousChain?: boolean;
+  minOperatingBalanceHint?: string;
 };
 
 const STAKING_CONTRACT_DETAILS: Record<Address, StakingContractDetailsInfo> = {
@@ -57,7 +57,7 @@ const STAKING_CONTRACT_DETAILS: Record<Address, StakingContractDetailsInfo> = {
     availableOn: 'optimusQuickstart',
     minOperatingBalance: 0.17,
     minOperatingBalanceToken: 'ETH',
-    isVariousChain: true,
+    minOperatingBalanceHint: '(Total Various Chains)'
   },
   '0x000000000000000000000000daf34ec46298b53a3d24cbcb431e84ebd23927da': {
     availableOn: null,
@@ -185,7 +185,7 @@ export const useStakingContractsList = () => {
           availableOn: details?.availableOn || null,
           minOperatingBalance: details?.minOperatingBalance,
           minOperatingBalanceToken: details?.minOperatingBalanceToken || null,
-          isVariousChain: details?.isVariousChain || false,
+          minOperatingBalanceHint: details?.minOperatingBalanceHint || null,
         };
       }) as StakingContract[];
     }
