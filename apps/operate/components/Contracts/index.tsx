@@ -1,14 +1,12 @@
 import { DownOutlined, RightOutlined } from '@ant-design/icons';
-import { Card, Flex, Skeleton, Table, Tag, Typography } from 'antd';
+import { Card, Flex, Table, Tag, Typography } from 'antd';
 import { ColumnsType } from 'antd/es/table';
-import { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { StakingContract } from 'types';
 
 import { Caption, TextWithTooltip } from 'libs/ui-components/src';
 import { BREAK_POINT } from 'libs/ui-theme/src';
 import { CHAIN_NAMES, GOVERN_URL, NA, UNICODE_SYMBOLS } from 'libs/util-constants/src';
-import { convertUsdToEth } from 'libs/util-functions/src';
 
 import { RunAgentButton } from 'components/RunAgentButton';
 
@@ -22,53 +20,6 @@ const StyledMain = styled.main`
 `;
 
 const { Title, Paragraph, Text } = Typography;
-
-const getMinOperatingSuffix = (chain: number) => {
-  if (chain === 10) return '(Total Various Chains)';
-  return null;
-};
-
-type ConvertedMinOperatingBalanceProps = { value: number; token: string | null; chainId: number };
-const ConvertedMinOperatingBalance = ({
-  value,
-  token,
-  chainId,
-}: ConvertedMinOperatingBalanceProps) => {
-  const [isConverting, setIsConverting] = useState<boolean>(false);
-  const [convertedValue, setConvertedValue] = useState<number | null>(null);
-
-  useEffect(() => {
-    const convert = async () => {
-      if (!value) return;
-
-      setIsConverting(true);
-      try {
-        const temp = await convertUsdToEth(value, 6);
-        setConvertedValue(temp);
-      } catch (error) {
-        console.error('Error converting token:', error);
-      } finally {
-        setIsConverting(false);
-      }
-    };
-
-    convert();
-  }, [value]);
-
-  if (isConverting) return <Skeleton.Input active />;
-  if (!convertedValue) return <Text>{NA}</Text>;
-
-  const textToDisplay = `~${convertedValue} ${token || ''}`.trim();
-  const suffix = getMinOperatingSuffix(chainId);
-
-  if (!suffix) return <Text>{textToDisplay}</Text>;
-  return (
-    <Flex vertical>
-      <Text>{textToDisplay}</Text>
-      <Text>{suffix}</Text>
-    </Flex>
-  );
-};
 
 const columns: ColumnsType<StakingContract> = [
   {
@@ -112,21 +63,21 @@ const columns: ColumnsType<StakingContract> = [
     dataIndex: 'minOperatingBalance',
     key: 'minOperatingBalance',
     render: (_, contract) => {
-      const { convertUsdToEth, minOperatingBalance, minOperatingBalanceToken, chainId } = contract;
+      const { isVariousChain, minOperatingBalance, minOperatingBalanceToken } = contract;
       if (!minOperatingBalance) return <Text>{NA}</Text>;
 
-      if (convertUsdToEth) {
+      const value = `${minOperatingBalance} ${minOperatingBalanceToken}`;
+
+      if (isVariousChain) {
         return (
-          <ConvertedMinOperatingBalance
-            value={minOperatingBalance}
-            token={minOperatingBalanceToken}
-            chainId={chainId}
-          />
+          <Flex vertical>
+            <Text>{`~${value}`}</Text>
+            <Text>(Total Various Chains)</Text>
+          </Flex>
         );
-      } else {
-        const value = `${minOperatingBalance} ${minOperatingBalanceToken}`;
-        return <Text>{value}</Text>;
       }
+
+      return <Text>{value}</Text>;
     },
     className: 'text-end',
     width: 200,

@@ -5,4 +5,3 @@ export * from './lib/sendTransaction/helpers';
 export * from './lib/notifications';
 export * from './lib/requests';
 export * from './lib/ethers';
-export * from './lib/liveConversion';
