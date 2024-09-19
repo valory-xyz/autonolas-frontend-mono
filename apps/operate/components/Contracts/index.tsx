@@ -24,7 +24,7 @@ const StyledMain = styled.main`
 const { Title, Paragraph, Text } = Typography;
 
 const getMinOperatingSuffix = (chain: number) => {
-  if (chain === 10) return '(On Optimism)';
+  if (chain === 10) return '(Total Various Chains)';
   return null;
 };
 
