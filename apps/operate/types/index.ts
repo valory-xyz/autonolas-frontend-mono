@@ -17,5 +17,5 @@ export type StakingContract = {
   availableOn: 'pearl' | 'quickstart' | 'optimusQuickstart' | null;
   minOperatingBalance: number | null;
   minOperatingBalanceToken: string | null;
-  convertUsdToEth: boolean;
+  minOperatingBalanceHint?: string;
 };
