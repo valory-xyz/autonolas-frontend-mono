@@ -6,7 +6,7 @@ import { useReadContracts } from 'wagmi';
 import { useNominees, useNomineesMetadata } from 'libs/common-contract-functions/src';
 import { RETAINER_ADDRESS } from 'libs/util-constants/src';
 import { STAKING_TOKEN } from 'libs/util-contracts/src';
-import { getAddressFromBytes32, getBytes32FromAddress } from 'libs/util-functions/src';
+import { areAddressesEqual, getAddressFromBytes32 } from 'libs/util-functions/src';
 
 const ONE_YEAR = 1 * 24 * 60 * 60 * 365;
 
@@ -16,6 +16,12 @@ type StakingContractDetailsInfo = {
   minOperatingBalanceToken?: string;
   minOperatingBalanceHint?: string;
 };
+
+const BLACKLISTED_ADDRESSES = [
+  RETAINER_ADDRESS,
+  '0xaD9d891134443B443D7F30013c7e14Fe27F2E029',
+  '0xE56dF1E563De1B10715cB313D514af350D207212',
+];
 
 const STAKING_CONTRACT_DETAILS: Record<Address, StakingContractDetailsInfo> = {
   '0x000000000000000000000000ef44fb0842ddef59d37f85d61a1ef492bba6135d': {
@@ -57,7 +63,7 @@ const STAKING_CONTRACT_DETAILS: Record<Address, StakingContractDetailsInfo> = {
     availableOn: 'optimusQuickstart',
     minOperatingBalance: 0.17,
     minOperatingBalanceToken: 'ETH',
-    minOperatingBalanceHint: '(Total Various Chains)'
+    minOperatingBalanceHint: '(Total Various Chains)',
   },
   '0x000000000000000000000000daf34ec46298b53a3d24cbcb431e84ebd23927da': {
     availableOn: null,
@@ -113,7 +119,10 @@ export const useStakingContractsList = () => {
   // Get nominees list
   const { data: nomineesData, isFetching: isNomineesLoading } = useNominees();
   const nominees = (nomineesData || []).filter(
-    (nominee) => nominee.account !== getBytes32FromAddress(RETAINER_ADDRESS),
+    (nominee) =>
+      !BLACKLISTED_ADDRESSES.some((blackListedNominee) =>
+        areAddressesEqual(blackListedNominee, getAddressFromBytes32(nominee.account)),
+      ),
   );
 
   // Get contracts metadata
