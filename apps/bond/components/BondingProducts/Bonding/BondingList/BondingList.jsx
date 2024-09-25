@@ -240,8 +240,7 @@ const sortProducts = (list) =>
     // - the API returns zero (shouldn't happen) OR
     // - has error OR
     // - not fetched yet
-    const isSvm = a.lpChainId === VM_TYPE.SVM || b.lpChainId === VM_TYPE.SVM;
-    if (isSvm && isCurrentPriceLpZero(a.fullCurrentPriceLp)) return 1;
+    if (isCurrentPriceLpZero(a.fullCurrentPriceLp)) return 1;
 
     if (isNaN(a.projectedChange)) return 1;
     if (isNaN(b.projectedChange)) return -1;

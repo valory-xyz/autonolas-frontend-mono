@@ -173,23 +173,28 @@ const getLpTokenDetails = memoize(async (address) => {
  * Fetches the current "price of the LP token" from Balancer
  */
 const getCurrentPriceBalancerFn = memoize(async (tokenAddress) => {
-  const { lpChainId, poolId } = await getLpTokenDetails(tokenAddress);
+  try {
+    const { lpChainId, poolId } = await getLpTokenDetails(tokenAddress);
 
-  const { pool } = await BALANCER_GRAPH_CLIENTS[lpChainId].request(balancerGetPoolQuery(poolId));
+    const { pool } = await BALANCER_GRAPH_CLIENTS[lpChainId].request(balancerGetPoolQuery(poolId));
 
-  if (!pool) {
-    throw new Error(`Pool not found on Balancer for poolId: ${poolId} and chainId: ${lpChainId}.`);
+    if (!pool) {
+      throw new Error(`Pool not found on Balancer for poolId: ${poolId} and chainId: ${lpChainId}.`);
+    }
+
+    const totalSupply = pool.totalShares;
+    const firstPoolTokenAddress = pool.tokens[0].address;
+    const olasTokenAddress = ADDRESSES[lpChainId].olasAddress;
+    const reservesOlas =
+      (areAddressesEqual(firstPoolTokenAddress, olasTokenAddress)
+        ? pool.tokens[0].balance
+        : pool.tokens[1].balance) * 1.0;
+    const priceLp = (reservesOlas * 10 ** 18) / totalSupply;
+    return priceLp;
+  } catch {
+    console.error(`Error getting priceLp from balancer`);
+    return 0;
   }
-
-  const totalSupply = pool.totalShares;
-  const firstPoolTokenAddress = pool.tokens[0].address;
-  const olasTokenAddress = ADDRESSES[lpChainId].olasAddress;
-  const reservesOlas =
-    (areAddressesEqual(firstPoolTokenAddress, olasTokenAddress)
-      ? pool.tokens[0].balance
-      : pool.tokens[1].balance) * 1.0;
-  const priceLp = (reservesOlas * 10 ** 18) / totalSupply;
-  return priceLp;
 });
 
 /**
