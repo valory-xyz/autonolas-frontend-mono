@@ -75,6 +75,7 @@ const ALLOWED_ORIGINS = [
   'https://sockjs-us3.pusher.com/',
   'https://programs.shyft.to/',
   'https://*.network.thegraph.com/',
+  'https://subgraph.satsuma-prod.com/',
 
   ...VERCEL_LINKS,
   ...APIS,

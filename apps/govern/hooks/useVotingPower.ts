@@ -14,9 +14,13 @@ export const useVotingPower = (account: Address | undefined) => {
     args: [account],
     query: {
       enabled: !!account,
-      select: (data) => ethers.formatUnits(data as string, 18),
     },
   });
 
-  return { data, isFetching, refetch };
+  return {
+    data: data ? ethers.formatUnits(data as string, 18) : undefined,
+    dataInWei: data as string | undefined,
+    isFetching,
+    refetch,
+  };
 };
