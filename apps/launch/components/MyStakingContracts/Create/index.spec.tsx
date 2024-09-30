@@ -120,6 +120,12 @@ describe('<CreateStakingContract />', () => {
     await userEvent.type(rewardsPerSecondInput, '100');
     expect(rewardsPerSecondInput).toHaveValue('100');
 
+    const minStakingDepositInput = screen.getByLabelText('Minimum service staking deposit, OLAS');
+    // clear first, because it has default value
+    await userEvent.clear(minStakingDepositInput);
+    await userEvent.type(minStakingDepositInput, '1000');
+    expect(minStakingDepositInput).toHaveValue('1000');
+
     await clickCreateContractButton();
     expect(
       screen.getByText('The rewards per second must be below the allowed limit'),

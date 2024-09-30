@@ -91,9 +91,11 @@ const TemplateInfoContent = ({ id }: { id: number }) => {
  * Create staking contract
  */
 export const CreateStakingContract = () => {
+  const [form] = Form.useForm();
+
   const router = useRouter();
   const dispatch = useAppDispatch();
-  const rulesConfig = useFieldRules();
+  const { rulesConfig, onValuesChange } = useFieldRules(form);
 
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<ErrorType>(null);
@@ -210,6 +212,8 @@ export const CreateStakingContract = () => {
         {alertMessage}
 
         <Form<FormValues>
+          form={form}
+          onValuesChange={onValuesChange}
           layout="vertical"
           onFinish={handleCreate}
           requiredMark={false}
