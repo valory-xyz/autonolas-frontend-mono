@@ -3,7 +3,6 @@ import { MenuItemType } from 'antd/es/menu/hooks/useItems';
 import { useRouter } from 'next/router';
 import { FC, useEffect, useState } from 'react';
 
-
 const items: MenuItemType[] = [
   { label: 'Live staking contracts', key: 'contracts' },
   { label: 'Agents', key: 'agents' },

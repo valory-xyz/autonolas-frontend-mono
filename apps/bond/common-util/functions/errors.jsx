@@ -97,8 +97,8 @@ export const notifyCustomErrors = (
   const errorList = types.map((type) => errorTypes[type]).flat();
 
   const message =
-    errorList.find((cError) => error?.message?.includes(cError.message))
-      ?.toDisplay || defaultMessage;
+    errorList.find((cError) => error?.message?.includes(cError.message))?.toDisplay ||
+    defaultMessage;
 
   if (message) {
     const errorInString = JSON.stringify(error, null, 2);

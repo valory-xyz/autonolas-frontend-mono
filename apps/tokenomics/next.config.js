@@ -33,7 +33,7 @@ const nextConfig = {
         destination: '/dev-incentives',
         permanent: false,
       },
-       {
+      {
         source: '/donate',
         destination: 'https://govern.olas.network/donate',
         permanent: true,
@@ -57,7 +57,7 @@ const nextConfig = {
         source: '/my-bonds',
         destination: 'https://bond.olas.network/my-bonds',
         permanent: true,
-      }
+      },
     ];
   },
 };

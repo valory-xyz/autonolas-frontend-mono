@@ -40,7 +40,6 @@ const StepIcon = ({ icon: Icon }: StepIconProps) => (
   </IconContainer>
 );
 
-
 type StepListProps = {
   title: string;
   items: (string | React.ReactNode)[];

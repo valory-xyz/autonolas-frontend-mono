@@ -40,9 +40,7 @@ describe('listComponents/mint.jsx', () => {
       },
     }));
 
-    const { container, getByText, getByRole } = render(
-      wrapProvider(<MintComponent />),
-    );
+    const { container, getByText, getByRole } = render(wrapProvider(<MintComponent />));
 
     // title
     expect(getByText(/Mint Component/i)).toBeInTheDocument();
@@ -58,17 +56,9 @@ describe('listComponents/mint.jsx', () => {
     fillIpfsGenerationModal();
 
     // other fields
-    expect(
-      getByRole('button', { name: 'Prefill Address' }),
-    ).toBeInTheDocument();
-    userEvent.type(
-      container.querySelector(`#${FORM_NAME}_owner_address`),
-      dummyAddress,
-    );
-    userEvent.type(
-      container.querySelector(`#${FORM_NAME}_dependencies`),
-      '1, 2',
-    );
+    expect(getByRole('button', { name: 'Prefill Address' })).toBeInTheDocument();
+    userEvent.type(container.querySelector(`#${FORM_NAME}_owner_address`), dummyAddress);
+    userEvent.type(container.querySelector(`#${FORM_NAME}_dependencies`), '1, 2');
 
     const submitButton = getByRole('button', { name: 'Submit' });
     expect(submitButton).toBeInTheDocument();

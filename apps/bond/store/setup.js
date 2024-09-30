@@ -40,4 +40,4 @@ export const {
   setLogout,
   setStoreState,
 } = setupSlice.actions;
-export const setupReducer = setupSlice.reducer; 
+export const setupReducer = setupSlice.reducer;

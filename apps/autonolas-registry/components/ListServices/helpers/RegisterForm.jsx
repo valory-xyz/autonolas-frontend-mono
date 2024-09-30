@@ -298,11 +298,7 @@ const RegisterForm = ({
                 // agentIds should be sorted before submitting the form
                 const agentIdsArray = value.split(',').map((val) => val.trim());
                 if (!isEqual(agentIdsArray, sortBy(agentIdsArray))) {
-                  return Promise.reject(
-                    new Error(
-                      'Agent IDs should be sorted from low to high.',
-                    ),
-                  );
+                  return Promise.reject(new Error('Agent IDs should be sorted from low to high.'));
                 }
 
                 return Promise.resolve();

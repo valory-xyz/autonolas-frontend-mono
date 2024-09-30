@@ -27,10 +27,7 @@ export const useGetOrCreateAssociatedTokenAccount = () => {
           return null;
         }
 
-        const associatedToken = await getAssociatedTokenAddress(
-          mintToken,
-          owner,
-        );
+        const associatedToken = await getAssociatedTokenAddress(mintToken, owner);
 
         const accountInfo = await connection.getAccountInfo(associatedToken);
         if (accountInfo) return associatedToken;

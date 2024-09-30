@@ -179,7 +179,9 @@ const getCurrentPriceBalancerFn = memoize(async (tokenAddress) => {
     const { pool } = await BALANCER_GRAPH_CLIENTS[lpChainId].request(balancerGetPoolQuery(poolId));
 
     if (!pool) {
-      throw new Error(`Pool not found on Balancer for poolId: ${poolId} and chainId: ${lpChainId}.`);
+      throw new Error(
+        `Pool not found on Balancer for poolId: ${poolId} and chainId: ${lpChainId}.`,
+      );
     }
 
     const totalSupply = pool.totalShares;

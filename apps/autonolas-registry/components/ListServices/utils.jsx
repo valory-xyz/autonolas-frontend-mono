@@ -56,7 +56,7 @@ export const getServices = async (total, nextPage, fetchAll = false) => {
   const existsResult = await Promise.allSettled(existsPromises);
   // filter services which don't exists (deleted or destroyed)
   const validTokenIds = [];
-  
+
   existsResult.forEach((item, index) => {
     const serviceId = `${total - (index + first - 1)}`;
     if (item.status === 'fulfilled' && !!item.value) {
@@ -78,11 +78,7 @@ export const getServices = async (total, nextPage, fetchAll = false) => {
 
 export const getFilteredServices = async (searchValue, account) => {
   const total = await getTotalForAllServices();
-  const list = await getServices(
-    total,
-    Math.round(total / TOTAL_VIEW_COUNT + 1),
-    true,
-  );
+  const list = await getServices(total, Math.round(total / TOTAL_VIEW_COUNT + 1), true);
 
   return new Promise((resolve) => {
     const filteredList = filterByOwner(list, { searchValue, account });

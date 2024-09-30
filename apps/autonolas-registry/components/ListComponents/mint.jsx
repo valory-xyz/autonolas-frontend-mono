@@ -29,10 +29,7 @@ const MintComponent = () => {
       setInformation(null);
 
       try {
-        const isValid = await checkIfERC721Receive(
-          account,
-          values.owner_address,
-        );
+        const isValid = await checkIfERC721Receive(account, values.owner_address);
         if (!isValid) {
           setIsMinting(false);
           return;

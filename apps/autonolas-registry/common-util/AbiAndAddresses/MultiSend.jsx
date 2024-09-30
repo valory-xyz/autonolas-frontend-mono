@@ -1,8 +1,7 @@
 export const MULTI_SEND_CONTRACT = {
   _format: 'hh-sol-artifact-1',
   contractName: 'MultiSendCallOnly',
-  sourceName:
-    '@gnosis.pm/safe-contracts/contracts/libraries/MultiSendCallOnly.sol',
+  sourceName: '@gnosis.pm/safe-contracts/contracts/libraries/MultiSendCallOnly.sol',
   abi: [
     {
       inputs: [

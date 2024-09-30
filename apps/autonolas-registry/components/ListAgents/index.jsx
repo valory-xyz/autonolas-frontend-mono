@@ -8,12 +8,7 @@ import { isMyTab } from 'common-util/List/ListTable/helpers';
 import { ListTable, useExtraTabContent } from 'common-util/List/ListTable';
 import { useHelpers } from 'common-util/hooks';
 import { useAllAgents, useMyAgents, useSearchAgents } from './useAgentsList';
-import {
-  getAgents,
-  getFilteredAgents,
-  getTotalForAllAgents,
-  getTotalForMyAgents,
-} from './utils';
+import { getAgents, getFilteredAgents, getTotalForAllAgents, getTotalForMyAgents } from './utils';
 
 const ALL_AGENTS = 'all-agents';
 const MY_AGENTS = 'my-agents';
@@ -21,12 +16,9 @@ const MY_AGENTS = 'my-agents';
 const ListAgents = () => {
   const router = useRouter();
 
-  const [currentTab, setCurrentTab] = useState(
-    isMyTab(router) ? MY_AGENTS : ALL_AGENTS,
-  );
+  const [currentTab, setCurrentTab] = useState(isMyTab(router) ? MY_AGENTS : ALL_AGENTS);
 
-  const { account, chainId, links, isL1OnlyNetwork, isSvm, isMainnet } =
-    useHelpers();
+  const { account, chainId, links, isL1OnlyNetwork, isSvm, isMainnet } = useHelpers();
 
   const getAllAgents = useAllAgents();
   const getMyAgents = useMyAgents();
@@ -160,14 +152,7 @@ const ListAgents = () => {
         setIsLoading(false);
       }
     })();
-  }, [
-    account,
-    searchValue,
-    currentTab,
-    currentPage,
-    getAgentsBySearch,
-    isMainnet,
-  ]);
+  }, [account, searchValue, currentTab, currentPage, getAgentsBySearch, isMainnet]);
 
   const tableCommonProps = {
     type: NAV_TYPES.AGENT,
@@ -207,11 +192,7 @@ const ListAgents = () => {
           label: 'All',
           disabled: isLoading,
           children: (
-            <ListTable
-              {...tableCommonProps}
-              list={list}
-              tableDataTestId="all-agents-table"
-            />
+            <ListTable {...tableCommonProps} list={list} tableDataTestId="all-agents-table" />
           ),
         },
         {

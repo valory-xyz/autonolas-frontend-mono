@@ -12,10 +12,7 @@ import {
 } from 'libs/util-contracts/src/lib/abiAndAddresses';
 
 import { ADDRESSES } from 'common-util/constants/addresses';
-import {
-  getChainId,
-  getProvider,
-} from 'common-util/functions/frontend-library';
+import { getChainId, getProvider } from 'common-util/functions/frontend-library';
 import { RPC_URLS } from 'common-util/constants/rpcs';
 
 /**
@@ -75,22 +72,15 @@ export const getAgentContract = () => {
 
 export const getComponentContract = () => {
   const { chainId } = getWeb3Details();
-  const contract = getContract(
-    COMPONENT_REGISTRY.abi,
-    ADDRESSES[chainId].component,
-  );
+  const contract = getContract(COMPONENT_REGISTRY.abi, ADDRESSES[chainId].component);
   return contract;
 };
 
 export const getServiceContract = () => {
   const { chainId } = getWeb3Details();
-  const contract = getContract(
-    SERVICE_REGISTRY.abi,
-    ADDRESSES[chainId].service,
-  );
+  const contract = getContract(SERVICE_REGISTRY.abi, ADDRESSES[chainId].service);
   return contract;
 };
-
 
 /**
  *

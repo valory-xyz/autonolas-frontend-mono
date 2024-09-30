@@ -1,7 +1,7 @@
 import { createSlice } from '@reduxjs/toolkit';
 
 import { VM_TYPE } from 'util/constants';
-import { ALL_SUPPORTED_CHAINS, EVM_SUPPORTED_CHAINS, } from 'common-util/Login/config';
+import { ALL_SUPPORTED_CHAINS, EVM_SUPPORTED_CHAINS } from 'common-util/Login/config';
 
 const initialState = {
   account: null,
@@ -27,9 +27,7 @@ export const setupSlice = createSlice({
     },
     setChainId: (state, action) => {
       const chainId = action.payload;
-      const networkInfo = EVM_SUPPORTED_CHAINS.find(
-        (item) => item.id === chainId,
-      );
+      const networkInfo = EVM_SUPPORTED_CHAINS.find((item) => item.id === chainId);
 
       state.chainId = chainId;
       state.chainDisplayName = networkInfo?.networkDisplayName || null;
@@ -37,16 +35,14 @@ export const setupSlice = createSlice({
     },
     setVmInfo: (state, action) => {
       const networkName = action.payload;
-      const info = ALL_SUPPORTED_CHAINS.find(
-        (item) => item.networkName === networkName,
-      );
+      const info = ALL_SUPPORTED_CHAINS.find((item) => item.networkName === networkName);
 
       if (info?.vmType === VM_TYPE.SVM) {
-        state.vmType = VM_TYPE.SVM
-        state.chainDisplayName = info.networkDisplayName
-        state.chainName = info.networkName
+        state.vmType = VM_TYPE.SVM;
+        state.chainDisplayName = info.networkDisplayName;
+        state.chainName = info.networkName;
       } else {
-        state.vmType = VM_TYPE.EVM
+        state.vmType = VM_TYPE.EVM;
       }
     },
     setErrorMessage: (state, action) => {
@@ -70,4 +66,4 @@ export const {
   setLogout,
   setStoreState,
 } = setupSlice.actions;
-export const setupReducer = setupSlice.reducer; 
+export const setupReducer = setupSlice.reducer;

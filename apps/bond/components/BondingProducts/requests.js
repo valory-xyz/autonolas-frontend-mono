@@ -1,5 +1,9 @@
 import { notifyError } from '@autonolas/frontend-library';
-import { getDepositoryContract, getTokenomicsContract, sendTransaction } from 'common-util/functions';
+import {
+  getDepositoryContract,
+  getTokenomicsContract,
+  sendTransaction,
+} from 'common-util/functions';
 
 export const getBondInfoRequest = async (bondList) => {
   const contract = getDepositoryContract();
@@ -30,9 +34,7 @@ export const getBondInfoRequest = async (bondList) => {
 const getBondsRequest = async ({ account, isActive: isBondMatured }) => {
   const contract = getDepositoryContract();
 
-  const response = await contract.methods
-    .getBonds(account, isBondMatured)
-    .call();
+  const response = await contract.methods.getBonds(account, isBondMatured).call();
 
   const { bondIds } = response;
   const allListPromise = [];

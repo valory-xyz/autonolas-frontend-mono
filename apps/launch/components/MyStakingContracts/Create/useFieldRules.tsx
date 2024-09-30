@@ -78,7 +78,7 @@ export const useFieldRules = (): StakingDepositRules => {
     livenessPeriod: {
       rules: [
         ...getGenericFieldRules(FieldConfig.livenessPeriod.name),
-        // TODO: any comments on this validation? 
+        // TODO: any comments on this validation?
         // {
         //   type: 'number',
         //   min: 86400,
@@ -100,9 +100,7 @@ export const useFieldRules = (): StakingDepositRules => {
     },
     numAgentInstances: { rules: getGenericFieldRules(FieldConfig.numAgentInstances.name) },
     agentIds: {
-      rules: [
-        { ...FORM_VALIDATION.validateCommaSeparatedList },
-      ],
+      rules: [{ ...FORM_VALIDATION.validateCommaSeparatedList }],
     },
     threshold: { rules: undefined },
     configHash: { rules: undefined },

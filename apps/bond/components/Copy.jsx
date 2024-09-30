@@ -3,9 +3,10 @@ import { handleCopy } from 'util/helpers';
 import PropTypes from 'prop-types';
 
 export const Copy = ({ copyText }) => (
-  <CopyOutlined onClick={() => {
-    handleCopy(copyText);
-  }}
+  <CopyOutlined
+    onClick={() => {
+      handleCopy(copyText);
+    }}
   />
 );
 

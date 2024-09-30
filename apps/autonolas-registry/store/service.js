@@ -1,7 +1,7 @@
 import { createSlice } from '@reduxjs/toolkit';
 
 const initialState = {
-  agentInstancesAndOperators: []
+  agentInstancesAndOperators: [],
 };
 
 export const serviceSlice = createSlice({
@@ -17,8 +17,5 @@ export const serviceSlice = createSlice({
   },
 });
 
-export const {
-  setAgentInstancesAndOperators,
-  setStoreState,
-} = serviceSlice.actions;
-export const serviceReducer = serviceSlice.reducer; 
+export const { setAgentInstancesAndOperators, setStoreState } = serviceSlice.actions;
+export const serviceReducer = serviceSlice.reducer;
