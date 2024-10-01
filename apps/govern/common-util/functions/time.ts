@@ -1,4 +1,8 @@
+import { Block } from 'viem';
+
 import { NA } from 'libs/util-constants/src';
+
+import { SECONDS_PER_BLOCK } from 'common-util/constants/time';
 
 // Returns the closest Thursday in the future
 // which is the start of the next week by Unix time
@@ -101,4 +105,19 @@ export const getRemainingTimeInSeconds = (unlockTime?: number) => {
   const futureDateInTimeStamp = new Date(unlockTime).getTime();
   const todayDateInTimeStamp = new Date().getTime();
   return Math.round((futureDateInTimeStamp - todayDateInTimeStamp) / 1000);
+};
+
+/**
+ * Returns estimated time in future based on provided block
+ */
+export const estimateFutureBlockTimestamp = (
+  currentBlock: Block | undefined,
+  futureBlockNumber: bigint,
+) => {
+  if (!currentBlock) return null;
+  const currentBlockNumber = currentBlock.number as bigint;
+  const currentBlockTimestamp = currentBlock.timestamp;
+  const blockDifference = futureBlockNumber - currentBlockNumber;
+  const estimatedTimestamp = currentBlockTimestamp + blockDifference * BigInt(SECONDS_PER_BLOCK);
+  return estimatedTimestamp;
 };

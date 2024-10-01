@@ -17,6 +17,7 @@ import { RPC_URLS } from 'common-util/constants/rpcs';
 import { getAddressFromBytes32 } from './addresses';
 import { getUnixNextWeekStartTimestamp } from './time';
 import {
+  getGovernorContract,
   getOlasContract,
   getTokenomicsContract,
   getTreasuryContract,
@@ -30,6 +31,7 @@ type VoteForNomineeWeightsParams = {
   chainIds: number[];
   weights: string[];
 };
+
 export const voteForNomineeWeights = async ({
   account,
   nominees,
@@ -381,4 +383,30 @@ export const depositServiceDonationRequest = async ({
     window.console.log('Error occurred on depositing service donation');
     throw error;
   }
+};
+
+/**
+ * Vote for a proposal
+ */
+export const voteForProposal = async ({
+  account,
+  proposalId,
+  support,
+}: {
+  account: Address;
+  proposalId: string;
+  support: number;
+}) => {
+  const contract = getGovernorContract();
+  const voteFn = contract.methods.castVote(proposalId, support);
+
+  const estimatedGas = await getEstimatedGasLimit(voteFn, account);
+  const fn = voteFn.send({ from: account, estimatedGas });
+
+  const result = await sendTransaction(fn, account, {
+    supportedChains: SUPPORTED_CHAINS,
+    rpcUrls: RPC_URLS,
+  });
+
+  return result;
 };

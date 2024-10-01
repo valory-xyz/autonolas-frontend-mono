@@ -2,11 +2,14 @@ import { PayloadAction } from '@reduxjs/toolkit';
 import { createSlice } from '@reduxjs/toolkit';
 import { StakingContract, UserVotes } from 'types';
 
+import { Proposal } from 'common-util/graphql/types';
+
 interface GovernState {
   isStakingContractsLoading: boolean;
   stakingContracts: StakingContract[];
   isUserVotesLoading: boolean;
   userVotes: Record<string, UserVotes>;
+  proposalVotes: Record<string, Proposal['voteCasts'][0]>;
   /** The timestamp of the last user vote */
   lastUserVote: number | null;
 }
@@ -16,6 +19,7 @@ const initialState: GovernState = {
   stakingContracts: [],
   isUserVotesLoading: true,
   userVotes: {},
+  proposalVotes: {},
   lastUserVote: null,
 };
 
@@ -40,9 +44,18 @@ export const governSlice = createSlice({
       state.isUserVotesLoading = true;
       state.lastUserVote = initialState.lastUserVote;
     },
+    setProposalVotes: (state, action: PayloadAction<GovernState['proposalVotes']>) => {
+      state.proposalVotes = { ...state.proposalVotes, ...action.payload };
+    },
   },
 });
 
-export const { setStakingContracts, setUserVotes, setLastUserVote, clearState, clearUserState } =
-  governSlice.actions;
+export const {
+  setStakingContracts,
+  setUserVotes,
+  setLastUserVote,
+  clearState,
+  clearUserState,
+  setProposalVotes,
+} = governSlice.actions;
 export const governReducer = governSlice.reducer;
