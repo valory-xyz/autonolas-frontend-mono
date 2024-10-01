@@ -37,15 +37,8 @@ export const MinimizedStatus = ({
           }}
           onClick={() => window.open('https://autonolas.network')}
         />
-        {showStatus && (
-          <rect x="38" y="10" width="30" height="30" fill="#D9D9D9" />
-        )}
-        <rect
-          width={108 - (showStatus ? 0 : 30)}
-          height="50"
-          rx="11.1872"
-          fill="black"
-        />
+        {showStatus && <rect x="38" y="10" width="30" height="30" fill="#D9D9D9" />}
+        <rect width={108 - (showStatus ? 0 : 30)} height="50" rx="11.1872" fill="black" />
         <rect
           x={66 - (showStatus ? 0 : 30)}
           y="8"
@@ -65,9 +58,7 @@ export const MinimizedStatus = ({
           style={{
             cursor: 'pointer',
             pointerEvents: 'all',
-            transform: showStatus
-              ? 'translate(0px, 0px)'
-              : 'translate(-24px, 0px)',
+            transform: showStatus ? 'translate(0px, 0px)' : 'translate(-24px, 0px)',
           }}
         />
         {showStatus && (
@@ -78,9 +69,7 @@ export const MinimizedStatus = ({
               r="4"
               fill={isOperational ? COLOR.GREEN_2 : COLOR.ORANGE}
             />
-            <div style={{ height: 0, width: 0, visibility: 'hidden' }}>
-              {timerCountdown}
-            </div>
+            <div style={{ height: 0, width: 0, visibility: 'hidden' }}>{timerCountdown}</div>
           </>
         )}
 
