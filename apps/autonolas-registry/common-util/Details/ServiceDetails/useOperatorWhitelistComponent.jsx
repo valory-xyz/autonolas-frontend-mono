@@ -1,10 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Switch } from 'antd';
 
-import {
-  checkIfServiceRequiresWhitelisting,
-  setOperatorsCheckRequest,
-} from '../utils';
+import { checkIfServiceRequiresWhitelisting, setOperatorsCheckRequest } from '../utils';
 import { useHelpers } from '../../hooks';
 import { OperatorWhitelist, SetOperatorStatus } from './OperatorWhitelist';
 
@@ -94,20 +91,14 @@ export const useOperatorWhitelistComponent = (id, isOwner) => {
    * Operator Whitelist component
    */
   const operatorWhitelistValue = (
-    <OperatorWhitelist
-      id={id}
-      setOpWhitelist={setOpWhitelist}
-      isWhiteListed={isWhiteListed}
-    />
+    <OperatorWhitelist id={id} setOpWhitelist={setOpWhitelist} isWhiteListed={isWhiteListed} />
   );
 
   /**
    *
    * Operator Status component
    */
-  const operatorStatusValue = (
-    <SetOperatorStatus id={id} setOpWhitelist={setOpWhitelist} />
-  );
+  const operatorStatusValue = <SetOperatorStatus id={id} setOpWhitelist={setOpWhitelist} />;
 
   return {
     operatorWhitelistTitle,

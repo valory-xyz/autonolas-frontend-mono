@@ -7,11 +7,7 @@ import { NAV_TYPES } from 'util/constants';
 import { isMyTab } from 'common-util/List/ListTable/helpers';
 import { ListTable, useExtraTabContent } from 'common-util/List/ListTable';
 import { useHelpers } from 'common-util/hooks';
-import {
-  useAllComponents,
-  useMyComponents,
-  useSearchComponents,
-} from './useComponentsList';
+import { useAllComponents, useMyComponents, useSearchComponents } from './useComponentsList';
 import {
   getComponents,
   getFilteredComponents,
@@ -25,12 +21,9 @@ const MY_COMPONENTS = 'my-components';
 const ListComponents = () => {
   const router = useRouter();
 
-  const [currentTab, setCurrentTab] = useState(
-    isMyTab(router) ? MY_COMPONENTS : ALL_COMPONENTS,
-  );
+  const [currentTab, setCurrentTab] = useState(isMyTab(router) ? MY_COMPONENTS : ALL_COMPONENTS);
 
-  const { account, chainId, links, isL1OnlyNetwork, isSvm, isMainnet } =
-    useHelpers();
+  const { account, chainId, links, isL1OnlyNetwork, isSvm, isMainnet } = useHelpers();
 
   const getAllComponents = useAllComponents();
   const getMyComponents = useMyComponents();
@@ -163,14 +156,7 @@ const ListComponents = () => {
         setIsLoading(false);
       }
     })();
-  }, [
-    account,
-    searchValue,
-    currentTab,
-    currentPage,
-    getComponentsBySearch,
-    isMainnet,
-  ]);
+  }, [account, searchValue, currentTab, currentPage, getComponentsBySearch, isMainnet]);
 
   const tableCommonProps = {
     type: NAV_TYPES.COMPONENT,
@@ -210,11 +196,7 @@ const ListComponents = () => {
           label: 'All',
           disabled: isLoading,
           children: (
-            <ListTable
-              {...tableCommonProps}
-              list={list}
-              tableDataTestId="all-components-table"
-            />
+            <ListTable {...tableCommonProps} list={list} tableDataTestId="all-components-table" />
           ),
         },
         {

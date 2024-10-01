@@ -53,8 +53,7 @@ export const useHelpers = () => {
     chainName,
     isL1OnlyNetwork: isL1OnlyNetworkFn(chainId),
     isL1Network: isL1NetworkFn(chainId),
-    doesNetworkHaveValidServiceManagerToken:
-      doesNetworkHaveValidServiceManagerTokenFn(chainId),
+    doesNetworkHaveValidServiceManagerToken: doesNetworkHaveValidServiceManagerTokenFn(chainId),
     links: updatedLinks,
     isConnectedToWrongNetwork,
     isMainnet: chainId === 1,

@@ -6,9 +6,8 @@ import { message } from 'antd';
  * @param {string} address - The Ethereum address to truncate
  * @returns {string} The truncated address
  */
-export const truncateAddress = (address) => (
-  address ? `${address.substring(0, 7)}...${address.substring(address.length - 3)}` : '--'
-);
+export const truncateAddress = (address) =>
+  address ? `${address.substring(0, 7)}...${address.substring(address.length - 3)}` : '--';
 
 /**
  * Handles copying text to the clipboard

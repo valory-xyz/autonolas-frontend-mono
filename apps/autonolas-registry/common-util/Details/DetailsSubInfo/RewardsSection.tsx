@@ -65,7 +65,13 @@ const getColumns = (
   },
 ];
 
-export const RewardsSection: FC<RewardsSectionProps> = ({ ownerAddress, isOwner, id, type, dataTestId }) => {
+export const RewardsSection: FC<RewardsSectionProps> = ({
+  ownerAddress,
+  isOwner,
+  id,
+  type,
+  dataTestId,
+}) => {
   const { account } = useHelpers();
 
   const [isClaimLoading, setIsClaimLoading] = useState(false);

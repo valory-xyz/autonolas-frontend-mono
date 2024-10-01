@@ -39,14 +39,8 @@ export const AutonolasServicesArchitected = () => {
         How are Autonolas services architected?
       </Title>
 
-      {LIST.map(({
-        title, desc, link, type,
-      }) => (
-        <Row
-          className="each-service"
-          key={`each-service-${type}`}
-          align="middle"
-        >
+      {LIST.map(({ title, desc, link, type }) => (
+        <Row className="each-service" key={`each-service-${type}`} align="middle">
           <Col className="column column-1" md={12} xs={10}>
             <Image
               src={`/images/homepage/${type}.svg`}
@@ -68,9 +62,7 @@ export const AutonolasServicesArchitected = () => {
                 {isL1Network ? (
                   <Link href={link} legacyBehavior>{`View all ${type}`}</Link>
                 ) : (
-                  <Text disabled>
-                    {`Switch network (to Ethereum or Goerli) to view ${type}`}
-                  </Text>
+                  <Text disabled>{`Switch network (to Ethereum or Goerli) to view ${type}`}</Text>
                 )}
               </>
             )}

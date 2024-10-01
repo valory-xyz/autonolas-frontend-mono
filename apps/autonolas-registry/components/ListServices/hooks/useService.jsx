@@ -7,11 +7,7 @@ import { useHelpers } from 'common-util/hooks';
 import { notifyError } from '@autonolas/frontend-library';
 
 import { getServiceDetails, getServiceOwner, getTokenUri } from '../utils';
-import {
-  useGetSvmServiceDetails,
-  useServiceOwner,
-  useTokenUri,
-} from './useSvmService';
+import { useGetSvmServiceDetails, useServiceOwner, useTokenUri } from './useSvmService';
 
 /**
  * hooks to get service details function
@@ -25,9 +21,7 @@ export const useGetServiceDetails = () => {
     async (id) => {
       if (!id) notifyError('No service id provided');
 
-      const serviceDetails = isSvm
-        ? await getSvmServiceDetails(id)
-        : await getServiceDetails(id);
+      const serviceDetails = isSvm ? await getSvmServiceDetails(id) : await getServiceDetails(id);
       return serviceDetails;
     },
     [isSvm, getSvmServiceDetails],
@@ -46,9 +40,7 @@ export const useGetServiceOwner = () => {
     async (id) => {
       if (!id) notifyError('No service id provided');
 
-      const serviceOwner = isSvm
-        ? await getSvmServiceOwner(id)
-        : await getServiceOwner(id);
+      const serviceOwner = isSvm ? await getSvmServiceOwner(id) : await getServiceOwner(id);
       return serviceOwner;
     },
     [isSvm, getSvmServiceOwner],
@@ -67,9 +59,7 @@ export const useGetServiceTokenUri = () => {
     async (id) => {
       if (!id) notifyError('No service id provided');
 
-      const serviceTokenUri = isSvm
-        ? await getSvmTokenUri(id)
-        : await getTokenUri(id);
+      const serviceTokenUri = isSvm ? await getSvmTokenUri(id) : await getTokenUri(id);
       return serviceTokenUri;
     },
     [isSvm, getSvmTokenUri],

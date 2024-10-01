@@ -1,13 +1,8 @@
 import { useMemo } from 'react';
 
-
-
 import { getCommaSeparatedNumber } from 'common-util/functions';
 
-
-
 import { InfoCard } from './InfoCard';
-
 
 const SECONDS_IN_A_YEAR = 31536000;
 

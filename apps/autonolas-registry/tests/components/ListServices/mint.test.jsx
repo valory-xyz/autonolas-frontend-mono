@@ -45,9 +45,7 @@ describe('listServices/mint.jsx', () => {
   });
 
   it('should submit the form successfully', async () => {
-    const { container, getByText, getByRole, getByTestId } = render(
-      wrapProvider(<MintService />),
-    );
+    const { container, getByText, getByRole, getByTestId } = render(wrapProvider(<MintService />));
     // title
     expect(getByText(/Mint Service/i)).toBeInTheDocument();
 
@@ -62,15 +60,9 @@ describe('listServices/mint.jsx', () => {
     fillIpfsGenerationModal();
 
     // other fields
-    userEvent.type(
-      container.querySelector(`#${FORM_NAME}_owner_address`),
-      dummyAddress,
-    );
+    userEvent.type(container.querySelector(`#${FORM_NAME}_owner_address`), dummyAddress);
     userEvent.type(container.querySelector(`#${FORM_NAME}_agent_ids`), '1');
-    userEvent.type(
-      container.querySelector(`#${FORM_NAME}_agent_num_slots`),
-      '1',
-    );
+    userEvent.type(container.querySelector(`#${FORM_NAME}_agent_num_slots`), '1');
     userEvent.type(container.querySelector(`#${FORM_NAME}_bonds`), '1');
     userEvent.type(container.querySelector(`#${FORM_NAME}_threshold`), '1');
 

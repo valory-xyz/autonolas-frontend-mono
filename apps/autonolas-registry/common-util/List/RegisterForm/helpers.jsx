@@ -25,21 +25,12 @@ export const FormItemHash = ({ listType, hashValue }) => (
       disabled
       addonBefore={HASH_PREFIX}
       addonAfter={
-        <Tooltip
-          title={
-            hashValue
-              ? 'Click to open the generated hash'
-              : 'Please generate hash'
-          }
-        >
+        <Tooltip title={hashValue ? 'Click to open the generated hash' : 'Please generate hash'}>
           <LinkOutlined
             style={hashValue ? {} : { cursor: 'not-allowed' }}
             onClick={() => {
               if (hashValue) {
-                window.open(
-                  `${GATEWAY_URL}${HASH_PREFIX}${hashValue}`,
-                  '_blank',
-                );
+                window.open(`${GATEWAY_URL}${HASH_PREFIX}${hashValue}`, '_blank');
               }
             }}
           />

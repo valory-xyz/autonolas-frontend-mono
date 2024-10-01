@@ -70,26 +70,20 @@ export const useRegisterAgents = () => {
         );
 
         if (operator !== SVM_EMPTY_ADDRESS) {
-          notifyError(
-            'The operator is registered as an agent instance already.',
-          );
+          notifyError('The operator is registered as an agent instance already.');
           return false;
         }
 
-        const agentInstanceAddressesPromises = agentInstances.map(
-          async (agentInstance) => {
-            const eachAgentInstance = await readSvmData(
-              'mapAgentInstanceOperators',
-              [new PublicKey(agentInstance)],
-              'publicKey',
-            );
-            return eachAgentInstance;
-          },
-        );
+        const agentInstanceAddressesPromises = agentInstances.map(async (agentInstance) => {
+          const eachAgentInstance = await readSvmData(
+            'mapAgentInstanceOperators',
+            [new PublicKey(agentInstance)],
+            'publicKey',
+          );
+          return eachAgentInstance;
+        });
 
-        const agentInstanceAddresses = await Promise.all(
-          agentInstanceAddressesPromises,
-        );
+        const agentInstanceAddresses = await Promise.all(agentInstanceAddressesPromises);
         const ifValidArray = agentInstanceAddresses.some(
           (eachAgentInstance) => eachAgentInstance === SVM_EMPTY_ADDRESS,
         );
@@ -112,9 +106,7 @@ export const useRegisterAgents = () => {
   );
 
   const registerAgents = useCallback(
-    async ({
-      account, serviceId, agentIds, agentInstances, dataSource,
-    }) => {
+    async ({ account, serviceId, agentIds, agentInstances, dataSource }) => {
       if (isSvm) {
         const pdaEscrow = new PublicKey(solanaAddresses.pda);
 
@@ -166,9 +158,7 @@ export const useFinishRegistration = () => {
       const fn = program.methods
         .deploy(id, new PublicKey(multisigKey))
         .accounts({ dataAccount: solanaAddresses.storageAccount })
-        .remainingAccounts([
-          { pubkey: walletPublicKey, isSigner: true, isWritable: true },
-        ]);
+        .remainingAccounts([{ pubkey: walletPublicKey, isSigner: true, isWritable: true }]);
 
       const response = await sendTransaction(fn, account || undefined, {
         vmType,

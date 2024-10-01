@@ -31,9 +31,7 @@ const validateThreshold = (
   }
 
   return Promise.reject(
-    new Error(
-      'Threshold must be at least 2/3 and not exceed the sum of no. of slots',
-    ),
+    new Error('Threshold must be at least 2/3 and not exceed the sum of no. of slots'),
   );
 };
 

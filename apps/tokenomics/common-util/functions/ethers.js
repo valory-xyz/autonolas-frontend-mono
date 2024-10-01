@@ -4,20 +4,17 @@ import { ethers } from 'ethers';
  * Same as `formatToEth` but doesn't fixes the decimal to 8
  * @returns {String} eg: 1000000000000000000 => 1
  */
-export const parseToEth = (amount) =>
-  amount ? ethers.formatEther(`${amount}`) : 0;
+export const parseToEth = (amount) => (amount ? ethers.formatEther(`${amount}`) : 0);
 
 /**
  * multiplies the amount by 10^18
  */
-export const parseToWei = (amount) =>
-  ethers.parseUnits(`${amount}`, 18).toString();
+export const parseToWei = (amount) => ethers.parseUnits(`${amount}`, 18).toString();
 
 /**
  * multiplies the amount by 10^8
  */
-export const parseToSolDecimals = (amount) =>
-  ethers.parseUnits(`${amount}`, 8).toString();
+export const parseToSolDecimals = (amount) => ethers.parseUnits(`${amount}`, 8).toString();
 
 /**
  * TODO: move to autonolas-library and figure out a better way

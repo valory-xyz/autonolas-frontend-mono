@@ -13,8 +13,7 @@ import {
 } from '../../common-util/hooks/useSubgraph';
 import { TOTAL_VIEW_COUNT } from '../../util/constants';
 
-const componentPackageType =
-  'packageType_in: [connection,skill,protocol,contract,custom,unknown]';
+const componentPackageType = 'packageType_in: [connection,skill,protocol,contract,custom,unknown]';
 
 const getAllAndMyComponentsQuery = (currentPage, ownerAddress = null) => {
   return gql`
@@ -41,9 +40,7 @@ const getComponentsBySearchQuery = (searchValue, ownerAddress = null) => {
           and: [
             { ${componentPackageType} }
             ${getSearchFilterSubQueryForUnitFields(searchValue)}
-            ${
-              ownerAddress ? `{ owner_contains_nocase: "${ownerAddress}" }` : ''
-            }
+            ${ownerAddress ? `{ owner_contains_nocase: "${ownerAddress}" }` : ''}
           ]
         }
         orderBy: tokenId

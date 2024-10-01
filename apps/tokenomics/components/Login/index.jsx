@@ -1,12 +1,7 @@
 import { useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { useAccount, useBalance } from 'wagmi';
-import {
-  setUserAccount,
-  setUserBalance,
-  setErrorMessage,
-  setLogout,
-} from 'store/setup';
+import { setUserAccount, setUserBalance, setErrorMessage, setLogout } from 'store/setup';
 import { LoginV2 } from 'common-util/Login';
 
 const Login = () => {
@@ -38,11 +33,7 @@ const Login = () => {
 
   return (
     <div>
-      <LoginV2
-        onConnect={onConnect}
-        onDisconnect={onDisconnect}
-        onError={onError}
-      />
+      <LoginV2 onConnect={onConnect} onDisconnect={onDisconnect} onError={onError} />
     </div>
   );
 };

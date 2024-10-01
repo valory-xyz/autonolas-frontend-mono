@@ -1,13 +1,6 @@
 import { getServiceContract } from '../../../common-util/Contracts';
-import {
-  getServices,
-  getFilteredServices,
-} from '../../../components/ListServices/utils';
-import {
-  dummyAddress,
-  svmConnectivityEmptyMock,
-  useHelpersEvmMock,
-} from '../../tests-helpers';
+import { getServices, getFilteredServices } from '../../../components/ListServices/utils';
+import { dummyAddress, svmConnectivityEmptyMock, useHelpersEvmMock } from '../../tests-helpers';
 
 const SERVICE_1 = { name: 'Service One' };
 
@@ -31,9 +24,7 @@ describe('listServices/utils.jsx', () => {
           call: jest.fn(() => Promise.resolve(1)),
         })),
         exists: jest.fn(() => ({
-          call: jest.fn(() =>
-            Promise.resolve({ status: 'fulfilled', value: true }),
-          ),
+          call: jest.fn(() => Promise.resolve({ status: 'fulfilled', value: true })),
         })),
         balanceOf: jest.fn(() => ({
           call: jest.fn(() => Promise.resolve(1)),
@@ -61,9 +52,7 @@ describe('listServices/utils.jsx', () => {
           call: jest.fn(() => Promise.resolve(1)),
         })),
         exists: jest.fn(() => ({
-          call: jest.fn(() =>
-            Promise.resolve({ status: 'fulfilled', value: true }),
-          ),
+          call: jest.fn(() => Promise.resolve({ status: 'fulfilled', value: true })),
         })),
         getService: jest.fn(() => ({
           call: jest.fn(() => Promise.resolve(SERVICE_1)),

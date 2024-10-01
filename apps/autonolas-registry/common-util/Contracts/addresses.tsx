@@ -1,9 +1,5 @@
 import { Address } from 'viem';
-import {
-  LOCAL_FORK_ID,
-  LOCAL_FORK_ID_GNOSIS,
-  LOCAL_FORK_ID_POLYGON,
-} from '../../util/constants';
+import { LOCAL_FORK_ID, LOCAL_FORK_ID_GNOSIS, LOCAL_FORK_ID_POLYGON } from '../../util/constants';
 
 type Addresses = {
   serviceManagerToken: Address;
