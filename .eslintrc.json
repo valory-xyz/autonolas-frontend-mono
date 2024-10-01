@@ -12,7 +12,19 @@
     "prettier/prettier": ["error", {
       "endOfLine": "auto",
       "semi": true,
-      "singleQuote": true
+      "trailingComma": "all",
+      "singleQuote": true,
+      "printWidth": 100,
+      "tabWidth": 2,
+      "importOrderSeparation": true,
+      "importOrderSortSpecifiers": true,
+      "importOrder": [
+        "<THIRD_PARTY_MODULES>",
+        "^@autonolas/(.*)$",
+        "^libs/*",
+        "^(store|util|common-util|components|data|hooks|context|types)/(.*)$",
+        "^[./]"
+      ]
     }]
   },
   "overrides": [
