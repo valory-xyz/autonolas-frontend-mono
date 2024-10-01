@@ -17,7 +17,7 @@ export const useProposals = () => {
   const { proposalVotes } = useAppSelector((state) => state.govern);
 
   const { data: proposals, isLoading: isProposalsLoading } = useQuery({
-    enabled: block !== undefined,
+    enabled: !!block,
     queryKey: ['getProposals'],
     queryFn: async () => {
       const proposals = await getProposals();
@@ -73,20 +73,17 @@ export const useProposals = () => {
   const data = useMemo(() => {
     if (!proposals) return [];
     if (Object.values(proposalVotes).length === 0) return proposals;
-    return proposals.map((proposal) => ({
-      ...proposal,
-      voteCasts: [
-        // insert fresh vote on top of the votes from subgraph
-        // if not there already
-        ...(proposalVotes[proposal.proposalId] &&
-        proposal.voteCasts.some((vote) =>
-          areAddressesEqual(vote.voter, proposalVotes[proposal.proposalId].voter),
-        )
-          ? []
-          : [proposalVotes[proposal.proposalId]]),
-        ...proposal.voteCasts,
-      ],
-    }));
+    return proposals.map((proposal) => {
+      const freshVote = proposalVotes[proposal.proposalId];
+      const hasFreshVote = proposal.voteCasts.some((vote) =>
+        areAddressesEqual(vote.voter, freshVote?.voter),
+      );
+
+      return {
+        ...proposal,
+        voteCasts: [...(hasFreshVote ? [] : [freshVote]), ...proposal.voteCasts],
+      };
+    });
   }, [proposals, proposalVotes]);
 
   return { data, block, isLoading: isBlockLoading || isProposalsLoading };

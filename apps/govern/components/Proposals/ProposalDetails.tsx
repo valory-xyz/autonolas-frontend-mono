@@ -4,17 +4,14 @@ import { mainnet } from 'viem/chains';
 import { useAccount, useBlock } from 'wagmi';
 
 import { Caption } from 'libs/ui-components/src';
-import { EXPLORER_URLS, UNICODE_SYMBOLS } from 'libs/util-constants/src';
 import { areAddressesEqual } from 'libs/util-functions/src';
+import { AddressLink } from 'libs/ui-components/src';
 
-import {
-  estimateFutureBlockTimestamp,
-  getFullFormattedDate,
-  truncateAddress,
-} from 'common-util/functions';
+import { estimateFutureBlockTimestamp, getFullFormattedDate } from 'common-util/functions';
 import { Proposal } from 'common-util/graphql/types';
 
-import { VOTES_SUPPORT, getFormattedValue } from './utils';
+import { VOTES_SUPPORT, formatWeiToEth } from './utils';
+import { NA } from 'libs/util-constants/src';
 
 const { Paragraph, Text } = Typography;
 
@@ -40,23 +37,12 @@ const useBlockTimestamp = (currentBlock: Block | undefined, block: bigint) => {
   };
 };
 
-const AddressLink = ({ address, className }: { address: string; className?: string }) => (
-  <a
-    href={`${EXPLORER_URLS[mainnet.id]}/address/${address}`}
-    target="_blank"
-    rel="noreferrer"
-    className={className}
-  >
-    {`${truncateAddress(address)} ${UNICODE_SYMBOLS.EXTERNAL_LINK}`}
-  </a>
-);
-
 export const ProposalDetails = ({
   item,
   currentBlock,
 }: {
   item: Proposal;
-  currentBlock: Block | undefined;
+  currentBlock?: Block | undefined;
 }) => {
   const { address } = useAccount();
 
@@ -68,7 +54,7 @@ export const ProposalDetails = ({
       <Caption>Proposal description</Caption>
       <Paragraph className="mb-16">{item.description}</Paragraph>
       <Caption>Owner</Caption>
-      <AddressLink address={item.proposer} className="mb-16" />
+      <AddressLink address={item.proposer} chainId={mainnet.id} className="mb-16" />
       <Flex gap={24} className="mb-16">
         <Flex vertical>
           <Caption>Start Date</Caption>
@@ -76,6 +62,7 @@ export const ProposalDetails = ({
           {startDateBlock.timestamp !== null && (
             <Text>{getFullFormattedDate(Number(startDateBlock.timestamp) * 1000)}</Text>
           )}
+          {!startDateBlock.isLoading && startDateBlock.timestamp === null && NA}
         </Flex>
         <Flex vertical>
           <Caption>End Date</Caption>
@@ -90,10 +77,10 @@ export const ProposalDetails = ({
         {item.voteCasts.map((vote, index) => (
           <Row key={vote.id} gutter={[0, 8]}>
             <Col span={5}>
-              <AddressLink address={vote.voter} />
+              <AddressLink address={vote.voter} chainId={mainnet.id} />
               {address && areAddressesEqual(vote.voter, address) && ' (you)'}
             </Col>
-            <Col span={2}>{getFormattedValue(vote.weight)}</Col>
+            <Col span={2}>{formatWeiToEth(vote.weight)}</Col>
             <Col>({VOTES_SUPPORT[vote.support]})</Col>
           </Row>
         ))}

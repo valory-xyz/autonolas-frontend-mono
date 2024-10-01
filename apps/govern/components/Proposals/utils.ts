@@ -24,7 +24,7 @@ export const VOTES_SORTED: VoteSupport[] = [
   VoteSupport.Abstain,
 ];
 
-export const getFormattedValue = (value: string) =>
+export const formatWeiToEth = (value: string) =>
   formatWeiNumber({
     value: ethers.formatUnits(value, 18),
     maximumFractionDigits: 3,

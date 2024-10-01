@@ -2,7 +2,7 @@ import { gql, request } from 'graphql-request';
 
 import { Proposals } from './types';
 
-const GOVERNOR_SUBGRAPH_URL = process.env.NEXT_PUBLIC_GOVERNOR_SUBGRAPH_URL || '';
+const GOVERNOR_SUBGRAPH_URL = process.env.NEXT_PUBLIC_GOVERNOR_SUBGRAPH_URL;
 
 const getProposalsQuery = gql`
   query GetProposalCreateds {
@@ -33,4 +33,4 @@ const getProposalsQuery = gql`
 `;
 
 export const getProposals = async () =>
-  request<Proposals>(GOVERNOR_SUBGRAPH_URL, getProposalsQuery);
+  request<Proposals>(GOVERNOR_SUBGRAPH_URL as string, getProposalsQuery);

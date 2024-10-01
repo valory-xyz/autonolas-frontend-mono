@@ -18,11 +18,12 @@ import { ProposalDetails } from './ProposalDetails';
 import {
   VOTES_SORTED,
   VOTES_SUPPORT,
-  getFormattedValue,
+  formatWeiToEth,
   getUserVote,
   hasNotStarted,
   isOngoing,
 } from './utils';
+import { COLOR } from 'libs/ui-theme/src';
 
 const { Text } = Typography;
 
@@ -75,14 +76,14 @@ const getColumns = (
     dataIndex: 'votesFor',
     key: 'votesFor',
     width: 105,
-    render: (votesFor) => <Text>{getFormattedValue(votesFor)}</Text>,
+    render: (votesFor) => <Text>{formatWeiToEth(votesFor)}</Text>,
   },
   {
     title: 'Votes against',
     dataIndex: 'votesAgainst',
     key: 'votesAgainst',
     width: 140,
-    render: (votesAgainst) => <Text>{getFormattedValue(votesAgainst)}</Text>,
+    render: (votesAgainst) => <Text>{formatWeiToEth(votesAgainst)}</Text>,
   },
   {
     title: 'Quorum',
@@ -90,8 +91,8 @@ const getColumns = (
     width: 120,
     render: (_, record) => (
       <Text>
-        {getFormattedValue(record.votesFor)} / {hasNotStarted(record, block) && '~'}
-        {getFormattedValue(record.quorum)}
+        {formatWeiToEth(record.votesFor)} / {hasNotStarted(record, block) && '~'}
+        {formatWeiToEth(record.quorum)}
       </Text>
     ),
   },
@@ -196,7 +197,7 @@ export const ProposalsList = () => {
           const Icon = expanded ? DownOutlined : RightOutlined;
           return (
             <Icon
-              style={{ fontSize: '14px', color: '#606F85' }}
+              style={{ fontSize: '14px', color: COLOR.TEXT_SECONDARY }}
               onClick={(e) => onExpand(record, e)}
             />
           );
