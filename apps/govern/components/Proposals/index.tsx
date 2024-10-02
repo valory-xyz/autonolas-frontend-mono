@@ -50,13 +50,11 @@ const SnapshotCard = () => (
 export const ProposalsPage = () => (
   <StyledMain>
     <SnapshotCard />
-
     <Card>
-      <Title>Proposals</Title>
+      <Title>On-chain proposals</Title>
       <Paragraph type="secondary" className="mb-24">
-        Participate in the Autonolas DAO governance by voting on proposals.
+        Participate in the Autonolas DAO governance by voting on on-chain proposals.
       </Paragraph>
-
       <ProposalsList />
     </Card>
   </StyledMain>
