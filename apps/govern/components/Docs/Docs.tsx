@@ -67,7 +67,7 @@ const WhatIsOlasGovern = () => (
         It allows to direct OLAS token emissions to desirable staking programs via a voting-weight
         mechanism.
       </li>
-      <li>It provides access to Olas DAO proposals on Boardroom and Snapshot.</li>
+      <li>It provides access to Olas DAO proposals.</li>
     </ul>
   </>
 );
@@ -197,8 +197,7 @@ const Proposals = () => (
       Olas DAO proposals
     </Title>
     <Paragraph className="mb-8">
-      Olas Govern is a central hub for Olas DAO members and provides access to the DAO proposals on
-      Boardroom and Snapshot.
+      Olas Govern is the central hub for Olas DAO members and provides access to DAO proposals.
     </Paragraph>
   </>
 );
