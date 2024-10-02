@@ -97,7 +97,7 @@ const PathContent = ({ path: { bond, network, exchange, bridge }, networkId, isE
       .
     </>,
     <>
-      Bond LP tokens using <NextStyledLink href="/bonding-products">Olas Tokenomics</NextStyledLink>
+      <NextStyledLink href="/bonding-products">Bond LP tokens</NextStyledLink>
       .
     </>,
   ];
