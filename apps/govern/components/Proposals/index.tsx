@@ -53,7 +53,7 @@ export const ProposalsPage = () => (
     <Card>
       <Title>On-chain proposals</Title>
       <Paragraph type="secondary" className="mb-24">
-        Participate in the Autonolas DAO governance by voting on on-chain proposals.
+        Participate in Autonolas DAO governance by voting on on-chain proposals.
       </Paragraph>
       <ProposalsList />
     </Card>
