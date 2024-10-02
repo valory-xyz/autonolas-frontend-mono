@@ -197,7 +197,7 @@ const Proposals = () => (
       Olas DAO proposals
     </Title>
     <Paragraph className="mb-8">
-      Olas Govern is a central hub for Olas DAO members and provides access to the DAO proposals.
+      Olas Govern is the central hub for Olas DAO members and provides access to DAO proposals.
     </Paragraph>
   </>
 );
