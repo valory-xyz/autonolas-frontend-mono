@@ -2,6 +2,8 @@ import { ethers } from 'ethers';
 
 import { notifyError } from '@autonolas/frontend-library';
 
+import { getEstimatedGasLimit } from 'libs/util-functions/src';
+
 import {
   getGenericErc20Contract,
   getServiceContract,
@@ -50,8 +52,11 @@ export const getBonds = async (id, tableDataSource) => {
 /* ----- common functions ----- */
 export const onTerminate = async (account, id) => {
   const contract = getServiceManagerContract();
-  const fn = contract.methods.terminate(id).send({
+  const terminateFn = contract.methods.terminate(id);
+  const estimatedGas = await getEstimatedGasLimit(terminateFn, account);
+  const fn = terminateFn.send({
     from: account,
+    gasLimit: estimatedGas,
   });
   const response = await sendTransaction(fn, account);
   return response;
@@ -128,8 +133,11 @@ export const mintTokenRequest = async ({ account, serviceId }) => {
 
 export const onActivateRegistration = async (id, account, deposit) => {
   const contract = getServiceManagerContract();
+  const activateRegistrationFn = contract.methods.activateRegistration(id);
+  const estimatedGas = await getEstimatedGasLimit(activateRegistrationFn, account, deposit);
   const fn = contract.methods.activateRegistration(id).send({
     from: account,
+    gasLimit: estimatedGas,
     value: deposit,
   });
 
@@ -232,9 +240,13 @@ export const onStep2RegisterAgents = async ({
   const contract = getServiceManagerContract();
   const { totalBonds } = await getBonds(serviceId, dataSource);
 
-  const fn = contract.methods
-    .registerAgents(serviceId, agentInstances, agentIds)
-    .send({ from: account, value: `${totalBonds}` });
+  const registerAgentsFn = contract.methods.registerAgents(serviceId, agentInstances, agentIds);
+  const estimatedGas = await getEstimatedGasLimit(registerAgentsFn, account, `${totalBonds}`);
+  const fn = registerAgentsFn.send({
+    from: account,
+    gasLimit: estimatedGas,
+    value: `${totalBonds}`,
+  });
   const response = await sendTransaction(fn, account);
   return response;
 };
@@ -258,7 +270,9 @@ export const getServiceAgentInstances = async (id) => {
 export const onStep3Deploy = async (account, id, radioValue, payload = '0x') => {
   const contract = getServiceManagerContract();
 
-  const fn = contract.methods.deploy(id, radioValue, payload).send({ from: account });
+  const deployFn = contract.methods.deploy(id, radioValue, payload);
+  const estimatedGas = await getEstimatedGasLimit(deployFn, account);
+  const fn = deployFn.send({ from: account, gasLimit: estimatedGas });
   const response = await sendTransaction(fn, account, { isLegacy: true });
   return response;
 };
@@ -283,7 +297,9 @@ export const getAgentInstanceAndOperator = async (id) => {
 /* ----- step 5 functions ----- */
 export const onStep5Unbond = async (account, id) => {
   const contract = getServiceManagerContract();
-  const fn = contract.methods.unbond(id).send({ from: account });
+  const unbondFn = contract.methods.unbond(id);
+  const estimatedGas = await getEstimatedGasLimit(unbondFn, account);
+  const fn = unbondFn.send({ from: account, gasLimit: estimatedGas });
   const response = await sendTransaction(fn, account);
   return response;
 };
