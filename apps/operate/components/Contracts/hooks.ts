@@ -17,11 +17,7 @@ type StakingContractDetailsInfo = {
   minOperatingBalanceHint?: string;
 };
 
-const BLACKLISTED_ADDRESSES = [
-  RETAINER_ADDRESS,
-  '0xaD9d891134443B443D7F30013c7e14Fe27F2E029',
-  '0xE56dF1E563De1B10715cB313D514af350D207212',
-];
+const BLACKLISTED_ADDRESSES = [RETAINER_ADDRESS];
 
 const STAKING_CONTRACT_DETAILS: Record<Address, StakingContractDetailsInfo> = {
   '0x000000000000000000000000ef44fb0842ddef59d37f85d61a1ef492bba6135d': {
