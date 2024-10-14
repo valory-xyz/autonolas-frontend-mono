@@ -72,7 +72,7 @@ export const ProposalDetails = ({
           )}
         </Flex>
       </Flex>
-      <Flex vertical gap={8}>
+      <Flex vertical gap={8} className="mb-16">
         <Caption>Voters ({item.voteCasts?.length})</Caption>
         {item.voteCasts.map((vote, index) => (
           <Row key={vote.id} gutter={[0, 8]}>
@@ -85,6 +85,8 @@ export const ProposalDetails = ({
           </Row>
         ))}
       </Flex>
+      <Caption>Proposal ID</Caption>
+      <Paragraph className="mb-16">{item.id}</Paragraph>
     </Flex>
   );
 };
