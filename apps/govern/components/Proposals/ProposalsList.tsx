@@ -28,16 +28,12 @@ import { COLOR } from 'libs/ui-theme/src';
 const { Text } = Typography;
 
 const Status = ({ item, block }: { item: Proposal; block: bigint | undefined }) => {
-  if (item.isExecuted) return <Tag color="green"> Executed</Tag>;
-  if (item.isCancelled) return <Tag color="volcano"> Cancelled</Tag>;
-  if (item.isQueued) return <Tag color="gold"> Queued</Tag>;
-
-  // check if the current block is between proposal's start and end blocks
-  if (isOngoing(item, block)) {
-    return <Tag color="blue">Ongoing</Tag>;
-  }
-
-  return <Tag>Created</Tag>;
+  if (item.isExecuted) return <Tag color="green">Executed</Tag>;
+  if (item.isCancelled) return <Tag color="volcano">Cancelled</Tag>;
+  if (item.isQueued) return <Tag color="gold">Queued</Tag>;
+  if (isOngoing(item, block)) return <Tag color="blue">Ongoing</Tag>;
+  if (hasNotStarted(item, block)) return <Tag>Created</Tag>;
+  return <Tag>Waiting to queue</Tag>;
 };
 
 const getColumns = (
