@@ -240,10 +240,22 @@ const sortProducts = (list) =>
     // - the API returns zero (shouldn't happen) OR
     // - has error OR
     // - not fetched yet
-    if (isCurrentPriceLpZero(a.fullCurrentPriceLp)) return 1;
+    const isAZeroPrice = isCurrentPriceLpZero(a.fullCurrentPriceLp);
+    const isBZeroPrice = isCurrentPriceLpZero(b.fullCurrentPriceLp);
 
-    if (isNaN(a.projectedChange)) return 1;
-    if (isNaN(b.projectedChange)) return -1;
+    if (isAZeroPrice && !isBZeroPrice) return 1;
+    if (!isAZeroPrice && isBZeroPrice) return -1;
+    if (isAZeroPrice && isBZeroPrice) return 0;
+
+    // Sort by projectedChange for products with valid prices
+    const isAProjectedChangeNaN = isNaN(a.projectedChange);
+    const isBProjectedChangeNaN = isNaN(b.projectedChange);
+
+    if (isAProjectedChangeNaN && !isBProjectedChangeNaN) return 1;
+    if (!isAProjectedChangeNaN && isBProjectedChangeNaN) return -1;
+    if (isAProjectedChangeNaN && isBProjectedChangeNaN) return 0;
+
+    // Sort by projectedChange descending
     return b.projectedChange - a.projectedChange;
   });
 

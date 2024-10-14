@@ -18,9 +18,6 @@ export const BALANCER_GRAPH_CLIENTS = {
   [optimism.id]: new GraphQLClient(process.env.NEXT_PUBLIC_OPTIMISM_BALANCER_URL, requestConfig),
   [gnosis.id]: new GraphQLClient(process.env.NEXT_PUBLIC_GNOSIS_BALANCER_URL, requestConfig),
   [polygon.id]: new GraphQLClient(process.env.NEXT_PUBLIC_POLYGON_BALANCER_URL, requestConfig),
-  [base.id]: new GraphQLClient(
-    'https://api.studio.thegraph.com/query/24660/balancer-base-v2/version/latest',
-    requestConfig,
-  ),
+  [base.id]: new GraphQLClient(process.env.NEXT_PUBLIC_BASE_BALANCER_URL, requestConfig),
   [arbitrum.id]: new GraphQLClient(process.env.NEXT_PUBLIC_ARBITRUM_BALANCER_URL, requestConfig),
 };

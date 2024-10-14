@@ -68,13 +68,13 @@ const ALLOWED_ORIGINS = [
   'https://virtual.gnosis.rpc.tenderly.co/',
   'https://virtual.polygon.rpc.tenderly.co/',
   'https://rpc.tenderly.co/fork/',
-
   // others
   'https://api.thegraph.com/',
   'https://api.studio.thegraph.com/',
   'https://sockjs-us3.pusher.com/',
   'https://programs.shyft.to/',
   'https://*.network.thegraph.com/',
+  'https://gateway.thegraph.com/',
   'https://subgraph.satsuma-prod.com/',
 
   ...VERCEL_LINKS,
