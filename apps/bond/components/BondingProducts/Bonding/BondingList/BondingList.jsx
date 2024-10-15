@@ -69,8 +69,10 @@ const getColumns = (onClick, isActive, acc, depositoryAddress, hideEmptyProducts
       dataIndex: 'guide',
       key: 'guide',
       width: 100,
-      render: (x) => {
-        return <Link href={`/paths/olas-eth-via-uniswap-on-ethereum`}>Guide ↗</Link>;
+      render: (x, data) => {
+        return (
+          <Link href={`/paths/${data.guide || 'olas-eth-via-uniswap-on-ethereum'}`}>Guide</Link>
+        );
       },
     },
     {
