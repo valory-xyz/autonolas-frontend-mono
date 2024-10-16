@@ -20,6 +20,7 @@ const StyledHeader = styled(Header)`
 const items = [
   { key: 'paths', label: 'Paths' },
   { key: 'dev-incentives', label: 'Dev Rewards' },
+  { key: 'opportunities', label: 'Opportunities' },
 ];
 
 const NavigationBar = ({ children }) => {
