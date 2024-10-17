@@ -92,8 +92,8 @@ export const Opportunities = () => {
         Opportunities
       </Typography.Title>
       <p>
-        Projects are interested in bringing Olas agents to their ecosystem.
-        This is a list of &quot;requests for agents&quot;.
+        Projects are interested in bringing Olas agents to their ecosystem. This
+        is a list of &quot;requests for agents&quot;.
       </p>
 
       <div>
