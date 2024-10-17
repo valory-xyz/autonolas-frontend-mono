@@ -1,6 +1,8 @@
 import Image from 'next/image';
 import PropTypes from 'prop-types';
-import { Button, Card, Col, Row, Typography } from 'antd';
+import {
+  Button, Card, Col, Flex, Row, Typography,
+} from 'antd';
 import styled from 'styled-components';
 import opportunities from './opportunities.json';
 
@@ -25,8 +27,8 @@ const OpportunityCard = ({
   background,
 }) => (
   <StyledCard>
-    <Row style={{ columnGap: '12px', width: '100%', minHeight: '100%' }}>
-      <Col xs={24} md={14}>
+    <Row gutter={16} style={{ width: '100%' }}>
+      <Col xs={24} md={16}>
         <h2>{agentName}</h2>
         <p style={{ whiteSpace: 'pre-line' }}>{agentDescription}</p>
       </Col>
@@ -35,7 +37,7 @@ const OpportunityCard = ({
         md={8}
         style={{ fontSize: '0.875rem', lineHeight: '1.25rem' }}
       >
-        <div style={{ display: 'flex', flexDirection: 'row', gap: '16px' }}>
+        <Flex style={{ gap: '16px' }}>
           <Image
             alt={project}
             src={image}
@@ -43,18 +45,17 @@ const OpportunityCard = ({
             height="100"
             style={{ objectFit: 'contain' }}
           />
-          <div
+          <Flex
+            justify="center"
+            vertical="false"
             style={{
-              display: 'flex',
-              flexDirection: 'column',
               letterSpacing: '0.05em',
-              justifyContent: 'center',
             }}
           >
             <span style={{ fontWeight: 500 }}>PROJECT</span>
             <span style={{ fontWeight: 700 }}>{project}</span>
-          </div>
-        </div>
+          </Flex>
+        </Flex>
         <p>{background}</p>
         <Button type="primary" className="mb-8" asChild isExternal>
           <a
@@ -85,25 +86,23 @@ const sortedOpportunities = opportunities.sort((a, b) => {
   return new Date(b.date) - new Date(a.date);
 });
 
-export const Opportunities = () => {
-  return (
-    <div id="opportunities">
-      <Typography.Title className="mt-0" level={2}>
-        Opportunities
-      </Typography.Title>
-      <p>
-        Projects are interested in bringing Olas agents to their ecosystem. This
-        is a list of &quot;requests for agents&quot;.
-      </p>
+export const Opportunities = () => (
+  <div id="opportunities">
+    <Typography.Title className="mt-0" level={2}>
+      Opportunities
+    </Typography.Title>
+    <p>
+      Projects are interested in bringing Olas agents to their ecosystem. This
+      is a list of &quot;requests for agents&quot;.
+    </p>
 
-      <div>
-        {sortedOpportunities.map((item) => (
-          <OpportunityCard
-            key={`${item.project} ${item.agentName}`}
-            {...item}
-          />
-        ))}
-      </div>
+    <div>
+      {sortedOpportunities.map((item) => (
+        <OpportunityCard
+          key={`${item.project} ${item.agentName}`}
+          {...item}
+        />
+      ))}
     </div>
-  );
-};
+  </div>
+);
