@@ -37,7 +37,7 @@ const OpportunityCard = ({
         md={8}
         style={{ fontSize: '0.875rem', lineHeight: '1.25rem' }}
       >
-        <Flex style={{ gap: '16px' }}>
+        <Flex gap={16}>
           <Image
             alt={project}
             src={image}
