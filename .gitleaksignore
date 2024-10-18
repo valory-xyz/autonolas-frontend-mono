@@ -158,3 +158,4 @@ c286a015e94a4abfa474749e6d0d38d944b25e8b:apps/govern/common-util/Contracts/addre
 6cf8d7df061c4bdb1e3ccbb8dbf3585b715ad874:apps/bond/components/BondingProducts/Bonding/TokenManagement/hooks/useWsolDeposit.jsx:generic-api-key:53
 dcc2ad3b708d9ac49cf82b6e0401fdf78531fa05:apps/bond/components/BondingProducts/Bonding/TokenManagement/hooks/useWsolDeposit.jsx:generic-api-key:53
 bc71dcb01b1c2619cc3805ad410fabc6f97b6e6d:apps/bond/components/Paths/data.json:generic-api-key:208
+613a7a61c1721d690c3ab3055e8fe97471c91a58:apps/bond/components/Paths/data.json:generic-api-key:168
