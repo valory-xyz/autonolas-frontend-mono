@@ -165,7 +165,7 @@
     "explorerBaseUrl": "https://solscan.io/account/",
     "exchange": {
       "name": "Orca",
-      "url": "https://www.orca.so/liquidity?address=5dMKUYJDsjZkAD3wiV3ViQkuq9pSmWQ5eAzcQLtDnUT3",
+      "url": "https://www.orca.so/?tokenIn=So11111111111111111111111111111111111111112&tokenOut=Ez3nzG9ofodYCvEmw73XhQ87LWNYVRM2s7diB5tBZPyM",
       "poolAddress": "5dMKUYJDsjZkAD3wiV3ViQkuq9pSmWQ5eAzcQLtDnUT3",
       "lpTokenExplorer": "https://solscan.io/account/",
       "lpTokenAddress": "CeZ77ti3nPAmcgRkBkUC1JcoAhR8jRti2DHaCcuyUnzR"

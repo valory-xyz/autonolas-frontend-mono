@@ -18,7 +18,7 @@ const NextStyledLink = styled(Link)`
 const SvmDeposit = () => (
   <>
     Deposit SOL or WSOL and OLAS tokens using the Lockbox via{' '}
-    <NextStyledLink href="/manage-solana-products">manage Solana products</NextStyledLink> to get
+    <NextStyledLink href="/manage-solana-liquidity">manage Solana products</NextStyledLink> to get
     fungible tokens representing{' '}
     <StyledLink
       href="https://www.orca.so/liquidity?address=5dMKUYJDsjZkAD3wiV3ViQkuq9pSmWQ5eAzcQLtDnUT3"
@@ -97,8 +97,13 @@ const PathContent = ({ path: { bond, network, exchange, bridge }, networkId, isE
       .
     </>,
     <>
-      <NextStyledLink href="/bonding-products">Bond LP tokens</NextStyledLink>
-      .
+      <NextStyledLink href="/bonding-products">Bond LP tokens:</NextStyledLink> this means your LP
+      tokens now belong to the Olas protocol and you will be able to withdraw the amount of OLAS
+      quoted by the bonding product at the end of the vesting time.
+    </>,
+    <>
+      Check <NextStyledLink href="/my-bonds">My Bonds</NextStyledLink> to see when your bonds have
+      vested. Once vested, withdraw your OLAS.
     </>,
   ];
 
