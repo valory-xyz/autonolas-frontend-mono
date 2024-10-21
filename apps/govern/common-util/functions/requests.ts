@@ -12,7 +12,6 @@ import {
 import { getEstimatedGasLimit, sendTransaction } from 'libs/util-functions/src';
 
 import { SUPPORTED_CHAINS, wagmiConfig } from 'common-util/config/wagmi';
-import { RPC_URLS } from 'common-util/constants/rpcs';
 
 import { getAddressFromBytes32 } from './addresses';
 import { getUnixNextWeekStartTimestamp } from './time';
@@ -24,6 +23,7 @@ import {
   getVeOlasContract,
   getVoteWeightingContract,
 } from './web3';
+import { RPC_URLS } from 'libs/util-constants/src';
 
 type VoteForNomineeWeightsParams = {
   account: Address | undefined;

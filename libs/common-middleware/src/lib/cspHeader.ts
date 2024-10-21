@@ -62,11 +62,13 @@ const ALLOWED_ORIGINS = [
   'https://alfajores-forno.celo-testnet.org',
   'https://api.web3modal.com/',
   'https://rpc.ankr.com/',
+  'https://mainnet.mode.network/',
 
   // tenderly
   'https://virtual.mainnet.rpc.tenderly.co/',
   'https://virtual.gnosis.rpc.tenderly.co/',
   'https://virtual.polygon.rpc.tenderly.co/',
+  'https://virtual.mode.rpc.tenderly.co/',
   'https://rpc.tenderly.co/fork/',
   // others
   'https://api.thegraph.com/',

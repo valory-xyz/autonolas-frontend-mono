@@ -1,5 +1,5 @@
 import { Address } from 'viem';
-import { arbitrum, base, celo, gnosis, mainnet, optimism, polygon } from 'viem/chains';
+import { arbitrum, base, celo, gnosis, mainnet, optimism, polygon, mode } from 'viem/chains';
 
 export const CONTRACT_TEMPLATES = [
   {
@@ -37,7 +37,8 @@ export type ChainId =
   | typeof polygon.id
   | typeof base.id
   | typeof arbitrum.id
-  | typeof celo.id;
+  | typeof celo.id
+  | typeof mode.id;
 
 type Addresses = {
   [key in ChainId]: Address;
@@ -51,6 +52,7 @@ export const IMPLEMENTATION_ADDRESSES: Addresses = {
   [base.id]: '0xEB5638eefE289691EcE01943f768EDBF96258a80',
   [arbitrum.id]: '0x04b0007b2aFb398015B76e5f22993a1fddF83644',
   [celo.id]: '0xe1E1B286EbE95b39F785d8069f2248ae9C41b7a9',
+  [mode.id]: '0xE49CB081e8d96920C38aA7AB90cb0294ab4Bc8EA',
 };
 
 export const SERVICE_REGISTRY_ADDRESSES: Addresses = {
@@ -61,6 +63,7 @@ export const SERVICE_REGISTRY_ADDRESSES: Addresses = {
   [base.id]: '0x3C1fF68f5aa342D296d4DEe4Bb1cACCA912D95fE',
   [arbitrum.id]: '0xE3607b00E75f6405248323A9417ff6b39B244b50',
   [celo.id]: '0xE3607b00E75f6405248323A9417ff6b39B244b50',
+  [mode.id]: '0x3C1fF68f5aa342D296d4DEe4Bb1cACCA912D95fE',
 };
 
 export const SERVICE_REGISTRY_TOKEN_UTILITY_ADDRESSES: Addresses = {
@@ -71,6 +74,7 @@ export const SERVICE_REGISTRY_TOKEN_UTILITY_ADDRESSES: Addresses = {
   [base.id]: '0x34C895f302D0b5cf52ec0Edd3945321EB0f83dd5',
   [arbitrum.id]: '0x3d77596beb0f130a4415df3D2D8232B3d3D31e44',
   [celo.id]: '0x3d77596beb0f130a4415df3D2D8232B3d3D31e44',
+  [mode.id]: '0x34C895f302D0b5cf52ec0Edd3945321EB0f83dd5',
 };
 
 export const STAKING_TOKEN_ADDRESSES: Addresses = {
@@ -81,6 +85,7 @@ export const STAKING_TOKEN_ADDRESSES: Addresses = {
   [base.id]: '0x54330d28ca3357F294334BDC454a032e7f353416',
   [arbitrum.id]: '0x3d77596beb0f130a4415df3D2D8232B3d3D31e44',
   [celo.id]: '0xaCFfAe8e57Ec6E394Eb1b41939A8CF7892DbDc51',
+  [mode.id]: '0xcfD1D50ce23C46D3Cf6407487B2F8934e96DC8f9',
 };
 
 export const isSupportedChainId = (chainId: number): chainId is ChainId => {
@@ -99,4 +104,5 @@ export const blockNumbers: BlockNumbers = {
   [base.id]: 17310019,
   [arbitrum.id]: 233883523,
   [celo.id]: 26748574,
+  [mode.id]: 14444647,
 };
