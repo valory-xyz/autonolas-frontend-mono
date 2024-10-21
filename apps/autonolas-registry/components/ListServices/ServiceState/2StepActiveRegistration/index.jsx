@@ -1,5 +1,4 @@
 import { Divider, Typography } from 'antd';
-import { ethers } from 'ethers';
 import { isArray } from 'lodash';
 import PropTypes from 'prop-types';
 import { useEffect, useState } from 'react';
@@ -114,6 +113,13 @@ export const ActiveRegistration = ({
     getSvmBonds,
   ]);
 
+  let totalTokenBonds = 0;
+  isArray(ethTokenBonds) &&
+    ethTokenBonds.forEach((bond, index) => {
+      const addressCount = getNumberOfAgentAddress(dataSource[index].agentAddresses);
+      totalTokenBonds += addressCount * bond;
+    });
+
   const handleStep2RegisterAgents = async () => {
     const { ids, agentInstances } = getIdsAndAgentInstances(dataSource);
 
@@ -127,7 +133,7 @@ export const ActiveRegistration = ({
           account,
           chainId,
           serviceId,
-          amountToApprove: ethers.parseUnits(`${totalBonds}`, 'ether'),
+          amountToApprove: `${totalTokenBonds}`,
         });
       }
 
@@ -159,13 +165,6 @@ export const ActiveRegistration = ({
 
   const btnProps = getOtherBtnProps(STEP);
   const totalBondEthToken = totalBonds ? convertToEth(totalBonds.toString()) : '--';
-
-  let totalTokenBonds = 0;
-  isArray(ethTokenBonds) &&
-    ethTokenBonds.forEach((bond, index) => {
-      const addressCount = getNumberOfAgentAddress(dataSource[index].agentAddresses);
-      totalTokenBonds += addressCount * bond;
-    });
   const totalTokenBondsEth = totalTokenBonds ? convertToEth(totalTokenBonds.toString()) : '--';
 
   return (
