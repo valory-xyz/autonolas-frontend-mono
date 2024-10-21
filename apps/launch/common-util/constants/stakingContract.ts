@@ -93,7 +93,7 @@ type BlockNumbers = {
 
 export const blockNumbers: BlockNumbers = {
   [mainnet.id]: 20342524,
-  [optimism.id]: 122903952,
+  [optimism.id]: 124618632,
   [gnosis.id]: 35047282,
   [polygon.id]: 59560456,
   [base.id]: 17310019,
