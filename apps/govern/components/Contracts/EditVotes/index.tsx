@@ -74,7 +74,7 @@ const getColumns = (
           value={allocations[index].weight}
           status={isError ? 'error' : undefined}
           onChange={(value) => {
-            if (value) {
+            if (typeof value === 'number') {
               setAllocation(value, index);
             }
           }}

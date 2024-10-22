@@ -1,3 +1,8 @@
-import { virtualGnosis, virtualMainnet, virtualPolygon } from 'libs/util-constants/src';
+import {
+  virtualGnosis,
+  virtualMainnet,
+  virtualPolygon,
+  virtualMode,
+} from 'libs/util-constants/src';
 
-export { virtualGnosis, virtualMainnet, virtualPolygon };
+export { virtualGnosis, virtualMainnet, virtualPolygon, virtualMode };
