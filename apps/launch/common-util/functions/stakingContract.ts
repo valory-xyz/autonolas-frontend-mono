@@ -10,7 +10,7 @@ import {
   ChainId,
   SERVICE_REGISTRY_ADDRESSES,
   SERVICE_REGISTRY_TOKEN_UTILITY_ADDRESSES,
-  STAKING_TOKEN_ADDRESSES,
+  OLAS_ADDRESSES,
 } from 'common-util/constants/stakingContract';
 
 type StakingContractValues = {
@@ -65,7 +65,7 @@ export const getStakingContractInitPayload = ({
 
   const contractInterface = new ethers.Interface(STAKING_TOKEN.abi);
   const serviceRegistryTokenUtilityAddress = SERVICE_REGISTRY_TOKEN_UTILITY_ADDRESSES[chainId];
-  const tokenAddress = STAKING_TOKEN_ADDRESSES[chainId];
+  const tokenAddress = OLAS_ADDRESSES[chainId];
 
   const encodedPayload = contractInterface.encodeFunctionData('initialize', [
     stakingParams,

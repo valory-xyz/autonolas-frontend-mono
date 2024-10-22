@@ -44,7 +44,7 @@ type Addresses = {
   [key in ChainId]: Address;
 };
 
-export const IMPLEMENTATION_ADDRESSES: Addresses = {
+export const STAKING_TOKEN_ADDRESSES: Addresses = {
   [mainnet.id]: '0x0Dc23eEf3bC64CF3cbd8f9329B57AE4C4f28d5d2',
   [optimism.id]: '0x63C2c53c09dE534Dd3bc0b7771bf976070936bAC',
   [gnosis.id]: '0xEa00be6690a871827fAfD705440D20dd75e67AB1',
@@ -77,7 +77,7 @@ export const SERVICE_REGISTRY_TOKEN_UTILITY_ADDRESSES: Addresses = {
   [mode.id]: '0x34C895f302D0b5cf52ec0Edd3945321EB0f83dd5',
 };
 
-export const STAKING_TOKEN_ADDRESSES: Addresses = {
+export const OLAS_ADDRESSES: Addresses = {
   [mainnet.id]: '0x0001A500A6B18995B03f44bb040A5fFc28E45CB0',
   [optimism.id]: '0xFC2E6e6BCbd49ccf3A5f029c79984372DcBFE527',
   [gnosis.id]: '0xcE11e14225575945b8E6Dc0D4F2dD4C570f79d9f',
@@ -89,7 +89,7 @@ export const STAKING_TOKEN_ADDRESSES: Addresses = {
 };
 
 export const isSupportedChainId = (chainId: number): chainId is ChainId => {
-  return chainId in IMPLEMENTATION_ADDRESSES;
+  return chainId in STAKING_TOKEN_ADDRESSES;
 };
 
 type BlockNumbers = {

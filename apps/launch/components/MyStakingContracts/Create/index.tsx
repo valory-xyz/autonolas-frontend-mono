@@ -25,7 +25,7 @@ import { ErrorAlert } from 'common-util/ErrorAlert';
 import {
   CONTRACT_DEFAULT_VALUES,
   CONTRACT_TEMPLATES,
-  IMPLEMENTATION_ADDRESSES,
+  STAKING_TOKEN_ADDRESSES,
   isSupportedChainId,
 } from 'common-util/constants/stakingContract';
 import { URL } from 'common-util/constants/urls';
@@ -147,7 +147,7 @@ export const CreateStakingContract = () => {
     try {
       const metadataHash = await getIpfsHash({ name: contractName, description });
 
-      const implementation = IMPLEMENTATION_ADDRESSES[chain.id];
+      const implementation = STAKING_TOKEN_ADDRESSES[chain.id];
       const initPayload = getStakingContractInitPayload({
         metadataHash,
         maxNumServices,
