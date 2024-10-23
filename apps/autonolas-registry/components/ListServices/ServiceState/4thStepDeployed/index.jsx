@@ -1,13 +1,12 @@
-import { Space, Table } from 'antd';
+import { Space, Table, Flex } from 'antd';
 import PropTypes from 'prop-types';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
-import { AddressLink } from '@autonolas/frontend-library';
+import { AddressLink } from 'libs/ui-components/src';
 
 import { SendTransactionButton } from 'common-util/TransactionHelpers/SendTransactionButton';
 import { useHelpers } from 'common-util/hooks/useHelpers';
-import { useScreen } from 'common-util/hooks/useScreen';
 
 import { setAgentInstancesAndOperators } from '../../../../store/service';
 import { useAgentInstanceAndOperator } from '../../hooks/useSvmService';
@@ -24,8 +23,7 @@ export const Deployed = ({
   handleTerminate,
 }) => {
   const dispatch = useDispatch();
-  const { account, chainId, isSvm, chainName } = useHelpers();
-  const { isMobile } = useScreen();
+  const { account, chainId, isSvm } = useHelpers();
   const data = useSelector((state) => state?.service?.agentInstancesAndOperators);
   const [isTerminating, setIsTerminating] = useState(false);
   const { getSvmAgentInstanceAndOperator } = useAgentInstanceAndOperator();
@@ -60,15 +58,6 @@ export const Deployed = ({
     }
   };
 
-  const addressLinkProps = useMemo(
-    () => ({
-      chainId,
-      chainName,
-      suffixCount: isMobile ? 4 : 6,
-    }),
-    [chainName, isMobile, chainId],
-  );
-
   return (
     <div className="step-4-deployed" data-testid="step-deployed">
       <Space direction="vertical" size={10} className="full-width">
@@ -83,23 +72,23 @@ export const Deployed = ({
                 title: 'Agent Instances',
                 dataIndex: 'agentInstance',
                 key: 'agentInstance',
-                render: (text) => <AddressLink text={text} {...addressLinkProps} />,
+                render: (text) => <AddressLink address={text} chainId={chainId} />,
                 width: '50%',
               },
               {
                 title: 'Operators',
                 dataIndex: 'operatorAddress',
                 key: 'operatorAddress',
-                render: (text) => <AddressLink text={text} {...addressLinkProps} />,
+                render: (text) => <AddressLink address={text} chainId={chainId} />,
                 width: '50%',
               },
             ]}
           />
         )}
-        <div>
+        <Flex gap={8}>
           {`${isSvm ? 'Squads' : 'Safe'} contract address:`}
-          <AddressLink text={multisig} {...addressLinkProps} />
-        </div>
+          <AddressLink address={multisig} chainId={chainId} />
+        </Flex>
         {getButton(
           <SendTransactionButton
             onClick={onTerminate}

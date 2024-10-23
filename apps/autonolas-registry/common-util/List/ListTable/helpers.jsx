@@ -1,6 +1,7 @@
 import { Button, Space } from 'antd';
 
 import { AddressLink, NA, areAddressesEqual } from '@autonolas/frontend-library';
+import { AddressLink as AddressLinkSimple } from 'libs/ui-components/src';
 
 import {
   HASH_PREFIX,
@@ -145,9 +146,9 @@ export const getTableColumns = (
       dataIndex: 'owner',
       key: 'owner',
       width: 200,
-      render: (text) => {
+      render: (text, record) => {
         if (!text || text === NA) return NA;
-        return <AddressLink {...addressLinkProps} text={text} chainName={chainName} />;
+        return <AddressLinkSimple address={record.owner} chainId={chainId} />;
       },
     };
 
