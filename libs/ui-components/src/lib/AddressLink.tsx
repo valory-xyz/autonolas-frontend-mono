@@ -1,4 +1,5 @@
 import { EXPLORER_URLS, UNICODE_SYMBOLS } from 'libs/util-constants/src';
+// eslint-disable-next-line @nx/enforce-module-boundaries
 import { truncateAddress } from 'libs/util-functions/src';
 
 export const AddressLink = ({
@@ -15,6 +16,7 @@ export const AddressLink = ({
     target="_blank"
     rel="noreferrer"
     className={className}
+    title={address}
   >
     {`${truncateAddress(address)} ${UNICODE_SYMBOLS.EXTERNAL_LINK}`}
   </a>

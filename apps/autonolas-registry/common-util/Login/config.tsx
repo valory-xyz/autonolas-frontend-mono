@@ -17,6 +17,7 @@ import {
   optimismSepolia,
   polygon,
   polygonMumbai,
+  mode,
 } from 'wagmi/chains';
 
 import { RPC_URLS } from 'common-util/Contracts';
@@ -37,6 +38,7 @@ export const SUPPORTED_CHAINS: Chain[] = [
   optimismSepolia,
   celo,
   celoAlfajores,
+  mode,
 ].map((chain) => {
   const defaultRpc = RPC_URLS[chain.id] || chain.rpcUrls.default.http[0];
   return {
@@ -150,6 +152,7 @@ export const ALL_SUPPORTED_CHAINS = [...EVM_SUPPORTED_CHAINS, ...SVM_SUPPORTED_C
       'Base',
       'Optimism',
       'Celo',
+      'Mode Mainnet',
       'Goerli',
       'Gnosis Chiado',
       'Polygon Mumbai',

@@ -227,7 +227,7 @@ describe('listServices/index.jsx - EVM', () => {
 
       await waitFor(async () => {
         expect(within(allServicesTable).getByText('5001')).toBeInTheDocument();
-        expect(within(allServicesTable).getByText(/0x8626...9C1199/)).toBeInTheDocument();
+        expect(within(allServicesTable).getByText(/0x8626f...C1199 ↗/)).toBeInTheDocument();
         expect(within(allServicesTable).getByText(/Terminated Bonded/)).toBeInTheDocument();
         expect(within(allServicesTable).getByText(/View/)).toBeInTheDocument();
       });
@@ -299,7 +299,7 @@ describe('listServices/index.jsx - SVM', () => {
       expect(getByText('Action')).toBeInTheDocument();
 
       // rows
-      expect(getByText(/DrGvsA...D3Wm5x/)).toBeInTheDocument();
+      expect(getByText(/DrGvsAx...3Wm5x/)).toBeInTheDocument();
       expect(getByText(/Terminated Bonded/)).toBeInTheDocument();
       expect(getByText(/View/)).toBeInTheDocument();
     });

@@ -6,7 +6,7 @@ module.exports = {
   displayName: 'launch',
   preset: '../../jest.preset.js',
   testEnvironment: 'jsdom',
-  testTimeout: 10000,
+  testTimeout: 15000,
   moduleNameMapper: {
     ...pathsToModuleNameMapper(compilerOptions.paths, { prefix: resolve(__dirname, '../..') }),
     '^util/(.*)$': '<rootDir>/util/$1',

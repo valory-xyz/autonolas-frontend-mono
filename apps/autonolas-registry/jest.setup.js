@@ -45,3 +45,16 @@ jest.mock('./common-util/Login/config', () => ({
   EVM_SUPPORTED_CHAINS: [{ id: 1 }],
   SVM_SUPPORTED_CHAINS: [{ id: 1 }],
 }));
+
+const { mainnet, optimism, gnosis, polygon, base, arbitrum, celo, mode } = require('viem/chains');
+
+jest.mock('wagmi/chains', () => ({
+  mainnet,
+  optimism,
+  gnosis,
+  polygon,
+  base,
+  arbitrum,
+  celo,
+  mode,
+}));

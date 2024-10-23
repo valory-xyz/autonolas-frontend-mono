@@ -1,4 +1,20 @@
-import { arbitrum, base, celo, gnosis, mainnet, optimism, polygon } from 'viem/chains';
+import {
+  arbitrum,
+  arbitrumSepolia,
+  base,
+  baseSepolia,
+  celo,
+  celoAlfajores,
+  gnosis,
+  gnosisChiado,
+  goerli,
+  mainnet,
+  mode,
+  optimism,
+  optimismSepolia,
+  polygon,
+  polygonMumbai,
+} from 'viem/chains';
 
 export const EXPLORER_URLS: Record<string, string> = {
   [mainnet.id]: mainnet.blockExplorers.default.url,
@@ -8,4 +24,12 @@ export const EXPLORER_URLS: Record<string, string> = {
   [base.id]: base.blockExplorers.default.url,
   [arbitrum.id]: arbitrum.blockExplorers.default.url,
   [celo.id]: celo.blockExplorers.default.url,
+  [mode.id]: mode.blockExplorers.default.url,
+  [goerli.id]: goerli.blockExplorers.default.url,
+  [gnosisChiado.id]: gnosisChiado.blockExplorers.default.url,
+  [polygonMumbai.id]: polygonMumbai.blockExplorers.default.url,
+  [baseSepolia.id]: baseSepolia.blockExplorers.default.url,
+  [arbitrumSepolia.id]: arbitrumSepolia.blockExplorers.default.url,
+  [optimismSepolia.id]: optimismSepolia.blockExplorers.default.url,
+  [celoAlfajores.id]: celoAlfajores.blockExplorers.default.url,
 };
