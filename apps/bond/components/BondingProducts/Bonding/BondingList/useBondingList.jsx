@@ -208,7 +208,13 @@ const getCurrentPriceUniswapFn = memoize(async (tokenAddress) => {
     throw new Error(`Chain id not found for provided token address: ${tokenAddress}`);
   }
 
-  const contract = getUniswapV2PairContractByChain(tokenAddress, chainId);
+  const tokenOriginAddress = LP_PAIRS[tokenAddress].originAddress;
+
+  if (!tokenOriginAddress) {
+    throw new Error(`Origin address not found for provided token address: ${tokenAddress}`);
+  }
+
+  const contract = getUniswapV2PairContractByChain(tokenOriginAddress, chainId);
 
   const [totalSupply, reserves, token0] = await Promise.all([
     contract.read.totalSupply(),
