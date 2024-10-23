@@ -38,7 +38,7 @@ const SnapshotCard = () => (
         size="large"
         type="primary"
         ghost
-        href="https://snapshot.org/#/autonolas.eth"
+        href="https://snapshot.box/#/s:autonolas.eth"
         target="_blank"
       >
         {`Vote on Snapshot ${UNICODE_SYMBOLS.EXTERNAL_LINK}`}
