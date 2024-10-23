@@ -226,7 +226,7 @@ const getCurrentPriceUniswapFn = memoize(async (tokenAddress) => {
 
   const olasTokenAddress = ADDRESSES[chainId].olasAddress;
   const reservesOlas = areAddressesEqual(token0, olasTokenAddress) ? reserve0 : reserve1;
-  const priceLp = ethers.parseUnits(`${reservesOlas / totalSupply}`, 'ether');
+  const priceLp = (reservesOlas * BigInt(10 ** 18)) / totalSupply;
   return priceLp;
 });
 
