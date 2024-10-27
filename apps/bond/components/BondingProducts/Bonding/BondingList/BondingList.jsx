@@ -76,9 +76,21 @@ const getColumns = (onClick, isActive, acc, depositoryAddress, hideEmptyProducts
       },
     },
     {
-      title: getTitle('LP Token', 'LP token address enabled by the Treasury'),
+      title: getTitle('Liquidity Pool', 'Liquidity Pool on target network'),
+      dataIndex: 'lpName',
+      key: 'lpName', 
+      render: (x, data) => {
+        return (
+          <a href={data.lpLink} target="_blank" rel="noreferrer">
+            {x}
+          </a>
+        );
+      },
+    },
+    {
+      title: getTitle('LP Token on Ethereum', 'LP token address enabled by the Treasury on Ethereum'),
       dataIndex: 'lpTokenName',
-      key: 'lpTokenName',
+      key: 'lpTokenName', 
       render: (x, data) => {
         return (
           <a href={data.lpTokenLink} target="_blank" rel="noreferrer">
