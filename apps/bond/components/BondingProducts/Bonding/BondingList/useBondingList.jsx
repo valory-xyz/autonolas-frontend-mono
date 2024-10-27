@@ -32,7 +32,7 @@ import {
   getCloseProductEvents,
   getCreateProductEvents,
   getCurrentPriceLpLink,
-  getLpTokenLink,
+  getLpLink,
   getLpTokenWithDiscount,
   getProductValueFromEvent,
 } from './utils';
