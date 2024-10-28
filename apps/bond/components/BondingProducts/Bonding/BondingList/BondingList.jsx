@@ -13,6 +13,7 @@ import styled from 'styled-components';
 import { NA, VM_TYPE, getNetworkName } from '@autonolas/frontend-library';
 
 import { COLOR } from 'libs/ui-theme/src';
+import { truncateAddress } from 'libs/util-functions/src';
 
 import { BONDING_PRODUCTS } from 'common-util/enums';
 import { parseToEth } from 'common-util/functions/ethers';
@@ -77,20 +78,24 @@ const getColumns = (onClick, isActive, acc, depositoryAddress, hideEmptyProducts
     },
     {
       title: getTitle('Liquidity Pool', 'Liquidity Pool on target network'),
-      dataIndex: 'lpName',
-      key: 'lpName', 
+      dataIndex: 'lpLink',
+      key: 'lpLink',
       render: (x, data) => {
         return (
-          <a href={data.lpLink} target="_blank" rel="noreferrer">
-            {x}
+          <a href={x} target="_blank" rel="noreferrer">
+            {truncateAddress(data.token)}
           </a>
         );
       },
     },
     {
-      title: getTitle('LP Token on Ethereum', 'LP token address enabled by the Treasury on Ethereum'),
+      title: getTitle(
+        'LP Token on Ethereum',
+        'LP token address enabled by the Treasury on Ethereum',
+      ),
       dataIndex: 'lpTokenName',
-      key: 'lpTokenName', 
+      key: 'lpTokenName',
+      width: 140,
       render: (x, data) => {
         return (
           <a href={data.lpTokenLink} target="_blank" rel="noreferrer">
