@@ -84,7 +84,7 @@ const getColumns = (onClick, isActive, acc, depositoryAddress, hideEmptyProducts
       render: (x, data) => {
         return (
           <a href={x} target="_blank" rel="noreferrer">
-            {`${capitalize(data.dex)} on ${capitalize(getChainName(data.lpChainId))}`}
+            {`${capitalize(data.dexDisplayName)} on ${capitalize(getChainName(data.lpChainId))}`}
           </a>
         );
       },
