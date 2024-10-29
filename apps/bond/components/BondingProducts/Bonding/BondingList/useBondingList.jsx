@@ -95,7 +95,7 @@ const LP_PAIRS = {
     lpChainId: celo.id,
     name: 'CELO-OLAS',
     originAddress: '0x2976Fa805141b467BCBc6334a69AffF4D914d96A',
-    dex: DEX.UBERSWAP.name,
+    dex: DEX.UBESWAP.name,
     poolId: '0x2976fa805141b467bcbc6334a69afff4d914d96a',
     guide: 'celo-olas-via-ubeswap-on-celo',
   },
@@ -266,7 +266,7 @@ const useAddCurrentLpPriceToProducts = () => {
             };
           } else {
             let currentLpPrice = null;
-            if (dex === DEX.UNISWAP.name || dex === DEX.UBERSWAP.name) {
+            if (dex === DEX.UNISWAP.name || dex === DEX.UBESWAP.name) {
               currentLpPrice = getCurrentPriceUniswap(productList[i].token);
               otherRequests[i] = currentLpPrice;
             } else if (dex === DEX.BALANCER.name) {

@@ -60,7 +60,7 @@ export const getSvmCalculatedPriceLp = (reserveOlas, totalSupply) => {
  * Function to get the link to the LP token
  */
 export const getLpLink = ({ lpDex, lpChainId, lpPoolId, lpAddress }) => {
-  if (lpDex === DEX.UBERSWAP.name) {
+  if (lpDex === DEX.UBESWAP.name) {
     if (lpChainId === celo.id) {
       return `https://info-v2.ubeswap.org/pair/${lpPoolId}`;
     }
@@ -105,7 +105,7 @@ export const getLpLink = ({ lpDex, lpChainId, lpPoolId, lpAddress }) => {
  * Function to get the exchange link for the LP token
  */
 export const getCurrentPriceLpLink = ({ lpDex, lpChainId, lpAddress }) => {
-  if (lpDex === DEX.UBERSWAP.name) {
+  if (lpDex === DEX.UBESWAP.name) {
     if (lpChainId === celo.id) {
       return `https://celoscan.io/address/${lpAddress}#readContract#F8`;
     }

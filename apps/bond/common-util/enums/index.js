@@ -10,7 +10,7 @@ export const BONDING_PRODUCTS = {
 
 export const DEX = {
   UNISWAP: { name: 'uniswap', displayName: 'Uniswap' },
-  UBERSWAP: { name: 'ubeswap', displayName: 'Ubeswap' },
+  UBESWAP: { name: 'ubeswap', displayName: 'Ubeswap' },
   BALANCER: { name: 'balancer', displayName: 'Balancer' },
   SOLANA: { name: 'whirlpool', displayName: 'Orca Whirlpool' },
 };
