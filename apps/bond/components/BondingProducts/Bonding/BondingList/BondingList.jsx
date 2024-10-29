@@ -149,7 +149,7 @@ const getColumns = (onClick, isActive, acc, depositoryAddress, hideEmptyProducts
       render: (record) => {
         const { projectedChange } = record;
 
-        if (isNaN(projectedChange)) {
+        if (isNaN(projectedChange) || projectedChange === Infinity) {
           return <Text>{NA}</Text>;
         }
 
