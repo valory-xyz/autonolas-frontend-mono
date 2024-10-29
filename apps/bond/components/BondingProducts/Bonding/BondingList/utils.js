@@ -59,9 +59,9 @@ export const getSvmCalculatedPriceLp = (reserveOlas, totalSupply) => {
 /**
  * Function to get the link to the LP token
  */
-export const getLpTokenLink = ({ lpDex, lpChainId, lpPoolId, lpAddress }) => {
+export const getLpLink = ({ lpDex, lpChainId, lpPoolId, lpAddress }) => {
   if (lpChainId === celo.id) {
-    return `https://celoscan.io/address/${lpAddress}`;
+    return `https://info-v2.ubeswap.org/pair/${lpPoolId}`;
   }
 
   if (lpDex === DEX.UNISWAP) {

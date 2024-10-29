@@ -32,7 +32,7 @@ import {
   getCloseProductEvents,
   getCreateProductEvents,
   getCurrentPriceLpLink,
-  getLpTokenLink,
+  getLpLink,
   getLpTokenWithDiscount,
   getProductValueFromEvent,
 } from './utils';
@@ -96,6 +96,7 @@ const LP_PAIRS = {
     name: 'CELO-OLAS',
     originAddress: '0x2976Fa805141b467BCBc6334a69AffF4D914d96A',
     dex: DEX.UNISWAP,
+    poolId: '0x2976fa805141b467bcbc6334a69afff4d914d96a',
     guide: 'celo-olas-via-ubeswap-on-celo',
   },
   // solana
@@ -329,12 +330,13 @@ const getLpTokenNamesForProducts = async (productList, events) => {
 
   return productList.map((component, index) => {
     const { name, poolId, lpChainId, guide } = lpTokenDetailsList[index];
-    const lpTokenLink = getLpTokenLink({
+    const lpLink = getLpLink({
       lpDex: lpTokenDetailsList[index].dex,
       lpChainId,
       lpPoolId: poolId,
       lpAddress: component.token,
     });
+    const lpTokenLink = `https://etherscan.io/token/${component.token}`;
     const currentPriceLpLink = getCurrentPriceLpLink({
       lpDex: lpTokenDetailsList[index].dex,
       lpChainId,
@@ -345,6 +347,7 @@ const getLpTokenNamesForProducts = async (productList, events) => {
       ...component,
       lpChainId,
       lpTokenName: name,
+      lpLink,
       lpTokenLink,
       currentPriceLpLink,
       guide,
