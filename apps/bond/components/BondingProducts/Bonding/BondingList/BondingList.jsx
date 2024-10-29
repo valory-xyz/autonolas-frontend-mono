@@ -4,7 +4,7 @@ import {
   UnorderedListOutlined,
 } from '@ant-design/icons';
 import { Button, Empty, Popconfirm, Skeleton, Spin, Table, Tag, Tooltip, Typography } from 'antd';
-import { isNaN, remove, round } from 'lodash';
+import { capitalize, isNaN, remove, round } from 'lodash';
 import Link from 'next/link';
 import PropTypes from 'prop-types';
 import { useCallback } from 'react';
@@ -13,7 +13,6 @@ import styled from 'styled-components';
 import { NA, VM_TYPE, getNetworkName } from '@autonolas/frontend-library';
 
 import { COLOR } from 'libs/ui-theme/src';
-import { truncateAddress } from 'libs/util-functions/src';
 
 import { BONDING_PRODUCTS } from 'common-util/enums';
 import { parseToEth } from 'common-util/functions/ethers';
@@ -49,6 +48,10 @@ const getTitle = (title, tooltipDesc) => (
 );
 
 const getColumns = (onClick, isActive, acc, depositoryAddress, hideEmptyProducts) => {
+  const getChainName = (type) => {
+    if (type === VM_TYPE.SVM) return 'Solana';
+    return getNetworkName(type);
+  };
   const columns = [
     {
       title: 'ID',
@@ -60,10 +63,7 @@ const getColumns = (onClick, isActive, acc, depositoryAddress, hideEmptyProducts
       title: 'Network',
       dataIndex: 'lpChainId',
       key: 'lpChainId',
-      render: (x) => {
-        if (x === VM_TYPE.SVM) return 'Solana';
-        return getNetworkName(x);
-      },
+      render: (x) => getChainName(x),
     },
     {
       title: 'Guide',
@@ -80,10 +80,11 @@ const getColumns = (onClick, isActive, acc, depositoryAddress, hideEmptyProducts
       title: getTitle('Liquidity Pool', 'Liquidity Pool on target network'),
       dataIndex: 'lpLink',
       key: 'lpLink',
+      width: 160,
       render: (x, data) => {
         return (
           <a href={x} target="_blank" rel="noreferrer">
-            {truncateAddress(data.token)}
+            {`${capitalize(data.dexDisplayName)} on ${capitalize(getChainName(data.lpChainId))}`}
           </a>
         );
       },
@@ -148,7 +149,7 @@ const getColumns = (onClick, isActive, acc, depositoryAddress, hideEmptyProducts
       render: (record) => {
         const { projectedChange } = record;
 
-        if (isNaN(projectedChange)) {
+        if (isNaN(projectedChange) || projectedChange === Infinity) {
           return <Text>{NA}</Text>;
         }
 

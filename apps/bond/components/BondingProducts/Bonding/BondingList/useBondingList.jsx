@@ -1,5 +1,5 @@
 import { ethers } from 'ethers';
-import { memoize, round } from 'lodash';
+import { find, memoize, round } from 'lodash';
 import { useCallback, useEffect, useState } from 'react';
 import { arbitrum, base, celo, gnosis, optimism, polygon } from 'viem/chains';
 import { usePublicClient } from 'wagmi';
@@ -50,7 +50,7 @@ const LP_PAIRS = {
     lpChainId: gnosis.id,
     name: 'OLAS-WXDAI',
     originAddress: '0x79C872Ed3Acb3fc5770dd8a0cD9Cd5dB3B3Ac985',
-    dex: DEX.BALANCER,
+    dex: DEX.BALANCER.name,
     poolId: '0x79c872ed3acb3fc5770dd8a0cd9cd5db3b3ac985000200000000000000000067',
     guide: 'olas-wxdai-via-balancer-on-gnosis-chain',
   },
@@ -59,7 +59,7 @@ const LP_PAIRS = {
     lpChainId: polygon.id,
     name: 'OLAS-WMATIC',
     originAddress: '0x62309056c759c36879Cde93693E7903bF415E4Bc',
-    dex: DEX.BALANCER,
+    dex: DEX.BALANCER.name,
     poolId: '0x62309056c759c36879cde93693e7903bf415e4bc000200000000000000000d5f',
     guide: 'olas-wmatic-via-balancer-on-polygon-pos',
   },
@@ -68,7 +68,7 @@ const LP_PAIRS = {
     lpChainId: arbitrum.id,
     name: 'OLAS-WETH',
     originAddress: '0xaf8912a3c4f55a8584b67df30ee0ddf0e60e01f8',
-    dex: DEX.BALANCER,
+    dex: DEX.BALANCER.name,
     poolId: '0xaf8912a3c4f55a8584b67df30ee0ddf0e60e01f80002000000000000000004fc',
     guide: 'olas-weth-via-balancer-on-arbitrum',
   },
@@ -77,7 +77,7 @@ const LP_PAIRS = {
     lpChainId: optimism.id,
     name: 'WETH-OLAS',
     originAddress: '0x5bb3e58887264b667f915130fd04bbb56116c278',
-    dex: DEX.BALANCER,
+    dex: DEX.BALANCER.name,
     poolId: '0x5bb3e58887264b667f915130fd04bbb56116c27800020000000000000000012a',
     guide: 'weth-olas-via-balancer-on-optimism',
   },
@@ -86,7 +86,7 @@ const LP_PAIRS = {
     lpChainId: base.id,
     name: 'OLAS-USDC',
     originAddress: '0x5332584890d6e415a6dc910254d6430b8aab7e69',
-    dex: DEX.BALANCER,
+    dex: DEX.BALANCER.name,
     poolId: '0x5332584890d6e415a6dc910254d6430b8aab7e69000200000000000000000103',
     guide: 'olas-usdc-via-balancer-on-base',
   },
@@ -95,7 +95,7 @@ const LP_PAIRS = {
     lpChainId: celo.id,
     name: 'CELO-OLAS',
     originAddress: '0x2976Fa805141b467BCBc6334a69AffF4D914d96A',
-    dex: DEX.UNISWAP,
+    dex: DEX.UBESWAP.name,
     poolId: '0x2976fa805141b467bcbc6334a69afff4d914d96a',
     guide: 'celo-olas-via-ubeswap-on-celo',
   },
@@ -104,7 +104,7 @@ const LP_PAIRS = {
     lpChainId: VM_TYPE.SVM,
     name: 'OLAS-WSOL',
     originAddress: POSITION.toString(),
-    dex: DEX.SOLANA,
+    dex: DEX.SOLANA.name,
     poolId: ADDRESSES[VM_TYPE.SVM].balancerVault, // whirpool address
     guide: 'wsol-olas-via-orca-on-solana',
   },
@@ -165,7 +165,7 @@ const getLpTokenDetails = memoize(async (address) => {
     lpChainId: chainId,
     name: `OLAS${tokenSymbol ? `-${tokenSymbol}` : ''}`,
     originAddress: address,
-    dex: DEX.UNISWAP,
+    dex: DEX.UNISWAP.name,
     poolId: null,
   };
 });
@@ -266,13 +266,13 @@ const useAddCurrentLpPriceToProducts = () => {
             };
           } else {
             let currentLpPrice = null;
-            if (dex === DEX.UNISWAP) {
+            if (dex === DEX.UNISWAP.name || dex === DEX.UBESWAP.name) {
               currentLpPrice = getCurrentPriceUniswap(productList[i].token);
               otherRequests[i] = currentLpPrice;
-            } else if (dex === DEX.BALANCER) {
+            } else if (dex === DEX.BALANCER.name) {
               currentLpPrice = getCurrentPriceBalancer(productList[i].token);
               otherRequests[i] = currentLpPrice;
-            } else if (dex === DEX.SOLANA) {
+            } else if (dex === DEX.SOLANA.name) {
               otherRequests[i] = svmPriceLp;
             } else {
               throw new Error('Dex not supported');
@@ -342,6 +342,7 @@ const getLpTokenNamesForProducts = async (productList, events) => {
       lpChainId,
       lpAddress: component.token,
     });
+    const dexDetails = find(DEX, { name: lpTokenDetailsList[index].dex });
 
     return {
       ...component,
@@ -351,6 +352,7 @@ const getLpTokenNamesForProducts = async (productList, events) => {
       lpTokenLink,
       currentPriceLpLink,
       guide,
+      dexDisplayName: dexDetails.displayName,
     };
   });
 };
