@@ -113,8 +113,8 @@
       "poolAddress": "0x5BB3E58887264B667f915130fD04bbB56116C278"
     },
     "bridge": {
-      "name": "Optimism Native Bridge",
-      "url": "https://app.optimism.io/bridge/deposit"
+      "name": "Superbridge App",
+      "url": "https://superbridge.app/optimism"
     },
     "bond": {
       "guideUrl": "https://olas.network/blog/bonding-guide-optimism",
@@ -140,8 +140,8 @@
       "poolAddress": "0x5332584890d6e415a6dc910254d6430b8aab7e69"
     },
     "bridge": {
-      "name": "BaseBridge contract",
-      "url": "https://etherscan.io/address/0x3154cf16ccdb4c6d922629664174b904d80f2c35"
+      "name": "Superbridge App",
+      "url": "https://superbridge.app/base"
     },
     "bond": {
       "guideUrl": "https://olas.network/blog/bonding-guide-base",
