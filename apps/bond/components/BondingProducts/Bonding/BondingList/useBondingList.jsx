@@ -351,6 +351,7 @@ const getLpTokenNamesForProducts = async (productList, events) => {
       lpTokenLink,
       currentPriceLpLink,
       guide,
+      dex: lpTokenDetailsList[index].dex,
     };
   });
 };
