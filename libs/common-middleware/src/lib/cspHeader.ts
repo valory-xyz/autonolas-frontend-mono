@@ -8,7 +8,7 @@ const WALLET_CONNECT_LINKS = [
 ];
 
 const VERCEL_LINKS = ['https://vercel.com', 'https://vercel.live/'];
-
+const APIS = ['https://api.coingecko.com/api/'];
 const GATEWAY_LINKS = [
   'https://gateway.autonolas.tech/ipfs/*',
   'https://gateway.pinata.cloud/ipfs/*',
@@ -16,7 +16,6 @@ const GATEWAY_LINKS = [
   'https://i.seadn.io/s/raw/files/',
   'https://www.askjimmy.xyz/images/',
 ];
-
 const ALLOWED_ORIGINS = [
   // internal
   "'self'",
@@ -37,6 +36,7 @@ const ALLOWED_ORIGINS = [
   'https://safe-transaction-goerli.safe.global/api/',
   'https://safe-transaction-gnosis-chain.safe.global/api/',
   'https://safe-transaction-polygon.safe.global/api/',
+  'https://cloudflare-eth.com/',
 
   // chains
   'https://eth-mainnet.g.alchemy.com/v2/',
@@ -64,24 +64,28 @@ const ALLOWED_ORIGINS = [
   'https://alfajores-forno.celo-testnet.org',
   'https://api.web3modal.com/',
   'https://rpc.ankr.com/',
+  'https://mainnet.mode.network/',
 
   // tenderly
   'https://virtual.mainnet.rpc.tenderly.co/',
   'https://virtual.gnosis.rpc.tenderly.co/',
   'https://virtual.polygon.rpc.tenderly.co/',
+  'https://virtual.mode.rpc.tenderly.co/',
   'https://rpc.tenderly.co/fork/',
-
   // others
   'https://api.thegraph.com/',
   'https://api.studio.thegraph.com/',
   'https://sockjs-us3.pusher.com/',
   'https://programs.shyft.to/',
   'https://*.network.thegraph.com/',
+  'https://gateway.thegraph.com/',
+  'https://subgraph.satsuma-prod.com/',
 
   ...VERCEL_LINKS,
+  ...APIS,
 ];
 
-const SCRIPT_SRC = ["'self'", 'https://vercel.live/', 'https://fonts.googleapis.com/'];
+const SCRIPT_SRC = ["'self'", ...VERCEL_LINKS, 'https://fonts.googleapis.com/', ...APIS];
 
 export const getCspHeaders = () => {
   if (!process.env.NEXT_PUBLIC_AUTONOLAS_SUB_GRAPH_URL) return [];

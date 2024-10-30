@@ -7,6 +7,26 @@
     "jest": true,
     "es6": true
   },
+  "extends": ["next/core-web-vitals", "plugin:prettier/recommended"],
+  "rules": {
+    "prettier/prettier": ["error", {
+      "endOfLine": "auto",
+      "semi": true,
+      "trailingComma": "all",
+      "singleQuote": true,
+      "printWidth": 100,
+      "tabWidth": 2,
+      "importOrderSeparation": true,
+      "importOrderSortSpecifiers": true,
+      "importOrder": [
+        "<THIRD_PARTY_MODULES>",
+        "^@autonolas/(.*)$",
+        "^libs/*",
+        "^(store|util|common-util|components|data|hooks|context|types)/(.*)$",
+        "^[./]"
+      ]
+    }]
+  },
   "overrides": [
     {
       "files": ["*.ts", "*.tsx", "*.js", "*.jsx"],
@@ -22,6 +42,12 @@
                 "onlyDependOnLibsWithTags": ["*"]
               }
             ]
+          }
+        ],
+        "no-console": [
+          "warn",
+          {
+            "allow": ["warn", "error"]
           }
         ]
       }

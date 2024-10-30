@@ -1,4 +1,5 @@
 import { Alert, Card, Flex, Skeleton, Space, Typography } from 'antd';
+import Head from 'next/head';
 import { useRouter } from 'next/router';
 import styled from 'styled-components';
 import { StakingContract } from 'types';
@@ -129,8 +130,15 @@ export const ContractPage = () => {
   }
 
   return (
-    <StyledMain>
-      <ContractPageContent contract={contract} />
-    </StyledMain>
+    <>
+      <Head>
+        <title>Govern | {contract.metadata.name}</title>
+        <meta name="description" content={contract.metadata.description} />
+      </Head>
+
+      <StyledMain>
+        <ContractPageContent contract={contract} />
+      </StyledMain>
+    </>
   );
 };

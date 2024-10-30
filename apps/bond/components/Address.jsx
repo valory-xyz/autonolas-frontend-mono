@@ -18,9 +18,7 @@ const Address = ({ address, networkId, customExplorerUrl }) => {
     <>
       <AddressText title={address}>
         <a href={explorerUrl} rel="noopener noreferrer" target="_blank">
-          {truncateAddress(address)}
-          {' '}
-          ↗
+          {truncateAddress(address)} ↗
         </a>
       </AddressText>
       &nbsp;

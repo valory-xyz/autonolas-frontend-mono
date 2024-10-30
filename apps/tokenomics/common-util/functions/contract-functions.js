@@ -1,5 +1,5 @@
-import { notifyError } from "@autonolas/frontend-library";
-import { getTokenomicsContract } from "./web3";
+import { notifyError } from '@autonolas/frontend-library';
+import { getTokenomicsContract } from './web3';
 
 export const getEpochCounter = async () => {
   const contract = getTokenomicsContract();

@@ -10,9 +10,5 @@ export const ThemeConfigProvider = ({ children }) => {
     setIsMounted(true);
   }, []);
 
-  return (
-    <AntdConfigProvider theme={THEME_CONFIG}>
-      {isMounted ? children : ''}
-    </AntdConfigProvider>
-  );
+  return <AntdConfigProvider theme={THEME_CONFIG}>{isMounted ? children : ''}</AntdConfigProvider>;
 };

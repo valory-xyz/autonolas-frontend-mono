@@ -4,7 +4,7 @@ import {
   UnorderedListOutlined,
 } from '@ant-design/icons';
 import { Button, Empty, Popconfirm, Skeleton, Spin, Table, Tag, Tooltip, Typography } from 'antd';
-import { isNaN, remove, round } from 'lodash';
+import { capitalize, isNaN, remove, round } from 'lodash';
 import Link from 'next/link';
 import PropTypes from 'prop-types';
 import { useCallback } from 'react';
@@ -48,6 +48,10 @@ const getTitle = (title, tooltipDesc) => (
 );
 
 const getColumns = (onClick, isActive, acc, depositoryAddress, hideEmptyProducts) => {
+  const getChainName = (type) => {
+    if (type === VM_TYPE.SVM) return 'Solana';
+    return getNetworkName(type);
+  };
   const columns = [
     {
       title: 'ID',
@@ -59,24 +63,40 @@ const getColumns = (onClick, isActive, acc, depositoryAddress, hideEmptyProducts
       title: 'Network',
       dataIndex: 'lpChainId',
       key: 'lpChainId',
-      render: (x) => {
-        if (x === VM_TYPE.SVM) return 'Solana';
-        return getNetworkName(x);
-      },
+      render: (x) => getChainName(x),
     },
     {
       title: 'Guide',
       dataIndex: 'guide',
       key: 'guide',
       width: 100,
-      render: (x) => {
-        return <Link href={`/paths/olas-eth-via-uniswap-on-ethereum`}>Guide ↗</Link>;
+      render: (x, data) => {
+        return (
+          <Link href={`/paths/${data.guide || 'olas-eth-via-uniswap-on-ethereum'}`}>Guide</Link>
+        );
       },
     },
     {
-      title: getTitle('LP Token', 'LP token address enabled by the Treasury'),
+      title: getTitle('Liquidity Pool', 'Liquidity Pool on target network'),
+      dataIndex: 'lpLink',
+      key: 'lpLink',
+      width: 160,
+      render: (x, data) => {
+        return (
+          <a href={x} target="_blank" rel="noreferrer">
+            {`${capitalize(data.dexDisplayName)} on ${capitalize(getChainName(data.lpChainId))}`}
+          </a>
+        );
+      },
+    },
+    {
+      title: getTitle(
+        'LP Token on Ethereum',
+        'LP token address enabled by the Treasury on Ethereum',
+      ),
       dataIndex: 'lpTokenName',
       key: 'lpTokenName',
+      width: 140,
       render: (x, data) => {
         return (
           <a href={data.lpTokenLink} target="_blank" rel="noreferrer">
@@ -129,7 +149,7 @@ const getColumns = (onClick, isActive, acc, depositoryAddress, hideEmptyProducts
       render: (record) => {
         const { projectedChange } = record;
 
-        if (isNaN(projectedChange)) {
+        if (isNaN(projectedChange) || projectedChange === Infinity) {
           return <Text>{NA}</Text>;
         }
 
@@ -240,11 +260,22 @@ const sortProducts = (list) =>
     // - the API returns zero (shouldn't happen) OR
     // - has error OR
     // - not fetched yet
-    const isSvm = a.lpChainId === VM_TYPE.SVM || b.lpChainId === VM_TYPE.SVM;
-    if (isSvm && isCurrentPriceLpZero(a.fullCurrentPriceLp)) return 1;
+    const isAZeroPrice = isCurrentPriceLpZero(a.fullCurrentPriceLp);
+    const isBZeroPrice = isCurrentPriceLpZero(b.fullCurrentPriceLp);
 
-    if (isNaN(a.projectedChange)) return 1;
-    if (isNaN(b.projectedChange)) return -1;
+    if (isAZeroPrice && !isBZeroPrice) return 1;
+    if (!isAZeroPrice && isBZeroPrice) return -1;
+    if (isAZeroPrice && isBZeroPrice) return 0;
+
+    // Sort by projectedChange for products with valid prices
+    const isAProjectedChangeNaN = isNaN(a.projectedChange);
+    const isBProjectedChangeNaN = isNaN(b.projectedChange);
+
+    if (isAProjectedChangeNaN && !isBProjectedChangeNaN) return 1;
+    if (!isAProjectedChangeNaN && isBProjectedChangeNaN) return -1;
+    if (isAProjectedChangeNaN && isBProjectedChangeNaN) return 0;
+
+    // Sort by projectedChange descending
     return b.projectedChange - a.projectedChange;
   });
 

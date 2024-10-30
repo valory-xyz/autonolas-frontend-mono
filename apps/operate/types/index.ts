@@ -14,5 +14,8 @@ export type StakingContract = {
   maxSlots: number;
   apy: number;
   stakeRequired: string;
-  availableOn: 'pearl' | 'quickstart' | null;
+  availableOn: 'pearl' | 'quickstart' | 'optimusQuickstart' | null;
+  minOperatingBalance: number | null;
+  minOperatingBalanceToken: string | null;
+  minOperatingBalanceHint?: string;
 };

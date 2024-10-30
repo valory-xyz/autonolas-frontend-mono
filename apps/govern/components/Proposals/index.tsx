@@ -1,15 +1,17 @@
-import { Button, Card, Col, Row, Typography } from 'antd';
+import { Button, Card, Flex, Typography } from 'antd';
 import Image from 'next/image';
 import styled from 'styled-components';
 
 import { UNICODE_SYMBOLS } from 'libs/util-constants/src';
 
-const { Paragraph } = Typography;
+import { ProposalsList } from './ProposalsList';
+
+const { Paragraph, Title: AntdTitle } = Typography;
 
 const StyledMain = styled.main`
   display: flex;
   flex-direction: column;
-  max-width: 946px;
+  max-width: 1200px;
   margin: 0 auto;
 `;
 
@@ -18,66 +20,42 @@ const Title = styled.h1`
   margin: 0 0 8px;
 `;
 
-type Proposal = {
-  title: string;
-  description: string;
-  imageSrc: string;
-  button: { title: string; href: string };
-};
-
-export const proposals: Proposal[] = [
-  {
-    title: 'Snapshot proposals',
-    description: 'Proposals that are made and enacted off-chain.',
-    imageSrc: '/images/snapshot.png',
-    button: {
-      title: 'Vote on Snapshot',
-      href: 'https://snapshot.org/#/autonolas.eth',
-    },
-  },
-  {
-    title: 'Boardroom proposals',
-    description: 'Proposals that are made and enacted on-chain.',
-    imageSrc: '/images/boardroom.png',
-    button: {
-      title: 'Vote on Boardroom',
-      href: 'https://boardroom.io/autonolas/',
-    },
-  },
-];
-
-const Proposal = ({ title, description, imageSrc, button }: Proposal) => (
-  <Card>
-    <Card.Meta
-      avatar={<Image src={imageSrc} alt={title} width={24} height={24} className="mt-4" />}
-      title={title}
-      description={
-        <>
-          <Paragraph type="secondary">{description}</Paragraph>
-          <Button size="large" type="primary" ghost href={button.href} target="_blank">
-            {`${button.title} ${UNICODE_SYMBOLS.EXTERNAL_LINK}`}
-          </Button>
-        </>
-      }
-    />
+const SnapshotCard = () => (
+  <Card className="mb-24">
+    <Flex justify="space-between" align="center">
+      <Flex gap={16} align="center">
+        <Image src="/images/snapshot.png" alt="" width={32} height={32} />
+        <div>
+          <AntdTitle level={4} className="mt-0 mb-4">
+            Snapshot proposals
+          </AntdTitle>
+          <Paragraph type="secondary" className="m-0">
+            Proposals that are made and enacted off-chain.
+          </Paragraph>
+        </div>
+      </Flex>
+      <Button
+        size="large"
+        type="primary"
+        ghost
+        href="https://snapshot.box/#/s:autonolas.eth"
+        target="_blank"
+      >
+        {`Vote on Snapshot ${UNICODE_SYMBOLS.EXTERNAL_LINK}`}
+      </Button>
+    </Flex>
   </Card>
 );
 
 export const ProposalsPage = () => (
   <StyledMain>
+    <SnapshotCard />
     <Card>
-      <Title>Proposals</Title>
+      <Title>On-chain proposals</Title>
       <Paragraph type="secondary" className="mb-24">
-        Participate in the Autonolas DAO governance by voting on proposals.
+        Participate in Autonolas DAO governance by voting on on-chain proposals.
       </Paragraph>
-
-      <Row gutter={24}>
-        {proposals.map((item, index) => (
-          <Col key={index} md={12} xs={24}>
-            <Proposal {...item} />
-          </Col>
-        ))}
-      </Row>
+      <ProposalsList />
     </Card>
   </StyledMain>
 );

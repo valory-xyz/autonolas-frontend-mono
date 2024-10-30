@@ -25,7 +25,7 @@ import { ErrorAlert } from 'common-util/ErrorAlert';
 import {
   CONTRACT_DEFAULT_VALUES,
   CONTRACT_TEMPLATES,
-  IMPLEMENTATION_ADDRESSES,
+  STAKING_TOKEN_ADDRESSES,
   isSupportedChainId,
 } from 'common-util/constants/stakingContract';
 import { URL } from 'common-util/constants/urls';
@@ -91,9 +91,11 @@ const TemplateInfoContent = ({ id }: { id: number }) => {
  * Create staking contract
  */
 export const CreateStakingContract = () => {
+  const [form] = Form.useForm();
+
   const router = useRouter();
   const dispatch = useAppDispatch();
-  const rulesConfig = useFieldRules();
+  const { rulesConfig, onValuesChange } = useFieldRules(form);
 
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<ErrorType>(null);
@@ -145,7 +147,7 @@ export const CreateStakingContract = () => {
     try {
       const metadataHash = await getIpfsHash({ name: contractName, description });
 
-      const implementation = IMPLEMENTATION_ADDRESSES[chain.id];
+      const implementation = STAKING_TOKEN_ADDRESSES[chain.id];
       const initPayload = getStakingContractInitPayload({
         metadataHash,
         maxNumServices,
@@ -210,6 +212,8 @@ export const CreateStakingContract = () => {
         {alertMessage}
 
         <Form<FormValues>
+          form={form}
+          onValuesChange={onValuesChange}
           layout="vertical"
           onFinish={handleCreate}
           requiredMark={false}

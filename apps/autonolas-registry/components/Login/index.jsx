@@ -1,12 +1,7 @@
 import { useEffect, useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 import { useAccount, useBalance } from 'wagmi';
-import {
-  setUserAccount,
-  setUserBalance,
-  setErrorMessage,
-  setLogout,
-} from 'store/setup';
+import { setUserAccount, setUserBalance, setErrorMessage, setLogout } from 'store/setup';
 import { LoginV2 } from 'common-util/Login';
 import { useHelpers } from 'common-util/hooks';
 
@@ -47,12 +42,7 @@ const Login = () => {
 
   return (
     <div>
-      <LoginV2
-        isSvm={isSvm}
-        onConnect={onConnect}
-        onDisconnect={onDisconnect}
-        onError={onError}
-      />
+      <LoginV2 isSvm={isSvm} onConnect={onConnect} onDisconnect={onDisconnect} onError={onError} />
     </div>
   );
 };

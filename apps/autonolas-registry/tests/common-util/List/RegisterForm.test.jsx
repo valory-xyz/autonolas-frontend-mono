@@ -1,8 +1,6 @@
 import { render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import RegisterForm, {
-  FORM_NAME,
-} from '../../../common-util/List/RegisterForm';
+import RegisterForm, { FORM_NAME } from '../../../common-util/List/RegisterForm';
 import { fillIpfsGenerationModal } from '../../tests-helpers/prefillForm';
 import { wrapProvider, dummyAddress, mockV1Hash } from '../../tests-helpers';
 
@@ -23,31 +21,19 @@ describe.skip('<RegisterForm />', () => {
   it('should submit the form successfully', async () => {
     const { container, getByRole, getByText } = render(
       wrapProvider(
-        <RegisterForm
-          listType="agent"
-          handleSubmit={handleSubmit}
-          handleCancel={handleCancel}
-        />,
+        <RegisterForm listType="agent" handleSubmit={handleSubmit} handleCancel={handleCancel} />,
       ),
     );
 
     // add the hash in the beginning
     userEvent.click(getByRole('button', { name: 'Generate Hash & File' }));
 
-    expect(
-      getByText('Generate IPFS Hash of Metadata File'),
-    ).toBeInTheDocument();
+    expect(getByText('Generate IPFS Hash of Metadata File')).toBeInTheDocument();
     fillIpfsGenerationModal();
 
     // adding input
-    userEvent.type(
-      container.querySelector(`#${FORM_NAME}_owner_address`),
-      dummyAddress,
-    );
-    userEvent.type(
-      container.querySelector(`#${FORM_NAME}_dependencies`),
-      '1, 2',
-    );
+    userEvent.type(container.querySelector(`#${FORM_NAME}_owner_address`), dummyAddress);
+    userEvent.type(container.querySelector(`#${FORM_NAME}_dependencies`), '1, 2');
 
     // submit
     const formSubmitBtn = getByRole('button', { name: 'Submit' });

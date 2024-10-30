@@ -2,29 +2,24 @@ import includes from 'lodash/includes';
 
 import { getFirstAndLastIndex } from '../List/functions';
 
-export const filterByOwner = (results, { searchValue, account }) => (results || []).filter((e) => {
-  const search = (searchValue || '').trim().toLowerCase();
-  const ownerL = (e.owner || '').trim().toLowerCase();
-  const hashL = (e.unitHash || '').trim().toLowerCase();
+export const filterByOwner = (results, { searchValue, account }) =>
+  (results || []).filter((e) => {
+    const search = (searchValue || '').trim().toLowerCase();
+    const ownerL = (e.owner || '').trim().toLowerCase();
+    const hashL = (e.unitHash || '').trim().toLowerCase();
 
-  // for "my components/agents" search only by Account
-  if (account) {
-    return ownerL === account.trim().toLowerCase() && includes(hashL, search);
-  }
+    // for "my components/agents" search only by Account
+    if (account) {
+      return ownerL === account.trim().toLowerCase() && includes(hashL, search);
+    }
 
-  return includes(ownerL, search) || includes(hashL, search);
-});
+    return includes(ownerL, search) || includes(hashL, search);
+  });
 
 /**
  * get all the list and filter by owner
  */
-export const getListByAccount = async ({
-  searchValue,
-  total,
-  getUnit,
-  getOwner,
-  account,
-}) => {
+export const getListByAccount = async ({ searchValue, total, getUnit, getOwner, account }) => {
   const allListPromise = [];
   for (let i = 1; i <= total; i += 1) {
     const id = `${i}`;

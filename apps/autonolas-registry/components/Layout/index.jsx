@@ -5,27 +5,15 @@ import dynamic from 'next/dynamic';
 import PropTypes from 'prop-types';
 import { Layout as AntdLayout, Select } from 'antd';
 import { VM_TYPE, useScreen } from '@autonolas/frontend-library';
-import {
-  ConnectionProvider,
-  WalletProvider,
-} from '@solana/wallet-adapter-react';
+import { ConnectionProvider, WalletProvider } from '@solana/wallet-adapter-react';
 import { PhantomWalletAdapter } from '@solana/wallet-adapter-wallets';
 
 import { PAGES_TO_LOAD_WITHOUT_CHAINID } from '../../util/constants';
 import { useHelpers } from '../../common-util/hooks';
-import {
-  ALL_SUPPORTED_CHAINS,
-  getSvmEndpoint,
-} from '../../common-util/Login/config';
+import { ALL_SUPPORTED_CHAINS, getSvmEndpoint } from '../../common-util/Login/config';
 import { useHandleRoute } from '../../common-util/hooks/useHandleRoute';
 import { LogoSvg, LogoIconSvg } from '../Logos';
-import {
-  CustomLayout,
-  Logo,
-  OlasHeader,
-  RightMenu,
-  SelectContainer,
-} from './styles';
+import { CustomLayout, Logo, OlasHeader, RightMenu, SelectContainer } from './styles';
 
 const Login = dynamic(() => import('../Login'), { ssr: false });
 const NavigationMenu = dynamic(() => import('./Menu'), { ssr: false });
@@ -44,11 +32,7 @@ const Layout = ({ children }) => {
   return (
     <CustomLayout>
       <OlasHeader ismobile={`${isMobile}`}>
-        <Logo
-          onClick={onHomeClick}
-          data-testid="protocol-logo"
-          ismobile={`${isMobile}`}
-        >
+        <Logo onClick={onHomeClick} data-testid="protocol-logo" ismobile={`${isMobile}`}>
           {isMobile || isTablet ? <LogoIconSvg /> : <LogoSvg />}
         </Logo>
 
@@ -60,17 +44,13 @@ const Layout = ({ children }) => {
             listHeight={800}
             value={chainName}
             placeholder="Select Network"
-            disabled={PAGES_TO_LOAD_WITHOUT_CHAINID.some((e) =>
-              path.includes(e),
-            )}
+            disabled={PAGES_TO_LOAD_WITHOUT_CHAINID.some((e) => path.includes(e))}
             options={ALL_SUPPORTED_CHAINS.map((e) => ({
               label: e.networkDisplayName,
               value: e.networkName,
             }))}
             onChange={(value) => {
-              const currentChainInfo = ALL_SUPPORTED_CHAINS.find(
-                (e) => e.networkName === value,
-              );
+              const currentChainInfo = ALL_SUPPORTED_CHAINS.find((e) => e.networkName === value);
 
               if (!currentChainInfo) return;
 
@@ -117,9 +97,7 @@ const Layout = ({ children }) => {
           {/* chainId has to be set in redux before rendering any components
               OR the page doesn't depends on the chain Id
               OR it is SOLANA */}
-          {chainId ||
-          isSvm ||
-          PAGES_TO_LOAD_WITHOUT_CHAINID.some((e) => e === path)
+          {chainId || isSvm || PAGES_TO_LOAD_WITHOUT_CHAINID.some((e) => e === path)
             ? children
             : null}
         </div>

@@ -1,10 +1,13 @@
 import { Button, Form, Input } from 'antd';
+import { isEqual, sortBy } from 'lodash';
 import { useRouter } from 'next/router';
 import PropTypes from 'prop-types';
 import { useEffect, useState } from 'react';
 import useDeepCompareEffect from 'use-deep-compare-effect';
 
 import { isValidAddress, notifyError } from '@autonolas/frontend-library';
+
+import { FORM_VALIDATION } from 'libs/util-functions/src';
 
 import { IpfsHashGenerationModal } from 'common-util/List/IpfsHashGenerationModal';
 import { DependencyLabel, commaMessage } from 'common-util/List/ListCommon';
@@ -19,10 +22,8 @@ import { ThresholdInput } from './ThresholdInput';
 
 export const FORM_NAME = 'serviceRegisterForm';
 
-const agentIdValidator = (form, value) => {
-  if (!/^\d+(\s*,\s*\d+?)*$/gm.test(value)) {
-    return Promise.reject(new Error('Please input a valid list'));
-  }
+const agentIdValidator = async (form, value) => {
+  await FORM_VALIDATION.validateCommaSeparatedList.validator(form, value);
 
   const agentIdsStr = form.getFieldValue('agent_ids');
   if (!agentIdsStr) {
@@ -291,11 +292,16 @@ const RegisterForm = ({
               message: 'Please input the agent Ids',
             },
             () => ({
-              validator(_, value) {
-                if (/^\d+(\s*,\s*\d+?)*$/gm.test(value)) {
-                  return Promise.resolve();
+              validator: async (_, value) => {
+                await FORM_VALIDATION.validateCommaSeparatedList.validator(form, value);
+
+                // agentIds should be sorted before submitting the form
+                const agentIdsArray = value.split(',').map((val) => val.trim());
+                if (!isEqual(agentIdsArray, sortBy(agentIdsArray))) {
+                  return Promise.reject(new Error('Agent IDs should be sorted from low to high.'));
                 }
-                return Promise.reject(new Error('Please input a valid list'));
+
+                return Promise.resolve();
               },
             }),
           ]}

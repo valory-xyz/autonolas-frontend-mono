@@ -3,10 +3,10 @@ const { pathsToModuleNameMapper } = require('ts-jest');
 const { compilerOptions } = require('../../tsconfig.base.json');
 
 module.exports = {
-  displayName: 'govern',
+  displayName: 'launch',
   preset: '../../jest.preset.js',
   testEnvironment: 'jsdom',
-
+  testTimeout: 15000,
   moduleNameMapper: {
     ...pathsToModuleNameMapper(compilerOptions.paths, { prefix: resolve(__dirname, '../..') }),
     '^util/(.*)$': '<rootDir>/util/$1',
@@ -21,7 +21,8 @@ module.exports = {
   setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx'],
   transform: {
-    '^.+\\.[tj]sx?$': ['ts-jest',
+    '^.+\\.[tj]sx?$': [
+      'ts-jest',
       {
         presets: ['@nx/next/babel'],
         tsconfig: '<rootDir>/tsconfig.spec.json',

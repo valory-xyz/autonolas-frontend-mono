@@ -60,9 +60,7 @@ describe('<AlertSuccess />', () => {
         output: /Minted successfully. This is being indexed and will take a few minutes to show./,
       },
     ])('expects valid object (input=$input)', ({ type, input, output }) => {
-      const { getByText } = render(
-        <AlertSuccess type={type} information={input} />,
-      );
+      const { getByText } = render(<AlertSuccess type={type} information={input} />);
       expect(getByText(output)).toBeInTheDocument();
     });
   });
@@ -85,9 +83,7 @@ describe('<AlertSuccess />', () => {
         output: /Minted successfully./,
       },
     ])('expects valid object (input=$input)', ({ type, input, output }) => {
-      const { getByText } = render(
-        <AlertSuccess type={type} information={input} />,
-      );
+      const { getByText } = render(<AlertSuccess type={type} information={input} />);
       expect(getByText(output)).toBeInTheDocument();
     });
   });
@@ -102,13 +98,14 @@ describe('<AlertSuccess />', () => {
 });
 
 describe('<AlertError />', () => {
-  it.each([
-    { input: new Error('Exception occurred'), output: /Exception occurred/ },
-  ])('expects valid error object (input=$input)', ({ input, output }) => {
-    const { getByText, getByTestId } = render(<AlertError error={input} />);
-    expect(getByText(output)).toBeInTheDocument();
-    expect(getByTestId('alert-error-container')).toBeInTheDocument();
-  });
+  it.each([{ input: new Error('Exception occurred'), output: /Exception occurred/ }])(
+    'expects valid error object (input=$input)',
+    ({ input, output }) => {
+      const { getByText, getByTestId } = render(<AlertError error={input} />);
+      expect(getByText(output)).toBeInTheDocument();
+      expect(getByTestId('alert-error-container')).toBeInTheDocument();
+    },
+  );
 
   it.each([{ input: null }, { input: undefined }])(
     'expects invalid object (input=$input)',

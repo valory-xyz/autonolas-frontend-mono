@@ -1,5 +1,15 @@
 import { createConfig, http } from 'wagmi';
-import { Chain, arbitrum, base, celo, gnosis, mainnet, optimism, polygon } from 'wagmi/chains';
+import {
+  Chain,
+  arbitrum,
+  base,
+  celo,
+  gnosis,
+  mainnet,
+  optimism,
+  polygon,
+  mode,
+} from 'wagmi/chains';
 
 import { RPC_URLS } from 'libs/util-constants/src';
 
@@ -11,6 +21,7 @@ export const SUPPORTED_CHAINS: [Chain, ...Chain[]] = [
   base,
   arbitrum,
   celo,
+  mode,
 ];
 
 export const wagmiConfig = createConfig({

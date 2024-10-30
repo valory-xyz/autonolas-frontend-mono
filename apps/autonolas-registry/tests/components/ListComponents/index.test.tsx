@@ -79,17 +79,13 @@ describe('listComponents/index.jsx', () => {
 
     (useRouter as jest.Mock).mockReturnValue({ query: {}, push: jest.fn() });
     (getComponents as jest.Mock).mockResolvedValue(allComponentsResponse);
-    (getFilteredComponents as jest.Mock).mockResolvedValue(
-      myComponentsResponse,
-    );
+    (getFilteredComponents as jest.Mock).mockResolvedValue(myComponentsResponse);
     (getTotalForAllComponents as jest.Mock).mockResolvedValue(1);
     (getTotalForMyComponents as jest.Mock).mockResolvedValue(1);
   });
 
   it('should display the column names', async () => {
-    const { container, findByTestId } = render(
-      wrapProvider(<ListComponents />),
-    );
+    const { container, findByTestId } = render(wrapProvider(<ListComponents />));
 
     if (!container) {
       throw new Error('`All tab` is null');
@@ -102,9 +98,7 @@ describe('listComponents/index.jsx', () => {
       expect(within(allComponentsTable).getByText('Owner')).toBeInTheDocument();
       expect(within(allComponentsTable).getByText('Hash')).toBeInTheDocument();
       expect(within(allComponentsTable).getByText('Name')).toBeInTheDocument();
-      expect(
-        within(allComponentsTable).getByText('Action'),
-      ).toBeInTheDocument();
+      expect(within(allComponentsTable).getByText('Action')).toBeInTheDocument();
     });
   });
 
@@ -124,43 +118,26 @@ describe('listComponents/index.jsx', () => {
 
   describe('All Components', () => {
     it('should display all components', async () => {
-      const { container, findByTestId } = render(
-        wrapProvider(<ListComponents />),
-      );
+      const { container, findByTestId } = render(wrapProvider(<ListComponents />));
 
-      await checkAndGetTabComponent(
-        container,
-        '.ant-tabs-tab:nth-child(1)',
-        'All',
-      );
+      await checkAndGetTabComponent(container, '.ant-tabs-tab:nth-child(1)', 'All');
 
       const firstComponent = allComponentsResponse[0];
       const allComponentsTable = await findByTestId('all-components-table');
 
-      expect(
-        within(allComponentsTable).getByText(firstComponent.tokenId),
-      ).toBeInTheDocument();
-      expect(
-        within(allComponentsTable).getByText(/0x8626...9C1199/),
-      ).toBeInTheDocument();
-      expect(
-        within(allComponentsTable).getByText(/0x9cf4...315ab0/),
-      ).toBeInTheDocument();
-      expect(
-        within(allComponentsTable).getByText(firstComponent.publicId),
-      ).toBeInTheDocument();
+      expect(within(allComponentsTable).getByText(firstComponent.tokenId)).toBeInTheDocument();
+      expect(within(allComponentsTable).getByText(/0x8626...9C1199/)).toBeInTheDocument();
+      expect(within(allComponentsTable).getByText(/0x9cf4...315ab0/)).toBeInTheDocument();
+      expect(within(allComponentsTable).getByText(firstComponent.publicId)).toBeInTheDocument();
       expect(within(allComponentsTable).getByText('View')).toBeInTheDocument();
     });
 
     it('should display all components search', async () => {
-      const { container, getByRole, findByTestId, getByPlaceholderText } =
-        render(wrapProvider(<ListComponents />));
-
-      await checkAndGetTabComponent(
-        container,
-        '.ant-tabs-tab:nth-child(1)',
-        'All',
+      const { container, getByRole, findByTestId, getByPlaceholderText } = render(
+        wrapProvider(<ListComponents />),
       );
+
+      await checkAndGetTabComponent(container, '.ant-tabs-tab:nth-child(1)', 'All');
 
       const searchInput = getByPlaceholderText('Search...');
       await userEvent.type(searchInput, '!');
@@ -171,18 +148,10 @@ describe('listComponents/index.jsx', () => {
       const firstComponent = allComponentsSearchResponse[0];
       const allComponentsTable = await findByTestId('all-components-table');
 
-      expect(
-        within(allComponentsTable).getByText(firstComponent.tokenId),
-      ).toBeInTheDocument();
-      expect(
-        within(allComponentsTable).getByText(/0x8626...9C1199/),
-      ).toBeInTheDocument();
-      expect(
-        within(allComponentsTable).getByText(/0x9cf4...315ab0/),
-      ).toBeInTheDocument();
-      expect(
-        within(allComponentsTable).getByText(firstComponent.publicId),
-      ).toBeInTheDocument();
+      expect(within(allComponentsTable).getByText(firstComponent.tokenId)).toBeInTheDocument();
+      expect(within(allComponentsTable).getByText(/0x8626...9C1199/)).toBeInTheDocument();
+      expect(within(allComponentsTable).getByText(/0x9cf4...315ab0/)).toBeInTheDocument();
+      expect(within(allComponentsTable).getByText(firstComponent.publicId)).toBeInTheDocument();
       expect(within(allComponentsTable).getByText('View')).toBeInTheDocument();
     });
 
@@ -197,13 +166,10 @@ describe('listComponents/index.jsx', () => {
       });
 
       it('should have search input if "search" query string is available', async () => {
-        const { findByPlaceholderText } = render(
-          wrapProvider(<ListComponents />),
-        );
+        const { findByPlaceholderText } = render(wrapProvider(<ListComponents />));
 
         const searchInput = await findByPlaceholderText('Search...');
-        if (!searchInput)
-          throw new Error('Search input not found in `All` tab');
+        if (!searchInput) throw new Error('Search input not found in `All` tab');
         expect(searchInput).toHaveValue('Random search string');
       });
     });
@@ -211,43 +177,26 @@ describe('listComponents/index.jsx', () => {
 
   describe('My Components', () => {
     it('should display my components', async () => {
-      const { container, findByTestId } = render(
-        wrapProvider(<ListComponents />),
-      );
+      const { container, findByTestId } = render(wrapProvider(<ListComponents />));
 
-      await checkAndGetTabComponent(
-        container,
-        '.ant-tabs-tab:nth-child(2)',
-        'My Components',
-      );
+      await checkAndGetTabComponent(container, '.ant-tabs-tab:nth-child(2)', 'My Components');
 
       const firstComponent = myComponentsResponse[0];
       const myComponentsTable = await findByTestId('my-components-table');
 
-      expect(
-        within(myComponentsTable).getByText(firstComponent.tokenId),
-      ).toBeInTheDocument();
-      expect(
-        within(myComponentsTable).getByText(/0x8626...9C1000/),
-      ).toBeInTheDocument();
-      expect(
-        within(myComponentsTable).getByText(/0x9cf4...315ab0/),
-      ).toBeInTheDocument();
-      expect(
-        within(myComponentsTable).getByText(firstComponent.publicId),
-      ).toBeInTheDocument();
+      expect(within(myComponentsTable).getByText(firstComponent.tokenId)).toBeInTheDocument();
+      expect(within(myComponentsTable).getByText(/0x8626...9C1000/)).toBeInTheDocument();
+      expect(within(myComponentsTable).getByText(/0x9cf4...315ab0/)).toBeInTheDocument();
+      expect(within(myComponentsTable).getByText(firstComponent.publicId)).toBeInTheDocument();
       expect(within(myComponentsTable).getByText('View')).toBeInTheDocument();
     });
 
     it('should display my components search', async () => {
-      const { container, getByRole, findByTestId, getByPlaceholderText } =
-        render(wrapProvider(<ListComponents />));
-
-      await checkAndGetTabComponent(
-        container,
-        '.ant-tabs-tab:nth-child(2)',
-        'My Components',
+      const { container, getByRole, findByTestId, getByPlaceholderText } = render(
+        wrapProvider(<ListComponents />),
       );
+
+      await checkAndGetTabComponent(container, '.ant-tabs-tab:nth-child(2)', 'My Components');
 
       const searchInput = getByPlaceholderText('Search...');
       await userEvent.type(searchInput, '!');
@@ -258,18 +207,10 @@ describe('listComponents/index.jsx', () => {
       const firstComponent = allComponentsSearchResponse[0];
       const myComponentsTable = await findByTestId('my-components-table');
 
-      expect(
-        within(myComponentsTable).getByText(firstComponent.tokenId),
-      ).toBeInTheDocument();
-      expect(
-        within(myComponentsTable).getByText(/0x8626...9C1199/),
-      ).toBeInTheDocument();
-      expect(
-        within(myComponentsTable).getByText(/0x9cf4...315ab0/),
-      ).toBeInTheDocument();
-      expect(
-        within(myComponentsTable).getByText(firstComponent.publicId),
-      ).toBeInTheDocument();
+      expect(within(myComponentsTable).getByText(firstComponent.tokenId)).toBeInTheDocument();
+      expect(within(myComponentsTable).getByText(/0x8626...9C1199/)).toBeInTheDocument();
+      expect(within(myComponentsTable).getByText(/0x9cf4...315ab0/)).toBeInTheDocument();
+      expect(within(myComponentsTable).getByText(firstComponent.publicId)).toBeInTheDocument();
       expect(within(myComponentsTable).getByText('View')).toBeInTheDocument();
     });
 
@@ -284,19 +225,12 @@ describe('listComponents/index.jsx', () => {
       });
 
       it('should switch to `My Components` tab if `tab` query is available and `search` query is available', async () => {
-        const { container, findByPlaceholderText } = render(
-          wrapProvider(<ListComponents />),
-        );
+        const { container, findByPlaceholderText } = render(wrapProvider(<ListComponents />));
 
-        await checkAndGetTabComponent(
-          container,
-          '.ant-tabs-tab:nth-child(2)',
-          'My Components',
-        );
+        await checkAndGetTabComponent(container, '.ant-tabs-tab:nth-child(2)', 'My Components');
 
         const searchInput = await findByPlaceholderText('Search...');
-        if (!searchInput)
-          throw new Error('Search input not found in `My Components` tab');
+        if (!searchInput) throw new Error('Search input not found in `My Components` tab');
 
         expect(searchInput).toHaveValue('Random search string');
       });

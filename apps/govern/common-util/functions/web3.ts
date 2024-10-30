@@ -3,6 +3,7 @@ import Web3 from 'web3';
 import { AbiItem } from 'web3-utils';
 
 import {
+  GOVERNOR_OLAS,
   OLAS,
   TOKENOMICS,
   TREASURY,
@@ -63,6 +64,13 @@ export const getTokenomicsContract = () => {
 export const getTreasuryContract = () => {
   const abi = TREASURY.abi as AbiItem[];
   const address = TREASURY.addresses[mainnet.id];
+  const contract = getContract(abi, address);
+  return contract;
+};
+
+export const getGovernorContract = () => {
+  const abi = GOVERNOR_OLAS.abi as AbiItem[];
+  const address = GOVERNOR_OLAS.addresses[mainnet.id];
   const contract = getContract(abi, address);
   return contract;
 };

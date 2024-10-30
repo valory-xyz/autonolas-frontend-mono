@@ -54,7 +54,9 @@ const MenuInstance: FC<MenuInstanceProps> = ({ selectedMenu, handleMenuItemClick
         handleMenuItemClick({
           label: '',
           key,
-          path: PAGES_TO_LOAD_WITH_CHAIN_ID.includes(key) ? `/${networkName || 'ethereum'}/${key}` : `/${key}`,
+          path: PAGES_TO_LOAD_WITH_CHAIN_ID.includes(key)
+            ? `/${networkName || 'ethereum'}/${key}`
+            : `/${key}`,
         })
       }
     />

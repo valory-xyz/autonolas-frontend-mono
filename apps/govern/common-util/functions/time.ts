@@ -1,4 +1,8 @@
+import { Block } from 'viem';
+
 import { NA } from 'libs/util-constants/src';
+
+import { SECONDS_PER_BLOCK } from 'common-util/constants/time';
 
 // Returns the closest Thursday in the future
 // which is the start of the next week by Unix time
@@ -55,17 +59,17 @@ export function getFormattedDate(ms: number): string {
 
 /**
  * Get formatted date from milliseconds including time
- * example, 1678320000000 => Mar 09 '2023 16:00
+ * example, 1678320000000 => Mar 09 '2023 16:00 (local time)
  */
 export function getFullFormattedDate(ms: number): string {
   if (ms == 0) return NA;
 
   const date = new Date(ms);
   const month = MONTHS[date.getMonth()];
-  const day = date.getUTCDate();
-  const year = date.getUTCFullYear();
-  const hours = date.getUTCHours();
-  const minutes = date.getUTCMinutes();
+  const day = date.getDate();
+  const year = date.getFullYear();
+  const hours = date.getHours();
+  const minutes = date.getMinutes();
 
   return (
     month +
@@ -101,4 +105,19 @@ export const getRemainingTimeInSeconds = (unlockTime?: number) => {
   const futureDateInTimeStamp = new Date(unlockTime).getTime();
   const todayDateInTimeStamp = new Date().getTime();
   return Math.round((futureDateInTimeStamp - todayDateInTimeStamp) / 1000);
+};
+
+/**
+ * Returns estimated time in future based on provided block
+ */
+export const estimateFutureBlockTimestamp = (
+  currentBlock: Block | undefined,
+  futureBlockNumber: bigint,
+) => {
+  if (!currentBlock) return null;
+  const currentBlockNumber = currentBlock.number as bigint;
+  const currentBlockTimestamp = currentBlock.timestamp;
+  const blockDifference = futureBlockNumber - currentBlockNumber;
+  const estimatedTimestamp = currentBlockTimestamp + blockDifference * BigInt(SECONDS_PER_BLOCK);
+  return estimatedTimestamp;
 };

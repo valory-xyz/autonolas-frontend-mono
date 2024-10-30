@@ -30,20 +30,16 @@ export const errorStore = mockStore({
   setup: { account: dummyAddress, errorMessage: 'Error in store' },
 });
 
-export const wrapProviderError = (component) => (
-  <Provider store={errorStore}>{component}</Provider>
-);
+export const wrapProviderError = (component) => <Provider store={errorStore}>{component}</Provider>;
 
 export const getTableTh = (i) => `.ant-table-thead > tr > th:nth-child(${i})`;
 
 export const getTableTd = (i) =>
   `.ant-table-tbody > tr.ant-table-row.ant-table-row-level-0 > td:nth-child(${i})`;
 
-export const mockV1Hash =
-  '6f3212908f2e7a0249b67b05f237a40b76b7d8ef36d5620b281ceb47dcb6b122';
+export const mockV1Hash = '6f3212908f2e7a0249b67b05f237a40b76b7d8ef36d5620b281ceb47dcb6b122';
 
-export const mockNftImageHash =
-  'Qmbh9SQLbNRawh9Km3PMEDSxo77k1wib8fYZUdZkhPBiev';
+export const mockNftImageHash = 'Qmbh9SQLbNRawh9Km3PMEDSxo77k1wib8fYZUdZkhPBiev';
 
 export const mockCodeUri =
   'f017012209cf4ae0b5d082843b3b34d0d400abbeffcb5a98b68ea89f3abf151f182315ab0';
@@ -127,8 +123,7 @@ export const svmServiceStateMock = {
   serviceOwner: 'DrGvsAxY8ehyXjE6qSZXcT5A9pTsUkVm3en5ZQD3Wm5x',
   securityDeposit: '01',
   multisig: 'CsZ2ZbCGALZ2p8Np9hFmgMDXVYg4X9i5zYN8nvbPYJ6D',
-  configHash:
-    '327277b25e86f19a5e4e5cf4bee643f3eb219067af05ca8929cb1cfcbf673b08',
+  configHash: '327277b25e86f19a5e4e5cf4bee643f3eb219067af05ca8929cb1cfcbf673b08',
   threshold: 1,
   maxNumAgentInstances: 1,
   numAgentInstances: 1,

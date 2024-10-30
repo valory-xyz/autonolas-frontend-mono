@@ -65,7 +65,13 @@ const getColumns = (
   },
 ];
 
-export const RewardsSection: FC<RewardsSectionProps> = ({ ownerAddress, isOwner, id, type, dataTestId }) => {
+export const RewardsSection: FC<RewardsSectionProps> = ({
+  ownerAddress,
+  isOwner,
+  id,
+  type,
+  dataTestId,
+}) => {
   const { account } = useHelpers();
 
   const [isClaimLoading, setIsClaimLoading] = useState(false);
@@ -182,7 +188,7 @@ export const RewardsSection: FC<RewardsSectionProps> = ({ ownerAddress, isOwner,
         pagination={false}
         style={{ maxWidth: '550px' }}
       />
-      <a href="https://tokenomics.olas.network/donate" target="_blank" rel="noopener noreferrer">
+      <a href="https://govern.olas.network/donate" target="_blank" rel="noopener noreferrer">
         Make donation {UNICODE_SYMBOLS.EXTERNAL_LINK}
       </a>
     </Flex>

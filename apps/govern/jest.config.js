@@ -21,7 +21,8 @@ module.exports = {
   setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx'],
   transform: {
-    '^.+\\.[tj]sx?$': ['ts-jest',
+    '^.+\\.[tj]sx?$': [
+      'ts-jest',
       {
         presets: ['@nx/next/babel'],
         tsconfig: '<rootDir>/tsconfig.spec.json',

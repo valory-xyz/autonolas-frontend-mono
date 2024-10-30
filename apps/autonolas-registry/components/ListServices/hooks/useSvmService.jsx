@@ -5,21 +5,14 @@
 
 import { useCallback } from 'react';
 import { BorshCoder } from '@project-serum/anchor';
-import {
-  TransactionMessage,
-  VersionedTransaction,
-  PublicKey,
-} from '@solana/web3.js';
+import { TransactionMessage, VersionedTransaction, PublicKey } from '@solana/web3.js';
 import { memoize } from 'lodash';
 import { areAddressesEqual } from '@autonolas/frontend-library';
 
 import { SERVICE_STATE_KEY_MAP, TOTAL_VIEW_COUNT } from 'util/constants';
 import idl from 'common-util/AbiAndAddresses/ServiceRegistrySolana.json';
 import { useSvmConnectivity } from 'common-util/hooks/useSvmConnectivity';
-import {
-  transformDatasourceForServiceTable,
-  transformSlotsAndBonds,
-} from '../helpers/functions';
+import { transformDatasourceForServiceTable, transformSlotsAndBonds } from '../helpers/functions';
 
 const getLatestBlockhash = memoize(async (connection) => {
   const block = await connection.getLatestBlockhash();
@@ -53,10 +46,7 @@ const deseralizeProgramData = (serializedValue, decodeTypeName) => {
   }
 
   const borshCoder = new BorshCoder(idl);
-  const decodedResult = borshCoder.types.decode(
-    decodeTypeName,
-    serializedValue,
-  );
+  const decodedResult = borshCoder.types.decode(decodeTypeName, serializedValue);
   return decodedResult;
 };
 
@@ -64,9 +54,7 @@ const deseralizeProgramData = (serializedValue, decodeTypeName) => {
 // hook to only READ data from the SVM (Solana)
 export const useSvmDataFetch = () => {
   // NOTE: Using `tempWalletPublicKey` to read data from the program
-  const {
-    tempWalletPublicKey, connection, program, solanaAddresses,
-  } = useSvmConnectivity();
+  const { tempWalletPublicKey, connection, program, solanaAddresses } = useSvmConnectivity();
 
   const getTransactionLogs = useCallback(
     async (fn, fnArgs) => {
@@ -198,9 +186,7 @@ const transformServiceData = (service, serviceId) => {
   // convert to base58 ie. readable format
   const multisig = new PublicKey(service.multisig).toBase58();
   // convert configHash u32 to hex string
-  const decodedConfigHash = Buffer.from(service.configHash, 'utf8').toString(
-    'hex',
-  );
+  const decodedConfigHash = Buffer.from(service.configHash, 'utf8').toString('hex');
 
   return {
     ...service,
@@ -235,9 +221,7 @@ const useGetServices = () => {
     async (total, nextPage, fetchAll = false) => {
       const promises = [];
       const first = fetchAll ? 1 : (nextPage - 1) * TOTAL_VIEW_COUNT + 1;
-      const last = fetchAll
-        ? total
-        : Math.min(nextPage * TOTAL_VIEW_COUNT, total);
+      const last = fetchAll ? total : Math.min(nextPage * TOTAL_VIEW_COUNT, total);
 
       for (let i = first; i <= last; i += 1) {
         promises.push(getSvmServiceDetails(i));
@@ -326,11 +310,7 @@ export const useSvmBonds = () => {
 
   const getSvmBonds = useCallback(
     async (id, tableDataSource) => {
-      const response = await readSvmData(
-        'getAgentParams',
-        [id],
-        'getAgentParams_returns',
-      );
+      const response = await readSvmData('getAgentParams', [id], 'getAgentParams_returns');
 
       const bondsArray = [];
       const slotsArray = [];
@@ -395,11 +375,7 @@ export const useAgentInstanceAndOperator = () => {
 
   const getSvmAgentInstanceAndOperator = useCallback(
     async (id) => {
-      const response = await readSvmData(
-        'getAgentInstances',
-        [id],
-        'getAgentInstances_returns',
-      );
+      const response = await readSvmData('getAgentInstances', [id], 'getAgentInstances_returns');
 
       const data = await Promise.all(
         (response?.agentInstances || []).map(async (agentInstance, index) => {

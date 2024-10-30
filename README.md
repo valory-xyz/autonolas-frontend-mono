@@ -2,9 +2,10 @@
 
 This mono repo contains the frontend for the Autonolas project. It is based on the Nx workspace and contains the following projects:
 - [Registry](https://registry.olas.network/)
-- [Tokenomics](https://tokenomics.olas.network/)
-- [Launch](https://launch.olas.network/)
+- [Bond](https://bond.olas.network/)
 - [Govern](https://govern.olas.network/)
+- [Launch](https://launch.olas.network/)
+- [Operate](https://operate.olas.network/)
 
 ## Start the app
 

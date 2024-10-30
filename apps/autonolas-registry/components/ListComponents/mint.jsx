@@ -3,6 +3,8 @@ import { useRouter } from 'next/router';
 import { Typography } from 'antd';
 import { notifyError, notifySuccess } from '@autonolas/frontend-library';
 
+import { getEstimatedGasLimit } from 'libs/util-functions/src';
+
 import RegisterForm from 'common-util/List/RegisterForm';
 import { AlertSuccess, AlertError } from 'common-util/List/ListCommon';
 import { getMechMinterContract } from 'common-util/Contracts';
@@ -29,10 +31,7 @@ const MintComponent = () => {
       setInformation(null);
 
       try {
-        const isValid = await checkIfERC721Receive(
-          account,
-          values.owner_address,
-        );
+        const isValid = await checkIfERC721Receive(account, values.owner_address);
         if (!isValid) {
           setIsMinting(false);
           return;
@@ -43,14 +42,14 @@ const MintComponent = () => {
       }
 
       const contract = getMechMinterContract();
-      const fn = contract.methods
-        .create(
-          '0',
-          values.owner_address,
-          `0x${values.hash}`,
-          values.dependencies ? values.dependencies.split(', ') : [],
-        )
-        .send({ from: account });
+      const createFn = contract.methods.create(
+        '0',
+        values.owner_address,
+        `0x${values.hash}`,
+        values.dependencies ? values.dependencies.split(', ') : [],
+      );
+      const estimatedGas = await getEstimatedGasLimit(createFn, account);
+      const fn = createFn.send({ from: account, gasLimit: estimatedGas });
 
       sendTransaction(fn, account)
         .then((result) => {

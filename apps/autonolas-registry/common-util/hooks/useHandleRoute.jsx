@@ -2,31 +2,20 @@ import { useCallback, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { useRouter } from 'next/router';
 import { toLower } from 'lodash';
- 
+
 import { setVmInfo, setChainId } from 'store/setup';
-import {
-  PAGES_TO_LOAD_WITHOUT_CHAINID,
-  SOLANA_CHAIN_NAMES,
-  URL,
-} from 'util/constants';
+import { PAGES_TO_LOAD_WITHOUT_CHAINID, SOLANA_CHAIN_NAMES, URL } from 'util/constants';
 import { useHelpers } from '../hooks';
 import { ALL_SUPPORTED_CHAINS, EVM_SUPPORTED_CHAINS } from '../Login/config';
-import {
-  doesPathIncludesComponentsOrAgents,
-  isPageWithSolana,
-} from '../functions';
+import { doesPathIncludesComponentsOrAgents, isPageWithSolana } from '../functions';
 
 const isValidNetworkName = (name) => {
-  const isValid = ALL_SUPPORTED_CHAINS.some(
-    (e) => toLower(e.networkName) === toLower(name),
-  );
+  const isValid = ALL_SUPPORTED_CHAINS.some((e) => toLower(e.networkName) === toLower(name));
   return isValid;
 };
 
 const getChainIdFromPath = (networkName) =>
-  EVM_SUPPORTED_CHAINS.find(
-    (e) => toLower(e.networkName) === toLower(networkName),
-  )?.id;
+  EVM_SUPPORTED_CHAINS.find((e) => toLower(e.networkName) === toLower(networkName))?.id;
 
 const isValidL1NetworkName = (name) => {
   if (name === 'ethereum') return true;
@@ -44,16 +33,22 @@ export const useHandleRoute = () => {
   const path = router?.pathname || '';
   const networkNameFromUrl = router?.query?.network;
 
-  const dispatchWithDelay = useCallback((action) => {
-    setTimeout(() => {
-      dispatch(action);
-    }, 0);
-  }, [dispatch]);
+  const dispatchWithDelay = useCallback(
+    (action) => {
+      setTimeout(() => {
+        dispatch(action);
+      }, 0);
+    },
+    [dispatch],
+  );
 
-  const updateChainId = useCallback((id) => {
-    sessionStorage.setItem('chainId', id);
-    dispatchWithDelay(setChainId(id));
-  }, [dispatchWithDelay]);
+  const updateChainId = useCallback(
+    (id) => {
+      sessionStorage.setItem('chainId', id);
+      dispatchWithDelay(setChainId(id));
+    },
+    [dispatchWithDelay],
+  );
 
   // updating the blockchain information in redux
   useEffect(() => {
@@ -115,13 +110,8 @@ export const useHandleRoute = () => {
      */
 
     // User navigates to `/[network]`
-    if (
-      !PAGES_TO_LOAD_WITHOUT_CHAINID.includes(router.asPath) &&
-      pathArray.length === 1
-    ) {
-      router.push(
-        `/${networkNameFromUrl}/${isL1Network ? 'components' : 'services'}`,
-      );
+    if (!PAGES_TO_LOAD_WITHOUT_CHAINID.includes(router.asPath) && pathArray.length === 1) {
+      router.push(`/${networkNameFromUrl}/${isL1Network ? 'components' : 'services'}`);
       return;
     }
 
@@ -136,10 +126,7 @@ export const useHandleRoute = () => {
      * because components & agents are not supported on gnosis
      */
 
-    if (
-      !isValidL1NetworkName(networkNameFromUrl) &&
-      doesPathIncludesComponentsOrAgents(path)
-    ) {
+    if (!isValidL1NetworkName(networkNameFromUrl) && doesPathIncludesComponentsOrAgents(path)) {
       router.push(`/${networkNameFromUrl}/services`);
     }
   }, [path, networkNameFromUrl, isL1Network, router]);

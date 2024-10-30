@@ -2,13 +2,10 @@ import { useState } from 'react';
 import PropTypes from 'prop-types';
 import { useRouter } from 'next/router';
 import { Space } from 'antd';
-import {
-  isLocalNetwork,
-  notifyError,
-  notifySuccess,
-} from '@autonolas/frontend-library';
+import { isLocalNetwork, notifyError, notifySuccess } from '@autonolas/frontend-library';
 
 import { useHelpers } from 'common-util/hooks';
+import { getTokenDetailsRequest } from 'common-util/Details/utils';
 import { SendTransactionButton } from 'common-util/TransactionHelpers/SendTransactionButton';
 import { checkAndApproveToken, mintTokenRequest } from '../utils';
 import { useGetActivateRegistration } from '../useSvmServiceStateManagement';
@@ -33,12 +30,12 @@ export const PreRegistration = ({
       // if not eth, check if the user has sufficient token balance
       // and if not, approve the token
       if (!isEthToken && !isSvm) {
+        const deposit = await getTokenDetailsRequest(serviceId);
         await checkAndApproveToken({
           account,
           chainId,
           serviceId,
-          // any amount, if not ETH token substitute with 1
-          amountToApprove: 1,
+          amountToApprove: deposit.securityDeposit,
         });
       }
 
@@ -49,11 +46,7 @@ export const PreRegistration = ({
       }
 
       // any amount if not ETH token substitute with 1
-      await onActivateRegistration(
-        serviceId,
-        account,
-        isEthToken ? securityDeposit : '1',
-      );
+      await onActivateRegistration(serviceId, account, isEthToken ? securityDeposit : '1');
       await updateDetails();
 
       notifySuccess('Activated successfully');

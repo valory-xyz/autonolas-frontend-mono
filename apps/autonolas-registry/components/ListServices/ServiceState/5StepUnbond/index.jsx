@@ -7,12 +7,7 @@ import { useHelpers } from 'common-util/hooks';
 import { SendTransactionButton } from 'common-util/TransactionHelpers/SendTransactionButton';
 import { useUnbond } from '../useSvmServiceStateManagement';
 
-export const Unbond = ({
-  serviceId,
-  updateDetails,
-  getButton,
-  getOtherBtnProps,
-}) => {
+export const Unbond = ({ serviceId, updateDetails, getButton, getOtherBtnProps }) => {
   const { account } = useHelpers();
   const operators = useSelector(
     (state) => state?.service?.serviceState?.agentInstancesAndOperators,
@@ -46,11 +41,7 @@ export const Unbond = ({
   );
 
   return getButton(
-    <SendTransactionButton
-      onClick={onUnbond}
-      loading={isUnbonding}
-      {...getOtherBtnProps(5)}
-    >
+    <SendTransactionButton onClick={onUnbond} loading={isUnbonding} {...getOtherBtnProps(5)}>
       Unbond
     </SendTransactionButton>,
     {

@@ -2,10 +2,7 @@ import { useRouter } from 'next/router';
 import { Grid } from 'antd';
 import Link from 'next/link';
 import Image from 'next/image';
-import {
-  Footer as CommonFooter,
-  getExplorerURL,
-} from '@autonolas/frontend-library';
+import { Footer as CommonFooter, getExplorerURL } from '@autonolas/frontend-library';
 
 import { ADDRESSES } from 'common-util/constants/addresses';
 import { useHelpers } from 'common-util/hooks/useHelpers';
@@ -68,19 +65,13 @@ const ContractInfo = () => {
     </div>
   );
 
-  const { textOne, addressOne, textTwo, addressTwo } =
-    getCurrentPageAddresses();
+  const { textOne, addressOne, textTwo, addressTwo } = getCurrentPageAddresses();
 
   return (
     <ContractsInfoContainer>
       {!PATHS_NOT_TO_SHOW.includes(pathname) && (
         <>
-          <Image
-            alt="Etherscan link"
-            width={18}
-            height={18}
-            src="/images/etherscan-logo.svg"
-          />
+          <Image alt="Etherscan link" width={18} height={18} src="/images/etherscan-logo.svg" />
           <span>Contracts</span>
           &nbsp;•&nbsp;
           {getContractInfo(textOne, addressOne)}

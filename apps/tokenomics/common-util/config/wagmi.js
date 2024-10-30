@@ -1,11 +1,6 @@
 import { http, createConfig } from 'wagmi';
 import { mainnet, goerli } from 'wagmi/chains';
-import {
-  safe,
-  walletConnect,
-  injected,
-  coinbaseWallet,
-} from 'wagmi/connectors';
+import { safe, walletConnect, injected, coinbaseWallet } from 'wagmi/connectors';
 import { RPC_URLS } from 'common-util/constants/rpcs';
 
 export const SUPPORTED_CHAINS = [mainnet, goerli];
@@ -39,8 +34,7 @@ export const wagmiConfig = createConfig({
     }),
   ],
   transports: SUPPORTED_CHAINS.reduce(
-    (acc, chain) =>
-      Object.assign(acc, { [chain.id]: http(RPC_URLS[chain.id]) }),
+    (acc, chain) => Object.assign(acc, { [chain.id]: http(RPC_URLS[chain.id]) }),
     {},
   ),
 });

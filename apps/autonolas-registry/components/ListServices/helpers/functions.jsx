@@ -52,11 +52,7 @@ export const getNumberOfAgentAddress = (agentAddresses) => {
  * bonds: [100, 200]
  * output: 2 * 100 + 3 * 200 = 800
  */
-export const transformSlotsAndBonds = (
-  slotsArray,
-  bondsArray,
-  tableDataSource,
-) => {
+export const transformSlotsAndBonds = (slotsArray, bondsArray, tableDataSource) => {
   let totalBonds = 0;
   (tableDataSource || []).forEach((data) => {
     const { agentAddresses, bond } = data;

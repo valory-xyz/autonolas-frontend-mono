@@ -21,7 +21,6 @@ Object.defineProperty(window, 'matchMedia', {
   })),
 });
 
-
 const { gnosis, mainnet, polygon } = require('viem/chains');
 
 jest.mock('wagmi/chains', () => ({
@@ -29,4 +28,3 @@ jest.mock('wagmi/chains', () => ({
   mainnet,
   polygon,
 }));
-

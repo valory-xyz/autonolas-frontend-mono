@@ -1,6 +1,6 @@
 import '@testing-library/jest-dom/jest-globals';
 import '@testing-library/jest-dom';
-import { TextEncoder } from 'util'; 
+import { TextEncoder } from 'util';
 
 global.TextEncoder = TextEncoder;
 
@@ -44,4 +44,17 @@ jest.mock('./common-util/Login', () => ({
 jest.mock('./common-util/Login/config', () => ({
   EVM_SUPPORTED_CHAINS: [{ id: 1 }],
   SVM_SUPPORTED_CHAINS: [{ id: 1 }],
+}));
+
+const { mainnet, optimism, gnosis, polygon, base, arbitrum, celo, mode } = require('viem/chains');
+
+jest.mock('wagmi/chains', () => ({
+  mainnet,
+  optimism,
+  gnosis,
+  polygon,
+  base,
+  arbitrum,
+  celo,
+  mode,
 }));

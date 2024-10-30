@@ -5,6 +5,7 @@ import { useAccount, useBlock } from 'wagmi';
 import { useNominees } from 'libs/common-contract-functions/src';
 
 import { LATEST_BLOCK_KEY, NEXT_USERS_SLOPES_KEY } from 'common-util/constants/scopeKeys';
+import { SECONDS_PER_BLOCK } from 'common-util/constants/time';
 import { getUnixWeekStartTimestamp } from 'common-util/functions/time';
 import { setLastUserVote, setUserVotes } from 'store/govern';
 import { useAppDispatch, useAppSelector } from 'store/index';
@@ -13,8 +14,6 @@ import { useLastUserVote } from './useLastUserVote';
 import { useVoteUserPower } from './useVoteUserPower';
 import { useVoteUserSlopes } from './useVoteUserSlopes';
 
-// approx time when Ethereum blockchain produces a new block
-const SECONDS_PER_BLOCK = 12;
 const CONTRACT_DEPLOY_BLOCK = 20312875;
 
 // Current votes are those that have been applied at the start of the week (unix time)

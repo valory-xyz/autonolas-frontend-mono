@@ -28,11 +28,7 @@ const getAllAndMyServicesQuery = (currentPage, ownerAddress = null) => {
         skip: ${TOTAL_VIEW_COUNT * (currentPage - 1)}
         orderBy: serviceId
         orderDirection: desc
-        ${
-          ownerAddress
-            ? `where: { owner_contains_nocase: "${ownerAddress}" }`
-            : ''
-        }
+        ${ownerAddress ? `where: { owner_contains_nocase: "${ownerAddress}" }` : ''}
       ) ${SERVICE_FIELDS}
     }
   `;
@@ -60,11 +56,7 @@ export const getSearchFilterSubQueryForServices = (searchValue) => {
   }`;
 };
 
-const getServicesBySearchQuery = (
-  searchValue,
-  currentPage,
-  ownerAddress = null,
-) => {
+const getServicesBySearchQuery = (searchValue, currentPage, ownerAddress = null) => {
   return gql`
     {
       services (
@@ -72,9 +64,7 @@ const getServicesBySearchQuery = (
         skip: ${TOTAL_VIEW_COUNT * (currentPage - 1)}
         where: {
           and: [
-            ${
-              ownerAddress ? `{ owner_contains_nocase: "${ownerAddress}" }` : ''
-            }
+            ${ownerAddress ? `{ owner_contains_nocase: "${ownerAddress}" }` : ''}
             ${getSearchFilterSubQueryForServices(searchValue)},
           ]
         }
@@ -128,11 +118,7 @@ export const useAllServicesBySearch = () => {
  */
 export const useMyServicesBySearch = () => {
   return useCallback(async (searchValue, currentPage, ownerAddress) => {
-    const query = getServicesBySearchQuery(
-      searchValue,
-      currentPage,
-      ownerAddress,
-    );
+    const query = getServicesBySearchQuery(searchValue, currentPage, ownerAddress);
     const response = await GRAPHQL_CLIENT.request(query);
     return response?.services || [];
   }, []);

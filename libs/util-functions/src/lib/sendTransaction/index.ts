@@ -18,9 +18,10 @@ export const SAFE_API_POLYGON =
 /**
  * returns the gnosis-safe API url based on the chainId.
  * Here is the ist of available gnosis safe transaction service
- * https://docs.safe.global/safe-core-api/available-services
+ * @see https://docs.safe.global/core-api/transaction-service-supported-networks
  */
 export const getUrl = (hash: string, chainId: number) => {
+  // TODO: update the URL for supported chains
   switch (chainId) {
     case 5:
       return `${process.env['NEXT_PUBLIC_GNOSIS_SAFE_API_GOERLI'] || SAFE_API_GOERLI}/${hash}`;
@@ -48,10 +49,7 @@ export const sendTransaction = async (
       if (!provider) return false;
 
       try {
-        const getCodeFn = provider?.provider?.getCode;
-        if (!getCodeFn) return false;
-
-        const code = await getCodeFn(account);
+        const code = await provider.getCode(account);
         return code !== '0x';
       } catch (error) {
         console.error(error);
@@ -68,7 +66,7 @@ export const sendTransaction = async (
        */
       notifyWarning('Please submit the transaction in your safe app.');
 
-      sendFn.on('transactionHash', async (safeTx: string) => {
+      return sendFn.on('transactionHash', async (safeTx: string) => {
         window.console.log('safeTx', safeTx);
 
         /**
@@ -94,6 +92,4 @@ export const sendTransaction = async (
     notifyError('Error occurred while sending transaction');
     throw e;
   }
-
-  return null;
 };

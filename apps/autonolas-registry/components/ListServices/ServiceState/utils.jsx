@@ -1,7 +1,9 @@
 import { ethers } from 'ethers';
+
 import { notifyError } from '@autonolas/frontend-library';
 
-import { DEFAULT_SERVICE_CREATION_ETH_TOKEN_ZEROS } from 'util/constants';
+import { getEstimatedGasLimit } from 'libs/util-functions/src';
+
 import {
   getGenericErc20Contract,
   getServiceContract,
@@ -9,12 +11,11 @@ import {
   getServiceRegistryTokenUtilityContract,
 } from 'common-util/Contracts';
 import { ADDRESSES } from 'common-util/Contracts/addresses';
-import { sendTransaction } from 'common-util/functions';
 import { getTokenDetailsRequest } from 'common-util/Details/utils';
-import {
-  transformDatasourceForServiceTable,
-  transformSlotsAndBonds,
-} from '../helpers/functions';
+import { sendTransaction } from 'common-util/functions';
+import { DEFAULT_SERVICE_CREATION_ETH_TOKEN_ZEROS } from 'util/constants';
+
+import { transformDatasourceForServiceTable, transformSlotsAndBonds } from '../helpers/functions';
 
 /* ----- helper functions ----- */
 
@@ -44,19 +45,18 @@ export const getBonds = async (id, tableDataSource) => {
     bondsArray.push(bond);
   }
 
-  const transformedSlotsAndBonds = transformSlotsAndBonds(
-    slotsArray,
-    bondsArray,
-    tableDataSource,
-  );
+  const transformedSlotsAndBonds = transformSlotsAndBonds(slotsArray, bondsArray, tableDataSource);
   return transformedSlotsAndBonds;
 };
 
 /* ----- common functions ----- */
 export const onTerminate = async (account, id) => {
   const contract = getServiceManagerContract();
-  const fn = contract.methods.terminate(id).send({
+  const terminateFn = contract.methods.terminate(id);
+  const estimatedGas = await getEstimatedGasLimit(terminateFn, account);
+  const fn = terminateFn.send({
     from: account,
+    gasLimit: estimatedGas,
   });
   const response = await sendTransaction(fn, account);
   return response;
@@ -68,12 +68,7 @@ export const getServiceOwner = async (id) => {
   return response;
 };
 
-const hasSufficientTokenRequest = async ({
-  account,
-  chainId,
-  serviceId,
-  amountToApprove,
-}) => {
+const hasSufficientTokenRequest = async ({ account, chainId, serviceId, amountToApprove }) => {
   /**
    * - fetch the token address from the serviceId
    * - fetch the allowance of the token using the token address
@@ -89,12 +84,7 @@ const hasSufficientTokenRequest = async ({
 /**
  * Approves token
  */
-const approveToken = async ({
-  account,
-  chainId,
-  serviceId,
-  amountToApprove,
-}) => {
+const approveToken = async ({ account, chainId, serviceId, amountToApprove }) => {
   const { token } = await getTokenDetailsRequest(serviceId);
   const contract = getGenericErc20Contract(token);
   const fn = contract.methods
@@ -105,12 +95,7 @@ const approveToken = async ({
   return response;
 };
 
-export const checkAndApproveToken = async ({
-  account,
-  chainId,
-  serviceId,
-  amountToApprove,
-}) => {
+export const checkAndApproveToken = async ({ account, chainId, serviceId, amountToApprove }) => {
   const hasTokenBalance = await hasSufficientTokenRequest({
     account,
     chainId,
@@ -141,17 +126,18 @@ export const checkIfEth = async (id) => {
 export const mintTokenRequest = async ({ account, serviceId }) => {
   const { token } = await getTokenDetailsRequest(serviceId);
   const contract = getGenericErc20Contract(token);
-  const fn = contract.methods
-    .mint(account, ethers.parseEther('1000'))
-    .send({ from: account });
+  const fn = contract.methods.mint(account, ethers.parseEther('1000')).send({ from: account });
   await sendTransaction(fn, account);
   return null;
 };
 
 export const onActivateRegistration = async (id, account, deposit) => {
   const contract = getServiceManagerContract();
+  const activateRegistrationFn = contract.methods.activateRegistration(id);
+  const estimatedGas = await getEstimatedGasLimit(activateRegistrationFn, account, deposit);
   const fn = contract.methods.activateRegistration(id).send({
     from: account,
+    gasLimit: estimatedGas,
     value: deposit,
   });
 
@@ -200,9 +186,7 @@ export const getServiceTableDataSource = async (id, agentIds) => {
    */
   const numAgentInstancesArray = await Promise.all(
     agentIds.map(async (agentId) => {
-      const info = await contract.methods
-        .getInstancesForAgentId(id, agentId)
-        .call();
+      const info = await contract.methods.getInstancesForAgentId(id, agentId).call();
       return info.numAgentInstances;
     }),
   );
@@ -216,34 +200,26 @@ export const getServiceTableDataSource = async (id, agentIds) => {
   return dateSource;
 };
 
-export const checkIfAgentInstancesAreValid = async ({
-  account,
-  agentInstances,
-}) => {
+export const checkIfAgentInstancesAreValid = async ({ account, agentInstances }) => {
   const contract = getServiceContract();
 
   // check if the operator is registered as an agent instance already
-  const operator = await contract.methods
-    .mapAgentInstanceOperators(account)
-    .call();
+  const operator = await contract.methods.mapAgentInstanceOperators(account).call();
   if (operator !== DEFAULT_SERVICE_CREATION_ETH_TOKEN_ZEROS) {
     notifyError('The operator is registered as an agent instance already.');
     return false;
   }
 
   // check if the agent instances are valid
-  const agentInstanceAddressesPromises = agentInstances.map(
-    async (agentInstance) => {
-      const eachAgentInstance = await contract.methods
-        .mapAgentInstanceOperators(agentInstance)
-        .call();
-      return eachAgentInstance;
-    },
-  );
+  const agentInstanceAddressesPromises = agentInstances.map(async (agentInstance) => {
+    const eachAgentInstance = await contract.methods
+      .mapAgentInstanceOperators(agentInstance)
+      .call();
+    return eachAgentInstance;
+  });
 
   const ifValidArray = (await Promise.all(agentInstanceAddressesPromises)).some(
-    (eachAgentInstance) =>
-      eachAgentInstance === DEFAULT_SERVICE_CREATION_ETH_TOKEN_ZEROS,
+    (eachAgentInstance) => eachAgentInstance === DEFAULT_SERVICE_CREATION_ETH_TOKEN_ZEROS,
   );
 
   if (!ifValidArray) {
@@ -264,9 +240,13 @@ export const onStep2RegisterAgents = async ({
   const contract = getServiceManagerContract();
   const { totalBonds } = await getBonds(serviceId, dataSource);
 
-  const fn = contract.methods
-    .registerAgents(serviceId, agentInstances, agentIds)
-    .send({ from: account, value: `${totalBonds}` });
+  const registerAgentsFn = contract.methods.registerAgents(serviceId, agentInstances, agentIds);
+  const estimatedGas = await getEstimatedGasLimit(registerAgentsFn, account, `${totalBonds}`);
+  const fn = registerAgentsFn.send({
+    from: account,
+    gasLimit: estimatedGas,
+    value: `${totalBonds}`,
+  });
   const response = await sendTransaction(fn, account);
   return response;
 };
@@ -287,17 +267,13 @@ export const getServiceAgentInstances = async (id) => {
   return response?.agentInstances;
 };
 
-export const onStep3Deploy = async (
-  account,
-  id,
-  radioValue,
-  payload = '0x',
-) => {
+export const onStep3Deploy = async (account, id, radioValue, payload = '0x') => {
   const contract = getServiceManagerContract();
-  const fn = contract.methods
-    .deploy(id, radioValue, payload)
-    .send({ from: account });
-  const response = sendTransaction(fn, account);
+
+  const deployFn = contract.methods.deploy(id, radioValue, payload);
+  const estimatedGas = await getEstimatedGasLimit(deployFn, account);
+  const fn = deployFn.send({ from: account, gasLimit: estimatedGas });
+  const response = await sendTransaction(fn, account, { isLegacy: true });
   return response;
 };
 
@@ -307,9 +283,7 @@ export const getAgentInstanceAndOperator = async (id) => {
   const response = await contract.methods.getAgentInstances(id).call();
   const data = await Promise.all(
     (response?.agentInstances || []).map(async (key, index) => {
-      const operatorAddress = await contract.methods
-        .mapAgentInstanceOperators(key)
-        .call();
+      const operatorAddress = await contract.methods.mapAgentInstanceOperators(key).call();
       return {
         id: `agent-instance-row-${index + 1}`,
         operatorAddress,
@@ -323,7 +297,9 @@ export const getAgentInstanceAndOperator = async (id) => {
 /* ----- step 5 functions ----- */
 export const onStep5Unbond = async (account, id) => {
   const contract = getServiceManagerContract();
-  const fn = contract.methods.unbond(id).send({ from: account });
+  const unbondFn = contract.methods.unbond(id);
+  const estimatedGas = await getEstimatedGasLimit(unbondFn, account);
+  const fn = unbondFn.send({ from: account, gasLimit: estimatedGas });
   const response = await sendTransaction(fn, account);
   return response;
 };

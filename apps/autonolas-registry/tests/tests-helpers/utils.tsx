@@ -15,17 +15,13 @@ export const checkAndGetTabComponent = async (
   }
 
   // wait until the tab is enabled
-  await waitFor(async () =>
-    expect(unitTab).not.toHaveAttribute('aria-disabled'),
-  );
+  await waitFor(async () => expect(unitTab).not.toHaveAttribute('aria-disabled'));
 
   // click the tab
   await userEvent.click(unitTab);
 
   // check if the selected tab is active
-  await waitFor(async () =>
-    expect(container.querySelector(ACTIVE_TAB)?.textContent).toBe(tabName),
-  );
+  await waitFor(async () => expect(container.querySelector(ACTIVE_TAB)?.textContent).toBe(tabName));
 
   return unitTab;
 };

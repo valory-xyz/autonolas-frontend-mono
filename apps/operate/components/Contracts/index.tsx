@@ -1,5 +1,5 @@
 import { DownOutlined, RightOutlined } from '@ant-design/icons';
-import { Card, Table, Tag, Typography } from 'antd';
+import { Card, Flex, Table, Tag, Typography } from 'antd';
 import { ColumnsType } from 'antd/es/table';
 import styled from 'styled-components';
 import { StakingContract } from 'types';
@@ -8,8 +8,9 @@ import { Caption, TextWithTooltip } from 'libs/ui-components/src';
 import { BREAK_POINT } from 'libs/ui-theme/src';
 import { CHAIN_NAMES, GOVERN_URL, NA, UNICODE_SYMBOLS } from 'libs/util-constants/src';
 
-import { useStakingContractsList } from './hooks';
 import { RunAgentButton } from 'components/RunAgentButton';
+
+import { useStakingContractsList } from './hooks';
 
 const StyledMain = styled.main`
   display: flex;
@@ -25,12 +26,13 @@ const columns: ColumnsType<StakingContract> = [
     title: 'Contract',
     dataIndex: 'metadata',
     key: 'address',
-    render: (metadata) => <Text strong>{metadata.name || NA}</Text>,
+    render: (metadata) => <Text strong>{metadata?.name || NA}</Text>,
   },
   {
     title: 'Chain',
     dataIndex: 'chainId',
     key: 'chainId',
+    width: 120,
     render: (chainId) => <Text type="secondary">{CHAIN_NAMES[chainId] || chainId}</Text>,
   },
   {
@@ -38,18 +40,44 @@ const columns: ColumnsType<StakingContract> = [
     dataIndex: 'availableSlots',
     key: 'availableSlots',
     render: (availableSlots, record) => <Text>{`${availableSlots} / ${record.maxSlots}`}</Text>,
+    className: 'text-end',
+    width: 80,
   },
   {
     title: () => <TextWithTooltip text="APY" description="Annual percentage yield" />,
     dataIndex: 'apy',
     key: 'apy',
-    render: (apy) => <Tag color="purple">{`${apy}%`}</Tag>,
+    render: (apy) => <Tag color="purple" className="m-0">{`${apy}%`}</Tag>,
+    className: 'text-end',
   },
   {
     title: 'Stake required, OLAS',
     dataIndex: 'stakeRequired',
     key: 'stakeRequired',
     render: (stakeRequired) => <Text>{stakeRequired}</Text>,
+    className: 'text-end',
+    width: 148,
+  },
+  {
+    title: 'Minimum operating balance required',
+    dataIndex: 'minOperatingBalance',
+    key: 'minOperatingBalance',
+    render: (_, contract) => {
+      const { minOperatingBalanceHint, minOperatingBalance, minOperatingBalanceToken } = contract;
+      if (!minOperatingBalance) return <Text>{NA}</Text>;
+
+      const value = `${minOperatingBalance} ${minOperatingBalanceToken}`;
+      if (!minOperatingBalanceHint) return <Text>{value}</Text>;
+
+      return (
+        <Flex vertical>
+          <Text>{`~${value}`}</Text>
+          <Text>{minOperatingBalanceHint}</Text>
+        </Flex>
+      );
+    },
+    className: 'text-end',
+    width: 200,
   },
   {
     title: () => (
@@ -67,7 +95,7 @@ const columns: ColumnsType<StakingContract> = [
     ),
     dataIndex: 'availableOn',
     key: 'availableOn',
-    render: (availableOn) => <RunAgentButton availableOn={availableOn}/>,
+    render: (availableOn) => <RunAgentButton availableOn={availableOn} />,
   },
 ];
 
@@ -83,6 +111,7 @@ export const ContractsPage = () => {
           Browse staking opportunities. Make a selection and start running them via Pearl or
           Quickstart for the opportunity to earn OLAS rewards.
         </Caption>
+
         <Table
           columns={columns}
           pagination={false}
@@ -110,6 +139,8 @@ export const ContractsPage = () => {
               </>
             ),
           }}
+          scroll={{ x: 1000 }}
+          rowHoverable={false}
         />
       </Card>
     </StyledMain>

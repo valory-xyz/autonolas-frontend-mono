@@ -1,11 +1,11 @@
-import React from 'react';
 import { render } from '@testing-library/react';
+import React from 'react';
 
 import { AutonolasThemeProvider } from './ThemeConfig';
 
-describe('UiTheme', () => {
+describe('<AutonolasThemeProvider />', () => {
   it('should render successfully', () => {
-    const { baseElement } = render(<AutonolasThemeProvider  />);
+    const { baseElement } = render(<AutonolasThemeProvider />);
     expect(baseElement).toBeTruthy();
   });
 });

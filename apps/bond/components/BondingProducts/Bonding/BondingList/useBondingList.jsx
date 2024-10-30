@@ -1,6 +1,7 @@
 import { ethers } from 'ethers';
-import { memoize, round } from 'lodash';
+import { find, memoize, round } from 'lodash';
 import { useCallback, useEffect, useState } from 'react';
+import { arbitrum, base, celo, gnosis, optimism, polygon } from 'viem/chains';
 import { usePublicClient } from 'wagmi';
 
 import { VM_TYPE, areAddressesEqual } from '@autonolas/frontend-library';
@@ -19,6 +20,7 @@ import {
   getErc20Contract,
   getTokenomicsContract,
   getUniswapV2PairContract,
+  getUniswapV2PairContractByChain,
 } from 'common-util/functions/web3';
 import { BALANCER_GRAPH_CLIENTS } from 'common-util/graphql/clients';
 import { balancerGetPoolQuery } from 'common-util/graphql/queries';
@@ -30,7 +32,7 @@ import {
   getCloseProductEvents,
   getCreateProductEvents,
   getCurrentPriceLpLink,
-  getLpTokenLink,
+  getLpLink,
   getLpTokenWithDiscount,
   getProductValueFromEvent,
 } from './utils';
@@ -45,55 +47,64 @@ import {
 const LP_PAIRS = {
   // gnosis-chain
   '0x27df632fd0dcf191C418c803801D521cd579F18e': {
-    lpChainId: 100,
+    lpChainId: gnosis.id,
     name: 'OLAS-WXDAI',
     originAddress: '0x79C872Ed3Acb3fc5770dd8a0cD9Cd5dB3B3Ac985',
-    dex: DEX.BALANCER,
+    dex: DEX.BALANCER.name,
     poolId: '0x79c872ed3acb3fc5770dd8a0cd9cd5db3b3ac985000200000000000000000067',
     guide: 'olas-wxdai-via-balancer-on-gnosis-chain',
   },
   // polygon
   '0xf9825A563222f9eFC81e369311DAdb13D68e60a4': {
-    lpChainId: 137,
+    lpChainId: polygon.id,
     name: 'OLAS-WMATIC',
     originAddress: '0x62309056c759c36879Cde93693E7903bF415E4Bc',
-    dex: DEX.BALANCER,
+    dex: DEX.BALANCER.name,
     poolId: '0x62309056c759c36879cde93693e7903bf415e4bc000200000000000000000d5f',
     guide: 'olas-wmatic-via-balancer-on-polygon-pos',
   },
   // arbitrum
   '0x36B203Cb3086269f005a4b987772452243c0767f': {
-    lpChainId: 42161,
+    lpChainId: arbitrum.id,
     name: 'OLAS-WETH',
     originAddress: '0xaf8912a3c4f55a8584b67df30ee0ddf0e60e01f8',
-    dex: DEX.BALANCER,
+    dex: DEX.BALANCER.name,
     poolId: '0xaf8912a3c4f55a8584b67df30ee0ddf0e60e01f80002000000000000000004fc',
     guide: 'olas-weth-via-balancer-on-arbitrum',
   },
   // optimism
   '0x2FD007a534eB7527b535a1DF35aba6bD2a8b660F': {
-    lpChainId: 10,
+    lpChainId: optimism.id,
     name: 'WETH-OLAS',
     originAddress: '0x5bb3e58887264b667f915130fd04bbb56116c278',
-    dex: DEX.BALANCER,
+    dex: DEX.BALANCER.name,
     poolId: '0x5bb3e58887264b667f915130fd04bbb56116c27800020000000000000000012a',
     guide: 'weth-olas-via-balancer-on-optimism',
   },
   // base
   '0x9946d6FD1210D85EC613Ca956F142D911C97a074': {
-    lpChainId: 8453,
+    lpChainId: base.id,
     name: 'OLAS-USDC',
     originAddress: '0x5332584890d6e415a6dc910254d6430b8aab7e69',
-    dex: DEX.BALANCER,
+    dex: DEX.BALANCER.name,
     poolId: '0x5332584890d6e415a6dc910254d6430b8aab7e69000200000000000000000103',
     guide: 'olas-usdc-via-balancer-on-base',
+  },
+  // celo
+  '0xC085F31E4ca659fF8A17042dDB26f1dcA2fBdAB4': {
+    lpChainId: celo.id,
+    name: 'CELO-OLAS',
+    originAddress: '0x2976Fa805141b467BCBc6334a69AffF4D914d96A',
+    dex: DEX.UBESWAP.name,
+    poolId: '0x2976fa805141b467bcbc6334a69afff4d914d96a',
+    guide: 'celo-olas-via-ubeswap-on-celo',
   },
   // solana
   '0x3685B8cC36B8df09ED9E81C1690100306bF23E04': {
     lpChainId: VM_TYPE.SVM,
     name: 'OLAS-WSOL',
     originAddress: POSITION.toString(),
-    dex: DEX.SOLANA,
+    dex: DEX.SOLANA.name,
     poolId: ADDRESSES[VM_TYPE.SVM].balancerVault, // whirpool address
     guide: 'wsol-olas-via-orca-on-solana',
   },
@@ -154,7 +165,7 @@ const getLpTokenDetails = memoize(async (address) => {
     lpChainId: chainId,
     name: `OLAS${tokenSymbol ? `-${tokenSymbol}` : ''}`,
     originAddress: address,
-    dex: DEX.UNISWAP,
+    dex: DEX.UNISWAP.name,
     poolId: null,
   };
 });
@@ -163,22 +174,60 @@ const getLpTokenDetails = memoize(async (address) => {
  * Fetches the current "price of the LP token" from Balancer
  */
 const getCurrentPriceBalancerFn = memoize(async (tokenAddress) => {
-  const { lpChainId, poolId } = await getLpTokenDetails(tokenAddress);
+  try {
+    const { lpChainId, poolId } = await getLpTokenDetails(tokenAddress);
 
-  const { pool } = await BALANCER_GRAPH_CLIENTS[lpChainId].request(balancerGetPoolQuery(poolId));
+    const { pool } = await BALANCER_GRAPH_CLIENTS[lpChainId].request(balancerGetPoolQuery(poolId));
 
-  if (!pool) {
-    throw new Error(`Pool not found on Balancer for poolId: ${poolId} and chainId: ${lpChainId}.`);
+    if (!pool) {
+      throw new Error(
+        `Pool not found on Balancer for poolId: ${poolId} and chainId: ${lpChainId}.`,
+      );
+    }
+
+    const totalSupply = pool.totalShares;
+    const firstPoolTokenAddress = pool.tokens[0].address;
+    const olasTokenAddress = ADDRESSES[lpChainId].olasAddress;
+    const reservesOlas =
+      (areAddressesEqual(firstPoolTokenAddress, olasTokenAddress)
+        ? pool.tokens[0].balance
+        : pool.tokens[1].balance) * 1.0;
+    const priceLp = (reservesOlas * 10 ** 18) / totalSupply;
+    return priceLp;
+  } catch {
+    console.error(`Error getting priceLp from balancer`);
+    return 0;
+  }
+});
+
+/**
+ * Fetches the current "price of the LP token" from UniswapV2Pair contract
+ */
+const getCurrentPriceUniswapFn = memoize(async (tokenAddress) => {
+  const chainId = LP_PAIRS[tokenAddress]?.lpChainId;
+  if (!chainId) {
+    throw new Error(`Chain id not found for provided token address: ${tokenAddress}`);
   }
 
-  const totalSupply = pool.totalShares;
-  const firstPoolTokenAddress = pool.tokens[0].address;
-  const olasTokenAddress = ADDRESSES[lpChainId].olasAddress;
-  const reservesOlas =
-    (areAddressesEqual(firstPoolTokenAddress, olasTokenAddress)
-      ? pool.tokens[0].balance
-      : pool.tokens[1].balance) * 1.0;
-  const priceLp = (reservesOlas * 10 ** 18) / totalSupply;
+  const tokenOriginAddress = LP_PAIRS[tokenAddress].originAddress;
+
+  if (!tokenOriginAddress) {
+    throw new Error(`Origin address not found for provided token address: ${tokenAddress}`);
+  }
+
+  const contract = getUniswapV2PairContractByChain(tokenOriginAddress, chainId);
+
+  const [totalSupply, reserves, token0] = await Promise.all([
+    contract.read.totalSupply(),
+    contract.read.getReserves(),
+    contract.read.token0(),
+  ]);
+
+  const [reserve0, reserve1] = reserves;
+
+  const olasTokenAddress = ADDRESSES[chainId].olasAddress;
+  const reservesOlas = areAddressesEqual(token0, olasTokenAddress) ? reserve0 : reserve1;
+  const priceLp = (reservesOlas * BigInt(10 ** 18)) / totalSupply;
   return priceLp;
 });
 
@@ -192,6 +241,7 @@ const useAddCurrentLpPriceToProducts = () => {
   const getCurrentPriceBalancer = useCallback(getCurrentPriceBalancerFn, [
     getCurrentPriceBalancerFn,
   ]);
+  const getCurrentPriceUniswap = useCallback(getCurrentPriceUniswapFn, [getCurrentPriceUniswapFn]);
 
   return useCallback(
     async (productList) => {
@@ -216,18 +266,13 @@ const useAddCurrentLpPriceToProducts = () => {
             };
           } else {
             let currentLpPrice = null;
-            // NOTE: It could be uniswap for other chains hence this if case.
-            // (commented for now)
-            // if (dex === DEX.UNISWAP) {
-            //   currentLpPricePromise = contract.methods
-            //     .getCurrentPriceUniswap(originAddress)
-            //     .call();
-            //   currentLpPricePromiseList.push(currentLpPricePromise);
-            // } else
-            if (dex === DEX.BALANCER) {
+            if (dex === DEX.UNISWAP.name || dex === DEX.UBESWAP.name) {
+              currentLpPrice = getCurrentPriceUniswap(productList[i].token);
+              otherRequests[i] = currentLpPrice;
+            } else if (dex === DEX.BALANCER.name) {
               currentLpPrice = getCurrentPriceBalancer(productList[i].token);
               otherRequests[i] = currentLpPrice;
-            } else if (dex === DEX.SOLANA) {
+            } else if (dex === DEX.SOLANA.name) {
               otherRequests[i] = svmPriceLp;
             } else {
               throw new Error('Dex not supported');
@@ -255,7 +300,7 @@ const useAddCurrentLpPriceToProducts = () => {
         currentPriceLp: resolvedList[index],
       }));
     },
-    [publicClient, getCurrentPriceBalancer, getCurrentPriceWhirlpool],
+    [publicClient, getCurrentPriceBalancer, getCurrentPriceUniswap, getCurrentPriceWhirlpool],
   );
 };
 
@@ -285,24 +330,29 @@ const getLpTokenNamesForProducts = async (productList, events) => {
 
   return productList.map((component, index) => {
     const { name, poolId, lpChainId, guide } = lpTokenDetailsList[index];
-    const lpTokenLink = getLpTokenLink({
+    const lpLink = getLpLink({
       lpDex: lpTokenDetailsList[index].dex,
       lpChainId,
       lpPoolId: poolId,
-      productName: component.token,
+      lpAddress: component.token,
     });
+    const lpTokenLink = `https://etherscan.io/token/${component.token}`;
     const currentPriceLpLink = getCurrentPriceLpLink({
       lpDex: lpTokenDetailsList[index].dex,
       lpChainId,
+      lpAddress: component.token,
     });
+    const dexDetails = find(DEX, { name: lpTokenDetailsList[index].dex });
 
     return {
       ...component,
       lpChainId,
       lpTokenName: name,
+      lpLink,
       lpTokenLink,
       currentPriceLpLink,
       guide,
+      dexDisplayName: dexDetails.displayName,
     };
   });
 };

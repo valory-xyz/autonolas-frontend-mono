@@ -22,6 +22,11 @@ const props = {
     text: 'Quickstart',
     href: 'https://github.com/valory-xyz/trader-quickstart?tab=readme-ov-file#trader-quickstart',
   },
+  optimusQuickstart: {
+    icon: <Image src={`/images/github.svg`} alt="Github" width={18} height={18} />,
+    text: 'Quickstart',
+    href: 'https://github.com/valory-xyz/optimus-quickstart',
+  },
 };
 export const RunAgentButton = ({ availableOn, type = 'text', className }: RunAgentButtonProps) => {
   if (availableOn === null)

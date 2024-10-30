@@ -7,7 +7,7 @@ import styled from 'styled-components';
 import { EXPLORER_URLS, GOVERN_URL, UNICODE_SYMBOLS } from 'libs/util-constants/src';
 import { truncateAddress } from 'libs/util-functions/src';
 
-import { ChainId, IMPLEMENTATION_ADDRESSES } from 'common-util/constants/stakingContract';
+import { ChainId, STAKING_TOKEN_ADDRESSES } from 'common-util/constants/stakingContract';
 import { URL } from 'common-util/constants/urls';
 import { useAppSelector } from 'store/index';
 import { MyStakingContract } from 'types/index';
@@ -128,7 +128,7 @@ const Template: FC<{ template: string }> = ({ template }) => {
       {networkId ? (
         <a
           href={`${EXPLORER_URLS[networkId]}/address/${
-            IMPLEMENTATION_ADDRESSES[networkId as ChainId]
+            STAKING_TOKEN_ADDRESSES[networkId as ChainId]
           }`}
           target="_blank"
           rel="noreferrer"

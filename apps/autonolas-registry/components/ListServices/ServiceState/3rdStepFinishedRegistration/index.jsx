@@ -19,7 +19,7 @@ import { SVM_EMPTY_ADDRESS } from 'util/constants';
 import { RadioLabel } from '../styles';
 import { useFinishRegistration } from '../useSvmServiceStateManagement';
 import { getServiceAgentInstances, onStep3Deploy } from '../utils';
-import { handleMultisigSubmit } from './utils';
+import { onMultisigSubmit } from './utils';
 
 const STEP = 3;
 const OPTION_1 = 'Creates a new service multisig with currently registered agent instances';
@@ -363,7 +363,7 @@ export const FinishedRegistration = ({
               onClick={async () => {
                 try {
                   setIsSubmitting(true);
-                  await handleMultisigSubmit({
+                  await onMultisigSubmit({
                     multisig,
                     threshold,
                     agentInstances,
@@ -375,9 +375,9 @@ export const FinishedRegistration = ({
                   });
                 } catch (error) {
                   console.error(error);
+                  notifyError('Error occurred while updating multisig. Please try again.');
                 } finally {
                   setIsSubmitting(false);
-                  notifyError('Error occurred while updating multisig. Please try again.');
                 }
               }}
               {...getOtherBtnProps(STEP, {
