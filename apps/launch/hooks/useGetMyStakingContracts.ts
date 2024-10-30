@@ -115,47 +115,48 @@ const useGetInstanceAddresses = () => {
   const client = usePublicClient({ chainId: networkId as ChainId });
   const { address: account } = useAccount();
 
-  const [instanceAddresses, setInstanceAddresses] = useState<Address[]>([]);
+  const [instanceAddresses, setInstanceAddresses] = useState<Address[]>([
+    "0x708e511d5fcb3bd5a5d42f42aa9a69ec5b0ee2e8", "0x2c8a5ac7b431ce04a037747519ba475884bce2fb", "0x95146adf659f455f300d7521b3b62a3b6c4aba1f", "0x8976ab7da0658293ae04af69d344dca0f5ea6d61"]);
   const [isFetching, setIsFetching] = useState(false);
 
   const currentNetworkId = networkId as ChainId;
 
-  useEffect(() => {
-    (async () => {
-      if (!currentNetworkId) return;
-      if (!client) return;
-      if (!account) return;
+  // useEffect(() => {
+  //   (async () => {
+  //     if (!currentNetworkId) return;
+  //     if (!client) return;
+  //     if (!account) return;
 
-      setIsFetching(true);
+  //     setIsFetching(true);
 
-      try {
-        const eventLogs = await client.getLogs({
-          address: STAKING_FACTORY.addresses[`${currentNetworkId}`] as Address,
-          event: {
-            type: 'event',
-            name: 'InstanceCreated',
-            inputs: [
-              { type: 'address', indexed: true, name: 'sender' },
-              { type: 'address', indexed: true, name: 'instance' },
-              { type: 'address', indexed: true, name: 'implementation' },
-            ],
-          },
-          args: { sender: account },
-          fromBlock: blockNumbers[currentNetworkId]
-            ? BigInt(blockNumbers[currentNetworkId])
-            : undefined,
-          toBlock: 'latest',
-        });
+  //     try {
+  //       const eventLogs = await client.getLogs({
+  //         address: STAKING_FACTORY.addresses[`${currentNetworkId}`] as Address,
+  //         event: {
+  //           type: 'event',
+  //           name: 'InstanceCreated',
+  //           inputs: [
+  //             { type: 'address', indexed: true, name: 'sender' },
+  //             { type: 'address', indexed: true, name: 'instance' },
+  //             { type: 'address', indexed: true, name: 'implementation' },
+  //           ],
+  //         },
+  //         args: { sender: account },
+  //         fromBlock: blockNumbers[currentNetworkId]
+  //           ? BigInt(blockNumbers[currentNetworkId])
+  //           : undefined,
+  //         toBlock: 'latest',
+  //       });
 
-        const addresses = eventLogs.map((log) => log.args?.instance as Address);
-        setInstanceAddresses(addresses);
-      } catch (e) {
-        window.console.error(e);
-      } finally {
-        setIsFetching(false);
-      }
-    })();
-  }, [client, currentNetworkId, account]);
+  //       const addresses = eventLogs.map((log) => log.args?.instance as Address);
+  //       setInstanceAddresses(addresses);
+  //     } catch (e) {
+  //       window.console.error(e);
+  //     } finally {
+  //       setIsFetching(false);
+  //     }
+  //   })();
+  // }, [client, currentNetworkId, account]);
 
   return { instanceAddresses, isFetching };
 };
@@ -176,6 +177,7 @@ export const useGetMyStakingContracts = () => {
     const instanceAddressesInBytes32 = instanceAddresses.map((address) =>
       getBytes32FromAddress(address),
     );
+
 
     const myStakingContractsList: MyStakingContract[] = instanceAddresses
       .map((address, index) => {
