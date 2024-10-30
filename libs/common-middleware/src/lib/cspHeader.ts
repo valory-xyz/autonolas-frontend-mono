@@ -64,6 +64,10 @@ const ALLOWED_ORIGINS = [
   'https://rpc.ankr.com/',
   'https://mainnet.mode.network/',
 
+  // base
+  'https://base.llamarpc.com',
+  
+
   // tenderly
   'https://virtual.mainnet.rpc.tenderly.co/',
   'https://virtual.gnosis.rpc.tenderly.co/',
