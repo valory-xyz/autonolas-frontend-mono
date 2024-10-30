@@ -189,7 +189,7 @@ export const CreateStakingContract = () => {
         router.push(`/${networkName}/${URL.myStakingContracts}`);
       }
     } catch (error) {
-      console.log(error);
+      console.error(error);
 
       const { message, transactionHash } = getErrorInfo(Feature.CREATE, error as Error);
       setError({ message, transactionHash });
@@ -254,11 +254,7 @@ export const CreateStakingContract = () => {
                 name="rewardsPerSecond"
                 rules={rulesConfig.rewardsPerSecond.rules}
               >
-                <InputNumber
-                  placeholder="e.g. 0.000001649305555557"
-                  step="0.0001"
-                  style={INPUT_WIDTH_STYLE}
-                />
+                <Input placeholder="e.g. 0.000001649305555557" style={INPUT_WIDTH_STYLE} />
               </Form.Item>
             </Col>
           </Row>
