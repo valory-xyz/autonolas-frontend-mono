@@ -19,7 +19,7 @@ import { mainnet } from 'viem/chains';
 import { useAccount } from 'wagmi';
 
 import { CHAIN_NAMES, EXPLORER_URLS, UNICODE_SYMBOLS } from 'libs/util-constants/src';
-import { notifyWarning } from 'libs/util-functions/src';
+import { allowOnlyNumbers, notifyWarning } from 'libs/util-functions/src';
 
 import { ErrorAlert } from 'common-util/ErrorAlert';
 import {
@@ -145,7 +145,10 @@ export const CreateStakingContract = () => {
     } = values;
 
     try {
-      const metadataHash = await getIpfsHash({ name: contractName, description });
+      const metadataHash = await getIpfsHash({
+        name: contractName,
+        description,
+      });
 
       const implementation = STAKING_TOKEN_ADDRESSES[chain.id];
       const initPayload = getStakingContractInitPayload({
@@ -170,7 +173,11 @@ export const CreateStakingContract = () => {
         throw new Error('Validation failed');
       }
 
-      const result = await createStakingContract({ implementation, initPayload, account });
+      const result = await createStakingContract({
+        implementation,
+        initPayload,
+        account,
+      });
       if (result) {
         const eventLog = result.events?.InstanceCreated?.returnValues;
 
@@ -254,7 +261,11 @@ export const CreateStakingContract = () => {
                 name="rewardsPerSecond"
                 rules={rulesConfig.rewardsPerSecond.rules}
               >
-                <Input placeholder="e.g. 0.000001649305555557" style={INPUT_WIDTH_STYLE} />
+                <Input
+                  placeholder="e.g. 0.000001649305555557"
+                  style={INPUT_WIDTH_STYLE}
+                  onKeyDown={allowOnlyNumbers}
+                />
               </Form.Item>
             </Col>
           </Row>
