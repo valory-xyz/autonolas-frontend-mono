@@ -116,7 +116,7 @@ const useGetInstanceAddresses = () => {
   const { address: account } = useAccount();
 
   const [instanceAddresses, setInstanceAddresses] = useState<Address[]>([
-    "0x708e511d5fcb3bd5a5d42f42aa9a69ec5b0ee2e8", "0x2c8a5ac7b431ce04a037747519ba475884bce2fb", "0x95146adf659f455f300d7521b3b62a3b6c4aba1f", "0x8976ab7da0658293ae04af69d344dca0f5ea6d61"]);
+    "0x06702a05312091013fdb50c8b60b98ca30762931", "0x708e511d5fcb3bd5a5d42f42aa9a69ec5b0ee2e8", "0x2c8a5ac7b431ce04a037747519ba475884bce2fb", "0x95146adf659f455f300d7521b3b62a3b6c4aba1f", "0x8976ab7da0658293ae04af69d344dca0f5ea6d61"]);
   const [isFetching, setIsFetching] = useState(false);
 
   const currentNetworkId = networkId as ChainId;
