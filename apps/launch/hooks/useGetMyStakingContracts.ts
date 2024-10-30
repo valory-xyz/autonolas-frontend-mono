@@ -115,7 +115,7 @@ const BATCH_SIZES: Record<string, number | null> = {
   [gnosis.id]: null,
   [polygon.id]: null,
   [optimism.id]: 10000,
-  [base.id]: null,
+  [base.id]: 10000,
   [arbitrum.id]: null,
   [celo.id]: null,
 };
