@@ -175,7 +175,7 @@ export const useWsolDeposit = () => {
     const { whirlpoolTokenA, whirlpoolTokenB } = await getWhirlpoolData();
 
     const quote = await getDepositIncreaseLiquidityQuote({ sol, slippage });
-    const { solMaxInLamport, solMax, olasMax } = await getDepositTransformedQuote(quote);
+    const { solMax, olasMax, solMaxInLamport } = await getDepositTransformedQuote(quote);
 
     // OLAS associated token account MUST always exist when the person bonds
     const tokenOwnerAccountB = await getAssociatedTokenAddress(
@@ -221,7 +221,6 @@ export const useWsolDeposit = () => {
     let isWrapRequired = false;
     const newAccountInfo = await connection.getAccountInfo(tokenOwnerAccountA);
     if (!newAccountInfo) {
-      console.log('if condition', newAccountInfo);
       isWrapRequired = true;
 
       // Create token account to hold wrapped SOL
@@ -247,25 +246,14 @@ export const useWsolDeposit = () => {
         return null;
       }
     } else {
-      console.log('else condition', newAccountInfo);
-
       // Check if the user has enough WSOL
       const wsolAmount = await getOlasAmount(connection, svmWalletPublicKey, whirlpoolTokenA.mint);
       const noEnoughWsol = solMaxInLamport > wsolAmount;
-
-      console.log({
-        solMaxInLamport,
-        wsolAmount,
-        sol,
-        noEnoughWsol,
-      });
 
       if (noEnoughWsol) {
         isWrapRequired = true;
       }
     }
-
-    console.log('isWrapRequired', isWrapRequired, 'after: newAccountInfo', newAccountInfo);
 
     if (isWrapRequired) {
       const balance = await connection.getBalance(svmWalletPublicKey);
@@ -281,8 +269,6 @@ export const useWsolDeposit = () => {
         tokenOwnerAccountA,
         quote.tokenMaxA,
       );
-
-      console.log('transaction', { transaction, balance });
 
       try {
         await configureAndSendCurrentTransaction(
