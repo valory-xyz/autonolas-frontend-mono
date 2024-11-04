@@ -155,8 +155,7 @@ export const useWsolDeposit = () => {
     return {
       solMax,
       olasMax,
-      liquidity,
-      solMaxInLamport: BigInt(quote.tokenMaxA),
+      liquidity
     };
   };
 
@@ -174,9 +173,9 @@ export const useWsolDeposit = () => {
 
     const { whirlpoolTokenA, whirlpoolTokenB } = await getWhirlpoolData();
 
+    const solInputInLamport = BigInt(sol);
     const quote = await getDepositIncreaseLiquidityQuote({ sol, slippage });
     const { solMax, olasMax, solMaxInLamport } = await getDepositTransformedQuote(quote);
-    console.log({ quote, solMax, olasMax, solMaxInLamport });
 
     // OLAS associated token account MUST always exist when the person bonds
     const tokenOwnerAccountB = await getAssociatedTokenAddress(
@@ -249,7 +248,7 @@ export const useWsolDeposit = () => {
     } else {
       // Check if the user has enough WSOL
       const wsolAmount = await getOlasAmount(connection, svmWalletPublicKey, whirlpoolTokenA.mint);
-      const noEnoughWsol = solMaxInLamport > wsolAmount;
+      const noEnoughWsol = solInputInLamport > wsolAmount;
 
       if (noEnoughWsol) {
         isWrapRequired = true;
@@ -268,7 +267,7 @@ export const useWsolDeposit = () => {
       const transaction = createSolTransferTransaction(
         svmWalletPublicKey,
         tokenOwnerAccountA,
-        quote.tokenMaxA,
+        solInputInLamport,
       );
 
       try {
@@ -289,7 +288,7 @@ export const useWsolDeposit = () => {
 
     try {
       await program.methods
-        .deposit(quote.liquidityAmount, quote.tokenMaxA, quote.tokenMaxB)
+        .deposit(quote.liquidityAmount, solInputInLamport, quote.tokenMaxB)
         .accounts({
           position: POSITION,
           positionMint: POSITION_MINT,
