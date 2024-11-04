@@ -176,7 +176,6 @@ export const useWsolDeposit = () => {
 
     const quote = await getDepositIncreaseLiquidityQuote({ sol, slippage });
     const { solMax, olasMax, solMaxInLamport } = await getDepositTransformedQuote(quote);
-    console.log({ quote, solMax, olasMax, solMaxInLamport });
 
     // OLAS associated token account MUST always exist when the person bonds
     const tokenOwnerAccountB = await getAssociatedTokenAddress(
