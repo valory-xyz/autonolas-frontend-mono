@@ -17,6 +17,11 @@ export const parseToWei = (amount) => ethers.parseUnits(`${amount}`, 18).toStrin
 export const parseToSolDecimals = (amount) => ethers.parseUnits(`${amount}`, 8).toString();
 
 /**
+ * divides the amount by 10^8
+ */
+export const parseToSol = (amount) => ethers.formatUnits(`${amount}`, 8);
+
+/**
  * TODO: move to autonolas-library and figure out a better way
  * to fetch timestamp
  */
