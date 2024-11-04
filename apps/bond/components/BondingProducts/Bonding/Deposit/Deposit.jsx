@@ -14,6 +14,7 @@ import { ONE_ETH, ONE_ETH_IN_STRING } from 'common-util/constants/numbers';
 import {
   notifyCustomErrors,
   parseToEth,
+  parseToSol,
   parseToSolDecimals,
   parseToWei,
 } from 'common-util/functions';
@@ -132,9 +133,11 @@ export const Deposit = ({
       (totalProductSupplyInWei * ONE_ETH) / BigInt(productLpPriceAfterDiscount);
     const remainingLPSupply =
       maxRedeemableSupply < lpBalanceInWei ? maxRedeemableSupply : lpBalanceInWei;
-    return parseToEth(remainingLPSupply);
-  }, [lpBalance, productSupply, productLpPriceAfterDiscount]);
 
+    return isSvmProduct ? parseToSol(remainingLPSupply) : parseToEth(remainingLPSupply);
+  }, [lpBalance, productSupply, productLpPriceAfterDiscount, isSvmProduct]);
+
+  // calculate the OLAS payout based on the token amount input
   const olasPayout = useMemo(() => {
     if (!tokenAmountInputValue || tokenAmountInputValue > remainingLpSupplyInEth) {
       return '--';
@@ -148,7 +151,6 @@ export const Deposit = ({
     const payout = isSvmProduct
       ? payoutInBg.dividedBy(BigNumber(`1${'0'.repeat(28)}`)).toFixed(2)
       : Number(payoutInBg.dividedBy(ONE_ETH_IN_STRING).dividedBy(ONE_ETH_IN_STRING).toFixed(2));
-
     return getCommaSeparatedNumber(payout, 4);
   }, [tokenAmountInputValue, remainingLpSupplyInEth, productLpPriceAfterDiscount, isSvmProduct]);
 
