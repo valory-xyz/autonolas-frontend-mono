@@ -35,7 +35,6 @@ export const Deposit = ({
   getProducts,
   closeModal,
 }) => {
-  console.log('Deposit -> productToken', productSupply);
   const { account } = useHelpers();
   const [form] = Form.useForm();
   const [isLoading, setIsLoading] = useState(false);
@@ -152,15 +151,6 @@ export const Deposit = ({
     const payout = isSvmProduct
       ? payoutInBg.dividedBy(BigNumber(`1${'0'.repeat(28)}`)).toFixed(2)
       : Number(payoutInBg.dividedBy(ONE_ETH_IN_STRING).dividedBy(ONE_ETH_IN_STRING).toFixed(2));
-
-    console.log({
-      tokenAmountInputValue,
-      remainingLpSupplyInEth,
-      productLpPriceAfterDiscount,
-      isSvmProduct,
-      payout,
-    });
-
     return getCommaSeparatedNumber(payout, 4);
   }, [tokenAmountInputValue, remainingLpSupplyInEth, productLpPriceAfterDiscount, isSvmProduct]);
 
@@ -297,7 +287,7 @@ Deposit.propTypes = {
   productId: PropTypes.string,
   productToken: PropTypes.string,
   productLpTokenName: PropTypes.string,
-  productSupply: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+  productSupply: PropTypes.oneOfType([PropTypes.string, PropTypes.instanceOf(BigInt)]),
   productLpPriceAfterDiscount: PropTypes.oneOfType([
     PropTypes.string,
     PropTypes.instanceOf(BigInt),
