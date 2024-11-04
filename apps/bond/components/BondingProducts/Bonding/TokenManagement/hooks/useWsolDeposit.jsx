@@ -169,7 +169,13 @@ export const useWsolDeposit = () => {
 
     const { whirlpoolTokenA, whirlpoolTokenB } = await getWhirlpoolData();
 
-    const quote = await getDepositIncreaseLiquidityQuote({ sol, slippage });
+    const solInputInLamportInBn = DecimalUtil.toBN(new Decimal(sol), 9);
+    const solInputInLamport = BigInt(solInputInLamportInBn.toString());
+
+    const quote = await getDepositIncreaseLiquidityQuote({
+      sol,
+      slippage,
+    });
     const { solMax, olasMax } = await getDepositTransformedQuote(quote);
 
     // OLAS associated token account MUST always exist when the person bonds
@@ -243,7 +249,7 @@ export const useWsolDeposit = () => {
     } else {
       // Check if the user has enough WSOL
       const wsolAmount = await getOlasAmount(connection, svmWalletPublicKey, whirlpoolTokenA.mint);
-      const noEnoughWsol = DecimalUtil.fromBN(solMax).greaterThan(DecimalUtil.fromBN(wsolAmount));
+      const noEnoughWsol = solInputInLamport > wsolAmount;
 
       if (noEnoughWsol) {
         isWrapRequired = true;
@@ -262,7 +268,7 @@ export const useWsolDeposit = () => {
       const transaction = createSolTransferTransaction(
         svmWalletPublicKey,
         tokenOwnerAccountA,
-        quote.tokenMaxA,
+        solInputInLamport,
       );
 
       try {
@@ -283,7 +289,7 @@ export const useWsolDeposit = () => {
 
     try {
       await program.methods
-        .deposit(quote.liquidityAmount, quote.tokenMaxA, quote.tokenMaxB)
+        .deposit(quote.liquidityAmount, solInputInLamportInBn, quote.tokenMaxB)
         .accounts({
           position: POSITION,
           positionMint: POSITION_MINT,

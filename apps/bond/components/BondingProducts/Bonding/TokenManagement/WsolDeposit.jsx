@@ -81,14 +81,16 @@ export const WsolDeposit = () => {
           name="sol"
           label="SOL (WSOL)"
           rules={[{ required: true, message: 'Please input a valid amount of SOL' }]}
+          extra="The amount of SOL or WSOL, whichever is greater."
         >
           <InputNumber min={0} className="full-width" onChange={onWsolAndSlippageChange} />
         </Form.Item>
 
         <Form.Item
           name="olas"
-          label="OLAS"
+          label="Max OLAS"
           rules={[{ required: true, message: 'Please input a valid amount of OLAS' }]}
+          extra="The max amount of OLAS accounting for the slippage value."
         >
           <InputNumber disabled className="full-width" />
         </Form.Item>
