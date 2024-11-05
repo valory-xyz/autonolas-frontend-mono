@@ -62,7 +62,7 @@ const STAKING_CONTRACT_DETAILS: Record<Address, StakingContractDetailsInfo> = {
     minOperatingBalanceHint: '(Total Various Chains)',
   },
   '0x000000000000000000000000daf34ec46298b53a3d24cbcb431e84ebd23927da': {
-    availableOn: null,
+    availableOn: 'pearl',
     minOperatingBalance: 11.5,
     minOperatingBalanceToken: 'xDAI',
   },
@@ -77,6 +77,31 @@ const STAKING_CONTRACT_DETAILS: Record<Address, StakingContractDetailsInfo> = {
     minOperatingBalanceToken: 'xDAI',
   },
   '0x000000000000000000000000e56df1e563de1b10715cb313d514af350d207212': {
+    availableOn: 'quickstart',
+    minOperatingBalance: 135,
+    minOperatingBalanceToken: 'xDAI',
+  },
+  '0x000000000000000000000000bd59ff0522aa773cb6074ce83cd1e4a05a457bc1': {
+    availableOn: 'pearl',
+    minOperatingBalance: 11.5,
+    minOperatingBalanceToken: 'xDAI',
+  },
+  '0x0000000000000000000000003052451e1eaee78e62e169afdf6288f8791f2918': {
+    availableOn: 'pearl',
+    minOperatingBalance: 11.5,
+    minOperatingBalanceToken: 'xDAI',
+  },
+  '0x0000000000000000000000004abe376fda28c2f43b84884e5f822ea775dea9f4': {
+    availableOn: 'pearl',
+    minOperatingBalance: 11.5,
+    minOperatingBalanceToken: 'xDAI',
+  },
+  '0x0000000000000000000000002546214aee7eea4bee7689c81231017ca231dc93': {
+    availableOn: 'quickstart',
+    minOperatingBalance: 90,
+    minOperatingBalanceToken: 'xDAI',
+  },
+  '0x000000000000000000000000d7a3c8b975f71030135f1a66e9e23164d54ff455': {
     availableOn: 'quickstart',
     minOperatingBalance: 135,
     minOperatingBalanceToken: 'xDAI',
