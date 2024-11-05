@@ -62,12 +62,12 @@ const STAKING_CONTRACT_DETAILS: Record<Address, StakingContractDetailsInfo> = {
     minOperatingBalanceHint: '(Total Various Chains)',
   },
   '0x000000000000000000000000daf34ec46298b53a3d24cbcb431e84ebd23927da': {
-    availableOn: null,
+    availableOn: 'pearl',
     minOperatingBalance: 11.5,
     minOperatingBalanceToken: 'xDAI',
   },
   '0x000000000000000000000000998defafd094817ef329f6dc79c703f1cf18bc90': {
-    availableOn: null,
+    availableOn: 'pearl',
     minOperatingBalance: 45,
     minOperatingBalanceToken: 'xDAI',
   },
