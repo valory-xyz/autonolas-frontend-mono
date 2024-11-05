@@ -67,7 +67,7 @@ const STAKING_CONTRACT_DETAILS: Record<Address, StakingContractDetailsInfo> = {
     minOperatingBalanceToken: 'xDAI',
   },
   '0x000000000000000000000000998defafd094817ef329f6dc79c703f1cf18bc90': {
-    availableOn: 'pearl',
+    availableOn: null,
     minOperatingBalance: 45,
     minOperatingBalanceToken: 'xDAI',
   },
