@@ -124,21 +124,21 @@ export const WsolDeposit = () => {
           <Table
             columns={[
               {
-                title: 'Estimated output',
-                dataIndex: 'estimated',
+                title: 'Estimated LP amount',
+                dataIndex: 'estimatedLpAmount',
                 width: '50%',
               },
               {
-                title: 'Bridged token amount',
-                dataIndex: 'bridgedTokenAmount',
+                title: 'Current LP balance',
+                dataIndex: 'currentLpBalance',
                 width: '50%',
               },
             ]}
             dataSource={[
               {
                 key: '1',
-                estimated: `${estimatedOutput} WSOL-OLAS LP`,
-                bridgedTokenAmount: `${bridgedTokenAmountValue} WSOL-OLAS LP`,
+                estimatedLpAmount: `${estimatedOutput} WSOL-OLAS`,
+                currentLpBalance: `${bridgedTokenAmountValue} WSOL-OLAS`,
               },
             ]}
             bordered
@@ -166,7 +166,7 @@ export const WsolDeposit = () => {
           message={
             <>
               You received
-              <Text strong>{` ${getCommaSeparatedNumber(quoteLiquidity)} WSOL-OLAS LP`}</Text>
+              <Text strong>{` ${getCommaSeparatedNumber(quoteLiquidity)} WSOL-OLAS`}</Text>
             </>
           }
           type="success"
