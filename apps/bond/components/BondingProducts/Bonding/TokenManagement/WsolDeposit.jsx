@@ -161,7 +161,7 @@ export const WsolDeposit = () => {
         </Form.Item>
       </Form>
 
-      {quoteLiquidity && (
+      {quoteLiquidity ? (
         <Alert
           message={
             <>
@@ -172,7 +172,7 @@ export const WsolDeposit = () => {
           type="success"
           showIcon
         />
-      )}
+      ) : null}
     </>
   );
 };

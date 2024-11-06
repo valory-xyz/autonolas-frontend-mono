@@ -334,6 +334,8 @@ export const useWsolDeposit = () => {
       return null;
     }
 
+    // wait for 2 seconds to allow the transaction to be processed
+    await new Promise((resolve) => setTimeout(resolve, 2000));
     await getLatestBridgeTokenAmount(); // refetch bridged token amount
 
     return quote.liquidityAmount.toString();
