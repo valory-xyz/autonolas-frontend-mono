@@ -316,7 +316,10 @@ export const useWsolDeposit = () => {
     }
 
     const bridgedToken = await getBridgeTokenAmount(connection, svmWalletPublicKey);
-    return bridgedToken.toString();
+    return {
+      bridgedToken: bridgedToken.toString(),
+      quoteLiquidityAmount: quote.liquidityAmount.toString(),
+    };
   };
 
   return {

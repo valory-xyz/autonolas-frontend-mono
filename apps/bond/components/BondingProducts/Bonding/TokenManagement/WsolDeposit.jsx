@@ -20,6 +20,7 @@ export const WsolDeposit = () => {
   const [isEstimating, setIsEstimating] = useState(false);
   const [isDepositing, setIsDepositing] = useState(false);
   const [bridgedTokenAmount, setBridgedTokenAmount] = useState(null);
+  const [quoteLiquidity, setQuoteLiquidity] = useState(null);
 
   const {
     getDepositIncreaseLiquidityQuote: fn,
@@ -59,7 +60,8 @@ export const WsolDeposit = () => {
       const sol = form.getFieldValue('sol');
       const slippage = form.getFieldValue('slippage');
 
-      const bridgedToken = await deposit({ slippage, sol });
+      const { bridgedToken, quoteLiquidityAmount } = await deposit({ slippage, sol });
+      setQuoteLiquidity(quoteLiquidityAmount);
       if (Number(bridgedToken) > 0) {
         setBridgedTokenAmount(bridgedToken / SVM_AMOUNT_DIVISOR);
       }
@@ -137,12 +139,12 @@ export const WsolDeposit = () => {
         </Form.Item>
       </Form>
 
-      {bridgedTokenAmount && (
+      {quoteLiquidity && (
         <Alert
           message={
             <>
               You received
-              <Text strong>{` ${getCommaSeparatedNumber(bridgedTokenAmount)} WSOL-OLAS LP`}</Text>
+              <Text strong>{` ${quoteLiquidity / SVM_AMOUNT_DIVISOR} WSOL-OLAS LP`}</Text>
             </>
           }
           type="success"
