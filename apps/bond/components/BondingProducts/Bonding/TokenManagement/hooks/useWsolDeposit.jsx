@@ -12,6 +12,7 @@ import { useWallet } from '@solana/wallet-adapter-react';
 import { SystemProgram, Transaction } from '@solana/web3.js';
 import Decimal from 'decimal.js';
 import Link from 'next/link';
+import { useCallback, useEffect, useState } from 'react';
 
 import { notifyError, notifySuccess } from '@autonolas/frontend-library';
 
@@ -30,6 +31,7 @@ import {
   POSITION_MINT,
   PROGRAM_ID,
   SOL,
+  SVM_AMOUNT_DIVISOR,
   TICK_ARRAY_LOWER,
   TICK_ARRAY_UPPER,
   TOKEN_VAULT_A,
@@ -118,9 +120,26 @@ export const useWsolDeposit = () => {
   const { svmWalletPublicKey, connection, anchorProvider } = useSvmConnectivity();
   const { getWhirlpoolData } = useWhirlpool();
   const { signTransaction } = useWallet();
+  const [bridgedTokenAmount, setBridgedTokenAmount] = useState(null);
 
   const customGetOrCreateAssociatedTokenAccount = useGetOrCreateAssociatedTokenAccount();
   const program = new Program(idl, PROGRAM_ID, anchorProvider);
+
+  const updateLatestBridgeTokenAmount = useCallback(async () => {
+    if (!svmWalletPublicKey) return;
+    if (!connection) return;
+
+    getBridgeTokenAmount(connection, svmWalletPublicKey).then((bridgedToken) => {
+      const token = bridgedToken.toString();
+      if (Number(token) > 0) {
+        setBridgedTokenAmount(token / SVM_AMOUNT_DIVISOR);
+      }
+    });
+  }, [connection, svmWalletPublicKey]);
+
+  useEffect(() => {
+    updateLatestBridgeTokenAmount();
+  }, [updateLatestBridgeTokenAmount]);
 
   const getDepositIncreaseLiquidityQuote = async ({ sol, slippage }) => {
     const { whirlpoolData, whirlpoolTokenA, whirlpoolTokenB } = await getWhirlpoolData();
@@ -315,13 +334,17 @@ export const useWsolDeposit = () => {
       return null;
     }
 
-    const bridgedToken = await getBridgeTokenAmount(connection, svmWalletPublicKey);
-    return bridgedToken.toString();
+    // wait for 2 seconds to allow the transaction to be processed
+    await new Promise((resolve) => setTimeout(resolve, 2000));
+    await updateLatestBridgeTokenAmount(); // refetch bridged token amount
+
+    return quote.liquidityAmount.toString();
   };
 
   return {
     getDepositIncreaseLiquidityQuote,
     getDepositTransformedQuote,
     deposit,
+    bridgedTokenAmount,
   };
 };
