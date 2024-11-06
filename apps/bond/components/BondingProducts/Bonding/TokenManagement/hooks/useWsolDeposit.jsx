@@ -125,7 +125,7 @@ export const useWsolDeposit = () => {
   const customGetOrCreateAssociatedTokenAccount = useGetOrCreateAssociatedTokenAccount();
   const program = new Program(idl, PROGRAM_ID, anchorProvider);
 
-  const getLatestBridgeTokenAmount = useCallback(async () => {
+  const updateLatestBridgeTokenAmount = useCallback(async () => {
     if (!svmWalletPublicKey) return;
     if (!connection) return;
 
@@ -138,8 +138,8 @@ export const useWsolDeposit = () => {
   }, [connection, svmWalletPublicKey]);
 
   useEffect(() => {
-    getLatestBridgeTokenAmount();
-  }, [getLatestBridgeTokenAmount]);
+    updateLatestBridgeTokenAmount();
+  }, [updateLatestBridgeTokenAmount]);
 
   const getDepositIncreaseLiquidityQuote = async ({ sol, slippage }) => {
     const { whirlpoolData, whirlpoolTokenA, whirlpoolTokenB } = await getWhirlpoolData();
@@ -336,7 +336,7 @@ export const useWsolDeposit = () => {
 
     // wait for 2 seconds to allow the transaction to be processed
     await new Promise((resolve) => setTimeout(resolve, 2000));
-    await getLatestBridgeTokenAmount(); // refetch bridged token amount
+    await updateLatestBridgeTokenAmount(); // refetch bridged token amount
 
     return quote.liquidityAmount.toString();
   };
