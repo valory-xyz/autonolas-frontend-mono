@@ -1,10 +1,11 @@
-import { Alert, Button, Flex, Form, InputNumber, Spin, Typography } from 'antd';
+import { Alert, Button, Form, InputNumber, Table, Typography } from 'antd';
 import { isNumber } from 'lodash';
 import pDebounce from 'p-debounce';
 import { useState } from 'react';
 
 import { getCommaSeparatedNumber, notifyError } from '@autonolas/frontend-library';
 
+import { NA } from 'libs/util-constants/src';
 import { useSvmConnectivity } from 'common-util/hooks/useSvmConnectivity';
 
 import { SVM_AMOUNT_DIVISOR } from './constants';
@@ -19,13 +20,13 @@ export const WsolDeposit = () => {
   const [estimatedQuote, setEstimatedQuote] = useState(null);
   const [isEstimating, setIsEstimating] = useState(false);
   const [isDepositing, setIsDepositing] = useState(false);
-  const [bridgedTokenAmount, setBridgedTokenAmount] = useState(null);
   const [quoteLiquidity, setQuoteLiquidity] = useState(null);
 
   const {
     getDepositIncreaseLiquidityQuote: fn,
     getDepositTransformedQuote,
     deposit,
+    bridgedTokenAmount,
   } = useWsolDeposit();
   const getDepositQuote = pDebounce(fn, 500);
 
@@ -60,11 +61,8 @@ export const WsolDeposit = () => {
       const sol = form.getFieldValue('sol');
       const slippage = form.getFieldValue('slippage');
 
-      const { bridgedToken, quoteLiquidityAmount } = await deposit({ slippage, sol });
-      setQuoteLiquidity(quoteLiquidityAmount);
-      if (Number(bridgedToken) > 0) {
-        setBridgedTokenAmount(bridgedToken / SVM_AMOUNT_DIVISOR);
-      }
+      const quoteLiquidityAmount = await deposit({ slippage, sol });
+      setQuoteLiquidity(quoteLiquidityAmount / SVM_AMOUNT_DIVISOR);
     } catch (error) {
       console.error(error);
     } finally {
@@ -74,7 +72,10 @@ export const WsolDeposit = () => {
 
   const isDepositButtonDisabled = isEstimating || isDepositing || !isSvmWalletConnected;
   const estimatedOutput =
-    getCommaSeparatedNumber((estimatedQuote?.liquidity || 0) / SVM_AMOUNT_DIVISOR) || '--';
+    getCommaSeparatedNumber((estimatedQuote?.liquidity || 0) / SVM_AMOUNT_DIVISOR) || NA;
+  const bridgedTokenAmountValue = bridgedTokenAmount
+    ? getCommaSeparatedNumber(bridgedTokenAmount)
+    : NA;
 
   return (
     <>
@@ -120,12 +121,33 @@ export const WsolDeposit = () => {
         </Form.Item>
 
         <Form.Item>
-          <Spin spinning={isEstimating} size="small">
-            <Flex vertical gap="small" className="mb-16">
-              <Text strong>ESTIMATED OUTPUT</Text>
-              <Text>{`${estimatedOutput} WSOL-OLAS LP`}</Text>
-            </Flex>
-          </Spin>
+          <Table
+            columns={[
+              {
+                title: 'Estimated output',
+                dataIndex: 'estimated',
+                width: '50%',
+              },
+              {
+                title: 'Bridged token amount',
+                dataIndex: 'bridgedTokenAmount',
+                width: '50%',
+              },
+            ]}
+            dataSource={[
+              {
+                key: '1',
+                estimated: `${estimatedOutput} WSOL-OLAS LP`,
+                bridgedTokenAmount: bridgedTokenAmountValue,
+              },
+            ]}
+            bordered
+            loading={isEstimating}
+            rowHoverable={false}
+            pagination={false}
+            style={{ width: '100%' }}
+            className="mb-16"
+          />
 
           <Button
             size="large"
@@ -144,7 +166,7 @@ export const WsolDeposit = () => {
           message={
             <>
               You received
-              <Text strong>{` ${quoteLiquidity / SVM_AMOUNT_DIVISOR} WSOL-OLAS LP`}</Text>
+              <Text strong>{` ${getCommaSeparatedNumber(quoteLiquidity)} WSOL-OLAS LP`}</Text>
             </>
           }
           type="success"
