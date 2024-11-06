@@ -138,7 +138,7 @@ export const WsolDeposit = () => {
               {
                 key: '1',
                 estimated: `${estimatedOutput} WSOL-OLAS LP`,
-                bridgedTokenAmount: bridgedTokenAmountValue,
+                bridgedTokenAmount: `${bridgedTokenAmountValue} WSOL-OLAS LP`,
               },
             ]}
             bordered

@@ -12,7 +12,7 @@ import { useWallet } from '@solana/wallet-adapter-react';
 import { SystemProgram, Transaction } from '@solana/web3.js';
 import Decimal from 'decimal.js';
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 import { notifyError, notifySuccess } from '@autonolas/frontend-library';
 
@@ -125,7 +125,7 @@ export const useWsolDeposit = () => {
   const customGetOrCreateAssociatedTokenAccount = useGetOrCreateAssociatedTokenAccount();
   const program = new Program(idl, PROGRAM_ID, anchorProvider);
 
-  useEffect(() => {
+  const getLatestBridgeTokenAmount = useCallback(async () => {
     if (!svmWalletPublicKey) return;
     if (!connection) return;
 
@@ -136,6 +136,10 @@ export const useWsolDeposit = () => {
       }
     });
   }, [connection, svmWalletPublicKey]);
+
+  useEffect(() => {
+    getLatestBridgeTokenAmount();
+  }, [getLatestBridgeTokenAmount]);
 
   const getDepositIncreaseLiquidityQuote = async ({ sol, slippage }) => {
     const { whirlpoolData, whirlpoolTokenA, whirlpoolTokenB } = await getWhirlpoolData();
@@ -329,6 +333,8 @@ export const useWsolDeposit = () => {
       console.error(error);
       return null;
     }
+
+    await getLatestBridgeTokenAmount(); // refetch bridged token amount
 
     return quote.liquidityAmount.toString();
   };
