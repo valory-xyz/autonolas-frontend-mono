@@ -51,6 +51,13 @@ const columns: ColumnsType<StakingContract> = [
     className: 'text-end',
   },
   {
+    title: () => 'Available Rewards (OLAS)',
+    dataIndex: 'availableRewards',
+    key: 'availableRewards',
+    render: (availableRewards) => <Text>{availableRewards}</Text>,
+    className: 'text-end',
+  },
+  {
     title: 'Stake required, OLAS',
     dataIndex: 'stakeRequired',
     key: 'stakeRequired',
@@ -77,7 +84,7 @@ const columns: ColumnsType<StakingContract> = [
       );
     },
     className: 'text-end',
-    width: 200,
+    width: 180,
   },
   {
     title: () => (

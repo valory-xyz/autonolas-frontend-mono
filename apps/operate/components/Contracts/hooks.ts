@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { StakingContract } from 'types';
-import { Abi, Address, formatEther } from 'viem';
+import { Abi, Address, formatEther, formatUnits } from 'viem';
 import { useReadContracts } from 'wagmi';
 
 import { useNominees, useNomineesMetadata } from 'libs/common-contract-functions/src';
@@ -203,11 +203,13 @@ export const useStakingContractsList = () => {
       return nominees.map((item, index) => {
         const maxSlots = Number(maxNumServicesList[index]);
         const servicesLength = ((serviceIdsList[index] as string[]) || []).length;
-        const availableRewards = availableRewardsList[index] as bigint;
-        const availableSlots = availableRewards > 0 && maxSlots > 0 ? maxSlots - servicesLength : 0;
+        const availableRewardsInWei = availableRewardsList[index] as bigint;
+        const availableSlots =
+          availableRewardsInWei > 0 && maxSlots > 0 ? maxSlots - servicesLength : 0;
         const rewardsPerSecond = rewardsPerSecondList[index] as bigint;
         const minStakingDeposit = minStakingDepositList[index] as bigint;
         const numAgentInstances = numAgentInstancesList[index] as bigint;
+        const availableRewards = Number(formatUnits(availableRewardsInWei, 18)).toFixed(2);
 
         const apy = getApy(rewardsPerSecond, minStakingDeposit, numAgentInstances);
         const stakeRequired = getStakeRequired(minStakingDeposit, numAgentInstances);
@@ -226,6 +228,7 @@ export const useStakingContractsList = () => {
           minOperatingBalance: details?.minOperatingBalance,
           minOperatingBalanceToken: details?.minOperatingBalanceToken || null,
           minOperatingBalanceHint: details?.minOperatingBalanceHint || null,
+          availableRewards,
         };
       }) as StakingContract[];
     }
