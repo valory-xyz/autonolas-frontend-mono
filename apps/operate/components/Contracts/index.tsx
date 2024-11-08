@@ -7,6 +7,7 @@ import { StakingContract } from 'types';
 import { Caption, TextWithTooltip } from 'libs/ui-components/src';
 import { BREAK_POINT } from 'libs/ui-theme/src';
 import { CHAIN_NAMES, GOVERN_URL, NA, UNICODE_SYMBOLS } from 'libs/util-constants/src';
+import { formatWeiNumber } from 'libs/util-functions/src';
 
 import { RunAgentButton } from 'components/RunAgentButton';
 
@@ -51,12 +52,20 @@ const columns: ColumnsType<StakingContract> = [
     className: 'text-end',
   },
   {
+    title: () => 'Available Rewards, OLAS',
+    dataIndex: 'availableRewards',
+    key: 'availableRewards',
+    render: (availableRewards) => <Text>{formatWeiNumber({ value: availableRewards })}</Text>,
+    className: 'text-end',
+    width: 120,
+  },
+  {
     title: 'Stake required, OLAS',
     dataIndex: 'stakeRequired',
     key: 'stakeRequired',
     render: (stakeRequired) => <Text>{stakeRequired}</Text>,
     className: 'text-end',
-    width: 148,
+    width: 120,
   },
   {
     title: 'Minimum operating balance required',
@@ -77,7 +86,7 @@ const columns: ColumnsType<StakingContract> = [
       );
     },
     className: 'text-end',
-    width: 200,
+    width: 180,
   },
   {
     title: () => (

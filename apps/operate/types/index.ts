@@ -18,4 +18,5 @@ export type StakingContract = {
   minOperatingBalance: number | null;
   minOperatingBalanceToken: string | null;
   minOperatingBalanceHint?: string;
+  availableRewards: string;
 };

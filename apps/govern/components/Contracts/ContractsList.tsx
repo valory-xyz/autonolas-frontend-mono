@@ -6,8 +6,8 @@ import { Allocation, StakingContract } from 'types';
 import { useAccount } from 'wagmi';
 
 import { CHAIN_NAMES } from 'libs/util-constants/src';
+import { formatWeiNumber } from 'libs/util-functions/src';
 
-import { formatWeiNumber } from 'common-util/functions/balance';
 import { NextWeekTooltip } from 'components/NextWeekTooltip';
 import { useVotingPower } from 'hooks/useVotingPower';
 import { useAppSelector } from 'store/index';

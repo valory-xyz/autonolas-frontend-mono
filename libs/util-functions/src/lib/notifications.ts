@@ -4,13 +4,13 @@ import { notification } from 'antd';
 export const notifySuccess = (
   message: ReactNode = 'Successful',
   description: ReactNode = '',
-  key?: string
+  key?: string,
 ) => notification.success({ message, description, key });
 
 export const notifyError = (
   message: ReactNode = 'Some error occurred',
   description: ReactNode = '',
-  key?: string
+  key?: string,
 ) => {
   notification.error({ message, description, key });
 };
@@ -18,5 +18,5 @@ export const notifyError = (
 export const notifyWarning = (
   message: ReactNode = 'Some error occurred',
   description: ReactNode = '',
-  key?: string
+  key?: string,
 ) => notification.warning({ message, description, key });
