@@ -57,6 +57,7 @@ const columns: ColumnsType<StakingContract> = [
     key: 'availableRewards',
     render: (availableRewards) => <Text>{formatWeiNumber({ value: availableRewards })}</Text>,
     className: 'text-end',
+    width: 120,
   },
   {
     title: 'Stake required, OLAS',
@@ -64,7 +65,7 @@ const columns: ColumnsType<StakingContract> = [
     key: 'stakeRequired',
     render: (stakeRequired) => <Text>{stakeRequired}</Text>,
     className: 'text-end',
-    width: 148,
+    width: 120,
   },
   {
     title: 'Minimum operating balance required',
