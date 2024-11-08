@@ -52,7 +52,7 @@ const columns: ColumnsType<StakingContract> = [
     className: 'text-end',
   },
   {
-    title: () => 'Available Rewards (OLAS)',
+    title: () => 'Available Rewards, OLAS',
     dataIndex: 'availableRewards',
     key: 'availableRewards',
     render: (availableRewards) => <Text>{formatWeiNumber({ value: availableRewards })}</Text>,
