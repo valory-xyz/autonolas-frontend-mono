@@ -1,5 +1,6 @@
+import { formatWeiNumber } from 'libs/util-functions/src';
+
 import {
-  formatWeiNumber,
   getCommaSeparatedNumber,
   getFormattedDate,
   getFullFormattedDate,

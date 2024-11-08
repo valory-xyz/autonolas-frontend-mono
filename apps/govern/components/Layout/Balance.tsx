@@ -5,8 +5,8 @@ import { useAccount } from 'wagmi';
 
 import { COLOR } from 'libs/ui-theme/src/lib/ui-theme';
 import { UNICODE_SYMBOLS } from 'libs/util-constants/src';
+import { formatWeiNumber } from 'libs/util-functions/src';
 
-import { formatWeiNumber } from 'common-util/functions';
 import { useVotingPower } from 'hooks/index';
 
 const { Text, Paragraph } = Typography;

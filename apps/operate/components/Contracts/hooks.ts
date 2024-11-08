@@ -209,7 +209,7 @@ export const useStakingContractsList = () => {
         const rewardsPerSecond = rewardsPerSecondList[index] as bigint;
         const minStakingDeposit = minStakingDepositList[index] as bigint;
         const numAgentInstances = numAgentInstancesList[index] as bigint;
-        const availableRewards = Number(formatUnits(availableRewardsInWei, 18)).toFixed(2);
+        const availableRewards = formatUnits(availableRewardsInWei, 18);
 
         const apy = getApy(rewardsPerSecond, minStakingDeposit, numAgentInstances);
         const stakeRequired = getStakeRequired(minStakingDeposit, numAgentInstances);
