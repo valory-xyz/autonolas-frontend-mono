@@ -39,9 +39,11 @@ const Meta = ({ title, description, url }) => {
 Meta.propTypes = {
   title: PropTypes.string,
   description: PropTypes.string,
+  url: PropTypes.string,
 };
 Meta.defaultProps = {
   title: null,
   description: SITE_DESCRIPTION,
+  url: SITE_URL,
 };
 export default Meta;

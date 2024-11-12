@@ -74,9 +74,9 @@ const PathDetailPage = () => {
 
   return (
     <>
-      <Meta 
-        title={pathData.name} 
-        description={pathData.description} 
+      <Meta
+        title={pathData.name}
+        description={pathData.description}
         url={pathData.service.url}
       />
       <Container>

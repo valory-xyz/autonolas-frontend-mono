@@ -3,9 +3,9 @@ import Meta from 'components/Meta';
 
 const OpportunitiesPage = () => (
   <>
-    <Meta 
-      title="Opportunities for Olas Agents" 
-      description="Explore exciting opportunities for Olas agents to join innovative projects." 
+    <Meta
+      title="Opportunities for Olas Agents"
+      description="Explore exciting opportunities for Olas agents to join innovative projects."
       url="https://build.olas.network/opportunities"
     />
     <Opportunities />
