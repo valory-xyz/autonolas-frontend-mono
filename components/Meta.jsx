@@ -6,18 +6,17 @@ const SITE_DESCRIPTION = 'Explore paths to build on Olas. Simplify your path to 
 const SITE_URL = 'https://build.olas.network/';
 const SITE_DEFAULT_IMAGE_URL = `${SITE_URL}/images/metatags-image.png`;
 
-const Meta = ({ title, description }) => {
+const Meta = ({ title, description, url }) => {
   const pageTitle = title ? `${title} | ${SITE_TITLE}` : SITE_TITLE;
-
   return (
     <Head>
       <title>{pageTitle}</title>
 
-      <meta name="title" content={pageTitle || SITE_TITLE} />
+      <meta name="title" content={pageTitle} />
       <meta name="description" content={description || SITE_DESCRIPTION} />
 
       <meta property="og:type" content="website" />
-      <meta property="og:url" content={SITE_URL} />
+      <meta property="og:url" content={url || SITE_URL} />
       <meta property="og:title" content={pageTitle} />
       <meta
         property="og:description"
@@ -26,7 +25,7 @@ const Meta = ({ title, description }) => {
       <meta property="og:image" content={SITE_DEFAULT_IMAGE_URL} />
 
       <meta property="twitter:card" content="summary_large_image" />
-      <meta property="twitter:url" content={SITE_URL} />
+      <meta property="twitter:url" content={url || SITE_URL} />
       <meta property="twitter:title" content={pageTitle} />
       <meta
         property="twitter:description"

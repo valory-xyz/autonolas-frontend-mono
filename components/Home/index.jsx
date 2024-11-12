@@ -7,7 +7,10 @@ const PathsContainer = styled.div`
 `;
 
 export const HomePage = () => (
-  <PathsContainer>
-    <Paths />
-  </PathsContainer>
+  <>
+    <Meta />
+    <PathsContainer>
+      <Paths />
+    </PathsContainer>
+  </>
 );

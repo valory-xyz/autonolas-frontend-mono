@@ -1,3 +1,15 @@
 import { DevIncentives } from 'components/DevIncentives';
+import Meta from 'components/Meta';
 
-export default DevIncentives;
+const DevIncentivesPage = () => (
+  <>
+    <Meta 
+        title="Developer Incentives for Builders" 
+        description="Discover exclusive incentives for developers who build innovative solutions. Unlock rewards, grow your skills, and get recognized for your contributions" 
+        url="https://build.olas.network/dev-incentives"
+    />
+    <DevIncentives />
+  </>
+);
+
+export default DevIncentivesPage;
