@@ -106,6 +106,15 @@ const STAKING_CONTRACT_DETAILS: Record<Address, StakingContractDetailsInfo> = {
     minOperatingBalance: 135,
     minOperatingBalanceToken: 'xDAI',
   },
+  '0x00000000000000000000000095146adf659f455f300d7521b3b62a3b6c4aba1f': {
+    availableOn: 'contribute',
+  },
+  '0x0000000000000000000000002c8a5ac7b431ce04a037747519ba475884bce2fb': {
+    availableOn: 'contribute',
+  },
+  '0x000000000000000000000000708e511d5fcb3bd5a5d42f42aa9a69ec5b0ee2e8': {
+    availableOn: 'contribute',
+  },
 };
 
 const getApy = (

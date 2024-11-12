@@ -1,5 +1,6 @@
 import { Button, Flex } from 'antd';
 import { BaseButtonProps } from 'antd/es/button/button';
+import { NotificationOutlined } from '@ant-design/icons';
 import Image from 'next/image';
 import { StakingContract } from 'types';
 
@@ -26,6 +27,11 @@ const props = {
     icon: <Image src={`/images/github.svg`} alt="Github" width={18} height={18} />,
     text: 'Quickstart',
     href: 'https://github.com/valory-xyz/optimus-quickstart',
+  },
+  contribute: {
+    icon: <NotificationOutlined width={18} height={18} />,
+    text: 'Contribute',
+    href: 'https://contribute.olas.network/staking',
   },
 };
 export const RunAgentButton = ({ availableOn, type = 'text', className }: RunAgentButtonProps) => {
