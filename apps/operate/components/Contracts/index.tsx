@@ -73,7 +73,7 @@ const columns: ColumnsType<StakingContract> = [
     key: 'minOperatingBalance',
     render: (_, contract) => {
       const { minOperatingBalanceHint, minOperatingBalance, minOperatingBalanceToken } = contract;
-      if (!minOperatingBalance) return <Text>{NA}</Text>;
+      if (typeof minOperatingBalance !== 'number') return <Text>{NA}</Text>;
 
       const value = `${minOperatingBalance} ${minOperatingBalanceToken}`;
       if (!minOperatingBalanceHint) return <Text>{value}</Text>;
