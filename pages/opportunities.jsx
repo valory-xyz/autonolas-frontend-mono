@@ -6,7 +6,7 @@ const OpportunitiesPage = () => (
     <Meta
       title="Opportunities for Olas Agents"
       description="Explore exciting opportunities for Olas agents to join innovative projects."
-      url="https://build.olas.network/opportunities"
+      path="opportunities"
     />
     <Opportunities />
   </>

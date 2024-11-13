@@ -77,7 +77,7 @@ const PathDetailPage = () => {
       <Meta
         title={pathData.name}
         description={pathData.description}
-        url={pathData.service.url}
+        path={`paths/${pathData.id}`}
       />
       <Container>
         <Typography.Title className="mt-0 mb-16" level={3}>

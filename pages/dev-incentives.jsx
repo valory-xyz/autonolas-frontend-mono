@@ -6,7 +6,7 @@ const DevIncentivesPage = () => (
     <Meta
       title="Developer Incentives for Builders"
       description="Discover exclusive incentives for developers who build innovative solutions. Unlock rewards, grow your skills, and get recognized for your contributions"
-      url="https://build.olas.network/dev-incentives"
+      path="dev-incentives"
     />
     <DevIncentives />
   </>
