@@ -1,14 +1,12 @@
-import { Alert, Button, Card, Space, Typography } from "antd";
-import { useState } from "react";
-import styled from "styled-components";
+import { Alert, Button, Card, Space, Typography } from 'antd';
+import { useState } from 'react';
+import styled from 'styled-components';
 
-import { useFetchBalances } from "hooks/index";
+import { useFetchBalances } from 'hooks/index';
 
-import { CreateLockModal } from "./CreateLockModal";
-import { IncreaseLockModal } from "./IncreaseLockModal";
-import { VeOlasManage } from "./VeOlasManage";
-import { GetServerSideProps } from "next";
-import Head from "next/head";
+import { CreateLockModal } from './CreateLockModal';
+import { IncreaseLockModal } from './IncreaseLockModal';
+import { VeOlasManage } from './VeOlasManage';
 
 const { Paragraph } = Typography;
 
@@ -24,65 +22,54 @@ const Title = styled.h1`
   margin: 0 0 8px;
 `;
 
-export const VeOlasPage = () => {
-  const { isLoading, canWithdrawVeolas, canIncreaseAmountOrUnlock } =
-    useFetchBalances();
+export const VeOlas = () => {
+  const { isLoading, canWithdrawVeolas, canIncreaseAmountOrUnlock } = useFetchBalances();
 
-  const [isCreateLockModalVisible, setIsCreateLockModalVisible] =
-    useState(false);
+  const [isCreateLockModalVisible, setIsCreateLockModalVisible] = useState(false);
   const [isIncreaseModalVisible, setIsIncreaseModalVisible] = useState(false);
 
   return (
-    <>
-      <Head>
-        <title>VeOlas</title>
-      </Head>
-      <StyledMain>
-        <Card>
-          <Title>veOLAS</Title>
-          <Paragraph type="secondary" className="mt-8 mb-24">
-            veOLAS gives you voting power in Olas governance. Lock OLAS for
-            longer periods to get more veOLAS.
-          </Paragraph>
-          <Space size="middle" className="mb-16">
-            <Button
-              type="primary"
-              size="large"
-              disabled={isLoading || !!canWithdrawVeolas}
-              onClick={() => {
-                // if the user has veolas, then show the modal to increase the amount
-                // else show the modal to create a lock
-                if (canIncreaseAmountOrUnlock) {
-                  setIsIncreaseModalVisible(true);
-                } else {
-                  setIsCreateLockModalVisible(true);
-                }
-              }}
-            >
-              Lock OLAS for veOLAS
-            </Button>
+    <StyledMain>
+      <Card>
+        <Title>veOLAS</Title>
+        <Paragraph type="secondary" className="mt-8 mb-24">
+          veOLAS gives you voting power in Olas governance. Lock OLAS for longer periods to get more
+          veOLAS.
+        </Paragraph>
+        <Space size="middle" className="mb-16">
+          <Button
+            type="primary"
+            size="large"
+            disabled={isLoading || !!canWithdrawVeolas}
+            onClick={() => {
+              // if the user has veolas, then show the modal to increase the amount
+              // else show the modal to create a lock
+              if (canIncreaseAmountOrUnlock) {
+                setIsIncreaseModalVisible(true);
+              } else {
+                setIsCreateLockModalVisible(true);
+              }
+            }}
+          >
+            Lock OLAS for veOLAS
+          </Button>
 
-            {canWithdrawVeolas && (
-              <Alert
-                message="Please claim your OLAS before locking again"
-                type="warning"
-                showIcon
-              />
-            )}
-          </Space>
+          {canWithdrawVeolas && (
+            <Alert message="Please claim your OLAS before locking again" type="warning" showIcon />
+          )}
+        </Space>
 
-          <VeOlasManage />
+        <VeOlasManage />
 
-          <CreateLockModal
-            isModalVisible={isCreateLockModalVisible}
-            setIsModalVisible={setIsCreateLockModalVisible}
-          />
-          <IncreaseLockModal
-            isModalVisible={isIncreaseModalVisible}
-            setIsModalVisible={setIsIncreaseModalVisible}
-          />
-        </Card>
-      </StyledMain>
-    </>
+        <CreateLockModal
+          isModalVisible={isCreateLockModalVisible}
+          setIsModalVisible={setIsCreateLockModalVisible}
+        />
+        <IncreaseLockModal
+          isModalVisible={isIncreaseModalVisible}
+          setIsModalVisible={setIsIncreaseModalVisible}
+        />
+      </Card>
+    </StyledMain>
   );
 };
