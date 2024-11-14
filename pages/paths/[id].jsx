@@ -9,6 +9,7 @@ import Markdown from 'markdown-to-jsx';
 
 import paths from 'components/Paths/data.json';
 import { COLOR } from '@autonolas/frontend-library';
+import Meta from 'components/Meta';
 
 const Container = styled.div`
   padding: 0 32px;
@@ -72,49 +73,55 @@ const PathDetailPage = () => {
   }
 
   return (
-    <Container>
-      <Typography.Title className="mt-0 mb-16" level={3}>
-        {pathData.name}
-      </Typography.Title>
-      <Row gutter={[48, 48]}>
-        <Col xs={24} lg={12}>
-          <Typography.Title className="mt-0 mb-8" level={4}>
-            Path
-          </Typography.Title>
-          {markdownContent && (
+    <>
+      <Meta
+        title={pathData.name}
+        description={pathData.description}
+        path={`paths/${pathData.id}`}
+      />
+      <Container>
+        <Typography.Title className="mt-0 mb-16" level={3}>
+          {pathData.name}
+        </Typography.Title>
+        <Row gutter={[48, 48]}>
+          <Col xs={24} lg={12}>
+            <Typography.Title className="mt-0 mb-8" level={4}>
+              Path
+            </Typography.Title>
+            {markdownContent && (
             <Markdown style={{ lineHeight: '1.4' }}>{markdownContent}</Markdown>
-          )}
-        </Col>
-        <Col xs={24} md={12}>
-          <Typography.Title className="mt-0 mb-8" level={4}>
-            About this path
-          </Typography.Title>
-          <section className="mb-16" id="description">
-            <div className="mb-8">
-              <Upcase>Description</Upcase>
-            </div>
-            <Row gutter={[16, 16]} align="middle" style={{ maxWidth: '500px' }}>
-              <Col span={8}>
-                <Image
-                  src={pathData.images?.description ?? `/images/${id}.png`}
-                  alt={pathData.name}
-                  width={200}
-                  height={200}
-                  layout="intrinsic"
-                  style={{
-                    borderRadius: '5px',
-                    border: `1px solid ${COLOR.BORDER_GREY}`,
-                  }}
-                />
-              </Col>
-              <Col span={16}>
-                <Typography.Paragraph>
-                  {pathData.description}
-                </Typography.Paragraph>
-              </Col>
-            </Row>
-          </section>
-          {pathData.service && (
+            )}
+          </Col>
+          <Col xs={24} md={12}>
+            <Typography.Title className="mt-0 mb-8" level={4}>
+              About this path
+            </Typography.Title>
+            <section className="mb-16" id="description">
+              <div className="mb-8">
+                <Upcase>Description</Upcase>
+              </div>
+              <Row gutter={[16, 16]} align="middle" style={{ maxWidth: '500px' }}>
+                <Col span={8}>
+                  <Image
+                    src={pathData.images?.description ?? `/images/${id}.png`}
+                    alt={pathData.name}
+                    width={200}
+                    height={200}
+                    layout="intrinsic"
+                    style={{
+                      borderRadius: '5px',
+                      border: `1px solid ${COLOR.BORDER_GREY}`,
+                    }}
+                  />
+                </Col>
+                <Col span={16}>
+                  <Typography.Paragraph>
+                    {pathData.description}
+                  </Typography.Paragraph>
+                </Col>
+              </Row>
+            </section>
+            {pathData.service && (
             <section className="mb-16" id="service">
               <div className="mb-8">
                 <Upcase>Service</Upcase>
@@ -155,33 +162,33 @@ const PathDetailPage = () => {
                 </Col>
               </Row>
             </section>
-          )}
-          <section className="mb-16" id="rewards">
-            <div className="mb-8">
-              <Upcase>Rewards</Upcase>
-            </div>
-            <Row gutter={[16, 16]} align="middle" style={{ maxWidth: '500px' }}>
-              <Col span={8}>
-                <Image
-                  src="/images/rewards.png"
-                  alt="Eligible for Olas Build Rewards"
-                  width={200}
-                  height={200}
-                  layout="intrinsic"
-                  style={{
-                    borderRadius: '5px',
-                    border: `1px solid ${COLOR.BORDER_GREY}`,
-                  }}
-                />
-              </Col>
-              <Col span={16}>
-                <Typography.Paragraph>
-                  Completing this path will make you eligible for Build Rewards.
-                </Typography.Paragraph>
-              </Col>
-            </Row>
-          </section>
-          {pathData.isMechsToolPath && (
+            )}
+            <section className="mb-16" id="rewards">
+              <div className="mb-8">
+                <Upcase>Rewards</Upcase>
+              </div>
+              <Row gutter={[16, 16]} align="middle" style={{ maxWidth: '500px' }}>
+                <Col span={8}>
+                  <Image
+                    src="/images/rewards.png"
+                    alt="Eligible for Olas Build Rewards"
+                    width={200}
+                    height={200}
+                    layout="intrinsic"
+                    style={{
+                      borderRadius: '5px',
+                      border: `1px solid ${COLOR.BORDER_GREY}`,
+                    }}
+                  />
+                </Col>
+                <Col span={16}>
+                  <Typography.Paragraph>
+                    Completing this path will make you eligible for Build Rewards.
+                  </Typography.Paragraph>
+                </Col>
+              </Row>
+            </section>
+            {pathData.isMechsToolPath && (
             <section className="mb-16" id="is-mechs-tool-path">
               <div className="mb-8">
                 <Upcase>Mechs Tool</Upcase>
@@ -213,10 +220,11 @@ const PathDetailPage = () => {
                 </Col>
               </Row>
             </section>
-          )}
-        </Col>
-      </Row>
-    </Container>
+            )}
+          </Col>
+        </Row>
+      </Container>
+    </>
   );
 };
 

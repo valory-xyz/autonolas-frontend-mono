@@ -1,3 +1,15 @@
-import { Opportunities } from 'components/Opportunities';
+import { Opportunities } from 'components/Opportunities'; // Import the actual Opportunities component
+import Meta from 'components/Meta';
 
-export default Opportunities;
+const OpportunitiesPage = () => (
+  <>
+    <Meta
+      title="Opportunities for Olas Agents"
+      description="Explore exciting opportunities for Olas agents to join innovative projects."
+      path="opportunities"
+    />
+    <Opportunities />
+  </>
+);
+
+export default OpportunitiesPage;
