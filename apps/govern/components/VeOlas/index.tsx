@@ -22,7 +22,7 @@ const Title = styled.h1`
   margin: 0 0 8px;
 `;
 
-export const VeOlasPage = () => {
+export const VeOlas = () => {
   const { isLoading, canWithdrawVeolas, canIncreaseAmountOrUnlock } = useFetchBalances();
 
   const [isCreateLockModalVisible, setIsCreateLockModalVisible] = useState(false);
