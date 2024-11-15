@@ -24,7 +24,12 @@ const FactoryManage = () => {
       const contract = getMechMinterContract();
 
       contract.methods
-        .create(values.owner_address, `0x${values.hash}`, values.price)
+        .create(
+          values.owner_address,
+          `0x${values.hash}`,
+          values.price,
+          values.mechMarketplace,
+        )
         .send({ from: account })
         .then((result) => {
           setInformation(result);

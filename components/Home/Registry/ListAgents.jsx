@@ -17,7 +17,7 @@ import {
   getFilteredAgents,
   getTotalForAllAgents,
   getTotalForMyAgents,
-} from '../utils';
+} from './utils';
 
 const ALL_AGENTS = 'all-agents';
 const MY_AGENTS = 'my-agents';

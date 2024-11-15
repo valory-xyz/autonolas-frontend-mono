@@ -111,9 +111,30 @@ const RegisterForm = ({ listType, handleSubmit, handleCancel }) => {
               message: 'Please input the price the mech charges',
             },
           ]}
-          className="mb-0"
         >
           <Input placeholder="10000000000000000" />
+        </Form.Item>
+
+        <Form.Item
+          label="Mech Marketplace Address"
+          name="mechMarketplace"
+          validateFirst
+          rules={[
+            {
+              required: true,
+              message: 'Please input the address',
+            },
+            () => ({
+              validator(_, value) {
+                if (ethers.utils.isAddress(value)) return Promise.resolve();
+                return Promise.reject(
+                  new Error('Please input a valid address'),
+                );
+              },
+            }),
+          ]}
+        >
+          <Input placeholder="0x862..." />
         </Form.Item>
 
         {account ? (
