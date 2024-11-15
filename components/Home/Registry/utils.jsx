@@ -1,7 +1,4 @@
-import { notification } from 'antd';
-
 import {
-  getMechMinterContract,
   getAgentContract,
   fetchGraphQLData,
 } from 'common-util/Contracts';
@@ -46,21 +43,6 @@ const getAgentsHelper = (startIndex, promiseList, resolve) => {
 };
 
 // --------- utils ---------
-export const getAgentDetails = (id) => new Promise((resolve, reject) => {
-  const contract = getAgentContract();
-
-  contract.methods
-    .getUnit(id)
-    .call()
-    .then((information) => {
-      resolve(information);
-    })
-    .catch((e) => {
-      console.error(e);
-      reject(e);
-    });
-});
-
 export const getAgent = (id) => new Promise((resolve, reject) => {
   const contract = getAgentContract();
 
@@ -135,50 +117,4 @@ export const getAgents = (total, nextPage = 1) => new Promise((resolve, reject) 
     console.error(e);
     reject(e);
   }
-});
-
-export const getAgentHashes = (id) => new Promise((resolve, reject) => {
-  const contract = getAgentContract();
-
-  contract.methods
-    .getUpdatedHashes(id)
-    .call()
-    .then((response) => {
-      resolve(response);
-    })
-    .catch((e) => {
-      console.error(e);
-      reject(e);
-    });
-});
-
-export const updateAgentHashes = (account, id, newHash) => {
-  const contract = getMechMinterContract();
-
-  // 0 to indicate `agents`
-  contract.methods
-    .updateHash('0', id, `0x${newHash}`)
-    .send({ from: account })
-    .then(() => {
-      notification.success({ message: 'Hash Updated' });
-    })
-    .catch((e) => {
-      notification.error({ message: 'Some error occured' });
-      console.error(e);
-    });
-};
-
-export const getTokenUri = (id) => new Promise((resolve, reject) => {
-  const contract = getAgentContract();
-
-  contract.methods
-    .tokenURI(id)
-    .call()
-    .then((response) => {
-      resolve(response);
-    })
-    .catch((e) => {
-      console.error(e);
-      reject(e);
-    });
 });

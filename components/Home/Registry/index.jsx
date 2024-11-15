@@ -1,5 +1,5 @@
 import React from 'react';
-import ListAgents from './components/ListAgents';
+import ListAgents from './ListAgents';
 
 export const Registry = () => (
   <div>
