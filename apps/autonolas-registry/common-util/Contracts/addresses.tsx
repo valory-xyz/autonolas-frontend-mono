@@ -154,10 +154,10 @@ type MultisigAddress = {
  */
 export const multisigAddresses: MultisigAddress = {
   [mainnet.id]: ['0x46C0D07F55d4F9B5Eed2Fc9680B5953e5fd7b461'],
-  [optimism.id]: ['0xE43d4F4103b623B61E095E8bEA34e1bc8979e168'],
+  [optimism.id]: ['0x5953f21495BD9aF1D78e87bb42AcCAA55C1e896C'],
   [gnosis.id]: ['0x3C1fF68f5aa342D296d4DEe4Bb1cACCA912D95fE'],
   [polygon.id]: ['0x3d77596beb0f130a4415df3D2D8232B3d3D31e44'],
-  [base.id]: ['0xBb7e1D6Cb6F243D6bdE81CE92a9f2aFF7Fbe7eac'],
+  [base.id]: ['0x22bE6fDcd3e29851B29b512F714C328A00A96B83'],
   [arbitrum.id]: ['0x63e66d7ad413C01A7b49C7FF4e3Bb765C4E4bd1b'],
   [celo.id]: ['0x63e66d7ad413C01A7b49C7FF4e3Bb765C4E4bd1b'],
   [mode.id]: ['0xBb7e1D6Cb6F243D6bdE81CE92a9f2aFF7Fbe7eac'],
