@@ -5,8 +5,8 @@ import styled from 'styled-components';
 import { Allocation, StakingContract } from 'types';
 import { useAccount } from 'wagmi';
 
-import { CHAIN_NAMES } from 'libs/util-constants/src';
-import { formatWeiNumber } from 'libs/util-functions/src';
+import { CHAIN_NAMES } from '@autonolas-frontend-mono/util-constants';
+import { formatWeiNumber } from '@autonolas-frontend-mono/util-functions';
 
 import { NextWeekTooltip } from 'components/NextWeekTooltip';
 import { useVotingPower } from 'hooks/useVotingPower';

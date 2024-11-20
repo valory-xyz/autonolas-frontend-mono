@@ -21,7 +21,7 @@
       "importOrder": [
         "<THIRD_PARTY_MODULES>",
         "^@autonolas/(.*)$",
-        "^libs/*",
+        "^@autonolas-frontend-mono/*",
         "^(store|util|common-util|components|data|hooks|context|types)/(.*)$",
         "^[./]"
       ]
@@ -35,7 +35,6 @@
           "error",
           {
             "enforceBuildableLibDependency": true,
-            "allow": [],
             "depConstraints": [
               {
                 "sourceTag": "*",

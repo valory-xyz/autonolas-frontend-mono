@@ -6,7 +6,11 @@ import { StakingContract } from 'types';
 import { mainnet } from 'viem/chains';
 import { useEnsName } from 'wagmi';
 
-import { CHAIN_NAMES, EXPLORER_URLS, UNICODE_SYMBOLS } from 'libs/util-constants/src';
+import {
+  CHAIN_NAMES,
+  EXPLORER_URLS,
+  UNICODE_SYMBOLS,
+} from '@autonolas-frontend-mono/util-constants';
 
 import { getAddressFromBytes32, truncateAddress } from 'common-util/functions/addresses';
 import { useAppSelector } from 'store/index';

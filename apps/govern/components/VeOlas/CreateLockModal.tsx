@@ -2,7 +2,7 @@ import { Alert, Button, Divider, Flex, Form, Modal } from 'antd';
 import { ethers } from 'ethers';
 import { useState } from 'react';
 
-import { notifyError, notifySuccess } from 'libs/util-functions/src';
+import { notifyError, notifySuccess } from '@autonolas-frontend-mono/util-functions';
 
 import {
   createLockRequest,

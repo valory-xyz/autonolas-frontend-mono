@@ -4,16 +4,6 @@
   "sourceRoot": "libs/ui-components/src",
   "projectType": "library",
   "targets": {
-    "build": {
-      "executor": "@nx/js:tsc",
-      "outputs": ["{options.outputPath}"],
-      "options": {
-        "outputPath": "dist/libs/ui-components",
-        "main": "libs/ui-components/src/index.ts",
-        "tsConfig": "libs/ui-components/tsconfig.lib.json",
-        "assets": ["libs/ui-components/*.md"]
-      }
-    },
     "lint": {
       "executor": "@nx/eslint:lint",
       "outputs": ["{options.outputFile}"]

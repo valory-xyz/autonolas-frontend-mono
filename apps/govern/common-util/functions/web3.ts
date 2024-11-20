@@ -9,7 +9,7 @@ import {
   TREASURY,
   VE_OLAS,
   VOTE_WEIGHTING,
-} from 'libs/util-contracts/src/lib/abiAndAddresses';
+} from '@autonolas-frontend-mono/util-contracts';
 
 import { getChainId, getProvider } from 'common-util/functions/frontend-library';
 

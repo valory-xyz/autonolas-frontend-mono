@@ -5,8 +5,8 @@ import { Dispatch, SetStateAction, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import { Allocation } from 'types';
 
-import { COLOR } from 'libs/ui-theme/src';
-import { CHAIN_NAMES, RETAINER_ADDRESS } from 'libs/util-constants/src';
+import { COLOR } from '@autonolas-frontend-mono/ui-theme';
+import { CHAIN_NAMES, RETAINER_ADDRESS } from '@autonolas-frontend-mono/util-constants';
 
 import { getBytes32FromAddress } from 'common-util/functions/addresses';
 import { NextWeekTooltip } from 'components/NextWeekTooltip';

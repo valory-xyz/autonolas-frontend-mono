@@ -4,7 +4,7 @@ import { Address } from 'viem';
 import { mainnet } from 'viem/chains';
 import { useAccount, useBlock, useReadContracts } from 'wagmi';
 
-import { OLAS, VE_OLAS } from 'libs/util-contracts/src/lib/abiAndAddresses';
+import { OLAS, VE_OLAS } from '@autonolas-frontend-mono/util-contracts';
 
 import { LATEST_BLOCK_KEY } from 'common-util/constants/scopeKeys';
 

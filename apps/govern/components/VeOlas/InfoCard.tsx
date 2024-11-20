@@ -2,7 +2,7 @@ import { Skeleton, Tooltip, Typography } from 'antd';
 import styled from 'styled-components';
 import { useAccount } from 'wagmi';
 
-import { COLOR } from 'libs/ui-theme/src';
+import { COLOR } from '@autonolas-frontend-mono/ui-theme';
 
 const { Title } = Typography;
 

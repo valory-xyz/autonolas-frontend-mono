@@ -1,7 +1,7 @@
 import { Button, Col, Row } from 'antd';
 import { useState } from 'react';
 
-import { notifyError, notifySuccess } from 'libs/util-functions/src';
+import { notifyError, notifySuccess } from '@autonolas-frontend-mono/util-functions';
 
 import { withdrawVeolasRequest } from 'common-util/functions';
 import { useFetchBalances } from 'hooks/index';

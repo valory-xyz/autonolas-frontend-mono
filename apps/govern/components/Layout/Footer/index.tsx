@@ -3,9 +3,9 @@ import Link from 'next/link';
 import { Fragment } from 'react';
 import { mainnet } from 'viem/chains';
 
-import { Footer as CommonFooter } from 'libs/ui-components/src';
-import { EXPLORER_URLS, GOVERN_REPO_URL } from 'libs/util-constants/src';
-import { VE_OLAS, VOTE_WEIGHTING } from 'libs/util-contracts/src/lib/abiAndAddresses';
+import { Footer as CommonFooter } from '@autonolas-frontend-mono/ui-components';
+import { EXPLORER_URLS, GOVERN_REPO_URL } from '@autonolas-frontend-mono/util-constants';
+import { VOTE_WEIGHTING } from '@autonolas-frontend-mono/util-contracts';
 
 import { Onboarding } from './Onboarding';
 

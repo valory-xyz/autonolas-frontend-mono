@@ -3,7 +3,7 @@ import { ethers } from 'ethers';
 import { useState } from 'react';
 import { useAccount } from 'wagmi';
 
-import { notifyError } from 'libs/util-functions/src';
+import { notifyError } from '@autonolas-frontend-mono/util-functions';
 
 import { approveOlasByOwner } from 'common-util/functions';
 

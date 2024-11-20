@@ -1,6 +1,5 @@
-import { EXPLORER_URLS, UNICODE_SYMBOLS } from 'libs/util-constants/src';
-// eslint-disable-next-line @nx/enforce-module-boundaries
-import { truncateAddress } from 'libs/util-functions/src';
+import { EXPLORER_URLS, UNICODE_SYMBOLS } from '@autonolas-frontend-mono/util-constants';
+import { truncateAddress } from '@autonolas-frontend-mono/util-functions';
 
 export const AddressLink = ({
   address,

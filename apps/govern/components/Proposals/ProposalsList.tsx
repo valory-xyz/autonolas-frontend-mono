@@ -5,7 +5,7 @@ import { useState } from 'react';
 import { Address } from 'viem';
 import { useAccount } from 'wagmi';
 
-import { notifyError, notifySuccess } from 'libs/util-functions/src';
+import { notifyError, notifySuccess } from '@autonolas-frontend-mono/util-functions';
 
 import { getFormattedDate, voteForProposal } from 'common-util/functions';
 import { Proposal } from 'common-util/graphql/types';
@@ -23,7 +23,7 @@ import {
   hasNotStarted,
   isOngoing,
 } from './utils';
-import { COLOR } from 'libs/ui-theme/src';
+import { COLOR } from '@autonolas-frontend-mono/ui-theme';
 
 const { Text } = Typography;
 

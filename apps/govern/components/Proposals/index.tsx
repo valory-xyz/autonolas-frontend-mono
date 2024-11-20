@@ -2,7 +2,7 @@ import { Button, Card, Flex, Typography } from 'antd';
 import Image from 'next/image';
 import styled from 'styled-components';
 
-import { UNICODE_SYMBOLS } from 'libs/util-constants/src';
+import { UNICODE_SYMBOLS } from '@autonolas-frontend-mono/util-constants';
 
 import { ProposalsList } from './ProposalsList';
 

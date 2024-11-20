@@ -2,7 +2,7 @@ import { InfoCircleOutlined } from '@ant-design/icons';
 import { Tooltip, Typography } from 'antd';
 import { ReactNode } from 'react';
 
-import { COLOR } from 'libs/ui-theme/src';
+import { COLOR } from '@autonolas-frontend-mono/ui-theme';
 
 const { Paragraph, Text } = Typography;
 

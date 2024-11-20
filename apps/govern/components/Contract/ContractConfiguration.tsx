@@ -5,8 +5,13 @@ import { Address, zeroHash } from 'viem';
 
 import { GATEWAY_URL, NA } from '@autonolas/frontend-library';
 
-import { EXPLORER_URLS, HASH_PREFIX, REGISTRY_URL, UNICODE_SYMBOLS } from 'libs/util-constants/src';
-import { truncateAddress } from 'libs/util-functions/src';
+import {
+  EXPLORER_URLS,
+  HASH_PREFIX,
+  REGISTRY_URL,
+  UNICODE_SYMBOLS,
+} from '@autonolas-frontend-mono/util-constants';
+import { truncateAddress } from '@autonolas-frontend-mono/util-functions';
 
 import {
   ActivityCheckerAddressLabel,

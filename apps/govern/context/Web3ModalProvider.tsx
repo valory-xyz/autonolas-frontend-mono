@@ -4,7 +4,7 @@ import { createWeb3Modal } from '@web3modal/wagmi';
 import { PropsWithChildren } from 'react';
 import { WagmiProvider } from 'wagmi';
 
-import { COLOR, W3M_BORDER_RADIUS } from 'libs/ui-theme/src';
+import { COLOR, W3M_BORDER_RADIUS } from '@autonolas-frontend-mono/ui-theme';
 
 import { wagmiConfig } from 'common-util/config/wagmi';
 

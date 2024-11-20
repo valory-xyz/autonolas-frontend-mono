@@ -3,7 +3,7 @@ import { Address } from 'viem';
 import { mainnet } from 'viem/chains';
 import { useReadContract } from 'wagmi';
 
-import { VE_OLAS } from 'libs/util-contracts/src/lib/abiAndAddresses';
+import { VE_OLAS } from '@autonolas-frontend-mono/util-contracts';
 
 export const useVotingPower = (account: Address | undefined) => {
   const { data, isFetching, refetch } = useReadContract({

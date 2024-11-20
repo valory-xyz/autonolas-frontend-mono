@@ -5,8 +5,8 @@ import { Abi, Address } from 'viem';
 import { mainnet } from 'viem/chains';
 import { useBlock } from 'wagmi';
 
-import { GOVERNOR_OLAS } from 'libs/util-contracts/src/lib/abiAndAddresses';
-import { areAddressesEqual } from 'libs/util-functions/src';
+import { GOVERNOR_OLAS } from '@autonolas-frontend-mono/util-contracts';
+import { areAddressesEqual } from '@autonolas-frontend-mono/util-functions';
 
 import { wagmiConfig } from 'common-util/config/wagmi';
 import { getProposals } from 'common-util/graphql/queries';

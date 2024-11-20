@@ -13,7 +13,7 @@ import {
 } from 'wagmi/chains';
 import { coinbaseWallet, injected, safe, walletConnect } from 'wagmi/connectors';
 
-import { RPC_URLS } from 'libs/util-constants/src';
+import { RPC_URLS } from '@autonolas-frontend-mono/util-constants';
 
 export const SUPPORTED_CHAINS: [Chain, ...Chain[]] = [
   mainnet,

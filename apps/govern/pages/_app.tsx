@@ -2,9 +2,7 @@ import type { AppProps } from 'next/app';
 import Head from 'next/head';
 import { FC, PropsWithChildren } from 'react';
 import { Provider } from 'react-redux';
-
-// TODO: should be able to import from 'libs/ui-theme'
-import { AutonolasThemeProvider, GlobalStyles } from 'libs/ui-theme/src';
+import { AutonolasThemeProvider, GlobalStyles } from '@autonolas-frontend-mono/ui-theme';
 
 import { Web3ModalProvider } from 'context/Web3ModalProvider';
 

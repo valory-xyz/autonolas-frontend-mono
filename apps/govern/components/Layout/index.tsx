@@ -1,7 +1,7 @@
 import { Alert, Layout as AntdLayout } from 'antd';
 import { FC, ReactNode } from 'react';
 
-import { useScreen } from 'libs/ui-theme/src';
+import { useScreen } from '@autonolas-frontend-mono/ui-theme';
 
 import { LoginV2 } from 'components/Login';
 

@@ -3,15 +3,15 @@ import { Block } from 'viem';
 import { mainnet } from 'viem/chains';
 import { useAccount, useBlock } from 'wagmi';
 
-import { Caption } from 'libs/ui-components/src';
-import { areAddressesEqual } from 'libs/util-functions/src';
-import { AddressLink } from 'libs/ui-components/src';
+import { Caption } from '@autonolas-frontend-mono/ui-components';
+import { areAddressesEqual } from '@autonolas-frontend-mono/util-functions';
+import { AddressLink } from '@autonolas-frontend-mono/ui-components';
 
 import { estimateFutureBlockTimestamp, getFullFormattedDate } from 'common-util/functions';
 import { Proposal } from 'common-util/graphql/types';
 
 import { VOTES_SUPPORT, formatWeiToEth } from './utils';
-import { NA } from 'libs/util-constants/src';
+import { NA } from '@autonolas-frontend-mono/util-constants';
 
 const { Paragraph, Text } = Typography;
 

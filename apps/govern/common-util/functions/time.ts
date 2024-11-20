@@ -1,6 +1,6 @@
 import { Block } from 'viem';
 
-import { NA } from 'libs/util-constants/src';
+import { NA } from '@autonolas-frontend-mono/util-constants';
 
 import { SECONDS_PER_BLOCK } from 'common-util/constants/time';
 

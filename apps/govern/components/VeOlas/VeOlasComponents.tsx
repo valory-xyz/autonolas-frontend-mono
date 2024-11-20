@@ -1,4 +1,4 @@
-import { formatWeiNumber } from 'libs/util-functions/src';
+import { formatWeiNumber } from '@autonolas-frontend-mono/util-functions';
 
 import {
   getCommaSeparatedNumber,

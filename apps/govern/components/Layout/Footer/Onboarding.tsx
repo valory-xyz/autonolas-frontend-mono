@@ -4,7 +4,7 @@ import Image from 'next/image';
 import { useState } from 'react';
 import styled from 'styled-components';
 
-import { COLOR } from 'libs/ui-theme/src';
+import { COLOR } from '@autonolas-frontend-mono/ui-theme';
 
 const OnboardingContent = styled.div`
   padding: 0 16px 16px;

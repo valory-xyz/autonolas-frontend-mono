@@ -8,8 +8,8 @@ import {
   SERVICE_REGISTRY,
   STAKING_FACTORY,
   VE_OLAS,
-} from 'libs/util-contracts/src/lib/abiAndAddresses';
-import { getEstimatedGasLimit, sendTransaction } from 'libs/util-functions/src';
+} from '@autonolas-frontend-mono/util-contracts';
+import { getEstimatedGasLimit, sendTransaction } from '@autonolas-frontend-mono/util-functions';
 
 import { SUPPORTED_CHAINS, wagmiConfig } from 'common-util/config/wagmi';
 
@@ -23,7 +23,7 @@ import {
   getVeOlasContract,
   getVoteWeightingContract,
 } from './web3';
-import { RPC_URLS } from 'libs/util-constants/src';
+import { RPC_URLS } from '@autonolas-frontend-mono/util-constants';
 
 type VoteForNomineeWeightsParams = {
   account: Address | undefined;

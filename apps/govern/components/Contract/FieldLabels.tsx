@@ -2,8 +2,8 @@ import { InfoCircleOutlined } from '@ant-design/icons';
 import { Flex, Tooltip, Typography } from 'antd';
 import { ReactNode } from 'react';
 
-import { COLOR } from 'libs/ui-theme/src';
-import { UNICODE_SYMBOLS } from 'libs/util-constants/src';
+import { COLOR } from '@autonolas-frontend-mono/ui-theme';
+import { UNICODE_SYMBOLS } from '@autonolas-frontend-mono/util-constants';
 
 const { Paragraph, Text } = Typography;
 

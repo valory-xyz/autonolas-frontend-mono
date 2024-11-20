@@ -17,17 +17,6 @@
       }
     ],
     "types": ["jest", "node", "react", "react-dom"],
-    "paths": {
-      "common-util/*": ["apps/govern/common-util/*"],
-      "components/*": ["apps/govern/components/*"],
-      "util/*": ["apps/govern/util/*"],
-      "static/*": ["apps/govern/static/*"],
-      "images/*": ["apps/govern/public/images/*"],
-      "store/*": ["apps/govern/store/*"],
-      "hooks/*": ["apps/govern/hooks/*"],
-      "context/*": ["apps/govern/context/*"],
-      "types": ["apps/govern/types"]
-    }
   },
   "include": ["**/*.ts", "**/*.tsx", "**/*.js", "**/*.jsx", "next-env.d.ts"],
   "exclude": ["node_modules", "jest.config.js", "src/**/*.spec.ts", "src/**/*.test.ts"]

@@ -7,7 +7,7 @@ import { useAccount } from 'wagmi';
 
 import { NA, getFullFormattedDate, notifySuccess } from '@autonolas/frontend-library';
 
-import { notifyError } from 'libs/util-functions/src';
+import { notifyError } from '@autonolas-frontend-mono/util-functions';
 
 import {
   checkServicesTerminatedOrNotDeployed,

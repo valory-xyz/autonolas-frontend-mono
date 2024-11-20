@@ -4,9 +4,12 @@ import { Address } from 'viem';
 import { mainnet } from 'viem/chains';
 import { useReadContract } from 'wagmi';
 
-import { useNominees, useNomineesMetadata } from 'libs/common-contract-functions/src';
-import { RETAINER_ADDRESS } from 'libs/util-constants/src';
-import { VOTE_WEIGHTING } from 'libs/util-contracts/src/lib/abiAndAddresses';
+import {
+  useNominees,
+  useNomineesMetadata,
+} from '@autonolas-frontend-mono/common-contract-functions';
+import { RETAINER_ADDRESS } from '@autonolas-frontend-mono/util-constants';
+import { VOTE_WEIGHTING } from '@autonolas-frontend-mono/util-contracts';
 
 import { NEXT_RELATIVE_WEIGHTS_KEY, TIME_SUM_KEY } from 'common-util/constants/scopeKeys';
 import { getBytes32FromAddress } from 'common-util/functions';

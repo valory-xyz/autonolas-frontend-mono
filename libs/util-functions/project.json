@@ -4,16 +4,6 @@
   "sourceRoot": "libs/util-functions/src",
   "projectType": "library",
   "targets": {
-    "build": {
-      "executor": "@nx/js:tsc",
-      "outputs": ["{options.outputPath}"],
-      "options": {
-        "outputPath": "dist/libs/util-functions",
-        "main": "libs/util-functions/src/index.ts",
-        "tsConfig": "libs/util-functions/tsconfig.lib.json",
-        "assets": ["libs/util-functions/*.md"]
-      }
-    },
     "lint": {
       "executor": "@nx/eslint:lint",
       "outputs": ["{options.outputFile}"]

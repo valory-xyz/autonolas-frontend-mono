@@ -3,9 +3,9 @@ import { Button, Tooltip, Typography } from 'antd';
 import Link from 'next/link';
 import { useAccount } from 'wagmi';
 
-import { COLOR } from 'libs/ui-theme/src/lib/ui-theme';
-import { UNICODE_SYMBOLS } from 'libs/util-constants/src';
-import { formatWeiNumber } from 'libs/util-functions/src';
+import { COLOR } from '@autonolas-frontend-mono/ui-theme';
+import { UNICODE_SYMBOLS } from '@autonolas-frontend-mono/util-constants';
+import { formatWeiNumber } from '@autonolas-frontend-mono/util-functions';
 
 import { useVotingPower } from 'hooks/index';
 

@@ -3,7 +3,7 @@ import { useCallback, useMemo } from 'react';
 import { mainnet } from 'viem/chains';
 import { useReadContract } from 'wagmi';
 
-import { TOKENOMICS, TREASURY } from 'libs/util-contracts/src/lib/abiAndAddresses';
+import { TOKENOMICS, TREASURY } from '@autonolas-frontend-mono/util-contracts';
 
 const useVeOLASThreshold = () =>
   useReadContract({

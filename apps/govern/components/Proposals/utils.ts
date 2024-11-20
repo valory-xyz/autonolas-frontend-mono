@@ -1,8 +1,8 @@
 import { ethers } from 'ethers';
 import { Address } from 'viem';
 
-import { areAddressesEqual } from 'libs/util-functions/src';
-import { formatWeiNumber } from 'libs/util-functions/src';
+import { areAddressesEqual } from '@autonolas-frontend-mono/util-functions';
+import { formatWeiNumber } from '@autonolas-frontend-mono/util-functions';
 
 import { Proposal } from 'common-util/graphql/types';
 

@@ -1,6 +1,6 @@
 import styled from 'styled-components';
 
-import { MEDIA_QUERY } from 'libs/ui-theme/src';
+import { MEDIA_QUERY } from '@autonolas-frontend-mono/ui-theme';
 
 export const DonateContainer = styled.div`
   display: flex;

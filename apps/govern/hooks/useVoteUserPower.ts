@@ -3,7 +3,7 @@ import { Address } from 'viem';
 import { mainnet } from 'viem/chains';
 import { useReadContract } from 'wagmi';
 
-import { VOTE_WEIGHTING } from 'libs/util-contracts/src/lib/abiAndAddresses';
+import { VOTE_WEIGHTING } from '@autonolas-frontend-mono/util-contracts';
 
 import { VOTE_USER_POWER_KEY } from 'common-util/constants/scopeKeys';
 

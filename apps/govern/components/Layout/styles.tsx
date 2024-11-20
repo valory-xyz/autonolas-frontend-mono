@@ -2,7 +2,7 @@ import { Layout } from 'antd';
 import Link from 'next/link';
 import styled from 'styled-components';
 
-import { COLOR } from 'libs/ui-theme/src';
+import { COLOR } from '@autonolas-frontend-mono/ui-theme';
 
 export const CustomLayout = styled(Layout)`
   min-height: 100vh;

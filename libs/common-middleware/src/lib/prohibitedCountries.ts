@@ -1,5 +1,4 @@
-/* eslint-disable @nx/enforce-module-boundaries */
-import prohibitedAddresses from 'libs/util-prohibited-data/src/lib/prohibited-addresses.json';
+import { prohibitedAddresses } from '@autonolas-frontend-mono/util-prohibited-data';
 
 export const getRedirectUrl = async (pathName: string, countryName?: string) => {
   const prohibitedCountriesCode = Object.values(prohibitedAddresses) as unknown as string[];

@@ -1,7 +1,7 @@
 import { Address, formatEther } from 'viem';
 import { useReadContract } from 'wagmi';
 
-import { STAKING_FACTORY, STAKING_TOKEN } from 'libs/util-contracts/src/lib/abiAndAddresses';
+import { STAKING_FACTORY, STAKING_TOKEN } from '@autonolas-frontend-mono/util-contracts';
 
 export const useContractParams = (address: string, chainId: number) => {
   const { data } = useReadContract({

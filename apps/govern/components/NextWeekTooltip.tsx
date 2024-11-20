@@ -3,9 +3,9 @@ import { Space, Tooltip, Typography } from 'antd';
 import { ReactNode } from 'react';
 import { mainnet } from 'viem/chains';
 
-import { COLOR } from 'libs/ui-theme/src';
-import { UNICODE_SYMBOLS } from 'libs/util-constants/src';
-import { VOTE_WEIGHTING } from 'libs/util-contracts/src/lib/abiAndAddresses';
+import { COLOR } from '@autonolas-frontend-mono/ui-theme';
+import { UNICODE_SYMBOLS } from '@autonolas-frontend-mono/util-constants';
+import { VOTE_WEIGHTING } from '@autonolas-frontend-mono/util-contracts';
 
 const { Text } = Typography;
 
