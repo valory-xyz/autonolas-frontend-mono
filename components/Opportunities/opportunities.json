@@ -1,27 +1,5 @@
 [
   {
-    "project": "Shutter",
-    "agentName": "AI Agent for MEV Simulation on Gnosis Chain",
-    "agentDescription": "1) Simulates MEV Scenarios: Develops and tests various MEV (Maximal Extractable Value) strategies.\n2) Transaction Ordering: Simulates and analyses transaction ordering in blockchain environments.\n3) Performance Evaluation: Provides insights on the performance and efficiency of different MEV tactics.\n4) Collaborative Research: Facilitates collaboration with other developers and researchers in the blockchain space.",
-    "background": "Shutter is building an encrypted mempool, aimed at securing transaction ordering processes. Their team is interested in theoretical simulations to analyze the economic implications of this technology, alongside various transaction ordering strategies.",
-    "image": "/images/opportunities/shutter.png",
-    "date": "07-June-24"
-  },
-  {
-    "project": "NIM",
-    "agentName": "Basic NIM Agent",
-    "agentDescription": "Gaming-related AI agent for the NIM ecosystem that can be used to do things like:\n\n1) Enable controlling of NPCs, making them respond intelligently to player actions and evolve their strategies over time.\n2) Enable the creation of evolving in-game narratives and gameplay, adjusting the game's storyline and character interactions in real-time based on player decisions.\n3) Enable procedural content generation, facilitating the creation of vast, diverse, and ever-changing game worlds.\n4) Chat as an influencer with KOLs and other gamers.",
-    "background": "NIM is an AI gaming focused blockchain built on Celestia and Dymension.",
-    "image": "/images/opportunities/nim.png"
-  },
-  {
-    "project": "Peaq",
-    "agentName": "Basic Peaq DePin Agent",
-    "agentDescription": "AI Agents that will trade on “energy” in an R&D setting.",
-    "background": "Peaq is an L1 blockchain focused on DePin and machine economies.",
-    "image": "/images/opportunities/peaq.png"
-  },
-  {
     "project": "Origin",
     "agentName": "Origin Buyback Agent",
     "agentDescription": "AI agent that makes OGV buybacks more impactful. Instead of bi-weekly buybacks, an AI agent could be used to dynamically buy back OGV based on market conditions.",
@@ -29,25 +7,58 @@
     "image": "/images/opportunities/origin.png"
   },
   {
-    "project": "HV Capital",
-    "agentName": "Content Curation Agent for DeSci",
-    "agentDescription": "Content curation and influencer marketing agent to identify and categorize influential research and other content.",
-    "background": "HV Capital is a fund investing in venture, Web3, and liquid tokens.",
-    "image": "/images/opportunities/hvcapital.png"
-  },
-  {
     "project": "Shutter",
     "agentName": "Shutter Agent",
     "agentDescription": "Agent to be used for MEV simulations on the Shutter stack that can do things like:\n\n1) Trade on EVM Dexs like Uniswap\n2) Access a mempool to try to perform front-running\n3) Provide liquidity to DEXs like Uniswap\n4) Mint tokens",
     "background": "Shutter is building an encrypted mempool, aimed at securing transaction ordering processes. Their team is interested in theoretical simulations to analyze the economic implications of this technology, alongside various transaction ordering strategies.",
-    "image": "/images/opportunities/shutter.png"
+    "image": "/images/opportunities/shutter.png",
+    "status": "Completed"
   },
   {
-    "project": "Y2K",
-    "agentName": "Stablecoin Prediction Agent",
-    "agentDescription": "Prediction market agent for stablecoins that can be applied to dynamically weight the Y2K system using information such as recent stablecoin price movements or news.",
-    "background": "Y2K is a protocol that allows anyone to speculate and hedge on pegged assets like stablecoins and other risk assets.",
-    "image": "/images/opportunities/y2k.png"
+    "project": "Orderly",
+    "agentName": "Perp DEX Trader Agent",
+    "agentDescription": "Agent that trades on the Orderly perp DEX.",
+    "background": "Orderly is an SDK to enables anyone to launch a perp DEX.",
+    "image": "/images/opportunities/orderly.png",
+    "status": "Completed"
+  },
+  {
+    "project": "Mode",
+    "agentName": "Trading Agent Strategies",
+    "agentDescription": "Create strategies for AI agents to trade on various Mode DEXs like KIM, Balancer, and Velodrome.",
+    "background": "Mode is an Ethereum L2 that is scaling DeFi through onchain agents and AI-powered financial applications.",
+    "image": "/images/opportunities/mode.svg"
+  },
+  {
+    "project": "Peaq / Combinder",
+    "agentName": "Basic Peaq DePin Agent",
+    "agentDescription": "AI Agents that will trade on “energy” in an R&D setting.",
+    "background": "Peaq is an L1 blockchain focused on DePin and machine economies.",
+    "image": "/images/opportunities/peaq.png",
+    "status": "Completed"
+  },
+  {
+    "project": "Azuro",
+    "agentName": "Prediction Market Agent",
+    "agentDescription": "AI Agent that bets on various Azuro markets including sports betting and prediction markets.",
+    "background": "Azuro is the leading provider of tooling, oracle & liquidity solutions for sports betting and other prediction market apps.",
+    "image": "/images/opportunities/azuro.png"
+  },
+  {
+    "project": "Alprina",
+    "agentName": "Financial Prediction Agent",
+    "agentDescription": "Financial product prediction market agent.",
+    "background": "Alprina is a prediction market for financial products like stocks, bonds, and other securities that seeks to predict future price movements.",
+    "image": "/images/opportunities/alprina.png",
+    "date": "05-Sept-24",
+    "status": "Completed"
+  },
+  {
+    "project": "IDriss",
+    "agentName": "News verification agent",
+    "agentDescription": "Trading co-pilot agent that produces actionable advice as you scroll through Twitter / X and other websites. This agent will enable the verification and authenticity of news via a browser extension.",
+    "background": "IDriss is a project focused on building open-source tools and consumer apps that make web3 more usable for everyone.",
+    "image": "/images/opportunities/idriss.svg"
   },
   {
     "project": "Polymarket",
@@ -57,6 +68,20 @@
     "image": "/images/opportunities/polymarket.png"
   },
   {
+    "project": "Betswirl",
+    "agentName": "Arbitrage Agent",
+    "agentDescription": "Agent that will arbitrage between Betswirl (Azuro) markets and other marketplaces like Thales.",
+    "background": "Betswirl is a GambleFi platform operating on Polygon, BNB Chain, Avalanche, and Arbitrum.",
+    "image": "/images/opportunities/betswirl.png"
+  },
+  {
+    "project": "NIM",
+    "agentName": "Basic NIM Agent",
+    "agentDescription": "Gaming-related AI agent for the NIM ecosystem that can be used to do things like:\n\n1) Enable controlling of NPCs, making them respond intelligently to player actions and evolve their strategies over time.\n2) Enable the creation of evolving in-game narratives and gameplay, adjusting the game's storyline and character interactions in real-time based on player decisions.\n3) Enable procedural content generation, facilitating the creation of vast, diverse, and ever-changing game worlds.\n4) Chat as an influencer with KOLs and other gamers.",
+    "background": "NIM is an AI gaming focused blockchain built on Celestia and Dymension.",
+    "image": "/images/opportunities/nim.png"
+  },
+  {
     "project": "OriginTrail",
     "agentName": "Knowledge creator agent",
     "agentDescription": "Knowledge assembly agent into OriginTrails Decentralized Knowledge Graph (DKG) that takes specific topics and becomes an upstream learning and memory system for other agents to leverage.",
@@ -64,59 +89,67 @@
     "image": "/images/opportunities/origintrail.png"
   },
   {
-    "project": "Orderly",
-    "agentName": "Perp DEX Trader Agent",
-    "agentDescription": "Agent that trades on the Orderly perp DEX.",
-    "background": "Orderly is an SDK to enables anyone to launch a perp DEX.",
-    "image": "/images/opportunities/orderly.png"
+    "project": "Aizel",
+    "agentName": "Offchain Verification Agent",
+    "agentDescription": "Agent that runs on the Aizel TEE with onchain verifiable AI models.",
+    "image": "/images/opportunities/aizel.png",
+    "date": "25-August-24",
+    "status": "Completed"
   },
   {
-    "project": "Hedgehog",
-    "agentName": "Prediction Market Agent",
-    "agentDescription": "Agent that trades on Solana prediction markets.",
-    "background": "Hedgehog is a prediction market on Solana.",
-    "image": "/images/opportunities/hedgehog.png"
+    "project": "Hopscotch",
+    "agentName": "Escrow Verification Agent",
+    "agentDescription": "Agent that verfies and arbitrates payments.",
+    "background": "Hopscotch is an application that fascilitates closing any on-chain deals, including inside active conversations, chats, and other interfaces.",
+    "image": "/images/opportunities/hopscotch.jpg",
+    "date": "4-September-2024"
   },
   {
-    "project": "Truflation",
-    "agentName": "Trader Agent",
-    "agentDescription": "Agent that trades based on Truflation data.",
-    "background": "Truflation is a decentralized data provider for RWA and other macro indicators.",
-    "image": "/images/opportunities/truflation.png"
+    "project": "Rethink",
+    "agentName": "Fund Management Agent",
+    "agentDescription": "Agent that deploys scalable and trust-minimized strategies across DeFi. ",
+    "background": "Rethink is committed to transforming the asset management landscape by minimising trust assumptions and eliminating intermediaries.",
+    "image": "/images/opportunities/rethink.png",
+    "date": "25-October-2024"
   },
   {
-    "project": "Mellow Finance",
-    "agentName": "Liquidity Management Agent",
-    "agentDescription": "Agent that can select the best liquidity strategies available through Mellow.",
-    "background": "Mellow uses an intent-based system to actively manage liquidity across a variety of DeFi strategies.",
-    "image": "/images/opportunities/mellow.png"
+    "project": "Sturdy",
+    "agentName": "Yield Optimization Agent",
+    "agentDescription": "Agent that optimizes yield using the Sturdy Bittensor subnet.",
+    "background": "Sturdy enables anyone to create a liquid money market for any token. Sturdy uses a novel two-tier architecture to isolate risk between assets while avoiding liquidity fragmentation.",
+    "image": "/images/opportunities/sturdy.jpg",
+    "date": "8-October-2024"
   },
   {
-    "project": "Aerodrome / Velodrome",
-    "agentName": "Liquidity Management Agent",
-    "agentDescription": "Liquidity providing agent that intelligently provides liquidity to the highest performing pools.",
-    "background": "Aerodrome / Velodrome is an innovative DEX on Base / Optimism.",
-    "image": "/images/opportunities/aerodrome.png"
+    "project": "Irys",
+    "agentName": "Irys Integration Component",
+    "agentDescription": "Connection component that enables Olas agent developers to access Irys data storage.",
+    "background": "Irys is an L1 programmable datachain, designed to optimize data storage and execution.",
+    "image": "/images/opportunities/irys.png",
+    "date": "25-October-2024"
   },
   {
-    "project": "UNKJD",
-    "agentName": "Gaming Agent",
-    "agentDescription": "Gaming simulation agent per predefined behaviors.",
-    "background": "UNKJD is a Web3 gaming studio building a connected world of casual, free-to-play games.",
-    "image": "/images/opportunities/unkjd.png"
+    "project": "Newcoin",
+    "agentName": "Integrate Olas agents into Newcoin",
+    "agentDescription": "Integrate existing Olas agents with Newcoin such as the Shorts.wtf agent.",
+    "background": "Newcoin is a peer-to-peer AI system and social network powered by creative energy.",
+    "image": "/images/opportunities/newcoin.svg",
+    "date": "24-October-2024"
   },
   {
-    "project": "Azuro",
-    "agentName": "Prediction Market Agent",
-    "agentDescription": "AI Agent that bets on various Azuro markets including sports betting and prediction markets.",
-    "background": "Azuro is the leading provider of tooling, oracle & liquidity solutions for sports betting and other prediction market apps.",
-    "image": "/images/opportunities/azuro.png"
-  }, 
+    "project": "Masa",
+    "agentName": "Masa Integration Component",
+    "agentDescription": "Connection component that enables Olas agent developers to access Masa data.",
+    "background": "Masa is a decentralized AI network, where people earn by contributing data.",
+    "image": "/images/opportunities/masa.svg",
+    "date": "29-October-2024"
+  },
   {
-    "project": "IDriss",
-    "agentName": "News verification agent",
-    "agentDescription": "Trading co-pilot agent that produces actionable advice as you scroll through Twitter / X and other websites. This agent will enable the verification and authenticity of news via a browser extension.",
-    "background": "IDriss is a project focused on building open-source tools and consumer apps that make web3 more usable for everyone.",
-    "image": "/images/opportunities/idriss.svg"
+    "project": "Shutter",
+    "agentName": "AI Agent for MEV Simulation on Gnosis Chain",
+    "agentDescription": "1) Simulates MEV Scenarios: Develops and tests various MEV (Maximal Extractable Value) strategies.\n2) Transaction Ordering: Simulates and analyses transaction ordering in blockchain environments.\n3) Performance Evaluation: Provides insights on the performance and efficiency of different MEV tactics.\n4) Collaborative Research: Facilitates collaboration with other developers and researchers in the blockchain space.",
+    "background": "Shutter is building an encrypted mempool, aimed at securing transaction ordering processes. Their team is interested in theoretical simulations to analyze the economic implications of this technology, alongside various transaction ordering strategies.",
+    "image": "/images/opportunities/shutter.png",
+    "date": "07-June-24"
   }
 ]

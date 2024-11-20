@@ -1,12 +1,19 @@
 import Image from 'next/image';
 import PropTypes from 'prop-types';
 import {
-  Button, Card, Col, Flex, Row, Typography,
+  Button, Card, Col, Flex, Row, Tag, Typography,
 } from 'antd';
 import styled from 'styled-components';
 import opportunities from './opportunities.json';
 
 const LAUNCH_CONTACT_URL = 'https://t.me/pahlmeyer';
+
+const StatusTag = styled(Tag)`
+  font-weight: 500;
+  font-size: 14px;
+  line-height: 20px;
+  padding: 2px 8px 2px 8px;
+`;
 
 const StyledCard = styled(Card)`
   width: 100%;
@@ -25,10 +32,16 @@ const OpportunityCard = ({
   project,
   image,
   background,
+  status,
 }) => (
   <StyledCard>
     <Row gutter={16} style={{ width: '100%' }}>
       <Col xs={24} md={16}>
+        {status && (
+          <StatusTag bordered color="green">
+            {status}
+          </StatusTag>
+        )}
         <h2>{agentName}</h2>
         <p style={{ whiteSpace: 'pre-line' }}>{agentDescription}</p>
       </Col>
@@ -77,6 +90,11 @@ OpportunityCard.propTypes = {
   agentDescription: PropTypes.string.isRequired,
   background: PropTypes.string.isRequired,
   image: PropTypes.string.isRequired,
+  status: PropTypes.string,
+};
+
+OpportunityCard.defaultProps = {
+  status: null,
 };
 
 const sortedOpportunities = opportunities.sort((a, b) => {
