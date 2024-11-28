@@ -88,12 +88,12 @@ describe('<ContractsList />', () => {
     expect(screen.getByText(/Ethereum/)).toBeInTheDocument();
 
     // current weight column
-    expect(screen.getByText(/10.12%/)).toBeInTheDocument();
-    expect(screen.getByText(/298.89K veOLAS/)).toBeInTheDocument();
+    expect(screen.getByText(/10.123%/)).toBeInTheDocument();
+    expect(screen.getByText(/298.892K veOLAS/)).toBeInTheDocument();
 
     // next weight column
-    expect(screen.getByText(/25.56%/)).toBeInTheDocument();
-    expect(screen.getByText(/297.43K veOLAS/)).toBeInTheDocument();
+    expect(screen.getByText(/25.556%/)).toBeInTheDocument();
+    expect(screen.getByText(/297.434K veOLAS/)).toBeInTheDocument();
   });
 
   describe('Already voted', () => {

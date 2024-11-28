@@ -58,9 +58,13 @@ const getColumns = ({
       dataIndex: 'currentWeight',
       render: (currentWeight) => (
         <Space size={2} direction="vertical">
-          <Text>{`${currentWeight?.percentage.toFixed(2)}%`}</Text>
+          <Text>{`${formatWeiNumber({
+            value: currentWeight?.percentage,
+            maximumFractionDigits: 3,
+          })}%`}</Text>
           <Text type="secondary">{`${formatWeiNumber({
             value: currentWeight?.value,
+            maximumFractionDigits: 3,
           })} veOLAS`}</Text>
         </Space>
       ),
@@ -71,8 +75,14 @@ const getColumns = ({
       dataIndex: 'nextWeight',
       render: (nextWeight) => (
         <Space size={2} direction="vertical">
-          <Text>{`${nextWeight?.percentage.toFixed(2)}%`}</Text>
-          <Text type="secondary">{`${formatWeiNumber({ value: nextWeight?.value })} veOLAS`}</Text>
+          <Text>{`${formatWeiNumber({
+            value: nextWeight?.percentage,
+            maximumFractionDigits: 3,
+          })}%`}</Text>
+          <Text type="secondary">{`${formatWeiNumber({
+            value: nextWeight?.value,
+            maximumFractionDigits: 3,
+          })} veOLAS`}</Text>
         </Space>
       ),
     },
