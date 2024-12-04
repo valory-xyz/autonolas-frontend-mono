@@ -156,6 +156,33 @@
     }
   },
   {
+    "id": "weth-olas-via-balancer-on-base",
+    "name": "WETH-OLAS via Balancer on Base",
+    "network": "Base",
+    "networkId": "base",
+    "address": "0x54330d28ca3357F294334BDC454a032e7f353416",
+    "explorerBaseUrl": "https://basescan.org/token/",
+    "exchange": {
+      "name": "Balancer",
+      "url": "https://app.balancer.fi/#/base/pool/0x2da6e67c45af2aaa539294d9fa27ea50ce4e2c5f0002000000000000000001a3",
+      "poolAddress": "0x2da6e67c45af2aaa539294d9fa27ea50ce4e2c5f"
+    },
+    "bridge": {
+      "name": "Superbridge App",
+      "url": "https://superbridge.app/base"
+    },
+    "bond": {
+      "guideUrl": "https://olas.network/blog/bonding-guide-base",
+      "lpTokenName": "WETH-OLAS",
+      "lpPairTokenTicker": "WETH",
+      "bridgedLpTokenAddress": "0xad47b6ffEe3ed15fCE55eCA42AcE9736901b94A1",
+      "lpTokenBridge": {
+        "name": "Wormhole: Portal Token Bridge",
+        "url": "https://portalbridge.com/advanced-tools/#/transfer"
+      }
+    }
+  },
+  {
     "id": "wsol-olas-via-orca-on-solana",
     "name": "WSOL-OLAS via Orca on Solana",
     "customSubtitle": "Get WSOL-OLAS LP fungible tokens. Such tokens are a fungible representation of full-range Orca WSOL-OLAS positions. Bridge the fungible tokens to Ethereum and bond into the Olas protocol.",

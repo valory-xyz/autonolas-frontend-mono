@@ -81,7 +81,7 @@ const LP_PAIRS = {
     poolId: '0x5bb3e58887264b667f915130fd04bbb56116c27800020000000000000000012a',
     guide: 'weth-olas-via-balancer-on-optimism',
   },
-  // base
+  // base OLAS-USDC
   '0x9946d6FD1210D85EC613Ca956F142D911C97a074': {
     lpChainId: base.id,
     name: 'OLAS-USDC',
@@ -89,6 +89,15 @@ const LP_PAIRS = {
     dex: DEX.BALANCER.name,
     poolId: '0x5332584890d6e415a6dc910254d6430b8aab7e69000200000000000000000103',
     guide: 'olas-usdc-via-balancer-on-base',
+  },
+  // base WETH-OLAS
+  '0xad47b6ffEe3ed15fCE55eCA42AcE9736901b94A1': {
+    lpChainId: base.id,
+    name: 'WETH-OLAS',
+    originAddress: '0x2da6e67c45af2aaa539294d9fa27ea50ce4e2c5f',
+    dex: DEX.BALANCER.name,
+    poolId: '0x2da6e67c45af2aaa539294d9fa27ea50ce4e2c5f0002000000000000000001a3',
+    guide: 'weth-olas-via-balancer-on-base',
   },
   // celo
   '0xC085F31E4ca659fF8A17042dDB26f1dcA2fBdAB4': {
