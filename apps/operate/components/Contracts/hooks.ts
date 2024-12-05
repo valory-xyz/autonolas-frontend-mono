@@ -121,6 +121,44 @@ const STAKING_CONTRACT_DETAILS: Record<Address, StakingContractDetailsInfo> = {
     minOperatingBalance: 0,
     minOperatingBalanceToken: 'ETH',
   },
+  '0x000000000000000000000000534c0a05b6d4d28d5f3630d6d74857b253cf8332': {
+    minOperatingBalance: 0.17,
+    minOperatingBalanceToken: 'ETH',
+    minOperatingBalanceHint: '(Total Various Chains)',
+  },
+  '0x000000000000000000000000f39cd0ee4c502df7d26f28cfadd579724a3cfce8': {
+    minOperatingBalance: 0.03,
+    minOperatingBalanceToken: 'ETH',
+  },
+  '0x00000000000000000000000006702a05312091013fdb50c8b60b98ca30762931': {
+    minOperatingBalance: 0.03,
+    minOperatingBalanceToken: 'ETH',
+  },
+  '0x000000000000000000000000356c108d49c5eebd21c84c04e9162de41933030c': {
+    availableOn: 'quickstart',
+    minOperatingBalance: 90,
+    minOperatingBalanceToken: 'xDAI',
+  },
+  '0x00000000000000000000000017dbae44bc5618cc254055b386a29576b4f87015': {
+    availableOn: 'quickstart',
+    minOperatingBalance: 135,
+    minOperatingBalanceToken: 'xDAI',
+  },
+  '0x000000000000000000000000b0ef657b8302bd2c74b6e6d9b2b4b39145b19c6f': {
+    availableOn: 'quickstart',
+    minOperatingBalance: 135,
+    minOperatingBalanceToken: 'xDAI',
+  },
+  '0x0000000000000000000000003112c1613eac3dbae3d4e38cef023eb9e2c91cf7': {
+    availableOn: 'quickstart',
+    minOperatingBalance: 135,
+    minOperatingBalanceToken: 'xDAI',
+  },
+  '0x000000000000000000000000f4a75f476801b3fbb2e7093acdcc3576593cc1fc': {
+    availableOn: 'quickstart',
+    minOperatingBalance: 135,
+    minOperatingBalanceToken: 'xDAI',
+  },
 };
 
 const getApy = (
