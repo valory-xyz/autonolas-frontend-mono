@@ -122,9 +122,9 @@ const STAKING_CONTRACT_DETAILS: Record<Address, StakingContractDetailsInfo> = {
     minOperatingBalanceToken: 'ETH',
   },
   '0x000000000000000000000000534c0a05b6d4d28d5f3630d6d74857b253cf8332': {
-    minOperatingBalance: 0.17,
+    availableOn: 'modiusQuickstart',
+    minOperatingBalance: 0.01,
     minOperatingBalanceToken: 'ETH',
-    minOperatingBalanceHint: '(Total Various Chains)',
   },
   '0x000000000000000000000000f39cd0ee4c502df7d26f28cfadd579724a3cfce8': {
     minOperatingBalance: 0.03,
