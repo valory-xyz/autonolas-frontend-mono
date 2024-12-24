@@ -109,7 +109,7 @@ const useColumns = () => {
         },
       },
     ],
-    [networkName],
+    [networkName, networkId],
   );
 
   return columns;
