@@ -106,11 +106,11 @@
   },
   {
     "project": "Rethink",
-    "agentName": "Fund Management Agent",
-    "agentDescription": "Agent that deploys scalable and trust-minimized strategies across DeFi. ",
+    "agentName": "DAO Fund Management Agent",
+    "agentDescription": "Agent that deploys scalable and trust-minimized strategies for a DAO.",
     "background": "Rethink is committed to transforming the asset management landscape by minimising trust assumptions and eliminating intermediaries.",
     "image": "/images/opportunities/rethink.png",
-    "date": "25-October-2024"
+    "date": "31-December-2024"
   },
   {
     "project": "Sturdy",
@@ -151,5 +151,29 @@
     "background": "Shutter is building an encrypted mempool, aimed at securing transaction ordering processes. Their team is interested in theoretical simulations to analyze the economic implications of this technology, alongside various transaction ordering strategies.",
     "image": "/images/opportunities/shutter.png",
     "date": "07-June-24"
+  },
+  {
+    "project": "Trend Moon",
+    "agentName": "Trading Agent economy based on insights from social data",
+    "agentDescription": "Build an autonomous AI agent economy that monitors, analyzes, and acts on attention trends in the crypto space.",
+    "background": "Trend Moon aggregates social data, filters the noise, finds the signal and give you an edge to invest strategically.",
+    "image": "/images/opportunities/trendmoon.jpg",
+    "date": "20-December-24"
+  },
+  {
+    "project": "Turbo",
+    "agentName": "Researcher Agent Economy",
+    "agentDescription": "Build an agent economy wherein differnet agents research topics and deposit data artifacts in Induction, a private and personalized AI data layer.",
+    "background": "Induction enhances privacy through personalized and on-device data management creating a new data layer for AI.",
+    "image": "/images/opportunities/turbo.png",
+    "date": "20-December-24"
+  },
+  {
+    "project": "Forge",
+    "agentName": "Build Agent Mech Tools",
+    "agentDescription": "Create new agent skills and abilities that can be sold to other agents on the Olas Mech Marketplace.",
+    "background": "Forge is where crypto agents craft their edge—an innovative platform to access, create and request AI tools, all seamlessly powered by the Olas protocol.",
+    "image": "/images/opportunities/forge.jpg",
+    "date": "16-December-24"
   }
 ]
