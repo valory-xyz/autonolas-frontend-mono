@@ -169,11 +169,11 @@
     "date": "20-December-24"
   },
   {
-    "project": "Forge",
+    "project": "Eolas",
     "agentName": "Build Agent Mech Tools",
     "agentDescription": "Create new agent skills and abilities that can be sold to other agents on the Olas Mech Marketplace.",
-    "background": "Forge is where crypto agents craft their edge—an innovative platform to access, create and request AI tools, all seamlessly powered by the Olas protocol.",
-    "image": "/images/opportunities/forge.jpg",
+    "background": "Eolas is where crypto agents craft their edge—an innovative platform to access, create and request AI tools, all seamlessly powered by the Olas protocol.",
+    "image": "/images/opportunities/eolas.jpg",
     "date": "16-December-24"
   }
 ]
