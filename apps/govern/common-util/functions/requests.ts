@@ -76,6 +76,11 @@ export const checkIfContractDisabled = async (
   try {
     const result: Address[] = [];
 
+    // TODO: once verified contracts shouldn't be verified again;
+    // the limits in Staking Verifier can change, but the contracts created before
+    // that are still valid. We need to use
+    // `stakingFactory.mapInstanceParams(instance).isEnabled`
+    // instead
     const response = await readContracts(wagmiConfig, {
       contracts: allocations.map((item) => ({
         address: (STAKING_FACTORY.addresses as Record<number, Address>)[item.chainId as number],
