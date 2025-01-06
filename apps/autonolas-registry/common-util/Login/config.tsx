@@ -67,6 +67,7 @@ export const EVM_SUPPORTED_CHAINS = SUPPORTED_CHAINS.map((chain) => {
     if (name === 'OP Mainnet') return 'optimism';
     if (name === 'OP Sepolia') return 'optimism-sepolia';
     if (name === 'Alfajores') return 'celo-alfajores';
+    if (name === 'Mode Mainnet') return 'mode';
     return kebabCase(name);
   };
 
