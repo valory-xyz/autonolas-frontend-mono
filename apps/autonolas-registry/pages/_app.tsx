@@ -18,7 +18,7 @@ const DESC = 'View and manage components, agents and services via the Autonolas 
 const queryClient = new QueryClient();
 const projectId = process.env.NEXT_PUBLIC_WALLET_PROJECT_ID as string;
 const metadata = {
-  name: 'Autonolas Registry',
+  name: 'Olas Registry',
   description: DESC,
   url: 'https://registry.olas.network/',
   icons: ['https://avatars.githubusercontent.com/u/37784886'],
@@ -60,7 +60,7 @@ const RegistryApp = ({
     <>
       <GlobalStyles />
       <Head>
-        <title>Autonolas Registry</title>
+        <title>Olas Registry</title>
         <meta name="description" content={DESC} />
       </Head>
       <Provider store={store}>
