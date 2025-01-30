@@ -17,7 +17,13 @@ type StakingContractDetailsInfo = {
   minOperatingBalanceHint?: string;
 };
 
-const BLACKLISTED_ADDRESSES = [RETAINER_ADDRESS];
+const BLACKLISTED_ADDRESSES = [
+  RETAINER_ADDRESS,
+  // Broken contribute staking contracts
+  '0x95146adf659f455f300d7521b3b62a3b6c4aba1f',
+  '0x2c8a5ac7b431ce04a037747519ba475884bce2fb',
+  '0x708e511d5fcb3bd5a5d42f42aa9a69ec5b0ee2e8',
+];
 
 const STAKING_CONTRACT_DETAILS: Record<Address, StakingContractDetailsInfo> = {
   '0x000000000000000000000000ef44fb0842ddef59d37f85d61a1ef492bba6135d': {
@@ -81,6 +87,11 @@ const STAKING_CONTRACT_DETAILS: Record<Address, StakingContractDetailsInfo> = {
     minOperatingBalance: 135,
     minOperatingBalanceToken: 'xDAI',
   },
+  '0x0000000000000000000000005fc25f50e96857373c64dc0edb1abcbed4587e91': {
+    availableOn: 'modiusQuickstart',
+    minOperatingBalance: 0.00516,
+    minOperatingBalanceToken: 'ETH',
+  },
   '0x000000000000000000000000bd59ff0522aa773cb6074ce83cd1e4a05a457bc1': {
     availableOn: 'pearl',
     minOperatingBalance: 11.5,
@@ -106,23 +117,7 @@ const STAKING_CONTRACT_DETAILS: Record<Address, StakingContractDetailsInfo> = {
     minOperatingBalance: 135,
     minOperatingBalanceToken: 'xDAI',
   },
-  '0x00000000000000000000000095146adf659f455f300d7521b3b62a3b6c4aba1f': {
-    availableOn: 'contribute',
-    minOperatingBalance: 0,
-    minOperatingBalanceToken: 'ETH',
-  },
-  '0x0000000000000000000000002c8a5ac7b431ce04a037747519ba475884bce2fb': {
-    availableOn: 'contribute',
-    minOperatingBalance: 0,
-    minOperatingBalanceToken: 'ETH',
-  },
-  '0x000000000000000000000000708e511d5fcb3bd5a5d42f42aa9a69ec5b0ee2e8': {
-    availableOn: 'contribute',
-    minOperatingBalance: 0,
-    minOperatingBalanceToken: 'ETH',
-  },
   '0x000000000000000000000000534c0a05b6d4d28d5f3630d6d74857b253cf8332': {
-    availableOn: 'modiusQuickstart',
     minOperatingBalance: 0.01,
     minOperatingBalanceToken: 'ETH',
   },
