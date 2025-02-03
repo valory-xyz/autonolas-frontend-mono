@@ -170,6 +170,43 @@ const AgentCard = ({ agent }: { agent: Agent }) => {
   );
 };
 
+const WantPeopleToRunYourAgent = () => (
+  <Col sm={24} lg={24} style={{ width: '100%' }}>
+    <StyledCard styles={{ body: { padding: 0 } }}>
+      <Row>
+        <Col span={7} className="p-0">
+          <AddImageContainer>
+            <StyledAddImage
+              alt="baby robot surfing a wave, having an idea"
+              src="/images/add-your-own.png"
+              layout="fill"
+              objectFit="cover"
+            />
+          </AddImageContainer>
+        </Col>
+        <Col span={17} className="p-16">
+          <Title className="mt-0 mb-16" level={4}>
+            Want people to run <b>your</b> agent?
+          </Title>
+          <Paragraph type="secondary" className="mb-24">
+            Build an autonomous service using Open Autonomy. Then, simply submit a pull request
+            including the quickstart.
+          </Paragraph>
+          <Button
+            type="default"
+            icon={<BulbFilled />}
+            href="https://github.com/valory-xyz/autonolas-operate-frontend?tab=readme-ov-file#add-your-own-agent"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Add your own
+          </Button>
+        </Col>
+      </Row>
+    </StyledCard>
+  </Col>
+);
+
 export const AgentsPage = () => {
   return (
     <StyledMain>
@@ -177,40 +214,7 @@ export const AgentsPage = () => {
         {agents.map((agent) => (
           <AgentCard key={agent.id} agent={agent} />
         ))}
-        <Col sm={24} lg={24} style={{ width: '100%' }}>
-          <StyledCard styles={{ body: { padding: 0 } }}>
-            <Row>
-              <Col span={7} className="p-0">
-                <AddImageContainer>
-                  <StyledAddImage
-                    alt="baby robot surfing a wave, having an idea"
-                    src="/images/add-your-own.png"
-                    layout="fill"
-                    objectFit="cover"
-                  />
-                </AddImageContainer>
-              </Col>
-              <Col span={17} className="p-16">
-                <Title className="mt-0 mb-16" level={4}>
-                  Want people to run <b>your</b> agent?
-                </Title>
-                <Paragraph type="secondary" className="mb-24">
-                  Build an autonomous service using Open Autonomy. Then, simply submit a pull
-                  request including the quickstart.
-                </Paragraph>
-                <Button
-                  type="default"
-                  icon={<BulbFilled />}
-                  href="https://github.com/valory-xyz/autonolas-operate-frontend?tab=readme-ov-file#add-your-own-agent"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  Add your own
-                </Button>
-              </Col>
-            </Row>
-          </StyledCard>
-        </Col>
+        <WantPeopleToRunYourAgent />
       </Row>
     </StyledMain>
   );
