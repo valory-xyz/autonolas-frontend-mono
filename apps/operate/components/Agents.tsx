@@ -56,7 +56,7 @@ type Agent = {
 
 const agents: Agent[] = [
   {
-    id: '582c485c-a2ba-4c53-8c58-8eb7b34ef87c',
+    id: 'prediction-agent',
     name: 'Prediction Agent',
     description: 'Participates in prediction markets according to your strategy.',
     comingSoon: false,
@@ -68,17 +68,39 @@ const agents: Agent[] = [
     imageFilename: 'prediction-agent.png',
   },
   {
-    id: '2c2b2e69-ad26-4c94-b6a0-b62ed25e144b',
+    id: 'optimus-agent',
     name: 'Optimus Agent',
     description:
       'Streamlines your DeFi experience by intelligently managing your assets across the Superchain.',
     comingSoon: false,
     availableOn: ['optimusQuickstart'],
     urls: {
-      // uncomment when the content is ready
-      // learnMore: 'https://olas.network/services/babydegen',
+      learnMore: 'https://olas.network/services/babydegen#optimus-agent',
     },
     imageFilename: 'optimus-agent.png',
+  },
+  {
+    id: 'modius-agent',
+    name: 'Modius Agent',
+    description: 'Invests crypto assets on your behalf and grows your portfolio on Mode chain.',
+    comingSoon: false,
+    availableOn: ['pearl', 'modiusQuickstart'],
+    urls: {
+      learnMore: 'https://olas.network/services/babydegen#modius-agent',
+    },
+    imageFilename: 'modius-agent.png',
+  },
+  {
+    id: 'agents.fun-agent',
+    name: 'Agents.fun agent',
+    description:
+      'Creates сustomized AI influencer personas that post on X and perform tasks on Base chain.',
+    comingSoon: false,
+    availableOn: ['pearl'],
+    urls: {
+      learnMore: 'https://olas.network/services/agentsfun',
+    },
+    imageFilename: 'agents.fun-agent.png',
   },
 ];
 
@@ -111,7 +133,7 @@ const AgentCard = ({ agent }: { agent: Agent }) => {
             </Button>
           ) : (
             <>
-              {availableOn && (
+              {availableOn && availableOn.length !== 0 && (
                 <Flex gap={8} justify="space-between" className="mb-8">
                   {availableOn.map((type) => (
                     <RunAgentButton
