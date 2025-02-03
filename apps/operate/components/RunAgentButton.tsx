@@ -40,14 +40,15 @@ const props = {
   },
 };
 export const RunAgentButton = ({ availableOn, type = 'text', className }: RunAgentButtonProps) => {
-  if (availableOn === null)
+  if (availableOn === null) {
     return (
       <Button type={type} className={className} disabled>
         Not available yet
       </Button>
     );
-  const agentProps = props[availableOn];
+  }
 
+  const agentProps = props[availableOn];
   return (
     <Button type={type} className={className} href={agentProps.href} target="_blank">
       <Flex gap={8} align="center" justify="center">
