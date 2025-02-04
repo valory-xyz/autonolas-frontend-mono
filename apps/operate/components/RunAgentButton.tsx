@@ -2,12 +2,12 @@ import { Button, Flex } from 'antd';
 import { BaseButtonProps } from 'antd/es/button/button';
 import { NotificationOutlined } from '@ant-design/icons';
 import Image from 'next/image';
-import { StakingContract } from 'types';
+import { AvailableOn } from 'types';
 
 import { UNICODE_SYMBOLS } from 'libs/util-constants/src';
 
 type RunAgentButtonProps = {
-  availableOn: StakingContract['availableOn'];
+  availableOn: AvailableOn;
   type?: BaseButtonProps['type'];
   className?: string;
 };
@@ -40,14 +40,6 @@ const props = {
   },
 };
 export const RunAgentButton = ({ availableOn, type = 'text', className }: RunAgentButtonProps) => {
-  if (availableOn === null) {
-    return (
-      <Button type={type} className={className} disabled>
-        Not available yet
-      </Button>
-    );
-  }
-
   const agentProps = props[availableOn];
   return (
     <Button type={type} className={className} href={agentProps.href} target="_blank">

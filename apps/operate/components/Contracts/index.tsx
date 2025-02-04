@@ -1,8 +1,8 @@
 import { DownOutlined, RightOutlined } from '@ant-design/icons';
-import { Card, Flex, Table, Tag, Typography } from 'antd';
+import { Button, Card, Flex, Table, Tag, Typography } from 'antd';
 import { ColumnsType } from 'antd/es/table';
 import styled from 'styled-components';
-import { StakingContract } from 'types';
+import { AvailableOn, StakingContract } from 'types';
 
 import { Caption, TextWithTooltip } from 'libs/ui-components/src';
 import { BREAK_POINT } from 'libs/ui-theme/src';
@@ -104,7 +104,18 @@ const columns: ColumnsType<StakingContract> = [
     ),
     dataIndex: 'availableOn',
     key: 'availableOn',
-    render: (availableOn) => <RunAgentButton availableOn={availableOn} />,
+    render: (availableOn) =>
+      availableOn && availableOn.length !== 0 ? (
+        <Flex gap={4} vertical align="start">
+          {availableOn.map((type: AvailableOn) => (
+            <RunAgentButton availableOn={type} key={type} />
+          ))}
+        </Flex>
+      ) : (
+        <Button type="text" disabled>
+          Not available yet
+        </Button>
+      ),
   },
 ];
 

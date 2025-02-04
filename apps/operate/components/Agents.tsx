@@ -33,7 +33,7 @@ type Agent = {
   name: string;
   description: string;
   comingSoon: boolean;
-  availableOn: StakingContract['availableOn'][];
+  availableOn: StakingContract['availableOn'];
   urls: Record<string, string>;
   imageFilename: string;
 };
