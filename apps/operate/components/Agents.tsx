@@ -47,7 +47,6 @@ const agents: Agent[] = [
     availableOn: ['pearl', 'quickstart'],
     urls: {
       learnMore: 'https://olas.network/services/prediction-agents',
-      gpt: 'https://chat.openai.com/g/g-6y88mEBzS-olas-trader-agent-guide',
     },
     imageFilename: 'prediction-agent.png',
   },
