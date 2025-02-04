@@ -5,6 +5,13 @@ export type Metadata = {
   description: string;
 };
 
+export type AvailableOn =
+  | 'pearl'
+  | 'quickstart'
+  | 'optimusQuickstart'
+  | 'modiusQuickstart'
+  | 'contribute';
+
 export type StakingContract = {
   key: Address;
   address: Address;
@@ -14,13 +21,7 @@ export type StakingContract = {
   maxSlots: number;
   apy: number;
   stakeRequired: string;
-  availableOn:
-    | 'pearl'
-    | 'quickstart'
-    | 'optimusQuickstart'
-    | 'modiusQuickstart'
-    | 'contribute'
-    | null;
+  availableOn: AvailableOn[] | null;
   minOperatingBalance: number | null;
   minOperatingBalanceToken: string | null;
   minOperatingBalanceHint?: string;

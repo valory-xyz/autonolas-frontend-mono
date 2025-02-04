@@ -112,7 +112,10 @@ export const ContractPage = () => {
   const router = useRouter();
   const { isStakingContractsLoading, stakingContracts } = useAppSelector((state) => state.govern);
 
-  const contract = stakingContracts.find((item) => item.address === router?.query?.address);
+  const contract = stakingContracts.find(
+    (item) =>
+      item.address.toLowerCase() === ((router?.query?.address as string) || '').toLowerCase(),
+  );
 
   if (isStakingContractsLoading) {
     return <SkeletonPage />;
