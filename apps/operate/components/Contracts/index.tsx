@@ -98,6 +98,9 @@ const columns: ColumnsType<StakingContract> = [
             <br />
             <Text strong>Quickstart</Text> - script for technical users to run agents with more
             flexibility.
+            <br />
+            <Text strong>Contribute</Text> - web app that enables you to get rewards for posting
+            about Olas on X.
           </>
         }
       />

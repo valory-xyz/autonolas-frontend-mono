@@ -239,6 +239,24 @@ const STAKING_CONTRACT_DETAILS: Record<Address, StakingContractDetailsInfo> = {
     minOperatingBalance: 0.03,
     minOperatingBalanceToken: 'ETH',
   },
+  // Contribute Beta I
+  '0x000000000000000000000000e2e68ddafbdc0ae48e39cdd1e778298e9d865cf4': {
+    availableOn: ['contribute'],
+    minOperatingBalance: 0,
+    minOperatingBalanceToken: 'ETH',
+  },
+  // Contribute Beta II
+  '0x0000000000000000000000006ce93e724606c365fc882d4d6dfb4a0a35fe2387': {
+    availableOn: ['contribute'],
+    minOperatingBalance: 0,
+    minOperatingBalanceToken: 'ETH',
+  },
+  // Contribute Beta III
+  '0x00000000000000000000000028877ffc6583170a4c9ed0121fc3195d06fd3a26': {
+    availableOn: ['contribute'],
+    minOperatingBalance: 0,
+    minOperatingBalanceToken: 'ETH',
+  },
 };
 
 const getApy = (
