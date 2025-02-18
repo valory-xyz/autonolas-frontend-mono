@@ -10,6 +10,7 @@ import { Footer } from './Footer';
 import { LogoSvg } from './Logos';
 import { NavigationMenu } from './Menu';
 import { CustomLayout, Logo, OlasHeader, RightMenu } from './styles';
+import { NavDropdown } from 'libs/ui-components/src';
 
 const { Content } = AntdLayout;
 
@@ -23,9 +24,12 @@ export const Layout: FC<LayoutProps> = ({ children }) => {
   return (
     <CustomLayout>
       <OlasHeader>
-        <Logo href="/">
-          <LogoSvg />
-        </Logo>
+        <div className="header-left-content">
+          <Logo href="/">
+            <LogoSvg />
+          </Logo>
+          <NavDropdown currentSite="govern" />
+        </div>
         <NavigationMenu />
         <RightMenu>
           <Balance />

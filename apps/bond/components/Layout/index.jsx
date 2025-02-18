@@ -9,6 +9,7 @@ import { useEffect, useState } from 'react';
 import styled from 'styled-components';
 
 import { COLOR } from 'libs/ui-theme/src';
+import { NavDropdown } from 'libs/ui-components/src';
 
 import { useHelpers } from 'common-util/hooks/useHelpers';
 import { Logo as LogoSvg } from 'components/Branding/Logo';
@@ -53,12 +54,14 @@ const Layout = ({ children }) => {
   return (
     <CustomLayout pathname={router.pathname}>
       <StyledHeader>
-        <div className="column-1">
+        <div className="column-1 header-left-content">
           <Link href="/">
             <Logo data-testid="tokenomics-logo">
               <LogoSvg />
             </Logo>
           </Link>
+
+          <NavDropdown currentSite="bond" />
         </div>
 
         <Menu

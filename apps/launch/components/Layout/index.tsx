@@ -11,6 +11,7 @@ import { LogoSvg } from './Logos';
 import NavigationMenu from './Menu';
 import { SwitchNetworkSelect } from './SwitchNetworkSelect';
 import { CustomLayout, Logo, OlasHeader, RightMenu } from './styles';
+import { NavDropdown } from 'libs/ui-components/src';
 
 const { Content } = AntdLayout;
 
@@ -28,9 +29,12 @@ const Layout: FC<LayoutProps> = ({ children }) => {
     <CustomLayout>
       {isMenuHidden ? null : (
         <OlasHeader>
-          <Logo href="/">
-            <LogoSvg />
-          </Logo>
+          <div className="header-left-content">
+            <Logo href="/">
+              <LogoSvg />
+            </Logo>
+            <NavDropdown currentSite="launch" />
+          </div>
           <NavigationMenu />
           <RightMenu>
             <SwitchNetworkButton />
