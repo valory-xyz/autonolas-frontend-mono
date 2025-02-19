@@ -4,13 +4,15 @@ import { NotificationOutlined } from '@ant-design/icons';
 import Image from 'next/image';
 import { AvailableOn } from 'types';
 
-import { UNICODE_SYMBOLS } from 'libs/util-constants/src';
+import { QUICKSTART_REPO_URL, UNICODE_SYMBOLS } from 'libs/util-constants/src';
 
 type RunAgentButtonProps = {
   availableOn: AvailableOn;
   type?: BaseButtonProps['type'];
   className?: string;
 };
+
+const QUICKSTART_URL = `${QUICKSTART_REPO_URL}?tab=readme-ov-file#olas-agents---quickstart`;
 
 const props = {
   pearl: {
@@ -21,7 +23,7 @@ const props = {
   quickstart: {
     icon: <Image src={`/images/github.svg`} alt="Github" width={18} height={18} />,
     text: 'Quickstart',
-    href: 'https://github.com/valory-xyz/trader-quickstart?tab=readme-ov-file#trader-quickstart',
+    href: QUICKSTART_URL,
   },
   optimusQuickstart: {
     icon: <Image src={`/images/github.svg`} alt="Github" width={18} height={18} />,
