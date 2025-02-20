@@ -3,7 +3,7 @@ import {
 } from 'antd';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
-import PropTypes, { string } from 'prop-types';
+import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import { COLOR } from '@autonolas/frontend-library';
 import Link from 'next/link';
@@ -154,7 +154,7 @@ NavigationBar.defaultProps = {
 };
 
 ExternalLink.propTypes = {
-  href: string,
+  href: PropTypes.string,
   label: PropTypes.element,
 };
 
