@@ -183,6 +183,18 @@ const GlobalStyle = createGlobalStyle`
     border-bottom: none;
   }
 
+  /* navbar dropdown */
+  .ant-dropdown-menu {
+    width: 180px;
+  }
+  .ant-dropdown-menu-item-disabled {
+    color: ${COLOR.PRIMARY} !important;
+    cursor: default !important;
+    &:hover {
+      background-color: #f7e6ff !important;
+    }
+  }
+
   /* table */
   .ant-table {
     .ant-table-thead {
