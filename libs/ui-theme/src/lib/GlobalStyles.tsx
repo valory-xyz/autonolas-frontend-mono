@@ -176,6 +176,32 @@ export const GlobalStyles = createGlobalStyle`
     border-bottom: none;
   }
 
+  /* navbar dropdown */
+  .ant-dropdown-menu {
+    width: 180px;
+  }
+  .ant-dropdown-menu-item-disabled {
+    color: ${COLOR.PRIMARY} !important;
+    cursor: default !important;
+    &:hover {
+      background-color: #f7e6ff !important;
+    }
+  }
+
+  .nav-button {
+    padding: 3px;
+    margin-top: auto;
+    margin-bottom: auto;
+    width: 32px;
+    height: 32px;
+  }
+  
+  .header-left-content {
+    display: flex;
+    flex-direction: row;
+    margin-right: 32px;
+  }
+
   /* table */
   .ant-table {
     .ant-table-thead {
