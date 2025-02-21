@@ -28,12 +28,12 @@ const props = {
   optimusQuickstart: {
     icon: <Image src={`/images/github.svg`} alt="Github" width={18} height={18} />,
     text: 'Quickstart',
-    href: 'https://github.com/valory-xyz/optimus-quickstart',
+    href: QUICKSTART_URL,
   },
   modiusQuickstart: {
     icon: <Image src={`/images/github.svg`} alt="Github" width={18} height={18} />,
     text: 'Quickstart',
-    href: 'https://github.com/valory-xyz/modius-quickstart?tab=readme-ov-file#olas-modius-quickstart',
+    href: QUICKSTART_URL,
   },
   contribute: {
     icon: <NotificationOutlined width={18} height={18} />,
