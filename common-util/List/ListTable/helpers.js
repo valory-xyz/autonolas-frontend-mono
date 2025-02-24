@@ -4,7 +4,6 @@ import { SearchOutlined } from '@ant-design/icons';
 import { AddressLink, NA } from '@autonolas/frontend-library';
 
 import { NAV_TYPES, TOTAL_VIEW_COUNT } from 'util/constants';
-import { getAgentHash } from 'common-util/functions';
 import { SUPPORTED_CHAINS } from 'common-util/Login';
 
 const { Title } = Typography;
@@ -95,7 +94,7 @@ export const getData = (type, rawData, { current }) => {
       description: item.description || '-',
       developer: item.developer || '-',
       owner: item.owner || '-',
-      hash: getAgentHash(item.agentHashes) || '-',
+      hash: item.hash || '-',
       mech: item.mech,
       dependency: (item.dependencies || []).length,
     }));

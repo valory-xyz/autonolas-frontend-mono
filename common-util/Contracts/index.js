@@ -51,16 +51,15 @@ export const getMechContract = () => {
   return contract;
 };
 
-export async function fetchGraphQLData() {
+export async function fetchMechAgents({ first, total }) {
   return new Promise((resolve, reject) => {
-    const url = 'https://api.studio.thegraph.com/query/57238/mech/v0.0.1';
+    const url = process.env.NEXT_PUBLIC_MECH_SUBGRAPH_URL;
     const query = `
       {
-        createMeches(first: 10, orderBy: agentId, order: ASC) {
+        mechAgents(first: ${total}, skip: ${first}, orderBy: id, order: asc) {
           id
           mech
-          agentId
-          price
+          agentHash
         }
       }
     `;
@@ -79,7 +78,7 @@ export async function fetchGraphQLData() {
         throw new Error(`Error fetching data: ${response.statusText}`);
       })
       .then((data) => {
-        resolve(data.data.createMeches);
+        resolve(data.data.mechAgents);
       })
       .catch((error) => {
         reject(error);
