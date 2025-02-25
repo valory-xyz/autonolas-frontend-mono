@@ -11,6 +11,7 @@ import { LogoSvg } from './Logos';
 import { NavigationMenu } from './Menu';
 import { CustomLayout, Logo, OlasHeader, RightMenu } from './styles';
 import { NavDropdown } from 'libs/ui-components/src';
+import { SwitchNetworkButton } from 'components/Login/SwitchNetworkButton';
 
 const { Content } = AntdLayout;
 
@@ -33,6 +34,7 @@ export const Layout: FC<LayoutProps> = ({ children }) => {
         <NavigationMenu />
         <RightMenu>
           <Balance />
+          <SwitchNetworkButton />
           <LoginV2 />
         </RightMenu>
       </OlasHeader>
