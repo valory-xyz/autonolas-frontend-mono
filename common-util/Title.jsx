@@ -2,7 +2,6 @@ import { Typography, Tooltip } from 'antd';
 import { InfoCircleOutlined } from '@ant-design/icons';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
-import { COLOR } from '@autonolas/frontend-library';
 
 const { Title } = Typography;
 
@@ -11,7 +10,6 @@ const TitleContainer = styled.div`
   justify-content: space-between;
   align-items: center;
   h2 {
-    color: ${COLOR.PRIMARY};
     margin-top: 16px;
   }
 `;

@@ -127,7 +127,7 @@ const EventListener = () => {
         if (error) {
           onErrorEvent(error, 'Request');
         } else {
-          onNewEvent(event);
+          // onNewEvent(event);
           setFirstEvents((prevEvents) => sortAndRemoveDuplicateEvents([...prevEvents, event]));
         }
       });
@@ -172,7 +172,7 @@ const EventListener = () => {
         if (error) {
           onErrorEvent(error, 'Deliver');
         } else {
-          onNewEvent(event);
+          // onNewEvent(event);
           setSecondEvents((prevEvents) => sortAndRemoveDuplicateEvents([...prevEvents, event]));
         }
       });

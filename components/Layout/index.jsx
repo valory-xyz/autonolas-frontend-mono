@@ -1,20 +1,25 @@
 import { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useRouter } from 'next/router';
-import dynamic from 'next/dynamic';
 import {
   Alert, Layout, Menu, Tag,
 } from 'antd';
 import PropTypes from 'prop-types';
 import { getSupportedNetworks } from 'common-util/functions';
 import { COLOR } from '@autonolas/frontend-library';
+import { LogoSvg } from './Logo';
 import Login from '../Login';
 import Footer from './Footer';
-import { CustomLayout, Logo } from './styles';
+import { CustomLayout, OlasHeader, Logo } from './styles';
 
-const LogoSvg = dynamic(() => import('common-util/SVGs/logo'));
+const { Content } = Layout;
 
-const { Header, Content } = Layout;
+const MENU_ITEMS = [
+  { key: 'mechs', label: 'Mechs' },
+  { key: 'mech', label: 'Mech' },
+  { key: 'docs', label: 'Docs' },
+  { key: 'factory', label: 'Factory' },
+];
 
 const NavigationBar = ({ children }) => {
   const router = useRouter();
@@ -27,7 +32,7 @@ const NavigationBar = ({ children }) => {
   useEffect(() => {
     if (pathname) {
       const name = pathname.split('/')[1];
-      setSelectedMenu(name || 'registry');
+      setSelectedMenu(name || MENU_ITEMS[0].key);
     }
   }, [pathname]);
 
@@ -43,12 +48,10 @@ const NavigationBar = ({ children }) => {
 
   return (
     <CustomLayout pathname={router.pathname}>
-      <Header>
+      <OlasHeader>
         <div className="column-1">
-          <Logo data-testid="member-logo">
+          <Logo href="/">
             <LogoSvg />
-            <span className="title-text">Mech</span>
-            &nbsp;
             <Tag color={COLOR.RED}>Beta</Tag>
           </Logo>
         </div>
@@ -58,15 +61,10 @@ const NavigationBar = ({ children }) => {
           mode="horizontal"
           selectedKeys={[selectedMenu]}
           onClick={handleMenuItemClick}
-          items={[
-            { key: 'registry', label: 'Registry' },
-            { key: 'factory', label: 'Factory' },
-            { key: 'mech', label: 'Mech' },
-            { key: 'docs', label: 'Docs' },
-          ]}
+          items={MENU_ITEMS}
         />
         <Login />
-      </Header>
+      </OlasHeader>
 
       <Content className="site-layout">
         <div className="site-layout-background">

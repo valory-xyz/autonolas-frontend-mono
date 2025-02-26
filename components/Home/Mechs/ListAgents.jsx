@@ -154,7 +154,7 @@ const ListAgents = () => {
 
   return (
     <>
-      <HeaderTitle title="Registry" description="View existing agents" />
+      <HeaderTitle title="Mechs" description="View existing agents" />
 
       <Tabs
         className="registry-tabs"
