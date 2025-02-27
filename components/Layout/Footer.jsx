@@ -4,7 +4,7 @@ import {
   ServiceStatusInfo,
 } from '@autonolas/frontend-library';
 
-import { GNOSIS_SCAN_URL } from 'util/constants';
+import { GNOSIS_SCAN_URL, URL } from 'util/constants';
 import { ADDRESSES } from 'common-util/Contracts';
 import { useHelpers } from 'common-util/hooks';
 import { FooterContainer, ContractsInfoContainer } from './styles';
@@ -23,10 +23,12 @@ const ContractInfo = () => {
     if (addresses) {
       const path = pathname || '';
 
-      if (path === '/' || path.includes('registry')) {
+      if (path === '/' || path.includes(URL.MECHS)) {
         return {
-          registryText: 'AgentRegistry',
-          registry: addresses.agentRegistry,
+          registryText: 'MechMarketplace',
+          registry: addresses.mechMarketplace,
+          managerText: 'AgentRegistry',
+          manager: addresses.agentRegistry,
         };
       }
 

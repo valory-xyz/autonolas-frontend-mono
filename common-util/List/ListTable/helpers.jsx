@@ -1,12 +1,10 @@
 import { useState } from 'react';
-import { Input, Button, Typography } from 'antd';
+import { Input, Button, Flex } from 'antd';
 import { SearchOutlined } from '@ant-design/icons';
 import { AddressLink, NA } from '@autonolas/frontend-library';
 
-import { NAV_TYPES, TOTAL_VIEW_COUNT } from 'util/constants';
+import { NAV_TYPES, TOTAL_VIEW_COUNT, REGISTRY_URL } from 'util/constants';
 import { SUPPORTED_CHAINS } from 'common-util/Login';
-
-const { Title } = Typography;
 
 export const getTableColumns = (type, { router, isMobile }) => {
   if (type === NAV_TYPES.COMPONENT || type === NAV_TYPES.AGENT) {
@@ -70,6 +68,87 @@ export const getTableColumns = (type, { router, isMobile }) => {
     ];
   }
 
+  if (type === NAV_TYPES.SERVICE) {
+    return [
+      {
+        title: 'Service ID',
+        dataIndex: 'id',
+        key: 'id',
+        width: 50,
+        render: (text) => (
+          <a href={`${REGISTRY_URL}/gnosis/services/${text}`} target="_blank" rel="noreferrer">
+            {text}
+          </a>
+        ),
+      },
+      {
+        title: 'Owner',
+        dataIndex: 'owner',
+        key: 'owner',
+        width: 160,
+        render: (text) => (
+          <AddressLink
+            text={text}
+            suffixCount={isMobile ? 4 : 6}
+            canCopy
+            textMinWidth={160}
+            supportedChains={SUPPORTED_CHAINS}
+          />
+        ),
+      },
+      {
+        title: 'Hash',
+        dataIndex: 'hash',
+        key: 'hash',
+        width: 180,
+        render: (text) => (
+          <AddressLink
+            text={text}
+            textMinWidth={240}
+            suffixCount={isMobile ? 4 : 14}
+            isIpfsLink
+            canCopy
+          />
+        ),
+      },
+      {
+        title: 'Mech',
+        dataIndex: 'mech',
+        width: 180,
+        key: 'mech',
+        render: (text) => {
+          if (!text) return NA;
+          return (
+            <AddressLink
+              text={text}
+              textMinWidth={240}
+              suffixCount={isMobile ? 4 : 14}
+              canCopy
+              onClick={() => {
+                if (router) router.push(`/mech/${text}`);
+              }}
+            />
+          );
+        },
+      },
+      {
+        title: 'Mech Factory',
+        dataIndex: 'mechFactory',
+        width: 220,
+        key: 'mechFactory',
+        render: (text) => (
+          <AddressLink
+            text={text}
+            suffixCount={isMobile ? 4 : 14}
+            canCopy
+            textMinWidth={240}
+            supportedChains={SUPPORTED_CHAINS}
+          />
+        ),
+      },
+    ];
+  }
+
   return [];
 };
 
@@ -100,13 +179,23 @@ export const getData = (type, rawData, { current }) => {
     }));
   }
 
+  if (type === NAV_TYPES.SERVICE) {
+    data = rawData.map((item) => ({
+      id: item.id,
+      owner: item.owner || '-',
+      hash: item.hash || '-',
+      mech: item.address,
+      mechFactory: item.mechFactory,
+    }));
+  }
+
   return data;
 };
 
 /**
  * tab content
  */
-export const useExtraTabContent = ({ title }) => {
+export const useSearchInput = () => {
   const [searchValue, setSearchValue] = useState('');
   const [value, setValue] = useState('');
   const clearSearch = () => {
@@ -114,28 +203,25 @@ export const useExtraTabContent = ({ title }) => {
     setSearchValue('');
   };
 
-  const extraTabContent = {
-    left: title ? <Title level={2}>{title}</Title> : null,
-    right: (
-      <>
-        <Input
-          prefix={<SearchOutlined className="site-form-item-icon" />}
-          placeholder="Owner or Hash"
-          value={value}
-          onChange={(e) => setValue(e.target.value)}
-        />
-        <Button
-          ghost
-          type="primary"
-          onClick={() => setSearchValue(value || '')}
-        >
-          Search
-        </Button>
-      </>
-    ),
-  };
+  const searchInput = (
+    <Flex gap={8}>
+      <Input
+        prefix={<SearchOutlined className="site-form-item-icon" />}
+        placeholder="Owner or Hash"
+        value={value}
+        onChange={(e) => setValue(e.target.value)}
+      />
+      <Button
+        ghost
+        type="primary"
+        onClick={() => setSearchValue(value || '')}
+      >
+        Search
+      </Button>
+    </Flex>
+  );
 
-  return { searchValue, extraTabContent, clearSearch };
+  return { searchValue, searchInput, clearSearch };
 };
 
 /**

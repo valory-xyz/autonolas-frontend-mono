@@ -1,16 +1,15 @@
 import { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
-import { Tabs } from 'antd';
+import { Flex, Segmented } from 'antd';
 import { useRouter } from 'next/router';
 import get from 'lodash/get';
 import { URL, NAV_TYPES } from 'util/constants';
 import ListTable from 'common-util/List/ListTable';
 import {
-  useExtraTabContent,
+  useSearchInput,
   getHash,
   isMyTab,
 } from 'common-util/List/ListTable/helpers';
-import { HeaderTitle } from 'common-util/Title';
 import { getMyListOnPagination } from 'common-util/ContractUtils/myList';
 import {
   getAgents,
@@ -22,7 +21,7 @@ import {
 const ALL_AGENTS = 'all-agents';
 const MY_AGENTS = 'my-agents';
 
-const ListAgents = () => {
+export const ListAgents = () => {
   const router = useRouter();
   const hash = getHash(router);
   const [currentTab, setCurrentTab] = useState(
@@ -34,11 +33,9 @@ const ListAgents = () => {
   /**
    * extra tab content & view click
    */
-  const { searchValue, extraTabContent, clearSearch } = useExtraTabContent({
+  const { searchValue, searchInput, clearSearch } = useSearchInput({
     title: '',
-    onRegisterClick: () => router.push(URL.MINT_AGENT),
   });
-  const onViewClick = (id) => router.push(`${URL.AGENTS}/${id}`);
 
   /**
    * filtered list
@@ -148,63 +145,50 @@ const ListAgents = () => {
     total,
     currentPage,
     setCurrentPage,
-    onViewClick,
-    searchValue,
+    isPaginationRequired: currentTab === ALL_AGENTS && !searchValue,
   };
 
   return (
-    <>
-      <HeaderTitle title="Registry" description="View existing agents" />
+    <Flex vertical gap={24}>
+      <Flex gap={8} justify="end">
+        <Segmented
+          options={[{ value: ALL_AGENTS, label: 'All agents' }, { value: MY_AGENTS, label: 'My agents' }]}
+          value={currentTab}
+          onChange={(e) => {
+            setCurrentTab(e);
 
-      <Tabs
-        className="registry-tabs"
-        type="card"
-        activeKey={currentTab}
-        tabBarExtraContent={extraTabContent}
-        onChange={(e) => {
-          setCurrentTab(e);
+            setList([]);
+            setTotal(0);
+            setCurrentPage(1);
+            setIsLoading(true);
 
-          setList([]);
-          setTotal(0);
-          setCurrentPage(1);
-          setIsLoading(true);
+            // clear the search
+            clearSearch();
+            // update the URL to keep track of my-agents
+            router.push(
+              e === MY_AGENTS ? `${URL.MECHS_LEGACY}#${MY_AGENTS}` : URL.MECHS_LEGACY,
+            );
+          }}
+        />
+        {searchInput}
+      </Flex>
 
-          // clear the search
-          clearSearch();
-          // update the URL to keep track of my-agents
-          router.push(
-            e === MY_AGENTS ? `${URL.AGENTS}#${MY_AGENTS}` : URL.AGENTS,
-          );
-        }}
-        items={[
-          {
-            key: ALL_AGENTS,
-            label: 'All Agents',
-            children: <ListTable {...tableCommonProps} list={list} />,
-          },
-          {
-            key: MY_AGENTS,
-            label: 'My Agents',
-            children: (
-              <ListTable
-                {...tableCommonProps}
-                list={
-                  searchValue
-                    ? list
-                    : getMyListOnPagination({
-                      total,
-                      nextPage: currentPage,
-                      list,
-                    })
-                }
-                isAccountRequired
-              />
-            ),
-          },
-        ]}
+      {currentTab === ALL_AGENTS && <ListTable {...tableCommonProps} list={list} />}
+      {currentTab === MY_AGENTS && (
+      <ListTable
+        {...tableCommonProps}
+        list={
+          searchValue
+            ? list
+            : getMyListOnPagination({
+              total,
+              nextPage: currentPage,
+              list,
+            })
+        }
+        isAccountRequired={!account}
       />
-    </>
+      )}
+    </Flex>
   );
 };
-
-export default ListAgents;

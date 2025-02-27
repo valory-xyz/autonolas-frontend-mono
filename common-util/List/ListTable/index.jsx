@@ -10,7 +10,7 @@ import { getData, getTableColumns } from './helpers';
 const ListTable = ({
   isLoading,
   type,
-  searchValue,
+  isPaginationRequired,
   list,
   total,
   currentPage,
@@ -20,21 +20,20 @@ const ListTable = ({
 }) => {
   const router = useRouter();
 
-  /**
-   * no pagination on search as we won't know total beforehand
-   */
-  const isPaginationRequired = !searchValue;
-
   const { scrollX } = extra;
+
+  if (isAccountRequired) {
+    return (
+      <Loader
+        isAccountRequired
+        message={`To see your ${type}s, connect wallet`}
+      />
+    );
+  }
 
   if (isLoading) {
     return (
-      <Loader
-        isAccountRequired={isAccountRequired}
-        message={
-          isAccountRequired ? `To see your ${type}s, connect wallet` : ''
-        }
-      />
+      <Loader />
     );
   }
 
@@ -68,7 +67,7 @@ const ListTable = ({
 
 ListTable.propTypes = {
   type: PropTypes.string.isRequired,
-  searchValue: PropTypes.string.isRequired,
+  isPaginationRequired: PropTypes.bool.isRequired,
   isLoading: PropTypes.bool,
   list: PropTypes.arrayOf(PropTypes.shape({})),
   total: PropTypes.number,

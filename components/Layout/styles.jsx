@@ -1,5 +1,6 @@
 import styled from 'styled-components';
 import { Layout } from 'antd';
+import Link from 'next/link';
 import { COLOR, MEDIA_QUERY } from '@autonolas/frontend-library';
 
 export const CustomLayout = styled(Layout)`
@@ -100,19 +101,23 @@ export const HeaderContainer = styled.div`
   }
 `;
 
-export const Logo = styled.div`
-  max-width: 280px;
+export const OlasHeader = styled(Layout.Header)`
+  padding: 0 40px;
+  border-bottom: 1px solid ${COLOR.BORDER_GREY};
+  display: flex;
+  align-items: center;
+`;
+
+export const Logo = styled(Link)`
+  font-weight: bold;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: left;
-  margin-right: 3.5rem;
-  font-size: 34px;
-  color: ${COLOR.PRIMARY};
-  .title-text {
-    display: inline-block;
-    margin-left: 1rem;
-    font-weight: bold;
+  margin-right: 1rem;
+  > span {
+    margin-left: 0.5rem;
+    margin-right: 0.5rem;
   }
 `;
 

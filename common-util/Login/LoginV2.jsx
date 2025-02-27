@@ -18,6 +18,7 @@ const LoginContainer = styled.div`
   align-items: center;
   font-size: 18px;
   line-height: normal;
+  padding: 8px 0;
 `;
 
 export const LoginV2 = ({
