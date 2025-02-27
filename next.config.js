@@ -8,6 +8,13 @@ module.exports = {
       maxChunkSize: 30000,
     },
   },
+  redirects: async () => [
+    {
+      source: '/',
+      destination: '/mechs',
+      permanent: false,
+    },
+  ],
   async headers() {
     return [
       {
