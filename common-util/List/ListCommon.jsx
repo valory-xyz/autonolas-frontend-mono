@@ -31,6 +31,10 @@ export const ListEmptyMessage = ({ type }) => {
         return {
           text: 'agent',
         };
+      case 'service':
+        return {
+          text: 'service',
+        };
       default:
         return null;
     }

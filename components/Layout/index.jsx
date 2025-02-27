@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useRouter } from 'next/router';
 import {
-  Alert, Layout, Menu, Tag,
+  Alert, Layout, Menu, Tag, Flex,
 } from 'antd';
 import PropTypes from 'prop-types';
 import { getSupportedNetworks } from 'common-util/functions';
@@ -16,9 +16,16 @@ const { Content } = Layout;
 
 const MENU_ITEMS = [
   { key: 'mechs', label: 'Mechs' },
-  { key: 'mech', label: 'Mech' },
   { key: 'docs', label: 'Docs' },
-  { key: 'factory', label: 'Factory' },
+  {
+    key: 'factory',
+    label: (
+      <Flex gap={6} align="center">
+        Factory
+        <Tag bordered={false}>Legacy</Tag>
+      </Flex>
+    ),
+  },
 ];
 
 const NavigationBar = ({ children }) => {

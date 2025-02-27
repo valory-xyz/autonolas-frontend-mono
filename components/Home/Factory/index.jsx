@@ -7,6 +7,7 @@ import { getMechMinterContract } from 'common-util/Contracts';
 import { HeaderTitle } from 'common-util/Title';
 import { FormContainer } from 'components/styles';
 import { useHelpers } from 'common-util/hooks/useHelpers';
+import { URL } from 'util/constants';
 
 const FactoryManage = () => {
   const [error, setError] = useState(null);
@@ -14,7 +15,7 @@ const FactoryManage = () => {
   const router = useRouter();
   const { account } = useHelpers();
 
-  const handleCancel = () => router.push('/registry');
+  const handleCancel = () => router.push(URL.MECHS);
 
   const handleSubmit = (values) => {
     if (account) {

@@ -4,6 +4,8 @@ import {
   getMechMinterContract,
   getAgentContract,
   fetchMechAgents,
+  fetchMmMechs,
+  fetchMmMechsTotal,
 } from 'common-util/Contracts';
 import { getListByAccount } from 'common-util/ContractUtils/myList';
 import { getFirstAndLastIndex } from 'common-util/functions';
@@ -28,7 +30,6 @@ const getAgentsHelper = ({ first, total, resolve }) => {
   // Get the promise for mechData from the GraphQL
   const mechDataPromise = fetchMechAgents({ total, first });
 
-  // Promise.all(promiseList).then(async (agentsList) => {
   mechDataPromise.then((mechAgents) => {
     const results = mechAgents.map(async (agent) => {
       const agentId = Number(agent.id);
@@ -47,7 +48,34 @@ const getAgentsHelper = ({ first, total, resolve }) => {
       resolve(resolvedResults);
     });
   });
-  // });
+};
+
+const getMechsHelper = ({
+  first, total, filters, resolve,
+}) => {
+  // Get the promise for mechData from the GraphQL
+  const mechDataPromise = fetchMmMechs({
+    total, first, filters,
+  });
+
+  mechDataPromise.then((mechs) => {
+    const results = mechs.map(async (mech) => {
+      const serviceId = Number(mech.id);
+
+      const mechInfo = {
+        id: serviceId,
+        address: mech.address,
+        owner: mech.owner,
+        hash: mech.configHash,
+        mechFactory: mech.mechFactory,
+      };
+
+      return mechInfo;
+    });
+    Promise.all(results).then((resolvedResults) => {
+      resolve(resolvedResults);
+    });
+  });
 };
 
 // --------- utils ---------
@@ -128,6 +156,33 @@ export const getAgents = (total, nextPage = 1) => new Promise((resolve, reject) 
   try {
     const { first } = getFirstAndLastIndex(total, nextPage);
     getAgentsHelper({ total, first: first - 1, resolve });
+  } catch (e) {
+    console.error(e);
+    reject(e);
+  }
+});
+
+/**
+ * Function to return all mechs
+ */
+export const getMechs = (total, nextPage = 1, filters = {}) => new Promise((resolve, reject) => {
+  try {
+    const { first } = getFirstAndLastIndex(total, nextPage);
+    getMechsHelper({
+      total, first: first - 1, filters, resolve,
+    });
+  } catch (e) {
+    console.error(e);
+    reject(e);
+  }
+});
+
+/**
+ * Function to return total mechs
+ */
+export const getTotalMechs = () => new Promise((resolve, reject) => {
+  try {
+    fetchMmMechsTotal().then((result) => resolve(result));
   } catch (e) {
     console.error(e);
     reject(e);
