@@ -59,7 +59,7 @@ export const getTableColumns = (type, { router, isMobile }) => {
               suffixCount={isMobile ? 4 : 14}
               canCopy
               onClick={(e) => {
-                if (router) router.push(`/mech/${e}/${row.hash}`);
+                if (router) router.push(`/mech/${e}/${row.hash}?legacy=true`);
               }}
             />
           );
