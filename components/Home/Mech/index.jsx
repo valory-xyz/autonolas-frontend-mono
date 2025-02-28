@@ -17,7 +17,7 @@ import {
 } from '@autonolas/frontend-library';
 
 import { GNOSIS_SCAN_URL } from 'util/constants';
-import { AGENT_MECH_ABI } from 'common-util/AbiAndAddresses';
+import { AGENT_MECH_ABI, OLAS_MECH_ABI } from 'common-util/AbiAndAddresses';
 import { SUPPORTED_CHAINS } from 'common-util/Login';
 import { uniqBy } from 'lodash';
 import Request from './Request';
@@ -61,6 +61,7 @@ const EventListener = () => {
 
   const { query } = useRouter();
   const id = query?.id;
+  const isLegacy = Boolean(query.legacy);
 
   useEffect(() => {
     const web3Instance = new Web3(
@@ -94,10 +95,11 @@ const EventListener = () => {
 
   useEffect(() => {
     if (web3Ws && id) {
-      const contractInstance = new web3Ws.eth.Contract(AGENT_MECH_ABI, id);
+      const abi = isLegacy ? AGENT_MECH_ABI : OLAS_MECH_ABI;
+      const contractInstance = new web3Ws.eth.Contract(abi, id);
       setContractWs(contractInstance);
     }
-  }, [web3Ws, id]);
+  }, [isLegacy, web3Ws, id]);
 
   // Effect hook for listening to the FirstEvent
   useEffect(() => {
@@ -285,7 +287,7 @@ const EventListener = () => {
                 />
               ),
             },
-            {
+            isLegacy ? {
               title: 'Sender',
               dataIndex: 'sender',
               key: 'sender',
@@ -302,7 +304,7 @@ const EventListener = () => {
                   />
                 );
               },
-            },
+            } : null,
             {
               title: 'Request Data',
               dataIndex: 'requestData',
@@ -344,7 +346,7 @@ const EventListener = () => {
                 );
               },
             },
-          ]}
+          ].filter(Boolean)}
         />
       </ConfigProvider>
     </div>
