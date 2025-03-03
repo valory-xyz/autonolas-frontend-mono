@@ -1,14 +1,13 @@
 import '@testing-library/jest-dom';
 import { render, screen } from '@testing-library/react';
 import { Allocation } from 'types';
-import { useAccount } from 'wagmi';
-
-import { useVotingPower } from 'hooks/index';
 
 import { MyVotingWeight } from './MyVotingWeight';
 
-jest.mock('wagmi', () => ({ useAccount: jest.fn() }));
-jest.mock('hooks/index', () => ({ useVotingPower: jest.fn() }));
+jest.mock('wagmi', () => ({
+  useAccount: jest.fn().mockReturnValue({ address: '0x1234', isConnected: true }),
+}));
+jest.mock('hooks/index', () => ({ useVotingPower: jest.fn().mockReturnValue({ data: '75.05' }) }));
 jest.mock('store/index', () => ({
   useAppSelector: jest.fn().mockReturnValue({
     userVotes: {},
@@ -33,13 +32,6 @@ const MyVotingWeightExample = () => {
 };
 
 describe('<MyVotingWeight/>', () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
-
-    (useVotingPower as jest.Mock).mockReturnValue({ data: '75.05' });
-    (useAccount as jest.Mock).mockReturnValue({ address: '0x1234', isConnected: true });
-  });
-
   it('should display title and description', () => {
     render(<MyVotingWeightExample />);
 
