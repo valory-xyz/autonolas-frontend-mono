@@ -1,5 +1,15 @@
 import { InfoCircleOutlined } from '@ant-design/icons';
-import { Button, Flex, Space, Statistic, Table, Tooltip, Typography } from 'antd';
+import {
+  Button,
+  Flex,
+  Modal,
+  notification,
+  Space,
+  Statistic,
+  Table,
+  Tooltip,
+  Typography,
+} from 'antd';
 import { ColumnsType } from 'antd/es/table';
 import { Dispatch, SetStateAction, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
@@ -10,7 +20,13 @@ import { CHAIN_NAMES, RETAINER_ADDRESS } from 'libs/util-constants/src';
 
 import { getBytes32FromAddress } from 'common-util/functions/addresses';
 import { NextWeekTooltip } from 'components/NextWeekTooltip';
-import { useAppSelector } from 'store/index';
+import { useAppDispatch, useAppSelector } from 'store/index';
+import { Address } from 'viem';
+import { useAccount } from 'wagmi';
+import { voteForNomineeWeights } from 'common-util/functions';
+import { queryClient } from 'context/Web3ModalProvider';
+import { INVALIDATE_AFTER_UPDATE_KEYS } from 'common-util/constants/scopeKeys';
+import { clearState } from 'store/govern';
 
 const ONE_DAY_IN_MS = 24 * 60 * 60 * 1000;
 const TEN_DAYS_IN_MS = 10 * ONE_DAY_IN_MS;
@@ -93,9 +109,17 @@ type VotesProps = {
 };
 
 export const Votes = ({ setIsUpdating, setAllocations }: VotesProps) => {
+  const dispatch = useAppDispatch();
   const { stakingContracts } = useAppSelector((state) => state.govern);
   const { lastUserVote, userVotes } = useAppSelector((state) => state.govern);
+  const { address: account } = useAccount();
   const [votesBlocked, setVotesBlocked] = useState(false);
+
+  const [isResetModalOpen, setIsResetModalOpen] = useState(false);
+  const [isResetLoading, setIsResetLoading] = useState(false);
+
+  const showResetModal = () => setIsResetModalOpen(true);
+  const closeResetModal = () => setIsResetModalOpen(false);
 
   useEffect(() => {
     setVotesBlocked(lastUserVote !== null ? lastUserVote + TEN_DAYS_IN_MS > Date.now() : false);
@@ -117,6 +141,57 @@ export const Votes = ({ setIsUpdating, setAllocations }: VotesProps) => {
         return acc;
       }, []),
     );
+  };
+
+  const resetAllWeights = async () => {
+    if (!account) return;
+
+    setIsResetLoading(true);
+
+    const nominees: Address[] = [];
+    const chainIds: number[] = [];
+    const weights: string[] = [];
+
+    Object.keys(userVotes).forEach((address) => {
+      const contract = stakingContracts.find((contract) => contract.address === address);
+      if (contract) {
+        // Set each staking contract's weight to 0
+        nominees.push(contract.address);
+        chainIds.push(contract.chainId);
+        weights.push('0');
+      } else if (address === getBytes32FromAddress(RETAINER_ADDRESS)) {
+        // set the retainer's weight to 0
+        nominees.push(getBytes32FromAddress(RETAINER_ADDRESS));
+        chainIds.push(1);
+        weights.push('0');
+      }
+    });
+
+    // Vote
+    voteForNomineeWeights({ account, nominees, chainIds, weights })
+      .then(() => {
+        closeResetModal();
+        notification.success({
+          message: 'Your votes have been reset',
+        });
+
+        // Reset previously saved data so it's re-fetched automatically
+        queryClient.removeQueries({
+          predicate: (query) =>
+            INVALIDATE_AFTER_UPDATE_KEYS.includes(
+              (query.queryKey[1] as Record<string, string>)?.scopeKey,
+            ),
+        });
+        dispatch(clearState());
+      })
+      .catch((error) => {
+        notification.error({
+          message: error.message,
+        });
+      })
+      .finally(() => {
+        setIsResetLoading(false);
+      });
   };
 
   const unblockVoting = () => setVotesBlocked(false);
@@ -157,34 +232,59 @@ export const Votes = ({ setIsUpdating, setAllocations }: VotesProps) => {
   }, [userVotes, stakingContracts]);
 
   return (
-    <VotesRoot>
-      <Flex gap={16} align="center" justify="end">
-        {votesBlocked && lastUserVote !== null && (
-          <Text type="secondary">
-            <Countdown
-              prefix={<Text type="secondary">Cooldown period: </Text>}
-              format={
-                deadline && deadline < Date.now() + ONE_DAY_IN_MS
-                  ? 'H[h] m[m] s[s]'
-                  : 'D[d] H[h] m[m]'
-              }
-              value={deadline}
-              onFinish={unblockVoting}
-            />
-          </Text>
-        )}
-        <Button size="large" type="primary" disabled={votesBlocked} onClick={startEditing}>
-          Update voting weight
-        </Button>
-      </Flex>
-      <Table<MyVote>
-        className="mt-16"
-        columns={columns}
-        dataSource={data}
-        pagination={false}
-        rowClassName={rowClassName}
-        rowKey={(record) => record.address || record.name}
-      />
-    </VotesRoot>
+    <>
+      <VotesRoot>
+        <Flex gap={16} align="center" justify="space-between">
+          {votesBlocked && lastUserVote !== null && (
+            <Text type="secondary">
+              <Countdown
+                prefix={<Text type="secondary">Cooldown period: </Text>}
+                format={
+                  deadline && deadline < Date.now() + ONE_DAY_IN_MS
+                    ? 'H[h] m[m] s[s]'
+                    : 'D[d] H[h] m[m]'
+                }
+                value={deadline}
+                onFinish={unblockVoting}
+              />
+            </Text>
+          )}
+          <Flex gap={8}>
+            <Button size="large" disabled={votesBlocked} onClick={showResetModal}>
+              Reset all weights
+            </Button>
+            <Button size="large" type="primary" disabled={votesBlocked} onClick={startEditing}>
+              Update voting weight
+            </Button>
+          </Flex>
+        </Flex>
+        <Table<MyVote>
+          className="mt-16"
+          columns={columns}
+          dataSource={data}
+          pagination={false}
+          rowClassName={rowClassName}
+          rowKey={(record) => record.address || record.name}
+        />
+      </VotesRoot>
+      <Modal
+        title="Reset all weights"
+        open={isResetModalOpen}
+        onOk={resetAllWeights}
+        onCancel={closeResetModal}
+        cancelText="Cancel"
+        okText="Reset all weights"
+        confirmLoading={isResetLoading}
+      >
+        <Paragraph>
+          This will seize all your voting weight, including unallocated ones applied to the Rollover
+          Pool.
+        </Paragraph>
+        <Paragraph>
+          After you confirm, you’ll enter a 10 day cooldown period. You won&apos;t be able to update
+          your weights during that time.
+        </Paragraph>
+      </Modal>
+    </>
   );
 };

@@ -33,3 +33,7 @@ jest.mock('wagmi/chains', () => ({
   celo,
   mode,
 }));
+
+jest.mock('common-util/config/wagmi', () => ({
+  SUPPORTED_CHAINS: [{ name: 'ethereum', chainId: 1 }],
+}));

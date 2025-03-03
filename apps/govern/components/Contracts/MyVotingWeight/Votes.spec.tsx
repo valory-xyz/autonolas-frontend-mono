@@ -4,7 +4,21 @@ import React from 'react';
 
 import { Votes } from './Votes';
 
+jest.mock('wagmi', () => ({
+  useAccount: jest.fn().mockReturnValue({ address: '0x1234', isConnected: true }),
+}));
+
+jest.mock('@wagmi/core', () => ({
+  readContract: jest.fn(),
+  readContracts: jest.fn(),
+}));
+
+jest.mock('context/Web3ModalProvider', () => ({
+  queryClient: jest.fn(),
+}));
+
 jest.mock('store/index', () => ({
+  useAppDispatch: jest.fn(),
   useAppSelector: jest.fn().mockReturnValue({
     lastUserVote: Date.now(),
     userVotes: {
