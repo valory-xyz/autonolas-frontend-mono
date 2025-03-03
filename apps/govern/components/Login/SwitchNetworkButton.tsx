@@ -1,18 +1,16 @@
 import { useAccount, useSwitchChain } from 'wagmi';
 
-import { useAppSelector } from 'store/index';
-
 import { SwitchNetworkButton as SwitchNetworkButtonComponent } from 'libs/ui-components/src';
+import { mainnet } from 'viem/chains';
 
 export const SwitchNetworkButton = () => {
   const { chain: walletConnectedChain } = useAccount();
-  const { networkId } = useAppSelector((state) => state.network);
   const { switchChainAsync, isPending } = useSwitchChain();
 
   return (
     <SwitchNetworkButtonComponent
       walletConnectedChain={walletConnectedChain}
-      networkId={networkId}
+      networkId={mainnet.id}
       switchChainAsync={switchChainAsync}
       isPending={isPending}
     />

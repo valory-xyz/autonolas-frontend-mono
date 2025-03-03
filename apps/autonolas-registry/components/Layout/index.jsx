@@ -8,6 +8,8 @@ import { VM_TYPE, useScreen } from '@autonolas/frontend-library';
 import { ConnectionProvider, WalletProvider } from '@solana/wallet-adapter-react';
 import { PhantomWalletAdapter } from '@solana/wallet-adapter-wallets';
 
+import { NavDropdown } from 'libs/ui-components/src';
+
 import { PAGES_TO_LOAD_WITHOUT_CHAINID } from '../../util/constants';
 import { useHelpers } from '../../common-util/hooks';
 import { ALL_SUPPORTED_CHAINS, getSvmEndpoint } from '../../common-util/Login/config';
@@ -32,9 +34,13 @@ const Layout = ({ children }) => {
   return (
     <CustomLayout>
       <OlasHeader ismobile={`${isMobile}`}>
-        <Logo onClick={onHomeClick} data-testid="protocol-logo" ismobile={`${isMobile}`}>
-          {isMobile || isTablet ? <LogoIconSvg /> : <LogoSvg />}
-        </Logo>
+        <div className="header-left-content">
+          <Logo onClick={onHomeClick} data-testid="protocol-logo" ismobile={`${isMobile}`}>
+            {isMobile || isTablet ? <LogoIconSvg /> : <LogoSvg />}
+          </Logo>
+
+          <NavDropdown currentSite="registry" />
+        </div>
 
         <SelectContainer style={{ marginRight: isMobile ? 8 : 0 }}>
           <Select

@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import { Alert, Button, Card, Skeleton, Typography } from 'antd';
 import { ethers } from 'ethers';
 import isNumber from 'lodash/isNumber';
@@ -170,7 +169,7 @@ export const DonatePage = () => {
         <DonateForm isLoading={isDonationLoading} onSubmit={onDepositServiceDonationSubmit} />
       </Card>
 
-      {/* <Card className="last-epoch-section">
+      <Card className="last-epoch-section">
         <Title level={2} className="mt-0">
           Epoch Status
         </Title>
@@ -198,7 +197,7 @@ export const DonatePage = () => {
           </Button>
           <Text type="secondary">New epochs must be manually triggered by community members</Text>
         </EpochCheckpointRow>
-      </Card> */}
+      </Card>
     </DonateContainer>
   );
 };

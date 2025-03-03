@@ -13,7 +13,7 @@ import { isAddressProhibited } from 'libs/util-prohibited-data/src/index';
 
 import { setUserBalance } from 'store/setup';
 
-import { YellowButton } from '../YellowButton';
+import { YellowButton } from 'libs/ui-components/src';
 import { useHelpers } from '../hooks';
 import { SolanaWallet } from './SolanaWallet';
 

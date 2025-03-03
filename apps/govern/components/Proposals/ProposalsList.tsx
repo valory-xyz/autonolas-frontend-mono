@@ -1,12 +1,13 @@
 import { DownOutlined, RightOutlined } from '@ant-design/icons';
 import { Button, Table, Tag, Typography } from 'antd';
 import { ColumnsType } from 'antd/es/table';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Address } from 'viem';
 import { useAccount } from 'wagmi';
+import { useRouter } from 'next/router';
 
 import { notifyError, notifySuccess } from 'libs/util-functions/src';
-
+import { COLOR } from 'libs/ui-theme/src';
 import { getFormattedDate, voteForProposal } from 'common-util/functions';
 import { Proposal } from 'common-util/graphql/types';
 import { useProposals } from 'hooks/useProposals';
@@ -23,7 +24,6 @@ import {
   hasNotStarted,
   isOngoing,
 } from './utils';
-import { COLOR } from 'libs/ui-theme/src';
 
 const { Text } = Typography;
 
@@ -140,12 +140,29 @@ const getColumns = (
 ];
 
 export const ProposalsList = () => {
-  const { data, block, isLoading } = useProposals();
   const { address } = useAccount();
+  const { data, block, isLoading } = useProposals();
   const { dataInWei: votingPower } = useVotingPower(address);
+
   const dispatch = useAppDispatch();
+  const { query } = useRouter();
 
   const [isVoting, setIsVoting] = useState(false);
+  const [expandedRowKeys, setExpandedRowKeys] = useState<string[]>([]);
+
+  useEffect(() => {
+    // open proposal if there's a proposalId in the URL
+    if (query.proposalId && typeof query.proposalId === 'string') {
+      setExpandedRowKeys([query.proposalId]);
+    }
+  }, [query.proposalId]);
+
+  const handleExpand = (expanded: boolean, record: Proposal) => {
+    const newKeys = expanded
+      ? [...expandedRowKeys, record.proposalId]
+      : expandedRowKeys.filter((key) => key !== record.proposalId);
+    setExpandedRowKeys(newKeys);
+  };
 
   const handleVote = (proposalId: string, support: number) => {
     if (!address) {
@@ -199,6 +216,8 @@ export const ProposalsList = () => {
           );
         },
         expandedRowRender: (record) => <ProposalDetails item={record} currentBlock={block} />,
+        expandedRowKeys,
+        onExpand: handleExpand,
       }}
       scroll={{ x: 1000 }}
       rowHoverable={false}
