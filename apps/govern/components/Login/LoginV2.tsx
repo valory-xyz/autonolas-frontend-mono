@@ -5,10 +5,11 @@ import { useAccountEffect, useConfig, useDisconnect } from 'wagmi';
 
 import { isAddressProhibited } from 'libs/util-prohibited-data/src/index';
 
-import { INVALIDATE_AFTER_ACCOUNT_CHANGE } from 'common-util/constants/scopeKeys';
+import { INVALIDATE_AFTER_USER_DATA_CHANGE } from 'common-util/constants/scopeKeys';
 import { queryClient } from 'context/Web3ModalProvider';
 import { clearUserState } from 'store/govern';
 import { useAppDispatch } from 'store/index';
+import { resetState } from 'common-util/functions/resetState';
 
 const LoginContainer = styled.div`
   display: flex;
@@ -37,13 +38,7 @@ export const LoginV2 = () => {
   );
 
   const clearUserData = useCallback(() => {
-    queryClient.removeQueries({
-      predicate: (query) =>
-        INVALIDATE_AFTER_ACCOUNT_CHANGE.includes(
-          (query.queryKey[1] as Record<string, string>)?.scopeKey,
-        ),
-    });
-    dispatch(clearUserState());
+    resetState(INVALIDATE_AFTER_USER_DATA_CHANGE, dispatch, clearUserState);
   }, [dispatch]);
 
   useAccountEffect({

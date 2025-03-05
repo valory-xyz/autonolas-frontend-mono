@@ -71,6 +71,7 @@ export const THEME_CONFIG: ThemeConfig = {
     },
     Button: {
       contentFontSizeLG: 16,
+      contentFontSizeSM: 14,
     },
     Input: {
       paddingBlock: 8,

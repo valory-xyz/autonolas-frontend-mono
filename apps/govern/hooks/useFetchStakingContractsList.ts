@@ -9,11 +9,11 @@ import { RETAINER_ADDRESS } from 'libs/util-constants/src';
 import { VOTE_WEIGHTING } from 'libs/util-contracts/src/lib/abiAndAddresses';
 
 import { NEXT_RELATIVE_WEIGHTS_KEY, TIME_SUM_KEY } from 'common-util/constants/scopeKeys';
-import { getBytes32FromAddress } from 'common-util/functions';
 import { setStakingContracts } from 'store/govern';
 import { useAppDispatch, useAppSelector } from 'store/index';
 
 import { useNomineesWeights } from './useNomineesWeights';
+import { getBytes32FromAddress } from 'libs/util-functions/src';
 
 const WEEK_IN_SECONDS = 604_800;
 

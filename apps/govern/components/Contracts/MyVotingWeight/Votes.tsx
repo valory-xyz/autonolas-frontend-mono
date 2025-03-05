@@ -18,15 +18,16 @@ import { Allocation } from 'types';
 import { COLOR } from 'libs/ui-theme/src';
 import { CHAIN_NAMES, RETAINER_ADDRESS } from 'libs/util-constants/src';
 
-import { getBytes32FromAddress } from 'common-util/functions/addresses';
 import { NextWeekTooltip } from 'components/NextWeekTooltip';
 import { useAppDispatch, useAppSelector } from 'store/index';
 import { Address } from 'viem';
 import { useAccount } from 'wagmi';
 import { voteForNomineeWeights } from 'common-util/functions';
-import { queryClient } from 'context/Web3ModalProvider';
 import { INVALIDATE_AFTER_UPDATE_KEYS } from 'common-util/constants/scopeKeys';
-import { clearState } from 'store/govern';
+import { RevokePower } from './RevokePower';
+import { resetState } from 'common-util/functions/resetState';
+import { useRemovedVotedNominees } from 'hooks/useRemovedNominees';
+import { getBytes32FromAddress } from 'libs/util-functions/src';
 
 const ONE_DAY_IN_MS = 24 * 60 * 60 * 1000;
 const TEN_DAYS_IN_MS = 10 * ONE_DAY_IN_MS;
@@ -44,6 +45,10 @@ type MyVote = {
 };
 
 const VotesRoot = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+
   .highlight-row {
     background: #f2f4f9;
   }
@@ -113,7 +118,9 @@ export const Votes = ({ setIsUpdating, setAllocations }: VotesProps) => {
   const { stakingContracts } = useAppSelector((state) => state.govern);
   const { lastUserVote, userVotes } = useAppSelector((state) => state.govern);
   const { address: account } = useAccount();
-  const [votesBlocked, setVotesBlocked] = useState(false);
+  const [votesBlocked, setVotesBlocked] = useState(true);
+  const { removedVotedNominees, isLoading: isRemovedNomineesLoading } =
+    useRemovedVotedNominees(userVotes);
 
   const [isResetModalOpen, setIsResetModalOpen] = useState(false);
   const [isResetLoading, setIsResetLoading] = useState(false);
@@ -122,8 +129,17 @@ export const Votes = ({ setIsUpdating, setAllocations }: VotesProps) => {
   const closeResetModal = () => setIsResetModalOpen(false);
 
   useEffect(() => {
-    setVotesBlocked(lastUserVote !== null ? lastUserVote + TEN_DAYS_IN_MS > Date.now() : false);
-  }, [lastUserVote]);
+    if (isRemovedNomineesLoading || lastUserVote === null) {
+      // block editing if data is loading
+      setVotesBlocked(true);
+    } else if (isRemovedNomineesLoading || removedVotedNominees.length > 0) {
+      // block editing if need to revoke power from removed nominees
+      setVotesBlocked(true);
+    } else {
+      // block editing based on last vote timestamp and cooldown period
+      setVotesBlocked(lastUserVote + TEN_DAYS_IN_MS > Date.now());
+    }
+  }, [lastUserVote, removedVotedNominees, isRemovedNomineesLoading]);
 
   const startEditing = () => {
     setIsUpdating(true);
@@ -175,14 +191,7 @@ export const Votes = ({ setIsUpdating, setAllocations }: VotesProps) => {
           message: 'Your votes have been reset',
         });
 
-        // Reset previously saved data so it's re-fetched automatically
-        queryClient.removeQueries({
-          predicate: (query) =>
-            INVALIDATE_AFTER_UPDATE_KEYS.includes(
-              (query.queryKey[1] as Record<string, string>)?.scopeKey,
-            ),
-        });
-        dispatch(clearState());
+        resetState(INVALIDATE_AFTER_UPDATE_KEYS, dispatch);
       })
       .catch((error) => {
         notification.error({
@@ -234,7 +243,8 @@ export const Votes = ({ setIsUpdating, setAllocations }: VotesProps) => {
   return (
     <>
       <VotesRoot>
-        <Flex gap={16} align="center" justify="space-between">
+        {removedVotedNominees.length > 0 && <RevokePower contracts={removedVotedNominees} />}
+        <Flex gap={16} align="center" wrap="wrap">
           {votesBlocked && lastUserVote !== null && (
             <Text type="secondary">
               <Countdown
@@ -249,7 +259,7 @@ export const Votes = ({ setIsUpdating, setAllocations }: VotesProps) => {
               />
             </Text>
           )}
-          <Flex gap={8}>
+          <Flex gap={8} wrap="wrap" className="ml-auto">
             <Button size="large" disabled={votesBlocked} onClick={showResetModal}>
               Reset all weights
             </Button>
@@ -259,7 +269,6 @@ export const Votes = ({ setIsUpdating, setAllocations }: VotesProps) => {
           </Flex>
         </Flex>
         <Table<MyVote>
-          className="mt-16"
           columns={columns}
           dataSource={data}
           pagination={false}

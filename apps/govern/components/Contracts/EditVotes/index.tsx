@@ -10,10 +10,7 @@ import { useAccount } from 'wagmi';
 import { CHAIN_NAMES, RETAINER_ADDRESS } from 'libs/util-constants/src';
 
 import { INVALIDATE_AFTER_UPDATE_KEYS } from 'common-util/constants/scopeKeys';
-import { getBytes32FromAddress } from 'common-util/functions/addresses';
 import { voteForNomineeWeights } from 'common-util/functions/requests';
-import { queryClient } from 'context/Web3ModalProvider';
-import { clearState } from 'store/govern';
 import { useAppDispatch, useAppSelector } from 'store/index';
 
 import { ConfirmModal } from './ConfirmModal';
@@ -24,6 +21,8 @@ import {
   checkNoRemovedNominees,
   checkNotNegativeSlope,
 } from './validations';
+import { resetState } from 'common-util/functions/resetState';
+import { getBytes32FromAddress } from 'libs/util-functions/src';
 
 const { Paragraph, Text } = Typography;
 
@@ -171,14 +170,8 @@ export const EditVotes = ({ allocations, setAllocations, setIsUpdating }: EditVo
         });
 
         setIsUpdating(false);
-        // Reset previously saved data so it's re-fetched automatically
-        queryClient.removeQueries({
-          predicate: (query) =>
-            INVALIDATE_AFTER_UPDATE_KEYS.includes(
-              (query.queryKey[1] as Record<string, string>)?.scopeKey,
-            ),
-        });
-        dispatch(clearState());
+
+        resetState(INVALIDATE_AFTER_UPDATE_KEYS, dispatch);
       })
       .catch((error) => {
         notification.error({
