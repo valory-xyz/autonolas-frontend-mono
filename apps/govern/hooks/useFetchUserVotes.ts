@@ -101,6 +101,7 @@ export const useFetchUserVotes = () => {
                 power: Number(powerNext) / 100,
                 end: Number(endNext),
               },
+              chainId: item.chainId,
             };
         }
       });
