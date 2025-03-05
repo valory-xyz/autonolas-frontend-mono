@@ -6,7 +6,6 @@ import { useAccountEffect, useConfig, useDisconnect } from 'wagmi';
 import { isAddressProhibited } from 'libs/util-prohibited-data/src/index';
 
 import { INVALIDATE_AFTER_USER_DATA_CHANGE } from 'common-util/constants/scopeKeys';
-import { queryClient } from 'context/Web3ModalProvider';
 import { clearUserState } from 'store/govern';
 import { useAppDispatch } from 'store/index';
 import { resetState } from 'common-util/functions/resetState';
