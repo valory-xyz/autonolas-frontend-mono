@@ -1,30 +1,31 @@
 import { notification } from 'antd';
 
+import { getListByAccount } from 'common-util/ContractUtils/myList';
 import {
-  getMechMinterContract,
-  getAgentContract,
   fetchMechAgents,
   fetchMmMechs,
   fetchMmMechsTotal,
+  getAgentContract,
+  getMechMinterContract,
 } from 'common-util/Contracts';
-import { getListByAccount } from 'common-util/ContractUtils/myList';
 import { getFirstAndLastIndex } from 'common-util/functions';
 
 // --------- HELPER METHODS ---------
-export const getAgentOwner = (id) => new Promise((resolve, reject) => {
-  const contract = getAgentContract();
+export const getAgentOwner = (id) =>
+  new Promise((resolve, reject) => {
+    const contract = getAgentContract();
 
-  contract.methods
-    .ownerOf(id)
-    .call()
-    .then((response) => {
-      resolve(response);
-    })
-    .catch((e) => {
-      console.error(e);
-      reject(e);
-    });
-});
+    contract.methods
+      .ownerOf(id)
+      .call()
+      .then((response) => {
+        resolve(response);
+      })
+      .catch((e) => {
+        console.error(e);
+        reject(e);
+      });
+  });
 
 const getAgentsHelper = ({ first, total, resolve }) => {
   // Get the promise for mechData from the GraphQL
@@ -50,12 +51,12 @@ const getAgentsHelper = ({ first, total, resolve }) => {
   });
 };
 
-const getMechsHelper = ({
-  first, total, filters, resolve,
-}) => {
+const getMechsHelper = ({ first, total, filters, resolve }) => {
   // Get the promise for mechData from the GraphQL
   const mechDataPromise = fetchMmMechs({
-    total, first, filters,
+    total,
+    first,
+    filters,
   });
 
   mechDataPromise.then((mechs) => {
@@ -79,61 +80,65 @@ const getMechsHelper = ({
 };
 
 // --------- utils ---------
-export const getAgentDetails = (id) => new Promise((resolve, reject) => {
-  const contract = getAgentContract();
+export const getAgentDetails = (id) =>
+  new Promise((resolve, reject) => {
+    const contract = getAgentContract();
 
-  contract.methods
-    .getUnit(id)
-    .call()
-    .then((information) => {
-      resolve(information);
-    })
-    .catch((e) => {
-      console.error(e);
-      reject(e);
-    });
-});
+    contract.methods
+      .getUnit(id)
+      .call()
+      .then((information) => {
+        resolve(information);
+      })
+      .catch((e) => {
+        console.error(e);
+        reject(e);
+      });
+  });
 
-export const getAgent = (id) => new Promise((resolve, reject) => {
-  const contract = getAgentContract();
+export const getAgent = (id) =>
+  new Promise((resolve, reject) => {
+    const contract = getAgentContract();
 
-  contract.methods
-    .getHashes(id)
-    .call()
-    .then((response) => {
-      resolve(response);
-    })
-    .catch((e) => {
-      console.error(e);
-      reject(e);
-    });
-});
+    contract.methods
+      .getHashes(id)
+      .call()
+      .then((response) => {
+        resolve(response);
+      })
+      .catch((e) => {
+        console.error(e);
+        reject(e);
+      });
+  });
 // totals
-export const getTotalForAllAgents = () => new Promise((resolve, reject) => {
-  const contract = getAgentContract();
-  contract.methods
-    .totalSupply()
-    .call()
-    .then((response) => {
-      resolve(response);
-    })
-    .catch((e) => {
-      reject(e);
-    });
-});
+export const getTotalForAllAgents = () =>
+  new Promise((resolve, reject) => {
+    const contract = getAgentContract();
+    contract.methods
+      .totalSupply()
+      .call()
+      .then((response) => {
+        resolve(response);
+      })
+      .catch((e) => {
+        reject(e);
+      });
+  });
 
-export const getTotalForMyAgents = (account) => new Promise((resolve, reject) => {
-  const contract = getAgentContract();
-  contract.methods
-    .balanceOf(account)
-    .call()
-    .then((response) => {
-      resolve(response);
-    })
-    .catch((e) => {
-      reject(e);
-    });
-});
+export const getTotalForMyAgents = (account) =>
+  new Promise((resolve, reject) => {
+    const contract = getAgentContract();
+    contract.methods
+      .balanceOf(account)
+      .call()
+      .then((response) => {
+        resolve(response);
+      })
+      .catch((e) => {
+        reject(e);
+      });
+  });
 
 export const getFilteredAgents = async (searchValue, account) => {
   const contract = getAgentContract();
@@ -152,57 +157,64 @@ export const getFilteredAgents = async (searchValue, account) => {
 /**
  * Function to return all agents
  */
-export const getAgents = (total, nextPage = 1) => new Promise((resolve, reject) => {
-  try {
-    const { first } = getFirstAndLastIndex(total, nextPage);
-    getAgentsHelper({ total, first: first - 1, resolve });
-  } catch (e) {
-    console.error(e);
-    reject(e);
-  }
-});
+export const getAgents = (total, nextPage = 1) =>
+  new Promise((resolve, reject) => {
+    try {
+      const { first } = getFirstAndLastIndex(total, nextPage);
+      getAgentsHelper({ total, first: first - 1, resolve });
+    } catch (e) {
+      console.error(e);
+      reject(e);
+    }
+  });
 
 /**
  * Function to return all mechs
  */
-export const getMechs = (total, nextPage = 1, filters = {}) => new Promise((resolve, reject) => {
-  try {
-    const { first } = getFirstAndLastIndex(total, nextPage);
-    getMechsHelper({
-      total, first: first - 1, filters, resolve,
-    });
-  } catch (e) {
-    console.error(e);
-    reject(e);
-  }
-});
+export const getMechs = (total, nextPage = 1, filters = {}) =>
+  new Promise((resolve, reject) => {
+    try {
+      const { first } = getFirstAndLastIndex(total, nextPage);
+      getMechsHelper({
+        total,
+        first: first - 1,
+        filters,
+        resolve,
+      });
+    } catch (e) {
+      console.error(e);
+      reject(e);
+    }
+  });
 
 /**
  * Function to return total mechs
  */
-export const getTotalMechs = () => new Promise((resolve, reject) => {
-  try {
-    fetchMmMechsTotal().then((result) => resolve(result));
-  } catch (e) {
-    console.error(e);
-    reject(e);
-  }
-});
-
-export const getAgentHashes = (id) => new Promise((resolve, reject) => {
-  const contract = getAgentContract();
-
-  contract.methods
-    .getUpdatedHashes(id)
-    .call()
-    .then((response) => {
-      resolve(response);
-    })
-    .catch((e) => {
+export const getTotalMechs = () =>
+  new Promise((resolve, reject) => {
+    try {
+      fetchMmMechsTotal().then((result) => resolve(result));
+    } catch (e) {
       console.error(e);
       reject(e);
-    });
-});
+    }
+  });
+
+export const getAgentHashes = (id) =>
+  new Promise((resolve, reject) => {
+    const contract = getAgentContract();
+
+    contract.methods
+      .getUpdatedHashes(id)
+      .call()
+      .then((response) => {
+        resolve(response);
+      })
+      .catch((e) => {
+        console.error(e);
+        reject(e);
+      });
+  });
 
 export const updateAgentHashes = (account, id, newHash) => {
   const contract = getMechMinterContract();
@@ -220,17 +232,18 @@ export const updateAgentHashes = (account, id, newHash) => {
     });
 };
 
-export const getTokenUri = (id) => new Promise((resolve, reject) => {
-  const contract = getAgentContract();
+export const getTokenUri = (id) =>
+  new Promise((resolve, reject) => {
+    const contract = getAgentContract();
 
-  contract.methods
-    .tokenURI(id)
-    .call()
-    .then((response) => {
-      resolve(response);
-    })
-    .catch((e) => {
-      console.error(e);
-      reject(e);
-    });
-});
+    contract.methods
+      .tokenURI(id)
+      .call()
+      .then((response) => {
+        resolve(response);
+      })
+      .catch((e) => {
+        console.error(e);
+        reject(e);
+      });
+  });

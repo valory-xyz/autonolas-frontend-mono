@@ -1,8 +1,9 @@
 /* eslint-disable react/no-unstable-nested-components */
 import { Typography } from 'antd';
 import ReactMarkdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
+import remarkGfm from 'remark-gfm';
+
 import { DOCS_SECTIONS } from '../helpers';
 
 const { Title, Paragraph } = Typography;
@@ -24,16 +25,11 @@ The code for the autonomous service can be found here: https://github.com/valory
 const HighLevelSpec = () => (
   <div id={DOCS_SECTIONS['high-level-spec']}>
     <Title level={3}>
-      High Level Specification of Off-Chain Agents that take input from the
-      AgentMechs
+      High Level Specification of Off-Chain Agents that take input from the AgentMechs
     </Title>
 
     <Paragraph>
-      <a
-        href="https://github.com/valory-xyz/mech/tree/main"
-        target="_blank"
-        rel="noreferrer"
-      >
+      <a href="https://github.com/valory-xyz/mech/tree/main" target="_blank" rel="noreferrer">
         Source
       </a>
     </Paragraph>
@@ -41,9 +37,7 @@ const HighLevelSpec = () => (
     <ReactMarkdown
       remarkPlugins={[remarkGfm]}
       components={{
-        code({
-          node, inline, className, children, ...props
-        }) {
+        code({ node, inline, className, children, ...props }) {
           const match = /language-(\w+)/.exec(className || '');
           return !inline && match ? (
             <SyntaxHighlighter {...props} language={match[1]} PreTag="div">

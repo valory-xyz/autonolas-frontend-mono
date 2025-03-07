@@ -1,24 +1,17 @@
-import { useState } from 'react';
-import PropTypes from 'prop-types';
 import { Button } from 'antd';
+import PropTypes from 'prop-types';
+import { useState } from 'react';
 
 import HashOfDataFile from '../IpfsHashGenerationModal/HashOfDataFile';
 
 export const FORM_NAME = 'request_form';
 
-const RequestForm = ({
-  isLoading, dataList, handleSubmit,
-}) => {
+const RequestForm = ({ isLoading, dataList, handleSubmit }) => {
   const [isModalVisible, setIsModalVisible] = useState(false);
 
   return (
     <>
-      <Button
-        type="primary"
-        ghost
-        onClick={() => setIsModalVisible(true)}
-        className="mb-12"
-      >
+      <Button type="primary" ghost onClick={() => setIsModalVisible(true)} className="mb-12">
         New request
       </Button>
 

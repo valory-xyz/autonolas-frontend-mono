@@ -1,12 +1,14 @@
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/router';
 import { Anchor, Typography } from 'antd';
 import { get } from 'lodash';
+import { useRouter } from 'next/router';
+import { useEffect, useState } from 'react';
+
 import { useScreen } from 'common-util/hooks';
+
 import Overview from './content/1_OffChainAgent';
+import ActionsDocs from './content/2_OnChainProtocol';
 import Badge from './content/3_HighLevelSpec';
 import { DOC_NAV, NavWrapper } from './helpers';
-import ActionsDocs from './content/2_OnChainProtocol';
 import { Container, DocSection } from './styles';
 
 const { Title } = Typography;

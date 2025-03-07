@@ -1,10 +1,12 @@
-import PropTypes from 'prop-types';
 import { Table } from 'antd';
 import { useRouter } from 'next/router';
+import PropTypes from 'prop-types';
+
 import { Loader } from '@autonolas/frontend-library';
 
-import { TOTAL_VIEW_COUNT } from 'util/constants';
 import { ListEmptyMessage } from 'common-util/List/ListCommon';
+import { TOTAL_VIEW_COUNT } from 'util/constants';
+
 import { getData, getTableColumns } from './helpers';
 
 const ListTable = ({
@@ -23,29 +25,22 @@ const ListTable = ({
   const { scrollX } = extra;
 
   if (isAccountRequired) {
-    return (
-      <Loader
-        isAccountRequired
-        message={`To see your ${type}s, connect wallet`}
-      />
-    );
+    return <Loader isAccountRequired message={`To see your ${type}s, connect wallet`} />;
   }
 
   if (isLoading) {
-    return (
-      <Loader />
-    );
+    return <Loader />;
   }
 
   const columns = getTableColumns(type, { router });
   const dataSource = getData(type, list, { current: currentPage });
   const pagination = isPaginationRequired
     ? {
-      total,
-      current: currentPage,
-      defaultPageSize: TOTAL_VIEW_COUNT,
-      onChange: (e) => setCurrentPage(e),
-    }
+        total,
+        current: currentPage,
+        defaultPageSize: TOTAL_VIEW_COUNT,
+        onChange: (e) => setCurrentPage(e),
+      }
     : false;
 
   return (

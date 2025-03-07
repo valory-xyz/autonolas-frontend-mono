@@ -1,4 +1,5 @@
 import get from 'lodash/get';
+
 import Mech from 'components/Home/Mech';
 import { DEFAULT_MECH_CONTRACT_ADDRESS } from 'util/constants';
 

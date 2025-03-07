@@ -1,6 +1,7 @@
 /* eslint-disable import/no-extraneous-dependencies */
-import PropTypes from 'prop-types';
 import { Alert, Button } from 'antd';
+import PropTypes from 'prop-types';
+
 import { EmptyMessage, RegisterFooter } from 'components/styles';
 
 export const RegisterMessage = ({ handleCancel }) => (
@@ -81,12 +82,7 @@ AlertSuccess.defaultProps = {
 export const AlertError = ({ error }) => {
   if (!error) return null;
   return (
-    <Alert
-      message={error.message}
-      data-testid="alert-error-container"
-      type="error"
-      showIcon
-    />
+    <Alert message={error.message} data-testid="alert-error-container" type="error" showIcon />
   );
 };
 AlertError.propTypes = {

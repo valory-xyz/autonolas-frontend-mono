@@ -1,25 +1,15 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import Web3 from 'web3';
-import {
-  Table,
-  Typography,
-  ConfigProvider,
-  Empty,
-  Skeleton,
-  Alert,
-} from 'antd';
+import { Alert, ConfigProvider, Empty, Skeleton, Table, Typography } from 'antd';
+import { uniqBy } from 'lodash';
 import { useRouter } from 'next/router';
-import {
-  notifyError,
-  notifySuccess,
-  AddressLink,
-  NA,
-} from '@autonolas/frontend-library';
+import React, { useCallback, useEffect, useState } from 'react';
+import Web3 from 'web3';
 
-import { GNOSIS_SCAN_URL } from 'util/constants';
+import { AddressLink, NA, notifyError, notifySuccess } from '@autonolas/frontend-library';
+
 import { AGENT_MECH_ABI, OLAS_MECH_ABI } from 'common-util/AbiAndAddresses';
 import { SUPPORTED_CHAINS } from 'common-util/Login';
-import { uniqBy } from 'lodash';
+import { GNOSIS_SCAN_URL } from 'util/constants';
+
 import Request from './Request';
 
 // Replace the following values with your specific contract information
@@ -64,9 +54,7 @@ const EventListener = () => {
   const isLegacy = Boolean(query.legacy);
 
   useEffect(() => {
-    const web3Instance = new Web3(
-      new Web3.providers.WebsocketProvider(WEBSOCKET_PROVIDER),
-    );
+    const web3Instance = new Web3(new Web3.providers.WebsocketProvider(WEBSOCKET_PROVIDER));
     setWeb3Ws(web3Instance);
   }, []);
 
@@ -111,10 +99,7 @@ const EventListener = () => {
         const filterOption = await getFilterOption();
 
         // Get past FirstEvent events
-        const pastFirstEvents = await contractWs.getPastEvents(
-          'Request',
-          filterOption,
-        );
+        const pastFirstEvents = await contractWs.getPastEvents('Request', filterOption);
 
         setFirstEvents(sortAndRemoveDuplicateEvents(pastFirstEvents));
       } catch (error) {
@@ -156,10 +141,7 @@ const EventListener = () => {
         const filterOption = await getFilterOption();
 
         // Get past SecondEvent events
-        const pastSecondEvents = await contractWs.getPastEvents(
-          'Deliver',
-          filterOption,
-        );
+        const pastSecondEvents = await contractWs.getPastEvents('Deliver', filterOption);
 
         setSecondEvents(sortAndRemoveDuplicateEvents(pastSecondEvents));
       } catch (error) {
@@ -212,9 +194,7 @@ const EventListener = () => {
     if (requestsDatasource.length === 0) return deliversDatasource;
 
     const finalDataSource = requestsDatasource.map((request) => {
-      const deliver = deliversDatasource.find(
-        (d) => d.requestId === request.requestId,
-      );
+      const deliver = deliversDatasource.find((d) => d.requestId === request.requestId);
 
       if (deliver) {
         return { ...request, deliverData: deliver.deliverData };
@@ -243,7 +223,7 @@ const EventListener = () => {
 
           return (
             <Empty
-              description={(
+              description={
                 <>
                   {`No events found. Only loading latest ${LATEST_BLOCK_COUNT} block(s).`}
                   <a
@@ -255,7 +235,7 @@ const EventListener = () => {
                   </a>
                   .
                 </>
-              )}
+              }
             />
           );
         }}
@@ -278,33 +258,29 @@ const EventListener = () => {
               key: 'requestId',
               width: 260,
               render: (text) => (
-                <AddressLink
-                  text={text}
-                  textMinWidth={195}
-                  suffixCount={8}
-                  canCopy
-                  cannotClick
-                />
+                <AddressLink text={text} textMinWidth={195} suffixCount={8} canCopy cannotClick />
               ),
             },
-            isLegacy ? {
-              title: 'Sender',
-              dataIndex: 'sender',
-              key: 'sender',
-              width: 300,
-              render: (text) => {
-                if (!text) return NA;
-                return (
-                  <AddressLink
-                    text={text}
-                    textMinWidth={245}
-                    suffixCount={10}
-                    canCopy
-                    supportedChains={SUPPORTED_CHAINS}
-                  />
-                );
-              },
-            } : null,
+            isLegacy
+              ? {
+                  title: 'Sender',
+                  dataIndex: 'sender',
+                  key: 'sender',
+                  width: 300,
+                  render: (text) => {
+                    if (!text) return NA;
+                    return (
+                      <AddressLink
+                        text={text}
+                        textMinWidth={245}
+                        suffixCount={10}
+                        canCopy
+                        supportedChains={SUPPORTED_CHAINS}
+                      />
+                    );
+                  },
+                }
+              : null,
             {
               title: 'Request Data',
               dataIndex: 'requestData',
@@ -313,13 +289,7 @@ const EventListener = () => {
               render: (text) => {
                 if (!text) return NA;
                 return (
-                  <AddressLink
-                    text={text}
-                    textMinWidth={240}
-                    suffixCount={10}
-                    canCopy
-                    isIpfsLink
-                  />
+                  <AddressLink text={text} textMinWidth={240} suffixCount={10} canCopy isIpfsLink />
                 );
               },
             },
@@ -336,13 +306,7 @@ const EventListener = () => {
                 if (!text) return NA;
 
                 return (
-                  <AddressLink
-                    text={text}
-                    textMinWidth={240}
-                    suffixCount={10}
-                    canCopy
-                    isIpfsLink
-                  />
+                  <AddressLink text={text} textMinWidth={240} suffixCount={10} canCopy isIpfsLink />
                 );
               },
             },

@@ -1,12 +1,13 @@
-import { useState } from 'react';
-import PropTypes from 'prop-types';
 import { Button, Form, Input } from 'antd';
 import { ethers } from 'ethers';
+import PropTypes from 'prop-types';
+import { useState } from 'react';
 
 import { useHelpers } from 'common-util/hooks/useHelpers';
+
 import IpfsHashGenerationModal from '../IpfsHashGenerationModal';
-import { FormItemHash } from './helpers';
 import { RegisterMessage } from '../ListCommon';
+import { FormItemHash } from './helpers';
 
 export const FORM_NAME = 'register_form';
 
@@ -66,9 +67,7 @@ const RegisterForm = ({ listType, handleSubmit, handleCancel }) => {
               validator(_, value) {
                 if (ethers.utils.isAddress(value)) return Promise.resolve();
                 return Promise.reject(
-                  new Error(
-                    `Please input a valid address of the ${listType} Owner`,
-                  ),
+                  new Error(`Please input a valid address of the ${listType} Owner`),
                 );
               },
             }),
@@ -79,24 +78,14 @@ const RegisterForm = ({ listType, handleSubmit, handleCancel }) => {
         </Form.Item>
 
         <Form.Item className="mb-0">
-          <Button
-            htmlType="button"
-            type="link"
-            onClick={prefillOwnerAddress}
-            className="pl-0"
-          >
+          <Button htmlType="button" type="link" onClick={prefillOwnerAddress} className="pl-0">
             Prefill Address
           </Button>
         </Form.Item>
 
         <FormItemHash listType={listType} hashValue={hashValue} />
 
-        <Button
-          type="primary"
-          ghost
-          onClick={() => setIsModalVisible(true)}
-          className="mb-12"
-        >
+        <Button type="primary" ghost onClick={() => setIsModalVisible(true)} className="mb-12">
           Generate Hash & File
         </Button>
 
@@ -127,9 +116,7 @@ const RegisterForm = ({ listType, handleSubmit, handleCancel }) => {
             () => ({
               validator(_, value) {
                 if (ethers.utils.isAddress(value)) return Promise.resolve();
-                return Promise.reject(
-                  new Error('Please input a valid address'),
-                );
+                return Promise.reject(new Error('Please input a valid address'));
               },
             }),
           ]}

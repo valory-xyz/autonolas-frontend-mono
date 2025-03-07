@@ -4,6 +4,7 @@
     "build": "CI= next build",
     "start": "next start",
     "lint": "eslint ./",
+    "lint:fix": "eslint --fix \"./**/*.{js,jsx,ts,tsx}\"",
     "test": "jest",
     "test:watch": "jest --watch",
     "testc": "jest --coverage --verbose"

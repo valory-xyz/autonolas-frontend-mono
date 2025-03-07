@@ -1,14 +1,16 @@
-import { useState, useEffect } from 'react';
-import PropTypes from 'prop-types';
-import { connect } from 'react-redux';
-import { useRouter } from 'next/router';
 import { notification } from 'antd';
-import RequestForm from 'common-util/List/RequestForm';
-import { AlertSuccess } from 'common-util/List/ListCommon';
+import { useRouter } from 'next/router';
+import PropTypes from 'prop-types';
+import { useEffect, useState } from 'react';
+import { connect } from 'react-redux';
+
 import { getMechContract } from 'common-util/Contracts';
+import { AlertSuccess } from 'common-util/List/ListCommon';
+import RequestForm from 'common-util/List/RequestForm';
 import { HeaderTitle } from 'common-util/Title';
 import { getAgentHash, getIpfsResponse } from 'common-util/functions';
 import { DEFAULT_AGENT_ID } from 'util/constants';
+
 import { FormContainer } from '../../styles';
 import { getAgent } from '../Mechs/utils';
 

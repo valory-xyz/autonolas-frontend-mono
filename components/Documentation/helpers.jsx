@@ -1,5 +1,6 @@
-import { useState } from 'react';
 import PropTypes from 'prop-types';
+import { useState } from 'react';
+
 import { WrapperDiv } from './styles';
 
 export const DOCS_SECTIONS = {
@@ -22,8 +23,7 @@ export const DOC_NAV = [
   },
   {
     id: DOCS_SECTIONS['high-level-spec'],
-    title:
-      'High Level Specification of Off-Chain Agents that take input from the AgentMechs',
+    title: 'High Level Specification of Off-Chain Agents that take input from the AgentMechs',
   },
 ];
 

@@ -1,5 +1,6 @@
 import { createGlobalStyle } from 'styled-components';
-import { MEDIA_QUERY, COLOR } from '@autonolas/frontend-library';
+
+import { COLOR, MEDIA_QUERY } from '@autonolas/frontend-library';
 
 const ANTD_COLOR = {
   whiteColor: '#fff',
