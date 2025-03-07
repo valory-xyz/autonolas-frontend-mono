@@ -1,23 +1,29 @@
-import React, { useEffect, useState } from 'react';
 import { Segmented } from 'antd';
 import { useRouter } from 'next/router';
+import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
-import { HeaderTitle } from 'common-util/Title';
+
 import { MEDIA_QUERY } from '@autonolas/frontend-library';
+
+import { HeaderTitle } from 'common-util/Title';
 import { URL } from 'util/constants';
+
 import { ListAgents } from './ListAgents';
 import { ListServices } from './ListServices';
 
 const MECH_MM = 'mechMM';
 const LEGACY = 'legacy';
 
-const MECH_TYPES = [{
-  value: MECH_MM,
-  label: 'Mech Marketplace',
-}, {
-  value: LEGACY,
-  label: 'Legacy',
-}];
+const MECH_TYPES = [
+  {
+    value: MECH_MM,
+    label: 'Mech Marketplace',
+  },
+  {
+    value: LEGACY,
+    label: 'Legacy',
+  },
+];
 
 const Content = styled.div`
   position: relative;
@@ -38,10 +44,10 @@ export const Mechs = () => {
   const router = useRouter();
   const [mechType, setMechType] = useState(MECH_MM);
 
+  const networkNameFromUrl = router?.query?.network;
+
   const handleChangeMechType = (e) => {
-    router.push(
-      e === MECH_MM ? URL.MECHS : URL.MECHS_LEGACY,
-    );
+    router.push(`/${networkNameFromUrl}/${e === MECH_MM ? URL.MECHS : URL.MECHS_LEGACY}`);
   };
 
   useEffect(() => {

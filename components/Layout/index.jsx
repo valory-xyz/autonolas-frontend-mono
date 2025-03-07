@@ -1,16 +1,21 @@
+import { Alert, Flex, Layout, Menu, Tag } from 'antd';
+import { useRouter } from 'next/router';
+import PropTypes from 'prop-types';
 import { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
-import { useRouter } from 'next/router';
-import {
-  Alert, Layout, Menu, Tag, Flex,
-} from 'antd';
-import PropTypes from 'prop-types';
-import { getSupportedNetworks } from 'common-util/functions';
+
 import { COLOR } from '@autonolas/frontend-library';
-import { LogoSvg } from './Logo';
+
+import { ALL_SUPPORTED_CHAINS } from 'common-util/Login/config';
+import { getSupportedNetworks } from 'common-util/functions';
+import { useHandleRoute } from 'common-util/hooks/useHandleRoute';
+import { PAGES_TO_LOAD_WITH_CHAIN_ID } from 'util/constants';
+
 import Login from '../Login';
 import Footer from './Footer';
-import { CustomLayout, OlasHeader, Logo } from './styles';
+import { LogoSvg } from './Logo';
+import { SwitchNetworkSelect } from './SwitchNetworkSelect';
+import { CustomLayout, Logo, OlasHeader } from './styles';
 
 const { Content } = Layout;
 
@@ -30,10 +35,11 @@ const MENU_ITEMS = [
 
 const NavigationBar = ({ children }) => {
   const router = useRouter();
-
-  const chainId = useSelector((state) => state?.setup?.chainId);
+  const { chainId } = useSelector((state) => state?.setup);
   const { pathname } = router;
   const [selectedMenu, setSelectedMenu] = useState([]);
+
+  useHandleRoute();
 
   // to set default menu on first render
   useEffect(() => {
@@ -45,11 +51,21 @@ const NavigationBar = ({ children }) => {
 
   const handleMenuItemClick = ({ key }) => {
     if (key === 'docs') {
-      window.open('https://docs.autonolas.network/product/mechkit/', '_blank', 'noopener,noreferrer');
+      window.open(
+        'https://docs.autonolas.network/product/mechkit/',
+        '_blank',
+        'noopener,noreferrer',
+      );
       return;
     }
 
-    router.push(`/${key}`);
+    if (PAGES_TO_LOAD_WITH_CHAIN_ID.includes(`/${key}`)) {
+      const chain = ALL_SUPPORTED_CHAINS.find((id) => chainId);
+      router.push(`/${chain.networkName}/${key}`);
+    } else {
+      router.push(`/${key}`);
+    }
+
     setSelectedMenu(key);
   };
 
@@ -70,6 +86,8 @@ const NavigationBar = ({ children }) => {
           onClick={handleMenuItemClick}
           items={MENU_ITEMS}
         />
+
+        <SwitchNetworkSelect />
         <Login />
       </OlasHeader>
 
@@ -78,20 +96,15 @@ const NavigationBar = ({ children }) => {
           {chainId && !getSupportedNetworks().includes(Number(chainId)) && (
             <Alert
               showIcon
-              message={(
+              message={
                 <>
-                  You are on a wrong network. Please switch to Gnosis Chain
-                  network or&nbsp;
-                  <a
-                    href="https://discord.com/invite/z2PT65jKqQ"
-                    target="_blank"
-                    rel="noreferrer"
-                  >
+                  You are on a wrong network. Please switch to Gnosis Chain network or&nbsp;
+                  <a href="https://discord.com/invite/z2PT65jKqQ" target="_blank" rel="noreferrer">
                     join our Discord
                   </a>
                   &nbsp;to request other networks.
                 </>
-              )}
+              }
               type="error"
               className="mt-12"
             />

@@ -1,22 +1,15 @@
-import { useState, useEffect } from 'react';
-import { useSelector } from 'react-redux';
 import { Flex, Segmented } from 'antd';
-import { useRouter } from 'next/router';
 import get from 'lodash/get';
-import { URL, NAV_TYPES } from 'util/constants';
-import ListTable from 'common-util/List/ListTable';
-import {
-  useSearchInput,
-  getHash,
-  isMyTab,
-} from 'common-util/List/ListTable/helpers';
+import { useRouter } from 'next/router';
+import { useEffect, useState } from 'react';
+import { useSelector } from 'react-redux';
+
 import { getMyListOnPagination } from 'common-util/ContractUtils/myList';
-import {
-  getAgents,
-  getFilteredAgents,
-  getTotalForAllAgents,
-  getTotalForMyAgents,
-} from './utils';
+import ListTable from 'common-util/List/ListTable';
+import { getHash, isMyTab, useSearchInput } from 'common-util/List/ListTable/helpers';
+import { NAV_TYPES, URL } from 'util/constants';
+
+import { getAgents, getFilteredAgents, getTotalForAllAgents, getTotalForMyAgents } from './utils';
 
 const ALL_AGENTS = 'all-agents';
 const MY_AGENTS = 'my-agents';
@@ -24,9 +17,8 @@ const MY_AGENTS = 'my-agents';
 export const ListAgents = () => {
   const router = useRouter();
   const hash = getHash(router);
-  const [currentTab, setCurrentTab] = useState(
-    isMyTab(hash) ? MY_AGENTS : ALL_AGENTS,
-  );
+  const [currentTab, setCurrentTab] = useState(isMyTab(hash) ? MY_AGENTS : ALL_AGENTS);
+  const networkNameFromUrl = router?.query?.network;
 
   const account = useSelector((state) => get(state, 'setup.account'));
 
@@ -152,7 +144,10 @@ export const ListAgents = () => {
     <Flex vertical gap={24}>
       <Flex gap={8} justify="end">
         <Segmented
-          options={[{ value: ALL_AGENTS, label: 'All agents' }, { value: MY_AGENTS, label: 'My agents' }]}
+          options={[
+            { value: ALL_AGENTS, label: 'All agents' },
+            { value: MY_AGENTS, label: 'My agents' },
+          ]}
           value={currentTab}
           onChange={(e) => {
             setCurrentTab(e);
@@ -166,7 +161,7 @@ export const ListAgents = () => {
             clearSearch();
             // update the URL to keep track of my-agents
             router.push(
-              e === MY_AGENTS ? `${URL.MECHS_LEGACY}#${MY_AGENTS}` : URL.MECHS_LEGACY,
+              `/${networkNameFromUrl}/${e === MY_AGENTS ? `${URL.MECHS_LEGACY}#${MY_AGENTS}` : URL.MECHS_LEGACY}`,
             );
           }}
         />
@@ -175,19 +170,19 @@ export const ListAgents = () => {
 
       {currentTab === ALL_AGENTS && <ListTable {...tableCommonProps} list={list} />}
       {currentTab === MY_AGENTS && (
-      <ListTable
-        {...tableCommonProps}
-        list={
-          searchValue
-            ? list
-            : getMyListOnPagination({
-              total,
-              nextPage: currentPage,
-              list,
-            })
-        }
-        isAccountRequired={!account}
-      />
+        <ListTable
+          {...tableCommonProps}
+          list={
+            searchValue
+              ? list
+              : getMyListOnPagination({
+                  total,
+                  nextPage: currentPage,
+                  list,
+                })
+          }
+          isAccountRequired={!account}
+        />
       )}
     </Flex>
   );

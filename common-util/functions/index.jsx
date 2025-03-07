@@ -1,29 +1,32 @@
-import { GATEWAY_URL, TOTAL_VIEW_COUNT } from 'util/constants';
-import { ADDRESSES, RPC_URLS } from 'common-util/Contracts';
 import {
-  getProvider as getProviderFn,
   getChainId as getChainIdFn,
   getChainIdOrDefaultToMainnet as getChainIdOrDefaultToMainnetFn,
   getIsValidChainId as getIsValidChainIdFn,
+  getProvider as getProviderFn,
   sendTransaction as sendTransactionFn,
 } from '@autonolas/frontend-library';
+
+import { ADDRESSES, RPC_URLS } from 'common-util/Contracts';
 import { SUPPORTED_CHAINS } from 'common-util/Login';
+import { FIRST_SUPPORTED_CHAIN } from 'common-util/Login/config';
+import { GATEWAY_URL, TOTAL_VIEW_COUNT } from 'util/constants';
 
 export const getProvider = () => getProviderFn(SUPPORTED_CHAINS, RPC_URLS);
 
 export const getIsValidChainId = (chainId) => getIsValidChainIdFn(SUPPORTED_CHAINS, chainId);
 
-export const getChainIdOrDefaultToMainnet = (chainId) => {
+export const getChainIdOrDefaultToFirstSupportedChain = (chainId = FIRST_SUPPORTED_CHAIN.id) => {
   const x = getChainIdOrDefaultToMainnetFn(SUPPORTED_CHAINS, chainId);
   return x;
 };
 
 export const getChainId = (chainId = null) => getChainIdFn(SUPPORTED_CHAINS, chainId);
 
-export const sendTransaction = (fn, account) => sendTransactionFn(fn, account, {
-  supportedChains: SUPPORTED_CHAINS,
-  rpcUrls: RPC_URLS,
-});
+export const sendTransaction = (fn, account) =>
+  sendTransactionFn(fn, account, {
+    supportedChains: SUPPORTED_CHAINS,
+    rpcUrls: RPC_URLS,
+  });
 
 /**
  * @example
@@ -60,4 +63,5 @@ export const getIpfsResponse = async (hash) => {
 };
 
 // show last element of agentHashes array
-export const getAgentHash = (agentHashes = []) => (agentHashes.length === 0 ? '' : agentHashes[agentHashes.length - 1]);
+export const getAgentHash = (agentHashes = []) =>
+  agentHashes.length === 0 ? '' : agentHashes[agentHashes.length - 1];

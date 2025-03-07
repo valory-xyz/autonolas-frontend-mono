@@ -1,12 +1,13 @@
-import { useState } from 'react';
-import { useRouter } from 'next/router';
 import { notification } from 'antd';
-import RegisterForm from 'common-util/List/RegisterForm';
-import { AlertSuccess, AlertError } from 'common-util/List/ListCommon';
+import { useRouter } from 'next/router';
+import { useState } from 'react';
+
 import { getMechMinterContract } from 'common-util/Contracts';
+import { AlertError, AlertSuccess } from 'common-util/List/ListCommon';
+import RegisterForm from 'common-util/List/RegisterForm';
 import { HeaderTitle } from 'common-util/Title';
-import { FormContainer } from 'components/styles';
 import { useHelpers } from 'common-util/hooks/useHelpers';
+import { FormContainer } from 'components/styles';
 import { URL } from 'util/constants';
 
 const FactoryManage = () => {
@@ -15,7 +16,9 @@ const FactoryManage = () => {
   const router = useRouter();
   const { account } = useHelpers();
 
-  const handleCancel = () => router.push(URL.MECHS);
+  const networkNameFromUrl = router?.query?.network;
+
+  const handleCancel = () => router.push(`/${networkNameFromUrl}/${URL.MECHS}`);
 
   const handleSubmit = (values) => {
     if (account) {
@@ -25,12 +28,7 @@ const FactoryManage = () => {
       const contract = getMechMinterContract();
 
       contract.methods
-        .create(
-          values.owner_address,
-          `0x${values.hash}`,
-          values.price,
-          values.mechMarketplace,
-        )
+        .create(values.owner_address, `0x${values.hash}`, values.price, values.mechMarketplace)
         .send({ from: account })
         .then((result) => {
           setInformation(result);
@@ -48,11 +46,7 @@ const FactoryManage = () => {
       <HeaderTitle title="Mint" description="Mint agent" />
 
       <FormContainer>
-        <RegisterForm
-          listType="agent"
-          handleSubmit={handleSubmit}
-          handleCancel={handleCancel}
-        />
+        <RegisterForm listType="agent" handleSubmit={handleSubmit} handleCancel={handleCancel} />
       </FormContainer>
       <AlertSuccess type="Agent" information={information} />
       <AlertError error={error} />

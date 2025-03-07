@@ -1,23 +1,50 @@
-export const OLAS_MECH_ABI = [
+export const AGENT_MECH_ABI = [
   {
-    inputs: [],
-    name: 'AlreadyInitialized',
+    inputs: [
+      {
+        internalType: 'address',
+        name: '_token',
+        type: 'address',
+      },
+      {
+        internalType: 'uint256',
+        name: '_tokenId',
+        type: 'uint256',
+      },
+      {
+        internalType: 'uint256',
+        name: '_price',
+        type: 'uint256',
+      },
+    ],
+    stateMutability: 'nonpayable',
+    type: 'constructor',
+  },
+  {
+    inputs: [
+      {
+        internalType: 'uint256',
+        name: 'agentId',
+        type: 'uint256',
+      },
+    ],
+    name: 'AgentNotFound',
     type: 'error',
   },
   {
     inputs: [
       {
-        internalType: 'address',
-        name: 'sender',
-        type: 'address',
+        internalType: 'uint256',
+        name: 'provided',
+        type: 'uint256',
       },
       {
-        internalType: 'address',
-        name: 'marketplace',
-        type: 'address',
+        internalType: 'uint256',
+        name: 'expected',
+        type: 'uint256',
       },
     ],
-    name: 'MarketplaceOnly',
+    name: 'NotEnoughPaid',
     type: 'error',
   },
   {
@@ -37,40 +64,14 @@ export const OLAS_MECH_ABI = [
     type: 'error',
   },
   {
-    inputs: [],
-    name: 'ReentrancyGuard',
-    type: 'error',
-  },
-  {
     inputs: [
       {
         internalType: 'uint256',
-        name: 'numValues1',
-        type: 'uint256',
-      },
-      {
-        internalType: 'uint256',
-        name: 'numValues2',
+        name: 'requestId',
         type: 'uint256',
       },
     ],
-    name: 'WrongArrayLength',
-    type: 'error',
-  },
-  {
-    inputs: [
-      {
-        internalType: 'uint256',
-        name: 'state',
-        type: 'uint256',
-      },
-      {
-        internalType: 'uint256',
-        name: 'serviceId',
-        type: 'uint256',
-      },
-    ],
-    name: 'WrongServiceState',
+    name: 'RequestIdNotFound',
     type: 'error',
   },
   {
@@ -79,35 +80,18 @@ export const OLAS_MECH_ABI = [
     type: 'error',
   },
   {
-    inputs: [],
-    name: 'ZeroValue',
-    type: 'error',
-  },
-  {
     anonymous: false,
     inputs: [
       {
         indexed: true,
         internalType: 'address',
-        name: 'mech',
+        name: 'sender',
         type: 'address',
-      },
-      {
-        indexed: true,
-        internalType: 'address',
-        name: 'mechServiceMultisig',
-        type: 'address',
-      },
-      {
-        indexed: false,
-        internalType: 'bytes32',
-        name: 'requestId',
-        type: 'bytes32',
       },
       {
         indexed: false,
         internalType: 'uint256',
-        name: 'deliveryRate',
+        name: 'requestId',
         type: 'uint256',
       },
       {
@@ -126,24 +110,11 @@ export const OLAS_MECH_ABI = [
       {
         indexed: false,
         internalType: 'uint256',
-        name: 'maxDeliveryRate',
+        name: 'price',
         type: 'uint256',
       },
     ],
-    name: 'MaxDeliveryRateUpdated',
-    type: 'event',
-  },
-  {
-    anonymous: false,
-    inputs: [
-      {
-        indexed: false,
-        internalType: 'uint256',
-        name: 'numRequests',
-        type: 'uint256',
-      },
-    ],
-    name: 'NumRequestsIncrease',
+    name: 'PriceUpdated',
     type: 'event',
   },
   {
@@ -152,14 +123,14 @@ export const OLAS_MECH_ABI = [
       {
         indexed: true,
         internalType: 'address',
-        name: 'mech',
+        name: 'sender',
         type: 'address',
       },
       {
         indexed: false,
-        internalType: 'bytes32',
+        internalType: 'uint256',
         name: 'requestId',
-        type: 'bytes32',
+        type: 'uint256',
       },
       {
         indexed: false,
@@ -172,110 +143,20 @@ export const OLAS_MECH_ABI = [
     type: 'event',
   },
   {
-    anonymous: false,
-    inputs: [
-      {
-        indexed: false,
-        internalType: 'bytes32',
-        name: 'requestId',
-        type: 'bytes32',
-      },
-    ],
-    name: 'RevokeRequest',
-    type: 'event',
-  },
-  {
-    inputs: [],
-    name: 'VERSION',
-    outputs: [
-      {
-        internalType: 'string',
-        name: '',
-        type: 'string',
-      },
-    ],
-    stateMutability: 'view',
-    type: 'function',
-  },
-  {
     inputs: [
       {
         internalType: 'uint256',
-        name: 'newMaxDeliveryRate',
+        name: 'requestId',
         type: 'uint256',
-      },
-    ],
-    name: 'changeMaxDeliveryRate',
-    outputs: [],
-    stateMutability: 'nonpayable',
-    type: 'function',
-  },
-  {
-    inputs: [
-      {
-        internalType: 'address',
-        name: 'requester',
-        type: 'address',
-      },
-      {
-        components: [
-          {
-            internalType: 'bytes',
-            name: 'requestData',
-            type: 'bytes',
-          },
-          {
-            internalType: 'bytes',
-            name: 'signature',
-            type: 'bytes',
-          },
-          {
-            internalType: 'bytes',
-            name: 'deliveryData',
-            type: 'bytes',
-          },
-        ],
-        internalType: 'struct DeliverWithSignature[]',
-        name: 'deliverWithSignatures',
-        type: 'tuple[]',
-      },
-      {
-        internalType: 'uint256[]',
-        name: 'deliveryRates',
-        type: 'uint256[]',
       },
       {
         internalType: 'bytes',
-        name: 'paymentData',
+        name: 'data',
         type: 'bytes',
       },
     ],
-    name: 'deliverMarketplaceWithSignatures',
+    name: 'deliver',
     outputs: [],
-    stateMutability: 'nonpayable',
-    type: 'function',
-  },
-  {
-    inputs: [
-      {
-        internalType: 'bytes32[]',
-        name: 'requestIds',
-        type: 'bytes32[]',
-      },
-      {
-        internalType: 'bytes[]',
-        name: 'datas',
-        type: 'bytes[]',
-      },
-    ],
-    name: 'deliverToMarketplace',
-    outputs: [
-      {
-        internalType: 'bool[]',
-        name: 'deliveredRequests',
-        type: 'bool[]',
-      },
-    ],
     stateMutability: 'nonpayable',
     type: 'function',
   },
@@ -332,13 +213,43 @@ export const OLAS_MECH_ABI = [
     type: 'function',
   },
   {
-    inputs: [],
-    name: 'getOperator',
-    outputs: [
+    inputs: [
       {
         internalType: 'address',
-        name: '',
+        name: 'account',
         type: 'address',
+      },
+      {
+        internalType: 'bytes',
+        name: 'data',
+        type: 'bytes',
+      },
+    ],
+    name: 'getRequestId',
+    outputs: [
+      {
+        internalType: 'uint256',
+        name: 'requestId',
+        type: 'uint256',
+      },
+    ],
+    stateMutability: 'pure',
+    type: 'function',
+  },
+  {
+    inputs: [
+      {
+        internalType: 'address',
+        name: 'account',
+        type: 'address',
+      },
+    ],
+    name: 'getRequestsCount',
+    outputs: [
+      {
+        internalType: 'uint256',
+        name: 'requestsCount',
+        type: 'uint256',
       },
     ],
     stateMutability: 'view',
@@ -360,9 +271,9 @@ export const OLAS_MECH_ABI = [
     name: 'getUndeliveredRequestIds',
     outputs: [
       {
-        internalType: 'bytes32[]',
+        internalType: 'uint256[]',
         name: 'requestIds',
-        type: 'bytes32[]',
+        type: 'uint256[]',
       },
     ],
     stateMutability: 'view',
@@ -372,7 +283,7 @@ export const OLAS_MECH_ABI = [
     inputs: [
       {
         internalType: 'address',
-        name: 'multisig',
+        name: 'signer',
         type: 'address',
       },
     ],
@@ -414,9 +325,9 @@ export const OLAS_MECH_ABI = [
   {
     inputs: [
       {
-        internalType: 'bytes32',
+        internalType: 'uint256',
         name: '',
-        type: 'bytes32',
+        type: 'uint256',
       },
       {
         internalType: 'uint256',
@@ -427,19 +338,6 @@ export const OLAS_MECH_ABI = [
     name: 'mapRequestIds',
     outputs: [
       {
-        internalType: 'bytes32',
-        name: '',
-        type: 'bytes32',
-      },
-    ],
-    stateMutability: 'view',
-    type: 'function',
-  },
-  {
-    inputs: [],
-    name: 'maxDeliveryRate',
-    outputs: [
-      {
         internalType: 'uint256',
         name: '',
         type: 'uint256',
@@ -449,13 +347,19 @@ export const OLAS_MECH_ABI = [
     type: 'function',
   },
   {
-    inputs: [],
-    name: 'mechMarketplace',
-    outputs: [
+    inputs: [
       {
         internalType: 'address',
         name: '',
         type: 'address',
+      },
+    ],
+    name: 'mapRequestsCounts',
+    outputs: [
+      {
+        internalType: 'uint256',
+        name: '',
+        type: 'uint256',
       },
     ],
     stateMutability: 'view',
@@ -464,32 +368,6 @@ export const OLAS_MECH_ABI = [
   {
     inputs: [],
     name: 'nonce',
-    outputs: [
-      {
-        internalType: 'uint256',
-        name: '',
-        type: 'uint256',
-      },
-    ],
-    stateMutability: 'view',
-    type: 'function',
-  },
-  {
-    inputs: [],
-    name: 'numTotalDeliveries',
-    outputs: [
-      {
-        internalType: 'uint256',
-        name: '',
-        type: 'uint256',
-      },
-    ],
-    stateMutability: 'view',
-    type: 'function',
-  },
-  {
-    inputs: [],
-    name: 'numTotalRequests',
     outputs: [
       {
         internalType: 'uint256',
@@ -627,38 +505,7 @@ export const OLAS_MECH_ABI = [
   },
   {
     inputs: [],
-    name: 'paymentType',
-    outputs: [
-      {
-        internalType: 'bytes32',
-        name: '',
-        type: 'bytes32',
-      },
-    ],
-    stateMutability: 'view',
-    type: 'function',
-  },
-  {
-    inputs: [
-      {
-        internalType: 'bytes32[]',
-        name: 'requestIds',
-        type: 'bytes32[]',
-      },
-      {
-        internalType: 'bytes[]',
-        name: 'datas',
-        type: 'bytes[]',
-      },
-    ],
-    name: 'requestFromMarketplace',
-    outputs: [],
-    stateMutability: 'nonpayable',
-    type: 'function',
-  },
-  {
-    inputs: [],
-    name: 'serviceId',
+    name: 'price',
     outputs: [
       {
         internalType: 'uint256',
@@ -670,29 +517,48 @@ export const OLAS_MECH_ABI = [
     type: 'function',
   },
   {
-    inputs: [],
-    name: 'serviceRegistry',
-    outputs: [
+    inputs: [
       {
-        internalType: 'address',
-        name: '',
-        type: 'address',
+        internalType: 'bytes',
+        name: 'data',
+        type: 'bytes',
       },
     ],
-    stateMutability: 'view',
+    name: 'request',
+    outputs: [
+      {
+        internalType: 'uint256',
+        name: 'requestId',
+        type: 'uint256',
+      },
+    ],
+    stateMutability: 'payable',
+    type: 'function',
+  },
+  {
+    inputs: [
+      {
+        internalType: 'uint256',
+        name: 'newPrice',
+        type: 'uint256',
+      },
+    ],
+    name: 'setPrice',
+    outputs: [],
+    stateMutability: 'nonpayable',
     type: 'function',
   },
   {
     inputs: [
       {
         internalType: 'bytes',
-        name: '',
+        name: 'initParams',
         type: 'bytes',
       },
     ],
     name: 'setUp',
     outputs: [],
-    stateMutability: 'pure',
+    stateMutability: 'nonpayable',
     type: 'function',
   },
   {
@@ -700,7 +566,7 @@ export const OLAS_MECH_ABI = [
     name: 'token',
     outputs: [
       {
-        internalType: 'address',
+        internalType: 'contract IERC721',
         name: '',
         type: 'address',
       },
@@ -757,19 +623,6 @@ export const OLAS_MECH_ABI = [
     name: 'tokensReceived',
     outputs: [],
     stateMutability: 'pure',
-    type: 'function',
-  },
-  {
-    inputs: [
-      {
-        internalType: 'uint256',
-        name: 'numRequests',
-        type: 'uint256',
-      },
-    ],
-    name: 'updateNumRequests',
-    outputs: [],
-    stateMutability: 'nonpayable',
     type: 'function',
   },
   {
@@ -862,4 +715,4 @@ export const OLAS_MECH_ABI = [
     stateMutability: 'payable',
     type: 'receive',
   },
-];
+] as const;

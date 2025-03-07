@@ -2,9 +2,7 @@ export const AGENT_FACTORY_ADDRESS = '0x6D8CbEbCAD7397c63347D44448147Db05E7d17B0
 
 export const AGENT_FACTORY_ABI = [
   {
-    inputs: [
-      { internalType: 'address', name: '_agentRegistry', type: 'address' },
-    ],
+    inputs: [{ internalType: 'address', name: '_agentRegistry', type: 'address' }],
     stateMutability: 'nonpayable',
     type: 'constructor',
   },
@@ -283,4 +281,4 @@ export const AGENT_FACTORY_ABI = [
     stateMutability: 'nonpayable',
     type: 'function',
   },
-];
+] as const;

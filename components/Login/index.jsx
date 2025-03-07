@@ -1,42 +1,34 @@
+import PropTypes from 'prop-types';
 import { useEffect } from 'react';
 import { connect } from 'react-redux';
-import PropTypes from 'prop-types';
-import { useAccount, useNetwork, useBalance } from 'wagmi';
+import { useAccount, useBalance, useChainId } from 'wagmi';
+
+import { LoginV2 as LoginComponent } from 'common-util/Login';
 import {
-  setUserAccount as setUserAccountFn,
-  setUserBalance as setUserBalanceFn,
   setChainId as setChainIdFn,
   setErrorMessage as setErrorMessageFn,
   setLogout as setLogoutFn,
+  setUserAccount as setUserAccountFn,
+  setUserBalance as setUserBalanceFn,
 } from 'store/setup/actions';
-import { LoginV2 as LoginComponent } from 'common-util/Login';
 
-const Login = ({
-  setUserAccount,
-  setUserBalance,
-  setChainId,
-  setErrorMessage,
-  setLogout,
-}) => {
-  const { address } = useAccount();
-  const { chain } = useNetwork();
+const Login = ({ setUserAccount, setUserBalance, setErrorMessage, setLogout }) => {
+  const { address, chain } = useAccount();
   const chainId = chain?.id;
-  const { data } = useBalance({ address, chainId: chain?.id });
+  const { data } = useBalance({ address, chainId });
 
   useEffect(() => {
     if (address) {
       setUserAccount(address);
       setUserBalance(data?.formatted);
-      setChainId(chainId);
     } else {
       setLogout();
     }
-  }, [address]);
+  }, [address, chainId, data?.formatted, setLogout, setUserAccount, setUserBalance]);
 
   const onConnect = (response) => {
     setUserAccount(response.address);
     setUserBalance(response.balance);
-    setChainId(response.chainId);
   };
 
   const onDisconnect = () => {
@@ -49,11 +41,7 @@ const Login = ({
 
   return (
     <div>
-      <LoginComponent
-        onConnect={onConnect}
-        onDisconnect={onDisconnect}
-        onError={onError}
-      />
+      <LoginComponent onConnect={onConnect} onDisconnect={onDisconnect} onError={onError} />
     </div>
   );
 };
@@ -61,7 +49,6 @@ const Login = ({
 Login.propTypes = {
   setUserAccount: PropTypes.func.isRequired,
   setUserBalance: PropTypes.func.isRequired,
-  setChainId: PropTypes.func.isRequired,
   setErrorMessage: PropTypes.func.isRequired,
   setLogout: PropTypes.func.isRequired,
 };
@@ -71,7 +58,6 @@ Login.defaultProps = {};
 const mapDispatchToProps = {
   setUserAccount: setUserAccountFn,
   setUserBalance: setUserBalanceFn,
-  setChainId: setChainIdFn,
   setErrorMessage: setErrorMessageFn,
   setLogout: setLogoutFn,
 };

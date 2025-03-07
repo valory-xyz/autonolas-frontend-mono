@@ -1,19 +1,14 @@
-import { useState, useEffect } from 'react';
-import { useSelector } from 'react-redux';
 import { Flex, Segmented } from 'antd';
-import { useRouter } from 'next/router';
 import get from 'lodash/get';
-import { URL, NAV_TYPES } from 'util/constants';
+import { useRouter } from 'next/router';
+import { useEffect, useState } from 'react';
+import { useSelector } from 'react-redux';
+
 import ListTable from 'common-util/List/ListTable';
-import {
-  useSearchInput,
-  getHash,
-  isMyTab,
-} from 'common-util/List/ListTable/helpers';
-import {
-  getMechs,
-  getTotalMechs,
-} from './utils';
+import { getHash, isMyTab, useSearchInput } from 'common-util/List/ListTable/helpers';
+import { NAV_TYPES, URL } from 'util/constants';
+
+import { getMechs, getTotalMechs } from './utils';
 
 const ALL_SERVICES = 'all-services';
 const MY_SERVICES = 'my-services';
@@ -23,9 +18,8 @@ const MAX_TOTAL = 1000;
 export const ListServices = () => {
   const router = useRouter();
   const hash = getHash(router);
-  const [currentTab, setCurrentTab] = useState(
-    isMyTab(hash) ? MY_SERVICES : ALL_SERVICES,
-  );
+  const [currentTab, setCurrentTab] = useState(isMyTab(hash) ? MY_SERVICES : ALL_SERVICES);
+  const networkNameFromUrl = router?.query?.network;
 
   const account = useSelector((state) => get(state, 'setup.account'));
 
@@ -119,7 +113,10 @@ export const ListServices = () => {
     <Flex vertical gap={24}>
       <Flex gap={8} justify="end">
         <Segmented
-          options={[{ value: ALL_SERVICES, label: 'All services' }, { value: MY_SERVICES, label: 'My services' }]}
+          options={[
+            { value: ALL_SERVICES, label: 'All services' },
+            { value: MY_SERVICES, label: 'My services' },
+          ]}
           value={currentTab}
           onChange={(e) => {
             setCurrentTab(e);
@@ -133,17 +130,14 @@ export const ListServices = () => {
             clearSearch();
             // update the URL to keep track of my-agents
             router.push(
-              e === MY_SERVICES ? `${URL.MECHS}#${MY_SERVICES}` : URL.MECHS,
+              `/${networkNameFromUrl}/${e === MY_SERVICES ? `${URL.MECHS}#${MY_SERVICES}` : URL.MECHS}`,
             );
           }}
         />
         {searchInput}
       </Flex>
 
-      <ListTable
-        {...tableCommonProps}
-        list={list}
-      />
+      <ListTable {...tableCommonProps} list={list} />
     </Flex>
   );
 };

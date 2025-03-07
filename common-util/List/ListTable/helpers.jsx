@@ -1,12 +1,16 @@
-import { useState } from 'react';
-import { Input, Button, Flex } from 'antd';
 import { SearchOutlined } from '@ant-design/icons';
+import { Button, Flex, Input } from 'antd';
+import { useState } from 'react';
+
 import { AddressLink, NA } from '@autonolas/frontend-library';
 
-import { NAV_TYPES, TOTAL_VIEW_COUNT, REGISTRY_URL } from 'util/constants';
 import { SUPPORTED_CHAINS } from 'common-util/Login';
+import { FIRST_SUPPORTED_CHAIN } from 'common-util/Login/config';
+import { NAV_TYPES, REGISTRY_URL, TOTAL_VIEW_COUNT } from 'util/constants';
 
 export const getTableColumns = (type, { router, isMobile }) => {
+  const networkName = router?.query?.network ?? FIRST_SUPPORTED_CHAIN.networkName;
+
   if (type === NAV_TYPES.COMPONENT || type === NAV_TYPES.AGENT) {
     return [
       {
@@ -59,7 +63,7 @@ export const getTableColumns = (type, { router, isMobile }) => {
               suffixCount={isMobile ? 4 : 14}
               canCopy
               onClick={(e) => {
-                if (router) router.push(`/mech/${e}/${row.hash}?legacy=true`);
+                if (router) router.push(`/${networkName}/mech/${e}/${row.hash}?legacy=true`);
               }}
             />
           );
@@ -125,7 +129,7 @@ export const getTableColumns = (type, { router, isMobile }) => {
               suffixCount={isMobile ? 4 : 14}
               canCopy
               onClick={() => {
-                if (router) router.push(`/mech/${text}`);
+                if (router) router.push(`/${networkName}/mech/${text}`);
               }}
             />
           );
@@ -211,11 +215,7 @@ export const useSearchInput = () => {
         value={value}
         onChange={(e) => setValue(e.target.value)}
       />
-      <Button
-        ghost
-        type="primary"
-        onClick={() => setSearchValue(value || '')}
-      >
+      <Button ghost type="primary" onClick={() => setSearchValue(value || '')}>
         Search
       </Button>
     </Flex>

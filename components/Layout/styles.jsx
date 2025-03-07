@@ -1,6 +1,7 @@
-import styled from 'styled-components';
 import { Layout } from 'antd';
 import Link from 'next/link';
+import styled from 'styled-components';
+
 import { COLOR, MEDIA_QUERY } from '@autonolas/frontend-library';
 
 export const CustomLayout = styled(Layout)`
