@@ -1,15 +1,13 @@
-import React, { Fragment, useState } from 'react';
+import { Button, Form, Input } from 'antd';
 import PropTypes from 'prop-types';
-import { Form, Input, Button } from 'antd';
+import React, { Fragment, useState } from 'react';
 
-import { getIpfsHashHelper } from './helpers';
 import { CustomModal } from '../styles';
+import { getIpfsHashHelper } from './helpers';
 
 export const FORM_NAME = 'ipfs_creation_form';
 
-const IpfsModal = ({
-  visible, type, onUpdateHash, handleCancel, callback,
-}) => {
+const IpfsModal = ({ visible, type, onUpdateHash, handleCancel, callback }) => {
   const [form] = Form.useForm();
   const [isHashLoading, setIsHashLoading] = useState(false);
 
@@ -79,9 +77,7 @@ const IpfsModal = ({
             loading={isHashLoading}
             onClick={onUpdateHash ? handleUpdate : handleOk}
           >
-            {onUpdateHash
-              ? 'Save File & Update Hash'
-              : 'Save File & Generate Hash'}
+            {onUpdateHash ? 'Save File & Update Hash' : 'Save File & Generate Hash'}
           </Button>
         </Fragment>,
       ]}
@@ -99,9 +95,7 @@ const IpfsModal = ({
         <Form.Item
           label="Name"
           name="name"
-          rules={[
-            { required: true, message: `Please input the name of the ${type}` },
-          ]}
+          rules={[{ required: true, message: `Please input the name of the ${type}` }]}
         >
           <Input />
         </Form.Item>

@@ -1,9 +1,7 @@
 import { defaultWagmiConfig } from '@web3modal/wagmi';
 import { kebabCase } from 'lodash';
 import { cookieStorage, createStorage } from 'wagmi';
-import { Chain, base, gnosis } from 'wagmi/chains';
-
-import { RPC_URLS } from 'common-util/Contracts';
+import { Chain, gnosis } from 'wagmi/chains';
 
 export const projectId = process.env.NEXT_PUBLIC_WALLET_PROJECT_ID || '';
 

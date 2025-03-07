@@ -1,4 +1,5 @@
 import styled from 'styled-components';
+
 import { COLOR } from '@autonolas/frontend-library';
 
 export const EmptyMessage = styled.div`
