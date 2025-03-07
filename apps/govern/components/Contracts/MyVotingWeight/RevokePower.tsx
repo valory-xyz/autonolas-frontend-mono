@@ -49,16 +49,16 @@ const columns = (
     key: 'action',
     width: 130,
     render: (_, record) => {
-      const itemStatus = statuses[record.account];
+      const contractStatus = statuses[record.account];
 
-      if (!itemStatus) {
+      if (!contractStatus) {
         return <Text type="danger">Error</Text>;
       }
 
-      if (itemStatus.transactionHash) {
+      if (contractStatus.transactionHash) {
         return (
           <a
-            href={`${EXPLORER_URLS[Number(record.chainId)]}/tx/${itemStatus.transactionHash}`}
+            href={`${EXPLORER_URLS[Number(record.chainId)]}/tx/${contractStatus.transactionHash}`}
             target="_blank"
             rel="noreferrer"
           >
@@ -69,8 +69,8 @@ const columns = (
 
       return (
         <Button
-          loading={itemStatus.isLoading}
-          disabled={itemStatus.isDisabled}
+          loading={contractStatus.isLoading}
+          disabled={contractStatus.isDisabled}
           onClick={() => onRevoke(record.account, Number(record.chainId))}
           size="small"
           type="primary"
@@ -132,7 +132,7 @@ export const RevokePower = ({ contracts }: RevokePowerProps) => {
     revokePower({ account, nominee: removedNominee, chainId })
       .then((result) => {
         notification.success({
-          message: 'You have revoked your power',
+          message: 'You have revoked your power.',
         });
 
         // Update statuses with txn hash for the provided nominee

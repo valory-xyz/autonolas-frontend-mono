@@ -132,7 +132,7 @@ export const Votes = ({ setIsUpdating, setAllocations }: VotesProps) => {
     if (isRemovedNomineesLoading || lastUserVote === null) {
       // block editing if data is loading
       setVotesBlocked(true);
-    } else if (isRemovedNomineesLoading || removedVotedNominees.length > 0) {
+    } else if (removedVotedNominees.length > 0) {
       // block editing if need to revoke power from removed nominees
       setVotesBlocked(true);
     } else {

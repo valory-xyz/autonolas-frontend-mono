@@ -39,7 +39,7 @@ export const useRemovedVotedNominees = (userVotes: Record<string, UserVotes>) =>
     });
 
     Object.entries(userVotes).forEach(([address, item]) => {
-      const key = getNomineeHash(address as Address, item.chainId);
+      const key = getNomineeHash(address, item.chainId);
 
       if (nomineeMap.has(key)) {
         res.push(nomineeMap.get(key));
