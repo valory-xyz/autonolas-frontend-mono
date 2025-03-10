@@ -106,7 +106,7 @@ export const ListServices = () => {
     setCurrentPage,
     isPaginationRequired: currentTab === ALL_SERVICES && !searchValue,
     isAccountRequired: currentTab === MY_SERVICES && !account,
-    extra: { scrollX: 1650 },
+    extra: { scrollX: 1100 },
   };
 
   return (

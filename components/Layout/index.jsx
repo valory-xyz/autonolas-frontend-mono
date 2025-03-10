@@ -44,7 +44,7 @@ const NavigationBar = ({ children }) => {
   // to set default menu on first render
   useEffect(() => {
     if (pathname) {
-      const name = pathname.split('/')[1];
+      const name = pathname.split('/')[2];
       setSelectedMenu(name || MENU_ITEMS[0].key);
     }
   }, [pathname]);
