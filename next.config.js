@@ -21,7 +21,7 @@ module.exports = {
     },
     {
       source: '/factory',
-      destination: '/gnosis/factory',
+      destination: '/gnosis/mechs',
       permanent: false,
     },
   ],
