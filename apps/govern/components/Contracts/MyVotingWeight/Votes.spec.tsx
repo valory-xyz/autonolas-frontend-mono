@@ -17,6 +17,13 @@ jest.mock('context/Web3ModalProvider', () => ({
   queryClient: jest.fn(),
 }));
 
+jest.mock('hooks/useRemovedNominees', () => ({
+  useRemovedVotedNominees: jest.fn().mockReturnValue({
+    removedVotedNominees: [],
+    isLoading: false,
+  }),
+}));
+
 jest.mock('store/index', () => ({
   useAppDispatch: jest.fn(),
   useAppSelector: jest.fn().mockReturnValue({
