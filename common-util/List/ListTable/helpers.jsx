@@ -6,15 +6,18 @@ import { AddressLink, NA } from '@autonolas/frontend-library';
 
 import { SUPPORTED_CHAINS } from 'common-util/Login';
 import { FIRST_SUPPORTED_CHAIN } from 'common-util/Login/config';
+import { getChainId } from 'common-util/functions';
 import { NAV_TYPES, REGISTRY_URL, TOTAL_VIEW_COUNT } from 'util/constants';
 
 export const getTableColumns = (type, { router, isMobile }) => {
   const networkName = router?.query?.network ?? FIRST_SUPPORTED_CHAIN.networkName;
+  const chainId = getChainId();
 
   const addressLinkProps = {
     suffixCount: isMobile ? 4 : 6,
     canCopy: true,
     textMinWidth: 160,
+    chainId,
   };
 
   if (type === NAV_TYPES.COMPONENT || type === NAV_TYPES.AGENT) {
@@ -70,7 +73,11 @@ export const getTableColumns = (type, { router, isMobile }) => {
         key: 'id',
         width: 50,
         render: (text) => (
-          <a href={`${REGISTRY_URL}/gnosis/services/${text}`} target="_blank" rel="noreferrer">
+          <a
+            href={`${REGISTRY_URL}/${networkName}/services/${text}`}
+            target="_blank"
+            rel="noreferrer"
+          >
             {text}
           </a>
         ),
