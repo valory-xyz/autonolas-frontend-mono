@@ -11,8 +11,8 @@ import { HeaderTitle } from 'common-util/Title';
 import { getAgentHash, getIpfsResponse } from 'common-util/functions';
 import { DEFAULT_AGENT_ID } from 'util/constants';
 
-import { FormContainer } from '../../styles';
 import { getAgent } from '../Mechs/utils';
+import { FormContainer } from '../styles';
 
 const Request = ({ account }) => {
   const [dataList, setDataList] = useState([]);

@@ -11,6 +11,7 @@ import {
 import { ADDRESSES, RPC_URLS } from 'common-util/Contracts';
 import { SUPPORTED_CHAINS } from 'common-util/Login';
 import { FIRST_SUPPORTED_CHAIN } from 'common-util/Login/config';
+import { Network } from 'types/index';
 import { GATEWAY_URL, TOTAL_VIEW_COUNT } from 'util/constants';
 
 // TODO: provide types for MODAL_PROVIDER
@@ -66,7 +67,7 @@ export const getChainIdOrDefaultToFirstSupportedChain = (chainId = FIRST_SUPPORT
   return x;
 };
 
-export const getChainId = (chainId = null) => {
+export const getChainId = (chainId = null): Network => {
   if (chainId) return chainId;
 
   // chainId fetched from sessionStorage
@@ -80,7 +81,7 @@ export const getChainId = (chainId = null) => {
     throw new Error('Invalid chain id');
   }
 
-  return chainIdFromSessionStorage || FIRST_SUPPORTED_CHAIN.id;
+  return (chainIdFromSessionStorage || FIRST_SUPPORTED_CHAIN.id) as Network;
 };
 
 // eslint-disable-next-line
