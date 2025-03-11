@@ -8,11 +8,11 @@ import { useEnsName } from 'wagmi';
 
 import { CHAIN_NAMES, EXPLORER_URLS, UNICODE_SYMBOLS } from 'libs/util-constants/src';
 
-import { getAddressFromBytes32, truncateAddress } from 'common-util/functions/addresses';
 import { useAppSelector } from 'store/index';
 
 import { ContractConfiguration } from './ContractConfiguration';
 import { useContractParams } from './hooks';
+import { getAddressFromBytes32, truncateAddress } from 'libs/util-functions/src';
 
 const StyledMain = styled.main`
   display: flex;

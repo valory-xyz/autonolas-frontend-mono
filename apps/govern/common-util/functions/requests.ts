@@ -9,11 +9,14 @@ import {
   STAKING_FACTORY,
   VE_OLAS,
 } from 'libs/util-contracts/src/lib/abiAndAddresses';
-import { getEstimatedGasLimit, sendTransaction } from 'libs/util-functions/src';
+import {
+  getAddressFromBytes32,
+  getEstimatedGasLimit,
+  sendTransaction,
+} from 'libs/util-functions/src';
 
 import { SUPPORTED_CHAINS, wagmiConfig } from 'common-util/config/wagmi';
 
-import { getAddressFromBytes32 } from './addresses';
 import { getUnixNextWeekStartTimestamp } from './time';
 import {
   getGovernorContract,
@@ -24,6 +27,7 @@ import {
   getVoteWeightingContract,
 } from './web3';
 import { RPC_URLS } from 'libs/util-constants/src';
+import { Nominee } from 'types';
 
 type VoteForNomineeWeightsParams = {
   account: Address | undefined;
@@ -54,9 +58,7 @@ export const voteForNomineeWeights = async ({
 
 export const checkIfNomineeRemoved = async (allocations: { address: Address }[]) => {
   const contract = getVoteWeightingContract();
-  const result: { account: Address; chainId: number }[] = await contract.methods
-    .getAllRemovedNominees()
-    .call();
+  const result: Nominee[] = await contract.methods.getAllRemovedNominees().call();
 
   if (!result) return [];
 
@@ -404,6 +406,30 @@ export const voteForProposal = async ({
 }) => {
   const contract = getGovernorContract();
   const voteFn = contract.methods.castVote(proposalId, support);
+
+  const estimatedGas = await getEstimatedGasLimit(voteFn, account);
+  const fn = voteFn.send({ from: account, estimatedGas });
+
+  const result = await sendTransaction(fn, account, {
+    supportedChains: SUPPORTED_CHAINS,
+    rpcUrls: RPC_URLS,
+  });
+
+  return result;
+};
+
+/**
+ * Revoke voting power from a removed nominee
+ */
+type RevokePowerParams = {
+  account: Address | undefined;
+  nominee: string;
+  chainId: number;
+};
+
+export const revokePower = async ({ account, nominee, chainId }: RevokePowerParams) => {
+  const contract = getVoteWeightingContract();
+  const voteFn = contract.methods.revokeRemovedNomineeVotingPower(nominee, chainId);
 
   const estimatedGas = await getEstimatedGasLimit(voteFn, account);
   const fn = voteFn.send({ from: account, estimatedGas });

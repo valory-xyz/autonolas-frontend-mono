@@ -107,8 +107,19 @@ export const GlobalStyles = createGlobalStyle`
     padding-top: 48px !important;
   }
 
+  .ml-auto {
+    margin-left: auto !important;
+  }
+  .mr-auto {
+    margin-right: auto !important;
+  }
+
   .block {
     display: block;
+  }
+
+  .font-weight-600 {
+    font-weight: 600 !important;
   }
 
   .text-start {
@@ -248,6 +259,25 @@ export const GlobalStyles = createGlobalStyle`
   }
 
   /* alert */
+  .ant-alert {
+    align-items: flex-start;
+    &-info {
+      color: #003EB3;
+    }
+    &-warning {
+      color: #612500;
+    }
+    &-error {
+      color: #A8071A;
+    }
+    .ant-typography {
+      color: inherit;
+    }
+    .anticon {
+      margin-top: 5px;
+    }
+  }
+
   .inherit-alert-info {
     background-color: inherit;
     border-color: ${COLOR.PRIMARY};

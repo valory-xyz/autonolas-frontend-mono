@@ -30,14 +30,17 @@ const userVotes: Record<Address, UserVotes> = {
   '0x2': {
     current: { slope: 1, power: 8000, end: 1000 },
     next: { slope: 1, power: 8000, end: 1000 },
+    chainId: 1,
   },
   '0x3': {
     current: { slope: 1, power: 500, end: 500 },
     next: { slope: 1, power: 500, end: 500 },
+    chainId: 1,
   },
   '0x5': {
     current: { slope: 1, power: 1000, end: 1000 },
     next: { slope: 1, power: 1000, end: 1000 },
+    chainId: 1,
   },
 };
 

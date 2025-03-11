@@ -27,3 +27,8 @@ export type StakingContract = {
   minOperatingBalanceHint?: string;
   availableRewards: string;
 };
+
+export type Nominee = {
+  account: Address;
+  chainId: bigint;
+};
