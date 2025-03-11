@@ -7,6 +7,7 @@ import { useSelector } from 'react-redux';
 import { getMyListOnPagination } from 'common-util/ContractUtils/myList';
 import ListTable from 'common-util/List/ListTable';
 import { getHash, isMyTab, useSearchInput } from 'common-util/List/ListTable/helpers';
+import { useUnsupportedNetwork } from 'common-util/hooks';
 import { NAV_TYPES, URL } from 'util/constants';
 
 import { getAgents, getFilteredAgents, getTotalForAllAgents, getTotalForMyAgents } from './utils';
@@ -21,6 +22,8 @@ export const ListAgents = () => {
   const networkNameFromUrl = router?.query?.network;
 
   const account = useSelector((state) => get(state, 'setup.account'));
+
+  const { isWrongNetwork, wrongNetworkContent } = useUnsupportedNetwork();
 
   /**
    * extra tab content & view click
@@ -139,6 +142,10 @@ export const ListAgents = () => {
     setCurrentPage,
     isPaginationRequired: currentTab === ALL_AGENTS && !searchValue,
   };
+
+  if (isWrongNetwork) {
+    return wrongNetworkContent;
+  }
 
   return (
     <Flex vertical gap={24}>

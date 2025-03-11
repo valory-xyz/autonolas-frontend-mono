@@ -37,6 +37,7 @@ export const useHandleRoute = () => {
 
   const updateChainId = useCallback(
     (id: number) => {
+      sessionStorage.setItem('chainId', `${id}`);
       dispatchWithDelay(setChainId(id));
     },
     [dispatchWithDelay],

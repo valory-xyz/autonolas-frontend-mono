@@ -115,6 +115,7 @@ export const getAgent = (id) =>
 export const getTotalForAllAgents = () =>
   new Promise((resolve, reject) => {
     const contract = getAgentContract();
+
     contract.methods
       .totalSupply()
       .call()

@@ -8,12 +8,12 @@ import { AddressLink, NA, notifyError, notifySuccess } from '@autonolas/frontend
 
 import { AGENT_MECH_ABI, OLAS_MECH_ABI } from 'common-util/AbiAndAddresses';
 import { SUPPORTED_CHAINS } from 'common-util/Login';
-import { GNOSIS_SCAN_URL } from 'util/constants';
+import { getChainId } from 'common-util/functions';
+import { SCAN_URLS, WEBSOCKET_URLS } from 'util/constants';
 
 import Request from './Request';
 
 // Replace the following values with your specific contract information
-const WEBSOCKET_PROVIDER = process.env.NEXT_PUBLIC_GNOSIS_WEB_SOCKET;
 const LATEST_BLOCK_COUNT = 5000;
 
 const { Title } = Typography;
@@ -22,7 +22,7 @@ const onNewEvent = (event) => {
   notifySuccess(
     'Event received',
     <a
-      href={`${GNOSIS_SCAN_URL}tx/${event?.transactionHash}`}
+      href={`${SCAN_URLS[getChainId()]}tx/${event?.transactionHash}`}
       target="_blank"
       rel="noopener noreferrer"
     >
@@ -51,10 +51,17 @@ const EventListener = () => {
 
   const { query } = useRouter();
   const id = query?.id;
+  const networkNameFromUrl = router?.query?.network;
   const isLegacy = Boolean(query.legacy);
 
   useEffect(() => {
-    const web3Instance = new Web3(new Web3.providers.WebsocketProvider(WEBSOCKET_PROVIDER));
+    const chainId = getChainId();
+    const websocketProvider = WEBSOCKET_URLS[chainId];
+    if (!websocketProvider) {
+      throw new Error('Websocket URL for selected chainId is not provided');
+    }
+
+    const web3Instance = new Web3(new Web3.providers.WebsocketProvider(websocketProvider));
     setWeb3Ws(web3Instance);
   }, []);
 
@@ -227,7 +234,7 @@ const EventListener = () => {
                 <>
                   {`No events found. Only loading latest ${LATEST_BLOCK_COUNT} block(s).`}
                   <a
-                    href={`${GNOSIS_SCAN_URL}address/${id}#events`}
+                    href={`${SCAN_URLS[getChainId()]}address/${id}#events`}
                     target="_blank"
                     rel="noopener noreferrer"
                   >

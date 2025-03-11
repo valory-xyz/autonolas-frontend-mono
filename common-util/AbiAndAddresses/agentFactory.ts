@@ -1,4 +1,10 @@
-export const AGENT_FACTORY_ADDRESS = '0x6D8CbEbCAD7397c63347D44448147Db05E7d17B0';
+import { Address } from 'viem';
+import { base, gnosis } from 'wagmi/chains';
+
+export const AGENT_FACTORY_ADDRESSES: Record<number, Address> = {
+  [gnosis.id]: '0x6D8CbEbCAD7397c63347D44448147Db05E7d17B0',
+  [base.id]: '0x75D529FAe220bC8db714F0202193726b46881B76',
+};
 
 export const AGENT_FACTORY_ABI = [
   {

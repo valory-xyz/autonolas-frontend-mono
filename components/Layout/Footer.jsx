@@ -5,9 +5,9 @@ import { Footer as CommonFooter, ServiceStatusInfo } from '@autonolas/frontend-l
 
 import { ADDRESSES } from 'common-util/Contracts';
 import { useHelpers } from 'common-util/hooks';
-import { GNOSIS_SCAN_URL, URL } from 'util/constants';
+import { SCAN_URLS, URL } from 'util/constants';
 
-import { ContractsInfoContainer, FooterContainer } from './styles';
+import { ContractsInfoContainer } from './styles';
 
 const ContractInfo = () => {
   const { chainId } = useHelpers();
@@ -58,7 +58,7 @@ const ContractInfo = () => {
   const getContractInfo = (text, addressToPoint) => (
     <div className="registry-contract">
       <a
-        href={`${GNOSIS_SCAN_URL}address/${addressToPoint}`}
+        href={`${SCAN_URLS[chainId]}address/${addressToPoint}`}
         target="_blank"
         rel="noopener noreferrer"
       >
@@ -90,10 +90,10 @@ const ContractInfo = () => {
 };
 
 const Footer = () => (
-  <FooterContainer>
+  <>
     <CommonFooter leftContent={<ContractInfo />} className="custom-footer" />
     <ServiceStatusInfo appType="mechkit" />
-  </FooterContainer>
+  </>
 );
 
 export default Footer;

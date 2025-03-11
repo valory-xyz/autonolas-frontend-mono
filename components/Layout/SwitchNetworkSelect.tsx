@@ -29,15 +29,18 @@ export const SwitchNetworkSelect = () => {
         onChange={(value) => {
           const currentChainInfo = ALL_SUPPORTED_CHAINS.find((e) => e.networkName === value);
 
-          if (currentChainInfo) {
-            if (PAGES_TO_LOAD_WITHOUT_CHAIN_ID.find((e) => e === path)) {
-              // eg. /docs will be redirect to same page ie. /docs
-              router.push(`/${path}`);
-            } else {
-              // eg. /mechs will be redirect to /<chainName>/mechs
-              const replacedPath = router.asPath.replace(chainName, value);
-              router.push(replacedPath);
-            }
+          if (!currentChainInfo) return;
+
+          // update session storage
+          sessionStorage.setItem('chainId', `${currentChainInfo.id}`);
+
+          if (PAGES_TO_LOAD_WITHOUT_CHAIN_ID.find((e) => e === path)) {
+            // eg. /docs will be redirect to same page ie. /docs
+            router.push(`/${path}`);
+          } else {
+            // eg. /mechs will be redirect to /<chainName>/mechs
+            const replacedPath = router.asPath.replace(chainName, value);
+            router.push(replacedPath);
           }
         }}
       />
