@@ -1,5 +1,7 @@
 import { base, gnosis } from 'wagmi/chains';
 
+import { Network } from 'types/index';
+
 export const LOCAL_CHAIN_ID = 31337;
 
 export const NAV_TYPES = {
@@ -44,17 +46,17 @@ export const PAGES_TO_LOAD_WITH_CHAIN_ID = [URL.MECHS, URL.MECHS_LEGACY, URL.MEC
   (item) => `/${item}`,
 );
 
-export const MECH_MARKETPLACE_SUBGRAPH_URLS: Record<number, string> = {
+export const MECH_MARKETPLACE_SUBGRAPH_URLS: Record<Network, string> = {
   [gnosis.id]: process.env.NEXT_PUBLIC_MECH_MARKETPLACE_GNOSIS_SUBGRAPH_URL || '',
   [base.id]: process.env.NEXT_PUBLIC_MECH_MARKETPLACE_BASE_SUBGRAPH_URL || '',
-};
+} as const;
 
-export const WEBSOCKET_URLS: Record<number, string> = {
+export const WEBSOCKET_URLS: Record<Network, string> = {
   [gnosis.id]: process.env.NEXT_PUBLIC_GNOSIS_WEB_SOCKET || '',
   [base.id]: process.env.NEXT_PUBLIC_BASE_WEB_SOCKET || '',
-};
+} as const;
 
-export const SCAN_URLS = {
+export const SCAN_URLS: Record<Network, string> = {
   [gnosis.id]: 'https://gnosisscan.io/',
   [base.id]: 'https://basescan.org',
-};
+} as const;

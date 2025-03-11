@@ -18,7 +18,7 @@
     "import/no-unresolved": [
       2,
       {
-        "ignore": ["common-util", "components", "context", "data", "store", "util"]
+        "ignore": ["common-util", "components", "context", "data", "store", "util", "types"]
       }
     ],
     "no-console": ["warn", { "allow": ["error"] }],
