@@ -60,7 +60,7 @@ export const ListServices = () => {
         console.error(e);
       }
     })();
-  }, [account, currentTab, searchValue, isLoading]);
+  }, [networkNameFromUrl, account, currentTab, searchValue, isLoading]);
 
   // fetch the list
   useEffect(() => {
@@ -96,7 +96,7 @@ export const ListServices = () => {
         setIsLoading(false);
       }
     })();
-  }, [account, currentTab, searchValue, total, currentPage]);
+  }, [networkNameFromUrl, account, currentTab, searchValue, total, currentPage]);
 
   const tableCommonProps = {
     type: NAV_TYPES.SERVICE,

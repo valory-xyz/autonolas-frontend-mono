@@ -1,15 +1,11 @@
 import { defaultWagmiConfig } from '@web3modal/wagmi';
 import { kebabCase } from 'lodash';
 import { cookieStorage, createStorage } from 'wagmi';
-import { Chain, gnosis } from 'wagmi/chains';
+import { Chain, base, gnosis } from 'wagmi/chains';
 
 export const projectId = process.env.NEXT_PUBLIC_WALLET_PROJECT_ID || '';
 
-export const SUPPORTED_CHAINS: Chain[] = [
-  gnosis,
-  // TODO: uncomment in next PRs
-  // base
-];
+export const SUPPORTED_CHAINS: Chain[] = [gnosis, base];
 
 export const METADATA = {
   name: 'Olas Mech',

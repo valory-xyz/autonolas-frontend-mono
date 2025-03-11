@@ -1,3 +1,4 @@
+import { ExportOutlined } from '@ant-design/icons';
 import { Alert, Flex, Layout, Menu, Tag } from 'antd';
 import { useRouter } from 'next/router';
 import PropTypes from 'prop-types';
@@ -21,13 +22,12 @@ const { Content } = Layout;
 
 const MENU_ITEMS = [
   { key: 'mechs', label: 'Mechs' },
-  { key: 'docs', label: 'Docs' },
   {
-    key: 'factory',
+    key: 'docs',
     label: (
-      <Flex gap={6} align="center">
-        Factory
-        <Tag bordered={false}>Legacy</Tag>
+      <Flex gap={4}>
+        Learn more
+        <ExportOutlined style={{ fontSize: '12px' }} />
       </Flex>
     ),
   },
@@ -51,11 +51,7 @@ const NavigationBar = ({ children }) => {
 
   const handleMenuItemClick = ({ key }) => {
     if (key === 'docs') {
-      window.open(
-        'https://docs.autonolas.network/product/mechkit/',
-        '_blank',
-        'noopener,noreferrer',
-      );
+      window.open('https://olas.network/mech-marketplace', '_blank', 'noopener,noreferrer');
       return;
     }
 

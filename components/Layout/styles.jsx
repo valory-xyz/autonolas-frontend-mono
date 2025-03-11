@@ -158,7 +158,3 @@ export const ContractsInfoContainer = styled.div`
     margin-right: 8px;
   }
 `;
-
-export const FooterContainer = styled.div`
-  margin-bottom: 8rem;
-`;

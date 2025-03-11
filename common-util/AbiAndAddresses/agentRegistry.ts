@@ -1,4 +1,12 @@
-export const AGENT_REGISTRY_ADDRESS = '0xE49CB081e8d96920C38aA7AB90cb0294ab4Bc8EA';
+import { Address } from 'viem';
+import { base, gnosis } from 'wagmi/chains';
+
+import { Network } from 'types/index';
+
+export const AGENT_REGISTRY_ADDRESSES: Record<Network, Address> = {
+  [gnosis.id]: '0xE49CB081e8d96920C38aA7AB90cb0294ab4Bc8EA',
+  [base.id]: '0x88DE734655184a09B70700aE4F72364d1ad23728',
+} as const;
 
 export const AGENT_REGISTRY_ABI = [
   {

@@ -1,12 +1,9 @@
-import { notification } from 'antd';
-
 import { getListByAccount } from 'common-util/ContractUtils/myList';
 import {
   fetchMechAgents,
   fetchMmMechs,
   fetchMmMechsTotal,
   getAgentContract,
-  getMechMinterContract,
 } from 'common-util/Contracts';
 import { getFirstAndLastIndex } from 'common-util/functions';
 
@@ -111,10 +108,12 @@ export const getAgent = (id) =>
         reject(e);
       });
   });
+
 // totals
 export const getTotalForAllAgents = () =>
   new Promise((resolve, reject) => {
     const contract = getAgentContract();
+
     contract.methods
       .totalSupply()
       .call()
@@ -198,52 +197,4 @@ export const getTotalMechs = () =>
       console.error(e);
       reject(e);
     }
-  });
-
-export const getAgentHashes = (id) =>
-  new Promise((resolve, reject) => {
-    const contract = getAgentContract();
-
-    contract.methods
-      .getUpdatedHashes(id)
-      .call()
-      .then((response) => {
-        resolve(response);
-      })
-      .catch((e) => {
-        console.error(e);
-        reject(e);
-      });
-  });
-
-export const updateAgentHashes = (account, id, newHash) => {
-  const contract = getMechMinterContract();
-
-  // 0 to indicate `agents`
-  contract.methods
-    .updateHash('0', id, `0x${newHash}`)
-    .send({ from: account })
-    .then(() => {
-      notification.success({ message: 'Hash Updated' });
-    })
-    .catch((e) => {
-      notification.error({ message: 'Some error occured' });
-      console.error(e);
-    });
-};
-
-export const getTokenUri = (id) =>
-  new Promise((resolve, reject) => {
-    const contract = getAgentContract();
-
-    contract.methods
-      .tokenURI(id)
-      .call()
-      .then((response) => {
-        resolve(response);
-      })
-      .catch((e) => {
-        console.error(e);
-        reject(e);
-      });
   });

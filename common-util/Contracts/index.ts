@@ -1,31 +1,31 @@
 import { Address } from 'viem';
-import { gnosis } from 'wagmi/chains';
+import { base, gnosis } from 'wagmi/chains';
 import Web3 from 'web3';
 import { AbiItem } from 'web3-utils';
 
 import {
-  AGENT_FACTORY_ABI,
-  AGENT_FACTORY_ADDRESS,
   AGENT_MECH_ABI,
   AGENT_REGISTRY_ABI,
-  AGENT_REGISTRY_ADDRESS,
-  MECH_MARKETPLACE_ADDRESS,
+  AGENT_REGISTRY_ADDRESSES,
+  MECH_MARKETPLACE_ADDRESSES,
 } from 'common-util/AbiAndAddresses';
 import { getChainId, getProvider } from 'common-util/functions';
-import { DEFAULT_MECH_CONTRACT_ADDRESS } from 'util/constants';
+import { Network } from 'types/index';
+import { DEFAULT_MECH_CONTRACT_ADDRESS, MECH_MARKETPLACE_SUBGRAPH_URLS } from 'util/constants';
 
-export const RPC_URLS: Record<number, string> = {
+export const RPC_URLS: Record<Network, string> = {
   [gnosis.id]: process.env.NEXT_PUBLIC_GNOSIS_URL ?? gnosis.rpcUrls.default.http[0],
+  [base.id]: process.env.NEXT_PUBLIC_BASE_URL ?? base.rpcUrls.default.http[0],
 };
 
-export const ADDRESSES: Record<
-  number,
-  { agentRegistry: Address; agentFactory: Address; mechMarketplace: Address }
-> = {
+export const ADDRESSES: Record<Network, { agentRegistry: Address; mechMarketplace: Address }> = {
   [gnosis.id]: {
-    agentRegistry: AGENT_REGISTRY_ADDRESS,
-    agentFactory: AGENT_FACTORY_ADDRESS,
-    mechMarketplace: MECH_MARKETPLACE_ADDRESS,
+    agentRegistry: AGENT_REGISTRY_ADDRESSES[gnosis.id],
+    mechMarketplace: MECH_MARKETPLACE_ADDRESSES[gnosis.id],
+  },
+  [base.id]: {
+    agentRegistry: AGENT_REGISTRY_ADDRESSES[base.id],
+    mechMarketplace: MECH_MARKETPLACE_ADDRESSES[base.id],
   },
 };
 
@@ -44,20 +44,20 @@ const getContract = (abi: AbiItem[], contractAddress: string) => {
 };
 
 export const getAgentContract = () => {
-  // @ts-ignore TODO: fix ABI type
-  const contract = getContract(AGENT_REGISTRY_ABI, AGENT_REGISTRY_ADDRESS);
-  return contract;
-};
+  const agentRegistryAddress = getWeb3Details().address?.agentRegistry;
+  if (!agentRegistryAddress) {
+    throw new Error('Unsupported network, agent registry address not found.');
+  }
 
-export const getMechMinterContract = () => {
   // @ts-ignore TODO: fix ABI type
-  const contract = getContract(AGENT_FACTORY_ABI, AGENT_FACTORY_ADDRESS);
-
+  const contract = getContract(AGENT_REGISTRY_ABI, agentRegistryAddress);
   return contract;
 };
 
 export const getMechContract = () => {
   // @ts-ignore TODO: fix ABI type
+  // TODO: fix default contract, should be the one from the URL
+  // seems to be broken long time ago
   const contract = getContract(AGENT_MECH_ABI, DEFAULT_MECH_CONTRACT_ADDRESS);
 
   return contract;
@@ -118,7 +118,9 @@ type FetchMmMechsArgs = {
 
 export async function fetchMmMechs({ first, total, filters }: FetchMmMechsArgs) {
   return new Promise((resolve, reject) => {
-    const url = process.env.NEXT_PUBLIC_MECH_MARKETPLACE_GNOSIS_SUBGRAPH_URL;
+    const chainId = getChainId();
+    const url = MECH_MARKETPLACE_SUBGRAPH_URLS[chainId];
+
     if (!url) {
       throw new Error('Mech Marketplace Subgraph URL is not provided');
     }
@@ -177,7 +179,9 @@ export async function fetchMmMechs({ first, total, filters }: FetchMmMechsArgs) 
 
 export async function fetchMmMechsTotal() {
   return new Promise((resolve, reject) => {
-    const url = process.env.NEXT_PUBLIC_MECH_MARKETPLACE_GNOSIS_SUBGRAPH_URL;
+    const chainId = getChainId();
+    const url = MECH_MARKETPLACE_SUBGRAPH_URLS[chainId];
+
     if (!url) {
       throw new Error('Mech Marketplace Subgraph URL is not provided');
     }
@@ -205,7 +209,11 @@ export async function fetchMmMechsTotal() {
         throw new Error(`Error fetching mechs total: ${response.statusText}`);
       })
       .then((data) => {
-        resolve(data.data.global.totalMechs);
+        if (!data.data.global) {
+          resolve({ totalMechs: 0 });
+        } else {
+          resolve(data.data.global.totalMechs);
+        }
       })
       .catch((error) => {
         reject(error);
