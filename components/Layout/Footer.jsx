@@ -32,13 +32,6 @@ const ContractInfo = () => {
         };
       }
 
-      if (path === '/factory') {
-        return {
-          registryText: 'AgentFactory',
-          registry: addresses.agentFactory,
-        };
-      }
-
       if (path === '/mech') {
         return {
           registryText: 'Mech',

@@ -27,6 +27,7 @@ const MECH_TYPES = [
 
 const Content = styled.div`
   position: relative;
+  padding: 20px 0;
 
   > .ant-segmented {
     position: absolute;
@@ -59,14 +60,10 @@ export const Mechs = () => {
   }, [router]);
 
   return (
-    <div>
-      <HeaderTitle title="Mechs" description="View existing agents" />
-
-      <Content>
-        <Segmented options={MECH_TYPES} value={mechType} onChange={handleChangeMechType} />
-        {mechType === MECH_MM && <ListServices />}
-        {mechType === LEGACY && <ListAgents />}
-      </Content>
-    </div>
+    <Content>
+      <Segmented options={MECH_TYPES} value={mechType} onChange={handleChangeMechType} />
+      {mechType === MECH_MM && <ListServices />}
+      {mechType === LEGACY && <ListAgents />}
+    </Content>
   );
 };

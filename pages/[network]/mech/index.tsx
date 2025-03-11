@@ -1,9 +1,10 @@
 import get from 'lodash/get';
+import { GetServerSideProps } from 'next';
 
-import Mech from 'components/Home/Mech';
+import Mech from 'components/Mech';
 import { DEFAULT_MECH_CONTRACT_ADDRESS } from 'util/constants';
 
-export async function getServerSideProps(ctx) {
+export const getServerSideProps: GetServerSideProps = async (ctx) => {
   const { query } = ctx;
   const id = get(query, 'id');
 
@@ -19,6 +20,6 @@ export async function getServerSideProps(ctx) {
   return {
     props: {},
   };
-}
+};
 
 export default Mech;

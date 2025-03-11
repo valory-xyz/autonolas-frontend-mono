@@ -37,12 +37,3 @@ export const FormContainer = styled.div`
     color: ${COLOR.PRIMARY};
   }
 `;
-
-export const RegisterFooter = styled.div`
-  display: flex;
-  align-items: center;
-  p {
-    margin: 0;
-    margin-right: 24px;
-  }
-`;

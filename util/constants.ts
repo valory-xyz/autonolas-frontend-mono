@@ -17,7 +17,6 @@ export const URL = {
   MECHS_LEGACY: 'mechs?legacy=true',
   MECH: 'mech',
   FACTORY: 'factory',
-  DOCS: 'docs',
   PAGE_NOT_FOUND: 'page-not-found',
 };
 
@@ -39,9 +38,7 @@ export const EXTRA_COLORS = {
   YELLOW_SECONDARY: '#fefce8', // tailwind orange.50
 } as const;
 
-export const PAGES_TO_LOAD_WITHOUT_CHAIN_ID = [URL.DOCS, URL.PAGE_NOT_FOUND].map(
-  (item) => `/${item}`,
-);
+export const PAGES_TO_LOAD_WITHOUT_CHAIN_ID = [URL.PAGE_NOT_FOUND].map((item) => `/${item}`);
 export const PAGES_TO_LOAD_WITH_CHAIN_ID = [URL.MECHS, URL.MECHS_LEGACY, URL.MECH, URL.FACTORY].map(
   (item) => `/${item}`,
 );

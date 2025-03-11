@@ -4,8 +4,6 @@ import Web3 from 'web3';
 import { AbiItem } from 'web3-utils';
 
 import {
-  AGENT_FACTORY_ABI,
-  AGENT_FACTORY_ADDRESSES,
   AGENT_MECH_ABI,
   AGENT_REGISTRY_ABI,
   AGENT_REGISTRY_ADDRESSES,
@@ -20,18 +18,13 @@ export const RPC_URLS: Record<Network, string> = {
   [base.id]: process.env.NEXT_PUBLIC_BASE_URL ?? base.rpcUrls.default.http[0],
 };
 
-export const ADDRESSES: Record<
-  Network,
-  { agentRegistry: Address; agentFactory: Address; mechMarketplace: Address }
-> = {
+export const ADDRESSES: Record<Network, { agentRegistry: Address; mechMarketplace: Address }> = {
   [gnosis.id]: {
     agentRegistry: AGENT_REGISTRY_ADDRESSES[gnosis.id],
-    agentFactory: AGENT_FACTORY_ADDRESSES[gnosis.id],
     mechMarketplace: MECH_MARKETPLACE_ADDRESSES[gnosis.id],
   },
   [base.id]: {
     agentRegistry: AGENT_REGISTRY_ADDRESSES[base.id],
-    agentFactory: AGENT_FACTORY_ADDRESSES[base.id],
     mechMarketplace: MECH_MARKETPLACE_ADDRESSES[base.id],
   },
 };
@@ -58,18 +51,6 @@ export const getAgentContract = () => {
 
   // @ts-ignore TODO: fix ABI type
   const contract = getContract(AGENT_REGISTRY_ABI, agentRegistryAddress);
-  return contract;
-};
-
-export const getMechMinterContract = () => {
-  const agentFactoryAddress = getWeb3Details().address?.agentFactory;
-  if (!agentFactoryAddress) {
-    throw new Error('Unsupported network, agent factory address not found.');
-  }
-
-  // @ts-ignore TODO: fix ABI type
-  const contract = getContract(AGENT_FACTORY_ABI, agentFactoryAddress);
-
   return contract;
 };
 
