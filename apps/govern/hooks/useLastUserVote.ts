@@ -7,18 +7,15 @@ import { VOTE_WEIGHTING } from 'libs/util-contracts/src/lib/abiAndAddresses';
 
 import { LAST_USER_VOTE_KEY } from 'common-util/constants/scopeKeys';
 import { getNomineeHash } from 'common-util/functions/nominee-hash';
+import { Nominee } from 'types';
 
-export const useLastUserVote = (
-  nominees: { account: Address; chainId: number }[],
-  account: Address | null,
-  enabled: boolean,
-) => {
+export const useLastUserVote = (nominees: Nominee[], account: Address | null, enabled: boolean) => {
   const contracts = nominees.map((nominee) => ({
     address: (VOTE_WEIGHTING.addresses as Record<number, Address>)[mainnet.id],
     abi: VOTE_WEIGHTING.abi as Abi,
     chainId: mainnet.id,
     functionName: 'lastUserVote',
-    args: [account, getNomineeHash(nominee.account, nominee.chainId)],
+    args: [account, getNomineeHash(nominee.account, Number(nominee.chainId))],
     scopeKey: LAST_USER_VOTE_KEY,
   }));
 

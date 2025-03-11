@@ -6,6 +6,7 @@ import { useReadContract, useReadContracts } from 'wagmi';
 
 import { TOKENOMICS, VOTE_WEIGHTING } from 'libs/util-contracts/src/lib/abiAndAddresses';
 import { useMemo } from 'react';
+import { Nominee } from 'types';
 
 type Weight = { percentage: number; value: number };
 
@@ -75,7 +76,7 @@ const useStakingInflation = () => {
 };
 
 export const useNomineesWeights = (
-  nominees: { account: Address; chainId: number }[],
+  nominees: Nominee[],
   timestamp: number | null,
   scopeKey?: string,
 ) => {

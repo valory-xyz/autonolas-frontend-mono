@@ -1,6 +1,6 @@
 import { Address } from 'viem';
 
-export type RemovedNominee = {
+export type Nominee = {
   account: Address;
   chainId: bigint;
 };

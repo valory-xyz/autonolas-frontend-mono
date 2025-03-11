@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import { UserVotes } from 'types';
 import { useAccount, useBlock } from 'wagmi';
 
@@ -13,6 +13,7 @@ import { useAppDispatch, useAppSelector } from 'store/index';
 import { useLastUserVote } from './useLastUserVote';
 import { useVoteUserPower } from './useVoteUserPower';
 import { useVoteUserSlopes } from './useVoteUserSlopes';
+import { useRemovedNominees } from './useRemovedNominees';
 
 const CONTRACT_DEPLOY_BLOCK = 20312875;
 
@@ -32,7 +33,13 @@ export const useFetchUserVotes = () => {
   const { address: account } = useAccount();
   const { lastUserVote, isUserVotesLoading } = useAppSelector((state) => state.govern);
 
-  const { data: nominees } = useNominees();
+  const { data: addedNominees } = useNominees();
+  const { data: removedNominees } = useRemovedNominees();
+
+  const nominees = useMemo(
+    () => [...(addedNominees || []), ...(removedNominees || [])],
+    [addedNominees, removedNominees],
+  );
 
   // Get user's total allocated power
   const { data: userPower } = useVoteUserPower(account);
@@ -101,7 +108,7 @@ export const useFetchUserVotes = () => {
                 power: Number(powerNext) / 100,
                 end: Number(endNext),
               },
-              chainId: item.chainId,
+              chainId: Number(item.chainId),
             };
         }
       });

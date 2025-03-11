@@ -27,6 +27,7 @@ import {
   getVoteWeightingContract,
 } from './web3';
 import { RPC_URLS } from 'libs/util-constants/src';
+import { Nominee } from 'types';
 
 type VoteForNomineeWeightsParams = {
   account: Address | undefined;
@@ -57,9 +58,7 @@ export const voteForNomineeWeights = async ({
 
 export const checkIfNomineeRemoved = async (allocations: { address: Address }[]) => {
   const contract = getVoteWeightingContract();
-  const result: { account: Address; chainId: number }[] = await contract.methods
-    .getAllRemovedNominees()
-    .call();
+  const result: Nominee[] = await contract.methods.getAllRemovedNominees().call();
 
   if (!result) return [];
 

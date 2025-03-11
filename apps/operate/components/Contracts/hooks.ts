@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { StakingContract } from 'types';
+import { Nominee, StakingContract } from 'types';
 import { Abi, Address, formatEther, formatUnits } from 'viem';
 import { useReadContracts } from 'wagmi';
 
@@ -273,10 +273,7 @@ const getStakeRequired = (minStakingDeposit: bigint, numAgentInstances: bigint) 
   return formatEther(minStakingDeposit + minStakingDeposit * numAgentInstances);
 };
 
-const useContractDetails = (
-  nominees: { account: Address; chainId: number }[],
-  functionName: string,
-) => {
+const useContractDetails = (nominees: Nominee[], functionName: string) => {
   const contracts = nominees.map((nominee) => ({
     address: getAddressFromBytes32(nominee.account),
     abi: STAKING_TOKEN.abi as Abi,

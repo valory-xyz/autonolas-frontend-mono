@@ -3,9 +3,11 @@ import { mainnet } from 'viem/chains';
 import { useReadContract } from 'wagmi';
 
 import { VOTE_WEIGHTING } from 'libs/util-contracts/src/lib/abiAndAddresses';
-import { RemovedNominee, UserVotes } from 'types';
+import { Nominee, UserVotes } from 'types';
 import { useMemo } from 'react';
 import { getNomineeHash } from 'common-util/functions/nominee-hash';
+import { getBytes32FromAddress } from 'libs/util-functions/src';
+import { ethers } from 'ethers';
 
 export const useRemovedNominees = () => {
   const { data, isLoading } = useReadContract({
@@ -14,9 +16,10 @@ export const useRemovedNominees = () => {
     chainId: mainnet.id,
     functionName: 'getAllRemovedNominees',
     query: {
-      select: (data) => {
-        return data as RemovedNominee[];
-      },
+      select: (data) =>
+        (data as Nominee[]).filter(
+          (item) => item.account !== getBytes32FromAddress(ethers.ZeroAddress),
+        ),
     },
   });
 
@@ -29,7 +32,7 @@ export const useRemovedVotedNominees = (userVotes: Record<string, UserVotes>) =>
   const removedVotedNominees = useMemo(() => {
     if (!removedNominees) return [];
 
-    const res: RemovedNominee[] = [];
+    const res: Nominee[] = [];
     const nomineeMap = new Map();
 
     // Create a map using a combined key of address and chainId for faster lookup

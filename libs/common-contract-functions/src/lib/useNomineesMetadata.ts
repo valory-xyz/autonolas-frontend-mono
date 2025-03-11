@@ -3,8 +3,11 @@ import { Abi } from 'viem';
 import { Address } from 'viem';
 import { useReadContracts } from 'wagmi';
 
+// eslint-disable-next-line @nx/enforce-module-boundaries
 import { GATEWAY_URL, HASH_PREFIX } from 'libs/util-constants/src';
+// eslint-disable-next-line @nx/enforce-module-boundaries
 import { STAKING_TOKEN } from 'libs/util-contracts/src';
+// eslint-disable-next-line @nx/enforce-module-boundaries
 import { getAddressFromBytes32, getBytes32FromAddress } from 'libs/util-functions/src';
 
 const BATCH_SIZE = 10;
@@ -33,7 +36,7 @@ const fetchBatch = async (params: HashesWithNominees) => {
   return results;
 };
 
-export const useNomineesMetadata = (nominees: { account: Address; chainId: number }[]) => {
+export const useNomineesMetadata = (nominees: { account: Address; chainId: bigint }[]) => {
   const [isLoading, setIsLoading] = useState(false);
   const [contractsMetadata, setContractsMetadata] = useState<Record<string, Metadata> | null>(null);
 

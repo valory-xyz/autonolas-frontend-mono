@@ -12,7 +12,7 @@ import { INVALIDATE_AFTER_USER_DATA_CHANGE } from 'common-util/constants/scopeKe
 import { useAppDispatch } from 'store/index';
 import { resetState } from 'common-util/functions/resetState';
 import { clearUserState } from 'store/govern';
-import { RemovedNominee } from 'types';
+import { Nominee } from 'types';
 import { areAddressesEqual, getAddressFromBytes32 } from 'libs/util-functions/src';
 
 const { Text, Paragraph } = Typography;
@@ -29,7 +29,7 @@ type Statuses = Record<
 const columns = (
   statuses: Statuses,
   onRevoke: (address: Address, chainId: number) => void,
-): ColumnsType<RemovedNominee> => [
+): ColumnsType<Nominee> => [
   {
     title: 'Contract address',
     key: 'account',
@@ -82,7 +82,7 @@ const columns = (
   },
 ];
 
-type RevokePowerProps = { contracts: RemovedNominee[] };
+type RevokePowerProps = { contracts: Nominee[] };
 
 export const RevokePower = ({ contracts }: RevokePowerProps) => {
   const dispatch = useAppDispatch();
@@ -195,7 +195,7 @@ export const RevokePower = ({ contracts }: RevokePowerProps) => {
           The following contracts have been removed from Olas Staking. <br />
           Revoke your votes from each one to free up your voting weight.
         </Paragraph>
-        <Table<RemovedNominee>
+        <Table<Nominee>
           className="mt-16"
           columns={columns(contractsStatuses, handleRevoke)}
           dataSource={contracts}
