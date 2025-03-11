@@ -120,7 +120,7 @@ export const getIpfsResponse = async (hash: string) => {
     return json;
   } catch (e) {
     window.console.error('Error fetching metadata from IPFS', e);
-    throw new Error(e);
+    throw new Error((e as Error)?.message);
   }
 };
 
