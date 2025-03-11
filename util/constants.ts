@@ -54,6 +54,11 @@ export const WEBSOCKET_URLS: Record<Network, string> = {
 } as const;
 
 export const SCAN_URLS: Record<Network, string> = {
-  [gnosis.id]: 'https://gnosisscan.io/',
+  [gnosis.id]: 'https://gnosisscan.io',
   [base.id]: 'https://basescan.org',
+} as const;
+
+export const SCAN_IMAGES: Record<Network, string> = {
+  [gnosis.id]: '/images/gnosisscan-logo.svg',
+  [base.id]: '/images/basescan-logo.svg',
 } as const;

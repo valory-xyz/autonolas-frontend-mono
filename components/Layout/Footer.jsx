@@ -1,11 +1,12 @@
 import { Flex } from 'antd';
+import Image from 'next/image';
 import { useRouter } from 'next/router';
 
 import { Footer as CommonFooter, ServiceStatusInfo } from '@autonolas/frontend-library';
 
 import { ADDRESSES } from 'common-util/Contracts';
 import { useHelpers } from 'common-util/hooks';
-import { SCAN_URLS, URL } from 'util/constants';
+import { SCAN_IMAGES, SCAN_URLS, URL } from 'util/constants';
 
 import { ContractsInfoContainer } from './styles';
 
@@ -51,7 +52,7 @@ const ContractInfo = () => {
   const getContractInfo = (text, addressToPoint) => (
     <div className="registry-contract">
       <a
-        href={`${SCAN_URLS[chainId]}address/${addressToPoint}`}
+        href={`${SCAN_URLS[chainId]}/address/${addressToPoint}`}
         target="_blank"
         rel="noopener noreferrer"
       >
@@ -66,18 +67,16 @@ const ContractInfo = () => {
 
   return (
     <ContractsInfoContainer>
-      <Flex gap={4} wrap="wrap">
-        <img alt="Etherscan link" width={18} height={18} src="/images/gnosisscan-logo.svg" />
-        <span>Contracts</span>
-        &nbsp;•&nbsp;
-        {getContractInfo(registryText, registry)}
-        {manager && (
-          <>
-            &nbsp;•&nbsp;
-            {getContractInfo(managerText, manager)}
-          </>
-        )}
-      </Flex>
+      <Image alt="Etherscan link" width={18} height={18} src={SCAN_IMAGES[chainId]} />
+      <span>Contracts</span>
+      &nbsp;•&nbsp;
+      {getContractInfo(registryText, registry)}
+      {manager && (
+        <>
+          &nbsp;•&nbsp;
+          {getContractInfo(managerText, manager)}
+        </>
+      )}
     </ContractsInfoContainer>
   );
 };

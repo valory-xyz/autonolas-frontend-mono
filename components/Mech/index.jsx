@@ -22,7 +22,7 @@ const onNewEvent = (event) => {
   notifySuccess(
     'Event received',
     <a
-      href={`${SCAN_URLS[getChainId()]}tx/${event?.transactionHash}`}
+      href={`${SCAN_URLS[getChainId()]}/tx/${event?.transactionHash}`}
       target="_blank"
       rel="noopener noreferrer"
     >
@@ -51,7 +51,7 @@ const EventListener = () => {
 
   const { query } = useRouter();
   const id = query?.id;
-  const networkNameFromUrl = router?.query?.network;
+  const networkNameFromUrl = query?.network;
   const isLegacy = Boolean(query.legacy);
 
   useEffect(() => {
@@ -234,7 +234,7 @@ const EventListener = () => {
                 <>
                   {`No events found. Only loading latest ${LATEST_BLOCK_COUNT} block(s).`}
                   <a
-                    href={`${SCAN_URLS[getChainId()]}address/${id}#events`}
+                    href={`${SCAN_URLS[getChainId()]}/address/${id}#events`}
                     target="_blank"
                     rel="noopener noreferrer"
                   >

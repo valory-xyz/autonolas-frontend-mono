@@ -57,7 +57,7 @@ export const CustomLayout = styled(Layout)`
     }
   }
 
-  ${MEDIA_QUERY.mobileL} {
+  ${MEDIA_QUERY.tabletL} {
     .site-layout {
       padding: 0 16px;
     }
@@ -119,30 +119,6 @@ export const Logo = styled(Link)`
   > span {
     margin-left: 0.5rem;
     margin-right: 0.5rem;
-  }
-`;
-
-export const SubFooter = styled.div`
-  display: flex;
-  align-items: flex-start;
-  justify-content: center;
-  margin-top: 0.5rem;
-  padding: 2rem 1rem;
-  border: 1px solid ${COLOR.GREY_1};
-  border-radius: 0px 0px 20px 20px;
-  border-top-color: transparent;
-
-  ${MEDIA_QUERY.tabletL} {
-  }
-
-  ${MEDIA_QUERY.tablet} {
-    position: relative;
-    flex-direction: column;
-    font-size: 16px;
-    padding: 2rem 0.75rem 1.5rem 0.75rem;
-  }
-
-  ${MEDIA_QUERY.mobileS} {
   }
 `;
 
