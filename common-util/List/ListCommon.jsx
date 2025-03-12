@@ -1,20 +1,8 @@
 /* eslint-disable import/no-extraneous-dependencies */
+import { Alert } from 'antd';
 import PropTypes from 'prop-types';
-import { Alert, Button } from 'antd';
-import { EmptyMessage, RegisterFooter } from 'components/styles';
 
-export const RegisterMessage = ({ handleCancel }) => (
-  <RegisterFooter>
-    <p>To mint, connect to wallet</p>
-    {handleCancel && (
-      <Button onClick={handleCancel} ghost type="primary">
-        Cancel
-      </Button>
-    )}
-  </RegisterFooter>
-);
-RegisterMessage.propTypes = { handleCancel: PropTypes.func };
-RegisterMessage.defaultProps = { handleCancel: null };
+import { EmptyMessage } from 'components/styles';
 
 export const ListEmptyMessage = ({ type }) => {
   const getValues = () => {
@@ -81,12 +69,7 @@ AlertSuccess.defaultProps = {
 export const AlertError = ({ error }) => {
   if (!error) return null;
   return (
-    <Alert
-      message={error.message}
-      data-testid="alert-error-container"
-      type="error"
-      showIcon
-    />
+    <Alert message={error.message} data-testid="alert-error-container" type="error" showIcon />
   );
 };
 AlertError.propTypes = {

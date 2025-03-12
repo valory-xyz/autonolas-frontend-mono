@@ -1,6 +1,7 @@
-import styled from 'styled-components';
 import { Layout } from 'antd';
 import Link from 'next/link';
+import styled from 'styled-components';
+
 import { COLOR, MEDIA_QUERY } from '@autonolas/frontend-library';
 
 export const CustomLayout = styled(Layout)`
@@ -56,7 +57,7 @@ export const CustomLayout = styled(Layout)`
     }
   }
 
-  ${MEDIA_QUERY.mobileL} {
+  ${MEDIA_QUERY.tabletL} {
     .site-layout {
       padding: 0 16px;
     }
@@ -121,30 +122,6 @@ export const Logo = styled(Link)`
   }
 `;
 
-export const SubFooter = styled.div`
-  display: flex;
-  align-items: flex-start;
-  justify-content: center;
-  margin-top: 0.5rem;
-  padding: 2rem 1rem;
-  border: 1px solid ${COLOR.GREY_1};
-  border-radius: 0px 0px 20px 20px;
-  border-top-color: transparent;
-
-  ${MEDIA_QUERY.tabletL} {
-  }
-
-  ${MEDIA_QUERY.tablet} {
-    position: relative;
-    flex-direction: column;
-    font-size: 16px;
-    padding: 2rem 0.75rem 1.5rem 0.75rem;
-  }
-
-  ${MEDIA_QUERY.mobileS} {
-  }
-`;
-
 export const ContractsInfoContainer = styled.div`
   font-size: 16px;
   display: flex;
@@ -156,8 +133,4 @@ export const ContractsInfoContainer = styled.div`
   img {
     margin-right: 8px;
   }
-`;
-
-export const FooterContainer = styled.div`
-  margin-bottom: 8rem;
 `;

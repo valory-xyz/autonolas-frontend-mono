@@ -3,15 +3,25 @@ module.exports = {
   compiler: {
     styledComponents: true,
   },
-  pages: {
-    '*': {
-      maxChunkSize: 30000,
-    },
-  },
   redirects: async () => [
     {
       source: '/',
-      destination: '/mechs',
+      destination: '/gnosis/mechs',
+      permanent: false,
+    },
+    {
+      source: '/mechs',
+      destination: '/gnosis/mechs',
+      permanent: false,
+    },
+    {
+      source: '/mech',
+      destination: '/gnosis/mech',
+      permanent: false,
+    },
+    {
+      source: '/factory',
+      destination: '/gnosis/mechs',
       permanent: false,
     },
   ],

@@ -1,4 +1,5 @@
 import isNil from 'lodash/isNil';
+
 import { HASH_PREFIXES } from 'util/constants';
 
 export const getBase16Validator = (value, hashType = HASH_PREFIXES.type1) => {

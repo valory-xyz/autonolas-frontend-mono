@@ -1,13 +1,14 @@
+import { Flex } from 'antd';
+import Image from 'next/image';
 import { useRouter } from 'next/router';
-import {
-  Footer as CommonFooter,
-  ServiceStatusInfo,
-} from '@autonolas/frontend-library';
 
-import { GNOSIS_SCAN_URL, URL } from 'util/constants';
+import { Footer as CommonFooter, ServiceStatusInfo } from '@autonolas/frontend-library';
+
 import { ADDRESSES } from 'common-util/Contracts';
 import { useHelpers } from 'common-util/hooks';
-import { FooterContainer, ContractsInfoContainer } from './styles';
+import { SCAN_IMAGES, SCAN_URLS, URL } from 'util/constants';
+
+import { ContractsInfoContainer } from './styles';
 
 const ContractInfo = () => {
   const { chainId } = useHelpers();
@@ -32,13 +33,6 @@ const ContractInfo = () => {
         };
       }
 
-      if (path === '/factory') {
-        return {
-          registryText: 'AgentFactory',
-          registry: addresses.agentFactory,
-        };
-      }
-
       if (path === '/mech') {
         return {
           registryText: 'Mech',
@@ -58,7 +52,7 @@ const ContractInfo = () => {
   const getContractInfo = (text, addressToPoint) => (
     <div className="registry-contract">
       <a
-        href={`${GNOSIS_SCAN_URL}address/${addressToPoint}`}
+        href={`${SCAN_URLS[chainId]}/address/${addressToPoint}`}
         target="_blank"
         rel="noopener noreferrer"
       >
@@ -67,40 +61,31 @@ const ContractInfo = () => {
     </div>
   );
 
-  const {
-    registry, manager, managerText, registryText,
-  } = getCurrentPageAddresses();
+  const { registry, manager, managerText, registryText } = getCurrentPageAddresses();
 
   if (!registry && !manager) return null;
 
   return (
     <ContractsInfoContainer>
-      <>
-        <img
-          alt="Etherscan link"
-          width={18}
-          height={18}
-          src="/images/gnosisscan-logo.svg"
-        />
-        <span>Contracts</span>
-        &nbsp;•&nbsp;
-        {getContractInfo(registryText, registry)}
-        {manager && (
-          <>
-            &nbsp;•&nbsp;
-            {getContractInfo(managerText, manager)}
-          </>
-        )}
-      </>
+      <Image alt="Etherscan link" width={18} height={18} src={SCAN_IMAGES[chainId]} />
+      <span>Contracts</span>
+      &nbsp;•&nbsp;
+      {getContractInfo(registryText, registry)}
+      {manager && (
+        <>
+          &nbsp;•&nbsp;
+          {getContractInfo(managerText, manager)}
+        </>
+      )}
     </ContractsInfoContainer>
   );
 };
 
 const Footer = () => (
-  <FooterContainer>
+  <>
     <CommonFooter leftContent={<ContractInfo />} className="custom-footer" />
     <ServiceStatusInfo appType="mechkit" />
-  </FooterContainer>
+  </>
 );
 
 export default Footer;

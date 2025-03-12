@@ -1,0 +1,73 @@
+{
+  "compileOnSave": false,
+  "compilerOptions": {
+    // Temporarily allow JS until all is migrated
+    "allowJs": true,
+    "checkJs": false,
+    // Same settings as in mono repo
+    "rootDir": ".",
+    "sourceMap": true,
+    "declaration": false,
+    "moduleResolution": "node",
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "importHelpers": true,
+    "target": "es2015",
+    "module": "esnext",
+    "lib": [
+      "dom",
+      "es2020"
+    ],
+    "skipLibCheck": true,
+    "skipDefaultLibCheck": true,
+    "baseUrl": ".",
+    "allowSyntheticDefaultImports": true,
+    "jsx": "preserve",
+    "strict": true,
+    "noImplicitAny": true,
+    "noImplicitReturns": true,
+    "noImplicitThis": true,
+    "resolveJsonModule": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "noFallthroughCasesInSwitch": true,
+    "strictNullChecks": true,
+    // repo specific settings
+    "paths": {
+      "common-util/*": [
+        "./common-util/*"
+      ],
+      "components/*": [
+        "./components/*"
+      ],
+      "context/*": [
+        "./context/*"
+      ],
+      "util/*": [
+        "./util/*"
+      ],
+      "images/*": [
+        "./public/images/*"
+      ],
+      "store/*": [
+        "./store/*"
+      ],
+      "types/*": [
+        "./types/*"
+      ]
+    },
+    "noEmit": true,
+    "incremental": true,
+    "isolatedModules": true
+  },
+  "exclude": [
+    "node_modules",
+    "dist"
+  ],
+  "include": [
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    "common-util/functions/index.js"
+  ]
+}

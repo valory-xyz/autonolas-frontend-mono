@@ -1,12 +1,25 @@
-import { useState } from 'react';
-import { Input, Button, Flex } from 'antd';
 import { SearchOutlined } from '@ant-design/icons';
+import { Button, Flex, Input } from 'antd';
+import { useState } from 'react';
+
 import { AddressLink, NA } from '@autonolas/frontend-library';
 
-import { NAV_TYPES, TOTAL_VIEW_COUNT, REGISTRY_URL } from 'util/constants';
 import { SUPPORTED_CHAINS } from 'common-util/Login';
+import { FIRST_SUPPORTED_CHAIN } from 'common-util/Login/config';
+import { getChainId } from 'common-util/functions';
+import { NAV_TYPES, REGISTRY_URL, TOTAL_VIEW_COUNT } from 'util/constants';
 
 export const getTableColumns = (type, { router, isMobile }) => {
+  const networkName = router?.query?.network ?? FIRST_SUPPORTED_CHAIN.networkName;
+  const chainId = getChainId();
+
+  const addressLinkProps = {
+    suffixCount: isMobile ? 4 : 6,
+    canCopy: true,
+    textMinWidth: 160,
+    chainId,
+  };
+
   if (type === NAV_TYPES.COMPONENT || type === NAV_TYPES.AGENT) {
     return [
       {
@@ -19,15 +32,9 @@ export const getTableColumns = (type, { router, isMobile }) => {
         title: 'Owner',
         dataIndex: 'owner',
         key: 'owner',
-        width: 250,
+        width: 200,
         render: (text) => (
-          <AddressLink
-            text={text}
-            suffixCount={isMobile ? 4 : 6}
-            canCopy
-            textMinWidth={160}
-            supportedChains={SUPPORTED_CHAINS}
-          />
+          <AddressLink text={text} {...addressLinkProps} supportedChains={SUPPORTED_CHAINS} />
         ),
       },
       {
@@ -35,15 +42,7 @@ export const getTableColumns = (type, { router, isMobile }) => {
         dataIndex: 'hash',
         key: 'hash',
         width: 200,
-        render: (text) => (
-          <AddressLink
-            text={text}
-            textMinWidth={320}
-            suffixCount={isMobile ? 4 : 14}
-            isIpfsLink
-            canCopy
-          />
-        ),
+        render: (text) => <AddressLink text={text} {...addressLinkProps} isIpfsLink />,
       },
       {
         title: 'Mech',
@@ -55,11 +54,9 @@ export const getTableColumns = (type, { router, isMobile }) => {
           return (
             <AddressLink
               text={text}
-              textMinWidth={320}
-              suffixCount={isMobile ? 4 : 14}
-              canCopy
+              {...addressLinkProps}
               onClick={(e) => {
-                if (router) router.push(`/mech/${e}/${row.hash}?legacy=true`);
+                if (router) router.push(`/${networkName}/mech/${e}/${row.hash}?legacy=true`);
               }}
             />
           );
@@ -76,7 +73,11 @@ export const getTableColumns = (type, { router, isMobile }) => {
         key: 'id',
         width: 50,
         render: (text) => (
-          <a href={`${REGISTRY_URL}/gnosis/services/${text}`} target="_blank" rel="noreferrer">
+          <a
+            href={`${REGISTRY_URL}/${networkName}/services/${text}`}
+            target="_blank"
+            rel="noreferrer"
+          >
             {text}
           </a>
         ),
@@ -87,45 +88,29 @@ export const getTableColumns = (type, { router, isMobile }) => {
         key: 'owner',
         width: 160,
         render: (text) => (
-          <AddressLink
-            text={text}
-            suffixCount={isMobile ? 4 : 6}
-            canCopy
-            textMinWidth={160}
-            supportedChains={SUPPORTED_CHAINS}
-          />
+          <AddressLink text={text} {...addressLinkProps} supportedChains={SUPPORTED_CHAINS} />
         ),
       },
       {
         title: 'Hash',
         dataIndex: 'hash',
         key: 'hash',
-        width: 180,
-        render: (text) => (
-          <AddressLink
-            text={text}
-            textMinWidth={240}
-            suffixCount={isMobile ? 4 : 14}
-            isIpfsLink
-            canCopy
-          />
-        ),
+        width: 160,
+        render: (text) => <AddressLink text={text} {...addressLinkProps} isIpfsLink />,
       },
       {
         title: 'Mech',
         dataIndex: 'mech',
-        width: 180,
+        width: 160,
         key: 'mech',
         render: (text) => {
           if (!text) return NA;
           return (
             <AddressLink
               text={text}
-              textMinWidth={240}
-              suffixCount={isMobile ? 4 : 14}
-              canCopy
+              {...addressLinkProps}
               onClick={() => {
-                if (router) router.push(`/mech/${text}`);
+                if (router) router.push(`/${networkName}/mech/${text}`);
               }}
             />
           );
@@ -134,16 +119,10 @@ export const getTableColumns = (type, { router, isMobile }) => {
       {
         title: 'Mech Factory',
         dataIndex: 'mechFactory',
-        width: 220,
+        width: 160,
         key: 'mechFactory',
         render: (text) => (
-          <AddressLink
-            text={text}
-            suffixCount={isMobile ? 4 : 14}
-            canCopy
-            textMinWidth={240}
-            supportedChains={SUPPORTED_CHAINS}
-          />
+          <AddressLink text={text} {...addressLinkProps} supportedChains={SUPPORTED_CHAINS} />
         ),
       },
     ];
@@ -211,11 +190,7 @@ export const useSearchInput = () => {
         value={value}
         onChange={(e) => setValue(e.target.value)}
       />
-      <Button
-        ghost
-        type="primary"
-        onClick={() => setSearchValue(value || '')}
-      >
+      <Button ghost type="primary" onClick={() => setSearchValue(value || '')}>
         Search
       </Button>
     </Flex>

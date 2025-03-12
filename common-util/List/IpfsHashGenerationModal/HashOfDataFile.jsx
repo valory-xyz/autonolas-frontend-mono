@@ -1,20 +1,17 @@
-import React, { Fragment, useState } from 'react';
-import PropTypes from 'prop-types';
-import {
-  Form, Input, Button, Select,
-} from 'antd';
-import { v4 as uuidv4 } from 'uuid';
+import { Button, Form, Input, Select } from 'antd';
 import { isArray } from 'lodash';
+import PropTypes from 'prop-types';
+import React, { Fragment, useState } from 'react';
+import { v4 as uuidv4 } from 'uuid';
+
 import { useHelpers } from 'common-util/hooks/useHelpers';
 
-import { getIpfsHashHelper } from './helpers';
 import { CustomModal } from '../styles';
+import { getIpfsHashHelper } from './helpers';
 
 export const FORM_NAME = 'ipfs_creation_form_for_mech';
 
-const IpfsModal = ({
-  visible, tools, handleCancel, handleSubmit, isLoading,
-}) => {
+const IpfsModal = ({ visible, tools, handleCancel, handleSubmit, isLoading }) => {
   const [form] = Form.useForm();
   const [isHashLoading, setIsHashLoading] = useState(false);
 
@@ -48,10 +45,13 @@ const IpfsModal = ({
   const onFinish = async (values) => {
     const hash = await getNewHash(values);
 
-    handleSubmit({
-      ...values,
-      hash,
-    }, onModalClose);
+    handleSubmit(
+      {
+        ...values,
+        hash,
+      },
+      onModalClose,
+    );
   };
 
   const onFinishFailed = (errorInfo) => {
@@ -84,7 +84,9 @@ const IpfsModal = ({
               Request
             </Button>
           </div>
-          {!account && <div className="text-gray-500 mt-12">To make a request, connect your wallet</div>}
+          {!account && (
+            <div className="text-gray-500 mt-12">To make a request, connect your wallet</div>
+          )}
         </Fragment>,
       ]}
     >

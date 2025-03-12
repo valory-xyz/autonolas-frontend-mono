@@ -1,8 +1,8 @@
 /* eslint-disable import/no-extraneous-dependencies */
 /* eslint-disable import/no-unresolved */
-
 import { create } from 'ipfs-http-client';
 import { base16 } from 'multiformats/bases/base16';
+
 import { HASH_PREFIXES } from 'util/constants';
 
 const ipfs = create({

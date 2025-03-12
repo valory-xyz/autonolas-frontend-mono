@@ -1,5 +1,5 @@
-import { Typography, Tooltip } from 'antd';
 import { InfoCircleOutlined } from '@ant-design/icons';
+import { Tooltip, Typography } from 'antd';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 
@@ -20,9 +20,7 @@ export const HeaderTitle = ({ title, description }) => (
     {description && (
       <div>
         <Tooltip title={description} placement="bottomLeft">
-          <InfoCircleOutlined
-            style={{ fontSize: 24, position: 'relative', top: -3 }}
-          />
+          <InfoCircleOutlined style={{ fontSize: 24, position: 'relative', top: -3 }} />
         </Tooltip>
       </div>
     )}

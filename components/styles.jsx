@@ -1,4 +1,5 @@
 import styled from 'styled-components';
+
 import { COLOR } from '@autonolas/frontend-library';
 
 export const EmptyMessage = styled.div`
@@ -34,14 +35,5 @@ export const FormContainer = styled.div`
   }
   .ant-typography {
     color: ${COLOR.PRIMARY};
-  }
-`;
-
-export const RegisterFooter = styled.div`
-  display: flex;
-  align-items: center;
-  p {
-    margin: 0;
-    margin-right: 24px;
   }
 `;

@@ -9,6 +9,7 @@
           "util": "./util",
           "common-util": "./common-util",
           "components": "./components",
+          "context": "./context",
           "images": "./public/images",
           "store": "./store"
         }
