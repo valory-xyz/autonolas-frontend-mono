@@ -67,7 +67,7 @@ export const RequestForm: React.FC<RequestFormProps> = ({
   useEffect(() => {
     if (maxDeliveryRate) {
       // Set default value for maxDeliveryRate when data is ready
-      form.setFieldsValue({ maxDeliveryRate });
+      form.setFieldsValue({ maxDeliveryRate: maxDeliveryRate.toString() });
     }
   }, [form, maxDeliveryRate]);
 

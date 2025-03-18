@@ -70,9 +70,9 @@ export const getChainId = (chainId = null): Network => {
 
   // chainId fetched from sessionStorage
   const chainIdFromSessionStorage =
-    typeof sessionStorage === 'undefined'
-      ? FIRST_SUPPORTED_CHAIN.id
-      : Number(sessionStorage.getItem('chainId'));
+    sessionStorage && sessionStorage.getItem('chainId')
+      ? Number(sessionStorage.getItem('chainId'))
+      : FIRST_SUPPORTED_CHAIN.id;
 
   // if chainId is not supported, throw error
   if (!SUPPORTED_CHAINS.find((e) => e.id === chainIdFromSessionStorage)) {

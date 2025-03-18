@@ -165,7 +165,7 @@ export const MarketplaceRequest = ({ mechAddresses }: { mechAddresses: string[] 
             values.responseTimeout,
             '0x',
           )
-          .send({ from: account, value })
+          .send({ from: account, value: values.maxDeliveryRate, gasLimit: 500_000 })
           .then((result: any) => {
             onSuccess();
             setInformation(result);
