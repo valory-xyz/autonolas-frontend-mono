@@ -26,6 +26,11 @@ export const HASH_PREFIXES = {
   type2: 'bafybei',
 };
 
+export const UNICODE_SYMBOLS = {
+  EXTERNAL_LINK: '↗',
+  BULLET: '•',
+};
+
 export const GATEWAY_URL = 'https://gateway.autonolas.tech/ipfs/';
 
 export const DEFAULT_MECH_CONTRACT_ADDRESS = '0x77af31De935740567Cf4fF1986D04B2c964A786a';

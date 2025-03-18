@@ -10,14 +10,12 @@ import {
   MECH_MARKETPLACE_ABI,
   MECH_MARKETPLACE_ADDRESSES,
   OLAS_MECH_ABI,
-} from 'common-util/AbiAndAddresses';
-import {
   SERVICE_REGISTRY_L2_ABI,
   SERVICE_REGISTRY_L2_ADDRESSES,
-} from 'common-util/AbiAndAddresses/serviceRegistryL2';
+} from 'common-util/AbiAndAddresses';
 import { getChainId, getProvider } from 'common-util/functions';
 import { Network } from 'types/index';
-import { DEFAULT_MECH_CONTRACT_ADDRESS, MECH_MARKETPLACE_SUBGRAPH_URLS } from 'util/constants';
+import { MECH_MARKETPLACE_SUBGRAPH_URLS } from 'util/constants';
 
 export const RPC_URLS: Record<Network, string> = {
   [gnosis.id]: process.env.NEXT_PUBLIC_GNOSIS_URL ?? gnosis.rpcUrls.default.http[0],
@@ -103,6 +101,7 @@ type FetchMechAgentsArgs = {
   total: number;
 };
 
+// TODO: move all fetchers below to functions/requests?
 export async function fetchMechAgents({ first, total }: FetchMechAgentsArgs) {
   return new Promise((resolve, reject) => {
     const url = process.env.NEXT_PUBLIC_MECH_SUBGRAPH_URL;

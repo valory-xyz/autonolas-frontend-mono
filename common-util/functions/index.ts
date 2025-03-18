@@ -1,4 +1,5 @@
 import { Address } from 'viem';
+import { base, gnosis } from 'wagmi/chains';
 
 import {
   getChainIdOrDefaultToMainnet as getChainIdOrDefaultToMainnetFn,
@@ -57,7 +58,7 @@ export const getProvider = () => {
   return rpcUrl;
 };
 
-export const getIsValidChainId = (chainId: number) =>
+export const getIsValidChainId = (chainId: number): chainId is Network =>
   getIsValidChainIdFn(SUPPORTED_CHAINS, chainId);
 
 export const getChainIdOrDefaultToFirstSupportedChain = (chainId = FIRST_SUPPORTED_CHAIN.id) => {

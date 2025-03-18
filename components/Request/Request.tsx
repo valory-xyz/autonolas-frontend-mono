@@ -1,3 +1,4 @@
+import { WaitForTransactionReceiptReturnType } from '@wagmi/core';
 import { Alert, Button, notification } from 'antd';
 import { useRouter } from 'next/router';
 import { useEffect, useMemo, useState } from 'react';
@@ -5,12 +6,17 @@ import { useSelector } from 'react-redux';
 
 import { AGENT_MECH_ABI } from 'common-util/AbiAndAddresses';
 import { getContract, getMarketplaceContract } from 'common-util/Contracts';
-import { getAgentHash, getIpfsResponse } from 'common-util/functions';
-import { getAgentHashes, getTokenId } from 'common-util/functions/requests';
-import { PAYMENT_TYPES } from 'util/constants';
+import { getAgentHash, getChainId, getIpfsResponse } from 'common-util/functions';
+import { checkAndApproveToken, getAgentHashes, getTokenId } from 'common-util/functions/requests';
+import { PAYMENT_TYPES, SCAN_URLS, UNICODE_SYMBOLS } from 'util/constants';
 
 import { FormValues, RequestForm } from './RequestForm/RequestForm';
 import { RequestFormLegacy } from './RequestForm/RequestFormLegacy';
+import {
+  getBalanceTrackerContract,
+  getBalanceTrackerToken,
+  sendMarketplaceRequest,
+} from './requests';
 
 type RequestProps = {
   mechAddress: string;
@@ -115,65 +121,58 @@ export const LegacyRequest = ({ mechAddress }: RequestProps) => {
 export const MarketplaceRequest = ({ mechAddresses }: { mechAddresses: string[] }) => {
   // @ts-ignore TODO: add types
   const { account } = useSelector((state) => state?.setup);
-  const [information, setInformation] = useState<any | null>(null);
+  const [txnHash, setTxnHash] = useState<`0x${string}` | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isModalVisible, setIsModalVisible] = useState(false);
 
   const handleSubmit = async (
-    values: FormValues & { hash: string; paymentType: string },
+    values: FormValues & { hash: string; paymentType: `0x${string}` },
     onSuccess: () => void,
   ) => {
     if (account) {
-      setInformation(null);
+      setTxnHash(null);
       setIsLoading(true);
 
       try {
         const payment = PAYMENT_TYPES[values.paymentType];
 
         if (!payment) {
-          throw new Error(
+          console.error(
             `Could not define payment configuration for payment type: ${values.paymentType}`,
           );
+          throw new Error('This mech is currently not supported');
         }
 
-        const marketplaceContract = getMarketplaceContract();
+        if (payment.isToken) {
+          // Need to approve token before proceeding with request
+          const addressToApprove = await getBalanceTrackerContract(values.paymentType);
+          const tokenToApprove = await getBalanceTrackerToken(addressToApprove);
+          const amountToApprove = BigInt(values.maxDeliveryRate);
 
-        let value: undefined | string = values.maxDeliveryRate;
-        if (payment.isNVM) {
-          // Deposit is not allowed for NVM
-          value = undefined;
-        }
-
-        // if (payment.isToken) {
-        //   // Need to approve token before proceeding with request
-        //   const balanceTrackerContract = await marketplaceContract.methods
-        //     .mapPaymentTypeBalanceTrackers(values.paymentType)
-        //     .call();
-
-        //   const tokenToApprove = '';
-        //   let valueToApprove = values.maxDeliveryRate;
-        //   // TODO: check and approve
-        // }
-
-        // TODO: use gas estimation
-        await marketplaceContract.methods
-          .request(
-            `0x${values.hash}`,
-            values.maxDeliveryRate,
-            values.paymentType,
-            values.mechAddress,
-            values.responseTimeout,
-            '0x',
-          )
-          .send({ from: account, value: values.maxDeliveryRate, gasLimit: 500_000 })
-          .then((result: any) => {
-            onSuccess();
-            setInformation(result);
-            notification.success({
-              message: 'Transaction executed',
-              description: 'Delivery may take several seconds.',
-            });
+          await checkAndApproveToken({
+            account,
+            token: tokenToApprove,
+            amountToApprove,
+            addressToApprove,
           });
+        }
+
+        const hash = await sendMarketplaceRequest({
+          requestData: `0x${values.hash}`,
+          maxDeliveryRate: BigInt(values.maxDeliveryRate),
+          paymentType: values.paymentType,
+          priorityMech: values.mechAddress,
+          responseTimeout: BigInt(values.responseTimeout),
+          paymentData: '0x',
+          isNVM: payment.isNVM,
+        });
+
+        onSuccess();
+        setTxnHash(hash);
+        notification.success({
+          message: 'Transaction executed',
+          description: 'Delivery may take several seconds.',
+        });
       } catch (e: any) {
         notification.error({ message: 'Transaction failed', description: e.message });
         console.error(e);
@@ -198,9 +197,20 @@ export const MarketplaceRequest = ({ mechAddresses }: { mechAddresses: string[] 
         onSubmit={handleSubmit}
         onCancel={() => setIsModalVisible(false)}
       />
-      {information && (
+      {txnHash && (
         <Alert
-          message={'Request successfully'}
+          message={
+            <>
+              Request sent successfully. See{' '}
+              <a
+                href={`${SCAN_URLS[getChainId()]}/tx/${txnHash}`}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                txn details {UNICODE_SYMBOLS.EXTERNAL_LINK}
+              </a>
+            </>
+          }
           type="success"
           data-testid="alert-info-container"
           showIcon

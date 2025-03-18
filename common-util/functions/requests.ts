@@ -1,6 +1,10 @@
+import { getChainId, readContract, waitForTransactionReceipt, writeContract } from '@wagmi/core';
+import { Address } from 'viem';
 import { Contract } from 'web3-eth-contract';
 
-import { getAgentContract, getServiceContract } from 'common-util/Contracts';
+import { GENERIC_ERC20_CONTRACT_ABI } from 'common-util/AbiAndAddresses';
+import { getAgentContract } from 'common-util/Contracts';
+import { wagmiConfig } from 'common-util/Login/config';
 
 /**
  *
@@ -37,21 +41,92 @@ export const getAgentHashes = (id: string) =>
       });
   });
 
-// export const getAgentId = (serviceId: string) =>
-//   new Promise<string | null>((resolve, reject) => {
-//     const contract = getServiceContract();
+type CheckAndApproveArgs = {
+  account: Address;
+  token: Address;
+  addressToApprove: Address;
+  amountToApprove: bigint;
+};
 
-//     contract.methods
-//       .getService(serviceId)
-//       .call()
-//       .then((response: { agentIds: string[] }) => {
-//         const agentId = response.agentIds[0];
-//         if (!agentId) resolve(null);
+const hasSufficientTokenRequest = async ({
+  account,
+  token,
+  amountToApprove,
+  addressToApprove,
+}: CheckAndApproveArgs) => {
+  try {
+    const balance = await readContract(wagmiConfig, {
+      address: token,
+      abi: GENERIC_ERC20_CONTRACT_ABI,
+      functionName: 'balanceOf',
+      args: [account],
+    });
 
-//         resolve(agentId);
-//       })
-//       .catch((e: typeof Error) => {
-//         console.error(e);
-//         reject(e);
-//       });
-//   });
+    if (balance < amountToApprove) {
+      throw new Error('Insufficient balance');
+    }
+
+    const allowance = await readContract(wagmiConfig, {
+      address: token,
+      abi: GENERIC_ERC20_CONTRACT_ABI,
+      functionName: 'allowance',
+      args: [account, addressToApprove],
+    });
+    return allowance >= amountToApprove;
+  } catch (error) {
+    console.error('Error checking allowance:', error);
+    throw new Error('Error checking allowance');
+  }
+};
+
+const approveToken = async ({
+  token,
+  amountToApprove,
+  addressToApprove,
+}: Omit<CheckAndApproveArgs, 'account'>) => {
+  try {
+    const hash = await writeContract(wagmiConfig, {
+      address: token,
+      abi: GENERIC_ERC20_CONTRACT_ABI,
+      functionName: 'approve',
+      args: [addressToApprove, amountToApprove],
+    });
+
+    // Wait for the transaction receipt
+    const chainId = getChainId(wagmiConfig);
+    const receipt = await waitForTransactionReceipt(wagmiConfig, {
+      chainId,
+      hash,
+    });
+
+    return receipt;
+  } catch (error) {
+    console.error('Error approving tokens:', error);
+    throw new Error('Error approving tokens');
+  }
+};
+
+export const checkAndApproveToken = async ({
+  account,
+  token,
+  amountToApprove,
+  addressToApprove,
+}: CheckAndApproveArgs) => {
+  const hasTokenBalance = await hasSufficientTokenRequest({
+    account,
+    token,
+    addressToApprove,
+    amountToApprove,
+  });
+
+  if (!hasTokenBalance) {
+    const response = await approveToken({
+      token,
+      addressToApprove,
+      amountToApprove,
+    });
+    return response;
+  }
+
+  return null;
+};

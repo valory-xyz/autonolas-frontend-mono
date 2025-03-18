@@ -1,6 +1,7 @@
 import { Alert, Button, Flex, Form, Input, InputNumber, Select } from 'antd';
 import React, { Fragment, useEffect, useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
+import { Address } from 'viem';
 
 // import { getTokenId } from 'common-util/functions/requests';
 import { useHelpers } from 'common-util/hooks/useHelpers';
@@ -21,7 +22,7 @@ export const FORM_NAME = 'ipfs_creation_form_for_mech';
 export type FormValues = {
   prompt: string;
   tool: string;
-  mechAddress: string;
+  mechAddress: Address;
   maxDeliveryRate: string;
   responseTimeout: number;
 };
@@ -32,7 +33,7 @@ type RequestFormProps = {
   mechAddresses: string[];
   onCancel: () => void;
   onSubmit: (
-    values: FormValues & { hash: string; paymentType: string },
+    values: FormValues & { hash: string; paymentType: `0x${string}` },
     onModalClose: () => void,
   ) => void;
   isLoading?: boolean;
