@@ -8,10 +8,10 @@ import { AddressLink, NA, notifyError, notifySuccess } from '@autonolas/frontend
 
 import { AGENT_MECH_ABI, OLAS_MECH_ABI } from 'common-util/AbiAndAddresses';
 import { SUPPORTED_CHAINS } from 'common-util/Login';
+import { HeaderTitle } from 'common-util/Title';
 import { getChainId } from 'common-util/functions';
+import { Request } from 'components/Request/Request';
 import { SCAN_URLS, WEBSOCKET_URLS } from 'util/constants';
-
-import Request from './Request';
 
 // Replace the following values with your specific contract information
 const LATEST_BLOCK_COUNT = 5000;
@@ -247,7 +247,8 @@ const EventListener = () => {
           );
         }}
       >
-        <Request />
+        <HeaderTitle title="Request" description="Make agent requests" />
+        <Request mechAddress={id} isLegacy={isLegacy} />
         <Alert
           message={`We only load the latest ${LATEST_BLOCK_COUNT} blocks due to data availability issues.`}
           showIcon

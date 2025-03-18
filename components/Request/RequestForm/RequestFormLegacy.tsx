@@ -1,29 +1,44 @@
-import { Button, Form, Input, Select } from 'antd';
+import { Button, Flex, Form, Input, Modal, Select } from 'antd';
 import { isArray } from 'lodash';
-import PropTypes from 'prop-types';
 import React, { Fragment, useState } from 'react';
+import styled from 'styled-components';
 import { v4 as uuidv4 } from 'uuid';
 
 import { useHelpers } from 'common-util/hooks/useHelpers';
 
-import { CustomModal } from '../styles';
 import { getIpfsHashHelper } from './helpers';
 
 export const FORM_NAME = 'ipfs_creation_form_for_mech';
 
-const IpfsModal = ({ visible, tools, handleCancel, handleSubmit, isLoading }) => {
+export const CustomModal = styled(Modal)`
+  .ant-typography {
+    margin: 0;
+  }
+`;
+
+type RequestFormProps = {
+  visible: boolean;
+  tools?: string[] | string | null;
+  onCancel: () => void;
+  onSubmit?: (values: any, onModalClose: () => void) => void;
+  isLoading?: boolean;
+};
+
+export const RequestFormLegacy: React.FC<RequestFormProps> = ({
+  visible,
+  tools = null,
+  onCancel,
+  onSubmit = () => {},
+  isLoading = false,
+}) => {
   const [form] = Form.useForm();
   const [isHashLoading, setIsHashLoading] = useState(false);
 
   const { account } = useHelpers();
 
-  const onModalClose = () => {
-    handleCancel();
-  };
-
-  const getNewHash = async (values) => {
+  const getNewHash = async (values: any): Promise<string | null> => {
     try {
-      setIsHashLoading(true); // loading on!
+      setIsHashLoading(true);
 
       const hash = await getIpfsHashHelper(
         {
@@ -34,28 +49,28 @@ const IpfsModal = ({ visible, tools, handleCancel, handleSubmit, isLoading }) =>
       );
       return hash;
     } catch (error) {
-      window.console.log(error);
+      console.error(error);
     } finally {
-      setIsHashLoading(false); // off the loader
+      setIsHashLoading(false);
     }
 
     return null;
   };
 
-  const onFinish = async (values) => {
+  const handleFinish = async (values: any) => {
     const hash = await getNewHash(values);
 
-    handleSubmit(
+    onSubmit(
       {
         ...values,
         hash,
       },
-      onModalClose,
+      onCancel,
     );
   };
 
-  const onFinishFailed = (errorInfo) => {
-    console.log('Failed:', errorInfo); /* eslint-disable-line no-console */
+  const handleFinishFailed = (errorInfo: any) => {
+    console.error('Failed:', errorInfo);
   };
 
   return (
@@ -66,11 +81,11 @@ const IpfsModal = ({ visible, tools, handleCancel, handleSubmit, isLoading }) =>
       cancelText="Cancel"
       destroyOnClose
       width={620}
-      onCancel={handleCancel}
+      onCancel={onCancel}
       footer={[
         <Fragment key="footer-1">
-          <div>
-            <Button type="default" onClick={onModalClose}>
+          <Flex gap={8} justify="end">
+            <Button type="default" onClick={onCancel}>
               Cancel
             </Button>
 
@@ -83,7 +98,7 @@ const IpfsModal = ({ visible, tools, handleCancel, handleSubmit, isLoading }) =>
             >
               Request
             </Button>
-          </div>
+          </Flex>
           {!account && (
             <div className="text-gray-500 mt-12">To make a request, connect your wallet</div>
           )}
@@ -97,8 +112,8 @@ const IpfsModal = ({ visible, tools, handleCancel, handleSubmit, isLoading }) =>
         autoComplete="off"
         preserve={false}
         id="ipfsModalForm"
-        onFinish={onFinish}
-        onFinishFailed={onFinishFailed}
+        onFinish={handleFinish}
+        onFinishFailed={handleFinishFailed}
       >
         <Form.Item
           label="Prompt"
@@ -118,10 +133,9 @@ const IpfsModal = ({ visible, tools, handleCancel, handleSubmit, isLoading }) =>
             },
           ]}
         >
-          {/* if "tools" has valid elements show dropdown, else input */}
           {isArray(tools) && tools.length > 0 ? (
             <Select
-              getPopupContainer={(triggerNode) => triggerNode.parentNode}
+              getPopupContainer={(triggerNode) => triggerNode.parentNode as HTMLElement}
               placeholder="Select a tool"
               options={tools.map((e) => ({
                 key: e,
@@ -137,19 +151,3 @@ const IpfsModal = ({ visible, tools, handleCancel, handleSubmit, isLoading }) =>
     </CustomModal>
   );
 };
-
-IpfsModal.propTypes = {
-  visible: PropTypes.bool.isRequired,
-  handleCancel: PropTypes.func.isRequired,
-  tools: PropTypes.oneOfType([PropTypes.string, PropTypes.array]),
-  handleSubmit: PropTypes.func,
-  isLoading: PropTypes.bool,
-};
-
-IpfsModal.defaultProps = {
-  tools: null,
-  handleSubmit: null,
-  isLoading: false,
-};
-
-export default IpfsModal;

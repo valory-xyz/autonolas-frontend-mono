@@ -20,12 +20,6 @@ export const ComplexLabel = styled.div`
   }
 `;
 
-export const CustomModal = styled(Modal)`
-  .ant-typography {
-    margin: 0;
-  }
-`;
-
 export const YourHashContainer = styled.div`
   p {
     margin: 0 0 0.5rem 0;

@@ -129,7 +129,7 @@ export const LoginV2 = ({ onConnect: onConnectCb, onDisconnect: onDisconnectCb }
         </YellowButton>
       )}
       &nbsp;&nbsp;
-      <w3m-button balance={isMobile ? 'hide' : 'show'} />
+      <w3m-button balance={'hide'} />
     </LoginContainer>
   );
 };

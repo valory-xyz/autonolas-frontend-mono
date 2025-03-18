@@ -1,10 +1,8 @@
 import { Address } from 'viem';
 
 import {
-  getChainId as getChainIdFn,
   getChainIdOrDefaultToMainnet as getChainIdOrDefaultToMainnetFn,
   getIsValidChainId as getIsValidChainIdFn,
-  getProvider as getProviderFn,
   sendTransaction as sendTransactionFn,
 } from '@autonolas/frontend-library';
 
@@ -126,5 +124,5 @@ export const getIpfsResponse = async (hash: string) => {
 };
 
 // show last element of agentHashes array
-export const getAgentHash = (agentHashes = []) =>
+export const getAgentHash = (agentHashes: string[] = []) =>
   agentHashes.length === 0 ? '' : agentHashes[agentHashes.length - 1];

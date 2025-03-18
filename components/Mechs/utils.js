@@ -93,22 +93,6 @@ export const getAgentDetails = (id) =>
       });
   });
 
-export const getAgent = (id) =>
-  new Promise((resolve, reject) => {
-    const contract = getAgentContract();
-
-    contract.methods
-      .getHashes(id)
-      .call()
-      .then((response) => {
-        resolve(response);
-      })
-      .catch((e) => {
-        console.error(e);
-        reject(e);
-      });
-  });
-
 // totals
 export const getTotalForAllAgents = () =>
   new Promise((resolve, reject) => {
