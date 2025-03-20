@@ -24,7 +24,7 @@ export const getBalanceTrackerContract = async (paymentType: `0x${string}`) => {
     return balanceTrackerContract;
   } catch (error) {
     console.error(`Error getting balance tracker contract by payment type: ${paymentType}`, error);
-    throw new Error('Some error occurred');
+    throw error;
   }
 };
 
@@ -39,7 +39,7 @@ export const getBalanceTrackerToken = async (address: Address) => {
     return token;
   } catch (error) {
     console.error(`Error getting token from balance tracker contract: ${address}`, error);
-    throw new Error('Some error occurred');
+    throw error;
   }
 };
 

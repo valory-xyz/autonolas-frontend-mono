@@ -18,12 +18,12 @@ import {
   sendMarketplaceRequest,
 } from './requests';
 
-type RequestProps = {
+type LegacyRequestProps = {
   mechAddress: string;
 };
 
 /** @deprecated */
-export const LegacyRequest = ({ mechAddress }: RequestProps) => {
+export const LegacyRequest = ({ mechAddress }: LegacyRequestProps) => {
   // @ts-ignore TODO: add types
   const { account } = useSelector((state) => state?.setup);
   const [dataList, setDataList] = useState<any[]>([]);
@@ -108,7 +108,7 @@ export const LegacyRequest = ({ mechAddress }: RequestProps) => {
       />
       {information && (
         <Alert
-          message={'Request successfully'}
+          message="Requested successfully"
           type="success"
           data-testid="alert-info-container"
           showIcon
@@ -129,66 +129,64 @@ export const MarketplaceRequest = ({ mechAddresses }: { mechAddresses: string[] 
     values: FormValues & { hash: string; paymentType: `0x${string}` },
     onSuccess: () => void,
   ) => {
-    if (account) {
-      setTxnHash(null);
-      setIsLoading(true);
+    if (!account) return;
 
-      try {
-        const payment = PAYMENT_TYPES[values.paymentType];
+    setTxnHash(null);
+    setIsLoading(true);
 
-        if (!payment) {
-          console.error(
-            `Could not define payment configuration for payment type: ${values.paymentType}`,
-          );
-          throw new Error('This mech is currently not supported');
-        }
+    try {
+      const payment = PAYMENT_TYPES[values.paymentType];
 
-        if (payment.isToken) {
-          // Need to approve token before proceeding with request
-          const addressToApprove = await getBalanceTrackerContract(values.paymentType);
-          const tokenToApprove = await getBalanceTrackerToken(addressToApprove);
-          const amountToApprove = BigInt(values.maxDeliveryRate);
-
-          await checkAndApproveToken({
-            account,
-            token: tokenToApprove,
-            amountToApprove,
-            addressToApprove,
-          });
-        }
-
-        const hash = await sendMarketplaceRequest({
-          requestData: `0x${values.hash}`,
-          maxDeliveryRate: BigInt(values.maxDeliveryRate),
-          paymentType: values.paymentType,
-          priorityMech: values.mechAddress,
-          responseTimeout: BigInt(values.responseTimeout),
-          paymentData: '0x',
-          isNVM: payment.isNVM,
-        });
-
-        onSuccess();
-        setTxnHash(hash);
-        notification.success({
-          message: 'Transaction executed',
-          description: 'Delivery may take several seconds.',
-        });
-      } catch (e: any) {
-        notification.error({ message: 'Transaction failed', description: e.message });
-        console.error(e);
-      } finally {
-        setIsLoading(false);
+      if (!payment) {
+        console.error(
+          `Could not define payment configuration for payment type: ${values.paymentType}`,
+        );
+        throw new Error('This mech is currently not supported');
       }
+
+      if (payment.isToken) {
+        // Need to approve token before proceeding with request
+        const addressToApprove = await getBalanceTrackerContract(values.paymentType);
+        const tokenToApprove = await getBalanceTrackerToken(addressToApprove);
+        const amountToApprove = BigInt(values.maxDeliveryRate);
+
+        await checkAndApproveToken({
+          account,
+          token: tokenToApprove,
+          amountToApprove,
+          addressToApprove,
+        });
+      }
+
+      const hash = await sendMarketplaceRequest({
+        requestData: `0x${values.hash}`,
+        maxDeliveryRate: BigInt(values.maxDeliveryRate),
+        paymentType: values.paymentType,
+        priorityMech: values.mechAddress,
+        responseTimeout: BigInt(values.responseTimeout),
+        paymentData: '0x',
+        isNVM: payment.isNVM,
+      });
+
+      onSuccess();
+      setTxnHash(hash);
+      notification.success({
+        message: 'Transaction executed',
+        description: 'Delivery may take several seconds.',
+      });
+    } catch (e: any) {
+      notification.error({ message: 'Transaction failed', description: e.message });
+      console.error(e);
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
-    <>
-      <div>
-        <Button type="primary" ghost onClick={() => setIsModalVisible(true)}>
-          New request
-        </Button>
-      </div>
+    <div>
+      <Button type="primary" ghost onClick={() => setIsModalVisible(true)}>
+        New request
+      </Button>
 
       <RequestForm
         visible={isModalVisible}
@@ -213,14 +211,20 @@ export const MarketplaceRequest = ({ mechAddresses }: { mechAddresses: string[] 
           }
           type="success"
           data-testid="alert-info-container"
+          className="mt-8"
           showIcon
         />
       )}
-    </>
+    </div>
   );
 };
 
-export const Request = ({ mechAddress, isLegacy }: RequestProps & { isLegacy: boolean }) => {
+type RequestProps = {
+  mechAddress: string;
+  isLegacy: boolean;
+};
+
+export const Request = ({ mechAddress, isLegacy }: RequestProps) => {
   if (!mechAddress) return null;
   if (isLegacy) return <LegacyRequest mechAddress={mechAddress} />;
 

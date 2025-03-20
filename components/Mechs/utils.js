@@ -1,11 +1,7 @@
 import { getListByAccount } from 'common-util/ContractUtils/myList';
-import {
-  fetchMechAgents,
-  fetchMmMechs,
-  fetchMmMechsTotal,
-  getAgentContract,
-} from 'common-util/Contracts';
+import { getAgentContract } from 'common-util/Contracts';
 import { getFirstAndLastIndex } from 'common-util/functions';
+import { fetchMechAgents, fetchMmMechs, fetchMmMechsTotal } from 'common-util/functions/graphql';
 
 // --------- HELPER METHODS ---------
 export const getAgentOwner = (id) =>

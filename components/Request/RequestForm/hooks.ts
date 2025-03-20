@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react';
-import { getAddress, zeroAddress } from 'viem';
+import { Address, getAddress, zeroAddress } from 'viem';
 import { useReadContract, useReadContracts } from 'wagmi';
 
 import { MECH_MARKETPLACE_ABI, OLAS_MECH_ABI } from 'common-util/AbiAndAddresses';
@@ -31,11 +31,11 @@ export const useFetchTools = () => {
   return { tools, isToolsLoading, fetchTools };
 };
 
-export const useMaxDeliveryRate = (mechAddress: string) => {
+export const useMaxDeliveryRate = (mechAddress: Address) => {
   const { chainId } = getWeb3Details();
 
   return useReadContract({
-    address: mechAddress ? getAddress(mechAddress) : zeroAddress,
+    address: mechAddress,
     abi: OLAS_MECH_ABI,
     functionName: 'maxDeliveryRate',
     chainId,
@@ -45,11 +45,11 @@ export const useMaxDeliveryRate = (mechAddress: string) => {
   });
 };
 
-export const usePaymentType = (mechAddress: string) => {
+export const usePaymentType = (mechAddress: Address) => {
   const { chainId } = getWeb3Details();
 
   return useReadContract({
-    address: mechAddress ? getAddress(mechAddress) : zeroAddress,
+    address: mechAddress,
     abi: OLAS_MECH_ABI,
     functionName: 'paymentType',
     chainId,

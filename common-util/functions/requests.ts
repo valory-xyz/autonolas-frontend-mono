@@ -7,8 +7,6 @@ import { getAgentContract } from 'common-util/Contracts';
 import { wagmiConfig } from 'common-util/Login/config';
 
 /**
- *
- * @param address Mech contract address
  * @returns either agent's ID (for legacy mechs) or service Id
  */
 export const getTokenId = (contract: Contract) =>
@@ -74,7 +72,7 @@ const hasSufficientTokenRequest = async ({
     });
     return allowance >= amountToApprove;
   } catch (error) {
-    console.error('Error checking allowance:', error);
+    console.error(error);
     throw new Error('Error checking allowance');
   }
 };
@@ -101,7 +99,7 @@ const approveToken = async ({
 
     return receipt;
   } catch (error) {
-    console.error('Error approving tokens:', error);
+    console.error(error);
     throw new Error('Error approving tokens');
   }
 };
@@ -119,14 +117,13 @@ export const checkAndApproveToken = async ({
     amountToApprove,
   });
 
-  if (!hasTokenBalance) {
-    const response = await approveToken({
-      token,
-      addressToApprove,
-      amountToApprove,
-    });
-    return response;
-  }
+  if (hasTokenBalance) return null;
 
-  return null;
+  const response = await approveToken({
+    token,
+    addressToApprove,
+    amountToApprove,
+  });
+
+  return response;
 };

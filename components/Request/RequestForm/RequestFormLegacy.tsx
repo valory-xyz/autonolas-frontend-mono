@@ -8,7 +8,7 @@ import { useHelpers } from 'common-util/hooks/useHelpers';
 
 import { getIpfsHashHelper } from './helpers';
 
-export const FORM_NAME = 'ipfs_creation_form_for_mech';
+const FORM_NAME = 'ipfs_creation_form_for_mech';
 
 export const CustomModal = styled(Modal)`
   .ant-typography {
@@ -69,10 +69,6 @@ export const RequestFormLegacy: React.FC<RequestFormProps> = ({
     );
   };
 
-  const handleFinishFailed = (errorInfo: any) => {
-    console.error('Failed:', errorInfo);
-  };
-
   return (
     <CustomModal
       open={visible}
@@ -113,7 +109,6 @@ export const RequestFormLegacy: React.FC<RequestFormProps> = ({
         preserve={false}
         id="ipfsModalForm"
         onFinish={handleFinish}
-        onFinishFailed={handleFinishFailed}
       >
         <Form.Item
           label="Prompt"

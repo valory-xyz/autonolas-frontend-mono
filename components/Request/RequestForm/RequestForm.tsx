@@ -17,7 +17,7 @@ import {
 } from './hooks';
 import { CustomModal, FormContainer } from './styles';
 
-export const FORM_NAME = 'ipfs_creation_form_for_mech';
+const FORM_NAME = 'ipfs_creation_form_for_mech';
 
 export type FormValues = {
   prompt: string;
@@ -47,7 +47,7 @@ export const RequestForm: React.FC<RequestFormProps> = ({
   isLoading,
 }) => {
   const [form] = Form.useForm();
-  const mechAddress = Form.useWatch('mechAddress', form);
+  const mechAddress = Form.useWatch<Address>('mechAddress', form);
   const [isHashLoading, setIsHashLoading] = useState(false);
   const { account } = useHelpers();
 
@@ -103,10 +103,6 @@ export const RequestForm: React.FC<RequestFormProps> = ({
     onSubmit({ ...values, hash, paymentType }, onCancel);
   };
 
-  const handleFinishFailed = (errorInfo: { values: FormValues }) => {
-    console.error('Failed:', errorInfo);
-  };
-
   return (
     <CustomModal
       open={visible}
@@ -147,7 +143,6 @@ export const RequestForm: React.FC<RequestFormProps> = ({
           id="ipfsModalForm"
           initialValues={{ mechAddress: mechAddresses[0] }}
           onFinish={handleFinish}
-          onFinishFailed={handleFinishFailed}
         >
           {paymentType && PAYMENT_TYPES[paymentType]?.isNVM && (
             <Alert
@@ -211,6 +206,8 @@ export const RequestForm: React.FC<RequestFormProps> = ({
               { required: true, message: 'Please input the max delivery rate' },
               {
                 validator: (_, value) => {
+                  if (!value) return Promise.resolve();
+
                   if (maxDeliveryRate && Number(value) > Number(maxDeliveryRate)) {
                     return Promise.reject(
                       new Error(
@@ -233,6 +230,8 @@ export const RequestForm: React.FC<RequestFormProps> = ({
               { required: true, message: 'Please input the max delivery rate' },
               {
                 validator: (_, value) => {
+                  if (!value) return Promise.resolve();
+
                   const min = responseTimeoutLimits ? Number(responseTimeoutLimits.min) : 0;
                   const max = responseTimeoutLimits ? Number(responseTimeoutLimits.max) : 0;
 

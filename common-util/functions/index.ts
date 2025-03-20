@@ -1,5 +1,4 @@
 import { Address } from 'viem';
-import { base, gnosis } from 'wagmi/chains';
 
 import {
   getChainIdOrDefaultToMainnet as getChainIdOrDefaultToMainnetFn,
