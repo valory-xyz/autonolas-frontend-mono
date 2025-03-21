@@ -1,11 +1,7 @@
 import { getListByAccount } from 'common-util/ContractUtils/myList';
-import {
-  fetchMechAgents,
-  fetchMmMechs,
-  fetchMmMechsTotal,
-  getAgentContract,
-} from 'common-util/Contracts';
+import { getAgentContract } from 'common-util/Contracts';
 import { getFirstAndLastIndex } from 'common-util/functions';
+import { fetchMechAgents, fetchMmMechs, fetchMmMechsTotal } from 'common-util/functions/graphql';
 
 // --------- HELPER METHODS ---------
 export const getAgentOwner = (id) =>
@@ -86,22 +82,6 @@ export const getAgentDetails = (id) =>
       .call()
       .then((information) => {
         resolve(information);
-      })
-      .catch((e) => {
-        console.error(e);
-        reject(e);
-      });
-  });
-
-export const getAgent = (id) =>
-  new Promise((resolve, reject) => {
-    const contract = getAgentContract();
-
-    contract.methods
-      .getHashes(id)
-      .call()
-      .then((response) => {
-        resolve(response);
       })
       .catch((e) => {
         console.error(e);

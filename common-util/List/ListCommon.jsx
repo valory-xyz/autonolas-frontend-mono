@@ -43,36 +43,3 @@ export const ListEmptyMessage = ({ type }) => {
 };
 ListEmptyMessage.propTypes = { type: PropTypes.string };
 ListEmptyMessage.defaultProps = { type: null };
-
-// AlertSuccess
-export const AlertSuccess = ({ type, information }) => {
-  if (!information) return null;
-  return (
-    <Alert
-      message={type ? `${type} minted` : 'Minted successfully'}
-      type="success"
-      data-testid="alert-info-container"
-      showIcon
-    />
-  );
-};
-AlertSuccess.propTypes = {
-  information: PropTypes.shape({}),
-  type: PropTypes.string,
-};
-AlertSuccess.defaultProps = {
-  information: null,
-  type: null,
-};
-
-// AlertError
-export const AlertError = ({ error }) => {
-  if (!error) return null;
-  return (
-    <Alert message={error.message} data-testid="alert-error-container" type="error" showIcon />
-  );
-};
-AlertError.propTypes = {
-  error: PropTypes.shape({ message: PropTypes.string }),
-};
-AlertError.defaultProps = { error: null };

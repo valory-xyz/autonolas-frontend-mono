@@ -6,6 +6,7 @@ import { useSelector } from 'react-redux';
 
 import ListTable from 'common-util/List/ListTable';
 import { getHash, isMyTab, useSearchInput } from 'common-util/List/ListTable/helpers';
+import { MarketplaceRequest } from 'components/Request/Request';
 import { NAV_TYPES, URL } from 'util/constants';
 
 import { getMechs, getTotalMechs } from './utils';
@@ -137,6 +138,7 @@ export const ListServices = () => {
         {searchInput}
       </Flex>
 
+      <MarketplaceRequest mechAddresses={list.map((item) => item.address)} />
       <ListTable {...tableCommonProps} list={list} />
     </Flex>
   );

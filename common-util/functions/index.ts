@@ -1,10 +1,8 @@
 import { Address } from 'viem';
 
 import {
-  getChainId as getChainIdFn,
   getChainIdOrDefaultToMainnet as getChainIdOrDefaultToMainnetFn,
   getIsValidChainId as getIsValidChainIdFn,
-  getProvider as getProviderFn,
   sendTransaction as sendTransactionFn,
 } from '@autonolas/frontend-library';
 
@@ -59,7 +57,7 @@ export const getProvider = () => {
   return rpcUrl;
 };
 
-export const getIsValidChainId = (chainId: number) =>
+export const getIsValidChainId = (chainId: number): chainId is Network =>
   getIsValidChainIdFn(SUPPORTED_CHAINS, chainId);
 
 export const getChainIdOrDefaultToFirstSupportedChain = (chainId = FIRST_SUPPORTED_CHAIN.id) => {
@@ -72,9 +70,9 @@ export const getChainId = (chainId = null): Network => {
 
   // chainId fetched from sessionStorage
   const chainIdFromSessionStorage =
-    typeof sessionStorage === 'undefined'
-      ? FIRST_SUPPORTED_CHAIN.id
-      : Number(sessionStorage.getItem('chainId'));
+    sessionStorage && sessionStorage.getItem('chainId')
+      ? Number(sessionStorage.getItem('chainId'))
+      : FIRST_SUPPORTED_CHAIN.id;
 
   // if chainId is not supported, throw error
   if (!SUPPORTED_CHAINS.find((e) => e.id === chainIdFromSessionStorage)) {
@@ -126,5 +124,5 @@ export const getIpfsResponse = async (hash: string) => {
 };
 
 // show last element of agentHashes array
-export const getAgentHash = (agentHashes = []) =>
+export const getAgentHash = (agentHashes: string[] = []) =>
   agentHashes.length === 0 ? '' : agentHashes[agentHashes.length - 1];

@@ -52,6 +52,7 @@
     "@trivago/prettier-plugin-sort-imports": "^5.2.2",
     "@types/lodash": "^4.17.16",
     "@types/node": "18.16.9",
+    "@types/uuid": "^9.0.0",
     "@typescript-eslint/eslint-plugin": "^6.13.2",
     "@typescript-eslint/parser": "^6.13.2",
     "babel-plugin-import": "^1.13.8",
