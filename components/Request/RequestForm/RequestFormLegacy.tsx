@@ -6,7 +6,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 import { useHelpers } from 'common-util/hooks/useHelpers';
 
-import { getIpfsHashHelper } from './helpers';
+import { getIpfsHashHelper } from './utils';
 
 const FORM_NAME = 'ipfs_creation_form_for_mech';
 

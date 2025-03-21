@@ -38,7 +38,7 @@ export const ADDRESSES: Record<
   [base.id]: {
     agentRegistry: AGENT_REGISTRY_ADDRESSES[base.id],
     mechMarketplace: MECH_MARKETPLACE_ADDRESSES[base.id],
-    serviceRegistryL2: SERVICE_REGISTRY_L2_ADDRESSES[gnosis.id],
+    serviceRegistryL2: SERVICE_REGISTRY_L2_ADDRESSES[base.id],
   },
 };
 

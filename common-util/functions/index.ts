@@ -1,6 +1,7 @@
 import { Address } from 'viem';
 
 import {
+  HASH_PREFIX,
   getChainIdOrDefaultToMainnet as getChainIdOrDefaultToMainnetFn,
   getIsValidChainId as getIsValidChainIdFn,
   sendTransaction as sendTransactionFn,
@@ -113,7 +114,7 @@ export const getSupportedNetworks = () => Object.keys(ADDRESSES).map((e) => Numb
 
 export const getIpfsResponse = async (hash: string) => {
   try {
-    const ipfsUrl = `${GATEWAY_URL}f01701220${hash.substring(2)}`;
+    const ipfsUrl = `${GATEWAY_URL}${HASH_PREFIX}${hash.substring(2)}`;
     const response = await fetch(ipfsUrl);
     const json = await response.json();
     return json;

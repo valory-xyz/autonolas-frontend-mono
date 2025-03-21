@@ -2,9 +2,12 @@ import { getChainId, readContract, waitForTransactionReceipt, writeContract } fr
 import { Address } from 'viem';
 import { Contract } from 'web3-eth-contract';
 
-import { GENERIC_ERC20_CONTRACT_ABI } from 'common-util/AbiAndAddresses';
-import { getAgentContract } from 'common-util/Contracts';
+import { GENERIC_ERC20_CONTRACT_ABI, SERVICE_REGISTRY_L2_ABI } from 'common-util/AbiAndAddresses';
+import { getAgentContract, getWeb3Details } from 'common-util/Contracts';
 import { wagmiConfig } from 'common-util/Login/config';
+import { GATEWAY_URL, HASH_PREFIX } from 'util/constants';
+
+import { getIpfsResponse } from '.';
 
 /**
  * @returns either agent's ID (for legacy mechs) or service Id
@@ -126,4 +129,51 @@ export const checkAndApproveToken = async ({
   });
 
   return response;
+};
+
+export const getMetadataHashByServiceId = async (serviceId: string, signal?: AbortSignal) => {
+  try {
+    const { address, chainId } = getWeb3Details();
+
+    if (!address?.serviceRegistryL2) {
+      throw new Error('Unsupported network, service registry address not found.');
+    }
+
+    const service = await readContract(wagmiConfig, {
+      address: address.serviceRegistryL2,
+      abi: SERVICE_REGISTRY_L2_ABI,
+      functionName: 'getService',
+      chainId,
+      args: [BigInt(serviceId)],
+    });
+
+    // Retrieve code uri hash from the service
+    const configHash = await getIpfsResponse(service.configHash);
+    if (!configHash.code_uri) {
+      console.error('No code uri found in config hash');
+      return null;
+    }
+
+    // Try fetching service yaml
+    const serviceYamlResponse = await fetch(
+      `${configHash.code_uri.replace('ipfs://', GATEWAY_URL)}/mech/service.yaml`,
+      { signal },
+    );
+    const serviceYamlText = await serviceYamlResponse.text();
+
+    // Use a reg exp to find the metadata_hash
+    const metadataHashMatch = serviceYamlText.match(
+      /metadata_hash:\s*\${METADATA_HASH:str:([^\s}]+)/,
+    );
+
+    if (metadataHashMatch) {
+      // Extract the matched metadata hash
+      const metadataHash = metadataHashMatch[1];
+      return metadataHash.replace(HASH_PREFIX, '0x');
+    }
+    return null;
+  } catch (error) {
+    console.error(`Unable to get hash for service: ${serviceId}`, error);
+    return null;
+  }
 };

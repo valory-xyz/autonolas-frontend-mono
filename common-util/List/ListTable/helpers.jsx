@@ -9,6 +9,8 @@ import { FIRST_SUPPORTED_CHAIN } from 'common-util/Login/config';
 import { getChainId } from 'common-util/functions';
 import { NAV_TYPES, REGISTRY_URL, TOTAL_VIEW_COUNT } from 'util/constants';
 
+import { AddressHashLink } from './AgentHashLink';
+
 export const getTableColumns = (type, { router, isMobile }) => {
   const networkName = router?.query?.network ?? FIRST_SUPPORTED_CHAIN.networkName;
   const chainId = getChainId();
@@ -96,7 +98,7 @@ export const getTableColumns = (type, { router, isMobile }) => {
         dataIndex: 'hash',
         key: 'hash',
         width: 160,
-        render: (text) => <AddressLink text={text} {...addressLinkProps} isIpfsLink />,
+        render: (text, record) => <AddressHashLink {...addressLinkProps} serviceId={record.id} />,
       },
       {
         title: 'Mech',
@@ -162,7 +164,7 @@ export const getData = (type, rawData, { current }) => {
     data = rawData.map((item) => ({
       id: item.id,
       owner: item.owner || '-',
-      hash: item.hash || '-',
+      hash: item.hash,
       mech: item.address,
       mechFactory: item.mechFactory,
     }));
