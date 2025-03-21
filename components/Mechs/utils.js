@@ -2,6 +2,7 @@ import { getListByAccount } from 'common-util/ContractUtils/myList';
 import { getAgentContract } from 'common-util/Contracts';
 import { getFirstAndLastIndex } from 'common-util/functions';
 import { fetchMechAgents, fetchMmMechs, fetchMmMechsTotal } from 'common-util/functions/graphql';
+import { getMetadataHashByServiceId } from 'common-util/functions/requests';
 
 // --------- HELPER METHODS ---------
 export const getAgentOwner = (id) =>
@@ -60,7 +61,6 @@ const getMechsHelper = ({ first, total, filters, resolve }) => {
         id: serviceId,
         address: mech.address,
         owner: mech.owner,
-        hash: mech.configHash,
         mechFactory: mech.mechFactory,
       };
 

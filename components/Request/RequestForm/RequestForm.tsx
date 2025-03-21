@@ -8,7 +8,6 @@ import { useHelpers } from 'common-util/hooks/useHelpers';
 import { PAYMENT_TYPES } from 'util/constants';
 import { allowOnlyNumbers } from 'util/formValidations';
 
-import { getIpfsHashHelper } from './helpers';
 import {
   useFetchTools,
   useMaxDeliveryRate,
@@ -16,6 +15,7 @@ import {
   useResponseTimeoutLimits,
 } from './hooks';
 import { CustomModal, FormContainer } from './styles';
+import { getIpfsHashHelper } from './utils';
 
 const FORM_NAME = 'ipfs_creation_form_for_mech';
 
@@ -156,7 +156,6 @@ export const RequestForm: React.FC<RequestFormProps> = ({
             <Select
               getPopupContainer={(triggerNode) => triggerNode.parentNode as HTMLElement}
               placeholder="Select mech address"
-              loading={isToolsLoading}
               disabled={mechAddresses.length === 1}
               options={mechAddresses.map((address) => ({
                 key: address,
@@ -188,6 +187,8 @@ export const RequestForm: React.FC<RequestFormProps> = ({
               <Select
                 getPopupContainer={(triggerNode) => triggerNode.parentNode as HTMLElement}
                 placeholder="Select a tool"
+                loading={isToolsLoading}
+                disabled={isToolsLoading}
                 options={tools.map((tool) => ({
                   key: tool,
                   value: tool,
