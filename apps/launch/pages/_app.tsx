@@ -1,5 +1,4 @@
 import type { AppProps } from 'next/app';
-import Head from 'next/head';
 import { FC, PropsWithChildren } from 'react';
 import { Provider } from 'react-redux';
 
@@ -11,6 +10,7 @@ import { useHandleRoute } from 'hooks/useHandleRoute';
 import Layout from '../components/Layout';
 import Web3ModalProvider from '../context/Web3ModalProvider';
 import { wrapper } from '../store';
+import Meta from 'components/Meta';
 
 const DataProvider: FC<PropsWithChildren> = ({ children }) => {
   useHandleRoute();
@@ -25,9 +25,7 @@ const LaunchApp = ({ Component, ...rest }: AppProps) => {
   return (
     <>
       <GlobalStyles />
-      <Head>
-        <title>Launch</title>
-      </Head>
+      <Meta />
 
       <Provider store={store}>
         <AutonolasThemeProvider>
