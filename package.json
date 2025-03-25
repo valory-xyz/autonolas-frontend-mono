@@ -23,6 +23,7 @@
     "antd": "^5.9.0",
     "cors": "^2.8.5",
     "ethers": "^6.11.1",
+    "fs": "^0.0.1-security",
     "ipfs": "^0.63.5",
     "ipfs-http-client": "^57.0.3",
     "ipfs-only-hash": "^4.0.0",

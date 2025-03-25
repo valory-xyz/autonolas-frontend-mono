@@ -134,7 +134,7 @@ PathCard.propTypes = {
 
 export const Paths = () => (
   <>
-    <Typography.Title className="mt-0" level={2}>
+    <Typography.Title className="mt-0" level={1}>
       Paths
     </Typography.Title>
     <Row gutter={[24, 24]} className="mb-128">

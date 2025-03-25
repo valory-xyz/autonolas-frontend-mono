@@ -1,25 +1,18 @@
-import { useRouter } from 'next/router';
-import { useEffect, useState } from 'react';
 import {
-  Typography, Spin, Row, Col,
+  Typography, Row, Col,
 } from 'antd';
 import Image from 'next/image';
 import styled from 'styled-components';
 import Markdown from 'markdown-to-jsx';
+import fs from 'fs';
+import path from 'path';
 
-import paths from 'components/Paths/data.json';
 import { COLOR } from '@autonolas/frontend-library';
 import Meta from 'components/Meta';
+import PropTypes from 'prop-types';
 
 const Container = styled.div`
   padding: 0 32px;
-`;
-
-const LoadingContainer = styled.div`
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
 `;
 
 const Upcase = styled(Typography.Text)`
@@ -28,48 +21,9 @@ const Upcase = styled(Typography.Text)`
   letter-spacing: 0.07em;
 `;
 
-const PathDetailPage = () => {
-  const router = useRouter();
-  const { id } = router.query;
-  const [pathData, setPathData] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [markdownContent, setMarkdownContent] = useState('');
-
-  useEffect(() => {
-    const fetchMarkdown = async () => {
-      if (pathData?.markdownPath) {
-        try {
-          const response = await fetch(`/${pathData.markdownPath}`);
-          const text = await response.text();
-          setMarkdownContent(text);
-        } catch (error) {
-          console.error('Error fetching markdown:', error);
-        }
-      }
-    };
-    fetchMarkdown();
-  }, [pathData]);
-
-  useEffect(() => {
-    if (id) {
-      const path = paths.find((p) => p.id === id);
-      if (path) {
-        setPathData(path);
-      }
-      setLoading(false);
-    }
-  }, [id]);
-
-  if (loading) {
-    return (
-      <LoadingContainer>
-        <Spin size="large" />
-      </LoadingContainer>
-    );
-  }
-
+const PathDetailPage = ({ pathData, markdownContent, id }) => {
   if (!pathData) {
-    return <Typography.Title level={2}>Path not found</Typography.Title>;
+    return <Typography.Title level={1}>Path not found</Typography.Title>;
   }
 
   return (
@@ -80,7 +34,7 @@ const PathDetailPage = () => {
         path={`paths/${pathData.id}`}
       />
       <Container>
-        <Typography.Title className="mt-0 mb-16" level={3}>
+        <Typography.Title className="mt-0 mb-16" level={1}>
           {pathData.name}
         </Typography.Title>
         <Row gutter={[48, 48]}>
@@ -229,3 +183,58 @@ const PathDetailPage = () => {
 };
 
 export default PathDetailPage;
+
+export async function getServerSideProps(context) {
+  const { id } = context.params;
+  let pathData = null;
+  let markdownContent = null;
+
+  try {
+    const dataFilePath = path.resolve('components/Paths/data.json');
+    const fileContents = fs.readFileSync(dataFilePath, 'utf8');
+    const paths = JSON.parse(fileContents);
+
+    pathData = paths.find((currentPath) => currentPath.id === id);
+
+    if (pathData?.markdownPath) {
+      const markdownPath = path.resolve('public/', pathData.markdownPath);
+      markdownContent = fs.readFileSync(markdownPath, 'utf8');
+    }
+  } catch (error) {
+    console.error('Error reading the data file or fetching data:', error);
+  }
+
+  return {
+    props: {
+      pathData: pathData || null,
+      markdownContent: markdownContent || '',
+      id: id || '',
+    },
+  };
+}
+PathDetailPage.propTypes = {
+  pathData: PropTypes.shape({
+    id: PropTypes.string.isRequired,
+    name: PropTypes.string.isRequired,
+    description: PropTypes.string,
+    images: PropTypes.shape({
+      description: PropTypes.string,
+      service: PropTypes.string,
+    }),
+    service: PropTypes.shape({
+      id: PropTypes.string,
+      name: PropTypes.string,
+      url: PropTypes.string,
+    }),
+    isMechsToolPath: PropTypes.bool,
+    markdownPath: PropTypes.string,
+  }),
+  markdownContent: PropTypes.string,
+  id: PropTypes.string,
+};
+
+PathDetailPage.defaultProps = {
+  pathData: null,
+  markdownContent: '',
+  id: '',
+};
