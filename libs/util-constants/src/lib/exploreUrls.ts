@@ -16,6 +16,8 @@ import {
   polygonMumbai,
 } from 'viem/chains';
 
+const MODE_EXPLORER = 'https://explorer.mode.network'
+
 export const EXPLORER_URLS: Record<string, string> = {
   [mainnet.id]: mainnet.blockExplorers.default.url,
   [optimism.id]: optimism.blockExplorers.default.url,
@@ -24,7 +26,7 @@ export const EXPLORER_URLS: Record<string, string> = {
   [base.id]: base.blockExplorers.default.url,
   [arbitrum.id]: arbitrum.blockExplorers.default.url,
   [celo.id]: celo.blockExplorers.default.url,
-  [mode.id]: mode.blockExplorers.default.url,
+  [mode.id]: MODE_EXPLORER,
   [goerli.id]: goerli.blockExplorers.default.url,
   [gnosisChiado.id]: gnosisChiado.blockExplorers.default.url,
   [polygonMumbai.id]: polygonMumbai.blockExplorers.default.url,
