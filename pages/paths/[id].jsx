@@ -4,12 +4,12 @@ import {
 import Image from 'next/image';
 import styled from 'styled-components';
 import Markdown from 'markdown-to-jsx';
-import fs from 'fs';
-import path from 'path';
 
+import paths from 'components/Paths/data.json';
 import { COLOR } from '@autonolas/frontend-library';
 import Meta from 'components/Meta';
 import PropTypes from 'prop-types';
+import { SITE } from 'util/constants';
 
 const Container = styled.div`
   padding: 0 32px;
@@ -21,7 +21,7 @@ const Upcase = styled(Typography.Text)`
   letter-spacing: 0.07em;
 `;
 
-const PathDetailPage = ({ pathData, markdownContent, id }) => {
+const PathDetailPage = ({ pathData, markdownContent }) => {
   if (!pathData) {
     return <Typography.Title level={1}>Path not found</Typography.Title>;
   }
@@ -57,7 +57,7 @@ const PathDetailPage = ({ pathData, markdownContent, id }) => {
               <Row gutter={[16, 16]} align="middle" style={{ maxWidth: '500px' }}>
                 <Col span={8}>
                   <Image
-                    src={pathData.images?.description ?? `/images/${id}.png`}
+                    src={pathData.images?.description ?? `/images/${pathData.id}.png`}
                     alt={pathData.name}
                     width={200}
                     height={200}
@@ -190,28 +190,26 @@ export async function getServerSideProps(context) {
   let markdownContent = null;
 
   try {
-    const dataFilePath = path.resolve('components/Paths/data.json');
-    const fileContents = fs.readFileSync(dataFilePath, 'utf8');
-    const paths = JSON.parse(fileContents);
-
-    pathData = paths.find((currentPath) => currentPath.id === id);
+    pathData = paths.find((path) => path.id === id);
 
     if (pathData?.markdownPath) {
-      const markdownPath = path.resolve('public/', pathData.markdownPath);
-      markdownContent = fs.readFileSync(markdownPath, 'utf8');
+      const response = await fetch(`${SITE.URL}/${pathData.markdownPath}`);
+      if (response.ok) {
+        markdownContent = await response.text();
+      }
     }
   } catch (error) {
-    console.error('Error reading the data file or fetching data:', error);
+    console.error('Error fetching markdown:', error);
   }
 
   return {
     props: {
       pathData: pathData || null,
       markdownContent: markdownContent || '',
-      id: id || '',
     },
   };
 }
+
 PathDetailPage.propTypes = {
   pathData: PropTypes.shape({
     id: PropTypes.string.isRequired,
@@ -230,11 +228,9 @@ PathDetailPage.propTypes = {
     markdownPath: PropTypes.string,
   }),
   markdownContent: PropTypes.string,
-  id: PropTypes.string,
 };
 
 PathDetailPage.defaultProps = {
   pathData: null,
   markdownContent: '',
-  id: '',
 };
