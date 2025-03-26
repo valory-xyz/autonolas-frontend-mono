@@ -63,6 +63,7 @@ const ALLOWED_ORIGINS = [
   'https://api.web3modal.com/',
   'https://rpc.ankr.com/',
   'https://mainnet.mode.network/',
+  'https://explorer.mode.network',
 
   // tenderly
   'https://virtual.mainnet.rpc.tenderly.co/',
