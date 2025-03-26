@@ -1,5 +1,4 @@
 import React from 'react';
-import PropTypes from 'prop-types';
 import Head from 'next/head';
 
 const SITE_URL = 'https://govern.olas.network';
@@ -7,15 +6,13 @@ const SITE_TITLE = 'Olas Govern';
 const SITE_DESCRIPTION =
   'View various contracts and join the decision-making process that drives growth in the Olas ecosystem; direct the future of Olas.';
 
-const Meta = ({
-  pageTitle,
-  description,
-  pageUrl,
-}: {
-  pageTitle: string;
-  description: string;
-  pageUrl: string;
-}) => {
+type MetaProps = {
+  pageTitle?: string;
+  description?: string;
+  pageUrl?: string;
+};
+
+export const Meta = ({ pageTitle, description, pageUrl }: MetaProps) => {
   const title = pageTitle ? `${pageTitle} | ${SITE_TITLE}` : SITE_TITLE;
   const url = `${SITE_URL}/${pageUrl}`;
 
@@ -48,16 +45,3 @@ const Meta = ({
     </Head>
   );
 };
-
-Meta.propTypes = {
-  pageTitle: PropTypes.string,
-  description: PropTypes.string,
-  pageUrl: PropTypes.string,
-};
-Meta.defaultProps = {
-  pageTitle: null,
-  description: SITE_DESCRIPTION,
-  pageUrl: '',
-};
-
-export default Meta;

@@ -10,7 +10,7 @@ import { Web3ModalProvider } from 'context/Web3ModalProvider';
 import { Layout } from '../components/Layout';
 import { useFetchStakingContractsList, useFetchUserVotes } from '../hooks';
 import { wrapper } from '../store';
-import Meta from 'components/Meta';
+import { Meta } from 'components/Meta';
 
 const DataProvider: FC<PropsWithChildren> = ({ children }) => {
   useFetchStakingContractsList();

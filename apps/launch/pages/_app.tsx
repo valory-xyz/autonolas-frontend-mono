@@ -10,7 +10,7 @@ import { useHandleRoute } from 'hooks/useHandleRoute';
 import Layout from '../components/Layout';
 import Web3ModalProvider from '../context/Web3ModalProvider';
 import { wrapper } from '../store';
-import Meta from 'components/Meta';
+import { Meta } from 'components/Meta';
 
 const DataProvider: FC<PropsWithChildren> = ({ children }) => {
   useHandleRoute();
