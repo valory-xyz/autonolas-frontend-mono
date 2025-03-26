@@ -23,7 +23,7 @@ const Upcase = styled(Typography.Text)`
 
 const PathDetailPage = ({ pathData, markdownContent }) => {
   if (!pathData) {
-    return <Typography.Title level={1}>Path not found</Typography.Title>;
+    return <Typography.Title level={2}>Path not found</Typography.Title>;
   }
 
   return (
@@ -192,11 +192,13 @@ export async function getServerSideProps(context) {
   try {
     pathData = paths.find((path) => path.id === id);
 
-    if (pathData?.markdownPath) {
-      const response = await fetch(`${SITE.URL}/${pathData.markdownPath}`);
-      if (response.ok) {
-        markdownContent = await response.text();
-      }
+    if (!pathData) {
+      return { props: { pathData: null, markdownContent: null, id } };
+    }
+
+    const response = await fetch(`${SITE.URL}/${pathData.markdownPath}`);
+    if (response.ok) {
+      markdownContent = await response.text();
     }
   } catch (error) {
     console.error('Error fetching markdown:', error);
@@ -204,8 +206,8 @@ export async function getServerSideProps(context) {
 
   return {
     props: {
-      pathData: pathData || null,
-      markdownContent: markdownContent || '',
+      pathData,
+      markdownContent,
     },
   };
 }
