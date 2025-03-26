@@ -1,10 +1,10 @@
 import React from 'react';
 import Head from 'next/head';
 
-const SITE_URL = 'https://govern.olas.network';
-const SITE_TITLE = 'Olas Govern';
+const SITE_URL = 'https://launch.olas.network';
+const SITE_TITLE = 'Olas Launch';
 const SITE_DESCRIPTION =
-  'View various contracts and join the decision-making process that drives growth in the Olas ecosystem; direct the future of Olas.';
+  'Create and deploy AI agent economies in your ecosystem. Manage agents and AI services with Olas Launch.';
 
 type MetaProps = {
   pageTitle?: string;

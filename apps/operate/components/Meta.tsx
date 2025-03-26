@@ -1,10 +1,10 @@
 import React from 'react';
 import Head from 'next/head';
 
-const SITE_URL = 'https://govern.olas.network';
-const SITE_TITLE = 'Olas Govern';
+const SITE_URL = 'https://operate.olas.network';
+const SITE_TITLE = 'Olas Operate';
 const SITE_DESCRIPTION =
-  'View various contracts and join the decision-making process that drives growth in the Olas ecosystem; direct the future of Olas.';
+  'Become an Operator in the Olas ecosystem using Pearl. Run AI agents, stake assets, and earn rewards while helping to expand the crypto and AI agent network. Get involved in managing decentralized AI-powered systems today!';
 
 type MetaProps = {
   pageTitle?: string;

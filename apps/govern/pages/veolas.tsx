@@ -1,4 +1,4 @@
-import Meta from 'components/Meta';
+import { Meta } from 'components/Meta';
 import { VeOlas } from '../components/VeOlas';
 
 const VeOlasPage = () => (

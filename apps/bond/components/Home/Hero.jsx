@@ -36,11 +36,11 @@ export const Hero = () => {
 
         <Row gutter={64}>
           <Col md={12} xs={24}>
-            <Image src="/images/bond.svg" fill className="mx-auto" />
+            <Image src="/images/bond.svg" alt="Olas Bond" fill className="mx-auto" />
           </Col>
           <Col md={12} xs={24}>
             <Flex vertical gap={16} style={{ height: '100%' }}>
-              <Typography.Title level={3} className="mt-0 mb-0">
+              <Typography.Title level={1} className="mt-0 mb-0">
                 Pool. Bridge. Bond.
               </Typography.Title>
               <Typography.Text>
