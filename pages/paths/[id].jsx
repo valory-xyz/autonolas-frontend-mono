@@ -186,11 +186,9 @@ export default PathDetailPage;
 
 export async function getServerSideProps(context) {
   const { id } = context.params;
-  let pathData = null;
-  let markdownContent = null;
 
   try {
-    pathData = paths.find((path) => path.id === id);
+    const pathData = paths.find((path) => path.id === id);
 
     if (!pathData) {
       return { props: { pathData: null, markdownContent: null, id } };
@@ -198,18 +196,14 @@ export async function getServerSideProps(context) {
 
     const response = await fetch(`${SITE.URL}/${pathData.markdownPath}`);
     if (response.ok) {
-      markdownContent = await response.text();
+      const markdownContent = await response.text();
+      return { props: { pathData, markdownContent, id } };
     }
   } catch (error) {
     console.error('Error fetching markdown:', error);
   }
 
-  return {
-    props: {
-      pathData,
-      markdownContent,
-    },
-  };
+  return { props: { pathData: null, markdownContent: null, id } };
 }
 
 PathDetailPage.propTypes = {
