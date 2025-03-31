@@ -64,7 +64,7 @@ const ALLOWED_ORIGINS = [
   'https://rpc.ankr.com/',
   'https://mainnet.mode.network/',
   'https://explorer.mode.network',
-  'https://eth.merkle.io/',
+  'https://rpc.mevblocker.io',
 
   // tenderly
   'https://virtual.mainnet.rpc.tenderly.co/',
