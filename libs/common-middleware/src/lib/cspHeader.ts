@@ -64,6 +64,7 @@ const ALLOWED_ORIGINS = [
   'https://rpc.ankr.com/',
   'https://mainnet.mode.network/',
   'https://explorer.mode.network',
+  'https://rpc.mevblocker.io',
 
   // tenderly
   'https://virtual.mainnet.rpc.tenderly.co/',
@@ -148,7 +149,10 @@ export const getCspHeaders = () => {
    */
   const headers = [
     ...getNextSafeHeaders(),
-    { key: 'Strict-Transport-Security', value: 'max-age=31536000; includeSubDomains' },
+    {
+      key: 'Strict-Transport-Security',
+      value: 'max-age=31536000; includeSubDomains',
+    },
   ];
 
   return headers;
