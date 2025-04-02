@@ -1,4 +1,4 @@
-import { cookieStorage, createStorage } from 'wagmi';
+import { cookieStorage, createStorage, http } from 'wagmi';
 import {
   Chain,
   arbitrum,
@@ -50,4 +50,9 @@ export const wagmiConfig = defaultWagmiConfig({
   projectId: process.env.NEXT_PUBLIC_WALLET_PROJECT_ID || '',
   metadata: walletConnectMetadata,
   storage: createStorage({ storage: cookieStorage }),
+  transports: SUPPORTED_CHAINS.reduce(
+    (acc, chain) =>
+      Object.assign(acc, { [chain.id]: http(RPC_URLS[chain.id]) || chain.rpcUrls.default.http[0] }),
+    {},
+  ),
 });
