@@ -257,6 +257,24 @@ const STAKING_CONTRACT_DETAILS: Record<Address, StakingContractDetailsInfo> = {
     minOperatingBalance: 0,
     minOperatingBalanceToken: 'ETH',
   },
+  // Agents.fun 1
+  '0x0000000000000000000000002585e63df7bd9de8e058884d496658a030b5c6ce': {
+    availableOn: ['pearl'],
+    minOperatingBalance: 0.03,
+    minOperatingBalanceToken: 'ETH',
+  },
+  // Agents.fun 2
+  '0x00000000000000000000000026fa75ef9ccaa60e58260226a71e9d07564c01bf': {
+    availableOn: ['pearl'],
+    minOperatingBalance: 0.03,
+    minOperatingBalanceToken: 'ETH',
+  },
+  // Agents.fun 3
+  '0x0000000000000000000000004d4233ebf0473ca8f34d105a6256a2389176f0ce': {
+    availableOn: ['pearl'],
+    minOperatingBalance: 0.03,
+    minOperatingBalanceToken: 'ETH',
+  },
 };
 
 const getApy = (
