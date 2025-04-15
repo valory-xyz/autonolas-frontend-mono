@@ -77,7 +77,7 @@ const agents: Agent[] = [
     id: 'agents.fun-agent',
     name: 'Agents.fun agent',
     description:
-      'Creates сustomized AI influencer personas that post on X and perform tasks on Base chain.',
+      'Creates customized AI influencer personas that post on X and perform tasks on Base chain.',
     comingSoon: false,
     availableOn: ['pearl'],
     urls: {
