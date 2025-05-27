@@ -40,6 +40,11 @@ createWeb3Modal({
   connectorImages: {
     ['wallet.binance.com']: '/images/binance-wallet.svg',
   },
+  // https://docs.reown.com/cloud/wallets/wallet-list
+  excludeWalletIds: [
+    '8a0ee50d1f22f6651afcae7eb4253e52a3310b90af5daef78a8c4929a9bb99d4',
+    'cbc11415130d01316513f735eac34fd1ad7a5d40a993bbb6772d2c02eeef3df8',
+  ],
 });
 
 const ContributeApp = ({ Component, pageProps }: AppProps) => {
