@@ -192,6 +192,7 @@ export const DonatePage = () => {
             loading={isCheckpointLoading}
             disabled={!account || isDataLoading || isExpectedEndTimeInFuture}
             onClick={onCheckpoint}
+            style={{ display: 'none' }} // TODO: temporarily hide this button
           >
             Start new epoch
           </Button>
