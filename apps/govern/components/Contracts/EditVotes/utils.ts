@@ -38,17 +38,19 @@ export const getReorderedVotes = (
 
   // Start from old votes
   sortedOldVotes.forEach((oldVote) => {
-    const [oldVoteAddress] = oldVote;
+    const [oldVoteAddress, oldVoteValue] = oldVote;
 
     const newVote = sortedAllocations.find((item) => item.address === oldVoteAddress);
     // If the user votes for the same contract they already voted on,
     // keep new weight value at the same position of resorted old votes
     if (newVote) {
-      newVotes.push({
-        address: newVote.address,
-        chainId: newVote.chainId,
-        weight: `${Math.floor(newVote.weight * 100)}`,
-      });
+      if (newVote.weight !== oldVoteValue.current.power) {
+        newVotes.push({
+          address: newVote.address,
+          chainId: newVote.chainId,
+          weight: `${Math.floor(newVote.weight * 100)}`,
+        });
+      }
     } else {
       // Otherwise we need to remove weight from that contract
       // before voting on the others contacts
@@ -65,7 +67,11 @@ export const getReorderedVotes = (
 
   // Add remaining new votes to the result
   sortedAllocations.forEach((newVote) => {
-    if (newVotes.findIndex((item) => item.address === newVote.address) === -1) {
+    const oldVote = userVotes[newVote.address];
+    if (
+      newVotes.findIndex((item) => item.address === newVote.address) === -1 &&
+      newVote.weight !== oldVote?.current.power
+    ) {
       newVotes.push({
         address: newVote.address,
         chainId: newVote.chainId,
