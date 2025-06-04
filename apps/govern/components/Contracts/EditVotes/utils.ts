@@ -33,7 +33,6 @@ export const getReorderedVotes = (
     ([aKey, aValue], [bKey, bValue]) => bValue.current.power - aValue.current.power,
   );
 
-
   const newVotes: { address: Address; chainId: number; weight: string }[] = [];
   const resetVotes: { address: Address; chainId: number; weight: string }[] = [];
 
@@ -68,8 +67,11 @@ export const getReorderedVotes = (
 
   // Add remaining new votes to the result
   sortedAllocations.forEach((newVote) => {
-    const oldVote = userVotes[newVote.address]
-    if (newVotes.findIndex((item) => item.address === newVote.address) === -1 && newVote.weight !== oldVote?.current.power) {
+    const oldVote = userVotes[newVote.address];
+    if (
+      newVotes.findIndex((item) => item.address === newVote.address) === -1 &&
+      newVote.weight !== oldVote?.current.power
+    ) {
       newVotes.push({
         address: newVote.address,
         chainId: newVote.chainId,
