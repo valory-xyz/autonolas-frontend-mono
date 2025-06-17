@@ -68,9 +68,15 @@ const STAKING_CONTRACT_DETAILS: Record<Address, StakingContractDetailsInfo> = {
     minOperatingBalance: 45,
     minOperatingBalanceToken: 'xDAI',
   },
+  // Optimus Alpha IV
+  '0x0000000000000000000000006891cf116f9a3bdbd1e89413118ef81f69d298c3': {
+    availableOn: ['pearl', 'quickstart'],
+    minOperatingBalance: 0.11,
+    minOperatingBalanceToken: 'ETH',
+  },
   // Optimus Alpha (optimism)
   '0x00000000000000000000000088996bbde7f982d93214881756840ce2c77c4992': {
-    availableOn: ['optimusQuickstart'],
+    availableOn: ['pearl', 'quickstart'],
     minOperatingBalance: 0.17,
     minOperatingBalanceToken: 'ETH',
     minOperatingBalanceHint: '(Total Various Chains)',
@@ -99,9 +105,15 @@ const STAKING_CONTRACT_DETAILS: Record<Address, StakingContractDetailsInfo> = {
     minOperatingBalance: 135,
     minOperatingBalanceToken: 'xDAI',
   },
+  // Optimus Alpha III
+  '0x0000000000000000000000000f69f35652b1acdbd769049334f1ac580927e139': {
+    availableOn: ['pearl', 'quickstart'],
+    minOperatingBalance: 0.011,
+    minOperatingBalanceToken: 'ETH',
+  },
   // Optimus Alpha (mode)
   '0x0000000000000000000000005fc25f50e96857373c64dc0edb1abcbed4587e91': {
-    availableOn: ['pearl', 'modiusQuickstart'],
+    availableOn: ['pearl', 'quickstart'],
     minOperatingBalance: 0.011,
     minOperatingBalanceToken: 'ETH',
   },
@@ -137,17 +149,19 @@ const STAKING_CONTRACT_DETAILS: Record<Address, StakingContractDetailsInfo> = {
   },
   // Quickstart Beta - Expert 16
   '0x0000000000000000000000006c65430515c70a3f5e62107cc301685b7d46f991': {
+    availableOn: ['quickstart'],
     minOperatingBalance: 135,
     minOperatingBalanceToken: 'xDAI',
   },
   // Quickstart Beta - Expert 15
   '0x00000000000000000000000088eb38ff79fba8c19943c0e5acfa67d5876adcc1': {
+    availableOn: ['quickstart'],
     minOperatingBalance: 135,
     minOperatingBalanceToken: 'xDAI',
   },
   // Modius Alpha
   '0x000000000000000000000000534c0a05b6d4d28d5f3630d6d74857b253cf8332': {
-    availableOn: ['pearl'],
+    availableOn: ['pearl', 'quickstart'],
     minOperatingBalance: 0.011,
     minOperatingBalanceToken: 'ETH',
   },
@@ -181,6 +195,12 @@ const STAKING_CONTRACT_DETAILS: Record<Address, StakingContractDetailsInfo> = {
     minOperatingBalance: 135,
     minOperatingBalanceToken: 'xDAI',
   },
+  // Optimus Alpha II
+  '0x000000000000000000000000bca056952d2a7a8dd4a002079219807cfdf9fd29': {
+    availableOn: ['pearl', 'quickstart'],
+    minOperatingBalance: 0.03,
+    minOperatingBalanceToken: 'ETH',
+  },
   // MemeBase Alpha II
   '0x000000000000000000000000c653622fd75026a020995a1d8c8651316cbbc4da': {
     availableOn: ['pearl'],
@@ -195,29 +215,31 @@ const STAKING_CONTRACT_DETAILS: Record<Address, StakingContractDetailsInfo> = {
   },
   // Quickstart Beta - Expert 17
   '0x0000000000000000000000001430107a785c3a36a0c1fc0ee09b9631e2e72aff': {
+    availableOn: ['quickstart'],
     minOperatingBalance: 135,
     minOperatingBalanceToken: 'xDAI',
   },
   // Quickstart Beta - Expert 18
   '0x000000000000000000000000041e679d04fc0d4f75eb937dea729df09a58e454': {
+    availableOn: ['quickstart'],
     minOperatingBalance: 135,
     minOperatingBalanceToken: 'xDAI',
   },
   // Modius Alpha II
   '0x000000000000000000000000ec013e68fe4b5734643499887941ec197fd757d0': {
-    availableOn: ['pearl'],
+    availableOn: ['pearl', 'quickstart'],
     minOperatingBalance: 0.011,
     minOperatingBalanceToken: 'ETH',
   },
   // Modius Alpha III
   '0x0000000000000000000000009034d0413d122015710f1744a19efb1d7c2ceb13': {
-    availableOn: ['pearl'],
+    availableOn: ['pearl', 'quickstart'],
     minOperatingBalance: 0.011,
     minOperatingBalanceToken: 'ETH',
   },
   // Modius Alpha IV
   '0x0000000000000000000000008bcadb2c291c159f9385964e5ed95a9887302862': {
-    availableOn: ['pearl'],
+    availableOn: ['pearl', 'quickstart'],
     minOperatingBalance: 0.011,
     minOperatingBalanceToken: 'ETH',
   },

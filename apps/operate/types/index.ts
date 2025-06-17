@@ -8,8 +8,6 @@ export type Metadata = {
 export type AvailableOn =
   | 'pearl'
   | 'quickstart'
-  | 'optimusQuickstart'
-  | 'modiusQuickstart'
   | 'contribute';
 
 export type StakingContract = {

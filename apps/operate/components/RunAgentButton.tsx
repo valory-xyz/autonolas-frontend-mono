@@ -18,19 +18,9 @@ const props = {
   pearl: {
     icon: <Image src={`/images/pearl.svg`} alt="Pearl app" width={18} height={18} />,
     text: 'Pearl',
-    href: 'https://olas.network/operate#download',
+    href: 'https://olas.network/pearl#download',
   },
   quickstart: {
-    icon: <Image src={`/images/github.svg`} alt="Github" width={18} height={18} />,
-    text: 'Quickstart',
-    href: QUICKSTART_URL,
-  },
-  optimusQuickstart: {
-    icon: <Image src={`/images/github.svg`} alt="Github" width={18} height={18} />,
-    text: 'Quickstart',
-    href: QUICKSTART_URL,
-  },
-  modiusQuickstart: {
     icon: <Image src={`/images/github.svg`} alt="Github" width={18} height={18} />,
     text: 'Quickstart',
     href: QUICKSTART_URL,
@@ -41,6 +31,7 @@ const props = {
     href: 'https://contribute.olas.network/staking',
   },
 };
+
 export const RunAgentButton = ({ availableOn, type = 'text', className }: RunAgentButtonProps) => {
   const agentProps = props[availableOn];
   return (
