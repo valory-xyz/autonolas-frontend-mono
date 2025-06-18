@@ -56,7 +56,7 @@ const agents: Agent[] = [
     description:
       'Streamlines your DeFi experience by intelligently managing your assets across the Superchain.',
     comingSoon: false,
-    availableOn: ['optimusQuickstart'],
+    availableOn: ['pearl', 'quickstart'],
     urls: {
       learnMore: 'https://olas.network/services/babydegen#optimus-agent',
     },
@@ -67,7 +67,7 @@ const agents: Agent[] = [
     name: 'Modius Agent',
     description: 'Invests crypto assets on your behalf and grows your portfolio on Mode chain.',
     comingSoon: false,
-    availableOn: ['pearl', 'modiusQuickstart'],
+    availableOn: ['pearl', 'quickstart'],
     urls: {
       learnMore: 'https://olas.network/services/babydegen#modius-agent',
     },
