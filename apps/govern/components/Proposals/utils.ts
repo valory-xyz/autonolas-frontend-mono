@@ -50,3 +50,26 @@ export const hasNotStarted = (proposal: Proposal, currentBlock: bigint | undefin
  */
 export const getUserVote = (proposal: Proposal, address: Address) =>
   proposal.voteCasts.find((vote) => areAddressesEqual(vote.voter, address));
+
+/**
+ * Returns true if the quorum is reached
+ */
+export const isQuorumReached = (proposal: Proposal) => {
+  const { votesFor, votesAgainst, quorum } = proposal;
+  const votesForNumber = Number(votesFor);
+  const votesAgainstNumber = Number(votesAgainst);
+  const quorumNumber = Number(quorum);
+
+  return votesForNumber >= quorumNumber || votesAgainstNumber >= quorumNumber;
+};
+
+/**
+ * Returns true if the vote succeeded
+ */
+export const isVoteSucceeded = (proposal: Proposal) => {
+  const { votesFor, votesAgainst } = proposal;
+  const votesForNumber = Number(votesFor);
+  const votesAgainstNumber = Number(votesAgainst);
+
+  return votesForNumber > votesAgainstNumber;
+};
