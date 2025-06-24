@@ -24,7 +24,6 @@ import {
   hasNotStarted,
   isOngoing,
   isQuorumReached,
-  isVoteSucceeded,
 } from './utils';
 
 const { Text } = Typography;
@@ -33,10 +32,10 @@ const Status = ({ item, block }: { item: Proposal; block: bigint | undefined }) 
   if (item.isExecuted) return <Tag color="green">Executed</Tag>;
   if (item.isCancelled) return <Tag color="volcano">Cancelled</Tag>;
   if (item.isQueued) return <Tag color="gold">Queued</Tag>;
-  if (isOngoing(item, block)) return <Tag color="blue">Ongoing</Tag>;
   if (hasNotStarted(item, block)) return <Tag>Created</Tag>;
-  if (isQuorumReached(item) && isVoteSucceeded(item)) return <Tag color="green">Succeeded</Tag>;
-  return <Tag color="red">Defeated</Tag>;
+  if (isOngoing(item, block)) return <Tag color="blue">Ongoing</Tag>;
+  if (!isQuorumReached(item)) return <Tag color="red">Defeated</Tag>;
+  return <Tag>Waiting to queue</Tag>;
 };
 
 const getColumns = (
