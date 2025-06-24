@@ -56,8 +56,8 @@ export const getUserVote = (proposal: Proposal, address: Address) =>
  */
 export const isQuorumReached = (proposal: Proposal) => {
   const { votesFor, quorum } = proposal;
-  const votesForNumber = Number(votesFor);
-  const quorumNumber = Number(quorum);
+  const votesForBigInt = BigInt(votesFor);
+  const quorumBigInt = BigInt(quorum);
 
-  return votesForNumber >= quorumNumber;
+  return votesForBigInt >= quorumBigInt;
 };
