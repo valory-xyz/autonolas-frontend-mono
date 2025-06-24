@@ -23,6 +23,7 @@ import {
   getUserVote,
   hasNotStarted,
   isOngoing,
+  isQuorumReached,
 } from './utils';
 
 const { Text } = Typography;
@@ -31,19 +32,9 @@ const Status = ({ item, block }: { item: Proposal; block: bigint | undefined }) 
   if (item.isExecuted) return <Tag color="green">Executed</Tag>;
   if (item.isCancelled) return <Tag color="volcano">Cancelled</Tag>;
   if (item.isQueued) return <Tag color="gold">Queued</Tag>;
-  if (isOngoing(item, block)) return <Tag color="blue">Ongoing</Tag>;
   if (hasNotStarted(item, block)) return <Tag>Created</Tag>;
-  /**
-   * TODO: display Defeated state:
-   * 
-   * if (_quorumReached(proposalId) && _voteSucceeded(proposalId)) {
-        return ProposalState.Succeeded;
-    } else {
-        return ProposalState.Defeated;    <---------- this
-    }
-   * 
-   * or can use https://etherscan.io/address/0x8e84b5055492901988b831817e4ace5275a3b401#readContract#F21
-   */
+  if (isOngoing(item, block)) return <Tag color="blue">Ongoing</Tag>;
+  if (!isQuorumReached(item)) return <Tag color="red">Defeated</Tag>;
   return <Tag>Waiting to queue</Tag>;
 };
 
