@@ -1,0 +1,71 @@
+[
+  {
+    "id": "prediction-agents-mechs-ai-tool",
+    "name": "Mechs Prediction Tool",
+    "description": "Create new tools on the Mechs marketplace. Improve Prediction Agents' prediction accuracy.",
+    "service": {
+      "id": "prediction-agents",
+      "name": "Prediction Agents",
+      "url": "https://olas.network/services/prediction-agents"
+    },
+    "images": {
+      "homepageCard": "/images/mechs-marketplace.png",
+      "description": "/images/mechs-marketplace.png"
+    },
+    "isMechsToolPath": true,
+    "markdownPath": "paths-markdown/prediction-agents-mechs-ai-tool.md"
+  },
+  {
+    "id": "prediction-agents-trading-strategy",
+    "name": "Trading Strategy",
+    "description": "Craft new strategies to help Prediction Agents win prediction markets.",
+    "service": {
+      "id": "prediction-agents",
+      "name": "Prediction Agents",
+      "url": "https://olas.network/services/prediction-agents"
+    },
+    "isMechsToolPath": false,
+    "markdownPath": "paths-markdown/prediction-agents-trading-strategy.md"
+  },
+  {
+    "id": "general-mechs-tool",
+    "name": "General Mechs Tool",
+    "description": "Add to the Mechs AI tools marketplace for agents.",
+    "isMechsToolPath": true,
+    "markdownPath": "paths-markdown/general-mechs-tool.md"
+  },
+  {
+    "id": "build-your-own-service",
+    "name": "Build your own service",
+    "description": "Build a full autonomous service from the ground up.",
+    "isMechsToolPath": false,
+    "markdownPath": "paths-markdown/build-your-own-service.md"
+  },
+  {
+    "id": "shorts-mech-tool",
+    "name": "Shorts.wtf Mech Tool",
+    "description": "Create new tools on the Mechs marketplace. Improve content generating functionality.",
+    "isMechsToolPath": true,    
+    "service": {
+      "name": "Shorts.wtf",
+      "url": "https://shorts.wtf"
+    },
+    "images": {
+      "homepageCard": "/images/video-clapper.png",
+      "description": "/images/mechs-marketplace.png",
+      "service": "/images/shorts-mech-tool.png"
+    },
+    "markdownPath": "paths-markdown/shorts-mech-tool.md"
+  }, 
+  {
+    "id": "ecosystem-opportunities",
+    "name": "Ecosystem Opportunities",
+    "description": "Build agents and services for projects in the Olas ecosystem.",
+    "isMechsToolPath": false,
+    "images": {
+      "homepageCard": "/images/ecosystem-opportunities.png",
+      "homepageCardImageCanContain": true
+    },
+    "markdownPath": "paths-markdown/ecosystem-opportunities.md"
+  }
+]

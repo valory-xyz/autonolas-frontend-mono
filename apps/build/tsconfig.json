@@ -1,0 +1,51 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "jsx": "preserve",
+    "allowJs": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "strict": true,
+    "forceConsistentCasingInFileNames": true,
+    "noEmit": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "incremental": true,
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ],
+    "types": [
+      "jest",
+      "node",
+      "react",
+      "react-dom"
+    ],
+    "paths": {
+      "common-util/*": [
+        "apps/build/common-util/*"
+      ],
+      "components/*": [
+        "apps/build/components/*"
+      ],
+      "util/*": [
+        "apps/build/util/*"
+      ],
+      "images/*": [
+        "apps/build/public/images/*"
+      ],
+      "static/*": [
+        "apps/build/static/*"
+      ]
+    }
+  },
+  "exclude": [
+    "node_modules"
+  ],
+  "include": [
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx"
+  ]
+}
