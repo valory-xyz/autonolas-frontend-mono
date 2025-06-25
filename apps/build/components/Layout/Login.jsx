@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
-import { useAccount, useNetwork, useBalance } from 'wagmi';
+import { useAccount, useBalance, useConfig } from 'wagmi';
 import { MEDIA_QUERY } from '@autonolas/frontend-library';
 import {
   setUserAccount as setUserAccountFn,
@@ -30,9 +30,9 @@ const Login = ({
   setLogout,
 }) => {
   const { address } = useAccount();
-  const { chain } = useNetwork();
-  const chainId = chain?.id;
-  const { data } = useBalance({ address, chainId: chain?.id });
+  const { chains } = useConfig();
+  const chainId = chains[0]?.id;
+  const { data } = useBalance({ address, chainId });
 
   useEffect(() => {
     if (address) {

@@ -3,24 +3,21 @@ import { ConfigProvider } from 'antd';
 import PropTypes from 'prop-types';
 import { THEME_CONFIG } from '@autonolas/frontend-library';
 
-/** wagmi config */
-import { WagmiConfig as WagmiConfigProvider } from 'wagmi';
-import { wagmiConfig } from 'common-util/Login/config';
-
 /** antd theme config */
 import Layout from 'components/Layout';
 import GlobalStyle from 'components/GlobalStyles';
+import Web3ModalProvider from '../context/Web3ModalProvider';
 import initStore from '../store';
 
 const MyApp = ({ Component, pageProps }) => (
   <>
     <GlobalStyle />
     <ConfigProvider theme={THEME_CONFIG}>
-      <WagmiConfigProvider config={wagmiConfig}>
+      <Web3ModalProvider>
         <Layout>
           <Component {...pageProps} />
         </Layout>
-      </WagmiConfigProvider>
+      </Web3ModalProvider>
     </ConfigProvider>
   </>
 );
@@ -34,7 +31,8 @@ MyApp.getInitialProps = async ({ Component, ctx }) => {
 };
 
 MyApp.propTypes = {
-  Component: PropTypes.oneOfType([PropTypes.func, PropTypes.shape({})]).isRequired,
+  Component: PropTypes.oneOfType([PropTypes.func, PropTypes.shape({})])
+    .isRequired,
   pageProps: PropTypes.shape({}).isRequired,
 };
 

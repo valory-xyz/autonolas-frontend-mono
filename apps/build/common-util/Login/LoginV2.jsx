@@ -1,8 +1,6 @@
 import { useEffect } from 'react';
 import PropTypes from 'prop-types';
-import { Web3Modal, Web3Button } from '@web3modal/react';
-import { useAccount, useNetwork, useBalance } from 'wagmi';
-import { COLOR } from '@autonolas/frontend-library';
+import { useAccount, useBalance, useConfig } from 'wagmi';
 import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
 import { setChainId } from 'store/setup/actions';
@@ -10,8 +8,6 @@ import {
   getChainId,
   getChainIdOrDefaultToMainnet,
 } from 'common-util/functions';
-import { useScreen } from 'common-util/hooks';
-import { projectId, ethereumClient } from './config';
 
 const LoginContainer = styled.div`
   display: flex;
@@ -23,15 +19,13 @@ const LoginContainer = styled.div`
 export const LoginV2 = ({
   onConnect: onConnectCb,
   onDisconnect: onDisconnectCb,
-  theme = 'light',
 }) => {
   const dispatch = useDispatch();
   const { address } = useAccount();
-  const { chain } = useNetwork();
+  const { chains } = useConfig();
   const { data } = useBalance({ address });
-  const { isMobile } = useScreen();
 
-  const chainId = chain?.id;
+  const chainId = chains[0]?.id;
 
   useEffect(() => {
     // if chainId is undefined, the wallet is not connected & default to mainnet
@@ -70,8 +64,9 @@ export const LoginV2 = ({
       try {
         // This is the initial `provider` that is returned when
         // using web3Modal to connect. Can be MetaMask or WalletConnect.
-        const modalProvider = connector?.options?.getProvider?.()
-          || (await connector?.getProvider?.());
+        const modalProvider =
+          connector?.options?.getProvider?.() ||
+          (await connector?.getProvider?.());
 
         if (modalProvider) {
           // *******************************************************
@@ -111,21 +106,7 @@ export const LoginV2 = ({
 
   return (
     <LoginContainer>
-      <Web3Button
-        balance="show"
-        avatar="hide"
-        icon={isMobile ? 'hide' : 'show'}
-      />
-      <Web3Modal
-        projectId={projectId}
-        ethereumClient={ethereumClient}
-        themeMode={theme}
-        themeVariables={{
-          '--w3m-button-border-radius': '5px',
-          '--w3m-accent-color': COLOR.PRIMARY,
-          '--w3m-background-color': COLOR.PRIMARY,
-        }}
-      />
+      <w3m-button balance="hide" />
     </LoginContainer>
   );
 };
@@ -133,11 +114,9 @@ export const LoginV2 = ({
 LoginV2.propTypes = {
   onConnect: PropTypes.func,
   onDisconnect: PropTypes.func,
-  theme: PropTypes.string,
 };
 
 LoginV2.defaultProps = {
   onConnect: undefined,
   onDisconnect: undefined,
-  theme: 'light',
 };
