@@ -6,7 +6,6 @@ import Markdown from 'markdown-to-jsx';
 import paths from 'components/Paths/data.json';
 import { COLOR } from '@autonolas/frontend-library';
 import Meta from 'components/Meta';
-import PropTypes from 'prop-types';
 import { SITE } from 'util/constants';
 import { GetServerSidePropsContext } from 'next';
 
@@ -42,7 +41,7 @@ type PathDetailPageProps = {
   markdownContent: string;
 };
 
-const PathDetailPage = ({ pathData, markdownContent }: PathDetailPageProps) => {
+const PathDetailPage = ({ pathData = null, markdownContent = '' }: PathDetailPageProps) => {
   if (!pathData) {
     return <Typography.Title level={2}>Path not found</Typography.Title>;
   }
@@ -211,28 +210,3 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
 
   return { props: { pathData: null, markdownContent: null, id } };
 }
-
-PathDetailPage.propTypes = {
-  pathData: PropTypes.shape({
-    id: PropTypes.string.isRequired,
-    name: PropTypes.string.isRequired,
-    description: PropTypes.string,
-    images: PropTypes.shape({
-      description: PropTypes.string,
-      service: PropTypes.string,
-    }),
-    service: PropTypes.shape({
-      id: PropTypes.string,
-      name: PropTypes.string,
-      url: PropTypes.string,
-    }),
-    isMechsToolPath: PropTypes.bool,
-    markdownPath: PropTypes.string,
-  }),
-  markdownContent: PropTypes.string,
-};
-
-PathDetailPage.defaultProps = {
-  pathData: null,
-  markdownContent: '',
-};
