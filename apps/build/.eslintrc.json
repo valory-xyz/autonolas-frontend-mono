@@ -1,58 +1,34 @@
 {
-  "env": {
-    "browser": true,
-    "es6": true
-  },
-  "parser": "@babel/eslint-parser",
-  "extends": [
-    "eslint:recommended",
-    "plugin:react/recommended",
-    "airbnb",
-    "plugin:jest/all"
-  ],
-  "globals": {
-    "BigInt": true
-  },
-  "settings": {
-    "react": {
-      "version": "detect"
-    }
-  },
-  "parserOptions": {
-    "ecmaFeatures": {
-      "jsx": true
-    },
-    "ecmaVersion": 2018,
-    "sourceType": "module"
-  },
-  "plugins": ["react", "jsx-a11y", "import", "jest"],
+  "extends": ["plugin:@nx/react-typescript", "next/core-web-vitals", "../../.eslintrc.json"],
+  "ignorePatterns": ["!**/*", ".next/**/*"],
   "rules": {
-    "react/react-in-jsx-scope": "off",
-    "react/jsx-props-no-spreading": "off",
-    "react/no-array-index-key": "off",
-    "arrow-parens": ["error"],
-    "import/no-unresolved": [
-      2,
+    "@nx/enforce-module-boundaries": [
+      "error",
       {
-        "ignore": ["util", "common-util", "components", "store"]
+        "allow": ["libs*"]
       }
-    ],
-    "no-console": ["warn", { "allow": ["error"] }],
-    "import/prefer-default-export": "off",
-    "react/forbid-prop-types": "off",
-    "react/destructuring-assignment": "off",
-    "jest/no-hooks": "off",
-    "jest/prefer-expect-assertions": "off",
-    "jest/no-conditional-expect": "off",
-    "react/function-component-definition": [
-      2,
-      {
-        "namedComponents": ["arrow-function", "function-declaration"],
-        "unnamedComponents": "arrow-function"
+    ]
+  },
+  "overrides": [
+    {
+      "files": ["*.*"],
+      "rules": {
+        "@next/next/no-html-link-for-pages": "off"
       }
-    ],
-    "react/jsx-no-useless-fragment": [2, { "allowExpressions": true }],
-    "no-untyped-mock-factory": "off",
-    "jest/no-untyped-mock-factory": "off"
-  }
+    },
+    {
+      "files": ["*.ts", "*.tsx", "*.js", "*.jsx"],
+      "rules": {
+        "@next/next/no-html-link-for-pages": ["error", "apps/launch/pages"]
+      }
+    },
+    {
+      "files": ["*.ts", "*.tsx"],
+      "rules": {}
+    },
+    {
+      "files": ["*.js", "*.jsx"],
+      "rules": {}
+    }
+  ]
 }
