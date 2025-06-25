@@ -12,6 +12,7 @@ import {
 import { useState } from "react";
 import { notifyError } from "@autonolas/frontend-library";
 import { useHelpers } from "common-util/hooks/useHelpers";
+import { CustomFormWrapper } from "components/DynamicFieldsForm/styles";
 import { getPendingIncentives } from "./requests";
 import { MapPendingIncentivesContainer } from "./styles";
 
@@ -76,55 +77,58 @@ export const IncentivesForNextEpoch = () => {
 
       <Row>
         <Col lg={14} xs={24}>
-          <Form
-            form={form}
-            name="dynamic_form_complex_incentives"
-            onFinish={onFinish}
-            layout="inline"
-            autoComplete="off"
-          >
-            <Form.Item
-              label="Unit Type"
-              name="unitType"
-              rules={[{ required: true, message: "Please add unit type" }]}
+          <CustomFormWrapper>
+            <Form
+              form={form}
+              name="dynamic_form_complex_incentives"
+              onFinish={onFinish}
+              layout="inline"
+              autoComplete="off"
             >
-              <Radio.Group>
-                <Radio value="1">Agent</Radio>
-                <Radio value="0">Component</Radio>
-              </Radio.Group>
-            </Form.Item>
-
-            <Form.Item
-              label="Unit ID"
-              name="unitId"
-              rules={[{ required: true, message: "Please add unit Id" }]}
-            >
-              <InputNumber min={0} className="mr-24" placeholder="Eg. 1" />
-            </Form.Item>
-
-            <Form.Item>
-              <Button
-                type="primary"
-                htmlType="submit"
-                loading={isLoading}
-                disabled={!account}
+              <Form.Item
+                label="Unit Type"
+                name="unitType"
+                rules={[{ required: true, message: "Please add unit type" }]}
               >
-                Estimate
-              </Button>
+                <Radio.Group>
+                  <Radio value="1">Agent</Radio>
+                  <Radio value="0">Component</Radio>
+                </Radio.Group>
+              </Form.Item>
 
-              {!account && (
-                <Text
-                  className="ml-8"
-                  type="secondary"
-                  style={
-                    screens.xs ? { display: "block" } : { display: "inline" }
-                  }
+              <Form.Item
+                label="Unit ID"
+                name="unitId"
+                rules={[{ required: true, message: "Please add unit Id" }]}
+              >
+                <InputNumber min={0} className="mr-24" placeholder="Eg. 1" />
+              </Form.Item>
+
+              <Form.Item>
+                <Button
+                  type="primary"
+                  size="large"
+                  htmlType="submit"
+                  loading={isLoading}
+                  disabled={!account}
                 >
-                  To check rewards, connect a wallet
-                </Text>
-              )}
-            </Form.Item>
-          </Form>
+                  Estimate
+                </Button>
+
+                {!account && (
+                  <Text
+                    className="ml-8"
+                    type="secondary"
+                    style={
+                      screens.xs ? { display: "block" } : { display: "inline" }
+                    }
+                  >
+                    To check rewards, connect a wallet
+                  </Text>
+                )}
+              </Form.Item>
+            </Form>
+          </CustomFormWrapper>
         </Col>
 
         <Col lg={10} xs={24}>

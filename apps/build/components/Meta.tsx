@@ -7,13 +7,13 @@ const SITE_URL = "https://build.olas.network/";
 const SITE_DEFAULT_IMAGE_URL = `${SITE_URL}images/metatags-image.png`;
 
 const Meta = ({
-  title = null,
+  title = SITE_TITLE,
   description = SITE_DESCRIPTION,
   path = "",
 }: {
-  title: string | null;
-  description: string;
-  path: string;
+  title?: string | null;
+  description?: string;
+  path?: string;
 }) => {
   const pageTitle = title ? `${title} | ${SITE_TITLE}` : SITE_TITLE;
   const pageUrl = `${SITE_URL}${path}`;

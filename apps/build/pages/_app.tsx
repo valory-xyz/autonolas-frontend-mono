@@ -1,11 +1,8 @@
 import { createWrapper } from "next-redux-wrapper";
-import { ConfigProvider } from "antd";
-import PropTypes from "prop-types";
-import { THEME_CONFIG } from "@autonolas/frontend-library";
 
 /** antd theme config */
 import Layout from "components/Layout";
-import GlobalStyle from "components/GlobalStyles";
+import { AutonolasThemeProvider, GlobalStyles } from "libs/ui-theme/src";
 import Web3ModalProvider from "../context/Web3ModalProvider";
 import initStore from "../store";
 import { NextPage, NextPageContext } from "next";
@@ -18,14 +15,14 @@ const MyApp = ({
   pageProps: Record<string, unknown>;
 }) => (
   <>
-    <GlobalStyle />
-    <ConfigProvider theme={THEME_CONFIG}>
+    <GlobalStyles />
+    <AutonolasThemeProvider>
       <Web3ModalProvider>
         <Layout>
           <Component {...pageProps} />
         </Layout>
       </Web3ModalProvider>
-    </ConfigProvider>
+    </AutonolasThemeProvider>
   </>
 );
 
@@ -41,12 +38,6 @@ MyApp.getInitialProps = async ({
     : {};
 
   return { pageProps };
-};
-
-MyApp.propTypes = {
-  Component: PropTypes.oneOfType([PropTypes.func, PropTypes.shape({})])
-    .isRequired,
-  pageProps: PropTypes.shape({}).isRequired,
 };
 
 const wrapper = createWrapper(initStore);
