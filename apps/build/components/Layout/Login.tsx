@@ -1,6 +1,5 @@
 import { useEffect } from 'react';
 import { connect } from 'react-redux';
-import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import { useAccount, useBalance, useConfig } from 'wagmi';
 import { MEDIA_QUERY } from '@autonolas/frontend-library';
@@ -68,16 +67,6 @@ const Login = ({
     </LoginContainer>
   );
 };
-
-Login.propTypes = {
-  setUserAccount: PropTypes.func.isRequired,
-  setUserBalance: PropTypes.func.isRequired,
-  setChainId: PropTypes.func.isRequired,
-  setErrorMessage: PropTypes.func.isRequired,
-  setLogout: PropTypes.func.isRequired,
-};
-
-Login.defaultProps = {};
 
 const mapDispatchToProps = {
   setUserAccount: setUserAccountFn,
