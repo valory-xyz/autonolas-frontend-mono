@@ -1,11 +1,6 @@
 import { createConfig } from 'wagmi';
 import { mainnet } from 'wagmi/chains';
-import {
-  coinbaseWallet,
-  injected,
-  safe,
-  walletConnect,
-} from 'wagmi/connectors';
+import { coinbaseWallet, injected, safe, walletConnect } from 'wagmi/connectors';
 import type { Chain } from 'wagmi/chains';
 import { http } from 'viem';
 import { RPC_URLS } from 'common-util/Contracts';
@@ -36,8 +31,7 @@ export const wagmiConfig = createConfig({
     }),
   ],
   transports: SUPPORTED_CHAINS.reduce(
-    (acc, chain) =>
-      Object.assign(acc, { [chain.id]: http(RPC_URLS[chain.id]) }),
+    (acc, chain) => Object.assign(acc, { [chain.id]: http(RPC_URLS[chain.id]) }),
     {},
   ),
 });

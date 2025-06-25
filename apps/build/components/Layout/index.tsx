@@ -31,13 +31,7 @@ const HeaderLeftContent = styled.div`
   gap: 16px;
 `;
 
-const ExternalLink = ({
-  href = '',
-  label = null,
-}: {
-  href: string;
-  label: React.ReactNode;
-}) => (
+const ExternalLink = ({ href = '', label = null }: { href: string; label: React.ReactNode }) => (
   <a href={href} target="_blank" rel="noopener noreferrer">
     {label}
   </a>
@@ -61,12 +55,7 @@ const navItems = [
   },
   {
     key: 'contribute',
-    label: (
-      <ExternalLink
-        label="Contribute"
-        href="https://contribute.olas.network/"
-      />
-    ),
+    label: <ExternalLink label="Contribute" href="https://contribute.olas.network/" />,
   },
   {
     key: 'govern',
@@ -78,18 +67,14 @@ const navItems = [
   },
   {
     key: 'operate',
-    label: (
-      <ExternalLink label="Operate" href="https://operate.olas.network/" />
-    ),
+    label: <ExternalLink label="Operate" href="https://operate.olas.network/" />,
   },
   {
     type: 'divider',
   },
   {
     key: 'registry',
-    label: (
-      <ExternalLink label="Registry" href="https://registry.olas.network/" />
-    ),
+    label: <ExternalLink label="Registry" href="https://registry.olas.network/" />,
   },
   {
     type: 'divider',

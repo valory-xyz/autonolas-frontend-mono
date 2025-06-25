@@ -5,12 +5,12 @@ export type SetupState = {
   balance?: string | null;
   chainId?: number | null;
   errorMessage?: string | null;
-}
+};
 
 type Action = {
   type: string;
   data: SetupState;
-}
+};
 
 /**
  * initialState of the store

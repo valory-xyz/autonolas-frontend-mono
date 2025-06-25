@@ -1,5 +1,10 @@
 export const PoweredByOlas = () => (
-  <a href="https://olas.network" rel="noopener noreferrer" target="_blank" aria-label="Powered by Olas">
+  <a
+    href="https://olas.network"
+    rel="noopener noreferrer"
+    target="_blank"
+    aria-label="Powered by Olas"
+  >
     <svg xmlns="http://www.w3.org/2000/svg" width="169" height="37" fill="none">
       <rect width="169" height="37" fill="#000" rx="5" />
       <path

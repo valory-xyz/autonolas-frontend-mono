@@ -45,7 +45,7 @@
     "id": "shorts-mech-tool",
     "name": "Shorts.wtf Mech Tool",
     "description": "Create new tools on the Mechs marketplace. Improve content generating functionality.",
-    "isMechsToolPath": true,    
+    "isMechsToolPath": true,
     "service": {
       "name": "Shorts.wtf",
       "url": "https://shorts.wtf"
@@ -56,7 +56,7 @@
       "service": "/images/shorts-mech-tool.png"
     },
     "markdownPath": "paths-markdown/shorts-mech-tool.md"
-  }, 
+  },
   {
     "id": "ecosystem-opportunities",
     "name": "Ecosystem Opportunities",

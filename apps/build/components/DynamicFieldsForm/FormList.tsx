@@ -1,17 +1,5 @@
-import {
-  MinusCircleOutlined,
-  PlusOutlined,
-  QuestionCircleOutlined,
-} from '@ant-design/icons';
-import {
-  Button,
-  Form,
-  Grid,
-  InputNumber,
-  Radio,
-  Space,
-  Typography,
-} from 'antd';
+import { MinusCircleOutlined, PlusOutlined, QuestionCircleOutlined } from '@ant-design/icons';
+import { Button, Form, Grid, InputNumber, Radio, Space, Typography } from 'antd';
 
 const { Text } = Typography;
 const { useBreakpoint } = Grid;
@@ -55,9 +43,7 @@ export const FormList = ({
             <Space key={field.key} align="baseline">
               <Form.Item
                 noStyle
-                shouldUpdate={(prevValues, curValues) =>
-                  prevValues.units !== curValues.units
-                }
+                shouldUpdate={(prevValues, curValues) => prevValues.units !== curValues.units}
               >
                 {() => (
                   <Form.Item
@@ -71,12 +57,7 @@ export const FormList = ({
                       },
                     ]}
                   >
-                    <InputNumber
-                      min={0}
-                      className="mr-24"
-                      placeholder="Eg. 1"
-                      style={inputStyle}
-                    />
+                    <InputNumber min={0} className="mr-24" placeholder="Eg. 1" style={inputStyle} />
                   </Form.Item>
                 )}
               </Form.Item>
@@ -85,9 +66,7 @@ export const FormList = ({
                 {...field}
                 label={inputTwoLabel}
                 name={[field.name, 'unitType']}
-                rules={[
-                  { required: true, message: `Please add ${inputTwoLabel}` },
-                ]}
+                rules={[{ required: true, message: `Please add ${inputTwoLabel}` }]}
               >
                 {isUnitTypeInput ? (
                   <Radio.Group>
@@ -95,17 +74,11 @@ export const FormList = ({
                     <Radio value="0">Component</Radio>
                   </Radio.Group>
                 ) : (
-                  <InputNumber
-                    min={0}
-                    placeholder="Eg. 0.065"
-                    style={inputStyle}
-                  />
+                  <InputNumber min={0} placeholder="Eg. 0.065" style={inputStyle} />
                 )}
               </Form.Item>
 
-              {fields.length > 1 && (
-                <MinusCircleOutlined onClick={() => remove(field.name)} />
-              )}
+              {fields.length > 1 && <MinusCircleOutlined onClick={() => remove(field.name)} />}
             </Space>
           ))}
 

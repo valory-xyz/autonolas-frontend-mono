@@ -14,7 +14,13 @@ import {
 /**
  * fetches the owners of the units
  */
-export const getOwnersForUnits = async ({ unitIds, unitTypes }: { unitIds: string[]; unitTypes: string[] }) => {
+export const getOwnersForUnits = async ({
+  unitIds,
+  unitTypes,
+}: {
+  unitIds: string[];
+  unitTypes: string[];
+}) => {
   const ownersList = [];
 
   const agentContract = getAgentContract();
@@ -46,9 +52,7 @@ export const getOwnerIncentivesRequest = async ({
   unitIds: string[];
 }) => {
   const contract = getTokenomicsContract();
-  const response = await contract.methods
-    .getOwnerIncentives(address, unitTypes, unitIds)
-    .call();
+  const response = await contract.methods.getOwnerIncentives(address, unitTypes, unitIds).call();
   return response;
 };
 
@@ -62,11 +66,9 @@ export const claimOwnerIncentivesRequest = async ({
   unitIds: string[];
 }) => {
   const contract = getDispenserContract();
-  const fn = contract.methods
-    .claimOwnerIncentives(unitTypes, unitIds)
-    .send({ from: account });
+  const fn = contract.methods.claimOwnerIncentives(unitTypes, unitIds).send({ from: account });
 
-  const response = await sendTransaction(fn, account) as unknown as { transactionHash?: string };
+  const response = (await sendTransaction(fn, account)) as unknown as { transactionHash?: string };
   return response?.transactionHash;
 };
 
@@ -138,27 +140,32 @@ export const getLastEpochRequest = async () => {
   }
 };
 
-export const rewardsFormatter = (value: bigint, dp = 4) => parseFloat(formatEther(value)).toLocaleString('en', {
-  maximumFractionDigits: dp,
-  minimumFractionDigits: dp,
-});
+export const rewardsFormatter = (value: bigint, dp = 4) =>
+  parseFloat(formatEther(value)).toLocaleString('en', {
+    maximumFractionDigits: dp,
+    minimumFractionDigits: dp,
+  });
 
 const BIG_INT_0 = BigInt(0);
 const BIG_INT_100 = BigInt(100);
 
-export const getPendingIncentives = async ({ unitType, unitId }: { unitType: string; unitId: string }) => {
+export const getPendingIncentives = async ({
+  unitType,
+  unitId,
+}: {
+  unitType: string;
+  unitId: string;
+}) => {
   const contract = getTokenomicsContract();
 
   const currentEpochCounter = await getEpochCounter();
 
-  const unitIncentives = await contract.methods
-    .mapUnitIncentives(unitType, unitId)
-    .call();
+  const unitIncentives = await contract.methods.mapUnitIncentives(unitType, unitId).call();
 
   const { pendingRelativeReward, pendingRelativeTopUp, lastEpoch } = unitIncentives;
 
-  const isCurrentEpochWithReward = currentEpochCounter === Number(lastEpoch)
-    && pendingRelativeReward > BIG_INT_0;
+  const isCurrentEpochWithReward =
+    currentEpochCounter === Number(lastEpoch) && pendingRelativeReward > BIG_INT_0;
 
   // if already received rewards this epoch, return zeroes
   if (!isCurrentEpochWithReward) {
@@ -169,12 +176,10 @@ export const getPendingIncentives = async ({ unitType, unitId }: { unitType: str
   }
 
   // Get the unit points of the current epoch
-  const unitInfo = await contract.methods
-    .getUnitPoint(currentEpochCounter, unitType)
-    .call();
+  const unitInfo = await contract.methods.getUnitPoint(currentEpochCounter, unitType).call();
 
-  const pendingReward = (BigInt(pendingRelativeReward) * BigInt(unitInfo.rewardUnitFraction))
-    / BIG_INT_100;
+  const pendingReward =
+    (BigInt(pendingRelativeReward) * BigInt(unitInfo.rewardUnitFraction)) / BIG_INT_100;
 
   let totalIncentives = BigInt(pendingRelativeTopUp);
   let pendingTopUp = BIG_INT_0;
@@ -184,9 +189,7 @@ export const getPendingIncentives = async ({ unitType, unitId }: { unitType: str
    * based on current epoch length
    */
   if (totalIncentives > BIG_INT_0) {
-    const inflationPerSecond = await contract.methods
-      .inflationPerSecond()
-      .call();
+    const inflationPerSecond = await contract.methods.inflationPerSecond().call();
 
     const { timeDiff, epochLen } = await getEpochDetails();
     const epochLength = timeDiff > epochLen ? timeDiff : epochLen;
@@ -194,8 +197,9 @@ export const getPendingIncentives = async ({ unitType, unitId }: { unitType: str
     const totalTopUps = inflationPerSecond * epochLength;
     totalIncentives *= BigInt(totalTopUps);
 
-    pendingTopUp = (BigInt(totalIncentives) * BigInt(unitInfo.topUpUnitFraction))
-      / (BigInt(unitInfo.sumUnitTopUpsOLAS) * BIG_INT_100);
+    pendingTopUp =
+      (BigInt(totalIncentives) * BigInt(unitInfo.topUpUnitFraction)) /
+      (BigInt(unitInfo.sumUnitTopUpsOLAS) * BIG_INT_100);
   }
 
   return {

@@ -64,9 +64,7 @@ const PathDetailPage = ({ pathData, markdownContent }: PathDetailPageProps) => {
               Path
             </Typography.Title>
             {markdownContent && (
-              <Markdown style={{ lineHeight: '1.4' }}>
-                {markdownContent}
-              </Markdown>
+              <Markdown style={{ lineHeight: '1.4' }}>{markdownContent}</Markdown>
             )}
           </Col>
           <Col xs={24} md={12}>
@@ -77,17 +75,10 @@ const PathDetailPage = ({ pathData, markdownContent }: PathDetailPageProps) => {
               <div className="mb-8">
                 <Upcase>Description</Upcase>
               </div>
-              <Row
-                gutter={[16, 16]}
-                align="middle"
-                style={{ maxWidth: '500px' }}
-              >
+              <Row gutter={[16, 16]} align="middle" style={{ maxWidth: '500px' }}>
                 <Col span={8}>
                   <Image
-                    src={
-                      pathData.images?.description ??
-                      `/images/${pathData.id}.png`
-                    }
+                    src={pathData.images?.description ?? `/images/${pathData.id}.png`}
                     alt={pathData.name}
                     width={200}
                     height={200}
@@ -99,9 +90,7 @@ const PathDetailPage = ({ pathData, markdownContent }: PathDetailPageProps) => {
                   />
                 </Col>
                 <Col span={16}>
-                  <Typography.Paragraph>
-                    {pathData.description}
-                  </Typography.Paragraph>
+                  <Typography.Paragraph>{pathData.description}</Typography.Paragraph>
                 </Col>
               </Row>
             </section>
@@ -110,16 +99,11 @@ const PathDetailPage = ({ pathData, markdownContent }: PathDetailPageProps) => {
                 <div className="mb-8">
                   <Upcase>Service</Upcase>
                 </div>
-                <Row
-                  gutter={[16, 16]}
-                  align="middle"
-                  style={{ maxWidth: '500px' }}
-                >
+                <Row gutter={[16, 16]} align="middle" style={{ maxWidth: '500px' }}>
                   <Col span={8}>
                     <Image
                       src={
-                        pathData.images?.service ??
-                        `/images/services/${pathData?.service?.id}.png`
+                        pathData.images?.service ?? `/images/services/${pathData?.service?.id}.png`
                       }
                       alt={pathData.service.name}
                       width={200}
@@ -134,11 +118,7 @@ const PathDetailPage = ({ pathData, markdownContent }: PathDetailPageProps) => {
                   <Col span={16}>
                     <Typography.Paragraph>
                       This tool contributes to the{' '}
-                      <a
-                        href={pathData.service.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
+                      <a href={pathData.service.url} target="_blank" rel="noopener noreferrer">
                         {pathData.service.name}
                         &nbsp;↗
                       </a>{' '}
@@ -152,11 +132,7 @@ const PathDetailPage = ({ pathData, markdownContent }: PathDetailPageProps) => {
               <div className="mb-8">
                 <Upcase>Rewards</Upcase>
               </div>
-              <Row
-                gutter={[16, 16]}
-                align="middle"
-                style={{ maxWidth: '500px' }}
-              >
+              <Row gutter={[16, 16]} align="middle" style={{ maxWidth: '500px' }}>
                 <Col span={8}>
                   <Image
                     src="/images/rewards.png"
@@ -172,8 +148,7 @@ const PathDetailPage = ({ pathData, markdownContent }: PathDetailPageProps) => {
                 </Col>
                 <Col span={16}>
                   <Typography.Paragraph>
-                    Completing this path will make you eligible for Build
-                    Rewards.
+                    Completing this path will make you eligible for Build Rewards.
                   </Typography.Paragraph>
                 </Col>
               </Row>
@@ -183,11 +158,7 @@ const PathDetailPage = ({ pathData, markdownContent }: PathDetailPageProps) => {
                 <div className="mb-8">
                   <Upcase>Mechs Tool</Upcase>
                 </div>
-                <Row
-                  gutter={[16, 16]}
-                  align="middle"
-                  style={{ maxWidth: '500px' }}
-                >
+                <Row gutter={[16, 16]} align="middle" style={{ maxWidth: '500px' }}>
                   <Col span={8}>
                     <Image
                       src="/images/mechs.png"
@@ -203,9 +174,8 @@ const PathDetailPage = ({ pathData, markdownContent }: PathDetailPageProps) => {
                   </Col>
                   <Col span={16}>
                     <Typography.Paragraph>
-                      This path is for building a Mech tool. Mechs is a
-                      marketplace for agents to easily use AI tools via a
-                      blockchain.
+                      This path is for building a Mech tool. Mechs is a marketplace for agents to
+                      easily use AI tools via a blockchain.
                     </Typography.Paragraph>
                   </Col>
                 </Row>

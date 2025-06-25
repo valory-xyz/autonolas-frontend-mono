@@ -3,10 +3,7 @@ import { useAccount, useBalance, useConfig } from 'wagmi';
 import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
 import { setChainId } from 'store/setup/actions';
-import {
-  getChainId,
-  getChainIdOrDefaultToMainnet,
-} from 'common-util/functions';
+import { getChainId, getChainIdOrDefaultToMainnet } from 'common-util/functions';
 
 const LoginContainer = styled.div`
   display: flex;
@@ -16,18 +13,11 @@ const LoginContainer = styled.div`
 `;
 
 type LoginV2Props = {
-  onConnect: (props: {
-    address: string;
-    balance: string;
-    chainId: number;
-  }) => void;
+  onConnect: (props: { address: string; balance: string; chainId: number }) => void;
   onDisconnect: () => void;
 };
 
-export const LoginV2 = ({
-  onConnect: onConnectCb,
-  onDisconnect: onDisconnectCb,
-}: LoginV2Props) => {
+export const LoginV2 = ({ onConnect: onConnectCb, onDisconnect: onDisconnectCb }: LoginV2Props) => {
   const dispatch = useDispatch();
   const { address } = useAccount();
   const { chains } = useConfig();
@@ -53,7 +43,7 @@ export const LoginV2 = ({
   }, [chainId]);
 
   const { connector } = useAccount({
-    // @ts-expect-error
+    // @ts-expect-error TODO: should be fixed once we upgrade the wallet libs
     onConnect: ({ address: currentAddress }: { address: string }) => {
       if (onConnectCb) {
         onConnectCb({
@@ -74,9 +64,8 @@ export const LoginV2 = ({
         // This is the initial `provider` that is returned when
         // using web3Modal to connect. Can be MetaMask or WalletConnect.
         const modalProvider =
-          // @ts-expect-error
-          connector?.options?.getProvider?.() ||
-          (await connector?.getProvider?.());
+          // @ts-expect-error - TODO: better global types
+          connector?.options?.getProvider?.() || (await connector?.getProvider?.());
 
         if (modalProvider) {
           // *******************************************************
@@ -95,10 +84,7 @@ export const LoginV2 = ({
             // cleanup
             return () => {
               if (modalProvider.removeListener) {
-                modalProvider.removeListener(
-                  'chainChanged',
-                  handleChainChanged,
-                );
+                modalProvider.removeListener('chainChanged', handleChainChanged);
               }
             };
           }

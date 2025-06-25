@@ -28,8 +28,8 @@ type OpportunityCardProps = {
   agentDescription: string;
   project: string;
   image: string;
-  background: string;
-  status: string | null;
+  background?: string;
+  status?: string | null;
 };
 
 const OpportunityCard = ({
@@ -51,11 +51,7 @@ const OpportunityCard = ({
         <h2>{agentName}</h2>
         <p style={{ whiteSpace: 'pre-line' }}>{agentDescription}</p>
       </Col>
-      <Col
-        xs={24}
-        md={8}
-        style={{ fontSize: '0.875rem', lineHeight: '1.25rem' }}
-      >
+      <Col xs={24} md={8} style={{ fontSize: '0.875rem', lineHeight: '1.25rem' }}>
         <Flex gap={16}>
           <Image
             alt={project}
@@ -77,11 +73,7 @@ const OpportunityCard = ({
         </Flex>
         <p>{background}</p>
         <Button type="primary" className="mb-8">
-          <a
-            href={LAUNCH_CONTACT_URL}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
+          <a href={LAUNCH_CONTACT_URL} target="_blank" rel="noopener noreferrer">
             Get in touch
           </a>
         </Button>
@@ -103,12 +95,12 @@ export const Opportunities = () => (
       Opportunities
     </Typography.Title>
     <p>
-      Projects are interested in bringing Olas agents to their ecosystem. This
-      is a list of &quot;requests for agents&quot;.
+      Projects are interested in bringing Olas agents to their ecosystem. This is a list of
+      &quot;requests for agents&quot;.
     </p>
 
     <div>
-      {sortedOpportunities.map((item: any) => (
+      {sortedOpportunities.map((item: OpportunityCardProps) => (
         <OpportunityCard key={`${item.project} ${item.agentName}`} {...item} />
       ))}
     </div>

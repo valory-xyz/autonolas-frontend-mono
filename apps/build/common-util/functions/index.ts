@@ -20,7 +20,8 @@ type ChainId = number | string;
 
 export const getProvider = () => getProviderFn(SUPPORTED_CHAINS, RPC_URLS);
 
-export const getIsValidChainId = (chainId: ChainId) => getIsValidChainIdFn(SUPPORTED_CHAINS, chainId);
+export const getIsValidChainId = (chainId: ChainId) =>
+  getIsValidChainIdFn(SUPPORTED_CHAINS, chainId);
 
 export const getChainIdOrDefaultToMainnet = (chainId: ChainId) => {
   const x = getChainIdOrDefaultToMainnetFn(SUPPORTED_CHAINS, chainId);
@@ -31,10 +32,14 @@ export const getChainId = (chainId = null) => getChainIdFn(SUPPORTED_CHAINS, cha
 
 type SendTransactionParameters = Parameters<typeof sendTransactionFn>;
 
-export const sendTransaction = (fn: SendTransactionParameters[0], account: SendTransactionParameters[1]) => sendTransactionFn(fn, account, {
-  supportedChains: SUPPORTED_CHAINS,
-  rpcUrls: RPC_URLS,
-});
+export const sendTransaction = (
+  fn: SendTransactionParameters[0],
+  account: SendTransactionParameters[1],
+) =>
+  sendTransactionFn(fn, account, {
+    supportedChains: SUPPORTED_CHAINS,
+    rpcUrls: RPC_URLS,
+  });
 
 /**
  * returns the web3 details
@@ -50,6 +55,7 @@ const getWeb3Details = () => {
  * @param {Array} abi - abi of the contract
  * @param {String} contractAddress - address of the contract
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const getContract = (abi: any, contractAddress: string) => {
   const { web3 } = getWeb3Details();
   const contract = new web3.eth.Contract(abi, contractAddress);
@@ -58,19 +64,28 @@ const getContract = (abi: any, contractAddress: string) => {
 
 export const getDispenserContract = () => {
   const { chainId } = getWeb3Details();
-  const contract = getContract(DISPENSER.abi, DISPENSER.addresses[chainId as unknown as keyof typeof DISPENSER.addresses]);
+  const contract = getContract(
+    DISPENSER.abi,
+    DISPENSER.addresses[chainId as unknown as keyof typeof DISPENSER.addresses],
+  );
   return contract;
 };
 
 export const getTreasuryContract = () => {
   const { chainId } = getWeb3Details();
-  const contract = getContract(TREASURY.abi, TREASURY.addresses[chainId as unknown as keyof typeof TREASURY.addresses]);
+  const contract = getContract(
+    TREASURY.abi,
+    TREASURY.addresses[chainId as unknown as keyof typeof TREASURY.addresses],
+  );
   return contract;
 };
 
 export const getTokenomicsContract = () => {
   const { chainId } = getWeb3Details();
-  const contract = getContract(TOKENOMICS.abi, TOKENOMICS.addresses[chainId as unknown as keyof typeof TOKENOMICS.addresses]);
+  const contract = getContract(
+    TOKENOMICS.abi,
+    TOKENOMICS.addresses[chainId as unknown as keyof typeof TOKENOMICS.addresses],
+  );
   return contract;
 };
 
@@ -99,5 +114,5 @@ export const getComponentContract = () => {
 export const getBlockTimestamp = async (block = 'latest') => {
   const { web3 } = getWeb3Details();
   const temp = await web3.eth.getBlock(block);
-  return (temp.timestamp as any) * 1;
+  return (temp.timestamp as number) * 1;
 };

@@ -52,11 +52,7 @@ const Login = ({
     }
   }, [address]);
 
-  const onConnect = (response: {
-    address: string;
-    balance: string;
-    chainId: number;
-  }) => {
+  const onConnect = (response: { address: string; balance: string; chainId: number }) => {
     setUserAccount(response.address);
     setUserBalance(response.balance);
     setChainId(response.chainId);
@@ -64,10 +60,6 @@ const Login = ({
 
   const onDisconnect = () => {
     setLogout();
-  };
-
-  const onError = (error: string) => {
-    setErrorMessage(error);
   };
 
   return (

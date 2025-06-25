@@ -15,21 +15,21 @@ export const DynamicFormContainer = styled.div`
 `;
 
 type Unit = {
-  unitId: string;
+  unitId: number;
   unitType: string;
 };
 
 type DynamicFieldsFormProps = {
-  isUnitTypeInput: boolean;
-  inputOneLabel: string;
-  inputTwoLabel: string;
-  buttonText: string;
+  isUnitTypeInput?: boolean;
+  inputOneLabel?: string;
+  inputTwoLabel?: string;
+  buttonText?: string;
   isLoading: boolean;
   submitButtonText: string;
-  onSubmit: (values: any) => void;
-  canResetOnSubmit: boolean;
-  dynamicFormType: string | null;
-  showAscendingOrderMessage: boolean;
+  onSubmit: (values: { unitIds: number[]; unitTypes: string[]; address: string }) => Promise<void>;
+  canResetOnSubmit?: boolean;
+  dynamicFormType?: string | null;
+  showAscendingOrderMessage?: boolean;
 };
 
 export const DynamicFieldsForm = ({
@@ -61,7 +61,7 @@ export const DynamicFieldsForm = ({
         await onSubmit({
           unitIds: values.units.map((unit: Unit) => unit.unitId),
           unitTypes: values.units.map((unit: Unit) => unit.unitType),
-          address: values.address,
+          address: values.address as string,
         });
 
         if (canResetOnSubmit) {
@@ -75,12 +75,7 @@ export const DynamicFieldsForm = ({
 
   return (
     <DynamicFormContainer>
-      <Form
-        form={form}
-        name="dynamic_form_complex"
-        onFinish={onFinish}
-        autoComplete="off"
-      >
+      <Form form={form} name="dynamic_form_complex" onFinish={onFinish} autoComplete="off">
         {/* address input is only visible for claimable incentives */}
         {dynamicFormType === FORM_TYPES.CLAIMABLE_INCENTIVES && (
           <Form.Item
@@ -101,12 +96,7 @@ export const DynamicFieldsForm = ({
         />
 
         <Form.Item>
-          <Button
-            type="primary"
-            htmlType="submit"
-            loading={isLoading}
-            disabled={!account}
-          >
+          <Button type="primary" htmlType="submit" loading={isLoading} disabled={!account}>
             {submitButtonText}
           </Button>
 

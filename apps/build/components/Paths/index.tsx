@@ -22,8 +22,7 @@ const StyledImage = styled(Image)<{ canImageContain: boolean }>`
   display: block;
   height: 100%;
   align-self: center;
-  ${({ canImageContain }) =>
-    `object-fit: ${canImageContain ? 'contain' : 'cover'};`}
+  ${({ canImageContain }) => `object-fit: ${canImageContain ? 'contain' : 'cover'};`}
 `;
 
 type Path = {
@@ -53,10 +52,7 @@ const PathImage = ({
     service: null,
     homepageCardImageCanContain: false,
   },
-}: Omit<
-  Path,
-  'description' | 'service' | 'isMechsToolPath' | 'markdownPath' | 'images'
-> &
+}: Omit<Path, 'description' | 'service' | 'isMechsToolPath' | 'markdownPath' | 'images'> &
   Partial<Pick<Path, 'images'>>) => (
   <StyledImage
     alt={name}
@@ -151,8 +147,7 @@ export const Paths = () => (
                 </Typography.Title>
                 <div className="mb-16">
                   <Typography.Text type="secondary">
-                    Submit a PR to the repo to guide developers towards useful
-                    code contributions.
+                    Submit a PR to the repo to guide developers towards useful code contributions.
                   </Typography.Text>
                 </div>
                 <Button
