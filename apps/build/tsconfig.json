@@ -37,6 +37,9 @@
       ],
       "static/*": [
         "apps/build/static/*"
+      ],
+      "store/*": [
+        "apps/build/store/*"
       ]
     }
   },
@@ -45,6 +48,7 @@
   ],
   "include": [
     "next-env.d.ts",
+    "index.d.ts",
     "**/*.ts",
     "**/*.tsx"
   ]
