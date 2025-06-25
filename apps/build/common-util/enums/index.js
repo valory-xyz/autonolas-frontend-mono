@@ -1,0 +1,8 @@
+export const FORM_TYPES = {
+  CLAIMABLE_INCENTIVES: 'CLAIMABLE_INCENTIVES',
+};
+
+export const TOKENOMICS_UNIT_TYPES = {
+  COMPONENT: '0',
+  AGENT: '1',
+};
