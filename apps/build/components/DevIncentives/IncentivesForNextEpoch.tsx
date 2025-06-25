@@ -1,14 +1,4 @@
-import {
-  Button,
-  Col,
-  Form,
-  Grid,
-  InputNumber,
-  Radio,
-  Row,
-  Table,
-  Typography,
-} from 'antd';
+import { Button, Col, Form, Grid, InputNumber, Radio, Row, Table, Typography } from 'antd';
 import { useState } from 'react';
 import { notifyError } from '@autonolas/frontend-library';
 import { useHelpers } from 'common-util/hooks/useHelpers';
@@ -34,7 +24,7 @@ const columns = [
 export const IncentivesForNextEpoch = () => {
   const { account } = useHelpers();
   const [isLoading, setIsLoading] = useState(false);
-  const [pendingIncentives, setPendingIncentives] = useState([]);
+  const [pendingIncentives, setPendingIncentives] = useState<Record<string, unknown>[]>([]);
   const screens = useBreakpoint();
 
   const [form] = Form.useForm();
@@ -48,7 +38,6 @@ export const IncentivesForNextEpoch = () => {
         unitId: values.unitId as unknown as string,
       });
       setPendingIncentives([
-        // @ts-expect-error
         {
           pendingRelativeReward: pendingReward,
           pendingRelativeTopUp: pendingTopUp,
@@ -70,8 +59,8 @@ export const IncentivesForNextEpoch = () => {
         Estimate rewards for next epoch
       </Title>
       <Paragraph style={{ maxWidth: 550 }}>
-        Note that the rewards claimable from the next epoch are estimated, as
-        they might eventually change during the epoch due to other donations.
+        Note that the rewards claimable from the next epoch are estimated, as they might eventually
+        change during the epoch due to other donations.
       </Paragraph>
 
       <Row>
@@ -103,12 +92,7 @@ export const IncentivesForNextEpoch = () => {
             </Form.Item>
 
             <Form.Item>
-              <Button
-                type="primary"
-                htmlType="submit"
-                loading={isLoading}
-                disabled={!account}
-              >
+              <Button type="primary" htmlType="submit" loading={isLoading} disabled={!account}>
                 Estimate
               </Button>
 
@@ -116,9 +100,7 @@ export const IncentivesForNextEpoch = () => {
                 <Text
                   className="ml-8"
                   type="secondary"
-                  style={
-                    screens.xs ? { display: 'block' } : { display: 'inline' }
-                  }
+                  style={screens.xs ? { display: 'block' } : { display: 'inline' }}
                 >
                   To check rewards, connect a wallet
                 </Text>

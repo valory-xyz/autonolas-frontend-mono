@@ -26,19 +26,13 @@ const Meta = ({ title, description, path }: MetaProps) => {
       <meta property="og:type" content="website" />
       <meta property="og:url" content={pageUrl} />
       <meta property="og:title" content={pageTitle} />
-      <meta
-        property="og:description"
-        content={description || SITE_DESCRIPTION}
-      />
+      <meta property="og:description" content={description || SITE_DESCRIPTION} />
       <meta property="og:image" content={SITE_DEFAULT_IMAGE_URL} />
 
       <meta property="twitter:card" content="summary_large_image" />
       <meta property="twitter:url" content={pageUrl} />
       <meta property="twitter:title" content={pageTitle} />
-      <meta
-        property="twitter:description"
-        content={description || SITE_DESCRIPTION}
-      />
+      <meta property="twitter:description" content={description || SITE_DESCRIPTION} />
       <meta property="twitter:image" content={SITE_DEFAULT_IMAGE_URL} />
     </Head>
   );

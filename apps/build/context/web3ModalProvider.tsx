@@ -21,11 +21,7 @@ createWeb3Modal({
   },
 });
 
-export default function Web3ModalProvider({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function Web3ModalProvider({ children }: { children: React.ReactNode }) {
   return (
     <WagmiProvider config={wagmiConfig}>
       <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>

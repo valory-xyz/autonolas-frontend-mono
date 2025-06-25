@@ -52,8 +52,7 @@ export const Checkpoint = () => {
   return (
     <CheckpointContainer>
       <Title level={5}>
-        A new epoch can start, in order to be able to claim your rewards call
-        the checkpoint
+        A new epoch can start, in order to be able to claim your rewards call the checkpoint
       </Title>
 
       <div className="btn-container">

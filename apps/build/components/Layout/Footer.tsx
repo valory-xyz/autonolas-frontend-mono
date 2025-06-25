@@ -14,11 +14,7 @@ const FooterContainer = styled.div`
 const Footer = () => (
   <FooterContainer>
     <Typography.Text>
-      ©
-      {' '}
-      {OPERATOR_NAME}
-      {' '}
-      {new Date().getFullYear()}
+      © {OPERATOR_NAME} {new Date().getFullYear()}
       {/* {' '}
       ·
       {' '}

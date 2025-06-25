@@ -28,10 +28,7 @@ export const ClaimIncentives = () => {
     if (account) getData();
   }, [account]);
 
-  const onClaimIncentivesSubmit = async (values: {
-    unitIds: number[];
-    unitTypes: string[];
-  }) => {
+  const onClaimIncentivesSubmit = async (values: { unitIds: number[]; unitTypes: string[] }) => {
     try {
       setIsLoading(true);
 

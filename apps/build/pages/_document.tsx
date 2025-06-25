@@ -1,10 +1,4 @@
-import Document, {
-  DocumentContext,
-  Head,
-  Html,
-  Main,
-  NextScript,
-} from 'next/document';
+import Document, { DocumentContext, Head, Html, Main, NextScript } from 'next/document';
 import { StyleProvider, createCache, extractStyle } from '@ant-design/cssinjs';
 import { ServerStyleSheet } from 'styled-components';
 
@@ -26,9 +20,7 @@ MyDocument.getInitialProps = async (ctx: DocumentContext) => {
   ctx.renderPage = () =>
     originalRenderPage({
       enhanceApp: (App) => (props) => (
-        <StyleProvider cache={cache}>
-          {sheet.collectStyles(<App {...props} />)}
-        </StyleProvider>
+        <StyleProvider cache={cache}>{sheet.collectStyles(<App {...props} />)}</StyleProvider>
       ),
     });
 

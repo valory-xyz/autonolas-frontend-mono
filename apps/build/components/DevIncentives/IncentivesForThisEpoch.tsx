@@ -30,9 +30,7 @@ const columns = [
 ];
 
 const checkIfHasDuplicate = (unitIds: string[], unitTypes: string[]) => {
-  const agentIds = unitIds.filter(
-    (e, index) => unitTypes[index] === TOKENOMICS_UNIT_TYPES.AGENT,
-  );
+  const agentIds = unitIds.filter((e, index) => unitTypes[index] === TOKENOMICS_UNIT_TYPES.AGENT);
   const componentIds = unitIds.filter(
     (e, index) => unitTypes[index] === TOKENOMICS_UNIT_TYPES.COMPONENT,
   );
@@ -93,17 +91,12 @@ export const IncentivesForThisEpoch = () => {
           const ids = indexesWithDifferentOwner
             .map((e) => {
               const type =
-                unitTypes[e] === TOKENOMICS_UNIT_TYPES.AGENT
-                  ? 'Agent ID'
-                  : 'Component ID';
+                unitTypes[e] === TOKENOMICS_UNIT_TYPES.AGENT ? 'Agent ID' : 'Component ID';
               return `${type} ${unitIds[e]}`;
             })
             .join(', ');
 
-          notifyError(
-            'Provided address is not the owner of the following units: ',
-            ids,
-          );
+          notifyError('Provided address is not the owner of the following units: ', ids);
         } else {
           const [sortedUnitIds, sortedUnitTypes] = sortUnitIdsAndTypes(
             unitIds as unknown as number[],
@@ -120,7 +113,7 @@ export const IncentivesForThisEpoch = () => {
 
             // set reward and top up for table
             setRewardAndTopUp([
-              // @ts-expect-error
+              // @ts-expect-error - TODO: fix this
               {
                 key: '1',
                 reward: round(parseToEth(response.reward) as number, 6),
@@ -172,12 +165,7 @@ export const IncentivesForThisEpoch = () => {
         <Col lg={10} xs={24}>
           {rewardAndTopUp.length > 0 && (
             <RewardAndTopUpContainer>
-              <Table
-                columns={columns}
-                dataSource={rewardAndTopUp}
-                bordered
-                pagination={false}
-              />
+              <Table columns={columns} dataSource={rewardAndTopUp} bordered pagination={false} />
             </RewardAndTopUpContainer>
           )}
         </Col>
