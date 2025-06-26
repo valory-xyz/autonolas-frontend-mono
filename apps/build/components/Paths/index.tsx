@@ -2,6 +2,7 @@ import styled from 'styled-components';
 import { Row, Card, Col, Button, Typography, Tag } from 'antd';
 import Image from 'next/image';
 
+import { BUILD_REPO_URL } from 'libs/util-constants/src';
 import { COLOR } from '@autonolas/frontend-library';
 import paths from './data.json';
 
@@ -103,7 +104,7 @@ const PathCard = ({ path }: { path: Path }) => {
               {description}
             </Typography.Paragraph>
           </div>
-          <Button type="primary" href={`/paths/${id}`} className="mb-8">
+          <Button type="primary" size="large" href={`/paths/${id}`} className="mb-8">
             View Path
           </Button>
         </Col>
@@ -152,8 +153,9 @@ export const Paths = () => (
                 </div>
                 <Button
                   type="default"
-                  href="https://github.com/valory-xyz/autonolas-build-frontend?tab=readme-ov-file#add-your-own-path"
+                  href={`${BUILD_REPO_URL}?tab=readme-ov-file#add-your-own-path`}
                   target="_blank"
+                  size="large"
                   rel="noopener noreferrer"
                 >
                   Create PR

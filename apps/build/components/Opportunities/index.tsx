@@ -72,7 +72,7 @@ const OpportunityCard = ({
           </Flex>
         </Flex>
         <p>{background}</p>
-        <Button type="primary" className="mb-8">
+        <Button type="primary" size="large" className="mb-8">
           <a href={LAUNCH_CONTACT_URL} target="_blank" rel="noopener noreferrer">
             Get in touch
           </a>
