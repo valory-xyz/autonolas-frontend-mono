@@ -16,5 +16,6 @@ const composeWithDevTools =
 
 const composedEnhancers = composeWithDevTools(applyMiddleware(...middleware));
 
+// TODO: `createStore` is deprecated, use the updated fns
 const Store = () => createStore(rootReducer, composedEnhancers);
 export default Store;

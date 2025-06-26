@@ -62,7 +62,7 @@ const OpportunityCard = ({
           />
           <Flex
             justify="center"
-            vertical={false}
+            vertical
             style={{
               letterSpacing: '0.05em',
             }}

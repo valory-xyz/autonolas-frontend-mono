@@ -10,7 +10,7 @@ import {
   setErrorMessage as setErrorMessageFn,
   setLogout as setLogoutFn,
 } from 'store/setup/actions';
-import { LoginV2 as LoginComponent } from 'common-util/Login';
+import { LoginV2 as LoginComponent } from 'components/Login';
 
 const LoginContainer = styled.div`
   display: flex;

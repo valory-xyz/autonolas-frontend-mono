@@ -4,7 +4,7 @@ import { WagmiProvider } from 'wagmi';
 
 import { COLOR, W3M_BORDER_RADIUS } from 'libs/ui-theme/src';
 
-import { wagmiConfig } from 'common-util/Login/config';
+import { wagmiConfig } from 'components/Login/config';
 
 const queryClient = new QueryClient();
 

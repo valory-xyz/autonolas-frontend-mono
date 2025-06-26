@@ -1,6 +1,6 @@
 import { notifyError } from '@autonolas/frontend-library';
 import { TOKENOMICS_UNIT_TYPES } from 'libs/util-constants/src';
-import { formatEther } from 'viem';
+import { rewardsFormatter } from 'libs/common-contract-functions/src/lib/utils';
 import {
   getAgentContract,
   getBlockTimestamp,
@@ -52,7 +52,9 @@ export const getOwnerIncentivesRequest = async ({
   unitIds: string[];
 }) => {
   const contract = getTokenomicsContract();
-  const response = await contract.methods.getOwnerIncentives(address, unitTypes, unitIds).call();
+  const response: { reward: string; topUp: string } = await contract.methods
+    .getOwnerIncentives(address, unitTypes, unitIds)
+    .call();
   return response;
 };
 
@@ -139,12 +141,6 @@ export const getLastEpochRequest = async () => {
     throw error;
   }
 };
-
-export const rewardsFormatter = (value: bigint, dp = 4) =>
-  parseFloat(formatEther(value)).toLocaleString('en', {
-    maximumFractionDigits: dp,
-    minimumFractionDigits: dp,
-  });
 
 const BIG_INT_0 = BigInt(0);
 const BIG_INT_100 = BigInt(100);

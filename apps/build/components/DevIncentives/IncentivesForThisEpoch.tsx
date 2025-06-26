@@ -54,7 +54,7 @@ export const IncentivesForThisEpoch = () => {
 
   // fetch incentives state
   const [isLoading, setIsLoading] = useState(false);
-  const [rewardAndTopUp, setRewardAndTopUp] = useState([]);
+  const [rewardAndTopUp, setRewardAndTopUp] = useState<Record<string, string | number>[]>([]);
 
   const getIncentives = async (values: {
     address: string;
@@ -62,7 +62,7 @@ export const IncentivesForThisEpoch = () => {
     unitTypes: string[];
   }) => {
     setIsLoading(true);
-    const address = values.address || account;
+    const address = values.address || (account as string);
     const unitIds = values.unitIds.map((e) => `${e}`);
     const unitTypes = values.unitTypes.map((e) => `${e}`);
 
@@ -80,7 +80,7 @@ export const IncentivesForThisEpoch = () => {
       .then(async (owners) => {
         // check if the owner of each unit is the same as the address input
         owners.forEach((e, index) => {
-          if (toLower(e) !== toLower(address as string)) {
+          if (toLower(e) !== toLower(address)) {
             indexesWithDifferentOwner.push(index);
           }
         });
@@ -99,25 +99,24 @@ export const IncentivesForThisEpoch = () => {
           notifyError('Provided address is not the owner of the following units: ', ids);
         } else {
           const [sortedUnitIds, sortedUnitTypes] = sortUnitIdsAndTypes(
-            unitIds as unknown as number[],
+            unitIds.map(Number),
             unitTypes,
           );
 
           try {
             const params = {
-              address: address as string,
-              unitIds: sortedUnitIds as unknown as string[],
-              unitTypes: sortedUnitTypes as unknown as string[],
+              address: address,
+              unitIds: sortedUnitIds.map(String),
+              unitTypes: sortedUnitTypes,
             };
             const response = await getOwnerIncentivesRequest(params);
 
             // set reward and top up for table
             setRewardAndTopUp([
-              // @ts-expect-error - TODO: fix this
               {
                 key: '1',
-                reward: round(parseToEth(response.reward) as number, 6),
-                topUp: round(parseToEth(response.topUp) as number, 6),
+                reward: round(Number(parseToEth(response.reward)), 6),
+                topUp: round(Number(parseToEth(response.topUp)), 6),
               },
             ]);
           } catch (error) {

@@ -1,5 +1,5 @@
 import Web3 from 'web3';
-import { RPC_URLS } from 'common-util/Contracts';
+import { RPC_URLS } from 'libs/util-constants/src';
 import {
   getProvider as getProviderFn,
   getChainId as getChainIdFn,
@@ -7,7 +7,7 @@ import {
   getIsValidChainId as getIsValidChainIdFn,
   sendTransaction as sendTransactionFn,
 } from '@autonolas/frontend-library';
-import { SUPPORTED_CHAINS } from 'common-util/Login';
+import { SUPPORTED_CHAINS } from 'components/Login';
 import {
   DISPENSER,
   TREASURY,
@@ -114,5 +114,5 @@ export const getComponentContract = () => {
 export const getBlockTimestamp = async (block = 'latest') => {
   const { web3 } = getWeb3Details();
   const temp = await web3.eth.getBlock(block);
-  return (temp.timestamp as number) * 1;
+  return Number(temp.timestamp);
 };
