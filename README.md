@@ -6,27 +6,44 @@ This mono repo contains the frontend for the Autonolas project. It is based on t
 - [Govern](https://govern.olas.network/)
 - [Launch](https://launch.olas.network/)
 - [Operate](https://operate.olas.network/)
+- [Build](https://build.olas.network/)(work in progress)
+- [Mech](https://mech.olas.network/)(work in progress)
+
 
 ## Start the app
 
-To start the development server run `npx nx run [app-name]:serve`. Open your browser and navigate to http://localhost:4200/. 
+- To start the development server run the following command. Open your browser and navigate to http://localhost:4200/.
+  ```bash
+  npx nx run [app-name]:serve
+  ```
 
-## Running tasks
+- To create an app in the monorepo, use:
+  ```bash
+  npx nx generate @nx/react:app apps/<app-name>
+  ```
 
-To execute tasks with Nx use the following syntax:
+- To create a library in the monorepo:
+  - For a React library, use:
+    ```bash
+    npx nx generate @nx/react:library libs/<lib-name>
+    ```
+  - For a JavaScript library, use:
+    ```bash
+    npx nx generate @nx/js:library libs/<lib-name>
+    ```
+  and other documentation can be found in the [Nx documentation](https://nx.dev/features/generate-code#generate-code).
+  - For general questions on creating apps and libraries:
+    - Which bundler would you like to use to build the library? Choose 'none' to skip build setup: `vite`.
+    - Which testing framework would you like to use? Choose 'none' to skip testing setup: `jest`.
 
-```
-nx <target> <project> <...options>
-```
+- To run tests for a specific app or library, use:
+  ```bash
+  npx nx test <app-or-lib-name>
+  ```
+- To clear the cache, use:
+  ```bash
+  npx nx reset
+  ```
 
-You can also run multiple targets:
-
-```
-nx run-many -t <target1> <target2>
-```
-
-..or add `-p` to filter specific projects
-
-```
-nx run-many -t <target1> <target2> -p <proj1> <proj2>
-```
+## License
+![MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
