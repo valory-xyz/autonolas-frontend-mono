@@ -1,8 +1,6 @@
 # util-ssr
 
-This library was generated with [Nx](https://nx.dev).
-
-This library contains utilities for rendering the UI on the server side. 
+A utility library for server-side rendering (SSR) of UI components.
 The `getInitialPropsWithSsrStyles` function in used to get the styles generated on the server side.
 
 ## Running unit tests

@@ -154,7 +154,7 @@ export const Paths = () => (
                 </div>
                 <Button
                   type="default"
-                  href={`${BUILD_REPO_URL}?tab=readme-ov-file#add-your-own-path`}
+                  href={BUILD_REPO_URL}
                   target="_blank"
                   size="large"
                   rel="noopener noreferrer"
