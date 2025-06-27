@@ -1,5 +1,5 @@
 import { Head, Html, Main, NextScript } from 'next/document';
-import { getInitialPropsWithSsrStyles } from 'libs/ui-ssr/src';
+import { getInitialPropsWithSsrStyles } from 'libs/util-ssr/src';
 
 const MyDocument = () => (
   <Html lang="en">

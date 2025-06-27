@@ -8,4 +8,4 @@ export * from './lib/rpcUrls';
 export * from './lib/appUrls';
 export * from './lib/repoUrls';
 export * from './lib/units';
-export * from './lib/enums';
+export * from './lib/constants';

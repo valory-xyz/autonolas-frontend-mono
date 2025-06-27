@@ -44,6 +44,8 @@ type Path = {
   };
 };
 
+type PathImageProps = Pick<Path, 'name' | 'id'> & Partial<Pick<Path, 'images'>>;
+
 const PathImage = ({
   name,
   id,
@@ -53,8 +55,7 @@ const PathImage = ({
     service: null,
     homepageCardImageCanContain: false,
   },
-}: Omit<Path, 'description' | 'service' | 'isMechsToolPath' | 'markdownPath' | 'images'> &
-  Partial<Pick<Path, 'images'>>) => (
+}: PathImageProps) => (
   <StyledImage
     alt={name}
     src={images?.homepageCard ?? `/images/${id}.png`}

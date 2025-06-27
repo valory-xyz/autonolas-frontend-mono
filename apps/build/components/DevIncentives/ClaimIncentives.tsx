@@ -19,7 +19,7 @@ export const ClaimIncentives = () => {
       try {
         const value = await getPausedValueRequest();
         setPausedValue(value);
-      } catch (error) {
+      } catch (error: unknown) {
         notifySpecificError(error as Error);
         console.error(error);
       }
@@ -44,7 +44,7 @@ export const ClaimIncentives = () => {
 
       await claimOwnerIncentivesRequest(params);
       notifySuccess('Rewards claimed');
-    } catch (error) {
+    } catch (error: unknown) {
       notifySpecificError(error as Error);
       console.error(error);
     } finally {

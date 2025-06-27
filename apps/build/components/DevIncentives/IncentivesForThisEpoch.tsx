@@ -119,11 +119,10 @@ export const IncentivesForThisEpoch = () => {
                 topUp: round(Number(parseToEth(response.topUp)), 6),
               },
             ]);
-          } catch (error) {
+          } catch (error: unknown) {
             // reset reward and top up & notify error
             setRewardAndTopUp([]);
             notifySpecificError(error as Error);
-
             console.error(error);
           } finally {
             setIsLoading(false);

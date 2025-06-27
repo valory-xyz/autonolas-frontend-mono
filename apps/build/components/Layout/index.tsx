@@ -1,4 +1,4 @@
-import { Layout, Menu } from 'antd';
+import { Flex, Layout, Menu } from 'antd';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import styled from 'styled-components';
@@ -15,12 +15,6 @@ const { Header, Content } = Layout;
 const StyledHeader = styled(Header)`
   border-bottom: 1px solid ${COLOR.BORDER_GREY};
   padding: 20px !important;
-`;
-
-const HeaderLeftContent = styled.div`
-  display: flex;
-  flex-direction: row;
-  gap: 16px;
 `;
 
 const items = [
@@ -49,12 +43,12 @@ const NavigationBar = ({ children }: { children: React.ReactNode }) => {
   return (
     <CustomLayout>
       <StyledHeader>
-        <HeaderLeftContent>
+        <Flex gap={16}>
           <Link href="/" className="logo-link">
             <Logo />
           </Link>
           <NavDropdown currentSite="build" />
-        </HeaderLeftContent>
+        </Flex>
 
         <Menu
           theme="light"

@@ -34,12 +34,12 @@ export const Checkpoint = () => {
     try {
       setIsLoading(true);
 
-      await checkpointRequest({ account: account as string });
+      await checkpointRequest({ account: account! });
       notifySuccess('Checkpoint called successfully');
 
       // check if checkpoint is visible again
       await getIfCheckpointVisible();
-    } catch (error) {
+    } catch (error: unknown) {
       notifySpecificError(error as Error);
       console.error(error);
     } finally {
