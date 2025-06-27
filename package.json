@@ -59,6 +59,7 @@
     "ts-pattern": "^5.2.0",
     "tslib": "^2.3.0",
     "use-deep-compare-effect": "^1.8.1",
+    "uuid": "9.0.0",
     "viem": "^2.9.15",
     "wagmi": "^2.5.19",
     "web3": "^1.7.3"
