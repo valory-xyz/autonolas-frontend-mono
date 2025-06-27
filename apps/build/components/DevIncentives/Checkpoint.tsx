@@ -1,7 +1,7 @@
 import { Alert, Button, Typography } from 'antd';
 import { useEffect, useState } from 'react';
 
-import { notifySuccess } from '@autonolas/frontend-library';
+import { notifyError, notifySuccess } from '@autonolas/frontend-library';
 
 import { notifySpecificError } from 'common-util/functions/errors';
 import { useHelpers } from 'common-util/hooks/useHelpers';
@@ -31,10 +31,15 @@ export const Checkpoint = () => {
 
   // checkpoint call on button click
   const onCheckpointCall = async () => {
+    if (!account) {
+      notifyError('Please connect your wallet');
+      return;
+    }
+
     try {
       setIsLoading(true);
 
-      await checkpointRequest({ account: account! });
+      await checkpointRequest({ account });
       notifySuccess('Checkpoint called successfully');
 
       // check if checkpoint is visible again
