@@ -24,7 +24,7 @@
       "options": {
         "buildTarget": "govern:build",
         "dev": true,
-        "port": "3003"
+        "port": 3003
       },
       "configurations": {
         "development": {
