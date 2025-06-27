@@ -1,8 +1,8 @@
-# Ignore built files
-build/
+
 dist/
 .next/
 .github/
+
 
 # Ignore node_modules
 node_modules/

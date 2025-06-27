@@ -1,0 +1,5 @@
+node_modules
+coverage
+.next
+.DS_Store
+.env
