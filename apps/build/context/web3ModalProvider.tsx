@@ -4,7 +4,7 @@ import { WagmiProvider } from 'wagmi';
 
 import { COLOR, W3M_BORDER_RADIUS } from 'libs/ui-theme/src';
 
-import { wagmiConfig } from 'common-util/Login/config';
+import { wagmiConfig } from 'components/Login/config';
 
 const queryClient = new QueryClient();
 
@@ -21,11 +21,7 @@ createWeb3Modal({
   },
 });
 
-export default function Web3ModalProvider({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function Web3ModalProvider({ children }: { children: React.ReactNode }) {
   return (
     <WagmiProvider config={wagmiConfig}>
       <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>

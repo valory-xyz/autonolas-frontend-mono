@@ -23,7 +23,8 @@
       "defaultConfiguration": "development",
       "options": {
         "buildTarget": "tokenomics:build",
-        "dev": true
+        "dev": true,
+        "port": "3006"
       },
       "configurations": {
         "development": {

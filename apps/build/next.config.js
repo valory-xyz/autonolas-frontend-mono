@@ -65,5 +65,4 @@ const plugins = [
   withNx,
 ];
 
-
 module.exports = composePlugins(...plugins)(nextConfig);
