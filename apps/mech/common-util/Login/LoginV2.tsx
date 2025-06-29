@@ -6,8 +6,9 @@ import styled from 'styled-components';
 import { Address } from 'viem';
 import { useAccount, useAccountEffect, useBalance, useSwitchChain } from 'wagmi';
 
-import { YellowButton } from 'common-util/YellowButton';
-import { useHelpers, useScreen } from 'common-util/hooks';
+import { YellowButton } from 'components/YellowButton';
+import { useHelpers } from 'common-util/hooks';
+import { useScreen } from 'libs/ui-theme/src';
 
 const LoginContainer = styled.div`
   display: flex;

@@ -6,7 +6,7 @@ import { Address } from 'viem';
 // import { getTokenId } from 'common-util/functions/requests';
 import { useHelpers } from 'common-util/hooks/useHelpers';
 import { PAYMENT_TYPES } from 'util/constants';
-import { allowOnlyNumbers } from 'util/formValidations';
+import { allowOnlyNumbers } from 'libs/util-functions/src';
 
 import {
   useFetchTools,

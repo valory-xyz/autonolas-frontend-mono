@@ -2,10 +2,9 @@ import { AppProps } from 'next/app';
 import Head from 'next/head';
 import { Provider } from 'react-redux';
 
+import { AutonolasThemeProvider, GlobalStyles } from 'libs/ui-theme/src';
 import { METADATA } from 'common-util/Login/config';
-import GlobalStyle from 'components/GlobalStyles';
 import Layout from 'components/Layout';
-import { AutonolasThemeProvider } from 'context/AutonolasThemeProvider';
 import { Web3ModalProvider } from 'context/Web3ModalProvider';
 
 import { wrapper } from '../store';
@@ -15,7 +14,7 @@ const MyApp = ({ Component, pageProps }: AppProps) => {
 
   return (
     <>
-      <GlobalStyle />
+      <GlobalStyles />
       <Head>
         <title>{METADATA.name}</title>
         <meta name="description" content={METADATA.description} />

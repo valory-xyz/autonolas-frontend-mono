@@ -4,8 +4,6 @@ import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
 
 import { MEDIA_QUERY } from '@autonolas/frontend-library';
-
-import { HeaderTitle } from 'common-util/Title';
 import { URL } from 'util/constants';
 
 import { ListAgents } from './ListAgents';
@@ -61,7 +59,12 @@ export const Mechs = () => {
 
   return (
     <Content>
-      <Segmented options={MECH_TYPES} value={mechType} onChange={handleChangeMechType} />
+      <Segmented
+        options={MECH_TYPES}
+        value={mechType}
+        size="large"
+        onChange={handleChangeMechType}
+      />
       {mechType === MECH_MM && <ListServices />}
       {mechType === LEGACY && <ListAgents />}
     </Content>

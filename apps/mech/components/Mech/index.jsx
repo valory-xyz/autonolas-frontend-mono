@@ -8,7 +8,7 @@ import { AddressLink, NA, notifyError, notifySuccess } from '@autonolas/frontend
 
 import { AGENT_MECH_ABI, OLAS_MECH_ABI } from 'common-util/AbiAndAddresses';
 import { SUPPORTED_CHAINS } from 'common-util/Login';
-import { HeaderTitle } from 'common-util/Title';
+import { HeaderTitle } from 'components/Title';
 import { getChainId } from 'common-util/functions';
 import { Request } from 'components/Request/Request';
 import { SCAN_URLS, WEBSOCKET_URLS } from 'util/constants';
@@ -51,7 +51,6 @@ const EventListener = () => {
 
   const { query } = useRouter();
   const id = query?.id;
-  const networkNameFromUrl = query?.network;
   const isLegacy = Boolean(query.legacy);
 
   useEffect(() => {
@@ -232,7 +231,7 @@ const EventListener = () => {
             <Empty
               description={
                 <>
-                  {`No events found. Only loading latest ${LATEST_BLOCK_COUNT} block(s).`}
+                  <p>{`No events found. Only loading latest ${LATEST_BLOCK_COUNT} block(s).`}</p>
                   <a
                     href={`${SCAN_URLS[getChainId()]}/address/${id}#events`}
                     target="_blank"

@@ -15,7 +15,6 @@ import {
 } from 'common-util/AbiAndAddresses';
 import { getChainId, getProvider } from 'common-util/functions';
 import { Network } from 'types/index';
-import { MECH_MARKETPLACE_SUBGRAPH_URLS } from 'util/constants';
 
 export const RPC_URLS: Record<Network, string> = {
   [gnosis.id]: process.env.NEXT_PUBLIC_GNOSIS_URL ?? gnosis.rpcUrls.default.http[0],

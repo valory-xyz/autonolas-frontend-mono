@@ -26,8 +26,7 @@ export const useHandleRoute = () => {
   const networkNameFromUrl = router?.query?.network;
 
   const dispatchWithDelay = useCallback(
-    // @ts-ignore TODO: set types for store
-    (action) => {
+    (action: ReturnType<typeof setChainId>) => {
       setTimeout(() => {
         dispatch(action);
       }, 0);
