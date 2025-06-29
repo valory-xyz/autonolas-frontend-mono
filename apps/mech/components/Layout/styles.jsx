@@ -6,6 +6,9 @@ import { COLOR, MEDIA_QUERY } from '@autonolas/frontend-library';
 
 export const CustomLayout = styled(Layout)`
   margin-bottom: 8rem;
+  min-height: 100vh;
+  background-color: ${COLOR.WHITE};
+
   .site-layout {
     padding: 0 50px;
     margin-top: 64px;

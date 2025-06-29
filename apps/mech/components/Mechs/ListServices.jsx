@@ -119,6 +119,7 @@ export const ListServices = () => {
             { value: MY_SERVICES, label: 'My services' },
           ]}
           value={currentTab}
+          size="large"
           onChange={(e) => {
             setCurrentTab(e);
 

@@ -10,7 +10,19 @@ const initialState = {
   errorMessage: null,
 };
 
-const setup = (state = initialState, { data, type } = {}) => {
+export type Setup = {
+  account?: string | null;
+  balance?: string | null;
+  chainId?: number | null;
+  errorMessage?: string | null;
+};
+
+type Action = {
+  data?: Setup;
+  type: string;
+};
+
+const setup = (state: Setup = initialState, { data, type }: Action) => {
   switch (type) {
     case apiTypes.GET_API: {
       return { ...state, data };

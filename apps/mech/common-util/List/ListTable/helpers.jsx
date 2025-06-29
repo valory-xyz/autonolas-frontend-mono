@@ -192,7 +192,7 @@ export const useSearchInput = () => {
         value={value}
         onChange={(e) => setValue(e.target.value)}
       />
-      <Button ghost type="primary" onClick={() => setSearchValue(value || '')}>
+      <Button ghost type="primary" size="large" onClick={() => setSearchValue(value || '')}>
         Search
       </Button>
     </Flex>
