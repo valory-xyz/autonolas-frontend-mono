@@ -13,13 +13,9 @@ import { FIRST_SUPPORTED_CHAIN } from 'common-util/Login/config';
 import { Network } from 'types/index';
 import { GATEWAY_URL, TOTAL_VIEW_COUNT } from 'util/constants';
 
-// TODO: provide types for MODAL_PROVIDER
-// eslint-disable-next-line
-export const getModalProvider = () => (window as any)?.MODAL_PROVIDER;
+export const getModalProvider = () => window?.MODAL_PROVIDER;
 
-// TODO: provide types for ethereum
-// eslint-disable-next-line
-export const getWindowEthereum = () => (window as any)?.ethereum;
+export const getWindowEthereum = () => window?.ethereum;
 
 export const getProvider = () => {
   const defaultChainId = getChainId();

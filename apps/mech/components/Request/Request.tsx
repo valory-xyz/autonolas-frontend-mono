@@ -1,11 +1,10 @@
-import { WaitForTransactionReceiptReturnType } from '@wagmi/core';
 import { Alert, Button, notification } from 'antd';
 import { useRouter } from 'next/router';
 import { useEffect, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
 
 import { AGENT_MECH_ABI } from 'common-util/AbiAndAddresses';
-import { getContract, getMarketplaceContract } from 'common-util/Contracts';
+import { getContract } from 'common-util/Contracts';
 import { getAgentHash, getChainId, getIpfsResponse } from 'common-util/functions';
 import { checkAndApproveToken, getAgentHashes, getTokenId } from 'common-util/functions/requests';
 import { PAYMENT_TYPES, SCAN_URLS, UNICODE_SYMBOLS } from 'util/constants';

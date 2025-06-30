@@ -1,3 +1,5 @@
+import { BrowserProvider, Eip1193Provider } from 'ethers';
+
 declare namespace JSX {
   interface IntrinsicElements {
     'w3m-button': {
@@ -7,5 +9,12 @@ declare namespace JSX {
       label?: string;
       loadingLabel?: string;
     };
+  }
+}
+
+declare global {
+  interface Window {
+    MODAL_PROVIDER?: ModalProvider;
+    ethereum?: Eip1193Provider & BrowserProvider;
   }
 }

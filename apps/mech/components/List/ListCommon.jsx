@@ -1,5 +1,4 @@
 /* eslint-disable import/no-extraneous-dependencies */
-import { Alert } from 'antd';
 import PropTypes from 'prop-types';
 
 import { EmptyMessage } from 'components/styles';

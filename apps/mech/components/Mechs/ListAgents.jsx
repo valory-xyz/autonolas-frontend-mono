@@ -5,8 +5,8 @@ import { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 
 import { getMyListOnPagination } from 'common-util/ContractUtils/myList';
-import ListTable from 'common-util/List/ListTable';
-import { getHash, isMyTab, useSearchInput } from 'common-util/List/ListTable/helpers';
+import ListTable from 'components/List/ListTable';
+import { getHash, isMyTab, useSearchInput } from 'components/List/ListTable/helpers';
 import { useUnsupportedNetwork } from 'common-util/hooks';
 import { NAV_TYPES, URL } from 'util/constants';
 

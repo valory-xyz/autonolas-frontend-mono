@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 
 import { Loader } from '@autonolas/frontend-library';
 
-import { ListEmptyMessage } from 'common-util/List/ListCommon';
+import { ListEmptyMessage } from 'components/List/ListCommon';
 import { TOTAL_VIEW_COUNT } from 'util/constants';
 
 import { getData, getTableColumns } from './helpers';

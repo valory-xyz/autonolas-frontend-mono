@@ -11,6 +11,7 @@ import { ALL_SUPPORTED_CHAINS } from 'common-util/Login/config';
 import { getSupportedNetworks } from 'common-util/functions';
 import { useHandleRoute } from 'common-util/hooks/useHandleRoute';
 import { PAGES_TO_LOAD_WITH_CHAIN_ID } from 'util/constants';
+import type { RootState } from 'store/types';
 
 import Login from '../Login';
 import Footer from './Footer';
@@ -33,11 +34,11 @@ const MENU_ITEMS = [
   },
 ];
 
-const NavigationBar = ({ children }) => {
+const NavigationBar = ({ children }: { children: React.ReactNode }) => {
   const router = useRouter();
-  const { chainId } = useSelector((state) => state?.setup);
+  const { chainId } = useSelector((state: RootState) => state?.setup);
   const { pathname } = router;
-  const [selectedMenu, setSelectedMenu] = useState([]);
+  const [selectedMenu, setSelectedMenu] = useState<string>('');
 
   useHandleRoute();
 
@@ -49,7 +50,7 @@ const NavigationBar = ({ children }) => {
     }
   }, [pathname]);
 
-  const handleMenuItemClick = ({ key }) => {
+  const handleMenuItemClick = ({ key }: { key: string }) => {
     if (key === 'docs') {
       window.open('https://olas.network/mech-marketplace', '_blank', 'noopener,noreferrer');
       return;
@@ -57,6 +58,7 @@ const NavigationBar = ({ children }) => {
 
     if (PAGES_TO_LOAD_WITH_CHAIN_ID.includes(`/${key}`)) {
       const chain = ALL_SUPPORTED_CHAINS.find((id) => chainId);
+      if (!chain) return;
       router.push(`/${chain.networkName}/${key}`);
     } else {
       router.push(`/${key}`);

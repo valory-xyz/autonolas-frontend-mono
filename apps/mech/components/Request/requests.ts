@@ -1,4 +1,4 @@
-import { getChainId, readContract, waitForTransactionReceipt, writeContract } from '@wagmi/core';
+import { getChainId, readContract, writeContract } from '@wagmi/core';
 import { Address } from 'viem';
 
 import { MECH_MARKETPLACE_ABI } from 'common-util/AbiAndAddresses';

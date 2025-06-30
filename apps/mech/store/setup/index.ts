@@ -1,3 +1,4 @@
+import { Network } from 'types/index';
 import { apiTypes, syncTypes } from './_types';
 
 /**
@@ -13,7 +14,7 @@ const initialState = {
 export type Setup = {
   account?: string | null;
   balance?: string | null;
-  chainId?: number | null;
+  chainId?: Network | null;
   errorMessage?: string | null;
 };
 
