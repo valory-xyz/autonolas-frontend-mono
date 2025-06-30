@@ -2,9 +2,10 @@ import { useCallback, useEffect } from 'react';
 import { SwapOutlined } from '@ant-design/icons';
 import { GetAccountReturnType } from '@wagmi/core';
 import { useAccount, useAccountEffect, useBalance, useSwitchChain } from 'wagmi';
+import type { Address } from 'viem';
+import type { BrowserProvider } from 'ethers';
 import { isNil } from 'lodash';
 import styled from 'styled-components';
-import { Address } from 'viem';
 
 import { useScreen } from 'libs/ui-theme/src';
 import { useHelpers } from 'common-util/hooks';
@@ -61,8 +62,7 @@ export const LoginV2 = ({ onConnect: onConnectCb, onDisconnect: onDisconnectCb }
         try {
           // This is the initial `provider` that is returned when
           // using web3Modal to connect. Can be MetaMask or WalletConnect.
-          const modalProvider = (await connector.getProvider()) as any;
-
+          const modalProvider = (await connector.getProvider()) as BrowserProvider;
           if (modalProvider) {
             // *******************************************************
             // ************ setting to the window object! ************

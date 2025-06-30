@@ -3,6 +3,7 @@ import { uniqBy } from 'lodash';
 import { useRouter } from 'next/router';
 import React, { useCallback, useEffect, useState } from 'react';
 import Web3 from 'web3';
+import type { Contract, EventData } from 'web3-eth-contract';
 
 import { AddressLink, NA, notifyError, notifySuccess } from '@autonolas/frontend-library';
 
@@ -14,11 +15,26 @@ import { HeaderTitle } from 'components/Title';
 import { Request } from 'components/Request/Request';
 
 // Replace the following values with your specific contract information
-const LATEST_BLOCK_COUNT = 5_000;
+const LATEST_BLOCK_COUNT = 5000;
 
 const { Title } = Typography;
 
-const onNewEvent = (event) => {
+type Event = EventData;
+
+type EventSubscription = {
+  unsubscribe: () => void;
+};
+
+type TableDataSource = {
+  key: string;
+  index: number;
+  requestId: string;
+  sender: string;
+  requestData?: string;
+  deliverData?: string;
+};
+
+const onNewEvent = (event: Event) => {
   notifySuccess(
     'Event received',
     <a
@@ -39,18 +55,18 @@ const onErrorEvent = (error: Error, type: string) => {
 
 const EventListener = () => {
   const [web3Ws, setWeb3Ws] = useState<Web3 | null>(null);
-  const [contractWs, setContractWs] = useState(null);
+  const [contractWs, setContractWs] = useState<Contract | null>(null);
 
-  const [firstEvents, setFirstEvents] = useState([]);
+  const [firstEvents, setFirstEvents] = useState<Event[]>([]);
   const [isFirstEventLoading, setIsFirstEventLoading] = useState(false);
   const [isFirstEventError, setIsFirstEventError] = useState(false);
 
-  const [secondEvents, setSecondEvents] = useState([]);
+  const [secondEvents, setSecondEvents] = useState<Event[]>([]);
   const [isSecondEventLoading, setIsSecondEventLoading] = useState(false);
   const [isSecondEventError, setIsSecondEventError] = useState(false);
 
   const { query } = useRouter();
-  const id = query?.id;
+  const id = query?.id as string;
   const isLegacy = Boolean(query.legacy);
 
   useEffect(() => {
@@ -68,20 +84,21 @@ const EventListener = () => {
    *
    * @param {Array} e
    */
-  const sortAndRemoveDuplicateEvents = (e) => {
+  const sortAndRemoveDuplicateEvents = (e: Event[]) => {
     const uniqueEvents = uniqBy(e, (event) => event.returnValues.requestId);
     return uniqueEvents.sort((a, b) => b.blockNumber - a.blockNumber);
   };
 
   const getFilterOption = async () => {
-    const blockNumber = await web3Ws.eth.getBlockNumber();
+    const blockNumber = await web3Ws?.eth.getBlockNumber();
+
     /**
      * blockNumber - 5000 is used to get the past 5000 blocks
      * due to too many events, we can't get all the events at once
      * // TODO: add pagination
      */
     const filterOption = {
-      fromBlock: blockNumber - LATEST_BLOCK_COUNT,
+      fromBlock: blockNumber! - LATEST_BLOCK_COUNT,
       toBlock: 'latest',
     };
     return filterOption;
@@ -90,6 +107,7 @@ const EventListener = () => {
   useEffect(() => {
     if (web3Ws && id) {
       const abi = isLegacy ? AGENT_MECH_ABI : OLAS_MECH_ABI;
+      // @ts-expect-error ABI type not correctly identified
       const contractInstance = new web3Ws.eth.Contract(abi, id);
       setContractWs(contractInstance);
     }
@@ -97,7 +115,7 @@ const EventListener = () => {
 
   // Effect hook for listening to the FirstEvent
   useEffect(() => {
-    let eventListener;
+    let eventListener: EventSubscription | null = null;
     const getFirstEvents = async () => {
       setIsFirstEventLoading(true);
 
@@ -105,9 +123,9 @@ const EventListener = () => {
         const filterOption = await getFilterOption();
 
         // Get past FirstEvent events
-        const pastFirstEvents = await contractWs.getPastEvents('Request', filterOption);
+        const pastFirstEvents = await contractWs?.getPastEvents('Request', filterOption);
 
-        setFirstEvents(sortAndRemoveDuplicateEvents(pastFirstEvents));
+        setFirstEvents(sortAndRemoveDuplicateEvents(pastFirstEvents || []));
       } catch (error) {
         setIsFirstEventError(true);
         console.error('Error on getting past events for `Request`', error);
@@ -116,7 +134,7 @@ const EventListener = () => {
       }
 
       // "Events": Listen to new FirstEvent events
-      eventListener = contractWs.events.Request({}, (error, event) => {
+      eventListener = contractWs?.events.Request({}, (error: Error, event: Event) => {
         if (error) {
           onErrorEvent(error, 'Request');
         } else {
@@ -139,7 +157,7 @@ const EventListener = () => {
 
   // Effect hook for listening to the SecondEvent
   useEffect(() => {
-    let eventListener;
+    let eventListener: EventSubscription | null = null;
     const getSecondEvents = async () => {
       setIsSecondEventLoading(true);
 
@@ -147,9 +165,9 @@ const EventListener = () => {
         const filterOption = await getFilterOption();
 
         // Get past SecondEvent events
-        const pastSecondEvents = await contractWs.getPastEvents('Deliver', filterOption);
+        const pastSecondEvents = await contractWs?.getPastEvents('Deliver', filterOption);
 
-        setSecondEvents(sortAndRemoveDuplicateEvents(pastSecondEvents));
+        setSecondEvents(sortAndRemoveDuplicateEvents(pastSecondEvents || []));
       } catch (error) {
         setIsSecondEventError(true);
         console.error('Error on getting past events for `Deliver`', error);
@@ -158,7 +176,7 @@ const EventListener = () => {
       }
 
       // "Events": Listen to new SecondEvent events
-      eventListener = contractWs.events.Deliver({}, (error, event) => {
+      eventListener = contractWs?.events.Deliver({}, (error: Error, event: Event) => {
         if (error) {
           onErrorEvent(error, 'Deliver');
         } else {
@@ -179,7 +197,7 @@ const EventListener = () => {
     };
   }, [contractWs]);
 
-  const getRequestAndDeliversData = useCallback(() => {
+  const getRequestAndDeliversData = useCallback((): TableDataSource[] => {
     const requestsDatasource = firstEvents.map((event, index) => ({
       key: `row-request-${index}`,
       index: index + 1,
@@ -264,36 +282,38 @@ const EventListener = () => {
               dataIndex: 'requestId',
               key: 'requestId',
               width: 260,
-              render: (text) => (
+              render: (text: string) => (
                 <AddressLink text={text} textMinWidth={195} suffixCount={8} canCopy cannotClick />
               ),
             },
-            isLegacy
-              ? {
-                  title: 'Sender',
-                  dataIndex: 'sender',
-                  key: 'sender',
-                  width: 300,
-                  render: (text) => {
-                    if (!text) return NA;
-                    return (
-                      <AddressLink
-                        text={text}
-                        textMinWidth={245}
-                        suffixCount={10}
-                        canCopy
-                        supportedChains={SUPPORTED_CHAINS}
-                      />
-                    );
+            ...(isLegacy
+              ? [
+                  {
+                    title: 'Sender',
+                    dataIndex: 'sender',
+                    key: 'sender',
+                    width: 300,
+                    render: (text: string) => {
+                      if (!text) return NA;
+                      return (
+                        <AddressLink
+                          text={text}
+                          textMinWidth={245}
+                          suffixCount={10}
+                          canCopy
+                          supportedChains={SUPPORTED_CHAINS}
+                        />
+                      );
+                    },
                   },
-                }
-              : null,
+                ]
+              : []),
             {
               title: 'Request Data',
               dataIndex: 'requestData',
               key: 'requestData',
               width: 300,
-              render: (text) => {
+              render: (text: string) => {
                 if (!text) return NA;
                 return (
                   <AddressLink text={text} textMinWidth={240} suffixCount={10} canCopy isIpfsLink />
@@ -305,7 +325,7 @@ const EventListener = () => {
               dataIndex: 'deliverData',
               key: 'deliverData',
               width: 300,
-              render: (text) => {
+              render: (text: string) => {
                 if (isSecondEventLoading) {
                   return <Skeleton.Input active />;
                 }
@@ -317,7 +337,7 @@ const EventListener = () => {
                 );
               },
             },
-          ].filter(Boolean)}
+          ]}
         />
       </ConfigProvider>
     </div>

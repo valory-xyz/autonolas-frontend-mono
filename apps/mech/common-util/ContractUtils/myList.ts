@@ -12,7 +12,7 @@ type Result = {
   id: string;
   owner: string;
   unitHash?: string;
-}
+};
 
 export const filterByOwner = (results: Result[], { searchValue, account }: FilterByOwnerParams) =>
   (results || []).filter((e) => {
@@ -28,7 +28,6 @@ export const filterByOwner = (results: Result[], { searchValue, account }: Filte
     return includes(ownerL, search) || includes(hashL, search);
   });
 
-
 type GetListByAccountParams = {
   searchValue: string;
   total: number;
@@ -39,7 +38,14 @@ type GetListByAccountParams = {
 /**
  * get all the list and filter by owner
  */
-export const getListByAccount = async ({ searchValue, total, getUnit, getOwner, account }: GetListByAccountParams): Promise<AgentInfo[]> =>
+/** TODO: getUnit is not available on the contract, this needs to be fixed. */
+export const getListByAccount = async ({
+  searchValue,
+  total,
+  getUnit,
+  getOwner,
+  account,
+}: GetListByAccountParams): Promise<AgentInfo[]> =>
   new Promise((resolve, reject) => {
     try {
       const allListPromise = [];

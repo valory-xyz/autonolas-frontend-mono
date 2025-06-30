@@ -2,7 +2,7 @@ import { getListByAccount } from 'common-util/ContractUtils/myList';
 import { getAgentContract } from 'common-util/Contracts';
 import { getFirstAndLastIndex } from 'common-util/functions';
 import { fetchMechAgents, fetchMmMechs, fetchMmMechsTotal } from 'common-util/functions/graphql';
-import type { Agent, MmMech } from 'common-util/functions/graphql';
+import type { MmMech } from 'common-util/functions/graphql';
 
 // --------- HELPER METHODS ---------
 export const getAgentOwner = (id: number): Promise<string> =>
@@ -36,18 +36,19 @@ export type AgentInfo = {
 
 const getAgentsHelper = ({ first, total, resolve }: GetAgentsHelperParams) => {
   // Get the promise for mechData from the GraphQL
-  const mechDataPromise = fetchMechAgents({ total, first }) as Promise<Agent[]>;
+  const mechDataPromise = fetchMechAgents({ total, first });
 
   mechDataPromise.then((mechAgents) => {
     const results = mechAgents.map(async (agent) => {
-      const agentId = Number(agent.id);
-      const owner = await getAgentOwner(agentId) as string;
+      const { id, agentHash, mech } = agent;
+      const agentId = Number(id);
+      const owner = await getAgentOwner(agentId);
 
       const agentInfo: AgentInfo = {
         id: agentId,
+        hash: agentHash,
         owner,
-        hash: agent.agentHash,
-        mech: agent.mech,
+        mech,
       };
 
       return agentInfo;
@@ -70,7 +71,7 @@ export type MechInfo = {
   address: string;
   owner: string;
   mechFactory: string;
-}
+};
 
 const getMechsHelper = ({ first, total, filters, resolve }: GetMechsHelperParams) => {
   // Get the promise for mechData from the GraphQL
@@ -115,9 +116,10 @@ export const getTotalForAllAgents = (): Promise<number> =>
       });
   });
 
-export const getTotalForMyAgents = (account: string) =>
+export const getTotalForMyAgents = (account: string): Promise<number> =>
   new Promise((resolve, reject) => {
     const contract = getAgentContract();
+
     contract.methods
       .balanceOf(account)
       .call()
@@ -129,7 +131,7 @@ export const getTotalForMyAgents = (account: string) =>
       });
   });
 
-export const getFilteredAgents = async (searchValue: string, account: string) => {
+export const getFilteredAgents = async (searchValue: string = '', account: string) => {
   const contract = getAgentContract();
   const total = await getTotalForAllAgents();
   const { getUnit } = contract.methods;
@@ -160,7 +162,11 @@ export const getAgents = (total: number, nextPage: number = 1): Promise<AgentInf
 /**
  * Function to return all mechs
  */
-export const getMechs = (total: number, nextPage: number = 1, filters: { owner?: string; searchValue?: string } = {}): Promise<MechInfo[]> =>
+export const getMechs = (
+  total: number,
+  nextPage: number = 1,
+  filters: { owner?: string; searchValue?: string } = {},
+): Promise<MechInfo[]> =>
   new Promise((resolve, reject) => {
     try {
       const { first } = getFirstAndLastIndex(total, nextPage);
@@ -179,7 +185,7 @@ export const getMechs = (total: number, nextPage: number = 1, filters: { owner?:
 /**
  * Function to return total mechs
  */
-export const getTotalMechs = () =>
+export const getTotalMechs = (): Promise<number> =>
   new Promise((resolve, reject) => {
     try {
       fetchMmMechsTotal().then((result) => resolve(result));

@@ -138,24 +138,18 @@ export const getTableColumns = (
 
 export type Item = {
   id: number;
-  description?: string;
-  developer?: string;
   owner: string;
   hash?: string;
   mech?: string;
-  dependencies?: Array<string>;
   address?: string;
   mechFactory?: string;
 };
 
 export type AgentData = {
   id: string;
-  description?: string;
-  developer?: string;
   owner: string;
   hash: string;
   mech?: string;
-  dependency?: number;
 };
 
 export type ServiceData = {
@@ -184,12 +178,9 @@ export const getData = (type: string, rawData: Item[], { current }: { current: n
   if (type === NAV_TYPES.AGENT) {
     data = rawData.map((item, index) => ({
       id: String(item.id) || `${startIndex + index}`,
-      description: item.description || '-',
-      developer: item.developer || '-',
       owner: item.owner || '-',
       hash: item.hash || '-',
       mech: item.mech,
-      dependency: (item.dependencies || []).length,
     }));
   }
 

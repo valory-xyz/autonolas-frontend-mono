@@ -9,7 +9,7 @@ import { useSearchInput } from 'common-util/hooks';
 import ListTable from 'components/List/ListTable';
 import { getHash, isMyTab } from 'components/List/ListTable/helpers';
 import { MarketplaceRequest } from 'components/Request/Request';
-import { NAV_TYPES,  URL } from 'util/constants';
+import { NAV_TYPES, URL } from 'util/constants';
 
 import { getMechs, getTotalMechs, type MechInfo } from './utils';
 
@@ -43,7 +43,7 @@ export const ListServices = () => {
   useEffect(() => {
     setCurrentTab(isMyTab(hash) ? MY_SERVICES : ALL_SERVICES);
     setList([]);
-  }, [router.asPath]);
+  }, [hash]);
 
   // fetch total
   useEffect(() => {
@@ -51,9 +51,9 @@ export const ListServices = () => {
       try {
         if (currentTab === ALL_SERVICES && !searchValue && isLoading) {
           const totalMechs = await getTotalMechs();
+          setTotal(totalMechs);
 
-          setTotal(Number(totalMechs));
-          if (Number(totalMechs) === 0) {
+          if (totalMechs === 0) {
             setIsLoading(false);
           }
         }
@@ -76,8 +76,8 @@ export const ListServices = () => {
         if (currentTab === ALL_SERVICES && !searchValue && total) {
           // get mechs without search
           setList([]);
-          const everyComps = await getMechs(total, currentPage);
-          setList(everyComps);
+          const mechs = await getMechs(total, currentPage);
+          setList(mechs);
         } else {
           // get my mechs or mechs with search
           const filters: { owner?: string; searchValue?: string } = {};
@@ -88,8 +88,8 @@ export const ListServices = () => {
             filters.searchValue = searchValue;
           }
           // request maximum amount as pagination is not supported with search
-          const everyComps = await getMechs(MAX_TOTAL, currentPage, filters);
-          setList(everyComps);
+          const mechs = await getMechs(MAX_TOTAL, currentPage, filters);
+          setList(mechs);
         }
       } catch (e) {
         console.error(e);

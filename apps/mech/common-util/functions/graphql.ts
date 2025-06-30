@@ -13,7 +13,7 @@ export type Agent = {
   mech: string;
 };
 
-export async function fetchMechAgents({ first, total }: FetchMechAgentsArgs): Promise<Agent[] | Error> {
+export async function fetchMechAgents({ first, total }: FetchMechAgentsArgs): Promise<Agent[]> {
   return new Promise((resolve, reject) => {
     const url = process.env.NEXT_PUBLIC_MECH_SUBGRAPH_URL;
     if (!url) {
@@ -69,7 +69,11 @@ export type MmMech = {
   owner: string;
 };
 
-export async function fetchMmMechs({ first, total, filters }: FetchMmMechsArgs): Promise<MmMech[] | Error> {
+export async function fetchMmMechs({
+  first,
+  total,
+  filters,
+}: FetchMmMechsArgs): Promise<MmMech[] | Error> {
   return new Promise((resolve, reject) => {
     const chainId = getChainId();
     const url = MECH_MARKETPLACE_SUBGRAPH_URLS[chainId];
@@ -130,7 +134,7 @@ export async function fetchMmMechs({ first, total, filters }: FetchMmMechsArgs):
   });
 }
 
-export async function fetchMmMechsTotal() {
+export async function fetchMmMechsTotal(): Promise<number> {
   return new Promise((resolve, reject) => {
     const chainId = getChainId();
     const url = MECH_MARKETPLACE_SUBGRAPH_URLS[chainId];
@@ -163,7 +167,7 @@ export async function fetchMmMechsTotal() {
       })
       .then((data) => {
         if (!data.data.global) {
-          resolve({ totalMechs: 0 });
+          resolve(0);
         } else {
           resolve(data.data.global.totalMechs);
         }

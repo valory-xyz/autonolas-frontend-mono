@@ -39,22 +39,22 @@ const Content = styled.div`
   }
 `;
 
+type MechType = 'mechMM' | 'legacy';
+
 export const Mechs = () => {
   const router = useRouter();
-  const [mechType, setMechType] = useState(MECH_MM);
+  const [mechType, setMechType] = useState<MechType>(MECH_MM);
 
   const networkNameFromUrl = router?.query?.network;
 
-  const handleChangeMechType = (e: string) => {
-    router.push(`/${networkNameFromUrl}/${e === MECH_MM ? URL.MECHS : URL.MECHS_LEGACY}`);
-  };
+  const handleChangeMechType = (selectedValue: string) =>
+    router.push(
+      `/${networkNameFromUrl}/${selectedValue === MECH_MM ? URL.MECHS : URL.MECHS_LEGACY}`,
+    );
 
   useEffect(() => {
-    if (router.asPath.includes(URL.MECHS_LEGACY)) {
-      setMechType(LEGACY);
-    } else {
-      setMechType(MECH_MM);
-    }
+    if (router.asPath.includes(URL.MECHS_LEGACY)) setMechType(LEGACY);
+    else setMechType(MECH_MM);
   }, [router]);
 
   return (
@@ -65,8 +65,7 @@ export const Mechs = () => {
         size="large"
         onChange={handleChangeMechType}
       />
-      {mechType === MECH_MM && <ListServices />}
-      {mechType === LEGACY && <ListAgents />}
+      {mechType === MECH_MM ? <ListServices /> : <ListAgents />}
     </Content>
   );
 };

@@ -7,9 +7,9 @@ import { useSelector } from 'react-redux';
 import type { RootState } from 'store/types';
 import { getMyListOnPagination } from 'common-util/ContractUtils/myList';
 import { useSearchInput, useUnsupportedNetwork } from 'common-util/hooks';
-import ListTable from 'components/List/ListTable';
-import { getHash, isMyTab } from 'components/List/ListTable/helpers';
 import { NAV_TYPES, URL } from 'util/constants';
+import { getHash, isMyTab } from 'components/List/ListTable/helpers';
+import ListTable from 'components/List/ListTable';
 
 import { getAgents, getFilteredAgents, getTotalForAllAgents, getTotalForMyAgents } from './utils';
 import type { AgentInfo } from './utils';
@@ -17,10 +17,12 @@ import type { AgentInfo } from './utils';
 const ALL_AGENTS = 'all-agents';
 const MY_AGENTS = 'my-agents';
 
+type CurrentTab = 'all-agents' | 'my-agents';
+
 export const ListAgents = () => {
   const router = useRouter();
   const hash = getHash(router);
-  const [currentTab, setCurrentTab] = useState(isMyTab(hash) ? MY_AGENTS : ALL_AGENTS);
+  const [currentTab, setCurrentTab] = useState<CurrentTab>(isMyTab(hash) ? MY_AGENTS : ALL_AGENTS);
   const networkNameFromUrl = router?.query?.network;
 
   const account = useSelector((state: RootState) => get(state, 'setup.account'));
@@ -44,15 +46,14 @@ export const ListAgents = () => {
   useEffect(() => {
     setCurrentTab(isMyTab(hash) ? MY_AGENTS : ALL_AGENTS);
     setList([]);
-  }, [router.asPath]);
+  }, [hash]);
 
   // fetch total
   useEffect(() => {
     (async () => {
       if (searchValue === '') {
         try {
-          let totalTemp = null;
-
+          let totalTemp: number | null = null;
           // All agents
           if (currentTab === ALL_AGENTS) {
             totalTemp = await getTotalForAllAgents();
@@ -83,9 +84,8 @@ export const ListAgents = () => {
         try {
           // All agents
           if (currentTab === ALL_AGENTS) {
-            setList([]);
-            const everyComps = await getAgents(total, currentPage);
-            setList(everyComps);
+            const agents = await getAgents(total, currentPage);
+            setList(agents);
           }
 
           /**
@@ -93,9 +93,9 @@ export const ListAgents = () => {
            * - search by `account` as searchValue
            * - API will be called only once & store the complete list
            */
-          if (currentTab === MY_AGENTS && list.length === 0) {
-            const e = await getFilteredAgents('', account!);
-            setList(e);
+          if (currentTab === MY_AGENTS && account && list.length === 0) {
+            const filteredAgents = await getFilteredAgents('', account);
+            setList(filteredAgents);
           }
         } catch (e) {
           console.error(e);
@@ -104,7 +104,7 @@ export const ListAgents = () => {
         }
       }
     })();
-  }, [account, total, currentPage]);
+  }, [account, total, currentPage, currentTab, searchValue, list.length]);
 
   /**
    * Search (All agents, My agents)
@@ -132,7 +132,7 @@ export const ListAgents = () => {
         }
       }
     })();
-  }, [account, searchValue]);
+  }, [account, currentTab, searchValue]);
 
   const tableCommonProps = {
     type: NAV_TYPES.AGENT,
@@ -143,10 +143,8 @@ export const ListAgents = () => {
     isPaginationRequired: currentTab === ALL_AGENTS && !searchValue,
   };
 
-  if (isWrongNetwork) {
-    return wrongNetworkContent;
-  }
-  
+  if (isWrongNetwork) return wrongNetworkContent;
+
   return (
     <Flex vertical gap={24}>
       <Flex gap={8} justify="end">
@@ -157,9 +155,8 @@ export const ListAgents = () => {
             { value: MY_AGENTS, label: 'My agents' },
           ]}
           value={currentTab}
-          onChange={(e) => {
-            setCurrentTab(e);
-
+          onChange={(selectedValue: CurrentTab) => {
+            setCurrentTab(selectedValue);
             setList([]);
             setTotal(0);
             setCurrentPage(1);
@@ -169,7 +166,7 @@ export const ListAgents = () => {
             clearSearch();
             // update the URL to keep track of my-agents
             router.push(
-              `/${networkNameFromUrl}/${e === MY_AGENTS ? `${URL.MECHS_LEGACY}#${MY_AGENTS}` : URL.MECHS_LEGACY}`,
+              `/${networkNameFromUrl}/${selectedValue === MY_AGENTS ? `${URL.MECHS_LEGACY}#${MY_AGENTS}` : URL.MECHS_LEGACY}`,
             );
           }}
         />

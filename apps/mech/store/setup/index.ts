@@ -12,7 +12,7 @@ const initialState = {
 };
 
 export type Setup = {
-  account?: string | null;
+  account?: `0x${string}` | null;
   balance?: string | null;
   chainId?: Network | null;
   errorMessage?: string | null;
