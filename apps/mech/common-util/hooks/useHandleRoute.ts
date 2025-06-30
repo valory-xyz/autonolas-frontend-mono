@@ -4,9 +4,8 @@ import { useCallback, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 
 import { setChainId } from 'store/setup/actions';
+import { ALL_SUPPORTED_CHAINS, FIRST_SUPPORTED_CHAIN } from 'components/Login/config';
 import { PAGES_TO_LOAD_WITHOUT_CHAIN_ID, URL } from 'util/constants';
-
-import { ALL_SUPPORTED_CHAINS, FIRST_SUPPORTED_CHAIN } from '../Login/config';
 
 const isValidNetworkName = (name: string) => {
   const isValid = ALL_SUPPORTED_CHAINS.some((e) => toLower(e.networkName) === toLower(name));

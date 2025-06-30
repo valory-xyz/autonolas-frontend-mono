@@ -7,7 +7,7 @@ import Web3 from 'web3';
 import { AddressLink, NA, notifyError, notifySuccess } from '@autonolas/frontend-library';
 
 import { AGENT_MECH_ABI, OLAS_MECH_ABI } from 'common-util/AbiAndAddresses';
-import { SUPPORTED_CHAINS } from 'common-util/Login';
+import { SUPPORTED_CHAINS } from 'components/Login';
 import { HeaderTitle } from 'components/Title';
 import { getChainId } from 'common-util/functions';
 import { Request } from 'components/Request/Request';

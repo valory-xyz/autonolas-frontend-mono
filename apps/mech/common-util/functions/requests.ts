@@ -4,7 +4,7 @@ import type { Contract } from 'web3-eth-contract';
 
 import { GENERIC_ERC20_CONTRACT_ABI, SERVICE_REGISTRY_L2_ABI } from 'common-util/AbiAndAddresses';
 import { getAgentContract, getWeb3Details } from 'common-util/Contracts';
-import { wagmiConfig } from 'common-util/Login/config';
+import { wagmiConfig } from 'components/Login/config';
 import { GATEWAY_URL, HASH_PREFIX } from 'util/constants';
 
 import { getIpfsResponse } from '.';

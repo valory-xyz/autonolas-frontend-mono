@@ -3,7 +3,7 @@ import { connect } from 'react-redux';
 import { useAccount, useBalance } from 'wagmi';
 import type { Address } from 'viem';
 
-import { LoginV2 as LoginComponent } from 'common-util/Login';
+import { LoginV2 as LoginComponent } from 'components/Login/LoginV2';
 import {
   setLogout as setLogoutFn,
   setUserAccount as setUserAccountFn,

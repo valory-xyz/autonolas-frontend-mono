@@ -2,7 +2,7 @@ import { Select } from 'antd';
 import { useRouter } from 'next/router';
 
 import { useScreen } from 'libs/ui-theme/src';
-import { ALL_SUPPORTED_CHAINS, FIRST_SUPPORTED_CHAIN } from 'common-util/Login/config';
+import { ALL_SUPPORTED_CHAINS, FIRST_SUPPORTED_CHAIN } from 'components/Login/config';
 import { PAGES_TO_LOAD_WITHOUT_CHAIN_ID } from 'util/constants';
 
 const networkSelectOptions = ALL_SUPPORTED_CHAINS.map((e) => ({

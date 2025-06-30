@@ -3,7 +3,7 @@ import Head from 'next/head';
 import { Provider } from 'react-redux';
 
 import { AutonolasThemeProvider, GlobalStyles } from 'libs/ui-theme/src';
-import { METADATA } from 'common-util/Login/config';
+import { METADATA } from 'components/Login/config';
 import Layout from 'components/Layout';
 import { Web3ModalProvider } from 'context/Web3ModalProvider';
 

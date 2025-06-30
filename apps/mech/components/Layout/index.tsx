@@ -6,13 +6,13 @@ import { useSelector } from 'react-redux';
 
 import { COLOR } from '@autonolas/frontend-library';
 
-import { ALL_SUPPORTED_CHAINS } from 'common-util/Login/config';
+import { ALL_SUPPORTED_CHAINS } from 'components/Login/config';
 import { getSupportedNetworks } from 'common-util/functions';
 import { useHandleRoute } from 'common-util/hooks/useHandleRoute';
 import { PAGES_TO_LOAD_WITH_CHAIN_ID } from 'util/constants';
+import Login from 'components/Login';
 import type { RootState } from 'store/types';
 
-import Login from '../Login';
 import Footer from './Footer';
 import { LogoSvg } from './Logo';
 import { SwitchNetworkSelect } from './SwitchNetworkSelect';

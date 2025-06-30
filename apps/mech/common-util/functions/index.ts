@@ -8,8 +8,8 @@ import {
 } from '@autonolas/frontend-library';
 
 import { ADDRESSES, RPC_URLS } from 'common-util/Contracts';
-import { SUPPORTED_CHAINS } from 'common-util/Login';
-import { FIRST_SUPPORTED_CHAIN } from 'common-util/Login/config';
+import { SUPPORTED_CHAINS } from 'components/Login/config';
+import { FIRST_SUPPORTED_CHAIN } from 'components/Login/config';
 import { Network } from 'types/index';
 import { GATEWAY_URL, TOTAL_VIEW_COUNT } from 'util/constants';
 
