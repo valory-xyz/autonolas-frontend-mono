@@ -1,7 +1,7 @@
 import { Button, Result } from 'antd';
 import { useRouter } from 'next/router';
 
-import { FIRST_SUPPORTED_CHAIN } from 'components/Login/config';
+import { FIRST_SUPPORTED_CHAIN } from 'common-util/login/config';
 import { URL } from 'util/constants';
 
 export const PageNotFound = () => {

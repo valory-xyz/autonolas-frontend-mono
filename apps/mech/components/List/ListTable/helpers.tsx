@@ -2,8 +2,8 @@ import type { NextRouter } from 'next/router';
 
 import { AddressLink, NA } from '@autonolas/frontend-library';
 
-import { SUPPORTED_CHAINS } from 'components/Login/config';
-import { FIRST_SUPPORTED_CHAIN } from 'components/Login/config';
+import { SUPPORTED_CHAINS } from 'common-util/login/config';
+import { FIRST_SUPPORTED_CHAIN } from 'common-util/login/config';
 import { getChainId } from 'common-util/functions';
 import { NAV_TYPES, REGISTRY_URL, TOTAL_VIEW_COUNT } from 'util/constants';
 

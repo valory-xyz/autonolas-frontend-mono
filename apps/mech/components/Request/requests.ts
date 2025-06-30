@@ -4,7 +4,7 @@ import { Address } from 'viem';
 import { MECH_MARKETPLACE_ABI } from 'common-util/AbiAndAddresses';
 import { BALANCE_TRACKER_FIXED_PRICE_TOKEN_ABI } from 'common-util/AbiAndAddresses';
 import { ADDRESSES } from 'common-util/Contracts';
-import { wagmiConfig } from 'components/Login/config';
+import { wagmiConfig } from 'common-util/login/config';
 import { getIsValidChainId } from 'common-util/functions';
 
 export const getBalanceTrackerContract = async (paymentType: `0x${string}`) => {

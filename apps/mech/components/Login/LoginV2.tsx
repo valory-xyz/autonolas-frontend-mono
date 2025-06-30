@@ -102,6 +102,7 @@ export const LoginV2 = ({ onConnect: onConnectCb, onDisconnect: onDisconnectCb }
 
   const onSwitchNetwork = useCallback(async () => {
     try {
+      if (!selectedChainId) return;
       await switchChainAsync({ chainId: selectedChainId });
     } catch (error) {
       console.error(error);

@@ -5,7 +5,7 @@ import { useReadContract, useReadContracts } from 'wagmi';
 
 import { MECH_MARKETPLACE_ABI, OLAS_MECH_ABI } from 'common-util/AbiAndAddresses';
 import { getWeb3Details } from 'common-util/Contracts';
-import { wagmiConfig } from 'components/Login/config';
+import { wagmiConfig } from 'common-util/login/config';
 import { getIpfsResponse } from 'common-util/functions';
 import { getMetadataHashByServiceId } from 'common-util/functions/requests';
 
