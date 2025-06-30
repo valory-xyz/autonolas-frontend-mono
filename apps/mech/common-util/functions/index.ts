@@ -8,10 +8,9 @@ import {
 } from '@autonolas/frontend-library';
 
 import { ADDRESSES, RPC_URLS } from 'common-util/Contracts';
-import { SUPPORTED_CHAINS } from 'common-util/login/config';
-import { FIRST_SUPPORTED_CHAIN } from 'common-util/login/config';
-import { Network } from 'types/index';
+import { SUPPORTED_CHAINS, FIRST_SUPPORTED_CHAIN } from 'common-util/login/config';
 import { GATEWAY_URL, TOTAL_VIEW_COUNT } from 'util/constants';
+import type { Network } from 'types/index';
 
 export const getModalProvider = () => window?.MODAL_PROVIDER;
 

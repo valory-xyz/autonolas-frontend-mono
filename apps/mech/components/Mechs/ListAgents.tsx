@@ -4,6 +4,7 @@ import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 
+import type { RootState } from 'store/types';
 import { getMyListOnPagination } from 'common-util/ContractUtils/myList';
 import { useSearchInput, useUnsupportedNetwork } from 'common-util/hooks';
 import ListTable from 'components/List/ListTable';
@@ -11,6 +12,7 @@ import { getHash, isMyTab } from 'components/List/ListTable/helpers';
 import { NAV_TYPES, URL } from 'util/constants';
 
 import { getAgents, getFilteredAgents, getTotalForAllAgents, getTotalForMyAgents } from './utils';
+import type { AgentInfo } from './utils';
 
 const ALL_AGENTS = 'all-agents';
 const MY_AGENTS = 'my-agents';
@@ -21,16 +23,14 @@ export const ListAgents = () => {
   const [currentTab, setCurrentTab] = useState(isMyTab(hash) ? MY_AGENTS : ALL_AGENTS);
   const networkNameFromUrl = router?.query?.network;
 
-  const account = useSelector((state) => get(state, 'setup.account'));
+  const account = useSelector((state: RootState) => get(state, 'setup.account'));
 
   const { isWrongNetwork, wrongNetworkContent } = useUnsupportedNetwork();
 
   /**
    * extra tab content & view click
    */
-  const { searchValue, searchInput, clearSearch } = useSearchInput({
-    title: '',
-  });
+  const { searchValue, searchInput, clearSearch } = useSearchInput();
 
   /**
    * filtered list
@@ -38,7 +38,7 @@ export const ListAgents = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [total, setTotal] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
-  const [list, setList] = useState([]);
+  const [list, setList] = useState<AgentInfo[]>([]);
 
   // update current tab based on the "hash" in the URL
   useEffect(() => {
@@ -60,7 +60,7 @@ export const ListAgents = () => {
 
           // My agents
           if (currentTab === MY_AGENTS) {
-            totalTemp = await getTotalForMyAgents(account);
+            totalTemp = await getTotalForMyAgents(account!);
           }
 
           setTotal(Number(totalTemp));

@@ -1,14 +1,14 @@
+import { useCallback, useEffect } from 'react';
 import { SwapOutlined } from '@ant-design/icons';
 import { GetAccountReturnType } from '@wagmi/core';
+import { useAccount, useAccountEffect, useBalance, useSwitchChain } from 'wagmi';
 import { isNil } from 'lodash';
-import { useCallback, useEffect } from 'react';
 import styled from 'styled-components';
 import { Address } from 'viem';
-import { useAccount, useAccountEffect, useBalance, useSwitchChain } from 'wagmi';
 
-import { YellowButton } from 'components/YellowButton';
-import { useHelpers } from 'common-util/hooks';
 import { useScreen } from 'libs/ui-theme/src';
+import { useHelpers } from 'common-util/hooks';
+import { YellowButton } from 'components/YellowButton';
 
 const LoginContainer = styled.div`
   display: flex;
@@ -37,7 +37,7 @@ const handleChainChanged = () => {
 
 export const LoginV2 = ({ onConnect: onConnectCb, onDisconnect: onDisconnectCb }: LoginV2Props) => {
   const { address, chain } = useAccount();
-  const { switchChainAsync, isLoading } = useSwitchChain();
+  const { switchChainAsync, isPending } = useSwitchChain();
   const { data } = useBalance({ address });
   const { isMobile } = useScreen();
   const { isConnectedToWrongNetwork, chainId: selectedChainId } = useHelpers();
@@ -122,7 +122,7 @@ export const LoginV2 = ({ onConnect: onConnectCb, onDisconnect: onDisconnectCb }
     <LoginContainer>
       {showWrongNetwork && (
         <YellowButton
-          loading={isLoading}
+          loading={isPending}
           type="default"
           onClick={onSwitchNetwork}
           icon={<SwapOutlined />}

@@ -18,8 +18,8 @@ type ListTableProps = {
   total: number;
   currentPage: number;
   setCurrentPage: (page: number) => void;
-  isAccountRequired: boolean;
-  extra: {
+  isAccountRequired?: boolean;
+  extra?: {
     scrollX: number;
   };
 };

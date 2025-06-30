@@ -45,7 +45,7 @@ export const Mechs = () => {
 
   const networkNameFromUrl = router?.query?.network;
 
-  const handleChangeMechType = (e) => {
+  const handleChangeMechType = (e: string) => {
     router.push(`/${networkNameFromUrl}/${e === MECH_MM ? URL.MECHS : URL.MECHS_LEGACY}`);
   };
 

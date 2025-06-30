@@ -94,5 +94,3 @@ export const getMechContract = (mechAddress: string) => {
   const contract = getContract(OLAS_MECH_ABI, mechAddress);
   return contract;
 };
-
-// TODO: move all fetchers below to functions/requests?

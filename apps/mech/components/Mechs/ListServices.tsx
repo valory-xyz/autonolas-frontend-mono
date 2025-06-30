@@ -4,6 +4,7 @@ import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 
+import type { RootState } from 'store/types';
 import { useSearchInput } from 'common-util/hooks';
 import ListTable from 'components/List/ListTable';
 import { getHash, isMyTab } from 'components/List/ListTable/helpers';
@@ -23,14 +24,12 @@ export const ListServices = () => {
   const [currentTab, setCurrentTab] = useState(isMyTab(hash) ? MY_SERVICES : ALL_SERVICES);
   const networkNameFromUrl = router?.query?.network;
 
-  const account = useSelector((state) => get(state, 'setup.account'));
+  const account = useSelector((state: RootState) => get(state, 'setup.account'));
 
   /**
    * extra tab content & view click
    */
-  const { searchValue, searchInput, clearSearch } = useSearchInput({
-    title: '',
-  });
+  const { searchValue, searchInput, clearSearch } = useSearchInput();
 
   /**
    * filtered list
@@ -81,7 +80,7 @@ export const ListServices = () => {
           setList(everyComps);
         } else {
           // get my mechs or mechs with search
-          const filters = {};
+          const filters: { owner?: string; searchValue?: string } = {};
           if (currentTab === MY_SERVICES && account) {
             filters.owner = account;
           }

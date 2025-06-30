@@ -7,14 +7,14 @@ import Web3 from 'web3';
 import { AddressLink, NA, notifyError, notifySuccess } from '@autonolas/frontend-library';
 
 import { AGENT_MECH_ABI, OLAS_MECH_ABI } from 'common-util/AbiAndAddresses';
-import { SUPPORTED_CHAINS } from 'components/Login';
-import { HeaderTitle } from 'components/Title';
+import { SUPPORTED_CHAINS } from 'common-util/login/config';
 import { getChainId } from 'common-util/functions';
-import { Request } from 'components/Request/Request';
 import { SCAN_URLS, WEBSOCKET_URLS } from 'util/constants';
+import { HeaderTitle } from 'components/Title';
+import { Request } from 'components/Request/Request';
 
 // Replace the following values with your specific contract information
-const LATEST_BLOCK_COUNT = 5000;
+const LATEST_BLOCK_COUNT = 5_000;
 
 const { Title } = Typography;
 
@@ -32,13 +32,13 @@ const onNewEvent = (event) => {
   );
 };
 
-const onErrorEvent = (error, type) => {
+const onErrorEvent = (error: Error, type: string) => {
   notifyError('Error occurred while receiving event, please check console');
   console.error(`Error occurred on ${type} event`, error);
 };
 
 const EventListener = () => {
-  const [web3Ws, setWeb3Ws] = useState(null);
+  const [web3Ws, setWeb3Ws] = useState<Web3 | null>(null);
   const [contractWs, setContractWs] = useState(null);
 
   const [firstEvents, setFirstEvents] = useState([]);
