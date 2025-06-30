@@ -9,9 +9,9 @@ import { useSearchInput } from 'common-util/hooks';
 import ListTable from 'components/List/ListTable';
 import { getHash, isMyTab } from 'components/List/ListTable/helpers';
 import { MarketplaceRequest } from 'components/Request/Request';
-import { NAV_TYPES, URL } from 'util/constants';
+import { NAV_TYPES,  URL } from 'util/constants';
 
-import { getMechs, getTotalMechs } from './utils';
+import { getMechs, getTotalMechs, type MechInfo } from './utils';
 
 const ALL_SERVICES = 'all-services';
 const MY_SERVICES = 'my-services';
@@ -37,7 +37,7 @@ export const ListServices = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [total, setTotal] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
-  const [list, setList] = useState([]);
+  const [list, setList] = useState<MechInfo[]>([]);
 
   // update current tab based on the "hash" in the URL
   useEffect(() => {

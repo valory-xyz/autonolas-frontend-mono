@@ -137,33 +137,33 @@ export const getTableColumns = (
 };
 
 export type Item = {
-  id: string;
-  description: string;
-  developer: string;
+  id: number;
+  description?: string;
+  developer?: string;
   owner: string;
-  hash: string;
-  mech: string;
-  dependencies: Array<string>;
-  address: string;
-  mechFactory: string;
+  hash?: string;
+  mech?: string;
+  dependencies?: Array<string>;
+  address?: string;
+  mechFactory?: string;
 };
 
 export type AgentData = {
   id: string;
-  description: string;
-  developer: string;
+  description?: string;
+  developer?: string;
   owner: string;
   hash: string;
-  mech: string;
-  dependency: number;
+  mech?: string;
+  dependency?: number;
 };
 
 export type ServiceData = {
   id: string;
   owner: string;
-  hash: string;
-  mech: string;
-  mechFactory: string;
+  hash?: string;
+  mech?: string;
+  mechFactory?: string;
 };
 
 export const getData = (type: string, rawData: Item[], { current }: { current: number }) => {
@@ -183,7 +183,7 @@ export const getData = (type: string, rawData: Item[], { current }: { current: n
 
   if (type === NAV_TYPES.AGENT) {
     data = rawData.map((item, index) => ({
-      id: item.id || `${startIndex + index}`,
+      id: String(item.id) || `${startIndex + index}`,
       description: item.description || '-',
       developer: item.developer || '-',
       owner: item.owner || '-',
@@ -195,11 +195,11 @@ export const getData = (type: string, rawData: Item[], { current }: { current: n
 
   if (type === NAV_TYPES.SERVICE) {
     data = rawData.map((item) => ({
-      id: item.id,
+      id: String(item.id),
       owner: item.owner || '-',
       hash: item.hash,
       mech: item.address,
-      mechFactory: item.mechFactory,
+      mechFactory: item?.mechFactory,
     }));
   }
 

@@ -94,7 +94,7 @@ export const ListAgents = () => {
            * - API will be called only once & store the complete list
            */
           if (currentTab === MY_AGENTS && list.length === 0) {
-            const e = await getFilteredAgents(account);
+            const e = await getFilteredAgents('', account!);
             setList(e);
           }
         } catch (e) {
@@ -120,7 +120,7 @@ export const ListAgents = () => {
         try {
           const filteredList = await getFilteredAgents(
             searchValue,
-            currentTab === MY_AGENTS ? account : null,
+            currentTab === MY_AGENTS ? account! : '',
           );
           setList(filteredList);
           setTotal(0); // total won't be used if search is used
@@ -146,7 +146,7 @@ export const ListAgents = () => {
   if (isWrongNetwork) {
     return wrongNetworkContent;
   }
-
+  
   return (
     <Flex vertical gap={24}>
       <Flex gap={8} justify="end">

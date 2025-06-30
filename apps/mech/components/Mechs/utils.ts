@@ -5,7 +5,7 @@ import { fetchMechAgents, fetchMmMechs, fetchMmMechsTotal } from 'common-util/fu
 import type { Agent, MmMech } from 'common-util/functions/graphql';
 
 // --------- HELPER METHODS ---------
-export const getAgentOwner = (id: number): Promise<string | Error> =>
+export const getAgentOwner = (id: number): Promise<string> =>
   new Promise((resolve, reject) => {
     const contract = getAgentContract();
 
@@ -62,8 +62,15 @@ type GetMechsHelperParams = {
   first: number;
   total: number;
   filters: { owner?: string; searchValue?: string };
-  resolve: (value: unknown) => void;
+  resolve: (value: MechInfo[]) => void;
 };
+
+export type MechInfo = {
+  id: number;
+  address: string;
+  owner: string;
+  mechFactory: string;
+}
 
 const getMechsHelper = ({ first, total, filters, resolve }: GetMechsHelperParams) => {
   // Get the promise for mechData from the GraphQL
@@ -93,7 +100,7 @@ const getMechsHelper = ({ first, total, filters, resolve }: GetMechsHelperParams
 };
 
 // totals
-export const getTotalForAllAgents = () =>
+export const getTotalForAllAgents = (): Promise<number> =>
   new Promise((resolve, reject) => {
     const contract = getAgentContract();
 
@@ -153,7 +160,7 @@ export const getAgents = (total: number, nextPage: number = 1): Promise<AgentInf
 /**
  * Function to return all mechs
  */
-export const getMechs = (total: number, nextPage: number = 1, filters: { owner?: string; searchValue?: string } = {}) =>
+export const getMechs = (total: number, nextPage: number = 1, filters: { owner?: string; searchValue?: string } = {}): Promise<MechInfo[]> =>
   new Promise((resolve, reject) => {
     try {
       const { first } = getFirstAndLastIndex(total, nextPage);

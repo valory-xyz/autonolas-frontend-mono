@@ -1,8 +1,20 @@
 import includes from 'lodash/includes';
 
 import { getFirstAndLastIndex } from 'common-util/functions';
+import type { AgentInfo } from 'components/Mechs/utils';
 
-export const filterByOwner = (results, { searchValue, account }) =>
+type FilterByOwnerParams = {
+  searchValue: string;
+  account: string;
+};
+
+type Result = {
+  id: string;
+  owner: string;
+  unitHash?: string;
+}
+
+export const filterByOwner = (results: Result[], { searchValue, account }: FilterByOwnerParams) =>
   (results || []).filter((e) => {
     const search = (searchValue || '').trim().toLowerCase();
     const ownerL = (e.owner || '').trim().toLowerCase();
@@ -16,10 +28,18 @@ export const filterByOwner = (results, { searchValue, account }) =>
     return includes(ownerL, search) || includes(hashL, search);
   });
 
+
+type GetListByAccountParams = {
+  searchValue: string;
+  total: number;
+  getUnit: (id: string) => { call: () => Promise<unknown> };
+  getOwner: (id: number) => Promise<string>;
+  account: string;
+};
 /**
  * get all the list and filter by owner
  */
-export const getListByAccount = async ({ searchValue, total, getUnit, getOwner, account }) =>
+export const getListByAccount = async ({ searchValue, total, getUnit, getOwner, account }: GetListByAccountParams): Promise<AgentInfo[]> =>
   new Promise((resolve, reject) => {
     try {
       const allListPromise = [];
@@ -33,8 +53,8 @@ export const getListByAccount = async ({ searchValue, total, getUnit, getOwner, 
         const results = await Promise.all(
           componentsList.map(async (info, i) => {
             const id = `${i + 1}`;
-            const owner = await getOwner(id);
-            return { ...info, id, owner };
+            const owner = await getOwner(Number(id));
+            return { ...(info as Record<string, unknown>), id, owner };
           }),
         );
 
@@ -42,7 +62,7 @@ export const getListByAccount = async ({ searchValue, total, getUnit, getOwner, 
           searchValue,
           account,
         });
-        resolve(filteredResults);
+        resolve(filteredResults as unknown as AgentInfo[]);
       });
     } catch (e) {
       console.error(e);
@@ -50,10 +70,16 @@ export const getListByAccount = async ({ searchValue, total, getUnit, getOwner, 
     }
   });
 
+type GetMyListOnPaginationParams = {
+  total: number;
+  nextPage: number;
+  list: AgentInfo[];
+};
+
 /**
  * call API once and return based on pagination
  */
-export const getMyListOnPagination = ({ total, nextPage, list }) => {
+export const getMyListOnPagination = ({ total, nextPage, list }: GetMyListOnPaginationParams) => {
   const { first, last } = getFirstAndLastIndex(total, nextPage);
   const array = list.slice(first - 1, last);
   return array;

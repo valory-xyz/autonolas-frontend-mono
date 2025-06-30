@@ -3,7 +3,6 @@ import React, { Fragment, useEffect, useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { Address } from 'viem';
 
-// import { getTokenId } from 'common-util/functions/requests';
 import { useHelpers } from 'common-util/hooks/useHelpers';
 import { PAYMENT_TYPES } from 'util/constants';
 import { allowOnlyNumbers } from 'libs/util-functions/src';
