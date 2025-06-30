@@ -1,6 +1,6 @@
 import { createConfig, http } from 'wagmi';
 import { mainnet } from 'wagmi/chains';
-import { coinbaseWallet, injected, safe, walletConnect } from 'wagmi/connectors';
+import { coinbaseWallet, injected, walletConnect } from 'wagmi/connectors';
 import type { Chain } from 'wagmi/chains';
 import { RPC_URLS } from 'libs/util-constants/src';
 
@@ -24,7 +24,6 @@ export const wagmiConfig = createConfig({
       metadata: walletConnectMetadata,
       showQrModal: false,
     }),
-    safe(),
     coinbaseWallet({
       appName: walletConnectMetadata.name,
     }),
