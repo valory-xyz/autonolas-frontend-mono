@@ -1,6 +1,6 @@
-import { Table } from 'antd';
 import { useRouter } from 'next/router';
-import PropTypes from 'prop-types';
+import { Table } from 'antd';
+import type { ColumnsType } from 'antd/es/table';
 
 import { Loader } from '@autonolas/frontend-library';
 
@@ -8,24 +8,43 @@ import { ListEmptyMessage } from 'components/List/ListCommon';
 import { TOTAL_VIEW_COUNT } from 'util/constants';
 
 import { getData, getTableColumns } from './helpers';
+import type { AgentData, ServiceData, Item } from './helpers';
+
+type ListTableProps = {
+  isLoading: boolean;
+  type: string;
+  isPaginationRequired: boolean;
+  list: Item[];
+  total: number;
+  currentPage: number;
+  setCurrentPage: (page: number) => void;
+  isAccountRequired: boolean;
+  extra: {
+    scrollX: number;
+  };
+};
+
+type ColumnType = ColumnsType<AgentData | ServiceData>;
 
 const ListTable = ({
-  isLoading,
+  isLoading = false,
   type,
   isPaginationRequired,
-  list,
-  total,
-  currentPage,
-  setCurrentPage,
-  isAccountRequired,
-  extra,
-}) => {
+  list = [],
+  total = 0,
+  currentPage = 0,
+  setCurrentPage = () => {},
+  isAccountRequired = false,
+  extra = { scrollX: 1200 },
+}: ListTableProps) => {
   const router = useRouter();
 
   const { scrollX } = extra;
 
   if (isAccountRequired) {
-    return <Loader isAccountRequired message={`To see your ${type}s, connect wallet`} />;
+    return (
+      <Loader isAccountRequired notConnectedMessage={`To see your ${type}s, connect wallet`} />
+    );
   }
 
   if (isLoading) {
@@ -39,7 +58,7 @@ const ListTable = ({
         total,
         current: currentPage,
         defaultPageSize: TOTAL_VIEW_COUNT,
-        onChange: (e) => setCurrentPage(e),
+        onChange: (e: number) => setCurrentPage(e),
       }
     : false;
 
@@ -49,39 +68,15 @@ const ListTable = ({
         <ListEmptyMessage type={type} />
       ) : (
         <Table
-          columns={columns}
+          columns={columns as ColumnType}
           dataSource={dataSource}
           pagination={pagination}
-          scroll={{ x: scrollX || 1200 }}
+          scroll={{ x: scrollX }}
           rowKey={(record) => `${type}-row-${record.id}`}
         />
       )}
     </>
   );
-};
-
-ListTable.propTypes = {
-  type: PropTypes.string.isRequired,
-  isPaginationRequired: PropTypes.bool.isRequired,
-  isLoading: PropTypes.bool,
-  list: PropTypes.arrayOf(PropTypes.shape({})),
-  total: PropTypes.number,
-  currentPage: PropTypes.number,
-  setCurrentPage: PropTypes.func,
-  isAccountRequired: PropTypes.bool,
-  extra: PropTypes.shape({
-    scrollX: PropTypes.number,
-  }),
-};
-
-ListTable.defaultProps = {
-  isLoading: false,
-  list: [],
-  total: 0,
-  currentPage: 0,
-  setCurrentPage: () => {},
-  isAccountRequired: false,
-  extra: {},
 };
 
 export default ListTable;

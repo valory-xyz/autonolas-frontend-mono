@@ -67,7 +67,7 @@ export const LoginV2 = ({ onConnect: onConnectCb, onDisconnect: onDisconnectCb }
             // *******************************************************
             // ************ setting to the window object! ************
             // *******************************************************
-            (window as any).MODAL_PROVIDER = modalProvider;
+            window.MODAL_PROVIDER = modalProvider;
 
             if (modalProvider?.on) {
               // https://docs.ethers.io/v5/concepts/best-practices/#best-practices--network-changes
@@ -91,7 +91,7 @@ export const LoginV2 = ({ onConnect: onConnectCb, onDisconnect: onDisconnectCb }
   });
 
   useEffect(() => {
-    const modalProvider = (window as any).MODAL_PROVIDER;
+    const modalProvider = window.MODAL_PROVIDER;
     // cleanup
     return () => {
       if (modalProvider && modalProvider.removeListener) {

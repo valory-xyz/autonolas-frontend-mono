@@ -1,7 +1,6 @@
 import { ExportOutlined } from '@ant-design/icons';
 import { Alert, Flex, Layout, Menu, Tag } from 'antd';
 import { useRouter } from 'next/router';
-import PropTypes from 'prop-types';
 import { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 
@@ -34,7 +33,7 @@ const MENU_ITEMS = [
   },
 ];
 
-const NavigationBar = ({ children }: { children: React.ReactNode }) => {
+const NavigationBar = ({ children = null }: { children: React.ReactNode }) => {
   const router = useRouter();
   const { chainId } = useSelector((state: RootState) => state?.setup);
   const { pathname } = router;
@@ -68,7 +67,7 @@ const NavigationBar = ({ children }: { children: React.ReactNode }) => {
   };
 
   return (
-    <CustomLayout pathname={router.pathname}>
+    <CustomLayout>
       <OlasHeader>
         <div className="column-1">
           <Logo href="/">
@@ -114,14 +113,6 @@ const NavigationBar = ({ children }: { children: React.ReactNode }) => {
       <Footer />
     </CustomLayout>
   );
-};
-
-NavigationBar.propTypes = {
-  children: PropTypes.element,
-};
-
-NavigationBar.defaultProps = {
-  children: null,
 };
 
 export default NavigationBar;

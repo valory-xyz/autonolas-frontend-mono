@@ -1,4 +1,3 @@
-import { Modal } from 'antd';
 import styled from 'styled-components';
 
 import { COLOR } from '@autonolas/frontend-library';
@@ -6,6 +5,7 @@ import { COLOR } from '@autonolas/frontend-library';
 export const ComplexLabel = styled.div`
   display: flex;
   flex-direction: column;
+
   .label-helper-text {
     color: ${COLOR.GREY_2};
     a {

@@ -1,8 +1,8 @@
 import { Select } from 'antd';
 import { useRouter } from 'next/router';
 
-import { ALL_SUPPORTED_CHAINS, FIRST_SUPPORTED_CHAIN } from 'common-util/Login/config';
 import { useScreen } from 'libs/ui-theme/src';
+import { ALL_SUPPORTED_CHAINS, FIRST_SUPPORTED_CHAIN } from 'common-util/Login/config';
 import { PAGES_TO_LOAD_WITHOUT_CHAIN_ID } from 'util/constants';
 
 const networkSelectOptions = ALL_SUPPORTED_CHAINS.map((e) => ({
@@ -16,6 +16,24 @@ export const SwitchNetworkSelect = () => {
   const path = router?.pathname || '';
   const chainName = (router?.query?.network || FIRST_SUPPORTED_CHAIN.networkName) as string;
 
+  const handleChange = (value: string) => {
+    const currentChainInfo = ALL_SUPPORTED_CHAINS.find((e) => e.networkName === value);
+
+    if (!currentChainInfo) return;
+
+    // update session storage
+    sessionStorage.setItem('chainId', `${currentChainInfo.id}`);
+
+    if (PAGES_TO_LOAD_WITHOUT_CHAIN_ID.find((e) => e === path)) {
+      // eg. /docs will be redirect to same page ie. /docs
+      router.push(`/${path}`);
+    } else {
+      // eg. /mechs will be redirect to /<chainName>/mechs
+      const replacedPath = router.asPath.replace(chainName, value);
+      router.push(replacedPath);
+    }
+  };
+
   return (
     <div style={{ marginRight: 8 }}>
       <Select
@@ -26,23 +44,7 @@ export const SwitchNetworkSelect = () => {
         placeholder="Select Network"
         disabled={PAGES_TO_LOAD_WITHOUT_CHAIN_ID.some((e) => path.includes(e))}
         options={networkSelectOptions}
-        onChange={(value) => {
-          const currentChainInfo = ALL_SUPPORTED_CHAINS.find((e) => e.networkName === value);
-
-          if (!currentChainInfo) return;
-
-          // update session storage
-          sessionStorage.setItem('chainId', `${currentChainInfo.id}`);
-
-          if (PAGES_TO_LOAD_WITHOUT_CHAIN_ID.find((e) => e === path)) {
-            // eg. /docs will be redirect to same page ie. /docs
-            router.push(`/${path}`);
-          } else {
-            // eg. /mechs will be redirect to /<chainName>/mechs
-            const replacedPath = router.asPath.replace(chainName, value);
-            router.push(replacedPath);
-          }
-        }}
+        onChange={handleChange}
       />
     </div>
   );

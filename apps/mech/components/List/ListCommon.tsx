@@ -1,9 +1,6 @@
-/* eslint-disable import/no-extraneous-dependencies */
-import PropTypes from 'prop-types';
-
 import { EmptyMessage } from 'components/styles';
 
-export const ListEmptyMessage = ({ type }) => {
+export const ListEmptyMessage = ({ type = null }: { type: string | null }) => {
   const getValues = () => {
     switch (type) {
       case 'component':
@@ -40,5 +37,3 @@ export const ListEmptyMessage = ({ type }) => {
     </EmptyMessage>
   );
 };
-ListEmptyMessage.propTypes = { type: PropTypes.string };
-ListEmptyMessage.defaultProps = { type: null };

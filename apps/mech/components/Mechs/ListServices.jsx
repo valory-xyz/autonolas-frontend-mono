@@ -4,8 +4,9 @@ import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 
+import { useSearchInput } from 'common-util/hooks';
 import ListTable from 'components/List/ListTable';
-import { getHash, isMyTab, useSearchInput } from 'components/List/ListTable/helpers';
+import { getHash, isMyTab } from 'components/List/ListTable/helpers';
 import { MarketplaceRequest } from 'components/Request/Request';
 import { NAV_TYPES, URL } from 'util/constants';
 

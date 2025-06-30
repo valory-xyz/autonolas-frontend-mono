@@ -17,7 +17,6 @@ const OPERATOR_NAME = 'Olas (aka Autonolas) DAO';
 const ContractInfo = () => {
   const { chainId } = useHelpers();
   const router = useRouter();
-
   const { pathname, query } = router;
 
   // if chainId is not set, show empty container

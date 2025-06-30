@@ -1,6 +1,4 @@
-import { SearchOutlined } from '@ant-design/icons';
-import { Button, Flex, Input } from 'antd';
-import { useState } from 'react';
+import type { NextRouter } from 'next/router';
 
 import { AddressLink, NA } from '@autonolas/frontend-library';
 
@@ -11,7 +9,10 @@ import { NAV_TYPES, REGISTRY_URL, TOTAL_VIEW_COUNT } from 'util/constants';
 
 import { AddressHashLink } from './AgentHashLink';
 
-export const getTableColumns = (type, { router, isMobile }) => {
+export const getTableColumns = (
+  type: string,
+  { router, isMobile }: { router: NextRouter; isMobile?: boolean },
+) => {
   const networkName = router?.query?.network ?? FIRST_SUPPORTED_CHAIN.networkName;
   const chainId = getChainId();
 
@@ -22,7 +23,7 @@ export const getTableColumns = (type, { router, isMobile }) => {
     chainId,
   };
 
-  if (type === NAV_TYPES.COMPONENT || type === NAV_TYPES.AGENT) {
+  if (type === NAV_TYPES.AGENT) {
     return [
       {
         title: 'ID',
@@ -35,7 +36,7 @@ export const getTableColumns = (type, { router, isMobile }) => {
         dataIndex: 'owner',
         key: 'owner',
         width: 200,
-        render: (text) => (
+        render: (text: string) => (
           <AddressLink text={text} {...addressLinkProps} supportedChains={SUPPORTED_CHAINS} />
         ),
       },
@@ -44,14 +45,14 @@ export const getTableColumns = (type, { router, isMobile }) => {
         dataIndex: 'hash',
         key: 'hash',
         width: 200,
-        render: (text) => <AddressLink text={text} {...addressLinkProps} isIpfsLink />,
+        render: (text: string) => <AddressLink text={text} {...addressLinkProps} isIpfsLink />,
       },
       {
         title: 'Mech',
         dataIndex: 'mech',
         width: 180,
         key: 'mech',
-        render: (text, row) => {
+        render: (text: string, row: AgentData) => {
           if (!text) return NA;
           return (
             <AddressLink
@@ -74,7 +75,7 @@ export const getTableColumns = (type, { router, isMobile }) => {
         dataIndex: 'id',
         key: 'id',
         width: 50,
-        render: (text) => (
+        render: (text: string) => (
           <a
             href={`${REGISTRY_URL}/${networkName}/services/${text}`}
             target="_blank"
@@ -89,7 +90,7 @@ export const getTableColumns = (type, { router, isMobile }) => {
         dataIndex: 'owner',
         key: 'owner',
         width: 160,
-        render: (text) => (
+        render: (text: string) => (
           <AddressLink text={text} {...addressLinkProps} supportedChains={SUPPORTED_CHAINS} />
         ),
       },
@@ -98,14 +99,16 @@ export const getTableColumns = (type, { router, isMobile }) => {
         dataIndex: 'hash',
         key: 'hash',
         width: 160,
-        render: (text, record) => <AddressHashLink {...addressLinkProps} serviceId={record.id} />,
+        render: (_text: string, record: ServiceData) => (
+          <AddressHashLink {...addressLinkProps} serviceId={record.id} />
+        ),
       },
       {
         title: 'Mech',
         dataIndex: 'mech',
         width: 160,
         key: 'mech',
-        render: (text) => {
+        render: (text: string) => {
           if (!text) return NA;
           return (
             <AddressLink
@@ -123,7 +126,7 @@ export const getTableColumns = (type, { router, isMobile }) => {
         dataIndex: 'mechFactory',
         width: 160,
         key: 'mechFactory',
-        render: (text) => (
+        render: (text: string) => (
           <AddressLink text={text} {...addressLinkProps} supportedChains={SUPPORTED_CHAINS} />
         ),
       },
@@ -133,7 +136,37 @@ export const getTableColumns = (type, { router, isMobile }) => {
   return [];
 };
 
-export const getData = (type, rawData, { current }) => {
+export type Item = {
+  id: string;
+  description: string;
+  developer: string;
+  owner: string;
+  hash: string;
+  mech: string;
+  dependencies: Array<string>;
+  address: string;
+  mechFactory: string;
+};
+
+export type AgentData = {
+  id: string;
+  description: string;
+  developer: string;
+  owner: string;
+  hash: string;
+  mech: string;
+  dependency: number;
+};
+
+export type ServiceData = {
+  id: string;
+  owner: string;
+  hash: string;
+  mech: string;
+  mechFactory: string;
+};
+
+export const getData = (type: string, rawData: Item[], { current }: { current: number }) => {
   /**
    * @example
    * TOTAL_VIEW_COUNT = 10, current = 1
@@ -146,7 +179,7 @@ export const getData = (type, rawData, { current }) => {
    *       = 41
    */
   const startIndex = (current - 1) * TOTAL_VIEW_COUNT + 1;
-  let data = [];
+  let data: AgentData[] | ServiceData[] = [];
 
   if (type === NAV_TYPES.AGENT) {
     data = rawData.map((item, index) => ({
@@ -174,42 +207,14 @@ export const getData = (type, rawData, { current }) => {
 };
 
 /**
- * tab content
- */
-export const useSearchInput = () => {
-  const [searchValue, setSearchValue] = useState('');
-  const [value, setValue] = useState('');
-  const clearSearch = () => {
-    setValue('');
-    setSearchValue('');
-  };
-
-  const searchInput = (
-    <Flex gap={8}>
-      <Input
-        prefix={<SearchOutlined className="site-form-item-icon" />}
-        placeholder="Owner or Hash"
-        value={value}
-        onChange={(e) => setValue(e.target.value)}
-      />
-      <Button ghost type="primary" size="large" onClick={() => setSearchValue(value || '')}>
-        Search
-      </Button>
-    </Flex>
-  );
-
-  return { searchValue, searchInput, clearSearch };
-};
-
-/**
  * returns hash from the url
  * @example
  * input: router-path (for example, /components#my-components)
  * output: my-components
  */
-export const getHash = (router) => router?.asPath?.split('#')[1] || '';
+export const getHash = (router: NextRouter) => router?.asPath?.split('#')[1] || '';
 
 /**
  * my-components/my-agents/my-serices has "my" in common hence returns
  */
-export const isMyTab = (hash) => !!(hash || '').includes('my-');
+export const isMyTab = (hash: string) => !!(hash || '').includes('my-');

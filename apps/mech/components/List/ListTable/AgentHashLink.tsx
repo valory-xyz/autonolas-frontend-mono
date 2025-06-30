@@ -5,7 +5,7 @@ import { AddressLink, NA } from '@autonolas/frontend-library';
 
 import { getMetadataHashByServiceId } from 'common-util/functions/requests';
 
-const FETCH_HASH_TIMEOUT = 10000;
+const FETCH_HASH_TIMEOUT = 10_000;
 
 type AddressHashLinkProps = {
   serviceId: string;

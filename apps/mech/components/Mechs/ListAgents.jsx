@@ -5,9 +5,9 @@ import { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 
 import { getMyListOnPagination } from 'common-util/ContractUtils/myList';
+import { useSearchInput, useUnsupportedNetwork } from 'common-util/hooks';
 import ListTable from 'components/List/ListTable';
-import { getHash, isMyTab, useSearchInput } from 'components/List/ListTable/helpers';
-import { useUnsupportedNetwork } from 'common-util/hooks';
+import { getHash, isMyTab } from 'components/List/ListTable/helpers';
 import { NAV_TYPES, URL } from 'util/constants';
 
 import { getAgents, getFilteredAgents, getTotalForAllAgents, getTotalForMyAgents } from './utils';
@@ -151,6 +151,7 @@ export const ListAgents = () => {
     <Flex vertical gap={24}>
       <Flex gap={8} justify="end">
         <Segmented
+          size="large"
           options={[
             { value: ALL_AGENTS, label: 'All agents' },
             { value: MY_AGENTS, label: 'My agents' },
