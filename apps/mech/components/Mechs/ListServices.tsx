@@ -17,6 +17,7 @@ const ALL_SERVICES = 'all-services';
 const MY_SERVICES = 'my-services';
 
 const MAX_TOTAL = 1000;
+const DEFAULT_CURRENT_PAGE = 1;
 
 export const ListServices = () => {
   const router = useRouter();
@@ -36,7 +37,7 @@ export const ListServices = () => {
    */
   const [isLoading, setIsLoading] = useState(true);
   const [total, setTotal] = useState(0);
-  const [currentPage, setCurrentPage] = useState(1);
+  const [currentPage, setCurrentPage] = useState(DEFAULT_CURRENT_PAGE);
   const [list, setList] = useState<MechInfo[]>([]);
 
   // update current tab based on the "hash" in the URL
@@ -76,7 +77,15 @@ export const ListServices = () => {
         if (currentTab === ALL_SERVICES && !searchValue && total) {
           // get mechs without search
           setList([]);
-          const mechs = await getMechs(total, currentPage);
+          /**
+           * The fetcher fn skips values based on the currentPage value, which in turn
+           * only gets items < total number of Items.
+           * Hence passing the actual current page value would break the pagination logic.
+           *
+           * TODO: if we fix the implementation for the `total` items, we can fill
+           * dummy values in the array.
+           */
+          const mechs = await getMechs(total, DEFAULT_CURRENT_PAGE);
           setList(mechs);
         } else {
           // get my mechs or mechs with search
@@ -88,7 +97,7 @@ export const ListServices = () => {
             filters.searchValue = searchValue;
           }
           // request maximum amount as pagination is not supported with search
-          const mechs = await getMechs(MAX_TOTAL, currentPage, filters);
+          const mechs = await getMechs(MAX_TOTAL, DEFAULT_CURRENT_PAGE, filters);
           setList(mechs);
         }
       } catch (e) {
@@ -97,12 +106,13 @@ export const ListServices = () => {
         setIsLoading(false);
       }
     })();
-  }, [networkNameFromUrl, account, currentTab, searchValue, total, currentPage]);
+  }, [networkNameFromUrl, account, currentTab, searchValue, total]);
 
   const tableCommonProps = {
     type: NAV_TYPES.SERVICE,
     isLoading,
-    total,
+    // `total` from the graphql API is incorrect, hence relying on the list length
+    total: list.length,
     currentPage,
     setCurrentPage,
     isPaginationRequired: currentTab === ALL_SERVICES && !searchValue,

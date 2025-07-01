@@ -37,6 +37,14 @@
           }
         }
       },
+      "start": {
+        "executor": "@nx/next:server",
+        "options": {
+          "buildTarget": "mech:build:production",
+          "dev": false,
+          "port": 3007
+        }
+      },
       "export": {
         "executor": "@nx/next:export",
         "options": {
