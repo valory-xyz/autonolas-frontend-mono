@@ -3,7 +3,6 @@ import { Row, Card, Col, Button, Typography, Tag } from 'antd';
 import Image from 'next/image';
 
 import { BUILD_REPO_URL } from 'libs/util-constants/src';
-import { useScreen } from 'libs/ui-theme/src';
 import { COLOR } from '@autonolas/frontend-library';
 import paths from './data.json';
 
@@ -24,6 +23,7 @@ const StyledImage = styled(Image)<{ canImageContain: boolean }>`
   display: block;
   height: 100%;
   align-self: center;
+  margin: auto;
   ${({ canImageContain }) => `object-fit: ${canImageContain ? 'contain' : 'cover'};`}
 `;
 
@@ -69,32 +69,25 @@ const PathImage = ({
 
 const PathCard = ({ path }: { path: Path }) => {
   const { id, name, description, service, images } = path;
-  const { isMobile } = useScreen();
 
   return (
     <StyledCard key={id} style={{ marginBottom: '24px' }}>
       <Row style={{ width: '100%', minHeight: '100%', margin: 'auto 0' }}>
-        {!isMobile && (
-          <Col
-            xs={0}
-            md={10}
-            style={{
-              minHeight: '100%',
-              alignItems: 'center',
-              borderRight: `1px solid ${COLOR.BORDER_GREY}`,
-              display: 'flex',
-              justifyContent: 'center',
-            }}
-          >
+        <Col
+          xs={0}
+          md={10}
+          style={{
+            minHeight: '100%',
+            alignItems: 'center',
+            borderRight: `1px solid ${COLOR.BORDER_GREY}`,
+          }}
+        >
+          <PathImage name={name} id={id} images={images} />
+        </Col>
+        <Col xs={24} md={14} style={{ padding: '2rem' }}>
+          <Col xs={24} md={0}>
             <PathImage name={name} id={id} images={images} />
           </Col>
-        )}
-        <Col xs={24} md={14} style={{ padding: '2rem' }}>
-          {isMobile && (
-            <Col xs={24} md={0} style={{ display: 'flex', justifyContent: 'center' }}>
-              <PathImage name={name} id={id} images={images} />
-            </Col>
-          )}
           <Typography.Title className="mt-0 mb-4" level={4}>
             {name}
           </Typography.Title>
