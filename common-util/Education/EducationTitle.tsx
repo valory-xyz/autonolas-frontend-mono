@@ -5,7 +5,7 @@ import Link from 'next/link';
 import PropTypes from 'prop-types';
 import React, { useEffect, useState } from 'react';
 
-import { getEducationItemByComponent } from 'util/education';
+import { getEducationItemByComponent } from 'common-util/functions';
 
 const { Title } = Typography;
 
@@ -14,7 +14,9 @@ type EducationItem = {
   docsLink?: string;
 };
 
-const PopoverContent = ({ text, docsLink }: EducationItem) => (
+type PopoverContentProps = EducationItem;
+
+const PopoverContent = ({ text, docsLink = '' }: PopoverContentProps) => (
   <>
     {text}
     {docsLink && (
@@ -26,27 +28,16 @@ const PopoverContent = ({ text, docsLink }: EducationItem) => (
   </>
 );
 
-PopoverContent.propTypes = {
-  text: PropTypes.string.isRequired,
-  docsLink: PropTypes.string,
-};
-
-PopoverContent.defaultProps = {
-  docsLink: '',
+type EducationItemProps = {
+  title?: string;
+  level?: TitleProps['level'];
+  educationItem: string;
 };
 
 /**
  * Education title component
  */
-export const EducationTitle = ({
-  title,
-  level,
-  educationItem,
-}: {
-  title: string;
-  level: TitleProps['level'] | undefined;
-  educationItem: string;
-}) => {
+export const EducationTitle = ({ title = '', level = 4, educationItem }: EducationItemProps) => {
   const [fullEducationItem, setFullEducationItem] = useState<EducationItem | null>(null);
   const { text, docsLink } = fullEducationItem || { text: '', docsLink: '' };
 
@@ -73,15 +64,4 @@ export const EducationTitle = ({
       </Col>
     </Row>
   );
-};
-
-EducationTitle.propTypes = {
-  title: PropTypes.string,
-  educationItem: PropTypes.string.isRequired,
-  level: PropTypes.number,
-};
-
-EducationTitle.defaultProps = {
-  level: 4,
-  title: '',
 };

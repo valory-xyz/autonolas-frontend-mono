@@ -1,22 +1,23 @@
 import { Card, Table } from 'antd';
+import { ColumnsType } from 'antd/es/table';
 import Link from 'next/link';
-import { useSelector } from 'react-redux';
 
 import { EducationTitle } from 'common-util/Education/EducationTitle';
 import { getName } from 'common-util/functions';
+import { useAppSelector } from 'store/setup';
+import { LeaderboardUser } from 'store/types';
 
 export const LeaderboardCard = () => {
-  const isLoading = useSelector((state) => state?.setup?.isLeaderboardLoading);
-  const leaderboard = useSelector((state) => state?.setup?.leaderboard);
+  const isLoading = useAppSelector((state) => state.setup.isLeaderboardLoading);
+  const leaderboard = useAppSelector((state) => state.setup.leaderboard);
   const limitedLeaderboardList = leaderboard.slice(0, 5);
 
-  const columns = [
+  const columns: ColumnsType<LeaderboardUser> = [
     { title: 'Rank', dataIndex: 'rank', width: 50 },
     {
       title: 'Name',
       width: 250,
-      render: (record) =>
-        <Link href={`/profile/${record.wallet_address}`}>{getName(record)}</Link> || '--',
+      render: (record) => <Link href={`/profile/${record.wallet_address}`}>{getName(record)}</Link>,
     },
   ];
 
@@ -38,7 +39,7 @@ export const LeaderboardCard = () => {
         loading={isLoading}
         bordered={false}
         pagination={false}
-        rowKey="rowKeyUi"
+        rowKey="id"
       />
     </Card>
   );

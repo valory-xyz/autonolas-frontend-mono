@@ -42,7 +42,7 @@ export const LoginV2 = ({
     if (isConnected) {
       const currentAddress = address;
 
-      if (isAddressProhibited(currentAddress)) {
+      if (currentAddress && isAddressProhibited(currentAddress)) {
         disconnect();
       } else if (onConnectCb) {
         onConnectCb({
@@ -134,7 +134,7 @@ export const LoginV2 = ({
       }
     };
 
-    if (connector && !isAddressProhibited(address)) {
+    if (connector && address && !isAddressProhibited(address)) {
       getData();
     }
   }, [address, connector]);

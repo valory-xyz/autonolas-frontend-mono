@@ -1,19 +1,9 @@
-/* eslint-disable no-param-reassign */
 import { createSlice } from '@reduxjs/toolkit';
 import { lowerCase, orderBy } from 'lodash';
 import { TypedUseSelectorHook, useSelector } from 'react-redux';
 
 import { store } from '.';
-
-type RankedValue = {
-  points: number;
-  rank: number;
-};
-
-export type StateDetails = {
-  details: { profile: { username: string }; metadata: { address: string } };
-  status: number;
-};
+import { LeaderboardUser } from './types';
 
 type SetupState = {
   account: string | null;
@@ -23,7 +13,7 @@ type SetupState = {
   /** If the user is verified. */
   isVerified: boolean;
   isLeaderboardLoading: boolean;
-  leaderboard: RankedValue[];
+  leaderboard: LeaderboardUser[];
   nftDetails: any | null;
   isMemoryDetailsLoading: boolean;
   memoryDetails: any[];
@@ -92,7 +82,7 @@ export const setupSlice = createSlice({
         ['desc', 'asc'],
       );
 
-      const rankedValues: RankedValue[] = [];
+      const rankedValues: LeaderboardUser[] = [];
       values.forEach((e, index) => {
         // setting rank for the first index
         if (index === 0) {

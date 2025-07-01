@@ -3,12 +3,12 @@ import get from 'lodash/get';
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
+import { EducationTitle } from 'common-util/Education/EducationTitle';
 import { BadgeLoading, ShowBadge } from 'common-util/ShowBadge';
 import { getLatestMintedNft } from 'common-util/api';
-import { setNftDetails } from 'store/setup';
+import { setNftDetails, useAppSelector } from 'store/setup';
 
-import { DiscordLink } from '../common';
-import { EducationTitle } from './Education';
+import { DiscordLink } from '../DiscordLink';
 import { MintBadgeCard } from './helpers';
 import { MintNftContainer, WriteFunctionalityContainer } from './styles';
 import { mintNft, pollNftDetails } from './utils';
@@ -17,9 +17,9 @@ const { Text } = Typography;
 
 export const MintNft = () => {
   const [isNftFetchingLoading, setNftFetchingLoading] = useState(false);
-  const account = useSelector((state) => state?.setup?.account);
-  const chainId = useSelector((state) => state?.setup?.chainId);
-  const nftDetails = useSelector((state) => state?.setup?.nftDetails);
+  const account = useAppSelector((state) => state.setup.account);
+  const chainId = useAppSelector((state) => state.setup.chainId);
+  const nftDetails = useAppSelector((state) => state.setup.nftDetails);
   const dispatch = useDispatch();
 
   const [isMintingLoading, setIsMintingLoading] = useState(false);
@@ -73,7 +73,7 @@ export const MintNft = () => {
 
   return (
     <MintNftContainer>
-      <EducationTitle title="Badge" level={3} educationItemSlug="badge" />
+      <EducationTitle title="Badge" level={3} educationItem="badge" />
 
       {isNftFetchingLoading ? (
         <>

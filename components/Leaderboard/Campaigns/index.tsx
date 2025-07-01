@@ -2,14 +2,14 @@ import { ReadOutlined } from '@ant-design/icons';
 import { Card, Table, Typography } from 'antd';
 import { get } from 'lodash';
 import React from 'react';
-import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
-// import { getTimeAgo } from 'common-util/functions/time';
+import { useAppSelector } from 'store/setup';
 import { DEFAULT_COORDINATE_ID } from 'util/constants';
 
 const { Title, Paragraph } = Typography;
-export const Description = styled.div`
+
+const Description = styled.div`
   color: #4d596a;
   a {
     color: #4d596a;
@@ -17,7 +17,7 @@ export const Description = styled.div`
   }
 `;
 
-const DESCRIPTION_BY_IDS = {
+const DESCRIPTION_BY_IDS: Record<string, React.ReactNode> = {
   OlasAgents: (
     <Description>
       Spread the word about Olas’ dominance in enabling{' '}
@@ -144,21 +144,15 @@ const columns = [
   {
     title: 'Hashtag',
     dataIndex: 'hashtag',
-    render: (hashtag) => `#${hashtag}`,
+    render: (hashtag: string) => `#${hashtag}`,
     width: 120,
   },
   Table.EXPAND_COLUMN,
-  // {
-  //   title: 'Start Date',
-  //   dataIndex: 'start_ts',
-  //   render: (start_ts) => (start_ts ? getTimeAgo(start_ts * 1000) : '-'),
-  //   width: 140,
-  // },
 ];
 
 export const Campaigns = () => {
-  const isLoading = useSelector((state) => state?.setup?.isMemoryDetailsLoading);
-  const memoryDetailsList = useSelector((state) => state?.setup?.memoryDetails || []);
+  const isLoading = useAppSelector((state) => state.setup.isMemoryDetailsLoading);
+  const memoryDetailsList = useAppSelector((state) => state.setup.memoryDetails || []);
   const currentMemoryDetails = memoryDetailsList.find((c) => c.id === DEFAULT_COORDINATE_ID) || {};
   const twitterCampaigns = get(currentMemoryDetails, 'plugins_data.twitter_campaigns.campaigns');
 

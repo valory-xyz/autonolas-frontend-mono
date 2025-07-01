@@ -53,12 +53,12 @@ export const sendTransaction = (fn, account) =>
     rpcUrls: RPC_URLS,
   });
 
-export const isGoerli = (id) => id === 5;
+export const isGoerli = (id: number) => id === 5;
 
-export const getEducationItemByComponent = (component) =>
+export const getEducationItemByComponent = (component: string) =>
   data.filter((item) => component === item.component)[0];
 
-export const getTier = (points) => {
+export const getTier = (points: number) => {
   switch (true) {
     case points >= 150000:
       return 'Super Epic';
@@ -73,7 +73,7 @@ export const getTier = (points) => {
   }
 };
 
-export const getName = (profile: XProfile | null, address: Address) =>
+export const getName = (profile?: XProfile | null, address?: Address) =>
   profile?.twitter_handle ||
   profile?.discord_handle ||
   profile?.wallet_address ||
@@ -131,7 +131,7 @@ export const canAddMemoryMessaage = (list, account) => {
   return null;
 };
 
-export const getNumberInMillions = (num) => {
+export const getNumberInMillions = (num: number) => {
   const formattedNumber = `${new Intl.NumberFormat('en-US', {
     style: 'decimal',
     maximumFractionDigits: 3,
@@ -140,7 +140,7 @@ export const getNumberInMillions = (num) => {
   return formattedNumber;
 };
 
-export const isAddressProhibited = (address) => {
+export const isAddressProhibited = (address: Address | string) => {
   const addresses = prohibitedAddresses.map((e) => toLower(e));
   return addresses.includes(toLower(address));
 };
@@ -162,13 +162,13 @@ export const checkOrbisConnection = async () => {
  * @param {string} address - The Ethereum address to truncate
  * @returns {string} The truncated address
  */
-export const truncateAddress = (address) =>
+export const truncateAddress = (address: Address | string) =>
   address ? `${address.substring(0, 5)}...${address.substring(address.length - 3)}` : '--';
 
-export const getAddressFromBytes32 = (address) => {
+export const getAddressFromBytes32 = (address: Address | string) => {
   return '0x' + address.slice(-40);
 };
 
-export const getBytes32FromAddress = (address) => {
+export const getBytes32FromAddress = (address: Address | string) => {
   return ethers.zeroPadValue(address, 32);
 };

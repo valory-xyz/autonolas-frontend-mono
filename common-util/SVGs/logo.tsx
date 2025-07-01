@@ -1,4 +1,4 @@
-export const Logo = () => (
+export const LogoSvg = () => (
   <svg xmlns="http://www.w3.org/2000/svg" width="182" height="38" viewBox="0 0 182 38" fill="none">
     <g clip-path="url(#clip0_1852_699)">
       <path d="M0 9V14.6076H25.5865V9H0Z" fill="black" />
@@ -17,5 +17,3 @@ export const Logo = () => (
     </defs>
   </svg>
 );
-
-export default Logo;

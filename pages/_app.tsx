@@ -17,12 +17,11 @@ import Meta from 'common-util/meta';
 
 /** antd theme config */
 import GlobalStyle from 'components/GlobalStyles';
+import { Layout } from 'components/Layout';
 import { ThemeConfigProvider } from 'context/ConfigProvider';
 
 import client from '../apolloClient';
 import { store } from '../store';
-
-const Layout = dynamic(() => import('components/Layout'));
 
 const queryClient = new QueryClient();
 

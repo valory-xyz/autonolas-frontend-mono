@@ -1,5 +1,6 @@
 import { Col, Row, Typography } from 'antd';
-import { useSelector } from 'react-redux';
+
+import { useAppSelector } from 'store/setup';
 
 import ConnectTwitterModal from '../ConnectTwitter/Modal';
 import { Campaigns } from './Campaigns';
@@ -8,8 +9,8 @@ import { TwitterCard } from './styles';
 
 const { Text } = Typography;
 
-const Leaderboard = () => {
-  const isVerified = useSelector((state) => state?.setup?.isVerified);
+export const Leaderboard = () => {
+  const isVerified = useAppSelector((state) => state.setup.isVerified);
 
   return (
     <Row gutter={[24, 8]}>
@@ -28,5 +29,3 @@ const Leaderboard = () => {
     </Row>
   );
 };
-
-export default Leaderboard;

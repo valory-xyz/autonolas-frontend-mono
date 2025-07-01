@@ -1,13 +1,14 @@
 import { XOutlined } from '@ant-design/icons';
 import { Button, Modal, Typography } from 'antd';
 import { useState } from 'react';
-import { useSelector } from 'react-redux';
+
+import { useAppSelector } from 'store/setup';
 
 const { Title, Text } = Typography;
 
 const ConnectTwitterModal = () => {
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const account = useSelector((state) => state?.setup?.account);
+  const account = useAppSelector((state) => state.setup.account);
 
   const handleOk = () => {
     setIsModalVisible(false);
@@ -49,7 +50,7 @@ const ConnectTwitterModal = () => {
           onClick={handleCreateTweet}
           className="mb-8"
           disabled={!account}
-          title={!account && 'Connect a wallet'}
+          title={!!account ? undefined : 'Connect a wallet'}
         >
           <XOutlined /> Post
         </Button>

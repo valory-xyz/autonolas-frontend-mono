@@ -3,30 +3,27 @@ import { TileDocument } from '@ceramicnetwork/stream-tile';
 import { DID } from 'dids';
 import { Ed25519Provider } from 'key-did-provider-ed25519';
 import { getResolver } from 'key-did-resolver';
-import { cloneDeep, get } from 'lodash';
+import { cloneDeep } from 'lodash';
 import { fromString } from 'uint8arrays';
 
 import { UsersDbContent } from 'types/streams';
-import { XProfile } from 'types/x';
+import { ContributeAgent } from 'types/users';
 
 const API_URL = 'https://ceramic-valory.hirenodes.io';
 const CERAMIC_OBJECT = new CeramicClient(API_URL);
 
 export const getLeaderboardList = async () => {
-  const response = await TileDocument.load(
-    CERAMIC_OBJECT,
-    process.env.NEXT_PUBLIC_STREAM_ID as string,
-  );
-  const users: UsersDbContent = get(response, 'content.users', {});
+  const response = await fetch('/api/leaderboard');
+  const json: ContributeAgent[] = await response.json();
+  const usersList: ContributeAgent['json_value'][] = [];
 
-  const usersList = Object.values(users)
-    .filter((e) => !!e.wallet_address)
-    .filter((e) => e.points !== 0)
-    .map((user, index) => ({
-      ...user,
-      // adding a unique key to each user
-      rowKeyUi: `${user.wallet_address}-${user.discord_id}-${index}`,
-    }));
+  if (json && Array.isArray(json) && json.length > 0) {
+    json.forEach((user) => {
+      if (!user.json_value.wallet_address) return;
+      if (user.json_value.points === 0) return;
+      usersList.push(user.json_value);
+    });
+  }
 
   return usersList;
 };

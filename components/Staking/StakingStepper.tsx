@@ -211,7 +211,7 @@ const SetUpAndStake = ({
         decodedData[abiInputs.findIndex((item) => item.name === 'serviceId')],
       );
       // get multisig address from event topics
-      const multisig = getAddressFromBytes32(createdAndStakedEvent.topics[3]);
+      const multisig = getAddressFromBytes32(createdAndStakedEvent.topics[3] as string);
 
       // write multisig and serviceId to Ceramic
       await updateUserStakingData(twitterId, multisig, `${serviceId}`);

@@ -330,10 +330,14 @@ export const StakingDetails = ({ profile }: { profile: XProfile }) => {
         />
         <InfoColumn
           title="Your Safe address"
-          link={{
-            href: `${base.blockExplorers.default.url}/address/${serviceMultisig}`,
-            text: truncateAddress(serviceMultisig),
-          }}
+          link={
+            serviceMultisig
+              ? {
+                  href: `${base.blockExplorers.default.url}/address/${serviceMultisig}`,
+                  text: truncateAddress(serviceMultisig),
+                }
+              : undefined
+          }
         />
       </Row>
 

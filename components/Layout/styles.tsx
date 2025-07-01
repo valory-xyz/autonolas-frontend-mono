@@ -5,7 +5,7 @@ import { COLOR, MEDIA_QUERY } from '@autonolas/frontend-library';
 
 import { MENU_WIDTH } from 'util/constants';
 
-export const CustomLayout = styled(Layout)`
+export const CustomLayout = styled(Layout)<{ $isBannerVisible: boolean; $isPadded: boolean }>`
   background: #f2f4f9;
 
   --header-height: 64px;
@@ -17,9 +17,9 @@ export const CustomLayout = styled(Layout)`
 
   /* filter: invert(0.95) hue-rotate(39deg); // uncomment this line for dark mode */
   .site-layout {
-    padding: ${({ ispadded }) => (ispadded === 'true' ? '0' : ' 0 20px 40px 20px;')};
-    margin-top: ${({ isBannerVisible }) =>
-      isBannerVisible === 'true'
+    padding: ${({ $isPadded }) => ($isPadded === true ? '0' : ' 0 20px 40px 20px;')};
+    margin-top: ${({ $isBannerVisible }) =>
+      $isBannerVisible === true
         ? 'calc(var(--header-height) + var(--banner-height))'
         : 'var(--header-height)'};
     .contribute-footer {
@@ -31,7 +31,7 @@ export const CustomLayout = styled(Layout)`
       }
     }
     .site-layout-background {
-      padding: ${({ ispadded }) => (ispadded === 'true' ? '0' : '24px 0;')};
+      padding: ${({ $isPadded }) => ($isPadded === true ? '0' : '24px 0;')};
       min-height: calc(100vh - 164px);
     }
   }
@@ -119,13 +119,13 @@ export const Banner = styled(Alert)`
   }
 `;
 
-export const CustomHeader = styled(Layout.Header)`
+export const CustomHeader = styled(Layout.Header)<{ $isBannerVisible: boolean }>`
   &.ant-layout-header {
     display: flex;
     flex-direction: column;
     padding: 0;
-    max-height: ${({ isBannerVisible }) =>
-      isBannerVisible === 'true'
+    max-height: ${({ $isBannerVisible }) =>
+      $isBannerVisible === true
         ? 'calc(var(--header-height) + var(--banner-height))'
         : 'var(--header-height)'};
   }
@@ -147,10 +147,10 @@ export const CustomHeaderContent = styled.div`
   }
 `;
 
-export const CustomMenu = styled(Menu)`
+export const CustomMenu = styled(Menu)<{ $isBannerVisible: boolean }>`
   position: fixed;
-  top: ${({ isBannerVisible }) =>
-    isBannerVisible === 'true'
+  top: ${({ $isBannerVisible }) =>
+    $isBannerVisible === true
       ? 'calc(var(--header-height) + var(--banner-height))'
       : 'var(--header-height)'};
   bottom: 0;
