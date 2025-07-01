@@ -29,7 +29,7 @@ const nextConfig = {
     },
     {
       source: '/mech',
-      destination: '/gnosis/mech',
+      destination: '/gnosis/mechs',
       permanent: false,
     },
     {

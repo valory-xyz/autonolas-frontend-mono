@@ -33,7 +33,6 @@ export const UNICODE_SYMBOLS = {
 
 export const GATEWAY_URL = 'https://gateway.autonolas.tech/ipfs/';
 
-export const DEFAULT_MECH_CONTRACT_ADDRESS = '0x77af31De935740567Cf4fF1986D04B2c964A786a';
 export const DEFAULT_AGENT_ID = '3';
 
 export const REGISTRY_URL = 'https://registry.olas.network';
