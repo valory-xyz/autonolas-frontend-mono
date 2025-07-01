@@ -37,6 +37,14 @@
         }
       }
     },
+    "start": {
+      "executor": "@nx/next:server",
+      "options": {
+        "buildTarget": "launch:build:production",
+        "dev": false,
+        "port": 3004
+      }
+    },
     "export": {
       "executor": "@nx/next:export",
       "options": {
