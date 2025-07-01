@@ -23,7 +23,8 @@
       "defaultConfiguration": "development",
       "options": {
         "buildTarget": "launch:build",
-        "dev": true
+        "dev": true,
+        "port": 3004
       },
       "configurations": {
         "development": {

@@ -1,5 +1,5 @@
 import { Card, Flex, Steps } from 'antd';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import styled from 'styled-components';
 
 import { BREAK_POINT } from 'libs/ui-theme/src';
@@ -29,13 +29,13 @@ const renderStep = (
 ) => <StepComponent onPrev={setPrevStep} onNext={setNextStep} isLastStep={isLastStep} />;
 
 export const PathPage = () => {
-  const [step, setStep] = useState(Number(sessionStorage.getItem(LAST_STEP_KEY) || '0'));
+  const [step, setStep] = useState(0);
 
   const isLastStep = step === steps.length - 1;
 
   const onChangeStep = (value: number) => {
     setStep(value);
-    sessionStorage.setItem(LAST_STEP_KEY, value.toString());
+    window.sessionStorage.setItem(LAST_STEP_KEY, value.toString());
   };
 
   const setPrevStep = () => {
@@ -47,6 +47,10 @@ export const PathPage = () => {
     const nextStep = isLastStep ? 0 : step + 1;
     onChangeStep(nextStep);
   };
+
+  useEffect(() => {
+    setStep(Number(window.sessionStorage.getItem(LAST_STEP_KEY) || '0'));
+  }, []);
 
   return (
     <StyledMain>

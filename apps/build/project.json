@@ -1,0 +1,70 @@
+{
+    "name": "build",
+    "$schema": "../../node_modules/nx/schemas/project-schema.json",
+    "sourceRoot": "apps/build",
+    "projectType": "application",
+    "targets": {
+      "build": {
+        "executor": "@nx/next:build",
+        "outputs": ["{options.outputPath}"],
+        "defaultConfiguration": "production",
+        "options": {
+          "outputPath": "dist/apps/build"
+        },
+        "configurations": {
+          "development": {
+            "outputPath": "apps/build"
+          },
+          "production": {}
+        }
+      },
+      "start": {
+        "executor": "@nx/next:server",
+        "options": {
+          "buildTarget": "build:build:production",
+          "dev": false,
+          "port": 3002
+        }
+      },
+      "serve": {
+        "executor": "@nx/next:server",
+        "defaultConfiguration": "development",
+        "options": {
+          "buildTarget": "build:build",
+          "dev": true,
+          "port": 3002
+        },
+        "configurations": {
+          "development": {
+            "buildTarget": "build:build:development",
+            "dev": true
+          },
+          "production": {
+            "buildTarget": "build:build:production",
+            "dev": false
+          }
+        }
+      },
+      "export": {
+        "executor": "@nx/next:export",
+        "options": {
+          "buildTarget": "build:build:production"
+        }
+      },
+      "lint": {
+        "executor": "@nx/eslint:lint",
+        "outputs": ["{options.outputFile}"],
+        "options": {
+          "lintFilePatterns": ["apps/build/**/*.{ts,tsx,js,jsx}"]
+        }
+      },
+      "test": {
+        "executor": "@nx/jest:jest",
+        "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+        "options": {
+          "jestConfig": "apps/build/jest.config.js"
+        }
+      }
+    },
+    "tags": ["app"]
+  }
