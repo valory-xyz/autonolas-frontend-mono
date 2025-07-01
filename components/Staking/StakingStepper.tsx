@@ -17,11 +17,11 @@ import {
 } from 'common-util/AbiAndAddresses';
 import { updateUserStakingData } from 'common-util/api';
 import { ethersToWei, getAddressFromBytes32, truncateAddress } from 'common-util/functions';
-import { XProfile } from 'types/x';
+import { LeaderboardUser } from 'store/types';
 import { GOVERN_APP_URL, OPERATE_APP_URL, STAKING_CONTRACTS_DETAILS } from 'util/constants';
 import { useReadStakingContract, useServiceInfo } from 'util/staking';
 
-import ConnectTwitterModal from '../ConnectTwitter/Modal';
+import { ConnectTwitterModal } from '../ConnectTwitter/Modal';
 import { WalletUpdateRequired } from './WalletUpdateRequired';
 import { checkAndApproveOlasForAddress, checkHasEnoughOlas, createAndStake } from './requests';
 
@@ -318,7 +318,7 @@ const TweetAndEarn = ({ disabled }: { disabled: boolean }) => {
   );
 };
 
-export const StakingStepper = ({ profile }: { profile: XProfile | null }) => {
+export const StakingStepper = ({ profile }: { profile: LeaderboardUser | null }) => {
   const [step, setStep] = useState(
     profile?.twitter_id ? STAKING_STEPS.SET_UP_AND_STAKE : STAKING_STEPS.CONNECT_TWITTER,
   );

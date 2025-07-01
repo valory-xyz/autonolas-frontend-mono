@@ -4,6 +4,8 @@ import Link from 'next/link';
 import { memo } from 'react';
 import styled from 'styled-components';
 
+import { Tweet } from 'store/types';
+
 import { TweetEmbed } from './TweetEmbed';
 import { shuffleArray } from './utils';
 
@@ -20,16 +22,14 @@ const NoTweetsText = styled(Paragraph)`
 `;
 
 type PointsShowcaseProps = {
-  tweetsData: Record<string, { points: number }> | undefined;
+  tweetsData: Tweet[] | undefined;
 };
 
 export const PointsShowcase = memo(
   function PointsShowcase({ tweetsData }: PointsShowcaseProps) {
-    const earnedPointsTweets = Object.entries(tweetsData || {})
-      .map(([tweetId, tweet]) => ({ tweetId, points: tweet.points }))
-      .filter(({ points }) => points > 0);
+    const earnedPointsTweets = tweetsData?.filter((tweet) => tweet.points > 0);
 
-    const tweets = shuffleArray(earnedPointsTweets).slice(0, MAX_TWEETS_SHOWN);
+    const tweets = shuffleArray(earnedPointsTweets || []).slice(0, MAX_TWEETS_SHOWN);
 
     return (
       <>
@@ -44,8 +44,8 @@ export const PointsShowcase = memo(
 
             <Row gutter={[16, 16]} className="mt-12">
               {tweets.map((item) => (
-                <StyledCol key={item.tweetId} xs={24} md={8}>
-                  <TweetEmbed tweetId={item.tweetId} points={item.points} width={250} />
+                <StyledCol key={item.tweet_id} xs={24} md={8}>
+                  <TweetEmbed tweetId={item.tweet_id} points={item.points} width={250} />
                 </StyledCol>
               ))}
             </Row>

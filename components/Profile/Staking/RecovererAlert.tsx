@@ -41,7 +41,7 @@ export const RecovererAlert = ({
               one way to do so in the PDF.
             </li>
           </ol>
-          {unstakeTimestamp && unstakeTimestamp > 0 && (
+          {typeof unstakeTimestamp === 'number' && unstakeTimestamp > 0 && (
             <Paragraph>
               <span className="font-weight-600">Note:</span> if you have recently staked, you may
               not be able to begin the withdrawal process yet, as you need to remain staked for a

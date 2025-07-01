@@ -17,7 +17,7 @@ export const getLeaderboardList = async () => {
   const json: ContributeAgent[] = await response.json();
   const usersList: ContributeAgent['json_value'][] = [];
 
-  if (json && Array.isArray(json) && json.length > 0) {
+  if (json && Array.isArray(json)) {
     json.forEach((user) => {
       if (!user.json_value.wallet_address) return;
       if (user.json_value.points === 0) return;
@@ -52,10 +52,10 @@ export const updateUserStakingData = async (
 
   // Find a user by the provided twitterId
   for (let key in newContent.users) {
-    if (newContent.users[key].twitter_id === twitterId) {
+    if (newContent.users[key].json_value.twitter_id === twitterId) {
       // Update service_multisig and service_id
-      newContent.users[key].service_multisig = multisig;
-      newContent.users[key].service_id = serviceId;
+      newContent.users[key].json_value.service_multisig = multisig;
+      newContent.users[key].json_value.service_id = serviceId;
       break;
     }
   }
@@ -84,9 +84,9 @@ export const clearUserOldStakingData = async (twitterId: string | null) => {
 
   // Find a user by the provided twitterId
   for (let key in newContent.users) {
-    if (newContent.users[key].twitter_id === twitterId) {
-      newContent.users[key].service_multisig_old = null;
-      newContent.users[key].service_id_old = null;
+    if (newContent.users[key].json_value.twitter_id === twitterId) {
+      newContent.users[key].json_value.service_multisig_old = null;
+      newContent.users[key].json_value.service_id_old = null;
       break;
     }
   }

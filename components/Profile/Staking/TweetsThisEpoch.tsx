@@ -2,6 +2,8 @@ import { XOutlined } from '@ant-design/icons';
 import { Col, Flex, Grid, Row, Typography } from 'antd';
 import styled from 'styled-components';
 
+import { Tweet } from 'store/types';
+
 import { TweetEmbed } from '../TweetEmbed';
 
 const { Text } = Typography;
@@ -15,14 +17,6 @@ const Scrollable = styled.div`
 const MOBILE_TWEET_WIDTH = 250;
 const TWEET_WIDTH = 310;
 
-type Tweet = {
-  epoch: number;
-  points: number;
-  campaign: string;
-  timestamp: string;
-  tweetId: string;
-};
-
 export const TweetsThisEpoch = ({ tweets }: { tweets: Tweet[] }) => {
   const screens = useBreakpoint();
   const isMobile = !!screens.xs;
@@ -33,12 +27,12 @@ export const TweetsThisEpoch = ({ tweets }: { tweets: Tweet[] }) => {
       <Row gutter={[16, 16]} className="mt-12">
         {tweets.map((item) => (
           <Col
-            key={item.tweetId}
+            key={item.tweet_id}
             xs={24}
             md={12}
             style={{ width: '100%', maxWidth: `${tweetWidth + 50}px` }}
           >
-            <TweetEmbed tweetId={item.tweetId} points={item.points} width={tweetWidth} />
+            <TweetEmbed tweetId={item.tweet_id} points={item.points} width={tweetWidth} />
           </Col>
         ))}
       </Row>

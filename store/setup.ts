@@ -3,7 +3,7 @@ import { lowerCase, orderBy } from 'lodash';
 import { TypedUseSelectorHook, useSelector } from 'react-redux';
 
 import { store } from '.';
-import { LeaderboardUser } from './types';
+import { LeaderboardUser, Tweet } from './types';
 
 type SetupState = {
   account: string | null;
@@ -12,8 +12,14 @@ type SetupState = {
   errorMessage: string | null;
   /** If the user is verified. */
   isVerified: boolean;
+  // leaderboard
   isLeaderboardLoading: boolean;
   leaderboard: LeaderboardUser[];
+  // tweets
+  isTweetsLoading: boolean;
+  tweets: Tweet[];
+
+  // TODO: below to be removed
   nftDetails: any | null;
   isMemoryDetailsLoading: boolean;
   memoryDetails: any[];
@@ -36,6 +42,10 @@ const initialState: SetupState = {
   // leaderboard
   isLeaderboardLoading: false,
   leaderboard: [],
+
+  // tweets
+  isTweetsLoading: false,
+  tweets: [],
 
   // nft details
   nftDetails: null,
@@ -100,6 +110,12 @@ export const setupSlice = createSlice({
 
       state.leaderboard = rankedValues;
     },
+    setIsTweetsLoading: (state, action) => {
+      state.isTweetsLoading = action.payload;
+    },
+    setTweets: (state, action) => {
+      state.tweets = action.payload;
+    },
     setNftDetails: (state, action) => {
       state.nftDetails = action.payload;
     },
@@ -135,6 +151,8 @@ export const {
   setIsVerified,
   setIsLeaderboardLoading,
   setLeaderboard,
+  setIsTweetsLoading,
+  setTweets,
   setNftDetails,
   setIsMemoryDetailsLoading,
   setMemoryDetails,

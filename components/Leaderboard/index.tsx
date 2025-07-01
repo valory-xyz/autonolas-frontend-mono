@@ -2,7 +2,7 @@ import { Col, Row, Typography } from 'antd';
 
 import { useAppSelector } from 'store/setup';
 
-import ConnectTwitterModal from '../ConnectTwitter/Modal';
+import { ConnectTwitterModal } from '../ConnectTwitter/Modal';
 import { Campaigns } from './Campaigns';
 import { LeaderboardTable } from './LeaderboardTable';
 import { TwitterCard } from './styles';

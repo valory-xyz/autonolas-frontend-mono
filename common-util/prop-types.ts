@@ -94,11 +94,3 @@ export const CentaurPropTypes = PropTypes.shape({
     memberWhitelist: PropTypes.arrayOf(PropTypes.string),
   }),
 });
-
-// TODO: remove, use the one from types/x.ts
-export const TweetShape = {
-  epoch: PropTypes.number,
-  points: PropTypes.number.isRequired,
-  campaign: PropTypes.string,
-  timestamp: PropTypes.string,
-};

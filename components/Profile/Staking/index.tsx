@@ -3,12 +3,12 @@ import Image from 'next/image';
 import Link from 'next/link';
 import styled from 'styled-components';
 
-import { XProfile } from 'types/x';
+import { LeaderboardUser, Tweet } from 'store/types';
 
 import { StakingDetails } from './StakingDetails';
 import { useUpdateProfileIfOldServiceTerminated } from './hooks';
 
-const { Title, Text, Paragraph } = Typography;
+const { Title, Paragraph } = Typography;
 
 const ImageContainer = styled.div`
   img {
@@ -29,7 +29,12 @@ const SetupStaking = () => (
   </>
 );
 
-export const Staking = ({ profile }: { profile: XProfile | null }) => {
+type StakingProps = {
+  profile: LeaderboardUser | undefined;
+  tweets: Tweet[];
+};
+
+export const Staking = ({ profile, tweets }: StakingProps) => {
   const hasStaked = !!(profile?.service_id_old || profile?.service_id);
 
   useUpdateProfileIfOldServiceTerminated(profile);
@@ -42,7 +47,11 @@ export const Staking = ({ profile }: { profile: XProfile | null }) => {
       <Paragraph type="secondary" className="mb-24">
         Staking allows you to earn OLAS rewards when you post about Olas on X.
       </Paragraph>
-      {profile && hasStaked ? <StakingDetails profile={profile} /> : <SetupStaking />}
+      {profile && hasStaked ? (
+        <StakingDetails profile={profile} tweets={tweets} />
+      ) : (
+        <SetupStaking />
+      )}
     </Card>
   );
 };

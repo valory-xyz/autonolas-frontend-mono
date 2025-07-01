@@ -1,3 +1,4 @@
-import { XProfile } from './x';
+import { ContributeAgent } from './users';
 
-export type UsersDbContent = Record<string, XProfile>;
+// TODO: to be removed
+export type UsersDbContent = Record<string, ContributeAgent>;

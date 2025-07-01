@@ -9,14 +9,16 @@ import { useDispatch } from 'react-redux';
 import { notifyError } from '@autonolas/frontend-library';
 
 import { LogoSvg } from 'common-util/SVGs/logo';
-import { getLeaderboardList, getMemoryDetails } from 'common-util/api';
+import { getLeaderboardList, getMemoryDetails, getTweetsList } from 'common-util/api';
 import Login from 'components/Login';
 import {
   setIsLeaderboardLoading,
   setIsMemoryDetailsLoading,
+  setIsTweetsLoading,
   setIsVerified,
   setLeaderboard,
   setMemoryDetails,
+  setTweets,
   useAppSelector,
 } from 'store/setup';
 import { MENU_WIDTH } from 'util/constants';
@@ -59,9 +61,27 @@ export const Layout = ({ children }: { children: React.ReactNode }) => {
     };
 
     fetchLeaderboard();
-  }, [chainId, dispatch]);
+  }, [dispatch]);
+
+  // load tweets only once on page load
+  useEffect(() => {
+    const fetchTweets = async () => {
+      try {
+        dispatch(setIsTweetsLoading(true));
+        const list = await getTweetsList();
+        dispatch(setTweets(list));
+      } catch (error) {
+        console.error(error);
+      } finally {
+        dispatch(setIsTweetsLoading(false));
+      }
+    };
+
+    fetchTweets();
+  }, [dispatch]);
 
   // load memory details only once on page load
+  // TODO: to be removed when campaigns requested from new DB
   useEffect(() => {
     const getData = async () => {
       try {

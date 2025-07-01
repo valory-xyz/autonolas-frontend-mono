@@ -1,4 +1,3 @@
-import { message } from 'antd';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Address } from 'viem';
 import { base, mainnet } from 'viem/chains';
@@ -11,7 +10,7 @@ import {
   SERVICE_REGISTRY_L2_ADDRESS_BASE,
 } from 'common-util/AbiAndAddresses';
 import { clearUserOldStakingData } from 'common-util/api';
-import { XProfile } from 'types/x';
+import { LeaderboardUser } from 'store/types';
 import { DEPRECATED_CONTRACTS_ADDRESSES } from 'util/constants';
 
 import { restake } from './requests';
@@ -68,7 +67,7 @@ export const useRestake = ({ contractAddress }: UseRestakeParams) => {
  * meaning the user went through the recovery process from old broken staking contracts
  * and clear old values in order to not to show the alert message
  */
-export const useUpdateProfileIfOldServiceTerminated = (profile: XProfile | null) => {
+export const useUpdateProfileIfOldServiceTerminated = (profile?: LeaderboardUser) => {
   const oldStakingDataCleared = useRef(false);
 
   const { data: isTerminated } = useReadContract({

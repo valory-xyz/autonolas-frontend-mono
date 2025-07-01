@@ -6,7 +6,7 @@ import { useAppSelector } from 'store/setup';
 
 const { Title, Text } = Typography;
 
-const ConnectTwitterModal = () => {
+export const ConnectTwitterModal = () => {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const account = useAppSelector((state) => state.setup.account);
 
@@ -50,7 +50,7 @@ const ConnectTwitterModal = () => {
           onClick={handleCreateTweet}
           className="mb-8"
           disabled={!account}
-          title={!!account ? undefined : 'Connect a wallet'}
+          title={account ? undefined : 'Connect a wallet'}
         >
           <XOutlined /> Post
         </Button>
@@ -75,5 +75,3 @@ const ConnectTwitterModal = () => {
     </>
   );
 };
-
-export default ConnectTwitterModal;

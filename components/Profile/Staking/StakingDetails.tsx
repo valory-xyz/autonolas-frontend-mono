@@ -29,7 +29,7 @@ import { COLOR, NA } from '@autonolas/frontend-library';
 
 import { getBytes32FromAddress, truncateAddress } from 'common-util/functions';
 import { formatDynamicTimeRange } from 'common-util/functions/time';
-import { XProfile } from 'types/x';
+import { LeaderboardUser, Tweet } from 'store/types';
 import { GOVERN_APP_URL, OLAS_UNICODE_SYMBOL, STAKING_CONTRACTS_DETAILS } from 'util/constants';
 import { useServiceInfo, useStakingDetails } from 'util/staking';
 
@@ -102,7 +102,12 @@ const InfoColumn = ({
   );
 };
 
-export const StakingDetails = ({ profile }: { profile: XProfile }) => {
+type StakingDetailsProps = {
+  profile: LeaderboardUser;
+  tweets: Tweet[];
+};
+
+export const StakingDetails = ({ profile, tweets }: StakingDetailsProps) => {
   const { address: account } = useAccount();
   const isNewContracts = !!profile.service_id;
 
@@ -129,7 +134,7 @@ export const StakingDetails = ({ profile }: { profile: XProfile }) => {
     if (!isNumber(stakingDetails.epochCounter)) return [];
     if (stakingDetails.stakingStatus !== 'Staked') return [];
 
-    return Object.entries(profile.tweets)
+    return Object.entries(tweets)
       .map(([tweetId, tweet]) => ({ tweetId, ...tweet }))
       .filter((tweet) => {
         if (isNil(stakingDetails.epochCounter)) return false;
@@ -141,16 +146,19 @@ export const StakingDetails = ({ profile }: { profile: XProfile }) => {
          */
         if (Number(tweet.timestamp) < Number(stakingDetails.tsStart)) return false;
 
-        return tweet.epoch > stakingDetails.epochCounter && tweet.points > 0;
+        return Number(tweet.epoch) > stakingDetails.epochCounter && tweet.points > 0;
       });
-  }, [profile, stakingDetails]);
+  }, [stakingDetails.epochCounter, stakingDetails.stakingStatus, stakingDetails.tsStart, tweets]);
 
   // Calculate total points earned for current epoch's tweets
   const pointsEarned = useMemo(() => {
     if (contractDetails?.isDeprecated) return 0;
 
     return tweetsThisEpoch.reduce((sum, tweet) => {
-      if (!isNil(stakingDetails.epochCounter) && tweet.epoch > stakingDetails.epochCounter) {
+      if (
+        !isNil(stakingDetails.epochCounter) &&
+        Number(tweet.epoch) > stakingDetails.epochCounter
+      ) {
         sum += tweet.points;
       }
       return sum;

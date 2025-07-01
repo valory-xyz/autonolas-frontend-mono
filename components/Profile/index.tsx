@@ -1,7 +1,6 @@
 import { Card, Flex, List, Skeleton, Statistic, Typography } from 'antd';
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
-import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
 import { COLOR, MEDIA_QUERY, NA, areAddressesEqual } from '@autonolas/frontend-library';
@@ -10,9 +9,10 @@ import { BadgeLoading, ShowBadge } from 'common-util/ShowBadge';
 import TruncatedEthereumLink from 'common-util/TruncatedEthereumLink';
 import { getLatestMintedNft, updateUserStakingData } from 'common-util/api';
 import { getName, getTier } from 'common-util/functions';
-import { XProfile } from 'types/x';
+import { useAppSelector } from 'store/setup';
+import { LeaderboardUser, Tweet } from 'store/types';
 
-import ConnectTwitterModal from '../ConnectTwitter/Modal';
+import { ConnectTwitterModal } from '../ConnectTwitter/Modal';
 import { PointsShowcase } from './PointsShowcase';
 import { Staking } from './Staking';
 
@@ -53,15 +53,15 @@ const ProfileContent = styled.div`
 `;
 
 type ProfileBodyProps = {
-  profile: XProfile | null;
+  profile: LeaderboardUser | undefined;
+  tweets: Tweet[];
   id: string;
 };
 
-const ProfileBody: React.FC<ProfileBodyProps> = ({ profile, id }) => {
+const ProfileBody: React.FC<ProfileBodyProps> = ({ profile, tweets, id }) => {
   const [isBadgeLoading, setIsBadgeLoading] = useState(false);
   const [details, setDetails] = useState<{ image: string; tokenId: string } | null>(null);
-  // TODO: types
-  const account = useSelector((state: any) => state?.setup?.account);
+  const account = useAppSelector((state) => state.setup.account);
 
   useEffect(() => {
     const getData = async () => {
@@ -152,12 +152,12 @@ const ProfileBody: React.FC<ProfileBodyProps> = ({ profile, id }) => {
                 formatter={(value) => <Text className="font-weight-600">{value}</Text>}
               />
             </Flex>
-            <PointsShowcase tweetsData={profile?.tweets} />
+            <PointsShowcase tweetsData={tweets} />
           </div>
         </ProfileContent>
       </Card>
 
-      {account && areAddressesEqual(id, account) && <Staking profile={profile} />}
+      {account && areAddressesEqual(id, account) && <Staking profile={profile} tweets={tweets} />}
     </Root>
   );
 };
@@ -165,12 +165,25 @@ const ProfileBody: React.FC<ProfileBodyProps> = ({ profile, id }) => {
 export const Profile: React.FC = () => {
   const router = useRouter();
   const { id } = router.query as { id: string };
-  const data = useSelector((state: any) => state?.setup?.leaderboard);
-  const profile = data.find((item: XProfile) => item.wallet_address === id);
+  const { leaderboard, isLeaderboardLoading, tweets, isTweetsLoading } = useAppSelector(
+    (state) => state.setup,
+  );
+  const profile = leaderboard.find((item: LeaderboardUser) => item.wallet_address === id);
+  const userTweets = profile
+    ? tweets.filter((tweet: Tweet) => tweet.twitter_user_id === profile.twitter_id)
+    : [];
 
-  if (!data || data.length === 0) {
+  if (isLeaderboardLoading || isTweetsLoading || leaderboard.length === 0 || tweets.length === 0) {
     return <Skeleton active />;
   }
 
-  return <ProfileBody profile={profile} id={id} />;
+  return (
+    <ProfileBody
+      profile={
+        profile ? { ...profile, service_id_old: null, service_multisig_old: null } : undefined
+      }
+      tweets={userTweets}
+      id={id}
+    />
+  );
 };

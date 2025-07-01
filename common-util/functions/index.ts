@@ -18,7 +18,6 @@ import { RPC_URLS } from 'common-util/Contracts';
 import data from 'common-util/Education/data.json';
 import { SUPPORTED_CHAINS } from 'common-util/Login/config';
 import orbis, { checkOrbisStatus } from 'common-util/orbis';
-import { XProfile } from 'types/x';
 
 import prohibitedAddresses from '../../data/prohibited-addresses.json';
 
@@ -73,7 +72,7 @@ export const getTier = (points: number) => {
   }
 };
 
-export const getName = (profile?: XProfile | null, address?: Address) =>
+export const getName = (profile?: LeaderboardUser | null, address?: Address | string | null) =>
   profile?.twitter_handle ||
   profile?.discord_handle ||
   profile?.wallet_address ||
