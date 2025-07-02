@@ -30,17 +30,32 @@
       "@autonolas-frontend-mono/common-contract-functions": [
         "libs/common-contract-functions/src/index.ts"
       ],
+      "@autonolas-frontend-mono/common-middleware": [
+        "libs/common-middleware/src/index.ts"
+      ],
+      "@autonolas-frontend-mono/common-middleware/server": [
+        "libs/common-middleware/src/server.ts"
+      ],
       "@autonolas-frontend-mono/feature-service-status-info": [
         "libs/feature-service-status-info/src/index.ts"
       ],
-      "@autonolas-frontend-mono/common-middleware": ["libs/common-middleware/src/index.ts"],
-      "@autonolas-frontend-mono/common-middleware/server": ["libs/common-middleware/src/server.ts"],
-      "@autonolas-frontend-mono/service-status-info": ["libs/service-status-info/src/index.ts"],
+      "@autonolas-frontend-mono/service-status-info": [
+        "libs/service-status-info/src/index.ts"
+      ],
+      "@autonolas-frontend-mono/ui-components": [
+        "libs/ui-components/src/index.ts"
+      ],
+      "@autonolas-frontend-mono/util-ssr": ["libs/util-ssr/src/index.ts"],
       "@autonolas-frontend-mono/ui-theme": ["libs/ui-theme/src/index.ts"],
-      "@autonolas-frontend-mono/ui-components": ["libs/ui-components/src/index.ts"],
-      "@autonolas-frontend-mono/util-contracts": ["libs/util-contracts/src/index.ts"],
-      "@autonolas-frontend-mono/util-functions": ["libs/util-functions/src/index.ts"],
-      "@autonolas-frontend-mono/util-prohibited-data": ["libs/util-prohibited-data/src/index.ts"]
+      "@autonolas-frontend-mono/util-contracts": [
+        "libs/util-contracts/src/index.ts"
+      ],
+      "@autonolas-frontend-mono/util-functions": [
+        "libs/util-functions/src/index.ts"
+      ],
+      "@autonolas-frontend-mono/util-prohibited-data": [
+        "libs/util-prohibited-data/src/index.ts"
+      ]
     }
   },
   "exclude": ["node_modules", "tmp"]
