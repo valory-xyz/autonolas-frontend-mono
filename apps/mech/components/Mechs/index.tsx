@@ -53,8 +53,7 @@ export const Mechs = () => {
     );
 
   useEffect(() => {
-    if (router.asPath.includes(URL.MECHS_LEGACY)) setMechType(LEGACY);
-    else setMechType(MECH_MM);
+    setMechType(router.asPath.includes(URL.MECHS_LEGACY) ? LEGACY : MECH_MM);
   }, [router]);
 
   return (

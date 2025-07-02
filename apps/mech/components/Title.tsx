@@ -8,7 +8,7 @@ type HeaderTitleProps = {
   description?: string | null;
 };
 
-export const HeaderTitle = ({ title, description = null }: HeaderTitleProps) => (
+export const HeaderTitle = ({ title, description }: HeaderTitleProps) => (
   <Flex justify="space-between" align="center">
     <Title level={2} style={{ marginTop: 16 }}>
       {title}

@@ -1,4 +1,5 @@
 import { Network } from 'types/index';
+import type { Address } from 'viem';
 import { apiTypes, syncTypes } from './_types';
 
 /**
@@ -12,7 +13,7 @@ const initialState = {
 };
 
 export type Setup = {
-  account?: `0x${string}` | null;
+  account?: Address | null;
   balance?: string | null;
   chainId?: Network | null;
   errorMessage?: string | null;
