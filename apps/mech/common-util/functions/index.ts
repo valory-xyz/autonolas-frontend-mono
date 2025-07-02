@@ -66,7 +66,7 @@ export const getChainId = (chainId = null): Network => {
 
   // chainId fetched from sessionStorage
   const chainIdFromSessionStorage =
-    sessionStorage && sessionStorage.getItem('chainId')
+    typeof window !== 'undefined' && sessionStorage.getItem('chainId')
       ? Number(sessionStorage.getItem('chainId'))
       : FIRST_SUPPORTED_CHAIN.id;
 
