@@ -110,6 +110,16 @@ export const OlasHeader = styled(Layout.Header)`
   border-bottom: 1px solid ${COLOR.BORDER_GREY};
   display: flex;
   align-items: center;
+
+  ${MEDIA_QUERY.mobileL} {
+    &.ant-layout-header {
+      padding: 0.5rem;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      height: auto;
+    }
+  }
 `;
 
 export const Logo = styled(Link)`

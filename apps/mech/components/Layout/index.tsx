@@ -6,6 +6,7 @@ import { useSelector } from 'react-redux';
 
 import { COLOR } from '@autonolas/frontend-library';
 
+import { useScreen } from 'libs/ui-theme/src';
 import { ALL_SUPPORTED_CHAINS } from 'common-util/login/config';
 import { getSupportedNetworks } from 'common-util/functions';
 import { useHandleRoute } from 'common-util/hooks/useHandleRoute';
@@ -38,6 +39,7 @@ const NavigationBar = ({ children = null }: { children: React.ReactNode }) => {
   const { chainId } = useSelector((state: RootState) => state?.setup);
   const { pathname } = router;
   const [selectedMenu, setSelectedMenu] = useState<string>('');
+  const { isMobile } = useScreen();
 
   useHandleRoute();
 
@@ -82,6 +84,7 @@ const NavigationBar = ({ children = null }: { children: React.ReactNode }) => {
           selectedKeys={[selectedMenu]}
           onClick={handleMenuItemClick}
           items={MENU_ITEMS}
+          disabledOverflow={isMobile}
         />
 
         <SwitchNetworkSelect />
