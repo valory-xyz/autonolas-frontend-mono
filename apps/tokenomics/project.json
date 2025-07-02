@@ -37,6 +37,14 @@
         }
       }
     },
+    "start": {
+      "executor": "@nx/next:server",
+      "options": {
+        "buildTarget": "tokenomics:build:production",
+        "dev": false,
+        "port": 3006
+      }
+    },
     "export": {
       "executor": "@nx/next:export",
       "options": {

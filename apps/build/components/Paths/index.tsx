@@ -23,6 +23,7 @@ const StyledImage = styled(Image)<{ canImageContain: boolean }>`
   display: block;
   height: 100%;
   align-self: center;
+  margin: auto;
   ${({ canImageContain }) => `object-fit: ${canImageContain ? 'contain' : 'cover'};`}
 `;
 
