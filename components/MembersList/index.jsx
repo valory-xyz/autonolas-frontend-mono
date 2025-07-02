@@ -8,7 +8,7 @@ import { useSignMessage } from 'wagmi';
 
 import { areAddressesEqual, notifyError, notifySuccess } from '@autonolas/frontend-library';
 
-import DisplayName from 'common-util/DisplayName';
+import { DisplayName } from 'common-util/DisplayName';
 import { useCentaursFunctionalities } from 'components/CoOrdinate/Centaur/hooks';
 import { VEOLAS_URL } from 'util/constants';
 

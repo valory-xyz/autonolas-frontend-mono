@@ -4,7 +4,7 @@ import Moment from 'react-moment';
 
 import { areAddressesEqual } from '@autonolas/frontend-library';
 
-import DisplayName from 'common-util/DisplayName';
+import { DisplayName } from 'common-util/DisplayName';
 
 import { MessageBody, MessageContainer, MessageGroup, MessageTimestamp } from './styles';
 

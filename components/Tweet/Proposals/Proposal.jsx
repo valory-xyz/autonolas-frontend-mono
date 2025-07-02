@@ -8,7 +8,7 @@ import { useSignMessage } from 'wagmi';
 
 import { NA, notifyError, notifySuccess } from '@autonolas/frontend-library';
 
-import DisplayName from 'common-util/DisplayName';
+import { DisplayName } from 'common-util/DisplayName';
 import { useHelpers } from 'common-util/hooks/useHelpers';
 import { ProposalPropTypes } from 'common-util/prop-types';
 import { VEOLAS_QUORUM } from 'util/constants';
