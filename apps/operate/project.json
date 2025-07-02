@@ -23,7 +23,8 @@
       "defaultConfiguration": "development",
       "options": {
         "buildTarget": "operate:build",
-        "dev": true
+        "dev": true,
+        "port": 3005
       },
       "configurations": {
         "development": {
@@ -34,6 +35,14 @@
           "buildTarget": "operate:build:production",
           "dev": false
         }
+      }
+    },
+    "start": {
+      "executor": "@nx/next:server",
+      "options": {
+        "buildTarget": "operate:build:production",
+        "dev": false,
+        "port": 3005
       }
     },
     "export": {

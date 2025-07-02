@@ -23,7 +23,8 @@
       "defaultConfiguration": "development",
       "options": {
         "buildTarget": "tokenomics:build",
-        "dev": true
+        "dev": true,
+        "port": 3006
       },
       "configurations": {
         "development": {
@@ -34,6 +35,14 @@
           "buildTarget": "tokenomics:build:production",
           "dev": false
         }
+      }
+    },
+    "start": {
+      "executor": "@nx/next:server",
+      "options": {
+        "buildTarget": "tokenomics:build:production",
+        "dev": false,
+        "port": 3006
       }
     },
     "export": {
