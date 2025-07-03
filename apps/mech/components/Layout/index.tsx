@@ -2,7 +2,6 @@ import { ExportOutlined } from '@ant-design/icons';
 import { Alert, Flex, Layout, Menu, Tag } from 'antd';
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
-import { useSelector } from 'react-redux';
 
 import { COLOR } from '@autonolas/frontend-library';
 
@@ -12,7 +11,7 @@ import { getSupportedNetworks } from 'common-util/functions';
 import { useHandleRoute } from 'common-util/hooks/useHandleRoute';
 import { PAGES_TO_LOAD_WITH_CHAIN_ID } from 'util/constants';
 import Login from 'components/Login';
-import type { RootState } from 'store/types';
+import { useAppSelector } from 'store/index';
 
 import Footer from './Footer';
 import { LogoSvg } from './Logo';
@@ -36,7 +35,7 @@ const MENU_ITEMS = [
 
 const NavigationBar = ({ children = null }: { children: React.ReactNode }) => {
   const router = useRouter();
-  const { chainId } = useSelector((state: RootState) => state?.setup);
+  const { chainId } = useAppSelector((state) => state?.setup);
   const { pathname } = router;
   const [selectedMenu, setSelectedMenu] = useState<string>('');
   const { isMobile } = useScreen();

@@ -2,9 +2,8 @@ import { Flex, Segmented } from 'antd';
 import get from 'lodash/get';
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
-import { useSelector } from 'react-redux';
 
-import type { RootState } from 'store/types';
+import { useAppSelector } from 'store/index';
 import { getMyListOnPagination } from 'common-util/ContractUtils/myList';
 import { useSearchInput, useUnsupportedNetwork } from 'common-util/hooks';
 import { NAV_TYPES, URL } from 'util/constants';
@@ -25,7 +24,7 @@ export const ListAgents = () => {
   const [currentTab, setCurrentTab] = useState<CurrentTab>(isMyTab(hash) ? MY_AGENTS : ALL_AGENTS);
   const networkNameFromUrl = router?.query?.network;
 
-  const account = useSelector((state: RootState) => get(state, 'setup.account'));
+  const account = useAppSelector((state) => get(state, 'setup.account'));
 
   const { isWrongNetwork, wrongNetworkContent } = useUnsupportedNetwork();
 

@@ -2,9 +2,8 @@ import { Flex, Segmented } from 'antd';
 import get from 'lodash/get';
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
-import { useSelector } from 'react-redux';
 
-import type { RootState } from 'store/types';
+import { useAppSelector } from 'store/index';
 import { useSearchInput } from 'common-util/hooks';
 import ListTable from 'components/List/ListTable';
 import { getHash, isMyTab } from 'components/List/ListTable/helpers';
@@ -25,7 +24,7 @@ export const ListServices = () => {
   const [currentTab, setCurrentTab] = useState(isMyTab(hash) ? MY_SERVICES : ALL_SERVICES);
   const networkNameFromUrl = router?.query?.network;
 
-  const account = useSelector((state: RootState) => get(state, 'setup.account'));
+  const account = useAppSelector((state) => get(state, 'setup.account'));
 
   /**
    * extra tab content & view click

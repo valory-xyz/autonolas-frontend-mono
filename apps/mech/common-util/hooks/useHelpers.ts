@@ -1,14 +1,13 @@
 import { isNumber } from 'lodash';
 import { useMemo } from 'react';
-import { useSelector } from 'react-redux';
 import { useAccount } from 'wagmi';
 
-import type { RootState } from 'store/types';
+import { useAppSelector } from 'store/index';
 import { getIsValidChainId } from '../functions';
 
 export const useHelpers = () => {
-  const account = useSelector((state: RootState) => state?.setup?.account);
-  const chainId = useSelector((state: RootState) => state?.setup?.chainId);
+  const account = useAppSelector((state) => state?.setup?.account);
+  const chainId = useAppSelector((state) => state?.setup?.chainId);
 
   const { chain } = useAccount();
   const chainIdFromWallet = chain?.id;

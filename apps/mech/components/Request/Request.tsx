@@ -1,8 +1,7 @@
 import { Alert, Button, notification } from 'antd';
 import { useState } from 'react';
-import { useSelector } from 'react-redux';
 
-import type { RootState } from 'store/types';
+import { useAppSelector } from 'store/index';
 import { getChainId } from 'common-util/functions';
 import { checkAndApproveToken } from 'common-util/functions/requests';
 import { PAYMENT_TYPES, SCAN_URLS, UNICODE_SYMBOLS } from 'util/constants';
@@ -15,7 +14,7 @@ import {
 } from './requests';
 
 export const MarketplaceRequest = ({ mechAddresses }: { mechAddresses: string[] }) => {
-  const { account } = useSelector((state: RootState) => state?.setup);
+  const { account } = useAppSelector((state) => state?.setup);
   const [txnHash, setTxnHash] = useState<`0x${string}` | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isModalVisible, setIsModalVisible] = useState(false);
