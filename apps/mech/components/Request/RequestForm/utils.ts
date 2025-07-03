@@ -11,7 +11,7 @@ const ipfs = create({
 
 type InfoType = {
   image?: string;
-  [key: string]: any; // To accommodate other properties in the info object
+  [key: string]: unknown; // To accommodate other properties in the info object
 };
 
 type OthersType = {

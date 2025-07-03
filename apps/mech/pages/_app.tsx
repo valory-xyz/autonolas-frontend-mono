@@ -1,31 +1,35 @@
-import { createWrapper } from 'next-redux-wrapper';
 import { AppProps } from 'next/app';
 import Head from 'next/head';
+import { Provider } from 'react-redux';
 
-import { METADATA } from 'common-util/Login/config';
-import GlobalStyle from 'components/GlobalStyles';
+import { AutonolasThemeProvider, GlobalStyles } from 'libs/ui-theme/src';
+import { METADATA } from 'common-util/login/config';
 import Layout from 'components/Layout';
-import { AutonolasThemeProvider } from 'context/AutonolasThemeProvider';
 import { Web3ModalProvider } from 'context/Web3ModalProvider';
 
-import initStore from '../store';
+import { wrapper } from '../store';
 
-const MyApp = ({ Component, pageProps }: AppProps) => (
-  <>
-    <GlobalStyle />
-    <Head>
-      <title>{METADATA.name}</title>
-      <meta name="description" content={METADATA.description} />
-    </Head>
-    <AutonolasThemeProvider>
-      <Web3ModalProvider>
-        <Layout>
-          <Component {...pageProps} />
-        </Layout>
-      </Web3ModalProvider>
-    </AutonolasThemeProvider>
-  </>
-);
+const MyApp = ({ Component, pageProps }: AppProps) => {
+  const { store, props } = wrapper.useWrappedStore(pageProps);
 
-const wrapper = createWrapper(initStore);
-export default wrapper.withRedux(MyApp);
+  return (
+    <>
+      <GlobalStyles />
+      <Head>
+        <title>{METADATA.name}</title>
+        <meta name="description" content={METADATA.description} />
+      </Head>
+      <Provider store={store}>
+        <AutonolasThemeProvider>
+          <Web3ModalProvider>
+            <Layout>
+              <Component {...props.pageProps} />
+            </Layout>
+          </Web3ModalProvider>
+        </AutonolasThemeProvider>
+      </Provider>
+    </>
+  );
+};
+
+export default MyApp;

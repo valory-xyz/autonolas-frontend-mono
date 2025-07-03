@@ -8,18 +8,13 @@ import {
 } from '@autonolas/frontend-library';
 
 import { ADDRESSES, RPC_URLS } from 'common-util/Contracts';
-import { SUPPORTED_CHAINS } from 'common-util/Login';
-import { FIRST_SUPPORTED_CHAIN } from 'common-util/Login/config';
-import { Network } from 'types/index';
+import { SUPPORTED_CHAINS, FIRST_SUPPORTED_CHAIN } from 'common-util/login/config';
 import { GATEWAY_URL, TOTAL_VIEW_COUNT } from 'util/constants';
+import type { Network } from 'types/index';
 
-// TODO: provide types for MODAL_PROVIDER
-// eslint-disable-next-line
-export const getModalProvider = () => (window as any)?.MODAL_PROVIDER;
+export const getModalProvider = () => window?.MODAL_PROVIDER;
 
-// TODO: provide types for ethereum
-// eslint-disable-next-line
-export const getWindowEthereum = () => (window as any)?.ethereum;
+export const getWindowEthereum = () => window?.ethereum;
 
 export const getProvider = () => {
   const defaultChainId = getChainId();
@@ -71,7 +66,7 @@ export const getChainId = (chainId = null): Network => {
 
   // chainId fetched from sessionStorage
   const chainIdFromSessionStorage =
-    sessionStorage && sessionStorage.getItem('chainId')
+    typeof window !== 'undefined' && sessionStorage.getItem('chainId')
       ? Number(sessionStorage.getItem('chainId'))
       : FIRST_SUPPORTED_CHAIN.id;
 

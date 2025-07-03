@@ -4,9 +4,8 @@ import { useCallback, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 
 import { setChainId } from 'store/setup/actions';
+import { ALL_SUPPORTED_CHAINS, FIRST_SUPPORTED_CHAIN } from 'common-util/login/config';
 import { PAGES_TO_LOAD_WITHOUT_CHAIN_ID, URL } from 'util/constants';
-
-import { ALL_SUPPORTED_CHAINS, FIRST_SUPPORTED_CHAIN } from '../Login/config';
 
 const isValidNetworkName = (name: string) => {
   const isValid = ALL_SUPPORTED_CHAINS.some((e) => toLower(e.networkName) === toLower(name));
@@ -26,8 +25,7 @@ export const useHandleRoute = () => {
   const networkNameFromUrl = router?.query?.network;
 
   const dispatchWithDelay = useCallback(
-    // @ts-ignore TODO: set types for store
-    (action) => {
+    (action: ReturnType<typeof setChainId>) => {
       setTimeout(() => {
         dispatch(action);
       }, 0);

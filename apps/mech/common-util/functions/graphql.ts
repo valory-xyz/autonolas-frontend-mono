@@ -7,7 +7,13 @@ type FetchMechAgentsArgs = {
   total: number;
 };
 
-export async function fetchMechAgents({ first, total }: FetchMechAgentsArgs) {
+export type Agent = {
+  id: number;
+  agentHash: string;
+  mech: string;
+};
+
+export async function fetchMechAgents({ first, total }: FetchMechAgentsArgs): Promise<Agent[]> {
   return new Promise((resolve, reject) => {
     const url = process.env.NEXT_PUBLIC_MECH_SUBGRAPH_URL;
     if (!url) {
@@ -37,10 +43,10 @@ export async function fetchMechAgents({ first, total }: FetchMechAgentsArgs) {
         }
         throw new Error(`Error fetching data: ${response.statusText}`);
       })
-      .then((data) => {
+      .then((data: { data: { mechAgents: Agent[] } }) => {
         resolve(data.data.mechAgents);
       })
-      .catch((error) => {
+      .catch((error: Error) => {
         reject(error);
       });
   });
@@ -55,7 +61,19 @@ type FetchMmMechsArgs = {
   };
 };
 
-export async function fetchMmMechs({ first, total, filters }: FetchMmMechsArgs) {
+export type MmMech = {
+  id: number;
+  address: string;
+  mechFactory: string;
+  configHash: string;
+  owner: string;
+};
+
+export async function fetchMmMechs({
+  first,
+  total,
+  filters,
+}: FetchMmMechsArgs): Promise<MmMech[] | Error> {
   return new Promise((resolve, reject) => {
     const chainId = getChainId();
     const url = MECH_MARKETPLACE_SUBGRAPH_URLS[chainId];
@@ -107,16 +125,16 @@ export async function fetchMmMechs({ first, total, filters }: FetchMmMechsArgs) 
         }
         throw new Error(`Error fetching mechs: ${response.statusText}`);
       })
-      .then((data) => {
+      .then((data: { data: { meches: MmMech[] } }) => {
         resolve(data.data.meches);
       })
-      .catch((error) => {
+      .catch((error: Error) => {
         reject(error);
       });
   });
 }
 
-export async function fetchMmMechsTotal() {
+export async function fetchMmMechsTotal(): Promise<number> {
   return new Promise((resolve, reject) => {
     const chainId = getChainId();
     const url = MECH_MARKETPLACE_SUBGRAPH_URLS[chainId];
@@ -149,7 +167,7 @@ export async function fetchMmMechsTotal() {
       })
       .then((data) => {
         if (!data.data.global) {
-          resolve({ totalMechs: 0 });
+          resolve(0);
         } else {
           resolve(data.data.global.totalMechs);
         }

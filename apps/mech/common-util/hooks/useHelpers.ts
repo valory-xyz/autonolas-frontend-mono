@@ -1,15 +1,13 @@
 import { isNumber } from 'lodash';
 import { useMemo } from 'react';
-import { useSelector } from 'react-redux';
-import { useAccount, useChainId } from 'wagmi';
+import { useAccount } from 'wagmi';
 
+import { useAppSelector } from 'store/index';
 import { getIsValidChainId } from '../functions';
 
 export const useHelpers = () => {
-  // @ts-ignore TODO: add types
-  const account = useSelector((state) => state?.setup?.account);
-  // @ts-ignore TODO: add types
-  const chainId = useSelector((state) => state?.setup?.chainId);
+  const account = useAppSelector((state) => state?.setup?.account);
+  const chainId = useAppSelector((state) => state?.setup?.chainId);
 
   const { chain } = useAccount();
   const chainIdFromWallet = chain?.id;
@@ -28,6 +26,6 @@ export const useHelpers = () => {
     chainId,
     account,
     isConnectedToWrongNetwork,
-    isValidChainId: getIsValidChainId(chainId),
+    isValidChainId: getIsValidChainId(chainId ?? 0),
   };
 };

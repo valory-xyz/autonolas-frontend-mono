@@ -6,7 +6,7 @@ import { WagmiProvider } from 'wagmi';
 
 import { COLOR } from '@autonolas/frontend-library';
 
-import { wagmiConfig } from 'common-util/Login/config';
+import { wagmiConfig } from 'common-util/login/config';
 
 export const queryClient = new QueryClient({
   defaultOptions: {
