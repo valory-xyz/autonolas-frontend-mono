@@ -1,11 +1,12 @@
 import { defaultWagmiConfig } from '@web3modal/wagmi';
 import { kebabCase } from 'lodash';
-import { cookieStorage, createStorage } from 'wagmi';
+import { cookieStorage, createStorage, http } from 'wagmi';
 import { Chain, base, gnosis } from 'wagmi/chains';
+import { RPC_URLS } from 'libs/util-constants/src';
 
 export const projectId = process.env.NEXT_PUBLIC_WALLET_PROJECT_ID || '';
 
-export const SUPPORTED_CHAINS: Chain[] = [gnosis, base];
+export const SUPPORTED_CHAINS: [Chain, ...Chain[]] = [gnosis, base];
 
 export const METADATA = {
   name: 'Olas Mech',
@@ -15,11 +16,15 @@ export const METADATA = {
 };
 
 export const wagmiConfig = defaultWagmiConfig({
-  chains: SUPPORTED_CHAINS as [Chain, ...Chain[]],
+  chains: SUPPORTED_CHAINS,
   projectId,
   metadata: METADATA,
   ssr: true,
   storage: createStorage({ storage: cookieStorage }),
+  transports: SUPPORTED_CHAINS.reduce(
+    (acc, chain) => Object.assign(acc, { [chain.id]: http(RPC_URLS[chain.id]) }),
+    {},
+  ),
 });
 
 /**

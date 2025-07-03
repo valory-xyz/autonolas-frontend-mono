@@ -7,7 +7,8 @@ import {
   sendTransaction as sendTransactionFn,
 } from '@autonolas/frontend-library';
 
-import { ADDRESSES, RPC_URLS } from 'common-util/Contracts';
+import { ADDRESSES } from 'common-util/Contracts';
+import { RPC_URLS } from 'libs/util-constants/src';
 import { SUPPORTED_CHAINS, FIRST_SUPPORTED_CHAIN } from 'common-util/login/config';
 import { GATEWAY_URL, TOTAL_VIEW_COUNT } from 'util/constants';
 import type { Network } from 'types/index';

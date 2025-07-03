@@ -57,7 +57,7 @@ const NavigationBar = ({ children = null }: { children: React.ReactNode }) => {
     }
 
     if (PAGES_TO_LOAD_WITH_CHAIN_ID.includes(`/${key}`)) {
-      const chain = ALL_SUPPORTED_CHAINS.find((id) => chainId);
+      const chain = ALL_SUPPORTED_CHAINS.find((chain) => chain.id === chainId);
       if (!chain) return;
       router.push(`/${chain.networkName}/${key}`);
     } else {

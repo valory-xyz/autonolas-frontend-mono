@@ -16,11 +16,6 @@ import {
 import { getChainId, getProvider } from 'common-util/functions';
 import { Network } from 'types/index';
 
-export const RPC_URLS: Record<Network, string> = {
-  [gnosis.id]: process.env.NEXT_PUBLIC_GNOSIS_URL ?? gnosis.rpcUrls.default.http[0],
-  [base.id]: process.env.NEXT_PUBLIC_BASE_URL ?? base.rpcUrls.default.http[0],
-};
-
 export const ADDRESSES: Record<
   Network,
   {
