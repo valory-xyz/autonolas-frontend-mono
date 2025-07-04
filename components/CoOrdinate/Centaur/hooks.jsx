@@ -9,6 +9,7 @@ import {
 
 import { getMemoryDetails, updateMemoryDetails } from 'common-util/api';
 import { ethersToWei, formatToEth } from 'common-util/functions';
+import { getCurrentProposalInfo } from 'common-util/functions/proposal';
 import { setMemoryDetails } from 'store/setup';
 import { addActionToCentaur } from 'util/addActionToCentaur';
 import { DEFAULT_COORDINATE_ID, VEOLAS_QUORUM } from 'util/constants';
@@ -121,52 +122,6 @@ export const useCentaursFunctionalities = () => {
 export const useProposals = () => {
   const { currentMemoryDetails } = useCentaurs();
 
-  // 2 million veolas in wei
-  const quorumInWei = ethersToWei(`${VEOLAS_QUORUM}`);
-
-  /**
-   * check if the current proposal has enough veOLAS to be executed
-   */
-  const getCurrentProposalInfo = (proposal) => {
-    // example of voters: [ { '0x123': '1000000000000000000000000' } ]
-    const totalVeolasInWei = proposal?.voters?.reduce((acc, voter) => {
-      // previously the voters were stored as an [account]: balance.
-      // now, it is stored as an object (eg. Check "Voter" in prop-types.js).
-      const currentVeOlasInWei = !isNil(voter?.votingPower)
-        ? ethersToWei(`${voter?.votingPower || '0'}`)
-        : Object.values(voter)[0];
-
-      return acc + ethers.toBigInt(currentVeOlasInWei);
-    }, 0n);
-
-    // check if voters have 2 million veolas in total
-    const isQuorumAchieved = totalVeolasInWei >= quorumInWei;
-
-    const remainingVeolasForApprovalInEth = formatToEth(
-      ethers.toBigInt(quorumInWei) - ethers.toBigInt(totalVeolasInWei),
-    );
-
-    // percentage of veolas invested in the proposal
-    // limit it to 2 decimal places
-    const totalVeolasInvestedInPercentage = ((totalVeolasInWei * 100n) / quorumInWei).toString();
-
-    const isProposalVerified = proposal?.proposer?.verified;
-
-    const votersAddress = proposal?.voters?.map((voter) => {
-      const address = voter.address || Object.keys(voter)[0];
-      return address;
-    });
-
-    return {
-      isQuorumAchieved,
-      totalVeolasInEth: formatToEth(totalVeolasInWei),
-      remainingVeolasForApprovalInEth,
-      totalVeolasInvestedInPercentage,
-      isProposalVerified,
-      votersAddress,
-    };
-  };
-
   /**
    * Proposals that are not executed and have less than 2 million veolas
    */
@@ -178,7 +133,6 @@ export const useProposals = () => {
   );
 
   return {
-    getCurrentProposalInfo,
     pendingTweetProposals,
   };
 };

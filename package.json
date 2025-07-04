@@ -7,7 +7,8 @@
     "lint:fix": "eslint --fix \"./**/*.{js,jsx}\"",
     "test": "jest",
     "test:watch": "jest --watch",
-    "testc": "jest --coverage --verbose"
+    "testc": "jest --coverage --verbose",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@ant-design/cssinjs": "^1.18.4",

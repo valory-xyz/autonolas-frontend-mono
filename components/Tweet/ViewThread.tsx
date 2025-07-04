@@ -1,16 +1,25 @@
 import { CloseOutlined, EditFilled } from '@ant-design/icons';
 import { Button, Timeline, Typography } from 'antd';
-import PropTypes from 'prop-types';
 import { Fragment } from 'react';
 
 import { NA } from '@autonolas/frontend-library';
 
+import type { TweetOrThread } from '.';
 import MediaList, { MODE } from './MediaList';
 import { EachThreadContainer } from './styles';
 
 const { Text } = Typography;
 
-export const ViewThread = ({ thread, onEditThread, onRemoveFromThread }) => (
+type ViewThreadProps = {
+  thread: {
+    text: string | string[];
+    media: (string | TweetOrThread['media'][number])[];
+  }[];
+  onEditThread?: (threadIndex: number) => void;
+  onRemoveFromThread?: (threadIndex: number) => void;
+};
+
+export const ViewThread = ({ thread, onEditThread, onRemoveFromThread }: ViewThreadProps) => (
   <Timeline
     style={{ paddingTop: 10 }}
     items={thread.map((tweet, threadIndex) => ({
@@ -47,20 +56,3 @@ export const ViewThread = ({ thread, onEditThread, onRemoveFromThread }) => (
     }))}
   />
 );
-
-ViewThread.propTypes = {
-  thread: PropTypes.arrayOf(
-    PropTypes.shape({
-      text: PropTypes.string,
-      media: PropTypes.arrayOf(PropTypes.string),
-    }),
-  ),
-  onEditThread: PropTypes.func,
-  onRemoveFromThread: PropTypes.func,
-};
-
-ViewThread.defaultProps = {
-  thread: [],
-  onEditThread: null,
-  onRemoveFromThread: null,
-};

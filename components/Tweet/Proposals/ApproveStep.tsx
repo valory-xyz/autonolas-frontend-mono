@@ -1,15 +1,15 @@
 import { Button, Card, Progress, Typography } from 'antd';
-import PropTypes from 'prop-types';
 import { useMemo } from 'react';
+import { Address } from 'viem';
 
 import { NA } from '@autonolas/frontend-library';
 
 import { getNumberInMillions } from 'common-util/functions';
+import { getCurrentProposalInfo } from 'common-util/functions/proposal';
 import { useHelpers } from 'common-util/hooks/useHelpers';
-import { ProposalPropTypes } from 'common-util/prop-types';
+import type { ModuleDetails } from 'store/types';
 import { VEOLAS_QUORUM } from 'util/constants';
 
-import { useProposals } from '../../CoOrdinate/Centaur/hooks';
 import MediaList, { MODE } from '../MediaList';
 import { ViewThread } from '../ViewThread';
 
@@ -21,8 +21,13 @@ const ConnectWalletToApprove = () => (
   </Text>
 );
 
-export const ApproveStep = ({ isApproveLoading, proposal, onApprove }) => {
-  const { getCurrentProposalInfo } = useProposals();
+type ApproveStepProps = {
+  isApproveLoading: boolean;
+  proposal: ModuleDetails['scheduled_tweet']['tweets'][number];
+  onApprove: () => void;
+};
+
+export const ApproveStep = ({ isApproveLoading, proposal, onApprove }: ApproveStepProps) => {
   const { account } = useHelpers();
 
   const {
@@ -32,7 +37,7 @@ export const ApproveStep = ({ isApproveLoading, proposal, onApprove }) => {
     totalVeolasInvestedInPercentage,
     isProposalVerified,
   } = getCurrentProposalInfo(proposal);
-  const hasVoted = votersAddress?.includes(account) ?? false;
+  const hasVoted = votersAddress?.includes(account as Address) ?? false;
   const canMoveToExecuteStep = isQuorumAchieved || proposal.posted;
   const isApproveDisabled = !account || !isProposalVerified || proposal?.posted;
 
@@ -45,10 +50,14 @@ export const ApproveStep = ({ isApproveLoading, proposal, onApprove }) => {
 
     if (Array.isArray(proposal?.text)) {
       return {
-        thread: proposal.text.map((text, index) => ({
-          text,
-          media: (proposal?.media_hashes ?? [])[index] ?? [],
-        })),
+        thread: proposal.text.map((text, index) => {
+          const tweetMedia = (proposal?.media_hashes ?? [])?.[index];
+          const media = tweetMedia ? [tweetMedia] : [];
+          return {
+            text,
+            media,
+          };
+        }),
       };
     }
 
@@ -93,27 +102,16 @@ export const ApproveStep = ({ isApproveLoading, proposal, onApprove }) => {
       )}
 
       <div className="mb-12">
-        <div>{`${getNumberInMillions(totalVeolasInEth)} veOLAS has approved`}</div>
+        <div>{`${getNumberInMillions(Number(totalVeolasInEth))} veOLAS has approved`}</div>
         <div>
           {`Quorum ${canMoveToExecuteStep ? '' : 'not '} achieved ${
             canMoveToExecuteStep ? '✅ ' : ''
-          } - ${getNumberInMillions(totalVeolasInEth)}/${getNumberInMillions(
+          } - ${getNumberInMillions(Number(totalVeolasInEth))}/${getNumberInMillions(
             VEOLAS_QUORUM,
           )} veOLAS`}
         </div>
-        <Progress percent={totalVeolasInvestedInPercentage} />
+        <Progress percent={Number(totalVeolasInvestedInPercentage)} />
       </div>
     </>
   );
-};
-
-ApproveStep.propTypes = {
-  isApproveLoading: PropTypes.bool,
-  proposal: ProposalPropTypes,
-  onApprove: PropTypes.func.isRequired,
-};
-
-ApproveStep.defaultProps = {
-  isApproveLoading: false,
-  proposal: {},
 };

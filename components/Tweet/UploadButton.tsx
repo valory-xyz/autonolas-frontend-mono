@@ -1,21 +1,35 @@
 import { FileImageOutlined } from '@ant-design/icons';
 import { Button, message } from 'antd';
-import PropTypes from 'prop-types';
 import { useRef } from 'react';
+
+import { TweetOrThread } from '.';
 
 const SUPPORTED_FILE_TYPES = ['image/jpeg', 'image/png'];
 const MAX_IMAGE_SIZE_IN_MB = 5;
 const MAX_IMAGE_SIZE = MAX_IMAGE_SIZE_IN_MB * 1024 * 1024;
 const ACCEPT = SUPPORTED_FILE_TYPES.join(',');
 
-const UploadButton = ({ disabled, title, onUploadMedia, ...rest }) => {
-  const inputRef = useRef();
+type UploadButtonProps = {
+  disabled: boolean;
+  title?: string;
+  onUploadMedia: (file: TweetOrThread['media'][number]) => void;
+};
 
-  const handleFileInputChange = async (e) => {
-    const file = e.target.files[0];
+const UploadButton = ({
+  disabled = true,
+  title = 'Add Image',
+  onUploadMedia,
+  ...rest
+}: UploadButtonProps) => {
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const handleFileInputChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
     if (!file) return;
 
-    inputRef.current.value = '';
+    if (inputRef.current) {
+      inputRef.current.value = '';
+    }
 
     // Validate file type
     if (!SUPPORTED_FILE_TYPES.includes(file.type)) {
@@ -44,7 +58,7 @@ const UploadButton = ({ disabled, title, onUploadMedia, ...rest }) => {
       <Button
         type="link"
         disabled={disabled}
-        onClick={() => inputRef.current.click()}
+        onClick={() => inputRef.current?.click()}
         icon={<FileImageOutlined />}
         {...rest}
       >
@@ -52,18 +66,6 @@ const UploadButton = ({ disabled, title, onUploadMedia, ...rest }) => {
       </Button>
     </>
   );
-};
-
-UploadButton.propTypes = {
-  disabled: PropTypes.bool,
-  title: PropTypes.string,
-  onUploadMedia: PropTypes.func,
-};
-
-UploadButton.defaultProps = {
-  disabled: true,
-  title: 'Add Image',
-  onUploadMedia: null,
 };
 
 export default UploadButton;

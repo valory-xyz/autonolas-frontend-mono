@@ -1,11 +1,9 @@
 import { ReadOutlined } from '@ant-design/icons';
 import { Card, Table, Typography } from 'antd';
-import { get } from 'lodash';
 import React from 'react';
 import styled from 'styled-components';
 
 import { useAppSelector } from 'store/setup';
-import { DEFAULT_COORDINATE_ID } from 'util/constants';
 
 const { Title, Paragraph } = Typography;
 
@@ -151,10 +149,10 @@ const columns = [
 ];
 
 export const Campaigns = () => {
-  const isLoading = useAppSelector((state) => state.setup.isMemoryDetailsLoading);
-  const memoryDetailsList = useAppSelector((state) => state.setup.memoryDetails || []);
-  const currentMemoryDetails = memoryDetailsList.find((c) => c.id === DEFAULT_COORDINATE_ID) || {};
-  const twitterCampaigns = get(currentMemoryDetails, 'plugins_data.twitter_campaigns.campaigns');
+  const { moduleDetails, isModuleDetailsLoading: isLoading } = useAppSelector(
+    (state) => state.setup,
+  );
+  const twitterCampaigns = moduleDetails?.twitter_campaigns?.campaigns;
 
   return (
     <Card>
@@ -181,7 +179,7 @@ export const Campaigns = () => {
             return (
               <div
                 style={{ fontSize: '14px', color: '#7E22CE', cursor: 'pointer' }}
-                onClick={(e) => onExpand(record, e)}
+                onClick={(event) => onExpand(record, event)}
               >
                 <Icon /> Guide
               </div>

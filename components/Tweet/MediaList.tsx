@@ -3,6 +3,7 @@ import { Col, Row } from 'antd';
 import PropTypes from 'prop-types';
 import { Fragment, useMemo } from 'react';
 
+import type { TweetOrThread } from '.';
 import { Media, MediaDeleteButton, MediaWrapper } from './styles';
 import { getMediaSrc } from './utils';
 
@@ -11,13 +12,26 @@ export const MODE = {
   EDIT: 'edit',
 };
 
-const MediaItem = ({ mode, item, handleDelete }) => {
+type MediaItem = {
+  name: string;
+  type: string;
+  size: number;
+  url?: string;
+};
+
+type MediaItemProps = {
+  mode?: typeof MODE.VIEW | typeof MODE.EDIT;
+  item: string | MediaItem | TweetOrThread['media'][number];
+  handleDelete?: (item: string | MediaItem) => void;
+};
+
+const MediaItem = ({ mode = MODE.EDIT, item, handleDelete }: MediaItemProps) => {
   const src = useMemo(() => {
     try {
       if (typeof item === 'string') {
         return getMediaSrc(item);
       }
-      return URL.createObjectURL(item);
+      return URL.createObjectURL(item as TweetOrThread['media'][number]);
     } catch {
       return '';
     }
@@ -28,9 +42,12 @@ const MediaItem = ({ mode, item, handleDelete }) => {
   const handleDeleteAndRevoke = () => {
     if (handleDelete) {
       handleDelete(item);
-      URL.revokeObjectURL(item.url);
+      if (typeof item === 'object' && item?.url) {
+        URL.revokeObjectURL(item.url);
+      }
     }
   };
+
   return (
     <Col>
       <Wrapper>
@@ -54,26 +71,14 @@ const MediaItem = ({ mode, item, handleDelete }) => {
   );
 };
 
-MediaItem.propTypes = {
-  item: PropTypes.oneOfType([
-    PropTypes.string, // Array of String URL
-    PropTypes.shape({
-      name: PropTypes.string.isRequired,
-      size: PropTypes.number.isRequired,
-      type: PropTypes.string.isRequired,
-      url: PropTypes.string.isRequired, // Array of file objects
-    }),
-  ]).isRequired,
-  handleDelete: PropTypes.func,
-  mode: PropTypes.oneOf(Object.values(MODE)),
+type MediaListProps = {
+  media: MediaItemProps['item'][];
+  handleDelete?: MediaItemProps['handleDelete'];
+  mode?: MediaItemProps['mode'];
+  className?: string;
 };
 
-MediaItem.defaultProps = {
-  mode: MODE.EDIT,
-  handleDelete: null,
-};
-
-const MediaList = ({ media, handleDelete, mode, className }) => {
+const MediaList = ({ media, handleDelete, mode = MODE.EDIT, className = '' }: MediaListProps) => {
   if (media.length === 0) return null;
 
   return (
@@ -84,19 +89,6 @@ const MediaList = ({ media, handleDelete, mode, className }) => {
       })}
     </Row>
   );
-};
-
-MediaList.propTypes = {
-  media: PropTypes.arrayOf(MediaItem.propTypes.item).isRequired,
-  handleDelete: MediaItem.propTypes.handleDelete,
-  className: PropTypes.string,
-  mode: MediaItem.propTypes.mode,
-};
-
-MediaList.defaultProps = {
-  className: '',
-  mode: MediaItem.defaultProps.mode,
-  handleDelete: MediaItem.defaultProps.handleDelete,
 };
 
 export default MediaList;

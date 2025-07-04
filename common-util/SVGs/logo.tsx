@@ -1,6 +1,6 @@
 export const LogoSvg = () => (
   <svg xmlns="http://www.w3.org/2000/svg" width="182" height="38" viewBox="0 0 182 38" fill="none">
-    <g clip-path="url(#clip0_1852_699)">
+    <g clipPath="url(#clip0_1852_699)">
       <path d="M0 9V14.6076H25.5865V9H0Z" fill="black" />
       <path d="M0 16.1962V21.8038H25.5865V16.1962H0Z" fill="black" />
       <path d="M0 23.3924V29H11.4466V23.3924H0Z" fill="black" />

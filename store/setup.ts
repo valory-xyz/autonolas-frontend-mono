@@ -3,7 +3,7 @@ import { lowerCase, orderBy } from 'lodash';
 import { TypedUseSelectorHook, useSelector } from 'react-redux';
 
 import { store } from '.';
-import { LeaderboardUser, Tweet } from './types';
+import { LeaderboardUser, ModuleDetails, Tweet } from './types';
 
 type SetupState = {
   account: string | null;
@@ -18,6 +18,9 @@ type SetupState = {
   // tweets
   isTweetsLoading: boolean;
   tweets: Tweet[];
+  // module details
+  isModuleDetailsLoading: boolean;
+  moduleDetails: ModuleDetails | null;
 
   // TODO: below to be removed
   nftDetails: any | null;
@@ -46,6 +49,10 @@ const initialState: SetupState = {
   // tweets
   isTweetsLoading: false,
   tweets: [],
+
+  // module details
+  isModuleDetailsLoading: false,
+  moduleDetails: null,
 
   // nft details
   nftDetails: null,
@@ -116,6 +123,12 @@ export const setupSlice = createSlice({
     setTweets: (state, action) => {
       state.tweets = action.payload;
     },
+    setIsModuleDetailsLoading: (state, action) => {
+      state.isModuleDetailsLoading = action.payload;
+    },
+    setModuleDetails: (state, action) => {
+      state.moduleDetails = action.payload;
+    },
     setNftDetails: (state, action) => {
       state.nftDetails = action.payload;
     },
@@ -153,6 +166,8 @@ export const {
   setLeaderboard,
   setIsTweetsLoading,
   setTweets,
+  setIsModuleDetailsLoading,
+  setModuleDetails,
   setNftDetails,
   setIsMemoryDetailsLoading,
   setMemoryDetails,

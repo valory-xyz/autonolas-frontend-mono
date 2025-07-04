@@ -6,11 +6,13 @@ import { base32 } from 'multiformats/bases/base32';
 
 import { GATEWAY_URL } from 'util/constants';
 
-export const getFirstTenCharsOfTweet = (tweetOrThread) => {
-  if (typeof tweetOrThread === 'string') {
-    return tweetOrThread.substring(0, 10);
+import { TweetOrThread } from '.';
+
+export const getFirstTenCharsOfTweet = (tweetText: TweetOrThread['text']) => {
+  if (typeof tweetText === 'string') {
+    return tweetText.substring(0, 10);
   }
-  return (tweetOrThread[0] || '').substring(0, 10);
+  return (tweetText[0] || '').substring(0, 10);
 };
 
 const ipfs = create({
@@ -24,14 +26,16 @@ const ipfs = create({
  * @param {string | ArrayBuffer} file
  * @returns hash to the file
  */
-export const uploadFileToIpfs = async (file) => {
+export const uploadFileToIpfs = async (file: FileReader['result'] | null) => {
+  if (!file) return null;
+
   const response = await ipfs.add(file);
   const hash = response.cid.toV1().toString(base32.encoder);
   return hash;
 };
 
-export const uploadFilesToIpfs = async (files) => {
-  const mediaPromises = [];
+export const uploadFilesToIpfs = async (files: TweetOrThread['media']) => {
+  const mediaPromises: Promise<string>[] = [];
 
   files.forEach((file) => {
     mediaPromises.push(
@@ -57,21 +61,25 @@ export const uploadFilesToIpfs = async (files) => {
 };
 
 const extensionRegex = /\.[^.]+$/;
-export const getMediaSrc = (hashWithExtension) => {
+export const getMediaSrc = (hashWithExtension: string) => {
   const hash = hashWithExtension.replace(extensionRegex, '');
 
   return `${GATEWAY_URL}${hash}`;
 };
 
-const handleFulfilled = (items) =>
-  items.filter((item) => item.status === 'fulfilled').map((item) => item.value);
+const handleFulfilled = (items: PromiseSettledResult<string>[]) =>
+  items.reduce<string[]>((acc, item) => {
+    if (item.status === 'fulfilled') {
+      acc.push(item.value);
+    }
+    return acc;
+  }, []);
 
-export const generateMediaHashes = async (tweetOrThread) => {
+export const generateMediaHashes = async (tweetOrThread: TweetOrThread) => {
   try {
     if (Array.isArray(tweetOrThread.text)) {
-      const threadMediaPromises = tweetOrThread.media.map(uploadFilesToIpfs);
-      const uploadedMedia = await Promise.allSettled(threadMediaPromises);
-      return handleFulfilled(uploadedMedia).map(handleFulfilled);
+      const threadMediaPromises = await uploadFilesToIpfs(tweetOrThread.media);
+      return handleFulfilled(threadMediaPromises);
     }
 
     const uploadedMedia = await uploadFilesToIpfs(tweetOrThread.media);

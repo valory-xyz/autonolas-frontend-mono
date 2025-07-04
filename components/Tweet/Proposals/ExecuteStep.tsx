@@ -1,15 +1,13 @@
 import { ExclamationCircleOutlined } from '@ant-design/icons';
 import { Alert, Button, Popconfirm, Result, Typography } from 'antd';
 import { isNil, last } from 'lodash';
-import PropTypes from 'prop-types';
 import { useMemo } from 'react';
 
 import { COLOR } from '@autonolas/frontend-library';
 
+import { getCurrentProposalInfo } from 'common-util/functions/proposal';
 import { useHelpers } from 'common-util/hooks/useHelpers';
-import { ProposalPropTypes } from 'common-util/prop-types';
-
-import { useProposals } from '../../CoOrdinate/Centaur/hooks';
+import type { ModuleDetails } from 'store/types';
 
 const { Text } = Typography;
 
@@ -33,9 +31,14 @@ const TweetFailed = () => (
   </>
 );
 
-export const ExecuteStep = ({ isExecuteLoading, proposal, onExecute }) => {
+type ExecuteStepProps = {
+  isExecuteLoading: boolean;
+  proposal: ModuleDetails['scheduled_tweet']['tweets'][number];
+  onExecute: () => void;
+};
+
+export const ExecuteStep = ({ isExecuteLoading, proposal, onExecute }: ExecuteStepProps) => {
   const { account } = useHelpers();
-  const { getCurrentProposalInfo } = useProposals();
 
   const {
     isQuorumAchieved,
@@ -108,21 +111,10 @@ export const ExecuteStep = ({ isExecuteLoading, proposal, onExecute }) => {
       <br />
 
       {!isQuorumAchieved && (
-        <Text text="secondary">
+        <Text type="secondary">
           {`To be executed, this proposal needs ${remainingVeolasForApprovalInEth} veOLAS. Current veOLAS: ${totalVeolasInEth}`}
         </Text>
       )}
     </>
   );
-};
-
-ExecuteStep.propTypes = {
-  isExecuteLoading: PropTypes.bool,
-  proposal: ProposalPropTypes,
-  onExecute: PropTypes.func.isRequired,
-};
-
-ExecuteStep.defaultProps = {
-  isExecuteLoading: false,
-  proposal: {},
 };

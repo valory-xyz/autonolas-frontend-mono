@@ -1,15 +1,23 @@
 import { PlusOutlined, XOutlined } from '@ant-design/icons';
 import { Button, Col, Input, Modal, Row, message } from 'antd';
-import PropTypes from 'prop-types';
 import React, { useState } from 'react';
 
 import { MAX_TWEET_IMAGES, MAX_TWEET_LENGTH } from 'util/constants';
 
+import type { TweetOrThread } from '.';
 import MediaList from './MediaList';
 import TweetLength from './TweetLength';
 import UploadButton from './UploadButton';
 import { ViewThread } from './ViewThread';
 import { ProposalCountRow } from './styles';
+
+type ThreadModalProps = {
+  firstTweetInThread: string;
+  firstMediaInThread: TweetOrThread['media'];
+  isSubmitting: boolean;
+  addThread: (thread: TweetOrThread) => Promise<void>;
+  closeThreadModal: () => void;
+};
 
 const ThreadModal = ({
   firstTweetInThread,
@@ -17,14 +25,14 @@ const ThreadModal = ({
   isSubmitting,
   addThread,
   closeThreadModal,
-}) => {
+}: ThreadModalProps) => {
   const [thread, setThread] = useState([{ text: firstTweetInThread, media: firstMediaInThread }]);
-  const [tweet, setTweet] = useState();
-  const [media, setMedia] = useState([]);
+  const [tweet, setTweet] = useState<string>('');
+  const [media, setMedia] = useState<TweetOrThread['media']>([]);
 
   // index of the tweet currently being edited,
   // null if no tweet is being edited
-  const [currentEditingIndex, setCurrentEditingIndex] = useState(null);
+  const [currentEditingIndex, setCurrentEditingIndex] = useState<number | null>(null);
 
   const onAddToThread = () => {
     if ((!tweet || tweet.trim() === '') && media.length === 0) {
@@ -42,19 +50,19 @@ const ThreadModal = ({
     }
 
     setThread(newThread);
-    setTweet(null);
+    setTweet('');
     setMedia([]);
     setCurrentEditingIndex(null);
   };
 
-  const onEditThread = (threadIndex) => {
+  const onEditThread = (threadIndex: number) => {
     setTweet(thread[threadIndex]?.text ?? '');
     setMedia(thread[threadIndex]?.media ?? []);
     setCurrentEditingIndex(threadIndex);
   };
 
   // REMOVE the tweet from the thread
-  const onRemoveFromThread = (threadIndex) => {
+  const onRemoveFromThread = (threadIndex: number) => {
     const newThread = [...thread];
     newThread.splice(threadIndex, 1);
     setThread(newThread);
@@ -62,7 +70,7 @@ const ThreadModal = ({
     // If the thread is being edited - clear all fields
     // to avoid incorrect saving
     if (currentEditingIndex === threadIndex) {
-      setTweet(null);
+      setTweet('');
       setMedia([]);
       setCurrentEditingIndex(null);
     }
@@ -85,7 +93,7 @@ const ThreadModal = ({
       // post the thread & close the modal
       await addThread({
         text: thread.map((item) => item.text ?? ''),
-        media: thread.map((item) => item.media),
+        media: thread.flatMap((item) => item.media),
       });
 
       closeThreadModal();
@@ -165,18 +173,6 @@ const ThreadModal = ({
       </Row>
     </Modal>
   );
-};
-
-ThreadModal.propTypes = {
-  firstTweetInThread: PropTypes.string.isRequired,
-  firstMediaInThread: PropTypes.arrayOf(PropTypes.string).isRequired,
-  closeThreadModal: PropTypes.func.isRequired,
-  addThread: PropTypes.func.isRequired,
-  isSubmitting: PropTypes.bool,
-};
-
-ThreadModal.defaultProps = {
-  isSubmitting: false,
 };
 
 export default ThreadModal;

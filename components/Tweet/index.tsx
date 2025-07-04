@@ -27,6 +27,11 @@ const ToProposeTweetText = () => (
   <Text type="secondary">To propose a post, you must have at least 100k veOLAS voting power.</Text>
 );
 
+export type TweetOrThread = {
+  text: string | string[];
+  media: File[];
+};
+
 export const TweetPropose = () => {
   const { signMessageAsync } = useSignMessage();
   const { isStaging, account } = useHelpers();
@@ -39,12 +44,12 @@ export const TweetPropose = () => {
   } = useCentaursFunctionalities();
 
   const [tweet, setTweet] = useState('');
-  const [media, setMedia] = useState([]);
+  const [media, setMedia] = useState<TweetOrThread['media']>([]);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isThreadModalVisible, setIsThreadModalVisible] = useState(false);
 
-  const handleSubmit = async (tweetOrThread) => {
+  const handleSubmit = async (tweetOrThread: TweetOrThread) => {
     setIsSubmitting(true);
 
     try {
@@ -75,10 +80,7 @@ export const TweetPropose = () => {
         action_id: '',
       };
 
-      const updatedCentaur = getUpdatedCentaurAfterTweetProposal(
-        tweetDetails,
-        currentMemoryDetails,
-      );
+      const updatedCentaur = getUpdatedCentaurAfterTweetProposal(tweetDetails);
 
       // Update the Ceramic stream
       const commitId = await updateMemoryWithNewCentaur(updatedCentaur);
@@ -107,7 +109,7 @@ export const TweetPropose = () => {
     }
   };
 
-  const onTweetChange = useCallback((event) => {
+  const onTweetChange = useCallback((event: React.ChangeEvent<HTMLTextAreaElement>) => {
     setTweet(event.target.value);
   }, []);
 
