@@ -15,17 +15,17 @@ type Result = {
 };
 
 export const filterByOwner = (results: Result[], { searchValue, account }: FilterByOwnerParams) =>
-  (results || []).filter((e) => {
+  results.filter((e) => {
     const search = (searchValue || '').trim().toLowerCase();
-    const ownerL = (e.owner || '').trim().toLowerCase();
-    const hashL = (e.unitHash || '').trim().toLowerCase();
+    const owner = (e.owner || '').trim().toLowerCase();
+    const hash = (e.unitHash || '').trim().toLowerCase();
 
     // for "my agents" search only by Account
     if (account) {
-      return ownerL === account.trim().toLowerCase() && includes(hashL, search);
+      return owner === account.trim().toLowerCase() && includes(hash, search);
     }
 
-    return includes(ownerL, search) || includes(hashL, search);
+    return includes(owner, search) || includes(hash, search);
   });
 
 type GetListByAccountParams = {

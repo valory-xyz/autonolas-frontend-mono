@@ -8,13 +8,13 @@ import { ListEmptyMessage } from 'components/List/ListCommon';
 import { TOTAL_VIEW_COUNT } from 'util/constants';
 
 import { getData, getTableColumns } from './helpers';
-import type { AgentData, ServiceData, Item } from './helpers';
+import type { AgentData, ServiceData, EntityItem } from './helpers';
 
 type ListTableProps = {
   isLoading: boolean;
   type: string;
   isPaginationRequired: boolean;
-  list: Item[];
+  list: EntityItem[];
   total: number;
   currentPage: number;
   setCurrentPage: (page: number) => void;

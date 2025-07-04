@@ -136,7 +136,7 @@ export const getTableColumns = (
   return [];
 };
 
-export type Item = {
+export type EntityItem = {
   id: number;
   owner: string;
   hash?: string;
@@ -160,7 +160,7 @@ export type ServiceData = {
   mechFactory?: string;
 };
 
-export const getData = (type: string, rawData: Item[], { current }: { current: number }) => {
+export const getData = (type: string, rawData: EntityItem[], { current }: { current: number }) => {
   /**
    * @example
    * TOTAL_VIEW_COUNT = 10, current = 1
