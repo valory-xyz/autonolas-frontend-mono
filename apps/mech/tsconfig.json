@@ -1,0 +1,34 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "jsx": "preserve",
+    "allowJs": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "strict": true,
+    "forceConsistentCasingInFileNames": true,
+    "noEmit": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "incremental": true,
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ],
+    "types": ["jest", "node", "react", "react-dom"],
+    "paths": {
+      "common-util/*": ["apps/mech/common-util/*"],
+      "components/*": ["apps/mech/components/*"],
+      "util/*": ["apps/mech/util/*"],
+      "static/*": ["apps/mech/static/*"],
+      "images/*": ["apps/mech/public/images/*"],
+      "store/*": ["apps/mech/store/*"],
+      "hooks/*": ["apps/mech/hooks/*"],
+      "context/*": ["apps/mech/context/*"],
+      "types/*": ["apps/mech/types/*"]
+    }
+  },
+  "include": ["**/*.ts", "**/*.tsx", "**/*.js", "**/*.jsx", "next-env.d.ts"],
+  "exclude": ["node_modules", "jest.config.js", "src/**/*.spec.ts", "src/**/*.test.ts"]
+}
