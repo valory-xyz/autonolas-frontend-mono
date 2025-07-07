@@ -1,13 +1,11 @@
-import { Typography, Row, Col } from 'antd';
+import { Typography, Row, Col, Spin } from 'antd';
 import Image from 'next/image';
 import styled from 'styled-components';
 import Markdown from 'markdown-to-jsx';
 
-import paths from 'components/Paths/data.json';
+import { useFetchPathData } from 'common-util/hooks/useFetchPathData';
 import { COLOR } from '@autonolas/frontend-library';
 import Meta from 'components/Meta';
-import { SITE } from 'util/constants';
-import { GetServerSidePropsContext } from 'next';
 
 const Container = styled.div`
   padding: 0 32px;
@@ -19,31 +17,25 @@ const Upcase = styled(Typography.Text)`
   letter-spacing: 0.07em;
 `;
 
-type PathData = {
-  id: string;
-  name: string;
-  description: string;
-  images: {
-    description: string;
-    service: string;
-  };
-  service: {
-    id: string;
-    name: string;
-    url: string;
-  };
-  isMechsToolPath: boolean;
-  markdownPath: string;
-} | null;
+const PathDetailPage = () => {
+  const { pathData, loading, markdownContent } = useFetchPathData();
 
-type PathDetailPageProps = {
-  pathData: PathData;
-  markdownContent: string;
-};
+  if (loading) {
+    return (
+      <Container>
+        <div style={{ textAlign: 'center', padding: '50px 0' }}>
+          <Spin />
+        </div>
+      </Container>
+    );
+  }
 
-const PathDetailPage = ({ pathData = null, markdownContent = '' }: PathDetailPageProps) => {
   if (!pathData) {
-    return <Typography.Title level={2}>Path not found</Typography.Title>;
+    return (
+      <Container>
+        <Typography.Title level={2}>Path not found</Typography.Title>
+      </Container>
+    );
   }
 
   return (
@@ -188,25 +180,3 @@ const PathDetailPage = ({ pathData = null, markdownContent = '' }: PathDetailPag
 };
 
 export default PathDetailPage;
-
-export async function getServerSideProps(context: GetServerSidePropsContext) {
-  const { id } = context.params as { id: string };
-
-  try {
-    const pathData = paths.find((path) => path.id === id);
-
-    if (!pathData) {
-      return { props: { pathData: null, markdownContent: null, id } };
-    }
-
-    const response = await fetch(`${SITE.URL}/${pathData.markdownPath}`);
-    if (response.ok) {
-      const markdownContent = await response.text();
-      return { props: { pathData, markdownContent, id } };
-    }
-  } catch (error) {
-    console.error('Error fetching markdown:', error);
-  }
-
-  return { props: { pathData: null, markdownContent: null, id } };
-}
