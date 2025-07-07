@@ -42,6 +42,8 @@ type PathDetailPageProps = {
 };
 
 const PathDetailPage = ({ pathData = null, markdownContent = '' }: PathDetailPageProps) => {
+  console.log('markdownContent', markdownContent);
+
   if (!pathData) {
     return <Typography.Title level={2}>Path not found</Typography.Title>;
   }
@@ -201,8 +203,10 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
       return { props: { pathData: null, markdownContent: null, id } };
     }
 
+    console.log('SITE.URL', SITE.URL);
     const response = await fetch(`${SITE.URL}/${pathData.markdownPath}`);
     if (response.ok) {
+      console.log('response', response);
       const markdownContent = await response.text();
       return { props: { pathData, markdownContent, id } };
     }
