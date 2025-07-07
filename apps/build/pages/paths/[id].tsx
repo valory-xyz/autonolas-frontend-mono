@@ -1,13 +1,14 @@
-import { Typography, Row, Col } from 'antd';
+import { Typography, Row, Col, Spin } from 'antd';
 import Image from 'next/image';
 import styled from 'styled-components';
 import Markdown from 'markdown-to-jsx';
+import { useRouter } from 'next/router';
+import { useState, useEffect } from 'react';
 
 import paths from 'components/Paths/data.json';
 import { COLOR } from '@autonolas/frontend-library';
 import Meta from 'components/Meta';
 import { SITE } from 'util/constants';
-import { GetServerSidePropsContext } from 'next';
 
 const Container = styled.div`
   padding: 0 32px;
@@ -23,12 +24,14 @@ type PathData = {
   id: string;
   name: string;
   description: string;
-  images: {
-    description: string;
-    service: string;
+  images?: {
+    homepageCard?: string;
+    description?: string;
+    service?: string;
+    homepageCardImageCanContain?: boolean;
   };
-  service: {
-    id: string;
+  service?: {
+    id?: string;
     name: string;
     url: string;
   };
@@ -36,17 +39,67 @@ type PathData = {
   markdownPath: string;
 } | null;
 
-type PathDetailPageProps = {
-  pathData: PathData;
-  markdownContent: string;
-};
+const PathDetailPage = () => {
+  const router = useRouter();
+  const { id } = router.query;
+  const [pathData, setPathData] = useState<PathData>(null);
+  const [markdownContent, setMarkdownContent] = useState<string>('');
+  const [loading, setLoading] = useState(true);
 
-const PathDetailPage = ({ pathData = null, markdownContent = '' }: PathDetailPageProps) => {
-  console.log('pathData', pathData);
-  console.log('markdownContent', markdownContent);
+  useEffect(() => {
+    if (!id || typeof id !== 'string') return;
+
+    const fetchPathData = async () => {
+      try {
+        setLoading(true);
+        const pathDetails = paths.find((path) => path.id === id);
+
+        if (!pathDetails) {
+          setPathData(null);
+          setMarkdownContent('');
+          setLoading(false);
+          return;
+        }
+
+        setPathData(pathDetails);
+
+        // Fetch markdown content
+        const response = await fetch(`${SITE.URL}/${pathDetails.markdownPath}`);
+
+        if (response.ok) {
+          const content = await response.text();
+          setMarkdownContent(content);
+        } else {
+          setMarkdownContent('');
+        }
+      } catch (error) {
+        console.error('Error fetching path data:', error);
+        setPathData(null);
+        setMarkdownContent('');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPathData();
+  }, [id]);
+
+  if (loading) {
+    return (
+      <Container>
+        <div style={{ textAlign: 'center', padding: '50px 0' }}>
+          <Spin size="large" />
+        </div>
+      </Container>
+    );
+  }
 
   if (!pathData) {
-    return <Typography.Title level={2}>Path not found</Typography.Title>;
+    return (
+      <Container>
+        <Typography.Title level={2}>Path not found</Typography.Title>
+      </Container>
+    );
   }
 
   return (
@@ -191,31 +244,3 @@ const PathDetailPage = ({ pathData = null, markdownContent = '' }: PathDetailPag
 };
 
 export default PathDetailPage;
-
-export async function getServerSideProps(context: GetServerSidePropsContext) {
-  const { id } = context.params as { id: string };
-
-  try {
-    const pathData = paths.find((path) => path.id === id);
-
-    console.log('pathData', pathData);
-
-    if (!pathData) {
-      return { props: { pathData: null, markdownContent: null, id } };
-    }
-
-    console.log('SITE.URL', SITE.URL);
-    const response = await fetch(`${SITE.URL}/${pathData.markdownPath}`);
-    console.log('response', response);
-    console.log('response.ok', response?.ok);
-    // if (response.ok) {
-    const markdownContent = await response.text();
-    return { props: { pathData, markdownContent, id } };
-    // }
-  } catch (error) {
-    console.log('error', error);
-    console.error('Error fetching markdown:', error);
-  }
-
-  return { props: { pathData: null, markdownContent: null, id } };
-}
