@@ -206,11 +206,11 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
 
     console.log('SITE.URL', SITE.URL);
     const response = await fetch(`${SITE.URL}/${pathData.markdownPath}`);
-    if (response.ok) {
-      console.log('response', response);
-      const markdownContent = await response.text();
-      return { props: { pathData, markdownContent, id } };
-    }
+    console.log('response', response);
+    // if (response.ok) {
+    const markdownContent = await response.text();
+    return { props: { pathData, markdownContent, id } };
+    // }
   } catch (error) {
     console.log('error', error);
     console.error('Error fetching markdown:', error);
