@@ -42,6 +42,7 @@ type PathDetailPageProps = {
 };
 
 const PathDetailPage = ({ pathData = null, markdownContent = '' }: PathDetailPageProps) => {
+  console.log('pathData', pathData);
   console.log('markdownContent', markdownContent);
 
   if (!pathData) {
@@ -211,6 +212,7 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
       return { props: { pathData, markdownContent, id } };
     }
   } catch (error) {
+    console.log('error', error);
     console.error('Error fetching markdown:', error);
   }
 
