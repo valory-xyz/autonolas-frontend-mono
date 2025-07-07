@@ -195,6 +195,8 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
   try {
     const pathData = paths.find((path) => path.id === id);
 
+    console.log('pathData', pathData);
+
     if (!pathData) {
       return { props: { pathData: null, markdownContent: null, id } };
     }
