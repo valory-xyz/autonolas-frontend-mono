@@ -2,13 +2,10 @@ import { Typography, Row, Col, Spin } from 'antd';
 import Image from 'next/image';
 import styled from 'styled-components';
 import Markdown from 'markdown-to-jsx';
-import { useRouter } from 'next/router';
-import { useState, useEffect } from 'react';
 
-import paths from 'components/Paths/data.json';
+import { useFetchPathData } from 'common-util/hooks/useFetchPathData';
 import { COLOR } from '@autonolas/frontend-library';
 import Meta from 'components/Meta';
-import { SITE } from 'util/constants';
 
 const Container = styled.div`
   padding: 0 32px;
@@ -20,75 +17,14 @@ const Upcase = styled(Typography.Text)`
   letter-spacing: 0.07em;
 `;
 
-type PathData = {
-  id: string;
-  name: string;
-  description: string;
-  images?: {
-    homepageCard?: string;
-    description?: string;
-    service?: string;
-    homepageCardImageCanContain?: boolean;
-  };
-  service?: {
-    id?: string;
-    name: string;
-    url: string;
-  };
-  isMechsToolPath: boolean;
-  markdownPath: string;
-} | null;
-
 const PathDetailPage = () => {
-  const router = useRouter();
-  const { id } = router.query;
-  const [pathData, setPathData] = useState<PathData>(null);
-  const [markdownContent, setMarkdownContent] = useState<string>('');
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    if (!id || typeof id !== 'string') return;
-
-    const fetchPathData = async () => {
-      try {
-        setLoading(true);
-        const pathDetails = paths.find((path) => path.id === id);
-
-        if (!pathDetails) {
-          setPathData(null);
-          setMarkdownContent('');
-          setLoading(false);
-          return;
-        }
-
-        setPathData(pathDetails);
-
-        // Fetch markdown content
-        const response = await fetch(`${SITE.URL}/${pathDetails.markdownPath}`);
-
-        if (response.ok) {
-          const content = await response.text();
-          setMarkdownContent(content);
-        } else {
-          setMarkdownContent('');
-        }
-      } catch (error) {
-        console.error('Error fetching path data:', error);
-        setPathData(null);
-        setMarkdownContent('');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchPathData();
-  }, [id]);
+  const { pathData, loading, markdownContent } = useFetchPathData();
 
   if (loading) {
     return (
       <Container>
         <div style={{ textAlign: 'center', padding: '50px 0' }}>
-          <Spin size="large" />
+          <Spin />
         </div>
       </Container>
     );
