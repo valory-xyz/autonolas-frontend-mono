@@ -68,8 +68,6 @@
     "next-env.d.ts",
     "**/*.ts",
     "**/*.tsx",
-    "common-util/functions/index.js",
-    "common-util/orbis.js",
-    "common-util/hooks/useOrbis.jsx"
+    "common-util/functions/index.js"
   ]
 }

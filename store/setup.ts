@@ -28,7 +28,6 @@ type SetupState = {
   memoryDetails: any[];
   predictionRequests: any[];
   approvedRequestsCount: number | null;
-  connection: any;
 };
 
 const initialState: SetupState = {
@@ -62,8 +61,6 @@ const initialState: SetupState = {
   memoryDetails: [],
   predictionRequests: [],
 
-  // orbis
-  connection: {},
   approvedRequestsCount: null,
 };
 
@@ -150,9 +147,6 @@ export const setupSlice = createSlice({
     setApprovedRequestsCount: (state, action) => {
       state.approvedRequestsCount = action.payload;
     },
-    setOrbisConnection: (state, action) => {
-      state.connection = action.payload;
-    },
   },
 });
 
@@ -174,7 +168,6 @@ export const {
   setLogout,
   setPredictionRequests,
   setApprovedRequestsCount,
-  setOrbisConnection,
 } = setupSlice.actions;
 export const setupReducer = setupSlice.reducer;
 

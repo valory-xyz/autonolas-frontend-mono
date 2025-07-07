@@ -14,7 +14,6 @@ import {
   getChainIdOrDefaultToMainnet,
   isAddressProhibited,
 } from 'common-util/functions';
-// import { SignInToOrbis } from 'components/SignInToOrbis';
 import VotingPower from 'components/VotingPower';
 import { setChainId, setUserBalance } from 'store/setup';
 
@@ -150,9 +149,6 @@ export const LoginV2 = ({
 
   return (
     <LoginContainer>
-      {/* <div className="mr-8">
-        <SignInToOrbis />
-      </div> */}
       {address && (
         <>
           <VotingPower />
