@@ -2,7 +2,6 @@ import { useRouter } from 'next/router';
 import { useState, useEffect } from 'react';
 
 import paths from 'components/Paths/data.json';
-import { SITE } from 'util/constants';
 
 type PathData = {
   id: string;
