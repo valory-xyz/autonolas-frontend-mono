@@ -48,7 +48,7 @@ export const useFetchPathData = () => {
         setPathData(pathDetails);
 
         // Fetch markdown content
-        const response = await fetch(`${SITE.URL}/${pathDetails.markdownPath}`);
+        const response = await fetch(`/${pathDetails.markdownPath}`);
 
         if (response.ok) {
           const content = await response.text();
