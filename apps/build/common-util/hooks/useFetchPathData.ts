@@ -2,7 +2,6 @@ import { useRouter } from 'next/router';
 import { useState, useEffect } from 'react';
 
 import paths from 'components/Paths/data.json';
-import { SITE } from 'util/constants';
 
 type PathData = {
   id: string;
@@ -48,7 +47,7 @@ export const useFetchPathData = () => {
         setPathData(pathDetails);
 
         // Fetch markdown content
-        const response = await fetch(`${SITE.URL}/${pathDetails.markdownPath}`);
+        const response = await fetch(`/${pathDetails.markdownPath}`);
 
         if (response.ok) {
           const content = await response.text();

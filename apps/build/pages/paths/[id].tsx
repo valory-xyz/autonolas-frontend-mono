@@ -17,6 +17,16 @@ const Upcase = styled(Typography.Text)`
   letter-spacing: 0.07em;
 `;
 
+const markdownOptions = {
+  overrides: {
+    a: {
+      props: {
+        target: '_blank',
+      },
+    },
+  },
+};
+
 const PathDetailPage = () => {
   const { pathData, loading, markdownContent } = useFetchPathData();
 
@@ -55,7 +65,9 @@ const PathDetailPage = () => {
               Path
             </Typography.Title>
             {markdownContent && (
-              <Markdown style={{ lineHeight: '1.4' }}>{markdownContent}</Markdown>
+              <Markdown style={{ lineHeight: '1.4' }} options={markdownOptions}>
+                {markdownContent}
+              </Markdown>
             )}
           </Col>
           <Col xs={24} md={12}>
