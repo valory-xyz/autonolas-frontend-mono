@@ -2,6 +2,7 @@ import { Button, Flex, Radio, RadioChangeEvent, Skeleton, Space, Steps, Typograp
 import { AbiCoder, ZeroAddress, isAddress } from 'ethers';
 import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
+import { useDispatch } from 'react-redux';
 import { Address, getAddress } from 'viem';
 import { base, mainnet } from 'viem/chains';
 import { useAccount, useReadContract, useSwitchChain } from 'wagmi';
@@ -17,6 +18,7 @@ import {
 } from 'common-util/AbiAndAddresses';
 import { updateUserStakingData } from 'common-util/api';
 import { ethersToWei, getAddressFromBytes32, truncateAddress } from 'common-util/functions';
+import { updateLeaderboardUser } from 'store/setup';
 import { LeaderboardUser } from 'store/types';
 import { GOVERN_APP_URL, OPERATE_APP_URL, STAKING_CONTRACTS_DETAILS } from 'util/constants';
 import { useReadStakingContract, useServiceInfo } from 'util/staking';
@@ -96,20 +98,25 @@ const StakingContractOption = ({ contract }: StakingContractOptionProps) => {
   );
 };
 
+type SetUpAndStakeProps = {
+  disabled: boolean;
+  twitterId: string | null;
+  multisigAddress: string | null;
+  attributeId: number | null;
+  onNextStep: () => void;
+};
 const SetUpAndStake = ({
   disabled,
   twitterId,
   multisigAddress,
+  attributeId,
   onNextStep,
-}: {
-  disabled: boolean;
-  twitterId: string | null;
-  multisigAddress: string | null;
-  onNextStep: () => void;
-}) => {
+}: SetUpAndStakeProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const [contract, setContract] = useState<Address | null>(null);
   const [multisig, setMultisig] = useState(multisigAddress);
+
+  const dispatch = useDispatch();
 
   const { chainId, address: account } = useAccount();
   const { switchChainAsync, switchChain } = useSwitchChain();
@@ -132,16 +139,27 @@ const SetUpAndStake = ({
   }, [serviceInfo]);
 
   useEffect(() => {
-    // In case the service info wasn't written to Ceramic, but the service was created,
+    // In case the service info wasn't written to DB, but the service was created,
     // try writing it again
-    if (serviceInfo && !areAddressesEqual(serviceInfo.multisig, ZeroAddress) && !multisigAddress) {
-      updateUserStakingData(twitterId, serviceInfo.multisig, `${serviceInfo.serviceId}`).then(
-        () => {
-          setMultisig(serviceInfo.multisig);
-        },
-      );
+    if (
+      attributeId &&
+      serviceInfo &&
+      !areAddressesEqual(serviceInfo.multisig, ZeroAddress) &&
+      !multisigAddress
+    ) {
+      updateUserStakingData({
+        attributeId,
+        multisig: serviceInfo.multisig,
+        serviceId: Number(serviceInfo.serviceId),
+      }).then((updatedAgent) => {
+        if (updatedAgent) {
+          dispatch(updateLeaderboardUser(updatedAgent));
+        }
+
+        setMultisig(serviceInfo.multisig);
+      });
     }
-  }, [serviceInfo, multisigAddress, twitterId]);
+  }, [serviceInfo, multisigAddress, twitterId, attributeId, dispatch]);
 
   const handleSelectContract = (e: RadioChangeEvent) => {
     setContract(e.target.value);
@@ -151,6 +169,7 @@ const SetUpAndStake = ({
     if (!account) return;
     if (!contract) return;
     if (!twitterId) return;
+    if (!attributeId) return;
 
     const selectedContract = STAKING_CONTRACTS_DETAILS[contract];
 
@@ -213,8 +232,11 @@ const SetUpAndStake = ({
       // get multisig address from event topics
       const multisig = getAddressFromBytes32(createdAndStakedEvent.topics[3] as string);
 
-      // write multisig and serviceId to Ceramic
-      await updateUserStakingData(twitterId, multisig, `${serviceId}`);
+      // write multisig and serviceId to agent DB
+      const updatedAgent = await updateUserStakingData({ attributeId, multisig, serviceId });
+      if (updatedAgent) {
+        dispatch(updateLeaderboardUser(updatedAgent));
+      }
 
       setMultisig(multisig);
       onNextStep();
@@ -377,6 +399,7 @@ export const StakingStepper = ({ profile }: { profile: LeaderboardUser | null })
                   }
                   twitterId={profile?.twitter_id || null}
                   multisigAddress={profile?.service_multisig || null}
+                  attributeId={profile?.attribute_id || null}
                   onNextStep={handleNext}
                 />
               ),

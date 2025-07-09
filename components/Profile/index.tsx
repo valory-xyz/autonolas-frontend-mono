@@ -79,10 +79,6 @@ const ProfileBody: React.FC<ProfileBodyProps> = ({ profile, tweets, id }) => {
     getData();
   }, [profile?.wallet_address]);
 
-  useEffect(() => {
-    updateUserStakingData('twitterId', 'multisig', `${1}`);
-  }, []);
-
   const getTwitterHandle = () => {
     if (profile?.twitter_handle) {
       return <Text type="secondary">{profile.twitter_handle}</Text>;

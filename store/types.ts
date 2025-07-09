@@ -3,7 +3,8 @@ import { ContributeTweet } from 'types/tweets';
 import { ContributeAgent } from 'types/users';
 
 export type LeaderboardUser = ContributeAgent['json_value'] & {
-  rank: number;
+  attribute_id: number;
+  rank: number | null;
 };
 
 export type Tweet = ContributeTweet['json_value'];

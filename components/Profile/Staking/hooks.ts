@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { useDispatch } from 'react-redux';
 import { Address } from 'viem';
 import { base, mainnet } from 'viem/chains';
 import { useAccount, useReadContract, useSwitchChain } from 'wagmi';
@@ -10,6 +11,7 @@ import {
   SERVICE_REGISTRY_L2_ADDRESS_BASE,
 } from 'common-util/AbiAndAddresses';
 import { clearUserOldStakingData } from 'common-util/api';
+import { updateLeaderboardUser } from 'store/setup';
 import { LeaderboardUser } from 'store/types';
 import { DEPRECATED_CONTRACTS_ADDRESSES } from 'util/constants';
 
@@ -68,6 +70,7 @@ export const useRestake = ({ contractAddress }: UseRestakeParams) => {
  * and clear old values in order to not to show the alert message
  */
 export const useUpdateProfileIfOldServiceTerminated = (profile?: LeaderboardUser) => {
+  const dispatch = useDispatch();
   const oldStakingDataCleared = useRef(false);
 
   const { data: isTerminated } = useReadContract({
@@ -91,9 +94,13 @@ export const useUpdateProfileIfOldServiceTerminated = (profile?: LeaderboardUser
     if (oldStakingDataCleared.current) return;
 
     if (isTerminated) {
-      clearUserOldStakingData(profile.twitter_id).then(() => {
+      clearUserOldStakingData(profile.attribute_id).then((updatedAgent) => {
+        if (updatedAgent) {
+          dispatch(updateLeaderboardUser(updatedAgent));
+        }
+
         oldStakingDataCleared.current = true;
       });
     }
-  }, [isTerminated, profile]);
+  }, [dispatch, isTerminated, profile]);
 };

@@ -8,6 +8,8 @@ export type ContributeAgent = {
   float_value: null;
   boolean_value: null;
   date_value: null;
+  attribute_id: number;
+  last_updated: string;
   json_value: {
     id: number;
     points: number;
@@ -21,7 +23,6 @@ export type ContributeAgent = {
     wallet_address: Address;
     service_multisig: string | null;
     current_period_points: number;
-    rank: number;
     service_id_old: string | null; // old broken service id
     service_multisig_old: string | null; // old broken multisig id
     attribute_instance_id: null;

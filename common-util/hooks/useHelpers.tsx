@@ -17,7 +17,7 @@ export const useHelpers = () => {
    */
   const currentChainId = getChainId();
   useEffect(() => {
-    if (currentChainId !== chainId) {
+    if (currentChainId && currentChainId !== chainId) {
       dispatch(setChainId(currentChainId));
     }
   }, [currentChainId, chainId, dispatch]);

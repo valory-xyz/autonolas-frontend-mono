@@ -92,3 +92,5 @@ export const formatDate = (timeInMs: number) => {
     timeStyle: 'long',
   }).format(new Date(timeInMs));
 };
+
+export const getNowTimestamp = () => Math.round(Date.now() / 1000);

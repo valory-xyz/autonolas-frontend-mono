@@ -2,13 +2,16 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 
 import { ContributeTweet } from 'types/tweets';
 
+// TODO: Update this once we point to prod.
 const AGENT_TYPE = 1;
 const ATTRIBUTE_TYPE_ID = 1;
+
 const LIMIT = 1000;
 
 const BASE_URL = `${process.env.NEXT_PUBLIC_AFMDB_URL}/api/agent-types/${AGENT_TYPE}/attributes/${ATTRIBUTE_TYPE_ID}/values`;
+const ERROR_MESSAGE = 'Failed to fetch tweets.';
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+export default async function handler(_req: NextApiRequest, res: NextApiResponse) {
   let skip = 0;
   let allResults: ContributeTweet[] = [];
 
@@ -19,7 +22,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       const response = await fetch(url);
 
       if (!response.ok) {
-        return res.status(response.status).json({ error: 'Failed to fetch tweets' });
+        return res.status(response.status).json({ error: ERROR_MESSAGE });
       }
 
       const pageData = await response.json();
@@ -36,6 +39,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     res.status(200).json(allResults);
   } catch (error) {
-    res.status(500).json({ error: 'Failed to fetch tweets.', details: error });
+    res.status(500).json({ error: ERROR_MESSAGE, details: error });
   }
 }

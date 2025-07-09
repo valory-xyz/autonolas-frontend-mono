@@ -5,6 +5,7 @@ export const getTweetsList = async () => {
   const json: ContributeTweet[] = await response.json();
   const tweetsList: ContributeTweet['json_value'][] = [];
 
+  // TODO: consider convenient mapping right inside the api endpoint
   if (json && Array.isArray(json)) {
     json.forEach((tweet) => {
       tweetsList.push(tweet.json_value);

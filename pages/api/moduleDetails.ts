@@ -8,19 +8,19 @@ const ATTRIBUTE_TYPE_ID = 4;
 
 const BASE_URL = `${process.env.NEXT_PUBLIC_AFMDB_URL}/api/agent-types/${AGENT_TYPE}/attributes/${ATTRIBUTE_TYPE_ID}/values`;
 
-const errorMessage = 'Failed to fetch module details.';
+const ERROR_MESSAGE = 'Failed to fetch module details.';
 
 export default async function handler(_req: NextApiRequest, res: NextApiResponse) {
   try {
     const response = await fetch(BASE_URL);
 
     if (!response.ok) {
-      return res.status(response.status).json({ error: errorMessage });
+      return res.status(response.status).json({ error: ERROR_MESSAGE });
     }
 
     const data: ContributeModuleDetails = await response.json();
     res.status(200).json(data);
   } catch (error) {
-    res.status(500).json({ error: errorMessage, details: error });
+    res.status(500).json({ error: ERROR_MESSAGE, details: error });
   }
 }

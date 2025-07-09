@@ -54,7 +54,8 @@ export const Layout = ({ children }: { children: React.ReactNode }) => {
         dispatch(setIsMemoryDetailsLoading(true));
 
         const { response } = await getMemoryDetails();
-        dispatch(setMemoryDetails(response));
+        // TODO: to be updated with Ceramic migration
+        dispatch(setMemoryDetails(response as any));
       } catch (error) {
         notifyError('Error fetching members');
       } finally {
