@@ -39,7 +39,7 @@ type Campaign = {
   proposer: Proposer;
 };
 
-type ScheduledTweet = {
+export type ScheduledTweet = {
   // Could be a tweet or thread
   text: string | string[];
   posted: boolean;
@@ -53,6 +53,7 @@ type ScheduledTweet = {
 };
 
 export type ContributeModuleDetails = {
+  // TODO: Update this once we point to prod.
   agent_id: 1;
   attr_def_id: 4;
   string_value: null;

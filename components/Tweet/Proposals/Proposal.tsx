@@ -12,10 +12,10 @@ import { NA, notifyError, notifySuccess } from '@autonolas/frontend-library';
 import { DisplayName } from 'common-util/DisplayName';
 import { getCurrentProposalInfo } from 'common-util/functions/proposal';
 import { useHelpers } from 'common-util/hooks/useHelpers';
+import { useModuleUtilities } from 'common-util/hooks/useModuleUtilities';
 import type { ModuleDetails } from 'store/types';
 import { VEOLAS_QUORUM } from 'util/constants';
 
-import { useCentaursFunctionalities } from '../../CoOrdinate/Centaur/hooks';
 import { fetchVotingPower } from '../../MembersList/requests';
 import { getFirstTenCharsOfTweet } from '../utils';
 import { ApproveStep } from './ApproveStep';
@@ -33,12 +33,7 @@ export const Proposal = ({ proposal }: { proposal: Proposal }) => {
 
   const { signMessageAsync } = useSignMessage();
   const { account, isStaging } = useHelpers();
-  const {
-    fetchUpdatedMemory,
-    updateMemoryWithNewCentaur,
-    currentMemoryDetails: centaur,
-    triggerAction,
-  } = useCentaursFunctionalities();
+  const { submitApprovedOrExecutedPost } = useModuleUtilities();
 
   const { isQuorumAchieved, votersAddress, isProposalVerified } = getCurrentProposalInfo(proposal);
   const hasVoted = votersAddress?.includes(account as Address) ?? false;
@@ -86,30 +81,10 @@ export const Proposal = ({ proposal }: { proposal: Proposal }) => {
       };
       const updatedProposal = cloneDeep(proposal);
       const updatedVotersWithVeOlas = [...(proposal.voters || []), vote];
-      // TODO: Update all the write methods (set, update memory, etc) here with the new DB methods
       set(updatedProposal, 'voters', updatedVotersWithVeOlas);
 
-      const updatedTweets = centaur?.plugins_data?.scheduled_tweet?.tweets?.map(
-        (tweet: Proposal) => (tweet.request_id === proposal.request_id ? updatedProposal : tweet),
-      );
-
-      // Update centaur with updated tweets
-      const updatedCentaur = cloneDeep(centaur);
-      set(updatedCentaur, 'plugins_data.scheduled_tweet.tweets', updatedTweets);
-
-      const commitId = await updateMemoryWithNewCentaur(updatedCentaur);
+      await submitApprovedOrExecutedPost(updatedProposal);
       notifySuccess('Proposal approved');
-
-      // Add voting action to the centaur
-      const action = {
-        actorAddress: account,
-        commitId,
-        description: 'approved a proposal',
-        timestamp: Date.now(),
-      };
-
-      const updateMemoryDetailsList = await fetchUpdatedMemory();
-      await triggerAction(centaur.id, action, updateMemoryDetailsList);
     } catch (error) {
       notifyError('Failed to approve proposal');
       console.error(error);
@@ -140,31 +115,11 @@ export const Proposal = ({ proposal }: { proposal: Proposal }) => {
         { id: uuid(), dateCreated: Date.now(), verified: null },
       ];
 
-      // TODO: update write methods
       const updatedProposal = cloneDeep(proposal);
       set(updatedProposal, 'executionAttempts', executionAttempts);
 
-      const updatedTweets = centaur?.plugins_data?.scheduled_tweet?.tweets?.map(
-        (tweet: Proposal) =>
-          tweet.request_id === updatedProposal.request_id ? updatedProposal : tweet,
-      );
-
-      // Update centaur with updated tweets
-      const updatedCentaur = cloneDeep(centaur);
-      set(updatedCentaur, 'plugins_data.scheduled_tweet.tweets', updatedTweets);
-
-      const commitId = await updateMemoryWithNewCentaur(updatedCentaur);
+      await submitApprovedOrExecutedPost(updatedProposal);
       notifySuccess('Proposal executed');
-
-      // Add voting action to the centaur
-      const action = {
-        actorAddress: account,
-        commitId,
-        description: 'executed a proposal',
-        timestamp: Date.now(),
-      };
-      const updateMemoryDetailsList = await fetchUpdatedMemory();
-      await triggerAction(centaur.id, action, updateMemoryDetailsList);
     } catch (error) {
       notifyError('Failed to execute');
       console.error(error);

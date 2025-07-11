@@ -1,6 +1,6 @@
 import { PayloadAction, createSlice } from '@reduxjs/toolkit';
 import { lowerCase, orderBy } from 'lodash';
-import { TypedUseSelectorHook, useDispatch, useSelector } from 'react-redux';
+import { TypedUseSelectorHook, useSelector } from 'react-redux';
 
 import { getName } from 'common-util/functions';
 import { ContributeAgent } from 'types/users';
@@ -24,6 +24,7 @@ type SetupState = {
   // module details
   isModuleDetailsLoading: boolean;
   moduleDetails: ModuleDetails | null;
+  moduleDetailsAttributeId: number | null;
 
   // TODO: below to be removed
   nftDetails: any | null;
@@ -55,6 +56,7 @@ const initialState: SetupState = {
   // module details
   isModuleDetailsLoading: false,
   moduleDetails: null,
+  moduleDetailsAttributeId: null,
 
   // nft details
   nftDetails: null,
@@ -152,6 +154,12 @@ export const setupSlice = createSlice({
     setModuleDetails: (state, action: PayloadAction<SetupState['moduleDetails']>) => {
       state.moduleDetails = action.payload;
     },
+    setModuleDetailsAttributeId: (
+      state,
+      action: PayloadAction<SetupState['moduleDetailsAttributeId']>,
+    ) => {
+      state.moduleDetailsAttributeId = action.payload;
+    },
     setNftDetails: (state, action: PayloadAction<SetupState['nftDetails']>) => {
       state.nftDetails = action.payload;
     },
@@ -195,6 +203,7 @@ export const {
   setTweets,
   setIsModuleDetailsLoading,
   setModuleDetails,
+  setModuleDetailsAttributeId,
   setNftDetails,
   setIsMemoryDetailsLoading,
   setMemoryDetails,

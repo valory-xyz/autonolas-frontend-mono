@@ -10,6 +10,7 @@ import {
   setIsTweetsLoading,
   setLeaderboard,
   setModuleDetails,
+  setModuleDetailsAttributeId,
   setTweets,
 } from 'store/setup';
 
@@ -46,8 +47,9 @@ export const useFetchApplicationData = () => {
   const fetchModuleDetails = useCallback(async () => {
     try {
       dispatch(setIsModuleDetailsLoading(true));
-      const moduleDetails = await getModuleDetails();
+      const { moduleDetails, attributeId } = await getModuleDetails();
       dispatch(setModuleDetails(moduleDetails));
+      dispatch(setModuleDetailsAttributeId(attributeId));
     } catch (error) {
       console.error(error);
     } finally {

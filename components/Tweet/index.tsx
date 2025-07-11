@@ -2,15 +2,16 @@ import { PlusCircleOutlined } from '@ant-design/icons';
 import { Button, Col, Input, Row, Typography } from 'antd';
 import { useCallback, useState } from 'react';
 import { v4 as uuid } from 'uuid';
+import { Address } from 'viem';
 import { useSignMessage } from 'wagmi';
 
 import { notifyError, notifySuccess } from '@autonolas/frontend-library';
 
 import { EducationTitle } from 'common-util/Education/EducationTitle';
 import { useHelpers } from 'common-util/hooks/useHelpers';
+import { useModuleUtilities } from 'common-util/hooks/useModuleUtilities';
 import { HUNDRED_K_OLAS_IN_WEI, MAX_TWEET_IMAGES, MAX_TWEET_LENGTH } from 'util/constants';
 
-import { useCentaursFunctionalities } from '../CoOrdinate/Centaur/hooks';
 import { checkVotingPower } from '../MembersList/requests';
 import MediaList from './MediaList';
 import { Proposals } from './Proposals';
@@ -35,14 +36,8 @@ export type TweetOrThread = {
 export const TweetPropose = () => {
   const { signMessageAsync } = useSignMessage();
   const { isStaging, account } = useHelpers();
-  const {
-    currentMemoryDetails,
-    getUpdatedCentaurAfterTweetProposal,
-    updateMemoryWithNewCentaur,
-    triggerAction,
-    fetchUpdatedMemory,
-  } = useCentaursFunctionalities();
 
+  const { submitPostProposal } = useModuleUtilities();
   const [tweet, setTweet] = useState('');
   const [media, setMedia] = useState<TweetOrThread['media']>([]);
 
@@ -74,28 +69,13 @@ export const TweetPropose = () => {
         text: tweetOrThread.text,
         media_hashes: mediaHashes,
         posted: false,
-        proposer: { address: account, signature, verified: null },
+        proposer: { address: account as Address, signature, verified: false },
         voters: [], // initially no votes
         executionAttempts: [], // initially no execution attempts
         action_id: '',
       };
 
-      const updatedCentaur = getUpdatedCentaurAfterTweetProposal(tweetDetails);
-
-      // Update the Ceramic stream
-      const commitId = await updateMemoryWithNewCentaur(updatedCentaur);
-
-      // Add action to the centaur
-      const action = {
-        actorAddress: account,
-        commitId,
-        description: 'proposed a post',
-        timestamp: Date.now(),
-      };
-
-      const updatedMemoryDetails = await fetchUpdatedMemory();
-
-      await triggerAction(currentMemoryDetails.id, action, updatedMemoryDetails);
+      await submitPostProposal(tweetDetails);
       notifySuccess('Post proposed');
 
       // reset form

@@ -1,6 +1,6 @@
-import { Wallet } from 'ethers';
 import type { NextApiRequest, NextApiResponse } from 'next';
 
+import { getSignature } from 'common-util/apiRoute';
 import { getNowTimestamp } from 'common-util/functions/time';
 import { ContributeAgent } from 'types/users';
 
@@ -49,11 +49,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const agent: ContributeAgent = await agentResponse.json();
 
     // Create a signature for updating the data
-    const privateKey = process.env.AGENT_DB_KEY;
-    if (!privateKey) throw new Error('Missing AGENT_DB_KEY');
-    const wallet = new Wallet(privateKey);
     const message = `timestamp:${getNowTimestamp()},endpoint:${ENDPOINT_URL}/${attributeId}`;
-    const signature = await wallet.signMessage(message);
+    const signature = await getSignature(message);
 
     // Send update to database
     const response = await fetch(`${BASE_URL}/${attributeId}`, {

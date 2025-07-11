@@ -1,4 +1,5 @@
-import { ContributeTweet } from 'types/tweets';
+import type { ContributeModuleDetails, ScheduledTweet } from 'types/moduleDetails';
+import type { ContributeTweet } from 'types/tweets';
 
 export const getTweetsList = async () => {
   const response = await fetch('/api/tweets');
@@ -13,4 +14,34 @@ export const getTweetsList = async () => {
   }
 
   return tweetsList;
+};
+
+export const proposePost = async (
+  post: ScheduledTweet,
+  attributeId: number,
+): Promise<ContributeModuleDetails> => {
+  const response = await fetch('/api/post', {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ post, attributeId, isPostProposal: true }),
+  });
+
+  return await response.json();
+};
+
+export const approveOrExecutePost = async (
+  post: ScheduledTweet,
+  attributeId: number,
+): Promise<ContributeModuleDetails> => {
+  const response = await fetch('/api/post', {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ post, attributeId, isPostProposal: false }),
+  });
+
+  return await response.json();
 };
