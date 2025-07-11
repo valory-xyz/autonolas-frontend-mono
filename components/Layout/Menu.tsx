@@ -1,8 +1,6 @@
 import { MenuOutlined } from '@ant-design/icons';
 import {
-  CalendarOutlined,
   FileTextOutlined, // MessageOutlined,
-  NodeIndexOutlined,
   NotificationOutlined, // RobotOutlined,
   // StarOutlined,
   TrophyOutlined,
@@ -22,8 +20,6 @@ const menuItems = [
   // { key: 'members', label: 'Members', icon: <UserOutlined /> },
   // { key: 'chat', label: 'Chat', icon: <MessageOutlined /> },
   // { key: 'predict', label: 'Predict', icon: <StarOutlined /> },
-  { key: 'roadmap', label: 'Roadmap', icon: <NodeIndexOutlined /> },
-  { key: 'calendar', label: 'Calendar', icon: <CalendarOutlined /> },
   // { key: 'chatbot', label: 'Chatbot', icon: <RobotOutlined /> },
   { key: 'docs', label: 'Docs', icon: <FileTextOutlined /> },
 ];

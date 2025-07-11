@@ -56,17 +56,5 @@
     "id": "9dcd5c61-cc48-45e9-b393-88977f8cec17",
     "component": "proposals",
     "text": "Members can vote to approve or reject post proposals. Approved posts are automatically posted by an Olas-powered service."
-  },
-  {
-    "id": "697e205d-e9cc-4a4b-a553-21fc53215062",
-    "component": "calendar",
-    "text": "Learn about upcoming Olas events.",
-    "docsLink": "#calendar"
-  },
-  {
-    "id": "d9b82344-c8fd-4eae-8aba-112bed020314",
-    "component": "roadmap",
-    "text": "Find out what Olas is working on.",
-    "docsLink": "#roadmap"
   }
 ]

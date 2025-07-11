@@ -4,13 +4,11 @@ import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 
 import { ActionsDocs } from './content/Actions';
-import { Calendar } from './content/Calendar';
 import { HowItWorks } from './content/HowItWorks';
 // import { Badge } from './content/3_Badge';
 import { Leaderboard } from './content/Leaderboard';
 import { Overview } from './content/Overview';
 import { Proposals } from './content/Proposals';
-import { Roadmap } from './content/Roadmap';
 // import { Members } from './content/Members';
 // import { Chatbot } from './content/Chatbot';
 // import { Memory } from './content/Memory';
@@ -73,8 +71,6 @@ export const Documentation = () => {
           {/* <Predict /> */}
           <Proposals />
           <HowItWorks />
-          <Roadmap />
-          <Calendar />
         </div>
       </DocSection>
       <br />
