@@ -1,0 +1,9 @@
+{
+    "$schema": "https://openapi.vercel.sh/vercel.json",
+    "cache": [
+        "**/.next/cache",
+        "node_modules",
+        ".nx/cache"
+    ]
+}
+  
