@@ -1,3 +1,7 @@
+//@ts-check
+
+const { composePlugins, withNx } = require('@nx/next');
+
 const securityHeaders = [
   {
     key: 'Content-Security-Policy',
@@ -17,8 +21,10 @@ const securityHeaders = [
   },
 ];
 
-/** @type {import('next').NextConfig} */
-const NextConfig = {
+/**
+ * @type {import('@nx/next/plugins/with-nx').WithNxOptions}
+ **/
+const nextConfig = {
   i18n: {
     locales: ['en'],
     defaultLocale: 'en',
@@ -72,4 +78,10 @@ const NextConfig = {
     ];
   },
 };
-module.exports = NextConfig;
+
+const plugins = [
+  // Add more Next.js plugins to this list if needed.
+  withNx,
+];
+
+module.exports = composePlugins(...plugins)(nextConfig);

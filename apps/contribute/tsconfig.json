@@ -1,73 +1,32 @@
 {
-  "compileOnSave": false,
+  "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    // Temporarily allow JS until all is migrated
-    "allowJs": true,
-    "checkJs": false,
-    // Same settings as in mono repo
-    "rootDir": ".",
-    "sourceMap": true,
-    "declaration": false,
-    "moduleResolution": "node",
-    "emitDecoratorMetadata": true,
-    "experimentalDecorators": true,
-    "importHelpers": true,
-    "target": "es2020",
-    "module": "esnext",
-    "lib": [
-      "dom",
-      "es2020"
-    ],
-    "skipLibCheck": true,
-    "skipDefaultLibCheck": true,
-    "baseUrl": ".",
-    "allowSyntheticDefaultImports": true,
     "jsx": "preserve",
-    "strict": true,
-    "noImplicitAny": true,
-    "noImplicitReturns": true,
-    "noImplicitThis": true,
-    "resolveJsonModule": true,
+    "allowJs": true,
     "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "strict": true,
     "forceConsistentCasingInFileNames": true,
-    "noFallthroughCasesInSwitch": true,
-    "strictNullChecks": true,
-    // repo specific settings
-    "paths": {
-      "common-util/*": [
-        "./common-util/*"
-      ],
-      "context/*": [
-        "./context/*"
-      ],
-      "components/*": [
-        "./components/*"
-      ],
-      "util/*": [
-        "./util/*"
-      ],
-      "images/*": [
-        "./public/images/*"
-      ],
-      "store/*": [
-        "./store/*"
-      ],
-      "types/*": [
-        "./types/*"
-      ]
-    },
     "noEmit": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
     "incremental": true,
-    "isolatedModules": true
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ],
+    "types": ["jest", "node", "react", "react-dom"],
+    "paths": {
+      "common-util/*": ["apps/contribute/common-util/*"],
+      "context/*": ["apps/contribute/context/*"],
+      "components/*": ["apps/contribute/components/*"],
+      "util/*": ["apps/contribute/util/*"],
+      "images/*": ["apps/contribute/public/images/*"],
+      "store/*": ["apps/contribute/store/*"],
+      "types": ["apps/contribute/types"]
+    }
   },
-  "exclude": [
-    "node_modules",
-    "dist"
-  ],
-  "include": [
-    "next-env.d.ts",
-    "**/*.ts",
-    "**/*.tsx",
-    "common-util/functions/index.js"
-  ]
+  "include": ["**/*.ts", "**/*.tsx", "**/*.js", "**/*.jsx", "next-env.d.ts"],
+  "exclude": ["node_modules", "jest.config.ts", "src/**/*.spec.ts", "src/**/*.test.ts"]
 }
