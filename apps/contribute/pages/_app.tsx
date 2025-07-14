@@ -11,7 +11,7 @@ import { COLOR } from '@autonolas/frontend-library';
 
 /* eslint-disable-line import/no-unresolved */
 import { wagmiConfig } from 'common-util/Login/config';
-import Meta from 'common-util/meta';
+import Meta from 'components/meta';
 
 /** antd theme config */
 import GlobalStyle from 'components/GlobalStyles';

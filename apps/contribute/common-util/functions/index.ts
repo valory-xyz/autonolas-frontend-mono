@@ -15,7 +15,7 @@ import {
 } from '@autonolas/frontend-library';
 
 import { RPC_URLS } from 'common-util/Contracts';
-import data from 'common-util/Education/data.json';
+import data from 'components/Education/data.json';
 import { SUPPORTED_CHAINS } from 'common-util/Login/config';
 
 import prohibitedAddresses from '../../data/prohibited-addresses.json';

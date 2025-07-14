@@ -8,7 +8,7 @@ import { isGoerli } from '@autonolas/frontend-library';
 
 import { useAppSelector } from 'store/setup';
 
-import { getAutonolasTokenUri } from '../components/Leaderboard/MintNft/utils';
+import { getAutonolasTokenUri } from './Leaderboard/MintNft/utils';
 
 const IMAGE_SIZE = 160;
 const { Text } = Typography;

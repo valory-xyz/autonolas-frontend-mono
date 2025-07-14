@@ -7,7 +7,7 @@ import { useSignMessage } from 'wagmi';
 
 import { notifyError, notifySuccess } from '@autonolas/frontend-library';
 
-import { EducationTitle } from 'common-util/Education/EducationTitle';
+import { EducationTitle } from 'components/Education/EducationTitle';
 import { useHelpers } from 'common-util/hooks/useHelpers';
 import { useModuleUtilities } from 'common-util/hooks/useModuleUtilities';
 import { HUNDRED_K_OLAS_IN_WEI, MAX_TWEET_IMAGES, MAX_TWEET_LENGTH } from 'util/constants';

@@ -24,7 +24,7 @@
       "util/*": ["apps/contribute/util/*"],
       "images/*": ["apps/contribute/public/images/*"],
       "store/*": ["apps/contribute/store/*"],
-      "types": ["apps/contribute/types"]
+      "types/*": ["apps/contribute/types/*"]
     }
   },
   "include": ["**/*.ts", "**/*.tsx", "**/*.js", "**/*.jsx", "next-env.d.ts"],

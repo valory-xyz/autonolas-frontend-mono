@@ -2,7 +2,7 @@ import { Tooltip } from 'antd';
 import PropTypes from 'prop-types';
 import React from 'react';
 
-import { truncateAddress } from './functions';
+import { truncateAddress } from '../common-util/functions';
 
 function TruncatedEthereumLink({
   text,

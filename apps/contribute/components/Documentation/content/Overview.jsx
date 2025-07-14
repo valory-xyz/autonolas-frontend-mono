@@ -1,6 +1,6 @@
 import { Typography } from 'antd';
 
-import educationItems from 'common-util/Education/data.json';
+import educationItems from 'components/Education/data.json';
 
 import { DOCS_SECTIONS } from '../helpers';
 

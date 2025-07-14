@@ -2,7 +2,7 @@ import { Card, Table } from 'antd';
 import { ColumnsType } from 'antd/es/table';
 import Link from 'next/link';
 
-import { EducationTitle } from 'common-util/Education/EducationTitle';
+import { EducationTitle } from 'components/Education/EducationTitle';
 import { getName } from 'common-util/functions';
 import { useAppSelector } from 'store/setup';
 import { LeaderboardUser } from 'store/types';

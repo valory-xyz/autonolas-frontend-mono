@@ -1,6 +1,6 @@
 import { Alert, Card, List, Skeleton } from 'antd';
 
-import { EducationTitle } from 'common-util/Education/EducationTitle';
+import { EducationTitle } from 'components/Education/EducationTitle';
 import { useAppSelector } from 'store/setup';
 
 import { Proposal } from './Proposal';

@@ -3,8 +3,8 @@ import get from 'lodash/get';
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
-import { EducationTitle } from 'common-util/Education/EducationTitle';
-import { BadgeLoading, ShowBadge } from 'common-util/ShowBadge';
+import { EducationTitle } from 'components/Education/EducationTitle';
+import { BadgeLoading, ShowBadge } from 'components/ShowBadge';
 import { getLatestMintedNft } from 'common-util/api';
 import { setNftDetails, useAppSelector } from 'store/setup';
 
