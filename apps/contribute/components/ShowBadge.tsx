@@ -14,7 +14,7 @@ const { Text } = Typography;
 
 type ShowBadgeProps = {
   image: string;
-  tokenId: string;
+  tokenId: string | null;
 };
 
 export const ShowBadge = ({ image, tokenId }: ShowBadgeProps) => {
@@ -47,10 +47,6 @@ export const ShowBadge = ({ image, tokenId }: ShowBadgeProps) => {
       )}
     </>
   );
-};
-
-ShowBadge.defaultProps = {
-  tokenId: null,
 };
 
 /**
