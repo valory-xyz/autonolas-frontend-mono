@@ -1,7 +1,6 @@
 import { LinkOutlined } from '@ant-design/icons';
 import { Skeleton, Typography } from 'antd';
 import Image from 'next/image';
-import PropTypes from 'prop-types';
 import styled from 'styled-components';
 
 import { isGoerli } from '@autonolas/frontend-library';
@@ -13,7 +12,12 @@ import { getAutonolasTokenUri } from './Leaderboard/MintNft/utils';
 const IMAGE_SIZE = 160;
 const { Text } = Typography;
 
-export const ShowBadge = ({ image, tokenId }: { image: string; tokenId: string }) => {
+type ShowBadgeProps = {
+  image: string;
+  tokenId: string;
+};
+
+export const ShowBadge = ({ image, tokenId }: ShowBadgeProps) => {
   const chainId = useAppSelector((state) => state?.setup?.chainId);
 
   if (chainId === null) {
@@ -43,11 +47,6 @@ export const ShowBadge = ({ image, tokenId }: { image: string; tokenId: string }
       )}
     </>
   );
-};
-
-ShowBadge.propTypes = {
-  image: PropTypes.string.isRequired,
-  tokenId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
 };
 
 ShowBadge.defaultProps = {

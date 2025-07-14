@@ -1,5 +1,4 @@
 import Head from 'next/head';
-import PropTypes from 'prop-types';
 import React from 'react';
 
 import { META_TAGS_INFO } from 'util/constants';
@@ -39,14 +38,6 @@ const Meta = ({ meta }: MetaProps) => {
       <meta property="twitter:image" content={metaInfo.image} key="twitter:image" />
     </Head>
   );
-};
-
-Meta.propTypes = {
-  meta: PropTypes.shape({}),
-};
-
-Meta.defaultProps = {
-  meta: null,
 };
 
 export default Meta;

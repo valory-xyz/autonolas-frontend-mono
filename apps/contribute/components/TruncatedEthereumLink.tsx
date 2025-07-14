@@ -1,13 +1,12 @@
 import { Tooltip } from 'antd';
-import PropTypes from 'prop-types';
 import React from 'react';
 
 import { truncateAddress } from '../common-util/functions';
 
 function TruncatedEthereumLink({
   text,
-  isTransaction,
-  className,
+  isTransaction = false,
+  className = '',
 }: {
   text: string;
   isTransaction: boolean;
@@ -23,16 +22,5 @@ function TruncatedEthereumLink({
     </Tooltip>
   );
 }
-
-TruncatedEthereumLink.propTypes = {
-  text: PropTypes.string.isRequired,
-  isTransaction: PropTypes.bool,
-  className: PropTypes.string,
-};
-
-TruncatedEthereumLink.defaultProps = {
-  isTransaction: false,
-  className: '',
-};
 
 export default TruncatedEthereumLink;

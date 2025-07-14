@@ -1,5 +1,4 @@
 import { ConfigProvider as AntdConfigProvider } from 'antd';
-import PropTypes from 'prop-types';
 import { useEffect, useState } from 'react';
 
 import { COLOR } from '@autonolas/frontend-library';
@@ -102,8 +101,4 @@ export const ThemeConfigProvider = ({ children }: { children: React.ReactNode })
   }, []);
 
   return <AntdConfigProvider theme={THEME_CONFIG}>{isMounted ? children : ''}</AntdConfigProvider>;
-};
-
-ThemeConfigProvider.propTypes = {
-  children: PropTypes.node.isRequired,
 };
