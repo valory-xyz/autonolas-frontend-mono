@@ -47,6 +47,11 @@ createWeb3Modal({
 const ContributeApp = ({ Component, pageProps }: AppProps) => {
   const initialState = cookieToInitialState(wagmiConfig);
 
+  /**
+   * Fixes hydration error caused by ServiceStatus component, 
+   * also, currently sidebar depends on a hook, 
+   * in future we can handle it using a custom request header.
+   */
   const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
