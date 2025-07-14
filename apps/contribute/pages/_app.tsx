@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import { ApolloProvider } from '@apollo/client';
 
 /** wagmi config */
@@ -14,9 +15,8 @@ import { wagmiConfig } from 'common-util/Login/config';
 import Meta from 'components/meta';
 
 /** antd theme config */
-import GlobalStyle from 'components/GlobalStyles';
+import { AutonolasThemeProvider, GlobalStyles } from 'libs/ui-theme/src';
 import { Layout } from 'components/Layout';
-import { ThemeConfigProvider } from 'context/ConfigProvider';
 
 import client from '../apolloClient';
 import { store } from '../store';
@@ -47,23 +47,31 @@ createWeb3Modal({
 const ContributeApp = ({ Component, pageProps }: AppProps) => {
   const initialState = cookieToInitialState(wagmiConfig);
 
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
   return (
     <>
-      <GlobalStyle />
+      <GlobalStyles />
       <Meta />
 
       <Provider store={store}>
-        <ThemeConfigProvider>
-          <WagmiProvider config={wagmiConfig} initialState={initialState}>
-            <QueryClientProvider client={queryClient}>
-              <ApolloProvider client={client}>
-                <Layout>
-                  <Component {...pageProps} />
-                </Layout>
-              </ApolloProvider>
-            </QueryClientProvider>
-          </WagmiProvider>
-        </ThemeConfigProvider>
+        <AutonolasThemeProvider>
+          {isMounted && (
+            <WagmiProvider config={wagmiConfig} initialState={initialState}>
+              <QueryClientProvider client={queryClient}>
+                <ApolloProvider client={client}>
+                  <Layout>
+                    <Component {...pageProps} />
+                  </Layout>
+                </ApolloProvider>
+              </QueryClientProvider>
+            </WagmiProvider>
+          )}
+        </AutonolasThemeProvider>
       </Provider>
     </>
   );

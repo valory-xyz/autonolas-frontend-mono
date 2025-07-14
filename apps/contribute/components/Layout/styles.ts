@@ -11,6 +11,63 @@ export const CustomLayout = styled(Layout)<{ $isBannerVisible: boolean; $isPadde
   --header-height: 64px;
   --banner-height: 56px;
 
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    margin-top: 0;
+  }
+
+  .border-bottom {
+    border-bottom: 1px solid ${COLOR.BORDER_GREY};
+  }
+  .border-right {
+    border-left: 1px solid ${COLOR.BORDER_GREY};
+  }
+
+  .show-only-sm {
+    display: none;
+  }
+  .hide-only-sm {
+    display: initial;
+  }
+
+  /* title */
+  .custom-text-secondary {
+    display: inline-block;
+    max-width: 400px;
+    margin-bottom: 12px;
+    svg {
+      color: ${COLOR.BORDER_GREY};
+    }
+  }
+
+  /* hyperlinks */
+  a.ant-typography,
+  .ant-typography a {
+    color: ${COLOR.PRIMARY};
+    text-decoration: none;
+    &:hover,
+    &:active {
+      text-decoration: none;
+      color: #b972e8;
+    }
+  }
+
+  //Switch
+  .ant-switch {
+    // add right padding assuming a label is added to the right
+    margin-right: 4px;
+  }
+
+  .ant-notification {
+    .ant-notification-notice-message {
+      margin-bottom: 0 !important;
+    }
+  }
+
   ${MEDIA_QUERY.mobileL} {
     --header-height: 100px;
   }
