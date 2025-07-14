@@ -264,7 +264,7 @@ export const StakingDetails = ({ profile, tweets }: StakingDetailsProps) => {
         </InfoColumn>
         <InfoColumn title="OLAS rewards this epoch" isLoading={isStakingDetailsLoading}>
           {contractDetails && stakingDetails?.rewardsPerEpoch ? (
-            <Flex gap={8} wrap>
+            <Flex gap={8} wrap={'wrap'}>
               <Text className="font-weight-600">
                 {`${OLAS_UNICODE_SYMBOL}${stakingDetails.rewardsPerEpoch}`}
               </Text>
@@ -355,7 +355,7 @@ export const StakingDetails = ({ profile, tweets }: StakingDetailsProps) => {
         To be eligible to earn rewards, make the required number of posts each epoch and include at
         least one of the keywords from active campaigns.
       </Paragraph>
-      <Flex align="center" gap={8} wrap>
+      <Flex align="center" gap={8} wrap="wrap">
         <Link href="/leaderboard">Review active campaigns on Leaderboard</Link>
         <Text type="secondary">•</Text>
         <HowTweetsAreScoredModal />

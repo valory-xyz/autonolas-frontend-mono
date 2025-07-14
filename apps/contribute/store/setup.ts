@@ -27,7 +27,7 @@ type SetupState = {
   moduleDetailsAttributeId: number | null;
 
   // TODO: below to be removed
-  nftDetails: any | null;
+  nftDetails: { tokenId: string } | null;
 };
 
 const initialState: SetupState = {

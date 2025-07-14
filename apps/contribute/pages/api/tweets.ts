@@ -17,6 +17,7 @@ export default async function handler(_req: NextApiRequest, res: NextApiResponse
 
   try {
     // Request all the tweets by pages
+    // eslint-disable-next-line no-constant-condition
     while (true) {
       const url = `${BASE_URL}?skip=${skip}&limit=${LIMIT}`;
       const response = await fetch(url);

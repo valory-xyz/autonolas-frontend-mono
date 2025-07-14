@@ -1,7 +1,6 @@
-/* eslint-disable max-len */
-// @ts-nocheck // TODO: provide all types
+import type { NextRouter } from 'next/router';
 import { ethers } from 'ethers';
-import { isNil, lowerCase, toLower } from 'lodash';
+import { isNil, toLower } from 'lodash';
 import { Address } from 'viem';
 
 import {
@@ -14,11 +13,12 @@ import {
   sendTransaction as sendTransactionFn,
 } from '@autonolas/frontend-library';
 
-import { RPC_URLS } from 'common-util/Contracts';
+import { RPC_URLS } from 'libs/util-constants/src';
 import data from 'components/Education/data.json';
 import { SUPPORTED_CHAINS } from 'common-util/Login/config';
 
 import prohibitedAddresses from '../../data/prohibited-addresses.json';
+import { LeaderboardUser } from 'store/types';
 
 const getSupportedChains = () =>
   process.env.NEXT_PUBLIC_IS_CONNECTED_TO_LOCAL === 'true'
@@ -33,9 +33,10 @@ export const getProvider = () => getProviderFn(getSupportedChains(), RPC_URLS);
 
 export const getEthersProvider = () => getEthersProviderFn(getSupportedChains(), RPC_URLS);
 
-export const getIsValidChainId = (chainId) => getIsValidChainIdFn(getSupportedChains(), chainId);
+export const getIsValidChainId = (chainId: number) =>
+  getIsValidChainIdFn(getSupportedChains(), chainId);
 
-export const getChainIdOrDefaultToMainnet = (chainId) =>
+export const getChainIdOrDefaultToMainnet = (chainId: number) =>
   getChainIdOrDefaultToMainnetFn(getSupportedChains(), chainId);
 
 export const getChainId = (chainId = null) => {
@@ -45,7 +46,7 @@ export const getChainId = (chainId = null) => {
   return getChainIdFn(getSupportedChains(), chainId);
 };
 
-export const sendTransaction = (fn, account) =>
+export const sendTransaction = (fn: Parameters<typeof sendTransactionFn>[0], account: string) =>
   sendTransactionFn(fn, account, {
     supportedChains: getSupportedChains(),
     rpcUrls: RPC_URLS,
@@ -85,7 +86,7 @@ export const getName = (profile?: LeaderboardUser | null, address?: Address | st
  * input: router-path (for example, /components#my-components)
  * output: my-components
  */
-export const getHash = (router) => router?.asPath?.split('#')[1] || '';
+export const getHash = (router: NextRouter) => router?.asPath?.split('#')[1] || '';
 
 export const isDevOrStaging =
   process.env.NODE_ENV === 'development' || process.env.NODE_VERCEL_ENV === 'staging';

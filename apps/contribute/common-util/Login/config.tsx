@@ -3,7 +3,7 @@ import { cookieStorage, createConfig, createStorage, http } from 'wagmi';
 import { Chain, base, mainnet } from 'wagmi/chains';
 import { walletConnect } from 'wagmi/connectors';
 
-import { RPC_URLS } from 'common-util/Contracts';
+import { RPC_URLS } from 'libs/util-constants/src';
 import { SITE_DESCRIPTION, SITE_TITLE, SITE_URL } from 'util/constants';
 
 export const SUPPORTED_CHAINS: [Chain, ...Chain[]] = [mainnet, base];

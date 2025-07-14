@@ -77,7 +77,6 @@ const BurgerMenuButton = styled(Button)`
 export const NavDropdown = () => (
   <Dropdown
     menu={{
-      // @ts-ignore TODO: should be fixed when antd is updated
       items: navItems,
       selectedKeys: ['contribute'],
     }}

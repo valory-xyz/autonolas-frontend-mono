@@ -23,7 +23,7 @@ export const WrapperDiv = styled.div`
   }
 `;
 
-export const DocSection = styled.div`
+export const DocSection = styled.div<{ isMobile: boolean }>`
   display: flex;
   align-items: flex-start;
   .navigation-section {

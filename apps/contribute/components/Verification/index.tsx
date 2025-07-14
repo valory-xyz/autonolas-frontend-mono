@@ -3,12 +3,12 @@ import get from 'lodash/get';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
 
 import { notifyError, notifySuccess } from '@autonolas/frontend-library';
 
-import { setIsVerified } from 'store/setup';
+import { setIsVerified, useAppSelector } from 'store/setup';
 
 import { getAddressStatus } from '../Layout/utils';
 import Login from '../Login';
@@ -46,13 +46,13 @@ const VerificationMessage = () => (
 const Verification = () => {
   const [isVerifying, setIsVerifying] = useState(false);
   const [isWalletVerified, setIsWalletVerified] = useState(false);
-  const account = useSelector((state) => get(state, 'setup.account'));
+  const account = useAppSelector((state) => get(state, 'setup.account'));
   const dispatch = useDispatch();
   const router = useRouter();
 
-  const discordId = get(router, 'query.[discord-id]');
-  const linkExpiration = get(router, 'query.[link-expiration]');
-  const signature = get(router, 'query.[signature]');
+  const discordId = get(router, 'query.[discord-id]') as string;
+  const linkExpiration = Number(get(router, 'query.[link-expiration]'));
+  const signature = get(router, 'query.[signature]') as string;
 
   const isValidId = !!discordId;
 
@@ -132,6 +132,7 @@ const Verification = () => {
                 onClick={async () => {
                   setIsVerifying(true);
                   try {
+                    if (!account) return;
                     await verifyAddress(account, discordId);
                     setIsVerifying(false);
                     setIsWalletVerified(true);

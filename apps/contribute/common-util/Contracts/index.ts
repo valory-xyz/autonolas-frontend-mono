@@ -1,5 +1,4 @@
 import { Abi } from 'viem';
-import { base, goerli, mainnet } from 'viem/chains';
 import Web3 from 'web3';
 import { AbiItem } from 'web3-utils';
 
@@ -103,10 +102,4 @@ export const getContributorsContract = () => {
 export const getServiceRegistryL2Contract = () => {
   const contract = getContract(SERVICE_REGISTRY_L2_ABI, SERVICE_REGISTRY_L2_ADDRESS_BASE);
   return contract;
-};
-
-export const RPC_URLS: { [key: number]: string | undefined } = {
-  [mainnet.id]: process.env.NEXT_PUBLIC_MAINNET_URL,
-  [goerli.id]: process.env.NEXT_PUBLIC_GOERLI_URL,
-  [base.id]: process.env.NEXT_PUBLIC_BASE_URL,
 };

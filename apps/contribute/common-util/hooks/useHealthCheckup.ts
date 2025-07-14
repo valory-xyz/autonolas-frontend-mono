@@ -10,7 +10,7 @@ const fetchUrl = (URL: string) => fetch(URL).then((response) => response.json())
 export const useHealthCheckup = (
   apiEndpoint: string,
   pollingInterval: number,
-  pollingCallback: Function,
+  pollingCallback: () => Promise<void>,
 ) => {
   const [isServiceHealthy, setIsServiceHealthy] = useState(false);
 

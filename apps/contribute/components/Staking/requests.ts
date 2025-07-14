@@ -63,7 +63,7 @@ const hasSufficientOlasAllowanceForAddress = async ({
 /**
  * Approve Olas transfer to the provided address
  */
-// @ts-ignore TODO: fix code paths issues
+// @ts-expect-error TODO: fix code paths issues
 const approveOlasForAddress = async ({
   addressToApprove,
   amountToApprove,

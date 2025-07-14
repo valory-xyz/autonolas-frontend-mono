@@ -7,7 +7,7 @@ import { COLOR, MEDIA_QUERY, NA, areAddressesEqual } from '@autonolas/frontend-l
 
 import { BadgeLoading, ShowBadge } from 'components/ShowBadge';
 import TruncatedEthereumLink from 'components/TruncatedEthereumLink';
-import { getLatestMintedNft, updateUserStakingData } from 'common-util/api';
+import { getLatestMintedNft } from 'common-util/api';
 import { getName, getTier } from 'common-util/functions';
 import { useAppSelector } from 'store/setup';
 import { LeaderboardUser, Tweet } from 'store/types';

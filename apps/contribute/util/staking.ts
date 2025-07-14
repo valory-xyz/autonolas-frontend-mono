@@ -1,4 +1,4 @@
-import { useQuery, useQueryErrorResetBoundary } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { gql, request } from 'graphql-request';
 import { isNil, isNumber } from 'lodash';
 import { useMemo } from 'react';
@@ -61,7 +61,7 @@ export const useReadStakingContract = <
 ) => {
   // TODO: The return type is correct based on the functionName provided,
   // but for some reason the below code is red
-  // @ts-ignore
+  // @ts-expect-error TODO: fix this
   return useReadContract({
     address,
     abi: STAKING_TOKEN_ABI,

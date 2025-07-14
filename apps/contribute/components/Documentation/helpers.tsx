@@ -1,4 +1,3 @@
-import PropTypes from 'prop-types';
 import { useState } from 'react';
 
 import { WrapperDiv } from './styles';
@@ -24,11 +23,16 @@ export const DOC_NAV = [
   { id: DOCS_SECTIONS['how-it-works'], title: 'How It Works' },
 ];
 
+type NavWrapperProps = {
+  isMobile: boolean;
+  children: React.ReactNode;
+};
+
 /**
  * navigation wrapper
  */
-export const NavWrapper = ({ isMobile, children }) => {
-  const [isOpen, setOpen] = useState(null);
+export const NavWrapper = ({ isMobile, children }: NavWrapperProps) => {
+  const [isOpen, setOpen] = useState<boolean | null>(null);
   const handleOpen = () => {
     setOpen(!isOpen);
   };
@@ -39,7 +43,7 @@ export const NavWrapper = ({ isMobile, children }) => {
         <div
           className="text"
           role="button"
-          tabIndex="0"
+          tabIndex={0}
           onKeyDown={handleOpen}
           onClick={handleOpen}
         >
@@ -51,9 +55,4 @@ export const NavWrapper = ({ isMobile, children }) => {
   }
 
   return <>{children}</>;
-};
-
-NavWrapper.propTypes = {
-  isMobile: PropTypes.bool.isRequired,
-  children: PropTypes.oneOfType([PropTypes.element]).isRequired,
 };

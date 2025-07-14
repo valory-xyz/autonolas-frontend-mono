@@ -6,7 +6,7 @@ import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 
-import { LogoSvg } from 'common-util/SVGs/logo';
+import { LogoSvg } from 'components/SVGs/logo';
 import { useFetchApplicationData } from 'common-util/hooks/useFetchApplicationData';
 import Login from 'components/Login';
 import { setIsVerified, useAppSelector } from 'store/setup';

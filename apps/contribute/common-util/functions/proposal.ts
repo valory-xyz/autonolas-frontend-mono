@@ -1,5 +1,4 @@
 import { ethers } from 'ethers';
-import { isNil } from 'lodash';
 
 import { ethersToWei, formatToEth } from 'common-util/functions';
 import { ModuleDetails } from 'store/types';

@@ -2,7 +2,6 @@ import { InfoCircleOutlined } from '@ant-design/icons';
 import { Col, Popover, Row, Typography } from 'antd';
 import { TitleProps } from 'antd/es/typography/Title';
 import Link from 'next/link';
-import PropTypes from 'prop-types';
 import React, { useEffect, useState } from 'react';
 
 import { getEducationItemByComponent } from 'common-util/functions';

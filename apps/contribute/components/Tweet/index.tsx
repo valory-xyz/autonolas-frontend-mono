@@ -48,6 +48,8 @@ export const TweetPropose = () => {
     setIsSubmitting(true);
 
     try {
+      if (!account) return;
+
       const has100kVotingPower = await checkVotingPower(account, HUNDRED_K_OLAS_IN_WEI);
 
       if (!isStaging && !has100kVotingPower) {

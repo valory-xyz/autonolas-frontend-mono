@@ -7,9 +7,10 @@ import { getEstimatedGasLimit } from 'common-util/functions/requests';
 import { GATEWAY_URL } from 'util/constants';
 
 const pattern = /ipfs:\/\/+/g;
-export const getAutonolasTokenUri = (tokenUri) => (tokenUri || '').replace(pattern, GATEWAY_URL);
+export const getAutonolasTokenUri = (tokenUri: string) =>
+  (tokenUri || '').replace(pattern, GATEWAY_URL);
 
-export const mintNft = (account) =>
+export const mintNft = (account: string): Promise<string> =>
   new Promise((resolve, reject) => {
     const contract = getMintContract();
     if (!contract) return;
@@ -18,12 +19,12 @@ export const mintNft = (account) =>
     getEstimatedGasLimit(mintFn, account).then((estimatedGas) => {
       mintFn
         .send({ from: account, gas: estimatedGas })
-        .then((response) => {
+        .then((response: { events: { Transfer: { returnValues: { id: string } } } }) => {
           notifySuccess('Successfully Minted');
           const id = get(response, 'events.Transfer.returnValues.id');
           resolve(id);
         })
-        .catch((e) => {
+        .catch((e: Error) => {
           notifyError('Error: could not mint NFT');
           window.console.log('Error occurred on minting NFT');
           reject(e);
@@ -31,7 +32,7 @@ export const mintNft = (account) =>
     });
   });
 
-export async function pollNftDetails(id) {
+export async function pollNftDetails(id: string): Promise<object | undefined> {
   const contract = getMintContract();
   if (!contract) return;
   const infoUrl = await contract.methods.tokenURI(`${id}`).call();

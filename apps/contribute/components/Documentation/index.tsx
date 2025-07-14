@@ -17,7 +17,7 @@ const { Link } = Anchor;
 const { useBreakpoint } = Grid;
 
 export const Documentation = () => {
-  const [activeNav, setActiveNav] = useState(null);
+  const [activeNav, setActiveNav] = useState<string | null>(null);
   const router = useRouter();
   const screens = useBreakpoint();
   const isMobile = !!screens.xs;

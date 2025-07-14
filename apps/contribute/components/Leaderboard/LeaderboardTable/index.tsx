@@ -34,7 +34,7 @@ const columns: ColumnsType<LeaderboardUser> = [
     title: 'Socials',
     width: 100,
     render: (record) => {
-      const { wallet_address, twitter_handle, discord_id, id } = record;
+      const { wallet_address, twitter_handle, id } = record;
 
       const socials = [
         wallet_address && (

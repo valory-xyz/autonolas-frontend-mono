@@ -6,7 +6,7 @@ const WALLET_STATUS = {
   linking: 'linking',
 };
 
-const pollStatus = async (url) =>
+const pollStatus = async (url: string): Promise<boolean> =>
   new Promise((resolve, reject) => {
     const interval = setInterval(async () => {
       try {
@@ -24,7 +24,7 @@ const pollStatus = async (url) =>
     }, 4000);
   });
 
-export async function getAddressStatus(account) {
+export async function getAddressStatus(account: string): Promise<boolean> {
   return new Promise((resolve, reject) => {
     try {
       const URL = `${process.env.NEXT_PUBLIC_BACKEND_URL}/address_status/${account}`;

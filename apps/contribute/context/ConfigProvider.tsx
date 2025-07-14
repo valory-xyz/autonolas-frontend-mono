@@ -94,7 +94,7 @@ const THEME_CONFIG = {
   },
 };
 
-export const ThemeConfigProvider = ({ children }) => {
+export const ThemeConfigProvider = ({ children }: { children: React.ReactNode }) => {
   const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {

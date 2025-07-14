@@ -1,6 +1,6 @@
 import { ethers } from 'ethers';
 
-export async function verifyAddress(account, id) {
+export async function verifyAddress(account: string, id: string) {
   try {
     await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/link`, {
       method: 'post',
@@ -16,13 +16,17 @@ export async function verifyAddress(account, id) {
   }
 }
 
-function verifyPayload(payload, signature) {
+function verifyPayload(payload: string, signature: string) {
   const messageHash = ethers.hashMessage(payload);
   const recoveredAddress = ethers.recoverAddress(messageHash, signature);
   return recoveredAddress === process.env.NEXT_PUBLIC_DISCORD_VERIFICATION_ADDRESS;
 }
 
-export function isRouteValid(linkExpiration, signature, discordId) {
+export function isRouteValid(
+  linkExpiration: number,
+  signature: string,
+  discordId: string,
+): boolean {
   const isExpiration = !!linkExpiration;
   const isSignature = !!signature;
 

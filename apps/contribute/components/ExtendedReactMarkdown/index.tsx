@@ -1,11 +1,15 @@
 import { Typography } from 'antd';
-import PropTypes from 'prop-types';
 import React, { useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 
 const { Text } = Typography;
 
-function ExtendedReactMarkdown({ content, rows }: { content: string; rows: number }) {
+type ExtendedReactMarkdownProps = {
+  content: string;
+  rows: number;
+};
+
+function ExtendedReactMarkdown({ content, rows }: ExtendedReactMarkdownProps) {
   const [expanded, setExpanded] = useState(false);
 
   const handleExpand = () => {
@@ -28,10 +32,5 @@ function ExtendedReactMarkdown({ content, rows }: { content: string; rows: numbe
     </div>
   );
 }
-
-ExtendedReactMarkdown.propTypes = {
-  content: PropTypes.string.isRequired,
-  rows: PropTypes.number.isRequired,
-};
 
 export default ExtendedReactMarkdown;
