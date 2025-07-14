@@ -9,8 +9,8 @@ function TruncatedEthereumLink({
   className = '',
 }: {
   text: string;
-  isTransaction: boolean;
-  className: string;
+  isTransaction?: boolean;
+  className?: string;
 }) {
   const etherscanLink = `https://etherscan.io/${isTransaction ? 'tx' : 'address'}/${text}`;
 

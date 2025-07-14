@@ -1,5 +1,5 @@
-import Home from './Leaderboard';
+import { Leaderboard } from './Leaderboard';
 
-const Component = () => <Home />;
+const Component = () => <Leaderboard />;
 
 export default Component;
