@@ -15,7 +15,7 @@ import {
 
 import { RPC_URLS } from 'libs/util-constants/src';
 import data from 'components/Education/data.json';
-import { SUPPORTED_CHAINS } from 'common-util/Login/config';
+import { SUPPORTED_CHAINS } from 'components/Login/config';
 
 import prohibitedAddresses from '../../data/prohibited-addresses.json';
 import { LeaderboardUser } from 'store/types';

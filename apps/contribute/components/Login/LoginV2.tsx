@@ -1,6 +1,5 @@
 import { Button } from 'antd';
 import Link from 'next/link';
-import PropTypes from 'prop-types';
 import { useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
@@ -25,13 +24,12 @@ const LoginContainer = styled.div`
   gap: 8px;
 `;
 
-export const LoginV2 = ({
-  onConnect: onConnectCb,
-  onDisconnect: onDisconnectCb,
-}: {
+type LoginV2Props = {
   onConnect: (response: { address?: string; balance?: number; chainId?: number }) => void;
   onDisconnect: () => void;
-}) => {
+};
+
+export const LoginV2 = ({ onConnect: onConnectCb, onDisconnect: onDisconnectCb }: LoginV2Props) => {
   const dispatch = useDispatch();
   const { disconnect } = useDisconnect();
 
@@ -90,7 +88,8 @@ export const LoginV2 = ({
       try {
         // This is the initial `provider` that is returned when
         // using web3Modal to connect. Can be MetaMask or WalletConnect.
-        const modalProvider: any = await connector?.getProvider?.();
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const modalProvider = (await connector?.getProvider?.()) as any;
 
         if (modalProvider) {
           // We plug the initial `provider` and get back
@@ -162,14 +161,4 @@ export const LoginV2 = ({
       <w3m-button balance="hide" />
     </LoginContainer>
   );
-};
-
-LoginV2.propTypes = {
-  onConnect: PropTypes.func,
-  onDisconnect: PropTypes.func,
-};
-
-LoginV2.defaultProps = {
-  onConnect: undefined,
-  onDisconnect: undefined,
 };

@@ -4,7 +4,7 @@ import { base } from 'wagmi/chains';
 
 import { OLAS_ABI, OLAS_ADDRESS_BASE } from 'common-util/AbiAndAddresses';
 import { getContributorsContract } from 'common-util/Contracts';
-import { wagmiConfig } from 'common-util/Login/config';
+import { wagmiConfig } from 'components/Login/config';
 import { getEstimatedGasLimit } from 'common-util/functions/requests';
 
 // Value in wei that should be sent with CreateAndStake transaction

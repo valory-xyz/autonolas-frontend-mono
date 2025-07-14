@@ -11,7 +11,7 @@ import { WagmiProvider, cookieToInitialState } from 'wagmi';
 import { COLOR } from '@autonolas/frontend-library';
 
 /* eslint-disable-line import/no-unresolved */
-import { wagmiConfig } from 'common-util/Login/config';
+import { wagmiConfig } from 'components/Login/config';
 import Meta from 'components/meta';
 
 /** antd theme config */

@@ -2,8 +2,8 @@ import { useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { useAccount, useBalance } from 'wagmi';
 
-import { LoginV2 } from 'common-util/Login';
-import { setErrorMessage, setLogout, setUserAccount, setUserBalance } from 'store/setup';
+import { LoginV2 } from './LoginV2';
+import { setLogout, setUserAccount, setUserBalance } from 'store/setup';
 
 const Login = () => {
   const dispatch = useDispatch();
@@ -13,28 +13,24 @@ const Login = () => {
   useEffect(() => {
     if (address) {
       dispatch(setUserAccount(address));
-      dispatch(setUserBalance(data?.formatted));
+      dispatch(setUserBalance(data?.formatted || 0));
     } else {
       dispatch(setLogout());
     }
   }, [address, chainId, data?.formatted, dispatch]);
 
-  const onConnect = (response) => {
-    dispatch(setUserAccount(response.address));
-    dispatch(setUserBalance(response.balance));
+  const onConnect = (response: { address?: string; balance?: number }) => {
+    dispatch(setUserAccount(response.address || ''));
+    dispatch(setUserBalance(response.balance || 0));
   };
 
   const onDisconnect = () => {
     dispatch(setLogout());
   };
 
-  const onError = (error) => {
-    dispatch(setErrorMessage(error));
-  };
-
   return (
     <div>
-      <LoginV2 onConnect={onConnect} onDisconnect={onDisconnect} onError={onError} />
+      <LoginV2 onConnect={onConnect} onDisconnect={onDisconnect} />
     </div>
   );
 };
