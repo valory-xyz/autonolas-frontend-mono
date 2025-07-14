@@ -10,7 +10,6 @@ const MINUTE = 60 * 1000;
 
 export const ServiceStatus = () => {
   const dispatch = useDispatch();
-  // const { account } = useHelpers();
 
   const pollingCallback = async () => {
     // fetch leaderboard list

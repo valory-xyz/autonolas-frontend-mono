@@ -1,7 +1,6 @@
-import { useEffect } from 'react';
 import styled from 'styled-components';
 
-import { useCentaursFunctionalities } from 'components/CoOrdinate/Centaur/hooks';
+import { useModuleUtilities } from 'common-util/hooks/useModuleUtilities';
 
 const StyledPre = styled.pre`
   max-width: 800px;
@@ -9,14 +8,9 @@ const StyledPre = styled.pre`
 `;
 
 const StatePage = () => {
-  const { currentMemoryDetails, fetchUpdatedMemory } = useCentaursFunctionalities();
+  const { moduleDetails } = useModuleUtilities();
 
-  useEffect(() => {
-    fetchUpdatedMemory();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  return <StyledPre>{JSON.stringify(currentMemoryDetails, undefined, 2)}</StyledPre>;
+  return <StyledPre>{JSON.stringify(moduleDetails, undefined, 2)}</StyledPre>;
 };
 
 export default StatePage;

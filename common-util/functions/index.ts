@@ -116,19 +116,6 @@ export const formatToEth = (
  */
 export const ethersToWei = (value: string) => ethers.parseUnits(value, 'ether');
 
-/**
- * returns error message if user can't add memory message
- * else returns null. If null, enable the button to add memory
- */
-export const canAddMemoryMessaage = (list, account) => {
-  if (!account) return 'To add to memory, connect wallet';
-
-  const isPresent = list.some((item) => lowerCase(item.address) === lowerCase(account));
-  if (!isPresent) return 'To add to memory, join this centaur';
-
-  return null;
-};
-
 export const getNumberInMillions = (num: number) => {
   const formattedNumber = `${new Intl.NumberFormat('en-US', {
     style: 'decimal',

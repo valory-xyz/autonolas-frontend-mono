@@ -5,16 +5,11 @@ import { useEffect, useState } from 'react';
 
 import { ActionsDocs } from './content/Actions';
 import { HowItWorks } from './content/HowItWorks';
-// import { Badge } from './content/3_Badge';
 import { Leaderboard } from './content/Leaderboard';
 import { Overview } from './content/Overview';
 import { Proposals } from './content/Proposals';
-// import { Members } from './content/Members';
-// import { Chatbot } from './content/Chatbot';
-// import { Memory } from './content/Memory';
 import { Tweet } from './content/Tweet';
 import { DOC_NAV, NavWrapper } from './helpers';
-// import Predict from './content/Predict';
 import { Container, DocSection } from './styles';
 
 const { Title } = Typography;
@@ -63,12 +58,7 @@ export const Documentation = () => {
           <Overview />
           <Leaderboard />
           <ActionsDocs />
-          {/* <Badge /> */}
-          {/* <Members /> */}
-          {/* <Chatbot /> */}
-          {/* <Memory /> */}
           <Tweet />
-          {/* <Predict /> */}
           <Proposals />
           <HowItWorks />
         </div>

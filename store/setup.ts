@@ -28,10 +28,6 @@ type SetupState = {
 
   // TODO: below to be removed
   nftDetails: any | null;
-  isMemoryDetailsLoading: boolean;
-  memoryDetails: any[];
-  predictionRequests: any[];
-  approvedRequestsCount: number | null;
 };
 
 const initialState: SetupState = {
@@ -60,13 +56,6 @@ const initialState: SetupState = {
 
   // nft details
   nftDetails: null,
-
-  // memory details
-  isMemoryDetailsLoading: true,
-  memoryDetails: [],
-  predictionRequests: [],
-
-  approvedRequestsCount: null,
 };
 
 const getRankedUsers = (leaderboard: LeaderboardUser[]): LeaderboardUser[] => {
@@ -163,29 +152,11 @@ export const setupSlice = createSlice({
     setNftDetails: (state, action: PayloadAction<SetupState['nftDetails']>) => {
       state.nftDetails = action.payload;
     },
-    setIsMemoryDetailsLoading: (
-      state,
-      action: PayloadAction<SetupState['isMemoryDetailsLoading']>,
-    ) => {
-      state.isMemoryDetailsLoading = action.payload;
-    },
-    setMemoryDetails: (state, action: PayloadAction<SetupState['memoryDetails']>) => {
-      state.memoryDetails = action.payload;
-    },
     setLogout: (state) => {
       state.account = null;
       state.balance = null;
       state.errorMessage = null;
       state.isVerified = false;
-    },
-    setPredictionRequests: (state, action: PayloadAction<SetupState['predictionRequests']>) => {
-      state.predictionRequests = action.payload;
-    },
-    setApprovedRequestsCount: (
-      state,
-      action: PayloadAction<SetupState['approvedRequestsCount']>,
-    ) => {
-      state.approvedRequestsCount = action.payload;
     },
   },
 });
@@ -205,11 +176,7 @@ export const {
   setModuleDetails,
   setModuleDetailsAttributeId,
   setNftDetails,
-  setIsMemoryDetailsLoading,
-  setMemoryDetails,
   setLogout,
-  setPredictionRequests,
-  setApprovedRequestsCount,
 } = setupSlice.actions;
 export const setupReducer = setupSlice.reducer;
 

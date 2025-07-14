@@ -1,10 +1,9 @@
 import { MenuOutlined } from '@ant-design/icons';
 import {
-  FileTextOutlined, // MessageOutlined,
-  NotificationOutlined, // RobotOutlined,
-  // StarOutlined,
+  FileTextOutlined,
+  NotificationOutlined,
   TrophyOutlined,
-  XOutlined, // UserOutlined,
+  XOutlined,
 } from '@ant-design/icons';
 import { Button, Dropdown, Grid } from 'antd';
 import { useRouter } from 'next/router';
@@ -17,10 +16,6 @@ const menuItems = [
   { key: 'leaderboard', label: 'Leaderboard', icon: <TrophyOutlined /> },
   { key: 'staking', label: 'Staking', icon: <NotificationOutlined /> },
   { key: 'post', label: 'Post', icon: <XOutlined /> },
-  // { key: 'members', label: 'Members', icon: <UserOutlined /> },
-  // { key: 'chat', label: 'Chat', icon: <MessageOutlined /> },
-  // { key: 'predict', label: 'Predict', icon: <StarOutlined /> },
-  // { key: 'chatbot', label: 'Chatbot', icon: <RobotOutlined /> },
   { key: 'docs', label: 'Docs', icon: <FileTextOutlined /> },
 ];
 
