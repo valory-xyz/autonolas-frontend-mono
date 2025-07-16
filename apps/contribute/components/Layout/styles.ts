@@ -58,7 +58,6 @@ export const CustomLayout = styled(Layout)<{ $isBannerVisible: boolean; $isPadde
 
   //Switch
   .ant-switch {
-    // add right padding assuming a label is added to the right
     margin-right: 4px;
   }
 

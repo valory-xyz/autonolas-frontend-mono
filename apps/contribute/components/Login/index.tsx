@@ -20,7 +20,7 @@ const Login = () => {
   }, [address, chainId, data?.formatted, dispatch]);
 
   const onConnect = (response: { address?: string; balance?: number }) => {
-    dispatch(setUserAccount(response.address || ''));
+    dispatch(setUserAccount(response.address ?? null));
     dispatch(setUserBalance(response.balance || 0));
   };
 

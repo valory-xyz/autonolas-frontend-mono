@@ -264,7 +264,7 @@ export const StakingDetails = ({ profile, tweets }: StakingDetailsProps) => {
         </InfoColumn>
         <InfoColumn title="OLAS rewards this epoch" isLoading={isStakingDetailsLoading}>
           {contractDetails && stakingDetails?.rewardsPerEpoch ? (
-            <Flex gap={8} wrap={'wrap'}>
+            <Flex gap={8} wrap="wrap">
               <Text className="font-weight-600">
                 {`${OLAS_UNICODE_SYMBOL}${stakingDetails.rewardsPerEpoch}`}
               </Text>
