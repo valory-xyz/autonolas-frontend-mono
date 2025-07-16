@@ -9,7 +9,7 @@ import { useSignMessage } from 'wagmi';
 
 import { NA, notifyError, notifySuccess } from '@autonolas/frontend-library';
 
-import { DisplayName } from 'common-util/DisplayName';
+import { DisplayName } from 'components/DisplayName';
 import { getCurrentProposalInfo } from 'common-util/functions/proposal';
 import { useHelpers } from 'common-util/hooks/useHelpers';
 import { useModuleUtilities } from 'common-util/hooks/useModuleUtilities';

@@ -1,24 +1,11 @@
-const securityHeaders = [
-  {
-    key: 'Content-Security-Policy',
-    value: "frame-ancestors 'none';",
-  },
-  {
-    key: 'X-Content-Type-Options',
-    value: 'nosniff',
-  },
-  {
-    key: 'Referrer-Policy',
-    value: 'strict-origin-when-cross-origin',
-  },
-  {
-    key: 'Strict-Transport-Security',
-    value: 'max-age=31536000; includeSubDomains',
-  },
-];
+//@ts-check
 
-/** @type {import('next').NextConfig} */
-const NextConfig = {
+const { composePlugins, withNx } = require('@nx/next');
+
+/**
+ * @type {import('@nx/next/plugins/with-nx').WithNxOptions}
+ **/
+const nextConfig = {
   i18n: {
     locales: ['en'],
     defaultLocale: 'en',
@@ -52,24 +39,19 @@ const NextConfig = {
       {
         source: '/api/:path*',
         headers: [
-          ...securityHeaders,
           {
             key: 'Cache-Control',
             value: 'no-store, no-cache, must-revalidate, proxy-revalidate',
           },
         ],
       },
-      {
-        source: '/:path*',
-        headers: [
-          ...securityHeaders,
-          {
-            key: 'Cache-Control',
-            value: 'public, s-maxage=604800, stale-while-revalidate=86400',
-          },
-        ],
-      },
     ];
   },
 };
-module.exports = NextConfig;
+
+const plugins = [
+  // Add more Next.js plugins to this list if needed.
+  withNx,
+];
+
+module.exports = composePlugins(...plugins)(nextConfig);

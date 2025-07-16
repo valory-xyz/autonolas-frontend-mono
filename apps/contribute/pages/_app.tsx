@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import { ApolloProvider } from '@apollo/client';
 
 /** wagmi config */
@@ -10,13 +11,12 @@ import { WagmiProvider, cookieToInitialState } from 'wagmi';
 import { COLOR } from '@autonolas/frontend-library';
 
 /* eslint-disable-line import/no-unresolved */
-import { wagmiConfig } from 'common-util/Login/config';
-import Meta from 'common-util/meta';
+import { wagmiConfig } from 'components/Login/config';
+import Meta from 'components/meta';
 
 /** antd theme config */
-import GlobalStyle from 'components/GlobalStyles';
+import { AutonolasThemeProvider, GlobalStyles } from 'libs/ui-theme/src';
 import { Layout } from 'components/Layout';
-import { ThemeConfigProvider } from 'context/ConfigProvider';
 
 import client from '../apolloClient';
 import { store } from '../store';
@@ -47,23 +47,36 @@ createWeb3Modal({
 const ContributeApp = ({ Component, pageProps }: AppProps) => {
   const initialState = cookieToInitialState(wagmiConfig);
 
+  /**
+   * Fixes hydration error caused by ServiceStatus component, 
+   * also, currently sidebar depends on a hook, 
+   * in future we can handle it using a custom request header.
+   */
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
   return (
     <>
-      <GlobalStyle />
+      <GlobalStyles />
       <Meta />
 
       <Provider store={store}>
-        <ThemeConfigProvider>
-          <WagmiProvider config={wagmiConfig} initialState={initialState}>
-            <QueryClientProvider client={queryClient}>
-              <ApolloProvider client={client}>
-                <Layout>
-                  <Component {...pageProps} />
-                </Layout>
-              </ApolloProvider>
-            </QueryClientProvider>
-          </WagmiProvider>
-        </ThemeConfigProvider>
+        <AutonolasThemeProvider>
+          {isMounted && (
+            <WagmiProvider config={wagmiConfig} initialState={initialState}>
+              <QueryClientProvider client={queryClient}>
+                <ApolloProvider client={client}>
+                  <Layout>
+                    <Component {...pageProps} />
+                  </Layout>
+                </ApolloProvider>
+              </QueryClientProvider>
+            </WagmiProvider>
+          )}
+        </AutonolasThemeProvider>
       </Provider>
     </>
   );

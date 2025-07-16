@@ -32,7 +32,7 @@ const ONE_HOUR_IN_MS = 3600 * 1000;
 
 // Considering provided time format is en-US
 const getHourAndPeriod = (time: string) => {
-  let [hour, ,] = time.split(':').map(Number);
+  const [hour] = time.split(':').map(Number);
   const period = time.includes('PM') ? 'pm' : 'am';
   return { hour, period };
 };

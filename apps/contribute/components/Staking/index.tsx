@@ -1,15 +1,14 @@
-// @ts-nocheck TODO: provide types for useSelector
 import { Card, Typography } from 'antd';
 import { useMemo } from 'react';
-import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
 import { areAddressesEqual } from '@autonolas/frontend-library';
 
 import { ConnectWallet } from './ConnectWallet';
 import { StakingStepper } from './StakingStepper';
+import { useAppSelector } from 'store/setup';
 
-const { Title, Text } = Typography;
+const { Title } = Typography;
 
 const Root = styled.div`
   max-width: 640px;
@@ -17,11 +16,12 @@ const Root = styled.div`
 `;
 
 export const StakingPage = () => {
-  const leaderboard = useSelector((state) => state?.setup?.leaderboard);
-  const account = useSelector((state) => state?.setup?.account);
+  const leaderboard = useAppSelector((state) => state?.setup?.leaderboard);
+  const account = useAppSelector((state) => state?.setup?.account);
 
   const xProfile = useMemo(() => {
-    return leaderboard.find((item) => areAddressesEqual(item.wallet_address, account));
+    if (!account) return null;
+    return leaderboard.find((item) => areAddressesEqual(item.wallet_address, account)) ?? null;
   }, [account, leaderboard]);
 
   return (

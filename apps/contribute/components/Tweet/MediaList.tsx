@@ -1,6 +1,5 @@
 import { CloseCircleOutlined } from '@ant-design/icons';
 import { Col, Row } from 'antd';
-import PropTypes from 'prop-types';
 import { Fragment, useMemo } from 'react';
 
 import type { TweetOrThread } from '.';

@@ -8,7 +8,7 @@
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
     "importHelpers": true,
-    "target": "es2015",
+    "target": "es2020",
     "module": "esnext",
     "lib": ["dom", "es2020"],
     "skipLibCheck": true,
@@ -34,7 +34,7 @@
         "libs/common-middleware/src/index.ts"
       ],
       "@autonolas-frontend-mono/common-middleware/server": [
-        "libs/common-middleware/src/server.ts"
+        "libs/common-middleware/src/middleware.ts"
       ],
       "@autonolas-frontend-mono/feature-service-status-info": [
         "libs/feature-service-status-info/src/index.ts"

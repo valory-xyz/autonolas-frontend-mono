@@ -3,7 +3,7 @@ import { Address } from 'viem';
 import { base } from 'wagmi/chains';
 
 import { getContributorsContract } from 'common-util/Contracts';
-import { wagmiConfig } from 'common-util/Login/config';
+import { wagmiConfig } from 'components/Login/config';
 import { getEstimatedGasLimit } from 'common-util/functions/requests';
 
 type RestakeParams = {

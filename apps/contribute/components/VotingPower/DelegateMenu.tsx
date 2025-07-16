@@ -1,5 +1,4 @@
 import { Button, Divider, Form, Input, Typography, notification } from 'antd';
-import PropTypes from 'prop-types';
 import { useState } from 'react';
 import { Address } from 'viem';
 
@@ -18,7 +17,12 @@ import {
 
 const { Text, Paragraph } = Typography;
 
-const DelegateMenu = (props: { refetchVotingPower: () => void; votingPower: string }) => {
+type DelegateMenuProps = {
+  refetchVotingPower: () => void;
+  votingPower: string;
+};
+
+const DelegateMenu = (props: DelegateMenuProps) => {
   const [form] = Form.useForm();
   const { account } = useHelpers();
 
@@ -170,11 +174,6 @@ const DelegateMenu = (props: { refetchVotingPower: () => void; votingPower: stri
       )}
     </StyledMenu>
   );
-};
-
-DelegateMenu.propTypes = {
-  votingPower: PropTypes.string.isRequired,
-  refetchVotingPower: PropTypes.func.isRequired,
 };
 
 export default DelegateMenu;

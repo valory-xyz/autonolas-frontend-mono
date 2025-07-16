@@ -1,0 +1,68 @@
+{
+    "name": "contribute",
+    "$schema": "../../node_modules/nx/schemas/project-schema.json",
+    "sourceRoot": "apps/contribute",
+    "projectType": "application",
+    "targets": {
+      "build": {
+        "executor": "@nx/next:build",
+        "outputs": ["{options.outputPath}"],
+        "defaultConfiguration": "production",
+        "options": {
+          "outputPath": "dist/apps/contribute"
+        },
+        "configurations": {
+          "development": {
+            "outputPath": "apps/contribute"
+          },
+          "production": {}
+        }
+      },
+      "serve": {
+        "executor": "@nx/next:server",
+        "defaultConfiguration": "development",
+        "options": {
+          "buildTarget": "contribute:build",
+          "dev": true,
+          "port": 3008
+        },
+        "configurations": {
+          "development": {
+            "buildTarget": "contribute:build:development",
+            "dev": true
+          },
+          "production": {
+            "buildTarget": "contribute:build:production",
+            "dev": false
+          }
+        }
+      },
+      "start": {
+        "executor": "@nx/next:server",
+        "options": {
+          "buildTarget": "contribute:build:production",
+          "dev": false,
+          "port": 3008
+        }
+      },
+      "export": {
+        "executor": "@nx/next:export",
+        "options": {
+          "buildTarget": "contribute:build:production"
+        }
+      },
+      "test": {
+        "executor": "@nx/jest:jest",
+        "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+        "options": {
+          "jestConfig": "apps/contribute/jest.config.js"
+        }
+      },
+      "lint": {
+        "executor": "@nx/eslint:lint",
+        "outputs": ["{options.outputFile}"]
+      }
+    },
+    "tags": []
+  }
+  

@@ -94,6 +94,15 @@ export const GlobalStyles = createGlobalStyle`
   .p-0 {
     padding: 0 !important;
   }
+  .p-12 {
+    padding: 12px !important;
+  }
+  .px-12 {
+    padding: 0 12px !important;
+  }
+  .p-24 {
+    padding: 24px !important;
+  }
   .p-16 {
     padding: 16px !important;
   }
@@ -113,6 +122,32 @@ export const GlobalStyles = createGlobalStyle`
   .mr-auto {
     margin-right: auto !important;
   }
+  .my-4 {
+    margin: 4px 0 !important;
+  }
+  .my-8 {
+    margin: 8px 0 !important;
+  }
+  .mr-12 {
+    margin-right: 12px !important;
+  }
+  .mb-2 {
+    margin-bottom: 2px !important;
+  }
+  .mb-32 {
+    margin-bottom: 32px !important;
+  }
+  .w-100 {
+    width: 100%;
+  }
+  .font-weight-400 {
+    font-weight: 400 !important;
+  }
+  .font-weight-600 {
+    font-weight: 600 !important;
+  }
+
+
 
   .block {
     display: block;

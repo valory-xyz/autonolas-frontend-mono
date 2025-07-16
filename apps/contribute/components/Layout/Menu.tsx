@@ -69,7 +69,8 @@ const navItems = [
 const { useBreakpoint } = Grid;
 
 const BurgerMenuButton = styled(Button)`
-  padding: 8px;
+  padding-left: 8px;
+  padding-right: 8px;
   margin-top: auto;
   margin-bottom: auto;
 `;
@@ -77,7 +78,6 @@ const BurgerMenuButton = styled(Button)`
 export const NavDropdown = () => (
   <Dropdown
     menu={{
-      // @ts-ignore TODO: should be fixed when antd is updated
       items: navItems,
       selectedKeys: ['contribute'],
     }}
