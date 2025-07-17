@@ -1,8 +1,9 @@
-import { useMemo } from 'react';
+import { useMemo, useCallback } from 'react';
 import type { Address } from 'viem';
 import { mainnet } from 'viem/chains';
 import { useReadContract, useReadContracts } from 'wagmi';
 
+import { useAppSelector } from 'store/index';
 import { TOKENOMICS } from 'libs/util-contracts/src';
 import { DISPENSER } from 'libs/util-contracts/src/lib/abiAndAddresses';
 
@@ -39,7 +40,11 @@ const useNomineesLastClaimedStakingEpoch = ({ nominees }: { nominees: StakingCon
     functionName: 'mapLastClaimedStakingEpochs',
     args: [getNomineeHash(nominee.address, nominee.chainId)],
   }));
-  const { data: lastClaimedStakingEpoch, isLoading: isLastClaimedLoading } = useReadContracts({
+  const {
+    data: lastClaimedStakingEpoch,
+    isLoading: isLastClaimedLoading,
+    refetch: refetchLastClaimedStakingEpoch,
+  } = useReadContracts({
     contracts,
   });
 
@@ -56,7 +61,7 @@ const useNomineesLastClaimedStakingEpoch = ({ nominees }: { nominees: StakingCon
     );
   }, [lastClaimedStakingEpoch, nominees]);
 
-  return { lastClaimedStakingEpochByNominee, isLastClaimedLoading };
+  return { lastClaimedStakingEpochByNominee, isLastClaimedLoading, refetchLastClaimedStakingEpoch };
 };
 
 const chunkNomineesArray = (nominees: Address[], chunkSize: number = MAX_BATCH_SIZE) => {
@@ -67,18 +72,29 @@ const chunkNomineesArray = (nominees: Address[], chunkSize: number = MAX_BATCH_S
   return chunks;
 };
 
-export const useClaimableNomineesBatches = ({ nominees }: { nominees: StakingContract[] }) => {
+export const useClaimableNomineesBatches = () => {
+  const nominees = useAppSelector((state) => state.govern.stakingContracts);
   const { data: currentEpoch, isLoading: isEpochLoading } = useEpochCounter();
   const previousEpoch = currentEpoch ? currentEpoch - 1 : null;
   const { minStakingWeight, isMinStakingLoading } = useMinStakingValue({
     epoch: previousEpoch,
   });
-  const { lastClaimedStakingEpochByNominee, isLastClaimedLoading } =
+  const { lastClaimedStakingEpochByNominee, isLastClaimedLoading, refetchLastClaimedStakingEpoch } =
     useNomineesLastClaimedStakingEpoch({ nominees });
 
   // Calculate if we're still loading data
   const isLoading =
     isEpochLoading || isMinStakingLoading || isLastClaimedLoading || !nominees.length;
+
+  /**
+   * Refetch the last claimed staking epoch for the nominees,
+   * this is required in case the user claims one or more batches
+   * but few batches are still remaining to be claimed.
+   * This will make sure we show the latest state to the user.
+   */
+  const refetchClaimableBatches = useCallback(async () => {
+    await refetchLastClaimedStakingEpoch();
+  }, [refetchLastClaimedStakingEpoch]);
 
   // TODO: ignore (0x0, 0) and (0xdead, 1) nominees
   const nomineesToClaimBatches = useMemo(() => {
@@ -189,5 +205,6 @@ export const useClaimableNomineesBatches = ({ nominees }: { nominees: StakingCon
   return {
     nomineesToClaimBatches,
     isLoadingClaimableBatches: isLoading,
+    refetchClaimableBatches,
   };
 };

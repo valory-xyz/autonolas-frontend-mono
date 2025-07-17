@@ -3,10 +3,18 @@ import { Address } from 'viem';
 import { mainnet } from 'viem/chains';
 import { useWriteContract } from 'wagmi';
 
-export const useClaimStakingIncentivesBatch = () => {
+type ClaimStakingIncentivesBatchProps = {
+  onSuccess: () => void;
+  onError: (error: Error) => void;
+};
+
+export const useClaimStakingIncentivesBatch = ({
+  onSuccess,
+  onError,
+}: ClaimStakingIncentivesBatchProps) => {
   const { writeContract, isPending } = useWriteContract();
 
-  const claimBatch = async (batch: [number[], Address[][]]) => {
+  const claimIncentivesForBatch = async (batch: [number[], Address[][]]) => {
     const [chainIds, stakingTargets] = batch;
 
     // Create bridge payloads - empty for now as they're not needed for claiming
@@ -15,20 +23,23 @@ export const useClaimStakingIncentivesBatch = () => {
     // Create value amounts - zero for all chains
     const valueAmounts = chainIds.map(() => BigInt(0));
 
-    return writeContract({
-      address: DISPENSER.addresses[mainnet.id],
-      abi: DISPENSER.abi,
-      chainId: mainnet.id,
-      functionName: 'claimStakingIncentivesBatch',
-      args: [
-        BigInt(1), // numClaimedEpochs
-        chainIds.map((id) => BigInt(id)),
-        stakingTargets,
-        bridgePayloads,
-        valueAmounts,
-      ],
-    });
+    return writeContract(
+      {
+        address: DISPENSER.addresses[mainnet.id],
+        abi: DISPENSER.abi,
+        chainId: mainnet.id,
+        functionName: 'claimStakingIncentivesBatch',
+        args: [
+          BigInt(1), // numClaimedEpochs
+          chainIds.map((id) => BigInt(id)),
+          stakingTargets,
+          bridgePayloads,
+          valueAmounts,
+        ],
+      },
+      { onSuccess, onError },
+    );
   };
 
-  return { claimBatch, isPending };
+  return { claimIncentivesForBatch, isPending };
 };

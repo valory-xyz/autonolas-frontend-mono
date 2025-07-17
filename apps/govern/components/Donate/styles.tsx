@@ -46,3 +46,26 @@ export const EpochCheckpointRow = styled.div`
     width: 200px;
   }
 `;
+
+export const StakingIncentivesModalContainer = styled.div<{ $isEmpty?: boolean }>`
+  display: grid;
+  grid-template-columns: ${({ $isEmpty }) => ($isEmpty ? '1fr' : '200px calc(100% - 200px)')};
+  gap: 16px;
+  margin: 24px 0 16px;
+
+  .ant-steps {
+    height: fit-content;
+
+    .ant-steps-item-description {
+      font-size: 14px;
+    }
+  }
+
+  .ant-table {
+    scrollbar-color: unset;
+  }
+
+  .ant-table-thead .ant-table-cell {
+    background-color: transparent !important;
+  }
+`;

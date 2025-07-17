@@ -1,0 +1,155 @@
+import { useMemo, useState } from 'react';
+import { Button, Collapse, Flex, Modal, Space, Steps, Table, Tag, Typography } from 'antd';
+
+import { formatWeiNumber, notifyError } from 'libs/util-functions/src';
+import { useAppSelector } from 'store/index';
+import { StakingContract } from 'types';
+import { useClaimableNomineesBatches } from 'hooks/useClaimableSet';
+import { useClaimStakingIncentivesBatch } from 'hooks/useClaimStakingIncentivesBatch';
+
+import { StakingIncentivesModalContainer } from './styles';
+
+const { Text } = Typography;
+
+const CHAIN_ID_COLUMN_WIDTH = 120;
+const NEXT_WEIGHT_COLUMN_WIDTH = 200;
+const MODAL_WIDTH = 860;
+const TABLE_SCROLL_HEIGHT = 500;
+const STEP_CHANGE_DELAY = 1000;
+
+const modalProps = {
+  title: 'Claim Staking Incentives',
+  open: true,
+  width: MODAL_WIDTH,
+  footer: null,
+};
+
+const getSteps = (totalSteps: number) => {
+  return Array.from({ length: totalSteps }, (_, index) => ({
+    title: `Batch ${index + 1}`,
+    description: `Claim staking incentives batch #${index + 1}`,
+  }));
+};
+
+const getColumns = () => {
+  return [
+    {
+      title: 'Staking contract',
+      render: (nominee: StakingContract) => <Text>{nominee?.metadata?.name}</Text>,
+    },
+    {
+      title: 'Chain Id',
+      dataIndex: 'chainId',
+      width: CHAIN_ID_COLUMN_WIDTH,
+    },
+    {
+      title: "Next Week's Weight",
+      width: NEXT_WEIGHT_COLUMN_WIDTH,
+      dataIndex: 'nextWeight',
+      render: (nextWeight: StakingContract['nextWeight']) => (
+        <Space size={2} direction="vertical">
+          <Text>{`${formatWeiNumber({
+            value: nextWeight?.percentage,
+            maximumFractionDigits: 3,
+          })}%`}</Text>
+          <Text type="secondary">{`${formatWeiNumber({
+            value: nextWeight?.value,
+            maximumFractionDigits: 3,
+          })} veOLAS`}</Text>
+        </Space>
+      ),
+    },
+  ];
+};
+
+type ClaimStakingIncentivesModalProps = {
+  onClose: () => void;
+};
+
+export const ClaimStakingIncentivesModal = ({ onClose }: ClaimStakingIncentivesModalProps) => {
+  const [currentStep, setCurrentStep] = useState(0);
+  const [claimedBatches, setClaimedBatches] = useState<number[]>([]);
+  const { stakingContracts } = useAppSelector((state) => state.govern);
+
+  const { nomineesToClaimBatches } = useClaimableNomineesBatches();
+  const { claimIncentivesForBatch, isPending } = useClaimStakingIncentivesBatch({
+    onSuccess: () => {
+      setClaimedBatches((prev) => [...prev, currentStep]);
+      setTimeout(() => {
+        setCurrentStep((prev) => prev + 1);
+      }, STEP_CHANGE_DELAY);
+    },
+    onError: (error) => {
+      console.error(error);
+      notifyError('Failed to claim staking incentives');
+    },
+  });
+
+  const nomineesForCurrentBatch = useMemo(() => {
+    const [, currentBatchNomineesSubArray] = nomineesToClaimBatches?.[currentStep] ?? [];
+    return (currentBatchNomineesSubArray || []).flat().map((nomineeAddress) => {
+      const nominee = stakingContracts.find(
+        (nominee) => nominee.address === nomineeAddress,
+      ) as StakingContract;
+      return nominee;
+    });
+  }, [currentStep, nomineesToClaimBatches, stakingContracts]);
+
+  const handleClaimForBatch = () => claimIncentivesForBatch(nomineesToClaimBatches[currentStep]);
+
+  if (nomineesToClaimBatches.length === 0) {
+    return (
+      <Modal {...modalProps} onCancel={onClose}>
+        <StakingIncentivesModalContainer $isEmpty={true}>
+          <Text>All staking incentives were claimed this epoch.</Text>
+        </StakingIncentivesModalContainer>
+      </Modal>
+    );
+  }
+
+  const isCurrentBatchClaimed = claimedBatches.includes(currentStep);
+  return (
+    <Modal {...modalProps} onCancel={onClose}>
+      <StakingIncentivesModalContainer>
+        <Steps
+          size="small"
+          items={getSteps(nomineesToClaimBatches.length)}
+          current={currentStep}
+          direction="vertical"
+        />
+
+        <Flex vertical gap={16} style={{ width: '100%', padding: '0 16px' }}>
+          {isCurrentBatchClaimed && (
+            <div>
+              <Tag color="success">Batch Claimed</Tag>
+            </div>
+          )}
+
+          <Collapse
+            items={[
+              {
+                key: '1',
+                label: "Staking Contracts' Details",
+                children: (
+                  <Table
+                    scroll={{ y: TABLE_SCROLL_HEIGHT }}
+                    columns={getColumns()}
+                    dataSource={nomineesForCurrentBatch}
+                    pagination={false}
+                    rowKey="address"
+                  />
+                ),
+              },
+            ]}
+          />
+
+          {!isCurrentBatchClaimed && (
+            <Button type="primary" size={'large'} loading={isPending} onClick={handleClaimForBatch}>
+              Claim Incentives
+            </Button>
+          )}
+        </Flex>
+      </StakingIncentivesModalContainer>
+    </Modal>
+  );
+};

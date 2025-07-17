@@ -1,49 +1,38 @@
-import { Button } from 'antd';
+import { useState } from 'react';
+import { Button, Flex, Typography } from 'antd';
 
 import { useClaimableNomineesBatches } from 'hooks/useClaimableSet';
-import { useClaimStakingIncentivesBatch } from 'hooks/useClaimStakingIncentivesBatch';
-import { useAppSelector } from 'store/index';
+import { ClaimStakingIncentivesModal } from './ClaimStakingIncentivesModal';
+
+const { Text } = Typography;
 
 export const ClaimStakingIncentives = () => {
-  const nominees = useAppSelector((state) => state.govern.stakingContracts);
-  const { nomineesToClaimBatches, isLoadingClaimableBatches } = useClaimableNomineesBatches({
-    nominees,
-  });
-  const { claimBatch, isPending } = useClaimStakingIncentivesBatch();
+  const { nomineesToClaimBatches, isLoadingClaimableBatches } = useClaimableNomineesBatches();
+  const [showModal, setShowModal] = useState(false);
 
-  const handleClaim = async () => {
-    if (!nomineesToClaimBatches.length) return;
-
-    try {
-      const batch = nomineesToClaimBatches[0];
-      await claimBatch(batch);
-    } catch (error) {
-      console.error('Error claiming batch:', error);
-    }
-  };
+  const handleShowModal = () => setShowModal((state) => !state);
 
   const hasClaimableBatches = nomineesToClaimBatches.length > 0;
-  const isDisabled = !hasClaimableBatches || isPending || isLoadingClaimableBatches;
-
+  const isDisabled = !hasClaimableBatches || isLoadingClaimableBatches;
   return (
-    <div>
-      <Button onClick={handleClaim} disabled={isDisabled} loading={isPending}>
-        {isPending
-          ? 'Claiming...'
-          : isLoadingClaimableBatches
-            ? 'Calculating claimable batches...'
-            : 'Claim Staking Incentives'}
-      </Button>
+    <Flex gap={8} vertical style={{ marginTop: 16 }}>
       {isLoadingClaimableBatches && (
-        <p style={{ marginTop: 8, fontSize: '14px', color: '#666' }}>
-          Calculating which nominees can be claimed...
-        </p>
+        <Text>Calculating which staking contracts can be claimed...</Text>
       )}
       {!isLoadingClaimableBatches && !hasClaimableBatches && (
-        <p style={{ marginTop: 8, fontSize: '14px', color: '#666' }}>
-          No claimable staking incentives available
-        </p>
+        <Text>No claimable staking incentives available.</Text>
       )}
-    </div>
+      <Button
+        onClick={handleShowModal}
+        disabled={isDisabled}
+        loading={isLoadingClaimableBatches || showModal}
+        type="primary"
+        size="large"
+        style={{ width: 'fit-content' }}
+      >
+        {showModal ? 'Claiming...' : 'Claim Staking Incentives'}
+      </Button>
+      {showModal && <ClaimStakingIncentivesModal onClose={handleShowModal} />}
+    </Flex>
   );
 };
