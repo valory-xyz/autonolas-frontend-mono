@@ -13,7 +13,7 @@ import type { StakingContract } from 'types';
 const MAX_BATCH_SIZE = 10;
 
 const useMinStakingValue = ({ epoch }: { epoch: number | null }) => {
-  const { data: minStakingWeight } = useReadContract({
+  const { data: minStakingWeight, isLoading: isMinStakingLoading } = useReadContract({
     address: TOKENOMICS.addresses[mainnet.id],
     abi: TOKENOMICS.abi,
     chainId: mainnet.id,
@@ -28,7 +28,7 @@ const useMinStakingValue = ({ epoch }: { epoch: number | null }) => {
     },
   });
 
-  return minStakingWeight;
+  return { minStakingWeight, isMinStakingLoading };
 };
 
 const useNomineesLastClaimedStakingEpoch = ({ nominees }: { nominees: StakingContract[] }) => {
@@ -39,7 +39,7 @@ const useNomineesLastClaimedStakingEpoch = ({ nominees }: { nominees: StakingCon
     functionName: 'mapLastClaimedStakingEpochs',
     args: [getNomineeHash(nominee.address, nominee.chainId)],
   }));
-  const { data: lastClaimedStakingEpoch } = useReadContracts({
+  const { data: lastClaimedStakingEpoch, isLoading: isLastClaimedLoading } = useReadContracts({
     contracts,
   });
 
@@ -56,7 +56,7 @@ const useNomineesLastClaimedStakingEpoch = ({ nominees }: { nominees: StakingCon
     );
   }, [lastClaimedStakingEpoch, nominees]);
 
-  return lastClaimedStakingEpochByNominee;
+  return { lastClaimedStakingEpochByNominee, isLastClaimedLoading };
 };
 
 const chunkNomineesArray = (nominees: Address[], chunkSize: number = MAX_BATCH_SIZE) => {
@@ -68,10 +68,17 @@ const chunkNomineesArray = (nominees: Address[], chunkSize: number = MAX_BATCH_S
 };
 
 export const useClaimableNomineesBatches = ({ nominees }: { nominees: StakingContract[] }) => {
-  const { data: currentEpoch } = useEpochCounter();
+  const { data: currentEpoch, isLoading: isEpochLoading } = useEpochCounter();
   const previousEpoch = currentEpoch ? currentEpoch - 1 : null;
-  const minStakingWeight = useMinStakingValue({ epoch: previousEpoch });
-  const lastClaimedStakingEpochByNominee = useNomineesLastClaimedStakingEpoch({ nominees });
+  const { minStakingWeight, isMinStakingLoading } = useMinStakingValue({
+    epoch: previousEpoch,
+  });
+  const { lastClaimedStakingEpochByNominee, isLastClaimedLoading } =
+    useNomineesLastClaimedStakingEpoch({ nominees });
+
+  // Calculate if we're still loading data
+  const isLoading =
+    isEpochLoading || isMinStakingLoading || isLastClaimedLoading || !nominees.length;
 
   // TODO: ignore (0x0, 0) and (0xdead, 1) nominees
   const nomineesToClaimBatches = useMemo(() => {
@@ -179,5 +186,8 @@ export const useClaimableNomineesBatches = ({ nominees }: { nominees: StakingCon
     return batches;
   }, [nominees, lastClaimedStakingEpochByNominee, currentEpoch, minStakingWeight]);
 
-  return nomineesToClaimBatches;
+  return {
+    nomineesToClaimBatches,
+    isLoadingClaimableBatches: isLoading,
+  };
 };
