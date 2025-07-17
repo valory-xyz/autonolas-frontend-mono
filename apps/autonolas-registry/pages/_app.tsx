@@ -28,7 +28,7 @@ const wagmiConfig = defaultWagmiConfig({
   chains: SUPPORTED_CHAINS as [Chain, ...Chain[]],
   projectId,
   metadata,
-  ssr: false,
+  ssr: true,
   storage: createStorage({ storage: cookieStorage }),
 });
 
