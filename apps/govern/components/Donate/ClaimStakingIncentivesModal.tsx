@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { Button, Collapse, Flex, Modal, Space, Steps, Table, Tag, Typography } from 'antd';
 
-import { formatWeiNumber, notifyError } from 'libs/util-functions/src';
+import { formatWeiNumber, notifyError, notifySuccess } from 'libs/util-functions/src';
 import { useAppSelector } from 'store/index';
 import { StakingContract } from 'types';
 import { useClaimableNomineesBatches } from 'hooks/useClaimableSet';
@@ -24,18 +24,18 @@ const modalProps = {
   footer: null,
 };
 
-const getSteps = (totalSteps: number) => {
-  return Array.from({ length: totalSteps }, (_, index) => ({
+const getSteps = (totalSteps: number) =>
+  Array.from({ length: totalSteps }, (_, index) => ({
     title: `Batch ${index + 1}`,
     description: `Claim staking incentives batch #${index + 1}`,
   }));
-};
 
 const getColumns = () => {
   return [
     {
       title: 'Staking contract',
-      render: (nominee: StakingContract) => <Text>{nominee?.metadata?.name}</Text>,
+      dataIndex: 'metadata',
+      render: (metadata: StakingContract['metadata']) => <Text>{metadata.name}</Text>,
     },
     {
       title: 'Chain Id',
@@ -49,11 +49,11 @@ const getColumns = () => {
       render: (nextWeight: StakingContract['nextWeight']) => (
         <Space size={2} direction="vertical">
           <Text>{`${formatWeiNumber({
-            value: nextWeight?.percentage,
+            value: nextWeight.percentage,
             maximumFractionDigits: 3,
           })}%`}</Text>
           <Text type="secondary">{`${formatWeiNumber({
-            value: nextWeight?.value,
+            value: nextWeight.value,
             maximumFractionDigits: 3,
           })} veOLAS`}</Text>
         </Space>
@@ -67,17 +67,18 @@ type ClaimStakingIncentivesModalProps = {
 };
 
 export const ClaimStakingIncentivesModal = ({ onClose }: ClaimStakingIncentivesModalProps) => {
-  const [currentStep, setCurrentStep] = useState(0);
+  const [currentBatch, setCurrentBatch] = useState(0);
   const [claimedBatches, setClaimedBatches] = useState<number[]>([]);
   const { stakingContracts } = useAppSelector((state) => state.govern);
 
   const { nomineesToClaimBatches } = useClaimableNomineesBatches();
   const { claimIncentivesForBatch, isPending } = useClaimStakingIncentivesBatch({
     onSuccess: () => {
-      setClaimedBatches((prev) => [...prev, currentStep]);
+      setClaimedBatches((prev) => [...prev, currentBatch]);
       setTimeout(() => {
-        setCurrentStep((prev) => prev + 1);
+        setCurrentBatch((prev) => prev + 1);
       }, STEP_CHANGE_DELAY);
+      notifySuccess('Staking incentives claimed successfully');
     },
     onError: (error) => {
       console.error(error);
@@ -86,16 +87,16 @@ export const ClaimStakingIncentivesModal = ({ onClose }: ClaimStakingIncentivesM
   });
 
   const nomineesForCurrentBatch = useMemo(() => {
-    const [, currentBatchNomineesSubArray] = nomineesToClaimBatches?.[currentStep] ?? [];
+    const [, currentBatchNomineesSubArray] = nomineesToClaimBatches?.[currentBatch] ?? [];
     return (currentBatchNomineesSubArray || []).flat().map((nomineeAddress) => {
       const nominee = stakingContracts.find(
         (nominee) => nominee.address === nomineeAddress,
       ) as StakingContract;
       return nominee;
     });
-  }, [currentStep, nomineesToClaimBatches, stakingContracts]);
+  }, [currentBatch, nomineesToClaimBatches, stakingContracts]);
 
-  const handleClaimForBatch = () => claimIncentivesForBatch(nomineesToClaimBatches[currentStep]);
+  const handleClaimForBatch = () => claimIncentivesForBatch(nomineesToClaimBatches[currentBatch]);
 
   if (nomineesToClaimBatches.length === 0) {
     return (
@@ -107,14 +108,14 @@ export const ClaimStakingIncentivesModal = ({ onClose }: ClaimStakingIncentivesM
     );
   }
 
-  const isCurrentBatchClaimed = claimedBatches.includes(currentStep);
+  const isCurrentBatchClaimed = claimedBatches.includes(currentBatch);
   return (
     <Modal {...modalProps} onCancel={onClose}>
       <StakingIncentivesModalContainer>
         <Steps
           size="small"
           items={getSteps(nomineesToClaimBatches.length)}
-          current={currentStep}
+          current={currentBatch}
           direction="vertical"
         />
 

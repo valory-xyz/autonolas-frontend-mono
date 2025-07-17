@@ -1,7 +1,8 @@
-import { DISPENSER } from 'libs/util-contracts/src/lib/abiAndAddresses';
-import { Address } from 'viem';
 import { mainnet } from 'viem/chains';
+import type { Address } from 'viem';
 import { useWriteContract } from 'wagmi';
+
+import { DISPENSER } from 'libs/util-contracts/src/lib/abiAndAddresses';
 
 type ClaimStakingIncentivesBatchProps = {
   onSuccess: () => void;
@@ -17,7 +18,7 @@ export const useClaimStakingIncentivesBatch = ({
   const claimIncentivesForBatch = async (batch: [number[], Address[][]]) => {
     const [chainIds, stakingTargets] = batch;
 
-    // Create bridge payloads - empty for now as they're not needed for claiming
+    // Create bridge payloads - empty as they're not needed for claiming
     const bridgePayloads = chainIds.map(() => '0x' as `0x${string}`);
 
     // Create value amounts - zero for all chains

@@ -87,10 +87,9 @@ export const useClaimableNomineesBatches = () => {
     isEpochLoading || isMinStakingLoading || isLastClaimedLoading || !nominees.length;
 
   /**
-   * Refetch the last claimed staking epoch for the nominees,
-   * this is required in case the user claims one or more batches
-   * but few batches are still remaining to be claimed.
-   * This will make sure we show the latest state to the user.
+   * Refetch the last claimed staking epoch for the nominees, this is required in
+   * case the user claims one or more batches and closes the modal but few batches
+   * are still remaining to be claimed. This will make sure we show the latest state to the user.
    */
   const refetchClaimableBatches = useCallback(async () => {
     await refetchLastClaimedStakingEpoch();
@@ -98,7 +97,8 @@ export const useClaimableNomineesBatches = () => {
 
   // TODO: ignore (0x0, 0) and (0xdead, 1) nominees
   const nomineesToClaimBatches = useMemo(() => {
-    if (!nominees.length || !lastClaimedStakingEpochByNominee || !currentEpoch) return [];
+    if (!nominees.length || !lastClaimedStakingEpochByNominee || !currentEpoch || !minStakingWeight)
+      return [];
 
     /**
      * Filter nominees to be claimed as per the conditions:
@@ -107,12 +107,11 @@ export const useClaimableNomineesBatches = () => {
      */
     const filteredNominees = nominees.filter((nominee) => {
       const { nextWeight } = nominee;
-      if (!minStakingWeight) return false;
       const nomineeRelativeWeight = nextWeight.percentage * 100;
-      return (
-        nomineeRelativeWeight >= minStakingWeight &&
-        Number(lastClaimedStakingEpochByNominee[nominee.address].result) < currentEpoch
+      const lastClaimedStakingEpoch = Number(
+        lastClaimedStakingEpochByNominee[nominee.address].result,
       );
+      return nomineeRelativeWeight >= minStakingWeight && lastClaimedStakingEpoch < currentEpoch;
     });
 
     /**
@@ -168,6 +167,11 @@ export const useClaimableNomineesBatches = () => {
     );
 
     /**
+     * Sort the chain ids in ascending order
+     */
+    const sortedChainIds = Object.keys(batchesByChain).sort((a, b) => Number(a) - Number(b));
+
+    /**
      * Create batches of nominees to claim
      * eg:
      * [
@@ -183,7 +187,7 @@ export const useClaimableNomineesBatches = () => {
       const currentBatchChainIds: number[] = [];
       const currentBatchNominees: Address[][] = [];
 
-      Object.keys(batchesByChain).forEach((chainId) => {
+      sortedChainIds.forEach((chainId) => {
         const nomineesByChainAtIndex = batchesByChain[Number(chainId)]?.[batchIndex] || [];
         if (nomineesByChainAtIndex.length !== 0) {
           currentBatchChainIds.push(Number(chainId));
