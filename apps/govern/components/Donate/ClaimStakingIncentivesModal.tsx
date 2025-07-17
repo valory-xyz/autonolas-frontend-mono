@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Button, Collapse, Flex, Modal, Space, Steps, Table, Tag, Typography } from 'antd';
 
 import { formatWeiNumber, notifyError, notifySuccess } from 'libs/util-functions/src';
@@ -71,7 +71,7 @@ export const ClaimStakingIncentivesModal = ({ onClose }: ClaimStakingIncentivesM
   const [claimedBatches, setClaimedBatches] = useState<number[]>([]);
   const { stakingContracts } = useAppSelector((state) => state.govern);
 
-  const { nomineesToClaimBatches } = useClaimableNomineesBatches();
+  const { nomineesToClaimBatches, refetchClaimableBatches } = useClaimableNomineesBatches();
   const { claimIncentivesForBatch, isPending } = useClaimStakingIncentivesBatch({
     onSuccess: () => {
       setClaimedBatches((prev) => [...prev, currentBatch]);
@@ -95,6 +95,11 @@ export const ClaimStakingIncentivesModal = ({ onClose }: ClaimStakingIncentivesM
       return nominee;
     });
   }, [currentBatch, nomineesToClaimBatches, stakingContracts]);
+
+  // Refresh claimable batches every time the modal is opened.
+  useEffect(() => {
+    refetchClaimableBatches();
+  }, [refetchClaimableBatches]);
 
   const handleClaimForBatch = () => claimIncentivesForBatch(nomineesToClaimBatches[currentBatch]);
 
