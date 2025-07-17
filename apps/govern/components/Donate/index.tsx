@@ -18,6 +18,7 @@ import {
 import { DonateForm } from './DonateForm';
 import { useThresholdData } from './hooks';
 import { DonateContainer, EpochCheckpointRow, EpochStatus } from './styles';
+import { ClaimStakingIncentives } from './ClaimStakingIncentives';
 
 const { Title, Paragraph, Text } = Typography;
 
@@ -196,6 +197,7 @@ export const DonatePage = () => {
             Start new epoch
           </Button>
           <Text type="secondary">New epochs must be manually triggered by community members</Text>
+          <ClaimStakingIncentives />
         </EpochCheckpointRow>
       </Card>
     </DonateContainer>

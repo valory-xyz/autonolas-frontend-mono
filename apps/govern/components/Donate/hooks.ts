@@ -24,7 +24,7 @@ const useMinAcceptedETH = () =>
     functionName: 'minAcceptedETH',
   });
 
-const useEpochCounter = () =>
+export const useEpochCounter = () =>
   useReadContract({
     address: TOKENOMICS.addresses[mainnet.id],
     abi: TOKENOMICS.abi,

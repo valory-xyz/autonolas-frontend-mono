@@ -28,7 +28,7 @@ export const LoginV2 = () => {
       }
 
       if (connector) {
-        const modalProvider = await connector.getProvider();
+        const modalProvider = await connector.getProvider?.();
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (window as any).MODAL_PROVIDER = modalProvider;
       }

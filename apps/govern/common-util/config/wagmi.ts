@@ -55,4 +55,5 @@ export const wagmiConfig = defaultWagmiConfig({
       Object.assign(acc, { [chain.id]: http(RPC_URLS[chain.id]) || chain.rpcUrls.default.http[0] }),
     {},
   ),
+  ssr: true,
 });
