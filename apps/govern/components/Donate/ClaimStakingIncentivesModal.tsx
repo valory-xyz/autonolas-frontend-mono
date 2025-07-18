@@ -95,7 +95,7 @@ export const ClaimStakingIncentivesModal = ({ onClose }: ClaimStakingIncentivesM
         if (!nominee) return null;
         return nominee;
       })
-      .filter((nominee) => nominee !== null);
+      .filter((nominee): nominee is StakingContract => nominee !== null);
   }, [currentBatch, nomineesToClaimBatches, stakingContracts]);
 
   // Refresh claimable batches every time the modal is opened.
