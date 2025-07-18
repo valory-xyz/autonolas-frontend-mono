@@ -11,8 +11,6 @@ import { StakingIncentivesModalContainer } from './styles';
 
 const { Text } = Typography;
 
-const CHAIN_ID_COLUMN_WIDTH = 120;
-const NEXT_WEIGHT_COLUMN_WIDTH = 200;
 const MODAL_WIDTH = 860;
 const TABLE_SCROLL_HEIGHT = 420;
 const STEP_CHANGE_DELAY = 1000;
@@ -22,7 +20,7 @@ const modalProps = {
   open: true,
   width: MODAL_WIDTH,
   footer: null,
-};
+} as const;
 
 const getSteps = (totalSteps: number) =>
   Array.from({ length: totalSteps }, (_, index) => ({
@@ -30,37 +28,35 @@ const getSteps = (totalSteps: number) =>
     description: `Claim staking incentives batch #${index + 1}`,
   }));
 
-const getColumns = () => {
-  return [
-    {
-      title: 'Staking contract',
-      dataIndex: 'metadata',
-      render: (metadata: StakingContract['metadata']) => <Text>{metadata?.name}</Text>,
-    },
-    {
-      title: 'Chain Id',
-      dataIndex: 'chainId',
-      width: CHAIN_ID_COLUMN_WIDTH,
-    },
-    {
-      title: "Next Week's Weight",
-      width: NEXT_WEIGHT_COLUMN_WIDTH,
-      dataIndex: 'nextWeight',
-      render: (nextWeight: StakingContract['nextWeight']) => (
-        <Space size={2} direction="vertical">
-          <Text>{`${formatWeiNumber({
-            value: nextWeight?.percentage,
-            maximumFractionDigits: 3,
-          })}%`}</Text>
-          <Text type="secondary">{`${formatWeiNumber({
-            value: nextWeight?.value,
-            maximumFractionDigits: 3,
-          })} veOLAS`}</Text>
-        </Space>
-      ),
-    },
-  ];
-};
+const columns = [
+  {
+    title: 'Staking contract',
+    dataIndex: 'metadata',
+    render: (metadata: StakingContract['metadata']) => <Text>{metadata?.name}</Text>,
+  },
+  {
+    title: 'Chain Id',
+    dataIndex: 'chainId',
+    width: 120,
+  },
+  {
+    title: "Next Week's Weight",
+    width: 200,
+    dataIndex: 'nextWeight',
+    render: (nextWeight: StakingContract['nextWeight']) => (
+      <Space size={2} direction="vertical">
+        <Text>{`${formatWeiNumber({
+          value: nextWeight?.percentage,
+          maximumFractionDigits: 3,
+        })}%`}</Text>
+        <Text type="secondary">{`${formatWeiNumber({
+          value: nextWeight?.value,
+          maximumFractionDigits: 3,
+        })} veOLAS`}</Text>
+      </Space>
+    ),
+  },
+];
 
 type ClaimStakingIncentivesModalProps = {
   onClose: () => void;
@@ -91,12 +87,15 @@ export const ClaimStakingIncentivesModal = ({ onClose }: ClaimStakingIncentivesM
 
   const nomineesForCurrentBatch = useMemo(() => {
     const [, currentBatchNomineesSubArray] = nomineesToClaimBatches?.[currentBatch] ?? [];
-    return (currentBatchNomineesSubArray || []).flat().map((nomineeAddress) => {
-      const nominee = stakingContracts.find(
-        (nominee) => nominee.address === nomineeAddress,
-      ) as StakingContract;
-      return nominee;
-    });
+    if (!currentBatchNomineesSubArray) return [];
+    return currentBatchNomineesSubArray
+      .flat()
+      .map((nomineeAddress) => {
+        const nominee = stakingContracts.find((nominee) => nominee.address === nomineeAddress);
+        if (!nominee) return null;
+        return nominee;
+      })
+      .filter((nominee) => nominee !== null);
   }, [currentBatch, nomineesToClaimBatches, stakingContracts]);
 
   // Refresh claimable batches every time the modal is opened.
@@ -142,7 +141,7 @@ export const ClaimStakingIncentivesModal = ({ onClose }: ClaimStakingIncentivesM
                 children: (
                   <Table
                     scroll={{ y: TABLE_SCROLL_HEIGHT }}
-                    columns={getColumns()}
+                    columns={columns}
                     dataSource={nomineesForCurrentBatch}
                     pagination={false}
                     rowKey="address"
@@ -153,7 +152,7 @@ export const ClaimStakingIncentivesModal = ({ onClose }: ClaimStakingIncentivesM
           />
 
           {!isCurrentBatchClaimed && (
-            <Button type="primary" size={'large'} loading={isPending} onClick={handleClaimForBatch}>
+            <Button type="primary" size="large" loading={isPending} onClick={handleClaimForBatch}>
               Claim Incentives
             </Button>
           )}
