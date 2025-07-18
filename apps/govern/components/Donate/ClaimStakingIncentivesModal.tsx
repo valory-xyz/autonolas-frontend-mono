@@ -35,7 +35,7 @@ const getColumns = () => {
     {
       title: 'Staking contract',
       dataIndex: 'metadata',
-      render: (metadata: StakingContract['metadata']) => <Text>{metadata.name}</Text>,
+      render: (metadata: StakingContract['metadata']) => <Text>{metadata?.name}</Text>,
     },
     {
       title: 'Chain Id',
@@ -49,11 +49,11 @@ const getColumns = () => {
       render: (nextWeight: StakingContract['nextWeight']) => (
         <Space size={2} direction="vertical">
           <Text>{`${formatWeiNumber({
-            value: nextWeight.percentage,
+            value: nextWeight?.percentage,
             maximumFractionDigits: 3,
           })}%`}</Text>
           <Text type="secondary">{`${formatWeiNumber({
-            value: nextWeight.value,
+            value: nextWeight?.value,
             maximumFractionDigits: 3,
           })} veOLAS`}</Text>
         </Space>
