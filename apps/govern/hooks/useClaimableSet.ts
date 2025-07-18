@@ -95,7 +95,6 @@ export const useClaimableNomineesBatches = () => {
     await refetchLastClaimedStakingEpoch();
   }, [refetchLastClaimedStakingEpoch]);
 
-  // TODO: ignore (0x0, 0) and (0xdead, 1) nominees
   const nomineesToClaimBatches = useMemo(() => {
     if (!nominees.length || !lastClaimedStakingEpochByNominee || !currentEpoch || !minStakingWeight)
       return [];
