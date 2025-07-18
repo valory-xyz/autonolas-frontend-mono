@@ -73,6 +73,8 @@ const ALLOWED_ORIGINS = [
   'https://virtual.polygon.rpc.tenderly.co/',
   'https://virtual.mode.rpc.tenderly.co/',
   'https://rpc.tenderly.co/fork/',
+  'https://virtual.base.rpc.tenderly.co/',
+
   // others
   'https://api.thegraph.com/',
   'https://api.studio.thegraph.com/',
