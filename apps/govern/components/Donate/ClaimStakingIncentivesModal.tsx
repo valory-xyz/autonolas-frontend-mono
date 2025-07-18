@@ -14,7 +14,7 @@ const { Text } = Typography;
 const CHAIN_ID_COLUMN_WIDTH = 120;
 const NEXT_WEIGHT_COLUMN_WIDTH = 200;
 const MODAL_WIDTH = 860;
-const TABLE_SCROLL_HEIGHT = 500;
+const TABLE_SCROLL_HEIGHT = 420;
 const STEP_CHANGE_DELAY = 1000;
 
 const modalProps = {
@@ -75,14 +75,17 @@ export const ClaimStakingIncentivesModal = ({ onClose }: ClaimStakingIncentivesM
   const { claimIncentivesForBatch, isPending } = useClaimStakingIncentivesBatch({
     onSuccess: () => {
       setClaimedBatches((prev) => [...prev, currentBatch]);
-      setTimeout(() => {
-        setCurrentBatch((prev) => prev + 1);
-      }, STEP_CHANGE_DELAY);
-      notifySuccess('Staking incentives claimed successfully');
+      // Only move to next batch, if more batches are remaining.
+      if (currentBatch < nomineesToClaimBatches.length - 1) {
+        setTimeout(() => {
+          setCurrentBatch((prev) => prev + 1);
+        }, STEP_CHANGE_DELAY);
+      }
+      notifySuccess(`Staking incentives for batch ${currentBatch + 1} claimed successfully`);
     },
     onError: (error) => {
       console.error(error);
-      notifyError('Failed to claim staking incentives');
+      notifyError(`Failed to claim staking incentives for batch ${currentBatch + 1}`);
     },
   });
 
