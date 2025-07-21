@@ -105,15 +105,7 @@ export const ClaimStakingIncentivesModal = ({ onClose }: ClaimStakingIncentivesM
 
   const handleClaimForBatch = () => claimIncentivesForBatch(nomineesToClaimBatches[currentBatch]);
 
-  if (nomineesToClaimBatches.length === 0) {
-    return (
-      <Modal {...modalProps} onCancel={onClose}>
-        <StakingIncentivesModalContainer $isEmpty={true}>
-          <Text>All staking incentives were claimed this epoch.</Text>
-        </StakingIncentivesModalContainer>
-      </Modal>
-    );
-  }
+  if (nomineesToClaimBatches.length === 0) return <NoNomineesToClaimModal onClose={onClose} />;
 
   const isCurrentBatchClaimed = claimedBatches.includes(currentBatch);
   return (
@@ -161,3 +153,11 @@ export const ClaimStakingIncentivesModal = ({ onClose }: ClaimStakingIncentivesM
     </Modal>
   );
 };
+
+const NoNomineesToClaimModal = ({ onClose }: ClaimStakingIncentivesModalProps) => (
+  <Modal {...modalProps} onCancel={onClose}>
+    <StakingIncentivesModalContainer $isEmpty={true}>
+      <Text>All staking incentives were claimed this epoch.</Text>
+    </StakingIncentivesModalContainer>
+  </Modal>
+);
