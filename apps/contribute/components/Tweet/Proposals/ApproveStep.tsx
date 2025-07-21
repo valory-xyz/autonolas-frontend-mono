@@ -42,26 +42,24 @@ export const ApproveStep = ({ isApproveLoading, proposal, onApprove }: ApproveSt
   const isApproveDisabled = !account || !isProposalVerified || proposal?.posted;
 
   const tweetData = useMemo(() => {
-    if (typeof proposal?.text === 'string') {
+    if (!Array.isArray(proposal?.text)) return {};
+
+    if (proposal?.text.length === 1) {
       return {
         tweet: { text: proposal.text, media: proposal?.media_hashes ?? [] },
       };
     }
 
-    if (Array.isArray(proposal?.text)) {
-      return {
-        thread: proposal.text.map((text, index) => {
-          const tweetMedia = (proposal?.media_hashes ?? [])?.[index];
-          const media = tweetMedia ? [tweetMedia] : [];
-          return {
-            text,
-            media,
-          };
-        }),
-      };
-    }
-
-    return {};
+    return {
+      thread: proposal.text.map((text, index) => {
+        const tweetMedia = (proposal?.media_hashes ?? [])?.[index];
+        const media = tweetMedia ? [tweetMedia] : [];
+        return {
+          text,
+          media,
+        };
+      }),
+    };
   }, [proposal?.media_hashes, proposal?.text]);
 
   return (

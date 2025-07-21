@@ -145,7 +145,7 @@ export const TweetPropose = () => {
         type="primary"
         disabled={!canSubmit}
         loading={isSubmitting && !isThreadModalVisible}
-        onClick={() => handleSubmit({ text: tweet, media })}
+        onClick={() => handleSubmit({ text: [tweet], media })}
       >
         Propose
       </Button>
