@@ -107,7 +107,7 @@ export const useClaimableNomineesBatches = () => {
 
     /**
      * Filter nominees to be claimed as per the conditions:
-     * 1. Nomineed's relative weight > min staking weight
+     * 1. Nominee's relative weight > min staking weight
      * 2. Nominee has not claimed in the current or future epochs
      */
     const filteredNominees = nominees.filter((nominee) => {

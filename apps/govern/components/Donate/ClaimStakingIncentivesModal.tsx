@@ -4,7 +4,7 @@ import { Button, Collapse, Flex, Modal, Space, Spin, Steps, Table, Tag, Typograp
 import { formatWeiNumber, notifyError, notifySuccess } from 'libs/util-functions/src';
 import { useAppSelector } from 'store/index';
 import { StakingContract } from 'types';
-import { useClaimableNomineesBatches } from 'hooks/useClaimableSet';
+import { useClaimableNomineesBatches } from 'hooks/useClaimableNomineeBatches';
 import { useClaimStakingIncentivesBatch } from 'hooks/useClaimStakingIncentivesBatch';
 
 import { StakingIncentivesModalContainer } from './styles';
