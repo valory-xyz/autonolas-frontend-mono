@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Button, Collapse, Flex, Modal, Space, Steps, Table, Tag, Typography } from 'antd';
+import { Button, Collapse, Flex, Modal, Space, Spin, Steps, Table, Tag, Typography } from 'antd';
 
 import { formatWeiNumber, notifyError, notifySuccess } from 'libs/util-functions/src';
 import { useAppSelector } from 'store/index';
@@ -7,7 +7,7 @@ import { StakingContract } from 'types';
 import { useClaimableNomineesBatches } from 'hooks/useClaimableSet';
 import { useClaimStakingIncentivesBatch } from 'hooks/useClaimStakingIncentivesBatch';
 
-import { StakingIncentivesModalContainer } from './styles';
+import { EmptyModalContainer, StakingIncentivesModalContainer } from './styles';
 
 const { Text } = Typography;
 
@@ -67,7 +67,8 @@ export const ClaimStakingIncentivesModal = ({ onClose }: ClaimStakingIncentivesM
   const [claimedBatches, setClaimedBatches] = useState<number[]>([]);
   const { stakingContracts } = useAppSelector((state) => state.govern);
 
-  const { nomineesToClaimBatches, refetchClaimableBatches } = useClaimableNomineesBatches();
+  const { nomineesToClaimBatches, refetchClaimableBatches, isLoadingClaimableBatches } =
+    useClaimableNomineesBatches();
   const { claimIncentivesForBatch, isPending } = useClaimStakingIncentivesBatch({
     onSuccess: () => {
       setClaimedBatches((prev) => [...prev, currentBatch]);
@@ -105,59 +106,95 @@ export const ClaimStakingIncentivesModal = ({ onClose }: ClaimStakingIncentivesM
 
   const handleClaimForBatch = () => claimIncentivesForBatch(nomineesToClaimBatches[currentBatch]);
 
-  if (nomineesToClaimBatches.length === 0) return <NoNomineesToClaimModal onClose={onClose} />;
-
   const isCurrentBatchClaimed = claimedBatches.includes(currentBatch);
   return (
     <Modal {...modalProps} onCancel={onClose}>
-      <StakingIncentivesModalContainer>
-        <Steps
-          size="small"
-          items={getSteps(nomineesToClaimBatches.length)}
-          current={currentBatch}
-          direction="vertical"
+      {nomineesToClaimBatches.length === 0 || isLoadingClaimableBatches ? (
+        <EmptyModalContent isLoadingClaimableBatches={isLoadingClaimableBatches} />
+      ) : (
+        <ModalContent
+          nomineesToClaimBatches={nomineesToClaimBatches}
+          currentBatch={currentBatch}
+          isCurrentBatchClaimed={isCurrentBatchClaimed}
+          nomineesForCurrentBatch={nomineesForCurrentBatch}
+          isPending={isPending}
+          handleClaimForBatch={handleClaimForBatch}
         />
-
-        <Flex vertical gap={16} style={{ width: '100%', padding: '0 16px' }}>
-          {isCurrentBatchClaimed && (
-            <div>
-              <Tag color="success">Batch Claimed</Tag>
-            </div>
-          )}
-
-          <Collapse
-            items={[
-              {
-                key: '1',
-                label: "Staking Contracts' Details",
-                children: (
-                  <Table
-                    scroll={{ y: TABLE_SCROLL_HEIGHT }}
-                    columns={columns}
-                    dataSource={nomineesForCurrentBatch}
-                    pagination={false}
-                    rowKey="address"
-                  />
-                ),
-              },
-            ]}
-          />
-
-          {!isCurrentBatchClaimed && (
-            <Button type="primary" size="large" loading={isPending} onClick={handleClaimForBatch}>
-              Claim Incentives
-            </Button>
-          )}
-        </Flex>
-      </StakingIncentivesModalContainer>
+      )}
     </Modal>
   );
 };
 
-const NoNomineesToClaimModal = ({ onClose }: ClaimStakingIncentivesModalProps) => (
-  <Modal {...modalProps} onCancel={onClose}>
-    <StakingIncentivesModalContainer $isEmpty={true}>
-      <Text>All staking incentives were claimed this epoch.</Text>
-    </StakingIncentivesModalContainer>
-  </Modal>
+const EmptyModalContent = ({
+  isLoadingClaimableBatches,
+}: {
+  isLoadingClaimableBatches: boolean;
+}) => (
+  <EmptyModalContainer>
+    {isLoadingClaimableBatches && <Spin />}
+    <Text>
+      {isLoadingClaimableBatches
+        ? 'Calculating which staking contracts can be claimed!'
+        : 'All staking incentives were claimed this epoch.'}
+    </Text>
+  </EmptyModalContainer>
+);
+
+type ModalContentProps = {
+  nomineesToClaimBatches: ReturnType<typeof useClaimableNomineesBatches>['nomineesToClaimBatches'];
+  currentBatch: number;
+  isCurrentBatchClaimed: boolean;
+  nomineesForCurrentBatch: StakingContract[];
+  isPending: boolean;
+  handleClaimForBatch: () => void;
+};
+
+const ModalContent = ({
+  nomineesToClaimBatches,
+  currentBatch,
+  isCurrentBatchClaimed,
+  nomineesForCurrentBatch,
+  isPending,
+  handleClaimForBatch,
+}: ModalContentProps) => (
+  <StakingIncentivesModalContainer>
+    <Steps
+      size="small"
+      items={getSteps(nomineesToClaimBatches.length)}
+      current={currentBatch}
+      direction="vertical"
+    />
+
+    <Flex vertical gap={16} style={{ width: '100%', padding: '0 16px' }}>
+      {isCurrentBatchClaimed && (
+        <div>
+          <Tag color="success">Batch Claimed</Tag>
+        </div>
+      )}
+
+      <Collapse
+        items={[
+          {
+            key: '1',
+            label: "Staking Contracts' Details",
+            children: (
+              <Table
+                scroll={{ y: TABLE_SCROLL_HEIGHT }}
+                columns={columns}
+                dataSource={nomineesForCurrentBatch}
+                pagination={false}
+                rowKey="address"
+              />
+            ),
+          },
+        ]}
+      />
+
+      {!isCurrentBatchClaimed && (
+        <Button type="primary" size="large" loading={isPending} onClick={handleClaimForBatch}>
+          Claim Incentives
+        </Button>
+      )}
+    </Flex>
+  </StakingIncentivesModalContainer>
 );

@@ -69,3 +69,12 @@ export const StakingIncentivesModalContainer = styled.div<{ $isEmpty?: boolean }
     background-color: transparent !important;
   }
 `;
+
+export const EmptyModalContainer = styled.div`
+  margin: 24px 0 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+`;
