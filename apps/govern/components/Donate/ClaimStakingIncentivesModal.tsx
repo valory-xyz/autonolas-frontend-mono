@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Button, Collapse, Flex, Modal, Space, Spin, Steps, Table, Tag, Typography } from 'antd';
 
 import { formatWeiNumber, notifyError, notifySuccess } from 'libs/util-functions/src';
@@ -7,7 +7,7 @@ import { StakingContract } from 'types';
 import { useClaimableNomineesBatches } from 'hooks/useClaimableSet';
 import { useClaimStakingIncentivesBatch } from 'hooks/useClaimStakingIncentivesBatch';
 
-import { EmptyModalContainer, StakingIncentivesModalContainer } from './styles';
+import { StakingIncentivesModalContainer } from './styles';
 
 const { Text } = Typography;
 
@@ -67,7 +67,7 @@ export const ClaimStakingIncentivesModal = ({ onClose }: ClaimStakingIncentivesM
   const [claimedBatches, setClaimedBatches] = useState<number[]>([]);
   const { stakingContracts } = useAppSelector((state) => state.govern);
 
-  const { nomineesToClaimBatches, refetchClaimableBatches, isLoadingClaimableBatches } =
+  const { nomineesToClaimBatches, isLoadingClaimableBatches, clearClaimableBatches } =
     useClaimableNomineesBatches();
   const { claimIncentivesForBatch, isPending } = useClaimStakingIncentivesBatch({
     onSuccess: () => {
@@ -99,16 +99,18 @@ export const ClaimStakingIncentivesModal = ({ onClose }: ClaimStakingIncentivesM
       .filter((nominee): nominee is StakingContract => nominee !== null);
   }, [currentBatch, nomineesToClaimBatches, stakingContracts]);
 
-  // Refresh claimable batches every time the modal is opened.
-  useEffect(() => {
-    refetchClaimableBatches();
-  }, [refetchClaimableBatches]);
+  const handleClose = () => {
+    /* Clear claimable batches when the modal is closed, 
+    this will ensure every time the modal is opened again it has the latest content. */
+    clearClaimableBatches();
+    onClose();
+  };
 
   const handleClaimForBatch = () => claimIncentivesForBatch(nomineesToClaimBatches[currentBatch]);
 
   const isCurrentBatchClaimed = claimedBatches.includes(currentBatch);
   return (
-    <Modal {...modalProps} onCancel={onClose}>
+    <Modal {...modalProps} onCancel={handleClose}>
       {nomineesToClaimBatches.length === 0 || isLoadingClaimableBatches ? (
         <EmptyModalContent isLoadingClaimableBatches={isLoadingClaimableBatches} />
       ) : (
@@ -130,14 +132,14 @@ const EmptyModalContent = ({
 }: {
   isLoadingClaimableBatches: boolean;
 }) => (
-  <EmptyModalContainer>
+  <StakingIncentivesModalContainer $isEmpty>
     {isLoadingClaimableBatches && <Spin />}
-    <Text>
+    <Text style={{ fontSize: 18 }}>
       {isLoadingClaimableBatches
         ? 'Calculating which staking contracts can be claimed!'
         : 'All staking incentives were claimed this epoch.'}
     </Text>
-  </EmptyModalContainer>
+  </StakingIncentivesModalContainer>
 );
 
 type ModalContentProps = {

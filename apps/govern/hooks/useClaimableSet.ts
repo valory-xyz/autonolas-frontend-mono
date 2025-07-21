@@ -1,4 +1,5 @@
 import { useMemo, useCallback } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import type { Address } from 'viem';
 import { mainnet } from 'viem/chains';
 import { useReadContract, useReadContracts } from 'wagmi';
@@ -33,6 +34,7 @@ const useMinStakingValue = ({ epoch }: { epoch: number | null }) => {
 };
 
 const useNomineesLastClaimedStakingEpoch = ({ nominees }: { nominees: StakingContract[] }) => {
+  const queryClient = useQueryClient();
   const contracts = nominees.map((nominee) => ({
     address: DISPENSER.addresses[mainnet.id],
     abi: DISPENSER.abi,
@@ -43,10 +45,14 @@ const useNomineesLastClaimedStakingEpoch = ({ nominees }: { nominees: StakingCon
   const {
     data: lastClaimedStakingEpoch,
     isLoading: isLastClaimedLoading,
-    refetch: refetchLastClaimedStakingEpoch,
+    queryKey,
   } = useReadContracts({
     contracts,
   });
+
+  const clearLastClaimedStakingEpoch = useCallback(() => {
+    queryClient.removeQueries({ queryKey });
+  }, [queryClient, queryKey]);
 
   // Map the results to an object with nominee address as key
   const lastClaimedStakingEpochByNominee = useMemo(() => {
@@ -61,7 +67,7 @@ const useNomineesLastClaimedStakingEpoch = ({ nominees }: { nominees: StakingCon
     );
   }, [lastClaimedStakingEpoch, nominees]);
 
-  return { lastClaimedStakingEpochByNominee, isLastClaimedLoading, refetchLastClaimedStakingEpoch };
+  return { lastClaimedStakingEpochByNominee, isLastClaimedLoading, clearLastClaimedStakingEpoch };
 };
 
 const chunkNomineesArray = (nominees: Address[], chunkSize: number = MAX_BATCH_SIZE) => {
@@ -79,7 +85,7 @@ export const useClaimableNomineesBatches = () => {
   const { minStakingWeight, isMinStakingLoading } = useMinStakingValue({
     epoch: previousEpoch,
   });
-  const { lastClaimedStakingEpochByNominee, isLastClaimedLoading, refetchLastClaimedStakingEpoch } =
+  const { lastClaimedStakingEpochByNominee, isLastClaimedLoading, clearLastClaimedStakingEpoch } =
     useNomineesLastClaimedStakingEpoch({ nominees });
 
   // Calculate if we're still loading data
@@ -87,13 +93,13 @@ export const useClaimableNomineesBatches = () => {
     isEpochLoading || isMinStakingLoading || isLastClaimedLoading || !nominees.length;
 
   /**
-   * Refetch the last claimed staking epoch for the nominees, this is required in
+   * Clear the last claimed staking epoch for the nominees, this is required in
    * case the user claims one or more batches and closes the modal but few batches
    * are still remaining to be claimed. This will make sure we show the latest state to the user.
    */
-  const refetchClaimableBatches = useCallback(async () => {
-    await refetchLastClaimedStakingEpoch();
-  }, [refetchLastClaimedStakingEpoch]);
+  const clearClaimableBatches = useCallback(async () => {
+    await clearLastClaimedStakingEpoch();
+  }, [clearLastClaimedStakingEpoch]);
 
   const nomineesToClaimBatches = useMemo(() => {
     if (!nominees.length || !lastClaimedStakingEpochByNominee || !currentEpoch || !minStakingWeight)
@@ -208,6 +214,6 @@ export const useClaimableNomineesBatches = () => {
   return {
     nomineesToClaimBatches,
     isLoadingClaimableBatches: isLoading,
-    refetchClaimableBatches,
+    clearClaimableBatches,
   };
 };
