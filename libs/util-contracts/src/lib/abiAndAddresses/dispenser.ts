@@ -1090,4 +1090,4 @@ export const DISPENSER = {
       type: 'function',
     },
   ],
-};
+} as const;
