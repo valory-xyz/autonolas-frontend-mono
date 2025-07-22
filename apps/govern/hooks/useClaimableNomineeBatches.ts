@@ -5,11 +5,12 @@ import { mainnet } from 'viem/chains';
 import { useReadContract, useReadContracts } from 'wagmi';
 
 import { useAppSelector } from 'store/index';
+import { useNomineesWeights } from 'hooks/useNomineesWeights';
 import { TOKENOMICS } from 'libs/util-contracts/src';
 import { DISPENSER } from 'libs/util-contracts/src/lib/abiAndAddresses';
 
 import { getNomineeHash } from 'common-util/functions/nominee-hash';
-import { useEpochCounter } from 'components/Donate/hooks';
+import { useEpochCounter, useEpochTokenomics } from 'components/Donate/hooks';
 import type { StakingContract } from 'types';
 
 const MAX_BATCH_SIZE = 10;
@@ -70,6 +71,28 @@ const useNomineesLastClaimedStakingEpoch = ({ nominees }: { nominees: StakingCon
   return { lastClaimedStakingEpochByNominee, isLastClaimedLoading, clearLastClaimedStakingEpoch };
 };
 
+const useNomineesWeightsAtPrevEpochEnd = ({
+  nominees,
+  previousEpoch,
+}: {
+  nominees: StakingContract[];
+  previousEpoch: number | null;
+}) => {
+  const { data: prevEpochPoint } = useEpochTokenomics(previousEpoch);
+
+  const { data: nomineesWeightsAtPrevEpochEnd } = useNomineesWeights(
+    nominees.map((nominee) => ({
+      account: nominee.address,
+      chainId: BigInt(nominee.chainId),
+    })),
+    prevEpochPoint?.endTime || null,
+  );
+
+  return {
+    nomineesWeightsAtPrevEpochEnd,
+  };
+};
+
 const chunkNomineesArray = (nominees: Address[], chunkSize: number = MAX_BATCH_SIZE) => {
   const chunks = [];
   for (let i = 0; i < nominees.length; i += chunkSize) {
@@ -87,10 +110,18 @@ export const useClaimableNomineesBatches = () => {
   });
   const { lastClaimedStakingEpochByNominee, isLastClaimedLoading, clearLastClaimedStakingEpoch } =
     useNomineesLastClaimedStakingEpoch({ nominees });
+  const { nomineesWeightsAtPrevEpochEnd } = useNomineesWeightsAtPrevEpochEnd({
+    nominees,
+    previousEpoch,
+  });
 
   // Calculate if we're still loading data
   const isLoading =
-    isEpochLoading || isMinStakingLoading || isLastClaimedLoading || !nominees.length;
+    isEpochLoading ||
+    isMinStakingLoading ||
+    isLastClaimedLoading ||
+    !nominees.length ||
+    !nomineesWeightsAtPrevEpochEnd;
 
   /**
    * Clear the last claimed staking epoch for the nominees, this is required in
@@ -102,7 +133,13 @@ export const useClaimableNomineesBatches = () => {
   }, [clearLastClaimedStakingEpoch]);
 
   const nomineesToClaimBatches = useMemo(() => {
-    if (!nominees.length || !lastClaimedStakingEpochByNominee || !currentEpoch || !minStakingWeight)
+    if (
+      !nominees.length ||
+      !lastClaimedStakingEpochByNominee ||
+      !currentEpoch ||
+      !minStakingWeight ||
+      !nomineesWeightsAtPrevEpochEnd
+    )
       return [];
 
     /**
@@ -111,11 +148,11 @@ export const useClaimableNomineesBatches = () => {
      * 2. Nominee has not claimed in the current or future epochs
      */
     const filteredNominees = nominees.filter((nominee) => {
-      const { nextWeight } = nominee;
-      const nomineeRelativeWeight = nextWeight.percentage * 100;
+      const nomineeRelativeWeight = nomineesWeightsAtPrevEpochEnd[nominee.address].percentage * 100;
       const lastClaimedStakingEpoch = Number(
         lastClaimedStakingEpochByNominee[nominee.address].result,
       );
+
       return nomineeRelativeWeight >= minStakingWeight && lastClaimedStakingEpoch < currentEpoch;
     });
 
@@ -209,7 +246,13 @@ export const useClaimableNomineesBatches = () => {
     }
 
     return batches;
-  }, [nominees, lastClaimedStakingEpochByNominee, currentEpoch, minStakingWeight]);
+  }, [
+    nominees,
+    lastClaimedStakingEpochByNominee,
+    currentEpoch,
+    minStakingWeight,
+    nomineesWeightsAtPrevEpochEnd,
+  ]);
 
   return {
     nomineesToClaimBatches,
