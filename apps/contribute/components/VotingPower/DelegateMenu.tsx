@@ -22,15 +22,15 @@ type DelegateMenuProps = {
   votingPower: string;
 };
 
-const DelegateMenu = (props: DelegateMenuProps) => {
+export const DelegateMenu = ({ refetchVotingPower, votingPower }: DelegateMenuProps) => {
   const [form] = Form.useForm();
   const { account } = useHelpers();
 
   const { balance, delegatorsBalance, delegatorList } = useVotingPowerBreakdown(account);
   const { delegatee, setDelegatee } = useFetchDelegatee(account);
 
-  const [delegateFormVisible, setDelegateFormVisible] = useState(false);
-  const [whoDelegatedVisible, setWhoDelegatedVisible] = useState(false);
+  const [isDelegateFormVisible, setIsDelegateFormVisible] = useState(false);
+  const [isWhoDelegatedVisible, setIsWhoDelegatedVisible] = useState(false);
   const { isDelegating, handleDelegate } = useDelegate(account, balance, delegatee);
   const { canUndelegate, isUndelegating, handleUndelegate } = useUndelegate(
     account,
@@ -47,8 +47,8 @@ const DelegateMenu = (props: DelegateMenuProps) => {
         notification.success({
           message: 'Delegated voting power',
         });
-        setDelegateFormVisible(false);
-        props.refetchVotingPower();
+        setIsDelegateFormVisible(false);
+        refetchVotingPower();
       },
       onError: (error: unknown) => {
         console.error(error);
@@ -79,7 +79,7 @@ const DelegateMenu = (props: DelegateMenuProps) => {
   return (
     <StyledMenu className="p-12">
       <Text strong>Total voting power</Text>
-      <Paragraph className="my-8">{formatWeiBalanceWithCommas(props.votingPower)}</Paragraph>
+      <Paragraph className="my-8">{formatWeiBalanceWithCommas(votingPower)}</Paragraph>
       <Text strong>Your voting power</Text>
       <Paragraph className="my-8">
         {delegatee
@@ -88,14 +88,14 @@ const DelegateMenu = (props: DelegateMenuProps) => {
       </Paragraph>
       <Text strong>Delegated to you</Text>
       <Paragraph className="my-8">{formatWeiBalanceWithCommas(delegatorsBalance)}</Paragraph>
-      {delegatorList.length > 0 && !whoDelegatedVisible && (
-        <Button size="small" onClick={() => setWhoDelegatedVisible(true)}>
+      {delegatorList.length > 0 && !isWhoDelegatedVisible && (
+        <Button size="small" onClick={() => setIsWhoDelegatedVisible(true)}>
           Who delegated to me?
         </Button>
       )}
-      {whoDelegatedVisible && (
+      {isWhoDelegatedVisible && (
         <>
-          <Button size="small" onClick={() => setWhoDelegatedVisible(false)}>
+          <Button size="small" onClick={() => setIsWhoDelegatedVisible(false)}>
             Hide
           </Button>
           {delegatorList.map((delegator) => (
@@ -126,9 +126,9 @@ const DelegateMenu = (props: DelegateMenuProps) => {
           'None'
         )}
       </Paragraph>
-      {delegateFormVisible && (
+      {isDelegateFormVisible && (
         <>
-          <Button size="small" className="mb-8" onClick={() => setDelegateFormVisible(false)}>
+          <Button size="small" className="mb-8" onClick={() => setIsDelegateFormVisible(false)}>
             Hide
           </Button>
           <Form onFinish={onSubmitDelegate} form={form}>
@@ -155,9 +155,9 @@ const DelegateMenu = (props: DelegateMenuProps) => {
           </Form>
         </>
       )}
-      {!delegateFormVisible && (
+      {!isDelegateFormVisible && (
         <>
-          <Button size="small" onClick={() => setDelegateFormVisible(true)}>
+          <Button size="small" onClick={() => setIsDelegateFormVisible(true)}>
             Delegate
           </Button>
           {canUndelegate && (
@@ -175,5 +175,3 @@ const DelegateMenu = (props: DelegateMenuProps) => {
     </StyledMenu>
   );
 };
-
-export default DelegateMenu;

@@ -30,7 +30,7 @@ const SetupStaking = () => (
 );
 
 type StakingProps = {
-  profile: LeaderboardUser | undefined;
+  profile?: LeaderboardUser;
   tweets: Tweet[];
 };
 

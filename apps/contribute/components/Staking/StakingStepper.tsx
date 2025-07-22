@@ -33,7 +33,7 @@ const STAKING_STEPS = {
   CONNECT_TWITTER: 0,
   SET_UP_AND_STAKE: 1,
   TWEET_AND_EARN: 2,
-};
+} as const;
 
 const STAKING_CONTRACTS = Object.entries(STAKING_CONTRACTS_DETAILS)
   .filter(([_, values]) => !values.isDeprecated)
@@ -341,7 +341,7 @@ const TweetAndEarn = ({ disabled }: { disabled: boolean }) => {
 };
 
 export const StakingStepper = ({ profile }: { profile: LeaderboardUser | null }) => {
-  const [step, setStep] = useState(
+  const [step, setStep] = useState<number>(
     profile?.twitter_id ? STAKING_STEPS.SET_UP_AND_STAKE : STAKING_STEPS.CONNECT_TWITTER,
   );
 

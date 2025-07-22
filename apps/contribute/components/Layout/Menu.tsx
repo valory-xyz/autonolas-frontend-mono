@@ -25,6 +25,7 @@ const ExternalLink = ({ href, label }: { href: string; label: string }) => (
   </a>
 );
 
+// TODO: use from common lib.
 const navItems = [
   { key: 'bond', label: <ExternalLink label="Bond" href="https://bond.olas.network/" /> },
   {

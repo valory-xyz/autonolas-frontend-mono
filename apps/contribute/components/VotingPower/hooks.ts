@@ -1,7 +1,6 @@
-import { ethers } from 'ethers';
 import { isNil } from 'lodash';
 import { useCallback, useEffect, useState } from 'react';
-import { Address } from 'viem';
+import { Address, zeroAddress } from 'viem';
 import { useReadContract, useReadContracts } from 'wagmi';
 import { mainnet } from 'wagmi/chains';
 
@@ -107,7 +106,7 @@ export const useVotingPowerBreakdown = (account: string | null) => {
     if (delegatorList.length > 0 && data) {
       setDelegatorsBalance(data);
     }
-    //   // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data, delegatorList]);
 
   return { balance, delegatorsBalance, delegatorList };
@@ -128,7 +127,7 @@ export const useFetchDelegatee = (account: string | null) => {
     },
   });
 
-  const delegatee = data !== ethers.ZeroAddress ? data : null;
+  const delegatee = data !== zeroAddress ? data : null;
 
   return { delegatee, setDelegatee: refetch };
 };
@@ -207,9 +206,9 @@ export const useUndelegate = (
         account,
         balance,
         delegatee: delegatee || '',
-        newDelegatee: ethers.ZeroAddress,
+        newDelegatee: zeroAddress,
       });
-      await delegate({ account, delegatee: ethers.ZeroAddress });
+      await delegate({ account, delegatee: zeroAddress });
 
       onSuccess();
     } catch (error) {

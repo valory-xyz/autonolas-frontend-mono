@@ -22,13 +22,7 @@ import { SERVICE_STAKING_STATE, STAKING_CONTRACTS_BASE_SUBGRAPH_URL } from 'util
 
 // A hook to get the user service's info based on their account
 // and if the info should be searched in old ContributorsManager or new Contributors
-export const useServiceInfo = ({
-  account,
-  isNew,
-}: {
-  account: Address | undefined;
-  isNew: boolean;
-}) => {
+export const useServiceInfo = ({ account, isNew }: { account?: Address; isNew: boolean }) => {
   const address = isNew ? CONTRIBUTORS_V2_ADDRESS_BASE : CONTRIBUTORS_ADDRESS_BASE;
   const abi = isNew ? CONTRIBUTORS_V2_ABI : CONTRIBUTORS_ABI;
 

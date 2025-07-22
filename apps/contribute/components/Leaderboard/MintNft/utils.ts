@@ -4,7 +4,7 @@ import { notifyError, notifySuccess } from '@autonolas/frontend-library';
 
 import { getMintContract } from 'common-util/Contracts';
 import { getEstimatedGasLimit } from 'common-util/functions/requests';
-import { GATEWAY_URL } from 'util/constants';
+import { GATEWAY_URL } from 'libs/util-constants/src';
 
 const pattern = /ipfs:\/\/+/g;
 export const getAutonolasTokenUri = (tokenUri: string) =>

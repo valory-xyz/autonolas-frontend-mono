@@ -4,9 +4,8 @@ import { isNil } from 'lodash';
 
 import { useHelpers } from 'common-util/hooks/useHelpers';
 
-import DelegateMenu from './DelegateMenu';
+import { DelegateMenu } from './DelegateMenu';
 import { useFetchVotingPower } from './hooks';
-// import { VerticalDivider } from './styles';
 import { formatWeiBalance } from './utils';
 
 const { useBreakpoint } = Grid;

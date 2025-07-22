@@ -24,6 +24,7 @@ export const ShowBadge = ({ image, tokenId }: ShowBadgeProps) => {
     throw new Error('ChainId is null.');
   }
 
+  // TODO: to be removed
   const openSeaUrl = isGoerli(chainId)
     ? 'https://testnets.opensea.io/assets/goerli/0x7c3b976434fae9986050b26089649d9f63314bd8'
     : 'https://opensea.io/assets/ethereum/0x02c26437b292d86c5f4f21bbcce0771948274f84';
@@ -49,9 +50,6 @@ export const ShowBadge = ({ image, tokenId }: ShowBadgeProps) => {
   );
 };
 
-/**
- * @returns {import { Skeleton } from "module"; Skeleton.Image}
- */
 export const BadgeLoadingContainer = styled(Skeleton.Image)`
   &.ant-skeleton {
     border-radius: 1rem;

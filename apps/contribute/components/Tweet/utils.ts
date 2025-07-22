@@ -4,7 +4,7 @@
 import { create } from 'ipfs-http-client';
 import { base32 } from 'multiformats/bases/base32';
 
-import { GATEWAY_URL } from 'util/constants';
+import { GATEWAY_URL } from 'libs/util-constants/src';
 
 import { TweetOrThread } from '.';
 
