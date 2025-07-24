@@ -1,9 +1,10 @@
+import { ATTRIBUTE_ID_MAPPING } from 'common-util/apiRoute';
 import type { NextApiRequest, NextApiResponse } from 'next';
 
 import { ContributeAgent } from 'types/users';
 
 const AGENT_TYPE = process.env.AGENT_TYPE_ID;
-const ATTRIBUTE_TYPE_ID = 2;
+const ATTRIBUTE_TYPE_ID = ATTRIBUTE_ID_MAPPING.USER;
 
 const LIMIT = 1000;
 

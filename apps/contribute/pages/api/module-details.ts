@@ -1,9 +1,10 @@
+import { ATTRIBUTE_ID_MAPPING } from 'common-util/apiRoute';
 import type { NextApiRequest, NextApiResponse } from 'next';
 
 import { ContributeModuleDetails } from 'types/moduleDetails';
 
 const AGENT_TYPE = process.env.AGENT_TYPE_ID;
-const ATTRIBUTE_TYPE_ID = 4;
+const ATTRIBUTE_TYPE_ID = ATTRIBUTE_ID_MAPPING.MODULE_DATA;
 
 export const MODULE_DETAILS_API_BASE_URL = `${process.env.NEXT_PUBLIC_AFMDB_URL}/api/agent-types/${AGENT_TYPE}/attributes/${ATTRIBUTE_TYPE_ID}/values`;
 

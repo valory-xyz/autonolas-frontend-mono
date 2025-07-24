@@ -1,6 +1,6 @@
 export type ContributeTweet = {
-  agent_id: 1;
-  attr_def_id: 1;
+  agent_id: number;
+  attr_def_id: number;
   string_value: null;
   integer_value: null;
   float_value: null;

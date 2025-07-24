@@ -1,8 +1,8 @@
 import { Address } from 'viem';
 
 export type ContributeAgent = {
-  agent_id: 1;
-  attr_def_id: 2;
+  agent_id: number;
+  attr_def_id: number;
   string_value: null;
   integer_value: null;
   float_value: null;
