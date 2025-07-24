@@ -12,7 +12,7 @@ export type ContributeTweet = {
     epoch: number | null;
     points: number;
     campaign: string | null;
-    timestamp: number | null;
+    timestamp: string | null;
     counted_for_activity: boolean;
     attribute_instance_id: null;
   };

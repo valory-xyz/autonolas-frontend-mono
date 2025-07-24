@@ -28,7 +28,7 @@ import { useAccount } from 'wagmi';
 import { COLOR, NA } from '@autonolas/frontend-library';
 
 import { getBytes32FromAddress, truncateAddress } from 'common-util/functions';
-import { formatDynamicTimeRange } from 'common-util/functions/time';
+import { formatDynamicTimeRange, getTimestamp } from 'common-util/functions/time';
 import { LeaderboardUser, Tweet } from 'store/types';
 import { GOVERN_APP_URL, OLAS_UNICODE_SYMBOL, STAKING_CONTRACTS_DETAILS } from 'util/constants';
 import { useServiceInfo, useStakingDetails } from 'util/staking';
@@ -144,7 +144,8 @@ export const StakingDetails = ({ profile, tweets }: StakingDetailsProps) => {
          * BE only stores epochs number regardless the staking instance (while each has their own epoch counter)
          * preventing from separating old contracts (with 20+ epochs) from the new ones (they've just started)
          */
-        if (Number(tweet.timestamp) < Number(stakingDetails.tsStart)) return false;
+        if (!tweet.timestamp) return false;
+        if (Number(getTimestamp(tweet.timestamp)) < Number(stakingDetails.tsStart)) return false;
 
         return Number(tweet.epoch) > stakingDetails.epochCounter && tweet.points > 0;
       });

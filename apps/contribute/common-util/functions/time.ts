@@ -94,3 +94,4 @@ export const formatDate = (timeInMs: number) => {
 };
 
 export const getNowTimestamp = () => Math.round(Date.now() / 1000);
+export const getTimestamp = (date: string) => Math.round(new Date(date).getTime() / 1000);

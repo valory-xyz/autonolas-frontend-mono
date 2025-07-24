@@ -21,6 +21,8 @@ const ALLOWED_ORIGINS = [
   "'self'",
   'https://*.olas.network/',
   'https://*.autonolas.tech/',
+  'https://pfp.staging.autonolas.tech/healthcheck',
+  'https://pfp.autonolas.tech/healthcheck', 
 
   // web3modal and wallet connect
   ...WALLET_CONNECT_LINKS,
@@ -30,6 +32,12 @@ const ALLOWED_ORIGINS = [
   'https://explorer-api.walletconnect.com/',
   'wss://*.pusher.com/',
   'wss://www.walletlink.org/rpc',
+
+  // binance wallet
+  'wss://nbstream.binance.com/',
+  'https://binance.nodereal.io/',
+  'https://bscrpc.com/',
+  'https://bsc-dataseed2.ninicoin.io/',
 
   // gnosis safe
   'https://safe-transaction-mainnet.safe.global/api/v1/',

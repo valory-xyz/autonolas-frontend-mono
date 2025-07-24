@@ -32,6 +32,10 @@ export const useHealthCheckup = (
 
   // Trigger polling at the specified interval
   useEffect(() => {
+    if (process.env.NODE_ENV !== 'production') {
+      return
+    }
+
     const interval = setInterval(
       async () => {
         await fetchData();
