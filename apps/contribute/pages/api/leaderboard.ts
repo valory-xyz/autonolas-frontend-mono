@@ -2,8 +2,7 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 
 import { ContributeAgent } from 'types/users';
 
-// TODO: Update this once we point to prod.
-const AGENT_TYPE = 1;
+const AGENT_TYPE = process.env.AGENT_TYPE_ID;
 const ATTRIBUTE_TYPE_ID = 2;
 
 const LIMIT = 1000;

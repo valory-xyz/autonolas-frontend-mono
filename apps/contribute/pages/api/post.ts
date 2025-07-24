@@ -6,8 +6,7 @@ import { getSignature } from 'common-util/apiRoute';
 import { getNowTimestamp } from 'common-util/functions/time';
 import type { ContributeModuleDetails, ScheduledTweet } from 'types/moduleDetails';
 
-// TODO: Update this once we point to prod.
-const AGENT_TYPE = 1;
+const AGENT_TYPE = process.env.AGENT_TYPE_ID;
 
 const ENDPOINT_URL = '/api/agent-attributes';
 const BASE_URL = `${process.env.NEXT_PUBLIC_AFMDB_URL}${ENDPOINT_URL}`;
