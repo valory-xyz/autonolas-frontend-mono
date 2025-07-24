@@ -33,7 +33,7 @@ export const useHealthCheckup = (
   // Trigger polling at the specified interval
   useEffect(() => {
     if (process.env.NODE_ENV !== 'production') {
-      return
+      return;
     }
 
     const interval = setInterval(
