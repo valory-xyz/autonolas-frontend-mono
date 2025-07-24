@@ -1,10 +1,9 @@
-import { ATTRIBUTE_ID_MAPPING } from 'common-util/apiRoute';
 import type { NextApiRequest, NextApiResponse } from 'next';
 
 import { ContributeTweet } from 'types/tweets';
 
 const AGENT_TYPE = process.env.AGENT_TYPE_ID;
-const ATTRIBUTE_TYPE_ID = ATTRIBUTE_ID_MAPPING.TWEET;
+const ATTRIBUTE_TYPE_ID = JSON.parse(process.env.ATTRIBUTE_ID_MAPPING!)['TWEET'];
 
 const LIMIT = 1000;
 
