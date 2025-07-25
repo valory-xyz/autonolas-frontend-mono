@@ -11,12 +11,10 @@ import {
   celoAlfajores,
   gnosis,
   gnosisChiado,
-  goerli,
   mainnet,
   optimism,
   optimismSepolia,
   polygon,
-  polygonMumbai,
   mode,
 } from 'wagmi/chains';
 
@@ -25,11 +23,9 @@ import { SOLANA_CHAIN_NAMES, VM_TYPE } from 'util/constants';
 
 export const SUPPORTED_CHAINS: Chain[] = [
   mainnet,
-  goerli,
   gnosis,
   gnosisChiado,
   polygon,
-  polygonMumbai,
   arbitrum,
   arbitrumSepolia,
   base,
@@ -154,9 +150,7 @@ export const ALL_SUPPORTED_CHAINS = [...EVM_SUPPORTED_CHAINS, ...SVM_SUPPORTED_C
       'Optimism',
       'Celo',
       'Mode Mainnet',
-      'Goerli',
       'Gnosis Chiado',
-      'Polygon Mumbai',
       'Solana Devnet',
       'Arbitrum Sepolia',
       'Base Sepolia',
