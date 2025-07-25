@@ -3,7 +3,7 @@ import { Button, Card, Col, Flex, Row, Tag, Typography } from 'antd';
 import styled from 'styled-components';
 import opportunities from './opportunities.json';
 
-const LAUNCH_CONTACT_URL = 'https://t.me/pahlmeyer';
+const LAUNCH_CONTACT_URL = 'mailto:sales@valory.xyz';
 
 const StatusTag = styled(Tag)`
   font-weight: 500;
