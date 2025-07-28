@@ -22,7 +22,7 @@ const ALLOWED_ORIGINS = [
   'https://*.olas.network/',
   'https://*.autonolas.tech/',
   'https://pfp.staging.autonolas.tech/healthcheck',
-  'https://pfp.autonolas.tech/healthcheck', 
+  'https://pfp.autonolas.tech/healthcheck',
 
   // web3modal and wallet connect
   ...WALLET_CONNECT_LINKS,
@@ -74,6 +74,7 @@ const ALLOWED_ORIGINS = [
   'https://mainnet.mode.network/',
   'https://explorer.mode.network',
   'https://rpc.mevblocker.io',
+  'https://base-rpc.publicnode.com',
 
   // tenderly
   'https://virtual.mainnet.rpc.tenderly.co/',
