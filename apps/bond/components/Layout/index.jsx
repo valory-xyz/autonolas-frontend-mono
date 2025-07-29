@@ -1,4 +1,3 @@
-import { ExportOutlined } from '@ant-design/icons';
 import { ConnectionProvider, WalletProvider } from '@solana/wallet-adapter-react';
 import { PhantomWalletAdapter } from '@solana/wallet-adapter-wallets';
 import { Layout as AntdLayout, Menu } from 'antd';
@@ -16,7 +15,7 @@ import { Logo as LogoSvg } from 'components/Branding/Logo';
 
 import Login from '../Login';
 import Footer from './Footer';
-import { CustomLayout, DocsLink, Logo } from './styles';
+import { CustomLayout, Logo } from './styles';
 
 const wallets = [new PhantomWalletAdapter()];
 
@@ -43,12 +42,8 @@ const Layout = ({ children }) => {
   }, [router.pathname]);
 
   const handleMenuItemClick = ({ key }) => {
-    if (key === 'docs') {
-      window.open('https://docs.autonolas.network/protocol/tokenomics/', '_blank');
-    } else {
-      router.push(`/${key}`);
-      setSelectedMenu(key);
-    }
+    router.push(`/${key}`);
+    setSelectedMenu(key);
   };
 
   return (
@@ -75,12 +70,7 @@ const Layout = ({ children }) => {
             { key: 'my-bonds', label: 'My Bonds' },
             {
               key: 'docs',
-              label: (
-                <DocsLink>
-                  Docs
-                  <ExportOutlined />
-                </DocsLink>
-              ),
+              label: 'Docs',
             },
           ]}
         />
