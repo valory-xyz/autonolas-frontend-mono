@@ -4,11 +4,12 @@ import { WrapperDiv } from './styles';
 
 export const DOCS_SECTIONS = {
   overview: 'overview',
-  leaderboard: 'leaderboard',
-  actions: 'actions',
-  tweet: 'post',
-  proposals: 'proposals',
+  'quick-start': 'quick-start',
+  'core-concepts': 'core-concepts',
+  'how-to-use': 'how-to-use',
+  'how-to-propose': 'how-to-propose',
   'how-it-works': 'how-it-works',
+  faq: 'faq',
 };
 
 /**
@@ -16,11 +17,12 @@ export const DOCS_SECTIONS = {
  */
 export const DOC_NAV = [
   { id: DOCS_SECTIONS.overview, title: 'Overview' },
-  { id: DOCS_SECTIONS.leaderboard, title: 'Leaderboard' },
-  { id: DOCS_SECTIONS.actions, title: 'Actions' },
-  { id: DOCS_SECTIONS.tweet, title: 'Post' },
-  { id: DOCS_SECTIONS.proposals, title: 'Proposals' },
+  { id: DOCS_SECTIONS['quick-start'], title: 'Quick Start' },
+  { id: DOCS_SECTIONS['core-concepts'], title: 'Core Concepts' },
+  { id: DOCS_SECTIONS['how-to-use'], title: 'How to Use Olas Contribute' },
+  { id: DOCS_SECTIONS['how-to-propose'], title: 'How to Propose a Post' },
   { id: DOCS_SECTIONS['how-it-works'], title: 'How It Works' },
+  { id: DOCS_SECTIONS.faq, title: 'Troubleshooting / FAQs' },
 ];
 
 type NavWrapperProps = {
