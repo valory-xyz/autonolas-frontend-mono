@@ -21,6 +21,7 @@ const items = [
   { key: 'paths', label: 'Paths' },
   { key: 'dev-incentives', label: 'Dev Rewards' },
   { key: 'opportunities', label: 'Opportunities' },
+  { key: 'docs', label: 'Docs' },
 ];
 
 const NavigationBar = ({ children }: { children: React.ReactNode }) => {
