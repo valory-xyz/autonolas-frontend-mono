@@ -16,7 +16,7 @@ export const FAQs = () => (
       Actions are validated by AI services. To earn points, your post must be{' '}
       <Text strong>
         relevant, high-quality, and include one or more of the active{' '}
-        <Link href="https://contribute.olas.network/leaderboard">Campaigns</Link>
+        <Link href="/leaderboard">Campaigns</Link>
       </Text>
       .
       <br />
