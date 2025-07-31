@@ -2,6 +2,7 @@ import { Typography } from 'antd';
 
 import { DOCS_SECTIONS } from '../helpers';
 import Link from 'next/link';
+import { GOVERN_URL } from 'libs/util-constants/src';
 
 const { Title, Paragraph, Text } = Typography;
 
@@ -30,7 +31,7 @@ export const FAQs = () => (
       </div>
       veOLAS is the locked form of OLAS tokens, giving members voting power to propose and approve
       posts. You can lock OLAS for veOLAS here:{' '}
-      <Link href="https://govern.olas.network/veolas">https://govern.olas.network/veolas</Link>
+      <Link href={`${GOVERN_URL}/veolas`}>{GOVERN_URL}/veolas</Link>
     </Paragraph>
 
     <Paragraph>

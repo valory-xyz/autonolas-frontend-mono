@@ -191,7 +191,7 @@ const StepByStep = () => (
 
 const FAQs = () => (
   <>
-    <Title level={3} className="mt-0">
+    <Title level={4} className="mt-0">
       Troubleshooting / FAQs
     </Title>
     <Paragraph>

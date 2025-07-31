@@ -117,10 +117,10 @@ const CoreConcepts = () => (
 
 const StepByStep = () => (
   <>
-    <Title level={3} className="mt-0">
+    <Title level={4} className="mt-0">
       Step-by-Step Guides
     </Title>
-    <Title level={4} className="mt-0 mb-0">
+    <Title level={3} className="mt-0 mb-0">
       How to Launch a Staking Contract
     </Title>
     <ol>
@@ -200,7 +200,7 @@ const StepByStep = () => (
 
 const FAQs = () => (
   <>
-    <Title level={3} className="mt-0">
+    <Title level={4} className="mt-0">
       Troubleshooting / FAQs
     </Title>
     <Paragraph className="mb-8">

@@ -3,6 +3,7 @@ import Link from 'next/link';
 import styled from 'styled-components';
 
 import { COLOR } from 'libs/ui-theme/src';
+import { BOND_URL, SITE_URL } from 'libs/util-constants/src';
 const { Paragraph, Title, Text } = Typography;
 
 const HERO_MAX_WIDTH = 1312;
@@ -59,8 +60,7 @@ const QuickStart = () => (
       Quick Start
     </Title>
     <Paragraph>
-      <Text strong>Get started with OLAS bonding:</Text>{' '}
-      <Link href="/">https://bond.olas.network/</Link>
+      <Text strong>Get started with OLAS bonding:</Text> <Link href="/">{BOND_URL}</Link>
     </Paragraph>
   </>
 );
@@ -119,16 +119,16 @@ const CoreConcepts = () => (
 
 const StepByStep = () => (
   <>
-    <Title level={3} className="mt-0">
+    <Title level={4} className="mt-0">
       Step-by-Step Guide
     </Title>
-    <Title level={4} className="mt-0 mb-0">
+    <Title level={3} className="mt-0 mb-0">
       How to Bond OLAS
     </Title>
 
     <ol>
       <li className="mb-8">
-        Visit <Link href="/">https://bond.olas.network/</Link>.
+        Visit <Link href="/">{BOND_URL}</Link>.
       </li>
       <li className="mb-8">Choose a liquidity pair to bond (e.g., OLAS/wxDAI).</li>
       <li className="mb-8">
@@ -147,7 +147,7 @@ const StepByStep = () => (
           </li>
           <li className="mb-8">
             Depositing the bridged LP tokens into the selected bonding product at{' '}
-            <Link href="/bonding-products">bond.olas.network/bonding-products</Link>.
+            <Link href="/bonding-products">{BOND_URL}/bonding-products</Link>.
           </li>
           <li>
             Once bonded, your LP tokens are owned by the Olas protocol, and you will receive the
@@ -159,14 +159,14 @@ const StepByStep = () => (
       <li>Withdraw your OLAS once the vesting period is complete.</li>
     </ol>
 
-    <Title level={4} className="mt-0 mb-0">
+    <Title level={3} className="mt-0 mb-0">
       How to Track and Withdraw
     </Title>
 
     <ol>
       <li className="mb-8">
         Track your active bonds in the <Text strong>My Bonds</Text> section on{' '}
-        <Link href="/">bond.olas.network</Link>.
+        <Link href="/">{BOND_URL}</Link>.
       </li>
       <li>
         After the vesting period ends, you can <Text strong>claim your OLAS</Text> directly from the
@@ -178,7 +178,7 @@ const StepByStep = () => (
 
 const FAQs = () => (
   <>
-    <Title level={3} className="mt-0">
+    <Title level={4} className="mt-0">
       Troubleshooting / FAQs
     </Title>
     <Paragraph className="mb-8">
@@ -205,14 +205,14 @@ const FAQs = () => (
   </>
 );
 
-const LearnMore = () => (
+const Feedback = () => (
   <>
     <Title level={4} className="mt-0">
       Contributing / Feedback
     </Title>
     <ul>
       <li>
-        Learn about OLAS <Link href="https://olas.network/olas-token">Tokenomics</Link>.
+        Learn about OLAS <Link href={`${SITE_URL}/olas-token`}>Tokenomics</Link>.
       </li>
     </ul>
   </>
@@ -233,7 +233,7 @@ export const DocsPage = () => (
         <Divider style={DIVIDER_STYLE} />
         <FAQs />
         <Divider style={DIVIDER_STYLE} />
-        <LearnMore />
+        <Feedback />
       </Content>
     </ContentWrapper>
   </>

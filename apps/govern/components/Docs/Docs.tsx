@@ -56,7 +56,7 @@ const HeroSection = () => (
 
 const WhatIsOlasGovern = () => (
   <>
-    <Title level={3}>What is Olas Govern?</Title>
+    <Title level={4}>What is Olas Govern?</Title>
     <Paragraph className="mb-8">
       <Text strong>Olas Govern</Text> is a dApp for participating in Olas DAO governance. It enables
       members to use veOLAS to shape the Olas ecosystem by:
@@ -183,7 +183,7 @@ const StepByStep = () => (
 
 const FAQ = () => (
   <>
-    <Title level={3} className="mt-0">
+    <Title level={4} className="mt-0">
       Troubleshooting / FAQs
     </Title>
     <Paragraph className="mb-8">
@@ -242,7 +242,7 @@ const FAQ = () => (
 
 const Feedback = () => (
   <>
-    <Title level={3} className="mt-0">
+    <Title level={4} className="mt-0">
       Contributing / Feedback
     </Title>
     <Paragraph>
