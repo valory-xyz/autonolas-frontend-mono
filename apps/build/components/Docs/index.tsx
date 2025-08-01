@@ -44,26 +44,28 @@ const Intro = () => (
 const QuickStart = () => (
   <>
     <Title level={4} className="mt-0">
-      👉 Quick start: How to become Olas Builder
+      Quick start: How to become Olas Builder
     </Title>
-    <ul>
-      <li>
-        <Link href="/paths">Select your builder path</Link>
-      </li>
-      <li>
-        <a href="https://open-autonomy.docs.autonolas.tech/">Read the developer documentation</a>
-      </li>
-      <li>
-        Optionally,{' '}
-        <a
-          href="https://www.youtube.com/playlist?list=PLXztsZv11CTfXiQK9OJhMwBkfgf4ETZkl"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          watch the Olas Dev Academy videos
-        </a>
-      </li>
-    </ul>
+    <Paragraph>
+      <ul>
+        <li>
+          <Link href="/paths">Select your builder path</Link>
+        </li>
+        <li>
+          <a href="https://open-autonomy.docs.autonolas.tech/">Read the developer documentation</a>
+        </li>
+        <li>
+          Optionally,{' '}
+          <a
+            href="https://www.youtube.com/playlist?list=PLXztsZv11CTfXiQK9OJhMwBkfgf4ETZkl"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            watch the Olas Dev Academy videos
+          </a>
+        </li>
+      </ul>
+    </Paragraph>
   </>
 );
 
@@ -107,37 +109,39 @@ const StepByStep = () => (
       Step-by-Step Guides
     </Title>
 
-    <ul>
-      <li className="mb-8">
-        Step 1 (optional):{' '}
-        <a href="https://open-autonomy.docs.autonolas.tech/demos/hello-world/">
-          Run the Hello World example
-        </a>
-      </li>
-      <li className="mb-8">
-        Step 2: create your own agent, component or mech tool. You can either use the{' '}
-        <a
-          href="https://github.com/valory-xyz/open-autonomy"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Open Autonomy
-        </a>
-        framework or bring your own. If you choose Open Autonomy, you can use the{' '}
-        <a
-          href="https://github.com/valory-xyz/academy-learning-service"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          learning service
-        </a>
-        as a template or to find useful code snippets.
-      </li>
-      <li>
-        Step 3: <a href="https://registry.olas.network/ethereum/components">mint your code</a> to
-        the Olas registry to receive an NFT that serves as proof of code ownership.
-      </li>
-    </ul>
+    <Paragraph className="mt-12">
+      <ul>
+        <li className="mb-8">
+          Step 1 (optional):{' '}
+          <a href="https://open-autonomy.docs.autonolas.tech/demos/hello-world/">
+            Run the Hello World example
+          </a>
+        </li>
+        <li className="mb-8">
+          Step 2: create your own agent, component or mech tool. You can either use the{' '}
+          <a
+            href="https://github.com/valory-xyz/open-autonomy"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Open Autonomy
+          </a>{' '}
+          framework or bring your own. If you choose Open Autonomy, you can use the{' '}
+          <a
+            href="https://github.com/valory-xyz/academy-learning-service"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            learning service
+          </a>{' '}
+          as a template or to find useful code snippets.
+        </li>
+        <li>
+          Step 3: <a href="https://registry.olas.network/ethereum/components">mint your code</a> to
+          the Olas registry to receive an NFT that serves as proof of code ownership.
+        </li>
+      </ul>
+    </Paragraph>
   </>
 );
 
@@ -173,17 +177,19 @@ const LearnMore = () => (
     <Title level={4} className="mt-0">
       Learn More
     </Title>
-    <ul>
-      <li>
-        <a href="https://olas.network/pearl">Pearl, the AI agent App Store</a>
-      </li>
-      <li>
-        <a href="https://olas.network/staking">Staking</a>
-      </li>
-      <li>
-        <a href="https://olas.network/olas-token">Tokenomics</a>
-      </li>
-    </ul>
+    <Paragraph>
+      <ul>
+        <li>
+          <a href="https://olas.network/pearl">Pearl, the AI agent App Store</a>
+        </li>
+        <li>
+          <a href="https://olas.network/staking">Staking</a>
+        </li>
+        <li>
+          <a href="https://olas.network/olas-token">Tokenomics</a>
+        </li>
+      </ul>
+    </Paragraph>
   </>
 );
 
