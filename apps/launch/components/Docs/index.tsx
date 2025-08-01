@@ -120,7 +120,7 @@ const StepByStep = () => (
     <Title level={4} className="mt-0">
       Step-by-Step Guides
     </Title>
-    <Title level={3} className="mt-0 mb-0">
+    <Title level={5} className="mt-0 mb-0">
       How to Launch a Staking Contract
     </Title>
     <ol>

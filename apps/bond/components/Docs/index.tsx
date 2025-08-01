@@ -37,7 +37,7 @@ const Content = styled.div`
 
 const HeroSection = () => (
   <Hero>
-    <Flex align="center" vertical gap={16} className="mb-24">
+    <Flex align="center" vertical gap={16} className="mb-24 mt-24">
       <Title className="m-0">Docs</Title>
     </Flex>
   </Hero>
@@ -122,7 +122,7 @@ const StepByStep = () => (
     <Title level={4} className="mt-0">
       Step-by-Step Guide
     </Title>
-    <Title level={3} className="mt-0 mb-0">
+    <Title level={5} className="mt-0 mb-0">
       How to Bond OLAS
     </Title>
 
@@ -159,7 +159,7 @@ const StepByStep = () => (
       <li>Withdraw your OLAS once the vesting period is complete.</li>
     </ol>
 
-    <Title level={3} className="mt-0 mb-0">
+    <Title level={5} className="mt-0 mb-0">
       How to Track and Withdraw
     </Title>
 
@@ -210,11 +210,13 @@ const Feedback = () => (
     <Title level={4} className="mt-0">
       Contributing / Feedback
     </Title>
-    <ul>
-      <li>
-        Learn about OLAS <Link href={`${SITE_URL}/olas-token`}>Tokenomics</Link>.
-      </li>
-    </ul>
+    <Paragraph>
+      <ul>
+        <li>
+          Learn about OLAS <Link href={`${SITE_URL}/olas-token`}>Tokenomics</Link>.
+        </li>
+      </ul>
+    </Paragraph>
   </>
 );
 

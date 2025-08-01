@@ -6,6 +6,7 @@ import Markdown from 'markdown-to-jsx';
 import { useFetchPathData } from 'common-util/hooks/useFetchPathData';
 import { COLOR } from '@autonolas/frontend-library';
 import Meta from 'components/Meta';
+import { PageWrapper } from 'util/theme';
 
 const Container = styled.div`
   padding: 0 32px;
@@ -49,7 +50,7 @@ const PathDetailPage = () => {
   }
 
   return (
-    <>
+    <PageWrapper>
       <Meta
         title={pathData.name}
         description={pathData.description}
@@ -187,7 +188,7 @@ const PathDetailPage = () => {
           </Col>
         </Row>
       </Container>
-    </>
+    </PageWrapper>
   );
 };
 

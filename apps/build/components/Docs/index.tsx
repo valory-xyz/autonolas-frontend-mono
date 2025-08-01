@@ -1,10 +1,10 @@
 import { Divider, Flex, Typography } from 'antd';
+import { COLOR } from 'libs/ui-theme/src';
 import Link from 'next/link';
 import styled from 'styled-components';
 
 const { Paragraph, Title, Text } = Typography;
 
-const HERO_MAX_WIDTH = 1312;
 const CONTENT_MAX_WIDTH = 720;
 
 const DIVIDER_STYLE = { margin: '40px 0' };
@@ -12,8 +12,17 @@ const DIVIDER_STYLE = { margin: '40px 0' };
 const Hero = styled.div`
   display: flex;
   flex-direction: column;
-  max-width: ${HERO_MAX_WIDTH}px;
+  max-width: auto;
   margin: 0 auto;
+  background: #f2f4f9;
+`;
+
+const ContentWrapper = styled.div`
+  border-top: 1px solid ${COLOR.BORDER_GREY_2};
+  border-bottom: 1px solid ${COLOR.BORDER_GREY_2};
+  background-color: ${COLOR.WHITE};
+  display: flex;
+  flex-direction: column;
 `;
 
 const Content = styled.div`
@@ -24,16 +33,16 @@ const Content = styled.div`
 `;
 
 const HeroSection = () => (
-  <Hero>
-    <Flex align="center" vertical gap={16} className="mb-24">
-      <Title className="m-0">Docs</Title>
+  <Hero className="p-24">
+    <Flex align="center" vertical gap={16}>
+      <Title className="m-0 mt-24">Docs</Title>
     </Flex>
   </Hero>
 );
 
 const Intro = () => (
   <>
-    <Paragraph className="mb-8 mt-20">
+    <Paragraph className="mb-8 mt-24">
       Olas Builders are developers who create and contribute code and applications to the Olas
       ecosystem. Their work powers the tools Operators run, and in return, Builders are eligible for
       developer rewards based on the impact of their contributions.
@@ -196,18 +205,20 @@ const LearnMore = () => (
 export const DocsPage = () => (
   <>
     <HeroSection />
-    <Content>
-      <Intro />
-      <Divider style={DIVIDER_STYLE} />
-      <QuickStart />
-      <Divider style={DIVIDER_STYLE} />
-      <CoreConcepts />
-      <Divider style={DIVIDER_STYLE} />
-      <StepByStep />
-      <Divider style={DIVIDER_STYLE} />
-      <FAQs />
-      <Divider style={DIVIDER_STYLE} />
-      <LearnMore />
-    </Content>
+    <ContentWrapper>
+      <Content>
+        <Intro />
+        <Divider style={DIVIDER_STYLE} />
+        <QuickStart />
+        <Divider style={DIVIDER_STYLE} />
+        <CoreConcepts />
+        <Divider style={DIVIDER_STYLE} />
+        <StepByStep />
+        <Divider style={DIVIDER_STYLE} />
+        <FAQs />
+        <Divider style={DIVIDER_STYLE} />
+        <LearnMore />
+      </Content>
+    </ContentWrapper>
   </>
 );
