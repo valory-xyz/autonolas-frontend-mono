@@ -5,6 +5,7 @@ import Image from 'next/image';
 import { BUILD_REPO_URL } from 'libs/util-constants/src';
 import { COLOR } from '@autonolas/frontend-library';
 import paths from './data.json';
+import { PageWrapper } from 'util/theme';
 
 const StyledCard = styled(Card)`
   border-color: ${COLOR.BORDER_GREY};
@@ -116,7 +117,7 @@ const PathCard = ({ path }: { path: Path }) => {
 };
 
 export const Paths = () => (
-  <>
+  <PageWrapper>
     <Typography.Title className="mt-0" level={1}>
       Paths
     </Typography.Title>
@@ -168,5 +169,5 @@ export const Paths = () => (
         </Row>
       </Col>
     </Row>
-  </>
+  </PageWrapper>
 );

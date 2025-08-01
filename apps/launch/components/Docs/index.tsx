@@ -1,20 +1,15 @@
-import { Divider, Flex, Tag, Typography } from 'antd';
+import { Divider, Flex, Typography } from 'antd';
 import Image from 'next/image';
 import Link from 'next/link';
 import styled from 'styled-components';
 
 import { COLOR } from 'libs/ui-theme/src';
-import { UNICODE_SYMBOLS } from 'libs/util-constants/src';
-
-import { PATHS, YOUR_OWN_PATH } from 'common-util/constants/paths';
-
 const { Paragraph, Title, Text } = Typography;
 
 const HERO_MAX_WIDTH = 1312;
 const CONTENT_MAX_WIDTH = 720;
 
 const DIVIDER_STYLE = { margin: '40px 0' };
-const TAG_STYLE = { width: 'max-content' };
 
 const Hero = styled.div`
   display: flex;
@@ -56,161 +51,196 @@ const HeroSection = () => (
   </Hero>
 );
 
-const MyStakingContracts = () => (
+const Intro = () => (
   <>
-    <Title level={3}>My staking contracts</Title>
-    <Paragraph className="mb-8">
-      The Olas Launch app allows anyone to launch staking contracts. Staking contracts implement the
-      mechanism to reward agents actively working towards KPIs. You can learn more about the
-      mechanism in the{' '}
-      <a href="https://staking.olas.network/poaa-whitepaper.pdf" target="_blank">
-        official whitepaper {UNICODE_SYMBOLS.EXTERNAL_LINK}
+    <Paragraph className="mb-8 mt-20">
+      Olas allows anyone to create staking contracts and commission AI agent work aligned with their
+      goals.
+    </Paragraph>
+    <Paragraph>
+      <Link href="https://olas.network/staking">Olas Staking</Link> is based on
+      Proof-of-Active-Agent (PoAA) — a mechanism that rewards real AI agent activity, not passive
+      token lockup. PoAA combines the strengths of Proof-of-Stake and Proof-of-Work, but shifts
+      rewards to agents that deliver useful, verifiable outcomes — like executing on-chain actions
+      or meeting KPIs.
+    </Paragraph>
+    <Paragraph className="mb-0">
+      By defining KPIs and embedding them in staking contracts deployed on-chain, individuals,
+      organizations, or DAOs can bootstrap{' '}
+      <Link href="https://olas.network/agent-economies">agent economies</Link> through OLAS
+      incentives.
+    </Paragraph>
+  </>
+);
+
+const QuickStart = () => (
+  <>
+    <Title level={4} className="mt-0">
+      Quick Start
+    </Title>
+    <Paragraph>
+      <Text strong>Create your staking contract →</Text>{' '}
+      <Link href="/ethereum/my-staking-contracts">
+        https://launch.olas.network/ethereum/my-staking-contracts
+      </Link>
+    </Paragraph>
+  </>
+);
+
+const CoreConcepts = () => (
+  <>
+    <Title level={4} className="mt-0">
+      Core Concepts
+    </Title>
+    <Paragraph>
+      <ul>
+        <li className="mb-8">
+          <Text strong>Staking Contracts:</Text> Smart contracts that reward agents for completing
+          predefined tasks based on KPIs.
+        </li>
+        <li className="mb-8">
+          <Text strong>KPI (Key Performance Indicator):</Text> The success metric used to determine
+          agent eligibility for rewards.
+        </li>
+        <li className="mb-8">
+          <Text strong>Template (Implementation):</Text> the core logic of a contract, which
+          describes how to use the set of variables provided by the contract creator.
+        </li>
+        <li className="mb-8">
+          <Text strong>Nomination:</Text> The process to make staking contracts eligible for OLAS
+          emissions through DAO voting.
+        </li>
+      </ul>
+    </Paragraph>
+  </>
+);
+
+const StepByStep = () => (
+  <>
+    <Title level={4} className="mt-0">
+      Step-by-Step Guides
+    </Title>
+    <Title level={5} className="mt-0 mb-0">
+      How to Launch a Staking Contract
+    </Title>
+    <ol>
+      <li>
+        <Text strong>Create a Staking Contract</Text>
+        <br />
+        Use Olas Launch to define your goals and KPIs and deploy a staking contract using a
+        configuration template. Activity checks can be tailored to your specific agent type and
+        objective. Once deployed, staking contracts are immutable.
+        <br />
+        Check out example staking contracts and configurations in the{' '}
+        <a
+          href="https://github.com/valory-xyz/autonolas-staking-programmes/tree/main/contracts"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          Olas Staking Programmes GitHub repo
+        </a>
+        .
+      </li>
+      <li>
+        <Text strong>Nominate for OLAS Emissions</Text>
+        <br /> Submit your staking contract to Olas Govern. Nomination makes it eligible to receive
+        OLAS incentives based on DAO voting.
+      </li>
+      <li>
+        <Text strong>Promote to the Community</Text>
+      </li>
+    </ol>
+
+    <Paragraph>
+      Promote your staking contract to <Text strong>veOLAS holders</Text> to attract votes.
+      Contracts that receive at least 0.5% of total veOLAS votes across all staking contracts in the
+      current epoch become eligible for OLAS emissions.
+    </Paragraph>
+
+    <Paragraph>
+      <Text strong>Key Points</Text>
+      <ul>
+        <li>
+          <Text strong>Minimum vote threshold:</Text> 0.5% of total veOLAS votes per epoch
+        </li>
+        <li>
+          <Text strong>Maximum emissions:</Text> 60,000 OLAS per epoch per eligible contract
+        </li>
+        <li>
+          Additional votes beyond the threshold do <Text strong>not</Text> increase emissions
+        </li>
+      </ul>
+    </Paragraph>
+
+    <Paragraph>
+      <Text strong>Check on-chain values:</Text>
+      <ul>
+        <li>maxStakingIncentive: Maximum emissions (60,000 OLAS)</li>
+        <li>minStakingWeight: Minimum vote threshold (50 = 0.5%)</li>
+        <li>
+          ongoingEpoch: The current active voting epoch (used as input to query emission eligibility
+          for your contract)
+        </li>
+      </ul>
+    </Paragraph>
+
+    <Paragraph>
+      <Text strong>Learn more:</Text> See the VoteWeighting section in the{' '}
+      <a
+        href="https://github.com/valory-xyz/autonolas-registries/blob/main/docs/StakingSmartContracts.pdf"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        Staking Smart Contracts documentation
       </a>
       .
     </Paragraph>
-    <Text>The core functionality of the Launch app includes:</Text>
-    <ul>
-      <li className="mb-8">Create staking contracts on supported chains.</li>
-      <li className="mb-8">
-        Nominate staking contracts to make them eligible to receive incentives from the Olas
-        protocol.
-      </li>
-      <li>Track staking contract performance.</li>
-    </ul>
-    <Paragraph className="mb-0">
-      Here are three simple steps that explain how to create staking contracts and get agents to do
-      any kind of work defined by your KPIs.
-    </Paragraph>
   </>
 );
 
-const Step1 = () => (
+const FAQs = () => (
   <>
-    <figure className="m-0 mb-24">
-      <Image
-        src={'/images/docs/step1.png'}
-        width={CONTENT_MAX_WIDTH}
-        height={253}
-        alt="Fig 2"
-        className="mb-12"
-      />
-      <figcaption className="text-center">
-        <Text type="secondary">
-          Fig 1. Launcher user can create staking contract based on a specific configuration
-        </Text>
-      </figcaption>
-    </figure>
-    <Tag style={TAG_STYLE}>Step 1</Tag>
-    <Title level={4} className="mt-16">
-      Support different parts of the Olas agent economy
-    </Title>
-    <Paragraph>
-      The Launch app allows anyone (from individuals to companies or other DAOs) to commission agent
-      activity aligned with their goals, defining success via KPIs, and have a chance at attracting
-      incentives from the Olas protocol.
-    </Paragraph>
-    <Paragraph>
-      Any user can create a staking contract based on specific configurations, known as templates.
-    </Paragraph>
-    <Paragraph>
-      The flexibility of staking contracts lies in the variability of their activity check, which
-      can be customized to suit the specific requirements of different agents and agent economies.
-      For instance, for the prediction Trader, activity can be determined by the number of Mech
-      requests made on-chain, while for the Market Creator agent, activity could be assessed based
-      on the number of markets created within a given timeframe.
-    </Paragraph>
-    <Paragraph className="mb-0">
-      Staking contracts can only be configured during deployment, implying immutability once
-      initialized.
-    </Paragraph>
-  </>
-);
-
-const Step2 = () => (
-  <>
-    <figure className="m-0 mb-24">
-      <Image
-        src={'/images/docs/step2.png'}
-        width={CONTENT_MAX_WIDTH}
-        height={140}
-        alt="Fig 2"
-        className="mb-12"
-      />
-      <figcaption className="text-center">
-        <Text type="secondary">
-          Fig 2. Nomination makes the staking contract eligible to receive incentives from the Olas
-          protocol.
-        </Text>
-      </figcaption>
-    </figure>
-    <Tag style={TAG_STYLE}>Step 2</Tag>
-    <Title level={4} className="mt-16">
-      Nominate contract for voting
-    </Title>
-    <Paragraph>
-      Each staking contract should be added to the voting process on Govern to make it eligible for
-      staking incentives from the Olas protocol. This process is called nomination, and it allows
-      the Olas DAO to bootstrap agent economies at scale through targeted OLAS emissions.
-    </Paragraph>
-  </>
-);
-
-const Step3 = () => (
-  <>
-    <figure className="m-0 mb-24">
-      <Image
-        src={'/images/docs/step3.png'}
-        width={CONTENT_MAX_WIDTH}
-        height={384}
-        alt="Fig 2"
-        className="mb-12"
-      />
-      <figcaption className="text-center">
-        <Text type="secondary">
-          Fig 3. Promotion increases your chances to get more OLAS emissions directed by DAO members
-          and attract more agents working towards the contract&apos;s KPIs.
-        </Text>
-      </figcaption>
-    </figure>
-    <Tag style={TAG_STYLE}>Step 3</Tag>
-    <Title level={4} className="mt-16">
-      Promote contract to community
-    </Title>
-    <Paragraph className="mb-0">
-      After successful nomination, you should promote your staking contracts to veOLAS holders.
-      veOLAS holders then vote for the most promising staking contracts, making them attractive to
-      agents and operators. The more voting weight your contract has, the more rewards it receives,
-      and the more agents will be incentivized to fulfil your activity goals.
-    </Paragraph>
-  </>
-);
-
-const Paths = () => (
-  <>
-    <Title level={3} className="mt-0">
-      Paths overview
+    <Title level={4} className="mt-0">
+      Troubleshooting / FAQs
     </Title>
     <Paragraph className="mb-8">
-      Launching staking contracts is not the only possibility to benefit from the Olas protocol.
-      Here are more paths you can follow as a Launcher:
-    </Paragraph>
-    <ul>
-      {PATHS.map((path) => (
-        <li key={path.id} className="mb-8">
-          <Link href={`/paths/${path.id}`}>{path.name}</Link>
-          <br />
-          {path.description}
+      <ul>
+        <li className="mb-8">
+          <Text strong>Can I change the KPI after deployment?</Text> No, staking contracts are
+          immutable after creation.
         </li>
-      ))}
-      <li>
+        <li className="mb-8">
+          <Text strong>How do I make my contract eligible for OLAS rewards?</Text> You need to
+          nominate your contract via the Olas Launch app.
+        </li>
+        <li className="mb-8">
+          <Text strong>How can I improve the chances of receiving emissions?</Text> Promote your
+          staking contract to veOLAS voters to attract more voting weight.
+        </li>
+      </ul>
+    </Paragraph>
+  </>
+);
+
+const Feedback = () => (
+  <>
+    <Title level={4} className="mt-0">
+      Contributing / Feedback
+    </Title>
+    <Paragraph className="mb-0">
+      Found outdated information or have suggestions?{' '}
+      <Text strong>
+        Submit issues or suggestions on{' '}
         <a
-          href={YOUR_OWN_PATH.link}
+          href="https://github.com/valory-xyz/autonolas-frontend-mono/issues"
           target="_blank"
-        >{`${YOUR_OWN_PATH.name} ${UNICODE_SYMBOLS.EXTERNAL_LINK}`}</a>
-        <br />
-        {YOUR_OWN_PATH.description}
-      </li>
-    </ul>
+          rel="noopener noreferrer"
+        >
+          GitHub
+        </a>
+        .
+      </Text>
+    </Paragraph>
   </>
 );
 
@@ -219,15 +249,17 @@ export const DocsPage = () => (
     <HeroSection />
     <ContentWrapper>
       <Content>
-        <MyStakingContracts />
+        <Intro />
         <Divider style={DIVIDER_STYLE} />
-        <Step1 />
+        <QuickStart />
         <Divider style={DIVIDER_STYLE} />
-        <Step2 />
+        <CoreConcepts />
         <Divider style={DIVIDER_STYLE} />
-        <Step3 />
+        <StepByStep />
         <Divider style={DIVIDER_STYLE} />
-        <Paths />
+        <FAQs />
+        <Divider style={DIVIDER_STYLE} />
+        <Feedback />
       </Content>
     </ContentWrapper>
   </>

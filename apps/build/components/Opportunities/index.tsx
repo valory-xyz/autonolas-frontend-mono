@@ -2,6 +2,7 @@ import Image from 'next/image';
 import { Button, Card, Col, Flex, Row, Tag, Typography } from 'antd';
 import styled from 'styled-components';
 import opportunities from './opportunities.json';
+import { PageWrapper } from 'util/theme';
 
 const LAUNCH_CONTACT_URL = 'mailto:sales@valory.xyz';
 
@@ -90,7 +91,7 @@ const sortedOpportunities = opportunities.sort((a, b) => {
 });
 
 export const Opportunities = () => (
-  <div id="opportunities">
+  <PageWrapper id="opportunities">
     <Typography.Title className="mt-0" level={2}>
       Opportunities
     </Typography.Title>
@@ -104,5 +105,5 @@ export const Opportunities = () => (
         <OpportunityCard key={`${item.project} ${item.agentName}`} {...item} />
       ))}
     </div>
-  </div>
+  </PageWrapper>
 );

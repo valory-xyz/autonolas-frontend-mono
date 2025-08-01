@@ -3,14 +3,15 @@ import { get } from 'lodash';
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 
-import { ActionsDocs } from './content/Actions';
+import { CoreConcepts } from './content/CoreConcepts';
 import { HowItWorks } from './content/HowItWorks';
-import { Leaderboard } from './content/Leaderboard';
+import { QuickStart } from './content/QuickStart';
 import { Overview } from './content/Overview';
-import { Proposals } from './content/Proposals';
-import { Tweet } from './content/Tweet';
+import { HowToProposeAPost } from './content/HowToProposeAPost';
+import { HowToUseOlasContribute } from './content/HowToUseOlasContribute';
 import { DOC_NAV, NavWrapper } from './helpers';
 import { Container, DocSection } from './styles';
+import { FAQs } from './content/FAQs';
 
 const { Title } = Typography;
 const { Link } = Anchor;
@@ -56,11 +57,12 @@ export const Documentation = () => {
 
         <div className="reading-section">
           <Overview />
-          <Leaderboard />
-          <ActionsDocs />
-          <Tweet />
-          <Proposals />
+          <QuickStart />
+          <CoreConcepts />
+          <HowToUseOlasContribute />
+          <HowToProposeAPost />
           <HowItWorks />
+          <FAQs />
         </div>
       </DocSection>
       <br />

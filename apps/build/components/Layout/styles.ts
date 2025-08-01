@@ -8,7 +8,7 @@ export const CustomLayout = styled(Layout)`
   background-color: ${COLOR.WHITE};
 
   .site-layout {
-    padding: 100px 24px 24px 24px;
+    padding: 60px 0 24px 0;
   }
 
   .logo-link {
