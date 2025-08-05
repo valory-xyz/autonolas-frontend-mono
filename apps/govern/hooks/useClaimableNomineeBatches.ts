@@ -197,14 +197,14 @@ export const useClaimableNomineesBatches = () => {
     });
 
     /**
-     * Group nominees by chain Ids
+     * Group nominees by chain Ids and extract their addresses
      */
     const nomineesByChain = filteredNominees.reduce(
       (acc, nominee) => {
-        acc[nominee.chainId] = [...(acc[nominee.chainId] || []), nominee];
+        acc[nominee.chainId] = [...(acc[nominee.chainId] || []), nominee.address];
         return acc;
       },
-      {} as Record<number, StakingContract[]>,
+      {} as Record<number, Address[]>,
     );
 
     /**
@@ -213,11 +213,11 @@ export const useClaimableNomineesBatches = () => {
     const sortedNomineesByChain = Object.keys(nomineesByChain).reduce(
       (acc, chainId) => {
         acc[Number(chainId)] = nomineesByChain[Number(chainId)].sort((a, b) =>
-          a.address.toString().localeCompare(b.address.toString()),
+          a.toString().localeCompare(b.toString()),
         );
         return acc;
       },
-      {} as Record<number, StakingContract[]>,
+      {} as Record<number, Address[]>,
     );
 
     /**
@@ -249,9 +249,9 @@ export const useClaimableNomineesBatches = () => {
         const nomineedTimesToClaimArray = nominees.reduce(
           (acc, nominee) => {
             const lastClaimedStakingEpoch = Number(
-              lastClaimedStakingEpochByNominee[nominee.address].result,
+              lastClaimedStakingEpochByNominee[nominee].result,
             );
-            acc.push([nominee.address, currentEpoch - lastClaimedStakingEpoch]);
+            acc.push([nominee, currentEpoch - lastClaimedStakingEpoch]);
             return acc;
           },
           [] as [Address, number][],
