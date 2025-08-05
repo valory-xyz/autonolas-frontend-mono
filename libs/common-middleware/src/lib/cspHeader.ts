@@ -83,6 +83,7 @@ const ALLOWED_ORIGINS = [
   'https://virtual.mode.rpc.tenderly.co/',
   'https://rpc.tenderly.co/fork/',
   'https://virtual.base.rpc.tenderly.co/',
+  'https://virtual.mainnet.eu.rpc.tenderly.co/',
 
   // others
   'https://api.thegraph.com/',
