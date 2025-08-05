@@ -2,13 +2,14 @@ import { useMemo, useState, useEffect, useCallback } from 'react';
 import { Nominee, StakingContract } from 'types';
 import { Abi, Address, formatEther, formatUnits, Block } from 'viem';
 import { useReadContracts } from 'wagmi';
-import { getBlock, getPublicClient } from 'viem/actions';
+import { getBlock } from 'viem/actions';
 
 import { useNominees, useNomineesMetadata } from 'libs/common-contract-functions/src';
 import { RETAINER_ADDRESS } from 'libs/util-constants/src';
 import { STAKING_TOKEN } from 'libs/util-contracts/src';
 import { areAddressesEqual, getAddressFromBytes32 } from 'libs/util-functions/src';
 import { wagmiConfig } from 'common-util/config/wagmi';
+import { getPublicClient } from '@wagmi/core';
 
 const ONE_YEAR = 1 * 24 * 60 * 60 * 365;
 
@@ -349,25 +350,29 @@ const useBlocksForNominees = (nominees: Nominee[]) => {
 
     try {
       // Fetch blocks for each nominee's chain ID in parallel
-      const blockPromises = [...new Set(nominees.map(item => item.chainId))].map(async (nominee) => {
-        try {
-          const publicClient = getPublicClient(wagmiConfig, { chainId: Number(nominee) });
-          const block = await getBlock(publicClient, { blockTag: 'latest' });
-          return { nominee, block };
-        } catch (error) {
-          console.warn(`Failed to fetch block for chain ${nominee}:`, error);
-          return { nominee, block: null };
-        }
-      });
+      const blockPromises = [...new Set(nominees.map((item) => item.chainId))].map(
+        async (nominee) => {
+          try {
+            const publicClient = getPublicClient(wagmiConfig, { chainId: Number(nominee) });
+            if (!publicClient) {
+              throw new Error(`No public client found for chainId ${nominee}`);
+            }
+            const block = await getBlock(publicClient, { blockTag: 'latest' });
+            return { nominee, block };
+          } catch (error) {
+            console.warn(`Failed to fetch block for chain ${nominee}:`, error);
+            return { nominee, block: null };
+          }
+        },
+      );
 
       const results = await Promise.all(blockPromises);
-      
+
       results.forEach(({ nominee, block }) => {
         if (block) {
           blockMap.set(nominee.toString(), block);
         }
       });
-      console.log(blockMap);
 
       setBlocks(blockMap);
     } catch (error) {
@@ -379,7 +384,7 @@ const useBlocksForNominees = (nominees: Nominee[]) => {
 
   useEffect(() => {
     fetchBlocks();
-  }, [fetchBlocks]);
+  }, [nominees, fetchBlocks]);
 
   return { blocks, isLoading };
 };
@@ -387,12 +392,14 @@ const useBlocksForNominees = (nominees: Nominee[]) => {
 export const useStakingContractsList = () => {
   // Get nominees list
   const { data: nomineesData, isFetching: isNomineesLoading } = useNominees();
-  const nominees = (nomineesData || []).filter(
-    (nominee) =>
-      !BLACKLISTED_ADDRESSES.some((blackListedNominee) =>
-        areAddressesEqual(blackListedNominee, getAddressFromBytes32(nominee.account)),
-      ),
-  );
+  const nominees = useMemo(() => {
+    return (nomineesData || []).filter(
+      (nominee) =>
+        !BLACKLISTED_ADDRESSES.some((blackListedNominee) =>
+          areAddressesEqual(blackListedNominee, getAddressFromBytes32(nominee.account)),
+        ),
+    );
+  }, [nomineesData]);
 
   // Fetch blocks for each nominee's chain ID
   const { blocks, isLoading: areBlocksLoading } = useBlocksForNominees(nominees);
@@ -461,7 +468,7 @@ export const useStakingContractsList = () => {
       !!epochCounter &&
       !!livenessPeriod &&
       !!tsCheckpoint &&
-      nominees.length > 0
+      !!blocks
     ) {
       return nominees.map((item, index) => {
         const maxSlots = Number(maxNumServicesList[index]);
@@ -486,7 +493,7 @@ export const useStakingContractsList = () => {
         const tsCheckpointSeconds = Number(tsCheckpoint[index]);
 
         // Get the block for this contract's specific chain
-        const contractBlock = blocks.get(item.account);
+        const contractBlock = blocks.get(item.chainId.toString());
 
         // Calculate time remaining using the block from the contract's chain
         const timeRemainingSeconds = contractBlock

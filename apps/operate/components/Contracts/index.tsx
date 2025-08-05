@@ -42,16 +42,13 @@ const columns: ColumnsType<StakingContract> = [
       />
     ),
     key: 'currentEpoch',
-    render: (_, record) => {
-      console.log(record.timeRemaining);
-      return (
-        <>
-          <Text>{record.epoch}</Text>
-          <br />
-          <Text type="secondary">{record.timeRemaining}</Text>
-        </>
-      );
-    },
+    render: (_, record) => (
+      <>
+        <Text>{record.epoch}</Text>
+        <br />
+        <Text type="secondary">{record.timeRemaining}</Text>
+      </>
+    ),
     width: 130,
     className: 'text-center',
   },
