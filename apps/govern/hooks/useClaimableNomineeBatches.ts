@@ -3,6 +3,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import type { Address } from 'viem';
 import { mainnet } from 'viem/chains';
 import { useReadContract, useReadContracts } from 'wagmi';
+import { cloneDeep } from 'lodash';
 
 import { useAppSelector } from 'store/index';
 import { useNomineesWeights } from 'hooks/useNomineesWeights';
@@ -68,7 +69,11 @@ const useNomineesLastClaimedStakingEpoch = ({ nominees }: { nominees: StakingCon
     );
   }, [lastClaimedStakingEpoch, nominees]);
 
-  return { lastClaimedStakingEpochByNominee, isLastClaimedLoading, clearLastClaimedStakingEpoch };
+  return {
+    lastClaimedStakingEpochByNominee,
+    isLastClaimedLoading,
+    clearLastClaimedStakingEpoch,
+  };
 };
 
 const useNomineesWeightsAtPrevEpochEnd = ({
@@ -93,11 +98,46 @@ const useNomineesWeightsAtPrevEpochEnd = ({
   };
 };
 
-const chunkNomineesArray = (nominees: Address[], chunkSize: number = MAX_BATCH_SIZE) => {
-  const chunks = [];
-  for (let i = 0; i < nominees.length; i += chunkSize) {
-    chunks.push(nominees.slice(i, i + chunkSize));
+/**
+ * Assuming max batch size to be "3"
+ * nomineesToClaimArray: [[0x1, 1], [0x2, 1], [0x3, 2], [0x4, 1]]
+ * 
+ * returns:
+ * [
+ *  [0x1, 0x2, 0x3],
+ *  [0x3, 0x4],
+ * ]
+ */
+const chunkNomineesArrayByTimeToClaim = (
+  nomineesTimesToClaimArray: [Address, number][],
+  chunkSize: number = MAX_BATCH_SIZE,
+) => {
+  const chunks: Address[][] = [];
+  let filteredNomineesTimesToClaim = cloneDeep(nomineesTimesToClaimArray);
+
+  // eslint-disable-next-line no-constant-condition
+  while (true) {
+    const currentChunk: Address[] = [];
+    let index = 0;
+
+    for (index = 0; index < Math.min(chunkSize, filteredNomineesTimesToClaim.length); index++) {
+      const nominee = filteredNomineesTimesToClaim[index][0];
+      currentChunk.push(nominee);
+      /* Decrease time to claim by 1 each time the nominee gets into the currentChunk, this ensures 
+      the order as well as the times a nominee needs to be claimed works as expected */
+      filteredNomineesTimesToClaim[index][1] -= 1;
+    }
+
+    chunks.push(currentChunk);
+    filteredNomineesTimesToClaim = filteredNomineesTimesToClaim.filter(
+      ([, timesToClaim]) => timesToClaim > 0,
+    );
+
+    if (filteredNomineesTimesToClaim.length === 0) {
+      break;
+    }
   }
+
   return chunks;
 };
 
@@ -157,14 +197,14 @@ export const useClaimableNomineesBatches = () => {
     });
 
     /**
-     * Group nominees by chain Ids and extract their addresses
+     * Group nominees by chain Ids
      */
     const nomineesByChain = filteredNominees.reduce(
       (acc, nominee) => {
-        acc[nominee.chainId] = [...(acc[nominee.chainId] || []), nominee.address];
+        acc[nominee.chainId] = [...(acc[nominee.chainId] || []), nominee];
         return acc;
       },
-      {} as Record<number, Address[]>,
+      {} as Record<number, StakingContract[]>,
     );
 
     /**
@@ -173,11 +213,11 @@ export const useClaimableNomineesBatches = () => {
     const sortedNomineesByChain = Object.keys(nomineesByChain).reduce(
       (acc, chainId) => {
         acc[Number(chainId)] = nomineesByChain[Number(chainId)].sort((a, b) =>
-          a.toString().localeCompare(b.toString()),
+          a.address.toString().localeCompare(b.address.toString()),
         );
         return acc;
       },
-      {} as Record<number, Address[]>,
+      {} as Record<number, StakingContract[]>,
     );
 
     /**
@@ -201,7 +241,22 @@ export const useClaimableNomineesBatches = () => {
     const batchesByChain = Object.keys(sortedNomineesByChain).reduce(
       (acc, chainId) => {
         const nominees = sortedNomineesByChain[Number(chainId)];
-        const chunks = chunkNomineesArray(nominees, MAX_BATCH_SIZE);
+
+        /**
+         * Nominees along with their timesToClaim
+         * eg: [[0x1, 1], [0x2, 1], [0x3, 2], [0x4, 1]]
+         */
+        const nomineedTimesToClaimArray = nominees.reduce(
+          (acc, nominee) => {
+            const lastClaimedStakingEpoch = Number(
+              lastClaimedStakingEpochByNominee[nominee.address].result,
+            );
+            acc.push([nominee.address, currentEpoch - lastClaimedStakingEpoch]);
+            return acc;
+          },
+          [] as [Address, number][],
+        );
+        const chunks = chunkNomineesArrayByTimeToClaim(nomineedTimesToClaimArray, MAX_BATCH_SIZE);
         acc[Number(chainId)] = chunks;
         return acc;
       },
