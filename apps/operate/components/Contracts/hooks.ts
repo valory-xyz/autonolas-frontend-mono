@@ -1,12 +1,14 @@
-import { useMemo } from 'react';
+import { useMemo, useState, useEffect, useCallback } from 'react';
 import { Nominee, StakingContract } from 'types';
-import { Abi, Address, formatEther, formatUnits } from 'viem';
+import { Abi, Address, formatEther, formatUnits, Block } from 'viem';
 import { useReadContracts } from 'wagmi';
+import { getBlock, getPublicClient } from 'viem/actions';
 
 import { useNominees, useNomineesMetadata } from 'libs/common-contract-functions/src';
 import { RETAINER_ADDRESS } from 'libs/util-constants/src';
 import { STAKING_TOKEN } from 'libs/util-contracts/src';
 import { areAddressesEqual, getAddressFromBytes32 } from 'libs/util-functions/src';
+import { wagmiConfig } from 'common-util/config/wagmi';
 
 const ONE_YEAR = 1 * 24 * 60 * 60 * 365;
 
@@ -334,6 +336,54 @@ const useContractDetails = (nominees: Nominee[], functionName: string) => {
   return { data, isFetching };
 };
 
+// Custom hook to fetch blocks for each nominee's chain ID
+const useBlocksForNominees = (nominees: Nominee[]) => {
+  const [blocks, setBlocks] = useState<Map<string, Block>>(new Map());
+  const [isLoading, setIsLoading] = useState(false);
+
+  const fetchBlocks = useCallback(async () => {
+    if (nominees.length === 0) return;
+
+    setIsLoading(true);
+    const blockMap = new Map<string, Block>();
+
+    try {
+      // Fetch blocks for each nominee's chain ID in parallel
+      const blockPromises = [...new Set(nominees.map(item => item.chainId))].map(async (nominee) => {
+        try {
+          const publicClient = getPublicClient(wagmiConfig, { chainId: Number(nominee) });
+          const block = await getBlock(publicClient, { blockTag: 'latest' });
+          return { nominee, block };
+        } catch (error) {
+          console.warn(`Failed to fetch block for chain ${nominee}:`, error);
+          return { nominee, block: null };
+        }
+      });
+
+      const results = await Promise.all(blockPromises);
+      
+      results.forEach(({ nominee, block }) => {
+        if (block) {
+          blockMap.set(nominee.toString(), block);
+        }
+      });
+      console.log(blockMap);
+
+      setBlocks(blockMap);
+    } catch (error) {
+      console.error('Error fetching blocks:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [nominees]);
+
+  useEffect(() => {
+    fetchBlocks();
+  }, [fetchBlocks]);
+
+  return { blocks, isLoading };
+};
+
 export const useStakingContractsList = () => {
   // Get nominees list
   const { data: nomineesData, isFetching: isNomineesLoading } = useNominees();
@@ -343,6 +393,9 @@ export const useStakingContractsList = () => {
         areAddressesEqual(blackListedNominee, getAddressFromBytes32(nominee.account)),
       ),
   );
+
+  // Fetch blocks for each nominee's chain ID
+  const { blocks, isLoading: areBlocksLoading } = useBlocksForNominees(nominees);
 
   // Get contracts metadata
   const { data: metadata, isLoading: isMetadataLoading } = useNomineesMetadata(nominees);
@@ -373,6 +426,24 @@ export const useStakingContractsList = () => {
   const { data: numAgentInstancesList, isFetching: isNumAgentInstancesLoading } =
     useContractDetails(nominees, 'numAgentInstances');
 
+  // Get epochCounter
+  const { data: epochCounter, isFetching: isEpochCounterLoading } = useContractDetails(
+    nominees,
+    'epochCounter',
+  );
+
+  // Get livenessPeriod
+  const { data: livenessPeriod, isFetching: isLivenessPeriodLoading } = useContractDetails(
+    nominees,
+    'livenessPeriod',
+  );
+
+  // Get tsCheckpoint
+  const { data: tsCheckpoint, isFetching: isTsCheckpointLoading } = useContractDetails(
+    nominees,
+    'tsCheckpoint',
+  );
+
   /**
    * Sets staking contracts list to the store
    **/
@@ -386,22 +457,47 @@ export const useStakingContractsList = () => {
       !!rewardsPerSecondList &&
       !!availableRewardsList &&
       !!minStakingDepositList &&
-      !!numAgentInstancesList
+      !!numAgentInstancesList &&
+      !!epochCounter &&
+      !!livenessPeriod &&
+      !!tsCheckpoint &&
+      nominees.length > 0
     ) {
       return nominees.map((item, index) => {
         const maxSlots = Number(maxNumServicesList[index]);
         const servicesLength = ((serviceIdsList[index] as string[]) || []).length;
-        const availableRewardsInWei = availableRewardsList[index] as bigint;
+        // const availableRewardsInWei = availableRewardsList[index] as bigint;
+        const availableRewardsInWei = availableRewardsList[index];
         const availableSlots =
-          availableRewardsInWei > 0 && maxSlots > 0 ? maxSlots - servicesLength : 0;
+          (availableRewardsInWei as bigint) > 0 && maxSlots > 0 ? maxSlots - servicesLength : 0;
         const rewardsPerSecond = rewardsPerSecondList[index] as bigint;
         const minStakingDeposit = minStakingDepositList[index] as bigint;
         const numAgentInstances = numAgentInstancesList[index] as bigint;
-        const availableRewards = formatUnits(availableRewardsInWei, 18);
+        // const availableRewards = formatUnits(availableRewardsInWei, 18);
+
+        const availableRewards =
+          availableRewardsInWei != null ? formatUnits(availableRewardsInWei as bigint, 18) : '0';
 
         const apy = getApy(rewardsPerSecond, minStakingDeposit, numAgentInstances);
         const stakeRequired = getStakeRequired(minStakingDeposit, numAgentInstances);
         const details = STAKING_CONTRACT_DETAILS[item.account];
+        const epoch = Number(epochCounter[index]);
+        const livenessPeriodSeconds = Number(livenessPeriod[index]);
+        const tsCheckpointSeconds = Number(tsCheckpoint[index]);
+
+        // Get the block for this contract's specific chain
+        const contractBlock = blocks.get(item.account);
+
+        // Calculate time remaining using the block from the contract's chain
+        const timeRemainingSeconds = contractBlock
+          ? livenessPeriodSeconds - (Number(contractBlock.timestamp) - tsCheckpointSeconds)
+          : 0;
+
+        // Convert to days, hours, minutes
+        const days = Math.floor(timeRemainingSeconds / 86400);
+        const hours = Math.floor((timeRemainingSeconds % 86400) / 3600);
+        const minutes = Math.floor((timeRemainingSeconds % 3600) / 60);
+        const timeRemaining = `${days}d ${hours}h ${minutes}m`;
 
         return {
           key: item.account,
@@ -417,6 +513,8 @@ export const useStakingContractsList = () => {
           minOperatingBalanceToken: details?.minOperatingBalanceToken || null,
           minOperatingBalanceHint: details?.minOperatingBalanceHint || null,
           availableRewards,
+          epoch,
+          timeRemaining,
         };
       }) as StakingContract[];
     }
@@ -427,9 +525,13 @@ export const useStakingContractsList = () => {
     maxNumServicesList,
     serviceIdsList,
     rewardsPerSecondList,
+    availableRewardsList,
     minStakingDepositList,
     numAgentInstancesList,
-    availableRewardsList,
+    epochCounter,
+    livenessPeriod,
+    tsCheckpoint,
+    blocks,
   ]);
 
   return {
@@ -442,6 +544,10 @@ export const useStakingContractsList = () => {
       isRewardsPerSecondLoading ||
       isAvailableRewardsLoading ||
       isMinStakingDepositLoading ||
-      isNumAgentInstancesLoading,
+      isNumAgentInstancesLoading ||
+      isEpochCounterLoading ||
+      isLivenessPeriodLoading ||
+      isTsCheckpointLoading ||
+      areBlocksLoading,
   };
 };

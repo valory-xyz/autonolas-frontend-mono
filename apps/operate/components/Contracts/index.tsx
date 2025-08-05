@@ -24,17 +24,36 @@ const { Title, Paragraph, Text } = Typography;
 
 const columns: ColumnsType<StakingContract> = [
   {
-    title: 'Contract',
-    dataIndex: 'metadata',
-    key: 'address',
-    render: (metadata) => <Text strong>{metadata?.name || NA}</Text>,
+    title: 'Contract Info',
+    key: 'contractInfo',
+    render: (_, record) => (
+      <>
+        <Text strong>{record.metadata?.name || NA}</Text>
+        <br />
+        <Text type="secondary">{CHAIN_NAMES[record.chainId] || record.chainId} chain</Text>
+      </>
+    ),
   },
   {
-    title: 'Chain',
-    dataIndex: 'chainId',
-    key: 'chainId',
-    width: 120,
-    render: (chainId) => <Text type="secondary">{CHAIN_NAMES[chainId] || chainId}</Text>,
+    title: (
+      <TextWithTooltip
+        text="Current Epoch"
+        description="The number of the current epoch and time till the next epoch"
+      />
+    ),
+    key: 'currentEpoch',
+    render: (_, record) => {
+      console.log(record.timeRemaining);
+      return (
+        <>
+          <Text>{record.epoch}</Text>
+          <br />
+          <Text type="secondary">{record.timeRemaining}</Text>
+        </>
+      );
+    },
+    width: 130,
+    className: 'text-center',
   },
   {
     title: 'Available slots',
@@ -42,7 +61,7 @@ const columns: ColumnsType<StakingContract> = [
     key: 'availableSlots',
     render: (availableSlots, record) => <Text>{`${availableSlots} / ${record.maxSlots}`}</Text>,
     className: 'text-end',
-    width: 80,
+    width: 60,
   },
   {
     title: () => <TextWithTooltip text="APY" description="Annual percentage yield" />,
