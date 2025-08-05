@@ -100,7 +100,7 @@ const useNomineesWeightsAtPrevEpochEnd = ({
 
 /**
  * Assuming max batch size to be "3"
- * nomineesToClaimArray: [[0x1, 1], [0x2, 1], [0x3, 2], [0x4, 1]]
+ * nomineesTimesToClaimArray: [[0x1, 1], [0x2, 1], [0x3, 2], [0x4, 1]]
  *
  * returns:
  * [
