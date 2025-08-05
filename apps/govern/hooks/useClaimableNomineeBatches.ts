@@ -246,7 +246,7 @@ export const useClaimableNomineesBatches = () => {
          * Nominees along with their timesToClaim
          * eg: [[0x1, 1], [0x2, 1], [0x3, 2], [0x4, 1]]
          */
-        const nomineedTimesToClaimArray = nominees.reduce(
+        const nomineesTimesToClaimArray = nominees.reduce(
           (acc, nominee) => {
             const lastClaimedStakingEpoch = Number(
               lastClaimedStakingEpochByNominee[nominee].result,
@@ -256,7 +256,7 @@ export const useClaimableNomineesBatches = () => {
           },
           [] as [Address, number][],
         );
-        const chunks = chunkNomineesArrayByTimeToClaim(nomineedTimesToClaimArray, MAX_BATCH_SIZE);
+        const chunks = chunkNomineesArrayByTimeToClaim(nomineesTimesToClaimArray, MAX_BATCH_SIZE);
         acc[Number(chainId)] = chunks;
         return acc;
       },
