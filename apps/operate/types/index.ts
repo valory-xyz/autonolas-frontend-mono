@@ -21,6 +21,8 @@ export type StakingContract = {
   minOperatingBalanceToken: string | null;
   minOperatingBalanceHint?: string;
   availableRewards: string;
+  epoch: number;
+  timeRemaining: string;
 };
 
 export type Nominee = {
