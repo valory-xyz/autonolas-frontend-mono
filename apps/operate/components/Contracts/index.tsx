@@ -49,7 +49,7 @@ const columns: ColumnsType<StakingContract> = [
         <Text type="secondary">{record.timeRemaining}</Text>
       </>
     ),
-    width: 130,
+    width: 160,
     className: 'text-center',
   },
   {
