@@ -351,26 +351,26 @@ const useBlocksForNominees = (nominees: Nominee[]) => {
     try {
       // Fetch blocks for each nominee's chain ID in parallel
       const blockPromises = [...new Set(nominees.map((item) => item.chainId))].map(
-        async (nominee) => {
+        async (chainId) => {
           try {
-            const publicClient = getPublicClient(wagmiConfig, { chainId: Number(nominee) });
+            const publicClient = getPublicClient(wagmiConfig, { chainId: Number(chainId) });
             if (!publicClient) {
-              throw new Error(`No public client found for chainId ${nominee}`);
+              throw new Error(`No public client found for chainId ${chainId}`);
             }
             const block = await getBlock(publicClient, { blockTag: 'latest' });
-            return { nominee, block };
+            return { chainId, block };
           } catch (error) {
-            console.warn(`Failed to fetch block for chain ${nominee}:`, error);
-            return { nominee, block: null };
+            console.warn(`Failed to fetch block for chain ${chainId}:`, error);
+            return { chainId, block: null };
           }
         },
       );
 
       const results = await Promise.all(blockPromises);
 
-      results.forEach(({ nominee, block }) => {
+      results.forEach(({ chainId, block }) => {
         if (block) {
-          blockMap.set(nominee.toString(), block);
+          blockMap.set(chainId.toString(), block);
         }
       });
 
@@ -387,6 +387,13 @@ const useBlocksForNominees = (nominees: Nominee[]) => {
   }, [nominees, fetchBlocks]);
 
   return { blocks, isLoading };
+};
+
+const getDate = (timeRemainingSeconds: number) => {
+  const days = Math.floor(timeRemainingSeconds / 86400);
+  const hours = Math.floor((timeRemainingSeconds % 86400) / 3600);
+  const minutes = Math.floor((timeRemainingSeconds % 3600) / 60);
+  return `${days}d ${hours}h ${minutes}m`;
 };
 
 export const useStakingContractsList = () => {
@@ -473,14 +480,12 @@ export const useStakingContractsList = () => {
       return nominees.map((item, index) => {
         const maxSlots = Number(maxNumServicesList[index]);
         const servicesLength = ((serviceIdsList[index] as string[]) || []).length;
-        // const availableRewardsInWei = availableRewardsList[index] as bigint;
         const availableRewardsInWei = availableRewardsList[index];
         const availableSlots =
           (availableRewardsInWei as bigint) > 0 && maxSlots > 0 ? maxSlots - servicesLength : 0;
         const rewardsPerSecond = rewardsPerSecondList[index] as bigint;
         const minStakingDeposit = minStakingDepositList[index] as bigint;
         const numAgentInstances = numAgentInstancesList[index] as bigint;
-        // const availableRewards = formatUnits(availableRewardsInWei, 18);
 
         const availableRewards =
           availableRewardsInWei != null ? formatUnits(availableRewardsInWei as bigint, 18) : '0';
@@ -499,12 +504,7 @@ export const useStakingContractsList = () => {
         const timeRemainingSeconds = contractBlock
           ? livenessPeriodSeconds - (Number(contractBlock.timestamp) - tsCheckpointSeconds)
           : 0;
-
-        // Convert to days, hours, minutes
-        const days = Math.floor(timeRemainingSeconds / 86400);
-        const hours = Math.floor((timeRemainingSeconds % 86400) / 3600);
-        const minutes = Math.floor((timeRemainingSeconds % 3600) / 60);
-        const timeRemaining = `${days}d ${hours}h ${minutes}m`;
+        const timeRemaining = getDate(timeRemainingSeconds);
 
         return {
           key: item.account,
