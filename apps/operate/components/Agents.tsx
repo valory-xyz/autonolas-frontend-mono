@@ -42,7 +42,7 @@ const agents: Agent[] = [
   {
     id: 'prediction-agent',
     name: 'Prediction Agent',
-    description: 'Participates in prediction markets according to your strategy.',
+    description: 'Trades on prediction markets.',
     comingSoon: false,
     availableOn: ['pearl', 'quickstart'],
     urls: {
@@ -53,8 +53,7 @@ const agents: Agent[] = [
   {
     id: 'optimus-agent',
     name: 'Optimus Agent',
-    description:
-      'Streamlines your DeFi experience by intelligently managing your assets across the Superchain.',
+    description: 'Intelligently manages your DeFi assets across the Superchain.',
     comingSoon: false,
     availableOn: ['pearl', 'quickstart'],
     urls: {
@@ -65,7 +64,7 @@ const agents: Agent[] = [
   {
     id: 'modius-agent',
     name: 'Modius Agent',
-    description: 'Invests crypto assets on your behalf and grows your portfolio on Mode chain.',
+    description: 'Manages your portfolio with cutting-edge strategies on Mode network.',
     comingSoon: false,
     availableOn: ['pearl', 'quickstart'],
     urls: {
@@ -76,10 +75,9 @@ const agents: Agent[] = [
   {
     id: 'agents.fun-agent',
     name: 'Agents.fun agent',
-    description:
-      'Creates customized AI influencer personas that post on X and perform tasks on Base chain.',
+    description: 'Posts to X, creates and interacts with memecoins and other agents.',
     comingSoon: false,
-    availableOn: ['pearl'],
+    availableOn: ['quickstart'],
     urls: {
       learnMore: 'https://olas.network/services/agentsfun',
     },

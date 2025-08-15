@@ -96,6 +96,19 @@ const STAKING_CONTRACT_DETAILS: Record<Address, StakingContractDetailsInfo> = {
     minOperatingBalance: 45,
     minOperatingBalanceToken: 'xDAI',
   },
+  // TODO: Add when balances are available
+  // // Marketplace Supply Alpha (Base)
+  // '0x000000000000000000000000b14cd66c6c601230ea79fa7cc072e5e0c2f3a756': {
+  //   availableOn: ['quickstart'],
+  //   minOperatingBalance: null,
+  //   minOperatingBalanceToken: 'ETH',
+  // },
+  // // Marketplace Supply Alpha (Gnosis)
+  // '0x000000000000000000000000cabd0c941e54147d40644cf7da7e36d70df46f44': {
+  //   availableOn: ['quickstart'],
+  //   minOperatingBalance: null,
+  //   minOperatingBalanceToken: 'xDAI',
+  // },
   // Quickstart Beta - Expert 4
   '0x000000000000000000000000ad9d891134443b443d7f30013c7e14fe27f2e029': {
     availableOn: ['quickstart'],
@@ -104,6 +117,42 @@ const STAKING_CONTRACT_DETAILS: Record<Address, StakingContractDetailsInfo> = {
   },
   // Quickstart Beta - Expert 5
   '0x000000000000000000000000e56df1e563de1b10715cb313d514af350d207212': {
+    availableOn: ['quickstart'],
+    minOperatingBalance: 135,
+    minOperatingBalanceToken: 'xDAI',
+  },
+  // Quickstart Beta Mech Marketplace - Expert 3
+  '0x00000000000000000000000075eeca6207be98cac3fde8a20ecd7b01e50b3472': {
+    availableOn: ['quickstart'],
+    minOperatingBalance: 90,
+    minOperatingBalanceToken: 'xDAI',
+  },
+  // Quickstart Beta Mech Marketplace - Expert 4
+  '0x0000000000000000000000009c7f6103e3a72e4d1805b9c683ea5b370ec1a99f': {
+    availableOn: ['quickstart'],
+    minOperatingBalance: 90,
+    minOperatingBalanceToken: 'xDAI',
+  },
+  // Quickstart Beta Mech Marketplace - Expert 5
+  '0x000000000000000000000000cdc603e0ee55aae92519f9770f214b2be4967f7d': {
+    availableOn: ['quickstart'],
+    minOperatingBalance: 135,
+    minOperatingBalanceToken: 'xDAI',
+  },
+  // Quickstart Beta Mech Marketplace - Expert 6
+  '0x00000000000000000000000022d6cd3d587d8391c3aae83a783f26c67ab54a85': {
+    availableOn: ['quickstart'],
+    minOperatingBalance: 135,
+    minOperatingBalanceToken: 'xDAI',
+  },
+  // Quickstart Beta Mech Marketplace - Expert 7
+  '0x000000000000000000000000aaecdf4d0cbd6ca0622892ac6044472f3912a5f3': {
+    availableOn: ['quickstart'],
+    minOperatingBalance: 135,
+    minOperatingBalanceToken: 'xDAI',
+  },
+  // Quickstart Beta Mech Marketplace - Expert 8
+  '0x000000000000000000000000168aed532a0cd8868c22fc77937af78b363652b1': {
     availableOn: ['quickstart'],
     minOperatingBalance: 135,
     minOperatingBalanceToken: 'xDAI',
