@@ -134,7 +134,7 @@ export const ListAgents = () => {
   }, [account, currentTab, searchValue]);
 
   const tableCommonProps = {
-    type: NAV_TYPES.AGENT,
+    type: NAV_TYPES.SERVICE,
     isLoading,
     total,
     currentPage,
