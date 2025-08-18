@@ -1,7 +1,7 @@
 import dynamic from 'next/dynamic';
 
-const MintAgent = dynamic(() => import('../../../components/ListAgents/mint'), {
+const MintService = dynamic(() => import('../../../components/ListServices/mint'), {
   ssr: false,
 });
 
-export default MintAgent;
+export default MintService;

@@ -1,7 +1,7 @@
 import dynamic from 'next/dynamic';
 
-const ListServices = dynamic(() => import('../../../components/ListServices'), {
+const ListAgents = dynamic(() => import('../../../components/ListAgents'), {
   ssr: false,
 });
 
-export default ListServices;
+export default ListAgents;
