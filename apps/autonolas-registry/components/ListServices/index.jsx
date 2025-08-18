@@ -244,7 +244,7 @@ const ListServices = () => {
         },
         {
           key: MY_SERVICES,
-          label: 'My Services',
+          label: 'My AI Agents',
           disabled: isLoading,
           children: (
             <ListTable

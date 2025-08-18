@@ -22,7 +22,7 @@ const MintAgent = () => {
   const [information, setInformation] = useState(null);
   const router = useRouter();
 
-  const handleCancel = () => router.push(`/${chainName}/agents`);
+  const handleCancel = () => router.push(`/${chainName}/agent-blueprints`);
 
   const handleSubmit = async (values) => {
     if (account) {

@@ -247,7 +247,7 @@ describe('listServices/index.jsx - SVM', () => {
     (useHelpers as jest.Mock).mockReturnValue({
       account: mockSvmAddress,
       chainName: 'SVM',
-      links: { SERVICES: '/services' },
+      links: { SERVICES: '/ai-agents' },
       isSvm: true,
     });
     (useServiceInfo as jest.Mock).mockReturnValue({

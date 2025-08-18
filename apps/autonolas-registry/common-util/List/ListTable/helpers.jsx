@@ -1,4 +1,4 @@
-import { Button, Space } from 'antd';
+import { Button, Space, Tag } from 'antd';
 
 import { AddressLink, NA, areAddressesEqual } from '@autonolas/frontend-library';
 import { AddressLink as AddressLinkSimple } from 'libs/ui-components/src';
@@ -25,6 +25,11 @@ export const getTableColumns = (
     dataIndex: 'tokenId',
     key: 'tokenId',
     width: isMobile ? 30 : 50,
+    render: (text, record) => {
+      <Button size="large" type="link" onClick={() => onViewClick(record.id)}>
+        {text}
+      </Button>;
+    },
   };
 
   const packageName = {
@@ -39,17 +44,6 @@ export const getTableColumns = (
           {text}
         </Button>
       );
-    },
-  };
-
-  const ownerColumn = {
-    title: 'Owner',
-    dataIndex: 'owner',
-    key: 'owner',
-    width: 160,
-    render: (text) => {
-      if (!text || text === NA) return NA;
-      return <AddressLink {...addressLinkProps} text={text} canCopy />;
     },
   };
 
@@ -85,6 +79,17 @@ export const getTableColumns = (
       ),
     };
 
+    const ownerColumn = {
+      title: 'Owner',
+      dataIndex: 'owner',
+      key: 'owner',
+      width: 160,
+      render: (text) => {
+        if (!text || text === NA) return NA;
+        return <AddressLink {...addressLinkProps} text={text} canCopy />;
+      },
+    };
+
     return isMainnet
       ? [tokenIdColumn, packageName, ownerColumn, hashColumn, actionColumn]
       : [tokenIdColumn, ownerColumn, dependencyColumn, actionColumn];
@@ -101,11 +106,58 @@ export const getTableColumns = (
         return SERVICE_STATE[text];
       },
     };
+    const descriptionColumn = {
+      title: 'Description',
+      dataIndex: 'description',
+      key: 'description',
+      width: 660,
+      render: () => {
+        return 'hi';
+      },
+    };
+
+    const servicesOfferedColumn = {
+      title: 'Services Offered',
+      dataIndex: 'servicesOffered',
+      key: 'servicesOffered',
+      width: 200,
+      render: () => {
+        return 'some hash';
+      },
+    };
+
+    const marketplaceRoleColumn = {
+      title: 'Marketplace Role',
+      dataIndex: 'marketplaceRole',
+      key: 'marketplaceRole',
+      width: 200,
+      render: (_text, record) => {
+        let color = '';
+
+        if (record.role === 'Demand & Supply') {
+          color = 'purple';
+        }
+        if (record.role === 'Demand') {
+          color = 'blue';
+        }
+        if (record.role === 'Supply') {
+          color = 'red';
+        }
+
+        return (
+          <Tag color={color} bordered={false}>
+            Example
+          </Tag>
+        );
+      },
+    };
+
     const actionAndUpdateColumn = {
       width: isMobile ? 40 : 200,
-      title: 'Action',
-      key: 'action',
-      fixed: 'right',
+      title: 'Marketplace Activity',
+      dataIndex: 'marketplaceActivity',
+      key: 'marketplaceActivity',
+      align: 'center',
       render: (_text, record) => {
         // only show update button for pre-registration state and
         // if the owner is the same as the current account
@@ -115,12 +167,7 @@ export const getTableColumns = (
 
         return (
           <Space size="middle">
-            <Button
-              size="large"
-              type="link"
-              onClick={() => onViewClick(record.id)}
-              disabled={record.owner === NA}
-            >
+            <Button onClick={() => onViewClick(record.id)} disabled={record.owner === NA}>
               View
             </Button>
 
@@ -138,7 +185,7 @@ export const getTableColumns = (
       title: 'ID',
       dataIndex: 'id',
       key: 'id',
-      width: isMobile ? 30 : 50,
+      width: isMobile ? 30 : 60,
     };
 
     const nonMainnetOwnerColumn = {
@@ -153,8 +200,14 @@ export const getTableColumns = (
     };
 
     return isMainnet
-      ? [tokenIdColumn, packageName, ownerColumn, hashColumn, stateColumn, actionAndUpdateColumn]
-      : [idColumn, nonMainnetOwnerColumn, stateColumn, actionAndUpdateColumn];
+      ? [
+          tokenIdColumn,
+          descriptionColumn,
+          servicesOfferedColumn,
+          marketplaceRoleColumn,
+          actionAndUpdateColumn,
+        ]
+      : [idColumn, descriptionColumn, nonMainnetOwnerColumn, stateColumn, actionAndUpdateColumn];
   }
 
   return [];
@@ -190,8 +243,8 @@ export const convertTableRawData = (type, rawData, { currentPage, isMainnet }) =
     if (type === NAV_TYPES.SERVICE) {
       return rawData.map((item) => ({
         id: item.serviceId,
+        dsecription: item.description,
         tokenId: item.serviceId,
-        owner: item.owner,
         hash: item.metadataHash,
         packageName: item.publicId,
         packageHash: item.packageHash,

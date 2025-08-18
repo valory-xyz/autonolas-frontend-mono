@@ -1,11 +1,11 @@
 export const URL = {
-  AGENTS: '/agents',
+  AGENTS: '/agent-blueprints',
   COMPONENTS: '/components',
-  SERVICES: '/services',
-  MINT_AGENT: '/agents/mint',
+  SERVICES: '/ai-agents',
+  MINT_AGENT: '/agent-blueprints/mint',
   MINT_COMPONENT: '/components/mint',
-  MINT_SERVICE: '/services/mint',
-  UPDATE_SERVICE: '/services/update',
+  MINT_SERVICE: '/ai-agents/mint',
+  UPDATE_SERVICE: '/ai-agents/update',
 
   // pages without chain id
   DISCLAIMER: '/disclaimer',
@@ -15,8 +15,8 @@ export const URL = {
 
 export const NAV_TYPES = {
   COMPONENT: 'component',
-  AGENT: 'agent',
-  SERVICE: 'service',
+  AGENT: 'agent-blueprints',
+  SERVICE: 'ai-agents',
 } as const;
 
 export type NavTypesKeys = keyof typeof NAV_TYPES;

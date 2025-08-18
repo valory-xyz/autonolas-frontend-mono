@@ -47,7 +47,7 @@ export const DependencyLabel = ({ type }) => {
             </>
           )}
           Comma-separated list of agent IDs which this service requires. Find IDs on&nbsp;
-          <MyLink href="/agents">
+          <MyLink href="/agent-blueprints">
             Agents
             <ExportOutlined style={{ width: 14 }} />
           </MyLink>

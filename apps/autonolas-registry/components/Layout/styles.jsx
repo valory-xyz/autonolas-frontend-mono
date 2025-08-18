@@ -37,10 +37,8 @@ export const CustomLayout = styled(Layout)`
     .ant-table-tbody > tr {
       > td {
         padding: 8px 16px;
-        .ant-btn {
-          &:first-child {
-            padding-left: 0;
-          }
+        .td-center {
+          align: center;
         }
         .ant-btn-link {
           font-size: 16px;

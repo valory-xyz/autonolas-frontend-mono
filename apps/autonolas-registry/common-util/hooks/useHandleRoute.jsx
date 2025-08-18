@@ -127,7 +127,7 @@ export const useHandleRoute = () => {
      */
 
     if (!isValidL1NetworkName(networkNameFromUrl) && doesPathIncludesComponentsOrAgents(path)) {
-      router.push(`/${networkNameFromUrl}/services`);
+      router.push(`/${networkNameFromUrl}/ai-agents`);
     }
   }, [path, networkNameFromUrl, isL1Network, router]);
 

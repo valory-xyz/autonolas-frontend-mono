@@ -36,64 +36,65 @@ const Layout = ({ children }) => {
       <OlasHeader ismobile={`${isMobile}`}>
         <div className="header-left-content">
           <Logo onClick={onHomeClick} data-testid="protocol-logo" ismobile={`${isMobile}`}>
-            {isMobile || isTablet ? <LogoIconSvg /> : <LogoSvg />}
+            {isTablet ? <LogoIconSvg /> : <LogoSvg />}
           </Logo>
 
           <NavDropdown currentSite="registry" />
         </div>
 
-        <SelectContainer style={{ marginRight: isMobile ? 8 : 0 }}>
-          <Select
-            showSearch
-            className="show-scrollbar"
-            style={{ width: isMobile ? 140 : 200 }}
-            listHeight={800}
-            value={chainName}
-            placeholder="Select Network"
-            disabled={PAGES_TO_LOAD_WITHOUT_CHAINID.some((e) => path.includes(e))}
-            options={ALL_SUPPORTED_CHAINS.map((e) => ({
-              label: e.networkDisplayName,
-              value: e.networkName,
-            }))}
-            onChange={(value) => {
-              const currentChainInfo = ALL_SUPPORTED_CHAINS.find((e) => e.networkName === value);
-
-              if (!currentChainInfo) return;
-
-              // update session storage
-              sessionStorage.setItem('chainId', currentChainInfo.id);
-
-              if (PAGES_TO_LOAD_WITHOUT_CHAINID.find((e) => e === path)) {
-                // eg. /disclaimer will be redirect to same page ie. /disclaimer
-                updateChainId(currentChainInfo.id);
-                router.push(`/${path}`);
-              } else {
-                // eg. /components, /agents, /services will be redirect to
-                // /<chainName>/components, /<chainName>/agents, /<chainName>/services
-                const replacedPath = router.asPath.replace(chainName, value);
-
-                // reload the page if vmType is different
-                // ie. user switched from svm to eth or vice versa
-                // or if the current chain selected is ethereum
-                if (
-                  vmType === VM_TYPE.SVM ||
-                  vmType !== currentChainInfo.vmType ||
-                  currentChainInfo.networkName === 'ethereum'
-                ) {
-                  window.open(replacedPath, '_self');
-                } else {
-                  router.push(replacedPath);
-                }
-              }
-            }}
-            filterOption={(input, option) => {
-              const { label } = option;
-              return label.toLowerCase().indexOf(input.toLowerCase()) >= 0;
-            }}
-          />
-        </SelectContainer>
         <NavigationMenu />
         <RightMenu>
+          <SelectContainer style={{ marginRight: isMobile ? 8 : 0 }}>
+            <Select
+              showSearch
+              className="show-scrollbar"
+              style={{ width: isMobile ? 140 : 200 }}
+              listHeight={800}
+              value={chainName}
+              placeholder="Select Network"
+              disabled={PAGES_TO_LOAD_WITHOUT_CHAINID.some((e) => path.includes(e))}
+              options={ALL_SUPPORTED_CHAINS.map((e) => ({
+                label: e.networkDisplayName,
+                value: e.networkName,
+              }))}
+              onChange={(value) => {
+                const currentChainInfo = ALL_SUPPORTED_CHAINS.find((e) => e.networkName === value);
+
+                if (!currentChainInfo) return;
+
+                // update session storage
+                sessionStorage.setItem('chainId', currentChainInfo.id);
+
+                if (PAGES_TO_LOAD_WITHOUT_CHAINID.find((e) => e === path)) {
+                  // eg. /disclaimer will be redirect to same page ie. /disclaimer
+                  updateChainId(currentChainInfo.id);
+                  router.push(`/${path}`);
+                } else {
+                  // eg. /components, /agents, /services will be redirect to
+                  // /<chainName>/components, /<chainName>/agents, /<chainName>/services
+                  const replacedPath = router.asPath.replace(chainName, value);
+
+                  // reload the page if vmType is different
+                  // ie. user switched from svm to eth or vice versa
+                  // or if the current chain selected is ethereum
+                  if (
+                    vmType === VM_TYPE.SVM ||
+                    vmType !== currentChainInfo.vmType ||
+                    currentChainInfo.networkName === 'ethereum'
+                  ) {
+                    window.open(replacedPath, '_self');
+                  } else {
+                    router.push(replacedPath);
+                  }
+                }
+              }}
+              filterOption={(input, option) => {
+                const { label } = option;
+                return label.toLowerCase().indexOf(input.toLowerCase()) >= 0;
+              }}
+            />
+          </SelectContainer>
+
           <Login />
         </RightMenu>
       </OlasHeader>

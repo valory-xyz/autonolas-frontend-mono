@@ -129,7 +129,7 @@ const UpdateService = () => {
     if (account) submitData();
   };
 
-  const handleCancel = () => router.push(`/${chainName}/services`);
+  const handleCancel = () => router.push(`/${chainName}/ai-agents`);
 
   return (
     <>

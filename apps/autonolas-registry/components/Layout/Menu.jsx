@@ -8,11 +8,11 @@ import { useScreen } from '@autonolas/frontend-library';
 import { useHelpers } from 'common-util/hooks';
 
 const items = [
-  { label: 'Components', key: 'components' },
-  { label: 'Agents', key: 'agents' },
+  { label: 'AI Agents', key: 'ai-agents' },
+  { label: 'Agent Blueprints', key: 'agent-blueprints' },
 ];
 
-const serviceItem = [{ label: 'Services', key: 'services' }];
+const serviceItem = [{ label: 'Components', key: 'components' }];
 
 const MenuInstance = ({ selectedMenu, handleMenuItemClick, mode }) => {
   const { isL1Network, isSvm } = useHelpers();
