@@ -8,20 +8,28 @@ import { useScreen } from '@autonolas/frontend-library';
 import { useHelpers } from 'common-util/hooks';
 
 const items = [
-  { label: 'AI Agents', key: 'ai-agents' },
   { label: 'Agent Blueprints', key: 'agent-blueprints' },
+  { label: 'Components', key: 'components' },
 ];
 
-const serviceItem = [{ label: 'Components', key: 'components' }];
+const serviceItem = [{ label: 'AI Agents', key: 'ai-agents' }];
 
-const MenuInstance = ({ selectedMenu, handleMenuItemClick, mode }) => {
+const MenuInstance = ({
+  selectedMenu,
+  handleMenuItemClick,
+  mode,
+}: {
+  selectedMenu: string;
+  handleMenuItemClick: (e: { key: string }) => void;
+  mode: 'horizontal' | 'vertical';
+}) => {
   const { isL1Network, isSvm } = useHelpers();
 
   const navItems = useMemo(() => {
     // only show services for svm
     if (isSvm) return serviceItem;
 
-    return isL1Network ? [...items, ...serviceItem] : serviceItem;
+    return isL1Network ? [...serviceItem, ...items] : serviceItem;
   }, [isL1Network, isSvm]);
 
   return (
@@ -58,11 +66,11 @@ const NavigationMenu = () => {
   useEffect(() => {
     if (pathname) {
       const name = pathname.split('/')[2];
-      setSelectedMenu(name || null);
+      setSelectedMenu(name || '');
     }
   }, [pathname]);
 
-  const handleMenuItemClick = ({ key }) => {
+  const handleMenuItemClick = ({ key }: { key: string }) => {
     router.push(`/${chainName}/${key}`);
     setSelectedMenu(key);
     setMenuVisible(false); // close the dropdown menu after item click
