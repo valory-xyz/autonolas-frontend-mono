@@ -31,6 +31,12 @@ export const COLOR = {
 
   YELLOW_PRIMARY: '#eab308', // tailwind orange.500
   YELLOW_SECONDARY: '#fefce8', // tailwind orange.50
+
+  NEUTRAL_10: '#262626',
+
+  BASE: {
+    NEUTRAL_1: '#F2F4F9',
+  },
 };
 
 export const BREAK_POINT = {

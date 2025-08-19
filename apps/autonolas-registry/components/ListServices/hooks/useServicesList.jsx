@@ -84,7 +84,12 @@ export const useAllServices = () => {
   return useCallback(async (currentPage) => {
     const query = getAllAndMyServicesQuery(currentPage);
     const response = await GRAPHQL_CLIENT.request(query);
-    return response?.services || [];
+    const services = (response?.services || []).map((service) => ({
+      ...service,
+      role: 'Registered',
+      metadata: service.metadataHash,
+    }));
+    return services;
   }, []);
 };
 

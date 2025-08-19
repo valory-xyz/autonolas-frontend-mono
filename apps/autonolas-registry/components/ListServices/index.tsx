@@ -17,12 +17,20 @@ import {
   getTotalForMyServices,
 } from './utils';
 
-const ALL_SERVICES = 'all-services';
-const MY_SERVICES = 'my-services';
+const ALL_AI_AGENTS = 'all-ai-agents';
+const MY_AI_AGENTS = 'my-ai-agents';
+
+type AI_AGENT = {
+  id: string;
+  description: string;
+  metadata: string;
+  configHash: string;
+  role: string;
+};
 
 const ListServices = () => {
   const router = useRouter();
-  const [currentTab, setCurrentTab] = useState(isMyTab(router) ? MY_SERVICES : ALL_SERVICES);
+  const [currentTab, setCurrentTab] = useState(isMyTab(router) ? MY_AI_AGENTS : ALL_AI_AGENTS);
 
   const { account, links, isSvm, chainId, isMainnet } = useHelpers();
 
@@ -33,13 +41,15 @@ const ListServices = () => {
   /**
    * extra tab content & view click
    */
-  const { searchValue, extraTabContent, clearSearch } = useExtraTabContent({
-    title: 'Services',
+  const { searchValue, clearSearch } = useExtraTabContent({
+    title: 'AI Agents',
     onRegisterClick: () => router.push(links.MINT_SERVICE),
     isSvm,
-    isMyTab: currentTab === MY_SERVICES,
+    isMyTab: currentTab === MY_AI_AGENTS,
+    type: NAV_TYPES.SERVICE,
   });
-  const onViewClick = (id) => router.push(`${links.SERVICES}/${id}`);
+
+  const onViewClick = (id: string) => router.push(`${links.SERVICES}/${id}`);
 
   /**
    * filtered list
@@ -47,7 +57,7 @@ const ListServices = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [total, setTotal] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
-  const [list, setList] = useState([]);
+  const [list, setList] = useState<AI_AGENT[]>([]);
 
   const { getTotalForAllSvmServices, getTotalForMySvmServices, getSvmServices, getMySvmServices } =
     useServiceInfo();
@@ -58,11 +68,12 @@ const ListServices = () => {
       try {
         let totalTemp = null;
 
-        if (currentTab === ALL_SERVICES) {
+        if (currentTab === ALL_AI_AGENTS) {
           totalTemp = isSvm ? await getTotalForAllSvmServices() : await getTotalForAllServices();
-        } else if (currentTab === MY_SERVICES && account) {
+        } else if (currentTab === MY_AI_AGENTS && account) {
           totalTemp = isSvm
-            ? await getTotalForMySvmServices(account)
+            ? // TODO: add logic to filter basis the account
+              await getTotalForMySvmServices()
             : await getTotalForMyServices(account);
         }
 
@@ -98,7 +109,7 @@ const ListServices = () => {
 
       try {
         // All services
-        if (currentTab === ALL_SERVICES) {
+        if (currentTab === ALL_AI_AGENTS) {
           if (isMainnet) {
             const mainnetServices = await getAllServices(currentPage);
             setList(mainnetServices);
@@ -108,7 +119,7 @@ const ListServices = () => {
               : await getServices(total, currentPage);
             setList(nonMainnetServices);
           }
-        } else if (currentTab === MY_SERVICES && account) {
+        } else if (currentTab === MY_AI_AGENTS && account) {
           /**
            * My services
            * - search by `account` as searchValue
@@ -172,13 +183,13 @@ const ListServices = () => {
           const filteredList = await getServicesBySearch(
             searchValue,
             currentPage,
-            currentTab === MY_SERVICES ? account : null,
+            currentTab === MY_AI_AGENTS ? account : null,
           );
           setList(filteredList);
         } else {
           const filteredList = await getFilteredServices(
             searchValue,
-            currentTab === MY_SERVICES ? account : null,
+            currentTab === MY_AI_AGENTS ? account : null,
           );
           setList(filteredList);
         }
@@ -202,12 +213,13 @@ const ListServices = () => {
     setCurrentPage,
     onViewClick,
     searchValue,
-    onUpdateClick: (serviceId) => router.push(`${links.UPDATE_SERVICE}/${serviceId}`),
+    onUpdateClick: (serviceId: string) => router.push(`${links.UPDATE_SERVICE}/${serviceId}`),
   };
 
   const getMyServiceList = () => {
     if (isMainnet) return list;
 
+    // @ts-expect-error TODO
     return searchValue ? list : getMyListOnPagination({ total, nextPage: currentPage, list });
   };
 
@@ -216,7 +228,7 @@ const ListServices = () => {
       className="registry-tabs"
       type="card"
       activeKey={currentTab}
-      tabBarExtraContent={extraTabContent}
+      // tabBarExtraContent={extraTabContent}
       onChange={(tabName) => {
         setCurrentTab(tabName);
 
@@ -230,12 +242,12 @@ const ListServices = () => {
         // update the URL to keep track of my-services
         router.push({
           pathname: links.SERVICES,
-          query: tabName === ALL_SERVICES ? {} : { tab: tabName },
+          query: tabName === ALL_AI_AGENTS ? {} : { tab: tabName },
         });
       }}
       items={[
         {
-          key: ALL_SERVICES,
+          key: ALL_AI_AGENTS,
           label: 'All',
           disabled: isLoading,
           children: (
@@ -243,7 +255,7 @@ const ListServices = () => {
           ),
         },
         {
-          key: MY_SERVICES,
+          key: MY_AI_AGENTS,
           label: 'My AI Agents',
           disabled: isLoading,
           children: (

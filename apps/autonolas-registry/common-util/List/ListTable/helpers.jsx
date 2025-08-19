@@ -25,11 +25,6 @@ export const getTableColumns = (
     dataIndex: 'tokenId',
     key: 'tokenId',
     width: isMobile ? 30 : 50,
-    render: (text, record) => {
-      <Button size="large" type="link" onClick={() => onViewClick(record.id)}>
-        {text}
-      </Button>;
-    },
   };
 
   const packageName = {
@@ -111,42 +106,52 @@ export const getTableColumns = (
       dataIndex: 'description',
       key: 'description',
       width: 660,
-      render: () => {
-        return 'hi';
+      render: (text) => {
+        if (!text || text === NA) return NA;
+        return text;
       },
     };
 
     const servicesOfferedColumn = {
       title: 'Services Offered',
-      dataIndex: 'servicesOffered',
-      key: 'servicesOffered',
+      dataIndex: 'hash',
+      key: 'hash',
       width: 200,
-      render: () => {
-        return 'some hash';
+      render: (text) => {
+        if (!text || text === NA) return NA;
+        return <AddressLink {...addressLinkProps} text={text} isIpfsLink />;
       },
     };
 
     const marketplaceRoleColumn = {
       title: 'Marketplace Role',
-      dataIndex: 'marketplaceRole',
-      key: 'marketplaceRole',
+      dataIndex: 'role',
+      key: 'role',
       width: 200,
       render: (_text, record) => {
         let color = '';
 
-        if (record.role === 'Demand & Supply') {
-          color = 'purple';
-        }
-        if (record.role === 'Demand') {
-          color = 'blue';
-        }
-        if (record.role === 'Supply') {
-          color = 'red';
+        switch (record.role) {
+          case 'Demand & Supply':
+            color = 'purple';
+            break;
+          case 'Demand':
+            color = 'blue';
+            break;
+          case 'Supply':
+            color = 'red';
+            break;
+          case 'Registered':
+            color = 'default';
+            break;
+          default:
+            color = 'default';
+            break;
         }
 
         return (
           <Tag color={color} bordered={false}>
-            Example
+            {record.role}
           </Tag>
         );
       },
@@ -243,9 +248,10 @@ export const convertTableRawData = (type, rawData, { currentPage, isMainnet }) =
     if (type === NAV_TYPES.SERVICE) {
       return rawData.map((item) => ({
         id: item.serviceId,
-        dsecription: item.description,
+        description: item.description,
+        role: item.role,
         tokenId: item.serviceId,
-        hash: item.metadataHash,
+        hash: item.metadata || item.configHash,
         packageName: item.publicId,
         packageHash: item.packageHash,
         state: item.state,
