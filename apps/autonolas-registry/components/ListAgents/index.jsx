@@ -155,7 +155,7 @@ const ListAgents = () => {
   }, [account, searchValue, currentTab, currentPage, getAgentsBySearch, isMainnet]);
 
   const tableCommonProps = {
-    type: NAV_TYPES.SERVICE,
+    type: NAV_TYPES.AGENT,
     isLoading,
     total,
     currentPage,
