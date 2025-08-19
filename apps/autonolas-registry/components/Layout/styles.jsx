@@ -27,8 +27,23 @@ export const CustomLayout = styled(Layout)`
         display: flex;
       }
     }
-    .ant-tabs-nav-wrap {
-      padding-left: 16px;
+
+    .ant-tabs-nav-list {
+      border-radius: 8px;
+      padding: 2px;
+      background-color: ${COLOR.BASE.NEUTRAL_1};
+
+      .ant-tabs-tab {
+        color: ${COLOR.TEXT_SECONDARY};
+      }
+
+      .ant-tabs-tab-active {
+        color: ${COLOR.NEUTRAL_10};
+        border-radius: 6px;
+        padding: 6px 16px;
+        background-color: ${COLOR.WHITE};
+        box-shadow: 0px 2px 4px 0px rgba(0, 0, 0, 0.02);
+      }
     }
   }
 
