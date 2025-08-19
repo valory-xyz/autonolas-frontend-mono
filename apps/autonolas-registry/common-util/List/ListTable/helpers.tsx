@@ -6,16 +6,13 @@ import { AddressLink, NA, areAddressesEqual } from '@autonolas/frontend-library'
 import {
   HASH_PREFIX,
   NAV_TYPES,
-  SERVICE_STATE,
-  SERVICE_STATE_KEY_MAP,
+  SERVICE_ROLE,
   TOTAL_VIEW_COUNT,
 } from '../../../util/constants';
 
-type Role = 'Demand & Supply' | 'Demand' | 'Supply' | 'Registered';
-
 type Record = {
   id: string;
-  role: Role;
+  role: (typeof SERVICE_ROLE)[keyof typeof SERVICE_ROLE];
   state: string;
   owner: string;
   tokenId: string;
@@ -160,16 +157,16 @@ export const getTableColumns = (
         let color = '';
 
         switch (record.role) {
-          case 'Demand & Supply':
+          case SERVICE_ROLE.DEMAND_AND_SUPPLY:
             color = 'purple';
             break;
-          case 'Demand':
+          case SERVICE_ROLE.DEMAND:
             color = 'blue';
             break;
-          case 'Supply':
+          case SERVICE_ROLE.SUPPLY:
             color = 'red';
             break;
-          case 'Registered':
+          case SERVICE_ROLE.REGISTERED:
             color = 'default';
             break;
           default:
@@ -202,11 +199,11 @@ export const getTableColumns = (
 
         return (
           <>
-          {shouldNotShowViewButton ? null : (
-            <Button onClick={() => onViewClick(record.id)}>
-              View
-            </Button>
-          )}
+            {shouldNotShowViewButton ? null : (
+              <Button onClick={() => onViewClick(record.id)}>
+                View
+              </Button>
+            )}
           </>
           // <Space size="middle">
           //   <Button onClick={() => onViewClick(record.id)} disabled={record.owner === NA}>
@@ -232,19 +229,19 @@ export const getTableColumns = (
 
     return isMainnet
       ? [
-          tokenIdColumn,
-          descriptionColumn,
-          servicesOfferedColumn,
-          marketplaceRoleColumn,
-          actionAndUpdateColumn,
-        ]
+        tokenIdColumn,
+        descriptionColumn,
+        servicesOfferedColumn,
+        marketplaceRoleColumn,
+        actionAndUpdateColumn,
+      ]
       : [
-          idColumn,
-          descriptionColumn,
-          servicesOfferedColumn,
-          marketplaceRoleColumn,
-          actionAndUpdateColumn,
-        ];
+        idColumn,
+        descriptionColumn,
+        servicesOfferedColumn,
+        marketplaceRoleColumn,
+        actionAndUpdateColumn,
+      ];
   }
 
   return [];

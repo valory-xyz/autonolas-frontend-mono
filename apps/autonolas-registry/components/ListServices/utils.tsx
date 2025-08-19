@@ -2,6 +2,7 @@ import {
   DEFAULT_SERVICE_CREATION_ETH_TOKEN,
   TOTAL_VIEW_COUNT,
   DEFAULT_SERVICE_CREATION_ETH_TOKEN_ZEROS,
+  SERVICE_ROLE,
 } from 'util/constants';
 import { getServiceContract, getWeb3Details } from 'common-util/Contracts';
 import { convertStringToArray } from 'common-util/List/ListCommon';
@@ -67,19 +68,19 @@ export const getMarketplaceRole = (service: Service) => {
   const { totalRequests, totalDeliveries } = service;
   const { chainId } = getWeb3Details();
 
-  if(chainId !== 100 && chainId !== 8453) {
-    return "Registered"
+  if (chainId !== 100 && chainId !== 8453) {
+    return SERVICE_ROLE.REGISTERED
   }
 
-  switch(true) {
+  switch (true) {
     case totalRequests! > 0 && totalDeliveries! > 0:
-      return "Demand & Supply"
+      return SERVICE_ROLE.DEMAND_AND_SUPPLY
     case totalRequests! > 0:
-      return "Demand"
+      return SERVICE_ROLE.DEMAND
     case totalDeliveries! > 0:
-      return "Supply"
+      return SERVICE_ROLE.SUPPLY
     default:
-      return "Registered"
+      return SERVICE_ROLE.REGISTERED
   }
 }
 
@@ -118,9 +119,9 @@ export const getServices = async (total: number, nextPage: number, fetchAll = fa
       return service;
     }),
   );
-  
+
   let servicesWithMetadata = await extractConfigDetailsForServices(results);
-  if(chainId === 100 || chainId === 8453) {
+  if (chainId === 100 || chainId === 8453) {
     const servicesDataFromSubgraph = await getServicesDataFromSubgraph({
       network: chainId === 100 ? 'gnosis' : 'base',
       serviceIds: validTokenIds.map(Number),

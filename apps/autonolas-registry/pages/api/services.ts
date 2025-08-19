@@ -1,5 +1,5 @@
 import { GraphQLClient } from "graphql-request";
-import { RequestConfig } from "graphql-request/build/esm/types";
+import type { RequestConfig } from "graphql-request/build/esm/types";
 import { NextApiRequest, NextApiResponse } from "next";
 
 const requestConfig: RequestConfig = {
@@ -10,13 +10,18 @@ const requestConfig: RequestConfig = {
   },
 };
 
-const GNOSIS_GRAPHQL_CLIENT = new GraphQLClient(
+const MM_GNOSIS_GRAPHQL_CLIENT = new GraphQLClient(
   process.env.NEXT_PUBLIC_GNOSIS_MM_SUBGRAPH!,
   requestConfig,
 );
 
-const BASE_GRAPHQL_CLIENT = new GraphQLClient(
+const MM_BASE_GRAPHQL_CLIENT = new GraphQLClient(
   process.env.NEXT_PUBLIC_BASE_MM_SUBGRAPH!,
+  requestConfig,
+);
+
+const LEGACY_MECH_SUBGRAPH_CLIENT = new GraphQLClient(
+  process.env.NEXT_PUBLIC_LEGACY_MECH_SUBGRAPH!,
   requestConfig,
 );
 
@@ -31,54 +36,102 @@ type Service = {
   };
 };
 
-type FlattenedService = Omit<Service, "metadata"> & { metadata: string };
-
 interface GraphQLResponse<T> {
   services: T[];
 }
 
-/**
- * Fetches services with their latestMultisig for the specified network and service IDs
- * @param network - The network to query ('gnosis' or 'base')
- * @param serviceIds - Array of service IDs to fetch
- * @returns Promise<FlattenedService[]> - Array of services with flattened metadata
- */
-export const getServices = async (
-  network: Network,
-  serviceIds: string[],
-): Promise<FlattenedService[]> => {
-  const client =
-    network === "gnosis" ? GNOSIS_GRAPHQL_CLIENT : BASE_GRAPHQL_CLIENT;
-
-  const query = `
-    {
-      services(
-        where: { 
-          id_in: [${serviceIds.map((id) => `"${id}"`).join(", ")}]
-        }
-      ) {
-        id
-        latestMultisig
-        totalRequests
-        totalDeliveries
-        metadata {
-            metadata 
-        }
+const getQuery = ({
+  serviceIds,
+  isLegacy = false,
+}: {
+  serviceIds: string[];
+  isLegacy?: boolean;
+}) => {
+  return `
+  {
+    services(
+      where: { 
+        id_in: [${serviceIds.map((id) => `"${id}"`).join(", ")}]
+      }
+    ) {
+      id
+      totalRequests
+      totalDeliveries
+      ${
+        !isLegacy
+          ? `metadata {
+          metadata 
+      }`
+          : ""
       }
     }
-  `;
-
-  const response = await client.request<GraphQLResponse<Service>>(query);
-  const { services } = response;
-
-  const flattenedServices = (services || []).map((service) => ({
-    ...service,
-    metadata: service.metadata?.metadata,
-  }));
-  return flattenedServices;
+  }
+`;
 };
 
-// Next.js API route handler
+export const getServicesFromMMSubgraph = async (
+  network: Network,
+  serviceIds: string[],
+): Promise<Service[]> => {
+  const client =
+    network === "gnosis" ? MM_GNOSIS_GRAPHQL_CLIENT : MM_BASE_GRAPHQL_CLIENT;
+
+  const query = getQuery({ serviceIds });
+  const response = await client.request<GraphQLResponse<Service>>(query);
+  return response.services;
+};
+
+export const getServicesFromLegacyMechSubgraph = async (
+  serviceIds: string[],
+): Promise<Service[]> => {
+  const query = getQuery({ serviceIds, isLegacy: true });
+  const response =
+    await LEGACY_MECH_SUBGRAPH_CLIENT.request<GraphQLResponse<Service>>(query);
+  return response.services;
+};
+
+export const mergeServicesData = (
+  servicesFromMM: Service[],
+  servicesFromLegacy: Service[] = [],
+) => {
+  const uniqueServiceIds = new Set([
+    ...servicesFromMM.map((service) => service.id),
+    ...servicesFromLegacy.map((service) => service.id),
+  ]);
+
+  const mergedServicesData = Array.from(uniqueServiceIds).map((id) => {
+    const serviceFromMM = servicesFromMM.find((service) => service.id === id);
+    const serviceFromLegacy = servicesFromLegacy.find(
+      (service) => service.id === id,
+    );
+
+    const {
+      totalRequests: totalRequestsFromMM = 0,
+      totalDeliveries: totalDeliveriesFromMM = 0,
+      metadata,
+    } = serviceFromMM || {};
+    const {
+      totalRequests: totalRequestsFromLegacy = 0,
+      totalDeliveries: totalDeliveriesFromLegacy = 0,
+    } = serviceFromLegacy || {};
+
+    return {
+      id,
+      totalRequestsFromLegacy: Number(totalRequestsFromLegacy),
+      totalDeliveriesFromLegacy: Number(totalDeliveriesFromLegacy),
+      totalRequestsFromMM: Number(totalRequestsFromMM),
+      totalDeliveriesFromMM: Number(totalDeliveriesFromMM),
+      totalRequests:
+        Number(totalRequestsFromMM) + Number(totalRequestsFromLegacy),
+      totalDeliveries:
+        Number(totalDeliveriesFromMM) + Number(totalDeliveriesFromLegacy),
+      metadata: metadata?.metadata || "",
+    };
+  });
+
+  return mergedServicesData;
+};
+
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse,
@@ -102,9 +155,18 @@ export default async function handler(
         error: "Invalid network. Must be 'gnosis' or 'base'",
       });
     }
-    const services = await getServices(network, serviceIds);
 
-    return res.status(200).json({ services });
+    const promises = [];
+
+    promises.push(getServicesFromMMSubgraph(network, serviceIds));
+    if (network === "gnosis")
+      promises.push(getServicesFromLegacyMechSubgraph(serviceIds));
+
+    const [servicesFromMM, servicesFromLegacy] = await Promise.all(promises);
+
+    return res.status(200).json({
+      services: mergeServicesData(servicesFromMM, servicesFromLegacy),
+    });
   } catch (error) {
     console.error("Error fetching services:", error);
     return res.status(500).json({
