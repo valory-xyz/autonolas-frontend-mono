@@ -49,7 +49,7 @@ export const useHelpers = () => {
      * If SVM, account is the public key of the phantom wallet
      * else account is the address of the selected wallet
      */
-    account: isSvm ? wallet?.publicKey : account,
+    account: isSvm ? (wallet?.publicKey as unknown as string) : account,
     vmType,
     chainId,
     chainDisplayName,

@@ -3,27 +3,39 @@ import {
   TOTAL_VIEW_COUNT,
   DEFAULT_SERVICE_CREATION_ETH_TOKEN_ZEROS,
 } from 'util/constants';
-import { getServiceContract } from 'common-util/Contracts';
+import { getServiceContract, getWeb3Details } from 'common-util/Contracts';
 import { convertStringToArray } from 'common-util/List/ListCommon';
 import { filterByOwner } from 'common-util/ContractUtils/myList';
 import { getTokenDetailsRequest } from 'common-util/Details/utils';
+import { getIpfsResponse } from 'common-util/functions/ifps';
+import { getServicesDataFromSubgraph } from 'common-util/subgraphs';
+
+type Service = {
+  id: string;
+  configHash: string;
+  description?: string;
+  name?: string;
+  metadata?: string;
+  totalRequests?: number;
+  totalDeliveries?: number;
+}
 
 // --------- HELPER METHODS ---------
-export const getServiceOwner = async (id) => {
+export const getServiceOwner = async (id: string) => {
   const contract = getServiceContract();
   const response = await contract.methods.ownerOf(id).call();
   return response;
 };
 
 // --------- utils ---------
-export const getServiceDetails = async (id) => {
+export const getServiceDetails = async (id: string) => {
   const contract = getServiceContract();
   const response = await contract.methods.getService(id).call();
   const owner = await getServiceOwner(id);
   return { ...response, owner };
 };
 
-export const getTotalForMyServices = async (account) => {
+export const getTotalForMyServices = async (account: string) => {
   const contract = getServiceContract();
   const total = await contract.methods.balanceOf(account).call();
   return total;
@@ -38,8 +50,42 @@ export const getTotalForAllServices = async () => {
   return total;
 };
 
-export const getServices = async (total, nextPage, fetchAll = false) => {
+export const extractConfigDetailsForServices = async (
+  services: { id: string; configHash: string }[],
+) => {
+  const serviceWithMetadata = await Promise.all(
+    services.map(async (service) => {
+      const metadata = await getIpfsResponse(service.configHash);
+      const { description, name, image } = metadata || {};
+      return { ...service, description, name, image };
+    }),
+  );
+  return serviceWithMetadata;
+};
+
+export const getMarketplaceRole = (service: Service) => {
+  const { totalRequests, totalDeliveries } = service;
+  const { chainId } = getWeb3Details();
+
+  if(chainId !== 100 && chainId !== 8453) {
+    return "Registered"
+  }
+
+  switch(true) {
+    case totalRequests! > 0 && totalDeliveries! > 0:
+      return "Demand & Supply"
+    case totalRequests! > 0:
+      return "Demand"
+    case totalDeliveries! > 0:
+      return "Supply"
+    default:
+      return "Registered"
+  }
+}
+
+export const getServices = async (total: number, nextPage: number, fetchAll = false) => {
   const contract = getServiceContract();
+  const { chainId } = getWeb3Details();
 
   const existsPromises = [];
 
@@ -55,7 +101,7 @@ export const getServices = async (total, nextPage, fetchAll = false) => {
 
   const existsResult = await Promise.allSettled(existsPromises);
   // filter services which don't exists (deleted or destroyed)
-  const validTokenIds = [];
+  const validTokenIds: string[] = [];
 
   existsResult.forEach((item, index) => {
     const serviceId = `${total - (index + first - 1)}`;
@@ -67,16 +113,35 @@ export const getServices = async (total, nextPage, fetchAll = false) => {
   // list of promises of valid service
   const results = await Promise.all(
     validTokenIds.map(async (id) => {
-      const info = await getServiceDetails(id);
-      const owner = await getServiceOwner(id);
-      return { ...info, id, owner };
+      const { configHash } = await getServiceDetails(id);
+      const service = { id, configHash };
+      return service;
     }),
   );
+  
+  let servicesWithMetadata = await extractConfigDetailsForServices(results);
+  if(chainId === 100 || chainId === 8453) {
+    const servicesDataFromSubgraph = await getServicesDataFromSubgraph({
+      network: chainId === 100 ? 'gnosis' : 'base',
+      serviceIds: validTokenIds.map(Number),
+    });
+    servicesWithMetadata = servicesWithMetadata.map((service) => {
+      const serviceDataFromSubgraph = servicesDataFromSubgraph.find(
+        (s: Service) => s.id === service.id,
+      );
+      return { ...service, ...serviceDataFromSubgraph };
+    });
+  }
 
-  return results.sort((a, b) => b.id - a.id);
+  servicesWithMetadata = servicesWithMetadata.map((service) => ({
+    ...service,
+    role: getMarketplaceRole(service),
+  }));
+
+  return servicesWithMetadata.sort((a, b) => Number(b.id) - Number(a.id));
 };
 
-export const getFilteredServices = async (searchValue, account) => {
+export const getFilteredServices = async (searchValue: string, account: string) => {
   const total = await getTotalForAllServices();
   const list = await getServices(total, Math.round(total / TOTAL_VIEW_COUNT + 1), true);
 
@@ -87,7 +152,7 @@ export const getFilteredServices = async (searchValue, account) => {
 };
 
 // for services, hash is hardcoded in frontend
-export const getServiceHash = (values) => values.hash;
+export const getServiceHash = (values: { hash: string }) => values.hash;
 
 /**
  *
@@ -97,25 +162,25 @@ export const getServiceHash = (values) => values.hash;
  * bonds = 100, 200
  * @returns [[1, 100], [2, 200]]
  */
-export const getAgentParams = (values) => {
+export const getAgentParams = (values: { agent_num_slots: string; bonds: string }) => {
   const agentNumSlots = convertStringToArray(values.agent_num_slots);
   const bonds = convertStringToArray(values.bonds);
   return bonds.map((bond, index) => [agentNumSlots[index], bond]);
 };
 
-export const getServiceHashes = async (id) => {
+export const getServiceHashes = async (id: string) => {
   const contract = getServiceContract();
   const information = await contract.methods.getPreviousHashes(id).call();
   return information;
 };
 
-export const getTokenUri = async (id) => {
+export const getTokenUri = async (id: string) => {
   const contract = getServiceContract();
   const response = await contract.methods.tokenURI(id).call();
   return response;
 };
 
-export const getTokenAddressRequest = async (id) => {
+export const getTokenAddressRequest = async (id: string) => {
   const response = await getTokenDetailsRequest(id);
   return response.token === DEFAULT_SERVICE_CREATION_ETH_TOKEN_ZEROS
     ? DEFAULT_SERVICE_CREATION_ETH_TOKEN

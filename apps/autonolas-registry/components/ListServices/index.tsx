@@ -30,7 +30,9 @@ type AI_AGENT = {
 
 const ListServices = () => {
   const router = useRouter();
-  const [currentTab, setCurrentTab] = useState(isMyTab(router) ? MY_AI_AGENTS : ALL_AI_AGENTS);
+  const [currentTab, setCurrentTab] = useState<string>(
+    isMyTab(router) ? MY_AI_AGENTS : ALL_AI_AGENTS,
+  );
 
   const { account, links, isSvm, chainId, isMainnet } = useHelpers();
 
@@ -117,6 +119,8 @@ const ListServices = () => {
             const nonMainnetServices = isSvm
               ? await getSvmServices(total, currentPage)
               : await getServices(total, currentPage);
+
+            console.log(nonMainnetServices);
             setList(nonMainnetServices);
           }
         } else if (currentTab === MY_AI_AGENTS && account) {
@@ -131,7 +135,7 @@ const ListServices = () => {
           } else {
             const nonMainnetMyServices = isSvm
               ? await getMySvmServices(account, total)
-              : await getFilteredServices(account);
+              : await getFilteredServices(searchValue, account);
             setList(nonMainnetMyServices);
 
             // TODO: remove this once `getTotalForMySvmServices` is fixed
@@ -160,8 +164,8 @@ const ListServices = () => {
     isSvm,
     getMyServices,
     getAllServices,
-    getSvmServices,
-    getMySvmServices,
+    // getSvmServices,
+    // getMySvmServices,
     isMainnet,
     chainId,
   ]);
@@ -189,7 +193,7 @@ const ListServices = () => {
         } else {
           const filteredList = await getFilteredServices(
             searchValue,
-            currentTab === MY_AI_AGENTS ? account : null,
+            currentTab === MY_AI_AGENTS && account ? account : '',
           );
           setList(filteredList);
         }
