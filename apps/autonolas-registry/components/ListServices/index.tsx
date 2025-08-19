@@ -30,6 +30,8 @@ type AI_AGENT = {
 
 const ListServices = () => {
   const router = useRouter();
+  const networkNameFromUrl = router.query.network as string;
+
   const [currentTab, setCurrentTab] = useState<string>(
     isMyTab(router) ? MY_AI_AGENTS : ALL_AI_AGENTS,
   );
@@ -98,9 +100,6 @@ const ListServices = () => {
     currentTab,
     searchValue,
     isSvm,
-    getTotalForAllSvmServices,
-    getTotalForMySvmServices,
-    getSvmServices,
     chainId,
   ]);
 
@@ -162,10 +161,6 @@ const ListServices = () => {
     currentTab,
     searchValue,
     isSvm,
-    getMyServices,
-    getAllServices,
-    // getSvmServices,
-    // getMySvmServices,
     isMainnet,
     chainId,
   ]);
@@ -207,7 +202,7 @@ const ListServices = () => {
         setIsLoading(false);
       }
     })();
-  }, [account, searchValue, currentTab, currentPage, getServicesBySearch, isMainnet, chainId]);
+  }, [account, searchValue, currentTab, currentPage, isMainnet, chainId]);
 
   const tableCommonProps = {
     type: NAV_TYPES.SERVICE,

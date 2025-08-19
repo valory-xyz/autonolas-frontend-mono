@@ -22,10 +22,16 @@ const BASE_GRAPHQL_CLIENT = new GraphQLClient(
 
 type Network = "gnosis" | "base";
 
-interface ServiceWithMultisig {
+type Service = {
   id: string;
-  latestMultisig: string;
-}
+  totalRequests: number;
+  totalDeliveries: number;
+  metadata: {
+    metadata: string;
+  };
+};
+
+type FlattenedService = Omit<Service, "metadata"> & { metadata: string };
 
 interface GraphQLResponse<T> {
   services: T[];
@@ -35,12 +41,12 @@ interface GraphQLResponse<T> {
  * Fetches services with their latestMultisig for the specified network and service IDs
  * @param network - The network to query ('gnosis' or 'base')
  * @param serviceIds - Array of service IDs to fetch
- * @returns Promise<ServiceWithMultisig[]> - Array of services with their latestMultisig
+ * @returns Promise<FlattenedService[]> - Array of services with flattened metadata
  */
 export const getServices = async (
   network: Network,
   serviceIds: string[],
-): Promise<ServiceWithMultisig[]> => {
+): Promise<FlattenedService[]> => {
   const client =
     network === "gnosis" ? GNOSIS_GRAPHQL_CLIENT : BASE_GRAPHQL_CLIENT;
 
@@ -62,10 +68,14 @@ export const getServices = async (
     }
   `;
 
-  const response =
-    await client.request<GraphQLResponse<ServiceWithMultisig>>(query);
+  const response = await client.request<GraphQLResponse<Service>>(query);
   const { services } = response;
-  return services || [];
+
+  const flattenedServices = (services || []).map((service) => ({
+    ...service,
+    metadata: service.metadata?.metadata,
+  }));
+  return flattenedServices;
 };
 
 // Next.js API route handler

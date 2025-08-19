@@ -188,28 +188,37 @@ export const getTableColumns = (
     const actionAndUpdateColumn = {
       width: isMobile ? 40 : 200,
       title: 'Marketplace Activity',
-      dataIndex: 'marketplaceActivity',
-      key: 'marketplaceActivity',
+      dataIndex: 'role',
+      key: 'role',
       align: 'center',
       render: (_text: string, record: Record) => {
         // only show update button for pre-registration state and
         // if the owner is the same as the current account
-        const canUpdate =
-          record.state === SERVICE_STATE_KEY_MAP.preRegistration &&
-          areAddressesEqual(record.owner, account);
+        // const canUpdate =
+        //   record.state === SERVICE_STATE_KEY_MAP.preRegistration &&
+        //   areAddressesEqual(record.owner, account);
+
+        const shouldNotShowViewButton = record.role === 'Registered';
 
         return (
-          <Space size="middle">
-            <Button onClick={() => onViewClick(record.id)} disabled={record.owner === NA}>
+          <>
+          {shouldNotShowViewButton ? null : (
+            <Button onClick={() => onViewClick(record.id)}>
               View
             </Button>
+          )}
+          </>
+          // <Space size="middle">
+          //   <Button onClick={() => onViewClick(record.id)} disabled={record.owner === NA}>
+          //     View
+          //   </Button>
 
-            {canUpdate && onUpdateClick && (
-              <Button size="large" type="link" onClick={() => onUpdateClick(record.id)}>
-                Update
-              </Button>
-            )}
-          </Space>
+          //   {canUpdate && onUpdateClick && (
+          //     <Button size="large" type="link" onClick={() => onUpdateClick(record.id)}>
+          //       Update
+          //     </Button>
+          //   )}
+          // </Space>
         );
       },
     };
