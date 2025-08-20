@@ -31,6 +31,13 @@ export const SERVICE_STATE = {
   5: 'Terminated Bonded',
 } as const;
 
+export const SERVICE_ROLE = {
+  REGISTERED: 'Registered',
+  DEMAND_AND_SUPPLY: 'Demand & Supply',
+  DEMAND: 'Demand',
+  SUPPLY: 'Supply',
+}
+
 export const SERVICE_STATE_KEY_MAP = {
   nonExistent: '0',
   preRegistration: '1',

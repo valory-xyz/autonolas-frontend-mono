@@ -45,9 +45,9 @@ export const useHandleRoute = () => {
   const updateChainId = useCallback(
     (id) => {
       sessionStorage.setItem('chainId', id);
-      dispatchWithDelay(setChainId(id));
+      dispatch(setChainId(id));
     },
-    [dispatchWithDelay],
+    [dispatch],
   );
 
   // updating the blockchain information in redux
@@ -57,9 +57,11 @@ export const useHandleRoute = () => {
 
     if (!isPageWithSolana(networkNameFromUrl)) {
       const chainIdFromPath = getChainIdFromPath(networkNameFromUrl);
-      updateChainId(isValidNetwork ? chainIdFromPath : 1);
+      const chainId = isValidNetwork ? chainIdFromPath : 1;
+      sessionStorage.setItem('chainId', chainId);
+      dispatchWithDelay(setChainId(chainId));
     }
-  }, [networkNameFromUrl, dispatchWithDelay, updateChainId]);
+  }, [networkNameFromUrl, dispatchWithDelay]);
 
   useEffect(() => {
     if (PAGES_TO_LOAD_WITHOUT_CHAINID.includes(path)) {
@@ -91,7 +93,7 @@ export const useHandleRoute = () => {
     // eg 2. pathArray = [networkName, agents, mint]
     const pathArray = (path?.split('/') || []).filter(Boolean);
 
-    const listingPage = pathArray >= 2;
+    const listingPage = pathArray.length >= 2;
     if (listingPage && !isValidNetworkName(networkNameFromUrl)) {
       /**
        * eg.
@@ -129,7 +131,7 @@ export const useHandleRoute = () => {
     if (!isValidL1NetworkName(networkNameFromUrl) && doesPathIncludesComponentsOrAgents(path)) {
       router.push(`/${networkNameFromUrl}/ai-agents`);
     }
-  }, [path, networkNameFromUrl, isL1Network, router]);
+  }, [path, networkNameFromUrl, isL1Network]);
 
   const onHomeClick = () => {
     const isSvm =

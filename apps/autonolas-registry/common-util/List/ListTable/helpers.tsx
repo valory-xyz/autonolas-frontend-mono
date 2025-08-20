@@ -1,19 +1,54 @@
+import type { NextRouter } from 'next/router';
 import { Button, Space, Tag } from 'antd';
 
 import { AddressLink, NA, areAddressesEqual } from '@autonolas/frontend-library';
-import { AddressLink as AddressLinkSimple } from 'libs/ui-components/src';
 
 import {
   HASH_PREFIX,
   NAV_TYPES,
-  SERVICE_STATE,
-  SERVICE_STATE_KEY_MAP,
+  SERVICE_ROLE,
   TOTAL_VIEW_COUNT,
 } from '../../../util/constants';
 
+type Record = {
+  id: string;
+  role: (typeof SERVICE_ROLE)[keyof typeof SERVICE_ROLE];
+  state: string;
+  owner: string;
+  tokenId: string;
+  description: string;
+  hash: string;
+  packageName: string;
+  packageHash: string;
+  dependency: number;
+  metadataHash: string;
+  publicId: string;
+  developer: string;
+  active: string;
+  serviceId: string;
+  metadata: string;
+  configHash: string;
+  unitHash: string;
+  dependencies: string[];
+};
+
 export const getTableColumns = (
-  type,
-  { onViewClick, onUpdateClick, isMobile, chainName, account, chainId, isMainnet },
+  type: (typeof NAV_TYPES)[keyof typeof NAV_TYPES],
+  {
+    onViewClick,
+    onUpdateClick,
+    isMobile,
+    account,
+    chainId,
+    isMainnet,
+  }: {
+    onViewClick: (id: string) => void;
+    onUpdateClick: (id: string) => void;
+    isMobile: boolean;
+    account: string;
+    chainId: number;
+    isMainnet: boolean;
+  },
 ) => {
   const addressLinkProps = {
     chainId,
@@ -32,7 +67,7 @@ export const getTableColumns = (
     dataIndex: 'packageName',
     key: 'packageName',
     width: type === NAV_TYPES.SERVICE ? 200 : 180,
-    render: (text, record) => {
+    render: (text: string, record: Record) => {
       if (!text || text === NA) return NA;
       return (
         <Button size="large" type="link" onClick={() => onViewClick(record.id)}>
@@ -47,7 +82,7 @@ export const getTableColumns = (
     dataIndex: 'hash',
     key: 'hash',
     width: 180,
-    render: (text) => {
+    render: (text: string) => {
       if (!text || text === NA) return NA;
       const updatedText = text.replace(HASH_PREFIX, '0x'); // .toUpperCase();
       return <AddressLink {...addressLinkProps} text={updatedText} isIpfsLink />;
@@ -67,7 +102,7 @@ export const getTableColumns = (
       title: 'Action',
       key: 'action',
       fixed: 'right',
-      render: (_text, record) => (
+      render: (_text: string, record: Record) => (
         <Button size="large" type="link" onClick={() => onViewClick(record.id)}>
           View
         </Button>
@@ -79,7 +114,7 @@ export const getTableColumns = (
       dataIndex: 'owner',
       key: 'owner',
       width: 160,
-      render: (text) => {
+      render: (text: string) => {
         if (!text || text === NA) return NA;
         return <AddressLink {...addressLinkProps} text={text} canCopy />;
       },
@@ -91,22 +126,12 @@ export const getTableColumns = (
   }
 
   if (type === NAV_TYPES.SERVICE) {
-    const stateColumn = {
-      title: 'State',
-      dataIndex: 'state',
-      key: 'state',
-      width: 150,
-      render: (text) => {
-        if (!text) return NA;
-        return SERVICE_STATE[text];
-      },
-    };
     const descriptionColumn = {
       title: 'Description',
       dataIndex: 'description',
       key: 'description',
       width: 660,
-      render: (text) => {
+      render: (text: string) => {
         if (!text || text === NA) return NA;
         return text;
       },
@@ -117,7 +142,7 @@ export const getTableColumns = (
       dataIndex: 'hash',
       key: 'hash',
       width: 200,
-      render: (text) => {
+      render: (text: string) => {
         if (!text || text === NA) return NA;
         return <AddressLink {...addressLinkProps} text={text} isIpfsLink />;
       },
@@ -128,20 +153,20 @@ export const getTableColumns = (
       dataIndex: 'role',
       key: 'role',
       width: 200,
-      render: (_text, record) => {
+      render: (_text: string, record: Record) => {
         let color = '';
 
         switch (record.role) {
-          case 'Demand & Supply':
+          case SERVICE_ROLE.DEMAND_AND_SUPPLY:
             color = 'purple';
             break;
-          case 'Demand':
+          case SERVICE_ROLE.DEMAND:
             color = 'blue';
             break;
-          case 'Supply':
+          case SERVICE_ROLE.SUPPLY:
             color = 'red';
             break;
-          case 'Registered':
+          case SERVICE_ROLE.REGISTERED:
             color = 'default';
             break;
           default:
@@ -160,28 +185,37 @@ export const getTableColumns = (
     const actionAndUpdateColumn = {
       width: isMobile ? 40 : 200,
       title: 'Marketplace Activity',
-      dataIndex: 'marketplaceActivity',
-      key: 'marketplaceActivity',
+      dataIndex: 'role',
+      key: 'role',
       align: 'center',
-      render: (_text, record) => {
+      render: (_text: string, record: Record) => {
         // only show update button for pre-registration state and
         // if the owner is the same as the current account
-        const canUpdate =
-          record.state === SERVICE_STATE_KEY_MAP.preRegistration &&
-          areAddressesEqual(record.owner, account);
+        // const canUpdate =
+        //   record.state === SERVICE_STATE_KEY_MAP.preRegistration &&
+        //   areAddressesEqual(record.owner, account);
+
+        const shouldNotShowViewButton = record.role === 'Registered';
 
         return (
-          <Space size="middle">
-            <Button onClick={() => onViewClick(record.id)} disabled={record.owner === NA}>
-              View
-            </Button>
-
-            {canUpdate && onUpdateClick && (
-              <Button size="large" type="link" onClick={() => onUpdateClick(record.id)}>
-                Update
+          <>
+            {shouldNotShowViewButton ? null : (
+              <Button onClick={() => onViewClick(record.id)}>
+                View
               </Button>
             )}
-          </Space>
+          </>
+          // <Space size="middle">
+          //   <Button onClick={() => onViewClick(record.id)} disabled={record.owner === NA}>
+          //     View
+          //   </Button>
+
+          //   {canUpdate && onUpdateClick && (
+          //     <Button size="large" type="link" onClick={() => onUpdateClick(record.id)}>
+          //       Update
+          //     </Button>
+          //   )}
+          // </Space>
         );
       },
     };
@@ -193,32 +227,31 @@ export const getTableColumns = (
       width: isMobile ? 30 : 60,
     };
 
-    const nonMainnetOwnerColumn = {
-      title: 'Owner',
-      dataIndex: 'owner',
-      key: 'owner',
-      width: 200,
-      render: (text, record) => {
-        if (!text || text === NA) return NA;
-        return <AddressLinkSimple address={record.owner} chainId={chainId} />;
-      },
-    };
-
     return isMainnet
       ? [
-          tokenIdColumn,
-          descriptionColumn,
-          servicesOfferedColumn,
-          marketplaceRoleColumn,
-          actionAndUpdateColumn,
-        ]
-      : [idColumn, descriptionColumn, nonMainnetOwnerColumn, stateColumn, actionAndUpdateColumn];
+        tokenIdColumn,
+        descriptionColumn,
+        servicesOfferedColumn,
+        marketplaceRoleColumn,
+        actionAndUpdateColumn,
+      ]
+      : [
+        idColumn,
+        descriptionColumn,
+        servicesOfferedColumn,
+        marketplaceRoleColumn,
+        actionAndUpdateColumn,
+      ];
   }
 
   return [];
 };
 
-export const convertTableRawData = (type, rawData, { currentPage, isMainnet }) => {
+export const convertTableRawData = (
+  type: (typeof NAV_TYPES)[keyof typeof NAV_TYPES],
+  rawData: Record[],
+  { currentPage, isMainnet }: { currentPage: number; isMainnet: boolean },
+) => {
   /**
    * @example
    * TOTAL_VIEW_COUNT = 10, current = 1
@@ -289,6 +322,9 @@ export const convertTableRawData = (type, rawData, { currentPage, isMainnet }) =
       owner: item.owner || NA,
       active: `${item.active}`,
       state: item.state,
+      hash: item.metadata || item.configHash,
+      description: item.description,
+      role: item.role,
     }));
   }
 
@@ -298,4 +334,4 @@ export const convertTableRawData = (type, rawData, { currentPage, isMainnet }) =
 /**
  * my-components/my-agents/my-services has "my" in common hence returns
  */
-export const isMyTab = (router) => router?.query?.tab?.includes('my-');
+export const isMyTab = (router: NextRouter) => router?.query?.tab?.includes('my-');

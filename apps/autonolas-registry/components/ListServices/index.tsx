@@ -30,17 +30,21 @@ type AI_AGENT = {
 
 const ListServices = () => {
   const router = useRouter();
-  const [currentTab, setCurrentTab] = useState(isMyTab(router) ? MY_AI_AGENTS : ALL_AI_AGENTS);
+  const [currentTab, setCurrentTab] = useState<string>(
+    isMyTab(router) ? MY_AI_AGENTS : ALL_AI_AGENTS,
+  );
+  const [isLoading, setIsLoading] = useState(true);
+  const [total, setTotal] = useState(0);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [list, setList] = useState<AI_AGENT[]>([]);
 
   const { account, links, isSvm, chainId, isMainnet } = useHelpers();
 
   const getAllServices = useAllServices();
   const getMyServices = useMyServices();
   const getServicesBySearch = useSearchServices();
-
-  /**
-   * extra tab content & view click
-   */
+  const { getTotalForAllSvmServices, getTotalForMySvmServices, getSvmServices, getMySvmServices } =
+    useServiceInfo();
   const { searchValue, clearSearch } = useExtraTabContent({
     title: 'AI Agents',
     onRegisterClick: () => router.push(links.MINT_SERVICE),
@@ -48,19 +52,6 @@ const ListServices = () => {
     isMyTab: currentTab === MY_AI_AGENTS,
     type: NAV_TYPES.SERVICE,
   });
-
-  const onViewClick = (id: string) => router.push(`${links.SERVICES}/${id}`);
-
-  /**
-   * filtered list
-   */
-  const [isLoading, setIsLoading] = useState(true);
-  const [total, setTotal] = useState(0);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [list, setList] = useState<AI_AGENT[]>([]);
-
-  const { getTotalForAllSvmServices, getTotalForMySvmServices, getSvmServices, getMySvmServices } =
-    useServiceInfo();
 
   // fetch total (All services & My services)
   useEffect(() => {
@@ -73,7 +64,7 @@ const ListServices = () => {
         } else if (currentTab === MY_AI_AGENTS && account) {
           totalTemp = isSvm
             ? // TODO: add logic to filter basis the account
-              await getTotalForMySvmServices()
+            await getTotalForMySvmServices()
             : await getTotalForMyServices(account);
         }
 
@@ -96,9 +87,6 @@ const ListServices = () => {
     currentTab,
     searchValue,
     isSvm,
-    getTotalForAllSvmServices,
-    getTotalForMySvmServices,
-    getSvmServices,
     chainId,
   ]);
 
@@ -117,6 +105,8 @@ const ListServices = () => {
             const nonMainnetServices = isSvm
               ? await getSvmServices(total, currentPage)
               : await getServices(total, currentPage);
+
+            console.log(nonMainnetServices);
             setList(nonMainnetServices);
           }
         } else if (currentTab === MY_AI_AGENTS && account) {
@@ -131,7 +121,7 @@ const ListServices = () => {
           } else {
             const nonMainnetMyServices = isSvm
               ? await getMySvmServices(account, total)
-              : await getFilteredServices(account);
+              : await getFilteredServices(searchValue, account);
             setList(nonMainnetMyServices);
 
             // TODO: remove this once `getTotalForMySvmServices` is fixed
@@ -158,10 +148,6 @@ const ListServices = () => {
     currentTab,
     searchValue,
     isSvm,
-    getMyServices,
-    getAllServices,
-    getSvmServices,
-    getMySvmServices,
     isMainnet,
     chainId,
   ]);
@@ -189,7 +175,7 @@ const ListServices = () => {
         } else {
           const filteredList = await getFilteredServices(
             searchValue,
-            currentTab === MY_AI_AGENTS ? account : null,
+            currentTab === MY_AI_AGENTS && account ? account : '',
           );
           setList(filteredList);
         }
@@ -203,7 +189,9 @@ const ListServices = () => {
         setIsLoading(false);
       }
     })();
-  }, [account, searchValue, currentTab, currentPage, getServicesBySearch, isMainnet, chainId]);
+  }, [account, searchValue, currentTab, currentPage, isMainnet, chainId]);
+
+  const onViewClick = (id: string) => router.push(`${links.SERVICES}/${id}`);
 
   const tableCommonProps = {
     type: NAV_TYPES.SERVICE,

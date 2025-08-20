@@ -7,7 +7,7 @@ import { useCallback } from 'react';
 import { gql } from 'graphql-request';
 
 import { GRAPHQL_CLIENT } from '../../../common-util/hooks/useSubgraph';
-import { HASH_PREFIX, TOTAL_VIEW_COUNT } from '../../../util/constants';
+import { HASH_PREFIX, SERVICE_ROLE, TOTAL_VIEW_COUNT } from '../../../util/constants';
 
 const SERVICE_FIELDS = `{
   id
@@ -86,7 +86,7 @@ export const useAllServices = () => {
     const response = await GRAPHQL_CLIENT.request(query);
     const services = (response?.services || []).map((service) => ({
       ...service,
-      role: 'Registered',
+      role: SERVICE_ROLE.REGISTERED,
       metadata: service.metadataHash,
     }));
     return services;
