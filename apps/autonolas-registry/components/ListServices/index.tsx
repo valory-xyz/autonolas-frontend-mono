@@ -22,10 +22,10 @@ const MY_AI_AGENTS = 'my-ai-agents';
 
 type AI_AGENT = {
   id: string;
-  description: string;
-  metadata: string;
+  description?: string;
+  metadata?: string;
   configHash: string;
-  role: string;
+  role?: string;
 };
 
 const ListServices = () => {
@@ -64,7 +64,7 @@ const ListServices = () => {
         } else if (currentTab === MY_AI_AGENTS && account) {
           totalTemp = isSvm
             ? // TODO: add logic to filter basis the account
-            await getTotalForMySvmServices()
+              await getTotalForMySvmServices()
             : await getTotalForMyServices(account);
         }
 
@@ -88,6 +88,8 @@ const ListServices = () => {
     searchValue,
     isSvm,
     chainId,
+    getTotalForAllSvmServices,
+    getTotalForMySvmServices,
   ]);
 
   // fetch the list (All services, My Services) - WITHOUT search
@@ -105,8 +107,6 @@ const ListServices = () => {
             const nonMainnetServices = isSvm
               ? await getSvmServices(total, currentPage)
               : await getServices(total, currentPage);
-
-            console.log(nonMainnetServices);
             setList(nonMainnetServices);
           }
         } else if (currentTab === MY_AI_AGENTS && account) {
@@ -150,6 +150,10 @@ const ListServices = () => {
     isSvm,
     isMainnet,
     chainId,
+    getAllServices,
+    getSvmServices,
+    getMyServices,
+    getMySvmServices,
   ]);
 
   /**
@@ -189,7 +193,7 @@ const ListServices = () => {
         setIsLoading(false);
       }
     })();
-  }, [account, searchValue, currentTab, currentPage, isMainnet, chainId]);
+  }, [account, searchValue, currentTab, currentPage, isMainnet, chainId, getServicesBySearch]);
 
   const onViewClick = (id: string) => router.push(`${links.SERVICES}/${id}`);
 
@@ -210,6 +214,8 @@ const ListServices = () => {
     // @ts-expect-error TODO
     return searchValue ? list : getMyListOnPagination({ total, nextPage: currentPage, list });
   };
+
+  console.log(list);
 
   return (
     <Tabs

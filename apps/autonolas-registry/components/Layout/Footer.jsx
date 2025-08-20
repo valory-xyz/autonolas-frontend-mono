@@ -29,7 +29,7 @@ const ContractInfo = () => {
       };
     }
 
-    if (addresses && (pathname || '').includes('agents')) {
+    if (addresses && (pathname || '').includes('agent-blueprints')) {
       return {
         registryText: 'AgentRegistry',
         managerText: 'RegistriesManager',
@@ -38,7 +38,7 @@ const ContractInfo = () => {
       };
     }
 
-    if (addresses && (pathname || '').includes('services')) {
+    if (addresses && (pathname || '').includes('ai-agents')) {
       return {
         registryText: 'ServiceRegistry',
         managerText: 'ServiceManager',

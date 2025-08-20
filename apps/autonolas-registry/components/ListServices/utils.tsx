@@ -19,7 +19,9 @@ type Service = {
   metadata?: string;
   totalRequests?: number;
   totalDeliveries?: number;
-}
+  owner?: string;
+  role?: string;
+};
 
 // --------- HELPER METHODS ---------
 export const getServiceOwner = async (id: string) => {
@@ -52,7 +54,7 @@ export const getTotalForAllServices = async () => {
 };
 
 export const extractConfigDetailsForServices = async (
-  services: { id: string; configHash: string }[],
+  services: { id: number | string; configHash: string }[],
 ) => {
   const serviceWithMetadata = await Promise.all(
     services.map(async (service) => {
@@ -69,22 +71,26 @@ export const getMarketplaceRole = (service: Service) => {
   const { chainId } = getWeb3Details();
 
   if (chainId !== 100 && chainId !== 8453) {
-    return SERVICE_ROLE.REGISTERED
+    return SERVICE_ROLE.REGISTERED;
   }
 
   switch (true) {
     case totalRequests! > 0 && totalDeliveries! > 0:
-      return SERVICE_ROLE.DEMAND_AND_SUPPLY
+      return SERVICE_ROLE.DEMAND_AND_SUPPLY;
     case totalRequests! > 0:
-      return SERVICE_ROLE.DEMAND
+      return SERVICE_ROLE.DEMAND;
     case totalDeliveries! > 0:
-      return SERVICE_ROLE.SUPPLY
+      return SERVICE_ROLE.SUPPLY;
     default:
-      return SERVICE_ROLE.REGISTERED
+      return SERVICE_ROLE.REGISTERED;
   }
-}
+};
 
-export const getServices = async (total: number, nextPage: number, fetchAll = false) => {
+export const getServices = async (
+  total: number,
+  nextPage: number,
+  fetchAll = false,
+): Promise<Service[]> => {
   const contract = getServiceContract();
   const { chainId } = getWeb3Details();
 
@@ -114,9 +120,8 @@ export const getServices = async (total: number, nextPage: number, fetchAll = fa
   // list of promises of valid service
   const results = await Promise.all(
     validTokenIds.map(async (id) => {
-      const { configHash } = await getServiceDetails(id);
-      const service = { id, configHash };
-      return service;
+      const service = await getServiceDetails(id);
+      return { id, ...service };
     }),
   );
 
@@ -127,7 +132,7 @@ export const getServices = async (total: number, nextPage: number, fetchAll = fa
       serviceIds: validTokenIds.map(Number),
     });
     servicesWithMetadata = servicesWithMetadata.map((service) => {
-      const serviceDataFromSubgraph = servicesDataFromSubgraph.find(
+      const serviceDataFromSubgraph: Service = servicesDataFromSubgraph.find(
         (s: Service) => s.id === service.id,
       );
       return { ...service, ...serviceDataFromSubgraph };
@@ -136,10 +141,10 @@ export const getServices = async (total: number, nextPage: number, fetchAll = fa
 
   servicesWithMetadata = servicesWithMetadata.map((service) => ({
     ...service,
-    role: getMarketplaceRole(service),
+    role: getMarketplaceRole(service as Service),
   }));
 
-  return servicesWithMetadata.sort((a, b) => Number(b.id) - Number(a.id));
+  return servicesWithMetadata.sort((a, b) => Number(b.id) - Number(a.id)) as Service[];
 };
 
 export const getFilteredServices = async (searchValue: string, account: string) => {

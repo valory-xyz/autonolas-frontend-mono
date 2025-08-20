@@ -1,5 +1,5 @@
 import { useCallback } from 'react';
-import { BorshCoder, Idl } from '@project-serum/anchor';
+import { BN, BorshCoder, Idl } from '@project-serum/anchor';
 import { TransactionMessage, VersionedTransaction, PublicKey, Connection } from '@solana/web3.js';
 import { memoize } from 'lodash';
 import { areAddressesEqual } from '@autonolas/frontend-library';
@@ -27,7 +27,10 @@ const getLatestBlockhash = memoize(async (connection: Connection) => {
  * example: { name: "serviceOwner", type: "publicKey" },
  *
  */
-const deseralizeProgramData = (serializedValue: Uint8Array, decodeTypeName: string | null): any => {
+const deseralizeProgramData = (
+  serializedValue: Uint8Array,
+  decodeTypeName: string | null,
+): unknown => {
   if (decodeTypeName === 'string') {
     const value = serializedValue.toString();
     // NOTE: This is a hack to remove the extra bytes added by the program
@@ -55,7 +58,7 @@ export const useSvmDataFetch = () => {
   const { tempWalletPublicKey, connection, program, solanaAddresses } = useSvmConnectivity();
 
   const getTransactionLogs = useCallback(
-    async (fn: string, fnArgs?: any[]) => {
+    async (fn: string, fnArgs?: unknown[]) => {
       try {
         if (!fn) {
           throw new Error('function is not provided');
@@ -106,7 +109,12 @@ export const useSvmDataFetch = () => {
    * @param {object} extraOptions extra options
    */
   const readSvmData = useCallback(
-    async (fn: string, fnArgs?: any[], decodeTypeName: string | null = null, extraOptions: { noDecode?: boolean } = {}) => {
+    async (
+      fn: string,
+      fnArgs?: unknown[],
+      decodeTypeName: string | null = null,
+      extraOptions: { noDecode?: boolean } = {},
+    ) => {
       const { noDecode = false } = extraOptions;
 
       const transactionLogs = await getTransactionLogs(fn, fnArgs);
@@ -172,13 +180,30 @@ const useGetTotalForMyServices = () => {
  * @property {string} state - The state of the service (eg. 4)
  */
 
+type Service = {
+  id: number | string;
+  serviceOwner: string;
+  state: Record<string, unknown>;
+  multisig: string;
+  configHash: string;
+  bonds: string[];
+};
+
+type TransformedService = Omit<Service, 'id' | 'state' | 'bonds'> & {
+  id: number | string;
+  owner: string;
+  state: string;
+  multisig: string;
+  bonds: number[];
+};
+
 /**
  * Transform service data
  * @param {Service}
  *
  */
-const transformServiceData = (service: any, serviceId: number | string) => {
-  if (!service) return {};
+const transformServiceData = (service: Service, serviceId: number | string): TransformedService => {
+  if (!service) return {} as TransformedService;
   const owner = service.serviceOwner?.toString();
   const stateName = Object.keys(service.state || {})[0];
   // convert to base58 ie. readable format
@@ -192,7 +217,7 @@ const transformServiceData = (service: any, serviceId: number | string) => {
     owner,
     state: SERVICE_STATE_KEY_MAP[stateName as keyof typeof SERVICE_STATE_KEY_MAP],
     multisig,
-    bonds: service.bonds.map((e: any) => Number(e)),
+    bonds: service.bonds.map((e) => Number(e)),
     configHash: decodedConfigHash,
   };
 };
@@ -203,7 +228,7 @@ export const useGetSvmServiceDetails = () => {
   const getSvmServiceDetails = useCallback(
     async (id: number | string) => {
       const details = await readSvmData('getService', [id], 'Service');
-      return transformServiceData(details, id);
+      return transformServiceData(details as Service, id);
     },
     [readSvmData],
   );
@@ -306,14 +331,24 @@ export const useTokenUri = () => {
   return { getSvmTokenUri };
 };
 
+type ReadSvmDataResponse = {
+  numAgentIds: number;
+  slots: number[];
+  bonds: string[];
+};
+
 // *********** HOOKS TO FETCH SERVICES STATE DATA ***********
 
 export const useSvmBonds = () => {
   const { readSvmData } = useSvmDataFetch();
 
   const getSvmBonds = useCallback(
-    async (id: number | string, tableDataSource?: any) => {
-      const response = await readSvmData('getAgentParams', [id], 'getAgentParams_returns');
+    async (id: number | string, tableDataSource?: unknown) => {
+      const response = (await readSvmData(
+        'getAgentParams',
+        [id],
+        'getAgentParams_returns',
+      )) as ReadSvmDataResponse;
 
       const bondsArray = [];
       const slotsArray = [];
@@ -341,11 +376,11 @@ export const useSvmServiceTableDataSource = () => {
   const { getSvmBonds } = useSvmBonds();
 
   const getSvmServiceTableDataSource = useCallback(
-    async (id: number | string, agentIds: any[]) => {
+    async (id: number | string, agentIds: unknown[]) => {
       const { bonds, slots } = await getSvmBonds(id, undefined);
 
       const numAgentInstances = await Promise.all(
-        agentIds.map(async (agentId: any) => {
+        agentIds.map(async (agentId: unknown) => {
           const info = await readSvmData(
             'getInstancesForAgentId',
             [id, agentId],
@@ -353,7 +388,7 @@ export const useSvmServiceTableDataSource = () => {
           );
 
           if (!info) return [];
-          return info.numAgentInstances;
+          return (info as { numAgentInstances: number }).numAgentInstances;
         }),
       );
 
@@ -378,10 +413,14 @@ export const useAgentInstanceAndOperator = () => {
 
   const getSvmAgentInstanceAndOperator = useCallback(
     async (id: number | string) => {
-      const response = await readSvmData('getAgentInstances', [id], 'getAgentInstances_returns');
+      const response = (await readSvmData(
+        'getAgentInstances',
+        [id],
+        'getAgentInstances_returns',
+      )) as { agentInstances: BN[] };
 
       const data = await Promise.all(
-        (response?.agentInstances || []).map(async (agentInstance: any, index: number) => {
+        (response?.agentInstances || []).map(async (agentInstance, index: number) => {
           const operatorAddress = await readSvmData(
             'mapAgentInstanceOperators',
             [agentInstance],

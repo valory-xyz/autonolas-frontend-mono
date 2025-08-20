@@ -103,11 +103,11 @@ const MintService = () => {
         registryAddress: solanaAddresses.serviceRegistry,
       });
       setInformation(result);
-      notifySuccess('Service minted');
+      notifySuccess('AI Agent added');
     } catch (e) {
       setError(e);
       console.error(e);
-      notifyError("Couldn't mint service");
+      notifyError("Couldn't add AI Agent");
     } finally {
       setIsMinting(false);
     }
@@ -116,7 +116,7 @@ const MintService = () => {
   return (
     <>
       <FormContainer>
-        <Title level={2}>Mint Service</Title>
+        <Title level={2}>Add AI Agent</Title>
         <RegisterForm
           isLoading={isMinting}
           account={account}
@@ -126,7 +126,7 @@ const MintService = () => {
       </FormContainer>
 
       {/* todo: add link to new service on creation */}
-      <AlertSuccess type="Service" information={information} />
+      <AlertSuccess type="AI Agent" information={information} />
       <AlertError error={error} />
     </>
   );

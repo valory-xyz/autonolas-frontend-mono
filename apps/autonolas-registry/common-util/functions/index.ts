@@ -207,9 +207,9 @@ export const checkIfGnosisSafe = async (
  */
 export const doesNetworkHaveValidServiceManagerTokenFn = (chainId: number) => !!chainId;
 
-const doesPathIncludesComponents = (path: string) => !!path?.includes('components');
-const doesPathIncludesAgents = (path: string) => !!path?.includes('agents');
-export const doesPathIncludesServices = (path: string) => !!path?.includes('services');
+const doesPathIncludesComponents = (path: string) => !!path?.includes('/components');
+const doesPathIncludesAgents = (path: string) => !!path?.includes('/agent-blueprints');
+export const doesPathIncludesServices = (path: string) => !!path?.includes('/ai-agents');
 export const doesPathIncludesComponentsOrAgents = (path: string) => {
   if (!path) return false;
   return doesPathIncludesComponents(path) || doesPathIncludesAgents(path);

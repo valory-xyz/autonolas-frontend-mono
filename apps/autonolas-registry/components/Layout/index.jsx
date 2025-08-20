@@ -29,10 +29,17 @@ const Layout = ({ children }) => {
   const { vmType, isSvm, chainId, chainName } = useHelpers();
   const path = router?.pathname || '';
 
+  const isMintOrAiAgentDetailsPage = useMemo(() => {
+    const currentPath = router?.asPath || '';
+    const aiAgentDetailPattern = /^\/[^/]+\/ai-agents\/[^/]+$/;
+    const isMintPage = currentPath.includes('mint');
+    return aiAgentDetailPattern.test(currentPath) || isMintPage;
+  }, [router?.asPath]);
+
   const { onHomeClick, updateChainId } = useHandleRoute();
 
   return (
-    <CustomLayout>
+    <CustomLayout $showWhiteBg={isMintOrAiAgentDetailsPage}>
       <OlasHeader ismobile={`${isMobile}`}>
         <div className="header-left-content">
           <Logo onClick={onHomeClick} data-testid="protocol-logo" ismobile={`${isMobile}`}>

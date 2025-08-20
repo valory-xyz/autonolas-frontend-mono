@@ -49,3 +49,21 @@ export const RegisterFooter = styled.div`
     margin-right: 24px;
   }
 `;
+
+export const PageMainContainer = styled.div`
+  padding: 24px;
+  border-radius: 16px;
+  box-shadow:
+    0 1px 2px 0 rgba(0, 0, 0, 0.03),
+    0 1px 6px -1px rgba(0, 0, 0, 0.02),
+    0 2px 4px 0 rgba(0, 0, 0, 0.02);
+  background-color: ${COLOR.WHITE};
+
+  h2.ant-typography {
+    margin: 0;
+  }
+
+  .ant-tabs-nav {
+    margin: 24px 0;
+  }
+`;
