@@ -1,15 +1,17 @@
+import { mergeServiceActivity } from 'common-util/apiRoute/service-activity';
 import {
-  getServicesFromMMSubgraph,
-  getServicesFromLegacyMechSubgraph,
-  mergeServicesDetails,
-} from 'common-util/apiRoute/services';
+  getServiceActivityFromMMSubgraph,
+  getServiceActivityFromLegacyMechSubgraph,
+} from 'common-util/apiRoute/service-activity';
 import { NextApiRequest, NextApiResponse } from 'next';
 
 type Network = 'gnosis' | 'base';
 
 type RequestBody = {
   network: Network;
-  serviceIds: string[];
+  serviceId: string;
+  limitForMM: number;
+  limitForLegacy: number;
 };
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -18,11 +20,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   try {
-    const { network, serviceIds } = JSON.parse(req.body) as RequestBody;
+    const { network, serviceId, limitForMM, limitForLegacy } = JSON.parse(req.body) as RequestBody;
 
-    if (!network || !serviceIds) {
+    if (!network || !serviceId) {
       return res.status(400).json({
-        error: 'Missing required parameters: network and serviceIds',
+        error: 'Missing required parameters: network and serviceId',
       });
     }
 
@@ -32,13 +34,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       });
     }
 
-    const promises = [getServicesFromMMSubgraph({ network, serviceIds })];
+    const promises = [getServiceActivityFromMMSubgraph({ network, serviceId, limit: limitForMM })];
 
     // For gnosis, we need to get the data from legacy mech as well
-    if (network === 'gnosis') promises.push(getServicesFromLegacyMechSubgraph({ serviceIds }));
+    if (network === 'gnosis')
+      promises.push(getServiceActivityFromLegacyMechSubgraph({ serviceId, limit: limitForLegacy }));
 
     const [servicesFromMM, servicesFromLegacy] = await Promise.all(promises);
-    const services = mergeServicesDetails(servicesFromMM, servicesFromLegacy);
+    const services = mergeServiceActivity(servicesFromMM, servicesFromLegacy);
     return res.status(200).json({ services });
   } catch (error) {
     console.error('Error fetching services:', error);
