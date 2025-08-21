@@ -1,5 +1,4 @@
-import { Button, Col, Row, Tabs, Typography, Table } from 'antd';
-import capitalize from 'lodash/capitalize';
+import { Button, Col, Row, Tabs, Table } from 'antd';
 import get from 'lodash/get';
 import { FC, useCallback, useState, useEffect, useMemo } from 'react';
 import { Address } from 'viem';
@@ -7,17 +6,92 @@ import { useRouter } from 'next/router';
 
 import { AddressLink, GenericObject, Loader, NA } from '@autonolas/frontend-library';
 
-import { HASH_PREFIX, NAV_TYPES, NavTypesValues, TOTAL_VIEW_COUNT } from 'util/constants';
+import {
+  getServiceActivityDataFromSubgraph,
+  getServicesDataFromSubgraph,
+} from 'common-util/subgraphs';
+import { Activity } from 'common-util/apiRoute/service-activity';
+import { ServiceDetails } from 'common-util/apiRoute/services';
+import { NAV_TYPES, NavTypesValues, TOTAL_VIEW_COUNT } from 'util/constants';
 
 import { IpfsHashGenerationModal } from '../List/IpfsHashGenerationModal';
 import { useHelpers } from '../hooks';
-import { useMetadata } from '../hooks/useMetadata';
 import { DetailsSubInfo } from './DetailsSubInfo';
 import { DetailsTitle, Header } from './styles';
 import { ActivityDetails } from './ActivityDetails';
 import { useDetails } from './useDetails';
 
-const { Text } = Typography;
+const getColumns = ({
+  addressLinkProps,
+  openActivityModal,
+}: {
+  addressLinkProps: {
+    chainId: number | undefined;
+    suffixCount: number;
+  };
+  openActivityModal: (record: Activity) => void;
+}) => {
+  return [
+    {
+      title: 'Request ID',
+      dataIndex: 'requestId',
+      key: 'requestId',
+      render: (text: string, record: Activity) =>
+        text ? (
+          <Button type="link" onClick={() => openActivityModal(record)}>
+            {<AddressLink {...addressLinkProps} text={text} cannotClick />}
+          </Button>
+        ) : null,
+    },
+    { title: 'Activity type', dataIndex: 'activityType', key: 'activityType' },
+    {
+      title: 'Request Data',
+      dataIndex: 'requestIpfsHash',
+      key: 'requestIpfsHash',
+      render: (text: string) =>
+        text ? <AddressLink {...addressLinkProps} text={text} isIpfsLink canCopy /> : null,
+    },
+    {
+      title: 'Delivery Data',
+      dataIndex: 'deliveryIpfsHash',
+      key: 'deliveryIpfsHash',
+      render: (text: string) =>
+        text ? <AddressLink {...addressLinkProps} text={text} isIpfsLink canCopy /> : null,
+    },
+    {
+      title: 'Requested By',
+      dataIndex: 'requestedBy',
+      key: 'requestedBy',
+      render: (text: string) => (text ? <AddressLink {...addressLinkProps} text={text} /> : null),
+    },
+    {
+      title: 'Delivered By',
+      dataIndex: 'deliveredBy',
+      key: 'deliveredBy',
+      render: (text: string) => (text ? <AddressLink {...addressLinkProps} text={text} /> : null),
+    },
+  ];
+};
+
+const MAX_ACTIVITY_LIMIT = 1000;
+
+const getLimitsForSubgraphs = (serviceData: ServiceDetails[number]) => {
+  const {
+    totalRequestsFromMM,
+    totalRequestsFromLegacy,
+    totalDeliveriesFromMM,
+    totalDeliveriesFromLegacy,
+  } = serviceData;
+  const limitForMM = Math.min(
+    Math.max(totalRequestsFromMM, totalDeliveriesFromMM),
+    MAX_ACTIVITY_LIMIT,
+  );
+  const limitForLegacy = Math.min(
+    Math.max(totalRequestsFromLegacy, totalDeliveriesFromLegacy),
+    MAX_ACTIVITY_LIMIT,
+  );
+  return { limitForMM, limitForLegacy };
+};
 
 type DetailsProps = {
   id: string;
@@ -35,6 +109,8 @@ type DetailsProps = {
   }) => JSX.Element | null;
 };
 
+type CurrentTab = 'details' | 'activity';
+
 export const Details: FC<DetailsProps> = ({
   id,
   type,
@@ -49,7 +125,7 @@ export const Details: FC<DetailsProps> = ({
   const [isModalVisible, setIsModalVisible] = useState(false);
   const router = useRouter();
 
-  const { isMainnet, chainName, chainId } = useHelpers();
+  const { chainName, chainId } = useHelpers();
   const { isLoading, isOwner, info, ownerAddress, tokenUri, updateDetails } = useDetails({
     id,
     type,
@@ -57,14 +133,13 @@ export const Details: FC<DetailsProps> = ({
     getOwner,
     getTokenUri,
   });
-  const { nftImageUrl, packageName } = useMetadata(tokenUri);
 
-  const [currentTab, setCurrentTab] = useState('details');
-  const [activityRows, setActivityRows] = useState<any[]>([]);
+  const [currentTab, setCurrentTab] = useState<CurrentTab>('details');
+  const [activityRows, setActivityRows] = useState<Activity[]>([]);
   const [activityLoading, setActivityLoading] = useState(false);
   const [activityPage, setActivityPage] = useState(1);
   const [isActivityModalVisible, setIsActivityModalVisible] = useState(false);
-  const [selectedActivity, setSelectedActivity] = useState<any | null>(null);
+  const [selectedActivity, setSelectedActivity] = useState<Activity | null>(null);
 
   const paginatedActivityRows = useMemo(() => {
     const start = (activityPage - 1) * TOTAL_VIEW_COUNT;
@@ -73,11 +148,11 @@ export const Details: FC<DetailsProps> = ({
   }, [activityRows, activityPage]);
 
   const addressLinkProps = {
-    chainId,
+    chainId: chainId ?? undefined,
     suffixCount: 6,
   };
 
-  const openActivityModal = (record: any) => {
+  const openActivityModal = (record: Activity) => {
     setSelectedActivity(record);
     setIsActivityModalVisible(true);
   };
@@ -86,9 +161,6 @@ export const Details: FC<DetailsProps> = ({
     setIsActivityModalVisible(false);
     setSelectedActivity(null);
   };
-
-  const formatTimestamp = (timestamp?: string) =>
-    timestamp ? new Date(Number(timestamp) * 1000).toLocaleString() : NA;
 
   // Handle URL query parameter for activity tab
   useEffect(() => {
@@ -102,7 +174,7 @@ export const Details: FC<DetailsProps> = ({
 
   // Handle tab change
   const handleTabChange = (activeKey: string) => {
-    setCurrentTab(activeKey);
+    setCurrentTab(activeKey as CurrentTab);
 
     // Update URL to reflect the current tab
     if (activeKey === 'activity') {
@@ -138,15 +210,19 @@ export const Details: FC<DetailsProps> = ({
     const fetchActivity = async () => {
       try {
         setActivityLoading(true);
-        let serviceIdStr = Array.isArray(id) ? id[0] : String(id);
-        const params = new URLSearchParams({
+        const serviceData = await getServicesDataFromSubgraph({
           network: mapNetwork(chainName),
-          serviceId: (serviceIdStr = '2119'), //for testing
+          serviceIds: [Number(id)],
         });
-        const response = await fetch(`/api/service-activity?${params.toString()}`);
-        const json = await response.json();
-        console.log(json);
-        setActivityRows(json?.services?.activities || []);
+        const { limitForMM, limitForLegacy } = getLimitsForSubgraphs(serviceData?.[0]);
+        const json = await getServiceActivityDataFromSubgraph({
+          network: mapNetwork(chainName),
+          serviceId: id,
+          limitForMM,
+          limitForLegacy,
+        });
+
+        setActivityRows(json.activities || []);
         setActivityPage(1);
       } catch (e) {
         setActivityRows([]);
@@ -158,7 +234,7 @@ export const Details: FC<DetailsProps> = ({
     if (currentTab === 'activity' && id) {
       fetchActivity();
     }
-  }, [currentTab, id, chainName]);
+  }, [currentTab, id, chainName, chainId]);
 
   // Update button to be show only if the connected account is the owner
   // and only for services
@@ -176,14 +252,7 @@ export const Details: FC<DetailsProps> = ({
     <>
       <Header>
         <div>
-          {isMainnet ? (
-            <DetailsTitle level={3}>ID {id}</DetailsTitle>
-          ) : (
-            <>
-              <Text strong>{`${capitalize(type)} Name`}</Text>
-              <DetailsTitle level={2}>{`${capitalize(type)} ID ${id}`}</DetailsTitle>
-            </>
-          )}
+          <DetailsTitle level={2}>{`ID ${id}`}</DetailsTitle>
         </div>
 
         <div className="right-content">
@@ -217,52 +286,7 @@ export const Details: FC<DetailsProps> = ({
             label: 'Activity',
             children: (
               <Table
-                columns={[
-                  {
-                    title: 'Request ID',
-                    dataIndex: 'requestId',
-                    key: 'requestId',
-                    render: (text: string, record: any) =>
-                      text ? (
-                        <Button type="link" onClick={() => openActivityModal(record)}>
-                          {<AddressLink {...addressLinkProps} text={text} cannotClick />}
-                        </Button>
-                      ) : null,
-                  },
-                  { title: 'Activity type', dataIndex: 'activityType', key: 'activityType' },
-                  {
-                    title: 'Request Data',
-                    dataIndex: 'requestIpfsHash',
-                    key: 'requestIpfsHash',
-                    render: (text: string) =>
-                      text ? (
-                        <AddressLink {...addressLinkProps} text={text} isIpfsLink canCopy />
-                      ) : null,
-                  },
-                  {
-                    title: 'Delivery Data',
-                    dataIndex: 'deliveryIpfsHash',
-                    key: 'deliveryIpfsHash',
-                    render: (text: string) =>
-                      text ? (
-                        <AddressLink {...addressLinkProps} text={text} isIpfsLink canCopy />
-                      ) : null,
-                  },
-                  {
-                    title: 'Requested By',
-                    dataIndex: 'requestedBy',
-                    key: 'requestedBy',
-                    render: (text: string) =>
-                      text ? <AddressLink {...addressLinkProps} text={text} /> : null,
-                  },
-                  {
-                    title: 'Delivered By',
-                    dataIndex: 'deliveredBy',
-                    key: 'deliveredBy',
-                    render: (text: string) =>
-                      text ? <AddressLink {...addressLinkProps} text={text} /> : null,
-                  },
-                ]}
+                columns={getColumns({ addressLinkProps, openActivityModal })}
                 dataSource={paginatedActivityRows}
                 loading={activityLoading}
                 pagination={{

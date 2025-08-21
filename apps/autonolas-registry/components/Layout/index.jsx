@@ -29,17 +29,24 @@ const Layout = ({ children }) => {
   const { isSvm, chainId, chainName } = useHelpers();
   const path = router?.pathname || '';
 
-  const isMintOrAiAgentDetailsPage = useMemo(() => {
+  const shouldShowWhiteBg = useMemo(() => {
     const currentPath = router?.asPath || '';
     const aiAgentDetailPattern = /^\/[^/]+\/ai-agents\/[^/]+$/;
+    const agentBlueprintDetailPattern = /^\/[^/]+\/agent-blueprints\/[^/]+$/;
+    const componentDetailPattern = /^\/[^/]+\/components\/[^/]+$/;
     const isMintPage = currentPath.includes('mint');
-    return aiAgentDetailPattern.test(currentPath) || isMintPage;
+    return (
+      aiAgentDetailPattern.test(currentPath) ||
+      agentBlueprintDetailPattern.test(currentPath) ||
+      componentDetailPattern.test(currentPath) ||
+      isMintPage
+    );
   }, [router?.asPath]);
 
   const { onHomeClick, updateChainId } = useHandleRoute();
 
   return (
-    <CustomLayout $showWhiteBg={isMintOrAiAgentDetailsPage}>
+    <CustomLayout $showWhiteBg={shouldShowWhiteBg}>
       <OlasHeader ismobile={`${isMobile}`}>
         <div className="header-left-content">
           <Logo onClick={onHomeClick} data-testid="protocol-logo" ismobile={`${isMobile}`}>

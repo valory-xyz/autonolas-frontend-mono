@@ -9,7 +9,7 @@ import {
 
 type ActivityType = 'Demand' | 'Supply';
 
-type Activity = {
+export type Activity = {
   activityType: ActivityType;
   requestId: string;
   requestIpfsHash: string;
@@ -48,7 +48,7 @@ export const getQueryForServiceActivity = ({
       }
     } 
   
-    requests (where: {service_: {id: "${serviceId}"}}, first: ${limit}) {
+    requests (where: {service_: {id: "${serviceId}"}}, first: ${limit}, orderBy: blockTimestamp, orderDirection: desc) {
       id
       ipfsHash
       blockTimestamp

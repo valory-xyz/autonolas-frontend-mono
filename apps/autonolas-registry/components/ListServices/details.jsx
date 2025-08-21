@@ -3,6 +3,7 @@ import { useCallback } from 'react';
 
 import { Details } from 'common-util/Details';
 import { useHelpers } from 'common-util/hooks';
+import { NAV_TYPES } from 'util/constants';
 
 import { ServiceState } from './ServiceState';
 import {
@@ -34,7 +35,7 @@ const Service = () => {
 
   return (
     <Details
-      type="service"
+      type={NAV_TYPES.SERVICE}
       id={id}
       getDetails={getDetails}
       getOwner={getOwner}

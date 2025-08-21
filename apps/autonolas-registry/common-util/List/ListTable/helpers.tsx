@@ -69,17 +69,6 @@ export const getTableColumns = (
     dataIndex: 'tokenId',
     key: 'tokenId',
     width: isMobile ? 30 : 50,
-    render: (_text: string, record: Record) => {
-      if (type === NAV_TYPES.SERVICE) {
-        return (
-          <Button size="large" type="link" onClick={() => onViewClick(record.id)}>
-            {_text}
-          </Button>
-        );
-      }
-
-      return _text;
-    },
   };
 
   const packageName = {
