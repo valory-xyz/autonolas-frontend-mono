@@ -71,7 +71,7 @@ const MintAgent = () => {
   return (
     <>
       <FormContainer>
-        <Title level={2}>Mint Agent</Title>
+        <Title level={2}>Add Agent Blueprint</Title>
         <RegisterForm
           isLoading={isMinting}
           listType="agent"
@@ -79,7 +79,7 @@ const MintAgent = () => {
           handleCancel={handleCancel}
         />
       </FormContainer>
-      <AlertSuccess type="Agent" information={information} />
+      <AlertSuccess type="Agent Blueprint" information={information} />
       <AlertError error={error} />
     </>
   );

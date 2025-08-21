@@ -36,7 +36,7 @@ export const SERVICE_ROLE = {
   DEMAND_AND_SUPPLY: 'Demand & Supply',
   DEMAND: 'Demand',
   SUPPLY: 'Supply',
-}
+};
 
 export const SERVICE_STATE_KEY_MAP = {
   nonExistent: '0',
@@ -106,4 +106,9 @@ export const HASH_DETAILS_STATE = {
   IS_LOADING: 'IS_LOADING',
   LOADED: 'LOADED',
   FAILED: 'FAILED',
+} as const;
+
+export const CACHE_DURATION = {
+  TWELVE_HOURS: 43200,
+  ONE_HOUR: 3600,
 } as const;

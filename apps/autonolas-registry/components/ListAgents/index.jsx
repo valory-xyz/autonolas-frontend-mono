@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Tabs } from 'antd';
+import { Tabs, Typography } from 'antd';
 import { useRouter } from 'next/router';
 import { notifyError } from '@autonolas/frontend-library';
 
@@ -9,9 +9,12 @@ import { ListTable, useExtraTabContent } from 'common-util/List/ListTable';
 import { useHelpers } from 'common-util/hooks';
 import { useAllAgents, useMyAgents, useSearchAgents } from './useAgentsList';
 import { getAgents, getFilteredAgents, getTotalForAllAgents, getTotalForMyAgents } from './utils';
+import { PageMainContainer } from 'components/styles';
 
-const ALL_AGENTS = 'all-agents';
-const MY_AGENTS = 'my-agents';
+const { Title } = Typography;
+
+const ALL_AGENTS = 'all-agent-blueprints';
+const MY_AGENTS = 'my-agent-blueprints';
 
 const ListAgents = () => {
   const router = useRouter();
@@ -28,9 +31,9 @@ const ListAgents = () => {
    * extra tab content & view click
    */
   const { searchValue, extraTabContent, clearSearch } = useExtraTabContent({
-    title: 'Agents',
     onRegisterClick: () => router.push(links.MINT_AGENT),
     isMyTab: currentTab === MY_AGENTS,
+    mintButtonText: 'Add Agent Blueprint',
   });
   const onViewClick = (id) => router.push(`${links.AGENTS}/${id}`);
 
@@ -165,51 +168,54 @@ const ListAgents = () => {
   };
 
   return (
-    <Tabs
-      className="registry-tabs"
-      type="card"
-      activeKey={currentTab}
-      tabBarExtraContent={extraTabContent}
-      onChange={(tabName) => {
-        setCurrentTab(tabName);
+    <PageMainContainer>
+      <Title level={2}>Agents</Title>
+      <Tabs
+        className="registry-tabs"
+        type="card"
+        activeKey={currentTab}
+        tabBarExtraContent={extraTabContent}
+        onChange={(tabName) => {
+          setCurrentTab(tabName);
 
-        setTotal(0);
-        setCurrentPage(1);
-        setIsLoading(true);
+          setTotal(0);
+          setCurrentPage(1);
+          setIsLoading(true);
 
-        // clear the search
-        clearSearch();
+          // clear the search
+          clearSearch();
 
-        // update the links to keep track of my-agents
-        router.push({
-          pathname: links.AGENTS,
-          query: tabName === ALL_AGENTS ? {} : { tab: tabName },
-        });
-      }}
-      items={[
-        {
-          key: ALL_AGENTS,
-          label: 'All',
-          disabled: isLoading,
-          children: (
-            <ListTable {...tableCommonProps} list={list} tableDataTestId="all-agents-table" />
-          ),
-        },
-        {
-          key: MY_AGENTS,
-          label: 'My Agents',
-          disabled: isLoading,
-          children: (
-            <ListTable
-              {...tableCommonProps}
-              list={list}
-              isAccountRequired
-              tableDataTestId="my-agents-table"
-            />
-          ),
-        },
-      ]}
-    />
+          // update the links to keep track of my-agents
+          router.push({
+            pathname: links.AGENTS,
+            query: tabName === ALL_AGENTS ? {} : { tab: tabName },
+          });
+        }}
+        items={[
+          {
+            key: ALL_AGENTS,
+            label: 'All',
+            disabled: isLoading,
+            children: (
+              <ListTable {...tableCommonProps} list={list} tableDataTestId="all-agents-table" />
+            ),
+          },
+          {
+            key: MY_AGENTS,
+            label: 'My Agents',
+            disabled: isLoading,
+            children: (
+              <ListTable
+                {...tableCommonProps}
+                list={list}
+                isAccountRequired
+                tableDataTestId="my-agents-table"
+              />
+            ),
+          },
+        ]}
+      />
+    </PageMainContainer>
   );
 };
 

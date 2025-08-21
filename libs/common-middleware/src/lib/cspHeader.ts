@@ -60,6 +60,7 @@ const ALLOWED_ORIGINS = [
   'https://holy-convincing-bird.solana-mainnet.quiknode.pro/',
   'wss://holy-convincing-bird.solana-mainnet.quiknode.pro/',
   'https://arb1.arbitrum.io/rpc/',
+  'https://arb1.arbitrum.io/rpc',
   'https://sepolia-rollup.arbitrum.io/rpc',
   'https://rpc.gnosischain.com/',
   'https://mainnet.base.org/',

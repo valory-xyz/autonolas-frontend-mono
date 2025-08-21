@@ -14,11 +14,12 @@ const SearchUl = styled.ul`
 `;
 
 type UseExtraTabContentProps = {
-  title: string;
+  title?: string;
   onRegisterClick?: () => void;
   isSvm?: boolean;
   type: string;
   isMyTab: boolean;
+  mintButtonText?: string;
 };
 
 export const useExtraTabContent = ({
@@ -26,6 +27,7 @@ export const useExtraTabContent = ({
   onRegisterClick,
   isSvm = false,
   isMyTab = true,
+  mintButtonText,
 }: UseExtraTabContentProps) => {
   const router = useRouter();
   const { account, isMainnet } = useHelpers();
@@ -41,7 +43,7 @@ export const useExtraTabContent = ({
   };
 
   const extraTabContent = {
-    left: <Title level={2}>{title}</Title>,
+    left: title && <Title level={2}>{title}</Title>,
     right: (
       <>
         {/* TODO: hiding search util feature is introduced */}
@@ -79,7 +81,7 @@ export const useExtraTabContent = ({
         )}
 
         <Button size="large" type="primary" onClick={onRegisterClick}>
-          Mint
+          {mintButtonText || 'Mint'}
         </Button>
       </>
     ),

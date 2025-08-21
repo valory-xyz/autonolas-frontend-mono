@@ -1,14 +1,21 @@
+import Link from 'next/link';
+import styled from 'styled-components';
 import type { NextRouter } from 'next/router';
-import { Button, Space, Tag } from 'antd';
+import { Button, Flex, Tag } from 'antd';
 
-import { AddressLink, NA, areAddressesEqual } from '@autonolas/frontend-library';
+import { AddressLink, NA } from '@autonolas/frontend-library';
+import { truncateAddress } from 'libs/util-functions/src';
 
-import {
-  HASH_PREFIX,
-  NAV_TYPES,
-  SERVICE_ROLE,
-  TOTAL_VIEW_COUNT,
-} from '../../../util/constants';
+import { HASH_PREFIX, NAV_TYPES, SERVICE_ROLE, TOTAL_VIEW_COUNT } from '../../../util/constants';
+
+const TruncatedText = styled.div`
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  word-break: break-word;
+`;
 
 type Record = {
   id: string;
@@ -36,20 +43,22 @@ export const getTableColumns = (
   type: (typeof NAV_TYPES)[keyof typeof NAV_TYPES],
   {
     onViewClick,
-    onUpdateClick,
     isMobile,
-    account,
     chainId,
     isMainnet,
+    chainName,
+    onServicesHashClick,
   }: {
     onViewClick: (id: string) => void;
-    onUpdateClick: (id: string) => void;
     isMobile: boolean;
-    account: string;
     chainId: number;
     isMainnet: boolean;
+    chainName: string;
+    onServicesHashClick: (serviceId: string) => void;
   },
 ) => {
+  const isGnosisOrBaseNetwork = !!chainId && (chainId === 100 || chainId === 8453);
+
   const addressLinkProps = {
     chainId,
     suffixCount: isMobile ? 4 : 6,
@@ -133,7 +142,7 @@ export const getTableColumns = (
       width: 660,
       render: (text: string) => {
         if (!text || text === NA) return NA;
-        return text;
+        return <TruncatedText title={text}>{text}</TruncatedText>;
       },
     };
 
@@ -142,9 +151,12 @@ export const getTableColumns = (
       dataIndex: 'hash',
       key: 'hash',
       width: 200,
-      render: (text: string) => {
-        if (!text || text === NA) return NA;
-        return <AddressLink {...addressLinkProps} text={text} isIpfsLink />;
+      render: (_text: string, record: Record) => {
+        return (
+          <Button type="link" onClick={() => onServicesHashClick?.(record.id)}>
+            {truncateAddress(record.hash)}
+          </Button>
+        );
       },
     };
 
@@ -175,47 +187,27 @@ export const getTableColumns = (
         }
 
         return (
-          <Tag color={color} bordered={false}>
+          <Tag color={color} bordered={false} style={{ margin: '8px 0' }}>
             {record.role}
           </Tag>
         );
       },
     };
 
-    const actionAndUpdateColumn = {
+    const marketplaceActivity = {
       width: isMobile ? 40 : 200,
       title: 'Marketplace Activity',
       dataIndex: 'role',
       key: 'role',
       align: 'center',
       render: (_text: string, record: Record) => {
-        // only show update button for pre-registration state and
-        // if the owner is the same as the current account
-        // const canUpdate =
-        //   record.state === SERVICE_STATE_KEY_MAP.preRegistration &&
-        //   areAddressesEqual(record.owner, account);
-
-        const shouldNotShowViewButton = record.role === 'Registered';
-
+        if (record.role === SERVICE_ROLE.REGISTERED) return null;
         return (
-          <>
-            {shouldNotShowViewButton ? null : (
-              <Button onClick={() => onViewClick(record.id)}>
-                View
-              </Button>
-            )}
-          </>
-          // <Space size="middle">
-          //   <Button onClick={() => onViewClick(record.id)} disabled={record.owner === NA}>
-          //     View
-          //   </Button>
-
-          //   {canUpdate && onUpdateClick && (
-          //     <Button size="large" type="link" onClick={() => onUpdateClick(record.id)}>
-          //       Update
-          //     </Button>
-          //   )}
-          // </Space>
+          <Flex justify="center">
+            <Button size="small" onClick={() => onViewClick(record.id)}>
+              View
+            </Button>
+          </Flex>
         );
       },
     };
@@ -225,23 +217,20 @@ export const getTableColumns = (
       dataIndex: 'id',
       key: 'id',
       width: isMobile ? 30 : 60,
+      render: (text: string) => {
+        return <Link href={`/${chainName}/ai-agents/${text}`}>{text}</Link>;
+      },
     };
 
-    return isMainnet
-      ? [
-        tokenIdColumn,
-        descriptionColumn,
-        servicesOfferedColumn,
-        marketplaceRoleColumn,
-        actionAndUpdateColumn,
-      ]
+    return !isGnosisOrBaseNetwork
+      ? [idColumn, descriptionColumn, servicesOfferedColumn, marketplaceRoleColumn]
       : [
-        idColumn,
-        descriptionColumn,
-        servicesOfferedColumn,
-        marketplaceRoleColumn,
-        actionAndUpdateColumn,
-      ];
+          idColumn,
+          descriptionColumn,
+          servicesOfferedColumn,
+          marketplaceRoleColumn,
+          marketplaceActivity,
+        ];
   }
 
   return [];

@@ -29,7 +29,7 @@ MyLink.propTypes = {
 export const commaMessage = 'Each comma must be followed by a space ("1, 2" not "1,2").';
 
 export const DependencyLabel = ({ type }) => {
-  const { isL1Network, isSvm } = useHelpers();
+  const { isL1Network, isSvm, chainName } = useHelpers();
   const dependencyHelperText = `Must be in ascending order – newest ${
     type === 'service' ? 'agents' : 'components'
   } last, oldest first. ${commaMessage}`;
@@ -47,8 +47,8 @@ export const DependencyLabel = ({ type }) => {
             </>
           )}
           Comma-separated list of agent IDs which this service requires. Find IDs on&nbsp;
-          <MyLink href="/agent-blueprints">
-            Agents
+          <MyLink href={`/${chainName}/agent-blueprints`}>
+            Agent Blueprints
             <ExportOutlined style={{ width: 14 }} />
           </MyLink>
           &nbsp;page.&nbsp;

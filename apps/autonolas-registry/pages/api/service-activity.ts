@@ -4,23 +4,28 @@ import {
   getServiceActivityFromLegacyMechSubgraph,
 } from 'common-util/apiRoute/service-activity';
 import { NextApiRequest, NextApiResponse } from 'next';
+import { CACHE_DURATION } from '../../util/constants';
 
 type Network = 'gnosis' | 'base';
 
-type RequestBody = {
+type RequestQuery = {
   network: Network;
   serviceId: string;
-  limitForMM: number;
-  limitForLegacy: number;
+  limitForMM: string;
+  limitForLegacy: string;
 };
 
+const DEFAULT_LIMIT = 1000;
+
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  if (req.method !== 'POST') {
+  if (req.method !== 'GET') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
   try {
-    const { network, serviceId, limitForMM, limitForLegacy } = JSON.parse(req.body) as RequestBody;
+    const { network, serviceId, limitForMM, limitForLegacy } = req.query as RequestQuery;
+    const parsedLimitForMM = limitForMM ? parseInt(limitForMM, 10) : DEFAULT_LIMIT;
+    const parsedLimitForLegacy = limitForLegacy ? parseInt(limitForLegacy, 10) : DEFAULT_LIMIT;
 
     if (!network || !serviceId) {
       return res.status(400).json({
@@ -34,14 +39,31 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       });
     }
 
-    const promises = [getServiceActivityFromMMSubgraph({ network, serviceId, limit: limitForMM })];
+    const promises = [
+      getServiceActivityFromMMSubgraph({
+        network,
+        serviceId,
+        limit: parsedLimitForMM,
+      }),
+    ];
 
     // For gnosis, we need to get the data from legacy mech as well
     if (network === 'gnosis')
-      promises.push(getServiceActivityFromLegacyMechSubgraph({ serviceId, limit: limitForLegacy }));
+      promises.push(
+        getServiceActivityFromLegacyMechSubgraph({
+          serviceId,
+          limit: parsedLimitForLegacy,
+        }),
+      );
 
     const [servicesFromMM, servicesFromLegacy] = await Promise.all(promises);
     const services = mergeServiceActivity(servicesFromMM, servicesFromLegacy);
+
+    res.setHeader(
+      'Cache-Control',
+      `public, s-maxage=${CACHE_DURATION.TWELVE_HOURS}, stale-while-revalidate=${CACHE_DURATION.ONE_HOUR}`,
+    );
+
     return res.status(200).json({ services });
   } catch (error) {
     console.error('Error fetching services:', error);

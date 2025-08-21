@@ -7,13 +7,20 @@ export const filterByOwner = (results, { searchValue, account }) =>
     const search = (searchValue || '').trim().toLowerCase();
     const ownerL = (e.owner || '').trim().toLowerCase();
     const hashL = (e.unitHash || '').trim().toLowerCase();
+    const name = (e.name || '').trim().toLowerCase();
+    const description = (e.description || '').trim().toLowerCase();
 
     // for "my components/agents" search only by Account
     if (account) {
       return ownerL === account.trim().toLowerCase() && includes(hashL, search);
     }
 
-    return includes(ownerL, search) || includes(hashL, search);
+    return (
+      includes(ownerL, search) ||
+      includes(hashL, search) ||
+      includes(name, search) ||
+      includes(description, search)
+    );
   });
 
 /**

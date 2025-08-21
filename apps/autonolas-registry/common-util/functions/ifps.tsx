@@ -1,6 +1,14 @@
 import { notifyError } from '@autonolas/frontend-library';
 import { GATEWAY_URL, HASH_PREFIX } from '../../util/constants';
 
+export const getIpfsUrl = (hash: string) => {
+  if (!hash) return '';
+
+  const cleanHash = hash.startsWith('0x') ? hash.substring(2) : hash;
+  const hasHashPrefix = cleanHash.startsWith(HASH_PREFIX);
+  return hasHashPrefix ? `${GATEWAY_URL}${cleanHash}` : `${GATEWAY_URL}${HASH_PREFIX}${cleanHash}`;
+};
+
 export interface IpfsMetadata {
   name?: string;
   description?: string;
@@ -25,11 +33,7 @@ export const getIpfsResponse = async (hash: string): Promise<IpfsMetadata | null
   }
 
   try {
-    const cleanHash = hash.startsWith('0x') ? hash.substring(2) : hash;
-    const ipfsUrl = `${GATEWAY_URL}${HASH_PREFIX}${cleanHash}`;
-
-    const response = await fetch(ipfsUrl);
-
+    const response = await fetch(getIpfsUrl(hash));
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }

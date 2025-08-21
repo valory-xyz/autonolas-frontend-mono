@@ -1,9 +1,10 @@
-import { Tabs } from 'antd';
+import { Tabs, Typography } from 'antd';
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 
 import { notifyError } from '@autonolas/frontend-library';
 
+import { PageMainContainer } from 'components/styles';
 import { getMyListOnPagination } from '../../common-util/ContractUtils/myList';
 import { ListTable, isMyTab, useExtraTabContent } from '../../common-util/List/ListTable';
 import { useHelpers } from '../../common-util/hooks';
@@ -16,16 +17,20 @@ import {
   getTotalForAllServices,
   getTotalForMyServices,
 } from './utils';
+import ServicesOfferedModal from './servicesOfferedModal';
+
+const { Title } = Typography;
 
 const ALL_AI_AGENTS = 'all-ai-agents';
 const MY_AI_AGENTS = 'my-ai-agents';
 
 type AI_AGENT = {
   id: string;
-  description: string;
-  metadata: string;
+  serviceId?: string;
+  description?: string;
+  metadata?: string;
   configHash: string;
-  role: string;
+  role?: string;
 };
 
 const ListServices = () => {
@@ -37,6 +42,8 @@ const ListServices = () => {
   const [total, setTotal] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
   const [list, setList] = useState<AI_AGENT[]>([]);
+  const [isServicesOfferedModalVisible, setIsServicesOfferedModalVisible] = useState(false);
+  const [selectedService, setSelectedService] = useState<AI_AGENT | null>(null);
 
   const { account, links, isSvm, chainId, isMainnet } = useHelpers();
 
@@ -45,12 +52,12 @@ const ListServices = () => {
   const getServicesBySearch = useSearchServices();
   const { getTotalForAllSvmServices, getTotalForMySvmServices, getSvmServices, getMySvmServices } =
     useServiceInfo();
-  const { searchValue, clearSearch } = useExtraTabContent({
-    title: 'AI Agents',
+  const { searchValue, clearSearch, extraTabContent } = useExtraTabContent({
     onRegisterClick: () => router.push(links.MINT_SERVICE),
     isSvm,
     isMyTab: currentTab === MY_AI_AGENTS,
     type: NAV_TYPES.SERVICE,
+    mintButtonText: 'Add AI Agent',
   });
 
   // fetch total (All services & My services)
@@ -64,7 +71,7 @@ const ListServices = () => {
         } else if (currentTab === MY_AI_AGENTS && account) {
           totalTemp = isSvm
             ? // TODO: add logic to filter basis the account
-            await getTotalForMySvmServices()
+              await getTotalForMySvmServices()
             : await getTotalForMyServices(account);
         }
 
@@ -88,6 +95,8 @@ const ListServices = () => {
     searchValue,
     isSvm,
     chainId,
+    getTotalForAllSvmServices,
+    getTotalForMySvmServices,
   ]);
 
   // fetch the list (All services, My Services) - WITHOUT search
@@ -105,8 +114,6 @@ const ListServices = () => {
             const nonMainnetServices = isSvm
               ? await getSvmServices(total, currentPage)
               : await getServices(total, currentPage);
-
-            console.log(nonMainnetServices);
             setList(nonMainnetServices);
           }
         } else if (currentTab === MY_AI_AGENTS && account) {
@@ -150,6 +157,10 @@ const ListServices = () => {
     isSvm,
     isMainnet,
     chainId,
+    getAllServices,
+    getSvmServices,
+    getMyServices,
+    getMySvmServices,
   ]);
 
   /**
@@ -189,9 +200,19 @@ const ListServices = () => {
         setIsLoading(false);
       }
     })();
-  }, [account, searchValue, currentTab, currentPage, isMainnet, chainId]);
+  }, [account, searchValue, currentTab, currentPage, isMainnet, chainId, getServicesBySearch]);
 
   const onViewClick = (id: string) => router.push(`${links.SERVICES}/${id}`);
+
+  const onServicesHashClick = (serviceId: string) => {
+    const service = list.find(
+      (service) => service.id === serviceId || service.serviceId === serviceId,
+    );
+    if (service) {
+      setSelectedService(service);
+      setIsServicesOfferedModalVisible(true);
+    }
+  };
 
   const tableCommonProps = {
     type: NAV_TYPES.SERVICE,
@@ -202,62 +223,72 @@ const ListServices = () => {
     onViewClick,
     searchValue,
     onUpdateClick: (serviceId: string) => router.push(`${links.UPDATE_SERVICE}/${serviceId}`),
+    onServicesHashClick,
   };
 
   const getMyServiceList = () => {
     if (isMainnet) return list;
-
-    // @ts-expect-error TODO
     return searchValue ? list : getMyListOnPagination({ total, nextPage: currentPage, list });
   };
 
   return (
-    <Tabs
-      className="registry-tabs"
-      type="card"
-      activeKey={currentTab}
-      // tabBarExtraContent={extraTabContent}
-      onChange={(tabName) => {
-        setCurrentTab(tabName);
+    <PageMainContainer>
+      <Title level={2}>AI Agents</Title>
 
-        setTotal(0);
-        setCurrentPage(1);
-        setIsLoading(true);
+      <Tabs
+        className="registry-tabs"
+        type="card"
+        activeKey={currentTab}
+        tabBarExtraContent={extraTabContent}
+        onChange={(tabName) => {
+          setCurrentTab(tabName);
 
-        // clear the search
-        clearSearch();
+          setTotal(0);
+          setCurrentPage(1);
+          setIsLoading(true);
 
-        // update the URL to keep track of my-services
-        router.push({
-          pathname: links.SERVICES,
-          query: tabName === ALL_AI_AGENTS ? {} : { tab: tabName },
-        });
-      }}
-      items={[
-        {
-          key: ALL_AI_AGENTS,
-          label: 'All',
-          disabled: isLoading,
-          children: (
-            <ListTable {...tableCommonProps} list={list} tableDataTestId="all-services-table" />
-          ),
-        },
-        {
-          key: MY_AI_AGENTS,
-          label: 'My AI Agents',
-          disabled: isLoading,
-          children: (
-            <ListTable
-              {...tableCommonProps}
-              list={getMyServiceList()}
-              isPaginationRequired={!isSvm}
-              isAccountRequired
-              tableDataTestId="all-services-table"
-            />
-          ),
-        },
-      ]}
-    />
+          // clear the search
+          clearSearch();
+
+          // update the URL to keep track of my-services
+          router.push({
+            pathname: links.SERVICES,
+            query: tabName === ALL_AI_AGENTS ? {} : { tab: tabName },
+          });
+        }}
+        items={[
+          {
+            key: ALL_AI_AGENTS,
+            label: 'All',
+            disabled: isLoading,
+            children: (
+              <ListTable {...tableCommonProps} list={list} tableDataTestId="all-services-table" />
+            ),
+          },
+          {
+            key: MY_AI_AGENTS,
+            label: 'My AI Agents',
+            disabled: isLoading,
+            children: (
+              <ListTable
+                {...tableCommonProps}
+                list={getMyServiceList()}
+                isPaginationRequired={!isSvm}
+                isAccountRequired
+                tableDataTestId="all-services-table"
+              />
+            ),
+          },
+        ]}
+      />
+
+      <ServicesOfferedModal
+        visible={isServicesOfferedModalVisible}
+        onCancel={() => setIsServicesOfferedModalVisible(false)}
+        configHash={selectedService?.configHash}
+        metadata={selectedService?.metadata}
+      />
+    </PageMainContainer>
   );
 };
 
