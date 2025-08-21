@@ -159,7 +159,17 @@ export const Logo = styled.div`
   }
 `;
 
-export const SelectContainer = styled.div``;
+export const SelectContainer = styled.div`
+  .ant-select {
+    display: flex;
+    align-items: center;
+
+    .ant-select-selector {
+      padding: 4px 12px;
+      height: auto;
+    }
+  }
+`;
 
 export const RightMenu = styled.div`
   display: flex;

@@ -23,6 +23,7 @@ const LoginContainer = styled.div`
   display: flex;
   align-items: center;
   line-height: normal;
+  margin-left: 16px;
 `;
 
 export const LoginV2 = ({
@@ -141,16 +142,18 @@ export const LoginV2 = ({
       ) : (
         <>
           {!hideWrongNetwork && (
-            <YellowButton
-              loading={isPending}
-              type="default"
-              onClick={onSwitchNetwork}
-              icon={<SwapOutlined />}
-            >
-              {!isMobile && 'Switch network'}
-            </YellowButton>
+            <div style={{ marginLeft: 8 }}>
+              <YellowButton
+                loading={isPending}
+                type="default"
+                onClick={onSwitchNetwork}
+                icon={<SwapOutlined />}
+              >
+                {!isMobile && 'Switch network'}
+              </YellowButton>
+            </div>
           )}
-          &nbsp;&nbsp;
+
           <w3m-button balance={screens.xs ? 'hide' : 'show'} />
         </>
       )}

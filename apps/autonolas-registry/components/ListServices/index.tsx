@@ -202,7 +202,7 @@ const ListServices = () => {
     })();
   }, [account, searchValue, currentTab, currentPage, isMainnet, chainId, getServicesBySearch]);
 
-  const onViewClick = (id: string) => router.push(`${links.SERVICES}/${id}`);
+  const onViewClick = (id: string) => router.push(`${links.SERVICES}/${id}?activity=true`);
 
   const onServicesHashClick = (serviceId: string) => {
     const service = list.find(
@@ -228,7 +228,13 @@ const ListServices = () => {
 
   const getMyServiceList = () => {
     if (isMainnet) return list;
-    return searchValue ? list : getMyListOnPagination({ total, nextPage: currentPage, list });
+    return searchValue
+      ? list
+      : getMyListOnPagination({
+          total,
+          nextPage: currentPage,
+          list,
+        });
   };
 
   return (
@@ -262,7 +268,7 @@ const ListServices = () => {
             label: 'All',
             disabled: isLoading,
             children: (
-              <ListTable {...tableCommonProps} list={list} tableDataTestId="all-services-table" />
+              <ListTable {...tableCommonProps} list={list} tableDataTestId="all-ai-agents-table" />
             ),
           },
           {
@@ -275,7 +281,7 @@ const ListServices = () => {
                 list={getMyServiceList()}
                 isPaginationRequired={!isSvm}
                 isAccountRequired
-                tableDataTestId="all-services-table"
+                tableDataTestId="all-ai-agents-table"
               />
             ),
           },

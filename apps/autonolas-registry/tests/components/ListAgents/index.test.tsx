@@ -105,7 +105,7 @@ describe('listAgents/index.jsx', () => {
   it('should display mint button', async () => {
     const { findByRole } = render(wrapProvider(<ListAgents />));
 
-    expect(await findByRole('button', { name: 'Mint' })).toBeInTheDocument();
+    expect(await findByRole('button', { name: 'Add Agent Blueprint' })).toBeInTheDocument();
   });
 
   it('should not have search input if "search" query string is not available', async () => {
