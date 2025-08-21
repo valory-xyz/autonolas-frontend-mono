@@ -7,11 +7,11 @@ import { useRouter } from 'next/router';
 import { AddressLink, GenericObject, Loader, NA } from '@autonolas/frontend-library';
 
 import {
+  getLimitsForSubgraphs,
   getServiceActivityDataFromSubgraph,
   getServicesDataFromSubgraph,
 } from 'common-util/subgraphs';
-import { Activity } from 'common-util/apiRoute/service-activity';
-import { ServiceDetails } from 'common-util/apiRoute/services';
+import type { Activity } from 'common-util/apiRoute/service-activity';
 import { NAV_TYPES, NavTypesValues, TOTAL_VIEW_COUNT } from 'util/constants';
 
 import { IpfsHashGenerationModal } from '../List/IpfsHashGenerationModal';
@@ -71,26 +71,6 @@ const getColumns = ({
       render: (text: string) => (text ? <AddressLink {...addressLinkProps} text={text} /> : null),
     },
   ];
-};
-
-const MAX_ACTIVITY_LIMIT = 1000;
-
-const getLimitsForSubgraphs = (serviceData: ServiceDetails[number]) => {
-  const {
-    totalRequestsFromMM,
-    totalRequestsFromLegacy,
-    totalDeliveriesFromMM,
-    totalDeliveriesFromLegacy,
-  } = serviceData;
-  const limitForMM = Math.min(
-    Math.max(totalRequestsFromMM, totalDeliveriesFromMM),
-    MAX_ACTIVITY_LIMIT,
-  );
-  const limitForLegacy = Math.min(
-    Math.max(totalRequestsFromLegacy, totalDeliveriesFromLegacy),
-    MAX_ACTIVITY_LIMIT,
-  );
-  return { limitForMM, limitForLegacy };
 };
 
 type DetailsProps = {

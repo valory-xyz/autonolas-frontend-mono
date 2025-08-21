@@ -1,21 +1,9 @@
-import { Divider, Modal, Typography } from 'antd';
+import type { Activity } from 'common-util/apiRoute/service-activity';
+import { Modal, Typography } from 'antd';
 import { AddressLink, NA } from '@autonolas/frontend-library';
 import { Info } from './styles';
 
 const { Text } = Typography;
-
-type Activity = {
-  activityType?: string;
-  requestId?: string;
-  requestIpfsHash?: string;
-  requestBlockTimestamp?: string;
-  requestedBy?: string;
-  requestTransactionHash?: string;
-  deliveryIpfsHash?: string;
-  deliveredBy?: string;
-  deliveryTransactionHash?: string;
-  deliveryBlockTimestamp?: string;
-};
 
 type AddressLinkProps = {
   chainId?: number;
