@@ -43,7 +43,7 @@ describe('listComponents/mint.jsx', () => {
     const { container, getByText, getByRole } = render(wrapProvider(<MintComponent />));
 
     // title
-    expect(getByText(/Mint Component/i)).toBeInTheDocument();
+    expect(getByText(/Add Component/i)).toBeInTheDocument();
 
     // get hash
     userEvent.click(getByRole('button', { name: 'Generate Hash & File' }));

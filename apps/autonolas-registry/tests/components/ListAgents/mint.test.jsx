@@ -44,7 +44,7 @@ describe('listAgents/mint.jsx', () => {
     const { container, getByRole, getByText } = render(wrapProvider(<MintAgent />));
 
     // title
-    expect(getByText(/Mint Agent/i)).toBeInTheDocument();
+    expect(getByText(/Add Agent Blueprint/i)).toBeInTheDocument();
 
     // get hash
     userEvent.click(getByRole('button', { name: 'Generate Hash & File' }));

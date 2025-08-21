@@ -101,13 +101,13 @@ describe('listServices/index.jsx - EVM', () => {
     (useServiceInfo as jest.Mock).mockReturnValue(jest.fn(() => {}));
   });
 
-  it('should display tabs with `All Tab` & Mint button', async () => {
+  it('should display tabs with `All Tab` & Add AI Agent button', async () => {
     const { container, getByRole } = render(wrapProvider(<ListServices />));
     // check if the selected tab is `All` & has the correct content
     await waitFor(async () => {
       expect(container.querySelector(ACTIVE_TAB)?.textContent).toBe('All');
 
-      expect(getByRole('button', { name: 'Mint' })).toBeInTheDocument();
+      expect(getByRole('button', { name: 'Add AI Agent' })).toBeInTheDocument();
     });
   });
 
@@ -204,10 +204,11 @@ describe('listServices/index.jsx - EVM', () => {
       await waitFor(async () => {
         expect(within(allServicesTable).getByText('ID')).toBeInTheDocument();
         expect(within(allServicesTable).queryByText('Name')).toBeNull();
-        expect(within(allServicesTable).getByText('Owner')).toBeInTheDocument();
+        expect(within(allServicesTable).getByText('Description')).toBeInTheDocument();
         expect(within(allServicesTable).queryByText('Hash')).toBeNull();
-        expect(within(allServicesTable).getByText('State')).toBeInTheDocument();
-        expect(within(allServicesTable).getByText('Action')).toBeInTheDocument();
+        expect(within(allServicesTable).getByText('Services Offered')).toBeInTheDocument();
+        expect(within(allServicesTable).getByText('Marketplace Role')).toBeInTheDocument();
+        expect(within(allServicesTable).getByText('Marketplace Activity')).toBeInTheDocument();
       });
     });
 
@@ -264,7 +265,7 @@ describe('listServices/index.jsx - SVM', () => {
     (getFilteredServices as jest.Mock).mockResolvedValue([]);
   });
 
-  it('should display tabs with `All Tab` & Mint button', async () => {
+  it('should display tabs with `All Tab` & Add AI Agent button', async () => {
     const { container, getByRole } = render(wrapProvider(<ListServices />));
 
     if (!container) {
@@ -275,7 +276,7 @@ describe('listServices/index.jsx - SVM', () => {
     await waitFor(async () => {
       expect(container.querySelector(ACTIVE_TAB)?.textContent).toBe('All');
 
-      expect(getByRole('button', { name: 'Mint' })).toBeInTheDocument();
+      expect(getByRole('button', { name: 'Add AI Agent' })).toBeInTheDocument();
     });
   });
 
@@ -294,9 +295,9 @@ describe('listServices/index.jsx - SVM', () => {
     await waitFor(async () => {
       // column names
       expect(getByText('ID')).toBeInTheDocument();
-      expect(getByText('Owner')).toBeInTheDocument();
-      expect(getByText('State')).toBeInTheDocument();
-      expect(getByText('Action')).toBeInTheDocument();
+      expect(getByText('Description')).toBeInTheDocument();
+      expect(getByText('Services Offered')).toBeInTheDocument();
+      expect(getByText('Marketplace Role')).toBeInTheDocument();
 
       // rows
       expect(getByText(/DrGvsAx...3Wm5x/)).toBeInTheDocument();

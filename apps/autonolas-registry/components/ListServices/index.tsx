@@ -262,7 +262,7 @@ const ListServices = () => {
             label: 'All',
             disabled: isLoading,
             children: (
-              <ListTable {...tableCommonProps} list={list} tableDataTestId="all-services-table" />
+              <ListTable {...tableCommonProps} list={list} tableDataTestId="all-ai-agents-table" />
             ),
           },
           {
@@ -275,7 +275,7 @@ const ListServices = () => {
                 list={getMyServiceList()}
                 isPaginationRequired={!isSvm}
                 isAccountRequired
-                tableDataTestId="all-services-table"
+                tableDataTestId="all-ai-agents-table"
               />
             ),
           },
