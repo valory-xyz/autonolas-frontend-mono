@@ -1,0 +1,12 @@
+{
+    "functions": {
+      "pages/api/services.ts": {
+        "maxDuration": 300,
+        "memory": 1000
+      },
+      "pages/api/service-activity.ts": {
+        "maxDuration": 300,
+        "memory": 1000
+      }
+    }
+  }
