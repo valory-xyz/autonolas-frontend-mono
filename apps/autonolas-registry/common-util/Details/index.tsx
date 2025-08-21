@@ -16,6 +16,7 @@ import { DetailsSubInfo } from './DetailsSubInfo';
 import { DetailsTitle, Header } from './styles';
 import { ActivityDetails } from './ActivityDetails';
 import { useDetails } from './useDetails';
+import { marketplaceRoleTag } from 'common-util/List/ListTable/helpers';
 
 const getColumns = ({
   addressLinkProps,
@@ -39,7 +40,12 @@ const getColumns = ({
           </Button>
         ) : null,
     },
-    { title: 'Activity type', dataIndex: 'activityType', key: 'activityType' },
+    {
+      title: 'Activity type',
+      dataIndex: 'activityType',
+      key: 'activityType',
+      render: marketplaceRoleTag,
+    },
     {
       title: 'Request Data',
       dataIndex: 'requestIpfsHash',

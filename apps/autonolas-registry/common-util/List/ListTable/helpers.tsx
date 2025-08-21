@@ -5,6 +5,7 @@ import { Button, Flex, Tag } from 'antd';
 
 import { AddressLink, NA } from '@autonolas/frontend-library';
 import { truncateAddress } from 'libs/util-functions/src';
+import { Activity } from 'common-util/apiRoute/service-activity';
 
 import { HASH_PREFIX, NAV_TYPES, SERVICE_ROLE, TOTAL_VIEW_COUNT } from '../../../util/constants';
 
@@ -20,6 +21,7 @@ const TruncatedText = styled.div`
 type Record = {
   id: string;
   role: (typeof SERVICE_ROLE)[keyof typeof SERVICE_ROLE];
+  activityType: (typeof SERVICE_ROLE)[keyof typeof SERVICE_ROLE];
   state: string;
   owner: string;
   tokenId: string;
@@ -37,6 +39,35 @@ type Record = {
   configHash: string;
   unitHash: string;
   dependencies: string[];
+};
+
+export const marketplaceRoleTag = (_text: string, record: Record | Activity) => {
+  let color = '';
+  const marketplaceRole = 'role' in record ? record.role : record.activityType;
+
+  switch (marketplaceRole) {
+    case SERVICE_ROLE.DEMAND_AND_SUPPLY:
+      color = 'purple';
+      break;
+    case SERVICE_ROLE.DEMAND:
+      color = 'blue';
+      break;
+    case SERVICE_ROLE.SUPPLY:
+      color = 'red';
+      break;
+    case SERVICE_ROLE.REGISTERED:
+      color = 'default';
+      break;
+    default:
+      color = 'default';
+      break;
+  }
+
+  return (
+    <Tag color={color} bordered={false} style={{ margin: '8px 0' }}>
+      {marketplaceRole}
+    </Tag>
+  );
 };
 
 export const getTableColumns = (
@@ -165,33 +196,7 @@ export const getTableColumns = (
       dataIndex: 'role',
       key: 'role',
       width: 200,
-      render: (_text: string, record: Record) => {
-        let color = '';
-
-        switch (record.role) {
-          case SERVICE_ROLE.DEMAND_AND_SUPPLY:
-            color = 'purple';
-            break;
-          case SERVICE_ROLE.DEMAND:
-            color = 'blue';
-            break;
-          case SERVICE_ROLE.SUPPLY:
-            color = 'red';
-            break;
-          case SERVICE_ROLE.REGISTERED:
-            color = 'default';
-            break;
-          default:
-            color = 'default';
-            break;
-        }
-
-        return (
-          <Tag color={color} bordered={false} style={{ margin: '8px 0' }}>
-            {record.role}
-          </Tag>
-        );
-      },
+      render: marketplaceRoleTag,
     };
 
     const marketplaceActivity = {
