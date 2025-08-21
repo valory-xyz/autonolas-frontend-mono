@@ -9,6 +9,7 @@ import {
   getAgentOwner,
   getTokenUri as getAgentTokenUri,
 } from './utils';
+import { NAV_TYPES } from 'util/constants';
 
 const Agent = () => {
   const router = useRouter();
@@ -27,7 +28,7 @@ const Agent = () => {
 
   return (
     <Details
-      type="agent"
+      type={NAV_TYPES.AGENT}
       id={id}
       getDetails={getDetails}
       getOwner={getOwner}

@@ -60,6 +60,8 @@ export const getServicesFromLegacyMechSubgraph = async ({
   return response.services;
 };
 
+export type ServiceDetails = ReturnType<typeof mergeServicesDetails>;
+
 export const mergeServicesDetails = (
   servicesFromMM: Service[],
   servicesFromLegacy: Service[] = [],

@@ -43,7 +43,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       getServiceActivityFromMMSubgraph({
         network,
         serviceId,
-        limit: parsedLimitForMM,
+        limit: parsedLimitForMM ? parsedLimitForMM : DEFAULT_LIMIT,
       }),
     ];
 
@@ -52,7 +52,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       promises.push(
         getServiceActivityFromLegacyMechSubgraph({
           serviceId,
-          limit: parsedLimitForLegacy,
+          limit: parsedLimitForLegacy ? parsedLimitForLegacy : DEFAULT_LIMIT,
         }),
       );
 
