@@ -1,11 +1,21 @@
 import Link from 'next/link';
+import styled from 'styled-components';
 import type { NextRouter } from 'next/router';
-import { Button, Tag } from 'antd';
+import { Button, Flex, Tag } from 'antd';
 
 import { AddressLink, NA } from '@autonolas/frontend-library';
 import { truncateAddress } from 'libs/util-functions/src';
 
 import { HASH_PREFIX, NAV_TYPES, SERVICE_ROLE, TOTAL_VIEW_COUNT } from '../../../util/constants';
+
+const TruncatedText = styled.div`
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  word-break: break-word;
+`;
 
 type Record = {
   id: string;
@@ -132,7 +142,7 @@ export const getTableColumns = (
       width: 660,
       render: (text: string) => {
         if (!text || text === NA) return NA;
-        return text;
+        return <TruncatedText title={text}>{text}</TruncatedText>;
       },
     };
 
@@ -177,7 +187,7 @@ export const getTableColumns = (
         }
 
         return (
-          <Tag color={color} bordered={false}>
+          <Tag color={color} bordered={false} style={{ margin: '8px 0' }}>
             {record.role}
           </Tag>
         );
@@ -193,9 +203,11 @@ export const getTableColumns = (
       render: (_text: string, record: Record) => {
         if (record.role === SERVICE_ROLE.REGISTERED) return null;
         return (
-          <Button size="small" onClick={() => onViewClick(record.id)}>
-            View
-          </Button>
+          <Flex justify="center">
+            <Button size="small" onClick={() => onViewClick(record.id)}>
+              View
+            </Button>
+          </Flex>
         );
       },
     };

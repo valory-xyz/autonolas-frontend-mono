@@ -51,6 +51,27 @@ export const CustomLayout = styled(Layout)`
     }
   }
 
+  .ant-menu-overflow {
+    height: 40px;
+    display: flex;
+    align-items: center;
+  }
+
+  .ant-menu-item {
+    height: 40px;
+    display: flex;
+    align-items: center;
+
+    &.ant-menu-item-selected {
+      background-color: ${COLOR.PRIMARY_BG};
+      border-radius: 8px;
+      font-weight: 500;
+    }
+
+    .ant-menu-title-content {
+    }
+  }
+
   .ant-input-affix-wrapper {
     height: 40px;
   }

@@ -190,7 +190,7 @@ type Service = {
 };
 
 type TransformedService = Omit<Service, 'id' | 'state' | 'bonds'> & {
-  id: number | string;
+  id: string;
   owner: string;
   state: string;
   multisig: string;
@@ -202,7 +202,7 @@ type TransformedService = Omit<Service, 'id' | 'state' | 'bonds'> & {
  * @param {Service}
  *
  */
-const transformServiceData = (service: Service, serviceId: number | string): TransformedService => {
+const transformServiceData = (service: Service, serviceId: string): TransformedService => {
   if (!service) return {} as TransformedService;
   const owner = service.serviceOwner?.toString();
   const stateName = Object.keys(service.state || {})[0];
@@ -226,9 +226,9 @@ export const useGetSvmServiceDetails = () => {
   const { readSvmData } = useSvmDataFetch();
 
   const getSvmServiceDetails = useCallback(
-    async (id: number | string) => {
+    async (id: number) => {
       const details = await readSvmData('getService', [id], 'Service');
-      return transformServiceData(details as Service, id);
+      return transformServiceData(details as Service, id.toString());
     },
     [readSvmData],
   );

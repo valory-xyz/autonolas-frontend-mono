@@ -5,9 +5,9 @@ export const getServicesDataFromSubgraph = async ({
   network: 'gnosis' | 'base';
   serviceIds: number[];
 }) => {
-  const data = await fetch('/api/services', {
-    method: 'POST',
-    body: JSON.stringify({ network, serviceIds }),
+  const serviceIdsParam = serviceIds.map(String).join(',');
+  const data = await fetch(`/api/services?network=${network}&serviceIds=${serviceIdsParam}`, {
+    method: 'GET',
   });
   const json = await data.json();
   return json.services;

@@ -66,4 +66,14 @@ export const PageMainContainer = styled.div`
   .ant-tabs-nav {
     margin: 24px 0;
   }
+
+  .ant-table {
+    .ant-table-thead > tr > th {
+      font-weight: 500;
+    }
+
+    .ant-table-cell button.ant-btn-link {
+      padding: 0;
+    }
+  }
 `;

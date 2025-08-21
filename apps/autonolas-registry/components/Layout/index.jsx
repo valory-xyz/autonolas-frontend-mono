@@ -26,7 +26,7 @@ const { Content } = AntdLayout;
 const Layout = ({ children }) => {
   const router = useRouter();
   const { isMobile, isTablet } = useScreen();
-  const { vmType, isSvm, chainId, chainName } = useHelpers();
+  const { isSvm, chainId, chainName } = useHelpers();
   const path = router?.pathname || '';
 
   const isMintOrAiAgentDetailsPage = useMemo(() => {
@@ -77,22 +77,10 @@ const Layout = ({ children }) => {
                   updateChainId(currentChainInfo.id);
                   router.push(`/${path}`);
                 } else {
-                  // eg. /components, /agents, /services will be redirect to
-                  // /<chainName>/components, /<chainName>/agents, /<chainName>/services
+                  // eg. /components, /agent-blueprints, /ai-agents will be redirect to
+                  // /<chainName>/components, /<chainName>/agent-blueprints, /<chainName>/ai-agents
                   const replacedPath = router.asPath.replace(chainName, value);
-
-                  // reload the page if vmType is different
-                  // ie. user switched from svm to eth or vice versa
-                  // or if the current chain selected is ethereum
-                  if (
-                    vmType === VM_TYPE.SVM ||
-                    vmType !== currentChainInfo.vmType ||
-                    currentChainInfo.networkName === 'ethereum'
-                  ) {
-                    window.open(replacedPath, '_self');
-                  } else {
-                    router.push(replacedPath);
-                  }
+                  window.open(replacedPath, '_self');
                 }
               }}
               filterOption={(input, option) => {

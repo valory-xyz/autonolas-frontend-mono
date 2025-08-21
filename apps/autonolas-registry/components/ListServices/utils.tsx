@@ -48,13 +48,19 @@ export const getTotalForMyServices = async (account: string) => {
  * Function to return all services
  */
 export const getTotalForAllServices = async () => {
+  const { web3 } = getWeb3Details();
+
+  if (!web3) {
+    throw new Error('Web3 provider not available');
+  }
+
   const contract = getServiceContract();
   const total = await contract.methods.totalSupply().call();
   return total;
 };
 
 export const extractConfigDetailsForServices = async (
-  services: { id: number | string; configHash: string }[],
+  services: { id: string; configHash: string }[],
 ) => {
   const serviceWithMetadata = await Promise.all(
     services.map(async (service) => {
@@ -147,7 +153,10 @@ export const getServices = async (
   return servicesWithMetadata.sort((a, b) => Number(b.id) - Number(a.id)) as Service[];
 };
 
-export const getFilteredServices = async (searchValue: string, account: string) => {
+export const getFilteredServices = async (
+  searchValue: string,
+  account: string,
+): Promise<Service[]> => {
   const total = await getTotalForAllServices();
   const list = await getServices(total, Math.round(total / TOTAL_VIEW_COUNT + 1), true);
 
