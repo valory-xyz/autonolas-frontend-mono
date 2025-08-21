@@ -52,7 +52,8 @@ export const getListByAccount = async ({ searchValue, total, getUnit, getOwner, 
 /**
  * call API once and return based on pagination
  */
-export const getMyListOnPagination = ({ total, nextPage, list = [] }) => {
+export const getMyListOnPagination = ({ total, nextPage, list }) => {
+  if (!list) return [];
   const { first, last } = getFirstAndLastIndex(total, nextPage);
   const array = list.slice(first - 1, last);
   return array;
