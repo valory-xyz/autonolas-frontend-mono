@@ -1,10 +1,11 @@
+import Link from 'next/link';
 import type { NextRouter } from 'next/router';
 import { Button, Tag } from 'antd';
 
 import { AddressLink, NA } from '@autonolas/frontend-library';
+import { truncateAddress } from 'libs/util-functions/src';
 
 import { HASH_PREFIX, NAV_TYPES, SERVICE_ROLE, TOTAL_VIEW_COUNT } from '../../../util/constants';
-import Link from 'next/link';
 
 type Record = {
   id: string;
@@ -36,12 +37,14 @@ export const getTableColumns = (
     chainId,
     isMainnet,
     chainName,
+    onServicesHashClick,
   }: {
     onViewClick: (id: string) => void;
     isMobile: boolean;
     chainId: number;
     isMainnet: boolean;
     chainName: string;
+    onServicesHashClick: (serviceId: string) => void;
   },
 ) => {
   const isGnosisOrBaseNetwork = !!chainId && (chainId === 100 || chainId === 8453);
@@ -138,9 +141,12 @@ export const getTableColumns = (
       dataIndex: 'hash',
       key: 'hash',
       width: 200,
-      render: (text: string) => {
-        if (!text || text === NA) return NA;
-        return <AddressLink {...addressLinkProps} text={text} isIpfsLink />;
+      render: (_text: string, record: Record) => {
+        return (
+          <Button type="link" onClick={() => onServicesHashClick?.(record.id)}>
+            {truncateAddress(record.hash)}
+          </Button>
+        );
       },
     };
 

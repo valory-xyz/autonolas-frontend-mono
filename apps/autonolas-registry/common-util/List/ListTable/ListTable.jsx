@@ -21,6 +21,7 @@ export const ListTable = ({
   onUpdateClick,
   extra,
   tableDataTestId,
+  onServicesHashClick,
 }) => {
   const { chainName, account, isSvm, chainId, isMainnet } = useHelpers();
 
@@ -54,6 +55,7 @@ export const ListTable = ({
     chainId,
     account,
     isMainnet,
+    onServicesHashClick,
   });
   const dataSource = convertTableRawData(type, list, {
     currentPage,
