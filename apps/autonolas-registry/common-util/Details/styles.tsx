@@ -24,11 +24,34 @@ export const Header = styled.div`
 `;
 
 export const Info = styled.div`
-  word-break: break-all;
+  word-break: break-word;
+
+  .grid-row {
+    display: grid;
+    grid-template-columns: 150px 1fr;
+    align-items: center;
+    gap: 12px;
+    padding: 6px 0;
+
+    &.text-only {
+      padding: 0;
+      > span {
+        padding: 7px 15px;
+      }
+    }
+  }
+
   li {
     .ant-btn-link {
       padding: 0;
       height: auto;
+    }
+  }
+
+  @media (max-width: 600px) {
+    .grid-row {
+      grid-template-columns: 1fr;
+      align-items: flex-start;
     }
   }
 `;

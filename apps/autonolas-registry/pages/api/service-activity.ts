@@ -3,6 +3,10 @@ import {
   getServiceActivityFromMMSubgraph,
   getServiceActivityFromLegacyMechSubgraph,
 } from 'common-util/apiRoute/service-activity';
+import {
+  getServicesFromMMSubgraph,
+  getServicesFromLegacyMechSubgraph,
+} from 'common-util/apiRoute/services';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { CACHE_DURATION } from '../../util/constants';
 
