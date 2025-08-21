@@ -22,16 +22,12 @@ export type Activity = {
   deliveryBlockTimestamp: string;
 };
 
-export const getQueryForServiceActivity = ({
-  serviceId,
-  limit = 1000,
-}: {
-  serviceId: string;
-  limit: number;
-}) => {
+const LIMIT = 1_000;
+
+export const getQueryForServiceActivity = ({ serviceId }: { serviceId: string }) => {
   return `
   {
-    delivers (where: {service_: {id: "${serviceId}"}}, first: ${limit}, orderBy: blockTimestamp, orderDirection: desc) {
+    delivers (where: {service_: {id: "${serviceId}"}}, first: ${LIMIT}, orderBy: blockTimestamp, orderDirection: desc) {
       id
       ipfsHash
       mech
@@ -48,7 +44,7 @@ export const getQueryForServiceActivity = ({
       }
     } 
   
-    requests (where: {service_: {id: "${serviceId}"}}, first: ${limit}, orderBy: blockTimestamp, orderDirection: desc) {
+    requests (where: {service_: {id: "${serviceId}"}}, first: ${LIMIT}, orderBy: blockTimestamp, orderDirection: desc) {
       id
       ipfsHash
       blockTimestamp
@@ -183,27 +179,23 @@ export const mergeServiceActivity = (
 export const getServiceActivityFromMMSubgraph = async ({
   network,
   serviceId,
-  limit,
 }: {
   network: Network;
   serviceId: string;
-  limit: number;
 }) => {
   const client = network === 'gnosis' ? MM_GNOSIS_GRAPHQL_CLIENT : MM_BASE_GRAPHQL_CLIENT;
 
-  const query = getQueryForServiceActivity({ serviceId, limit });
+  const query = getQueryForServiceActivity({ serviceId });
   const response: Omit<ActivityResponse, 'id'> = await client.request(query);
   return { id: serviceId, ...response };
 };
 
 export const getServiceActivityFromLegacyMechSubgraph = async ({
   serviceId,
-  limit,
 }: {
   serviceId: string;
-  limit: number;
 }) => {
-  const query = getQueryForServiceActivity({ serviceId, limit });
+  const query = getQueryForServiceActivity({ serviceId });
   const response: Omit<ActivityResponse, 'id'> = await LEGACY_MECH_SUBGRAPH_CLIENT.request(query);
   return { id: serviceId, ...response };
 };

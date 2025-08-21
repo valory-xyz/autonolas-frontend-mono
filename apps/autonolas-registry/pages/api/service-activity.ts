@@ -11,11 +11,7 @@ type Network = 'gnosis' | 'base';
 type RequestQuery = {
   network: Network;
   serviceId: string;
-  limitForMM: string;
-  limitForLegacy: string;
 };
-
-const DEFAULT_LIMIT = 1000;
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'GET') {
@@ -23,9 +19,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   try {
-    const { network, serviceId, limitForMM, limitForLegacy } = req.query as RequestQuery;
-    const parsedLimitForMM = limitForMM ? parseInt(limitForMM, 10) : DEFAULT_LIMIT;
-    const parsedLimitForLegacy = limitForLegacy ? parseInt(limitForLegacy, 10) : DEFAULT_LIMIT;
+    const { network, serviceId } = req.query as RequestQuery;
 
     if (!network || !serviceId) {
       return res.status(400).json({
@@ -43,7 +37,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       getServiceActivityFromMMSubgraph({
         network,
         serviceId,
-        limit: parsedLimitForMM ? parsedLimitForMM : DEFAULT_LIMIT,
       }),
     ];
 
@@ -52,7 +45,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       promises.push(
         getServiceActivityFromLegacyMechSubgraph({
           serviceId,
-          limit: parsedLimitForLegacy ? parsedLimitForLegacy : DEFAULT_LIMIT,
         }),
       );
 

@@ -6,11 +6,7 @@ import { useRouter } from 'next/router';
 
 import { AddressLink, GenericObject, Loader, NA } from '@autonolas/frontend-library';
 
-import {
-  getLimitsForSubgraphs,
-  getServiceActivityDataFromSubgraph,
-  getServicesDataFromSubgraph,
-} from 'common-util/subgraphs';
+import { getServiceActivityDataFromSubgraph } from 'common-util/subgraphs';
 import type { Activity } from 'common-util/apiRoute/service-activity';
 import { NAV_TYPES, NavTypesValues, TOTAL_VIEW_COUNT } from 'util/constants';
 
@@ -190,16 +186,9 @@ export const Details: FC<DetailsProps> = ({
     const fetchActivity = async () => {
       try {
         setActivityLoading(true);
-        const serviceData = await getServicesDataFromSubgraph({
-          network: mapNetwork(chainName),
-          serviceIds: [Number(id)],
-        });
-        const { limitForMM, limitForLegacy } = getLimitsForSubgraphs(serviceData?.[0]);
         const json = await getServiceActivityDataFromSubgraph({
           network: mapNetwork(chainName),
           serviceId: id,
-          limitForMM,
-          limitForLegacy,
         });
 
         setActivityRows(json.activities || []);
