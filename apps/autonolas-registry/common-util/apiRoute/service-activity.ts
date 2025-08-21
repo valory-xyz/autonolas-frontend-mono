@@ -22,7 +22,13 @@ type Activity = {
   deliveryBlockTimestamp: string;
 };
 
-export const getQueryForServiceActivity = ({ serviceId, limit = 1000 }: { serviceId: string, limit: number }) => {
+export const getQueryForServiceActivity = ({
+  serviceId,
+  limit = 1000,
+}: {
+  serviceId: string;
+  limit: number;
+}) => {
   return `
   {
     delivers (where: {service_: {id: "${serviceId}"}}, first: ${limit}, orderBy: blockTimestamp, orderDirection: desc) {
@@ -149,52 +155,50 @@ export const mergeServiceActivity = (
   activityFromMM: ActivityResponse,
   activityFromLegacy: ActivityResponse,
 ) => {
-    const { id } = activityFromMM || {};
-    const { requests: requestsFromMM, delivers: deliveriesFromMM } = activityFromMM || {};
-    const { requests: requestsFromLegacy, delivers: deliveriesFromLegacy } = activityFromLegacy || {};
+  const { id } = activityFromMM || {};
+  const { requests: requestsFromMM, delivers: deliveriesFromMM } = activityFromMM || {};
+  const { requests: requestsFromLegacy, delivers: deliveriesFromLegacy } = activityFromLegacy || {};
 
-    const requestActivitiesFromMM = (requestsFromMM || [])?.map(convertRequestToActivity);
-    const requestActivitiesFromLegacy = (requestsFromLegacy || [])?.map(convertRequestToActivity);
+  const requestActivitiesFromMM = (requestsFromMM || [])?.map(convertRequestToActivity);
+  const requestActivitiesFromLegacy = (requestsFromLegacy || [])?.map(convertRequestToActivity);
 
-    const deliveryActivitiesFromMM = (deliveriesFromMM || [])?.map(convertDeliveryToActivity);
-    const deliveryActivitiesFromLegacy = (deliveriesFromLegacy || [])?.map(
-      convertDeliveryToActivity,
-    );
+  const deliveryActivitiesFromMM = (deliveriesFromMM || [])?.map(convertDeliveryToActivity);
+  const deliveryActivitiesFromLegacy = (deliveriesFromLegacy || [])?.map(convertDeliveryToActivity);
 
-    const activities = [
-      ...requestActivitiesFromMM,
-      ...requestActivitiesFromLegacy,
-      ...deliveryActivitiesFromMM,
-      ...deliveryActivitiesFromLegacy,
-    ];
+  const activities = [
+    ...requestActivitiesFromMM,
+    ...requestActivitiesFromLegacy,
+    ...deliveryActivitiesFromMM,
+    ...deliveryActivitiesFromLegacy,
+  ];
 
-    const sortedActivities = sortActivities(activities);
+  const sortedActivities = sortActivities(activities);
 
-    return {
-      id,
-      activities: sortedActivities,
-    };
+  return {
+    id,
+    activities: sortedActivities,
+  };
 };
 
 export const getServiceActivityFromMMSubgraph = async ({
   network,
   serviceId,
-  limit
+  limit,
 }: {
   network: Network;
   serviceId: string;
   limit: number;
 }) => {
-   const client = network === 'gnosis' ? MM_GNOSIS_GRAPHQL_CLIENT : MM_BASE_GRAPHQL_CLIENT;
+  const client = network === 'gnosis' ? MM_GNOSIS_GRAPHQL_CLIENT : MM_BASE_GRAPHQL_CLIENT;
 
   const query = getQueryForServiceActivity({ serviceId, limit });
-  const response: Omit<ActivityResponse, 'id'>  = await client.request(query);
+  const response: Omit<ActivityResponse, 'id'> = await client.request(query);
   return { id: serviceId, ...response };
 };
 
 export const getServiceActivityFromLegacyMechSubgraph = async ({
   serviceId,
-  limit 
+  limit,
 }: {
   serviceId: string;
   limit: number;
