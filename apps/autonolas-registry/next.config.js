@@ -60,17 +60,17 @@ const nextConfig = {
     },
     {
       source: '/mechs',
-      destination: '/ethereum/ai-agents',
+      destination: '/gnosis/ai-agents',
       permanent: true,
     },
     {
       source: '/mech',
-      destination: '/ethereum/ai-agents',
+      destination: '/gnosis/ai-agents',
       permanent: true,
     },
     {
       source: '/factory',
-      destination: '/ethereum/ai-agents',
+      destination: '/gnosis/ai-agents',
       permanent: true,
     },
   ],
