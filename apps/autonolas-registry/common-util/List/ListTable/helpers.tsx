@@ -53,7 +53,7 @@ export const marketplaceRoleTag = (_text: string, record: Record | Activity) => 
       color = 'blue';
       break;
     case SERVICE_ROLE.SUPPLY:
-      color = 'red';
+      color = 'pink';
       break;
     case SERVICE_ROLE.REGISTERED:
       color = 'default';

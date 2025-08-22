@@ -169,7 +169,7 @@ const ListAgents = () => {
 
   return (
     <PageMainContainer>
-      <Title level={2}>Agents</Title>
+      <Title level={2}>Agent Blueprints</Title>
       <Tabs
         className="registry-tabs"
         type="card"
@@ -202,7 +202,7 @@ const ListAgents = () => {
           },
           {
             key: MY_AGENTS,
-            label: 'My Agents',
+            label: 'My Agent Blueprints',
             disabled: isLoading,
             children: (
               <ListTable

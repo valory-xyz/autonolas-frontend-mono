@@ -20,6 +20,7 @@ type UseExtraTabContentProps = {
   type: string;
   isMyTab: boolean;
   mintButtonText?: string;
+  searchFields?: string[];
 };
 
 export const useExtraTabContent = ({
@@ -28,6 +29,7 @@ export const useExtraTabContent = ({
   isSvm = false,
   isMyTab = true,
   mintButtonText,
+  searchFields,
 }: UseExtraTabContentProps) => {
   const router = useRouter();
   const { account, isMainnet } = useHelpers();
@@ -42,6 +44,7 @@ export const useExtraTabContent = ({
     setSearchValue('');
   };
 
+  const defaultSearchFields = ['Name', 'Description', 'Owner', 'Package Hash'];
   const extraTabContent = {
     left: title && <Title level={2}>{title}</Title>,
     right: (
@@ -61,10 +64,9 @@ export const useExtraTabContent = ({
                     <div>
                       <div>Search by:</div>
                       <SearchUl>
-                        <li>Name</li>
-                        <li>Description</li>
-                        <li>Owner</li>
-                        <li>Package Hash</li>
+                        {(searchFields || defaultSearchFields).map((field) => (
+                          <li key={field}>{field}</li>
+                        ))}
                       </SearchUl>
                     </div>
                   }

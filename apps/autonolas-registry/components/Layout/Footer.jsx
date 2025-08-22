@@ -45,10 +45,12 @@ const ContractInfo = () => {
       return {
         registryText: 'ServiceRegistry',
         managerText: 'ServiceManager',
+        marketplaceText: 'MechMarketplace',
         registry: isL1Network ? addresses.serviceRegistry : addresses.serviceRegistryL2,
         manager: doesNetworkHaveValidServiceManagerToken
           ? addresses.serviceManagerToken
           : addresses.serviceManager,
+        marketplace: addresses.mechMarketplace || null,
       };
     }
 
@@ -73,7 +75,8 @@ const ContractInfo = () => {
     </div>
   );
 
-  const { registry, manager, managerText, registryText } = getCurrentPageAddresses();
+  const { registry, manager, managerText, registryText, marketplaceText, marketplace } =
+    getCurrentPageAddresses();
 
   return (
     <ContractsInfoContainer>
@@ -84,6 +87,9 @@ const ContractInfo = () => {
           </Text>
           <Text style={{ fontSize: 14 }}>{getContractInfo(registryText, registry)}</Text>
           <Text style={{ fontSize: 14 }}>{getContractInfo(managerText, manager)}</Text>
+          {marketplace && (
+            <Text style={{ fontSize: 14 }}>{getContractInfo(marketplaceText, marketplace)}</Text>
+          )}
         </>
       )}
     </ContractsInfoContainer>

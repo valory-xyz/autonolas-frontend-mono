@@ -53,7 +53,7 @@ const Layout = ({ children }) => {
             {isTablet ? <LogoIconSvg /> : <LogoSvg />}
           </Logo>
 
-          <NavDropdown currentSite="registry" />
+          <NavDropdown currentSite="mech-marketplace" />
         </div>
 
         <NavigationMenu />

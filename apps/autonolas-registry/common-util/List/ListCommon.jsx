@@ -4,6 +4,7 @@ import Link from 'next/link';
 import PropTypes from 'prop-types';
 import { useMemo } from 'react';
 
+import { NAV_TYPES } from 'util/constants';
 import { EmptyMessage, RegisterFooter } from '../../components/styles';
 import { useHelpers } from '../hooks';
 
@@ -90,21 +91,21 @@ RegisterMessage.defaultProps = { handleCancel: null };
 export const ListEmptyMessage = ({ message = '', type }) => {
   const getValues = () => {
     switch (type) {
-      case 'component':
+      case NAV_TYPES.COMPONENT:
         return {
           text: 'component',
         };
-      case 'service':
+      case NAV_TYPES.SERVICE:
         return {
-          text: 'service',
+          text: 'AI Agent',
         };
       case 'operator':
         return {
           text: 'operator',
         };
-      case 'agent':
+      case NAV_TYPES.AGENT:
         return {
-          text: 'agent',
+          text: 'Agent blueprint',
         };
       default:
         return null;

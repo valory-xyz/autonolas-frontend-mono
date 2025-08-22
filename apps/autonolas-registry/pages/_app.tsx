@@ -14,13 +14,14 @@ import { SUPPORTED_CHAINS } from '../common-util/Login/config';
 import Layout from '../components/Layout';
 import { wrapper } from '../store';
 
-const DESC = 'View and manage components, agents and services via the Autonolas on-chain registry.';
+const DESC =
+  'Marketplace to discover, manage, and view activity of autonomous AI agents directly from the Autonolas on-chain registry.';
 const queryClient = new QueryClient();
 const projectId = process.env.NEXT_PUBLIC_WALLET_PROJECT_ID as string;
 const metadata = {
-  name: 'Olas Registry',
+  name: 'Mech Marketplace',
   description: DESC,
-  url: 'https://registry.olas.network/',
+  url: 'https://marketplace.olas.network/',
   icons: ['https://avatars.githubusercontent.com/u/37784886'],
 };
 
@@ -60,8 +61,8 @@ const RegistryApp = ({
     <>
       <GlobalStyles />
       <Head>
-        <title>Olas Registry</title>
-        <meta name="description" content={DESC} />
+        <title>{metadata.name}</title>
+        <meta name="description" content={metadata.description} />
       </Head>
       <Provider store={store}>
         <AutonolasThemeProvider>

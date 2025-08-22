@@ -23,6 +23,7 @@ type Addresses = {
   serviceRegistryL2: Address;
   serviceRegistryTokenUtility: Address;
   operatorWhitelist: Address;
+  mechMarketplace?: Address;
 };
 
 type L1Addresses = {
@@ -50,6 +51,7 @@ const GNOSIS_ADDRESSES: Addresses = {
   serviceRegistryL2: '0x9338b5153AE39BB89f50468E608eD9d764B755fD',
   serviceRegistryTokenUtility: '0xa45E64d13A30a51b91ae0eb182e88a40e9b18eD8',
   operatorWhitelist: '0x526E064cB694E8f5B7DB299158e17F33055B3943',
+  mechMarketplace: '0x735FAAb1c4Ec41128c367AFb5c3baC73509f70bB',
 };
 
 const POLYGON_ADDRESSES: Addresses = {
@@ -97,6 +99,7 @@ export const ADDRESSES = {
     serviceRegistryL2: '0x3C1fF68f5aa342D296d4DEe4Bb1cACCA912D95fE',
     serviceRegistryTokenUtility: '0x34C895f302D0b5cf52ec0Edd3945321EB0f83dd5',
     operatorWhitelist: '0x3d77596beb0f130a4415df3D2D8232B3d3D31e44',
+    mechMarketplace: '0xf24eE42edA0fc9b33B7D41B06Ee8ccD2Ef7C5020',
   },
   [arbitrum.id]: {
     serviceManagerToken: '0x34C895f302D0b5cf52ec0Edd3945321EB0f83dd5',

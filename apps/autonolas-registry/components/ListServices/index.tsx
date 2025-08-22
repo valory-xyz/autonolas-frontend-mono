@@ -58,6 +58,7 @@ const ListServices = () => {
     isMyTab: currentTab === MY_AI_AGENTS,
     type: NAV_TYPES.SERVICE,
     mintButtonText: 'Add AI Agent',
+    searchFields: ['Description', 'Services Offered'],
   });
 
   // fetch total (All services & My services)

@@ -9,6 +9,7 @@ export const filterByOwner = (results, { searchValue, account }) =>
     const hashL = (e.unitHash || '').trim().toLowerCase();
     const name = (e.name || '').trim().toLowerCase();
     const description = (e.description || '').trim().toLowerCase();
+    const servicesOffered = (e.configHash || e.metadata || '').trim().toLowerCase();
 
     // for "my components/agents" search only by Account
     if (account) {
@@ -19,7 +20,8 @@ export const filterByOwner = (results, { searchValue, account }) =>
       includes(ownerL, search) ||
       includes(hashL, search) ||
       includes(name, search) ||
-      includes(description, search)
+      includes(description, search) ||
+      includes(servicesOffered, search)
     );
   });
 
