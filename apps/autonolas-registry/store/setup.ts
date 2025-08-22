@@ -3,7 +3,17 @@ import { createSlice } from '@reduxjs/toolkit';
 import { VM_TYPE } from 'util/constants';
 import { ALL_SUPPORTED_CHAINS, EVM_SUPPORTED_CHAINS } from 'common-util/Login/config';
 
-const initialState = {
+type InitialState = {
+  account: string | null;
+  balance: string | null;
+  vmType: string | null;
+  errorMessage: string | null;
+  chainId: number | null;
+  chainDisplayName: string | null;
+  chainName: string | null;
+};
+
+const initialState: InitialState = {
   account: null,
   balance: null,
   vmType: null,

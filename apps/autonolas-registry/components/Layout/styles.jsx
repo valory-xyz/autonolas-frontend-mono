@@ -4,10 +4,11 @@ import styled from 'styled-components';
 import { COLOR, MEDIA_QUERY } from 'libs/ui-theme/src';
 
 export const CustomLayout = styled(Layout)`
-  background-color: ${COLOR.WHITE};
+  min-height: 100vh;
+  background-color: ${(props) => (props.$showWhiteBg ? COLOR.WHITE : COLOR.BASE.NEUTRAL_1)};
 
   .site-layout {
-    padding: 0 50px;
+    padding: 0 48px;
     margin-top: 64px;
   }
   .site-layout-background {
@@ -27,9 +28,52 @@ export const CustomLayout = styled(Layout)`
         display: flex;
       }
     }
-    .ant-tabs-nav-wrap {
-      padding-left: 16px;
+
+    .ant-tabs-nav-list {
+      border-radius: 8px;
+      padding: 2px;
+      background-color: ${COLOR.BASE.NEUTRAL_1};
+      display: flex;
+      align-items: center;
+
+      .ant-tabs-tab {
+        color: ${COLOR.TEXT_SECONDARY};
+        padding: 6px 16px;
+        border: none;
+      }
+
+      .ant-tabs-tab-active {
+        color: ${COLOR.NEUTRAL_10};
+        border-radius: 6px;
+        background-color: ${COLOR.WHITE} !important;
+        box-shadow: 0px 2px 4px 0px rgba(0, 0, 0, 0.02);
+      }
     }
+  }
+
+  .ant-menu-overflow {
+    height: 40px;
+    display: flex;
+    align-items: center;
+  }
+
+  .ant-menu-item {
+    height: 40px;
+    display: flex;
+    align-items: center;
+
+    &.ant-menu-item-selected {
+      background-color: ${COLOR.PRIMARY_BG};
+      border-radius: 8px;
+      font-weight: 500;
+    }
+
+    .ant-menu-title-content {
+    }
+  }
+
+  .ant-input-affix-wrapper {
+    height: 40px;
   }
 
   /* table */
@@ -37,16 +81,18 @@ export const CustomLayout = styled(Layout)`
     .ant-table-tbody > tr {
       > td {
         padding: 8px 16px;
-        .ant-btn {
-          &:first-child {
-            padding-left: 0;
-          }
+        .td-center {
+          align: center;
         }
         .ant-btn-link {
           font-size: 16px;
         }
       }
     }
+  }
+
+  .wallet-adapter-dropdown {
+    margin-left: 24px;
   }
 
   ${MEDIA_QUERY.tabletL} {
@@ -113,7 +159,17 @@ export const Logo = styled.div`
   }
 `;
 
-export const SelectContainer = styled.div``;
+export const SelectContainer = styled.div`
+  .ant-select {
+    display: flex;
+    align-items: center;
+
+    .ant-select-selector {
+      padding: 4px 12px;
+      height: auto;
+    }
+  }
+`;
 
 export const RightMenu = styled.div`
   display: flex;

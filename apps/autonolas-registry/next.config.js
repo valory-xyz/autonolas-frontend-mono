@@ -30,7 +30,7 @@ const nextConfig = {
   redirects: async () => [
     {
       source: '/',
-      destination: '/ethereum/components',
+      destination: '/ethereum/ai-agents',
       permanent: true,
     },
     {
@@ -40,12 +40,12 @@ const nextConfig = {
     },
     {
       source: '/agents',
-      destination: '/ethereum/agents',
+      destination: '/ethereum/agent-blueprints',
       permanent: true,
     },
     {
       source: '/services',
-      destination: '/ethereum/services',
+      destination: '/ethereum/ai-agents',
       permanent: true,
     },
   ],

@@ -13,7 +13,9 @@ import { setIsVerified, useAppSelector } from 'store/setup';
 import { MENU_WIDTH } from 'util/constants';
 
 import Footer from './Footer';
-import { Menu, NavDropdown } from './Menu';
+import { Menu } from './Menu';
+import { NavDropdown } from 'libs/ui-components/src';
+
 import { ServiceStatus } from './ServiceStatus';
 import { Banner, CustomHeader, CustomHeaderContent, CustomLayout, Logo, RightMenu } from './styles';
 import { getAddressStatus } from './utils';
@@ -89,7 +91,7 @@ export const Layout = ({ children }: { children: React.ReactNode }) => {
                 <LogoSvg />
               </Logo>
             </Link>
-            <NavDropdown />
+            <NavDropdown currentSite="contribute" />
             {!screens.md && (
               <Button className="ml-4" onClick={() => setIsMenuVisible((prev) => !prev)}>
                 Menu

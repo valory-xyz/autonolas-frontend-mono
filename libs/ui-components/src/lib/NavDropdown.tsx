@@ -34,8 +34,8 @@ const navItems = [
     type: 'divider',
   },
   {
-    key: 'registry',
-    label: <ExternalLink label="Registry" href="https://registry.olas.network/" />,
+    key: 'mech-marketplace',
+    label: <ExternalLink label="Mech Marketplace" href="https://marketplace.olas.network/" />,
   },
   {
     key: 'divider',

@@ -14,11 +14,13 @@ const SearchUl = styled.ul`
 `;
 
 type UseExtraTabContentProps = {
-  title: string;
+  title?: string;
   onRegisterClick?: () => void;
   isSvm?: boolean;
   type: string;
   isMyTab: boolean;
+  mintButtonText?: string;
+  searchFields?: string[];
 };
 
 export const useExtraTabContent = ({
@@ -26,12 +28,14 @@ export const useExtraTabContent = ({
   onRegisterClick,
   isSvm = false,
   isMyTab = true,
+  mintButtonText,
+  searchFields,
 }: UseExtraTabContentProps) => {
   const router = useRouter();
   const { account, isMainnet } = useHelpers();
 
   // search query is supported only in mainnet for now (as subgraph is available only in mainnet)
-  const searchQuery = isMainnet ? (router.query.search ?? '') : '';
+  const searchQuery = isMainnet ? ((router.query.search as string) ?? '') : '';
 
   const [searchValue, setSearchValue] = useState(searchQuery); // to control the search
   const [value, setValue] = useState(searchQuery); // to control the input field
@@ -40,8 +44,9 @@ export const useExtraTabContent = ({
     setSearchValue('');
   };
 
+  const defaultSearchFields = ['Name', 'Description', 'Owner', 'Package Hash'];
   const extraTabContent = {
-    left: <Title level={2}>{title}</Title>,
+    left: title && <Title level={2}>{title}</Title>,
     right: (
       <>
         {/* TODO: hiding search util feature is introduced */}
@@ -59,10 +64,9 @@ export const useExtraTabContent = ({
                     <div>
                       <div>Search by:</div>
                       <SearchUl>
-                        <li>Name</li>
-                        <li>Description</li>
-                        <li>Owner</li>
-                        <li>Package Hash</li>
+                        {(searchFields || defaultSearchFields).map((field) => (
+                          <li key={field}>{field}</li>
+                        ))}
                       </SearchUl>
                     </div>
                   }
@@ -79,7 +83,7 @@ export const useExtraTabContent = ({
         )}
 
         <Button size="large" type="primary" onClick={onRegisterClick}>
-          Mint
+          {mintButtonText || 'Mint'}
         </Button>
       </>
     ),

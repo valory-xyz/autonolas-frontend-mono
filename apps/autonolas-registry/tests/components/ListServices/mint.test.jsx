@@ -47,7 +47,7 @@ describe('listServices/mint.jsx', () => {
   it('should submit the form successfully', async () => {
     const { container, getByText, getByRole, getByTestId } = render(wrapProvider(<MintService />));
     // title
-    expect(getByText(/Mint Service/i)).toBeInTheDocument();
+    expect(getByText(/Add AI Agent/i)).toBeInTheDocument();
 
     // get hash
     userEvent.click(getByTestId('generate-hash-file'));

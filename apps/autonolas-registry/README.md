@@ -1,4 +1,4 @@
-# Autonolas Registry Frontend
+# Marketplace Frontend
 This repository contains the [Autonolas Registry](https://registry.olas.network/) frontend.
 
 ## Tech Stack

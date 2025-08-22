@@ -1,0 +1,12 @@
+{
+    "functions": {
+      "pages/api/services.js": {
+        "maxDuration": 300,
+        "memory": 1000
+      },
+      "pages/api/service-activity.js": {
+        "maxDuration": 300,
+        "memory": 1000
+      }
+    }
+  }

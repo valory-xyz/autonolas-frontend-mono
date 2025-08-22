@@ -1,6 +1,7 @@
 import { useCallback } from 'react';
 import { useRouter } from 'next/router';
 
+import { NAV_TYPES } from 'util/constants';
 import Details from '../../common-util/Details';
 import { useHelpers } from '../../common-util/hooks';
 import {
@@ -27,7 +28,7 @@ const Component = () => {
 
   return (
     <Details
-      type="component"
+      type={NAV_TYPES.COMPONENT}
       id={id}
       getDetails={getDetails}
       getOwner={getOwner}

@@ -7,7 +7,7 @@ import { useCallback } from 'react';
 import { gql } from 'graphql-request';
 
 import { GRAPHQL_CLIENT } from '../../../common-util/hooks/useSubgraph';
-import { HASH_PREFIX, TOTAL_VIEW_COUNT } from '../../../util/constants';
+import { HASH_PREFIX, SERVICE_ROLE, TOTAL_VIEW_COUNT } from '../../../util/constants';
 
 const SERVICE_FIELDS = `{
   id
@@ -75,6 +75,14 @@ const getServicesBySearchQuery = (searchValue, currentPage, ownerAddress = null)
   `;
 };
 
+const prepareServiceData = (services = []) => {
+  return services.map((service) => ({
+    ...service,
+    role: SERVICE_ROLE.REGISTERED,
+    metadata: service.metadataHash,
+  }));
+};
+
 /**
  * Hook to get ALL units
  * @returns {function} function to get all units
@@ -84,7 +92,7 @@ export const useAllServices = () => {
   return useCallback(async (currentPage) => {
     const query = getAllAndMyServicesQuery(currentPage);
     const response = await GRAPHQL_CLIENT.request(query);
-    return response?.services || [];
+    return prepareServiceData(response?.services);
   }, []);
 };
 
@@ -96,7 +104,7 @@ export const useMyServices = () => {
   return useCallback(async (ownerAddress, currentPage) => {
     const query = getAllAndMyServicesQuery(currentPage, ownerAddress);
     const response = await GRAPHQL_CLIENT.request(query);
-    return response?.services || [];
+    return prepareServiceData(response?.services);
   }, []);
 };
 
@@ -108,7 +116,7 @@ export const useAllServicesBySearch = () => {
   return useCallback(async (searchValue, currentPage) => {
     const query = getServicesBySearchQuery(searchValue, currentPage);
     const response = await GRAPHQL_CLIENT.request(query);
-    return response?.services || [];
+    return prepareServiceData(response?.services);
   }, []);
 };
 
@@ -120,7 +128,7 @@ export const useMyServicesBySearch = () => {
   return useCallback(async (searchValue, currentPage, ownerAddress) => {
     const query = getServicesBySearchQuery(searchValue, currentPage, ownerAddress);
     const response = await GRAPHQL_CLIENT.request(query);
-    return response?.services || [];
+    return prepareServiceData(response?.services);
   }, []);
 };
 

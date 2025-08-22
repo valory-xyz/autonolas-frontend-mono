@@ -1,13 +1,16 @@
 import { useRouter } from 'next/router';
 import Link from 'next/link';
-import Image from 'next/image';
-import { Footer as CommonFooter, getExplorerURL } from '@autonolas/frontend-library';
+import { Typography } from 'antd';
+import { Footer as CommonFooter } from 'libs/ui-components/src';
+import { getExplorerURL } from '@autonolas/frontend-library';
 
 import { PAGES_TO_LOAD_WITHOUT_CHAINID } from 'util/constants';
 import { ADDRESSES } from 'common-util/Contracts/addresses';
 import { useHelpers } from 'common-util/hooks';
 import Socials from './Socials';
 import { ContractsInfoContainer } from './styles';
+
+const { Text } = Typography;
 
 const ContractInfo = () => {
   const { chainId, isL1Network, doesNetworkHaveValidServiceManagerToken } = useHelpers();
@@ -29,7 +32,7 @@ const ContractInfo = () => {
       };
     }
 
-    if (addresses && (pathname || '').includes('agents')) {
+    if (addresses && (pathname || '').includes('agent-blueprints')) {
       return {
         registryText: 'AgentRegistry',
         managerText: 'RegistriesManager',
@@ -38,14 +41,16 @@ const ContractInfo = () => {
       };
     }
 
-    if (addresses && (pathname || '').includes('services')) {
+    if (addresses && (pathname || '').includes('ai-agents')) {
       return {
         registryText: 'ServiceRegistry',
         managerText: 'ServiceManager',
+        marketplaceText: 'MechMarketplace',
         registry: isL1Network ? addresses.serviceRegistry : addresses.serviceRegistryL2,
         manager: doesNetworkHaveValidServiceManagerToken
           ? addresses.serviceManagerToken
           : addresses.serviceManager,
+        marketplace: addresses.mechMarketplace || null,
       };
     }
 
@@ -70,18 +75,21 @@ const ContractInfo = () => {
     </div>
   );
 
-  const { registry, manager, managerText, registryText } = getCurrentPageAddresses();
+  const { registry, manager, managerText, registryText, marketplaceText, marketplace } =
+    getCurrentPageAddresses();
 
   return (
     <ContractsInfoContainer>
       {!PAGES_TO_LOAD_WITHOUT_CHAINID.includes(pathname) && (
         <>
-          <div>
-            <Image src="/images/etherscan-logo.svg" width={18} height={18} alt="Etherscan link" />
-            <span>Contracts</span>
-          </div>
-          {getContractInfo(registryText, registry)}
-          {getContractInfo(managerText, manager)}
+          <Text type="secondary" style={{ fontSize: 14 }}>
+            Contracts
+          </Text>
+          <Text style={{ fontSize: 14 }}>{getContractInfo(registryText, registry)}</Text>
+          <Text style={{ fontSize: 14 }}>{getContractInfo(managerText, manager)}</Text>
+          {marketplace && (
+            <Text style={{ fontSize: 14 }}>{getContractInfo(marketplaceText, marketplace)}</Text>
+          )}
         </>
       )}
     </ContractsInfoContainer>
@@ -94,12 +102,17 @@ const Footer = () => (
     rightContent={<Socials />}
     centerContent={
       <>
-        ©&nbsp;Autonolas DAO&nbsp;
-        {new Date().getFullYear()}
-        &nbsp;•&nbsp;
-        <Link href="/disclaimer">Disclaimer</Link>
+        <Text type="secondary" style={{ fontSize: 14 }}>
+          ©&nbsp;Olas DAO&nbsp;
+          {new Date().getFullYear()}
+          &nbsp;•&nbsp;
+        </Text>
+        <Link href="/disclaimer" style={{ fontSize: 14 }}>
+          Disclaimer
+        </Link>
         &nbsp;•&nbsp;
         <a
+          style={{ fontSize: 14 }}
           href="https://gateway.autonolas.tech/ipfs/bafybeibrhz6hnxsxcbv7dkzerq4chssotexb276pidzwclbytzj7m4t47u"
           target="_blank"
           rel="noopener noreferrer"

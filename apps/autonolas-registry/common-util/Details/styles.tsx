@@ -1,4 +1,4 @@
-import { Image, Typography } from 'antd';
+import { Divider, Image, Table, TableProps, Typography } from 'antd';
 import styled from 'styled-components';
 
 import { COLOR } from 'libs/ui-theme/src';
@@ -24,13 +24,55 @@ export const Header = styled.div`
 `;
 
 export const Info = styled.div`
-  word-break: break-all;
+  word-break: break-word;
+
+  .grid-row {
+    display: grid;
+    grid-template-columns: 150px 1fr;
+    align-items: center;
+    gap: 12px;
+    padding: 2px 0;
+
+    .ant-typography-secondary {
+      font-size: 14px;
+    }
+
+    &.text-only {
+      margin-bottom: 4px;
+    }
+
+    .ant-btn-link {
+      padding: 0;
+      font-size: 16px;
+    }
+  }
+
   li {
     .ant-btn-link {
       padding: 0;
       height: auto;
     }
   }
+
+  @media (max-width: 600px) {
+    .grid-row {
+      grid-template-columns: 1fr;
+      align-items: flex-start;
+    }
+  }
+`;
+
+export const DetailsTable = styled(<T extends object>(props: TableProps<T>) => (
+  <Table {...props} />
+))`
+  button {
+    padding: 0;
+  }
+`;
+
+export const DetailsDivider = styled(Divider)`
+  margin-top: 0;
+  margin-bottom: 16px;
 `;
 
 export const EachSection = styled.div`

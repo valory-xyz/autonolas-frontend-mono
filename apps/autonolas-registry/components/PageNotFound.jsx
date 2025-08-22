@@ -13,7 +13,7 @@ const NotLegalContainer = styled.div`
 export const PageNotFound = () => (
   <NotLegalContainer>
     <Title level={4}>Error 404 - we couldn&apos;t find that page</Title>
-    <Link href="ethereum/services" passHref>
+    <Link href="ethereum/ai-agents" passHref>
       <Button size="large" type="link">
         Check out services on Ethereum
       </Button>

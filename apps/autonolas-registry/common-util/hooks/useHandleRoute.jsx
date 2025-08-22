@@ -45,9 +45,9 @@ export const useHandleRoute = () => {
   const updateChainId = useCallback(
     (id) => {
       sessionStorage.setItem('chainId', id);
-      dispatchWithDelay(setChainId(id));
+      dispatch(setChainId(id));
     },
-    [dispatchWithDelay],
+    [dispatch],
   );
 
   // updating the blockchain information in redux
@@ -57,9 +57,11 @@ export const useHandleRoute = () => {
 
     if (!isPageWithSolana(networkNameFromUrl)) {
       const chainIdFromPath = getChainIdFromPath(networkNameFromUrl);
-      updateChainId(isValidNetwork ? chainIdFromPath : 1);
+      const chainId = isValidNetwork ? chainIdFromPath : 1;
+      sessionStorage.setItem('chainId', chainId);
+      dispatchWithDelay(setChainId(chainId));
     }
-  }, [networkNameFromUrl, dispatchWithDelay, updateChainId]);
+  }, [networkNameFromUrl, dispatchWithDelay]);
 
   useEffect(() => {
     if (PAGES_TO_LOAD_WITHOUT_CHAINID.includes(path)) {
@@ -91,7 +93,7 @@ export const useHandleRoute = () => {
     // eg 2. pathArray = [networkName, agents, mint]
     const pathArray = (path?.split('/') || []).filter(Boolean);
 
-    const listingPage = pathArray >= 2;
+    const listingPage = pathArray.length >= 2;
     if (listingPage && !isValidNetworkName(networkNameFromUrl)) {
       /**
        * eg.
@@ -111,7 +113,7 @@ export const useHandleRoute = () => {
 
     // User navigates to `/[network]`
     if (!PAGES_TO_LOAD_WITHOUT_CHAINID.includes(router.asPath) && pathArray.length === 1) {
-      router.push(`/${networkNameFromUrl}/${isL1Network ? 'components' : 'services'}`);
+      router.push(`/${networkNameFromUrl}/${isL1Network ? 'components' : 'ai-agents'}`);
       return;
     }
 
@@ -122,14 +124,14 @@ export const useHandleRoute = () => {
      *
      * if user navigates to `/ethereum/random-page redirect to `/page-not-found`
      *
-     * if user navigates to `/gnosis/components redirect to `/gnosis/services`
+     * if user navigates to `/gnosis/components redirect to `/gnosis/ai-agents`
      * because components & agents are not supported on gnosis
      */
 
     if (!isValidL1NetworkName(networkNameFromUrl) && doesPathIncludesComponentsOrAgents(path)) {
-      router.push(`/${networkNameFromUrl}/services`);
+      router.push(`/${networkNameFromUrl}/ai-agents`);
     }
-  }, [path, networkNameFromUrl, isL1Network, router]);
+  }, [path, networkNameFromUrl, isL1Network]);
 
   const onHomeClick = () => {
     const isSvm =
@@ -137,9 +139,9 @@ export const useHandleRoute = () => {
       networkNameFromUrl === SOLANA_CHAIN_NAMES.MAINNET;
 
     const getListName = () => {
-      if (isSvm) return 'services';
+      if (isSvm) return 'ai-agents';
       if (isL1Network) return 'components';
-      return 'services';
+      return 'ai-agents';
     };
 
     if (networkNameFromUrl) {

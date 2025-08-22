@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Tabs } from 'antd';
+import { Tabs, Typography } from 'antd';
 import { useRouter } from 'next/router';
 import { notifyError } from '@autonolas/frontend-library';
 
@@ -14,6 +14,9 @@ import {
   getTotalForAllComponents,
   getTotalForMyComponents,
 } from './utils';
+import { PageMainContainer } from 'components/styles';
+
+const { Title } = Typography;
 
 const ALL_COMPONENTS = 'all-components';
 const MY_COMPONENTS = 'my-components';
@@ -33,9 +36,9 @@ const ListComponents = () => {
    * extra tab content & view click
    */
   const { searchValue, extraTabContent, clearSearch } = useExtraTabContent({
-    title: 'Components',
     onRegisterClick: () => router.push(links.MINT_COMPONENT),
     isMyTab: currentTab === MY_COMPONENTS,
+    mintButtonText: 'Add Component',
   });
   const onViewClick = (id) => router.push(`${links.COMPONENTS}/${id}`);
 
@@ -169,51 +172,55 @@ const ListComponents = () => {
   };
 
   return (
-    <Tabs
-      className="registry-tabs"
-      type="card"
-      activeKey={currentTab}
-      tabBarExtraContent={extraTabContent}
-      onChange={(tabName) => {
-        setCurrentTab(tabName);
+    <PageMainContainer>
+      <Title level={2}>Components</Title>
 
-        setTotal(0);
-        setCurrentPage(1);
-        setIsLoading(true);
+      <Tabs
+        className="registry-tabs"
+        type="card"
+        activeKey={currentTab}
+        tabBarExtraContent={extraTabContent}
+        onChange={(tabName) => {
+          setCurrentTab(tabName);
 
-        // clear the search
-        clearSearch();
+          setTotal(0);
+          setCurrentPage(1);
+          setIsLoading(true);
 
-        // update the URL to keep track of my-components
-        router.push({
-          pathname: links.COMPONENTS,
-          query: tabName === ALL_COMPONENTS ? {} : { tab: tabName },
-        });
-      }}
-      items={[
-        {
-          key: ALL_COMPONENTS,
-          label: 'All',
-          disabled: isLoading,
-          children: (
-            <ListTable {...tableCommonProps} list={list} tableDataTestId="all-components-table" />
-          ),
-        },
-        {
-          key: MY_COMPONENTS,
-          label: 'My Components',
-          disabled: isLoading,
-          children: (
-            <ListTable
-              {...tableCommonProps}
-              list={list}
-              isAccountRequired
-              tableDataTestId="my-components-table"
-            />
-          ),
-        },
-      ]}
-    />
+          // clear the search
+          clearSearch();
+
+          // update the URL to keep track of my-components
+          router.push({
+            pathname: links.COMPONENTS,
+            query: tabName === ALL_COMPONENTS ? {} : { tab: tabName },
+          });
+        }}
+        items={[
+          {
+            key: ALL_COMPONENTS,
+            label: 'All',
+            disabled: isLoading,
+            children: (
+              <ListTable {...tableCommonProps} list={list} tableDataTestId="all-components-table" />
+            ),
+          },
+          {
+            key: MY_COMPONENTS,
+            label: 'My Components',
+            disabled: isLoading,
+            children: (
+              <ListTable
+                {...tableCommonProps}
+                list={list}
+                isAccountRequired
+                tableDataTestId="my-components-table"
+              />
+            ),
+          },
+        ]}
+      />
+    </PageMainContainer>
   );
 };
 

@@ -1,11 +1,11 @@
 export const URL = {
-  AGENTS: '/agents',
+  AGENTS: '/agent-blueprints',
   COMPONENTS: '/components',
-  SERVICES: '/services',
-  MINT_AGENT: '/agents/mint',
+  SERVICES: '/ai-agents',
+  MINT_AGENT: '/agent-blueprints/mint',
   MINT_COMPONENT: '/components/mint',
-  MINT_SERVICE: '/services/mint',
-  UPDATE_SERVICE: '/services/update',
+  MINT_SERVICE: '/ai-agents/mint',
+  UPDATE_SERVICE: '/ai-agents/update',
 
   // pages without chain id
   DISCLAIMER: '/disclaimer',
@@ -15,8 +15,8 @@ export const URL = {
 
 export const NAV_TYPES = {
   COMPONENT: 'component',
-  AGENT: 'agent',
-  SERVICE: 'service',
+  AGENT: 'agent-blueprints',
+  SERVICE: 'ai-agents',
 } as const;
 
 export type NavTypesKeys = keyof typeof NAV_TYPES;
@@ -30,6 +30,13 @@ export const SERVICE_STATE = {
   4: 'Deployed',
   5: 'Terminated Bonded',
 } as const;
+
+export const SERVICE_ROLE = {
+  REGISTERED: 'Registered',
+  DEMAND_AND_SUPPLY: 'Demand & Supply',
+  DEMAND: 'Demand',
+  SUPPLY: 'Supply',
+};
 
 export const SERVICE_STATE_KEY_MAP = {
   nonExistent: '0',
@@ -99,4 +106,9 @@ export const HASH_DETAILS_STATE = {
   IS_LOADING: 'IS_LOADING',
   LOADED: 'LOADED',
   FAILED: 'FAILED',
+} as const;
+
+export const CACHE_DURATION = {
+  TWELVE_HOURS: 43200,
+  ONE_HOUR: 3600,
 } as const;

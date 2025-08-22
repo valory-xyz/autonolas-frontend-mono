@@ -4,6 +4,7 @@ import Link from 'next/link';
 import PropTypes from 'prop-types';
 import { useMemo } from 'react';
 
+import { NAV_TYPES } from 'util/constants';
 import { EmptyMessage, RegisterFooter } from '../../components/styles';
 import { useHelpers } from '../hooks';
 
@@ -29,7 +30,7 @@ MyLink.propTypes = {
 export const commaMessage = 'Each comma must be followed by a space ("1, 2" not "1,2").';
 
 export const DependencyLabel = ({ type }) => {
-  const { isL1Network, isSvm } = useHelpers();
+  const { isL1Network, isSvm, chainName } = useHelpers();
   const dependencyHelperText = `Must be in ascending order – newest ${
     type === 'service' ? 'agents' : 'components'
   } last, oldest first. ${commaMessage}`;
@@ -47,8 +48,8 @@ export const DependencyLabel = ({ type }) => {
             </>
           )}
           Comma-separated list of agent IDs which this service requires. Find IDs on&nbsp;
-          <MyLink href="/agents">
-            Agents
+          <MyLink href={`/${chainName}/agent-blueprints`}>
+            Agent Blueprints
             <ExportOutlined style={{ width: 14 }} />
           </MyLink>
           &nbsp;page.&nbsp;
@@ -90,21 +91,21 @@ RegisterMessage.defaultProps = { handleCancel: null };
 export const ListEmptyMessage = ({ message = '', type }) => {
   const getValues = () => {
     switch (type) {
-      case 'component':
+      case NAV_TYPES.COMPONENT:
         return {
           text: 'component',
         };
-      case 'service':
+      case NAV_TYPES.SERVICE:
         return {
-          text: 'service',
+          text: 'AI Agent',
         };
       case 'operator':
         return {
           text: 'operator',
         };
-      case 'agent':
+      case NAV_TYPES.AGENT:
         return {
-          text: 'agent',
+          text: 'Agent blueprint',
         };
       default:
         return null;

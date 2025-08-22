@@ -105,7 +105,7 @@ describe('listComponents/index.jsx', () => {
   it('should display mint button', async () => {
     const { findByRole } = render(wrapProvider(<ListComponents />));
 
-    expect(await findByRole('button', { name: 'Mint' })).toBeInTheDocument();
+    expect(await findByRole('button', { name: 'Add Component' })).toBeInTheDocument();
   });
 
   it('should not have search input if "search" query string is not available', async () => {

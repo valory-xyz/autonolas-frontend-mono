@@ -70,7 +70,7 @@ const MintComponent = () => {
   return (
     <>
       <FormContainer>
-        <Title level={2}>Mint Component</Title>
+        <Title level={2}>Add Component</Title>
         <RegisterForm
           isLoading={isMinting}
           listType="component"

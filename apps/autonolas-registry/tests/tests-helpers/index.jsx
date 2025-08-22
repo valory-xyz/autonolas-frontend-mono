@@ -61,7 +61,7 @@ export const useHelpersEvmMock = {
   isL1OnlyNetwork: true,
   isL1Network: true,
   doesNetworkHaveValidServiceManagerToken: true,
-  links: { AGENTS: '/ethereum/agents' },
+  links: { AGENTS: '/ethereum/agent-blueprints' },
   isConnectedToWrongNetwork: false,
   isSvm: false,
   isMainnet: true,
@@ -76,7 +76,7 @@ export const useHelpersBaseMock = {
   isL1OnlyNetwork: false,
   isL1Network: false,
   doesNetworkHaveValidServiceManagerToken: true,
-  links: { AGENTS: '/base/agents' },
+  links: { AGENTS: '/base/agent-blueprints' },
   isConnectedToWrongNetwork: false,
   isSvm: false,
 };
@@ -92,7 +92,7 @@ export const useHelpersSvmMock = {
   isL1OnlyNetwork: false,
   isL1Network: false,
   doesNetworkHaveValidServiceManagerToken: false,
-  links: { SERVICES: '/solana/services' },
+  links: { SERVICES: '/solana/ai-agents' },
   isConnectedToWrongNetwork: false,
   isSvm: true,
 };
