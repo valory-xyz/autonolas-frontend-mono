@@ -8,9 +8,6 @@ const NotLegalContainer = styled.div`
 
 export const NotLegal = () => (
   <NotLegalContainer>
-    <Result
-      status="warning"
-      title="Access is blocked for the US and countries on the OFAC-sanctioned list"
-    />
+    <Result status="warning" title="Access is blocked for countries on the OFAC-sanctioned list" />
   </NotLegalContainer>
 );
