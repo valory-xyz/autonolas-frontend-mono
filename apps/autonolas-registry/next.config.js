@@ -49,7 +49,7 @@ const nextConfig = {
       permanent: true,
     },
     {
-      source: '/:network/services',
+      source: '/:network((?!api).+)/services',
       destination: '/:network/ai-agents',
       permanent: true,
     },

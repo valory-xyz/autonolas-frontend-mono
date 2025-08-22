@@ -142,7 +142,7 @@ export const LoginV2 = ({
       ) : (
         <>
           {!hideWrongNetwork && (
-            <div style={{ marginLeft: 8 }}>
+            <div style={{ marginRight: 8 }}>
               <YellowButton
                 loading={isPending}
                 type="default"
