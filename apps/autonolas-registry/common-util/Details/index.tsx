@@ -1,10 +1,11 @@
-import { Button, Col, Row, Tabs, Table } from 'antd';
+import { Button, Col, Row, Tabs } from 'antd';
+import type { ColumnsType, ColumnType } from 'antd/es/table';
 import get from 'lodash/get';
 import { FC, useCallback, useState, useEffect, useMemo } from 'react';
 import { Address } from 'viem';
 import { useRouter } from 'next/router';
 
-import { AddressLink, GenericObject, Loader, NA } from '@autonolas/frontend-library';
+import { AddressLink, GenericObject, NA } from '@autonolas/frontend-library';
 
 import { getServiceActivityDataFromSubgraph } from 'common-util/subgraphs';
 import type { Activity } from 'common-util/apiRoute/service-activity';
@@ -13,10 +14,25 @@ import { NAV_TYPES, NavTypesValues, TOTAL_VIEW_COUNT } from 'util/constants';
 import { IpfsHashGenerationModal } from '../List/IpfsHashGenerationModal';
 import { useHelpers } from '../hooks';
 import { DetailsSubInfo } from './DetailsSubInfo';
-import { DetailsTitle, Header } from './styles';
+import { DetailsTable, DetailsTitle, Header } from './styles';
 import { ActivityDetails } from './ActivityDetails';
 import { useDetails } from './useDetails';
 import { marketplaceRoleTag } from 'common-util/List/ListTable/helpers';
+import { CopyOutlined } from '@ant-design/icons';
+import { Flex } from 'antd';
+
+export const CopyBtn = ({ text }: { text: string }) => {
+  return (
+    <Button
+      size="small"
+      onClick={(e) => {
+        e.stopPropagation();
+        navigator.clipboard.writeText(text);
+      }}
+      icon={<CopyOutlined />}
+    />
+  );
+};
 
 const getColumns = ({
   addressLinkProps,
@@ -27,7 +43,7 @@ const getColumns = ({
     suffixCount: number;
   };
   openActivityModal: (record: Activity) => void;
-}) => {
+}): ColumnsType<Activity> => {
   return [
     {
       title: 'Request ID',
@@ -35,8 +51,13 @@ const getColumns = ({
       key: 'requestId',
       render: (text: string, record: Activity) =>
         text ? (
-          <Button type="link" onClick={() => openActivityModal(record)}>
-            {<AddressLink {...addressLinkProps} text={text} cannotClick />}
+          <Button
+            type="link"
+            onClick={() => openActivityModal(record)}
+            style={{ display: 'flex', gap: 8 }}
+          >
+            {<AddressLink suffixCount={8} textMinWidth={160} text={text} cannotClick />}
+            <CopyBtn text={text} />
           </Button>
         ) : null,
     },
@@ -44,6 +65,7 @@ const getColumns = ({
       title: 'Activity type',
       dataIndex: 'activityType',
       key: 'activityType',
+      align: 'center',
       render: marketplaceRoleTag,
     },
     {
@@ -51,14 +73,24 @@ const getColumns = ({
       dataIndex: 'requestIpfsHash',
       key: 'requestIpfsHash',
       render: (text: string) =>
-        text ? <AddressLink {...addressLinkProps} text={text} isIpfsLink canCopy /> : null,
+        text ? (
+          <Flex align="center" gap={8}>
+            <AddressLink {...addressLinkProps} textMinWidth={120} text={text} isIpfsLink />
+            <CopyBtn text={text} />
+          </Flex>
+        ) : null,
     },
     {
       title: 'Delivery Data',
       dataIndex: 'deliveryIpfsHash',
       key: 'deliveryIpfsHash',
       render: (text: string) =>
-        text ? <AddressLink {...addressLinkProps} text={text} isIpfsLink canCopy /> : null,
+        text ? (
+          <Flex align="center" gap={8}>
+            <AddressLink {...addressLinkProps} textMinWidth={120} text={text} isIpfsLink />
+            <CopyBtn text={text} />
+          </Flex>
+        ) : null,
     },
     {
       title: 'Requested By',
@@ -108,7 +140,7 @@ export const Details: FC<DetailsProps> = ({
   const router = useRouter();
 
   const { chainName, chainId } = useHelpers();
-  const { isLoading, isOwner, info, ownerAddress, tokenUri, updateDetails } = useDetails({
+  const { isOwner, info, ownerAddress, tokenUri, updateDetails } = useDetails({
     id,
     type,
     getDetails,
@@ -219,10 +251,6 @@ export const Details: FC<DetailsProps> = ({
     setIsModalVisible(true);
   }, []);
 
-  if (isLoading) {
-    return <Loader timeoutMessage="Details couldn’t be loaded" />;
-  }
-
   return (
     <>
       <Header>
@@ -245,39 +273,43 @@ export const Details: FC<DetailsProps> = ({
         </div>
       </Header>
 
-      <Tabs
-        className="registry-tabs"
-        type="card"
-        activeKey={currentTab}
-        onChange={handleTabChange}
-        style={{ marginTop: '24px' }}
-        items={[
-          {
-            key: 'details',
-            label: 'Details',
-          },
-          {
-            key: 'activity',
-            label: 'Activity',
-            children: (
-              <Table
-                columns={getColumns({ addressLinkProps, openActivityModal })}
-                dataSource={paginatedActivityRows}
-                loading={activityLoading}
-                pagination={{
-                  total: activityRows.length,
-                  current: activityPage,
-                  defaultPageSize: TOTAL_VIEW_COUNT,
-                  showSizeChanger: false,
-                  onChange: (p) => setActivityPage(p),
-                }}
-                rowKey="requestId"
-                data-testid="activity-table"
-              />
-            ),
-          },
-        ]}
-      />
+      {(chainId == 100 || chainId == 8453) && (
+        <Tabs
+          className="registry-tabs"
+          type="card"
+          activeKey={currentTab}
+          onChange={handleTabChange}
+          style={{ marginTop: '24px' }}
+          items={[
+            {
+              key: 'details',
+              label: 'Details',
+            },
+            {
+              key: 'activity',
+              label: 'Activity',
+              children: (
+                <DetailsTable
+                  columns={
+                    getColumns({ addressLinkProps, openActivityModal }) as ColumnType<object>[]
+                  }
+                  dataSource={paginatedActivityRows}
+                  loading={activityLoading}
+                  pagination={{
+                    total: activityRows.length,
+                    current: activityPage,
+                    defaultPageSize: TOTAL_VIEW_COUNT,
+                    showSizeChanger: false,
+                    onChange: (p) => setActivityPage(p),
+                  }}
+                  rowKey="requestId"
+                  data-testid="activity-table"
+                />
+              ),
+            },
+          ]}
+        />
+      )}
 
       <ActivityDetails
         open={isActivityModalVisible}
