@@ -113,7 +113,7 @@ export const useHandleRoute = () => {
 
     // User navigates to `/[network]`
     if (!PAGES_TO_LOAD_WITHOUT_CHAINID.includes(router.asPath) && pathArray.length === 1) {
-      router.push(`/${networkNameFromUrl}/${isL1Network ? 'components' : 'services'}`);
+      router.push(`/${networkNameFromUrl}/${isL1Network ? 'components' : 'ai-agents'}`);
       return;
     }
 
@@ -124,7 +124,7 @@ export const useHandleRoute = () => {
      *
      * if user navigates to `/ethereum/random-page redirect to `/page-not-found`
      *
-     * if user navigates to `/gnosis/components redirect to `/gnosis/services`
+     * if user navigates to `/gnosis/components redirect to `/gnosis/ai-agents`
      * because components & agents are not supported on gnosis
      */
 
@@ -139,9 +139,9 @@ export const useHandleRoute = () => {
       networkNameFromUrl === SOLANA_CHAIN_NAMES.MAINNET;
 
     const getListName = () => {
-      if (isSvm) return 'services';
+      if (isSvm) return 'ai-agents';
       if (isL1Network) return 'components';
-      return 'services';
+      return 'ai-agents';
     };
 
     if (networkNameFromUrl) {
