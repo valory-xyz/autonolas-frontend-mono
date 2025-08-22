@@ -1,10 +1,10 @@
-import { Button, Col, Row, Tabs, Table } from 'antd';
+import { Button, Col, Row, Tabs } from 'antd';
 import get from 'lodash/get';
 import { FC, useCallback, useState, useEffect, useMemo } from 'react';
 import { Address } from 'viem';
 import { useRouter } from 'next/router';
 
-import { AddressLink, GenericObject, Loader, NA } from '@autonolas/frontend-library';
+import { AddressLink, GenericObject, NA } from '@autonolas/frontend-library';
 
 import { getServiceActivityDataFromSubgraph } from 'common-util/subgraphs';
 import type { Activity } from 'common-util/apiRoute/service-activity';
@@ -13,7 +13,7 @@ import { NAV_TYPES, NavTypesValues, TOTAL_VIEW_COUNT } from 'util/constants';
 import { IpfsHashGenerationModal } from '../List/IpfsHashGenerationModal';
 import { useHelpers } from '../hooks';
 import { DetailsSubInfo } from './DetailsSubInfo';
-import { DetailsTitle, Header } from './styles';
+import { DetailsTable, DetailsTitle, Header } from './styles';
 import { ActivityDetails } from './ActivityDetails';
 import { useDetails } from './useDetails';
 import { marketplaceRoleTag } from 'common-util/List/ListTable/helpers';
@@ -36,7 +36,7 @@ const getColumns = ({
       render: (text: string, record: Activity) =>
         text ? (
           <Button type="link" onClick={() => openActivityModal(record)}>
-            {<AddressLink {...addressLinkProps} text={text} cannotClick />}
+            {<AddressLink suffixCount={8} textMinWidth={150} text={text} cannotClick canCopy />}
           </Button>
         ) : null,
     },
@@ -44,6 +44,7 @@ const getColumns = ({
       title: 'Activity type',
       dataIndex: 'activityType',
       key: 'activityType',
+      align: 'center',
       render: marketplaceRoleTag,
     },
     {
@@ -51,14 +52,18 @@ const getColumns = ({
       dataIndex: 'requestIpfsHash',
       key: 'requestIpfsHash',
       render: (text: string) =>
-        text ? <AddressLink {...addressLinkProps} text={text} isIpfsLink canCopy /> : null,
+        text ? (
+          <AddressLink {...addressLinkProps} textMinWidth={120} text={text} isIpfsLink canCopy />
+        ) : null,
     },
     {
       title: 'Delivery Data',
       dataIndex: 'deliveryIpfsHash',
       key: 'deliveryIpfsHash',
       render: (text: string) =>
-        text ? <AddressLink {...addressLinkProps} text={text} isIpfsLink canCopy /> : null,
+        text ? (
+          <AddressLink {...addressLinkProps} textMinWidth={120} text={text} isIpfsLink canCopy />
+        ) : null,
     },
     {
       title: 'Requested By',
@@ -108,7 +113,7 @@ export const Details: FC<DetailsProps> = ({
   const router = useRouter();
 
   const { chainName, chainId } = useHelpers();
-  const { isLoading, isOwner, info, ownerAddress, tokenUri, updateDetails } = useDetails({
+  const { isOwner, info, ownerAddress, tokenUri, updateDetails } = useDetails({
     id,
     type,
     getDetails,
@@ -219,10 +224,6 @@ export const Details: FC<DetailsProps> = ({
     setIsModalVisible(true);
   }, []);
 
-  if (isLoading) {
-    return <Loader timeoutMessage="Details couldn’t be loaded" />;
-  }
-
   return (
     <>
       <Header>
@@ -245,7 +246,7 @@ export const Details: FC<DetailsProps> = ({
         </div>
       </Header>
 
-      <Tabs
+      {(chainId == 100 || chainId == 8453) && <Tabs
         className="registry-tabs"
         type="card"
         activeKey={currentTab}
@@ -260,7 +261,7 @@ export const Details: FC<DetailsProps> = ({
             key: 'activity',
             label: 'Activity',
             children: (
-              <Table
+              <DetailsTable
                 columns={getColumns({ addressLinkProps, openActivityModal })}
                 dataSource={paginatedActivityRows}
                 loading={activityLoading}
@@ -277,7 +278,7 @@ export const Details: FC<DetailsProps> = ({
             ),
           },
         ]}
-      />
+      />}
 
       <ActivityDetails
         open={isActivityModalVisible}

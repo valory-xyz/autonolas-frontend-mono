@@ -1,4 +1,4 @@
-import { Image, Typography } from 'antd';
+import { Divider, Image, Table, TableProps, Typography } from 'antd';
 import styled from 'styled-components';
 
 import { COLOR } from 'libs/ui-theme/src';
@@ -35,7 +35,7 @@ export const Info = styled.div`
 
     &.text-only {
       padding: 0;
-      > span {
+      > .info-text {
         padding: 7px 15px;
       }
     }
@@ -54,6 +54,19 @@ export const Info = styled.div`
       align-items: flex-start;
     }
   }
+`;
+
+export const DetailsTable = styled(<T extends object>(props: TableProps<T>) => (
+  <Table {...props} />
+))`
+  button {
+    padding: 0;
+  }
+`;
+
+export const DetailsDivider = styled(Divider)`
+  margin-top: 0;
+  margin-bottom: 7px;
 `;
 
 export const EachSection = styled.div`
