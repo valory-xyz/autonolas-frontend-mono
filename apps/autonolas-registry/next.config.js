@@ -48,6 +48,31 @@ const nextConfig = {
       destination: '/ethereum/ai-agents',
       permanent: true,
     },
+    {
+      source: '/:network/services',
+      destination: '/:network/ai-agents',
+      permanent: true,
+    },
+    {
+      source: '/:network/agents',
+      destination: '/:network/agent-blueprints',
+      permanent: true,
+    },
+    {
+      source: '/mechs',
+      destination: '/gnosis/ai-agents',
+      permanent: true,
+    },
+    {
+      source: '/mech',
+      destination: '/gnosis/ai-agents',
+      permanent: true,
+    },
+    {
+      source: '/factory',
+      destination: '/gnosis/ai-agents',
+      permanent: true,
+    },
   ],
 };
 
