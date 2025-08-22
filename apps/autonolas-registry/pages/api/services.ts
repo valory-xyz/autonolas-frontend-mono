@@ -2,7 +2,7 @@ import {
   getServicesFromMMSubgraph,
   getServicesFromLegacyMechSubgraph,
   mergeServicesDetails,
-} from 'common-util/apiRoute/services';
+} from 'common-util/graphql/services';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { CACHE_DURATION } from '../../util/constants';
 

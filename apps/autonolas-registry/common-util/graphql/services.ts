@@ -1,9 +1,8 @@
 import {
   GraphQLResponse,
   LEGACY_MECH_SUBGRAPH_CLIENT,
-  MM_BASE_GRAPHQL_CLIENT,
-  MM_GNOSIS_GRAPHQL_CLIENT,
-  Network,
+  MM_GRAPHQL_CLIENTS,
+  MarketplaceSupportedNetwork,
   Service,
 } from '.';
 
@@ -40,10 +39,10 @@ export const getServicesFromMMSubgraph = async ({
   network,
   serviceIds,
 }: {
-  network: Network;
+  network: MarketplaceSupportedNetwork;
   serviceIds: string[];
 }): Promise<Service[]> => {
-  const client = network === 'gnosis' ? MM_GNOSIS_GRAPHQL_CLIENT : MM_BASE_GRAPHQL_CLIENT;
+  const client = MM_GRAPHQL_CLIENTS[network];
 
   const query = getQueryForServiceDetails({ serviceIds });
   const response = await client.request<GraphQLResponse<Service>>(query);

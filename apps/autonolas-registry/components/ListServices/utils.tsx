@@ -8,7 +8,7 @@ import { getServiceContract, getWeb3Details } from 'common-util/Contracts';
 import { convertStringToArray } from 'common-util/List/ListCommon';
 import { filterByOwner } from 'common-util/ContractUtils/myList';
 import { getTokenDetailsRequest } from 'common-util/Details/utils';
-import { getIpfsResponse } from 'common-util/functions/ifps';
+import { getIpfsResponse } from 'common-util/functions/ipfs';
 import { getServicesDataFromSubgraph } from 'common-util/subgraphs';
 
 type Service = {

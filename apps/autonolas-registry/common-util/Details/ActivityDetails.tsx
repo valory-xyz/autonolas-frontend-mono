@@ -1,4 +1,4 @@
-import type { Activity } from 'common-util/apiRoute/service-activity';
+import type { Activity } from 'common-util/graphql/service-activity';
 import { Flex, Modal, Typography } from 'antd';
 import { AddressLink, NA } from '@autonolas/frontend-library';
 import { DetailsDivider, Info } from './styles';

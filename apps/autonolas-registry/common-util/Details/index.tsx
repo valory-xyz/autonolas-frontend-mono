@@ -8,7 +8,7 @@ import { useRouter } from 'next/router';
 import { AddressLink, GenericObject, NA } from '@autonolas/frontend-library';
 
 import { getServiceActivityDataFromSubgraph } from 'common-util/subgraphs';
-import type { Activity } from 'common-util/apiRoute/service-activity';
+import type { Activity } from 'common-util/graphql/service-activity';
 import { NAV_TYPES, NavTypesValues, TOTAL_VIEW_COUNT } from 'util/constants';
 
 import { IpfsHashGenerationModal } from '../List/IpfsHashGenerationModal';
@@ -123,7 +123,7 @@ type DetailsProps = {
   }) => JSX.Element | null;
 };
 
-type CurrentTab = 'details' | 'activity';
+type CurrentTab = 'details' | 'activity' | '';
 
 export const Details: FC<DetailsProps> = ({
   id,
@@ -148,7 +148,7 @@ export const Details: FC<DetailsProps> = ({
     getTokenUri,
   });
 
-  const [currentTab, setCurrentTab] = useState<CurrentTab>('details');
+  const [currentTab, setCurrentTab] = useState<CurrentTab>('');
   const [activityRows, setActivityRows] = useState<Activity[]>([]);
   const [activityLoading, setActivityLoading] = useState(false);
   const [activityPage, setActivityPage] = useState(1);
@@ -161,10 +161,12 @@ export const Details: FC<DetailsProps> = ({
     return activityRows.slice(start, end);
   }, [activityRows, activityPage]);
 
-  const addressLinkProps = {
-    chainId: chainId ?? undefined,
-    suffixCount: 6,
-  };
+  const addressLinkProps = useMemo(() => {
+    return {
+      chainId: chainId ?? undefined,
+      suffixCount: 6,
+    };
+  }, [chainId]);
 
   const openActivityModal = (record: Activity) => {
     setSelectedActivity(record);
@@ -214,18 +216,13 @@ export const Details: FC<DetailsProps> = ({
   };
 
   useEffect(() => {
-    const mapNetwork = (name?: string | null) => {
-      if (!name) return 'gnosis';
-      if (name.includes('base')) return 'base';
-      if (name.includes('gnosis')) return 'gnosis';
-      return 'gnosis';
-    };
+    if (chainName !== 'gnosis' && chainName !== 'base') return;
 
     const fetchActivity = async () => {
       try {
         setActivityLoading(true);
         const json = await getServiceActivityDataFromSubgraph({
-          network: mapNetwork(chainName),
+          network: chainName,
           serviceId: id,
         });
 
@@ -251,6 +248,7 @@ export const Details: FC<DetailsProps> = ({
     setIsModalVisible(true);
   }, []);
 
+  const showTabs = chainName === 'gnosis' || chainName === 'base';
   return (
     <>
       <Header>
@@ -273,7 +271,7 @@ export const Details: FC<DetailsProps> = ({
         </div>
       </Header>
 
-      {(chainId == 100 || chainId == 8453) && (
+      {showTabs && (
         <Tabs
           className="registry-tabs"
           type="card"
@@ -283,40 +281,41 @@ export const Details: FC<DetailsProps> = ({
           items={[
             {
               key: 'details',
-              label: 'Details',
+              label: 'Agent Details',
             },
             {
               key: 'activity',
-              label: 'Activity',
-              children: (
-                <DetailsTable
-                  columns={
-                    getColumns({ addressLinkProps, openActivityModal }) as ColumnType<object>[]
-                  }
-                  dataSource={paginatedActivityRows}
-                  loading={activityLoading}
-                  pagination={{
-                    total: activityRows.length,
-                    current: activityPage,
-                    defaultPageSize: TOTAL_VIEW_COUNT,
-                    showSizeChanger: false,
-                    onChange: (p) => setActivityPage(p),
-                  }}
-                  rowKey="requestId"
-                  data-testid="activity-table"
-                />
-              ),
+              label: 'Marketplace Activity',
             },
           ]}
         />
       )}
 
-      <ActivityDetails
-        open={isActivityModalVisible}
-        onCancel={closeActivityModal}
-        activity={selectedActivity}
-        addressLinkProps={{ chainId: chainId ?? undefined, suffixCount: 6 }}
-      />
+      {currentTab === 'activity' && (
+        <>
+          <DetailsTable
+            columns={getColumns({ addressLinkProps, openActivityModal }) as ColumnType<object>[]}
+            dataSource={paginatedActivityRows}
+            loading={activityLoading}
+            pagination={{
+              total: activityRows.length,
+              current: activityPage,
+              defaultPageSize: TOTAL_VIEW_COUNT,
+              showSizeChanger: false,
+              onChange: (p) => setActivityPage(p),
+            }}
+            rowKey="requestId"
+            data-testid="activity-table"
+          />
+
+          <ActivityDetails
+            open={isActivityModalVisible}
+            onCancel={closeActivityModal}
+            activity={selectedActivity}
+            addressLinkProps={{ chainId: chainId ?? undefined, suffixCount: 6 }}
+          />
+        </>
+      )}
 
       {currentTab === 'details' ? (
         <Row>

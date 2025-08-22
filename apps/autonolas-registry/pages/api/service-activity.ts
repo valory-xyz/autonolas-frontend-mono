@@ -1,8 +1,8 @@
-import { mergeServiceActivity } from 'common-util/apiRoute/service-activity';
+import { mergeServiceActivity } from 'common-util/graphql/service-activity';
 import {
   getServiceActivityFromMMSubgraph,
   getServiceActivityFromLegacyMechSubgraph,
-} from 'common-util/apiRoute/service-activity';
+} from 'common-util/graphql/service-activity';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { CACHE_DURATION } from '../../util/constants';
 

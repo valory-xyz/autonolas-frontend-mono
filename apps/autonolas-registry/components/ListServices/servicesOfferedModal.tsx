@@ -3,7 +3,7 @@ import { Modal, Typography, Tag, Space, Spin, Flex } from 'antd';
 import { COLOR } from 'libs/ui-theme/src/lib/ui-theme';
 import { UNICODE_SYMBOLS } from 'libs/util-constants/src';
 
-import { getIpfsResponse, getIpfsUrl } from '../../common-util/functions/ifps';
+import { getIpfsResponse, getIpfsUrl } from '../../common-util/functions/ipfs';
 
 type ServicesOfferedModalProps = {
   visible: boolean;

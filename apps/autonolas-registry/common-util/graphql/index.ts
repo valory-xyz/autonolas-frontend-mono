@@ -51,23 +51,18 @@ const requestConfig: RequestConfig = {
   },
 };
 
-export const MM_GNOSIS_GRAPHQL_CLIENT = new GraphQLClient(
-  process.env.NEXT_PUBLIC_GNOSIS_MM_SUBGRAPH!,
-  requestConfig,
-);
-
-export const MM_BASE_GRAPHQL_CLIENT = new GraphQLClient(
-  process.env.NEXT_PUBLIC_BASE_MM_SUBGRAPH!,
-  requestConfig,
-);
-
 export const LEGACY_MECH_SUBGRAPH_CLIENT = new GraphQLClient(
   process.env.NEXT_PUBLIC_LEGACY_MECH_SUBGRAPH!,
   requestConfig,
 );
 
+export const MM_GRAPHQL_CLIENTS = {
+  gnosis: new GraphQLClient(process.env.NEXT_PUBLIC_GNOSIS_MM_SUBGRAPH!, requestConfig),
+  base: new GraphQLClient(process.env.NEXT_PUBLIC_BASE_MM_SUBGRAPH!, requestConfig),
+};
+
 export interface GraphQLResponse<T> {
   services: T[];
 }
 
-export type Network = 'gnosis' | 'base';
+export type MarketplaceSupportedNetwork = 'gnosis' | 'base';

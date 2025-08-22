@@ -1,10 +1,9 @@
 import {
   Request,
   Delivery,
-  MM_BASE_GRAPHQL_CLIENT,
-  MM_GNOSIS_GRAPHQL_CLIENT,
-  Network,
+  MarketplaceSupportedNetwork,
   LEGACY_MECH_SUBGRAPH_CLIENT,
+  MM_GRAPHQL_CLIENTS,
 } from '.';
 
 type ActivityType = 'Demand' | 'Supply';
@@ -180,10 +179,10 @@ export const getServiceActivityFromMMSubgraph = async ({
   network,
   serviceId,
 }: {
-  network: Network;
+  network: MarketplaceSupportedNetwork;
   serviceId: string;
 }) => {
-  const client = network === 'gnosis' ? MM_GNOSIS_GRAPHQL_CLIENT : MM_BASE_GRAPHQL_CLIENT;
+  const client = MM_GRAPHQL_CLIENTS[network];
 
   const query = getQueryForServiceActivity({ serviceId });
   const response: Omit<ActivityResponse, 'id'> = await client.request(query);

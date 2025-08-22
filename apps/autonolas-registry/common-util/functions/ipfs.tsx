@@ -1,5 +1,5 @@
 import { notifyError } from '@autonolas/frontend-library';
-import { GATEWAY_URL, HASH_PREFIX } from '../../util/constants';
+import { GATEWAY_URL, HASH_PREFIX } from 'libs/util-constants/src';
 
 export const getIpfsUrl = (hash: string) => {
   if (!hash) return '';

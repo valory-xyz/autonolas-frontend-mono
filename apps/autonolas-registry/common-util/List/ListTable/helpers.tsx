@@ -5,7 +5,7 @@ import { Button, Flex, Tag } from 'antd';
 
 import { AddressLink, NA } from '@autonolas/frontend-library';
 import { truncateAddress } from 'libs/util-functions/src';
-import { Activity } from 'common-util/apiRoute/service-activity';
+import { Activity } from 'common-util/graphql/service-activity';
 
 import { HASH_PREFIX, NAV_TYPES, SERVICE_ROLE, TOTAL_VIEW_COUNT } from '../../../util/constants';
 
@@ -18,7 +18,10 @@ const TruncatedText = styled.div`
   word-break: break-word;
 `;
 
-type Record = {
+/**
+ * This handles to record for these types: ai agents, agent blueprints and components
+ */
+type TableRecord = {
   id: string;
   role: (typeof SERVICE_ROLE)[keyof typeof SERVICE_ROLE];
   activityType: (typeof SERVICE_ROLE)[keyof typeof SERVICE_ROLE];
@@ -41,7 +44,7 @@ type Record = {
   dependencies: string[];
 };
 
-export const marketplaceRoleTag = (_text: string, record: Record | Activity) => {
+export const marketplaceRoleTag = (_text: string, record: TableRecord | Activity) => {
   let color = '';
   const marketplaceRole = 'role' in record ? record.role : record.activityType;
 
@@ -107,7 +110,7 @@ export const getTableColumns = (
     dataIndex: 'packageName',
     key: 'packageName',
     width: type === NAV_TYPES.SERVICE ? 200 : 180,
-    render: (text: string, record: Record) => {
+    render: (text: string, record: TableRecord) => {
       if (!text || text === NA) return NA;
       return (
         <Button size="large" type="link" onClick={() => onViewClick(record.id)}>
@@ -142,7 +145,7 @@ export const getTableColumns = (
       title: 'Action',
       key: 'action',
       fixed: 'right',
-      render: (_text: string, record: Record) => (
+      render: (_text: string, record: TableRecord) => (
         <Button size="large" type="link" onClick={() => onViewClick(record.id)}>
           View
         </Button>
@@ -182,7 +185,7 @@ export const getTableColumns = (
       dataIndex: 'hash',
       key: 'hash',
       width: 200,
-      render: (_text: string, record: Record) => {
+      render: (_text: string, record: TableRecord) => {
         return (
           <Button type="link" onClick={() => onServicesHashClick?.(record.id)}>
             {truncateAddress(record.hash)}
@@ -205,7 +208,7 @@ export const getTableColumns = (
       dataIndex: 'role',
       key: 'role',
       align: 'center',
-      render: (_text: string, record: Record) => {
+      render: (_text: string, record: TableRecord) => {
         if (record.role === SERVICE_ROLE.REGISTERED) return null;
         return (
           <Flex justify="center">
@@ -243,7 +246,7 @@ export const getTableColumns = (
 
 export const convertTableRawData = (
   type: (typeof NAV_TYPES)[keyof typeof NAV_TYPES],
-  rawData: Record[],
+  rawData: TableRecord[],
   { currentPage, isMainnet }: { currentPage: number; isMainnet: boolean },
 ) => {
   /**
