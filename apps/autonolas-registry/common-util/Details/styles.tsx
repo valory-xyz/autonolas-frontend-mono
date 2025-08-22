@@ -31,13 +31,19 @@ export const Info = styled.div`
     grid-template-columns: 150px 1fr;
     align-items: center;
     gap: 12px;
-    padding: 6px 0;
+    padding: 2px 0;
+
+    .ant-typography-secondary {
+      font-size: 14px;
+    }
 
     &.text-only {
+      margin-bottom: 4px;
+    }
+
+    .ant-btn-link {
       padding: 0;
-      > .info-text {
-        padding: 7px 15px;
-      }
+      font-size: 16px;
     }
   }
 
@@ -66,7 +72,7 @@ export const DetailsTable = styled(<T extends object>(props: TableProps<T>) => (
 
 export const DetailsDivider = styled(Divider)`
   margin-top: 0;
-  margin-bottom: 7px;
+  margin-bottom: 16px;
 `;
 
 export const EachSection = styled.div`
