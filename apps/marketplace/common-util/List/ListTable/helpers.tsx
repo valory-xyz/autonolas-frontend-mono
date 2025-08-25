@@ -67,7 +67,7 @@ export const marketplaceRoleTag = (_text: string, record: TableRecord | Activity
   }
 
   return (
-    <Tag color={color} bordered={false} style={{ margin: '8px 0' }}>
+    <Tag color={color} bordered={false} style={{ margin: 0 }}>
       {marketplaceRole}
     </Tag>
   );
@@ -109,7 +109,7 @@ export const getTableColumns = (
     title: 'Name',
     dataIndex: 'packageName',
     key: 'packageName',
-    width: type === NAV_TYPES.SERVICE ? 200 : 180,
+    width: type === NAV_TYPES.AI_AGENTS ? 200 : 180,
     render: (text: string, record: TableRecord) => {
       if (!text || text === NA) return NA;
       return (
@@ -132,7 +132,7 @@ export const getTableColumns = (
     },
   };
 
-  if (type === NAV_TYPES.COMPONENT || type === NAV_TYPES.AGENT) {
+  if (type === NAV_TYPES.COMPONENT || type === NAV_TYPES.AGENT_BLUEPRINTS) {
     const dependencyColumn = {
       title: 'No. of component dependencies',
       dataIndex: 'dependency',
@@ -168,7 +168,7 @@ export const getTableColumns = (
       : [tokenIdColumn, ownerColumn, dependencyColumn, actionColumn];
   }
 
-  if (type === NAV_TYPES.SERVICE) {
+  if (type === NAV_TYPES.AI_AGENTS) {
     const descriptionColumn = {
       title: 'Description',
       dataIndex: 'description',
@@ -264,7 +264,7 @@ export const convertTableRawData = (
 
   // for mainnet
   if (isMainnet) {
-    if (type === NAV_TYPES.COMPONENT || type === NAV_TYPES.AGENT) {
+    if (type === NAV_TYPES.COMPONENT || type === NAV_TYPES.AGENT_BLUEPRINTS) {
       return rawData.map((item) => ({
         id: item.tokenId,
         tokenId: item.tokenId,
@@ -275,7 +275,7 @@ export const convertTableRawData = (
       }));
     }
 
-    if (type === NAV_TYPES.SERVICE) {
+    if (type === NAV_TYPES.AI_AGENTS) {
       return rawData.map((item) => ({
         id: item.serviceId,
         description: item.description,
@@ -301,7 +301,7 @@ export const convertTableRawData = (
     }));
   }
 
-  if (type === NAV_TYPES.AGENT) {
+  if (type === NAV_TYPES.AGENT_BLUEPRINTS) {
     return rawData.map((item, index) => ({
       id: item.id || `${startIndex + index}`,
       description: item.description || NA,
@@ -312,7 +312,7 @@ export const convertTableRawData = (
     }));
   }
 
-  if (type === NAV_TYPES.SERVICE) {
+  if (type === NAV_TYPES.AI_AGENTS) {
     return rawData.map((item, index) => ({
       id: item.id || `${startIndex + index}`,
       developer: item.developer || NA,

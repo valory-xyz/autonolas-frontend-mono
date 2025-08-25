@@ -1,4 +1,4 @@
-import { Divider, Image, Table, TableProps, Typography } from 'antd';
+import { Divider, Table, TableProps, Typography } from 'antd';
 import styled from 'styled-components';
 
 import { COLOR } from 'libs/ui-theme/src';
@@ -26,24 +26,18 @@ export const Header = styled.div`
 export const Info = styled.div`
   word-break: break-word;
 
-  .grid-row {
-    display: grid;
-    grid-template-columns: 150px 1fr;
+  .ant-row {
+    margin: 16px 0;
     align-items: center;
-    gap: 12px;
-    padding: 2px 0;
 
     .ant-typography-secondary {
       font-size: 14px;
     }
 
-    &.text-only {
-      margin-bottom: 4px;
-    }
-
     .ant-btn-link {
       padding: 0;
       font-size: 16px;
+      height: auto;
     }
   }
 
@@ -77,10 +71,6 @@ export const DetailsDivider = styled(Divider)`
 
 export const EachSection = styled.div`
   padding-top: 1.25rem;
-`;
-
-export const NftImageContainer = styled(Image)`
-  border: 1px solid ${COLOR.BORDER_GREY};
 `;
 
 export const ServiceStatusContainer = styled.div`

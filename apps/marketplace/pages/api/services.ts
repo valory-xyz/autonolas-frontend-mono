@@ -1,15 +1,15 @@
+import type { NextApiRequest, NextApiResponse } from 'next';
 import {
   getServicesFromMMSubgraph,
   getServicesFromLegacyMechSubgraph,
   mergeServicesDetails,
 } from 'common-util/graphql/services';
-import { NextApiRequest, NextApiResponse } from 'next';
-import { CACHE_DURATION } from '../../util/constants';
+import type { MarketplaceSupportedNetwork } from 'common-util/types';
 
-type Network = 'gnosis' | 'base';
+import { CACHE_DURATION, MARKETPLACE_SUPPORTED_NETWORKS } from '../../util/constants';
 
 type RequestQuery = {
-  network: Network;
+  network: MarketplaceSupportedNetwork;
   serviceIds: string;
 };
 
@@ -31,18 +31,24 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       });
     }
 
-    if (network !== 'gnosis' && network !== 'base') {
+    if (
+      network !== MARKETPLACE_SUPPORTED_NETWORKS.GNOSIS &&
+      network !== MARKETPLACE_SUPPORTED_NETWORKS.BASE
+    ) {
       return res.status(400).json({
         error: "Invalid network. Must be 'gnosis' or 'base'",
       });
     }
 
     const promises = [
-      getServicesFromMMSubgraph({ network: network as Network, serviceIds: parsedServiceIds }),
+      getServicesFromMMSubgraph({
+        network: network as MarketplaceSupportedNetwork,
+        serviceIds: parsedServiceIds,
+      }),
     ];
 
     // For gnosis, we need to get the data from legacy mech as well
-    if (network === 'gnosis')
+    if (network === MARKETPLACE_SUPPORTED_NETWORKS.GNOSIS)
       promises.push(getServicesFromLegacyMechSubgraph({ serviceIds: parsedServiceIds }));
 
     const [servicesFromMM, servicesFromLegacy] = await Promise.all(promises);

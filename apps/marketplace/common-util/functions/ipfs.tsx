@@ -9,7 +9,7 @@ export const getIpfsUrl = (hash: string) => {
   return hasHashPrefix ? `${GATEWAY_URL}${cleanHash}` : `${GATEWAY_URL}${HASH_PREFIX}${cleanHash}`;
 };
 
-export interface IpfsMetadata {
+export type IpfsMetadata = {
   name?: string;
   description?: string;
   image?: string;
@@ -19,7 +19,7 @@ export interface IpfsMetadata {
     value: string | number;
   }>;
   [key: string]: unknown;
-}
+};
 
 /**
  * Fetches data from IPFS using the provided hash

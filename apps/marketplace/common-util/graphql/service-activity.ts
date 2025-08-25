@@ -1,10 +1,5 @@
-import {
-  Request,
-  Delivery,
-  MarketplaceSupportedNetwork,
-  LEGACY_MECH_SUBGRAPH_CLIENT,
-  MM_GRAPHQL_CLIENTS,
-} from '.';
+import { Request, Delivery, MarketplaceSupportedNetwork } from 'common-util/types';
+import { LEGACY_MECH_SUBGRAPH_CLIENT, MM_GRAPHQL_CLIENTS } from './index';
 
 type ActivityType = 'Demand' | 'Supply';
 

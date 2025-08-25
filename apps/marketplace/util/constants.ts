@@ -15,8 +15,8 @@ export const URL = {
 
 export const NAV_TYPES = {
   COMPONENT: 'component',
-  AGENT: 'agent-blueprints',
-  SERVICE: 'ai-agents',
+  AGENT_BLUEPRINTS: 'agent-blueprints',
+  AI_AGENTS: 'ai-agents',
 } as const;
 
 export type NavTypesKeys = keyof typeof NAV_TYPES;
@@ -111,4 +111,9 @@ export const HASH_DETAILS_STATE = {
 export const CACHE_DURATION = {
   TWELVE_HOURS: 43200,
   ONE_HOUR: 3600,
+} as const;
+
+export const MARKETPLACE_SUPPORTED_NETWORKS = {
+  GNOSIS: 'gnosis',
+  BASE: 'base',
 } as const;

@@ -3,13 +3,14 @@ import {
   TOTAL_VIEW_COUNT,
   DEFAULT_SERVICE_CREATION_ETH_TOKEN_ZEROS,
   SERVICE_ROLE,
+  MARKETPLACE_SUPPORTED_NETWORKS,
 } from 'util/constants';
 import { getServiceContract, getWeb3Details } from 'common-util/Contracts';
 import { convertStringToArray } from 'common-util/List/ListCommon';
 import { filterByOwner } from 'common-util/ContractUtils/myList';
 import { getTokenDetailsRequest } from 'common-util/Details/utils';
 import { getIpfsResponse } from 'common-util/functions/ipfs';
-import { getServicesDataFromSubgraph } from 'common-util/subgraphs';
+import { getServicesFromSubgraph } from 'common-util/subgraphs';
 
 type Service = {
   id: string;
@@ -133,14 +134,15 @@ export const getServices = async (
 
   let servicesWithMetadata = await extractConfigDetailsForServices(results);
   if (chainId === 100 || chainId === 8453) {
-    const servicesDataFromSubgraph = await getServicesDataFromSubgraph({
-      network: chainId === 100 ? 'gnosis' : 'base',
+    const servicesDataFromSubgraph = await getServicesFromSubgraph({
+      network:
+        chainId === 100
+          ? MARKETPLACE_SUPPORTED_NETWORKS.GNOSIS
+          : MARKETPLACE_SUPPORTED_NETWORKS.BASE,
       serviceIds: validTokenIds.map(Number),
     });
     servicesWithMetadata = servicesWithMetadata.map((service) => {
-      const serviceDataFromSubgraph: Service = servicesDataFromSubgraph.find(
-        (s: Service) => s.id === service.id,
-      );
+      const serviceDataFromSubgraph = servicesDataFromSubgraph.find((s) => s.id === service.id);
       return { ...service, ...serviceDataFromSubgraph };
     });
   }

@@ -56,7 +56,7 @@ const ListServices = () => {
     onRegisterClick: () => router.push(links.MINT_SERVICE),
     isSvm,
     isMyTab: currentTab === MY_AI_AGENTS,
-    type: NAV_TYPES.SERVICE,
+    type: NAV_TYPES.AI_AGENTS,
     mintButtonText: 'Add AI Agent',
     searchFields: ['Description', 'Services Offered'],
   });
@@ -216,7 +216,7 @@ const ListServices = () => {
   };
 
   const tableCommonProps = {
-    type: NAV_TYPES.SERVICE,
+    type: NAV_TYPES.AI_AGENTS,
     isLoading,
     total,
     currentPage,
