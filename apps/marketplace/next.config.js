@@ -67,6 +67,11 @@ const nextConfig = {
       permanent: true,
     },
     {
+      source: '/:network((?!api).+)/services/:id',
+      destination: '/:network/ai-agents/:id',
+      permanent: true,
+    },
+    {
       source: '/mechs',
       destination: '/gnosis/ai-agents',
       permanent: true,

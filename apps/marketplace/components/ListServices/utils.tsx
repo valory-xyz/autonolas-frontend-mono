@@ -3,7 +3,6 @@ import {
   TOTAL_VIEW_COUNT,
   DEFAULT_SERVICE_CREATION_ETH_TOKEN_ZEROS,
   SERVICE_ROLE,
-  MARKETPLACE_SUPPORTED_NETWORKS,
 } from 'util/constants';
 import { getServiceContract, getWeb3Details } from 'common-util/Contracts';
 import { convertStringToArray } from 'common-util/List/ListCommon';
@@ -11,6 +10,7 @@ import { filterByOwner } from 'common-util/ContractUtils/myList';
 import { getTokenDetailsRequest } from 'common-util/Details/utils';
 import { getIpfsResponse } from 'common-util/functions/ipfs';
 import { getServicesFromSubgraph } from 'common-util/subgraphs';
+import { isMarketplaceSupportedNetwork } from 'common-util/functions';
 
 type Service = {
   id: string;
@@ -77,7 +77,7 @@ export const getMarketplaceRole = (service: Service) => {
   const { totalRequests, totalDeliveries } = service;
   const { chainId } = getWeb3Details();
 
-  if (chainId !== 100 && chainId !== 8453) {
+  if (!isMarketplaceSupportedNetwork(Number(chainId))) {
     return SERVICE_ROLE.REGISTERED;
   }
 
@@ -133,12 +133,9 @@ export const getServices = async (
   );
 
   let servicesWithMetadata = await extractConfigDetailsForServices(results);
-  if (chainId === 100 || chainId === 8453) {
+  if (isMarketplaceSupportedNetwork(Number(chainId))) {
     const servicesDataFromSubgraph = await getServicesFromSubgraph({
-      network:
-        chainId === 100
-          ? MARKETPLACE_SUPPORTED_NETWORKS.GNOSIS
-          : MARKETPLACE_SUPPORTED_NETWORKS.BASE,
+      chainId: Number(chainId),
       serviceIds: validTokenIds.map(Number),
     });
     servicesWithMetadata = servicesWithMetadata.map((service) => {

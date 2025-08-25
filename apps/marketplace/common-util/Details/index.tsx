@@ -5,18 +5,13 @@ import { FC, useCallback, useState, useEffect, useMemo } from 'react';
 import { Address } from 'viem';
 import { useRouter } from 'next/router';
 
-import { AddressLink, GenericObject, NA } from '@autonolas/frontend-library';
+import { GenericObject, NA } from '@autonolas/frontend-library';
+import { AddressLink } from 'libs/ui-components/src';
 
 import { getServiceActivityFromSubgraph } from 'common-util/subgraphs';
 import type { Activity } from 'common-util/graphql/service-activity';
 import { marketplaceRoleTag } from 'common-util/List/ListTable/helpers';
-import { Copy } from 'components/Copy';
-import {
-  MARKETPLACE_SUPPORTED_NETWORKS,
-  NAV_TYPES,
-  NavTypesValues,
-  TOTAL_VIEW_COUNT,
-} from 'util/constants';
+import { NAV_TYPES, NavTypesValues, TOTAL_VIEW_COUNT } from 'util/constants';
 
 import { IpfsHashGenerationModal } from '../List/IpfsHashGenerationModal';
 import { useHelpers } from '../hooks';
@@ -24,6 +19,7 @@ import { DetailsSubInfo } from './DetailsSubInfo';
 import { DetailsTable, DetailsTitle, Header } from './styles';
 import { ActivityDetails } from './ActivityDetails';
 import { useDetails } from './useDetails';
+import { isMarketplaceSupportedNetwork } from 'common-util/functions';
 
 const getColumns = ({
   addressLinkProps,
@@ -31,7 +27,6 @@ const getColumns = ({
 }: {
   addressLinkProps: {
     chainId: number | undefined;
-    suffixCount: number;
   };
   openActivityModal: (record: Activity) => void;
 }): ColumnsType<Activity> => {
@@ -47,8 +42,7 @@ const getColumns = ({
             onClick={() => openActivityModal(record)}
             style={{ display: 'flex', gap: 8 }}
           >
-            <AddressLink suffixCount={8} textMinWidth={160} text={text} cannotClick />
-            <Copy text={text} />
+            <AddressLink address={text} canNotClick canCopy />
           </Button>
         ) : null,
     },
@@ -66,8 +60,7 @@ const getColumns = ({
       render: (text: string) =>
         text ? (
           <Flex align="center" gap={8}>
-            <AddressLink {...addressLinkProps} textMinWidth={120} text={text} isIpfsLink />
-            <Copy text={text} />
+            <AddressLink {...addressLinkProps} address={text} isIpfs />
           </Flex>
         ) : null,
     },
@@ -78,8 +71,7 @@ const getColumns = ({
       render: (text: string) =>
         text ? (
           <Flex align="center" gap={8}>
-            <AddressLink {...addressLinkProps} textMinWidth={120} text={text} isIpfsLink />
-            <Copy text={text} />
+            <AddressLink {...addressLinkProps} address={text} isIpfs />
           </Flex>
         ) : null,
     },
@@ -87,13 +79,15 @@ const getColumns = ({
       title: 'Requested By',
       dataIndex: 'requestedBy',
       key: 'requestedBy',
-      render: (text: string) => (text ? <AddressLink {...addressLinkProps} text={text} /> : null),
+      render: (text: string) =>
+        text ? <AddressLink {...addressLinkProps} address={text} /> : null,
     },
     {
       title: 'Delivered By',
       dataIndex: 'deliveredBy',
       key: 'deliveredBy',
-      render: (text: string) => (text ? <AddressLink {...addressLinkProps} text={text} /> : null),
+      render: (text: string) =>
+        text ? <AddressLink {...addressLinkProps} address={text} /> : null,
     },
   ];
 };
@@ -155,7 +149,6 @@ export const Details: FC<DetailsProps> = ({
   const addressLinkProps = useMemo(() => {
     return {
       chainId: chainId ?? undefined,
-      suffixCount: 6,
     };
   }, [chainId]);
 
@@ -207,17 +200,13 @@ export const Details: FC<DetailsProps> = ({
   };
 
   useEffect(() => {
-    if (
-      chainName !== MARKETPLACE_SUPPORTED_NETWORKS.GNOSIS &&
-      chainName !== MARKETPLACE_SUPPORTED_NETWORKS.BASE
-    )
-      return;
+    if (!isMarketplaceSupportedNetwork(Number(chainId))) return;
 
     const fetchActivity = async () => {
       try {
         setActivityLoading(true);
         const json = await getServiceActivityFromSubgraph({
-          network: chainName,
+          chainId: Number(chainId),
           serviceId: id,
         });
 
@@ -243,10 +232,7 @@ export const Details: FC<DetailsProps> = ({
     setIsModalVisible(true);
   }, []);
 
-  const showTabs =
-    (chainName === MARKETPLACE_SUPPORTED_NETWORKS.GNOSIS ||
-      chainName === MARKETPLACE_SUPPORTED_NETWORKS.BASE) &&
-    activityRows.length > 0;
+  const showTabs = isMarketplaceSupportedNetwork(Number(chainId)) && activityRows.length > 0;
 
   return (
     <>
@@ -289,7 +275,7 @@ export const Details: FC<DetailsProps> = ({
       )}
 
       {currentTab === 'activity' && (
-        <div style={{ marginTop: !showTabs ? 16 : 0 }}>
+        <div style={{ marginTop: showTabs ? 0 : 16 }}>
           <DetailsTable
             columns={getColumns({ addressLinkProps, openActivityModal }) as ColumnType<object>[]}
             dataSource={paginatedActivityRows}

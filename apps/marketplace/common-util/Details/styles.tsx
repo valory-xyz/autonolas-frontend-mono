@@ -62,6 +62,10 @@ export const DetailsTable = styled(<T extends object>(props: TableProps<T>) => (
   button {
     padding: 0;
   }
+
+  .ant-table-cell {
+    height: 60px;
+  }
 `;
 
 export const DetailsDivider = styled(Divider)`

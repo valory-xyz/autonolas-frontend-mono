@@ -1,9 +1,9 @@
 import type { Activity } from 'common-util/graphql/service-activity';
 import { Col, Flex, Modal, Row, Typography } from 'antd';
-import { AddressLink, NA } from '@autonolas/frontend-library';
+import { NA } from '@autonolas/frontend-library';
+import { AddressLink, Copy } from 'libs/ui-components/src';
 import { DetailsDivider, Info } from './styles';
 import { marketplaceRoleTag } from 'common-util/List/ListTable/helpers';
-import { Copy } from 'components/Copy';
 import { truncateAddress } from 'libs/util-functions/src';
 
 const { Text, Title } = Typography;
@@ -109,7 +109,7 @@ export const ActivityDetails = ({
             {activity.requestIpfsHash ? (
               <Flex align="center" justify="space-between">
                 <>
-                  <AddressLink {...addressLinkProps} text={activity.requestIpfsHash} isIpfsLink />
+                  <AddressLink {...addressLinkProps} address={activity.requestIpfsHash} isIpfs />
                 </>
                 <Copy text={activity.requestIpfsHash} />
               </Flex>
@@ -126,7 +126,7 @@ export const ActivityDetails = ({
           <Col span={16}>
             {activity.requestedBy ? (
               <Flex align="center" justify="space-between">
-                <AddressLink {...addressLinkProps} text={activity.requestedBy} />
+                <AddressLink {...addressLinkProps} address={activity.requestedBy} />
                 <Copy text={activity.requestedBy} />
               </Flex>
             ) : (
@@ -142,7 +142,7 @@ export const ActivityDetails = ({
           <Col span={16}>
             {activity.requestTransactionHash ? (
               <Flex align="center" justify="space-between">
-                <AddressLink {...addressLinkProps} text={activity.requestTransactionHash} />
+                <AddressLink {...addressLinkProps} address={activity.requestTransactionHash} />
                 <Copy text={activity.requestTransactionHash} />
               </Flex>
             ) : (
@@ -173,7 +173,7 @@ export const ActivityDetails = ({
           <Col span={16}>
             {activity.deliveryIpfsHash ? (
               <Flex align="center" justify="space-between">
-                <AddressLink {...addressLinkProps} text={activity.deliveryIpfsHash} isIpfsLink />
+                <AddressLink {...addressLinkProps} address={activity.deliveryIpfsHash} isIpfs />
                 <Copy text={activity.deliveryIpfsHash} />
               </Flex>
             ) : (
@@ -189,7 +189,7 @@ export const ActivityDetails = ({
           <Col span={16}>
             {activity.deliveredBy ? (
               <Flex align="center" justify="space-between">
-                <AddressLink {...addressLinkProps} text={activity.deliveredBy} />
+                <AddressLink {...addressLinkProps} address={activity.deliveredBy} />
                 <Copy text={activity.deliveredBy} />
               </Flex>
             ) : (
@@ -205,7 +205,7 @@ export const ActivityDetails = ({
           <Col span={16}>
             {activity.deliveryTransactionHash ? (
               <Flex align="center" justify="space-between">
-                <AddressLink {...addressLinkProps} text={activity.deliveryTransactionHash} />
+                <AddressLink {...addressLinkProps} address={activity.deliveryTransactionHash} />
                 <Copy text={activity.deliveryTransactionHash} />
               </Flex>
             ) : (

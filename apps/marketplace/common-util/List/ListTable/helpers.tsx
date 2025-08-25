@@ -187,7 +187,11 @@ export const getTableColumns = (
       width: 200,
       render: (_text: string, record: TableRecord) => {
         return (
-          <Button type="link" onClick={() => onServicesHashClick?.(record.id)}>
+          <Button
+            type="link"
+            onClick={() => onServicesHashClick?.(record.id)}
+            style={{ margin: '4px 0' }}
+          >
             {truncateAddress(record.hash)}
           </Button>
         );

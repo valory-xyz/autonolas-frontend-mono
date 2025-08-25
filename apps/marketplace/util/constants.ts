@@ -113,7 +113,4 @@ export const CACHE_DURATION = {
   ONE_HOUR: 3600,
 } as const;
 
-export const MARKETPLACE_SUPPORTED_NETWORKS = {
-  GNOSIS: 'gnosis',
-  BASE: 'base',
-} as const;
+export const MARKETPLACE_SUPPORTED_CHAIN_IDS = [100, 8453];

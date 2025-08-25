@@ -18,7 +18,7 @@ import {
 import { sendTransaction as sendTransactionFn } from 'libs/util-functions/src';
 import { RpcUrl } from 'libs/util-functions/src/lib/sendTransaction/types';
 
-import { VM_TYPE } from '../../util/constants';
+import { MARKETPLACE_SUPPORTED_CHAIN_IDS, VM_TYPE } from '../../util/constants';
 import { RPC_URLS } from '../Contracts';
 import { SUPPORTED_CHAINS } from '../Login';
 import { EVM_SUPPORTED_CHAINS, SVM_SUPPORTED_CHAINS, SolanaChain } from '../Login/config';
@@ -237,3 +237,6 @@ export const isValidSolanaPublicKey = (publicKey: PublicKey) => {
     return false;
   }
 };
+
+export const isMarketplaceSupportedNetwork = (chainId: number) =>
+  MARKETPLACE_SUPPORTED_CHAIN_IDS.includes(chainId);

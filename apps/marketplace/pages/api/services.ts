@@ -4,12 +4,13 @@ import {
   getServicesFromLegacyMechSubgraph,
   mergeServicesDetails,
 } from 'common-util/graphql/services';
-import type { MarketplaceSupportedNetwork } from 'common-util/types';
 
-import { CACHE_DURATION, MARKETPLACE_SUPPORTED_NETWORKS } from '../../util/constants';
+import { CACHE_DURATION } from '../../util/constants';
+import { isMarketplaceSupportedNetwork } from 'common-util/functions';
+import { MM_GRAPHQL_CLIENTS } from 'common-util/graphql';
 
 type RequestQuery = {
-  network: MarketplaceSupportedNetwork;
+  chainId: string;
   serviceIds: string;
 };
 
@@ -19,22 +20,19 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   try {
-    const { network, serviceIds = '' } = req.query as RequestQuery;
+    const { chainId, serviceIds = '' } = req.query as RequestQuery;
     const parsedServiceIds = serviceIds
       .split(',')
       .map((id) => id.trim())
       .filter(Boolean);
 
-    if (!network || !parsedServiceIds.length) {
+    if (!chainId || !parsedServiceIds.length) {
       return res.status(400).json({
-        error: 'Missing required parameters: network and serviceIds',
+        error: 'Missing required parameters: chainId and serviceIds',
       });
     }
 
-    if (
-      network !== MARKETPLACE_SUPPORTED_NETWORKS.GNOSIS &&
-      network !== MARKETPLACE_SUPPORTED_NETWORKS.BASE
-    ) {
+    if (!isMarketplaceSupportedNetwork(Number(chainId))) {
       return res.status(400).json({
         error: "Invalid network. Must be 'gnosis' or 'base'",
       });
@@ -42,13 +40,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     const promises = [
       getServicesFromMMSubgraph({
-        network: network as MarketplaceSupportedNetwork,
+        chainId: Number(chainId) as keyof typeof MM_GRAPHQL_CLIENTS,
         serviceIds: parsedServiceIds,
       }),
     ];
 
     // For gnosis, we need to get the data from legacy mech as well
-    if (network === MARKETPLACE_SUPPORTED_NETWORKS.GNOSIS)
+    if (Number(chainId) === 100)
       promises.push(getServicesFromLegacyMechSubgraph({ serviceIds: parsedServiceIds }));
 
     const [servicesFromMM, servicesFromLegacy] = await Promise.all(promises);
