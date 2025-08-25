@@ -1,10 +1,5 @@
-import {
-  GraphQLResponse,
-  LEGACY_MECH_SUBGRAPH_CLIENT,
-  MM_GRAPHQL_CLIENTS,
-  MarketplaceSupportedNetwork,
-  Service,
-} from '.';
+import { Service } from 'common-util/types';
+import { LEGACY_MECH_SUBGRAPH_CLIENT, MM_GRAPHQL_CLIENTS } from './index';
 
 export const getQueryForServiceDetails = ({
   serviceIds,
@@ -35,14 +30,18 @@ export const getQueryForServiceDetails = ({
   `;
 };
 
+type GraphQLResponse<T> = {
+  services: T[];
+};
+
 export const getServicesFromMMSubgraph = async ({
-  network,
+  chainId,
   serviceIds,
 }: {
-  network: MarketplaceSupportedNetwork;
+  chainId: keyof typeof MM_GRAPHQL_CLIENTS;
   serviceIds: string[];
 }): Promise<Service[]> => {
-  const client = MM_GRAPHQL_CLIENTS[network];
+  const client = MM_GRAPHQL_CLIENTS[chainId];
 
   const query = getQueryForServiceDetails({ serviceIds });
   const response = await client.request<GraphQLResponse<Service>>(query);

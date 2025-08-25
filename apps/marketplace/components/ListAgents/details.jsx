@@ -28,7 +28,7 @@ const Agent = () => {
 
   return (
     <Details
-      type={NAV_TYPES.AGENT}
+      type={NAV_TYPES.AGENT_BLUEPRINTS}
       id={id}
       getDetails={getDetails}
       getOwner={getOwner}

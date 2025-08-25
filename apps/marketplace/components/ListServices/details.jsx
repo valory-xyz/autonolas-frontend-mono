@@ -35,7 +35,7 @@ const Service = () => {
 
   return (
     <Details
-      type={NAV_TYPES.SERVICE}
+      type={NAV_TYPES.AI_AGENTS}
       id={id}
       getDetails={getDetails}
       getOwner={getOwner}

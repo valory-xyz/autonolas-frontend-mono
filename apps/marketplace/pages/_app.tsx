@@ -19,7 +19,7 @@ const DESC =
 const queryClient = new QueryClient();
 const projectId = process.env.NEXT_PUBLIC_WALLET_PROJECT_ID as string;
 const metadata = {
-  name: 'Mech Marketplace',
+  name: 'Mech Marketplace | Olas',
   description: DESC,
   url: 'https://marketplace.olas.network/',
   icons: ['https://avatars.githubusercontent.com/u/37784886'],

@@ -22,7 +22,7 @@ import { ServiceStatus } from './ServiceStatus';
 import { ViewHashAndCode } from './ViewHashAndCode';
 import { getTokenomicsUnitType } from './utils';
 
-const navTypesForRewards = [NAV_TYPES.COMPONENT, NAV_TYPES.AGENT];
+const navTypesForRewards = [NAV_TYPES.COMPONENT, NAV_TYPES.AGENT_BLUEPRINTS];
 
 /**
  * Agent | Component | Service - details component
@@ -207,7 +207,7 @@ export const DetailsSubInfo = ({
   };
 
   const detailsValues =
-    type === NAV_TYPES.SERVICE ? getServiceValues() : getComponentAndAgentValues();
+    type === NAV_TYPES.AI_AGENTS ? getServiceValues() : getComponentAndAgentValues();
 
   const detailsSections = useMemo(
     () =>
@@ -238,7 +238,7 @@ export const DetailsSubInfo = ({
   // get token address for service
   useEffect(() => {
     const fetchData = async () => {
-      if (type === NAV_TYPES.SERVICE) {
+      if (type === NAV_TYPES.AI_AGENTS) {
         try {
           const response = await getTokenDetailsRequest(id);
           setTokenAddress(response.token);

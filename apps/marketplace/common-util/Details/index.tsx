@@ -1,14 +1,16 @@
-import { Button, Col, Row, Tabs } from 'antd';
+import { Button, Col, Flex, Row, Tabs } from 'antd';
 import type { ColumnsType, ColumnType } from 'antd/es/table';
 import get from 'lodash/get';
 import { FC, useCallback, useState, useEffect, useMemo } from 'react';
 import { Address } from 'viem';
 import { useRouter } from 'next/router';
 
-import { AddressLink, GenericObject, NA } from '@autonolas/frontend-library';
+import { GenericObject, NA } from '@autonolas/frontend-library';
+import { AddressLink } from 'libs/ui-components/src';
 
-import { getServiceActivityDataFromSubgraph } from 'common-util/subgraphs';
+import { getServiceActivityFromSubgraph } from 'common-util/subgraphs';
 import type { Activity } from 'common-util/graphql/service-activity';
+import { marketplaceRoleTag } from 'common-util/List/ListTable/helpers';
 import { NAV_TYPES, NavTypesValues, TOTAL_VIEW_COUNT } from 'util/constants';
 
 import { IpfsHashGenerationModal } from '../List/IpfsHashGenerationModal';
@@ -17,22 +19,7 @@ import { DetailsSubInfo } from './DetailsSubInfo';
 import { DetailsTable, DetailsTitle, Header } from './styles';
 import { ActivityDetails } from './ActivityDetails';
 import { useDetails } from './useDetails';
-import { marketplaceRoleTag } from 'common-util/List/ListTable/helpers';
-import { CopyOutlined } from '@ant-design/icons';
-import { Flex } from 'antd';
-
-export const CopyBtn = ({ text }: { text: string }) => {
-  return (
-    <Button
-      size="small"
-      onClick={(e) => {
-        e.stopPropagation();
-        navigator.clipboard.writeText(text);
-      }}
-      icon={<CopyOutlined />}
-    />
-  );
-};
+import { isMarketplaceSupportedNetwork } from 'common-util/functions';
 
 const getColumns = ({
   addressLinkProps,
@@ -40,7 +27,6 @@ const getColumns = ({
 }: {
   addressLinkProps: {
     chainId: number | undefined;
-    suffixCount: number;
   };
   openActivityModal: (record: Activity) => void;
 }): ColumnsType<Activity> => {
@@ -56,8 +42,7 @@ const getColumns = ({
             onClick={() => openActivityModal(record)}
             style={{ display: 'flex', gap: 8 }}
           >
-            {<AddressLink suffixCount={8} textMinWidth={160} text={text} cannotClick />}
-            <CopyBtn text={text} />
+            <AddressLink address={text} canNotClick canCopy />
           </Button>
         ) : null,
     },
@@ -75,8 +60,7 @@ const getColumns = ({
       render: (text: string) =>
         text ? (
           <Flex align="center" gap={8}>
-            <AddressLink {...addressLinkProps} textMinWidth={120} text={text} isIpfsLink />
-            <CopyBtn text={text} />
+            <AddressLink {...addressLinkProps} address={text} isIpfs />
           </Flex>
         ) : null,
     },
@@ -87,8 +71,7 @@ const getColumns = ({
       render: (text: string) =>
         text ? (
           <Flex align="center" gap={8}>
-            <AddressLink {...addressLinkProps} textMinWidth={120} text={text} isIpfsLink />
-            <CopyBtn text={text} />
+            <AddressLink {...addressLinkProps} address={text} isIpfs />
           </Flex>
         ) : null,
     },
@@ -96,13 +79,15 @@ const getColumns = ({
       title: 'Requested By',
       dataIndex: 'requestedBy',
       key: 'requestedBy',
-      render: (text: string) => (text ? <AddressLink {...addressLinkProps} text={text} /> : null),
+      render: (text: string) =>
+        text ? <AddressLink {...addressLinkProps} address={text} /> : null,
     },
     {
       title: 'Delivered By',
       dataIndex: 'deliveredBy',
       key: 'deliveredBy',
-      render: (text: string) => (text ? <AddressLink {...addressLinkProps} text={text} /> : null),
+      render: (text: string) =>
+        text ? <AddressLink {...addressLinkProps} address={text} /> : null,
     },
   ];
 };
@@ -123,7 +108,7 @@ type DetailsProps = {
   }) => JSX.Element | null;
 };
 
-type CurrentTab = 'details' | 'activity' | '';
+type CurrentTab = 'details' | 'activity' | null;
 
 export const Details: FC<DetailsProps> = ({
   id,
@@ -148,7 +133,7 @@ export const Details: FC<DetailsProps> = ({
     getTokenUri,
   });
 
-  const [currentTab, setCurrentTab] = useState<CurrentTab>('');
+  const [currentTab, setCurrentTab] = useState<CurrentTab>(null);
   const [activityRows, setActivityRows] = useState<Activity[]>([]);
   const [activityLoading, setActivityLoading] = useState(false);
   const [activityPage, setActivityPage] = useState(1);
@@ -164,7 +149,6 @@ export const Details: FC<DetailsProps> = ({
   const addressLinkProps = useMemo(() => {
     return {
       chainId: chainId ?? undefined,
-      suffixCount: 6,
     };
   }, [chainId]);
 
@@ -216,13 +200,13 @@ export const Details: FC<DetailsProps> = ({
   };
 
   useEffect(() => {
-    if (chainName !== 'gnosis' && chainName !== 'base') return;
+    if (!isMarketplaceSupportedNetwork(Number(chainId))) return;
 
     const fetchActivity = async () => {
       try {
         setActivityLoading(true);
-        const json = await getServiceActivityDataFromSubgraph({
-          network: chainName,
+        const json = await getServiceActivityFromSubgraph({
+          chainId: Number(chainId),
           serviceId: id,
         });
 
@@ -235,26 +219,25 @@ export const Details: FC<DetailsProps> = ({
       }
     };
 
-    if (currentTab === 'activity' && id) {
+    if (id) {
       fetchActivity();
     }
   }, [currentTab, id, chainName, chainId]);
 
   // Update button to be show only if the connected account is the owner
   // and only for services
-  const canShowUpdateBtn = isOwner && type === NAV_TYPES.SERVICE && !!handleUpdate;
+  const canShowUpdateBtn = isOwner && type === NAV_TYPES.AI_AGENTS && !!handleUpdate;
 
   const openUpdateHashModal = useCallback(() => {
     setIsModalVisible(true);
   }, []);
 
-  const showTabs = chainName === 'gnosis' || chainName === 'base';
+  const showTabs = isMarketplaceSupportedNetwork(Number(chainId)) && activityRows.length > 0;
+
   return (
     <>
       <Header>
-        <div>
-          <DetailsTitle level={2}>{`ID ${id}`}</DetailsTitle>
-        </div>
+        <DetailsTitle level={2}>{`ID ${id}`}</DetailsTitle>
 
         <div className="right-content">
           {canShowUpdateBtn && (
@@ -275,7 +258,7 @@ export const Details: FC<DetailsProps> = ({
         <Tabs
           className="registry-tabs"
           type="card"
-          activeKey={currentTab}
+          activeKey={currentTab ?? undefined}
           onChange={handleTabChange}
           style={{ marginTop: '24px' }}
           items={[
@@ -292,7 +275,7 @@ export const Details: FC<DetailsProps> = ({
       )}
 
       {currentTab === 'activity' && (
-        <>
+        <div style={{ marginTop: showTabs ? 0 : 16 }}>
           <DetailsTable
             columns={getColumns({ addressLinkProps, openActivityModal }) as ColumnType<object>[]}
             dataSource={paginatedActivityRows}
@@ -314,7 +297,7 @@ export const Details: FC<DetailsProps> = ({
             activity={selectedActivity}
             addressLinkProps={{ chainId: chainId ?? undefined, suffixCount: 6 }}
           />
-        </>
+        </div>
       )}
 
       {currentTab === 'details' ? (
@@ -336,7 +319,7 @@ export const Details: FC<DetailsProps> = ({
           </Col>
 
           <Col md={12} xs={24}>
-            {type === NAV_TYPES.SERVICE ? (
+            {type === NAV_TYPES.AI_AGENTS ? (
               <>
                 {renderServiceState
                   ? renderServiceState({ isOwner, details: info, updateDetails })

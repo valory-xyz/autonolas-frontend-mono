@@ -40,11 +40,11 @@ export const CustomLayout = styled(Layout)`
         color: ${COLOR.TEXT_SECONDARY};
         padding: 6px 16px;
         border: none;
+        border-radius: 6px;
       }
 
       .ant-tabs-tab-active {
         color: ${COLOR.NEUTRAL_10};
-        border-radius: 6px;
         background-color: ${COLOR.WHITE} !important;
         box-shadow: 0px 2px 4px 0px rgba(0, 0, 0, 0.02);
       }

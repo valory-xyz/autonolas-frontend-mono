@@ -9,7 +9,8 @@ import { convertStringToArray } from 'common-util/List/ListCommon';
 import { filterByOwner } from 'common-util/ContractUtils/myList';
 import { getTokenDetailsRequest } from 'common-util/Details/utils';
 import { getIpfsResponse } from 'common-util/functions/ipfs';
-import { getServicesDataFromSubgraph } from 'common-util/subgraphs';
+import { getServicesFromSubgraph } from 'common-util/subgraphs';
+import { isMarketplaceSupportedNetwork } from 'common-util/functions';
 
 type Service = {
   id: string;
@@ -76,7 +77,7 @@ export const getMarketplaceRole = (service: Service) => {
   const { totalRequests, totalDeliveries } = service;
   const { chainId } = getWeb3Details();
 
-  if (chainId !== 100 && chainId !== 8453) {
+  if (!isMarketplaceSupportedNetwork(Number(chainId))) {
     return SERVICE_ROLE.REGISTERED;
   }
 
@@ -132,15 +133,13 @@ export const getServices = async (
   );
 
   let servicesWithMetadata = await extractConfigDetailsForServices(results);
-  if (chainId === 100 || chainId === 8453) {
-    const servicesDataFromSubgraph = await getServicesDataFromSubgraph({
-      network: chainId === 100 ? 'gnosis' : 'base',
+  if (isMarketplaceSupportedNetwork(Number(chainId))) {
+    const servicesDataFromSubgraph = await getServicesFromSubgraph({
+      chainId: Number(chainId),
       serviceIds: validTokenIds.map(Number),
     });
     servicesWithMetadata = servicesWithMetadata.map((service) => {
-      const serviceDataFromSubgraph: Service = servicesDataFromSubgraph.find(
-        (s: Service) => s.id === service.id,
-      );
+      const serviceDataFromSubgraph = servicesDataFromSubgraph.find((s) => s.id === service.id);
       return { ...service, ...serviceDataFromSubgraph };
     });
   }

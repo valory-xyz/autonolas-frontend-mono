@@ -1,10 +1,5 @@
-import {
-  Request,
-  Delivery,
-  MarketplaceSupportedNetwork,
-  LEGACY_MECH_SUBGRAPH_CLIENT,
-  MM_GRAPHQL_CLIENTS,
-} from '.';
+import { Request, Delivery } from 'common-util/types';
+import { LEGACY_MECH_SUBGRAPH_CLIENT, MM_GRAPHQL_CLIENTS } from './index';
 
 type ActivityType = 'Demand' | 'Supply';
 
@@ -176,13 +171,13 @@ export const mergeServiceActivity = (
 };
 
 export const getServiceActivityFromMMSubgraph = async ({
-  network,
+  chainId,
   serviceId,
 }: {
-  network: MarketplaceSupportedNetwork;
+  chainId: keyof typeof MM_GRAPHQL_CLIENTS;
   serviceId: string;
 }) => {
-  const client = MM_GRAPHQL_CLIENTS[network];
+  const client = MM_GRAPHQL_CLIENTS[chainId];
 
   const query = getQueryForServiceActivity({ serviceId });
   const response: Omit<ActivityResponse, 'id'> = await client.request(query);

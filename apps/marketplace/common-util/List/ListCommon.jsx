@@ -95,7 +95,7 @@ export const ListEmptyMessage = ({ message = '', type }) => {
         return {
           text: 'component',
         };
-      case NAV_TYPES.SERVICE:
+      case NAV_TYPES.AI_AGENTS:
         return {
           text: 'AI Agent',
         };
@@ -103,7 +103,7 @@ export const ListEmptyMessage = ({ message = '', type }) => {
         return {
           text: 'operator',
         };
-      case NAV_TYPES.AGENT:
+      case NAV_TYPES.AGENT_BLUEPRINTS:
         return {
           text: 'Agent blueprint',
         };

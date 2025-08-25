@@ -12,6 +12,14 @@ const nextConfig = {
     locales: ['en'],
     defaultLocale: 'en',
   },
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'gateway.autonolas.tech',
+      },
+    ],
+  },
   nx: {
     // Set this to true if you would like to to use SVGR
     // See: https://github.com/gregberge/svgr
@@ -56,6 +64,11 @@ const nextConfig = {
     {
       source: '/:network/agents',
       destination: '/:network/agent-blueprints',
+      permanent: true,
+    },
+    {
+      source: '/:network((?!api).+)/services/:id',
+      destination: '/:network/ai-agents/:id',
       permanent: true,
     },
     {

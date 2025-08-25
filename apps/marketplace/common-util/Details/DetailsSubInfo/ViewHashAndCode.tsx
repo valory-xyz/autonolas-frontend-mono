@@ -26,7 +26,7 @@ export const ViewHashAndCode = ({
 
   return (
     <>
-      {type === NAV_TYPES.SERVICE && <>&nbsp;•&nbsp;</>}
+      {type === NAV_TYPES.AI_AGENTS && <>&nbsp;•&nbsp;</>}
       <Link target="_blank" data-testid="view-hash-link" href={hashUrl}>
         View Hash {UNICODE_SYMBOLS.EXTERNAL_LINK}
       </Link>

@@ -4,6 +4,6 @@ import { NAV_TYPES } from '../../../util/constants';
 
 export const getTokenomicsUnitType = (type?: string) => {
   if (type === NAV_TYPES.COMPONENT) return TOKENOMICS_UNIT_TYPES.COMPONENT;
-  if (type === NAV_TYPES.AGENT) return TOKENOMICS_UNIT_TYPES.AGENT;
+  if (type === NAV_TYPES.AGENT_BLUEPRINTS) return TOKENOMICS_UNIT_TYPES.AGENT;
   return;
 };
