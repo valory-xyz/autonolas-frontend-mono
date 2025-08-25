@@ -1,0 +1,34 @@
+{
+  "extends": ["plugin:@nx/react-typescript", "next/core-web-vitals", "../../.eslintrc.json"],
+  "ignorePatterns": ["!**/*", ".next/**/*"],
+  "rules": {
+    "@nx/enforce-module-boundaries": [
+      "error",
+      {
+        "allow": ["libs*"]
+      }
+    ]
+  },
+  "overrides": [
+    {
+      "files": ["*.*"],
+      "rules": {
+        "@next/next/no-html-link-for-pages": "off"
+      }
+    },
+    {
+      "files": ["*.ts", "*.tsx", "*.js", "*.jsx"],
+      "rules": {
+        "@next/next/no-html-link-for-pages": ["error", "apps/marketplace/pages"]
+      }
+    },
+    {
+      "files": ["*.ts", "*.tsx"],
+      "rules": {}
+    },
+    {
+      "files": ["*.js", "*.jsx"],
+      "rules": {}
+    }
+  ]
+}
