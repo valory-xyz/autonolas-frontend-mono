@@ -4,3 +4,4 @@ export * from './lib/Caption';
 export * from './lib/NavDropdown';
 export * from './lib/SwitchNetworkButton';
 export * from './lib/TextWithTooltip';
+export * from './lib/Copy';

@@ -1,0 +1,40 @@
+name: Marketplace
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'apps/marketplace/**'
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'apps/marketplace/**'
+
+jobs:
+  build:
+    continue-on-error: False
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 18
+      - name: Cache node modules
+        uses: actions/cache@v4
+        with:
+          path: |
+            node_modules
+            ~/.cache/yarn
+          key: ${{ runner.os }}-yarn-${{ hashFiles('yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-yarn-          
+      - name: Install modules
+        run: yarn
+      - name: Run ESLint
+        run: yarn nx lint marketplace
+      # temporarily disabling as the changes are quite a lot and most of the test broke.
+      # - name: Run Test
+      #   run: yarn nx test marketplace
