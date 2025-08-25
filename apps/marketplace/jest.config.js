@@ -3,7 +3,7 @@ const { pathsToModuleNameMapper } = require('ts-jest');
 const { compilerOptions } = require('../../tsconfig.base.json');
 
 module.exports = {
-  displayName: 'autonolas-registry',
+  displayName: 'marketplace',
   preset: '../../jest.preset.js',
   testEnvironment: 'jsdom',
   moduleDirectories: ['node_modules'],
@@ -30,7 +30,7 @@ module.exports = {
     '^(?!.*\\.(js|jsx|ts|tsx|css|json)$)': '@nx/react/plugins/jest',
   },
   globals: { fetch },
-  coverageDirectory: '../../coverage/apps/autonolas-registry',
+  coverageDirectory: '../../coverage/apps/marketplace',
   collectCoverageFrom: [
     'common-util/**/*.{js,jsx}',
     'components/**/*.{js,jsx}',

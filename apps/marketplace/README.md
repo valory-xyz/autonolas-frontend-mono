@@ -26,7 +26,7 @@ To Run Test Suite:
 
 To Start Server:
 
-`yarn nx run autonolas-registry:serve`
+`yarn nx run marketplace:serve`
 
 To Visit App:
 

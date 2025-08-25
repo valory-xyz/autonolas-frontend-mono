@@ -1,7 +1,7 @@
 {
-  "name": "autonolas-registry",
+  "name": "marketplace",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
-  "sourceRoot": "apps/autonolas-registry",
+  "sourceRoot": "apps/marketplace",
   "projectType": "application",
   "targets": {
     "build": {
@@ -9,11 +9,11 @@
       "outputs": ["{options.outputPath}"],
       "defaultConfiguration": "production",
       "options": {
-        "outputPath": "dist/apps/autonolas-registry"
+        "outputPath": "dist/apps/marketplace"
       },
       "configurations": {
         "development": {
-          "outputPath": "apps/autonolas-registry"
+          "outputPath": "apps/marketplace"
         },
         "production": {}
       }
@@ -22,17 +22,17 @@
       "executor": "@nx/next:server",
       "defaultConfiguration": "development",
       "options": {
-        "buildTarget": "autonolas-registry:build",
+        "buildTarget": "marketplace:build",
         "dev": true,
         "port": 3000
       },
       "configurations": {
         "development": {
-          "buildTarget": "autonolas-registry:build:development",
+          "buildTarget": "marketplace:build:development",
           "dev": true
         },
         "production": {
-          "buildTarget": "autonolas-registry:build:production",
+          "buildTarget": "marketplace:build:production",
           "dev": false
         }
       }
@@ -40,14 +40,14 @@
     "export": {
       "executor": "@nx/next:export",
       "options": {
-        "buildTarget": "autonolas-registry:build:production"
+        "buildTarget": "marketplace:build:production"
       }
     },
     "test": {
       "executor": "@nx/jest:jest",
       "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
       "options": {
-        "jestConfig": "apps/autonolas-registry/jest.config.js"
+        "jestConfig": "apps/marketplace/jest.config.js"
       }
     },
     "lint": {

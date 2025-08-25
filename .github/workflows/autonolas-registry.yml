@@ -4,12 +4,12 @@ on:
     branches:
       - main
     paths:
-      - 'apps/autonolas-registry/**'
+      - 'apps/marketplace/**'
   pull_request:
     branches:
       - main
     paths:
-      - 'apps/autonolas-registry/**'
+      - 'apps/marketplace/**'
 
 jobs:
   build:
@@ -34,7 +34,7 @@ jobs:
       - name: Install modules
         run: yarn
       - name: Run ESLint
-        run: yarn nx lint autonolas-registry
+        run: yarn nx lint marketplace
       # temporarily disabling as the changes are quite a lot and most of the test broke.
       # - name: Run Test
-      #   run: yarn nx test autonolas-registry
+      #   run: yarn nx test marketplace

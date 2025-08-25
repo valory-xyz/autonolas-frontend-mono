@@ -18,12 +18,12 @@
     ],
     "types": ["jest", "node", "react", "react-dom"],
     "paths": {
-      "common-util/*": ["apps/autonolas-registry/common-util/*"],
-      "components/*": ["apps/autonolas-registry/components/*"],
-      "util/*": ["apps/autonolas-registry/util/*"],
-      "static/*": ["apps/autonolas-registry/static/*"],
-      "images/*": ["apps/autonolas-registry/public/images/*"],
-      "store/*": ["apps/autonolas-registry/store/*"]
+      "common-util/*": ["apps/marketplace/common-util/*"],
+      "components/*": ["apps/marketplace/components/*"],
+      "util/*": ["apps/marketplace/util/*"],
+      "static/*": ["apps/marketplace/static/*"],
+      "images/*": ["apps/marketplace/public/images/*"],
+      "store/*": ["apps/marketplace/store/*"]
     }
   },
   "include": ["**/*.ts", "**/*.tsx", "**/*.js", "**/*.jsx", "next-env.d.ts"],
