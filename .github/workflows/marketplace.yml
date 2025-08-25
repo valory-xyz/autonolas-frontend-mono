@@ -1,4 +1,4 @@
-name: Autonolas registry
+name: Marketplace
 on:
   push:
     branches:
