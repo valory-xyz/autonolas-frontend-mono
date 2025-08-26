@@ -72,6 +72,18 @@ const nextConfig = {
       permanent: true,
     },
     {
+      source: '/:network/mechs',
+      destination: '/:network/ai-agents',
+      permanent: true,
+    },
+    /* we used to have the mech's address as the hash on the mech service,
+    while now we use the service's id, hence redirecting the user to the listing page  */
+    {
+      source: '/:network/mech/:id',
+      destination: '/:network/ai-agents',
+      permanent: true,
+    },
+    {
       source: '/mechs',
       destination: '/gnosis/ai-agents',
       permanent: true,
