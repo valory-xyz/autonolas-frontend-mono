@@ -3,6 +3,7 @@ import {
   BOND_SITE_URL,
   BUILD_SITE_URL,
   CONTRIBUTE_SITE_URL,
+  DISCORD_INVITE_URL,
   GOVERN_SITE_URL,
   LAUNCH_SITE_URL,
   OLAS_SITE_URL,
@@ -96,10 +97,9 @@ const WhatCanIUse = () => (
           </div>
         </li>
         <li>
-          <a href={`${OLAS_SITE_URL}/mech-marketplace`}>Mech Marketplace</a>
+          <a href={`${OLAS_SITE_URL}/mech-marketplace`}>Mech Marketplace (AI Agent Bazaar)</a>
           <div className="mb-8">
-            The first AI Agent Bazaar - a decentralized marketplace where you can hire or offer AI
-            agent services.
+            The first decentralized marketplace where you can hire or offer AI agent services.
           </div>
         </li>
         <li>
@@ -160,6 +160,11 @@ const HowCanIGetInvolved = () => (
         <li>
           <a href={`${OLAS_SITE_URL}/blog`} rel="noopener noreferrer" target="_blank">
             Blog
+          </a>
+        </li>
+        <li>
+          <a href={DISCORD_INVITE_URL} rel="noopener noreferrer" target="_blank">
+            Discord
           </a>
         </li>
       </ul>

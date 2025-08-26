@@ -1,4 +1,4 @@
-export const OLAS_SITE_URL = 'https://olas.network/';
+export const OLAS_SITE_URL = 'https://olas.network';
 export const OPERATOR_NAME = 'Olas (aka Autonolas) DAO';
 
 export const BUILD_SITE_URL = 'https://build.olas.network';
@@ -10,3 +10,4 @@ export const LAUNCH_SITE_URL = 'https://launch.olas.network';
 
 export const X_URL = 'https://x.com/autonolas';
 export const YOUTUBE_URL = 'https://www.youtube.com/@autonolas';
+export const DISCORD_INVITE_URL = 'https://discord.com/invite/BQzYqhjGjQ';
