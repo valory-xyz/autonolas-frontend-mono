@@ -3,7 +3,8 @@ import styled from 'styled-components';
 import type { NextRouter } from 'next/router';
 import { Button, Flex, Tag } from 'antd';
 
-import { AddressLink, NA } from '@autonolas/frontend-library';
+import { NA } from '@autonolas/frontend-library';
+import { AddressLink } from 'libs/ui-components/src';
 import { truncateAddress } from 'libs/util-functions/src';
 import { Activity } from 'common-util/graphql/service-activity';
 
@@ -96,6 +97,7 @@ export const getTableColumns = (
   const addressLinkProps = {
     chainId,
     suffixCount: isMobile ? 4 : 6,
+    showExternalLinkSymbol: false,
   };
 
   const tokenIdColumn = {
@@ -128,7 +130,7 @@ export const getTableColumns = (
     render: (text: string) => {
       if (!text || text === NA) return NA;
       const updatedText = text.replace(HASH_PREFIX, '0x'); // .toUpperCase();
-      return <AddressLink {...addressLinkProps} text={updatedText} isIpfsLink />;
+      return <AddressLink {...addressLinkProps} address={updatedText} isIpfs />;
     },
   };
 
@@ -159,7 +161,7 @@ export const getTableColumns = (
       width: 160,
       render: (text: string) => {
         if (!text || text === NA) return NA;
-        return <AddressLink {...addressLinkProps} text={text} canCopy />;
+        return <AddressLink {...addressLinkProps} address={text} canCopy />;
       },
     };
 
