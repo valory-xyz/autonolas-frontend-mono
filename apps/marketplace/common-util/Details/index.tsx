@@ -44,7 +44,9 @@ const getColumns = ({
           >
             <AddressLink address={text} canNotClick canCopy />
           </Button>
-        ) : null,
+        ) : (
+          NA
+        ),
     },
     {
       title: 'Activity type',
@@ -62,7 +64,9 @@ const getColumns = ({
           <Flex align="center" gap={8}>
             <AddressLink {...addressLinkProps} address={text} isIpfs />
           </Flex>
-        ) : null,
+        ) : (
+          NA
+        ),
     },
     {
       title: 'Delivery Data',
@@ -81,8 +85,7 @@ const getColumns = ({
       title: 'Requested By',
       dataIndex: 'requestedBy',
       key: 'requestedBy',
-      render: (text: string) =>
-        text ? <AddressLink {...addressLinkProps} address={text} /> : null,
+      render: (text: string) => (text ? <AddressLink {...addressLinkProps} address={text} /> : NA),
     },
     {
       title: 'Delivered By',
