@@ -84,10 +84,17 @@ const Layout = ({ children }) => {
                   updateChainId(currentChainInfo.id);
                   router.push(`/${path}`);
                 } else {
-                  // eg. /components, /agent-blueprints, /ai-agents will be redirect to
-                  // /<chainName>/components, /<chainName>/agent-blueprints, /<chainName>/ai-agents
-                  const replacedPath = router.asPath.replace(chainName, value);
-                  window.open(replacedPath, '_self');
+                  // Check if current route is an AI agent detail page
+                  const aiAgentDetailPattern = /^\/[^/]+\/ai-agents\/[^/]+/;
+                  if (aiAgentDetailPattern.test(router.asPath)) {
+                    // If on AI agent detail page, redirect to AI agents listing page
+                    window.open(`/${value}/ai-agents`, '_self');
+                  } else {
+                    // eg. /components, /agent-blueprints, /ai-agents will be redirect to
+                    // /<chainName>/components, /<chainName>/agent-blueprints, /<chainName>/ai-agents
+                    const replacedPath = router.asPath.replace(chainName, value);
+                    window.open(replacedPath, '_self');
+                  }
                 }
               }}
               filterOption={(input, option) => {

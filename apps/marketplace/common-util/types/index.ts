@@ -25,12 +25,14 @@ export type Delivery = {
   id: string;
   ipfsHash: string;
   mech: Address;
-  sender: Address;
   blockTimestamp: string;
   transactionHash: TransactionHash;
   request: {
     id: string;
     ipfsHash: string;
+    sender: {
+      id: Address;
+    };
     blockTimestamp: string;
     transactionHash: TransactionHash;
   };
