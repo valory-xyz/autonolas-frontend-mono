@@ -10,6 +10,7 @@ import {
 } from 'apps/docs/util/constants';
 import { COLOR } from '@autonolas-frontend-mono/ui-theme';
 import styled from 'styled-components';
+import Meta from '../Meta';
 
 const { Paragraph, Title, Text } = Typography;
 
@@ -166,6 +167,7 @@ const HowCanIGetInvolved = () => (
 
 export const HomePage = () => (
   <>
+    <Meta />
     <HeroSection />
     <ContentWrapper>
       <Content>

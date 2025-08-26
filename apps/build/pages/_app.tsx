@@ -1,10 +1,9 @@
 import type { NextPage, NextPageContext } from 'next';
-import { createWrapper } from 'next-redux-wrapper';
 
 /** antd theme config */
 import Layout from 'components/Layout';
-import Web3ModalProvider from '../context/web3ModalProvider';
-import initStore from '../store';
+// import Web3ModalProvider from '../context/web3ModalProvider';
+// import initStore from '../store';
 import { AutonolasThemeProvider, GlobalStyles } from 'libs/ui-theme/src';
 
 type MyAppProps = {
@@ -16,11 +15,9 @@ const MyApp = ({ Component, pageProps }: MyAppProps) => (
   <>
     <GlobalStyles />
     <AutonolasThemeProvider>
-      <Web3ModalProvider>
-        <Layout>
-          <Component {...pageProps} />
-        </Layout>
-      </Web3ModalProvider>
+      <Layout>
+        <Component {...pageProps} />
+      </Layout>
     </AutonolasThemeProvider>
   </>
 );
@@ -37,5 +34,4 @@ MyApp.getInitialProps = async ({
   return { pageProps };
 };
 
-const wrapper = createWrapper(initStore);
-export default wrapper.withRedux(MyApp);
+export default MyApp;
