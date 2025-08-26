@@ -74,7 +74,7 @@ const convertRequestToActivity = (request: Request): Activity => {
     transactionHash: deliveryTransactionHash,
     blockTimestamp: deliveryBlockTimestamp,
   } = delivery || {};
-  const { id: requestedBy } = sender;
+  const { id: requestedBy } = sender || {};
 
   return {
     activityType: 'Demand',
@@ -105,7 +105,7 @@ const convertDeliveryToActivity = (delivery: Delivery): Activity => {
     blockTimestamp: requestBlockTimestamp,
     transactionHash: requestTransactionHash,
   } = request || {};
-  const { id: requestedBy } = sender;
+  const { id: requestedBy } = sender || {};
 
   return {
     activityType: 'Supply',
