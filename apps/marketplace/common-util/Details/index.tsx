@@ -73,7 +73,9 @@ const getColumns = ({
           <Flex align="center" gap={8}>
             <AddressLink {...addressLinkProps} address={text} isIpfs />
           </Flex>
-        ) : null,
+        ) : (
+          NA
+        ),
     },
     {
       title: 'Requested By',
@@ -86,8 +88,7 @@ const getColumns = ({
       title: 'Delivered By',
       dataIndex: 'deliveredBy',
       key: 'deliveredBy',
-      render: (text: string) =>
-        text ? <AddressLink {...addressLinkProps} address={text} /> : null,
+      render: (text: string) => (text ? <AddressLink {...addressLinkProps} address={text} /> : NA),
     },
   ];
 };

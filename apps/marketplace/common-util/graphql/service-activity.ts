@@ -25,7 +25,6 @@ export const getQueryForServiceActivity = ({ serviceId }: { serviceId: string })
       id
       ipfsHash
       mech
-      sender
       blockTimestamp
       transactionHash
       service {
@@ -35,6 +34,9 @@ export const getQueryForServiceActivity = ({ serviceId }: { serviceId: string })
         ipfsHash
         blockTimestamp
         transactionHash
+        sender {
+          id
+        }
       }
     } 
   
@@ -93,16 +95,17 @@ const convertDeliveryToActivity = (delivery: Delivery): Activity => {
     id: requestId,
     ipfsHash: deliveryIpfsHash,
     mech: deliveredBy,
-    sender: requestedBy,
     blockTimestamp: deliveryBlockTimestamp,
     transactionHash: deliveryTransactionHash,
     request,
   } = delivery || {};
   const {
     ipfsHash: requestIpfsHash,
+    sender,
     blockTimestamp: requestBlockTimestamp,
     transactionHash: requestTransactionHash,
   } = request || {};
+  const { id: requestedBy } = sender;
 
   return {
     activityType: 'Supply',
