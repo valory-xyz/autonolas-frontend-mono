@@ -7,6 +7,8 @@ import {
   LAUNCH_SITE_URL,
   OLAS_SITE_URL,
   OPERATE_SITE_URL,
+  X_URL,
+  YOUTUBE_URL,
 } from 'apps/docs/util/constants';
 import { COLOR } from '@autonolas-frontend-mono/ui-theme';
 import styled from 'styled-components';
@@ -146,12 +148,12 @@ const HowCanIGetInvolved = () => (
       </div>
       <ul>
         <li>
-          <a href="https://x.com/autonolas" rel="noopener noreferrer" target="_blank">
+          <a href={X_URL} rel="noopener noreferrer" target="_blank">
             X
           </a>
         </li>
         <li>
-          <a href="https://www.youtube.com/@autonolas" rel="noopener noreferrer" target="_blank">
+          <a href={YOUTUBE_URL} rel="noopener noreferrer" target="_blank">
             Youtube
           </a>
         </li>

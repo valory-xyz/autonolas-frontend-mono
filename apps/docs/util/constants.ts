@@ -7,3 +7,6 @@ export const OPERATE_SITE_URL = 'operate.olas.network';
 export const BOND_SITE_URL = 'bond.olas.network';
 export const GOVERN_SITE_URL = 'govern.olas.network';
 export const LAUNCH_SITE_URL = 'launch.olas.network';
+
+export const X_URL = 'https://x.com/autonolas';
+export const YOUTUBE_URL = 'https://www.youtube.com/@autonolas';
