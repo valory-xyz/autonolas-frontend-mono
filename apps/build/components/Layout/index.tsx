@@ -18,9 +18,12 @@ const StyledHeader = styled(Header)`
 `;
 
 const items = [
-  { key: 'paths', label: 'Paths' },
+  // { key: 'paths', label: 'Paths' },
   { key: 'dev-incentives', label: 'Dev Rewards' },
-  { key: 'opportunities', label: 'Opportunities' },
+  { key: 'hire', label: 'Hire an Agent' },
+  { key: 'monetize', label: 'Monetize your Agent' },
+  { key: 'build', label: 'Build an Agent' },
+  // { key: 'opportunities', label: 'Opportunities' },
   { key: 'docs', label: 'Docs' },
 ];
 

@@ -57,9 +57,10 @@ const QuickStart = () => (
     </Title>
     <Paragraph>
       <ul>
+        {/* Links to disabled /paths page
         <li>
           <Link href="/paths">Select your builder path</Link>
-        </li>
+        </li> */}
         <li>
           <a href="https://open-autonomy.docs.autonolas.tech/">Read the developer documentation</a>
         </li>

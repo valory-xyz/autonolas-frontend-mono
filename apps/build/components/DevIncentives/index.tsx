@@ -11,6 +11,8 @@ const { Title, Paragraph } = Typography;
 
 const DevIncentivesContainer = styled.div`
   padding-bottom: 24px;
+  max-width: 1400px;
+  margin: auto;
 `;
 
 export const DevIncentives = () => (
