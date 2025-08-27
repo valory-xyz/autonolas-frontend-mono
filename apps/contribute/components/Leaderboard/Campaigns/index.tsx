@@ -140,9 +140,9 @@ const DESCRIPTION_BY_IDS: Record<string, React.ReactNode> = {
 
 const columns = [
   {
-    title: 'Hashtag',
+    title: 'Keyword',
     dataIndex: 'hashtag',
-    render: (hashtag: string) => `#${hashtag}`,
+    render: (hashtag: string) => hashtag,
     width: 120,
   },
   Table.EXPAND_COLUMN,
@@ -164,7 +164,7 @@ export const Campaigns = () => {
         <a href="https://x.com/autonolas" target="_blank" rel="noopener noreferrer">
           @autonolas
         </a>{' '}
-        or use at least one of the following tags in your post to earn leaderboard points and be
+        or use at least one of the following keywords in your post to earn leaderboard points and be
         eligible for staking rewards.
       </Paragraph>
       <Paragraph>
