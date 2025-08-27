@@ -9,7 +9,7 @@ export const Intro = ({ onNext }: { onNext: SetNextStep }) => (
   <Flex vertical align="center" gap={16}>
     <Image src={`/images/path/intro.svg`} alt="Intro" width={672} height={192} />
     <Title level={3} className="mb-0 mt-16">
-      Launch your own agent economy with Olas
+      Launch your own AI agent economy with Olas
     </Title>
     <Paragraph type="secondary" className="mb-0">
       Create and deploy entire AI agent economies within your ecosystem efficiently. Here is a

@@ -126,7 +126,7 @@ export const ContractsList = ({ isUpdating, handleAdd, allocations }: ContractsL
         All staking contracts
       </Title>
       <Paragraph type="secondary" className="mt-8">
-        Decide which staking contracts receive the most incentives, attract the most agents, and
+        Decide which staking contracts receive the most incentives, attract the most AI agents, and
         grow.
       </Paragraph>
       <Table

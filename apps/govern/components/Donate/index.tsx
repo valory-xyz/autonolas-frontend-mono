@@ -144,8 +144,8 @@ export const DonatePage = () => {
           Donate
         </Title>
         <Paragraph>
-          Show appreciation for the value of an autonomous service by making a donation. The
-          protocol will reward devs who have contributed code for that service.
+          Show appreciation for the value of a decentralized AI by making a donation. The protocol
+          will reward devs who have contributed code for that service.
         </Paragraph>
 
         <Alert

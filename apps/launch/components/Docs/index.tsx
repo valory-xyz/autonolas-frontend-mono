@@ -54,8 +54,8 @@ const HeroSection = () => (
 const Intro = () => (
   <>
     <Paragraph className="mb-8 mt-20">
-      Olas allows anyone to create staking contracts and commission AI agent work aligned with their
-      goals.
+      <Text strong>Olas</Text> allows anyone to create staking contracts and commission AI agent
+      work aligned with their goals.
     </Paragraph>
     <Paragraph>
       <Link href="https://olas.network/staking">Olas Staking</Link> is based on
@@ -153,8 +153,8 @@ const StepByStep = () => (
 
     <Paragraph>
       Promote your staking contract to <Text strong>veOLAS holders</Text> to attract votes.
-      Contracts that receive at least 0.5% of total veOLAS votes across all staking contracts in the
-      current epoch become eligible for OLAS emissions.
+      Contracts that receive at least <Text strong>0.5%</Text> of total veOLAS votes across all
+      staking contracts in the current epoch become eligible for OLAS emissions.
     </Paragraph>
 
     <Paragraph>
