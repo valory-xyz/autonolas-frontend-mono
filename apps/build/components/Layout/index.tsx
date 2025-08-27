@@ -27,6 +27,8 @@ const items = [
   { key: 'docs', label: 'Docs' },
 ];
 
+const DEFAULT_TAB = 'dev-incentives';
+
 const NavigationBar = ({ children }: { children: React.ReactNode }) => {
   const router = useRouter();
   const [selectedMenu, setSelectedMenu] = useState<string | null>(null);
@@ -35,7 +37,7 @@ const NavigationBar = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     if (router.pathname) {
       const name = router.pathname.split('/')[1];
-      setSelectedMenu(name || items[3].key);
+      setSelectedMenu(name || DEFAULT_TAB);
     }
   }, [router.pathname]);
 
@@ -57,7 +59,7 @@ const NavigationBar = ({ children }: { children: React.ReactNode }) => {
         <Menu
           theme="light"
           mode="horizontal"
-          selectedKeys={[selectedMenu || 'build']}
+          selectedKeys={[selectedMenu || DEFAULT_TAB]}
           onClick={handleMenuItemClick}
           items={items}
         />
