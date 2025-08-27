@@ -1,6 +1,5 @@
 import { Divider, Flex, Typography } from 'antd';
 import { COLOR } from 'libs/ui-theme/src';
-import Link from 'next/link';
 import styled from 'styled-components';
 
 const { Paragraph, Title, Text } = Typography;
@@ -57,9 +56,10 @@ const QuickStart = () => (
     </Title>
     <Paragraph>
       <ul>
+        {/* Links to disabled /paths page
         <li>
           <Link href="/paths">Select your builder path</Link>
-        </li>
+        </li> */}
         <li>
           <a href="https://open-autonomy.docs.autonolas.tech/">Read the developer documentation</a>
         </li>

@@ -20,7 +20,7 @@ const nextConfig = {
   redirects: async () => [
     {
       source: '/',
-      destination: '/paths',
+      destination: '/dev-incentives',
       permanent: false,
     },
   ],

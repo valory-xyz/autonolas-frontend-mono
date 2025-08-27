@@ -18,11 +18,16 @@ const StyledHeader = styled(Header)`
 `;
 
 const items = [
-  { key: 'paths', label: 'Paths' },
+  // { key: 'paths', label: 'Paths' },
+  { key: 'hire', label: 'Hire an Agent' },
+  { key: 'monetize', label: 'Monetize your Agent' },
+  { key: 'build', label: 'Build an Agent' },
   { key: 'dev-incentives', label: 'Dev Rewards' },
-  { key: 'opportunities', label: 'Opportunities' },
+  // { key: 'opportunities', label: 'Opportunities' },
   { key: 'docs', label: 'Docs' },
 ];
+
+const DEFAULT_TAB = 'dev-incentives';
 
 const NavigationBar = ({ children }: { children: React.ReactNode }) => {
   const router = useRouter();
@@ -32,7 +37,7 @@ const NavigationBar = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     if (router.pathname) {
       const name = router.pathname.split('/')[1];
-      setSelectedMenu(name || items[0].key);
+      setSelectedMenu(name || DEFAULT_TAB);
     }
   }, [router.pathname]);
 
@@ -54,7 +59,7 @@ const NavigationBar = ({ children }: { children: React.ReactNode }) => {
         <Menu
           theme="light"
           mode="horizontal"
-          selectedKeys={[selectedMenu || 'build']}
+          selectedKeys={[selectedMenu || DEFAULT_TAB]}
           onClick={handleMenuItemClick}
           items={items}
         />
