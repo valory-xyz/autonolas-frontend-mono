@@ -35,7 +35,7 @@ const NavigationBar = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     if (router.pathname) {
       const name = router.pathname.split('/')[1];
-      setSelectedMenu(name || items[0].key);
+      setSelectedMenu(name || items[3].key);
     }
   }, [router.pathname]);
 

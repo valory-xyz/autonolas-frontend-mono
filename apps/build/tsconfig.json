@@ -47,5 +47,5 @@
     "next-env.d.ts",
     "**/*.ts",
     "**/*.tsx"
-, "components/BuildAnAgent"  ]
+  ]
 }

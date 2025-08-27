@@ -1,6 +1,5 @@
 import { Divider, Flex, Typography } from 'antd';
 import { COLOR } from 'libs/ui-theme/src';
-import Link from 'next/link';
 import styled from 'styled-components';
 
 const { Paragraph, Title, Text } = Typography;
