@@ -6,7 +6,7 @@ const { Title, Paragraph } = Typography;
 
 export const HowToUseOlasContribute = () => (
   <div id={DOCS_SECTIONS['how-to-use']}>
-    <Title level={2}>Post</Title>
+    <Title level={2}>How to Use Olas Contribute</Title>
     <Paragraph>
       <ul>
         <li>Complete actions to earn points.</li>

@@ -65,7 +65,7 @@ describe('<ContractsList />', () => {
     expect(screen.getByText(/All staking contracts/)).toBeInTheDocument();
     expect(
       screen.getByText(
-        /Decide which staking contracts receive the most incentives, attract the most agents, and grow./,
+        /Decide which staking contracts receive the most incentives, attract the most AI agents, and grow./,
       ),
     ).toBeInTheDocument();
   });

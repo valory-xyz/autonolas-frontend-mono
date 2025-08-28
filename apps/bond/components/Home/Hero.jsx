@@ -41,7 +41,7 @@ export const Hero = () => {
           <Col md={12} xs={24}>
             <Flex vertical gap={16} style={{ height: '100%' }}>
               <Typography.Title level={1} className="mt-0 mb-0">
-                Pool. Bridge. Bond.
+                Start Earning OLAS in 3 Steps: Pool. Bridge. Bond
               </Typography.Title>
               <Typography.Text>
                 Pick a path and bond into the Olas protocol for the potential to receive discounted
