@@ -19,7 +19,9 @@ import { DetailsSubInfo } from './DetailsSubInfo';
 import { DetailsTable, DetailsTitle, Header } from './styles';
 import { ActivityDetails } from './ActivityDetails';
 import { useDetails } from './useDetails';
+import { useMetadata } from '../hooks/useMetadata';
 import { isMarketplaceSupportedNetwork } from 'common-util/functions';
+import { NftImage } from './NFTImage';
 
 const getColumns = ({
   addressLinkProps,
@@ -136,6 +138,8 @@ export const Details: FC<DetailsProps> = ({
     getOwner,
     getTokenUri,
   });
+
+  const { nftImageUrl } = useMetadata(tokenUri);
 
   const [currentTab, setCurrentTab] = useState<CurrentTab>(null);
   const [activityRows, setActivityRows] = useState<Activity[]>([]);
@@ -329,7 +333,11 @@ export const Details: FC<DetailsProps> = ({
                   ? renderServiceState({ isOwner, details: info, updateDetails })
                   : null}
               </>
-            ) : null}
+            ) : (
+              // NftImage for "ai-agents" is shown in `DetailsSubInfo` component
+              // in the left column & for "agent-blueprints" and "component" is shown here
+              <NftImage imageUrl={nftImageUrl} />
+            )}
           </Col>
         </Row>
       ) : null}
