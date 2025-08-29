@@ -1,6 +1,6 @@
 import styled from 'styled-components';
 import { Typography } from 'antd';
-import { COLOR } from '@autonolas/frontend-library';
+import { COLOR } from '@autonolas-frontend-mono/ui-theme';
 import { OPERATOR_NAME } from 'apps/docs/util/constants';
 
 const FooterContainer = styled.div`

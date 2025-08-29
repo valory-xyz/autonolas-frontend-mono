@@ -1,5 +1,5 @@
-import { COLOR, MEDIA_QUERY } from '@autonolas/frontend-library';
 import styled from 'styled-components';
+import { COLOR, MEDIA_QUERY } from '@autonolas-frontend-mono/ui-theme';
 
 const StyledBanner = styled.div`
   background-color: ${COLOR.BLACK};

@@ -1,16 +1,17 @@
 import { Divider, Flex, Typography } from 'antd';
 import {
-  BOND_SITE_URL,
-  BUILD_SITE_URL,
-  CONTRIBUTE_SITE_URL,
+  BOND_URL,
+  BUILD_URL,
+  CONTRIBUTE_URL,
   DISCORD_INVITE_URL,
-  GOVERN_SITE_URL,
-  LAUNCH_SITE_URL,
-  OLAS_SITE_URL,
-  OPERATE_SITE_URL,
+  GOVERN_URL,
+  LAUNCH_URL,
+  SITE_URL,
+  OPERATE_URL,
   X_URL,
   YOUTUBE_URL,
-} from 'apps/docs/util/constants';
+  STACK_URL,
+} from 'libs/util-constants/src';
 import { COLOR } from '@autonolas-frontend-mono/ui-theme';
 import styled from 'styled-components';
 import Meta from '../Meta';
@@ -43,6 +44,52 @@ const Content = styled.div`
   margin: 0 auto;
 `;
 
+const roles = [
+  {
+    name: 'Builders',
+    url: BUILD_URL,
+  },
+  {
+    name: 'Contributors',
+    url: CONTRIBUTE_URL,
+  },
+  {
+    name: 'Operators',
+    url: OPERATE_URL,
+  },
+  {
+    name: 'Bonders',
+    url: BOND_URL,
+  },
+  {
+    name: 'Govern',
+    url: GOVERN_URL,
+  },
+  {
+    name: 'Launch',
+    url: LAUNCH_URL,
+  },
+];
+
+const socials = [
+  {
+    name: 'X',
+    url: X_URL,
+  },
+  {
+    name: 'YouTube',
+    url: YOUTUBE_URL,
+  },
+  {
+    name: 'Discord',
+    url: DISCORD_INVITE_URL,
+  },
+  {
+    name: 'Blog',
+    url: `${SITE_URL}/blog`,
+  },
+];
+
 const HeroSection = () => (
   <Hero className="p-24">
     <Flex align="center" vertical gap={16}>
@@ -70,10 +117,10 @@ const WhatIsOlas = () => (
       <div className="mb-12">Understand the mission, vision, and roadmap of Olas.</div>
       <ul>
         <li>
-          <a href={`${OLAS_SITE_URL}/about`}>About Olas</a>
+          <a href={`${SITE_URL}/about`}>About Olas</a>
         </li>
         <li>
-          <a href={`${OLAS_SITE_URL}/roadmap`}>Roadmap</a>
+          <a href={`${SITE_URL}/roadmap`}>Roadmap</a>
         </li>
       </ul>
     </Paragraph>
@@ -88,22 +135,22 @@ const WhatCanIUse = () => (
     <Paragraph>
       <ul>
         <li>
-          <a href={`${OLAS_SITE_URL}/pearl`}>Pearl (AI Agent App Store)</a>
+          <a href={`${SITE_URL}/pearl`}>Pearl (AI Agent App Store)</a>
           <div className="mb-8">
             A world of AI agents owned by you, in one app. From asset managers to custom AI
             influencers, Pearl lets you run your agents on a device you control, stake OLAS for
             potential rewards, and benefit from your agents. The list of agents available in Pearl
-            can be found <a href={`${OLAS_SITE_URL}/agents`}>here</a>.
+            can be found <a href={`${SITE_URL}/agents`}>here</a>.
           </div>
         </li>
         <li>
-          <a href={`${OLAS_SITE_URL}/mech-marketplace`}>Mech Marketplace (AI Agent Bazaar)</a>
+          <a href={`${SITE_URL}/mech-marketplace`}>Mech Marketplace (AI Agent Bazaar)</a>
           <div className="mb-8">
             The first decentralized marketplace where you can hire or offer AI agent services.
           </div>
         </li>
         <li>
-          <a href={`${OLAS_SITE_URL}/olas-token`}>Olas Token</a>
+          <a href={`${SITE_URL}/olas-token`}>Olas Token</a>
           <div>OLAS token provides access to the core functions of the Olas network.</div>
         </li>
       </ul>
@@ -122,24 +169,11 @@ const HowCanIGetInvolved = () => (
         ecosystem.
       </div>
       <ul>
-        <li>
-          <a href={BUILD_SITE_URL}>Builders</a>
-        </li>
-        <li>
-          <a href={CONTRIBUTE_SITE_URL}>Contributors</a>
-        </li>
-        <li>
-          <a href={OPERATE_SITE_URL}>Operators</a>
-        </li>
-        <li>
-          <a href={BOND_SITE_URL}>Bonders</a>
-        </li>
-        <li>
-          <a href={GOVERN_SITE_URL}>Governors</a>
-        </li>
-        <li>
-          <a href={LAUNCH_SITE_URL}>Launchers</a>
-        </li>
+        {roles.map((role) => (
+          <li key={role.name}>
+            <a href={role.url}>{role.name}</a>
+          </li>
+        ))}
       </ul>
     </Paragraph>
     <Paragraph>
@@ -147,25 +181,43 @@ const HowCanIGetInvolved = () => (
         <Text strong>Community and Communication</Text>
       </div>
       <ul>
+        {socials.map((social) => (
+          <li key={social.name}>
+            <a href={social.url} rel="noopener noreferrer" target="_blank">
+              {social.name}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </Paragraph>
+  </>
+);
+
+const FindTheDocs = () => (
+  <>
+    <Title level={4} className="mb-16">
+      But where can I find “the docs” on the Olas stack?
+    </Title>
+    <Paragraph>
+      <div className="mb-12">You can build agents on Olas:</div>
+      <ul>
         <li>
-          <a href={X_URL} rel="noopener noreferrer" target="_blank">
-            X
-          </a>
+          with Olas&apos;s own agent framework →{' '}
+          <a href={`${STACK_URL}/open-autonomy`}>Open Autonomy</a>
         </li>
         <li>
-          <a href={YOUTUBE_URL} rel="noopener noreferrer" target="_blank">
-            Youtube
-          </a>
+          with other agent frameworks → <a href={`${STACK_URL}/olas-sdk`}>Olas SDK</a>
         </li>
+      </ul>
+    </Paragraph>
+    <Paragraph>
+      <div className="mb-12">
+        You can monetize your agent on Olas →{' '}
+        <a href={`${STACK_URL}/mech-tools-dev`}>Mech Marketplace</a>.
+      </div>
+      <ul>
         <li>
-          <a href={`${OLAS_SITE_URL}/blog`} rel="noopener noreferrer" target="_blank">
-            Blog
-          </a>
-        </li>
-        <li>
-          <a href={DISCORD_INVITE_URL} rel="noopener noreferrer" target="_blank">
-            Discord
-          </a>
+          For the full technical documentation visit <a href={STACK_URL}>stack.olas.network</a>.
         </li>
       </ul>
     </Paragraph>
@@ -185,6 +237,8 @@ export const HomePage = () => (
         <WhatCanIUse />
         <Divider style={DIVIDER_STYLE} />
         <HowCanIGetInvolved />
+        <Divider style={DIVIDER_STYLE} />
+        <FindTheDocs />
       </Content>
     </ContentWrapper>
   </>

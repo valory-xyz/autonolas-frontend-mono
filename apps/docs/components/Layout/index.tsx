@@ -1,6 +1,6 @@
 import { Flex, Layout } from 'antd';
 import styled from 'styled-components';
-import { COLOR } from '@autonolas/frontend-library';
+import { COLOR } from '@autonolas-frontend-mono/ui-theme';
 import Link from 'next/link';
 import { CustomLayout } from './styles';
 import { Logo } from '../Branding/Logo';
