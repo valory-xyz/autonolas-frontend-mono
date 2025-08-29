@@ -2,8 +2,6 @@ import type { NextPage, NextPageContext } from 'next';
 
 /** antd theme config */
 import Layout from 'components/Layout';
-// import Web3ModalProvider from '../context/web3ModalProvider';
-// import initStore from '../store';
 import { AutonolasThemeProvider, GlobalStyles } from 'libs/ui-theme/src';
 
 type MyAppProps = {
