@@ -152,7 +152,9 @@ export const Campaigns = () => {
   const { moduleDetails, isModuleDetailsLoading: isLoading } = useAppSelector(
     (state) => state.setup,
   );
-  const twitterCampaigns = moduleDetails?.twitter_campaigns?.campaigns;
+  const activeTwitterCampaigns = (moduleDetails?.twitter_campaigns?.campaigns || []).filter(
+    (campaign) => campaign.status === 'live',
+  );
 
   return (
     <Card>
@@ -172,7 +174,7 @@ export const Campaigns = () => {
       </Paragraph>
       <Table
         columns={columns}
-        dataSource={twitterCampaigns}
+        dataSource={activeTwitterCampaigns}
         expandable={{
           expandIcon: ({ onExpand, record }) => {
             const Icon = ReadOutlined;
