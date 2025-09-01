@@ -16,9 +16,51 @@ const Description = styled.div`
 `;
 
 const DESCRIPTION_BY_IDS: Record<string, React.ReactNode> = {
-  OlasAgents: (
+  ['Agents Unleashed Singapore']: (
     <Description>
-      Spread the word about Olas’ dominance in enabling{' '}
+      🔥 Hype up the premier Crypto x AI side event at TOKEN2049 Singapore this year,{' '}
+      <b>Agents Unleashed Singapore: The Next Wave.</b> Share venue pics, agenda, your excitement
+      and why it&apos;s a <i>must-attend</i> event. Tag your friends, build excitement, share
+      previous{' '}
+      <a
+        href="https://www.youtube.com/@autonolas/playlists"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        YouTube videos
+      </a>
+      {', '}
+      <a href="https://x.com/autonolas" target="_blank" rel="noopener noreferrer">
+        photos
+      </a>{' '}
+      from previous events, and drive{' '}
+      <b>
+        registrations at this{' '}
+        <a href="https://luma.com/h0zgn96s" target="_blank" rel="noopener noreferrer">
+          link
+        </a>
+        .
+      </b>
+    </Description>
+  ),
+  ['Co-own AI']: (
+    <Description>
+      AI shouldn&apos;t be rented by the few, it should be owned by all. Spread this message and
+      share how Olas is building the future of <b>co-owned AI</b> as one of the OG AI Agent project
+      in the space. Tell people{' '}
+      <a href="https://olas.network/about" target="_blank" rel="noopener noreferrer">
+        what co-owned AI is
+      </a>
+      , how Olas is working towards that mission, and how they can{' '}
+      <a href="https://olas.network/" target="_blank" rel="noopener noreferrer">
+        get started
+      </a>
+      . 🟪
+    </Description>
+  ),
+  ['Olas AI Agents']: (
+    <Description>
+      Spread the word about Olas&apos; dominance in enabling{' '}
       <a
         href="https://x.com/autonolas/status/1864671146702155938"
         target="_blank"
@@ -35,105 +77,6 @@ const DESCRIPTION_BY_IDS: Record<string, React.ReactNode> = {
         Olas Agents ↗
       </a>
       , and more. Share the link to running agents via Pearl.
-    </Description>
-  ),
-  OlasNetwork: (
-    <Description>
-      Educate others about{' '}
-      <a href="https://olas.network/" target="_blank" rel="noopener noreferrer">
-        Olas
-      </a>
-      , its leadership in the{' '}
-      <a
-        href="https://x.com/autonolas/status/1864671146702155938"
-        target="_blank"
-        rel="noopener noreferrer"
-      >
-        Agent ↗
-      </a>{' '}
-      space, and the many ways to{' '}
-      <a href="https://olas.network#get-involved" target="_blank" rel="noopener noreferrer">
-        co-own AI
-      </a>{' '}
-      & contribute to Olas with one of the six roles:{' '}
-      <a href="https://olas.network/contribute" target="_blank" rel="noopener noreferrer">
-        Contributor
-      </a>
-      ,{' '}
-      <a href="https://olas.network/operate" target="_blank" rel="noopener noreferrer">
-        Operator
-      </a>
-      ,{' '}
-      <a href="https://olas.network/launch" target="_blank" rel="noopener noreferrer">
-        Launcher
-      </a>
-      ,{' '}
-      <a href="https://olas.network/build" target="_blank" rel="noopener noreferrer">
-        Builder
-      </a>
-      ,{' '}
-      <a href="https://olas.network/govern" target="_blank" rel="noopener noreferrer">
-        Governor
-      </a>
-      ,{' '}
-      <a href="https://olas.network/bond" target="_blank" rel="noopener noreferrer">
-        Bonder
-      </a>
-      .
-    </Description>
-  ),
-  StakeWithPearl: (
-    <Description>
-      Talk about{' '}
-      <a href="https://olas.network/operate" target="_blank" rel="noopener noreferrer">
-        Pearl
-      </a>{' '}
-      — easily running agents,{' '}
-      <a href="https://operate.olas.network/contracts" target="_blank" rel="noopener noreferrer">
-        staking
-      </a>{' '}
-      OLAS, earning potential rewards, and product updates. Share your journey or even{' '}
-      <a
-        href="https://olas.network/blog/the-3-step-guide-to-start-running-agents-with-pearl"
-        target="_blank"
-        rel="noopener noreferrer"
-      >
-        tips to get started
-      </a>{' '}
-      with the link to{' '}
-      <a href="https://olas.network/operate" target="_blank" rel="noopener noreferrer">
-        Pearl
-      </a>
-      .
-    </Description>
-  ),
-  AgentsUnleashed: (
-    <Description>
-      Fuel the hype for the global{' '}
-      <a
-        href="https://lu.ma/calendar/cal-jzVaHMZnzkjYEyd"
-        target="_blank"
-        rel="noopener noreferrer"
-      >
-        Agents Unleashed ↗
-      </a>{' '}
-      events! Share your favorite moments, photos, or{' '}
-      <a
-        href="https://www.youtube.com/@autonolas/playlists"
-        target="_blank"
-        rel="noopener noreferrer"
-      >
-        YouTube ↗
-      </a>{' '}
-      videos. Share the link to register for the next event or the official event{' '}
-      <a
-        href="https://lu.ma/calendar/cal-jzVaHMZnzkjYEyd"
-        target="_blank"
-        rel="noopener noreferrer"
-      >
-        calendar ↗
-      </a>
-      .
     </Description>
   ),
 };
