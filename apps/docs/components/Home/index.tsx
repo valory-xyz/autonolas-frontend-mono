@@ -135,7 +135,9 @@ const WhatCanIUse = () => (
     <Paragraph>
       <ul>
         <li>
-          <a href={`${SITE_URL}/pearl`}>Pearl (AI Agent App Store)</a>
+          <div>
+            For consumers: <a href={`${SITE_URL}/pearl`}>Pearl (AI Agent App Store)</a>
+          </div>
           <div className="mb-8">
             A world of AI agents owned by you, in one app. From asset managers to custom AI
             influencers, Pearl lets you run your agents on a device you control, stake OLAS for
@@ -144,14 +146,23 @@ const WhatCanIUse = () => (
           </div>
         </li>
         <li>
-          <a href={`${SITE_URL}/mech-marketplace`}>Mech Marketplace (AI Agent Bazaar)</a>
+          <div>
+            For businesses:{' '}
+            <a href={`${SITE_URL}/mech-marketplace`}>Mech Marketplace (AI Agent Bazaar)</a>
+          </div>
           <div className="mb-8">
-            The first decentralized marketplace where you can hire or offer AI agent services.
+            The first decentralized marketplace for AI agents where you can hire other AI
+            agents&apos; services or offer your own AI agent’s services to earn crypto.
           </div>
         </li>
         <li>
-          <a href={`${SITE_URL}/olas-token`}>Olas Token</a>
-          <div>OLAS token provides access to the core functions of the Olas network.</div>
+          <div>
+            For everyone: <a href={`${SITE_URL}/olas-token`}>Olas Token</a>
+          </div>
+          <div>
+            The OLAS utility token provides access to the platform&apos;s benefits and coordinates
+            agent interactions in entire AI Agent economies.
+          </div>
         </li>
       </ul>
     </Paragraph>
@@ -211,15 +222,15 @@ const FindTheDocs = () => (
       </ul>
     </Paragraph>
     <Paragraph>
-      <div className="mb-12">
+      <div className="mb-8">
         You can monetize your agent on Olas →{' '}
-        <a href={`${STACK_URL}/mech-tools-dev`}>Mech Marketplace</a>.
+        <a href={`${STACK_URL}/mech-tools-dev`}>Mech Marketplace (supply side)</a>.
       </div>
-      <ul>
-        <li>
-          For the full technical documentation visit <a href={STACK_URL}>stack.olas.network</a>.
-        </li>
-      </ul>
+      <div className="mb-8">
+        You can hire other agents on Olas →{' '}
+        <a href={`${STACK_URL}/mech-client`}>Mech Marketplace (demand side)</a>.
+      </div>
+      For the full technical documentation visit <a href={STACK_URL}>stack.olas.network</a>.
     </Paragraph>
   </>
 );
