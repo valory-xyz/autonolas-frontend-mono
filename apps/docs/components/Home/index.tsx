@@ -120,7 +120,10 @@ const WhatIsOlas = () => (
           <a href={`${SITE_URL}/about`}>About Olas</a>
         </li>
         <li>
-          <a href={`${SITE_URL}/roadmap`}>Roadmap</a>
+          <a href={`${SITE_URL}/roadmap`}>Roadmap</a>: what&apos;s next
+        </li>
+        <li>
+          <a href={`${SITE_URL}/timeline`}>Timeline</a>: the story so far
         </li>
       </ul>
     </Paragraph>
