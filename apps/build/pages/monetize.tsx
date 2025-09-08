@@ -1,10 +1,10 @@
-import { ContentComing } from 'components/ContentComing';
 import Meta from 'components/Meta';
+import { MonetizeYourAgent } from 'components/MonetizeYourAgent';
 
 const MonetizePage = () => (
   <>
     <Meta title="Monetize your Agent" description="" path="monetize" />
-    <ContentComing />
+    <MonetizeYourAgent />
   </>
 );
 
