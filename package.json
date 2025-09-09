@@ -6,7 +6,7 @@
   "private": true,
   "dependencies": {
     "@ant-design/cssinjs": "1.16.2",
-    "@ant-design/icons": "5.2.6",
+    "@ant-design/icons": "5.4.0",
     "@apollo/client": "3.8.5",
     "@autonolas/frontend-library": "0.4.25",
     "@balancer-labs/sdk": "1.1.5",
@@ -31,7 +31,7 @@
     "@web3inbox/core": "0.0.22",
     "@web3inbox/widget-react": "0.6.25",
     "@web3modal/wagmi": "4.0.13",
-    "antd": "5.9.0",
+    "antd": "5.12.8",
     "axios": "1.2.1",
     "bignumber.js": "9.1.2",
     "cors": "2.8.5",
