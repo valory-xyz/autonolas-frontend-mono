@@ -1,4 +1,3 @@
-import { QueryClient } from '@tanstack/react-query';
 import { WEB3AUTH_NETWORK } from '@web3auth/modal';
 import {
   type Web3AuthContextConfig,
@@ -36,12 +35,8 @@ const web3AuthContextConfig: Web3AuthContextConfig = {
   },
 };
 
-const queryClient = new QueryClient();
-
 export const Web3AuthProvider = ({ children }: PropsWithChildren) => {
   return (
-    <Web3AuthPackageProvider config={web3AuthContextConfig}>
-          {children}
-    </Web3AuthPackageProvider>
+    <Web3AuthPackageProvider config={web3AuthContextConfig}>{children}</Web3AuthPackageProvider>
   );
 };

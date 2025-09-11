@@ -1,12 +1,19 @@
+import { createGlobalStyle } from 'styled-components';
 import { Maybe } from '@web3auth/modal';
 import { useWeb3Auth, useWeb3AuthConnect, useWeb3AuthDisconnect } from '@web3auth/modal/react';
 import { Web3AuthProvider } from 'context/Web3AuthProvider';
 import { useEffect, useRef } from 'react';
-import { WEB3AUTH_AUTH_SUCCESS_URL } from 'util/constants';
+import { WEB3AUTH_AUTH_SUCCESS_URL, WEB3AUTH_MODAL_CLOSED_URL } from 'util/constants';
 import { Address } from 'viem';
 
+export const Styles = createGlobalStyle`
+  .w3a-parent-container > div {
+    background-color: rgba(0, 0, 0, 0.45) !important;
+  }
+`;
+
 const Web3AuthModal = () => {
-  const { provider, isInitialized } = useWeb3Auth();
+  const { provider, isInitialized, web3Auth } = useWeb3Auth();
   const { connect, isConnected } = useWeb3AuthConnect();
   const { disconnect } = useWeb3AuthDisconnect();
   const isAddressUpdated = useRef(false);
@@ -41,15 +48,34 @@ const Web3AuthModal = () => {
     if (isConnected) {
       getAccountAddressAndDisconnect();
     }
-  }, [disconnect, isConnected, provider, ]);
+  }, [disconnect, isConnected, provider]);
+
+  useEffect(() => {
+    // Notify if modal is closed
+    if (!web3Auth) return;
+
+    const handleClose = (isVisible: boolean) => {
+      if (!isVisible && !isConnected) {
+        window.location.href = WEB3AUTH_MODAL_CLOSED_URL;
+      }
+    };
+    web3Auth.on('MODAL_VISIBILITY', handleClose);
+    return () => {
+      web3Auth.off('MODAL_VISIBILITY', handleClose);
+    };
+  }, [web3Auth, isConnected]);
 
   return <div></div>;
 };
 
 export default function Page() {
   return (
-    <Web3AuthProvider>
-      <Web3AuthModal />
-    </Web3AuthProvider>
+    <>
+      <Styles />
+      
+      <Web3AuthProvider>
+        <Web3AuthModal />
+      </Web3AuthProvider>
+    </>
   );
 }
