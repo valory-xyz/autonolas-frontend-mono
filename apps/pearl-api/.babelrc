@@ -1,0 +1,16 @@
+{
+  "presets": ["next/babel"],
+  "plugins": [
+    [
+      "module-resolver",
+      {
+        "extensions": [".js", ".jsx"],
+        "alias": {
+          "util": "./util",
+          "context": "./context"
+        }
+      }
+    ],
+    ["import", { "libraryName": "antd", "libraryDirectory": "lib", "style": true }]
+  ]
+}
