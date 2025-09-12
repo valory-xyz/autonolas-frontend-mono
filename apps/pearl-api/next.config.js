@@ -17,12 +17,6 @@ const nextConfig = {
     // For other options, see https://styled-components.com/docs/tooling#babel-plugin
     styledComponents: true,
   },
-  webpack(config) {
-    config.resolve.fallback = {
-      fs: false,
-    };
-    return config;
-  },
 };
 
 const plugins = [
