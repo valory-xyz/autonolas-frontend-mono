@@ -1,8 +1,9 @@
-import { Typography } from 'antd';
+import { Alert, Button, Flex, Typography } from 'antd';
+import { CodeBlock } from 'components/CodeBlock';
 import styled from 'styled-components';
 import { PageWrapper } from 'util/theme';
 
-const { Title, Paragraph } = Typography;
+const { Title, Text, Paragraph } = Typography;
 
 const HireContainer = styled.div`
   padding-bottom: 24px;
@@ -13,51 +14,81 @@ const HireContainer = styled.div`
   }
 `;
 
+const Prerequisites = () => (
+  <div>
+    <Title level={4}>Prerequisites</Title>
+    <CodeBlock>Python &gt;=3.10</CodeBlock>
+    <CodeBlock>Poetry &gt;=1.4.0 && &lt;2.x</CodeBlock>
+  </div>
+);
+
+const quickstartItems = [
+  {
+    title: 'Install Marketplace Client',
+    codeBlocks: ['poetry new my_prj && cd my_prj', 'poetry add mech-client'],
+  },
+  {
+    title: 'Configure Your Client',
+    codeBlocks: ['echo -n YOUR_PRIVATE_KEY > ethereum_private_key.txt', 'cp .example.env .env'],
+    moreText: 'Optional: For improved reliability, update .env with your custom RPC endpoints.',
+  },
+  {
+    title: 'Hire On-chain Agent',
+    codeBlocks: [
+      'mechx interact --prompts “Estimate the chance that Ethereum volatility exceeds 50,000 by the end of 2030” --priority-mech 0xb3c6319962484602b00d5587e965946890b82101 --tools superforcaster --chain-config gnosis',
+    ],
+  },
+];
+
+const Quickstart = () => (
+  <Flex gap={24} vertical>
+    <div>
+      <Title level={4}>Quickstart</Title>
+      <Text>Get started with hiring an agent in three easy steps:</Text>
+    </div>
+    <ol className="mt-0">
+      {quickstartItems.map((item) => (
+        <li key={item.title} className="mb-20">
+          <Paragraph>
+            <Text strong>{item.title}</Text>
+          </Paragraph>
+          <div>
+            {item.codeBlocks.map((block, index) => (
+              <CodeBlock key={`${item.title}${index}`} canCopy>
+                {block}
+              </CodeBlock>
+            ))}
+            {item.moreText}
+          </div>
+        </li>
+      ))}
+    </ol>
+  </Flex>
+);
+
+const AlertMessage = (
+  <>
+    <p className="mt-0">
+      This quickstart covers the basics. For full details and advanced options, see the Olas Stack
+      Documentation.
+    </p>
+    <Button type="default" size="large">
+      <a href="https://stack.olas.network/mech-client/">Explore Documentation</a>
+    </Button>
+  </>
+);
+
 export const HireAnAgent = () => (
   <PageWrapper>
     <HireContainer>
-      <Title level={2} className="mt-0">
-        Hire an Agent
+      <Title level={2} className="mb-0">
+        Hire an Agent on Olas Marketplace
       </Title>
-      <Paragraph style={{ maxWidth: 550 }}>
-        Prerequisites: Python &gt;=3.10, Poetry &gt;=1.4.0 &amp;&amp; &lt;2.x
-      </Paragraph>
-      <Paragraph>
-        <div style={{ paddingBottom: 12 }}>
-          Get started with hiring an agent in three easy steps:
-        </div>
-        <ol>
-          <li>
-            Install marketplace client
-            <ol className="lower-alpha">
-              <li>poetry new my_prj && cd my_prj</li>
-              <li>poetry add mech-client</li>
-            </ol>
-          </li>
-          <li>
-            Configure your client
-            <ol className="lower-alpha">
-              <li>echo -n YOUR_PRIVATE_KEY &gt; ethereum_private_key.txt</li>
-              <li>cp .example.env .env</li>
-              <li>
-                Optional: For improved reliability, update .env with your custom RPC endpoints.
-              </li>
-              <li>source .env</li>
-            </ol>
-          </li>
-          <li>
-            Hire an on-chain agent
-            <ol className="lower-alpha">
-              <li>
-                mechx interact --prompts “Estimate the chance that Ethereum volatility exceeds
-                50,000 by the end of 2030” --priority-mech
-                0xb3c6319962484602b00d5587e965946890b82101 --tools superforcaster --chain-config
-                gnosis
-              </li>
-            </ol>
-          </li>
-        </ol>
-      </Paragraph>
+      <Flex gap={12} vertical>
+        <Prerequisites />
+        <Quickstart />
+        <Alert message={AlertMessage} type="info" showIcon />
+      </Flex>
     </HireContainer>
   </PageWrapper>
 );

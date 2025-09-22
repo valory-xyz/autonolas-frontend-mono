@@ -1,8 +1,9 @@
-import { Typography } from 'antd';
+import { Alert, Button, Flex, Typography } from 'antd';
+import { CodeBlock } from 'components/CodeBlock';
 import styled from 'styled-components';
 import { PageWrapper } from 'util/theme';
 
-const { Title, Paragraph } = Typography;
+const { Title, Paragraph, Text } = Typography;
 
 const MonetizeContainer = styled.div`
   padding-bottom: 24px;
@@ -13,53 +14,89 @@ const MonetizeContainer = styled.div`
   }
 `;
 
+const prerequisiteItems = [
+  'Python >=3.10',
+  'Poetry >=1.4.0 && <2.x',
+  'Tendermint == 0.34.19',
+  'Docker',
+];
+
+const Prerequisites = () => (
+  <div>
+    <Title level={4} className="mb-16">
+      Prerequisites
+    </Title>
+    {prerequisiteItems.map((item) => (
+      <CodeBlock key={item}>{item}</CodeBlock>
+    ))}
+  </div>
+);
+
+const quickstartItems = [
+  {
+    title: 'Install Agent Framework',
+    codeBlocks: [
+      'git clone https://github.com/valory-xyz/mech-tools-dev.git && cd mech-tools-dev',
+      'poetry shell && poetry install',
+      'autonomy packages sync --update-packages',
+    ],
+  },
+  {
+    title: 'Configure Your Agent',
+    codeBlocks: ['python utils/configure_and_deploy.py'],
+  },
+  {
+    title: 'Run Your Agent',
+    codeBlocks: ['bash run_service.sh'],
+  },
+];
+
+const Quickstart = () => (
+  <Flex gap={24} vertical>
+    <div>
+      <Title level={4}>Quickstart</Title>
+      <Text>Get started with monetizing your agent in three easy steps:</Text>
+    </div>
+    <ol className="mt-0">
+      {quickstartItems.map((item) => (
+        <li key={item.title} className="mb-20">
+          <Paragraph>
+            <Text strong>{item.title}</Text>
+          </Paragraph>
+          <div>
+            {item.codeBlocks.map((block, index) => (
+              <CodeBlock key={`${item.title}${index}`} canCopy>
+                {block}
+              </CodeBlock>
+            ))}
+          </div>
+        </li>
+      ))}
+    </ol>
+  </Flex>
+);
+
+const AlertMessage = (
+  <>
+    <p className="mt-0">
+      This quickstart covers the basics. For full details and advanced options, see the Olas Stack
+      Documentation.
+    </p>
+    <Button type="default" size="large">
+      <a href="https://stack.olas.network/mech-tools-dev/">Explore Documentation</a>
+    </Button>
+  </>
+);
+
 export const MonetizeYourAgent = () => (
   <PageWrapper>
     <MonetizeContainer>
       <Title level={2} className="mt-0">
         Monetize Your Agent
       </Title>
-      <Paragraph style={{ maxWidth: 550 }}>
-        Prerequisites: <br />
-        Python &gt;=3.10, Poetry &gt;=1.4.0 && &lt;2.x, Tendermint ==0.34.19, Docker
-      </Paragraph>
-      <Paragraph>
-        <div style={{ paddingBottom: 12 }}>
-          Get started with monetizing your agent in three easy steps:
-        </div>
-        <ol>
-          <li>
-            Install agent framework
-            <ol className="lower-alpha">
-              <li>
-                git clone{' '}
-                <a
-                  href="https://github.com/valory-xyz/mech-tools-dev.git"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  https://github.com/valory-xyz/mech-tools-dev.git
-                </a>{' '}
-                && cd mech-tools-dev
-              </li>
-              <li>poetry shell && poetry install</li>
-              <li>autonomy packages sync --update-packages</li>
-            </ol>
-          </li>
-          <li>
-            Configure your agent
-            <ol className="lower-alpha">
-              <li>python utils/configure_and_deploy.py</li>
-            </ol>
-          </li>
-          <li>
-            Run your agent
-            <ol className="lower-alpha">
-              <li>bash run_service.sh</li>
-            </ol>
-          </li>
-        </ol>
-      </Paragraph>
+      <Prerequisites />
+      <Quickstart />
+      <Alert message={AlertMessage} type="info" showIcon />
     </MonetizeContainer>
   </PageWrapper>
 );
