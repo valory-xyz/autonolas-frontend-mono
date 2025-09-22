@@ -3,7 +3,6 @@ import { Maybe } from '@web3auth/modal';
 import { useWeb3Auth, useWeb3AuthConnect, useWeb3AuthDisconnect } from '@web3auth/modal/react';
 import { Web3AuthProvider } from 'context/Web3AuthProvider';
 import { useEffect, useRef } from 'react';
-import { WEB3AUTH_AUTH_SUCCESS_URL, WEB3AUTH_MODAL_CLOSED_URL } from 'util/constants';
 import { Address } from 'viem';
 
 export const Styles = createGlobalStyle`
@@ -11,6 +10,11 @@ export const Styles = createGlobalStyle`
     background-color: rgba(0, 0, 0, 0.45) !important;
   }
 `;
+
+enum Events {
+  WEB3AUTH_AUTH_SUCCESS = 'WEB3AUTH_AUTH_SUCCESS',
+  WEB3AUTH_MODAL_CLOSED = 'WEB3AUTH_MODAL_CLOSED'
+}
 
 const Web3AuthModal = () => {
   const { provider, isInitialized, web3Auth } = useWeb3Auth();
@@ -39,7 +43,13 @@ const Web3AuthModal = () => {
         if (!accounts || !accounts[0]) return;
         isAddressUpdated.current = true;
         disconnect();
-        window.location.href = `${WEB3AUTH_AUTH_SUCCESS_URL}?address=${accounts[0]}`;
+
+        // Post message to the parent window with the connected address
+        window.parent.postMessage({
+          event_id: Events.WEB3AUTH_AUTH_SUCCESS,
+          address: accounts[0]
+        }, `${process.env.NEXT_PUBLIC_ALLOWED_ORIGIN}`);
+
       } catch (error) {
         console.error('Error getting address:', error);
       }
@@ -56,7 +66,9 @@ const Web3AuthModal = () => {
 
     const handleClose = (isVisible: boolean) => {
       if (!isVisible && !isConnected) {
-        window.location.href = WEB3AUTH_MODAL_CLOSED_URL;
+        window.parent.postMessage({
+          event_id: Events.WEB3AUTH_MODAL_CLOSED
+        }, `${process.env.NEXT_PUBLIC_ALLOWED_ORIGIN}`);
       }
     };
     web3Auth.on('MODAL_VISIBILITY', handleClose);
