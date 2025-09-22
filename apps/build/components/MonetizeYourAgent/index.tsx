@@ -34,7 +34,7 @@ const Prerequisites = () => (
 
 const quickstartItems = [
   {
-    title: 'Install Agent Framework',
+    title: '1. Install Agent Framework',
     codeBlocks: [
       'git clone https://github.com/valory-xyz/mech-tools-dev.git && cd mech-tools-dev',
       'poetry shell && poetry install',
@@ -42,11 +42,11 @@ const quickstartItems = [
     ],
   },
   {
-    title: 'Configure Your Agent',
+    title: '2. Configure Your Agent',
     codeBlocks: ['python utils/configure_and_deploy.py'],
   },
   {
-    title: 'Run Your Agent',
+    title: '3. Run Your Agent',
     codeBlocks: ['bash run_service.sh'],
   },
 ];
@@ -57,9 +57,9 @@ const Quickstart = () => (
       <Title level={4}>Quickstart</Title>
       <Text>Get started with monetizing your agent in three easy steps:</Text>
     </div>
-    <ol className="mt-0">
+    <Flex vertical>
       {quickstartItems.map((item) => (
-        <li key={item.title} className="mb-20">
+        <div key={item.title} className="mb-20">
           <Paragraph>
             <Text strong>{item.title}</Text>
           </Paragraph>
@@ -70,9 +70,9 @@ const Quickstart = () => (
               </CodeBlock>
             ))}
           </div>
-        </li>
+        </div>
       ))}
-    </ol>
+    </Flex>
   </Flex>
 );
 

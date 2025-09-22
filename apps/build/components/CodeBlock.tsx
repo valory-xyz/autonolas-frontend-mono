@@ -25,9 +25,8 @@ export const CodeBlock = ({ canCopy = false, children }: CodeBlockProps) => {
         <CodeContainer
           style={{
             padding: '8px 8px 8px 16px',
-            width: 'calc(100% + 40px)',
+            width: '100%',
             justifyContent: 'space-between',
-            marginLeft: '-40px',
           }}
         >
           <code>{children}</code>

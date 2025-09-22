@@ -24,16 +24,16 @@ const Prerequisites = () => (
 
 const quickstartItems = [
   {
-    title: 'Install Marketplace Client',
+    title: '1. Install Marketplace Client',
     codeBlocks: ['poetry new my_prj && cd my_prj', 'poetry add mech-client'],
   },
   {
-    title: 'Configure Your Client',
+    title: '2. Configure Your Client',
     codeBlocks: ['echo -n YOUR_PRIVATE_KEY > ethereum_private_key.txt', 'cp .example.env .env'],
     moreText: 'Optional: For improved reliability, update .env with your custom RPC endpoints.',
   },
   {
-    title: 'Hire On-chain Agent',
+    title: '3. Hire On-chain Agent',
     codeBlocks: [
       'mechx interact --prompts “Estimate the chance that Ethereum volatility exceeds 50,000 by the end of 2030” --priority-mech 0xb3c6319962484602b00d5587e965946890b82101 --tools superforcaster --chain-config gnosis',
     ],
@@ -46,9 +46,9 @@ const Quickstart = () => (
       <Title level={4}>Quickstart</Title>
       <Text>Get started with hiring an agent in three easy steps:</Text>
     </div>
-    <ol className="mt-0">
+    <Flex vertical>
       {quickstartItems.map((item) => (
-        <li key={item.title} className="mb-20">
+        <div key={item.title} className="mb-20">
           <Paragraph>
             <Text strong>{item.title}</Text>
           </Paragraph>
@@ -60,9 +60,9 @@ const Quickstart = () => (
             ))}
             {item.moreText}
           </div>
-        </li>
+        </div>
       ))}
-    </ol>
+    </Flex>
   </Flex>
 );
 
@@ -84,11 +84,9 @@ export const HireAnAgent = () => (
       <Title level={2} className="mb-0">
         Hire an Agent on Olas Marketplace
       </Title>
-      <Flex gap={12} vertical>
-        <Prerequisites />
-        <Quickstart />
-        <Alert message={AlertMessage} type="info" showIcon />
-      </Flex>
+      <Prerequisites />
+      <Quickstart />
+      <Alert message={AlertMessage} type="info" showIcon />
     </HireContainer>
   </PageWrapper>
 );
