@@ -13,7 +13,8 @@ export const Styles = createGlobalStyle`
 
 enum Events {
   WEB3AUTH_AUTH_SUCCESS = 'WEB3AUTH_AUTH_SUCCESS',
-  WEB3AUTH_MODAL_CLOSED = 'WEB3AUTH_MODAL_CLOSED'
+  WEB3AUTH_MODAL_CLOSED = 'WEB3AUTH_MODAL_CLOSED',
+  WEB3AUTH_MODAL_INITIALIZED = 'WEB3AUTH_MODAL_INITIALIZED'
 }
 
 const Web3AuthModal = () => {
@@ -21,6 +22,14 @@ const Web3AuthModal = () => {
   const { connect, isConnected } = useWeb3AuthConnect();
   const { disconnect } = useWeb3AuthDisconnect();
   const isAddressUpdated = useRef(false);
+
+  useEffect(() => {
+    // Notify once initialized
+    if (isInitialized)
+    window.parent.postMessage({
+      event_id: Events.WEB3AUTH_MODAL_INITIALIZED
+    }, '*');
+  }, [isInitialized])
 
   useEffect(() => {
     // Connect when the page is open
