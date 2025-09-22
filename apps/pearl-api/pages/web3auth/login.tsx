@@ -48,7 +48,7 @@ const Web3AuthModal = () => {
         window.parent.postMessage({
           event_id: Events.WEB3AUTH_AUTH_SUCCESS,
           address: accounts[0]
-        }, `${process.env.NEXT_PUBLIC_ALLOWED_ORIGIN}`);
+        }, '*');
 
       } catch (error) {
         console.error('Error getting address:', error);
@@ -68,7 +68,7 @@ const Web3AuthModal = () => {
       if (!isVisible && !isConnected) {
         window.parent.postMessage({
           event_id: Events.WEB3AUTH_MODAL_CLOSED
-        }, `${process.env.NEXT_PUBLIC_ALLOWED_ORIGIN}`);
+        }, '*');
       }
     };
     web3Auth.on('MODAL_VISIBILITY', handleClose);
