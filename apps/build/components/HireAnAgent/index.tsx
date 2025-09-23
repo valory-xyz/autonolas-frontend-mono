@@ -1,5 +1,6 @@
 import { Alert, Button, Flex, Typography } from 'antd';
 import { CodeBlock } from 'components/CodeBlock';
+import { STACK_URL } from 'libs/util-constants/src';
 import styled from 'styled-components';
 import { PageWrapper } from 'util/theme';
 
@@ -73,7 +74,7 @@ const AlertMessage = (
       Documentation.
     </p>
     <Button type="default" size="large">
-      <a href="https://stack.olas.network/mech-client/">Explore Documentation</a>
+      <a href={`${STACK_URL}/mech-client/`}>Explore Documentation</a>
     </Button>
   </>
 );
