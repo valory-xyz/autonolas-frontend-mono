@@ -23,15 +23,6 @@ const web3AuthContextConfig: Web3AuthContextConfig = {
         },
       },
     },
-    mfaLevel: 'optional',
-    mfaSettings: {
-      socialBackupFactor: { enable: true, mandatory: true, priority: 1 },
-      authenticatorFactor: { enable: false },
-      passkeysFactor: { enable: false },
-      deviceShareFactor: { enable: false },
-      backUpShareFactor: { enable: false },
-      passwordFactor: { enable: false },
-    },
   },
 };
 
