@@ -3,7 +3,8 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 import {
   COINGECKO_COIN_ID_BY_NATIVE_SYMBOL,
   COINGECKO_PLATFORM_BY_CHAIN_NAME,
-} from '../../constants';
+} from '../../constants/coingecko';
+import { CACHE_DURATION } from '../../constants';
 
 const COINGECKO_API_BASE = 'https://api.coingecko.com/api/v3';
 const COINGECKO_API_KEY = process.env.COINGECKO_API_KEY;
@@ -23,7 +24,7 @@ const fetchTokenPriceInUSD = async ({
   platform,
   address,
 }: {
-  platform: string;
+  platform?: string;
   address?: string;
 }) => {
   if (!platform || !address) {
@@ -68,7 +69,8 @@ const fetchCoinPriceInUSD = async (coinId?: string) => {
     }
 
     const data = await response.json();
-    const price: number = typeof data?.[coinId]?.usd === 'number' ? data[coinId].usd : 0;
+    const price: number =
+      typeof data?.[coingeckoCoinId]?.usd === 'number' ? data[coingeckoCoinId].usd : 0;
     return { price };
   } catch (error) {
     return { error: extractErrorMessage(error) };
@@ -76,6 +78,17 @@ const fetchCoinPriceInUSD = async (coinId?: string) => {
 };
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  // CORS headers
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+
+  // Vercel's cache
+  res.setHeader(
+    'Cache-Control',
+    `public, s-maxage=${CACHE_DURATION.TWELVE_HOURS}, stale-while-revalidate=${CACHE_DURATION.ONE_HOUR}`,
+  );
+
   if (req.method !== 'GET') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
@@ -90,12 +103,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(400).json({ error: 'platform or coinId is required' });
   }
 
-  const { price, error } = platform
-    ? await fetchTokenPriceInUSD({ platform, address })
-    : await fetchCoinPriceInUSD(coinId);
+  const { price, error } = coinId
+    ? await fetchCoinPriceInUSD(coinId)
+    : await fetchTokenPriceInUSD({ platform, address });
 
   if (error) {
-    // get data from cache
+    return res.status(500).json({ error });
   }
 
   return res.status(200).json({ price });
