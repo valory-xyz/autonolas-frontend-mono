@@ -1,5 +1,10 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 
+import {
+  COINGECKO_COIN_ID_BY_NATIVE_SYMBOL,
+  COINGECKO_PLATFORM_BY_CHAIN_NAME,
+} from '../../constants';
+
 const COINGECKO_API_BASE = 'https://api.coingecko.com/api/v3';
 const COINGECKO_API_KEY = process.env.COINGECKO_API_KEY;
 
@@ -30,7 +35,8 @@ const fetchTokenPriceInUSD = async ({
       contract_addresses: address,
       vs_currencies: 'usd',
     });
-    const requestUrl = `${COINGECKO_API_BASE}/simple/token_price/${platform}?${params.toString()}`;
+    const coingeckoPlatform = COINGECKO_PLATFORM_BY_CHAIN_NAME[platform];
+    const requestUrl = `${COINGECKO_API_BASE}/simple/token_price/${coingeckoPlatform}?${params.toString()}`;
     const response = await fetch(requestUrl, getRequestOptions());
     if (!response.ok) {
       return { error: `Upstream error ${response.status}` };
@@ -53,7 +59,8 @@ const fetchCoinPriceInUSD = async (coinId?: string) => {
   }
 
   try {
-    const params = new URLSearchParams({ ids: coinId, vs_currencies: 'usd' });
+    const coingeckoCoinId = COINGECKO_COIN_ID_BY_NATIVE_SYMBOL[coinId];
+    const params = new URLSearchParams({ ids: coingeckoCoinId, vs_currencies: 'usd' });
     const requestUrl = `${COINGECKO_API_BASE}/simple/price?${params.toString()}`;
     const response = await fetch(requestUrl, getRequestOptions());
     if (!response.ok) {
