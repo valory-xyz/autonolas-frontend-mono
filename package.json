@@ -44,6 +44,7 @@
     "express": "^4.18.2",
     "graphql": "^16.8.1",
     "graphql-request": "^6.1.0",
+    "ioredis": "^5.8.0",
     "ipfs": "^0.63.5",
     "ipfs-http-client": "^57.0.3",
     "ipfs-only-hash": "^4.0.0",
