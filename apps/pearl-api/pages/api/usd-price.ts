@@ -6,6 +6,9 @@ import {
 } from '../../constants/coingecko';
 import { CACHE_DURATION } from '../../constants';
 
+type CoinId = keyof typeof COINGECKO_COIN_ID_BY_NATIVE_SYMBOL;
+type Platform = keyof typeof COINGECKO_PLATFORM_BY_CHAIN_NAME;
+
 const COINGECKO_API_BASE = 'https://api.coingecko.com/api/v3';
 const COINGECKO_API_KEY = process.env.COINGECKO_API_KEY;
 
@@ -24,7 +27,7 @@ const fetchTokenPriceInUSD = async ({
   platform,
   address,
 }: {
-  platform?: string;
+  platform?: Platform;
   address?: string;
 }) => {
   if (!platform || !address) {
@@ -54,7 +57,7 @@ const fetchTokenPriceInUSD = async ({
   }
 };
 
-const fetchCoinPriceInUSD = async (coinId?: string) => {
+const fetchCoinPriceInUSD = async (coinId?: CoinId) => {
   if (!coinId) {
     return { error: 'coinId is required' };
   }
@@ -94,9 +97,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   const { platform, address, coinId } = req.query as {
-    platform?: string;
+    platform?: Platform;
     address?: string;
-    coinId?: string;
+    coinId?: CoinId;
   };
 
   if (!platform && !coinId) {
