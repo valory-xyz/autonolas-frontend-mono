@@ -103,7 +103,7 @@ export const FormList = ({
               </div>
             )}
 
-            <Form.Item wrapperCol={{ span: 6 }}>
+            <Form.Item wrapperCol={{ span: 8 }}>
               <Button onClick={() => add()} block icon={<PlusOutlined />} size="large">
                 {buttonText}
               </Button>

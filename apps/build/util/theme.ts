@@ -11,5 +11,8 @@ export const GREEN_THEME = {
 };
 
 export const PageWrapper = styled.div`
-  margin: 40px 24px 0 24px;
+  width: 596px;
+  height: 100%;
+  margin: auto;
+  margin-top: 32px;
 `;
