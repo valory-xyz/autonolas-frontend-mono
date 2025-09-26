@@ -1,4 +1,4 @@
-import { Flex, Typography } from 'antd';
+import { Col, Row, Typography } from 'antd';
 import { SITE_URL } from '@autonolas-frontend-mono/util-constants';
 import { ContentWrapper, DocsCard } from '../Layout/styles';
 import { COLOR } from '@autonolas-frontend-mono/ui-theme';
@@ -32,19 +32,21 @@ export const WhatIsOlas = () => (
       Olas is the platform that enables true co-ownership of AI.
     </Paragraph>
     <div>
-      <Flex justify="space-between">
+      <Row gutter={[24, 24]}>
         {olasItems.map(({ label, description, link }) => (
-          <a href={link} key={label}>
-            <DocsCard className="what-is-olas-card">
-              <Text className="mb-4" style={{ fontWeight: 500 }}>
-                {label}
-              </Text>
-              <br />
-              <Text style={{ fontSize: 14, color: COLOR.SECONDARY }}>{description}</Text>
-            </DocsCard>
-          </a>
+          <Col key={label} xs={24} sm={12} md={8}>
+            <a href={link}>
+              <DocsCard className="what-is-olas-card">
+                <Text className="mb-4" style={{ fontWeight: 500 }}>
+                  {label}
+                </Text>
+                <br />
+                <Text style={{ fontSize: 14, color: COLOR.SECONDARY }}>{description}</Text>
+              </DocsCard>
+            </a>
+          </Col>
         ))}
-      </Flex>
+      </Row>
     </div>
   </ContentWrapper>
 );

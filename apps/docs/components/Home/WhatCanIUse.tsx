@@ -54,9 +54,9 @@ export const WhatCanIUse = () => (
       <Row gutter={[16, 16]}>
         {products.map((product, index) => {
           const isLastOdd = products.length % 2 === 1 && index === products.length - 1;
-          const span = isLastOdd ? 24 : 12;
+
           return (
-            <Col key={product.label} span={span}>
+            <Col key={product.label} xs={24} sm={12} md={isLastOdd ? 24 : 12}>
               <Card style={{ height: '100%' }} bodyStyle={{ height: '100%' }}>
                 <Flex vertical gap={24} style={{ height: '100%' }} justify="space-between">
                   <div>

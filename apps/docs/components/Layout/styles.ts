@@ -121,7 +121,8 @@ export const ContentContainer = styled(Flex)`
 `;
 
 export const ContentWrapper = styled.div`
-  width: ${CONTENT_MAX_WIDTH}px;
+  max-width: ${CONTENT_MAX_WIDTH}px;
+  width: 100%;
   margin: auto;
 `;
 
@@ -130,10 +131,6 @@ export const DocsCard = styled(Card)`
   transition:
     background 0.2s ease,
     box-shadow 0.2s ease;
-
-  &.what-is-olas-card {
-    width: 230px;
-  }
 
   &.the-docs-card {
     border: 1px solid #fff;

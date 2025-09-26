@@ -4,6 +4,7 @@ import Image from 'next/image';
 import { COLOR } from '@autonolas-frontend-mono/ui-theme';
 import { SITE_URL } from '@autonolas-frontend-mono/util-constants';
 import { BackgroundOverlay, GetInvolvedBg, GetInvolvedCard } from '../Layout/styles';
+import styled from 'styled-components';
 
 const { Title, Paragraph, Text } = Typography;
 
@@ -16,6 +17,15 @@ type InvolvedItem = {
   imageWidth?: number;
   imageHeight?: number;
 };
+
+const ImageContainer = styled.div`
+  padding: 24px;
+  display: flex;
+  justify-content: center;
+  position: relative;
+  width: 100%;
+  aspect-ratio: 840 / 543;
+`;
 
 const GET_INVOLVED_DATA: InvolvedItem[] = [
   {
@@ -69,14 +79,8 @@ const ContentCard = ({ imageSrc, title, description, ctaText, href }: InvolvedIt
       <Flex vertical style={{ height: '100%' }} justify="space-between">
         <div>
           {imageSrc && title && (
-            <div style={{ width: '100%', minHeight: 85 }}>
-              <Image
-                src={imageSrc}
-                alt={ctaText}
-                width={354}
-                height={110}
-                className="object-cover"
-              />
+            <div style={{ width: '100%', minHeight: 85, position: 'relative' }}>
+              <Image src={imageSrc} alt={ctaText} fill style={{ objectFit: 'fill' }} />
             </div>
           )}
           {ctaText && (
@@ -110,9 +114,9 @@ export const GetInvolved = () => (
       </div>
       <Row gutter={[24, 24]}>
         <Col span={24}>
-          <div style={{ padding: 24, display: 'flex', justifyContent: 'center' }}>
-            <Image src="/roles-diagram.png" alt="Get involved" width={840} height={543} />
-          </div>
+          <ImageContainer>
+            <Image src="/roles-diagram.png" alt="Get involved" fill style={{ objectFit: 'fill' }} />
+          </ImageContainer>
         </Col>
         {GET_INVOLVED_DATA.map((item, index) => (
           <Col key={index} xs={24} md={12} lg={8}>
