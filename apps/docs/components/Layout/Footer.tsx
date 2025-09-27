@@ -1,11 +1,11 @@
 import styled from 'styled-components';
 import { Typography } from 'antd';
 import { COLOR } from '@autonolas-frontend-mono/ui-theme';
-import { OPERATOR_NAME } from 'apps/docs/util/constants';
+import { OPERATOR_NAME } from '../../util/constants';
 
 const FooterContainer = styled.div`
   text-align: center;
-  border-top: 1px solid ${COLOR.BORDER_GREY};
+  border-top: 1px solid ${COLOR.BORDER_GREY_2};
   padding: 48px 0;
 `;
 

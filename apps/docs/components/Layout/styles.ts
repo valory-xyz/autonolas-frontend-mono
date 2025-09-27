@@ -1,6 +1,8 @@
 import styled from 'styled-components';
-import { Layout } from 'antd';
+import { Card, Flex, Layout } from 'antd';
 import { COLOR, MEDIA_QUERY } from '@autonolas-frontend-mono/ui-theme';
+
+export const CONTENT_MAX_WIDTH = 720;
 
 export const CustomLayout = styled(Layout)`
   margin-bottom: 8rem;
@@ -8,7 +10,7 @@ export const CustomLayout = styled(Layout)`
   background-color: ${COLOR.WHITE};
 
   .site-layout {
-    padding: 60px 0 24px 0;
+    padding: 60px 0 0 0;
   }
 
   .logo-link {
@@ -110,4 +112,103 @@ export const ContractsInfoContainer = styled.div`
 
 export const FooterContainer = styled.div`
   margin-bottom: 8rem;
+`;
+
+export const ContentContainer = styled(Flex)`
+  flex-direction: column;
+  margin: 0 auto;
+  gap: 120px;
+`;
+
+export const ContentWrapper = styled.div`
+  max-width: ${CONTENT_MAX_WIDTH}px;
+  width: 100%;
+  margin: auto;
+`;
+
+export const DocsCard = styled(Card)`
+  height: auto;
+  transition:
+    background 0.2s ease,
+    box-shadow 0.2s ease;
+
+  &.the-docs-card {
+    border: 1px solid #fff;
+    background: linear-gradient(
+      180deg,
+      var(--Colors-Neutral-colorWhite, rgba(255, 255, 255, 0.5)) 0%,
+      var(--Colors-Base-Neutral-1, rgba(242, 244, 249, 0.5)) 100%
+    );
+    box-shadow: 8px 8px 24px 0 rgba(24, 39, 75, 0.12);
+
+    &:hover {
+      background: ${COLOR.WHITE};
+    }
+  }
+
+  .ant-card-body {
+    padding: 24px 16px;
+  }
+
+  &:hover {
+    background: ${COLOR.BASE.NEUTRAL_1};
+  }
+`;
+
+export const GetInvolvedCard = styled(Card)`
+  min-height: 278px;
+  height: 100%;
+  border: 1px solid white;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.5) 0%, rgba(242, 244, 249, 0.5) 100%);
+  box-shadow: 0px 8px 24px 0px rgba(24, 39, 75, 0.12);
+  backdrop-filter: blur(1px);
+  transition:
+    background 0.2s ease,
+    box-shadow 0.2s ease;
+
+  body {
+    height: 100%;
+    padding: 24px;
+  }
+
+  &:hover {
+    background: ${COLOR.WHITE};
+    box-shadow: 0px 8px 24px 0px rgba(24, 39, 75, 0.15);
+  }
+`;
+
+export const GetInvolvedBg = styled.div`
+  background-image: url('/metric-bg.png'), linear-gradient(#f4f7fb, #f4f7fb);
+  background-size:
+    45px 45px,
+    auto;
+  background-repeat: repeat, no-repeat;
+  background-position:
+    center,
+    0 0;
+  background-blend-mode: multiply, normal;
+  padding: 80px 0;
+  position: relative;
+  border-bottom: 1px solid ${COLOR.BORDER_GREY_2};
+  border-top: 1px solid ${COLOR.BORDER_GREY_2};
+`;
+
+export const BackgroundOverlay = styled.div`
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: white;
+  opacity: 0.5;
+  z-index: 0;
+`;
+
+export const Hero = styled.div`
+  display: flex;
+  flex-direction: column;
+  max-width: auto;
+  height: 464px;
+  margin: 80px auto;
+  background: linear-gradient(180deg, ${COLOR.WHITE} 0%, #e9eff7 100%);
 `;

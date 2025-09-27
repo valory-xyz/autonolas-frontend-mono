@@ -46,6 +46,9 @@
         "libs/ui-components/src/index.ts"
       ],
       "@autonolas-frontend-mono/ui-theme": ["libs/ui-theme/src/index.ts"],
+      "@autonolas-frontend-mono/util-constants": [
+        "libs/util-constants/src/index.ts"
+      ],
       "@autonolas-frontend-mono/util-contracts": [
         "libs/util-contracts/src/index.ts"
       ],

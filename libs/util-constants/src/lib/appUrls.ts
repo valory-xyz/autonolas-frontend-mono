@@ -8,6 +8,7 @@ export const GOVERN_URL = 'https://govern.olas.network';
 export const LAUNCH_URL = 'https://launch.olas.network';
 export const REGISTRY_URL = 'https://registry.olas.network/';
 export const STACK_URL = 'https://stack.olas.network';
+export const DOCS_URL = 'https://docs.olas.network';
 
 export const X_URL = 'https://x.com/autonolas';
 export const YOUTUBE_URL = 'https://www.youtube.com/@autonolas';

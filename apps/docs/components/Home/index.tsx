@@ -1,259 +1,37 @@
-import { Divider, Flex, Typography } from 'antd';
-import {
-  BOND_URL,
-  BUILD_URL,
-  CONTRIBUTE_URL,
-  DISCORD_INVITE_URL,
-  GOVERN_URL,
-  LAUNCH_URL,
-  SITE_URL,
-  OPERATE_URL,
-  X_URL,
-  YOUTUBE_URL,
-  STACK_URL,
-} from 'libs/util-constants/src';
-import { COLOR } from '@autonolas-frontend-mono/ui-theme';
-import styled from 'styled-components';
+import { Flex, Typography } from 'antd';
 import Meta from '../Meta';
+import Image from 'next/image';
+import { ContentContainer, Hero } from '../Layout/styles';
+import { WhatIsOlas } from './WhatIsOlas';
+import { WhatCanIUse } from './WhatCanIUse';
+import { StayInTouch } from './StayInTouch';
+import { TheDocs } from './TheDocs';
+import { GetInvolved } from './GetInvolved';
 
-const { Paragraph, Title, Text } = Typography;
-
-const CONTENT_MAX_WIDTH = 720;
-
-const DIVIDER_STYLE = { margin: '20px 0' };
-
-const Hero = styled.div`
-  display: flex;
-  flex-direction: column;
-  max-width: auto;
-  margin: 0 auto;
-  background: #f2f4f9;
-`;
-
-const ContentWrapper = styled.div`
-  border-top: 1px solid ${COLOR.BORDER_GREY_2};
-  background-color: ${COLOR.WHITE};
-  display: flex;
-  flex-direction: column;
-`;
-
-const Content = styled.div`
-  display: flex;
-  flex-direction: column;
-  max-width: ${CONTENT_MAX_WIDTH}px;
-  margin: 0 auto;
-`;
-
-const roles = [
-  {
-    name: 'Builders',
-    url: BUILD_URL,
-  },
-  {
-    name: 'Contributors',
-    url: CONTRIBUTE_URL,
-  },
-  {
-    name: 'Operators',
-    url: OPERATE_URL,
-  },
-  {
-    name: 'Bonders',
-    url: BOND_URL,
-  },
-  {
-    name: 'Govern',
-    url: GOVERN_URL,
-  },
-  {
-    name: 'Launch',
-    url: LAUNCH_URL,
-  },
-];
-
-const socials = [
-  {
-    name: 'X',
-    url: X_URL,
-  },
-  {
-    name: 'YouTube',
-    url: YOUTUBE_URL,
-  },
-  {
-    name: 'Discord',
-    url: DISCORD_INVITE_URL,
-  },
-  {
-    name: 'Blog',
-    url: `${SITE_URL}/blog`,
-  },
-];
+const { Title, Text } = Typography;
 
 const HeroSection = () => (
-  <Hero className="p-24">
-    <Flex align="center" vertical gap={16}>
-      <Title className="m-0 mt-24">Welcome to Olas Docs</Title>
+  <Hero>
+    <Flex align="center" vertical gap={24}>
+      <Image src="/docs.png" alt="Olas docs" width={160} height={160} className="mb-16" />
+      <Title style={{ fontSize: 48 }} className="m-0">
+        Olas Docs
+      </Title>
+      <Text>Explore what Olas is, what you can build and use, and how to get involved.</Text>
     </Flex>
   </Hero>
-);
-
-const Intro = () => (
-  <>
-    <Paragraph className="mb-8 mt-24">
-      This documentation will guide you through what Olas is, what you can build and use, and how to
-      get involved based on your role.
-    </Paragraph>
-  </>
-);
-
-const WhatIsOlas = () => (
-  <>
-    <Title level={4} className="mb-16">
-      What is Olas?
-    </Title>
-    <Paragraph>Olas is the platform that enables true co-ownership of AI.</Paragraph>
-    <Paragraph>
-      <div className="mb-12">Understand the mission, vision, and roadmap of Olas.</div>
-      <ul>
-        <li>
-          <a href={`${SITE_URL}/about`}>About Olas</a>
-        </li>
-        <li>
-          <a href={`${SITE_URL}/roadmap`}>Roadmap</a>: what&apos;s next
-        </li>
-        <li>
-          <a href={`${SITE_URL}/timeline`}>Timeline</a>: the story so far
-        </li>
-      </ul>
-    </Paragraph>
-  </>
-);
-
-const WhatCanIUse = () => (
-  <>
-    <Title level={4} className="mb-16">
-      What can I use?
-    </Title>
-    <Paragraph>
-      <ul>
-        <li>
-          <div>
-            For consumers: <a href={`${SITE_URL}/pearl`}>Pearl (AI Agent App Store)</a>
-          </div>
-          <div className="mb-8">
-            A world of AI agents owned by you, in one app. From asset managers to custom AI
-            influencers, Pearl lets you run your agents on a device you control, stake OLAS for
-            potential rewards, and benefit from your agents. The list of agents available in Pearl
-            can be found <a href={`${SITE_URL}/agents`}>here</a>.
-          </div>
-        </li>
-        <li>
-          <div>
-            For businesses:{' '}
-            <a href={`${SITE_URL}/mech-marketplace`}>Mech Marketplace (AI Agent Bazaar)</a>
-          </div>
-          <div className="mb-8">
-            The first decentralized marketplace for AI agents where you can hire other AI
-            agents&apos; services or offer your own AI agent’s services to earn crypto.
-          </div>
-        </li>
-        <li>
-          <div>
-            For everyone: <a href={`${SITE_URL}/olas-token`}>Olas Token</a>
-          </div>
-          <div>
-            The OLAS utility token provides access to the platform&apos;s benefits and coordinates
-            agent interactions in entire AI Agent economies.
-          </div>
-        </li>
-      </ul>
-    </Paragraph>
-  </>
-);
-
-const HowCanIGetInvolved = () => (
-  <>
-    <Title level={4} className="mb-16">
-      How can I get involved?
-    </Title>
-    <Paragraph>
-      <div className="mb-12">
-        For those who want to shape the DAO, find tailored guides based on your role in the
-        ecosystem.
-      </div>
-      <ul>
-        {roles.map((role) => (
-          <li key={role.name}>
-            <a href={role.url}>{role.name}</a>
-          </li>
-        ))}
-      </ul>
-    </Paragraph>
-    <Paragraph>
-      <div className="mb-12">
-        <Text strong>Community and Communication</Text>
-      </div>
-      <ul>
-        {socials.map((social) => (
-          <li key={social.name}>
-            <a href={social.url} rel="noopener noreferrer" target="_blank">
-              {social.name}
-            </a>
-          </li>
-        ))}
-      </ul>
-    </Paragraph>
-  </>
-);
-
-const FindTheDocs = () => (
-  <>
-    <Title level={4} className="mb-16">
-      But where can I find “the docs” on the Olas stack?
-    </Title>
-    <Paragraph>
-      <div className="mb-12">You can build agents on Olas:</div>
-      <ul>
-        <li>
-          with Olas&apos;s own agent framework →{' '}
-          <a href={`${STACK_URL}/open-autonomy`}>Open Autonomy</a>
-        </li>
-        <li>
-          with other agent frameworks → <a href={`${STACK_URL}/olas-sdk`}>Olas SDK</a>
-        </li>
-      </ul>
-    </Paragraph>
-    <Paragraph>
-      <div className="mb-8">
-        You can monetize your agent on Olas →{' '}
-        <a href={`${STACK_URL}/mech-tools-dev`}>Mech Marketplace (supply side)</a>.
-      </div>
-      <div className="mb-8">
-        You can hire other agents on Olas →{' '}
-        <a href={`${STACK_URL}/mech-client`}>Mech Marketplace (demand side)</a>.
-      </div>
-      For the full technical documentation visit <a href={STACK_URL}>stack.olas.network</a>.
-    </Paragraph>
-  </>
 );
 
 export const HomePage = () => (
   <>
     <Meta />
     <HeroSection />
-    <ContentWrapper>
-      <Content>
-        <Intro />
-        <Divider style={DIVIDER_STYLE} />
-        <WhatIsOlas />
-        <Divider style={DIVIDER_STYLE} />
-        <WhatCanIUse />
-        <Divider style={DIVIDER_STYLE} />
-        <HowCanIGetInvolved />
-        <Divider style={DIVIDER_STYLE} />
-        <FindTheDocs />
-      </Content>
-    </ContentWrapper>
+    <ContentContainer>
+      <WhatIsOlas />
+      <WhatCanIUse />
+      <GetInvolved />
+      <StayInTouch />
+      <TheDocs />
+    </ContentContainer>
   </>
 );
