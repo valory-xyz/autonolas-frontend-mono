@@ -116,7 +116,7 @@ const RegisterForm = ({ isLoading, listType, handleSubmit, handleCancel }) => {
           validateFirst
           rules={[
             {
-              required: true,
+              required: listType === 'agent',
               message: `Please input the list of ${listType}s on which this ${listType} depends`,
             },
             () => ({
