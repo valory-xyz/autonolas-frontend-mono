@@ -116,7 +116,7 @@ const RegisterForm = ({ isLoading, listType, handleSubmit, handleCancel }) => {
           validateFirst
           rules={[
             {
-              required: false,
+              required: listType === 'agent',
               message: `Please input the list of ${listType}s on which this ${listType} depends`,
             },
             () => ({
@@ -128,7 +128,7 @@ const RegisterForm = ({ isLoading, listType, handleSubmit, handleCancel }) => {
 
                 /**
                  * https://regex101.com/r/ip1z51/1
-                 * accepts comma seperated values, examples below
+                 * accepts comma separated values, examples below
                  * eg
                  * 1,2,4,2
                  * 2,3,4
