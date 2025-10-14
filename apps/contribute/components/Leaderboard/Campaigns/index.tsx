@@ -18,12 +18,20 @@ const Description = styled.div`
 const DESCRIPTION_BY_IDS: Record<string, React.ReactNode> = {
   ['Pearl v1']: (
     <Description>
-      🔥 Hype up the upcoming launch of <b>Pearl v1</b> — the new version of the AI agent app store that makes it easy for anyone to set up and own AI agents. Pearl v1 brings a Web2-friendly UX with all the benefits of Web3: full transparency, true ownership, and the ability to run multiple agents in one app. View this video introducing{' '}
-      <a href="https://youtu.be/qD8AowWuVxU?si=Ywo08hIPubShvXha" target="_blank" rel="noopener noreferrer">
+      🔥 Hype up the upcoming launch of <b>Pearl v1</b> — the new version of the AI agent app store
+      that makes it easy for anyone to set up and own AI agents. Pearl v1 brings a Web2-friendly UX
+      with all the benefits of Web3: full transparency, true ownership, and the ability to run
+      multiple agents in one app. View this video introducing{' '}
+      <a
+        href="https://youtu.be/qD8AowWuVxU?si=Ywo08hIPubShvXha"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
         Pearl v1
       </a>{' '}
-      .
-      Talk about what excites you most about the v1 release and why it&apos;s a game-changer for agent ownership. Encourage your followers to follow @autonolas to stay updated on the launch. 🟪
+      . Talk about what excites you most about the v1 release and why it&apos;s a game-changer for
+      agent ownership. Encourage your followers to follow @autonolas to stay updated on the launch.
+      🟪
     </Description>
   ),
   ['Co-own AI']: (
