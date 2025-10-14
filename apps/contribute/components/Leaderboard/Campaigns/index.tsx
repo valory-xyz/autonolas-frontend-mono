@@ -23,7 +23,7 @@ const DESCRIPTION_BY_IDS: Record<string, React.ReactNode> = {
         Pearl v1
       </a>{' '}
       .
-      Talk about what excites you most about the v1 release and why it’s a game-changer for agent ownership. Encourage your followers to follow @autonolas to stay updated on the launch. 🟪
+      Talk about what excites you most about the v1 release and why it&apos;s a game-changer for agent ownership. Encourage your followers to follow @autonolas to stay updated on the launch. 🟪
     </Description>
   ),
   ['Co-own AI']: (
