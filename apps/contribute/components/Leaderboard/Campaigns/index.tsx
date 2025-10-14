@@ -16,31 +16,14 @@ const Description = styled.div`
 `;
 
 const DESCRIPTION_BY_IDS: Record<string, React.ReactNode> = {
-  ['Agents Unleashed Singapore']: (
+  ['Pearl v1']: (
     <Description>
-      🔥 Hype up the premier Crypto x AI side event at TOKEN2049 Singapore this year,{' '}
-      <b>Agents Unleashed Singapore: The Next Wave.</b> Share venue pics, agenda, your excitement
-      and why it&apos;s a <i>must-attend</i> event. Tag your friends, build excitement, share
-      previous{' '}
-      <a
-        href="https://www.youtube.com/@autonolas/playlists"
-        target="_blank"
-        rel="noopener noreferrer"
-      >
-        YouTube videos
-      </a>
-      {', '}
-      <a href="https://x.com/autonolas" target="_blank" rel="noopener noreferrer">
-        photos
+      🔥 Hype up the upcoming launch of <b>Pearl v1</b> — the new version of the AI agent app store that makes it easy for anyone to set up and own AI agents. Pearl v1 brings a Web2-friendly UX with all the benefits of Web3: full transparency, true ownership, and the ability to run multiple agents in one app. View this video introducing{' '}
+      <a href="https://youtu.be/qD8AowWuVxU?si=Ywo08hIPubShvXha" target="_blank" rel="noopener noreferrer">
+        Pearl v1
       </a>{' '}
-      from previous events, and drive{' '}
-      <b>
-        registrations at this{' '}
-        <a href="https://luma.com/h0zgn96s" target="_blank" rel="noopener noreferrer">
-          link
-        </a>
-        .
-      </b>
+      .
+      Talk about what excites you most about the v1 release and why it’s a game-changer for agent ownership. Encourage your followers to follow @autonolas to stay updated on the launch. 🟪
     </Description>
   ),
   ['Co-own AI']: (
