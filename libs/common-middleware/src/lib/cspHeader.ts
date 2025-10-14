@@ -63,6 +63,7 @@ const ALLOWED_ORIGINS = [
   'https://sepolia-rollup.arbitrum.io/rpc',
   'https://rpc.gnosischain.com/',
   'https://gnosis.drpc.org/',
+  'https://gnosis-rpc.publicnode.com/',
   'https://mainnet.base.org/',
   'https://base.llamarpc.com',
   'https://sepolia.base.org/',
