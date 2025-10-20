@@ -23,11 +23,22 @@ type ServiceActivityResponse = ReturnType<typeof mergeServiceActivity>;
 export const getServiceActivityFromSubgraph = async ({
   chainId,
   serviceId,
+  latest,
 }: {
   chainId: number;
   serviceId: string;
+  latest?: string;
 }): Promise<ServiceActivityResponse> => {
-  const data = await fetch(`/api/service-activity?chainId=${chainId}&serviceId=${serviceId}`, {
+  const params = new URLSearchParams({
+    chainId: chainId.toString(),
+    serviceId,
+  });
+
+  if (latest) {
+    params.set('latest', latest);
+  }
+
+  const data = await fetch(`/api/service-activity?${params.toString()}`, {
     method: 'GET',
   });
   const json = await data.json();

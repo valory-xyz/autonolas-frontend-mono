@@ -11,6 +11,7 @@ import { MM_GRAPHQL_CLIENTS } from 'common-util/graphql';
 type RequestQuery = {
   chainId: string;
   serviceId: string;
+  latest?: string; // Param to fetch latest data.
 };
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -19,7 +20,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   try {
-    const { chainId, serviceId } = req.query as RequestQuery;
+    const { chainId, serviceId, latest } = req.query as RequestQuery;
 
     if (!chainId || !serviceId) {
       return res.status(400).json({
@@ -51,10 +52,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const [servicesFromMM, servicesFromLegacy] = await Promise.all(promises);
     const services = mergeServiceActivity(servicesFromMM, servicesFromLegacy);
 
-    res.setHeader(
-      'Cache-Control',
-      `public, s-maxage=${CACHE_DURATION.TWELVE_HOURS}, stale-while-revalidate=${CACHE_DURATION.ONE_HOUR}`,
-    );
+    // If 'latest' parameter is present, disable caching to force fresh data
+    if (latest) {
+      res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+    } else {
+      res.setHeader(
+        'Cache-Control',
+        `public, s-maxage=${CACHE_DURATION.TWELVE_HOURS}, stale-while-revalidate=${CACHE_DURATION.ONE_HOUR}`,
+      );
+    }
 
     return res.status(200).json({ services });
   } catch (error) {
