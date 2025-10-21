@@ -213,9 +213,11 @@ export const Details: FC<DetailsProps> = ({
     const fetchActivity = async () => {
       try {
         setActivityLoading(true);
+        const { latest = '' } = router.query as { latest: string };
         const json = await getServiceActivityFromSubgraph({
           chainId: Number(chainId),
           serviceId: id,
+          latest,
         });
 
         setActivityRows(json.activities || []);
@@ -230,7 +232,7 @@ export const Details: FC<DetailsProps> = ({
     if (id) {
       fetchActivity();
     }
-  }, [currentTab, id, chainName, chainId]);
+  }, [currentTab, id, chainName, chainId, router.query]);
 
   // Update button to be show only if the connected account is the owner
   // and only for services
