@@ -4,7 +4,7 @@ import { NA } from '@autonolas/frontend-library';
 import { AddressLink, Copy } from 'libs/ui-components/src';
 import { DetailsDivider, Info } from './styles';
 import { marketplaceRoleTag } from 'common-util/List/ListTable/helpers';
-import { truncateAddress } from 'libs/util-functions/src';
+import { parseToEth, truncateAddress } from 'libs/util-functions/src';
 
 const { Text, Title } = Typography;
 
@@ -165,6 +165,17 @@ export const ActivityDetails = ({
             <span className="info-text">{formatTimestamp(activity.deliveryBlockTimestamp)}</span>
           </Col>
         </Row>
+
+        {activity.payment !== null && activity.payment !== undefined ? (
+          <Row>
+            <Col span={8}>
+              <Text type="secondary">Payment:</Text>{' '}
+            </Col>
+            <Col span={16}>
+              <span className="info-text">{parseToEth(activity.payment)}</span>
+            </Col>
+          </Row>
+        ) : null}
 
         <Row>
           <Col span={8}>
