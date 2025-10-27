@@ -44,6 +44,12 @@ const formatTimestamp = (timestamp?: string) => {
   return `${formattedTime} • ${formattedDate}`;
 };
 
+const formatPaymentWithCurrency = (payment: string, chainId?: number) => {
+  const amount = parseToEth(payment);
+  const currency = chainId === 100 ? 'XDAI' : 'ETH'; // 100 = Gnosis, 8453 = Base
+  return `${amount} ${currency}`;
+};
+
 export const ActivityDetails = ({
   open,
   onCancel,
@@ -172,7 +178,9 @@ export const ActivityDetails = ({
               <Text type="secondary">Payment:</Text>{' '}
             </Col>
             <Col span={16}>
-              <span className="info-text">{parseToEth(activity.payment)}</span>
+              <span className="info-text">
+                {formatPaymentWithCurrency(activity.payment, addressLinkProps.chainId)}
+              </span>
             </Col>
           </Row>
         ) : null}
