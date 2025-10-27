@@ -1,5 +1,6 @@
-import { notifyError } from '@autonolas/frontend-library';
 import { GATEWAY_URL, HASH_PREFIX } from 'libs/util-constants/src';
+
+const IPFS_TIMEOUT = 5_000;
 
 export const getIpfsUrl = (hash: string) => {
   if (!hash) return '';
@@ -33,7 +34,14 @@ export const getIpfsResponse = async (hash: string): Promise<IpfsMetadata | null
   }
 
   try {
-    const response = await fetch(getIpfsUrl(hash));
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), IPFS_TIMEOUT);
+    const response = await fetch(getIpfsUrl(hash), {
+      signal: controller.signal,
+    });
+
+    clearTimeout(timeoutId);
+
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
@@ -43,7 +51,6 @@ export const getIpfsResponse = async (hash: string): Promise<IpfsMetadata | null
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
     console.error('Error fetching metadata from IPFS:', errorMessage);
-    notifyError('Error fetching metadata from IPFS');
     return null;
   }
 };
