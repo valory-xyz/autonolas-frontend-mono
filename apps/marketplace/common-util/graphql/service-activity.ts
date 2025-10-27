@@ -14,11 +14,24 @@ export type Activity = {
   deliveredBy: string;
   deliveryTransactionHash: string;
   deliveryBlockTimestamp: string;
+  payment?: string | null;
 };
 
 const LIMIT = 1_000;
 
-export const getQueryForServiceActivity = ({ serviceId }: { serviceId: string }) => {
+export const getQueryForServiceActivity = ({
+  serviceId,
+  includeDeliveryRate,
+}: {
+  serviceId: string;
+  includeDeliveryRate?: boolean;
+}) => {
+  const deliveryRateLine = includeDeliveryRate ? '      deliveryRate\n' : '';
+  const nestedDeliveryRateLine = includeDeliveryRate ? '          deliveryRate\n' : '';
+  const nestedDeliveryBlock = includeDeliveryRate
+    ? `        delivery {\n${nestedDeliveryRateLine}        }\n`
+    : '';
+
   return `
   {
     delivers (where: {service_: {id: "${serviceId}"}}, first: ${LIMIT}, orderBy: blockTimestamp, orderDirection: desc) {
@@ -27,6 +40,7 @@ export const getQueryForServiceActivity = ({ serviceId }: { serviceId: string })
       mech
       blockTimestamp
       transactionHash
+${deliveryRateLine}
       service {
         id
       }
@@ -37,9 +51,10 @@ export const getQueryForServiceActivity = ({ serviceId }: { serviceId: string })
         sender {
           id
         }
+${nestedDeliveryBlock}
       }
-    } 
-  
+    }
+
     requests (where: {service_: {id: "${serviceId}"}}, first: ${LIMIT}, orderBy: blockTimestamp, orderDirection: desc) {
       id
       ipfsHash
@@ -53,6 +68,7 @@ export const getQueryForServiceActivity = ({ serviceId }: { serviceId: string })
         mech
         transactionHash
         blockTimestamp
+${nestedDeliveryRateLine}
       }
     }
   }
@@ -73,6 +89,7 @@ const convertRequestToActivity = (request: Request): Activity => {
     mech: deliveredBy,
     transactionHash: deliveryTransactionHash,
     blockTimestamp: deliveryBlockTimestamp,
+    deliveryRate,
   } = delivery || {};
   const { id: requestedBy } = sender || {};
 
@@ -87,6 +104,7 @@ const convertRequestToActivity = (request: Request): Activity => {
     deliveredBy,
     deliveryTransactionHash,
     deliveryBlockTimestamp,
+    payment: deliveryRate ?? null,
   };
 };
 
@@ -98,6 +116,7 @@ const convertDeliveryToActivity = (delivery: Delivery): Activity => {
     blockTimestamp: deliveryBlockTimestamp,
     transactionHash: deliveryTransactionHash,
     request,
+    deliveryRate,
   } = delivery || {};
   const {
     ipfsHash: requestIpfsHash,
@@ -118,6 +137,7 @@ const convertDeliveryToActivity = (delivery: Delivery): Activity => {
     deliveredBy,
     deliveryTransactionHash,
     deliveryBlockTimestamp,
+    payment: deliveryRate ?? null,
   };
 };
 
@@ -182,7 +202,7 @@ export const getServiceActivityFromMMSubgraph = async ({
 }) => {
   const client = MM_GRAPHQL_CLIENTS[chainId];
 
-  const query = getQueryForServiceActivity({ serviceId });
+  const query = getQueryForServiceActivity({ serviceId, includeDeliveryRate: true });
   const response: Omit<ActivityResponse, 'id'> = await client.request(query);
   return { id: serviceId, ...response };
 };
