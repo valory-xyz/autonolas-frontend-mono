@@ -18,6 +18,7 @@ export type Activity = {
 };
 
 const LIMIT = 1_000;
+const LEGACY_DELIVERY_PAYMENT_WEI = '10000000000000000';
 
 export const getQueryForServiceActivity = ({
   serviceId,
@@ -214,5 +215,19 @@ export const getServiceActivityFromLegacyMechSubgraph = async ({
 }) => {
   const query = getQueryForServiceActivity({ serviceId });
   const response: Omit<ActivityResponse, 'id'> = await LEGACY_MECH_SUBGRAPH_CLIENT.request(query);
-  return { id: serviceId, ...response };
+
+  return {
+    id: serviceId,
+    requests: (response.requests || []).map((request) => {
+      if (!request?.delivery) return request;
+      if (!request.delivery.deliveryRate) {
+        request.delivery.deliveryRate = LEGACY_DELIVERY_PAYMENT_WEI;
+      }
+      return request;
+    }),
+    delivers: (response.delivers || []).map((delivery) => {
+      if (!delivery.deliveryRate) delivery.deliveryRate = LEGACY_DELIVERY_PAYMENT_WEI;
+      return delivery;
+    }),
+  };
 };
