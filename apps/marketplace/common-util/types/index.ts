@@ -18,6 +18,7 @@ export type Request = {
     mech: Address;
     transactionHash: TransactionHash;
     blockTimestamp: string;
+    deliveryRate?: string;
   };
 };
 
@@ -36,6 +37,7 @@ export type Delivery = {
     blockTimestamp: string;
     transactionHash: TransactionHash;
   };
+  deliveryRate?: string;
 };
 
 export type Service = {

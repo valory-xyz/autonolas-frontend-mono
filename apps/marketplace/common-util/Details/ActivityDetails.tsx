@@ -4,9 +4,14 @@ import { NA } from '@autonolas/frontend-library';
 import { AddressLink, Copy } from 'libs/ui-components/src';
 import { DetailsDivider, Info } from './styles';
 import { marketplaceRoleTag } from 'common-util/List/ListTable/helpers';
-import { truncateAddress } from 'libs/util-functions/src';
+import { parseToEth, truncateAddress } from 'libs/util-functions/src';
 
 const { Text, Title } = Typography;
+
+const CHAIN_TO_NATIVE_CURRENCY: Record<number, string> = {
+  100: 'XDAI',
+  8453: 'ETH',
+};
 
 type AddressLinkProps = {
   chainId?: number;
@@ -42,6 +47,12 @@ const formatTimestamp = (timestamp?: string) => {
   const formattedDate = date.toLocaleDateString('en-US', dateOptions);
 
   return `${formattedTime} • ${formattedDate}`;
+};
+
+const formatPaymentWithCurrency = (payment: string, chainId?: number) => {
+  const amount = parseToEth(payment);
+  const currency = (chainId && CHAIN_TO_NATIVE_CURRENCY[chainId]) || 'ETH';
+  return `${amount} ${currency}`;
 };
 
 export const ActivityDetails = ({
@@ -165,6 +176,19 @@ export const ActivityDetails = ({
             <span className="info-text">{formatTimestamp(activity.deliveryBlockTimestamp)}</span>
           </Col>
         </Row>
+
+        {!!activity.payment && (
+          <Row>
+            <Col span={8}>
+              <Text type="secondary">Payment:</Text>&nbsp;
+            </Col>
+            <Col span={16}>
+              <span className="info-text">
+                {formatPaymentWithCurrency(activity.payment, addressLinkProps.chainId)}
+              </span>
+            </Col>
+          </Row>
+        )}
 
         <Row>
           <Col span={8}>
