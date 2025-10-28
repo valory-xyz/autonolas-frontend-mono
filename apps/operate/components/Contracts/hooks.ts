@@ -485,7 +485,7 @@ export const useStakingContractsList = () => {
           (availableRewardsInWei as bigint) > 0 && maxSlots > 0 ? maxSlots - servicesLength : 0;
         const rewardsPerSecond = rewardsPerSecondList[index] as bigint;
         const minStakingDeposit = minStakingDepositList[index] as bigint;
-        const numAgentInstances = numAgentInstancesList[index] as bigint;
+        const numAgentInstances = (numAgentInstancesList[index] || 1n) as bigint;
 
         const availableRewards =
           availableRewardsInWei != null ? formatUnits(availableRewardsInWei as bigint, 18) : '0';
