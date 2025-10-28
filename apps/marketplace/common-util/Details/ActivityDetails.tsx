@@ -175,7 +175,7 @@ export const ActivityDetails = ({
         {activity.payment !== null && activity.payment !== undefined ? (
           <Row>
             <Col span={8}>
-              <Text type="secondary">Payment:</Text>{' '}
+              <Text type="secondary">Payment:</Text>&nbsp;
             </Col>
             <Col span={16}>
               <span className="info-text">
