@@ -183,7 +183,6 @@ export const ActivityDetails = ({
               </span>
             </Col>
           </Row>
-        ) : null}
 
         <Row>
           <Col span={8}>
