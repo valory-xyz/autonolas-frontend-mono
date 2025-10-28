@@ -220,13 +220,11 @@ export const getServiceActivityFromLegacyMechSubgraph = async ({
     id: serviceId,
     requests: (response.requests || []).map((request) => {
       if (!request?.delivery) return request;
-      if (!request.delivery.deliveryRate) {
-        request.delivery.deliveryRate = LEGACY_DELIVERY_PAYMENT_WEI;
-      }
+      request.delivery.deliveryRate = LEGACY_DELIVERY_PAYMENT_WEI;
       return request;
     }),
     delivers: (response.delivers || []).map((delivery) => {
-      if (!delivery.deliveryRate) delivery.deliveryRate = LEGACY_DELIVERY_PAYMENT_WEI;
+      delivery.deliveryRate = LEGACY_DELIVERY_PAYMENT_WEI;
       return delivery;
     }),
   };
