@@ -8,6 +8,11 @@ import { parseToEth, truncateAddress } from 'libs/util-functions/src';
 
 const { Text, Title } = Typography;
 
+const CHAIN_TO_NATIVE_CURRENCY: Record<number, string> = {
+  100: 'XDAI',
+  8453: 'ETH',
+};
+
 type AddressLinkProps = {
   chainId?: number;
   suffixCount?: number;
@@ -46,7 +51,7 @@ const formatTimestamp = (timestamp?: string) => {
 
 const formatPaymentWithCurrency = (payment: string, chainId?: number) => {
   const amount = parseToEth(payment);
-  const currency = chainId === 100 ? 'XDAI' : 'ETH'; // 100 = Gnosis, 8453 = Base
+  const currency = (chainId && CHAIN_TO_NATIVE_CURRENCY[chainId]) || 'ETH';
   return `${amount} ${currency}`;
 };
 
@@ -183,6 +188,7 @@ export const ActivityDetails = ({
               </span>
             </Col>
           </Row>
+        )}
 
         <Row>
           <Col span={8}>
