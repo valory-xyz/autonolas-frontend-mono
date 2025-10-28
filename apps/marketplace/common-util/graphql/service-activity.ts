@@ -34,7 +34,7 @@ export const getQueryForServiceActivity = ({
       ipfsHash
       mech
       blockTimestamp
-      transactionHash${includeDeliveryRate ? '\n      deliveryRate' : ''}
+      transactionHash${includeDeliveryRate ? '\ndeliveryRate' : ''}
       service {
         id
       }
@@ -45,7 +45,7 @@ export const getQueryForServiceActivity = ({
         sender {
           id
         }
-${includeDeliveryRate ? '        delivery {\n          deliveryRate\n        }\n' : ''}
+${includeDeliveryRate ? 'delivery {\ndeliveryRate\n}' : ''}
       }
     }
 
@@ -61,7 +61,7 @@ ${includeDeliveryRate ? '        delivery {\n          deliveryRate\n        }\n
         ipfsHash
         mech
         transactionHash
-        blockTimestamp${includeDeliveryRate ? '\n        deliveryRate' : ''}
+        blockTimestamp${includeDeliveryRate ? '\ndeliveryRate' : ''}
       }
     }
   }
