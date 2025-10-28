@@ -27,12 +27,6 @@ export const getQueryForServiceActivity = ({
   serviceId: string;
   includeDeliveryRate?: boolean;
 }) => {
-  const deliveryRateLine = includeDeliveryRate ? '      deliveryRate\n' : '';
-  const nestedDeliveryRateLine = includeDeliveryRate ? '          deliveryRate\n' : '';
-  const nestedDeliveryBlock = includeDeliveryRate
-    ? `        delivery {\n${nestedDeliveryRateLine}        }\n`
-    : '';
-
   return `
   {
     delivers (where: {service_: {id: "${serviceId}"}}, first: ${LIMIT}, orderBy: blockTimestamp, orderDirection: desc) {
@@ -40,8 +34,7 @@ export const getQueryForServiceActivity = ({
       ipfsHash
       mech
       blockTimestamp
-      transactionHash
-${deliveryRateLine}
+      transactionHash${includeDeliveryRate ? '\n      deliveryRate' : ''}
       service {
         id
       }
@@ -52,7 +45,7 @@ ${deliveryRateLine}
         sender {
           id
         }
-${nestedDeliveryBlock}
+${includeDeliveryRate ? '        delivery {\n          deliveryRate\n        }\n' : ''}
       }
     }
 
@@ -68,8 +61,7 @@ ${nestedDeliveryBlock}
         ipfsHash
         mech
         transactionHash
-        blockTimestamp
-${nestedDeliveryRateLine}
+        blockTimestamp${includeDeliveryRate ? '\n        deliveryRate' : ''}
       }
     }
   }
