@@ -5,3 +5,5 @@ export const ZENDESK_CONFIG = {
 };
 
 export const ZENDESK_BASE_URL = `https://${ZENDESK_CONFIG.SUBDOMAIN}.zendesk.com`;
+
+export const ZENDESK_RATING_FIELD_ID = process.env.ZENDESK_RATING_FIELD_ID;

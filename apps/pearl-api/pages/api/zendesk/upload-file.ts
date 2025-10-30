@@ -5,6 +5,12 @@ import { getZendeskRequestHeaders } from '../../../utils';
 
 const API_URL = `${ZENDESK_BASE_URL}/api/v2/uploads.json`;
 
+type RequestBody = {
+  fileName: string;
+  fileData: string;
+  contentType: string;
+};
+
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === 'OPTIONS') {
     res.setHeader('Allow', 'POST, OPTIONS');
@@ -17,7 +23,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   try {
-    const { fileName, fileData, contentType } = req.body;
+    const { fileName, fileData, contentType } = req.body as RequestBody;
 
     if (!fileName || !fileData || !contentType) {
       return res
@@ -48,3 +54,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     });
   }
 }
+
+export const config = {
+  api: {
+    bodyParser: {
+      sizeLimit: '50mb',
+    },
+  },
+};

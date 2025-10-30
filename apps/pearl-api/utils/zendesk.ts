@@ -1,4 +1,5 @@
 import { ZENDESK_CONFIG } from '../constants';
+import { ZENDESK_RATING_FIELD_ID } from '../constants';
 
 export const getZendeskRequestHeaders = (contentType: string = 'application/json') => {
   const auth = Buffer.from(
@@ -13,10 +14,12 @@ export const getZendeskRequestHeaders = (contentType: string = 'application/json
 };
 
 type GenerateZendeskTicketInfoParams = {
-  email: string;
+  email?: string;
   subject: string;
   description: string;
   uploadTokens?: string[];
+  tags?: string[];
+  rating?: string | number;
 };
 
 export const generateZendeskTicketInfo = ({
@@ -24,7 +27,15 @@ export const generateZendeskTicketInfo = ({
   subject,
   description,
   uploadTokens,
+  tags,
+  rating,
 }: GenerateZendeskTicketInfoParams) => {
+  const customFields: Array<{ id: number; value: string | number }> = [];
+  if (rating !== undefined && ZENDESK_RATING_FIELD_ID) {
+    const fieldIdNum = Number(ZENDESK_RATING_FIELD_ID);
+    customFields.push({ id: fieldIdNum, value: rating });
+  }
+
   return {
     ticket: {
       subject,
@@ -34,11 +45,11 @@ export const generateZendeskTicketInfo = ({
       },
       requester: {
         email,
-        name: email.split('@')[0],
+        name: email ? email.split('@')[0] : undefined,
       },
       priority: 'normal',
-      //   type
-      //   tags,
+      tags,
+      ...(customFields.length > 0 ? { custom_fields: customFields } : {}),
     },
   };
 };
