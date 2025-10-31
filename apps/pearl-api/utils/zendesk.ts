@@ -1,7 +1,14 @@
+import { isNil } from 'lodash';
+
+
 import { ZENDESK_CONFIG } from '../constants';
 import { ZENDESK_RATING_FIELD_ID } from '../constants';
 
 export const getZendeskRequestHeaders = (contentType: string = 'application/json') => {
+  if (!ZENDESK_CONFIG.API_EMAIL || !ZENDESK_CONFIG.API_TOKEN) {
+    throw new Error('Zendesk API credentials are not set');
+  }
+
   const auth = Buffer.from(
     `${ZENDESK_CONFIG.API_EMAIL}/token:${ZENDESK_CONFIG.API_TOKEN}`,
   ).toString('base64');
@@ -19,7 +26,7 @@ type GenerateZendeskTicketInfoParams = {
   description: string;
   uploadTokens?: string[];
   tags?: string[];
-  rating?: string | number;
+  rating?: number;
 };
 
 export const generateZendeskTicketInfo = ({
@@ -31,7 +38,7 @@ export const generateZendeskTicketInfo = ({
   rating,
 }: GenerateZendeskTicketInfoParams) => {
   const customFields: Array<{ id: number; value: string | number }> = [];
-  if (rating !== undefined && ZENDESK_RATING_FIELD_ID) {
+  if (!isNil(rating) && ZENDESK_RATING_FIELD_ID) {
     const fieldIdNum = Number(ZENDESK_RATING_FIELD_ID);
     customFields.push({ id: fieldIdNum, value: rating });
   }

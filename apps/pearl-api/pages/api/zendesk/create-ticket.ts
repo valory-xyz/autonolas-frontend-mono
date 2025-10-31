@@ -42,7 +42,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       description,
       uploadTokens,
       tags,
-      rating,
+      rating: rating ? Number(rating) : undefined,
     });
     const response = await fetch(API_URL, {
       method: 'POST',

@@ -1,6 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 
-import { ZENDESK_BASE_URL } from '../../../constants';
+import { ZENDESK_BASE_URL, ZENDESK_MAX_UPLOAD_BYTES } from '../../../constants';
 import { getZendeskRequestHeaders } from '../../../utils';
 
 const API_URL = `${ZENDESK_BASE_URL}/api/v2/uploads.json`;
@@ -31,9 +31,24 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         .json({ error: 'Bad request', message: 'One or more of the required fields is missing' });
     }
 
+    if(typeof fileData !== 'string' || !fileData.startsWith('data:') || !fileData.includes('base64,')) {
+      return res
+        .status(400)
+        .json({ error: 'Bad request', message: 'fileData must be a base64-encoded data URL' });
+    }
+
+    const fileBuffer = Buffer.from(fileData.split(',')[1], 'base64');
+    if (fileBuffer.length > ZENDESK_MAX_UPLOAD_BYTES) {
+      return res.status(413).json({
+        error: 'File too large',
+        message: `Maximum allowed size is ${Math.floor(
+          ZENDESK_MAX_UPLOAD_BYTES / (1024 * 1024),
+        )}MB`,
+      });
+    }
+
     const headers = getZendeskRequestHeaders(contentType);
     const uploadUrl = `${API_URL}?filename=${encodeURIComponent(fileName)}`;
-    const fileBuffer = Buffer.from(fileData.split(',')[1], 'base64');
     const response = await fetch(uploadUrl, {
       method: 'POST',
       headers,
