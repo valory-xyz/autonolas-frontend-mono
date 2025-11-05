@@ -31,7 +31,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         .json({ error: 'Bad request', message: 'One or more of the required fields is missing' });
     }
 
-    if(typeof fileData !== 'string' || !fileData.startsWith('data:') || !fileData.includes('base64,')) {
+    if (
+      typeof fileData !== 'string' ||
+      !fileData.startsWith('data:') ||
+      !fileData.includes('base64,')
+    ) {
       return res
         .status(400)
         .json({ error: 'Bad request', message: 'fileData must be a base64-encoded data URL' });

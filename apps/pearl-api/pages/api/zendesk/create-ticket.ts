@@ -7,12 +7,11 @@ import type { ZendeskTicketResponse } from '../../../types';
 const API_URL = `${ZENDESK_BASE_URL}/api/v2/tickets.json`;
 
 type RequestBody = {
-  email?: string;
+  email: string;
   subject: string;
   description: string;
   uploadTokens?: string[];
   tags?: string[];
-  rating?: string | number;
 };
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -27,9 +26,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   try {
-    const { email, subject, description, uploadTokens, tags, rating } = req.body as RequestBody;
+    const { email, subject, description, uploadTokens, tags } = req.body as RequestBody;
 
-    if (!subject || !description) {
+    if (!email || !subject || !description) {
       return res
         .status(400)
         .json({ error: 'Bad request', message: 'One or more of the required fields is missing' });
@@ -42,7 +41,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       description,
       uploadTokens,
       tags,
-      rating: rating ? Number(rating) : undefined,
     });
     const response = await fetch(API_URL, {
       method: 'POST',

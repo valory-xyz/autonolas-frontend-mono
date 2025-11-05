@@ -1,8 +1,4 @@
-import { isNil } from 'lodash';
-
-
 import { ZENDESK_CONFIG } from '../constants';
-import { ZENDESK_RATING_FIELD_ID } from '../constants';
 
 export const getZendeskRequestHeaders = (contentType: string = 'application/json') => {
   if (!ZENDESK_CONFIG.API_EMAIL || !ZENDESK_CONFIG.API_TOKEN) {
@@ -26,7 +22,6 @@ type GenerateZendeskTicketInfoParams = {
   description: string;
   uploadTokens?: string[];
   tags?: string[];
-  rating?: number;
 };
 
 export const generateZendeskTicketInfo = ({
@@ -35,14 +30,7 @@ export const generateZendeskTicketInfo = ({
   description,
   uploadTokens,
   tags,
-  rating,
 }: GenerateZendeskTicketInfoParams) => {
-  const customFields: Array<{ id: number; value: string | number }> = [];
-  if (!isNil(rating) && ZENDESK_RATING_FIELD_ID) {
-    const fieldIdNum = Number(ZENDESK_RATING_FIELD_ID);
-    customFields.push({ id: fieldIdNum, value: rating });
-  }
-
   return {
     ticket: {
       subject,
@@ -56,7 +44,6 @@ export const generateZendeskTicketInfo = ({
       },
       priority: 'normal',
       tags,
-      ...(customFields.length > 0 ? { custom_fields: customFields } : {}),
     },
   };
 };
