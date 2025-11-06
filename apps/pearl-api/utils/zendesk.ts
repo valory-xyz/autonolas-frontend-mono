@@ -47,3 +47,14 @@ export const generateZendeskTicketInfo = ({
     },
   };
 };
+
+export const isValidFileType = (contentType: string, fileName: string): boolean => {
+  const isImage = contentType.startsWith('image/');
+  const isVideo = contentType.startsWith('video/');
+  const isZip =
+    contentType === 'application/zip' ||
+    contentType === 'application/x-zip-compressed' ||
+    fileName.toLowerCase().endsWith('.zip');
+
+  return isImage || isVideo || isZip;
+};

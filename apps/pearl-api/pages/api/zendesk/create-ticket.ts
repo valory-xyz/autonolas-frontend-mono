@@ -1,6 +1,10 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 
-import { generateZendeskTicketInfo, getZendeskRequestHeaders } from '../../../utils';
+import {
+  generateZendeskTicketInfo,
+  getZendeskRequestHeaders,
+  setCorsHeaders,
+} from '../../../utils';
 import { ZENDESK_BASE_URL } from '../../../constants';
 import type { ZendeskTicketResponse } from '../../../types';
 
@@ -15,6 +19,8 @@ type RequestBody = {
 };
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  setCorsHeaders(req, res);
+
   if (req.method === 'OPTIONS') {
     res.setHeader('Allow', 'POST, OPTIONS');
     res.status(204).end();

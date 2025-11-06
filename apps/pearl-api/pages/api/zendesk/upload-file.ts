@@ -1,7 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 
 import { ZENDESK_BASE_URL, ZENDESK_MAX_UPLOAD_BYTES } from '../../../constants';
-import { getZendeskRequestHeaders } from '../../../utils';
+import { getZendeskRequestHeaders, isValidFileType, setCorsHeaders } from '../../../utils';
 
 const API_URL = `${ZENDESK_BASE_URL}/api/v2/uploads.json`;
 
@@ -12,6 +12,8 @@ type RequestBody = {
 };
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  setCorsHeaders(req, res);
+
   if (req.method === 'OPTIONS') {
     res.setHeader('Allow', 'POST, OPTIONS');
     res.status(204).end();
@@ -39,6 +41,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res
         .status(400)
         .json({ error: 'Bad request', message: 'fileData must be a base64-encoded data URL' });
+    }
+
+    if (!isValidFileType(contentType, fileName)) {
+      return res.status(400).json({
+        error: 'Bad request',
+        message: `File type '${contentType}' is not allowed.`,
+      });
     }
 
     const fileBuffer = Buffer.from(fileData.split(',')[1], 'base64');
