@@ -58,3 +58,23 @@ export const isValidFileType = (contentType: string, fileName: string): boolean 
 
   return isImage || isVideo || isZip;
 };
+
+export const isValidFileName = (fileName: string): boolean => {
+  if (typeof fileName !== 'string') return false;
+  if (fileName.length === 0 || fileName.length > 255) return false;
+
+  // Disallow path separators, leading/trailing space or dot, and starting with a dot
+  if (
+    fileName.includes('/') ||
+    fileName.includes('\\') ||
+    /^[ .]/.test(fileName) ||
+    /[ .]$/.test(fileName)
+  ) {
+    return false;
+  }
+
+  // Allowlist of safe characters
+  if (!/^[A-Za-z0-9][A-Za-z0-9 _.()\-!~*]*$/.test(fileName)) return false;
+
+  return true;
+};

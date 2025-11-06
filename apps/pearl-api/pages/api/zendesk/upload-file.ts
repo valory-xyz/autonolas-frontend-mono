@@ -1,7 +1,12 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 
 import { ZENDESK_BASE_URL, ZENDESK_MAX_UPLOAD_BYTES } from '../../../constants';
-import { getZendeskRequestHeaders, isValidFileType, setCorsHeaders } from '../../../utils';
+import {
+  getZendeskRequestHeaders,
+  isValidFileType,
+  isValidFileName,
+  setCorsHeaders,
+} from '../../../utils';
 
 const API_URL = `${ZENDESK_BASE_URL}/api/v2/uploads.json`;
 
@@ -41,6 +46,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res
         .status(400)
         .json({ error: 'Bad request', message: 'fileData must be a base64-encoded data URL' });
+    }
+
+    if (!isValidFileName(fileName)) {
+      return res.status(400).json({
+        error: 'Bad request',
+        message: 'File name contains invalid characters.',
+      });
     }
 
     if (!isValidFileType(contentType, fileName)) {
