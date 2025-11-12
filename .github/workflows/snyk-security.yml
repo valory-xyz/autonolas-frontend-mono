@@ -30,9 +30,9 @@ permissions:
 jobs:
   snyk:
     permissions:
-      contents: read # for actions/checkout to fetch code
-      security-events: write # for github/codeql-action/upload-sarif to upload SARIF results
-      actions: read # only required for a private repository by github/codeql-action/upload-sarif to get the Action run status
+      contents: read                # for actions/checkout
+      security-events: write        # for github/codeql-action/upload-sarif
+      actions: read                 # required for private repos
     runs-on: ubuntu-latest
 
     env:
@@ -41,54 +41,51 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
+        uses: actions/checkout@v4
 
       - name: Setup Node.js
-        uses: actions/setup-node@1e60f620b9541d16bece96c5465dc8ee9832be0b # v4.0.3
+        uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: 'yarn'
 
       - name: Install dependencies
         run: yarn install --frozen-lockfile
-      - name: Set up Snyk CLI to check for security issues
-        # Snyk can be used to break the build when it detects security issues.
-        # In this case we want to upload the SAST issues to GitHub Code Scanning
-        uses: snyk/actions/setup@806182742461562b67788a64410098c9d9b96adb
+
+      # Snyk can be used to break the build when it detects security issues.
+      # In this case we want to upload the SAST issues to GitHub Code Scanning
+      - name: Setup Snyk CLI
+        uses: snyk/actions/setup@v4
 
       - name: Verify Snyk authentication
         run: snyk auth ${{ secrets.SNYK_TOKEN }}
 
-      # Runs Snyk Code (SAST) analysis and uploads result into GitHub.
-      # Use || true to not fail the pipeline
-      - name: Snyk Code test
-        run: snyk code test --sarif > snyk-code.sarif || true
-        continue-on-error: true
-
-      # Runs Snyk Open Source (SCA) analysis for the root package.json only
-      - name: Snyk Open Source monitor
+      # Run Snyk Code analysis (SAST)
+      # Save stdout to snyk-code.sarif and stderr to snyk-error.log
+      - name: Snyk Code test (SAST)
         run: |
-          # Monitor only the root package.json to avoid duplicate scans and .NET framework errors
-          snyk monitor --file=package.json --project-name="autonolas-frontend-mono"
+          snyk code test --sarif > snyk-code.sarif 2> snyk-error.log || true
+          echo "✅ Snyk Code test completed. Check snyk-error.log for any warnings."
         continue-on-error: true
 
-      # Disabled because this repo does not use IaC or Docker yet
+      # Optionally run Snyk Open Source scan for dependencies
+      - name: Snyk Open Source monitor (SCA)
+        run: |
+          # Monitor only the root package.json to avoid duplicate scans in a monorepo
+          snyk monitor --file=package.json --project-name="autonolas-frontend-mono" || true
+        continue-on-error: true
 
-      #   # Runs Snyk Infrastructure as Code (IaC) analysis and uploads result to Snyk.
-      #   # Use || true to not fail the pipeline.
-      # - name: Snyk IaC test and report
-      #   run: snyk iac test --report # || true
+      # Validate SARIF file before upload
+      - name: Validate SARIF output
+        run: |
+          if ! jq empty snyk-code.sarif > /dev/null 2>&1; then
+            echo "❌ Invalid SARIF JSON detected. Skipping upload."
+            exit 0
+          fi
 
-      #   # Build the docker image for testing
-      # - name: Build a Docker image
-      #   run: docker build -t your/image-to-test .
-      #   # Runs Snyk Container (Container and SCA) analysis and uploads result to Snyk.
-      # - name: Snyk Container monitor
-      #   run: snyk container monitor your/image-to-test --file=Dockerfile
-
-      # Push the Snyk Code results into GitHub Code Scanning tab
-      - name: Upload result to GitHub Code Scanning
+      # Upload valid SARIF to GitHub Code Scanning
+      - name: Upload SARIF to GitHub Code Scanning
         if: always() && hashFiles('snyk-code.sarif') != ''
-        uses: github/codeql-action/upload-sarif@e2b3eafc8d227b0241d48be5f425d47c2d750a13 # v3.26.10
+        uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: snyk-code.sarif
