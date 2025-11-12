@@ -58,37 +58,65 @@ jobs:
         uses: snyk/actions/setup@806182742461562b67788a64410098c9d9b96adb
 
       - name: Verify Snyk authentication
-        run: snyk auth ${{ secrets.SNYK_TOKEN }}
+        run: |
+          snyk auth ${{ secrets.SNYK_TOKEN }} || {
+            echo "❌ Snyk authentication failed. Check token validity."
+            exit 1
+          }
 
       # Run Snyk Code analysis (SAST)
       # Save stdout to snyk-code.sarif and stderr to snyk-error.log
       - name: Snyk Code test (SAST)
         run: |
           snyk code test --sarif > snyk-code.sarif 2> snyk-error.log || true
-          echo "✅ Snyk Code test completed. Check snyk-error.log for any warnings."
+          echo "✅ Snyk Code test completed. Check snyk-error.log for warnings."
         continue-on-error: true
 
-      # Optionally run Snyk Open Source scan for dependencies
-      - name: Snyk Open Source monitor (SCA)
+      # Optional: Snyk dependency scan (SCA)
+      - name: Snyk Open Source monitor
         run: |
           # Monitor only the root package.json to avoid duplicate scans in a monorepo
           snyk monitor --file=package.json --project-name="autonolas-frontend-mono" || true
         continue-on-error: true
 
-      # Validate and fix SARIF file before upload
-      - name: Validate SARIF output
+      # Show any Snyk CLI errors for easier debugging
+      - name: Print Snyk error log (if any)
+        if: always()
         run: |
-          if [ -f snyk-code.sarif ] && jq empty snyk-code.sarif > /dev/null 2>&1; then
-            echo "✅ Valid SARIF JSON detected."
+          if [ -s snyk-error.log ]; then
+            echo "⚠️ Snyk error output:"
+            cat snyk-error.log
           else
-            echo "❌ Invalid or missing SARIF JSON. Creating empty SARIF."
-            echo '{"$schema": "https://raw.githubusercontent.com/oasis-tcs/sarif-spec/master/Schemata/sarif-schema-2.1.0.json", "version": "2.1.0", "runs": []}' > snyk-code.sarif
+            echo "✅ No Snyk errors found."
           fi
-        continue-on-error: true
 
-      # Upload SARIF to GitHub Code Scanning
+      # Validate SARIF before upload
+      - name: Validate SARIF output
+        id: validate_sarif
+        run: |
+          if [ -f snyk-code.sarif ] && [ -s snyk-code.sarif ]; then
+            # Check if file starts with { (basic JSON validation)
+            if head -c 1 snyk-code.sarif | grep -q '^{'; then
+              # Check if it has empty runs array or no meaningful content
+              if grep -q '"runs": *\[\]' snyk-code.sarif || ! grep -q '"results"' snyk-code.sarif; then
+                echo "⚠️ SARIF has no security findings. Skipping upload."
+                echo "sarif_valid=false" >> $GITHUB_OUTPUT
+              else
+                echo "✅ Valid SARIF with findings detected."
+                echo "sarif_valid=true" >> $GITHUB_OUTPUT
+              fi
+            else
+              echo "❌ Invalid JSON format detected. Skipping upload."
+              echo "sarif_valid=false" >> $GITHUB_OUTPUT
+            fi
+          else
+            echo "❌ SARIF file missing or empty. Skipping upload."
+            echo "sarif_valid=false" >> $GITHUB_OUTPUT
+          fi
+
+      # Upload valid SARIF to GitHub Code Scanning
       - name: Upload SARIF to GitHub Code Scanning
-        if: always() && hashFiles('snyk-code.sarif') != ''
+        if: steps.validate_sarif.outputs.sarif_valid == 'true'
         uses: github/codeql-action/upload-sarif@e2b3eafc8d227b0241d48be5f425d47c2d750a13 # v3.26.10
         with:
           sarif_file: snyk-code.sarif
