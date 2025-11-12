@@ -60,13 +60,9 @@ jobs:
         run: snyk auth ${{ secrets.SNYK_TOKEN }}
 
       # Runs Snyk Code (SAST) analysis and uploads result into GitHub.
+      # Use || true to not fail the pipeline
       - name: Snyk Code test
-        run: |
-          snyk code test --sarif > snyk-code.sarif || true
-          # Ensure SARIF file exists even if scan fails
-          if [ ! -f snyk-code.sarif ] || [ ! -s snyk-code.sarif ]; then
-            echo '{"runs": []}' > snyk-code.sarif
-          fi
+        run: snyk code test --sarif > snyk-code.sarif || true
         continue-on-error: true
 
       # Runs Snyk Open Source (SCA) analysis for the root package.json only
