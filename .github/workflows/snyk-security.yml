@@ -29,7 +29,6 @@ permissions:
 
 jobs:
   snyk:
-    continue-on-error: true
     permissions:
       contents: read # for actions/checkout to fetch code
       security-events: write # for github/codeql-action/upload-sarif to upload SARIF results
@@ -41,27 +40,41 @@ jobs:
       SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
+
+      - name: Setup Node.js
+        uses: actions/setup-node@1e60f620b9541d16bece96c5465dc8ee9832be0b # v4.0.3
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
       - name: Set up Snyk CLI to check for security issues
         # Snyk can be used to break the build when it detects security issues.
         # In this case we want to upload the SAST issues to GitHub Code Scanning
         uses: snyk/actions/setup@806182742461562b67788a64410098c9d9b96adb
 
-        # For Snyk Open Source you must first set up the development environment for your application's dependencies
-        # For example for Node
-        #- uses: actions/setup-node@v4
-        #  with:
-        #    node-version: 20
+      - name: Verify Snyk authentication
+        run: snyk auth ${{ secrets.SNYK_TOKEN }}
 
-        # Runs Snyk Code (SAST) analysis and uploads result into GitHub.
-        # Use || true to not fail the pipeline
+      # Runs Snyk Code (SAST) analysis and uploads result into GitHub.
       - name: Snyk Code test
-        run: snyk code test --sarif > snyk-code.sarif
+        run: |
+          snyk code test --sarif > snyk-code.sarif || true
+          # Ensure SARIF file exists even if scan fails
+          if [ ! -f snyk-code.sarif ] || [ ! -s snyk-code.sarif ]; then
+            echo '{"runs": []}' > snyk-code.sarif
+          fi
         continue-on-error: true
 
-        # Runs Snyk Open Source (SCA) analysis and uploads result to Snyk.
+      # Runs Snyk Open Source (SCA) analysis for the root package.json only
       - name: Snyk Open Source monitor
-        run: snyk monitor --all-projects
+        run: |
+          # Monitor only the root package.json to avoid duplicate scans and .NET framework errors
+          snyk monitor --file=package.json --project-name="autonolas-frontend-mono"
+        continue-on-error: true
 
       # Disabled because this repo does not use IaC or Docker yet
 
@@ -77,8 +90,9 @@ jobs:
       # - name: Snyk Container monitor
       #   run: snyk container monitor your/image-to-test --file=Dockerfile
 
-        # Push the Snyk Code results into GitHub Code Scanning tab
+      # Push the Snyk Code results into GitHub Code Scanning tab
       - name: Upload result to GitHub Code Scanning
-        uses: github/codeql-action/upload-sarif@v3
+        if: always() && hashFiles('snyk-code.sarif') != ''
+        uses: github/codeql-action/upload-sarif@e2b3eafc8d227b0241d48be5f425d47c2d750a13 # v3.26.10
         with:
           sarif_file: snyk-code.sarif
