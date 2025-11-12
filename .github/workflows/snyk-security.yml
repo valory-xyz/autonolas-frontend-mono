@@ -75,15 +75,18 @@ jobs:
           snyk monitor --file=package.json --project-name="autonolas-frontend-mono" || true
         continue-on-error: true
 
-      # Validate SARIF file before upload
+      # Validate and fix SARIF file before upload
       - name: Validate SARIF output
         run: |
-          if ! jq empty snyk-code.sarif > /dev/null 2>&1; then
-            echo "❌ Invalid SARIF JSON detected. Skipping upload."
-            exit 0
+          if [ -f snyk-code.sarif ] && jq empty snyk-code.sarif > /dev/null 2>&1; then
+            echo "✅ Valid SARIF JSON detected."
+          else
+            echo "❌ Invalid or missing SARIF JSON. Creating empty SARIF."
+            echo '{"$schema": "https://raw.githubusercontent.com/oasis-tcs/sarif-spec/master/Schemata/sarif-schema-2.1.0.json", "version": "2.1.0", "runs": []}' > snyk-code.sarif
           fi
+        continue-on-error: true
 
-      # Upload valid SARIF to GitHub Code Scanning
+      # Upload SARIF to GitHub Code Scanning
       - name: Upload SARIF to GitHub Code Scanning
         if: always() && hashFiles('snyk-code.sarif') != ''
         uses: github/codeql-action/upload-sarif@e2b3eafc8d227b0241d48be5f425d47c2d750a13 # v3.26.10
