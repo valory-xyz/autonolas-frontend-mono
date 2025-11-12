@@ -5,11 +5,7 @@ import { useEffect, useState } from 'react';
 
 import { notifyError, notifySuccess } from '@autonolas/frontend-library';
 
-import {
-  FALLBACK_HANDLER,
-  multisigAddresses,
-  multisigSameAddresses,
-} from 'common-util/Contracts/addresses';
+import { FALLBACK_HANDLER } from 'common-util/Contracts/addresses';
 import { RegistryForm } from 'common-util/TransactionHelpers/RegistryForm';
 import { SendTransactionButton } from 'common-util/TransactionHelpers/SendTransactionButton';
 import { isValidSolanaPublicKey } from 'common-util/functions';
@@ -19,7 +15,7 @@ import { SVM_EMPTY_ADDRESS } from 'util/constants';
 import { RadioLabel } from '../styles';
 import { useFinishRegistration } from '../useSvmServiceStateManagement';
 import { getServiceAgentInstances, onStep3Deploy } from '../utils';
-import { onMultisigSubmit } from './utils';
+import { getMultisigAddresses, onMultisigSubmit } from './utils';
 
 const STEP = 3;
 const OPTION_1 = 'Creates a new service multisig with currently registered agent instances';
@@ -147,6 +143,11 @@ export const FinishedRegistration = ({
   const [agentInstances, setAgentInstances] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isTerminating, setIsTerminating] = useState(false);
+  const [multisigOptions, setMultisigOptions] = useState({
+    multisigAddresses: [],
+    multisigSameAddresses: [],
+    isOld: true,
+  });
 
   useEffect(() => {
     let isMounted = true;
@@ -156,13 +157,19 @@ export const FinishedRegistration = ({
         if (isMounted) {
           setAgentInstances(response);
         }
+
+        // Get multisig addresses based on whether multisig has recovery module
+        const addresses = await getMultisigAddresses(multisig, chainId, canShowMultisigSameAddress);
+        if (isMounted) {
+          setMultisigOptions(addresses);
+        }
       }
     })();
 
     return () => {
       isMounted = false;
     };
-  }, [serviceId, chainId, isSvm]);
+  }, [serviceId, chainId, isSvm, multisig, canShowMultisigSameAddress]);
 
   const handleStep3Deploy = async (radioValuePassed, payload) => {
     try {
@@ -199,9 +206,10 @@ export const FinishedRegistration = ({
     console.log('Failed:', errorInfo); /* eslint-disable-line no-console */
   };
 
-  const otherAddress = canShowMultisigSameAddress ? multisigSameAddresses[chainId] || [] : [];
-  const options = [...(multisigAddresses[chainId] || []), ...otherAddress];
-  const isMultiSig = (multisigAddresses[chainId] || [])[0];
+  // Use multisig addresses from state (determined by whether multisig has recovery module)
+  const otherAddress = multisigOptions.multisigSameAddresses || [];
+  const options = [...(multisigOptions.multisigAddresses || []), ...otherAddress];
+  const isMultiSig = (multisigOptions.multisigAddresses || [])[0];
   const btnProps = getOtherBtnProps(STEP);
 
   const terminateBtn = (

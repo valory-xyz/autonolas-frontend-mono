@@ -152,7 +152,7 @@ type MultisigAddress = {
 };
 // TODO: add testcases for all networks
 /**
- * check addresses here - GnosisSafeMultisig
+ * check addresses here - GnosisSafeMultisig || SafeMultisigWithRecoveryModule
  * Addresses: https://github.com/valory-xyz/autonolas-registries/blob/main/docs/configuration.json
  */
 export const multisigAddresses: MultisigAddress = {
@@ -176,8 +176,29 @@ export const multisigAddresses: MultisigAddress = {
   [LOCAL_FORK_ID_POLYGON]: ['0x3d77596beb0f130a4415df3D2D8232B3d3D31e44'],
 };
 
+export const newMultisigAddresses: MultisigAddress = {
+  [mainnet.id]: ['0xCb728aefD88FCA806d638EAEeEAcFC03Dd985d70'],
+  [optimism.id]: ['0x4be7A91e67be963806FeFA9C1FD6C53DfC358d94'],
+  [gnosis.id]: ['0xB4eB492bbfDcE5ccc11d675797cCF090eB0bCbd6'],
+  [polygon.id]: ['0x1a0bFCC27051BCcDDc444578f56A4F5920e0E083'],
+  [base.id]: ['0x8c534420Db046d6801A1A8bE6fb602cC8F257453'],
+  [arbitrum.id]: ['0x17B2198872216D8469AdeBC1227D0d4824940821'],
+  [celo.id]: ['0x379451B13e4900C7005Bf57467770b2EE4e62a86'],
+  [mode.id]: ['0x7Fd1F4b764fA41d19fe3f63C85d12bf64d2bbf68'],
+  [goerli.id]: ['0x65dD51b02049ad1B6FF7fa9Ea3322E1D2CAb1176'],
+  [gnosisChiado.id]: ['0xeB49bE5DF00F74bd240DE4535DDe6Bc89CEfb994'],
+  [polygonMumbai.id]: ['0x9dEc6B62c197268242A768dc3b153AE7a2701396'],
+  [baseSepolia.id]: ['0x19936159B528C66750992C3cBcEd2e71cF4E4824'],
+  [arbitrumSepolia.id]: ['0x19936159B528C66750992C3cBcEd2e71cF4E4824'],
+  [optimismSepolia.id]: ['0x19936159B528C66750992C3cBcEd2e71cF4E4824'],
+  [celoAlfajores.id]: ['0x19936159B528C66750992C3cBcEd2e71cF4E4824'],
+  [LOCAL_FORK_ID]: ['0x46C0D07F55d4F9B5Eed2Fc9680B5953e5fd7b461'],
+  [LOCAL_FORK_ID_GNOSIS]: ['0x3C1fF68f5aa342D296d4DEe4Bb1cACCA912D95fE'],
+  [LOCAL_FORK_ID_POLYGON]: ['0x3d77596beb0f130a4415df3D2D8232B3d3D31e44'],
+};
+
 /**
- * check addresses here - GnosisSafeSameAddressMultisig
+ * check addresses here - GnosisSafeSameAddressMultisig || RecoveryModule
  * Addresses: https://github.com/valory-xyz/autonolas-registries/blob/main/docs/configuration.json
  */
 export const multisigSameAddresses: MultisigAddress = {
@@ -189,6 +210,27 @@ export const multisigSameAddresses: MultisigAddress = {
   [arbitrum.id]: ['0xBb7e1D6Cb6F243D6bdE81CE92a9f2aFF7Fbe7eac'],
   [celo.id]: ['0xBb7e1D6Cb6F243D6bdE81CE92a9f2aFF7Fbe7eac'],
   [mode.id]: ['0xFbBEc0C8b13B38a9aC0499694A69a10204c5E2aB'],
+  [goerli.id]: ['0x06467Cb835da623384a22aa902647784C1c9f5Ae'],
+  [gnosisChiado.id]: ['0xE16adc7777B7C2a0d35033bd3504C028AB28EE8b'],
+  [polygonMumbai.id]: ['0xd6AA4Ec948d84f6Db8EEf25104CeE0Ecd280C74e'],
+  [baseSepolia.id]: ['0x10100e74b7F706222F8A7C0be9FC7Ae1717Ad8B2'],
+  [arbitrumSepolia.id]: ['0x10100e74b7F706222F8A7C0be9FC7Ae1717Ad8B2'],
+  [optimismSepolia.id]: ['0x10100e74b7F706222F8A7C0be9FC7Ae1717Ad8B2'],
+  [celoAlfajores.id]: ['0x10100e74b7F706222F8A7C0be9FC7Ae1717Ad8B2'],
+  [LOCAL_FORK_ID]: ['0xfa517d01DaA100cB1932FA4345F68874f7E7eF46'],
+  [LOCAL_FORK_ID_GNOSIS]: ['0x6e7f594f680f7aBad18b7a63de50F0FeE47dfD06'],
+  [LOCAL_FORK_ID_POLYGON]: ['0xd8BCC126ff31d2582018715d5291A508530587b0'],
+};
+
+export const newMultisigSameAddresses: MultisigAddress = {
+  [mainnet.id]: ['0x69D97b5c4F35fd3A72FA83b6B1eB911c6A8a2e3c'],
+  [optimism.id]: ['0x6e7f594f680f7aBad18b7a63de50F0FeE47dfD06'],
+  [gnosis.id]: ['0x0Cb12457ed26d572c5e4A50f30b6f7A904662a72'],
+  [polygon.id]: ['0x02C26437B292D86c5F4F21bbCcE0771948274f84'],
+  [base.id]: ['0x359d53C326388D24037b3b1590d217fdb5EEE74c'],
+  [arbitrum.id]: ['0xD0863340f947bE329c67e196e192705e53A1338f'],
+  [celo.id]: ['0x24F792D51b398928459Dfbb4181bDb4D5d2CD472'],
+  [mode.id]: ['0x1d79e0a600B61FAC1B8F40c27347e48962Ed2f23'],
   [goerli.id]: ['0x06467Cb835da623384a22aa902647784C1c9f5Ae'],
   [gnosisChiado.id]: ['0xE16adc7777B7C2a0d35033bd3504C028AB28EE8b'],
   [polygonMumbai.id]: ['0xd6AA4Ec948d84f6Db8EEf25104CeE0Ecd280C74e'],
