@@ -55,6 +55,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     });
 
     if (!response.ok) {
+      const errorText = await response.text().catch(() => 'No response text');
+      console.error('Zendesk API error:', {
+        status: response.status,
+        statusText: response.statusText,
+        body: errorText,
+      });
+
       return res.status(response.status).json({ error: 'Failed to create ticket' });
     }
 
