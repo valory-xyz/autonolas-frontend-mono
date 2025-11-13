@@ -300,6 +300,18 @@ const STAKING_CONTRACT_DETAILS: Record<Address, StakingContractDetailsInfo> = {
     minOperatingBalance: 0.03,
     minOperatingBalanceToken: 'ETH',
   },
+  // Quickstart Beta Mech MarketPlace - Expert 1
+  '0x000000000000000000000000db9e2713c3da3c403f2ea6e570eb978b00304e9e': {
+    availableOn: ['quickstart'],
+    minOperatingBalance: 135,
+    minOperatingBalanceToken: 'XDAI',
+  },
+  // Quickstart Beta Mech MarketPlace - Expert 2
+  '0x0000000000000000000000001e90522b45c771dcf5f79645b9e96551d2ecaf62': {
+    availableOn: ['quickstart'],
+    minOperatingBalance: 135,
+    minOperatingBalanceToken: 'XDAI',
+  },
   // Quickstart Beta Mech MarketPlace - Expert 3
   '0x00000000000000000000000075eeca6207be98cac3fde8a20ecd7b01e50b3472': {
     availableOn: ['quickstart'],
