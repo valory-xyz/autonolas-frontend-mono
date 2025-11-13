@@ -65,11 +65,11 @@ jobs:
           }
 
       # Run Snyk Code analysis (SAST)
-      # Save stdout to snyk-code.sarif and stderr to snyk-error.log
       - name: Snyk Code test (SAST)
         run: |
-          snyk code test --sarif > snyk-code.sarif 2> snyk-error.log || true
-          echo "✅ Snyk Code test completed. Check snyk-error.log for warnings."
+          # Redirect both stdout and stderr to prevent error contamination
+          snyk code test --sarif > snyk-code.sarif 2>&1 || true
+          echo "✅ Snyk Code test completed."
         continue-on-error: true
 
       # Optional: Snyk dependency scan (SCA)
@@ -114,6 +114,14 @@ jobs:
             echo "sarif_valid=false" >> $GITHUB_OUTPUT
           fi
 
+      - name: Debug SARIF output
+        if: always()
+        run: |
+          echo "---- snyk-code.sarif ----"
+          head -n 20 snyk-code.sarif || echo "No SARIF file found."
+          echo "---- snyk-error.log ----"
+          cat snyk-error.log || echo "No error log."
+          
       # Upload valid SARIF to GitHub Code Scanning
       - name: Upload SARIF to GitHub Code Scanning
         if: steps.validate_sarif.outputs.sarif_valid == 'true'
