@@ -300,6 +300,54 @@ const STAKING_CONTRACT_DETAILS: Record<Address, StakingContractDetailsInfo> = {
     minOperatingBalance: 0.03,
     minOperatingBalanceToken: 'ETH',
   },
+  // Quickstart Beta Mech MarketPlace - Expert 3
+  '0x00000000000000000000000075eeca6207be98cac3fde8a20ecd7b01e50b3472': {
+    availableOn: ['quickstart'],
+    minOperatingBalance: 90,
+    minOperatingBalanceToken: 'XDAI',
+  },
+  // Quickstart Beta Mech MarketPlace - Expert 4
+  '0x0000000000000000000000009c7f6103e3a72e4d1805b9c683ea5b370ec1a99f': {
+    availableOn: ['quickstart'],
+    minOperatingBalance: 90,
+    minOperatingBalanceToken: 'XDAI',
+  },
+  // Quickstart Beta Mech MarketPlace - Expert 5
+  '0x000000000000000000000000cdc603e0ee55aae92519f9770f214b2be4967f7d': {
+    availableOn: ['quickstart'],
+    minOperatingBalance: 135,
+    minOperatingBalanceToken: 'XDAI',
+  },
+  // Quickstart Beta Mech MarketPlace - Expert 6
+  '0x00000000000000000000000022d6cd3d587d8391c3aae83a783f26c67ab54a85': {
+    availableOn: ['quickstart'],
+    minOperatingBalance: 135,
+    minOperatingBalanceToken: 'XDAI',
+  },
+  // Quickstart Beta Mech MarketPlace - Expert 7
+  '0x000000000000000000000000aaecdf4d0cbd6ca0622892ac6044472f3912a5f3': {
+    availableOn: ['quickstart'],
+    minOperatingBalance: 135,
+    minOperatingBalanceToken: 'XDAI',
+  },
+  // Quickstart Beta Mech MarketPlace - Expert 8
+  '0x000000000000000000000000168aed532a0cd8868c22fc77937af78b363652b1': {
+    availableOn: ['quickstart'],
+    minOperatingBalance: 135,
+    minOperatingBalanceToken: 'XDAI',
+  },
+  // Quickstart Beta Mech MarketPlace - Expert 9
+  '0x000000000000000000000000dda9cd214f12e7c2d58e871404a0a3b1177065c8': {
+    availableOn: ['quickstart'],
+    minOperatingBalance: 135,
+    minOperatingBalanceToken: 'XDAI',
+  },
+  // Quickstart Beta Mech MarketPlace - Expert 10
+  '0x00000000000000000000000053a38655b4e659ef4c7f88a26fbf5c67932c7156': {
+    availableOn: ['quickstart'],
+    minOperatingBalance: 135,
+    minOperatingBalanceToken: 'XDAI',
+  },
 };
 
 const getApy = (
