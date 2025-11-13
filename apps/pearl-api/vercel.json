@@ -1,0 +1,12 @@
+{
+  "functions": {
+    "pages/api/zendesk/upload-file.ts": {
+      "maxDuration": 60
+    },
+    "pages/api/zendesk/create-ticket.ts": {
+      "maxDuration": 30
+    }
+  }
+}
+
+
