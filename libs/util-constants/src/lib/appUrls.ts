@@ -13,4 +13,5 @@ export const DOCS_URL = 'https://docs.olas.network';
 export const X_URL = 'https://x.com/autonolas';
 export const YOUTUBE_URL = 'https://www.youtube.com/@autonolas';
 export const DISCORD_INVITE_URL = 'https://discord.com/invite/BQzYqhjGjQ';
-
+export const DISCORD_CREATE_TICKET_URL =
+  'https://discord.com/channels/899649805582737479/1335000001797034044';

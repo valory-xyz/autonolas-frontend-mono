@@ -3,6 +3,7 @@ import Link from 'next/link';
 import styled from 'styled-components';
 
 import { COLOR } from 'libs/ui-theme/src';
+import { DISCORD_CREATE_TICKET_URL } from 'libs/util-constants/src';
 const { Paragraph, Title, Text } = Typography;
 
 const HERO_MAX_WIDTH = 1312;
@@ -248,11 +249,7 @@ const FAQs = () => (
         Discord
       </a>{' '}
       community for help, where you can{' '}
-      <a
-        href="https://discord.com/channels/899649805582737479/1335000001797034044"
-        target="_blank"
-        rel="noopener noreferrer"
-      >
+      <a href={DISCORD_CREATE_TICKET_URL} target="_blank" rel="noopener noreferrer">
         create a support ticket
       </a>{' '}
       directly.
