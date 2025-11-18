@@ -14,7 +14,7 @@ export const Styles = createGlobalStyle`
 enum Events {
   WEB3AUTH_AUTH_SUCCESS = 'WEB3AUTH_AUTH_SUCCESS',
   WEB3AUTH_MODAL_CLOSED = 'WEB3AUTH_MODAL_CLOSED',
-  WEB3AUTH_MODAL_INITIALIZED = 'WEB3AUTH_MODAL_INITIALIZED'
+  WEB3AUTH_MODAL_INITIALIZED = 'WEB3AUTH_MODAL_INITIALIZED',
 }
 
 const Web3AuthModal = () => {
@@ -25,11 +25,10 @@ const Web3AuthModal = () => {
 
   useEffect(() => {
     // Notify once initialized
-    if (isInitialized)
-    window.parent.postMessage({
-      event_id: Events.WEB3AUTH_MODAL_INITIALIZED
-    }, '*');
-  }, [isInitialized])
+    if (isInitialized) {
+      window.parent.postMessage({ event_id: Events.WEB3AUTH_MODAL_INITIALIZED }, '*');
+    }
+  }, [isInitialized]);
 
   useEffect(() => {
     // Connect when the page is open
@@ -54,11 +53,13 @@ const Web3AuthModal = () => {
         disconnect();
 
         // Post message to the parent window with the connected address
-        window.parent.postMessage({
-          event_id: Events.WEB3AUTH_AUTH_SUCCESS,
-          address: accounts[0]
-        }, '*');
-
+        window.parent.postMessage(
+          {
+            event_id: Events.WEB3AUTH_AUTH_SUCCESS,
+            address: accounts[0],
+          },
+          '*',
+        );
       } catch (error) {
         console.error('Error getting address:', error);
       }
@@ -75,9 +76,12 @@ const Web3AuthModal = () => {
 
     const handleClose = (isVisible: boolean) => {
       if (!isVisible && !isConnected) {
-        window.parent.postMessage({
-          event_id: Events.WEB3AUTH_MODAL_CLOSED
-        }, '*');
+        window.parent.postMessage(
+          {
+            event_id: Events.WEB3AUTH_MODAL_CLOSED,
+          },
+          '*',
+        );
       }
     };
     web3Auth.on('MODAL_VISIBILITY', handleClose);
@@ -93,7 +97,7 @@ export default function Page() {
   return (
     <>
       <Styles />
-      
+
       <Web3AuthProvider>
         <Web3AuthModal />
       </Web3AuthProvider>
