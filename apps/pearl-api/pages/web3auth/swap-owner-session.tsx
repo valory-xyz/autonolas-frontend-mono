@@ -5,6 +5,10 @@ import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/router';
 import { Address } from 'viem';
 import Safe from '@safe-global/protocol-kit';
+import { Card, Typography, Alert, Spin, Descriptions, Space } from 'antd';
+import { CheckCircleOutlined, CloseCircleOutlined, LoadingOutlined } from '@ant-design/icons';
+
+const { Title, Paragraph, Text } = Typography;
 
 export const Styles = createGlobalStyle`
   .w3a-parent-container > div {
@@ -124,96 +128,91 @@ const SwapOwnerSession = () => {
   ]);
 
   return (
-    <div
-      style={{
-        padding: '40px',
-        fontFamily: 'sans-serif',
-        maxWidth: '600px',
-        margin: '0 auto',
-      }}
-    >
-      <h2>Safe Owner Swap Transaction</h2>
+    <div style={{ padding: '40px', maxWidth: '600px', margin: '0 auto' }}>
+      <Space direction="vertical" size="large" style={{ width: '100%' }}>
+        <Title level={2}>Safe Owner Swap Transaction</Title>
 
-      <div
-        style={{
-          marginTop: '20px',
-          padding: '16px',
-          backgroundColor: '#f5f5f5',
-          borderRadius: '8px',
-        }}
-      >
-        <p>
-          <strong>Status:</strong> {status}
-        </p>
+        <Card>
+          <Space direction="vertical" size="middle" style={{ width: '100%' }}>
+            <div>
+              <Text strong>Status: </Text>
+              {!result && <LoadingOutlined style={{ marginLeft: 8 }} />}
+              <Text>{status}</Text>
+            </div>
 
-        {safeAddress && (
-          <div style={{ marginTop: '12px', fontSize: '14px' }}>
-            <p>
-              <strong>Safe Address:</strong> {safeAddress}
-            </p>
-            <p>
-              <strong>Chain ID:</strong> {chainId || 'Unknown'}
-            </p>
-          </div>
+            {safeAddress && (
+              <Descriptions column={1} size="small">
+                <Descriptions.Item label="Safe Address">
+                  <Text code copyable>
+                    {safeAddress}
+                  </Text>
+                </Descriptions.Item>
+                <Descriptions.Item label="Chain ID">{chainId || 'Unknown'}</Descriptions.Item>
+              </Descriptions>
+            )}
+          </Space>
+        </Card>
+
+        {result && result.success && (
+          <Alert
+            message="Transaction Successful!"
+            description={
+              <Space direction="vertical" size="small" style={{ width: '100%' }}>
+                <div>
+                  <Text strong>Transaction Hash:</Text>
+                  <br />
+                  <Text code copyable style={{ wordBreak: 'break-all', fontSize: '12px' }}>
+                    {result.txHash}
+                  </Text>
+                </div>
+                <Paragraph style={{ marginBottom: 0, marginTop: 8 }}>
+                  You can safely close this window.
+                </Paragraph>
+              </Space>
+            }
+            type="success"
+            icon={<CheckCircleOutlined />}
+            showIcon
+          />
         )}
-      </div>
 
-      {result && (
-        <div
-          style={{
-            marginTop: '20px',
-            padding: '16px',
-            backgroundColor: result.success ? '#d4edda' : '#f8d7da',
-            color: result.success ? '#155724' : '#721c24',
-            borderRadius: '8px',
-          }}
-        >
-          {result.success ? (
-            <>
-              <h3>✓ Transaction Successful!</h3>
-              <p>
-                <strong>Transaction Hash:</strong>
-              </p>
-              <p style={{ wordBreak: 'break-all', fontFamily: 'monospace', fontSize: '12px' }}>
-                {result.txHash}
-              </p>
-              <p style={{ marginTop: '12px' }}>You can safely close this window.</p>
-            </>
-          ) : (
-            <>
-              <h3>✗ Transaction Failed</h3>
-              <p>
-                <strong>Error:</strong> {result.error}
-              </p>
-              <p style={{ marginTop: '12px' }}>You can close this window and try again.</p>
-            </>
-          )}
-        </div>
-      )}
+        {result && !result.success && (
+          <Alert
+            message="Transaction Failed"
+            description={
+              <Space direction="vertical" size="small">
+                <div>
+                  <Text strong>Error: </Text>
+                  <Text>{result.error}</Text>
+                </div>
+                <Paragraph style={{ marginBottom: 0 }}>
+                  You can close this window and try again.
+                </Paragraph>
+              </Space>
+            }
+            type="error"
+            icon={<CloseCircleOutlined />}
+            showIcon
+          />
+        )}
 
-      {!isInitialized && (
-        <div style={{ marginTop: '20px' }}>
-          <p>Loading Web3Auth...</p>
-        </div>
-      )}
+        {!isInitialized && (
+          <Card>
+            <Space>
+              <Spin />
+              <Text>Loading Web3Auth...</Text>
+            </Space>
+          </Card>
+        )}
 
-      {result && (
-        <div
-          style={{
-            marginTop: '20px',
-            padding: '16px',
-            backgroundColor: '#fff3cd',
-            borderRadius: '8px',
-          }}
-        >
-          <p>
-            <strong>Result Data (for Pearl):</strong>
-          </p>
-          <pre style={{ fontSize: '12px', overflow: 'auto' }}>
-            {JSON.stringify(result, null, 2)}
-          </pre>
-        </div>
-      )}
+        {result && (
+          <Card title="Result Data (for Pearl)" size="small">
+            <pre style={{ fontSize: '12px', overflow: 'auto', margin: 0 }}>
+              {JSON.stringify(result, null, 2)}
+            </pre>
+          </Card>
+        )}
+      </Space>
     </div>
   );
 };

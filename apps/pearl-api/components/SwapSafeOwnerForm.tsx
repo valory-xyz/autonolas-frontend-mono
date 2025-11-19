@@ -1,5 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Address } from 'viem';
+import { Button, Alert, Space, Spin, Card } from 'antd';
+import { LoadingOutlined, CheckCircleOutlined, CloseCircleOutlined } from '@ant-design/icons';
 
 type SwapOwnerFormProps = {
   safeAddress: Address;
@@ -45,12 +47,7 @@ export function SwapSafeOwnerForm({
             iframeRef.current.contentWindow.postMessage(
               {
                 action: 'EXECUTE_SWAP_OWNER',
-                params: {
-                  safeAddress,
-                  oldOwnerAddress,
-                  newOwnerAddress,
-                  backupOwnerAddress,
-                },
+                params: { safeAddress, oldOwnerAddress, newOwnerAddress, backupOwnerAddress },
               },
               '*',
             );
@@ -122,66 +119,55 @@ export function SwapSafeOwnerForm({
 
   return (
     <div style={{ maxWidth: '500px', margin: '0 auto', padding: '20px' }}>
-      <button
-        onClick={handleSubmit}
-        disabled={isProcessing}
-        style={{
-          padding: '10px 20px',
-          fontSize: '14px',
-          fontWeight: 'bold',
-          backgroundColor: isProcessing ? '#ccc' : '#007bff',
-          color: 'white',
-          border: 'none',
-          borderRadius: '4px',
-          cursor: isProcessing ? 'not-allowed' : 'pointer',
-          width: '100%',
-        }}
-      >
-        {isProcessing ? 'Processing...' : 'Submit Transaction'}
-      </button>
-
-      {status && (
-        <div
-          style={{
-            marginTop: '12px',
-            padding: '8px',
-            backgroundColor: '#f0f0f0',
-            borderRadius: '4px',
-          }}
+      <Space direction="vertical" size="middle" style={{ width: '100%' }}>
+        <Button
+          type="primary"
+          size="large"
+          onClick={handleSubmit}
+          disabled={isProcessing}
+          loading={isProcessing}
+          icon={isProcessing ? <LoadingOutlined /> : undefined}
+          block
         >
-          Status: {status}
-        </div>
-      )}
+          {isProcessing ? 'Processing...' : 'Submit Transaction'}
+        </Button>
 
-      {txHash && (
-        <div
-          style={{
-            marginTop: '12px',
-            padding: '8px',
-            backgroundColor: '#d4edda',
-            color: '#155724',
-            borderRadius: '4px',
-          }}
-        >
-          <strong>Transaction sent!</strong>
-          <br />
-          Hash: {txHash}
-        </div>
-      )}
+        {status && (
+          <Card size="small">
+            <Space>
+              {isProcessing && <Spin indicator={<LoadingOutlined />} />}
+              <span>Status: {status}</span>
+            </Space>
+          </Card>
+        )}
 
-      {error && (
-        <div
-          style={{
-            marginTop: '12px',
-            padding: '8px',
-            backgroundColor: '#f8d7da',
-            color: '#721c24',
-            borderRadius: '4px',
-          }}
-        >
-          <strong>Error:</strong> {error}
-        </div>
-      )}
+        {txHash && (
+          <Alert
+            message="Transaction sent!"
+            description={
+              <>
+                <strong>Hash: </strong>
+                <span style={{ wordBreak: 'break-all', fontFamily: 'monospace', fontSize: '12px' }}>
+                  {txHash}
+                </span>
+              </>
+            }
+            type="success"
+            icon={<CheckCircleOutlined />}
+            showIcon
+          />
+        )}
+
+        {error && (
+          <Alert
+            message="Error"
+            description={error}
+            type="error"
+            icon={<CloseCircleOutlined />}
+            showIcon
+          />
+        )}
+      </Space>
 
       {/* Hidden iframe for Web3Auth */}
       {showIframe && (
