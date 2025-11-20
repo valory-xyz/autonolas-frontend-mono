@@ -15,11 +15,19 @@ const web3AuthContextConfig: Web3AuthContextConfig = {
       connectors: {
         metamask: {
           label: 'MetaMask',
-          showOnModal: false,
+          showOnModal: true, // Enable MetaMask connection
+        },
+        coinbase: {
+          label: 'Coinbase Wallet',
+          showOnModal: true, // Enable Coinbase Wallet connection
         },
         auth: {
           label: 'Auth',
-          showOnModal: true,
+          showOnModal: true, // Keep social auth (Google, Email, etc.)
+        },
+        'wallet-connect-v2': {
+          label: 'WalletConnect',
+          showOnModal: true, // Enable WalletConnect
         },
       },
     },

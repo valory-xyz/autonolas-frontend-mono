@@ -1,5 +1,5 @@
 import { createGlobalStyle } from 'styled-components';
-import { useWeb3Auth } from '@web3auth/modal/react';
+import { useWeb3Auth, useWeb3AuthConnect } from '@web3auth/modal/react';
 import { Web3AuthProvider } from 'context/Web3AuthProvider';
 import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/router';
@@ -26,6 +26,7 @@ type TransactionResult = {
 
 const SwapOwnerSession = () => {
   const { provider, isInitialized } = useWeb3Auth();
+  const { connect, isConnected } = useWeb3AuthConnect();
   const router = useRouter();
   const [status, setStatus] = useState<string>('Initializing...');
   const [result, setResult] = useState<TransactionResult | null>(null);
@@ -34,12 +35,20 @@ const SwapOwnerSession = () => {
   const { safeAddress, oldOwnerAddress, newOwnerAddress, backupOwnerAddress, chainId } =
     router.query;
 
+  // Auto-connect Web3Auth modal when initialized and not already connected
+  useEffect(() => {
+    if (isInitialized && !isConnected && !provider) {
+      setStatus('Opening Web3Auth modal...');
+      connect();
+    }
+  }, [isInitialized, isConnected, provider, connect]);
+
   useEffect(() => {
     const executeSwapOwner = async () => {
       if (
+        hasExecuted.current ||
         !provider ||
         !isInitialized ||
-        hasExecuted.current ||
         !safeAddress ||
         !oldOwnerAddress ||
         !newOwnerAddress ||
@@ -53,9 +62,24 @@ const SwapOwnerSession = () => {
       try {
         setStatus('Initializing Safe Protocol Kit...');
 
-        // Initialize Safe Protocol Kit with backup owner as signer
+        // Get the connected wallet address from Web3Auth
+        const accounts = (await provider.request({ method: 'eth_accounts' })) as string[];
+        const connectedAddress = accounts?.[0];
+
+        if (!connectedAddress) {
+          throw new Error('No connected wallet address found');
+        }
+
+        // Verify the connected address matches the backup owner
+        if (connectedAddress.toLowerCase() !== (backupOwnerAddress as string).toLowerCase()) {
+          throw new Error(
+            `Connected address (${connectedAddress}) does not match backup owner address (${backupOwnerAddress}). Please login with the correct account.`,
+          );
+        }
+
+        // Initialize Safe Protocol Kit with the Web3Auth provider
+        // The provider will automatically use the connected address as signer
         const protocolKit = await Safe.init({
-          signer: backupOwnerAddress as Address,
           provider: provider,
           safeAddress: safeAddress as Address,
         });
