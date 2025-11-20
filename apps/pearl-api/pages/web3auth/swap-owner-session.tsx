@@ -17,8 +17,7 @@ export const Styles = createGlobalStyle`
 `;
 
 enum Events {
-  WE3AUTH_MODAL_VISIBILITY = 'WE3AUTH_MODAL_VISIBILITY',
-  WEB3AUTH_SWAP_OWNER_INITIALIZED = 'WEB3AUTH_SWAP_OWNER_INITIALIZED',
+  WEB3AUTH_MODAL_INITIALIZED = 'WEB3AUTH_MODAL_INITIALIZED',
   WEB3AUTH_SWAP_OWNER_RESULT = 'WEB3AUTH_SWAP_OWNER_RESULT',
   WEB3AUTH_MODAL_CLOSED = 'WEB3AUTH_MODAL_CLOSED',
 }
@@ -46,6 +45,13 @@ const SwapOwnerSession = () => {
     () => (window.parent !== window ? window.parent : window.opener),
     [],
   );
+
+  // Notify when Web3Auth is initialized
+  useEffect(() => {
+    if (isInitialized && targetWindow) {
+      targetWindow.postMessage({ type: Events.WEB3AUTH_MODAL_INITIALIZED }, '*');
+    }
+  }, [isInitialized, targetWindow]);
 
   // Auto-connect Web3Auth modal when initialized and not already connected
   useEffect(() => {

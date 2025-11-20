@@ -10,24 +10,16 @@ const clientId = `${process.env.NEXT_PUBLIC_WEB3AUTH_CLIENT_ID}`;
 const web3AuthContextConfig: Web3AuthContextConfig = {
   web3AuthOptions: {
     clientId,
-    web3AuthNetwork: WEB3AUTH_NETWORK.SAPPHIRE_MAINNET,
+    web3AuthNetwork: WEB3AUTH_NETWORK.SAPPHIRE_DEVNET,
     modalConfig: {
       connectors: {
         metamask: {
           label: 'MetaMask',
-          showOnModal: true, // Enable MetaMask connection
-        },
-        coinbase: {
-          label: 'Coinbase Wallet',
-          showOnModal: true, // Enable Coinbase Wallet connection
+          showOnModal: false,
         },
         auth: {
           label: 'Auth',
-          showOnModal: true, // Keep social auth (Google, Email, etc.)
-        },
-        'wallet-connect-v2': {
-          label: 'WalletConnect',
-          showOnModal: true, // Enable WalletConnect
+          showOnModal: true,
         },
       },
     },
