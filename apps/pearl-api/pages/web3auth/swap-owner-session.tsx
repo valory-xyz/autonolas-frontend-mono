@@ -1,7 +1,7 @@
 import { createGlobalStyle } from 'styled-components';
 import { useWeb3Auth, useWeb3AuthConnect } from '@web3auth/modal/react';
 import { Web3AuthProvider } from 'context/Web3AuthProvider';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/router';
 import { Address } from 'viem';
 import Safe from '@safe-global/protocol-kit';
@@ -16,6 +16,13 @@ export const Styles = createGlobalStyle`
   }
 `;
 
+enum Events {
+  WE3AUTH_MODAL_VISIBILITY = 'WE3AUTH_MODAL_VISIBILITY',
+  WEB3AUTH_SWAP_OWNER_INITIALIZED = 'WEB3AUTH_SWAP_OWNER_INITIALIZED',
+  WEB3AUTH_SWAP_OWNER_RESULT = 'WEB3AUTH_SWAP_OWNER_RESULT',
+  WEB3AUTH_MODAL_CLOSED = 'WEB3AUTH_MODAL_CLOSED',
+}
+
 type TransactionResult = {
   success: boolean;
   txHash?: string;
@@ -25,7 +32,7 @@ type TransactionResult = {
 };
 
 const SwapOwnerSession = () => {
-  const { provider, isInitialized } = useWeb3Auth();
+  const { provider, isInitialized, web3Auth } = useWeb3Auth();
   const { connect, isConnected } = useWeb3AuthConnect();
   const router = useRouter();
   const [status, setStatus] = useState<string>('Initializing...');
@@ -34,6 +41,11 @@ const SwapOwnerSession = () => {
 
   const { safeAddress, oldOwnerAddress, newOwnerAddress, backupOwnerAddress, chainId } =
     router.query;
+
+  const targetWindow = useMemo(
+    () => (window.parent !== window ? window.parent : window.opener),
+    [],
+  );
 
   // Auto-connect Web3Auth modal when initialized and not already connected
   useEffect(() => {
@@ -45,6 +57,7 @@ const SwapOwnerSession = () => {
 
   useEffect(() => {
     const executeSwapOwner = async () => {
+      // Send result back to Pearl (supports both iframe and popup)
       if (
         hasExecuted.current ||
         !provider ||
@@ -79,10 +92,7 @@ const SwapOwnerSession = () => {
 
         // Initialize Safe Protocol Kit with the Web3Auth provider
         // The provider will automatically use the connected address as signer
-        const protocolKit = await Safe.init({
-          provider: provider,
-          safeAddress: safeAddress as Address,
-        });
+        const protocolKit = await Safe.init({ provider, safeAddress: safeAddress as Address });
 
         setStatus('Creating swap owner transaction...');
 
@@ -112,28 +122,33 @@ const SwapOwnerSession = () => {
 
         setResult(successResult);
 
-        // Try to send result back to Pearl if it's listening
-        if (window.opener) {
-          window.opener.postMessage({ type: 'SWAP_OWNER_RESULT', ...successResult }, '*');
+        if (targetWindow) {
+          targetWindow.postMessage(
+            { type: Events.WEB3AUTH_SWAP_OWNER_RESULT, ...successResult },
+            '*',
+          );
         }
       } catch (error) {
         console.error('Error swapping owner:', error);
-        const errorMsg = error instanceof Error ? error.message : 'Unknown error occurred';
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
 
-        setStatus(`Transaction failed: ${errorMsg}`);
+        setStatus(`Transaction failed: ${errorMessage}`);
 
         const errorResult: TransactionResult = {
           success: false,
-          error: errorMsg,
+          error: errorMessage,
           chainId: chainId ? Number(chainId) : undefined,
           safeAddress: safeAddress as string,
         };
 
         setResult(errorResult);
 
-        // Try to send error back to Pearl if it's listening
-        if (window.opener) {
-          window.opener.postMessage({ type: 'SWAP_OWNER_RESULT', ...errorResult }, '*');
+        // Send error back to Pearl (supports both iframe and popup)
+        if (targetWindow) {
+          targetWindow.postMessage(
+            { type: Events.WEB3AUTH_SWAP_OWNER_RESULT, ...errorResult },
+            '*',
+          );
         }
       }
     };
@@ -149,7 +164,54 @@ const SwapOwnerSession = () => {
     newOwnerAddress,
     backupOwnerAddress,
     chainId,
+    targetWindow,
   ]);
+
+  // Notify if Web3Auth modal is closed without connecting
+  useEffect(() => {
+    if (!web3Auth) return;
+
+    const handleModalClose = (isVisible: boolean) => {
+      if (!isVisible && !isConnected && !result) {
+        if (!targetWindow) return;
+        targetWindow.postMessage(
+          {
+            type: Events.WEB3AUTH_MODAL_CLOSED,
+            success: false,
+            error: 'User closed Web3Auth modal without connecting',
+          },
+          '*',
+        );
+      }
+    };
+
+    web3Auth.on('MODAL_VISIBILITY', handleModalClose);
+    return () => {
+      web3Auth.off('MODAL_VISIBILITY', handleModalClose);
+    };
+  }, [web3Auth, isConnected, result, targetWindow]);
+
+  // Notify if user closes the entire window/iframe before transaction completes
+  useEffect(() => {
+    const handleBeforeUnload = () => {
+      // Only send message if transaction hasn't completed yet
+      if (result) return;
+      if (!targetWindow) return;
+      targetWindow.postMessage(
+        {
+          type: Events.WEB3AUTH_MODAL_CLOSED,
+          success: false,
+          error: 'User closed window before transaction completed',
+        },
+        '*',
+      );
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
+  }, [result, targetWindow]);
 
   return (
     <div style={{ padding: '40px', maxWidth: '600px', margin: '0 auto' }}>
