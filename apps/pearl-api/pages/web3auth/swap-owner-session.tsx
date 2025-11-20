@@ -1,7 +1,7 @@
 import { createGlobalStyle } from 'styled-components';
 import { useWeb3Auth, useWeb3AuthConnect } from '@web3auth/modal/react';
 import { Web3AuthProvider } from 'context/Web3AuthProvider';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/router';
 import { Address } from 'viem';
 import Safe from '@safe-global/protocol-kit';
@@ -36,15 +36,18 @@ const SwapOwnerSession = () => {
   const router = useRouter();
   const [status, setStatus] = useState<string>('Initializing...');
   const [result, setResult] = useState<TransactionResult | null>(null);
+  const [targetWindow, setTargetWindow] = useState<Window | null>(null);
   const hasExecuted = useRef(false);
 
   const { safeAddress, oldOwnerAddress, newOwnerAddress, backupOwnerAddress, chainId } =
     router.query;
 
-  const targetWindow = useMemo(
-    () => (window.parent !== window ? window.parent : window.opener),
-    [],
-  );
+  // Initialize targetWindow only on client side
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      setTargetWindow(window.parent !== window ? window.parent : window.opener);
+    }
+  }, []);
 
   // Notify when Web3Auth is initialized
   useEffect(() => {
