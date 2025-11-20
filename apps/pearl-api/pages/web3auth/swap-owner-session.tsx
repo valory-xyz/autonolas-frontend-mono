@@ -202,6 +202,8 @@ const SwapOwnerSession = () => {
 
   // Notify if user closes the entire window/iframe before transaction completes
   useEffect(() => {
+    if (typeof window === 'undefined') return;
+
     const handleBeforeUnload = () => {
       // Only send message if transaction hasn't completed yet
       if (result) return;
