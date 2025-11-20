@@ -49,7 +49,7 @@ const SwapOwnerSession = () => {
   // Notify when Web3Auth is initialized
   useEffect(() => {
     if (isInitialized && targetWindow) {
-      targetWindow.postMessage({ type: Events.WEB3AUTH_SWAP_OWNER_MODAL_INITIALIZED }, '*');
+      targetWindow.postMessage({ event_id: Events.WEB3AUTH_SWAP_OWNER_MODAL_INITIALIZED }, '*');
     }
   }, [isInitialized, targetWindow]);
 
@@ -130,7 +130,7 @@ const SwapOwnerSession = () => {
 
         if (targetWindow) {
           targetWindow.postMessage(
-            { type: Events.WEB3AUTH_SWAP_OWNER_RESULT, ...successResult },
+            { event_id: Events.WEB3AUTH_SWAP_OWNER_RESULT, ...successResult },
             '*',
           );
         }
@@ -152,7 +152,7 @@ const SwapOwnerSession = () => {
         // Send error back to Pearl (supports both iframe and popup)
         if (targetWindow) {
           targetWindow.postMessage(
-            { type: Events.WEB3AUTH_SWAP_OWNER_RESULT, ...errorResult },
+            { event_id: Events.WEB3AUTH_SWAP_OWNER_RESULT, ...errorResult },
             '*',
           );
         }
@@ -182,7 +182,7 @@ const SwapOwnerSession = () => {
         if (!targetWindow) return;
         targetWindow.postMessage(
           {
-            type: Events.WEB3AUTH_SWAP_OWNER_MODAL_CLOSED,
+            event_id: Events.WEB3AUTH_SWAP_OWNER_MODAL_CLOSED,
             success: false,
             error: 'User closed Web3Auth modal without connecting',
           },
@@ -205,7 +205,7 @@ const SwapOwnerSession = () => {
       if (!targetWindow) return;
       targetWindow.postMessage(
         {
-          type: Events.WEB3AUTH_SWAP_OWNER_MODAL_CLOSED,
+          event_id: Events.WEB3AUTH_SWAP_OWNER_MODAL_CLOSED,
           success: false,
           error: 'User closed window before transaction completed',
         },
