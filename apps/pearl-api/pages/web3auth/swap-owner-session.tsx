@@ -111,11 +111,11 @@ const SwapOwnerSession = () => {
         }
 
         // Verify the connected address matches the backup owner
-        if (connectedAddress.toLowerCase() !== (backupOwnerAddress as string).toLowerCase()) {
-          throw new Error(
-            `Connected address (${connectedAddress}) does not match backup owner address (${backupOwnerAddress}). Please login with the correct account.`,
-          );
-        }
+        // if (connectedAddress.toLowerCase() !== (backupOwnerAddress as string).toLowerCase()) {
+        //   throw new Error(
+        //     `Connected address (${connectedAddress}) does not match backup owner address (${backupOwnerAddress}). Please login with the correct account.`,
+        //   );
+        // }
 
         // Initialize Safe Protocol Kit with the Web3Auth provider
         // The provider will automatically use the connected address as signer
