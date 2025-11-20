@@ -17,9 +17,9 @@ export const Styles = createGlobalStyle`
 `;
 
 enum Events {
-  WEB3AUTH_MODAL_INITIALIZED = 'WEB3AUTH_MODAL_INITIALIZED',
+  WEB3AUTH_SWAP_OWNER_MODAL_INITIALIZED = 'WEB3AUTH_SWAP_OWNER_MODAL_INITIALIZED',
   WEB3AUTH_SWAP_OWNER_RESULT = 'WEB3AUTH_SWAP_OWNER_RESULT',
-  WEB3AUTH_MODAL_CLOSED = 'WEB3AUTH_MODAL_CLOSED',
+  WEB3AUTH_SWAP_OWNER_MODAL_CLOSED = 'WEB3AUTH_SWAP_OWNER_MODAL_CLOSED',
 }
 
 type TransactionResult = {
@@ -49,7 +49,7 @@ const SwapOwnerSession = () => {
   // Notify when Web3Auth is initialized
   useEffect(() => {
     if (isInitialized && targetWindow) {
-      targetWindow.postMessage({ type: Events.WEB3AUTH_MODAL_INITIALIZED }, '*');
+      targetWindow.postMessage({ type: Events.WEB3AUTH_SWAP_OWNER_MODAL_INITIALIZED }, '*');
     }
   }, [isInitialized, targetWindow]);
 
@@ -182,7 +182,7 @@ const SwapOwnerSession = () => {
         if (!targetWindow) return;
         targetWindow.postMessage(
           {
-            type: Events.WEB3AUTH_MODAL_CLOSED,
+            type: Events.WEB3AUTH_SWAP_OWNER_MODAL_CLOSED,
             success: false,
             error: 'User closed Web3Auth modal without connecting',
           },
@@ -205,7 +205,7 @@ const SwapOwnerSession = () => {
       if (!targetWindow) return;
       targetWindow.postMessage(
         {
-          type: Events.WEB3AUTH_MODAL_CLOSED,
+          type: Events.WEB3AUTH_SWAP_OWNER_MODAL_CLOSED,
           success: false,
           error: 'User closed window before transaction completed',
         },
