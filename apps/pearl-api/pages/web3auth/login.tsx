@@ -25,7 +25,7 @@ const Web3AuthModal = () => {
 
   useEffect(() => {
     // Notify once initialized
-    if (isInitialized) {
+    if (isInitialized && typeof window !== 'undefined') {
       window.parent.postMessage({ event_id: Events.WEB3AUTH_MODAL_INITIALIZED }, '*');
     }
   }, [isInitialized]);
@@ -53,13 +53,15 @@ const Web3AuthModal = () => {
         disconnect();
 
         // Post message to the parent window with the connected address
-        window.parent.postMessage(
-          {
-            event_id: Events.WEB3AUTH_AUTH_SUCCESS,
-            address: accounts[0],
-          },
-          '*',
-        );
+        if (typeof window !== 'undefined') {
+          window.parent.postMessage(
+            {
+              event_id: Events.WEB3AUTH_AUTH_SUCCESS,
+              address: accounts[0],
+            },
+            '*',
+          );
+        }
       } catch (error) {
         console.error('Error getting address:', error);
       }
@@ -75,7 +77,7 @@ const Web3AuthModal = () => {
     if (!web3Auth) return;
 
     const handleClose = (isVisible: boolean) => {
-      if (!isVisible && !isConnected) {
+      if (!isVisible && !isConnected && typeof window !== 'undefined') {
         window.parent.postMessage(
           {
             event_id: Events.WEB3AUTH_MODAL_CLOSED,

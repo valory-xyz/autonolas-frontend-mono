@@ -1,12 +1,13 @@
-import { createGlobalStyle } from 'styled-components';
+import styled, { createGlobalStyle } from 'styled-components';
 import { useWeb3Auth, useWeb3AuthConnect } from '@web3auth/modal/react';
 import { Web3AuthProvider } from 'context/Web3AuthProvider';
 import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/router';
 import { Address } from 'viem';
 import Safe from '@safe-global/protocol-kit';
-import { Card, Typography, Alert, Spin, Descriptions, Space } from 'antd';
+import { Card, Typography, Alert, Spin, Space, Flex } from 'antd';
 import { CheckCircleOutlined, CloseCircleOutlined, LoadingOutlined } from '@ant-design/icons';
+import { EvmChainName, EvmChainId } from '../../utils/index';
 
 const { Title, Paragraph, Text } = Typography;
 
@@ -30,8 +31,25 @@ type TransactionResult = {
   safeAddress?: string;
 };
 
+const Container = styled.div`
+  padding: 40px;
+  max-width: 420px;
+  margin: 0 auto;
+`;
+
+const Loading = () => (
+  <Container>
+    <Card>
+      <Space>
+        <Spin />
+        <Text>Loading Web3Auth...</Text>
+      </Space>
+    </Card>
+  </Container>
+);
+
 const SwapOwnerSession = () => {
-  const { provider, isInitialized, web3Auth } = useWeb3Auth();
+  const { provider, isInitialized, web3Auth, initError } = useWeb3Auth();
   const { connect, isConnected } = useWeb3AuthConnect();
   const router = useRouter();
   const [status, setStatus] = useState<string>('Initializing...');
@@ -224,10 +242,34 @@ const SwapOwnerSession = () => {
     };
   }, [result, targetWindow]);
 
+  if (!isInitialized) {
+    return <Loading />;
+  }
+
+  if (initError) {
+    return (
+      <Container>
+        <Alert
+          message="Error Initializing Web3Auth"
+          description={
+            <Text>
+              {(initError instanceof Error ? initError : new Error('Unknown error')).message}
+            </Text>
+          }
+          type="error"
+          icon={<CloseCircleOutlined />}
+          showIcon
+        />
+      </Container>
+    );
+  }
+
   return (
-    <div style={{ padding: '40px', maxWidth: '600px', margin: '0 auto' }}>
-      <Space direction="vertical" size="large" style={{ width: '100%' }}>
-        <Title level={2}>Safe Owner Swap Transaction</Title>
+    <Container>
+      <Flex vertical gap={16} style={{ width: '100%' }}>
+        <Title level={2} style={{ marginBottom: 0 }}>
+          {`Approve Transaction - ${EvmChainName[chainId as unknown as EvmChainId] || chainId} `}
+        </Title>
 
         <Card>
           <Space direction="vertical" size="middle" style={{ width: '100%' }}>
@@ -238,14 +280,12 @@ const SwapOwnerSession = () => {
             </div>
 
             {safeAddress && (
-              <Descriptions column={1} size="small">
-                <Descriptions.Item label="Safe Address">
-                  <Text code copyable>
-                    {safeAddress}
-                  </Text>
-                </Descriptions.Item>
-                <Descriptions.Item label="Chain ID">{chainId || 'Unknown'}</Descriptions.Item>
-              </Descriptions>
+              <Flex vertical gap={2}>
+                <Text type="secondary">Safe Address:</Text>
+                <Text code copyable>
+                  {safeAddress}
+                </Text>
+              </Flex>
             )}
           </Space>
         </Card>
@@ -255,13 +295,12 @@ const SwapOwnerSession = () => {
             message="Transaction Successful!"
             description={
               <Space direction="vertical" size="small" style={{ width: '100%' }}>
-                <div>
-                  <Text strong>Transaction Hash:</Text>
-                  <br />
-                  <Text code copyable style={{ wordBreak: 'break-all', fontSize: '12px' }}>
+                <Flex vertical gap={2}>
+                  <Text type="secondary">Transaction Hash:</Text>
+                  <Text code copyable>
                     {result.txHash}
                   </Text>
-                </div>
+                </Flex>
                 <Paragraph style={{ marginBottom: 0, marginTop: 8 }}>
                   You can safely close this window.
                 </Paragraph>
@@ -278,10 +317,7 @@ const SwapOwnerSession = () => {
             message="Transaction Failed"
             description={
               <Space direction="vertical" size="small">
-                <div>
-                  <Text strong>Error: </Text>
-                  <Text>{result.error}</Text>
-                </div>
+                <Paragraph>{result.error}</Paragraph>
                 <Paragraph style={{ marginBottom: 0 }}>
                   You can close this window and try again.
                 </Paragraph>
@@ -309,8 +345,8 @@ const SwapOwnerSession = () => {
             </pre>
           </Card>
         )}
-      </Space>
-    </div>
+      </Flex>
+    </Container>
   );
 };
 

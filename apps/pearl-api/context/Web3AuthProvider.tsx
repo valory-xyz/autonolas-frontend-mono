@@ -5,7 +5,8 @@ import {
 } from '@web3auth/modal/react';
 import { PropsWithChildren } from 'react';
 
-const clientId = `${process.env.NEXT_PUBLIC_WEB3AUTH_CLIENT_ID}`;
+// const clientId = `${process.env.NEXT_PUBLIC_WEB3AUTH_CLIENT_ID}`;
+const clientId = `${process.env.NEXT_PUBLIC_WEB3AUTH_CLIENT_ID_STAGING}`;
 
 const web3AuthContextConfig: Web3AuthContextConfig = {
   web3AuthOptions: {
