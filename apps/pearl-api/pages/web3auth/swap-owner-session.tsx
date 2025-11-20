@@ -1,13 +1,14 @@
-import styled, { createGlobalStyle } from 'styled-components';
-import { useWeb3Auth, useWeb3AuthConnect } from '@web3auth/modal/react';
-import { Web3AuthProvider } from 'context/Web3AuthProvider';
 import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/router';
-import { Address } from 'viem';
-import Safe from '@safe-global/protocol-kit';
-import { Card, Typography, Alert, Spin, Space, Flex } from 'antd';
 import { CheckCircleOutlined, CloseCircleOutlined, LoadingOutlined } from '@ant-design/icons';
-import { EvmChainName, EvmChainId } from '../../utils/index';
+import Safe from '@safe-global/protocol-kit';
+import { useWeb3Auth, useWeb3AuthConnect } from '@web3auth/modal/react';
+import { Alert, Card, Flex, Space, Spin, Typography } from 'antd';
+import { Web3AuthProvider } from 'context/Web3AuthProvider';
+import styled, { createGlobalStyle } from 'styled-components';
+import { Address } from 'viem';
+
+import { EvmChainId, EvmChainName } from '../../utils/index';
 
 const { Title, Paragraph, Text } = Typography;
 
@@ -100,15 +101,39 @@ const SwapOwnerSession = () => {
       hasExecuted.current = true;
 
       try {
-        setStatus('Initializing Safe Protocol Kit...');
+        setStatus('Switching to correct chain...');
+
+        // Switch to the correct chain if chainId is provided
+        const chainHex = `0x${Number(chainId).toString(16)}`;
+
+        try {
+          // Try switching to the provided chain
+          await provider.request({
+            method: 'wallet_switchEthereumChain',
+            params: [{ chainId: chainHex }],
+          });
+        } catch (e: unknown) {
+          const error = e as { code?: number; message?: string };
+          // 4902 = chain not added (user wallet doesn’t know the chain)
+          if (error.code === 4902) {
+            console.warn(`Chain ${chainHex} not found in wallet.`);
+          }
+          throw error;
+        }
+
+        setStatus('Getting connected wallet address...');
 
         // Get the connected wallet address from Web3Auth
-        const accounts = (await provider.request({ method: 'eth_accounts' })) as string[];
+        const accounts = (await provider.request({
+          method: 'eth_accounts',
+        })) as string[];
         const connectedAddress = accounts?.[0];
 
         if (!connectedAddress) {
           throw new Error('No connected wallet address found');
         }
+
+        setStatus('Initializing Safe Protocol Kit...');
 
         // Verify the connected address matches the backup owner
         // if (connectedAddress.toLowerCase() !== (backupOwnerAddress as string).toLowerCase()) {
@@ -119,7 +144,11 @@ const SwapOwnerSession = () => {
 
         // Initialize Safe Protocol Kit with the Web3Auth provider
         // The provider will automatically use the connected address as signer
-        const protocolKit = await Safe.init({ provider, safeAddress: safeAddress as Address });
+        const protocolKit = await Safe.init({
+          signer: connectedAddress,
+          provider,
+          safeAddress: safeAddress as Address,
+        });
 
         setStatus('Creating swap owner transaction...');
 
@@ -275,7 +304,7 @@ const SwapOwnerSession = () => {
           <Space direction="vertical" size="middle" style={{ width: '100%' }}>
             <div>
               <Text strong>Status: </Text>
-              {!result && <LoadingOutlined style={{ marginLeft: 8 }} />}
+              {!result && <LoadingOutlined style={{ margin: '0 8px' }} />}
               <Text>{status}</Text>
             </div>
 
@@ -317,7 +346,7 @@ const SwapOwnerSession = () => {
             message="Transaction Failed"
             description={
               <Space direction="vertical" size="small">
-                <Paragraph>{result.error}</Paragraph>
+                <Paragraph style={{ marginBottom: 0 }}>{result.error}</Paragraph>
                 <Paragraph style={{ marginBottom: 0 }}>
                   You can close this window and try again.
                 </Paragraph>
@@ -351,10 +380,13 @@ const SwapOwnerSession = () => {
 };
 
 export default function Page() {
+  const router = useRouter();
+  const { chainId } = router.query;
+
   return (
     <>
       <Styles />
-      <Web3AuthProvider>
+      <Web3AuthProvider defaultChainId={chainId ? Number(chainId) : undefined}>
         <SwapOwnerSession />
       </Web3AuthProvider>
     </>
