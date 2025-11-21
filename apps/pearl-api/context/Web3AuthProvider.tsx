@@ -8,7 +8,7 @@ import { PropsWithChildren } from 'react';
 import { CHAIN_CONFIGS } from '../utils/web3auth';
 
 // const clientId = `${process.env.NEXT_PUBLIC_WEB3AUTH_CLIENT_ID}`;
-const clientId = `${process.env.NEXT_PUBLIC_WEB3AUTH_CLIENT_ID_STAGING}`;
+const clientId = `${process.env.NEXT_PUBLIC_WEB3AUTH_CLIENT_ID_STAGING}`; // TODO: replace with above one
 
 const web3AuthContextConfig: Web3AuthContextConfig = {
   web3AuthOptions: {
@@ -29,26 +29,29 @@ const web3AuthContextConfig: Web3AuthContextConfig = {
   },
 };
 
+const getWeb3AuthProviderConfig = (defaultChainId?: number): Web3AuthContextConfig => {
+  if (!defaultChainId) return web3AuthContextConfig;
+
+  const defaultChainHex = `0x${defaultChainId.toString(16)}`;
+  const currentChain = Object.values(CHAIN_CONFIGS).find(
+    (chain) => chain.chainId === defaultChainHex,
+  );
+
+  return {
+    ...web3AuthContextConfig,
+    web3AuthOptions: {
+      ...web3AuthContextConfig.web3AuthOptions,
+      defaultChainId: defaultChainHex,
+      chains: currentChain ? [currentChain] : undefined,
+    },
+  };
+};
+
 type Web3AuthProviderProps = PropsWithChildren & { defaultChainId?: number };
 
 export const Web3AuthProvider = ({ children, defaultChainId }: Web3AuthProviderProps) => {
-  const chainHex = defaultChainId ? `0x${defaultChainId.toString(16)}` : undefined;
-  const currentChain =
-    defaultChainId && chainHex
-      ? Object.values(CHAIN_CONFIGS).find((chain) => chain.chainId === chainHex)
-      : undefined;
-
   return (
-    <Web3AuthPackageProvider
-      config={{
-        ...web3AuthContextConfig,
-        web3AuthOptions: {
-          ...web3AuthContextConfig.web3AuthOptions,
-          defaultChainId: defaultChainId ? `0x${defaultChainId.toString(16)}` : undefined,
-          chains: currentChain ? [currentChain] : undefined,
-        },
-      }}
-    >
+    <Web3AuthPackageProvider config={getWeb3AuthProviderConfig(defaultChainId)}>
       {children}
     </Web3AuthPackageProvider>
   );

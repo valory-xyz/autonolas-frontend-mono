@@ -31,7 +31,7 @@ export const CHAIN_CONFIGS: Record<
     ticker: 'ETH',
     tickerName: 'Ether',
     blockExplorerUrl: 'https://basescan.org/',
-    logo: 'https://gnosisscan.io/assets/xdai/images/svg/logos/token-secondary-dim.svg',
+    logo: 'https://avatars.githubusercontent.com/u/108554348?s=200&v=4',
   },
   optimism: {
     chainNamespace: 'eip155',
@@ -41,7 +41,7 @@ export const CHAIN_CONFIGS: Record<
     ticker: 'ETH',
     tickerName: 'Ether',
     blockExplorerUrl: 'https://optimistic.etherscan.io/',
-    logo: 'https://gnosisscan.io/assets/xdai/images/svg/logos/token-secondary-dim.svg',
+    logo: 'https://cryptologos.cc/logos/optimism-ethereum-op-logo.png?v=040',
   },
   mode: {
     chainNamespace: 'eip155',
@@ -51,6 +51,6 @@ export const CHAIN_CONFIGS: Record<
     ticker: 'MODE',
     tickerName: 'Mode',
     blockExplorerUrl: 'https://explorer.mode.network/',
-    logo: 'https://gnosisscan.io/assets/xdai/images/svg/logos/token-secondary-dim.svg',
+    logo: 'https://avatars.githubusercontent.com/u/139873699?s=200&v=4',
   },
 };

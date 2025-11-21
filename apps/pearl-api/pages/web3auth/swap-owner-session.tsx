@@ -46,10 +46,10 @@ const SwapOwnerSession = () => {
   const { provider, isInitialized, web3Auth, initError } = useWeb3Auth();
   const { connect, isConnected } = useWeb3AuthConnect();
   const router = useRouter();
+  const hasExecuted = useRef(false);
   const [status, setStatus] = useState<string>('Initializing...');
   const [result, setResult] = useState<TransactionResult | null>(null);
   const [targetWindow, setTargetWindow] = useState<Window | null>(null);
-  const hasExecuted = useRef(false);
 
   const { safeAddress, oldOwnerAddress, newOwnerAddress, backupOwnerAddress, chainId } =
     router.query;
@@ -78,7 +78,6 @@ const SwapOwnerSession = () => {
 
   useEffect(() => {
     const executeSwapOwner = async () => {
-      // Send result back to Pearl (supports both iframe and popup)
       if (
         hasExecuted.current ||
         !provider ||
@@ -117,9 +116,7 @@ const SwapOwnerSession = () => {
         setStatus('Getting connected wallet address...');
 
         // Get the connected wallet address from Web3Auth
-        const accounts = (await provider.request({
-          method: 'eth_accounts',
-        })) as string[];
+        const accounts = (await provider.request({ method: 'eth_accounts' })) as string[];
         const connectedAddress = accounts?.[0];
 
         if (!connectedAddress) {
@@ -129,17 +126,17 @@ const SwapOwnerSession = () => {
         setStatus('Initializing Safe Protocol Kit...');
 
         // Verify the connected address matches the backup owner
-        // if (connectedAddress.toLowerCase() !== (backupOwnerAddress as string).toLowerCase()) {
-        //   throw new Error(
-        //     `Connected address (${connectedAddress}) does not match backup owner address (${backupOwnerAddress}). Please login with the correct account.`,
-        //   );
-        // }
+        if (connectedAddress.toLowerCase() !== (backupOwnerAddress as string).toLowerCase()) {
+          throw new Error(
+            `Connected address (${connectedAddress}) does not match backup owner address (${backupOwnerAddress}). Please login with the correct account.`,
+          );
+        }
 
         // Initialize Safe Protocol Kit with the Web3Auth provider
         // The provider will automatically use the connected address as signer
         const protocolKit = await Safe.init({
-          signer: connectedAddress,
           provider,
+          signer: connectedAddress,
           safeAddress: safeAddress as Address,
         });
 
@@ -152,14 +149,10 @@ const SwapOwnerSession = () => {
         });
 
         // Create Safe transaction
-        const safeTx = await protocolKit.createTransaction({
-          transactions: [swapOwnerTx.data],
-        });
-
+        const safeTx = await protocolKit.createTransaction({ transactions: [swapOwnerTx.data] });
         setStatus('Executing transaction (please sign in wallet)...');
 
         const executeTxResponse = await protocolKit.executeTransaction(safeTx);
-
         setStatus('Transaction successful! You can close this window.');
 
         const successResult: TransactionResult = {
@@ -264,9 +257,7 @@ const SwapOwnerSession = () => {
     };
   }, [result, targetWindow]);
 
-  if (!isInitialized) {
-    return <Loading />;
-  }
+  if (!isInitialized) return <Loading />;
 
   if (initError) {
     return (
@@ -347,15 +338,6 @@ const SwapOwnerSession = () => {
           icon={<CloseCircleOutlined />}
           showIcon
         />
-      )}
-
-      {!isInitialized && (
-        <Card>
-          <Space>
-            <Spin />
-            <Text>Loading Web3Auth...</Text>
-          </Space>
-        </Card>
       )}
     </Flex>
   );
