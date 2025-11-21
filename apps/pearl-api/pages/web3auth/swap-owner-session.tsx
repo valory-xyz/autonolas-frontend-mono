@@ -95,6 +95,9 @@ const SwapOwnerSession = () => {
       try {
         setStatus('Switching to correct chain...');
 
+        console.log('Web3Auth user info', await web3Auth?.getUserInfo?.());
+        console.log('Connected wallets', await provider.request({ method: 'eth_accounts' }));
+
         // Switch to the correct chain if chainId is provided
         const chainHex = `0x${Number(chainId).toString(16)}`;
 
@@ -117,6 +120,8 @@ const SwapOwnerSession = () => {
 
         // Get the connected wallet address from Web3Auth
         const accounts = (await provider.request({ method: 'eth_accounts' })) as string[];
+        console.log('Connected accounts:', accounts);
+
         const connectedAddress = accounts?.[0];
 
         if (!connectedAddress) {
@@ -207,6 +212,7 @@ const SwapOwnerSession = () => {
     backupOwnerAddress,
     chainId,
     targetWindow,
+    web3Auth,
   ]);
 
   // Notify if Web3Auth modal is closed without connecting
@@ -256,6 +262,8 @@ const SwapOwnerSession = () => {
       window.removeEventListener('beforeunload', handleBeforeUnload);
     };
   }, [result, targetWindow]);
+
+  console.log('SwapOwnerSession render', { isInitialized, initError, status, result });
 
   if (!isInitialized) return <Loading />;
 

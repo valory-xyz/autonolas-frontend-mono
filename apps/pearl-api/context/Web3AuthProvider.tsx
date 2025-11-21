@@ -26,6 +26,8 @@ const web3AuthContextConfig: Web3AuthContextConfig = {
         },
       },
     },
+    ssr: true,
+    sessionTime: 60 * 5, // 5 minutes
   },
 };
 
