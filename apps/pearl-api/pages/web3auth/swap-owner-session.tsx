@@ -70,13 +70,11 @@ const SwapOwnerSession = () => {
 
   // Auto-connect Web3Auth modal when initialized and not already connected
   useEffect(() => {
-    if (isInitialized && !isConnected && !provider && web3Auth) {
+    if (isInitialized && !isConnected && !provider) {
       setStatus('Opening Web3Auth modal...');
-      web3Auth.logout().then(() => {
-        connect();
-      });
+      connect();
     }
-  }, [isInitialized, isConnected, provider, connect, web3Auth]);
+  }, [isInitialized, isConnected, provider, connect]);
 
   useEffect(() => {
     const executeSwapOwner = async () => {
