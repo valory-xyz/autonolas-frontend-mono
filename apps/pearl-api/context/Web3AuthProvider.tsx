@@ -4,6 +4,7 @@ import {
   Web3AuthProvider as Web3AuthPackageProvider,
 } from '@web3auth/modal/react';
 import { PropsWithChildren } from 'react';
+
 import { CHAIN_CONFIGS } from '../utils/web3auth';
 
 // const clientId = `${process.env.NEXT_PUBLIC_WEB3AUTH_CLIENT_ID}`;

@@ -1,9 +1,10 @@
-import { createGlobalStyle } from 'styled-components';
 import { Maybe } from '@web3auth/modal';
 import { useWeb3Auth, useWeb3AuthConnect, useWeb3AuthDisconnect } from '@web3auth/modal/react';
-import { Web3AuthProvider } from 'context/Web3AuthProvider';
 import { useEffect, useRef } from 'react';
+import { createGlobalStyle } from 'styled-components';
 import { Address } from 'viem';
+
+import { Web3AuthProvider } from 'context/Web3AuthProvider';
 
 export const Styles = createGlobalStyle`
   .w3a-parent-container > div {

@@ -1,12 +1,13 @@
-import { useEffect, useRef, useState } from 'react';
-import { useRouter } from 'next/router';
 import { CheckCircleOutlined, CloseCircleOutlined, LoadingOutlined } from '@ant-design/icons';
 import Safe from '@safe-global/protocol-kit';
 import { useWeb3Auth, useWeb3AuthConnect } from '@web3auth/modal/react';
 import { Alert, Card, Flex, Space, Spin, Typography } from 'antd';
-import { Web3AuthProvider } from 'context/Web3AuthProvider';
-import styled, { createGlobalStyle } from 'styled-components';
+import { useRouter } from 'next/router';
+import { useEffect, useRef, useState } from 'react';
+import { createGlobalStyle } from 'styled-components';
 import { Address } from 'viem';
+
+import { Web3AuthProvider } from 'context/Web3AuthProvider';
 
 import { EvmChainId, EvmChainName } from '../../utils/index';
 
@@ -32,21 +33,13 @@ type TransactionResult = {
   safeAddress?: string;
 };
 
-const Container = styled.div`
-  padding: 40px;
-  max-width: 420px;
-  margin: 0 auto;
-`;
-
 const Loading = () => (
-  <Container>
-    <Card>
-      <Space>
-        <Spin />
-        <Text>Loading Web3Auth...</Text>
-      </Space>
-    </Card>
-  </Container>
+  <Card style={{ margin: 24 }}>
+    <Space>
+      <Spin />
+      <Text>Loading Web3Auth...</Text>
+    </Space>
+  </Card>
 );
 
 const SwapOwnerSession = () => {
@@ -277,105 +270,94 @@ const SwapOwnerSession = () => {
 
   if (initError) {
     return (
-      <Container>
+      <Alert
+        message="Error Initializing Web3Auth"
+        description={
+          <Text>
+            {(initError instanceof Error ? initError : new Error('Unknown error')).message}
+          </Text>
+        }
+        type="error"
+        icon={<CloseCircleOutlined />}
+        showIcon
+        style={{ margin: 16 }}
+      />
+    );
+  }
+
+  return (
+    <Flex vertical gap={16} style={{ padding: 16 }}>
+      <Title level={2} style={{ margin: 0 }}>
+        {`Approve Transaction - ${EvmChainName[chainId as unknown as EvmChainId] || chainId} `}
+      </Title>
+
+      <Card>
+        <Space direction="vertical" size="middle" style={{ width: '100%' }}>
+          <div>
+            <Text strong>Status: </Text>
+            {!result && <LoadingOutlined style={{ margin: '0 8px' }} />}
+            <Text>{status}</Text>
+          </div>
+
+          {safeAddress && (
+            <Flex vertical gap={2}>
+              <Text type="secondary">Safe Address:</Text>
+              <Text code copyable>
+                {safeAddress}
+              </Text>
+            </Flex>
+          )}
+        </Space>
+      </Card>
+
+      {result && result.success && (
         <Alert
-          message="Error Initializing Web3Auth"
+          message="Transaction Successful!"
           description={
-            <Text>
-              {(initError instanceof Error ? initError : new Error('Unknown error')).message}
-            </Text>
+            <Space direction="vertical" size="small" style={{ width: '100%' }}>
+              <Flex vertical gap={2}>
+                <Text type="secondary">Transaction Hash:</Text>
+                <Text code copyable>
+                  {result.txHash}
+                </Text>
+              </Flex>
+              <Paragraph style={{ marginBottom: 0, marginTop: 8 }}>
+                You can safely close this window.
+              </Paragraph>
+            </Space>
+          }
+          type="success"
+          icon={<CheckCircleOutlined />}
+          showIcon
+        />
+      )}
+
+      {result && !result.success && (
+        <Alert
+          message="Transaction Failed"
+          description={
+            <Space direction="vertical" size="small">
+              <Paragraph style={{ marginBottom: 0 }}>{result.error}</Paragraph>
+              <Paragraph style={{ marginBottom: 0 }}>
+                You can close this window and try again.
+              </Paragraph>
+            </Space>
           }
           type="error"
           icon={<CloseCircleOutlined />}
           showIcon
         />
-      </Container>
-    );
-  }
+      )}
 
-  return (
-    <Container>
-      <Flex vertical gap={16} style={{ width: '100%' }}>
-        <Title level={2} style={{ marginBottom: 0 }}>
-          {`Approve Transaction - ${EvmChainName[chainId as unknown as EvmChainId] || chainId} `}
-        </Title>
-
+      {!isInitialized && (
         <Card>
-          <Space direction="vertical" size="middle" style={{ width: '100%' }}>
-            <div>
-              <Text strong>Status: </Text>
-              {!result && <LoadingOutlined style={{ margin: '0 8px' }} />}
-              <Text>{status}</Text>
-            </div>
-
-            {safeAddress && (
-              <Flex vertical gap={2}>
-                <Text type="secondary">Safe Address:</Text>
-                <Text code copyable>
-                  {safeAddress}
-                </Text>
-              </Flex>
-            )}
+          <Space>
+            <Spin />
+            <Text>Loading Web3Auth...</Text>
           </Space>
         </Card>
-
-        {result && result.success && (
-          <Alert
-            message="Transaction Successful!"
-            description={
-              <Space direction="vertical" size="small" style={{ width: '100%' }}>
-                <Flex vertical gap={2}>
-                  <Text type="secondary">Transaction Hash:</Text>
-                  <Text code copyable>
-                    {result.txHash}
-                  </Text>
-                </Flex>
-                <Paragraph style={{ marginBottom: 0, marginTop: 8 }}>
-                  You can safely close this window.
-                </Paragraph>
-              </Space>
-            }
-            type="success"
-            icon={<CheckCircleOutlined />}
-            showIcon
-          />
-        )}
-
-        {result && !result.success && (
-          <Alert
-            message="Transaction Failed"
-            description={
-              <Space direction="vertical" size="small">
-                <Paragraph style={{ marginBottom: 0 }}>{result.error}</Paragraph>
-                <Paragraph style={{ marginBottom: 0 }}>
-                  You can close this window and try again.
-                </Paragraph>
-              </Space>
-            }
-            type="error"
-            icon={<CloseCircleOutlined />}
-            showIcon
-          />
-        )}
-
-        {!isInitialized && (
-          <Card>
-            <Space>
-              <Spin />
-              <Text>Loading Web3Auth...</Text>
-            </Space>
-          </Card>
-        )}
-
-        {result && (
-          <Card title="Result Data (for Pearl)" size="small">
-            <pre style={{ fontSize: '12px', overflow: 'auto', margin: 0 }}>
-              {JSON.stringify(result, null, 2)}
-            </pre>
-          </Card>
-        )}
-      </Flex>
-    </Container>
+      )}
+    </Flex>
   );
 };
 
