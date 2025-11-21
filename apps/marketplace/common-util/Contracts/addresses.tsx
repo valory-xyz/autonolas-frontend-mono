@@ -19,7 +19,6 @@ import {
 } from 'viem/chains';
 
 type Addresses = {
-  serviceManagerToken: Address;
   serviceRegistryL2: Address;
   serviceRegistryTokenUtility: Address;
   operatorWhitelist: Address;
@@ -30,7 +29,6 @@ type L1Addresses = {
   agentRegistry: Address;
   componentRegistry: Address;
   registriesManager: Address;
-  serviceManagerToken: Address;
   serviceRegistry: Address;
   serviceRegistryTokenUtility: Address;
   operatorWhitelist: Address;
@@ -40,14 +38,12 @@ const MAINNET_ADDRESSES: L1Addresses = {
   agentRegistry: '0x2F1f7D38e4772884b88f3eCd8B6b9faCdC319112',
   componentRegistry: '0x15bd56669F57192a97dF41A2aa8f4403e9491776',
   registriesManager: '0x9eC9156dEF5C613B2a7D4c46C383F9B58DfcD6fE',
-  serviceManagerToken: '0x2EA682121f815FBcF86EA3F3CaFdd5d67F2dB143',
   serviceRegistry: '0x48b6af7B12C71f09e2fC8aF4855De4Ff54e775cA',
   serviceRegistryTokenUtility: '0x3Fb926116D454b95c669B6Bf2E7c3bad8d19affA',
   operatorWhitelist: '0x42042799B0DE38AdD2a70dc996f69f98E1a85260',
 };
 
 const GNOSIS_ADDRESSES: Addresses = {
-  serviceManagerToken: '0x04b0007b2aFb398015B76e5f22993a1fddF83644',
   serviceRegistryL2: '0x9338b5153AE39BB89f50468E608eD9d764B755fD',
   serviceRegistryTokenUtility: '0xa45E64d13A30a51b91ae0eb182e88a40e9b18eD8',
   operatorWhitelist: '0x526E064cB694E8f5B7DB299158e17F33055B3943',
@@ -55,14 +51,12 @@ const GNOSIS_ADDRESSES: Addresses = {
 };
 
 const POLYGON_ADDRESSES: Addresses = {
-  serviceManagerToken: '0x04b0007b2aFb398015B76e5f22993a1fddF83644',
   serviceRegistryL2: '0xE3607b00E75f6405248323A9417ff6b39B244b50',
   serviceRegistryTokenUtility: '0xa45E64d13A30a51b91ae0eb182e88a40e9b18eD8',
   operatorWhitelist: '0x526E064cB694E8f5B7DB299158e17F33055B3943',
 };
 
 const MODE_ADDRESSES: Addresses = {
-  serviceManagerToken: '0x63e66d7ad413C01A7b49C7FF4e3Bb765C4E4bd1b',
   serviceRegistryL2: '0x3C1fF68f5aa342D296d4DEe4Bb1cACCA912D95fE',
   serviceRegistryTokenUtility: '0x34C895f302D0b5cf52ec0Edd3945321EB0f83dd5',
   operatorWhitelist: '0x3d77596beb0f130a4415df3D2D8232B3d3D31e44',
@@ -76,7 +70,6 @@ const MODE_ADDRESSES: Addresses = {
  * - celo
  */
 const COMMON_TEST_ADDRESSES: Addresses = {
-  serviceManagerToken: '0x5BA58970c2Ae16Cf6218783018100aF2dCcFc915',
   serviceRegistryL2: '0x31D3202d8744B16A120117A053459DDFAE93c855',
   serviceRegistryTokenUtility: '0xeB49bE5DF00F74bd240DE4535DDe6Bc89CEfb994',
   operatorWhitelist: '0x29086141ecdc310058fc23273F8ef7881d20C2f7',
@@ -87,7 +80,6 @@ const COMMON_TEST_ADDRESSES: Addresses = {
 export const ADDRESSES = {
   [mainnet.id]: MAINNET_ADDRESSES,
   [optimism.id]: {
-    serviceManagerToken: '0xFbBEc0C8b13B38a9aC0499694A69a10204c5E2aB',
     serviceRegistryL2: '0x3d77596beb0f130a4415df3D2D8232B3d3D31e44',
     serviceRegistryTokenUtility: '0xBb7e1D6Cb6F243D6bdE81CE92a9f2aFF7Fbe7eac',
     operatorWhitelist: '0x63e66d7ad413C01A7b49C7FF4e3Bb765C4E4bd1b',
@@ -95,20 +87,17 @@ export const ADDRESSES = {
   [gnosis.id]: GNOSIS_ADDRESSES,
   [polygon.id]: POLYGON_ADDRESSES,
   [base.id]: {
-    serviceManagerToken: '0x63e66d7ad413C01A7b49C7FF4e3Bb765C4E4bd1b',
     serviceRegistryL2: '0x3C1fF68f5aa342D296d4DEe4Bb1cACCA912D95fE',
     serviceRegistryTokenUtility: '0x34C895f302D0b5cf52ec0Edd3945321EB0f83dd5',
     operatorWhitelist: '0x3d77596beb0f130a4415df3D2D8232B3d3D31e44',
     mechMarketplace: '0xf24eE42edA0fc9b33B7D41B06Ee8ccD2Ef7C5020',
   },
   [arbitrum.id]: {
-    serviceManagerToken: '0x34C895f302D0b5cf52ec0Edd3945321EB0f83dd5',
     serviceRegistryL2: '0xE3607b00E75f6405248323A9417ff6b39B244b50',
     serviceRegistryTokenUtility: '0x3d77596beb0f130a4415df3D2D8232B3d3D31e44',
     operatorWhitelist: '0x3C1fF68f5aa342D296d4DEe4Bb1cACCA912D95fE',
   },
   [celo.id]: {
-    serviceManagerToken: '0x34C895f302D0b5cf52ec0Edd3945321EB0f83dd5',
     serviceRegistryL2: '0xE3607b00E75f6405248323A9417ff6b39B244b50',
     serviceRegistryTokenUtility: '0x3d77596beb0f130a4415df3D2D8232B3d3D31e44',
     operatorWhitelist: '0x3C1fF68f5aa342D296d4DEe4Bb1cACCA912D95fE',
@@ -116,7 +105,6 @@ export const ADDRESSES = {
   [mode.id]: MODE_ADDRESSES,
   // Test nets
   [polygonMumbai.id]: {
-    serviceManagerToken: '0xE16adc7777B7C2a0d35033bd3504C028AB28EE8b',
     serviceRegistryL2: '0xf805DfF246CC208CD2F08ffaD242b7C32bc93623',
     serviceRegistryTokenUtility: '0x131b5551c81e9B3E89E9ACE30A5B3D45144E3e42',
     operatorWhitelist: '0x118173028162C1b7c6Bf8488bd5dA2abd7c30F9D',
@@ -125,13 +113,11 @@ export const ADDRESSES = {
     agentRegistry: '0xEB5638eefE289691EcE01943f768EDBF96258a80',
     componentRegistry: '0x7Fd1F4b764fA41d19fe3f63C85d12bf64d2bbf68',
     registriesManager: '0x10c5525F77F13b28f42c5626240c001c2D57CAd4',
-    serviceManagerToken: '0x1d333b46dB6e8FFd271b6C2D2B254868BD9A2dbd',
     serviceRegistry: '0x1cEe30D08943EB58EFF84DD1AB44a6ee6FEff63a',
     serviceRegistryTokenUtility: '0x6d9b08701Af43D68D991c074A27E4d90Af7f2276',
     operatorWhitelist: '0x0338893fB1A1D9Df03F72CC53D8f786487d3D03E',
   },
   [gnosisChiado.id]: {
-    serviceManagerToken: '0xc965a32185590Eb5a5fffDba29E96126b7650eDe',
     serviceRegistryL2: '0x31D3202d8744B16A120117A053459DDFAE93c855',
     serviceRegistryTokenUtility: '0xc2c7E40674f1C7Bb99eFe5680Efd79842502bED4',
     operatorWhitelist: '0x6f7661F52fE1919996d0A4F68D09B344093a349d',
