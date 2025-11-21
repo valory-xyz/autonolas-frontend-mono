@@ -51,7 +51,7 @@ export const getBonds = async (id, tableDataSource) => {
 
 /* ----- common functions ----- */
 export const onTerminate = async (account, id) => {
-  const contract = getServiceManagerContract();
+  const contract = await getServiceManagerContract();
   const terminateFn = contract.methods.terminate(id);
   const estimatedGas = await getEstimatedGasLimit(terminateFn, account);
   const fn = terminateFn.send({
@@ -132,7 +132,7 @@ export const mintTokenRequest = async ({ account, serviceId }) => {
 };
 
 export const onActivateRegistration = async (id, account, deposit) => {
-  const contract = getServiceManagerContract();
+  const contract = await getServiceManagerContract();
   const activateRegistrationFn = contract.methods.activateRegistration(id);
   const estimatedGas = await getEstimatedGasLimit(activateRegistrationFn, account, deposit);
   const fn = contract.methods.activateRegistration(id).send({
@@ -237,7 +237,7 @@ export const onStep2RegisterAgents = async ({
   agentInstances,
   dataSource,
 }) => {
-  const contract = getServiceManagerContract();
+  const contract = await getServiceManagerContract();
   const { totalBonds } = await getBonds(serviceId, dataSource);
 
   const registerAgentsFn = contract.methods.registerAgents(serviceId, agentInstances, agentIds);
@@ -268,7 +268,7 @@ export const getServiceAgentInstances = async (id) => {
 };
 
 export const onStep3Deploy = async (account, id, radioValue, payload = '0x') => {
-  const contract = getServiceManagerContract();
+  const contract = await getServiceManagerContract();
 
   const deployFn = contract.methods.deploy(id, radioValue, payload);
   const estimatedGas = await getEstimatedGasLimit(deployFn, account);
@@ -296,7 +296,7 @@ export const getAgentInstanceAndOperator = async (id) => {
 
 /* ----- step 5 functions ----- */
 export const onStep5Unbond = async (account, id) => {
-  const contract = getServiceManagerContract();
+  const contract = await getServiceManagerContract();
   const unbondFn = contract.methods.unbond(id);
   const estimatedGas = await getEstimatedGasLimit(unbondFn, account);
   const fn = unbondFn.send({ from: account, gasLimit: estimatedGas });

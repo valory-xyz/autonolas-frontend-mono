@@ -1,11 +1,13 @@
 import { useRouter } from 'next/router';
 import Link from 'next/link';
 import { Typography } from 'antd';
+import { useEffect, useState } from 'react';
 import { Footer as CommonFooter } from 'libs/ui-components/src';
 import { getExplorerURL } from '@autonolas/frontend-library';
 
 import { PAGES_TO_LOAD_WITHOUT_CHAINID } from 'util/constants';
 import { ADDRESSES } from 'common-util/Contracts/addresses';
+import { getServiceManagerAddress } from 'common-util/Contracts';
 import { useHelpers } from 'common-util/hooks';
 import Socials from './Socials';
 import { ContractsInfoContainer } from './styles';
@@ -13,10 +15,24 @@ import { ContractsInfoContainer } from './styles';
 const { Text } = Typography;
 
 const ContractInfo = () => {
-  const { chainId, isL1Network, doesNetworkHaveValidServiceManagerToken } = useHelpers();
+  const { chainId, isL1Network } = useHelpers();
   const router = useRouter();
+  const [serviceManagerAddress, setServiceManagerAddress] = useState(null);
 
   const { pathname } = router;
+
+  useEffect(() => {
+    const fetchServiceManagerAddress = async () => {
+      try {
+        const address = await getServiceManagerAddress();
+        setServiceManagerAddress(address);
+      } catch (error) {
+        console.error('Error fetching service manager address:', error);
+      }
+    };
+
+    fetchServiceManagerAddress();
+  }, []);
 
   // if chainId is not set, show empty container
   if (!chainId) return <ContractsInfoContainer />;
@@ -47,9 +63,7 @@ const ContractInfo = () => {
         managerText: 'ServiceManager',
         marketplaceText: 'MechMarketplace',
         registry: isL1Network ? addresses.serviceRegistry : addresses.serviceRegistryL2,
-        manager: doesNetworkHaveValidServiceManagerToken
-          ? addresses.serviceManagerToken
-          : addresses.serviceManager,
+        manager: serviceManagerAddress,
         marketplace: addresses.mechMarketplace || null,
       };
     }
@@ -86,7 +100,7 @@ const ContractInfo = () => {
             Contracts
           </Text>
           <Text style={{ fontSize: 14 }}>{getContractInfo(registryText, registry)}</Text>
-          <Text style={{ fontSize: 14 }}>{getContractInfo(managerText, manager)}</Text>
+          {manager && <Text style={{ fontSize: 14 }}>{getContractInfo(managerText, manager)}</Text>}
           {marketplace && (
             <Text style={{ fontSize: 14 }}>{getContractInfo(marketplaceText, marketplace)}</Text>
           )}

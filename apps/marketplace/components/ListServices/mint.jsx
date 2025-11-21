@@ -90,7 +90,7 @@ const MintService = () => {
         console.error(e);
       }
 
-      const contract = getServiceManagerContract();
+      const contract = await getServiceManagerContract();
       const params = buildEvmParams(values);
       const createFn = contract.methods.create(...params);
       const estimatedGas = await getEstimatedGasLimit(createFn, account);
