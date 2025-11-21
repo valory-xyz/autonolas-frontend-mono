@@ -1,9 +1,10 @@
-import { createGlobalStyle } from 'styled-components';
 import { Maybe } from '@web3auth/modal';
 import { useWeb3Auth, useWeb3AuthConnect, useWeb3AuthDisconnect } from '@web3auth/modal/react';
-import { Web3AuthProvider } from 'context/Web3AuthProvider';
 import { useEffect, useRef } from 'react';
+import { createGlobalStyle } from 'styled-components';
 import { Address } from 'viem';
+
+import { Web3AuthProvider } from 'context/Web3AuthProvider';
 
 export const Styles = createGlobalStyle`
   .w3a-parent-container > div {
@@ -14,7 +15,7 @@ export const Styles = createGlobalStyle`
 enum Events {
   WEB3AUTH_AUTH_SUCCESS = 'WEB3AUTH_AUTH_SUCCESS',
   WEB3AUTH_MODAL_CLOSED = 'WEB3AUTH_MODAL_CLOSED',
-  WEB3AUTH_MODAL_INITIALIZED = 'WEB3AUTH_MODAL_INITIALIZED'
+  WEB3AUTH_MODAL_INITIALIZED = 'WEB3AUTH_MODAL_INITIALIZED',
 }
 
 const Web3AuthModal = () => {
@@ -25,11 +26,10 @@ const Web3AuthModal = () => {
 
   useEffect(() => {
     // Notify once initialized
-    if (isInitialized)
-    window.parent.postMessage({
-      event_id: Events.WEB3AUTH_MODAL_INITIALIZED
-    }, '*');
-  }, [isInitialized])
+    if (isInitialized && typeof window !== 'undefined') {
+      window.parent.postMessage({ event_id: Events.WEB3AUTH_MODAL_INITIALIZED }, '*');
+    }
+  }, [isInitialized]);
 
   useEffect(() => {
     // Connect when the page is open
@@ -54,11 +54,15 @@ const Web3AuthModal = () => {
         disconnect();
 
         // Post message to the parent window with the connected address
-        window.parent.postMessage({
-          event_id: Events.WEB3AUTH_AUTH_SUCCESS,
-          address: accounts[0]
-        }, '*');
-
+        if (typeof window !== 'undefined') {
+          window.parent.postMessage(
+            {
+              event_id: Events.WEB3AUTH_AUTH_SUCCESS,
+              address: accounts[0],
+            },
+            '*',
+          );
+        }
       } catch (error) {
         console.error('Error getting address:', error);
       }
@@ -74,10 +78,13 @@ const Web3AuthModal = () => {
     if (!web3Auth) return;
 
     const handleClose = (isVisible: boolean) => {
-      if (!isVisible && !isConnected) {
-        window.parent.postMessage({
-          event_id: Events.WEB3AUTH_MODAL_CLOSED
-        }, '*');
+      if (!isVisible && !isConnected && typeof window !== 'undefined') {
+        window.parent.postMessage(
+          {
+            event_id: Events.WEB3AUTH_MODAL_CLOSED,
+          },
+          '*',
+        );
       }
     };
     web3Auth.on('MODAL_VISIBILITY', handleClose);
@@ -93,7 +100,7 @@ export default function Page() {
   return (
     <>
       <Styles />
-      
+
       <Web3AuthProvider>
         <Web3AuthModal />
       </Web3AuthProvider>
