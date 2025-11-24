@@ -16,7 +16,7 @@ export const CHAIN_CONFIGS: Record<
   gnosis: {
     chainNamespace: 'eip155',
     chainId: '0x64',
-    rpcTarget: 'https://virtual.gnosis.eu.rpc.tenderly.co/ba80b032-763f-41f2-8342-baabf5dcbb0c',
+    rpcTarget: 'https://gnosis.drpc.org',
     displayName: EvmDisplayName.Gnosis,
     ticker: 'xDAI',
     tickerName: 'xDAI',
