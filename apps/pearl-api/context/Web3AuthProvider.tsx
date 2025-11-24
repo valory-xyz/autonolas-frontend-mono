@@ -7,13 +7,13 @@ import { PropsWithChildren } from 'react';
 
 import { CHAIN_CONFIGS } from '../utils/web3auth';
 
-// const clientId = `${process.env.NEXT_PUBLIC_WEB3AUTH_CLIENT_ID}`;
-const clientId = `${process.env.NEXT_PUBLIC_WEB3AUTH_CLIENT_ID_STAGING}`; // TODO: replace with above one
+const clientId = `${process.env.NEXT_PUBLIC_WEB3AUTH_CLIENT_ID}`;
+// const clientId = `${process.env.NEXT_PUBLIC_WEB3AUTH_CLIENT_ID_STAGING}`; // TODO: replace with above one
 
 const web3AuthContextConfig: Web3AuthContextConfig = {
   web3AuthOptions: {
     clientId,
-    web3AuthNetwork: WEB3AUTH_NETWORK.SAPPHIRE_DEVNET,
+    web3AuthNetwork: WEB3AUTH_NETWORK.SAPPHIRE_MAINNET,
     modalConfig: {
       connectors: {
         metamask: {
@@ -26,7 +26,7 @@ const web3AuthContextConfig: Web3AuthContextConfig = {
         },
       },
     },
-    ssr: true,
+    // ssr: true,
     sessionTime: 60 * 5, // 5 minutes
   },
 };

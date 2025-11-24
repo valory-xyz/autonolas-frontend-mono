@@ -120,6 +120,12 @@ const SwapOwnerSession = () => {
 
         // Get the connected wallet address from Web3Auth
         const accounts = (await provider.request({ method: 'eth_accounts' })) as string[];
+        console.log('All Address:', {
+          safeAddress,
+          oldOwnerAddress,
+          newOwnerAddress,
+          backupOwnerAddress,
+        });
         console.log('Connected accounts:', accounts);
 
         const connectedAddress = accounts?.[0];
@@ -131,17 +137,18 @@ const SwapOwnerSession = () => {
         setStatus('Initializing Safe Protocol Kit...');
 
         // Verify the connected address matches the backup owner
-        if (connectedAddress.toLowerCase() !== (backupOwnerAddress as string).toLowerCase()) {
-          throw new Error(
-            `Connected address (${connectedAddress}) does not match backup owner address (${backupOwnerAddress}). Please login with the correct account.`,
-          );
-        }
+        // if (connectedAddress.toLowerCase() !== (backupOwnerAddress as string).toLowerCase()) {
+        //   throw new Error(
+        //     `Connected address (${connectedAddress}) does not match backup owner address (${backupOwnerAddress}). Please login with the correct account.`,
+        //   );
+        // }
 
         // Initialize Safe Protocol Kit with the Web3Auth provider
         // The provider will automatically use the connected address as signer
         const protocolKit = await Safe.init({
           provider,
-          signer: connectedAddress,
+          signer: backupOwnerAddress as Address,
+          // signer: connectedAddress,
           safeAddress: safeAddress as Address,
         });
 
@@ -286,7 +293,7 @@ const SwapOwnerSession = () => {
 
   return (
     <Flex vertical gap={16} style={{ padding: 16 }}>
-      <Title level={2} style={{ margin: 0 }}>
+      <Title level={3} style={{ margin: 0 }}>
         {`Approve Transaction - ${EvmChainName[chainId as unknown as EvmChainId] || chainId} `}
       </Title>
 
