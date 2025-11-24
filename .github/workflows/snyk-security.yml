@@ -113,14 +113,6 @@ jobs:
             echo "❌ SARIF file missing or empty. Skipping upload."
             echo "sarif_valid=false" >> $GITHUB_OUTPUT
           fi
-
-      - name: Debug SARIF output
-        if: always()
-        run: |
-          echo "---- snyk-code.sarif ----"
-          head -n 20 snyk-code.sarif || echo "No SARIF file found."
-          echo "---- snyk-error.log ----"
-          cat snyk-error.log || echo "No error log."
           
       # Upload valid SARIF to GitHub Code Scanning
       - name: Upload SARIF to GitHub Code Scanning
