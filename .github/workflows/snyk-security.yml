@@ -68,7 +68,7 @@ jobs:
       - name: Snyk Code test (SAST)
         run: |
           # Redirect both stdout and stderr to prevent error contamination
-          snyk code test --sarif > snyk-code.sarif 2>&1 || true
+          snyk code test --org=00508cff-0e2b-4bb5-aaf0-9fa7cc430473 --sarif > snyk-code.sarif 2>&1 || true
           echo "✅ Snyk Code test completed."
         continue-on-error: true
 
@@ -76,7 +76,7 @@ jobs:
       - name: Snyk Open Source monitor
         run: |
           # Monitor only the root package.json to avoid duplicate scans in a monorepo
-          snyk monitor --file=package.json --project-name="autonolas-frontend-mono" || true
+          snyk monitor --org=00508cff-0e2b-4bb5-aaf0-9fa7cc430473 --file=package.json --project-name="autonolas-frontend-mono" || true
         continue-on-error: true
 
       # Show any Snyk CLI errors for easier debugging
