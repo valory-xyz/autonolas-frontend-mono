@@ -290,7 +290,7 @@ const SwapOwnerSession = () => {
     if (!web3Auth) return;
 
     const handleModalClose = (isVisible: boolean) => {
-      if (!isVisible && !isConnected && !result && targetWindow) {
+      if (!isVisible && targetWindow) {
         targetWindow.postMessage(
           {
             event_id: Events.WEB3AUTH_SWAP_OWNER_MODAL_CLOSED,
