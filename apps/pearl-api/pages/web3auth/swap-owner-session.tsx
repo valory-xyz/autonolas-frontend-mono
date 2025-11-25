@@ -52,7 +52,7 @@ const Loading = () => (
 const ChainIdMissingAlert = () => (
   <Alert
     message="Error"
-    description={<Text>Chain ID is missing or invalid in the query parameters.</Text>}
+    description={<Text>Chain ID is missing.</Text>}
     type="error"
     icon={<CloseCircleOutlined />}
     showIcon
@@ -75,7 +75,7 @@ const InitErrorAlert = ({ error }: { error: Error }) => (
 
 const SwapOwnerSuccess = ({ txHash, txnLink }: { txHash: string; txnLink: string }) => (
   <Alert
-    message="Transaction Successful!"
+    message="Swap Owner Successful!"
     description={
       <Space direction="vertical" size="small" style={{ width: '100%' }}>
         <Flex vertical gap={2}>
@@ -97,7 +97,7 @@ const SwapOwnerSuccess = ({ txHash, txnLink }: { txHash: string; txnLink: string
 
 const SwapOwnerFailed = ({ error }: { error: string }) => (
   <Alert
-    message="Swap Owner Failed"
+    message="Swap Owner Failed!"
     description={
       <Space direction="vertical" size="small">
         <Paragraph style={{ marginBottom: 0 }}>{error}</Paragraph>
@@ -358,7 +358,7 @@ const SwapOwnerSession = () => {
 
           {safeAddress && (
             <Flex vertical gap={2}>
-              <Text type="secondary">Safe Address:</Text>
+              <Text type="secondary">Pearl wallet:</Text>
               <Text code copyable>
                 {safeAddress}
               </Text>
