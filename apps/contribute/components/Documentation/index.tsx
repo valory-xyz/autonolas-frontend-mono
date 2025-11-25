@@ -7,7 +7,7 @@ import { CoreConcepts } from './content/CoreConcepts';
 import { HowItWorks } from './content/HowItWorks';
 import { QuickStart } from './content/QuickStart';
 import { Overview } from './content/Overview';
-import { HowToProposeAPost } from './content/HowToProposeAPost';
+// import { HowToProposeAPost } from './content/HowToProposeAPost';
 import { HowToUseOlasContribute } from './content/HowToUseOlasContribute';
 import { DOC_NAV, NavWrapper } from './helpers';
 import { Container, DocSection } from './styles';
@@ -60,7 +60,7 @@ export const Documentation = () => {
           <QuickStart />
           <CoreConcepts />
           <HowToUseOlasContribute />
-          <HowToProposeAPost />
+          {/* <HowToProposeAPost /> */}
           <HowItWorks />
           <FAQs />
         </div>

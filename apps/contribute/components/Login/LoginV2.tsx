@@ -13,7 +13,7 @@ import {
   getChainIdOrDefaultToMainnet,
   isAddressProhibited,
 } from 'common-util/functions';
-import VotingPower from 'components/VotingPower';
+// import VotingPower from 'components/VotingPower';
 import { setChainId, setUserBalance } from 'store/setup';
 
 const LoginContainer = styled.div`
@@ -152,7 +152,7 @@ export const LoginV2 = ({ onConnect: onConnectCb, onDisconnect: onDisconnectCb }
     <LoginContainer>
       {address && (
         <>
-          <VotingPower />
+          {/* <VotingPower /> */}
           <Link href={`/profile/${address}`} passHref>
             <Button>Your profile</Button>
           </Link>

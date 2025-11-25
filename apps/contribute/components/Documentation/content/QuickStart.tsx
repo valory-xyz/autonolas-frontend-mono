@@ -16,7 +16,7 @@ export const QuickStart = () => (
         <li>
           <Text strong>Complete your first action</Text> — for example, “Spread the word on X” via
           Connect X. Choose a campaign and make a tweet.
-          <ul>
+          {/* <ul>
             <li>
               There are two types of actions:
               <ul>
@@ -29,10 +29,10 @@ export const QuickStart = () => (
                 </li>
               </ul>
             </li>
-          </ul>
-          <li>
-            <Text strong>Earn points</Text> and start climbing the leaderboard.
-          </li>
+          </ul> */}
+        </li>
+        <li>
+          <Text strong>Earn points</Text> and start climbing the leaderboard.
         </li>
       </ol>
     </Paragraph>
