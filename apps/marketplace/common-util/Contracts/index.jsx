@@ -126,17 +126,52 @@ export const getServiceContract = () => {
 /**
  * @returns serviceManager contract
  */
-export const getServiceManagerContract = () => {
+export const getServiceManagerContract = async () => {
   const { address, chainId } = getWeb3Details();
   if (doesNetworkHaveValidServiceManagerTokenFn(chainId)) {
-    const { serviceManagerToken } = address;
-    const contract = getContract(SERVICE_MANAGER_TOKEN_CONTRACT.abi, serviceManagerToken);
+    const serviceManagerProxyAddress = await getServiceManagerAddress();
+    const contract = getContract(SERVICE_MANAGER_TOKEN_CONTRACT.abi, serviceManagerProxyAddress);
     return contract;
   }
 
   const { serviceManager } = address;
   const contract = getContract(SERVICE_MANAGER_CONTRACT.abi, serviceManager);
   return contract;
+};
+
+/**
+ * Fetches the service manager proxy address for the selected chain
+ * by calling the manager function on the service registry contract.
+ */
+export const getServiceManagerAddress = async () => {
+  try {
+    const { chainId } = getWeb3Details();
+    const rpcUrl = RPC_URLS[chainId];
+    const provider = new ethers.JsonRpcProvider(rpcUrl);
+    const contractsAddresses = ADDRESSES[chainId];
+
+    if (!contractsAddresses) {
+      throw new Error(`No addresses found for chainId: ${chainId}`);
+    }
+
+    const registryAddress = isL1Network(chainId)
+      ? contractsAddresses.serviceRegistry
+      : contractsAddresses.serviceRegistryL2;
+    const registryAbi = isL1Network(chainId)
+      ? SERVICE_REGISTRY_CONTRACT.abi
+      : SERVICE_REGISTRY_L2.abi;
+
+    if (!registryAddress) {
+      throw new Error(`No service registry address found for chainId: ${chainId}`);
+    }
+
+    const serviceRegistryContract = new ethers.Contract(registryAddress, registryAbi, provider);
+    const serviceManagerAddress = await serviceRegistryContract.manager();
+    return serviceManagerAddress;
+  } catch (error) {
+    console.error('Error fetching service manager token address:', error);
+    throw error;
+  }
 };
 
 /**
