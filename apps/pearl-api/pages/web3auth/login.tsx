@@ -24,22 +24,22 @@ const Web3AuthModal = () => {
   const { disconnect } = useWeb3AuthDisconnect();
   const isAddressUpdated = useRef(false);
 
+  // Notify once initialized
   useEffect(() => {
-    // Notify once initialized
     if (isInitialized && typeof window !== 'undefined') {
       window.parent.postMessage({ event_id: Events.WEB3AUTH_MODAL_INITIALIZED }, '*');
     }
   }, [isInitialized]);
 
+  // Connect when the page is open
   useEffect(() => {
-    // Connect when the page is open
     if (isInitialized && !isConnected) {
       connect();
     }
   }, [isInitialized, isConnected, connect]);
 
+  // Receive connected wallet address and redirect to Pearl
   useEffect(() => {
-    // Receive connected wallet address and redirect to Pearl
     const getAccountAddressAndDisconnect = async () => {
       if (!provider) return;
       if (isAddressUpdated.current) return;
@@ -54,15 +54,13 @@ const Web3AuthModal = () => {
         disconnect();
 
         // Post message to the parent window with the connected address
-        if (typeof window !== 'undefined') {
-          window.parent.postMessage(
-            {
-              event_id: Events.WEB3AUTH_AUTH_SUCCESS,
-              address: accounts[0],
-            },
-            '*',
-          );
-        }
+        window.parent.postMessage(
+          {
+            event_id: Events.WEB3AUTH_AUTH_SUCCESS,
+            address: accounts[0],
+          },
+          '*',
+        );
       } catch (error) {
         console.error('Error getting address:', error);
       }
@@ -73,19 +71,13 @@ const Web3AuthModal = () => {
     }
   }, [disconnect, isConnected, provider]);
 
+  // Notify if modal is closed
   useEffect(() => {
-    // Notify if modal is closed
     if (!web3Auth) return;
 
     const handleClose = (isVisible: boolean) => {
-      if (!isVisible && !isConnected && typeof window !== 'undefined') {
-        window.parent.postMessage(
-          {
-            event_id: Events.WEB3AUTH_MODAL_CLOSED,
-          },
-          '*',
-        );
-      }
+      if (isVisible) return;
+      window.parent.postMessage({ event_id: Events.WEB3AUTH_MODAL_CLOSED }, '*');
     };
     web3Auth.on('MODAL_VISIBILITY', handleClose);
     return () => {

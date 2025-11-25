@@ -9,9 +9,9 @@ import { Address } from 'viem';
 
 import { Web3AuthProvider } from 'context/Web3AuthProvider';
 
-import { EvmChainId, EvmChainName, toHexChainId } from '../../utils';
+import { EvmChainDetails, EvmChainId, EvmChainName, toHexChainId } from '../../utils';
 
-const { Title, Paragraph, Text } = Typography;
+const { Title, Paragraph, Link, Text } = Typography;
 
 export const Styles = createGlobalStyle`
   .w3a-parent-container > div {
@@ -21,16 +21,23 @@ export const Styles = createGlobalStyle`
 
 enum Events {
   WEB3AUTH_SWAP_OWNER_MODAL_INITIALIZED = 'WEB3AUTH_SWAP_OWNER_MODAL_INITIALIZED',
-  WEB3AUTH_SWAP_OWNER_RESULT = 'WEB3AUTH_SWAP_OWNER_RESULT',
+  WEB3AUTH_SWAP_OWNER_SUCCESS = 'WEB3AUTH_SWAP_OWNER_SUCCESS',
+  WEB3AUTH_SWAP_OWNER_FAILURE = 'WEB3AUTH_SWAP_OWNER_FAILURE',
   WEB3AUTH_SWAP_OWNER_MODAL_CLOSED = 'WEB3AUTH_SWAP_OWNER_MODAL_CLOSED',
 }
 
-type TransactionResult = {
+type TransactionSuccess = {
   success: boolean;
-  txHash?: string;
-  error?: string;
-  chainId?: number;
-  safeAddress?: string;
+  txHash: string;
+  chainId: number;
+  safeAddress: string;
+};
+
+type TransactionFailure = {
+  success: boolean;
+  error: string;
+  chainId: number;
+  safeAddress: string;
 };
 
 const Loading = () => (
@@ -42,13 +49,74 @@ const Loading = () => (
   </Card>
 );
 
+const ChainIdMissingAlert = () => (
+  <Alert
+    message="Error"
+    description={<Text>Chain ID is missing or invalid in the query parameters.</Text>}
+    type="error"
+    icon={<CloseCircleOutlined />}
+    showIcon
+    style={{ margin: 16 }}
+  />
+);
+
+const InitErrorAlert = ({ error }: { error: Error }) => (
+  <Alert
+    message="Error Initializing Web3Auth"
+    description={
+      <Text>{(error instanceof Error ? error : new Error('Unknown error')).message}</Text>
+    }
+    type="error"
+    icon={<CloseCircleOutlined />}
+    showIcon
+    style={{ margin: 16 }}
+  />
+);
+
+const SwapOwnerSuccess = ({ txHash, txnLink }: { txHash: string; txnLink: string }) => (
+  <Alert
+    message="Transaction Successful!"
+    description={
+      <Space direction="vertical" size="small" style={{ width: '100%' }}>
+        <Flex vertical gap={2}>
+          <Text type="secondary">Transaction Hash:</Text>
+          <Link href={txnLink} target="_blank" rel="noopener noreferrer">
+            {txHash}
+          </Link>
+        </Flex>
+        <Paragraph style={{ marginBottom: 0, marginTop: 8 }}>
+          You can safely close this window.
+        </Paragraph>
+      </Space>
+    }
+    type="success"
+    icon={<CheckCircleOutlined />}
+    showIcon
+  />
+);
+
+const SwapOwnerFailed = ({ error }: { error: string }) => (
+  <Alert
+    message="Swap Owner Failed"
+    description={
+      <Space direction="vertical" size="small">
+        <Paragraph style={{ marginBottom: 0 }}>{error}</Paragraph>
+        <Paragraph style={{ marginBottom: 0 }}>You can close this window and try again.</Paragraph>
+      </Space>
+    }
+    type="error"
+    icon={<CloseCircleOutlined />}
+    showIcon
+  />
+);
+
 const SwapOwnerSession = () => {
   const { provider, isInitialized, web3Auth, initError } = useWeb3Auth();
   const { connect, isConnected } = useWeb3AuthConnect();
   const router = useRouter();
   const hasExecuted = useRef(false);
   const [status, setStatus] = useState<string>('Initializing...');
-  const [result, setResult] = useState<TransactionResult | null>(null);
+  const [result, setResult] = useState<TransactionSuccess | TransactionFailure | null>(null);
   const [targetWindow, setTargetWindow] = useState<Window | null>(null);
 
   const {
@@ -58,13 +126,12 @@ const SwapOwnerSession = () => {
     backupOwnerAddress,
     chainId: untypedChainId,
   } = router.query;
-  const chainId = untypedChainId as string | undefined;
+  const chainId = untypedChainId as unknown as EvmChainId | undefined;
 
   // Initialize targetWindow only on client side
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      setTargetWindow(window.parent !== window ? window.parent : window.opener);
-    }
+    if (typeof window === 'undefined') return;
+    setTargetWindow(window.parent);
   }, []);
 
   // Notify when Web3Auth is initialized
@@ -162,10 +229,10 @@ const SwapOwnerSession = () => {
         const executeTxResponse = await protocolKit.executeTransaction(safeTx);
         setStatus('Transaction successful! You can close this window.');
 
-        const successResult: TransactionResult = {
+        const successResult: TransactionSuccess = {
           success: true,
           txHash: executeTxResponse.hash,
-          chainId: chainId ? Number(chainId) : undefined,
+          chainId,
           safeAddress: safeAddress as string,
         };
 
@@ -173,7 +240,7 @@ const SwapOwnerSession = () => {
 
         if (targetWindow) {
           targetWindow.postMessage(
-            { event_id: Events.WEB3AUTH_SWAP_OWNER_RESULT, ...successResult },
+            { event_id: Events.WEB3AUTH_SWAP_OWNER_SUCCESS, ...successResult },
             '*',
           );
         }
@@ -181,12 +248,12 @@ const SwapOwnerSession = () => {
         console.error('Error swapping owner:', error);
         const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
 
-        setStatus(`Transaction failed: ${errorMessage}`);
+        setStatus(`Swapping owners failed: ${errorMessage}`);
 
-        const errorResult: TransactionResult = {
+        const errorResult: TransactionFailure = {
           success: false,
           error: errorMessage,
-          chainId: chainId ? Number(chainId) : undefined,
+          chainId,
           safeAddress: safeAddress as string,
         };
 
@@ -195,7 +262,7 @@ const SwapOwnerSession = () => {
         // Send error back to Pearl (supports both iframe and popup)
         if (targetWindow) {
           targetWindow.postMessage(
-            { event_id: Events.WEB3AUTH_SWAP_OWNER_RESULT, ...errorResult },
+            { event_id: Events.WEB3AUTH_SWAP_OWNER_FAILURE, ...errorResult },
             '*',
           );
         }
@@ -243,12 +310,11 @@ const SwapOwnerSession = () => {
 
   // Notify if user closes the entire window/iframe before transaction completes
   useEffect(() => {
-    if (typeof window === 'undefined') return;
-
     const handleBeforeUnload = () => {
       // Only send message if transaction hasn't completed yet
       if (result) return;
       if (!targetWindow) return;
+
       targetWindow.postMessage(
         {
           event_id: Events.WEB3AUTH_SWAP_OWNER_MODAL_CLOSED,
@@ -267,27 +333,14 @@ const SwapOwnerSession = () => {
 
   const chainName = useMemo(() => {
     if (!chainId) return 'Unknown Chain';
-    return `${EvmChainName[chainId as unknown as EvmChainId] || chainId}`;
+    return `${EvmChainName[chainId] || chainId}`;
   }, [chainId]);
 
   if (!isInitialized) return <Loading />;
 
-  if (initError) {
-    return (
-      <Alert
-        message="Error Initializing Web3Auth"
-        description={
-          <Text>
-            {(initError instanceof Error ? initError : new Error('Unknown error')).message}
-          </Text>
-        }
-        type="error"
-        icon={<CloseCircleOutlined />}
-        showIcon
-        style={{ margin: 16 }}
-      />
-    );
-  }
+  if (!chainId) return <ChainIdMissingAlert />;
+
+  if (initError) return <InitErrorAlert error={initError as Error} />;
 
   return (
     <Flex vertical gap={16} style={{ padding: 16 }}>
@@ -314,44 +367,14 @@ const SwapOwnerSession = () => {
         </Space>
       </Card>
 
-      {result && result.success && (
-        <Alert
-          message="Transaction Successful!"
-          description={
-            <Space direction="vertical" size="small" style={{ width: '100%' }}>
-              <Flex vertical gap={2}>
-                <Text type="secondary">Transaction Hash:</Text>
-                <Text code copyable>
-                  {result.txHash}
-                </Text>
-              </Flex>
-              <Paragraph style={{ marginBottom: 0, marginTop: 8 }}>
-                You can safely close this window.
-              </Paragraph>
-            </Space>
-          }
-          type="success"
-          icon={<CheckCircleOutlined />}
-          showIcon
+      {result && result.success && 'txHash' in result && (
+        <SwapOwnerSuccess
+          txHash={result.txHash}
+          txnLink={`${EvmChainDetails[chainId].explorer}/${result.txHash}`}
         />
       )}
 
-      {result && !result.success && (
-        <Alert
-          message="Transaction Failed"
-          description={
-            <Space direction="vertical" size="small">
-              <Paragraph style={{ marginBottom: 0 }}>{result.error}</Paragraph>
-              <Paragraph style={{ marginBottom: 0 }}>
-                You can close this window and try again.
-              </Paragraph>
-            </Space>
-          }
-          type="error"
-          icon={<CloseCircleOutlined />}
-          showIcon
-        />
-      )}
+      {result && !result.success && 'error' in result && <SwapOwnerFailed error={result.error} />}
     </Flex>
   );
 };
