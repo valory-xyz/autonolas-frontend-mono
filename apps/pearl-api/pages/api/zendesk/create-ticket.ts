@@ -1,12 +1,12 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 
+import { ZENDESK_BASE_URL } from '../../../constants';
+import type { ZendeskTicketResponse } from '../../../types';
 import {
   generateZendeskTicketInfo,
   getZendeskRequestHeaders,
   setCorsHeaders,
 } from '../../../utils';
-import { ZENDESK_BASE_URL } from '../../../constants';
-import type { ZendeskTicketResponse } from '../../../types';
 
 const API_URL = `${ZENDESK_BASE_URL}/api/v2/tickets.json`;
 
@@ -26,6 +26,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     res.status(204).end();
     return;
   }
+
   if (req.method !== 'POST') {
     res.status(405).end();
     return;

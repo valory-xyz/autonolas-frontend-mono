@@ -5,6 +5,9 @@ import {
 } from '@web3auth/modal/react';
 import { PropsWithChildren } from 'react';
 
+import { toHexChainId } from '../utils';
+import { CHAIN_CONFIGS } from '../utils/web3auth';
+
 const clientId = `${process.env.NEXT_PUBLIC_WEB3AUTH_CLIENT_ID}`;
 
 const web3AuthContextConfig: Web3AuthContextConfig = {
@@ -23,11 +26,34 @@ const web3AuthContextConfig: Web3AuthContextConfig = {
         },
       },
     },
+    sessionTime: 60 * 5,
   },
 };
 
-export const Web3AuthProvider = ({ children }: PropsWithChildren) => {
+const getWeb3AuthProviderConfig = (defaultChainId?: number): Web3AuthContextConfig => {
+  if (!defaultChainId) return web3AuthContextConfig;
+
+  const defaultChainHex = toHexChainId(defaultChainId);
+  const currentChain = Object.values(CHAIN_CONFIGS).find(
+    (chain) => chain.chainId === defaultChainHex,
+  );
+
+  return {
+    ...web3AuthContextConfig,
+    web3AuthOptions: {
+      ...web3AuthContextConfig.web3AuthOptions,
+      defaultChainId: defaultChainHex,
+      chains: currentChain ? [currentChain] : undefined,
+    },
+  };
+};
+
+type Web3AuthProviderProps = PropsWithChildren & { defaultChainId?: number };
+
+export const Web3AuthProvider = ({ children, defaultChainId }: Web3AuthProviderProps) => {
   return (
-    <Web3AuthPackageProvider config={web3AuthContextConfig}>{children}</Web3AuthPackageProvider>
+    <Web3AuthPackageProvider config={getWeb3AuthProviderConfig(defaultChainId)}>
+      {children}
+    </Web3AuthPackageProvider>
   );
 };
