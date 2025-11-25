@@ -154,15 +154,12 @@ export const getServiceManagerAddress = async () => {
       throw new Error(`No addresses found for chainId: ${chainId}`);
     }
 
-    let registryAddress, registryAbi;
-
-    if (isL1Network(chainId)) {
-      registryAddress = contractsAddresses.serviceRegistry;
-      registryAbi = SERVICE_REGISTRY_CONTRACT.abi;
-    } else {
-      registryAddress = contractsAddresses.serviceRegistryL2;
-      registryAbi = SERVICE_REGISTRY_L2.abi;
-    }
+    const registryAddress = isL1Network(chainId)
+      ? contractsAddresses.serviceRegistry
+      : contractsAddresses.serviceRegistryL2;
+    const registryAbi = isL1Network(chainId)
+      ? SERVICE_REGISTRY_CONTRACT.abi
+      : SERVICE_REGISTRY_L2.abi;
 
     if (!registryAddress) {
       throw new Error(`No service registry address found for chainId: ${chainId}`);
