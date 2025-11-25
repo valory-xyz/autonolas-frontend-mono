@@ -13,6 +13,8 @@ import { EvmChainDetails, EvmChainId, EvmChainName, toHexChainId } from '../../u
 
 const { Title, Paragraph, Link, Text } = Typography;
 
+const CHAIN_NOT_ADDED_ERROR_CODE = 4902;
+
 export const Styles = createGlobalStyle`
   .w3a-parent-container > div {
     background-color: rgba(0, 0, 0, 0.45) !important;
@@ -131,6 +133,7 @@ const SwapOwnerSession = () => {
   // Initialize targetWindow only on client side
   useEffect(() => {
     if (typeof window === 'undefined') return;
+    if (!window.parent) return;
     setTargetWindow(window.parent);
   }, []);
 
@@ -180,8 +183,7 @@ const SwapOwnerSession = () => {
           });
         } catch (e: unknown) {
           const error = e as { code?: number; message?: string };
-          // 4902 = chain not added (user wallet doesn’t know the chain)
-          if (error.code === 4902) {
+          if (error.code === CHAIN_NOT_ADDED_ERROR_CODE) {
             console.warn(`Chain ${chainHex} not found in wallet.`);
           }
           throw error;
@@ -259,7 +261,6 @@ const SwapOwnerSession = () => {
 
         setResult(errorResult);
 
-        // Send error back to Pearl (supports both iframe and popup)
         if (targetWindow) {
           targetWindow.postMessage(
             { event_id: Events.WEB3AUTH_SWAP_OWNER_FAILURE, ...errorResult },
@@ -289,12 +290,10 @@ const SwapOwnerSession = () => {
     if (!web3Auth) return;
 
     const handleModalClose = (isVisible: boolean) => {
-      if (!isVisible && !isConnected && !result) {
-        if (!targetWindow) return;
+      if (!isVisible && !isConnected && !result && targetWindow) {
         targetWindow.postMessage(
           {
             event_id: Events.WEB3AUTH_SWAP_OWNER_MODAL_CLOSED,
-            success: false,
             error: 'User closed Web3Auth modal without connecting',
           },
           '*',
