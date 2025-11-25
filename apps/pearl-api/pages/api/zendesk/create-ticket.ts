@@ -1,12 +1,12 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 
+import { ZENDESK_BASE_URL } from '../../../constants';
+import type { ZendeskTicketResponse } from '../../../types';
 import {
   generateZendeskTicketInfo,
   getZendeskRequestHeaders,
   setCorsHeaders,
 } from '../../../utils';
-import { ZENDESK_BASE_URL } from '../../../constants';
-import type { ZendeskTicketResponse } from '../../../types';
 
 const API_URL = `${ZENDESK_BASE_URL}/api/v2/tickets.json`;
 

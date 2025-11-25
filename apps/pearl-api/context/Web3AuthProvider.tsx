@@ -5,15 +5,15 @@ import {
 } from '@web3auth/modal/react';
 import { PropsWithChildren } from 'react';
 
+import { toHexChainId } from '../utils';
 import { CHAIN_CONFIGS } from '../utils/web3auth';
 
-// const clientId = `${process.env.NEXT_PUBLIC_WEB3AUTH_CLIENT_ID}`;
-const clientId = `${process.env.NEXT_PUBLIC_WEB3AUTH_CLIENT_ID_STAGING}`; // TODO: replace with above one
+const clientId = `${process.env.NEXT_PUBLIC_WEB3AUTH_CLIENT_ID}`;
 
 const web3AuthContextConfig: Web3AuthContextConfig = {
   web3AuthOptions: {
     clientId,
-    web3AuthNetwork: WEB3AUTH_NETWORK.SAPPHIRE_DEVNET,
+    web3AuthNetwork: WEB3AUTH_NETWORK.SAPPHIRE_MAINNET,
     modalConfig: {
       connectors: {
         metamask: {
@@ -26,15 +26,14 @@ const web3AuthContextConfig: Web3AuthContextConfig = {
         },
       },
     },
-    // ssr: true,
-    sessionTime: 60 * 5, // 5 minutes
+    sessionTime: 60 * 5,
   },
 };
 
 const getWeb3AuthProviderConfig = (defaultChainId?: number): Web3AuthContextConfig => {
   if (!defaultChainId) return web3AuthContextConfig;
 
-  const defaultChainHex = `0x${defaultChainId.toString(16)}`;
+  const defaultChainHex = toHexChainId(defaultChainId);
   const currentChain = Object.values(CHAIN_CONFIGS).find(
     (chain) => chain.chainId === defaultChainHex,
   );

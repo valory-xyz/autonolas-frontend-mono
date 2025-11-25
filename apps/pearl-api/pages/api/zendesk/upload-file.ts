@@ -3,8 +3,8 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 import { ZENDESK_BASE_URL, ZENDESK_MAX_UPLOAD_BYTES } from '../../../constants';
 import {
   getZendeskRequestHeaders,
-  isValidFileType,
   isValidFileName,
+  isValidFileType,
   setCorsHeaders,
 } from '../../../utils';
 

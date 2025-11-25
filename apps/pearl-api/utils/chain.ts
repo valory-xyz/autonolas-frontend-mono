@@ -22,3 +22,7 @@ export const EvmChainName = {
   [EvmChainIdMap.Optimism]: EvmDisplayName.Optimism,
 } as const;
 export type EvmChainName = ValueOf<typeof EvmChainName>;
+
+export const toHexChainId = (chainId: number | string): string => {
+  return `0x${Number(chainId).toString(16)}`;
+};
