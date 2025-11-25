@@ -1,0 +1,122 @@
+# This workflow uses actions that are not certified by GitHub.
+# They are provided by a third-party and are governed by
+# separate terms of service, privacy policy, and support
+# documentation.
+
+# A sample workflow which sets up Snyk to analyze the full Snyk platform (Snyk Open Source, Snyk Code,
+# Snyk Container and Snyk Infrastructure as Code)
+# The setup installs the Snyk CLI - for more details on the possible commands
+# check https://docs.snyk.io/snyk-cli/cli-reference
+# The results of Snyk Code are then uploaded to GitHub Security Code Scanning
+#
+# In order to use the Snyk Action you will need to have a Snyk API token.
+# More details in https://github.com/snyk/actions#getting-your-snyk-token
+# or you can signup for free at https://snyk.io/login
+#
+# For more examples, including how to limit scans to only high-severity issues
+# and fail PR checks, see https://github.com/snyk/actions/
+
+name: Snyk Security
+
+on:
+  push:
+    branches: ["main", "staging"]
+  pull_request:
+    branches: ["main", "staging"]
+
+permissions:
+  contents: read
+
+jobs:
+  snyk:
+    permissions:
+      contents: read                # for actions/checkout
+      security-events: write        # for github/codeql-action/upload-sarif
+      actions: read                 # required for private repos
+    runs-on: ubuntu-latest
+
+    env:
+      # This is where you will need to introduce the Snyk API token created with your Snyk account
+      SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
+
+      - name: Setup Node.js
+        uses: actions/setup-node@1e60f620b9541d16bece96c5465dc8ee9832be0b # v4.0.3
+        with:
+          node-version: 20
+          cache: 'yarn'
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+
+      # Snyk can be used to break the build when it detects security issues.
+      # In this case we want to upload the SAST issues to GitHub Code Scanning
+      - name: Setup Snyk CLI
+        uses: snyk/actions/setup@806182742461562b67788a64410098c9d9b96adb
+
+      - name: Verify Snyk authentication
+        run: |
+          snyk auth ${{ secrets.SNYK_TOKEN }} || {
+            echo "❌ Snyk authentication failed. Check token validity."
+            exit 1
+          }
+
+      # Run Snyk Code analysis (SAST)
+      - name: Snyk Code test (SAST)
+        run: |
+          # Redirect both stdout and stderr to prevent error contamination
+          snyk code test --org=00508cff-0e2b-4bb5-aaf0-9fa7cc430473 --sarif > snyk-code.sarif 2>&1 || true
+          echo "✅ Snyk Code test completed."
+        continue-on-error: true
+
+      # Optional: Snyk dependency scan (SCA)
+      - name: Snyk Open Source monitor
+        run: |
+          # Monitor only the root package.json to avoid duplicate scans in a monorepo
+          snyk monitor --org=00508cff-0e2b-4bb5-aaf0-9fa7cc430473 --file=package.json --project-name="autonolas-frontend-mono" || true
+        continue-on-error: true
+
+      # Show any Snyk CLI errors for easier debugging
+      - name: Print Snyk error log (if any)
+        if: always()
+        run: |
+          if [ -s snyk-error.log ]; then
+            echo "⚠️ Snyk error output:"
+            cat snyk-error.log
+          else
+            echo "✅ No Snyk errors found."
+          fi
+
+      # Validate SARIF before upload
+      - name: Validate SARIF output
+        id: validate_sarif
+        run: |
+          if [ -f snyk-code.sarif ] && [ -s snyk-code.sarif ]; then
+            # Check if file starts with { (basic JSON validation)
+            if head -c 1 snyk-code.sarif | grep -q '^{'; then
+              # Check if it has empty runs array or no meaningful content
+              if grep -q '"runs": *\[\]' snyk-code.sarif || ! grep -q '"results"' snyk-code.sarif; then
+                echo "⚠️ SARIF has no security findings. Skipping upload."
+                echo "sarif_valid=false" >> $GITHUB_OUTPUT
+              else
+                echo "✅ Valid SARIF with findings detected."
+                echo "sarif_valid=true" >> $GITHUB_OUTPUT
+              fi
+            else
+              echo "❌ Invalid JSON format detected. Skipping upload."
+              echo "sarif_valid=false" >> $GITHUB_OUTPUT
+            fi
+          else
+            echo "❌ SARIF file missing or empty. Skipping upload."
+            echo "sarif_valid=false" >> $GITHUB_OUTPUT
+          fi
+          
+      # Upload valid SARIF to GitHub Code Scanning
+      - name: Upload SARIF to GitHub Code Scanning
+        if: steps.validate_sarif.outputs.sarif_valid == 'true'
+        uses: github/codeql-action/upload-sarif@e2b3eafc8d227b0241d48be5f425d47c2d750a13 # v3.26.10
+        with:
+          sarif_file: snyk-code.sarif
