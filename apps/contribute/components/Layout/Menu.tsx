@@ -2,7 +2,7 @@ import {
   FileTextOutlined,
   NotificationOutlined,
   TrophyOutlined,
-  XOutlined,
+  // XOutlined,
 } from '@ant-design/icons';
 import { Grid } from 'antd';
 import { useRouter } from 'next/router';
@@ -13,7 +13,7 @@ import { CustomMenu } from './styles';
 const menuItems = [
   { key: 'leaderboard', label: 'Leaderboard', icon: <TrophyOutlined /> },
   { key: 'staking', label: 'Staking', icon: <NotificationOutlined /> },
-  { key: 'post', label: 'Post', icon: <XOutlined /> },
+  // { key: 'post', label: 'Post', icon: <XOutlined /> },
   { key: 'docs', label: 'Docs', icon: <FileTextOutlined /> },
 ];
 

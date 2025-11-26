@@ -16,7 +16,7 @@ export const HowItWorks = () => (
             <li>Action processing</li>
             <li>Points aggregation</li>
             <li>Staking KPI Progress Calculation</li>
-            <li>Post approvals based on on-chain votes</li>
+            {/* <li>Post approvals based on on-chain votes</li> */}
           </ul>
         </li>
       </ul>
