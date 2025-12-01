@@ -53,10 +53,13 @@ export async function waitForTransactionReceipt(
         throw new Error('Transaction failed on-chain. The transaction was mined but reverted.');
       }
 
-      // Optionally enforce success:
-      // if (result.status !== '0x1') {
-      //   throw new Error(`Unexpected transaction status: ${result.status ?? 'unknown'}`);
-      // }
+      // Warn if status is not '0x1' (success) or '0x0' (revert)
+      if (result.status !== '0x1') {
+        console.warn(
+          `Unexpected transaction status: ${result.status ?? 'unknown'} for tx ${txHash}. Receipt:`,
+          result,
+        );
+      }
 
       return result;
     }
