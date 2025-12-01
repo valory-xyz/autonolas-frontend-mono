@@ -116,7 +116,7 @@ const SwapOwnerFailed = ({ error, txHash, chainId }: SwapOwnerFailedProps) => {
           {txHash && chainId && EvmChainDetails[chainId] && (
             <Flex vertical gap={2} style={{ marginTop: 8 }}>
               <Text type="secondary">Transaction Hash:</Text>
-              <Link href={`${explorer}/${txHash}`} target="_blank" rel="noopener noreferrer">
+              <Link href={`${explorer}/tx/${txHash}`} target="_blank" rel="noopener noreferrer">
                 {txHash}
               </Link>
             </Flex>
