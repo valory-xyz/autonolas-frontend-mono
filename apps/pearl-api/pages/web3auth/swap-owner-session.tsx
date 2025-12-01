@@ -35,14 +35,14 @@ enum Events {
 }
 
 type TransactionSuccess = {
-  success: boolean;
+  success: true;
   txHash: string;
   chainId: number;
   safeAddress: string;
 };
 
 type TransactionFailure = {
-  success: boolean;
+  success: false;
   error: string;
   chainId: number;
   safeAddress: string;

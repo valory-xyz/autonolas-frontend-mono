@@ -4,18 +4,21 @@ const MAX_RECEIPT_POLL_ATTEMPTS = 60;
 const RECEIPT_POLL_INTERVAL_MS = 5000; // 5 seconds
 
 type TransactionReceipt = {
-  status: string;
+  status?: string; // '0x1' (success) or '0x0' (revert)
   blockHash: string;
   blockNumber: string;
   transactionHash: string;
-  gasUsed: string;
 };
+
+type Receipt = TransactionReceipt | null;
+
+function delay(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
 
 /**
  * Polls for transaction receipt until confirmed or timeout
- * @param provider - EIP-1193 provider
- * @param txHash - Transaction hash to poll
- * @param onProgress - Callback for progress updates
+ *
  * @returns Transaction receipt
  * @throws Error if transaction reverted or timeout
  */
@@ -24,50 +27,46 @@ export async function waitForTransactionReceipt(
   txHash: string,
   onProgress?: (attempt: number, maxAttempts: number) => void,
 ): Promise<TransactionReceipt> {
-  let receipt: TransactionReceipt | null = null;
   let attempts = 0;
 
-  while (!receipt && attempts < MAX_RECEIPT_POLL_ATTEMPTS) {
+  while (attempts < MAX_RECEIPT_POLL_ATTEMPTS) {
+    let result: Receipt = null;
+
+    // Fetch receipt
     try {
-      const result = await provider.request({
+      result = (await provider.request({
         method: 'eth_getTransactionReceipt',
         params: [txHash],
-      });
-
-      if (result) {
-        receipt = result as TransactionReceipt;
-
-        // Check if transaction was successful (status === '0x1')
-        if (receipt.status === '0x0') {
-          throw new Error('Transaction failed on-chain. The transaction was mined but reverted.');
-        }
-        break;
-      }
-
-      // Wait before next attempt
-      await new Promise((resolve) => setTimeout(resolve, RECEIPT_POLL_INTERVAL_MS));
-      attempts++;
-      onProgress?.(attempts, MAX_RECEIPT_POLL_ATTEMPTS);
+      })) as Receipt;
     } catch (error) {
-      // If we get an error other than receipt not found, check if we should retry
       if (attempts >= MAX_RECEIPT_POLL_ATTEMPTS - 1) {
+        const lastError = error instanceof Error ? error.message : String(error);
         throw new Error(
-          `Transaction receipt not found after ${MAX_RECEIPT_POLL_ATTEMPTS} attempts. Transaction may still be pending. Hash: ${txHash}`,
+          `Failed to fetch transaction receipt after ${MAX_RECEIPT_POLL_ATTEMPTS} attempts. Last error: ${lastError}`,
         );
       }
-
-      // Continue polling
-      await new Promise((resolve) => setTimeout(resolve, RECEIPT_POLL_INTERVAL_MS));
-      attempts++;
-      onProgress?.(attempts, MAX_RECEIPT_POLL_ATTEMPTS);
     }
+
+    if (result) {
+      // If chain returns explicit revert, surface it immediately
+      if (result.status === '0x0') {
+        throw new Error('Transaction failed on-chain. The transaction was mined but reverted.');
+      }
+
+      // Optionally enforce success:
+      // if (result.status !== '0x1') {
+      //   throw new Error(`Unexpected transaction status: ${result.status ?? 'unknown'}`);
+      // }
+
+      return result;
+    }
+
+    attempts++;
+    onProgress?.(attempts, MAX_RECEIPT_POLL_ATTEMPTS);
+    await delay(RECEIPT_POLL_INTERVAL_MS);
   }
 
-  if (!receipt) {
-    throw new Error(
-      `Transaction confirmation timeout. Transaction may still be pending. Hash: ${txHash}`,
-    );
-  }
-
-  return receipt;
+  throw new Error(
+    `Transaction confirmation timeout. Transaction may still be pending. Hash: ${txHash}`,
+  );
 }
