@@ -4,7 +4,7 @@ const MAX_RECEIPT_POLL_ATTEMPTS = 60;
 const RECEIPT_POLL_INTERVAL_MS = 5000; // 5 seconds
 
 type TransactionReceipt = {
-  status?: string; // '0x1' (success) or '0x0' (revert)
+  status: string; // '0x1' (success) or '0x0' (revert)
   blockHash: string;
   blockNumber: string;
   transactionHash: string;
