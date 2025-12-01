@@ -1,10 +1,21 @@
-import { Button, Flex, Radio, RadioChangeEvent, Skeleton, Space, Steps, Typography } from 'antd';
+import {
+  Alert,
+  Button,
+  Flex,
+  Radio,
+  RadioChangeEvent,
+  Skeleton,
+  Space,
+  Steps,
+  Typography,
+} from 'antd';
 import { AbiCoder, ZeroAddress, isAddress } from 'ethers';
 import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { Address, getAddress } from 'viem';
 import { base, mainnet } from 'viem/chains';
+import { DISCORD_CREATE_TICKET_URL } from 'libs/util-constants/src';
 import { useAccount, useReadContract, useSwitchChain } from 'wagmi';
 
 import { areAddressesEqual, notifyError } from '@autonolas/frontend-library';
@@ -340,6 +351,39 @@ const TweetAndEarn = ({ disabled }: { disabled: boolean }) => {
   );
 };
 
+const IS_STAKE_TEMPORARILY_DISABLED = true;
+
+const StakeTemporarilyDisabledAlert = () => (
+  <Alert
+    type="warning"
+    showIcon
+    message={
+      <Flex vertical gap={8}>
+        <Text className="font-weight-600">Disruption for Beta staking contracts users!</Text>
+        <Paragraph className="mb-16">
+          Once this{' '}
+          <a
+            href={`${GOVERN_APP_URL}/proposals?proposalId=61092920434081846314634639695185450956263029379791193205240049323524867179380`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mb-4"
+          >
+            DAO proposal&nbsp;↗
+          </a>{' '}
+          is executed, you will temporarily be unable to stake on Beta staking contracts.
+        </Paragraph>
+        <Paragraph>
+          Visit the{' '}
+          <a href={DISCORD_CREATE_TICKET_URL} target="_blank" rel="noopener noreferrer">
+            Olas DAO&apos;s Discord Server&nbsp;↗
+          </a>{' '}
+          for more information.
+        </Paragraph>
+      </Flex>
+    }
+  />
+);
+
 export const StakingStepper = ({ profile }: { profile: LeaderboardUser | null }) => {
   const [step, setStep] = useState<number>(
     profile?.twitter_id ? STAKING_STEPS.SET_UP_AND_STAKE : STAKING_STEPS.CONNECT_TWITTER,
@@ -376,6 +420,7 @@ export const StakingStepper = ({ profile }: { profile: LeaderboardUser | null })
   return (
     <Flex gap={24} vertical>
       {isWalletUpdateRequired && <WalletUpdateRequired />}
+      {IS_STAKE_TEMPORARILY_DISABLED && <StakeTemporarilyDisabledAlert />}
       <Flex>
         <Steps
           direction="vertical"
@@ -395,7 +440,10 @@ export const StakingStepper = ({ profile }: { profile: LeaderboardUser | null })
               description: (
                 <SetUpAndStake
                   disabled={
-                    step !== STAKING_STEPS.SET_UP_AND_STAKE || isLoading || !!isWalletUpdateRequired
+                    IS_STAKE_TEMPORARILY_DISABLED ||
+                    step !== STAKING_STEPS.SET_UP_AND_STAKE ||
+                    isLoading ||
+                    !!isWalletUpdateRequired
                   }
                   twitterId={profile?.twitter_id || null}
                   multisigAddress={profile?.service_multisig || null}

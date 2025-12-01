@@ -34,7 +34,7 @@ import { GOVERN_APP_URL, OLAS_UNICODE_SYMBOL, STAKING_CONTRACTS_DETAILS } from '
 import { useServiceInfo, useStakingDetails } from 'util/staking';
 
 import { HowTweetsAreScoredModal, TweetCountTooltip } from './HowTweetsAreScored';
-import { RecovererAlert } from './RecovererAlert';
+import { RecovererAlertAlpha, RecovererAlertBeta } from './RecovererAlert';
 import { TweetsThisEpoch } from './TweetsThisEpoch';
 import { useRestake } from './hooks';
 
@@ -237,11 +237,13 @@ export const StakingDetails = ({ profile, tweets }: StakingDetailsProps) => {
 
   return (
     <>
-      {profile.service_id_old && (
-        <RecovererAlert
+      {profile.service_id_old ? (
+        <RecovererAlertAlpha
           isNew={isNewContracts}
           unstakeTimestamp={isNewContracts ? null : stakingDetails.canUnstakeTimestamp}
         />
+      ) : (
+        <RecovererAlertBeta safeAddress={serviceMultisig} />
       )}
       <StyledDivider />
       <Title level={5}>Rewards</Title>
