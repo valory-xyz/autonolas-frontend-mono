@@ -120,13 +120,13 @@ export const RecovererAlertBeta = ({ safeAddress }: { safeAddress: string | null
                     </a>
                   ) : (
                     <>
-                      Safe UI: <b>https://app.safe.global/home?safe=base:multisig_address"</b>
+                      Safe UI: <b>https://app.safe.global/home?safe=base:multisig_address</b>
                     </>
                   )}
                 </li>
                 <li>
-                  Connect with your EOA, and you’ll have the access to transfer rewarded OLAS to
-                  where you see fit.
+                  Connect with your EOA, and you&apos;ll have the access to transfer rewarded OLAS
+                  to where you see fit.
                 </li>
               </ul>
             </li>
