@@ -9,7 +9,13 @@ import { Address } from 'viem';
 
 import { Web3AuthProvider } from 'context/Web3AuthProvider';
 
-import { EvmChainDetails, EvmChainId, EvmChainName, toHexChainId } from '../../utils';
+import {
+  EvmChainDetails,
+  EvmChainId,
+  EvmChainName,
+  toHexChainId,
+  waitForTransactionReceipt,
+} from '../../utils';
 
 const { Title, Paragraph, Link, Text } = Typography;
 
@@ -229,11 +235,20 @@ const SwapOwnerSession = () => {
         setStatus('Executing transaction (please sign in wallet)...');
 
         const executeTxResponse = await protocolKit.executeTransaction(safeTx);
-        setStatus('Transaction successful! You can close this window.');
+        const txHash = executeTxResponse.hash;
+
+        setStatus('Transaction submitted. Waiting for confirmation...');
+
+        // Wait for transaction to be mined and confirmed
+        await waitForTransactionReceipt(provider, txHash, (attempt, maxAttempts) => {
+          setStatus(`Waiting for transaction confirmation... (${attempt}/${maxAttempts} attempts)`);
+        });
+
+        setStatus('Transaction confirmed successfully! You can close this window.');
 
         const successResult: TransactionSuccess = {
           success: true,
-          txHash: executeTxResponse.hash,
+          txHash,
           chainId,
           safeAddress: safeAddress as string,
         };
