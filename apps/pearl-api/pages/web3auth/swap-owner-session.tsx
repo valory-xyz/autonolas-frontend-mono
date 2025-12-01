@@ -288,7 +288,7 @@ const SwapOwnerSession = () => {
           success: false,
           error: errorMessage,
           chainId: chainId || undefined,
-          safeAddress: (safeAddress as string) || undefined,
+          safeAddress: safeAddress || undefined,
           txHash: submittedTxHash,
         };
 
