@@ -1,7 +1,7 @@
-import { CheckCircleOutlined, CloseCircleOutlined, LoadingOutlined } from '@ant-design/icons';
+import { LoadingOutlined } from '@ant-design/icons';
 import Safe from '@safe-global/protocol-kit';
 import { useWeb3Auth, useWeb3AuthConnect } from '@web3auth/modal/react';
-import { Alert, Card, Flex, Space, Spin, Typography } from 'antd';
+import { Card, Flex, Space, Spin, Typography } from 'antd';
 import { useRouter } from 'next/router';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { createGlobalStyle } from 'styled-components';
@@ -10,6 +10,12 @@ import { Address } from 'viem';
 import { Web3AuthProvider } from 'context/Web3AuthProvider';
 
 import {
+  ChainIdMissingAlert,
+  InitErrorAlert,
+  SwapOwnerFailed,
+  SwapOwnerSuccess,
+} from '../../components/web3auth';
+import {
   EvmChainDetails,
   EvmChainId,
   EvmChainName,
@@ -17,11 +23,11 @@ import {
   waitForTransactionReceipt,
 } from '../../utils';
 
-const { Title, Paragraph, Link, Text } = Typography;
+const { Title, Text } = Typography;
 
 const CHAIN_NOT_ADDED_ERROR_CODE = 4902;
 
-export const Styles = createGlobalStyle`
+const Styles = createGlobalStyle`
   .w3a-parent-container > div {
     background-color: rgba(0, 0, 0, 0.45) !important;
   }
@@ -57,81 +63,6 @@ const Loading = () => (
     </Space>
   </Card>
 );
-
-const ChainIdMissingAlert = () => (
-  <Alert
-    message="Error"
-    description={<Text>Chain ID is missing.</Text>}
-    type="error"
-    icon={<CloseCircleOutlined />}
-    showIcon
-    style={{ margin: 16 }}
-  />
-);
-
-const InitErrorAlert = ({ error }: { error: Error }) => (
-  <Alert
-    message="Error Initializing Web3Auth"
-    description={
-      <Text>{(error instanceof Error ? error : new Error('Unknown error')).message}</Text>
-    }
-    type="error"
-    icon={<CloseCircleOutlined />}
-    showIcon
-    style={{ margin: 16 }}
-  />
-);
-
-const SwapOwnerSuccess = ({ txHash, txnLink }: { txHash: string; txnLink: string }) => (
-  <Alert
-    message="Swap Owner Successful!"
-    description={
-      <Space direction="vertical" size="small" style={{ width: '100%' }}>
-        <Flex vertical gap={2}>
-          <Text type="secondary">Transaction Hash:</Text>
-          <Link href={txnLink} target="_blank" rel="noopener noreferrer">
-            {txHash}
-          </Link>
-        </Flex>
-        <Paragraph style={{ marginBottom: 0, marginTop: 8 }}>
-          You can safely close this window.
-        </Paragraph>
-      </Space>
-    }
-    type="success"
-    icon={<CheckCircleOutlined />}
-    showIcon
-  />
-);
-
-type SwapOwnerFailedProps = { error: string; txHash?: string; chainId?: EvmChainId };
-const SwapOwnerFailed = ({ error, txHash, chainId }: SwapOwnerFailedProps) => {
-  const explorer = chainId && EvmChainDetails[chainId] ? EvmChainDetails[chainId].explorer : null;
-  return (
-    <Alert
-      message="Swap Owner Failed!"
-      description={
-        <Space direction="vertical" size="small">
-          <Paragraph style={{ marginBottom: 0 }}>{error}</Paragraph>
-          {txHash && chainId && EvmChainDetails[chainId] && (
-            <Flex vertical gap={2} style={{ marginTop: 8 }}>
-              <Text type="secondary">Transaction Hash:</Text>
-              <Link href={`${explorer}/tx/${txHash}`} target="_blank" rel="noopener noreferrer">
-                {txHash}
-              </Link>
-            </Flex>
-          )}
-          <Paragraph style={{ marginBottom: 0, marginTop: 8 }}>
-            You can close this window and try again.
-          </Paragraph>
-        </Space>
-      }
-      type="error"
-      icon={<CloseCircleOutlined />}
-      showIcon
-    />
-  );
-};
 
 const SwapOwnerSession = () => {
   const { provider, isInitialized, web3Auth, initError } = useWeb3Auth();
@@ -288,7 +219,7 @@ const SwapOwnerSession = () => {
           success: false,
           error: errorMessage,
           chainId: chainId || undefined,
-          safeAddress: safeAddress || undefined,
+          safeAddress: (safeAddress as string) || undefined,
           txHash: submittedTxHash,
         };
 
