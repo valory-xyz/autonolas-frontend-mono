@@ -17,7 +17,7 @@ function delay(ms: number) {
 }
 
 /**
- * Polls for transaction receipt until confirmed or timeout
+ * Polls for transaction receipt until confirmed or timeout occurs
  *
  * @returns Transaction receipt
  * @throws Error if transaction reverted or timeout
