@@ -1,4 +1,5 @@
 import { Alert, Flex, Typography } from 'antd';
+import { CONTRIBUTORS_V2_ADDRESS_BASE } from 'common-util/AbiAndAddresses';
 
 import { formatDate } from 'common-util/functions/time';
 import { DISCORD_CREATE_TICKET_URL } from 'libs/util-constants/src';
@@ -6,7 +7,7 @@ import { GOVERN_APP_URL } from 'util/constants';
 
 const { Text, Paragraph } = Typography;
 
-export const RecovererAlert = ({
+export const RecovererAlertAlpha = ({
   isNew,
   unstakeTimestamp,
 }: {
@@ -64,6 +65,80 @@ export const RecovererAlert = ({
               Visit the Olas DAO&apos;s Discord Server&nbsp;↗
             </a>
           </Text>
+        </Flex>
+      }
+    />
+  );
+};
+
+export const RecovererAlertBeta = ({ safeAddress }: { safeAddress: string | null }) => {
+  return (
+    <Alert
+      type="warning"
+      showIcon
+      message={
+        <Flex vertical gap={8}>
+          <Text className="font-weight-600">Disruption for Beta staking contracts users!</Text>
+          <Paragraph className="mb-16">
+            Before this{' '}
+            <a
+              href={`${GOVERN_APP_URL}/proposals?proposalId=61092920434081846314634639695185450956263029379791193205240049323524867179380`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mb-4"
+            >
+              DAO proposal&nbsp;↗
+            </a>{' '}
+            is executed, you can follow the steps below to unstake from your Beta staking contracts:
+          </Paragraph>
+          <ul className="mt-0">
+            <li>
+              Go to{' '}
+              <a
+                href={`https://basescan.org/address/${CONTRIBUTORS_V2_ADDRESS_BASE}#writeProxyContract#F13`}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                BaseScan
+              </a>{' '}
+              and call the <b>unstake()</b> function using your originally used EOA. <br />
+              Set <b>pullService</b> to <b>true</b>
+            </li>
+            <li>Your OLAS original deposit and bond will be returned to your EOA.</li>
+            <li>
+              In order to transfer OLAS rewards to the EOA, please do the following:
+              <ul>
+                <li>
+                  Go to your agent multisig{' '}
+                  {safeAddress ? (
+                    <a
+                      href={`https://app.safe.global/home?safe=base:${safeAddress}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      Safe UI
+                    </a>
+                  ) : (
+                    <>
+                      Safe UI: <b>https://app.safe.global/home?safe=base:multisig_address</b>
+                    </>
+                  )}
+                </li>
+                <li>
+                  Connect with your EOA, and you&apos;ll have the access to transfer rewarded OLAS
+                  to where you see fit.
+                </li>
+              </ul>
+            </li>
+          </ul>
+          <Paragraph>
+            Once the proposal is executed, <b>you will temporarily be unable to unstake</b> from
+            your Beta staking contracts. Visit the{' '}
+            <a href={DISCORD_CREATE_TICKET_URL} target="_blank" rel="noopener noreferrer">
+              Olas DAO&apos;s Discord Server&nbsp;↗
+            </a>{' '}
+            for more information.
+          </Paragraph>
         </Flex>
       }
     />
