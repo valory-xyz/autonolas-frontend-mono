@@ -20,7 +20,9 @@ function delay(ms: number) {
  * Polls for transaction receipt until confirmed or timeout occurs
  *
  * @returns Transaction receipt
- * @throws Error if transaction reverted or timeout
+ * @throws Error If the transaction is mined but reverted (status '0x0').
+ * @throws Error If fetching the transaction receipt fails after the maximum number of attempts.
+ * @throws Error If transaction confirmation times out.
  */
 export async function waitForTransactionReceipt(
   provider: IProvider,
