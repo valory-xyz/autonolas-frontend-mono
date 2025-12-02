@@ -1,7 +1,7 @@
-import { CheckCircleOutlined, CloseCircleOutlined, LoadingOutlined } from '@ant-design/icons';
+import { LoadingOutlined } from '@ant-design/icons';
 import Safe from '@safe-global/protocol-kit';
 import { useWeb3Auth, useWeb3AuthConnect } from '@web3auth/modal/react';
-import { Alert, Card, Flex, Space, Spin, Typography } from 'antd';
+import { Card, Flex, Space, Spin, Typography } from 'antd';
 import { useRouter } from 'next/router';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { createGlobalStyle } from 'styled-components';
@@ -9,13 +9,25 @@ import { Address } from 'viem';
 
 import { Web3AuthProvider } from 'context/Web3AuthProvider';
 
-import { EvmChainDetails, EvmChainId, EvmChainName, toHexChainId } from '../../utils';
+import {
+  ChainIdMissingAlert,
+  InitErrorAlert,
+  SwapOwnerFailed,
+  SwapOwnerSuccess,
+} from '../../components/web3auth';
+import {
+  EvmChainDetails,
+  EvmChainId,
+  EvmChainName,
+  toHexChainId,
+  waitForTransactionReceipt,
+} from '../../utils';
 
-const { Title, Paragraph, Link, Text } = Typography;
+const { Title, Text } = Typography;
 
 const CHAIN_NOT_ADDED_ERROR_CODE = 4902;
 
-export const Styles = createGlobalStyle`
+const Styles = createGlobalStyle`
   .w3a-parent-container > div {
     background-color: rgba(0, 0, 0, 0.45) !important;
   }
@@ -29,17 +41,18 @@ enum Events {
 }
 
 type TransactionSuccess = {
-  success: boolean;
+  success: true;
   txHash: string;
-  chainId: number;
+  chainId: EvmChainId;
   safeAddress: string;
 };
 
 type TransactionFailure = {
-  success: boolean;
+  success: false;
   error: string;
-  chainId: number;
-  safeAddress: string;
+  chainId?: EvmChainId;
+  safeAddress?: string;
+  txHash?: string;
 };
 
 const Loading = () => (
@@ -49,67 +62,6 @@ const Loading = () => (
       <Text>Loading Web3Auth...</Text>
     </Space>
   </Card>
-);
-
-const ChainIdMissingAlert = () => (
-  <Alert
-    message="Error"
-    description={<Text>Chain ID is missing.</Text>}
-    type="error"
-    icon={<CloseCircleOutlined />}
-    showIcon
-    style={{ margin: 16 }}
-  />
-);
-
-const InitErrorAlert = ({ error }: { error: Error }) => (
-  <Alert
-    message="Error Initializing Web3Auth"
-    description={
-      <Text>{(error instanceof Error ? error : new Error('Unknown error')).message}</Text>
-    }
-    type="error"
-    icon={<CloseCircleOutlined />}
-    showIcon
-    style={{ margin: 16 }}
-  />
-);
-
-const SwapOwnerSuccess = ({ txHash, txnLink }: { txHash: string; txnLink: string }) => (
-  <Alert
-    message="Swap Owner Successful!"
-    description={
-      <Space direction="vertical" size="small" style={{ width: '100%' }}>
-        <Flex vertical gap={2}>
-          <Text type="secondary">Transaction Hash:</Text>
-          <Link href={txnLink} target="_blank" rel="noopener noreferrer">
-            {txHash}
-          </Link>
-        </Flex>
-        <Paragraph style={{ marginBottom: 0, marginTop: 8 }}>
-          You can safely close this window.
-        </Paragraph>
-      </Space>
-    }
-    type="success"
-    icon={<CheckCircleOutlined />}
-    showIcon
-  />
-);
-
-const SwapOwnerFailed = ({ error }: { error: string }) => (
-  <Alert
-    message="Swap Owner Failed!"
-    description={
-      <Space direction="vertical" size="small">
-        <Paragraph style={{ marginBottom: 0 }}>{error}</Paragraph>
-        <Paragraph style={{ marginBottom: 0 }}>You can close this window and try again.</Paragraph>
-      </Space>
-    }
-    type="error"
-    icon={<CloseCircleOutlined />}
-    showIcon
-  />
 );
 
 const SwapOwnerSession = () => {
@@ -168,6 +120,7 @@ const SwapOwnerSession = () => {
       }
 
       hasExecuted.current = true;
+      let submittedTxHash: string | undefined;
 
       try {
         setStatus('Switching to correct chain...');
@@ -196,7 +149,7 @@ const SwapOwnerSession = () => {
         const connectedAddress = accounts?.[0];
 
         if (!connectedAddress) {
-          throw new Error('No connected wallet address found');
+          throw new Error('No connected wallet address found.');
         }
 
         setStatus('Initializing Safe Protocol Kit...');
@@ -229,11 +182,21 @@ const SwapOwnerSession = () => {
         setStatus('Executing transaction (please sign in wallet)...');
 
         const executeTxResponse = await protocolKit.executeTransaction(safeTx);
-        setStatus('Transaction successful! You can close this window.');
+        const txHash = executeTxResponse.hash;
+        submittedTxHash = txHash;
+
+        setStatus('Transaction submitted. Waiting for confirmation...');
+
+        // Wait for transaction to be mined and confirmed
+        await waitForTransactionReceipt(provider, txHash, (attempt, maxAttempts) => {
+          setStatus(`Waiting for transaction confirmation... (${attempt}/${maxAttempts} attempts)`);
+        });
+
+        setStatus('Transaction confirmed successfully! You can close this window.');
 
         const successResult: TransactionSuccess = {
           success: true,
-          txHash: executeTxResponse.hash,
+          txHash,
           chainId,
           safeAddress: safeAddress as string,
         };
@@ -250,13 +213,14 @@ const SwapOwnerSession = () => {
         console.error('Error swapping owner:', error);
         const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
 
-        setStatus(`Swapping owners failed: ${errorMessage}`);
+        setStatus(`Transaction failed: ${errorMessage}`);
 
         const errorResult: TransactionFailure = {
           success: false,
           error: errorMessage,
-          chainId,
-          safeAddress: safeAddress as string,
+          chainId: chainId || undefined,
+          safeAddress: (safeAddress as string) || undefined,
+          txHash: submittedTxHash,
         };
 
         setResult(errorResult);
@@ -373,7 +337,9 @@ const SwapOwnerSession = () => {
         />
       )}
 
-      {result && !result.success && 'error' in result && <SwapOwnerFailed error={result.error} />}
+      {result && !result.success && 'error' in result && (
+        <SwapOwnerFailed error={result.error} txHash={result.txHash} chainId={result.chainId} />
+      )}
     </Flex>
   );
 };
