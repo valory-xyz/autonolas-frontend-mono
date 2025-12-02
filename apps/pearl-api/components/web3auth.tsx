@@ -28,9 +28,7 @@ export const ChainIdMissingAlert = () => (
 export const InitErrorAlert = ({ error }: { error: Error }) => (
   <Alert
     message="Error Initializing Web3Auth"
-    description={
-      <Text>{(error instanceof Error ? error : new Error('Unknown error')).message}</Text>
-    }
+    description={<Text>{error instanceof Error ? error.message : 'Unknown error'}</Text>}
     type="error"
     icon={<CloseCircleOutlined />}
     showIcon
