@@ -202,6 +202,23 @@ export const FinishedRegistration = ({
     handleStep3Deploy(radioValue, payload);
   };
 
+  // use for newMultisigAddresses with recovery module
+  const onFinishTwo = (values) => {
+    const payload = ethers.ABIEncoderV2.encode(
+      ['address', 'uint256'],
+      [values.addressFallbackHandler, Number(values.nonce)],
+    );
+
+    handleStep3Deploy(radioValue, payload);
+  };
+
+  // use for nMultisigSameAddresses
+  const onFinishTwoSame = (values) => {
+    const payload = ethers.ABIEncoderV2.encode(['uint256'], [values.serviceId]);
+
+    handleStep3Deploy(radioValue, payload);
+  };
+
   const onFinishFailed = (errorInfo) => {
     console.log('Failed:', errorInfo); /* eslint-disable-line no-console */
   };
@@ -381,6 +398,15 @@ export const FinishedRegistration = ({
                     radioValue,
                     account,
                   });
+
+                  // Refresh multisig addresses after enabling recovery module
+                  const refreshedAddresses = await getMultisigAddresses(
+                    multisig,
+                    chainId,
+                    canShowMultisigSameAddress,
+                  );
+                  setMultisigOptions(refreshedAddresses);
+                  setRadioValue(null);
                 } catch (error) {
                   console.error(error);
                   notifyError('Error occurred while updating multisig. Please try again.');
