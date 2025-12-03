@@ -3,6 +3,13 @@ import { Address } from 'viem';
 
 export const MAX_ALLOCATED_POWER = 10_000;
 
+type ReorderedVote = {
+  address: Address;
+  chainId: number;
+  weight: string;
+  metadata?: Allocation['metadata'];
+};
+
 /**
  * BE stores and checks the user's limit (which is 10_000 = 100%)
  * every time we vote on a contract.
@@ -25,60 +32,117 @@ export const getReorderedVotes = (
   allocations: Allocation[],
   userVotes: Record<string, UserVotes>,
   stakingContracts: StakingContract[],
-) => {
-  // Sort new allocation by ascending weights
+): ReorderedVote[] => {
+  // Sort new allocation by ascending weights (percentages)
   const sortedAllocations = [...allocations].sort((a, b) => a.weight - b.weight);
-  // Sort old votes by descending weights
-  const sortedOldVotes = [...Object.entries(userVotes)].sort(
-    ([aKey, aValue], [bKey, bValue]) => bValue.current.power - aValue.current.power,
+
+  const allocationsByAddress = new Map(
+    allocations.map((allocation) => [allocation.address.toLowerCase(), allocation]),
+  );
+  const stakingByAddress = new Map(
+    stakingContracts.map((contract) => [contract.address.toLowerCase(), contract]),
   );
 
-  const newVotes: { address: Address; chainId: number; weight: string }[] = [];
-  const resetVotes: { address: Address; chainId: number; weight: string }[] = [];
+  // Sort old votes by descending weights (base units)
+  const sortedOldVotes = [...Object.entries(userVotes)].sort(
+    ([_aKey, aValue], [_bKey, bValue]) => bValue.current.power - aValue.current.power,
+  );
+
+  const result: ReorderedVote[] = [];
+  const processedAddresses = new Set<string>();
+
+  const resetVotes: ReorderedVote[] = [];
+  const decreaseVotes: ReorderedVote[] = [];
+  const increasedAllocations: Allocation[] = [];
+
+  const toBaseUnits = (weightPercentage: number) => Math.floor(weightPercentage * 100);
 
   // Start from old votes
-  sortedOldVotes.forEach((oldVote) => {
-    const [oldVoteAddress, oldVoteValue] = oldVote;
+  sortedOldVotes.forEach(([oldVoteAddress, oldVoteValue]) => {
+    const key = oldVoteAddress.toLowerCase();
+    const allocation = allocationsByAddress.get(key);
+    const oldPower = oldVoteValue.current.power;
 
-    const newVote = sortedAllocations.find((item) => item.address === oldVoteAddress);
-    // If the user votes for the same contract they already voted on,
-    // keep new weight value at the same position of resorted old votes
-    if (newVote) {
-      if (newVote.weight !== oldVoteValue.current.power) {
-        newVotes.push({
-          address: newVote.address,
-          chainId: newVote.chainId,
-          weight: `${Math.floor(newVote.weight * 100)}`,
+    if (allocation) {
+      const newPower = toBaseUnits(allocation.weight);
+
+      if (newPower < oldPower) {
+        // Negative delta – apply first (after pure resets) to free up power.
+        decreaseVotes.push({
+          address: allocation.address as Address,
+          chainId: allocation.chainId,
+          weight: `${newPower}`,
+          metadata: allocation.metadata,
         });
+        processedAddresses.add(key);
+      } else if (newPower > oldPower) {
+        // Positive delta – apply later, after all decreases.
+        increasedAllocations.push(allocation);
+      } else {
+        // Same power - nothing to send.
+        processedAddresses.add(key);
       }
     } else {
       // Otherwise we need to remove weight from that contract
-      // before voting on the others contacts
-      const chainId = stakingContracts.find((item) => item.address === oldVoteAddress)?.chainId;
-      if (chainId) {
-        // Use new array to keep the order
-        resetVotes.push({ address: oldVoteAddress as Address, chainId, weight: '0' });
+      // before voting on the others contracts
+      const stakingContract = stakingByAddress.get(key);
+      if (stakingContract) {
+        resetVotes.push({
+          address: stakingContract.address as Address,
+          chainId: stakingContract.chainId,
+          weight: '0',
+          metadata: stakingContract.metadata,
+        });
+        processedAddresses.add(key);
       }
     }
   });
 
-  // Add old votes that we need to reset the power from
-  newVotes.unshift(...resetVotes);
+  // Reset votes from removed contracts first
+  result.push(...resetVotes);
 
-  // Add remaining new votes to the result
-  sortedAllocations.forEach((newVote) => {
-    const oldVote = userVotes[newVote.address];
-    if (
-      newVotes.findIndex((item) => item.address === newVote.address) === -1 &&
-      newVote.weight !== oldVote?.current.power
-    ) {
-      newVotes.push({
-        address: newVote.address,
-        chainId: newVote.chainId,
-        weight: `${Math.floor(newVote.weight * 100)}`,
+  // Handle existing contracts with decreased votes
+  result.push(...decreaseVotes);
+
+  // Handle existing contracts with increased votes
+  increasedAllocations
+    .slice()
+    .sort((a, b) => a.weight - b.weight)
+    .forEach((allocation) => {
+      const key = allocation.address.toLowerCase();
+      if (processedAddresses.has(key)) return;
+
+      const newPower = toBaseUnits(allocation.weight);
+      const oldPower = userVotes[allocation.address]?.current.power ?? 0;
+      if (newPower === oldPower) return;
+
+      result.push({
+        address: allocation.address as Address,
+        chainId: allocation.chainId,
+        weight: `${newPower}`,
+        metadata: allocation.metadata,
       });
-    }
+      processedAddresses.add(key);
+    });
+
+  // 4) Handle newly added contracts (no previous votes), ordered by ascending new power
+  sortedAllocations.forEach((allocation) => {
+    const key = allocation.address.toLowerCase();
+    if (processedAddresses.has(key)) return;
+
+    const newPower = toBaseUnits(allocation.weight);
+    const oldPower = userVotes[allocation.address]?.current.power ?? 0;
+
+    if (newPower === oldPower) return;
+
+    result.push({
+      address: allocation.address as Address,
+      chainId: allocation.chainId,
+      weight: `${newPower}`,
+      metadata: allocation.metadata,
+    });
+    processedAddresses.add(key);
   });
 
-  return newVotes;
+  return result;
 };
