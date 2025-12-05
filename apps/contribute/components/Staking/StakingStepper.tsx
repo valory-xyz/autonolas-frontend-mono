@@ -31,7 +31,12 @@ import { updateUserStakingData } from 'common-util/api';
 import { ethersToWei, getAddressFromBytes32, truncateAddress } from 'common-util/functions';
 import { updateLeaderboardUser } from 'store/setup';
 import { LeaderboardUser } from 'store/types';
-import { GOVERN_APP_URL, OPERATE_APP_URL, STAKING_CONTRACTS_DETAILS } from 'util/constants';
+import {
+  GOVERN_APP_URL,
+  IS_STAKE_TEMPORARILY_DISABLED,
+  OPERATE_APP_URL,
+  STAKING_CONTRACTS_DETAILS,
+} from 'util/constants';
 import { useReadStakingContract, useServiceInfo } from 'util/staking';
 
 import { ConnectTwitterModal } from '../ConnectTwitter/Modal';
@@ -350,8 +355,6 @@ const TweetAndEarn = ({ disabled }: { disabled: boolean }) => {
     </>
   );
 };
-
-const IS_STAKE_TEMPORARILY_DISABLED = true;
 
 const StakeTemporarilyDisabledAlert = () => (
   <Alert

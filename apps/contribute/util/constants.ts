@@ -96,3 +96,6 @@ export const OLAS_UNICODE_SYMBOL = '☴';
 export const SERVICE_STAKING_STATE = ['Unstaked', 'Staked', 'Evicted'];
 
 export const SUPPORT_URL = 'https://discord.com/channels/899649805582737479/899649805582737482';
+
+// TODO: once the staking is available, remove this and related code
+export const IS_STAKE_TEMPORARILY_DISABLED = true;
