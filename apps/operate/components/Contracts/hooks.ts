@@ -319,26 +319,26 @@ const STAKING_CONTRACT_DETAILS: Record<Address, StakingContractDetailsInfo> = {
     minOperatingBalanceToken: 'xDAI',
   },
   // Pearl Beta Mech MarketPlace I
-  '0x000000000000000000000000Ab10188207Ea030555f53C8A84339A92f473aa5e': {
+  '0x000000000000000000000000ab10188207ea030555f53c8a84339a92f473aa5e': {
     availableOn: ['pearl'],
     minOperatingBalance: 90,
     minOperatingBalanceToken: 'xDAI',
   },
   // Pearl Beta Mech MarketPlace II
-  '0x0000000000000000000000008d7bE092d154b01d404f1aCCFA22Cef98C613B5D': {
+  '0x0000000000000000000000008d7be092d154b01d404f1accfa22cef98c613b5d': {
     availableOn: ['pearl'],
     minOperatingBalance: 90,
     minOperatingBalanceToken: 'xDAI',
   },
   // Pearl Beta Mech MarketPlace III
-  '0x0000000000000000000000009D00A0551F20979080d3762005C9B74D7Aa77b85': {
-    availableOn: ['quickstart'],
+  '0x0000000000000000000000009d00a0551f20979080d3762005c9b74d7aa77b85': {
+    availableOn: ['pearl'],
     minOperatingBalance: 11.5,
     minOperatingBalanceToken: 'xDAI',
   },
   // Pearl Beta Mech MarketPlace IV
-  '0x000000000000000000000000E2f80659dB1069f3B6a08af1A62064190c119543': {
-    availableOn: ['quickstart'],
+  '0x000000000000000000000000e2f80659db1069f3b6a08af1a62064190c119543': {
+    availableOn: ['pearl'],
     minOperatingBalance: 11.5,
     minOperatingBalanceToken: 'xDAI',
   },
