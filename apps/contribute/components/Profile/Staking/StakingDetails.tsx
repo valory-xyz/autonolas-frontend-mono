@@ -30,7 +30,12 @@ import { COLOR, NA } from '@autonolas/frontend-library';
 import { getBytes32FromAddress, truncateAddress } from 'common-util/functions';
 import { formatDynamicTimeRange, getTimestamp } from 'common-util/functions/time';
 import { LeaderboardUser, Tweet } from 'store/types';
-import { GOVERN_APP_URL, OLAS_UNICODE_SYMBOL, STAKING_CONTRACTS_DETAILS } from 'util/constants';
+import {
+  GOVERN_APP_URL,
+  IS_STAKE_TEMPORARILY_DISABLED,
+  OLAS_UNICODE_SYMBOL,
+  STAKING_CONTRACTS_DETAILS,
+} from 'util/constants';
 import { useServiceInfo, useStakingDetails } from 'util/staking';
 
 import { HowTweetsAreScoredModal, TweetCountTooltip } from './HowTweetsAreScored';
@@ -201,7 +206,13 @@ export const StakingDetails = ({ profile, tweets }: StakingDetailsProps) => {
       );
       if (stakingDetails.isEligibleForStaking) {
         children = (
-          <Button size="small" loading={isRestaking} onClick={handleRestake} className="block mt-8">
+          <Button
+            size="small"
+            loading={isRestaking}
+            onClick={handleRestake}
+            className="block mt-8"
+            disabled={IS_STAKE_TEMPORARILY_DISABLED}
+          >
             Restake
           </Button>
         );
