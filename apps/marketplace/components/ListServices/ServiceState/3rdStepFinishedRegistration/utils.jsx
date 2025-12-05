@@ -24,8 +24,6 @@ import { getEthersProvider as getEthersV5Provider } from '@autonolas/frontend-li
 import { GNOSIS_SAFE_CONTRACT, MULTI_SEND_CONTRACT } from 'common-util/AbiAndAddresses';
 import { RPC_URLS, getServiceOwnerMultisigContract } from 'common-util/Contracts';
 import {
-  multisigAddresses,
-  multisigSameAddresses,
   newMultisigAddresses,
   newMultisigSameAddresses,
   safeMultiSend,
@@ -116,12 +114,12 @@ const getRecoveryModuleAddress = async (chainId) => {
 
 /**
  * Check if a multisig is old (doesn't have recovery module installed)
- * @param {string} multisigAddresses
+ * @param {string} multisigAddress
  * @param {string} recoveryModuleAddress
  * @param {number} chainId
  * @returns {Promise<boolean>} true if multisig is old (no recovery module), false otherwise
  */
-const isOldMultisig = async (multisigAddress, recoveryModuleAddress, chainId) => {
+const isMultisigWithoutRecoveryModule = async (multisigAddress, recoveryModuleAddress, chainId) => {
   try {
     if (!recoveryModuleAddress) {
       return true;
@@ -340,85 +338,6 @@ const enableRecoveryModule = async (multisigAddress, recoveryModuleAddress, acco
   }
 };
 
-/**
- * Map old contract address to new contract address
- * @param {string} oldAddress - The old contract address
- * @param {number} chainId - The chain ID
- * @returns {string|null} The corresponding new address, or null if not found
- */
-const mapOldAddressToNew = (oldAddress, chainId) => {
-  if (!oldAddress) return null;
-
-  const oldAddresses = multisigAddresses[chainId] || [];
-  const newAddresses = newMultisigAddresses[chainId] || [];
-  const oldSameAddresses = multisigSameAddresses[chainId] || [];
-  const newSameAddresses = newMultisigSameAddresses[chainId] || [];
-
-  // Check if it's in multisigAddresses
-  const oldIndex = oldAddresses.findIndex(
-    (addr) => addr.toLowerCase() === oldAddress.toLowerCase(),
-  );
-  if (oldIndex !== -1 && newAddresses[oldIndex]) {
-    return newAddresses[oldIndex];
-  }
-
-  // Check if it's in multisigSameAddresses
-  const oldSameIndex = oldSameAddresses.findIndex(
-    (addr) => addr.toLowerCase() === oldAddress.toLowerCase(),
-  );
-  if (oldSameIndex !== -1 && newSameAddresses[oldSameIndex]) {
-    return newSameAddresses[oldSameIndex];
-  }
-
-  return oldAddress;
-};
-
-/**
- * Get multisig addresses based on whether the multisig has recovery module
- * @param {string} multisigAddress
- * @param {number} chainId
- * @param {boolean} canShowMultisigSameAddress
- * @returns {Promise<{multisigAddresses: string[], multisigSameAddresses: string[], isOld: boolean}>}
- */
-export const getMultisigAddresses = async (
-  multisigAddress,
-  chainId,
-  canShowMultisigSameAddress,
-) => {
-  // Get the recovery module address
-  const recoveryModuleAddress = await getRecoveryModuleAddress(chainId);
-
-  if (!recoveryModuleAddress) {
-    // If we can't get recovery module address, use old addresses
-    return {
-      multisigAddresses: multisigAddresses[chainId] || [],
-      multisigSameAddresses: canShowMultisigSameAddress ? multisigSameAddresses[chainId] || [] : [],
-      isOld: true,
-    };
-  }
-
-  // Check if multisig is old
-  const isOld = await isOldMultisig(multisigAddress, recoveryModuleAddress, chainId);
-
-  if (isOld) {
-    // Use old addresses
-    return {
-      multisigAddresses: multisigAddresses[chainId] || [],
-      multisigSameAddresses: canShowMultisigSameAddress ? multisigSameAddresses[chainId] || [] : [],
-      isOld: true,
-    };
-  }
-
-  // Use new addresses
-  return {
-    multisigAddresses: newMultisigAddresses[chainId] || [],
-    multisigSameAddresses: canShowMultisigSameAddress
-      ? newMultisigSameAddresses[chainId] || []
-      : [],
-    isOld: false,
-  };
-};
-
 export const onMultisigSubmit = async ({
   multisig,
   threshold,
@@ -432,33 +351,17 @@ export const onMultisigSubmit = async ({
   // Get the recovery module address
   const recoveryModuleAddress = await getRecoveryModuleAddress(chainId);
 
-  // Track if we enabled the recovery module to use new addresses
-  let recoveryModuleEnabled = false;
-
-  // Check if multisig is old
+  // Check if multisig is old and enable recovery module if needed
   if (recoveryModuleAddress) {
-    const isOld = await isOldMultisig(multisig, recoveryModuleAddress, chainId);
+    const isOld = await isMultisigWithoutRecoveryModule(multisig, recoveryModuleAddress, chainId);
     if (isOld) {
       // Enable recovery module on old multisig
       try {
         await enableRecoveryModule(multisig, recoveryModuleAddress, account, chainId);
-        recoveryModuleEnabled = true;
       } catch (error) {
         console.error('Error enabling recovery module:', error);
         throw error;
       }
-    }
-  }
-
-  // If we enabled the recovery module, map the old address to the new address
-  let addressToUse = radioValue;
-  if (recoveryModuleEnabled && radioValue) {
-    const newAddress = mapOldAddressToNew(radioValue, chainId);
-    if (newAddress && newAddress.toLowerCase() !== radioValue.toLowerCase()) {
-      addressToUse = newAddress;
-      window.console.log(
-        `🔄 Mapped old address ${radioValue} to new address ${addressToUse} after enabling recovery module`,
-      );
     }
   }
 
@@ -549,7 +452,7 @@ export const onMultisigSubmit = async ({
         async (_error, events) => {
           // if hash was already approved, call the deploy function right away.
           if (events.length > 0) {
-            await handleStep3Deploy(addressToUse, packedData);
+            await handleStep3Deploy(radioValue, packedData);
           } else {
             // else wait until the hash is approved and then call deploy function
             multisigContractServiceOwner.methods
@@ -559,7 +462,7 @@ export const onMultisigSubmit = async ({
                 window.console.log('safeTx', hash);
 
                 await isHashApproved(multisigContractServiceOwner, startingBlock, filterOption);
-                await handleStep3Deploy(addressToUse, packedData);
+                await handleStep3Deploy(radioValue, packedData);
               })
               .then((information) => window.console.log(information))
               .catch((e) => console.error(e));
@@ -603,6 +506,7 @@ export const onMultisigSubmit = async ({
       };
 
       const signatureBytes = await getSignatureBytes();
+      // How payload is encoded for Option_2
       const safeExecData = multisigContract.interface.encodeFunctionData('execTransaction', [
         safeTx.to,
         safeTx.value,
@@ -617,7 +521,7 @@ export const onMultisigSubmit = async ({
       ]);
       const packedData = ethers.utils.solidityPack(['address', 'bytes'], [multisig, safeExecData]);
 
-      await handleStep3Deploy(addressToUse, packedData);
+      await handleStep3Deploy(radioValue, packedData);
     }
   } catch (error) {
     window.console.log('Error in signing:');

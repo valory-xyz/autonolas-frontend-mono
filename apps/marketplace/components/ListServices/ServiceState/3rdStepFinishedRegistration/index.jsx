@@ -1,11 +1,15 @@
-import { Button, Divider, Form, Input, Radio } from 'antd';
+import { Button, Divider, Form, Input, Radio, Tooltip } from 'antd';
 import { ethers } from 'ethers';
 import PropTypes from 'prop-types';
 import { useEffect, useState } from 'react';
 
 import { notifyError, notifySuccess } from '@autonolas/frontend-library';
 
-import { FALLBACK_HANDLER } from 'common-util/Contracts/addresses';
+import {
+  FALLBACK_HANDLER,
+  newMultisigAddresses,
+  newMultisigSameAddresses,
+} from 'common-util/Contracts/addresses';
 import { RegistryForm } from 'common-util/TransactionHelpers/RegistryForm';
 import { SendTransactionButton } from 'common-util/TransactionHelpers/SendTransactionButton';
 import { isValidSolanaPublicKey } from 'common-util/functions';
@@ -15,7 +19,8 @@ import { SVM_EMPTY_ADDRESS } from 'util/constants';
 import { RadioLabel } from '../styles';
 import { useFinishRegistration } from '../useSvmServiceStateManagement';
 import { getServiceAgentInstances, onStep3Deploy } from '../utils';
-import { getMultisigAddresses, onMultisigSubmit } from './utils';
+import { onMultisigSubmit } from './utils';
+import { InfoCircleOutlined } from '@ant-design/icons';
 
 const STEP = 3;
 const OPTION_1 = 'Creates a new service multisig with currently registered agent instances';
@@ -143,11 +148,6 @@ export const FinishedRegistration = ({
   const [agentInstances, setAgentInstances] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isTerminating, setIsTerminating] = useState(false);
-  const [multisigOptions, setMultisigOptions] = useState({
-    multisigAddresses: [],
-    multisigSameAddresses: [],
-    isOld: true,
-  });
 
   useEffect(() => {
     let isMounted = true;
@@ -157,19 +157,13 @@ export const FinishedRegistration = ({
         if (isMounted) {
           setAgentInstances(response);
         }
-
-        // Get multisig addresses based on whether multisig has recovery module
-        const addresses = await getMultisigAddresses(multisig, chainId, canShowMultisigSameAddress);
-        if (isMounted) {
-          setMultisigOptions(addresses);
-        }
       }
     })();
 
     return () => {
       isMounted = false;
     };
-  }, [serviceId, chainId, isSvm, multisig, canShowMultisigSameAddress]);
+  }, [serviceId, isSvm]);
 
   const handleStep3Deploy = async (radioValuePassed, payload) => {
     try {
@@ -202,31 +196,17 @@ export const FinishedRegistration = ({
     handleStep3Deploy(radioValue, payload);
   };
 
-  // use for newMultisigAddresses with recovery module
-  const onFinishTwo = (values) => {
-    const payload = ethers.ABIEncoderV2.encode(
-      ['address', 'uint256'],
-      [values.addressFallbackHandler, Number(values.nonce)],
-    );
-
-    handleStep3Deploy(radioValue, payload);
-  };
-
-  // use for nMultisigSameAddresses
-  const onFinishTwoSame = (values) => {
-    const payload = ethers.ABIEncoderV2.encode(['uint256'], [values.serviceId]);
-
-    handleStep3Deploy(radioValue, payload);
-  };
-
   const onFinishFailed = (errorInfo) => {
     console.log('Failed:', errorInfo); /* eslint-disable-line no-console */
   };
 
-  // Use multisig addresses from state (determined by whether multisig has recovery module)
-  const otherAddress = multisigOptions.multisigSameAddresses || [];
-  const options = [...(multisigOptions.multisigAddresses || []), ...otherAddress];
-  const isMultiSig = (multisigOptions.multisigAddresses || [])[0];
+  // New multisig addresses for radio values
+  const multisigAddressesList = newMultisigAddresses[chainId] || [];
+  const multisigSameAddressesList = canShowMultisigSameAddress
+    ? newMultisigSameAddresses[chainId] || []
+    : [];
+  const options = [...multisigAddressesList, ...multisigSameAddressesList];
+  const firstMultisigAddress = multisigAddressesList[0];
   const btnProps = getOtherBtnProps(STEP);
 
   const terminateBtn = (
@@ -281,12 +261,15 @@ export const FinishedRegistration = ({
           {options.map((multisigAddress) => (
             <div className="mb-12" key={`multisig-${multisigAddress}`}>
               <RadioLabel disabled={btnProps.disabled}>
-                {multisigAddress === isMultiSig && OPTION_1}
-                {multisigAddress !== isMultiSig && OPTION_2}
+                {multisigAddress === firstMultisigAddress && OPTION_1}
+                {multisigAddress !== firstMultisigAddress && OPTION_2}
               </RadioLabel>
 
               <Radio key={multisigAddress} value={multisigAddress}>
-                {multisigAddress}
+                {multisigAddress}{' '}
+                <Tooltip title="The multisig has been updated with a recovery module, in order to have easier recovery management process and future agent re-deployments">
+                  <InfoCircleOutlined style={{ color: 'rgba(0,0,0,.45)' }} />
+                </Tooltip>
               </Radio>
             </div>
           ))}
@@ -295,7 +278,7 @@ export const FinishedRegistration = ({
 
       {/* form should be shown only if 1st radio button is selected
       2nd radio button means everything will be handled by the backend */}
-      {radioValue === isMultiSig && (
+      {radioValue === firstMultisigAddress && (
         <RegistryForm
           form={form}
           layout="vertical"
@@ -379,12 +362,13 @@ export const FinishedRegistration = ({
       )}
 
       {/* submits the data for 2nd radio button (ie. 2nd multisig option) */}
-      {radioValue !== isMultiSig && (
+      {radioValue !== firstMultisigAddress && (
         <div className="mb-12 mt-8">
           {getButton(
             <SendTransactionButton
               type="primary"
               loading={isSubmitting}
+              // how onClick/onFinish is handled for OPTION_2
               onClick={async () => {
                 try {
                   setIsSubmitting(true);
@@ -399,13 +383,6 @@ export const FinishedRegistration = ({
                     account,
                   });
 
-                  // Refresh multisig addresses after enabling recovery module
-                  const refreshedAddresses = await getMultisigAddresses(
-                    multisig,
-                    chainId,
-                    canShowMultisigSameAddress,
-                  );
-                  setMultisigOptions(refreshedAddresses);
                   setRadioValue(null);
                 } catch (error) {
                   console.error(error);
