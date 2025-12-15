@@ -17,6 +17,7 @@ const nextConfig = {
       minify: true,
     },
   },
+  transpilePackages: ['@ant-design', 'rc-util'],
   images: {
     domains: ['github.com'],
     remotePatterns: [

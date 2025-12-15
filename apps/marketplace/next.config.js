@@ -29,6 +29,7 @@ const nextConfig = {
     // For other options, see https://styled-components.com/docs/tooling#babel-plugin
     styledComponents: true,
   },
+  transpilePackages: ['@ant-design', 'rc-util'],
   webpack(config) {
     config.resolve.fallback = {
       fs: false,
