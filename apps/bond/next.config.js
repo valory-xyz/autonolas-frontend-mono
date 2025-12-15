@@ -22,6 +22,7 @@ const nextConfig = {
       minify: true,
     },
   },
+  transpilePackages: ['@ant-design', 'rc-util'],
   webpack(config) {
     config.resolve.fallback = {
       fs: false,

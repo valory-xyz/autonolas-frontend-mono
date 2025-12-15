@@ -9,7 +9,7 @@ const allowedOrigin = process.env.NEXT_PUBLIC_ALLOWED_ORIGIN
 
 const securityHeaders = [
   {
-    key: "Content-Security-Policy",
+    key: 'Content-Security-Policy',
     value: `frame-ancestors ${allowedOrigin};`,
   },
 ];
@@ -28,11 +28,12 @@ const nextConfig = {
     // For other options, see https://styled-components.com/docs/tooling#babel-plugin
     styledComponents: true,
   },
+  transpilePackages: ['@ant-design', 'rc-util'],
 
   async headers() {
     return [
       {
-        source: "/(.*)",
+        source: '/(.*)',
         headers: securityHeaders,
       },
     ];

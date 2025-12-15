@@ -9,6 +9,7 @@ const nextConfig = {
   compiler: {
     styledComponents: true,
   },
+  transpilePackages: ['@ant-design', 'rc-util'],
   images: {
     domains: [],
   },
