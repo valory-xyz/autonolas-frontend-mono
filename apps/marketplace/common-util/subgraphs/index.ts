@@ -6,7 +6,7 @@ export const getServicesFromSubgraph = async ({
 }: {
   chainId: number;
   serviceIds: number[];
-}): Promise<Service> => {
+}): Promise<Service[]> => {
   const serviceIdsParam = serviceIds.map(String).join(',');
   const data = await fetch(`/api/services?chainId=${chainId}&serviceIds=${serviceIdsParam}`, {
     method: 'GET',
