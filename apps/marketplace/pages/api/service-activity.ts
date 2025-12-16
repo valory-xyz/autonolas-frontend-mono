@@ -1,12 +1,8 @@
-import { mergeServiceActivity } from 'common-util/graphql/service-activity';
-import {
-  getServiceActivityFromMMSubgraph,
-  getServiceActivityFromLegacyMechSubgraph,
-} from 'common-util/graphql/service-activity';
+import { getServiceActivityFromMarketplaceSubgraph } from 'common-util/graphql/service-activity';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { CACHE_DURATION } from '../../util/constants';
 import { isMarketplaceSupportedNetwork } from 'common-util/functions';
-import { MM_GRAPHQL_CLIENTS } from 'common-util/graphql';
+import { MARKETPLACE_SUBGRAPH_CLIENTS } from 'common-util/graphql';
 
 type RequestQuery = {
   chainId: string;
@@ -34,23 +30,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       });
     }
 
-    const promises = [
-      getServiceActivityFromMMSubgraph({
-        chainId: Number(chainId) as keyof typeof MM_GRAPHQL_CLIENTS,
-        serviceId,
-      }),
-    ];
-
-    // For gnosis, we need to get the data from legacy mech as well
-    if (Number(chainId) === 100)
-      promises.push(
-        getServiceActivityFromLegacyMechSubgraph({
-          serviceId,
-        }),
-      );
-
-    const [servicesFromMM, servicesFromLegacy] = await Promise.all(promises);
-    const services = mergeServiceActivity(servicesFromMM, servicesFromLegacy);
+    const services = await getServiceActivityFromMarketplaceSubgraph({
+      chainId: Number(chainId) as keyof typeof MARKETPLACE_SUBGRAPH_CLIENTS,
+      serviceId,
+    });
 
     // If 'latest' parameter is present, disable caching to force fresh data
     if (latest) {
