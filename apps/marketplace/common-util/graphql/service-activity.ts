@@ -1,5 +1,5 @@
 import { Request, Delivery } from 'common-util/types';
-import { LEGACY_MECH_SUBGRAPH_CLIENT, MM_GRAPHQL_CLIENTS } from './index';
+import { MARKETPLACE_SUBGRAPH_CLIENTS } from './index';
 
 type ActivityType = 'Demand' | 'Supply';
 
@@ -20,48 +20,64 @@ export type Activity = {
 const LIMIT = 1_000;
 const LEGACY_DELIVERY_PAYMENT_WEI = '10000000000000000';
 
-export const getQueryForServiceActivity = ({
-  serviceId,
-  includeDeliveryRate,
-}: {
-  serviceId: string;
-  includeDeliveryRate?: boolean;
-}) => {
+export const getQueryForServiceActivity = ({ serviceId }: { serviceId: string }) => {
   return `
   {
     delivers (where: {service_: {id: "${serviceId}"}}, first: ${LIMIT}, orderBy: blockTimestamp, orderDirection: desc) {
       id
-      ipfsHash
       mech
       blockTimestamp
-      transactionHash${includeDeliveryRate ? '\ndeliveryRate' : ''}
+      transactionHash
       service {
         id
       }
-      request {
+      mechDelivery {
         ipfsHash
+      }
+      marketplaceDelivery {
+        ipfsHashBytes
+        deliveryRate
+      }
+      request {
+        id
         blockTimestamp
         transactionHash
         sender {
           id
         }
-${includeDeliveryRate ? 'delivery {\ndeliveryRate\n}' : ''}
+        mechRequest {
+          ipfsHash
+        }
+        marketplaceRequest {
+          ipfsHashBytes
+        }
       }
     }
 
     requests (where: {service_: {id: "${serviceId}"}}, first: ${LIMIT}, orderBy: blockTimestamp, orderDirection: desc) {
       id
-      ipfsHash
+      mechRequest {
+        ipfsHash
+      }
+      marketplaceRequest {
+        ipfsHashBytes
+      }
       blockTimestamp
       transactionHash
       sender {
         id
       }
-      delivery {
-        ipfsHash
+      deliveries {
         mech
         transactionHash
-        blockTimestamp${includeDeliveryRate ? '\ndeliveryRate' : ''}
+        blockTimestamp
+        marketplaceDelivery {
+          ipfsHashBytes
+          deliveryRate
+        }
+        mechDelivery {
+          ipfsHash
+        }
       }
     }
   }
@@ -71,20 +87,29 @@ ${includeDeliveryRate ? 'delivery {\ndeliveryRate\n}' : ''}
 const convertRequestToActivity = (request: Request): Activity => {
   const {
     id: requestId,
-    ipfsHash: requestIpfsHash,
+    mechRequest,
+    marketplaceRequest,
     sender,
-    delivery,
+    deliveries,
     blockTimestamp: requestBlockTimestamp,
     transactionHash: requestTransactionHash,
   } = request || {};
   const {
-    ipfsHash: deliveryIpfsHash,
     mech: deliveredBy,
     transactionHash: deliveryTransactionHash,
     blockTimestamp: deliveryBlockTimestamp,
-    deliveryRate,
-  } = delivery || {};
+    marketplaceDelivery,
+    mechDelivery,
+  } = deliveries?.[0] || {};
   const { id: requestedBy } = sender || {};
+
+  const requestIpfsHash = mechRequest?.ipfsHash || marketplaceRequest?.ipfsHashBytes;
+  const deliveryIpfsHash = mechDelivery?.ipfsHash || marketplaceDelivery?.ipfsHashBytes;
+
+  const isDeliveredByMech = !!mechDelivery;
+  const payment = isDeliveredByMech
+    ? LEGACY_DELIVERY_PAYMENT_WEI
+    : marketplaceDelivery?.deliveryRate || null;
 
   return {
     activityType: 'Demand',
@@ -97,27 +122,36 @@ const convertRequestToActivity = (request: Request): Activity => {
     deliveredBy,
     deliveryTransactionHash,
     deliveryBlockTimestamp,
-    payment: deliveryRate ?? null,
+    payment,
   };
 };
 
 const convertDeliveryToActivity = (delivery: Delivery): Activity => {
   const {
-    id: requestId,
-    ipfsHash: deliveryIpfsHash,
     mech: deliveredBy,
     blockTimestamp: deliveryBlockTimestamp,
     transactionHash: deliveryTransactionHash,
     request,
-    deliveryRate,
+    marketplaceDelivery,
+    mechDelivery,
   } = delivery || {};
   const {
-    ipfsHash: requestIpfsHash,
+    id: requestId,
+    mechRequest,
+    marketplaceRequest,
     sender,
     blockTimestamp: requestBlockTimestamp,
     transactionHash: requestTransactionHash,
   } = request || {};
   const { id: requestedBy } = sender || {};
+
+  const requestIpfsHash = mechRequest?.ipfsHash || marketplaceRequest?.ipfsHashBytes;
+  const deliveryIpfsHash = mechDelivery?.ipfsHash || marketplaceDelivery?.ipfsHashBytes;
+
+  const isDeliveredByMech = !!mechDelivery;
+  const payment = isDeliveredByMech
+    ? LEGACY_DELIVERY_PAYMENT_WEI
+    : marketplaceDelivery?.deliveryRate || null;
 
   return {
     activityType: 'Supply',
@@ -130,7 +164,7 @@ const convertDeliveryToActivity = (delivery: Delivery): Activity => {
     deliveredBy,
     deliveryTransactionHash,
     deliveryBlockTimestamp,
-    payment: deliveryRate ?? null,
+    payment,
   };
 };
 
@@ -157,27 +191,13 @@ type ActivityResponse = {
   delivers: Delivery[];
 };
 
-export const mergeServiceActivity = (
-  activityFromMM: ActivityResponse,
-  activityFromLegacy: ActivityResponse,
-) => {
-  const { id } = activityFromMM || {};
-  const { requests: requestsFromMM, delivers: deliveriesFromMM } = activityFromMM || {};
-  const { requests: requestsFromLegacy, delivers: deliveriesFromLegacy } = activityFromLegacy || {};
+const mergeServiceActivity = (serviceActivity: ActivityResponse) => {
+  const { id } = serviceActivity || {};
+  const { requests: requestsFromMM, delivers: deliveriesFromMM } = serviceActivity || {};
 
   const requestActivitiesFromMM = (requestsFromMM || [])?.map(convertRequestToActivity);
-  const requestActivitiesFromLegacy = (requestsFromLegacy || [])?.map(convertRequestToActivity);
-
   const deliveryActivitiesFromMM = (deliveriesFromMM || [])?.map(convertDeliveryToActivity);
-  const deliveryActivitiesFromLegacy = (deliveriesFromLegacy || [])?.map(convertDeliveryToActivity);
-
-  const activities = [
-    ...requestActivitiesFromMM,
-    ...requestActivitiesFromLegacy,
-    ...deliveryActivitiesFromMM,
-    ...deliveryActivitiesFromLegacy,
-  ];
-
+  const activities = [...requestActivitiesFromMM, ...deliveryActivitiesFromMM];
   const sortedActivities = sortActivities(activities);
 
   return {
@@ -186,38 +206,17 @@ export const mergeServiceActivity = (
   };
 };
 
-export const getServiceActivityFromMMSubgraph = async ({
+export const getServiceActivityFromMarketplaceSubgraph = async ({
   chainId,
   serviceId,
 }: {
-  chainId: keyof typeof MM_GRAPHQL_CLIENTS;
+  chainId: keyof typeof MARKETPLACE_SUBGRAPH_CLIENTS;
   serviceId: string;
 }) => {
-  const client = MM_GRAPHQL_CLIENTS[chainId];
+  const client = MARKETPLACE_SUBGRAPH_CLIENTS[chainId];
 
-  const query = getQueryForServiceActivity({ serviceId, includeDeliveryRate: true });
-  const response: Omit<ActivityResponse, 'id'> = await client.request(query);
-  return { id: serviceId, ...response };
-};
-
-export const getServiceActivityFromLegacyMechSubgraph = async ({
-  serviceId,
-}: {
-  serviceId: string;
-}) => {
   const query = getQueryForServiceActivity({ serviceId });
-  const response: Omit<ActivityResponse, 'id'> = await LEGACY_MECH_SUBGRAPH_CLIENT.request(query);
-
-  return {
-    id: serviceId,
-    requests: (response.requests || []).map((request) => {
-      if (!request?.delivery) return request;
-      request.delivery.deliveryRate = LEGACY_DELIVERY_PAYMENT_WEI;
-      return request;
-    }),
-    delivers: (response.delivers || []).map((delivery) => {
-      delivery.deliveryRate = LEGACY_DELIVERY_PAYMENT_WEI;
-      return delivery;
-    }),
-  };
+  const response: Omit<ActivityResponse, 'id'> = await client.request(query);
+  const serviceActivity = mergeServiceActivity({ id: serviceId, ...response });
+  return serviceActivity;
 };

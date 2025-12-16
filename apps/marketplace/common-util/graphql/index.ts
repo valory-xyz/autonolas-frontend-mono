@@ -9,12 +9,7 @@ const requestConfig: RequestConfig = {
   },
 };
 
-export const LEGACY_MECH_SUBGRAPH_CLIENT = new GraphQLClient(
-  process.env.NEXT_PUBLIC_LEGACY_MECH_SUBGRAPH!,
-  requestConfig,
-);
-
-export const MM_GRAPHQL_CLIENTS = {
-  100: new GraphQLClient(process.env.NEXT_PUBLIC_GNOSIS_MM_SUBGRAPH!, requestConfig),
-  8453: new GraphQLClient(process.env.NEXT_PUBLIC_BASE_MM_SUBGRAPH!, requestConfig),
+export const MARKETPLACE_SUBGRAPH_CLIENTS = {
+  100: new GraphQLClient(process.env.NEXT_PUBLIC_GNOSIS_MARKETPLACE_SUBGRAPH!, requestConfig),
+  8453: new GraphQLClient(process.env.NEXT_PUBLIC_BASE_MARKETPLACE_SUBGRAPH!, requestConfig),
 };
