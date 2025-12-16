@@ -1,4 +1,4 @@
-import { mergeServiceActivity } from 'common-util/graphql/service-activity';
+import { Activity } from 'common-util/graphql/service-activity';
 
 type Address = `0x${string}`;
 
@@ -66,4 +66,7 @@ export type Service = {
   metadata: string;
 };
 
-export type ServiceActivity = ReturnType<typeof mergeServiceActivity>;
+export type ServiceActivity = {
+  id: string;
+  activities: Activity[];
+};
