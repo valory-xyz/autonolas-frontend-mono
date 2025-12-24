@@ -34,6 +34,10 @@ const navItems = [
     type: 'divider',
   },
   {
+    key: 'docs',
+    label: <ExternalLink label="Docs" href="https://docs.olas.network/" />,
+  },
+  {
     key: 'mech-marketplace',
     label: <ExternalLink label="Mech Marketplace" href="https://marketplace.olas.network/" />,
   },
