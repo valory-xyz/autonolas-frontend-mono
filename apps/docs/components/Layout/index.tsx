@@ -1,6 +1,7 @@
 import { Flex, Layout } from 'antd';
 import styled from 'styled-components';
 import { COLOR } from '@autonolas-frontend-mono/ui-theme';
+import { NavDropdown } from 'libs/ui-components/src';
 import Link from 'next/link';
 import { CustomLayout } from './styles';
 import { Logo } from '../Branding/Logo';
@@ -21,6 +22,7 @@ const NavigationBar = ({ children }: { children: React.ReactNode }) => {
           <Link href="/" className="logo-link">
             <Logo />
           </Link>
+          <NavDropdown  currentSite="docs"/>
         </Flex>
       </StyledHeader>
 
