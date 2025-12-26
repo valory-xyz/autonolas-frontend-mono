@@ -12,6 +12,7 @@ import { Web3AuthProvider } from 'context/Web3AuthProvider';
 import {
   ChainIdMissingAlert,
   InitErrorAlert,
+  Loading,
   SwapOwnerFailed,
   SwapOwnerSuccess,
 } from '../../components/web3auth';
@@ -54,15 +55,6 @@ type TransactionFailure = {
   safeAddress?: string;
   txHash?: string;
 };
-
-const Loading = () => (
-  <Card style={{ margin: 24 }}>
-    <Space>
-      <Spin />
-      <Text>Loading Web3Auth...</Text>
-    </Space>
-  </Card>
-);
 
 const SwapOwnerSession = () => {
   const { provider, isInitialized, web3Auth, initError } = useWeb3Auth();
@@ -299,7 +291,7 @@ const SwapOwnerSession = () => {
     return `${EvmChainName[chainId] || chainId}`;
   }, [chainId]);
 
-  if (!isInitialized) return <Loading />;
+  if (!isInitialized && !initError) return <Loading />;
 
   if (!chainId) return <ChainIdMissingAlert />;
 
