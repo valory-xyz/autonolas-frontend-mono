@@ -5,6 +5,7 @@ import { createGlobalStyle } from 'styled-components';
 import { Address } from 'viem';
 
 import { Web3AuthProvider } from 'context/Web3AuthProvider';
+import { InitErrorAlert, Loading } from '../../components/web3auth';
 
 export const Styles = createGlobalStyle`
   .w3a-parent-container > div {
@@ -19,7 +20,7 @@ enum Events {
 }
 
 const Web3AuthModal = () => {
-  const { provider, isInitialized, web3Auth } = useWeb3Auth();
+  const { provider, isInitialized, web3Auth, initError } = useWeb3Auth();
   const { connect, isConnected } = useWeb3AuthConnect();
   const { disconnect } = useWeb3AuthDisconnect();
   const isAddressUpdated = useRef(false);
@@ -84,6 +85,9 @@ const Web3AuthModal = () => {
       web3Auth.off('MODAL_VISIBILITY', handleClose);
     };
   }, [web3Auth, isConnected]);
+
+  if (!isInitialized && !initError) return <Loading />;
+  if (initError) return <InitErrorAlert error={initError as Error} />;
 
   return <div></div>;
 };
