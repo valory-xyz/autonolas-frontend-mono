@@ -1,13 +1,9 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import {
-  getServicesFromMMSubgraph,
-  getServicesFromLegacyMechSubgraph,
-  mergeServicesDetails,
-} from 'common-util/graphql/services';
+import { getServicesFromMarketplaceSubgraph } from 'common-util/graphql/services';
 
 import { CACHE_DURATION } from '../../util/constants';
 import { isMarketplaceSupportedNetwork } from 'common-util/functions';
-import { MM_GRAPHQL_CLIENTS } from 'common-util/graphql';
+import { MARKETPLACE_SUBGRAPH_CLIENTS } from 'common-util/graphql';
 
 type RequestQuery = {
   chainId: string;
@@ -38,19 +34,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       });
     }
 
-    const promises = [
-      getServicesFromMMSubgraph({
-        chainId: Number(chainId) as keyof typeof MM_GRAPHQL_CLIENTS,
-        serviceIds: parsedServiceIds,
-      }),
-    ];
-
-    // For gnosis, we need to get the data from legacy mech as well
-    if (Number(chainId) === 100)
-      promises.push(getServicesFromLegacyMechSubgraph({ serviceIds: parsedServiceIds }));
-
-    const [servicesFromMM, servicesFromLegacy] = await Promise.all(promises);
-    const services = mergeServicesDetails(servicesFromMM, servicesFromLegacy);
+    const services = await getServicesFromMarketplaceSubgraph({
+      chainId: Number(chainId) as keyof typeof MARKETPLACE_SUBGRAPH_CLIENTS,
+      serviceIds: parsedServiceIds,
+    });
 
     res.setHeader(
       'Cache-Control',
