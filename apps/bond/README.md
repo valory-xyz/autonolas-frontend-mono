@@ -12,7 +12,7 @@
 
 ## Installation and Setup Instructions
 
-Clone down this repository. You will need `node` version `">=18"` and `yarn` version `">=1"` installed globally on your machine.
+Clone down this repository. You will need `node` version `">=22.x"` and `yarn` version `">=1"` installed globally on your machine.
 
 ### Installation:
 
