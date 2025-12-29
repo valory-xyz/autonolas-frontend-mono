@@ -151,6 +151,7 @@
     "vitest": "^1.0.4"
   },
   "resolutions": {
-    "@gnosis.pm/safe-contracts/ethers": "^5.7.0"
+    "@gnosis.pm/safe-contracts/ethers": "5.7.2",
+    "@autonolas/frontend-library/ethers": "5.7.2"
   }
 }
