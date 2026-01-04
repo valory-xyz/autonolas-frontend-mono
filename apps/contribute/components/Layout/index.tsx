@@ -30,7 +30,7 @@ export const Layout = ({ children }: { children: React.ReactNode }) => {
   const [isMenuVisible, setIsMenuVisible] = useState(false);
   const { pathname } = router;
 
-  const [isBannerVisible, setIsBannerVisible] = useState(true);
+  const [isBannerVisible, setIsBannerVisible] = useState(false);
   const handleBannerClose = () => setIsBannerVisible(false);
 
   const dispatch = useDispatch();
