@@ -1,5 +1,5 @@
 import { Col, Row, Typography } from 'antd';
-import { DOCS_URL, STACK_URL } from '@autonolas-frontend-mono/util-constants';
+import { BUILD_URL, STACK_URL } from '@autonolas-frontend-mono/util-constants';
 import { CONTENT_MAX_WIDTH, DocsCard } from '../Layout/styles';
 import styled from 'styled-components';
 import { COLOR } from '@autonolas-frontend-mono/ui-theme';
@@ -26,12 +26,12 @@ const resources = [
   {
     label: 'Monetize your agent on Olas',
     linkText: 'Mech Marketplace — Supply Side',
-    link: `${STACK_URL}/mech-tools-dev`,
+    link: `${BUILD_URL}/monetize`,
   },
   {
     label: 'Hire an agent on Olas',
     linkText: 'Mech Marketplace — Demand Side',
-    link: `${DOCS_URL}/#:~:text=Mech%20Marketplace%20%E2%80%94%20The%20%22AI%20Agent%20Bazaar%22`,
+    link: `${BUILD_URL}/hire`,
   },
 ];
 
