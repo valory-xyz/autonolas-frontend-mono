@@ -74,11 +74,7 @@ export const EpochPage = () => {
       {epochStatusList.map(({ text, value }, index) => (
         <EpochStatus key={`epoch-section-${index}`}>
           <Title level={5}>{`${text}:`}</Title>
-          {isDataLoading ? (
-            <Skeleton.Input size="small" active />
-          ) : (
-            <Paragraph>{value}</Paragraph>
-          )}
+          {isDataLoading ? <Skeleton.Input size="small" active /> : <Paragraph>{value}</Paragraph>}
         </EpochStatus>
       ))}
 
