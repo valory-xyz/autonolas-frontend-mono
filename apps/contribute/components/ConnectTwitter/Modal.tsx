@@ -6,7 +6,7 @@ import { useAppSelector } from 'store/setup';
 
 const { Title, Text } = Typography;
 
-export const ConnectTwitterModal = () => {
+export const ConnectTwitterModal = ({ disabled }: { disabled?: boolean }) => {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const account = useAppSelector((state) => state.setup.account);
 
@@ -22,7 +22,7 @@ export const ConnectTwitterModal = () => {
 
   return (
     <>
-      <Button onClick={() => setIsModalVisible(true)}>
+      <Button onClick={() => setIsModalVisible(true)} disabled={disabled}>
         <XOutlined /> Connect X
       </Button>
 
