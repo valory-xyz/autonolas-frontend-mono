@@ -75,7 +75,7 @@ const WhatIsOlasGovern = () => (
         <li>
           <Text strong>Starting new tokenomic epochs</Text> that kick off a fresh emission cycle for
           OLAS, with epoch switched here{' '}
-          <Link href="https://govern.olas.network/donate">https://govern.olas.network/donate</Link>{' '}
+          <Link href="https://govern.olas.network/epoch">https://govern.olas.network/epoch</Link>{' '}
           and emissions data tracked here{' '}
           <Link href="https://olas.network/olas-token">https://olas.network/olas-token</Link>.
         </li>

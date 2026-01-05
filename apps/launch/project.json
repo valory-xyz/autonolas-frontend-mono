@@ -24,7 +24,7 @@
       "options": {
         "buildTarget": "launch:build",
         "dev": true,
-        "port": 3004
+        "port": 3005
       },
       "configurations": {
         "development": {
@@ -42,7 +42,7 @@
       "options": {
         "buildTarget": "launch:build:production",
         "dev": false,
-        "port": 3004
+        "port": 3005
       }
     },
     "export": {

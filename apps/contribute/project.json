@@ -24,7 +24,7 @@
         "options": {
           "buildTarget": "contribute:build",
           "dev": true,
-          "port": 3008
+          "port": 3003
         },
         "configurations": {
           "development": {
@@ -42,7 +42,7 @@
         "options": {
           "buildTarget": "contribute:build:production",
           "dev": false,
-          "port": 3008
+          "port": 3003
         }
       },
       "export": {

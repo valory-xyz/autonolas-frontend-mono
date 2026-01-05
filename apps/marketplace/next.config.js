@@ -58,6 +58,11 @@ const nextConfig = {
       permanent: true,
     },
     {
+      source: '/services/:id',
+      destination: '/ethereum/ai-agents/:id',
+      permanent: true,
+    },
+    {
       source: '/:network((?!api).+)/services',
       destination: '/:network/ai-agents',
       permanent: true,
