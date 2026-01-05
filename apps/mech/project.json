@@ -24,7 +24,7 @@
         "options": {
           "buildTarget": "mech:build",
           "dev": true,
-          "port": 3007
+          "port": 3009
         },
         "configurations": {
           "development": {
@@ -42,7 +42,7 @@
         "options": {
           "buildTarget": "mech:build:production",
           "dev": false,
-          "port": 3007
+          "port": 3009
         }
       },
       "export": {
