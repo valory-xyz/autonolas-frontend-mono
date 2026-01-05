@@ -16,7 +16,13 @@ const Footer = () => (
             {new Date().getFullYear()}
             &nbsp;•&nbsp;
           </Text>
-          <Link href="/disclaimer">Disclaimer</Link>
+          <a
+            href="https://olas.network/disclaimer"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Disclaimer
+          </a>
           &nbsp;•&nbsp;
           <Link
             href="https://gateway.autonolas.tech/ipfs/bafybeibrhz6hnxsxcbv7dkzerq4chssotexb276pidzwclbytzj7m4t47u"

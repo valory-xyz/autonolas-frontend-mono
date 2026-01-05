@@ -1,5 +1,4 @@
 import { useRouter } from 'next/router';
-import Link from 'next/link';
 import { Typography } from 'antd';
 import { useEffect, useState } from 'react';
 import { Footer as CommonFooter } from 'libs/ui-components/src';
@@ -62,7 +61,9 @@ const ContractInfo = () => {
         registryText: 'ServiceRegistry',
         managerText: 'ServiceManager',
         marketplaceText: 'MechMarketplace',
-        registry: isL1Network ? addresses.serviceRegistry : addresses.serviceRegistryL2,
+        registry: isL1Network
+          ? addresses.serviceRegistry
+          : addresses.serviceRegistryL2,
         manager: serviceManagerAddress,
         marketplace: addresses.mechMarketplace || null,
       };
@@ -89,8 +90,14 @@ const ContractInfo = () => {
     </div>
   );
 
-  const { registry, manager, managerText, registryText, marketplaceText, marketplace } =
-    getCurrentPageAddresses();
+  const {
+    registry,
+    manager,
+    managerText,
+    registryText,
+    marketplaceText,
+    marketplace,
+  } = getCurrentPageAddresses();
 
   return (
     <ContractsInfoContainer>
@@ -99,10 +106,18 @@ const ContractInfo = () => {
           <Text type="secondary" style={{ fontSize: 14 }}>
             Contracts
           </Text>
-          <Text style={{ fontSize: 14 }}>{getContractInfo(registryText, registry)}</Text>
-          {manager && <Text style={{ fontSize: 14 }}>{getContractInfo(managerText, manager)}</Text>}
+          <Text style={{ fontSize: 14 }}>
+            {getContractInfo(registryText, registry)}
+          </Text>
+          {manager && (
+            <Text style={{ fontSize: 14 }}>
+              {getContractInfo(managerText, manager)}
+            </Text>
+          )}
           {marketplace && (
-            <Text style={{ fontSize: 14 }}>{getContractInfo(marketplaceText, marketplace)}</Text>
+            <Text style={{ fontSize: 14 }}>
+              {getContractInfo(marketplaceText, marketplace)}
+            </Text>
           )}
         </>
       )}
@@ -121,9 +136,14 @@ const Footer = () => (
           {new Date().getFullYear()}
           &nbsp;•&nbsp;
         </Text>
-        <Link href="/disclaimer" style={{ fontSize: 14 }}>
+        <a
+          href="https://olas.network/disclaimer"
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{ fontSize: 14 }}
+        >
           Disclaimer
-        </Link>
+        </a>
         &nbsp;•&nbsp;
         <a
           style={{ fontSize: 14 }}

@@ -13,7 +13,15 @@ const Footer = () => (
   <FooterContainer>
     <Typography.Text>
       © {OPERATOR_NAME} {new Date().getFullYear()}
+      &nbsp;•&nbsp;
     </Typography.Text>
+    <a
+      href="https://olas.network/disclaimer"
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      Disclaimer
+    </a>
     <br />
     <br />
   </FooterContainer>

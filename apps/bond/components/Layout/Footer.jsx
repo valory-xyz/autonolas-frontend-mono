@@ -12,14 +12,7 @@ import { ContractsInfoContainer } from './styles';
 
 const { useBreakpoint } = Grid;
 
-const PATHS_NOT_TO_SHOW = [
-  '/',
-  '/paths',
-  '/manage-solana-liquidity',
-  '/docs',
-  '/disclaimer',
-  '/not-legal',
-];
+const PATHS_NOT_TO_SHOW = ['/', '/paths', '/manage-solana-liquidity', '/docs', '/not-legal'];
 
 const ContractInfo = () => {
   const { chainId } = useHelpers();
@@ -92,6 +85,11 @@ const Footer = () => {
             {new Date().getFullYear()}
           </>
         )
+      }
+      rightContent={
+        <a href="https://olas.network/disclaimer" target="_blank" rel="noopener noreferrer">
+          Disclaimer
+        </a>
       }
     />
   );

@@ -2,7 +2,10 @@ import Image from 'next/image';
 import { useRouter } from 'next/router';
 import { Grid } from 'antd';
 
-import { Footer as CommonFooter, ServiceStatusInfo } from '@autonolas/frontend-library';
+import {
+  Footer as CommonFooter,
+  ServiceStatusInfo,
+} from '@autonolas/frontend-library';
 
 import { ADDRESSES } from 'common-util/Contracts';
 import { useHelpers } from 'common-util/hooks';
@@ -65,16 +68,24 @@ const ContractInfo = () => {
     </div>
   );
 
-  const { registry, manager, managerText, registryText } = getCurrentPageAddresses();
+  const { registry, manager, managerText, registryText } =
+    getCurrentPageAddresses();
 
   if (!registry && !manager) return null;
 
   return (
     <ContractsInfoContainer>
-      <Image alt="Etherscan link" width={18} height={18} src={SCAN_IMAGES[chainId]} />
+      <Image
+        alt="Etherscan link"
+        width={18}
+        height={18}
+        src={SCAN_IMAGES[chainId]}
+      />
       <span>Contracts</span>
       &nbsp;•&nbsp;
-      {registry && typeof registry === 'string' && getContractInfo(registryText, registry)}
+      {registry &&
+        typeof registry === "string" &&
+        getContractInfo(registryText, registry)}
       {manager && (
         <>
           &nbsp;•&nbsp;
@@ -99,6 +110,15 @@ const Footer = () => {
               {new Date().getFullYear()}
             </>
           )
+        }
+        rightContent={
+          <a
+            href="https://olas.network/disclaimer"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Disclaimer
+          </a>
         }
       />
       <ServiceStatusInfo appType="mechkit" />

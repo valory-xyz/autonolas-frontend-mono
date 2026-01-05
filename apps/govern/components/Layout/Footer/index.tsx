@@ -37,7 +37,13 @@ const LeftContent = () => (
 const CenterContent = () => (
   <Typography.Text type="secondary">
     {`© Autonolas DAO ${new Date().getFullYear()} • `}
-    <Link href="/disclaimer">Disclaimer</Link>
+    <a
+      href="https://olas.network/disclaimer"
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      Disclaimer
+    </a>
     {' • '}
     <a
       href="https://gateway.autonolas.tech/ipfs/bafybeibrhz6hnxsxcbv7dkzerq4chssotexb276pidzwclbytzj7m4t47u"

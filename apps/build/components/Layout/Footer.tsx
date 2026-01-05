@@ -14,11 +14,14 @@ const FooterContainer = styled.div`
 const Footer = () => (
   <FooterContainer>
     <Typography.Text>
-      © {OPERATOR_NAME} {new Date().getFullYear()}
-      {/* {' '}
-      ·
-      {' '}
-      <Link href="/disclaimer">Disclaimer</Link> */}
+      © {OPERATOR_NAME} {new Date().getFullYear()} ·{" "}
+      <a
+        href="https://olas.network/disclaimer"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        Disclaimer
+      </a>
     </Typography.Text>
     <br />
     <br />
