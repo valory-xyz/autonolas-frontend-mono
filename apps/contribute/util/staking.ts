@@ -6,7 +6,7 @@ import { Address, ContractFunctionArgs, ContractFunctionName } from 'viem';
 import { useReadContract } from 'wagmi';
 import { base } from 'wagmi/chains';
 
-import { areAddressesEqual } from '@autonolas/frontend-library';
+import { areAddressesEqual } from 'libs/util-functions/src';
 
 import {
   CONTRIBUTORS_ABI,

@@ -1,6 +1,6 @@
 import { useDispatch } from 'react-redux';
 
-import { ServiceStatusInfo } from '@autonolas/frontend-library';
+import { ServiceStatusInfo } from 'libs/feature-service-status-info/src/lib/ServiceStatusInfo';
 
 import { getLeaderboardList } from 'common-util/api';
 import { useHealthCheckup } from 'common-util/hooks/useHealthCheckup';

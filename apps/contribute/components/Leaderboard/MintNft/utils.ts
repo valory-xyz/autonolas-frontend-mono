@@ -1,6 +1,6 @@
 import get from 'lodash/get';
 
-import { notifyError, notifySuccess } from '@autonolas/frontend-library';
+import { notifyError, notifySuccess } from 'libs/util-functions/src';
 
 import { getMintContract } from 'common-util/Contracts';
 import { getEstimatedGasLimit } from 'common-util/functions/requests';

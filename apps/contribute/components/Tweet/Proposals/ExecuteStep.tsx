@@ -3,7 +3,7 @@ import { Alert, Button, Popconfirm, Result, Typography } from 'antd';
 import { isNil, last } from 'lodash';
 import { useMemo } from 'react';
 
-import { COLOR } from '@autonolas/frontend-library';
+import { COLOR } from 'libs/ui-theme/src';
 
 import { getCurrentProposalInfo } from 'common-util/functions/proposal';
 import { useHelpers } from 'common-util/hooks/useHelpers';

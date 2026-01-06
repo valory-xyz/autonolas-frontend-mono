@@ -3,7 +3,9 @@ import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 import styled from 'styled-components';
 
-import { COLOR, MEDIA_QUERY, NA, areAddressesEqual } from '@autonolas/frontend-library';
+import { COLOR, MEDIA_QUERY } from 'libs/ui-theme/src';
+import { NA } from 'libs/util-constants/src';
+import { areAddressesEqual } from 'libs/util-functions/src';
 
 import { BadgeLoading, ShowBadge } from 'components/ShowBadge';
 import TruncatedEthereumLink from 'components/TruncatedEthereumLink';

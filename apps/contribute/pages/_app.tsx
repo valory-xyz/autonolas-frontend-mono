@@ -8,7 +8,7 @@ import type { AppProps } from 'next/app';
 import { Provider } from 'react-redux';
 import { WagmiProvider, cookieToInitialState } from 'wagmi';
 
-import { COLOR } from '@autonolas/frontend-library';
+import { COLOR } from 'libs/ui-theme/src';
 
 /* eslint-disable-line import/no-unresolved */
 import { wagmiConfig } from 'components/Login/config';

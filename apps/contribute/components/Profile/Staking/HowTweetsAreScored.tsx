@@ -2,7 +2,7 @@ import { Alert, Button, Modal, Tooltip, Typography } from 'antd';
 import { useState } from 'react';
 import styled from 'styled-components';
 
-import { COLOR } from '@autonolas/frontend-library';
+import { COLOR } from 'libs/ui-theme/src';
 
 const { Text, Paragraph } = Typography;
 

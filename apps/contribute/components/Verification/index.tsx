@@ -6,7 +6,7 @@ import { useState } from 'react';
 import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
 
-import { notifyError, notifySuccess } from '@autonolas/frontend-library';
+import { notifyError, notifySuccess } from 'libs/util-functions/src';
 
 import { setIsVerified, useAppSelector } from 'store/setup';
 
