@@ -3,7 +3,7 @@ import { useRouter } from 'next/router';
 import PropTypes from 'prop-types';
 import { useEffect, useMemo, useState } from 'react';
 
-import { useScreen } from '@autonolas/frontend-library';
+import { useScreen } from 'libs/ui-theme/src';
 
 import { useHelpers } from 'common-util/hooks';
 

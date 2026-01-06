@@ -3,7 +3,7 @@ import isNil from 'lodash/isNil';
 import PropTypes from 'prop-types';
 import { useState } from 'react';
 
-import { isValidAddress } from '@autonolas/frontend-library';
+import { isValidAddress } from 'libs/util-functions/src';
 
 import { RegistryForm } from '../../TransactionHelpers/RegistryForm';
 import { useHelpers } from '../../hooks';

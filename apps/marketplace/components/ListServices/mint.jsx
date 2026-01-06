@@ -1,9 +1,7 @@
 import { Typography } from 'antd';
 import { useState } from 'react';
 
-import { notifyError, notifySuccess } from '@autonolas/frontend-library';
-
-import { getEstimatedGasLimit } from 'libs/util-functions/src';
+import { notifyError, notifySuccess, getEstimatedGasLimit } from 'libs/util-functions/src';
 
 import { getServiceManagerContract } from 'common-util/Contracts';
 import { AlertError, AlertSuccess, convertStringToArray } from 'common-util/List/ListCommon';

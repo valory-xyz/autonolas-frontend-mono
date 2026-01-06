@@ -3,10 +3,10 @@ import Image from 'next/image';
 import Link from 'next/link';
 
 import { useHelpers } from 'common-util/hooks/useHelpers';
-import { useScreen } from 'common-util/hooks/useScreen';
 
 import { AutonolasServicesArchitected } from './AutonolasServicesArchitected';
 import { Container, HeaderRow } from './styles';
+import { useScreen } from 'libs/ui-theme/src';
 
 const { Title, Text } = Typography;
 

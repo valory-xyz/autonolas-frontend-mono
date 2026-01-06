@@ -19,7 +19,8 @@ import {
 } from 'wagmi/chains';
 
 import { RPC_URLS } from 'common-util/Contracts';
-import { SOLANA_CHAIN_NAMES, VM_TYPE } from 'util/constants';
+import { SOLANA_CHAIN_NAMES } from 'util/constants';
+import { VM_TYPE } from 'libs/util-constants/src';
 
 export const SUPPORTED_CHAINS: Chain[] = [
   mainnet,

@@ -12,16 +12,15 @@ import {
   isValidAddress,
   notifyError,
   notifyWarning,
-  sendTransaction as sendTransactionLegacyFn,
-} from '@autonolas/frontend-library';
-
-import { sendTransaction as sendTransactionFn } from 'libs/util-functions/src';
+  sendTransaction as sendTransactionFn,
+} from 'libs/util-functions/src';
 import { RpcUrl } from 'libs/util-functions/src/lib/sendTransaction/types';
 
-import { MARKETPLACE_SUPPORTED_CHAIN_IDS, VM_TYPE } from '../../util/constants';
+import { MARKETPLACE_SUPPORTED_CHAIN_IDS } from '../../util/constants';
 import { RPC_URLS } from '../Contracts';
 import { SUPPORTED_CHAINS } from '../Login';
 import { EVM_SUPPORTED_CHAINS, SVM_SUPPORTED_CHAINS, SolanaChain } from '../Login/config';
+import { VM_TYPE } from 'libs/util-constants/src';
 
 // TODO: provide types for MODAL_PROVIDER
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -160,17 +159,15 @@ export const sendTransaction = (
     return method.rpc();
   }
 
-  if (isLegacy) {
-    return sendTransactionLegacyFn(method as ContractV5, account, {
+  return sendTransactionFn(
+    method,
+    account,
+    {
       supportedChains: SUPPORTED_CHAINS,
       rpcUrls: RPC_URLS as RpcUrl,
-    });
-  }
-
-  return sendTransactionFn(method as Contract, account, {
-    supportedChains: SUPPORTED_CHAINS,
-    rpcUrls: RPC_URLS as RpcUrl,
-  });
+    },
+    isLegacy,
+  );
 };
 
 export const addressValidator = () => ({

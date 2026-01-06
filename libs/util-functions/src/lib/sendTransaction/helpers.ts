@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { ethers } from 'ethers';
+import { ethers as ethersV5 } from 'ethers-v5';
 
 import { getUrl } from './index';
 import { Chain, RpcUrl } from './types';
@@ -106,6 +107,24 @@ export const getEthersProvider = (supportedChains: Chain[], rpcUrls: RpcUrl) => 
   }
 
   return new ethers.BrowserProvider(provider);
+};
+
+/**
+ * gets ethers provider from the connected wallet or
+ * installed wallet or fallback to mainnet
+ *
+ * Note: this provider uses ethers v5 version compatible with
+ * some smart contracts, otherwise some functions might not work correctly
+ */
+export const getEthersV5Provider = (supportedChains: Chain[], rpcUrls: RpcUrl) => {
+  const provider = getProvider(supportedChains, rpcUrls);
+
+  // if provider is a string, it is a JSON-RPC provider
+  if (typeof provider === 'string') {
+    return new ethersV5.providers.JsonRpcProvider(provider);
+  }
+
+  return new ethersV5.providers.Web3Provider(provider, 'any');
 };
 
 /**

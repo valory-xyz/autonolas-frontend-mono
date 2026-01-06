@@ -1,6 +1,6 @@
 import { useCallback } from 'react';
 import { PublicKey } from '@solana/web3.js';
-import { notifyError } from '@autonolas/frontend-library';
+import { notifyError } from 'libs/util-functions/src';
 
 import { SVM_EMPTY_ADDRESS } from 'util/constants';
 import { useSvmConnectivity } from 'common-util/hooks/useSvmConnectivity';

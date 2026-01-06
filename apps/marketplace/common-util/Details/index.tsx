@@ -5,8 +5,7 @@ import { FC, useCallback, useState, useEffect, useMemo } from 'react';
 import { Address } from 'viem';
 import { useRouter } from 'next/router';
 
-import { GenericObject, NA } from '@autonolas/frontend-library';
-import { AddressLink } from 'libs/ui-components/src';
+import { AddressLink, NA } from 'libs/ui-components/src';
 
 import { getServiceActivityFromSubgraph } from 'common-util/subgraphs';
 import type { Activity } from 'common-util/graphql/service-activity';
@@ -97,6 +96,8 @@ const getColumns = ({
     },
   ];
 };
+
+type GenericObject<T = unknown> = Record<string, T>;
 
 type DetailsProps = {
   id: string;

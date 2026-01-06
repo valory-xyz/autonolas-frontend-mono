@@ -1,6 +1,7 @@
 import PropTypes from 'prop-types';
 import { Table } from 'antd';
-import { Loader, useScreen } from '@autonolas/frontend-library';
+import { Loader } from 'libs/ui-components/src';
+import { useScreen } from 'libs/ui-theme/src';
 
 import { TOTAL_VIEW_COUNT } from '../../../util/constants';
 import { ListEmptyMessage } from '../ListCommon';

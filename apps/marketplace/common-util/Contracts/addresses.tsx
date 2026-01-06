@@ -1,5 +1,4 @@
 import { Address } from 'viem';
-import { LOCAL_FORK_ID, LOCAL_FORK_ID_GNOSIS, LOCAL_FORK_ID_POLYGON } from '../../util/constants';
 import {
   arbitrum,
   arbitrumSepolia,
@@ -126,9 +125,6 @@ export const ADDRESSES = {
   [arbitrumSepolia.id]: COMMON_TEST_ADDRESSES,
   [optimismSepolia.id]: COMMON_TEST_ADDRESSES,
   [celoAlfajores.id]: COMMON_TEST_ADDRESSES,
-  [LOCAL_FORK_ID]: MAINNET_ADDRESSES,
-  [LOCAL_FORK_ID_GNOSIS]: GNOSIS_ADDRESSES,
-  [LOCAL_FORK_ID_POLYGON]: POLYGON_ADDRESSES,
 } as const;
 
 export type ChainIds = keyof typeof ADDRESSES;
@@ -157,9 +153,6 @@ export const multisigAddresses: MultisigAddress = {
   [arbitrumSepolia.id]: ['0x19936159B528C66750992C3cBcEd2e71cF4E4824'],
   [optimismSepolia.id]: ['0x19936159B528C66750992C3cBcEd2e71cF4E4824'],
   [celoAlfajores.id]: ['0x19936159B528C66750992C3cBcEd2e71cF4E4824'],
-  [LOCAL_FORK_ID]: ['0x46C0D07F55d4F9B5Eed2Fc9680B5953e5fd7b461'],
-  [LOCAL_FORK_ID_GNOSIS]: ['0x3C1fF68f5aa342D296d4DEe4Bb1cACCA912D95fE'],
-  [LOCAL_FORK_ID_POLYGON]: ['0x3d77596beb0f130a4415df3D2D8232B3d3D31e44'],
 };
 
 /**
@@ -182,9 +175,6 @@ export const multisigSameAddresses: MultisigAddress = {
   [arbitrumSepolia.id]: ['0x10100e74b7F706222F8A7C0be9FC7Ae1717Ad8B2'],
   [optimismSepolia.id]: ['0x10100e74b7F706222F8A7C0be9FC7Ae1717Ad8B2'],
   [celoAlfajores.id]: ['0x10100e74b7F706222F8A7C0be9FC7Ae1717Ad8B2'],
-  [LOCAL_FORK_ID]: ['0xfa517d01DaA100cB1932FA4345F68874f7E7eF46'],
-  [LOCAL_FORK_ID_GNOSIS]: ['0x6e7f594f680f7aBad18b7a63de50F0FeE47dfD06'],
-  [LOCAL_FORK_ID_POLYGON]: ['0xd8BCC126ff31d2582018715d5291A508530587b0'],
 };
 
 /**
@@ -207,9 +197,6 @@ export const safeMultiSend: MultisigAddress = {
   [arbitrumSepolia.id]: ['0x40A2aCCbd92BCA938b02010E17A5b8929b49130D'],
   [optimismSepolia.id]: ['0xA1dabEF33b3B82c7814B6D82A79e50F4AC44102B'],
   [celoAlfajores.id]: ['0x40A2aCCbd92BCA938b02010E17A5b8929b49130D'],
-  [LOCAL_FORK_ID]: ['0x40A2aCCbd92BCA938b02010E17A5b8929b49130D'],
-  [LOCAL_FORK_ID_GNOSIS]: ['0x40A2aCCbd92BCA938b02010E17A5b8929b49130D'],
-  [LOCAL_FORK_ID_POLYGON]: ['0x40A2aCCbd92BCA938b02010E17A5b8929b49130D'],
 };
 
 /**
@@ -234,9 +221,6 @@ export const FALLBACK_HANDLER: {
   [arbitrumSepolia.id]: '0xf48f2B2d2a534e402487b3ee7C18c33Aec0Fe5e4',
   [optimismSepolia.id]: '0x017062a1dE2FE6b99BE3d9d37841FeD19F573804',
   [celoAlfajores.id]: '0xf48f2B2d2a534e402487b3ee7C18c33Aec0Fe5e4',
-  [LOCAL_FORK_ID]: '0xf48f2B2d2a534e402487b3ee7C18c33Aec0Fe5e4',
-  [LOCAL_FORK_ID_GNOSIS]: '0xf48f2B2d2a534e402487b3ee7C18c33Aec0Fe5e4',
-  [LOCAL_FORK_ID_POLYGON]: '0xf48f2B2d2a534e402487b3ee7C18c33Aec0Fe5e4',
 };
 
 /**

@@ -5,7 +5,7 @@ import PropTypes from 'prop-types';
 import React, { useContext, useEffect, useRef } from 'react';
 import styled from 'styled-components';
 
-import { isValidAddress } from '@autonolas/frontend-library';
+import { isValidAddress } from 'libs/util-functions/src';
 
 import { isValidSolanaPublicKey } from 'common-util/functions';
 import { useHelpers } from 'common-util/hooks';

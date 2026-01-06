@@ -2,8 +2,7 @@ import Image from 'next/image';
 import PropTypes from 'prop-types';
 import { useEffect, useState } from 'react';
 
-import { useScreen } from '../../hooks/useScreen';
-import { COLOR } from 'libs/ui-theme/src';
+import { COLOR, useScreen } from 'libs/ui-theme/src';
 
 const DEFAULT_SIZE = { width: 500, height: 500 };
 const SMALL_SIZE = { width: 300, height: 300 };

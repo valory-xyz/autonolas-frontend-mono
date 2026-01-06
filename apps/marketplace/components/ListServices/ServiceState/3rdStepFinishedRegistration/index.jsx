@@ -3,8 +3,7 @@ import { ethers } from 'ethers';
 import PropTypes from 'prop-types';
 import { useEffect, useState } from 'react';
 
-import { notifyError, notifySuccess } from '@autonolas/frontend-library';
-
+import { notifyError, notifySuccess } from 'libs/util-functions/src';
 import {
   FALLBACK_HANDLER,
   multisigAddresses,

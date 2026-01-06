@@ -2,9 +2,9 @@ import { Col, Row, Typography } from 'antd';
 import Link from 'next/link';
 import Image from 'next/image';
 
-import { useScreen } from 'common-util/hooks/useScreen';
 import { useHelpers } from 'common-util/hooks/useHelpers';
 import { ContentRow } from './styles';
+import { useScreen } from 'libs/ui-theme/src';
 
 const { Title, Text } = Typography;
 

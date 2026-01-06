@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { useEffect, useMemo, useState } from 'react';
 import { useEnsName } from 'wagmi';
 
-import { NA } from '@autonolas/frontend-library';
+import { NA } from 'libs/util-constants/src';
 
 import {
   DEFAULT_SERVICE_CREATION_ETH_TOKEN_ZEROS,
