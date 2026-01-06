@@ -1,15 +1,16 @@
-import { useMemo, useState, useEffect, useCallback } from 'react';
+import { getPublicClient } from '@wagmi/core';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Nominee, StakingContract } from 'types';
-import { Abi, Address, formatEther, formatUnits, Block } from 'viem';
-import { useReadContracts } from 'wagmi';
+import { Abi, Address, Block, formatEther, formatUnits } from 'viem';
 import { getBlock } from 'viem/actions';
+import { useReadContracts } from 'wagmi';
 
 import { useNominees, useNomineesMetadata } from 'libs/common-contract-functions/src';
 import { RETAINER_ADDRESS } from 'libs/util-constants/src';
 import { STAKING_TOKEN } from 'libs/util-contracts/src';
 import { areAddressesEqual, getAddressFromBytes32 } from 'libs/util-functions/src';
+
 import { wagmiConfig } from 'common-util/config/wagmi';
-import { getPublicClient } from '@wagmi/core';
 
 const ONE_YEAR = 1 * 24 * 60 * 60 * 365;
 
