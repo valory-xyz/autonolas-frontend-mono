@@ -343,6 +343,16 @@ const STAKING_CONTRACT_DETAILS: Record<Address, StakingContractDetailsInfo> = {
     minOperatingBalance: 11.5,
     minOperatingBalanceToken: 'xDAI',
   },
+  // Pett.AI Agent Staking Contract
+  '0x000000000000000000000000fa0ca3935758cb81d35a8f1395b9eb5a596ce301': {
+    availableOn: ['pearl'],
+    minOperatingBalanceToken: 'ETH',
+  },
+  // Pett.AI Agent Staking Contract 2
+  '0x00000000000000000000000000d544c10bdc0e9b0a71ceaf52c1342bb8f21c1d': {
+    availableOn: ['pearl'],
+    minOperatingBalanceToken: 'ETH',
+  },
 };
 
 const getApy = (
