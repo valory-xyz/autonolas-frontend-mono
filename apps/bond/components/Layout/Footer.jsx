@@ -1,14 +1,14 @@
 import Image from 'next/image';
 import { useRouter } from 'next/router';
 
-import { FooterCenterContent } from 'libs/ui-components/src';
 import { Footer as CommonFooter, FooterCenterContent } from 'libs/ui-components/src';
-import { BOND_REPO_URL } from "libs/util-constants/src";
+import { BOND_REPO_URL } from 'libs/util-constants/src';
 
 import { ADDRESSES } from 'common-util/constants/addresses';
 import { useHelpers } from 'common-util/hooks/useHelpers';
 
 import { ContractsInfoContainer } from './styles';
+import { getExplorerURL } from '@autonolas/frontend-library';
 
 const PATHS_NOT_TO_SHOW = ['/', '/paths', '/manage-solana-liquidity', '/docs', '/not-legal'];
 
@@ -71,7 +71,13 @@ const ContractInfo = () => {
 };
 
 const Footer = () => {
-  return <CommonFooter leftContent={<ContractInfo />} centerContent={<FooterCenterContent />} githubUrl={BOND_REPO_URL} />;
+  return (
+    <CommonFooter
+      leftContent={<ContractInfo />}
+      centerContent={<FooterCenterContent />}
+      githubUrl={BOND_REPO_URL}
+    />
+  );
 };
 
 export default Footer;
