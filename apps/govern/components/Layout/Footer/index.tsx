@@ -2,7 +2,7 @@ import { Typography } from 'antd';
 import { Fragment } from 'react';
 import { mainnet } from 'viem/chains';
 
-import { Footer as CommonFooter } from 'libs/ui-components/src';
+import { Footer as CommonFooter, FooterCenterContent } from 'libs/ui-components/src';
 import { EXPLORER_URLS, GOVERN_REPO_URL } from 'libs/util-constants/src';
 import { VE_OLAS, VOTE_WEIGHTING } from 'libs/util-contracts/src/lib/abiAndAddresses';
 
@@ -33,28 +33,11 @@ const LeftContent = () => (
   </Typography.Text>
 );
 
-const CenterContent = () => (
-  <Typography.Text type="secondary">
-    {`© Olas DAO ${new Date().getFullYear()} • `}
-    <a href="https://olas.network/disclaimer" target="_blank" rel="noopener noreferrer">
-      Disclaimer
-    </a>
-    {' • '}
-    <a
-      href="https://gateway.autonolas.tech/ipfs/bafybeibrhz6hnxsxcbv7dkzerq4chssotexb276pidzwclbytzj7m4t47u"
-      target="_blank"
-      rel="noopener noreferrer"
-    >
-      DAO Constitution
-    </a>
-  </Typography.Text>
-);
-
 export const Footer = () => (
   <>
     <CommonFooter
       leftContent={<LeftContent />}
-      centerContent={<CenterContent />}
+      centerContent={<FooterCenterContent />}
       githubUrl={GOVERN_REPO_URL}
     />
     <Onboarding />

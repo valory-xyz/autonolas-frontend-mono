@@ -1,7 +1,7 @@
 import { useRouter } from 'next/router';
 import { Typography } from 'antd';
 import { useEffect, useState } from 'react';
-import { Footer as CommonFooter } from 'libs/ui-components/src';
+import { Footer as CommonFooter, FooterCenterContent } from 'libs/ui-components/src';
 import { getExplorerURL } from '@autonolas/frontend-library';
 
 import { PAGES_TO_LOAD_WITHOUT_CHAINID } from 'util/constants';
@@ -113,32 +113,7 @@ const Footer = () => (
   <CommonFooter
     leftContent={<ContractInfo />}
     rightContent={<Socials />}
-    centerContent={
-      <>
-        <Text type="secondary" style={{ fontSize: 14 }}>
-          ©&nbsp;Olas DAO&nbsp;
-          {new Date().getFullYear()}
-          &nbsp;•&nbsp;
-        </Text>
-        <a
-          href="https://olas.network/disclaimer"
-          target="_blank"
-          rel="noopener noreferrer"
-          style={{ fontSize: 14 }}
-        >
-          Disclaimer
-        </a>
-        &nbsp;•&nbsp;
-        <a
-          style={{ fontSize: 14 }}
-          href="https://gateway.autonolas.tech/ipfs/bafybeibrhz6hnxsxcbv7dkzerq4chssotexb276pidzwclbytzj7m4t47u"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          DAO Constitution
-        </a>
-      </>
-    }
+    centerContent={<FooterCenterContent fontSize={14} />}
   />
 );
 
