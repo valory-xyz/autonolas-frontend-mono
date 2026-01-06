@@ -1,7 +1,7 @@
 import { LoadingOutlined } from '@ant-design/icons';
 import Safe from '@safe-global/protocol-kit';
 import { useWeb3Auth, useWeb3AuthConnect } from '@web3auth/modal/react';
-import { Card, Flex, Space, Spin, Typography } from 'antd';
+import { Card, Flex, Space, Typography } from 'antd';
 import { useRouter } from 'next/router';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { createGlobalStyle } from 'styled-components';

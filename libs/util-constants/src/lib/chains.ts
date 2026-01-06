@@ -25,4 +25,4 @@ export const CHAINS: Record<string, Chain> = {
 export const VM_TYPE = {
   EVM: 'EVM',
   SVM: 'SVM',
-};
+} as const;

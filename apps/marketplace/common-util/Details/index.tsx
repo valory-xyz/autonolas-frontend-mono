@@ -5,7 +5,7 @@ import { FC, useCallback, useState, useEffect, useMemo } from 'react';
 import { Address } from 'viem';
 import { useRouter } from 'next/router';
 
-import { AddressLink, NA } from 'libs/ui-components/src';
+import { AddressLink } from 'libs/ui-components/src';
 
 import { getServiceActivityFromSubgraph } from 'common-util/subgraphs';
 import type { Activity } from 'common-util/graphql/service-activity';
@@ -21,6 +21,7 @@ import { useDetails } from './useDetails';
 import { useMetadata } from '../hooks/useMetadata';
 import { isMarketplaceSupportedNetwork } from 'common-util/functions';
 import { NftImage } from './NFTImage';
+import { NA } from 'libs/util-constants/src';
 
 const getColumns = ({
   addressLinkProps,
