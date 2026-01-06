@@ -1,6 +1,6 @@
 import { web3 } from '@coral-xyz/anchor';
 import { TickUtil } from '@orca-so/whirlpools-sdk';
-import { VM_TYPE } from '@autonolas/frontend-library';
+import { VM_TYPE } from 'libs/util-constants/src';
 
 import { ADDRESSES } from 'common-util/constants/addresses';
 

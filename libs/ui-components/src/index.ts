@@ -5,3 +5,5 @@ export * from './lib/NavDropdown';
 export * from './lib/SwitchNetworkButton';
 export * from './lib/TextWithTooltip';
 export * from './lib/Copy';
+export * from './lib/Loader';
+export * from './lib/CannotConnectAddressOfacError';

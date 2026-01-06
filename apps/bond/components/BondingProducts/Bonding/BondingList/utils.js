@@ -3,7 +3,8 @@ import { gql } from 'graphql-request';
 import { isNumber, isString, memoize } from 'lodash';
 import { celo } from 'viem/chains';
 
-import { VM_TYPE, notifyError } from '@autonolas/frontend-library';
+import { notifyError } from 'libs/util-functions/src';
+import { VM_TYPE } from 'libs/util-constants/src';
 
 import { ADDRESSES } from 'common-util/constants/addresses';
 import { ADDRESS_ZERO } from 'common-util/constants/numbers';

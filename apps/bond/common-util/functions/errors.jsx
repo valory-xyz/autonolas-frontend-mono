@@ -1,5 +1,5 @@
 import isObject from 'lodash/isObject';
-import { notifyError } from '@autonolas/frontend-library';
+import { notifyError } from 'libs/util-functions/src';
 import { Alert, Typography } from 'antd';
 import styled from 'styled-components';
 

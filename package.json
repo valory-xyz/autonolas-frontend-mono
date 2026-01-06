@@ -8,7 +8,6 @@
     "@ant-design/cssinjs": "^1.16.2",
     "@ant-design/icons": "^5.2.6",
     "@apollo/client": "3.8.5",
-    "@autonolas/frontend-library": "0.4.25",
     "@balancer-labs/sdk": "^1.1.5",
     "@binance/w3w-wagmi-connector-v2": "1.2.5",
     "@coral-xyz/anchor": "^0.29.0",
@@ -151,7 +150,6 @@
     "vitest": "^1.0.4"
   },
   "resolutions": {
-    "@gnosis.pm/safe-contracts/ethers": "5.7.2",
-    "@autonolas/frontend-library/ethers": "5.7.2"
+    "@gnosis.pm/safe-contracts/ethers": "5.7.2"
   }
 }

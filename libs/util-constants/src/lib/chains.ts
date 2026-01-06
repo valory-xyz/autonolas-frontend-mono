@@ -21,3 +21,8 @@ export const CHAINS: Record<string, Chain> = {
   42_161: arbitrum,
   42_220: celo,
 };
+
+export const VM_TYPE = {
+  EVM: 'EVM',
+  SVM: 'SVM',
+};
