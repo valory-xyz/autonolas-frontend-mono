@@ -1,14 +1,20 @@
+<<<<<<< Updated upstream
 import { Typography } from 'antd';
 
 import { Footer as CommonFooter } from '@autonolas/frontend-library';
 
 import Socials from './Socials';
+=======
+import { Footer as CommonFooter, FooterCenterContent } from "libs/ui-components/src";
+import { CONTRIBUTE_REPO_URL } from "libs/util-constants/src";
+>>>>>>> Stashed changes
 
 const { Link, Text } = Typography;
 
 const Footer = () => (
   <CommonFooter
     centerContent={
+<<<<<<< Updated upstream
       <>
         <div className="mb-12">
           <Text type="secondary">
@@ -30,7 +36,13 @@ const Footer = () => (
           <Socials />
         </div>
       </>
+=======
+      <div className="mb-12">
+        <FooterCenterContent />
+      </div>
+>>>>>>> Stashed changes
     }
+    githubUrl={CONTRIBUTE_REPO_URL}
   />
 );
 

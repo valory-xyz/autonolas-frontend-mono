@@ -1,8 +1,13 @@
-import { Grid } from 'antd';
 import Image from 'next/image';
 import { useRouter } from 'next/router';
 
+<<<<<<< Updated upstream
 import { Footer as CommonFooter, getExplorerURL } from '@autonolas/frontend-library';
+=======
+import { getExplorerURL } from '@autonolas/frontend-library';
+import { Footer as CommonFooter, FooterCenterContent } from 'libs/ui-components/src';
+import { BOND_REPO_URL } from "libs/util-constants/src";
+>>>>>>> Stashed changes
 
 import { ADDRESSES } from 'common-util/constants/addresses';
 import { useHelpers } from 'common-util/hooks/useHelpers';
@@ -10,6 +15,7 @@ import { OPERATOR_NAME } from 'util/meta';
 
 import { ContractsInfoContainer } from './styles';
 
+<<<<<<< Updated upstream
 const { useBreakpoint } = Grid;
 
 const PATHS_NOT_TO_SHOW = [
@@ -20,6 +26,9 @@ const PATHS_NOT_TO_SHOW = [
   '/disclaimer',
   '/not-legal',
 ];
+=======
+const PATHS_NOT_TO_SHOW = ['/', '/paths', '/manage-solana-liquidity', '/docs', '/not-legal'];
+>>>>>>> Stashed changes
 
 const ContractInfo = () => {
   const { chainId } = useHelpers();
@@ -80,6 +89,7 @@ const ContractInfo = () => {
 };
 
 const Footer = () => {
+<<<<<<< Updated upstream
   const screens = useBreakpoint();
 
   return (
@@ -95,6 +105,9 @@ const Footer = () => {
       }
     />
   );
+=======
+  return <CommonFooter leftContent={<ContractInfo />} centerContent={<FooterCenterContent />} githubUrl={BOND_REPO_URL} />;
+>>>>>>> Stashed changes
 };
 
 export default Footer;

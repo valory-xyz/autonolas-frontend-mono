@@ -1,3 +1,4 @@
+<<<<<<< Updated upstream
 import styled from 'styled-components';
 import { Typography } from 'antd';
 import { COLOR } from '@autonolas-frontend-mono/ui-theme';
@@ -18,5 +19,11 @@ const Footer = () => (
     <br />
   </FooterContainer>
 );
+=======
+import { DOCS_REPO_URL } from '@autonolas-frontend-mono/util-constants';
+import { Footer as CommonFooter, FooterCenterContent } from 'libs/ui-components/src';
+
+const Footer = () => <CommonFooter centerContent={<FooterCenterContent />} githubUrl={DOCS_REPO_URL} />;
+>>>>>>> Stashed changes
 
 export default Footer;

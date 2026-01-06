@@ -1,3 +1,4 @@
+<<<<<<< Updated upstream
 import styled from 'styled-components';
 import { Typography } from 'antd';
 import { COLOR } from '@autonolas/frontend-library';
@@ -25,5 +26,11 @@ const Footer = () => (
     <PoweredByOlas />
   </FooterContainer>
 );
+=======
+import { Footer as CommonFooter, FooterCenterContent } from 'libs/ui-components/src';
+import { BUILD_REPO_URL } from 'libs/util-constants/src';
+
+const Footer = () => <CommonFooter centerContent={<FooterCenterContent />} githubUrl={BUILD_REPO_URL} />;
+>>>>>>> Stashed changes
 
 export default Footer;
