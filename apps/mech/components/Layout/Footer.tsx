@@ -12,7 +12,7 @@ import { ContractsInfoContainer } from './styles';
 
 const { useBreakpoint } = Grid;
 
-const OPERATOR_NAME = 'Olas (aka Autonolas) DAO';
+const OPERATOR_NAME = 'Olas DAO';
 
 const ContractInfo = () => {
   const { chainId } = useHelpers();

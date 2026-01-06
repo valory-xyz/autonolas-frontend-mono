@@ -5,4 +5,4 @@ export const SITE = {
   SITE_IMAGE_URL: '/images/meta-image.png',
 };
 
-export const OPERATOR_NAME = 'Olas (aka Autonolas) DAO';
+export const OPERATOR_NAME = 'Olas DAO';

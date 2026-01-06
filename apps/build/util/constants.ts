@@ -5,4 +5,4 @@ export const SITE = {
     'Explore paths to build on Olas. Simplify your path to contributing and earning OLAS rewards.',
 };
 
-export const OPERATOR_NAME = 'Olas (aka Autonolas) DAO';
+export const OPERATOR_NAME = 'Olas DAO';

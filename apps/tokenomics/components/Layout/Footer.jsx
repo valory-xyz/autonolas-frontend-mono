@@ -96,7 +96,7 @@ const Footer = () => {
       centerContent={
         screens.xs ? null : (
           <>
-            ©&nbsp;Autonolas DAO&nbsp;
+            ©&nbsp;Olas DAO&nbsp;
             {new Date().getFullYear()}
             &nbsp;•&nbsp;
             <a href="https://olas.network/disclaimer" target="_blank" rel="noopener noreferrer">

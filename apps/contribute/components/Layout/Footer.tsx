@@ -12,7 +12,7 @@ const Footer = () => (
       <>
         <div className="mb-12">
           <Text type="secondary">
-            ©&nbsp;Autonolas DAO&nbsp;
+            ©&nbsp;Olas DAO&nbsp;
             {new Date().getFullYear()}
             &nbsp;•&nbsp;
           </Text>
