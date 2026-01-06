@@ -10,9 +10,6 @@ import { useHelpers } from 'common-util/hooks/useHelpers';
 
 import { ContractsInfoContainer } from './styles';
 
-<<<<<<< Updated upstream
-const { useBreakpoint } = Grid;
-
 const PATHS_NOT_TO_SHOW = ['/', '/paths', '/manage-solana-liquidity', '/docs', '/not-legal'];
 
 const ContractInfo = () => {
@@ -74,18 +71,7 @@ const ContractInfo = () => {
 };
 
 const Footer = () => {
-<<<<<<< Updated upstream
-  const screens = useBreakpoint();
-
-  return (
-    <CommonFooter
-      leftContent={<ContractInfo />}
-      centerContent={screens.xs ? null : <FooterCenterContent />}
-    />
-  );
-=======
   return <CommonFooter leftContent={<ContractInfo />} centerContent={<FooterCenterContent />} githubUrl={BOND_REPO_URL} />;
->>>>>>> Stashed changes
 };
 
 export default Footer;
