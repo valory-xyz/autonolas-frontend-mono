@@ -1,0 +1,22 @@
+# Olas Contribute
+
+> Community contribution app for the Olas ecosystem
+
+## Overview
+
+Contribute is the Olas app where community members coordinate content marketing in Olas DAO. Community members earn points, climb a leaderboard, and more.
+
+## Key Features
+
+- Leaderboard: View top contributors and community rankings
+- Staking: Stake tokens to earn rewards for posting on X
+
+## Documentation
+
+- Website: https://contribute.olas.network/
+- Documentation: https://contribute.olas.network/docs
+- Disclaimer: https://olas.network/disclaimer
+
+## Technology
+
+Built with Next.js, React, and Web3 technologies. Integrates with Twitter for social features and supports staking mechanisms across multiple blockchain networks.
