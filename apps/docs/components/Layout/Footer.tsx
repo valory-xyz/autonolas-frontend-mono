@@ -1,5 +1,5 @@
-import styled from 'styled-components';
 import { Typography } from 'antd';
+import styled from 'styled-components';
 import { COLOR } from '@autonolas-frontend-mono/ui-theme';
 import { OPERATOR_NAME } from '../../util/constants';
 
@@ -11,19 +11,20 @@ const FooterContainer = styled.div`
 
 const Footer = () => (
   <FooterContainer>
-    <Typography.Text>
-      © {OPERATOR_NAME} {new Date().getFullYear()}
-      &nbsp;•&nbsp;
+    <Typography.Text type="secondary">
+      {`© ${OPERATOR_NAME} ${new Date().getFullYear()} • `}
+      <a href="https://olas.network/disclaimer" target="_blank" rel="noopener noreferrer">
+        Disclaimer
+      </a>
+      {' • '}
+      <a
+        href="https://gateway.autonolas.tech/ipfs/bafybeibrhz6hnxsxcbv7dkzerq4chssotexb276pidzwclbytzj7m4t47u"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        DAO Constitution
+      </a>
     </Typography.Text>
-    <a
-      href="https://olas.network/disclaimer"
-      target="_blank"
-      rel="noopener noreferrer"
-    >
-      Disclaimer
-    </a>
-    <br />
-    <br />
   </FooterContainer>
 );
 

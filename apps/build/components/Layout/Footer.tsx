@@ -13,10 +13,18 @@ const FooterContainer = styled.div`
 
 const Footer = () => (
   <FooterContainer>
-    <Typography.Text>
-      © {OPERATOR_NAME} {new Date().getFullYear()} ·{' '}
+    <Typography.Text type="secondary">
+      {`© ${OPERATOR_NAME} ${new Date().getFullYear()} • `}
       <a href="https://olas.network/disclaimer" target="_blank" rel="noopener noreferrer">
         Disclaimer
+      </a>
+      {' • '}
+      <a
+        href="https://gateway.autonolas.tech/ipfs/bafybeibrhz6hnxsxcbv7dkzerq4chssotexb276pidzwclbytzj7m4t47u"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        DAO Constitution
       </a>
     </Typography.Text>
     <br />
