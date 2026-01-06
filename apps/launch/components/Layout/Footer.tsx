@@ -4,10 +4,7 @@ import { mainnet } from 'viem/chains';
 
 import { Footer as CommonFooter } from 'libs/ui-components/src';
 import { EXPLORER_URLS, LAUNCH_REPO_URL } from 'libs/util-constants/src';
-import {
-  STAKING_FACTORY,
-  VOTE_WEIGHTING,
-} from 'libs/util-contracts/src/lib/abiAndAddresses';
+import { STAKING_FACTORY, VOTE_WEIGHTING } from 'libs/util-contracts/src/lib/abiAndAddresses';
 
 import { ChainId } from 'common-util/constants/stakingContract';
 import { useAppSelector } from 'store/index';
@@ -47,12 +44,8 @@ const LeftContent = () => {
 
 const CenterContent = () => (
   <Typography.Text type="secondary">
-    {`© Autonolas DAO ${new Date().getFullYear()} • `}
-    <a
-      href="https://olas.network/disclaimer"
-      target="_blank"
-      rel="noopener noreferrer"
-    >
+    {`© Olas DAO ${new Date().getFullYear()} • `}
+    <a href="https://olas.network/disclaimer" target="_blank" rel="noopener noreferrer">
       Disclaimer
     </a>
     {' • '}

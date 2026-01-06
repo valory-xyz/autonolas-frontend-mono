@@ -47,10 +47,7 @@ export const SERVICE_STATE_KEY_MAP = {
 } as const;
 
 // should not display contracts on homepage nor load with chain Ids
-export const PAGES_TO_LOAD_WITHOUT_CHAINID = [
-  '/page-not-found',
-  '/not-legal',
-] as const;
+export const PAGES_TO_LOAD_WITHOUT_CHAINID = ['/page-not-found', '/not-legal'] as const;
 
 export const HASH_PREFIX = 'f01701220';
 export const HASH_PREFIXES = {

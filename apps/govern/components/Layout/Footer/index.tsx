@@ -1,5 +1,4 @@
 import { Typography } from 'antd';
-import Link from 'next/link';
 import { Fragment } from 'react';
 import { mainnet } from 'viem/chains';
 
@@ -36,12 +35,8 @@ const LeftContent = () => (
 
 const CenterContent = () => (
   <Typography.Text type="secondary">
-    {`© Autonolas DAO ${new Date().getFullYear()} • `}
-    <a
-      href="https://olas.network/disclaimer"
-      target="_blank"
-      rel="noopener noreferrer"
-    >
+    {`© Olas DAO ${new Date().getFullYear()} • `}
+    <a href="https://olas.network/disclaimer" target="_blank" rel="noopener noreferrer">
       Disclaimer
     </a>
     {' • '}

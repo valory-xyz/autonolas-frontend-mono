@@ -16,11 +16,7 @@ const Footer = () => (
             {new Date().getFullYear()}
             &nbsp;•&nbsp;
           </Text>
-          <a
-            href="https://olas.network/disclaimer"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
+          <a href="https://olas.network/disclaimer" target="_blank" rel="noopener noreferrer">
             Disclaimer
           </a>
           &nbsp;•&nbsp;
