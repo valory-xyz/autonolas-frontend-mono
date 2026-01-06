@@ -4,7 +4,8 @@ import Link from 'next/link';
 import { useState } from 'react';
 import { useAccount } from 'wagmi';
 
-import { NA, notifySuccess } from '@autonolas/frontend-library';
+import { NA } from 'libs/util-constants/src';
+import { notifySuccess } from 'libs/util-functions/src';
 
 import { notifyError } from 'libs/util-functions/src';
 
@@ -15,6 +16,7 @@ import {
 
 import { DonateForm } from './DonateForm';
 import { useThresholdData } from './hooks';
+import styled from 'styled-components';
 
 const { Title, Paragraph, Text } = Typography;
 
@@ -23,6 +25,13 @@ const sortUnitIdsAndAmounts = (unitIds: number[], amounts: number[]) => {
   const sortedAmounts = sortedUnitIds.map((e) => amounts[unitIds.indexOf(e)]);
   return [sortedUnitIds, sortedAmounts];
 };
+
+const StyledMain = styled.main`
+  display: flex;
+  flex-direction: column;
+  max-width: 946px;
+  margin: 0 auto;
+`;
 
 export const DonatePage = () => {
   const { address: account } = useAccount();
@@ -86,35 +95,37 @@ export const DonatePage = () => {
   };
 
   return (
-    <Card>
-      <Title level={2} className="mt-0">
-        Donate
-      </Title>
-      <Paragraph>
-        Show appreciation for the value of a decentralized AI by making a donation. The protocol
-        will reward devs who have contributed code for that service.
-      </Paragraph>
+    <StyledMain>
+      <Card>
+        <Title level={3} className="mt-0">
+          Donate
+        </Title>
+        <Paragraph>
+          Show appreciation for the value of a decentralized AI by making a donation. The protocol
+          will reward devs who have contributed code for that service.
+        </Paragraph>
 
-      <Alert
-        showIcon
-        type="info"
-        message={
-          <>
-            To boost rewards of devs with freshly minted OLAS, you must hold at least&nbsp;
-            <Text strong>{veOLASThreshold || NA}</Text>
-            &nbsp;veOLAS. Grab your veOLAS by locking OLAS&nbsp;
-            <Link href="/veolas">here</Link>. At least&nbsp;
-            <Text strong>
-              {minAcceptedETH ? ethers.formatEther(`${minAcceptedETH}`) : NA}
-              &nbsp;ETH
-            </Text>
-            &nbsp;of donations is required to trigger boosts.
-          </>
-        }
-        className="mb-16"
-      />
+        <Alert
+          showIcon
+          type="info"
+          message={
+            <>
+              To boost rewards of devs with freshly minted OLAS, you must hold at least&nbsp;
+              <Text strong>{veOLASThreshold || NA}</Text>
+              &nbsp;veOLAS. Grab your veOLAS by locking OLAS&nbsp;
+              <Link href="/veolas">here</Link>. At least&nbsp;
+              <Text strong>
+                {minAcceptedETH ? ethers.formatEther(`${minAcceptedETH}`) : NA}
+                &nbsp;ETH
+              </Text>
+              &nbsp;of donations is required to trigger boosts.
+            </>
+          }
+          className="mb-16"
+        />
 
-      <DonateForm isLoading={isDonationLoading} onSubmit={onDepositServiceDonationSubmit} />
-    </Card>
+        <DonateForm isLoading={isDonationLoading} onSubmit={onDepositServiceDonationSubmit} />
+      </Card>
+    </StyledMain>
   );
 };

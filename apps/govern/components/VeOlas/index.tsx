@@ -8,18 +8,13 @@ import { CreateLockModal } from './CreateLockModal';
 import { IncreaseLockModal } from './IncreaseLockModal';
 import { VeOlasManage } from './VeOlasManage';
 
-const { Paragraph } = Typography;
+const { Paragraph, Title } = Typography;
 
 const StyledMain = styled.main`
   display: flex;
   flex-direction: column;
   max-width: 946px;
   margin: 0 auto;
-`;
-
-const Title = styled.h1`
-  font-size: 24px;
-  margin: 0 0 8px;
 `;
 
 export const VeOlas = () => {
@@ -31,7 +26,9 @@ export const VeOlas = () => {
   return (
     <StyledMain>
       <Card>
-        <Title>veOLAS</Title>
+        <Title level={3} className="mt-0">
+          veOLAS
+        </Title>
         <Paragraph type="secondary" className="mt-8 mb-24">
           veOLAS gives you voting power in Olas governance. Lock OLAS for longer periods to get more
           veOLAS.
