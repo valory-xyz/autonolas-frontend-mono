@@ -1,2 +1,3 @@
 User-agent: *
 Allow: /
+Sitemap: https://bond.olas.network/sitemap.xml
