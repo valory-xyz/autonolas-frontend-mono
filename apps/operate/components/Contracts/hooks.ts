@@ -349,12 +349,16 @@ const getApy = (
   minStakingDeposit: bigint,
   maxNumAgentInstances: bigint,
 ) => {
+  if (!minStakingDeposit || !rewardsPerSecond) return null;
+
   const rewardsPerYear = rewardsPerSecond * BigInt(ONE_YEAR);
   const apy = (rewardsPerYear * BigInt(100)) / minStakingDeposit;
   return Number(apy) / (1 + Number(maxNumAgentInstances));
 };
 
 const getStakeRequired = (minStakingDeposit: bigint, numAgentInstances: bigint) => {
+  if (!minStakingDeposit || !numAgentInstances) return null;
+
   return formatEther(minStakingDeposit + minStakingDeposit * numAgentInstances);
 };
 
