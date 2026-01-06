@@ -64,7 +64,11 @@ const columns: ColumnsType<StakingContract> = [
     title: () => <TextWithTooltip text="APY" description="Annual percentage yield" />,
     dataIndex: 'apy',
     key: 'apy',
-    render: (apy) => <Tag color="purple" className="m-0">{`${apy}%`}</Tag>,
+    render: (apy) => (
+      <Tag color="purple" className="m-0">
+        {apy ? `${apy}%` : NA}
+      </Tag>
+    ),
     className: 'text-end',
   },
   {
@@ -79,7 +83,7 @@ const columns: ColumnsType<StakingContract> = [
     title: 'Stake required, OLAS',
     dataIndex: 'stakeRequired',
     key: 'stakeRequired',
-    render: (stakeRequired) => <Text>{stakeRequired}</Text>,
+    render: (stakeRequired) => <Text>{stakeRequired ?? NA}</Text>,
     className: 'text-end',
     width: 120,
   },
