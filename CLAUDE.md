@@ -34,7 +34,6 @@ Development server ports:
 - launch: 3005
 - marketplace: 3006
 - operate: 3007
-- tokenomics: 3008
 - pearl-api: 3010
 
 ### Building
