@@ -3,23 +3,16 @@ import Image from 'next/image';
 import { useRouter } from 'next/router';
 
 import { Footer as CommonFooter, getExplorerURL } from '@autonolas/frontend-library';
+import { FooterCenterContent } from 'libs/ui-components/src';
 
 import { ADDRESSES } from 'common-util/constants/addresses';
 import { useHelpers } from 'common-util/hooks/useHelpers';
-import { OPERATOR_NAME } from 'util/meta';
 
 import { ContractsInfoContainer } from './styles';
 
 const { useBreakpoint } = Grid;
 
-const PATHS_NOT_TO_SHOW = [
-  '/',
-  '/paths',
-  '/manage-solana-liquidity',
-  '/docs',
-  '/disclaimer',
-  '/not-legal',
-];
+const PATHS_NOT_TO_SHOW = ['/', '/paths', '/manage-solana-liquidity', '/docs', '/not-legal'];
 
 const ContractInfo = () => {
   const { chainId } = useHelpers();
@@ -85,14 +78,7 @@ const Footer = () => {
   return (
     <CommonFooter
       leftContent={<ContractInfo />}
-      centerContent={
-        screens.xs ? null : (
-          <>
-            ©&nbsp;{OPERATOR_NAME}&nbsp;
-            {new Date().getFullYear()}
-          </>
-        )
-      }
+      centerContent={screens.xs ? null : <FooterCenterContent />}
     />
   );
 };
