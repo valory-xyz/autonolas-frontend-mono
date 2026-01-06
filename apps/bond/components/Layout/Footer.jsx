@@ -1,16 +1,14 @@
-import { Grid } from 'antd';
 import Image from 'next/image';
 import { useRouter } from 'next/router';
 
-import { Footer as CommonFooter, getExplorerURL } from '@autonolas/frontend-library';
-import { FooterCenterContent } from 'libs/ui-components/src';
+import { Footer as CommonFooter, FooterCenterContent } from 'libs/ui-components/src';
+import { BOND_REPO_URL } from 'libs/util-constants/src';
 
 import { ADDRESSES } from 'common-util/constants/addresses';
 import { useHelpers } from 'common-util/hooks/useHelpers';
 
 import { ContractsInfoContainer } from './styles';
-
-const { useBreakpoint } = Grid;
+import { getExplorerURL } from '@autonolas/frontend-library';
 
 const PATHS_NOT_TO_SHOW = ['/', '/paths', '/manage-solana-liquidity', '/docs', '/not-legal'];
 
@@ -73,12 +71,11 @@ const ContractInfo = () => {
 };
 
 const Footer = () => {
-  const screens = useBreakpoint();
-
   return (
     <CommonFooter
       leftContent={<ContractInfo />}
-      centerContent={screens.xs ? null : <FooterCenterContent />}
+      centerContent={<FooterCenterContent />}
+      githubUrl={BOND_REPO_URL}
     />
   );
 };
