@@ -23,7 +23,7 @@ export const FooterCenterContent = ({
     <Typography.Text type="secondary" style={textStyle} className={className}>
       {children || (
         <>
-          {`© OLAS DAO ${new Date().getFullYear()} • `}
+          {`© Olas DAO ${new Date().getFullYear()} • `}
           <a href={DISCLAIMER_URL} target="_blank" rel="noopener noreferrer">
             Disclaimer
           </a>

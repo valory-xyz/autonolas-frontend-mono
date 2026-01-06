@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Repository Overview
 
-This is an Nx-based monorepo for Autonolas frontend applications. It contains multiple Next.js applications that share common libraries and utilities.
+This is an Nx-based monorepo for Olas frontend applications. It contains multiple Next.js applications that share common libraries and utilities.
 
 **Live Applications:**
 - Bond: https://bond.olas.network/

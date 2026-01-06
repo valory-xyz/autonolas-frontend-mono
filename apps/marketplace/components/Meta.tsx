@@ -3,7 +3,7 @@ import Head from 'next/head';
 const SITE_URL = 'https://marketplace.olas.network';
 const SITE_TITLE = 'Mech Marketplace | Olas';
 const SITE_DESCRIPTION =
-  'Marketplace to discover, manage, and view activity of autonomous AI agents directly from the Autonolas on-chain registry.';
+  'Marketplace to discover, manage, and view activity of autonomous AI agents directly from the Olas on-chain registry.';
 const SITE_IMAGE_URL = `${SITE_URL}/images/meta-image.png`;
 
 type MetaProps = {
