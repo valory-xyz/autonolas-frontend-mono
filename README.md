@@ -7,7 +7,6 @@ This mono repo contains the frontend for the Autonolas project. It is based on t
 - [Launch](https://launch.olas.network/)
 - [Operate](https://operate.olas.network/)
 - [Build](https://build.olas.network/)(work in progress)
-- [Mech](https://mech.olas.network/)(work in progress)
 
 
 ## Start the app
