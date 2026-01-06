@@ -71,10 +71,10 @@ const ContractInfo = () => {
 
   return (
     <ContractsInfoContainer>
-      <Image alt="Etherscan link" width={18} height={18} src={SCAN_IMAGES[chainId]}/>
+      <Image alt="Etherscan link" width={18} height={18} src={SCAN_IMAGES[chainId]} />
       <span>Contracts</span>
       &nbsp;•&nbsp;
-      {registry && typeof registry === "string" && getContractInfo(registryText, registry)}
+      {registry && typeof registry === 'string' && getContractInfo(registryText, registry)}
       {manager && (
         <>
           &nbsp;•&nbsp;

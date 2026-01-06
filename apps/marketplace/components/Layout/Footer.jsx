@@ -99,7 +99,7 @@ const ContractInfo = () => {
             Contracts
           </Text>
           <Text style={{ fontSize: 14 }}>{getContractInfo(registryText, registry)}</Text>
-          {manager && (<Text style={{ fontSize: 14 }}>{getContractInfo(managerText, manager)}</Text>)}
+          {manager && <Text style={{ fontSize: 14 }}>{getContractInfo(managerText, manager)}</Text>}
           {marketplace && (
             <Text style={{ fontSize: 14 }}>{getContractInfo(marketplaceText, marketplace)}</Text>
           )}

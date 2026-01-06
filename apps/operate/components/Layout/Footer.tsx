@@ -21,5 +21,5 @@ const CenterContent = () => (
 );
 
 export const Footer = () => (
-  <CommonFooter centerContent={<CenterContent />} githubUrl={OPERATE_REPO_URL}/>
+  <CommonFooter centerContent={<CenterContent />} githubUrl={OPERATE_REPO_URL} />
 );
