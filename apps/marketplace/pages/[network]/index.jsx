@@ -1,7 +1,19 @@
 import dynamic from 'next/dynamic';
+import { Meta } from '../../components/Meta';
 
 const HomePage = dynamic(() => import('../../components/HomePage'), {
   ssr: false,
 });
 
-export default HomePage;
+const NetworkHome = () => (
+  <>
+    <Meta
+      pageTitle={null}
+      description="Browse autonomous AI agents on different blockchain networks. Discover and manage agents from the Olas on-chain registry."
+      pageUrl=""
+    />
+    <HomePage />
+  </>
+);
+
+export default NetworkHome;
