@@ -2,7 +2,7 @@ import { Alert, Col, Row, Table, Typography } from 'antd';
 import { round, toLower } from 'lodash';
 import { useState } from 'react';
 
-import { notifyError } from '@autonolas/frontend-library';
+import { notifyError } from 'libs/util-functions/src';
 
 import { TOKENOMICS_UNIT_TYPES, FORM_TYPES } from 'libs/util-constants/src';
 import { notifySpecificError } from 'common-util/functions/errors';
