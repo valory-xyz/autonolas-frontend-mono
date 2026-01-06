@@ -1,8 +1,8 @@
 <<<<<<< Updated upstream
 import styled from 'styled-components';
-import { Typography } from 'antd';
 import { COLOR } from '@autonolas-frontend-mono/ui-theme';
-import { OPERATOR_NAME } from '../../util/constants';
+
+import { FooterCenterContent } from 'libs/ui-components/src';
 
 const FooterContainer = styled.div`
   text-align: center;
@@ -12,11 +12,7 @@ const FooterContainer = styled.div`
 
 const Footer = () => (
   <FooterContainer>
-    <Typography.Text>
-      © {OPERATOR_NAME} {new Date().getFullYear()}
-    </Typography.Text>
-    <br />
-    <br />
+    <FooterCenterContent />
   </FooterContainer>
 );
 =======

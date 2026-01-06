@@ -80,7 +80,7 @@ const Layout = ({ children }) => {
                 sessionStorage.setItem('chainId', currentChainInfo.id);
 
                 if (PAGES_TO_LOAD_WITHOUT_CHAINID.find((e) => e === path)) {
-                  // eg. /disclaimer will be redirect to same page ie. /disclaimer
+                  // eg. /page-not-found will be redirect to same page
                   updateChainId(currentChainInfo.id);
                   router.push(`/${path}`);
                 } else {

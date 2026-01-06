@@ -1,34 +1,19 @@
 import Image from 'next/image';
 import { useRouter } from 'next/router';
 
-<<<<<<< Updated upstream
-import { Footer as CommonFooter, getExplorerURL } from '@autonolas/frontend-library';
-=======
-import { getExplorerURL } from '@autonolas/frontend-library';
+import { FooterCenterContent } from 'libs/ui-components/src';
 import { Footer as CommonFooter, FooterCenterContent } from 'libs/ui-components/src';
 import { BOND_REPO_URL } from "libs/util-constants/src";
->>>>>>> Stashed changes
 
 import { ADDRESSES } from 'common-util/constants/addresses';
 import { useHelpers } from 'common-util/hooks/useHelpers';
-import { OPERATOR_NAME } from 'util/meta';
 
 import { ContractsInfoContainer } from './styles';
 
 <<<<<<< Updated upstream
 const { useBreakpoint } = Grid;
 
-const PATHS_NOT_TO_SHOW = [
-  '/',
-  '/paths',
-  '/manage-solana-liquidity',
-  '/docs',
-  '/disclaimer',
-  '/not-legal',
-];
-=======
 const PATHS_NOT_TO_SHOW = ['/', '/paths', '/manage-solana-liquidity', '/docs', '/not-legal'];
->>>>>>> Stashed changes
 
 const ContractInfo = () => {
   const { chainId } = useHelpers();
@@ -95,14 +80,7 @@ const Footer = () => {
   return (
     <CommonFooter
       leftContent={<ContractInfo />}
-      centerContent={
-        screens.xs ? null : (
-          <>
-            ©&nbsp;{OPERATOR_NAME}&nbsp;
-            {new Date().getFullYear()}
-          </>
-        )
-      }
+      centerContent={screens.xs ? null : <FooterCenterContent />}
     />
   );
 =======

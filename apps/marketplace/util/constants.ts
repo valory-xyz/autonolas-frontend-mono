@@ -8,7 +8,6 @@ export const URL = {
   UPDATE_SERVICE: '/ai-agents/update',
 
   // pages without chain id
-  DISCLAIMER: '/disclaimer',
   PAGE_NOT_FOUND: '/page-not-found',
   NOT_LEGAL: '/not-legal',
 } as const;
@@ -48,11 +47,7 @@ export const SERVICE_STATE_KEY_MAP = {
 } as const;
 
 // should not display contracts on homepage nor load with chain Ids
-export const PAGES_TO_LOAD_WITHOUT_CHAINID = [
-  '/disclaimer',
-  '/page-not-found',
-  '/not-legal',
-] as const;
+export const PAGES_TO_LOAD_WITHOUT_CHAINID = ['/page-not-found', '/not-legal'] as const;
 
 export const HASH_PREFIX = 'f01701220';
 export const HASH_PREFIXES = {
