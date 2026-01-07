@@ -1,0 +1,26 @@
+# Olas Govern
+
+> Governance and protocol management platform for the Olas ecosystem
+
+## Overview
+
+Govern is the Olas governance app where token holders can participate in protocol governance, manage staking contract emissions, vote on proposals, and interact with the veOLAS token system.
+
+## Key Features
+
+- Proposals: View and vote on governance proposals
+- Staking Contracts: View and manage emissions to staking contracts
+- veOLAS: Lock OLAS tokens for governance voting power
+- Epoch: Monitor and manage protocol epochs
+- Donate: Donate to developers to drive code contributions
+- Documentation: Access governance guides and resources
+
+## Documentation
+
+- Website: https://govern.olas.network/
+- Documentation: https://govern.olas.network/docs
+- Disclaimer: https://govern.olas.network/disclaimer
+
+## Technology
+
+Built with Next.js, React, and Web3 technologies. Implements on-chain governance mechanisms and integrates with the Olas protocol smart contracts across multiple blockchain networks.

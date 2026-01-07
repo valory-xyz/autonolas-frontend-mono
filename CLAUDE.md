@@ -16,6 +16,13 @@ This is an Nx-based monorepo for Olas frontend applications. It contains multipl
 - Mech Marketplace: https://marketplace.olas.network/
 - Operate: https://operate.olas.network/
 
+## Installation
+
+Install dependencies using Yarn (required - this project uses Yarn, not npm):
+```bash
+yarn
+```
+
 ## Development Commands
 
 ### Running Applications

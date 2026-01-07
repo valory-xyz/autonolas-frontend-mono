@@ -1,0 +1,26 @@
+# Olas Build
+
+> App for building, monetizing, and hiring AI agents in the Olas ecosystem
+
+## Overview
+
+Build is the Olas app for developers and businesses to create AI agents, monetize their work, and hire pre-built agents for various use cases.
+
+## Key Features
+
+- Build an Agent: Create custom AI agents with guided workflows
+- Hire an Agent: Browse and deploy pre-built AI agents
+- Monetize Your Agent: Earn rewards by sharing your agents
+- Dev Incentives: Access developer rewards and incentive programs
+- Opportunities: Discover building opportunities in the ecosystem
+- Paths: Follow structured learning paths for agent development
+
+## Documentation
+
+- Website: https://build.olas.network/
+- Documentation: https://build.olas.network/docs
+- Disclaimer: https://olas.network/disclaimer
+
+## Technology
+
+Built with Next.js, React, and Web3 technologies. Supports multiple blockchain networks and integrates with the Olas protocol for AI agents.

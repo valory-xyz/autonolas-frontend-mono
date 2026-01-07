@@ -1,0 +1,24 @@
+# Olas Launch
+
+> App for launching and managing staking contracts in the Olas ecosystem
+
+## Overview
+
+Launch is the Olas app for creating, deploying, and managing staking contracts across multiple blockchain networks. Users can nominate contracts, create custom staking programs, and explore different staking paths.
+
+## Key Features
+
+- Path: Explore staking opportunities and guided workflows
+- My Staking Contracts: Manage and monitor your deployed staking contracts
+- Nominate Contract: Submit contracts for staking program consideration
+- Multi-Network Support: Deploy staking contracts across Ethereum, Gnosis, Polygon, and other supported networks
+
+## Documentation
+
+- Website: https://launch.olas.network/
+- Documentation: https://launch.olas.network/docs
+- Disclaimer: https://olas.network/disclaimer
+
+## Technology
+
+Built with Next.js, React, and Web3 technologies. Supports staking contract deployment and management across multiple blockchain networks including Ethereum, Gnosis, Polygon, Arbitrum, Optimism, Base, Mode, and Celo.
