@@ -50,7 +50,7 @@ const getTitle = (title, tooltipDesc) => (
 const getColumns = (onClick, isActive, acc, depositoryAddress, hideEmptyProducts) => {
   const getChainName = (type) => {
     if (type === VM_TYPE.SVM) return 'Solana';
-    return CHAIN_NAMES(type);
+    return CHAIN_NAMES[type];
   };
   const columns = [
     {

@@ -1,10 +1,10 @@
-import { notifyError } from 'libs/util-functions/src';
 import {
+  notifyError,
   getProvider as getProviderFn,
   getChainId as getChainIdFn,
   getChainIdOrDefaultToMainnet as getChainIdOrDefaultToMainnetFn,
-} from 'libs/util-functions/src/lib/sendTransaction/helpers';
-import { sendTransaction as sendTransactionFn } from 'libs/util-functions/src/lib/sendTransaction';
+  sendTransaction as sendTransactionFn,
+} from 'libs/util-functions/src';
 
 import { RPC_URLS } from 'common-util/constants/rpcs';
 import { SUPPORTED_CHAINS } from 'common-util/config/wagmi';
@@ -30,4 +30,4 @@ export const getChainId = (chainId) => {
 };
 
 export const sendTransaction = (fn, account) =>
-  sendTransactionFn(fn, account, { SUPPORTED_CHAINS, rpcUrls: RPC_URLS });
+  sendTransactionFn(fn, account, { supportedChains: SUPPORTED_CHAINS, rpcUrls: RPC_URLS });

@@ -159,15 +159,11 @@ export const sendTransaction = (
     return method.rpc();
   }
 
-  return sendTransactionFn(
-    method,
-    account,
-    {
-      supportedChains: SUPPORTED_CHAINS,
-      rpcUrls: RPC_URLS as RpcUrl,
-    },
+  return sendTransactionFn(method, account, {
+    supportedChains: SUPPORTED_CHAINS,
+    rpcUrls: RPC_URLS as RpcUrl,
     isLegacy,
-  );
+  });
 };
 
 export const addressValidator = () => ({

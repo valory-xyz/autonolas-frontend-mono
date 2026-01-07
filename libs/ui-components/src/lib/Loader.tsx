@@ -14,7 +14,6 @@ const Container = styled.div`
   }
 `;
 
-// wait for 20 seconds before showing the error message
 const TIMEOUT_IN_SECONDS = 20;
 
 const DEFAULT_MESSAGE = 'Items couldn’t be loaded';
