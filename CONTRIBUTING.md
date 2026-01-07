@@ -1,6 +1,6 @@
 # Contributing to the Project
 
-Thank you for your interest in contributing to this project! We welcome contributions from everyone. Please follow the guidelines below to ensure a smooth contribution process.
+Thank you for your interest in contributing to this project! Please follow the guidelines below to ensure a smooth contribution process.
 
 ## Types of Contributions
 
@@ -15,17 +15,14 @@ Thank you for your interest in contributing to this project! We welcome contribu
 
 1. **Clone the Repository**: 
    ```bash
-   git clone https://github.com/your-username/your-repo.git
-   cd your-repo
+   git clone https://github.com/valory-xyz/autonolas-frontend-mono.git
+   cd autonolas-frontend-mono
    ```
 2. **Install Dependencies**: 
    ```bash
-   npm install
+   yarn install
    ```
-3. **Run the Development Server**: 
-   ```bash
-   nx serve your-app
-   ```
+3. **Run the Development Server**: See the [README for instructions on starting the apps](https://github.com/valory-xyz/autonolas-frontend-mono?tab=readme-ov-file#start-the-app)
 
 ## Submitting Your Contribution
 
@@ -53,7 +50,9 @@ By participating in this project, you agree to abide by our Code of Conduct. Ple
 
 ## Additional Resources
 
-- [Documentation](https://link-to-your-docs)
-- [Issue Tracker](https://github.com/your-username/your-repo/issues)
+- [Documentation](https://github.com/valory-xyz/autonolas-frontend-mono/blob/main/README.md)
+- [Security Policy](https://github.com/valory-xyz/autonolas-frontend-mono/security/policy)
+
+By contributing to this project, you agree that your contributions will be licensed under the Apache 2.0 License.
 
 Thank you for contributing!

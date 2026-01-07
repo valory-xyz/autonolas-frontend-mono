@@ -1,4 +1,4 @@
-# AutonolasFrontendMono
+# Autonolas Frontend Mono
 
 This mono repo contains the frontend for the Autonolas project. It is based on the Nx workspace and contains the following projects:
 - [Registry](https://registry.olas.network/)
