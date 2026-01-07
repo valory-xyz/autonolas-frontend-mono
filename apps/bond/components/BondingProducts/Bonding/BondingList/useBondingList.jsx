@@ -4,14 +4,14 @@ import { useCallback, useEffect, useState } from 'react';
 import { arbitrum, base, celo, gnosis, optimism, polygon } from 'viem/chains';
 import { usePublicClient } from 'wagmi';
 
-import { VM_TYPE, areAddressesEqual } from '@autonolas/frontend-library';
+import { areAddressesEqual, isL1Network } from 'libs/util-functions/src';
+import { VM_TYPE } from 'libs/util-constants/src';
 
 import { DEPOSITORY } from 'libs/util-contracts/src/lib/abiAndAddresses';
 
 import { ADDRESSES } from 'common-util/constants/addresses';
 import { ADDRESS_ZERO, ONE_ETH } from 'common-util/constants/numbers';
 import { DEX } from 'common-util/enums';
-import { isL1Network } from 'common-util/functions/chains';
 import { notifySpecificError } from 'common-util/functions/errors';
 import { parseToEth } from 'common-util/functions/ethers';
 import { getChainId } from 'common-util/functions/frontend-library';

@@ -8,7 +8,8 @@ import {
 import { GraphQLClient, gql } from 'graphql-request';
 import { useCallback } from 'react';
 
-import { VM_TYPE, areAddressesEqual } from '@autonolas/frontend-library';
+import { areAddressesEqual } from 'libs/util-functions/src';
+import { VM_TYPE } from 'libs/util-constants/src';
 
 import { ADDRESSES } from 'common-util/constants/addresses';
 import { useSvmConnectivity } from 'common-util/hooks/useSvmConnectivity';

@@ -1,8 +1,6 @@
 import { ethers } from 'ethers';
 
-import { notifyError } from '@autonolas/frontend-library';
-
-import { getEstimatedGasLimit } from 'libs/util-functions/src';
+import { notifyError, getEstimatedGasLimit } from 'libs/util-functions/src';
 
 import {
   getGenericErc20Contract,

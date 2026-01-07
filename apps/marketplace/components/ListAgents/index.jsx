@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Tabs, Typography } from 'antd';
 import { useRouter } from 'next/router';
-import { notifyError } from '@autonolas/frontend-library';
+import { notifyError } from 'libs/util-functions/src';
 
 import { NAV_TYPES } from 'util/constants';
 import { isMyTab } from 'common-util/List/ListTable/helpers';
@@ -21,7 +21,7 @@ const ListAgents = () => {
 
   const [currentTab, setCurrentTab] = useState(isMyTab(router) ? MY_AGENTS : ALL_AGENTS);
 
-  const { account, chainId, links, isL1OnlyNetwork, isSvm, isMainnet } = useHelpers();
+  const { account, chainId, links, isL1Network, isSvm, isMainnet } = useHelpers();
 
   const getAllAgents = useAllAgents();
   const getMyAgents = useMyAgents();
@@ -49,7 +49,7 @@ const ListAgents = () => {
   useEffect(() => {
     (async () => {
       if (isSvm) return;
-      if (!isL1OnlyNetwork) return;
+      if (!isL1Network) return;
       if (searchValue !== '') return;
 
       try {
@@ -70,13 +70,13 @@ const ListAgents = () => {
         console.error(e);
       }
     })();
-  }, [account, chainId, isL1OnlyNetwork, currentTab, searchValue, isSvm]);
+  }, [account, chainId, isL1Network, currentTab, searchValue, isSvm]);
 
   // fetch the list (without search)
   useEffect(() => {
     (async () => {
       if (isSvm) return;
-      if (!isL1OnlyNetwork) return;
+      if (!isL1Network) return;
       if (searchValue) return;
 
       if (total && currentPage) {
@@ -111,7 +111,7 @@ const ListAgents = () => {
   }, [
     isSvm,
     searchValue,
-    isL1OnlyNetwork,
+    isL1Network,
     account,
     total,
     currentPage,

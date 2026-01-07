@@ -3,7 +3,8 @@ import { ColumnsType } from 'antd/es/table';
 import Link from 'next/link';
 import styled from 'styled-components';
 
-import { COLOR, NA } from '@autonolas/frontend-library';
+import { COLOR } from 'libs/ui-theme/src';
+import { NA } from 'libs/util-constants/src';
 
 import { getName, getTier } from 'common-util/functions';
 import { useAppSelector } from 'store/setup';

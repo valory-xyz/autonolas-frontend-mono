@@ -14,7 +14,7 @@ import Decimal from 'decimal.js';
 import Link from 'next/link';
 import { useCallback, useEffect, useState } from 'react';
 
-import { notifyError, notifySuccess } from '@autonolas/frontend-library';
+import { notifyError, notifySuccess } from 'libs/util-functions/src';
 
 import { UNICODE_SYMBOLS } from 'libs/util-constants/src/lib/symbols';
 import idl from 'libs/util-contracts/src/lib/abiAndAddresses/liquidityLockbox.json';

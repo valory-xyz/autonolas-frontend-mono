@@ -1,7 +1,13 @@
 import { Contract } from 'ethers';
+import { Contract as ContractV5 } from 'ethers-v5';
 
 import { notifyError, notifyWarning } from '../notifications';
-import { getChainId, getEthersProvider, pollTransactionDetails } from './helpers';
+import {
+  getChainId,
+  getEthersProvider,
+  getEthersV5Provider,
+  pollTransactionDetails,
+} from './helpers';
 import { Chain, RpcUrl } from './types';
 
 export const SAFE_API_MAINNET =
@@ -36,13 +42,22 @@ export const getUrl = (hash: string, chainId: number) => {
 
 /**
  * poll until the hash has been approved
+ * uses legacy ethers v5 version for compatibility
+ * with some smart contracts (as they use ethers v5), otherwise
+ * some functions calls may fail
  */
 export const sendTransaction = async (
-  sendFn: Contract,
+  sendFn: Contract | ContractV5,
   account = (window as any)?.MODAL_PROVIDER?.accounts[0],
-  { supportedChains, rpcUrls }: { supportedChains: Chain[]; rpcUrls: RpcUrl },
+  {
+    supportedChains,
+    rpcUrls,
+    isLegacy,
+  }: { supportedChains: Chain[]; rpcUrls: RpcUrl; isLegacy?: boolean },
 ) => {
-  const provider = getEthersProvider(supportedChains, rpcUrls);
+  const provider = isLegacy
+    ? getEthersV5Provider(supportedChains, rpcUrls)
+    : getEthersProvider(supportedChains, rpcUrls);
 
   try {
     const isGnosisSafe = async () => {

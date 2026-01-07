@@ -19,7 +19,7 @@
  */
 import { ethers } from 'ethers-v5';
 
-import { getEthersProvider as getEthersV5Provider } from '@autonolas/frontend-library';
+import { getEthersV5Provider } from 'libs/util-functions/src';
 
 import { GNOSIS_SAFE_CONTRACT, MULTI_SEND_CONTRACT } from 'common-util/AbiAndAddresses';
 import { RPC_URLS, getServiceOwnerMultisigContract } from 'common-util/Contracts';

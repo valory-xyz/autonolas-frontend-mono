@@ -3,7 +3,7 @@ import isNil from 'lodash/isNil';
 import PropTypes from 'prop-types';
 import React, { Fragment, useState } from 'react';
 
-import { notifyError, notifySuccess } from '@autonolas/frontend-library';
+import { notifyError, notifySuccess } from 'libs/util-functions/src';
 
 import { HASH_PREFIXES } from 'util/constants';
 

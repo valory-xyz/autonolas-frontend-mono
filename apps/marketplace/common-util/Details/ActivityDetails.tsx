@@ -1,6 +1,6 @@
 import type { Activity } from 'common-util/graphql/service-activity';
 import { Col, Flex, Modal, Row, Typography } from 'antd';
-import { NA } from '@autonolas/frontend-library';
+import { NA } from 'libs/util-constants/src';
 import { AddressLink, Copy } from 'libs/ui-components/src';
 import { DetailsDivider, Info } from './styles';
 import { marketplaceRoleTag } from 'common-util/List/ListTable/helpers';

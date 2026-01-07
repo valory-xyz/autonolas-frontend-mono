@@ -5,7 +5,6 @@ import { FC, useCallback, useState, useEffect, useMemo } from 'react';
 import { Address } from 'viem';
 import { useRouter } from 'next/router';
 
-import { GenericObject, NA } from '@autonolas/frontend-library';
 import { AddressLink } from 'libs/ui-components/src';
 
 import { getServiceActivityFromSubgraph } from 'common-util/subgraphs';
@@ -22,6 +21,7 @@ import { useDetails } from './useDetails';
 import { useMetadata } from '../hooks/useMetadata';
 import { isMarketplaceSupportedNetwork } from 'common-util/functions';
 import { NftImage } from './NFTImage';
+import { NA } from 'libs/util-constants/src';
 
 const getColumns = ({
   addressLinkProps,
@@ -97,6 +97,8 @@ const getColumns = ({
     },
   ];
 };
+
+type GenericObject<T = unknown> = Record<string, T>;
 
 type DetailsProps = {
   id: string;

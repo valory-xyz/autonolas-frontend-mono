@@ -3,7 +3,7 @@ import { ReactNode, useMemo } from 'react';
 import { StakingContract } from 'types';
 import { Address, zeroHash } from 'viem';
 
-import { GATEWAY_URL, NA } from '@autonolas/frontend-library';
+import { GATEWAY_URL, NA } from 'libs/util-constants/src';
 
 import { EXPLORER_URLS, HASH_PREFIX, REGISTRY_URL, UNICODE_SYMBOLS } from 'libs/util-constants/src';
 import { truncateAddress } from 'libs/util-functions/src';

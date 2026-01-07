@@ -5,10 +5,8 @@ import { isNil } from 'lodash';
 import PropTypes from 'prop-types';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
-import { getCommaSeparatedNumber } from '@autonolas/frontend-library';
-
 import { COLOR } from 'libs/ui-theme/src';
-import { notifyError, notifySuccess } from 'libs/util-functions/src';
+import { notifyError, notifySuccess, getCommaSeparatedNumber } from 'libs/util-functions/src';
 
 import { ONE_ETH, ONE_ETH_IN_STRING } from 'common-util/constants/numbers';
 import {

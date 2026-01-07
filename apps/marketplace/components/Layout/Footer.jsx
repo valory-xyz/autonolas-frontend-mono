@@ -2,7 +2,7 @@ import { useRouter } from 'next/router';
 import { Typography } from 'antd';
 import { useEffect, useState } from 'react';
 import { Footer as CommonFooter, FooterCenterContent } from 'libs/ui-components/src';
-import { getExplorerURL } from '@autonolas/frontend-library';
+import { EXPLORER_URLS } from 'libs/util-constants/src';
 
 import { PAGES_TO_LOAD_WITHOUT_CHAINID } from 'util/constants';
 import { ADDRESSES } from 'common-util/Contracts/addresses';
@@ -79,7 +79,7 @@ const ContractInfo = () => {
     <div className="registry-contract">
       &nbsp;•&nbsp;
       <a
-        href={`${getExplorerURL(chainId)}/address/${addressToPoint}`}
+        href={`${EXPLORER_URLS[chainId]}/address/${addressToPoint}`}
         target="_blank"
         rel="noopener noreferrer"
       >

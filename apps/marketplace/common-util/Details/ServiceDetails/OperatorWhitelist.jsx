@@ -2,7 +2,7 @@ import { Button, Form, Input, Typography } from 'antd';
 import PropTypes from 'prop-types';
 import { useEffect, useState } from 'react';
 
-import { notifyError, notifySuccess, notifyWarning } from '@autonolas/frontend-library';
+import { notifyError, notifySuccess, notifyWarning } from 'libs/util-functions/src';
 
 import { DynamicFieldsForm } from '../../DynamicFieldsForm';
 import { addressValidator } from '../../functions';

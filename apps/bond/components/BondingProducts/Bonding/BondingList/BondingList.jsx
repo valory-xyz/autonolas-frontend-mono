@@ -10,7 +10,7 @@ import PropTypes from 'prop-types';
 import { useCallback } from 'react';
 import styled from 'styled-components';
 
-import { NA, VM_TYPE, getNetworkName } from '@autonolas/frontend-library';
+import { CHAIN_NAMES, NA, VM_TYPE } from 'libs/util-constants/src';
 
 import { COLOR } from 'libs/ui-theme/src';
 
@@ -50,7 +50,7 @@ const getTitle = (title, tooltipDesc) => (
 const getColumns = (onClick, isActive, acc, depositoryAddress, hideEmptyProducts) => {
   const getChainName = (type) => {
     if (type === VM_TYPE.SVM) return 'Solana';
-    return getNetworkName(type);
+    return CHAIN_NAMES[type];
   };
   const columns = [
     {

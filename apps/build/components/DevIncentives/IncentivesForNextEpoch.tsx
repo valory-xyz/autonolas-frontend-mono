@@ -1,6 +1,6 @@
 import { Button, Col, Form, Grid, InputNumber, Radio, Row, Table, Typography } from 'antd';
 import { useState } from 'react';
-import { notifyError } from '@autonolas/frontend-library';
+import { notifyError } from 'libs/util-functions/src';
 import { useHelpers } from 'common-util/hooks/useHelpers';
 import { CustomFormWrapper } from 'components/DynamicFieldsForm/styles';
 import { getPendingIncentives } from './requests';

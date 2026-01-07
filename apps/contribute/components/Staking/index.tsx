@@ -2,7 +2,7 @@ import { Alert, Card, Typography } from 'antd';
 import { useMemo } from 'react';
 import styled from 'styled-components';
 
-import { areAddressesEqual } from '@autonolas/frontend-library';
+import { areAddressesEqual } from 'libs/util-functions/src';
 
 import { ConnectWallet } from './ConnectWallet';
 import { StakingStepper } from './StakingStepper';

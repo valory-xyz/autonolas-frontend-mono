@@ -8,7 +8,7 @@ import { useEffect, useState } from 'react';
 import { Provider } from 'react-redux';
 import { cookieToInitialState, WagmiProvider } from 'wagmi';
 
-import { COLOR } from '@autonolas/frontend-library';
+import { COLOR } from 'libs/ui-theme/src';
 
 /** antd theme config */
 import { AutonolasThemeProvider, GlobalStyles } from 'libs/ui-theme/src';

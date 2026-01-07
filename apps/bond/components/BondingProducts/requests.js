@@ -1,4 +1,4 @@
-import { notifyError } from '@autonolas/frontend-library';
+import { notifyError } from 'libs/util-functions/src';
 import {
   getDepositoryContract,
   getTokenomicsContract,

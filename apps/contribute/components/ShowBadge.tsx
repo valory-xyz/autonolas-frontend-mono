@@ -3,7 +3,7 @@ import { Skeleton, Typography } from 'antd';
 import Image from 'next/image';
 import styled from 'styled-components';
 
-import { isGoerli } from '@autonolas/frontend-library';
+import { isGoerli } from 'common-util/functions';
 
 import { useAppSelector } from 'store/setup';
 

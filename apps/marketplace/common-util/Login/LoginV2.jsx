@@ -7,13 +7,13 @@ import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
 import { useAccount, useBalance, useDisconnect, useSwitchChain } from 'wagmi';
 
-import { CannotConnectAddressOfacError, notifyError, useScreen } from '@autonolas/frontend-library';
-
+import { useScreen } from 'libs/ui-theme/src';
+import { notifyError } from 'libs/util-functions/src';
+import { YellowButton, CannotConnectAddressOfacError } from 'libs/ui-components/src';
 import { isAddressProhibited } from 'libs/util-prohibited-data/src/index';
 
 import { setUserBalance } from 'store/setup';
 
-import { YellowButton } from 'libs/ui-components/src';
 import { useHelpers } from '../hooks';
 import { SolanaWallet } from './SolanaWallet';
 

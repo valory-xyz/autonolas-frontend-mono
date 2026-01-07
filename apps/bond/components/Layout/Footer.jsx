@@ -2,13 +2,12 @@ import Image from 'next/image';
 import { useRouter } from 'next/router';
 
 import { Footer as CommonFooter, FooterCenterContent } from 'libs/ui-components/src';
-import { BOND_REPO_URL } from 'libs/util-constants/src';
+import { BOND_REPO_URL, EXPLORER_URLS } from 'libs/util-constants/src';
 
 import { ADDRESSES } from 'common-util/constants/addresses';
 import { useHelpers } from 'common-util/hooks/useHelpers';
 
 import { ContractsInfoContainer } from './styles';
-import { getExplorerURL } from '@autonolas/frontend-library';
 
 const PATHS_NOT_TO_SHOW = ['/', '/paths', '/manage-solana-liquidity', '/docs', '/not-legal'];
 
@@ -39,7 +38,7 @@ const ContractInfo = () => {
   const getContractInfo = (text, addressToPoint) => (
     <div className="registry-contract">
       <a
-        href={`${getExplorerURL(chainId)}/address/${addressToPoint}`}
+        href={`${EXPLORER_URLS[chainId]}/address/${addressToPoint}`}
         target="_blank"
         rel="noopener noreferrer"
       >

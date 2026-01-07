@@ -1,7 +1,7 @@
 import { Menu } from 'antd';
 import styled from 'styled-components';
 
-import { COLOR } from '@autonolas/frontend-library';
+import { COLOR } from 'libs/ui-theme/src';
 
 export const VerticalDivider = styled.div`
   height: 40px;

@@ -1,7 +1,7 @@
 import { Card, Col, Row, Typography } from 'antd';
 import styled from 'styled-components';
 
-import { COLOR } from '@autonolas/frontend-library';
+import { COLOR } from 'libs/ui-theme/src';
 
 const { Text } = Typography;
 

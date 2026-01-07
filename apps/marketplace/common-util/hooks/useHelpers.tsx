@@ -2,14 +2,12 @@ import { useMemo } from 'react';
 import { isNumber } from 'lodash';
 import { useAccount } from 'wagmi';
 import { useAnchorWallet } from '@solana/wallet-adapter-react';
-import {
-  isL1OnlyNetwork as isL1OnlyNetworkFn,
-  isL1Network as isL1NetworkFn,
-} from '@autonolas/frontend-library';
+import { isL1Network as isL1NetworkFn } from 'libs/util-functions/src';
 
-import { URL, VM_TYPE } from '../../util/constants';
+import { URL } from '../../util/constants';
 import { doesNetworkHaveValidServiceManagerTokenFn } from '../functions';
 import { useAppSelector } from 'store/index';
+import { VM_TYPE } from 'libs/util-constants/src';
 
 export const useHelpers = () => {
   const wallet = useAnchorWallet();
@@ -54,7 +52,6 @@ export const useHelpers = () => {
     chainId,
     chainDisplayName,
     chainName,
-    isL1OnlyNetwork: isL1OnlyNetworkFn(chainId!),
     isL1Network: isL1NetworkFn(chainId!),
     doesNetworkHaveValidServiceManagerToken: doesNetworkHaveValidServiceManagerTokenFn(chainId!),
     links: updatedLinks,

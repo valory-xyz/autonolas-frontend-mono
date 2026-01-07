@@ -1,7 +1,7 @@
 import { Alert, Button, Typography } from 'antd';
 import { useEffect, useState } from 'react';
 
-import { notifyError, notifySuccess } from '@autonolas/frontend-library';
+import { notifyError, notifySuccess } from 'libs/util-functions/src';
 
 import { notifySpecificError } from 'common-util/functions/errors';
 import { useHelpers } from 'common-util/hooks/useHelpers';

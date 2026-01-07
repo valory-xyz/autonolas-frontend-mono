@@ -3,7 +3,7 @@ import { Row, Card, Col, Button, Typography, Tag } from 'antd';
 import Image from 'next/image';
 
 import { BUILD_REPO_URL } from 'libs/util-constants/src';
-import { COLOR } from '@autonolas/frontend-library';
+import { COLOR } from 'libs/ui-theme/src';
 import paths from './data.json';
 import { PageWrapper } from 'util/theme';
 

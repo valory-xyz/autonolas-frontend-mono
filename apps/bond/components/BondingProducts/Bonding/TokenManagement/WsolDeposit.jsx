@@ -3,7 +3,7 @@ import { isNumber } from 'lodash';
 import pDebounce from 'p-debounce';
 import { useState } from 'react';
 
-import { getCommaSeparatedNumber, notifyError } from '@autonolas/frontend-library';
+import { notifyError, getCommaSeparatedNumber } from 'libs/util-functions/src';
 
 import { NA } from 'libs/util-constants/src';
 import { useSvmConnectivity } from 'common-util/hooks/useSvmConnectivity';
