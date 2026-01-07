@@ -1,13 +1,9 @@
-import { Meta } from 'components/Meta';
 import { HomePage } from 'components/Home';
+import { Meta } from 'components/Meta';
 
 const Index = () => (
   <>
-    <Meta
-      pageTitle={null}
-      description="Get access to discounted OLAS by bonding capital into the Olas protocol. Explore bonding products and manage your bonds."
-      pageUrl=""
-    />
+    <Meta description="Get access to discounted OLAS by bonding capital into the Olas protocol. Explore bonding products and manage your bonds." />
     <HomePage />
   </>
 );
