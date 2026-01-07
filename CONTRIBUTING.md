@@ -98,14 +98,6 @@ git checkout -b chore/description
 
 Follow conventional commit format:
 
-```
-type(scope): description
-
-[optional body]
-
-[optional footer]
-```
-
 **Types:**
 - `feat`: New feature
 - `fix`: Bug fix
