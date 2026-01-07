@@ -8,6 +8,12 @@ This mono repo contains the frontend for the Olas (aka Autonolas) project. It is
 - [Operate](https://operate.olas.network/)
 - [Build](https://build.olas.network/)(work in progress)
 
+## Installation
+
+- Install dependencies using Yarn (required):
+  ```bash
+  yarn
+  ```
 
 ## Start the app
 
