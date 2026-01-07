@@ -1,5 +1,5 @@
-import React from 'react';
 import Head from 'next/head';
+import React from 'react';
 
 const SITE_URL = 'https://operate.olas.network';
 const SITE_TITLE = 'Olas Operate';

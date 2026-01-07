@@ -36,7 +36,7 @@ export const AutonolasServicesArchitected = () => {
   return (
     <ContentRow className="row-2">
       <Title level={3} className="title">
-        How are Autonolas services architected?
+        How are Olas services architected?
       </Title>
 
       {LIST.map(({ title, desc, link, type }) => (

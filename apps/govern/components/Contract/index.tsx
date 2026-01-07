@@ -1,5 +1,4 @@
 import { Alert, Card, Flex, Skeleton, Space, Typography } from 'antd';
-import Head from 'next/head';
 import { useRouter } from 'next/router';
 import styled from 'styled-components';
 import { StakingContract } from 'types';
@@ -7,12 +6,13 @@ import { mainnet } from 'viem/chains';
 import { useEnsName } from 'wagmi';
 
 import { CHAIN_NAMES, EXPLORER_URLS, UNICODE_SYMBOLS } from 'libs/util-constants/src';
+import { getAddressFromBytes32, truncateAddress } from 'libs/util-functions/src';
 
+import { Meta } from 'components/Meta';
 import { useAppSelector } from 'store/index';
 
 import { ContractConfiguration } from './ContractConfiguration';
 import { useContractParams } from './hooks';
-import { getAddressFromBytes32, truncateAddress } from 'libs/util-functions/src';
 
 const StyledMain = styled.main`
   display: flex;
@@ -134,10 +134,7 @@ export const ContractPage = () => {
 
   return (
     <>
-      <Head>
-        <title>Govern | {contract.metadata.name}</title>
-        <meta name="description" content={contract.metadata.description} />
-      </Head>
+      <Meta pageTitle={contract.metadata.name} description={contract.metadata.description} />
 
       <StyledMain>
         <ContractPageContent contract={contract} />

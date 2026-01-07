@@ -70,7 +70,7 @@ export const ConnectTwitterModal = ({ disabled }: { disabled?: boolean }) => {
         <Title className="mb-0" level={5}>
           Step 4:
         </Title>
-        <Text>@-mention Autonolas or use the #OlasNetwork hashtag to start receiving rewards.</Text>
+        <Text>@-mention Olas or use the #OlasNetwork hashtag to start receiving rewards.</Text>
       </Modal>
     </>
   );

@@ -14,7 +14,7 @@ describe('<Proposals />', () => {
     expect(pageTitle).toBeInTheDocument();
 
     const pageDesc = screen.getByText(
-      /Participate in Autonolas DAO governance by voting on on-chain proposals./,
+      /Participate in Olas DAO governance by voting on on-chain proposals./,
     );
     expect(pageDesc).toBeInTheDocument();
   });

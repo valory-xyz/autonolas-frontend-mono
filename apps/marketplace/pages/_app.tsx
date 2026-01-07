@@ -15,7 +15,7 @@ import Layout from '../components/Layout';
 import { wrapper } from '../store';
 
 const DESC =
-  'Marketplace to discover, manage, and view activity of autonomous AI agents directly from the Autonolas on-chain registry.';
+  'Marketplace to discover, manage, and view activity of autonomous AI agents directly from the Olas on-chain registry.';
 const queryClient = new QueryClient();
 const projectId = process.env.NEXT_PUBLIC_WALLET_PROJECT_ID as string;
 const metadata = {

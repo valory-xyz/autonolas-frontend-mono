@@ -28,7 +28,7 @@ const HomePage = () => {
               {` Mint and manage your services${isL1Network ? ', agents and components' : ''}.`}
             </Title>
             <Text className="lead">
-              The easiest way to interact with the Autonolas on-chain registry.
+              The easiest way to interact with the Olas on-chain registry.
             </Text>
             <Link href={isL1Network ? links.COMPONENTS : links.SERVICES} passHref legacyBehavior>
               <Button size="large" type="primary">

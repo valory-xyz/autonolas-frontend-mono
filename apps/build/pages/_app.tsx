@@ -1,11 +1,13 @@
 import type { NextPage, NextPageContext } from 'next';
 import { createWrapper } from 'next-redux-wrapper';
 
+import { AutonolasThemeProvider, GlobalStyles } from 'libs/ui-theme/src';
+
 /** antd theme config */
 import Layout from 'components/Layout';
+
 import Web3ModalProvider from '../context/web3ModalProvider';
 import initStore from '../store';
-import { AutonolasThemeProvider, GlobalStyles } from 'libs/ui-theme/src';
 
 type MyAppProps = {
   Component: NextPage;

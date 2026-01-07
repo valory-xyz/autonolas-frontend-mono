@@ -1,5 +1,4 @@
 import { Flex, Typography } from 'antd';
-import Meta from '../Meta';
 import Image from 'next/image';
 import { ContentContainer, Hero } from '../Layout/styles';
 import { WhatIsOlas } from './WhatIsOlas';
@@ -24,7 +23,6 @@ const HeroSection = () => (
 
 export const HomePage = () => (
   <>
-    <Meta />
     <HeroSection />
     <ContentContainer>
       <WhatIsOlas />

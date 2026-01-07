@@ -1,6 +1,6 @@
 # AutonolasFrontendMono
 
-This mono repo contains the frontend for the Autonolas project. It is based on the Nx workspace and contains the following projects:
+This mono repo contains the frontend for the Olas (aka Autonolas) project. It is based on the Nx workspace and contains the following projects:
 - [Registry](https://registry.olas.network/)
 - [Bond](https://bond.olas.network/)
 - [Govern](https://govern.olas.network/)
