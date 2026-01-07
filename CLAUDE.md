@@ -216,7 +216,6 @@ ESLint enforces import ordering (configured in .eslintrc.json):
 - Ethers v6 (and v5 as ethers-v5)
 - Ant Design 5.9.0
 - Styled-components 6.0.7
-- @autonolas/frontend-library 0.4.25
 
 ## Notes
 

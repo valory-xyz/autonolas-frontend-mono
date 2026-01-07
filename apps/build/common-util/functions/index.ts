@@ -6,7 +6,7 @@ import {
   getChainIdOrDefaultToMainnet as getChainIdOrDefaultToMainnetFn,
   getIsValidChainId as getIsValidChainIdFn,
   sendTransaction as sendTransactionFn,
-} from '@autonolas/frontend-library';
+} from 'libs/util-functions/src';
 import { SUPPORTED_CHAINS } from 'components/Login';
 import {
   DISPENSER,

@@ -18,7 +18,7 @@ import { base, mainnet } from 'viem/chains';
 import { DISCORD_CREATE_TICKET_URL } from 'libs/util-constants/src';
 import { useAccount, useReadContract, useSwitchChain } from 'wagmi';
 
-import { areAddressesEqual, notifyError } from '@autonolas/frontend-library';
+import { areAddressesEqual, notifyError } from 'libs/util-functions/src';
 
 import {
   CONTRIBUTE_MANAGER_ADDRESS_BASE,

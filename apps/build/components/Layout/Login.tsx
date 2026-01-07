@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { connect } from 'react-redux';
 import styled from 'styled-components';
 import { useAccount, useBalance, useConfig } from 'wagmi';
-import { MEDIA_QUERY } from '@autonolas/frontend-library';
+import { MEDIA_QUERY } from 'libs/ui-theme/src';
 import {
   setUserAccount as setUserAccountFn,
   setUserBalance as setUserBalanceFn,

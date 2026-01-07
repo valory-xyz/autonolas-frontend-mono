@@ -1,4 +1,4 @@
-import { notifyError } from '@autonolas/frontend-library';
+import { notifyError } from 'libs/util-functions/src';
 import { TOKENOMICS_UNIT_TYPES } from 'libs/util-constants/src';
 import { rewardsFormatter } from 'libs/common-contract-functions/src/lib/utils';
 import {

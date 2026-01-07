@@ -67,24 +67,7 @@ export const DEFAULT_SERVICE_CREATION_ETH_TOKEN_ZEROS =
 
 export const SVM_EMPTY_ADDRESS = '11111111111111111111111111111111';
 
-// used for local testing
-export const LOCAL_FORK_ID = 100000;
-export const LOCAL_FORK_ID_GNOSIS = 100001;
-export const LOCAL_FORK_ID_POLYGON = 100002;
-
 export const DEFAULT_CHAIN_ID = 1;
-
-// TODO: move to autonolas-frontend-library
-export const EXTRA_COLORS = {
-  YELLOW_PRIMARY: '#eab308', // tailwind orange.500
-  YELLOW_SECONDARY: '#fefce8', // tailwind orange.50
-} as const;
-
-// These constants define the types of virtual machines supported
-export const VM_TYPE = {
-  EVM: 'EVM', // Ethereum Virtual Machine
-  SVM: 'SVM', // Solana Virtual Machine
-} as const;
 
 /**
  * Constants for Solana chain names

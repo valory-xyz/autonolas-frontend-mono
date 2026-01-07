@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
-import { notifyError, NA } from '@autonolas/frontend-library';
+import { NA } from 'libs/util-constants/src';
+import { notifyError } from 'libs/util-functions/src';
 
 import { GATEWAY_URL, HASH_DETAILS_STATE } from '../../util/constants';
 

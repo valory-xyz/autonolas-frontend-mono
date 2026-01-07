@@ -2,7 +2,7 @@ import { Button, Divider, Form, Input, Typography, notification } from 'antd';
 import { useState } from 'react';
 import { Address } from 'viem';
 
-import { isValidAddress } from '@autonolas/frontend-library';
+import { isValidAddress } from 'libs/util-functions/src';
 
 import { useHelpers } from 'common-util/hooks/useHelpers';
 

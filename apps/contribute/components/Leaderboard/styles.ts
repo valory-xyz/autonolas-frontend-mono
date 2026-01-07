@@ -1,7 +1,7 @@
 import { Card } from 'antd';
 import styled from 'styled-components';
 
-import { COLOR, MEDIA_QUERY } from '@autonolas/frontend-library';
+import { COLOR, MEDIA_QUERY } from 'libs/ui-theme/src';
 
 export const HomeContainer = styled.div``;
 

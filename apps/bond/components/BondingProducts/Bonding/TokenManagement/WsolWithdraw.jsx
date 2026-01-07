@@ -3,7 +3,7 @@ import { isNil, isNumber } from 'lodash';
 import pDebounce from 'p-debounce';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
-import { notifyError } from '@autonolas/frontend-library';
+import { notifyError } from 'libs/util-functions/src';
 
 import { useSvmConnectivity } from 'common-util/hooks/useSvmConnectivity';
 

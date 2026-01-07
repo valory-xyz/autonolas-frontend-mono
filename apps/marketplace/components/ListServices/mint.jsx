@@ -1,24 +1,22 @@
 import { Typography } from 'antd';
 import { useState } from 'react';
 
-import { notifyError, notifySuccess } from '@autonolas/frontend-library';
-
-import { getEstimatedGasLimit } from 'libs/util-functions/src';
+import { notifyError, notifySuccess, getEstimatedGasLimit } from 'libs/util-functions/src';
 
 import { getServiceManagerContract } from 'common-util/Contracts';
-import { AlertError, AlertSuccess, convertStringToArray } from 'common-util/List/ListCommon';
 import { sendTransaction } from 'common-util/functions';
 import { checkIfERC721Receive } from 'common-util/functions/requests';
 import { useHelpers } from 'common-util/hooks';
 import { useSvmConnectivity } from 'common-util/hooks/useSvmConnectivity';
+import { AlertError, AlertSuccess, convertStringToArray } from 'common-util/List/ListCommon';
 import {
   DEFAULT_SERVICE_CREATION_ETH_TOKEN,
   DEFAULT_SERVICE_CREATION_ETH_TOKEN_ZEROS,
 } from 'util/constants';
 
 import { FormContainer } from '../styles';
-import RegisterForm from './helpers/RegisterForm';
 import { buildSvmArgsToMintOrUpdate } from './helpers/functions';
+import RegisterForm from './helpers/RegisterForm';
 import { getAgentParams } from './utils';
 
 const { Title } = Typography;

@@ -1,7 +1,7 @@
 import Head from 'next/head';
 import React from 'react';
 
-import { SITE_URL, SITE_TITLE, SITE_DESCRIPTION, SITE_META_TAG_IMAGE } from 'util/constants';
+import { SITE_DESCRIPTION, SITE_META_TAG_IMAGE, SITE_TITLE, SITE_URL } from 'util/constants';
 
 type MetaProps = {
   pageTitle?: string | null;
@@ -22,7 +22,11 @@ const Meta = ({ pageTitle, description, pageUrl }: MetaProps) => {
       <meta property="og:type" content="website" key="og:type" />
       <meta property="og:url" content={url} key="og:url" />
       <meta property="og:title" content={title} key="og:title" />
-      <meta property="og:description" content={description || SITE_DESCRIPTION} key="og:description" />
+      <meta
+        property="og:description"
+        content={description || SITE_DESCRIPTION}
+        key="og:description"
+      />
       <meta property="og:image" content={SITE_META_TAG_IMAGE} key="og:image" />
 
       <meta property="twitter:card" content="summary_large_image" key="twitter:card" />

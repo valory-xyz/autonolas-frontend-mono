@@ -1,5 +1,5 @@
-import Meta from 'components/meta';
 import { Documentation } from 'components/Documentation';
+import Meta from 'components/meta';
 
 const Docs = () => (
   <>

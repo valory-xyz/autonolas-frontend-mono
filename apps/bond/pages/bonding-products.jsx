@@ -1,5 +1,5 @@
-import { Meta } from 'components/Meta';
 import { BondingProducts } from 'components/BondingProducts/BondingProducts';
+import { Meta } from 'components/Meta';
 
 const BondingProductsPage = () => (
   <>

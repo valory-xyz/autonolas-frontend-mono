@@ -2,7 +2,7 @@ import {
   getChainId as getChainIdFn,
   getProvider as getProviderFn,
   notifyError,
-} from '@autonolas/frontend-library';
+} from 'libs/util-functions/src';
 
 import { RPC_URLS } from 'libs/util-constants/src';
 

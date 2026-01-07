@@ -1,5 +1,5 @@
-import { Opportunities } from 'components/Opportunities'; // Import the actual Opportunities component
 import Meta from 'components/Meta';
+import { Opportunities } from 'components/Opportunities';
 
 const OpportunitiesPage = () => (
   <>

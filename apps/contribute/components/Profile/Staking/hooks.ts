@@ -4,7 +4,7 @@ import { Address } from 'viem';
 import { base, mainnet } from 'viem/chains';
 import { useAccount, useReadContract, useSwitchChain } from 'wagmi';
 
-import { notifyError, notifyWarning } from '@autonolas/frontend-library';
+import { notifyError, notifyWarning } from 'libs/util-functions/src';
 
 import {
   SERVICE_REGISTRY_L2_ABI,

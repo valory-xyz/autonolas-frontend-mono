@@ -7,7 +7,8 @@ import { v4 as uuid } from 'uuid';
 import { Address } from 'viem';
 import { useSignMessage } from 'wagmi';
 
-import { NA, notifyError, notifySuccess } from '@autonolas/frontend-library';
+import { NA } from 'libs/util-constants/src';
+import { notifyError, notifySuccess } from 'libs/util-functions/src';
 
 import { DisplayName } from 'components/DisplayName';
 import { getCurrentProposalInfo } from 'common-util/functions/proposal';

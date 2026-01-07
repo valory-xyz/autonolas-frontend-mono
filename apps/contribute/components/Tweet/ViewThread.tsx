@@ -2,7 +2,7 @@ import { CloseOutlined, EditFilled } from '@ant-design/icons';
 import { Button, Timeline, Typography } from 'antd';
 import { Fragment } from 'react';
 
-import { NA } from '@autonolas/frontend-library';
+import { NA } from 'libs/util-constants/src';
 
 import type { TweetOrThread } from '.';
 import MediaList, { MODE } from './MediaList';

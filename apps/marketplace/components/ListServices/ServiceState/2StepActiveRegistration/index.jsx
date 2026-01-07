@@ -3,7 +3,7 @@ import { isArray } from 'lodash';
 import PropTypes from 'prop-types';
 import { useEffect, useState } from 'react';
 
-import { convertToEth, notifyError, notifySuccess } from '@autonolas/frontend-library';
+import { convertToEth, notifyError, notifySuccess } from 'libs/util-functions/src';
 
 import { SendTransactionButton } from '../../../../common-util/TransactionHelpers/SendTransactionButton';
 import { useHelpers } from '../../../../common-util/hooks';

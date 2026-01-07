@@ -2,7 +2,7 @@ import { Tabs, Typography } from 'antd';
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 
-import { notifyError } from '@autonolas/frontend-library';
+import { notifyError } from 'libs/util-functions/src';
 
 import { PageMainContainer } from 'components/styles';
 import { getMyListOnPagination } from '../../common-util/ContractUtils/myList';

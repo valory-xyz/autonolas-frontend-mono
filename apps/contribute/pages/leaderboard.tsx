@@ -1,5 +1,5 @@
-import Meta from 'components/meta';
 import { Leaderboard } from 'components/Leaderboard';
+import Meta from 'components/meta';
 
 const LeaderboardPage = () => (
   <>

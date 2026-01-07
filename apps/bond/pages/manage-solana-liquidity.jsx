@@ -1,5 +1,5 @@
-import { Meta } from 'components/Meta';
 import { WsolTokenManagement } from 'components/BondingProducts/Bonding/TokenManagement/WsolTokenManagement';
+import { Meta } from 'components/Meta';
 
 const ManageSolanaLiquidityPage = () => (
   <>

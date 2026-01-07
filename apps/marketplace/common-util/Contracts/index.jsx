@@ -2,7 +2,7 @@ import { ethers } from 'ethers';
 import { mainnet } from 'viem/chains';
 import Web3 from 'web3';
 
-import { isL1Network } from '@autonolas/frontend-library';
+import { isL1Network } from 'libs/util-functions/src';
 
 import { DISPENSER, TOKENOMICS } from 'libs/util-contracts/src/lib/abiAndAddresses';
 
@@ -26,7 +26,6 @@ import {
   getChainId,
   getProvider,
 } from 'common-util/functions';
-import { LOCAL_FORK_ID, LOCAL_FORK_ID_GNOSIS, LOCAL_FORK_ID_POLYGON } from 'util/constants';
 
 import { ADDRESSES } from './addresses';
 
@@ -47,9 +46,6 @@ export const RPC_URLS = {
   421614: process.env.NEXT_PUBLIC_ARBITRUM_SEPOLIA_URL,
   84532: process.env.NEXT_PUBLIC_BASE_SEPOLIA_URL,
   11155420: process.env.NEXT_PUBLIC_OPTIMISM_SEPOLIA_URL,
-  [LOCAL_FORK_ID]: 'http://localhost:8545',
-  [LOCAL_FORK_ID_GNOSIS]: 'http://localhost:8545',
-  [LOCAL_FORK_ID_POLYGON]: 'http://localhost:8545',
 };
 
 /**

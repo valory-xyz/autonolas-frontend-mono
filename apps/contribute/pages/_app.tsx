@@ -1,22 +1,23 @@
-import { useEffect, useState } from 'react';
 import { ApolloProvider } from '@apollo/client';
 
 /** wagmi config */
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { createWeb3Modal } from '@web3modal/wagmi/react';
 import type { AppProps } from 'next/app';
+import { useEffect, useState } from 'react';
 import { Provider } from 'react-redux';
-import { WagmiProvider, cookieToInitialState } from 'wagmi';
+import { cookieToInitialState, WagmiProvider } from 'wagmi';
 
-import { COLOR } from '@autonolas/frontend-library';
+import { COLOR } from 'libs/ui-theme/src';
+
+/** antd theme config */
+import { AutonolasThemeProvider, GlobalStyles } from 'libs/ui-theme/src';
+
+import { Layout } from 'components/Layout';
 
 /* eslint-disable-line import/no-unresolved */
 import { wagmiConfig } from 'components/Login/config';
 import Meta from 'components/meta';
-
-/** antd theme config */
-import { AutonolasThemeProvider, GlobalStyles } from 'libs/ui-theme/src';
-import { Layout } from 'components/Layout';
 
 import client from '../apolloClient';
 import { store } from '../store';

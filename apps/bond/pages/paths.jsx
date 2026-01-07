@@ -1,5 +1,5 @@
-import { Meta } from 'components/Meta';
 import { HomePage } from 'components/Home';
+import { Meta } from 'components/Meta';
 
 const PathsPage = () => (
   <>

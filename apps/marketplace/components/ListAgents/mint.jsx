@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/router';
 import { Typography } from 'antd';
-import { notifyError, notifySuccess } from '@autonolas/frontend-library';
+import { notifyError, notifySuccess } from 'libs/util-functions/src';
 
 import { getEstimatedGasLimit } from 'libs/util-functions/src';
 

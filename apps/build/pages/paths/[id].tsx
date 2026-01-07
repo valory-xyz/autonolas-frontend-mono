@@ -4,7 +4,7 @@ import styled from 'styled-components';
 import Markdown from 'markdown-to-jsx';
 
 import { useFetchPathData } from 'common-util/hooks/useFetchPathData';
-import { COLOR } from '@autonolas/frontend-library';
+import { COLOR } from 'libs/ui-theme/src';
 import Meta from 'components/Meta';
 import { PageWrapper } from 'util/theme';
 

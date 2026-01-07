@@ -1,6 +1,7 @@
 import { Alert, Divider, Typography } from 'antd';
 import { useEffect, useState } from 'react';
-import { COLOR, notifySuccess } from '@autonolas/frontend-library';
+import { COLOR } from 'libs/ui-theme/src';
+import { notifySuccess } from 'libs/util-functions/src';
 import { notifySpecificError } from 'common-util/functions/errors';
 import { sortUnitIdsAndTypes } from 'common-util/functions/units';
 import { useHelpers } from 'common-util/hooks/useHelpers';

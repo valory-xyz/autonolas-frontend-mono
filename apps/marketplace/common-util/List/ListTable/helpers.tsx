@@ -3,7 +3,7 @@ import styled from 'styled-components';
 import type { NextRouter } from 'next/router';
 import { Button, Flex, Tag } from 'antd';
 
-import { NA } from '@autonolas/frontend-library';
+import { NA } from 'libs/util-constants/src';
 import { AddressLink } from 'libs/ui-components/src';
 import { truncateAddress } from 'libs/util-functions/src';
 import { Activity } from 'common-util/graphql/service-activity';

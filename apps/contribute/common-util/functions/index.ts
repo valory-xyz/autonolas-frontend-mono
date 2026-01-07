@@ -4,14 +4,13 @@ import { isNil, toLower } from 'lodash';
 import { Address } from 'viem';
 
 import {
-  LOCAL_FORK_ID,
   getChainId as getChainIdFn,
   getChainIdOrDefaultToMainnet as getChainIdOrDefaultToMainnetFn,
   getEthersProvider as getEthersProviderFn,
   getIsValidChainId as getIsValidChainIdFn,
   getProvider as getProviderFn,
   sendTransaction as sendTransactionFn,
-} from '@autonolas/frontend-library';
+} from 'libs/util-functions/src';
 
 import { RPC_URLS } from 'libs/util-constants/src';
 import data from 'components/Education/data.json';
@@ -20,35 +19,27 @@ import { SUPPORTED_CHAINS } from 'components/Login/config';
 import prohibitedAddresses from '../../data/prohibited-addresses.json';
 import { LeaderboardUser } from 'store/types';
 
-const getSupportedChains = () =>
-  process.env.NEXT_PUBLIC_IS_CONNECTED_TO_LOCAL === 'true'
-    ? [...SUPPORTED_CHAINS, { id: LOCAL_FORK_ID }]
-    : SUPPORTED_CHAINS;
-
 /**
  * re-usable functions
  */
 
-export const getProvider = () => getProviderFn(getSupportedChains(), RPC_URLS);
+export const getProvider = () => getProviderFn(SUPPORTED_CHAINS, RPC_URLS);
 
-export const getEthersProvider = () => getEthersProviderFn(getSupportedChains(), RPC_URLS);
+export const getEthersProvider = () => getEthersProviderFn(SUPPORTED_CHAINS, RPC_URLS);
 
 export const getIsValidChainId = (chainId: number) =>
-  getIsValidChainIdFn(getSupportedChains(), chainId);
+  getIsValidChainIdFn(SUPPORTED_CHAINS, chainId);
 
 export const getChainIdOrDefaultToMainnet = (chainId: number) =>
-  getChainIdOrDefaultToMainnetFn(getSupportedChains(), chainId);
+  getChainIdOrDefaultToMainnetFn(SUPPORTED_CHAINS, chainId);
 
 export const getChainId = (chainId = null) => {
-  if (process.env.NEXT_PUBLIC_IS_CONNECTED_TO_LOCAL === 'true') {
-    return LOCAL_FORK_ID;
-  }
-  return getChainIdFn(getSupportedChains(), chainId);
+  return getChainIdFn(SUPPORTED_CHAINS, chainId);
 };
 
 export const sendTransaction = (fn: Parameters<typeof sendTransactionFn>[0], account: string) =>
   sendTransactionFn(fn, account, {
-    supportedChains: getSupportedChains(),
+    supportedChains: SUPPORTED_CHAINS,
     rpcUrls: RPC_URLS,
   });
 

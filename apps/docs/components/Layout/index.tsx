@@ -22,7 +22,7 @@ const NavigationBar = ({ children }: { children: React.ReactNode }) => {
           <Link href="/" className="logo-link">
             <Logo />
           </Link>
-          <NavDropdown  currentSite="docs"/>
+          <NavDropdown currentSite="docs" />
         </Flex>
       </StyledHeader>
 
