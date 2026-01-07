@@ -1,73 +1,31 @@
 # Contributing to Autonolas Frontend Mono
 
-Thank you for your interest in contributing to the Autonolas Frontend Mono repository! This document provides guidelines and information for contributors.
+Thank you for your interest in contributing! This document provides guidelines for contributing code to this repository.
 
 ## Table of Contents
 
-- [Project Overview](#project-overview)
-- [Development Setup](#development-setup)
+- [Getting Started](#getting-started)
 - [Development Workflow](#development-workflow)
 - [Code Quality](#code-quality)
 - [Testing](#testing)
 - [Pull Request Process](#pull-request-process)
 - [Getting Help](#getting-help)
 
-## Project Overview
+## Getting Started
 
-This is an Nx monorepo containing multiple Next.js frontend applications for the Autonolas ecosystem:
+Before contributing, please:
 
-- **marketplace**: AI agent and component marketplace
-- **bond**: Bonding mechanisms
-- **govern**: Governance interface
-- **launch**: Service launching
-- **operate**: Service operations
-- **build**: (Work in progress)
-- **contribute**: Contribution interface
-- **docs**: Documentation site
-- **tokenomics**: Token economics interface
-
-Additionally, the repository contains shared libraries in the `libs/` directory for common functionality across applications.
-
-## Development Setup
-
-### Prerequisites
-
-- **Node.js**: Version 18.x or higher
-- **Yarn**: Package manager
-
-### Quick Setup
-
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/valory-xyz/autonolas-frontend-mono.git
-   cd autonolas-frontend-mono
-   ```
-
-2. **Install dependencies**
-   ```bash
-   yarn install
-   ```
-
-3. **Run a specific app**: See the [README for instructions on starting the apps](https://github.com/valory-xyz/autonolas-frontend-mono?tab=readme-ov-file#start-the-app)
-
-### Development Commands
-
-Common commands you'll use:
-
-| Command | Description |
-|---------|-------------|
-| `npx nx serve [app-name]` | Start development server for a specific app |
-| `npx nx test [app-name]` | Run tests for a specific app or library |
-| `npx nx lint [app-name]` | Run linting for a specific app or library |
-| `npx nx reset` | Clear the Nx cache |
+1. Review the [README](https://github.com/valory-xyz/autonolas-frontend-mono/blob/main/README.md) for setup instructions and development commands
+2. Check the [Issues](https://github.com/valory-xyz/autonolas-frontend-mono/issues) page for open tasks
+3. Look for issues labeled `good first issue` or `help wanted` if you're new to the project
 
 ## Development Workflow
 
 ### 1. Choose an Issue
 
-- Check the [Issues](https://github.com/valory-xyz/autonolas-frontend-mono/issues) page
-- Look for issues labeled `good first issue` or `help wanted`
-- Comment on the issue to indicate you're working on it
+- Find an issue you'd like to work on
+- Comment on the issue to indicate you're working on it to avoid duplicate efforts
+- If you're proposing a new feature, open an issue first to discuss it
 
 ### 2. Create a Branch
 
@@ -89,14 +47,14 @@ git checkout -b chore/description
 - Write clear, focused commits
 - Follow the code quality guidelines below
 - Test your changes thoroughly
-- Update documentation if needed
+- Update documentation if your changes affect user-facing features or developer workflows
 
 ### 4. Test Your Changes
 
-- Run the affected app locally
+- Run the affected app locally: `npx nx serve [app-name]`
 - Run tests: `npx nx test [app-name]`
 - Run linting: `npx nx lint [app-name]`
-- Ensure all checks pass
+- Ensure all checks pass before submitting
 
 ### 5. Submit a Pull Request
 
@@ -136,6 +94,34 @@ git checkout -b chore/description
 
 ## Pull Request Process
 
+### Commit Messages
+
+Follow conventional commit format:
+
+```
+type(scope): description
+
+[optional body]
+
+[optional footer]
+```
+
+**Types:**
+- `feat`: New feature
+- `fix`: Bug fix
+- `docs`: Documentation changes
+- `style`: Code style changes (formatting, missing semicolons, etc.)
+- `refactor`: Code refactoring without changing functionality
+- `test`: Adding or updating tests
+- `chore`: Maintenance tasks, dependency updates
+
+**Examples:**
+```
+feat(marketplace): add network parameter to Meta component
+fix(launch): resolve staking contract navigation issue
+docs: update CONTRIBUTING.md with testing guidelines
+```
+
 ### Before Submitting
 
 1. **Run code quality checks**
@@ -144,25 +130,24 @@ git checkout -b chore/description
    npx nx test [app-name]
    ```
 
-2. **Update documentation** if your changes affect user-facing features or developer workflows
+2. **Ensure your branch is up to date** with the base branch
 
-3. **Ensure your branch is up to date** with the base branch
+3. **Write a clear PR description** explaining what changes you made and why
 
 ### PR Review Process
 
 1. **Automated checks** run via GitHub Actions
-2. **Code review** by maintainers
-3. **Feedback incorporation** - address review comments
-4. **Approval and merge** by maintainers
+2. **Code review** by maintainers - address all feedback
+3. **Approval and merge** by maintainers
 
 ## Getting Help
 
-- **Documentation**: Check the [README](https://github.com/valory-xyz/autonolas-frontend-mono/blob/main/README.md)
+- **Setup & Usage**: Check the [README](https://github.com/valory-xyz/autonolas-frontend-mono/blob/main/README.md)
 - **Issues**: Search existing issues or create new ones
 - **Security**: See [SECURITY.md](https://github.com/valory-xyz/autonolas-frontend-mono/security/policy) for security-related issues
 
 ## License
 
-By contributing to this project, you agree that your contributions will be licensed under the Apache 2.0 License.
+By contributing to this project, you agree that your contributions will be licensed under the MIT License.
 
 Thank you for contributing! 🚀
