@@ -109,8 +109,8 @@ Follow conventional commit format:
 
 **Examples:**
 ```
-feat(marketplace): add network parameter to Meta component
-fix(launch): resolve staking contract navigation issue
+feat: add network parameter to Meta component
+fix: resolve staking contract navigation issue
 docs: update CONTRIBUTING.md with testing guidelines
 ```
 
