@@ -114,17 +114,6 @@ fix(launch): resolve staking contract navigation issue
 docs: update CONTRIBUTING.md with testing guidelines
 ```
 
-### Before Submitting
-
-1. **Run code quality checks**
-   ```bash
-   npx nx lint [app-name]
-   npx nx test [app-name]
-   ```
-
-2. **Ensure your branch is up to date** with the base branch
-
-3. **Write a clear PR description** explaining what changes you made and why
 
 ### PR Review Process
 
