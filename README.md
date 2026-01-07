@@ -13,22 +13,22 @@ This mono repo contains the frontend for the Autonolas project. It is based on t
 
 - To start the development server run the following command. Open your browser and navigate to http://localhost:4200/.
   ```bash
-  npx nx run [app-name]:serve
+  yarn nx run [app-name]:serve
   ```
 
 - To create an app in the monorepo, use:
   ```bash
-  npx nx generate @nx/react:app apps/<app-name>
+  yarn nx generate @nx/react:app apps/<app-name>
   ```
 
 - To create a library in the monorepo:
   - For a React library, use:
     ```bash
-    npx nx generate @nx/react:library libs/<lib-name>
+    yarn nx generate @nx/react:library libs/<lib-name>
     ```
   - For a JavaScript library, use:
     ```bash
-    npx nx generate @nx/js:library libs/<lib-name>
+    yarn nx generate @nx/js:library libs/<lib-name>
     ```
   and other documentation can be found in the [Nx documentation](https://nx.dev/features/generate-code#generate-code).
   - For general questions on creating apps and libraries:
@@ -37,11 +37,11 @@ This mono repo contains the frontend for the Autonolas project. It is based on t
 
 - To run tests for a specific app or library, use:
   ```bash
-  npx nx test <app-or-lib-name>
+  yarn nx test <app-or-lib-name>
   ```
 - To clear the cache, use:
   ```bash
-  npx nx reset
+  yarn nx reset
   ```
 
 ## License

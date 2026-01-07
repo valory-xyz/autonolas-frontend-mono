@@ -51,9 +51,9 @@ git checkout -b chore/description
 
 ### 4. Test Your Changes
 
-- Run the affected app locally: `npx nx serve [app-name]`
-- Run tests: `npx nx test [app-name]`
-- Run linting: `npx nx lint [app-name]`
+- Run the affected app locally: `yarn nx serve [app-name]`
+- Run tests: `yarn nx test [app-name]`
+- Run linting: `yarn nx lint [app-name]`
 - Ensure all checks pass before submitting
 
 ### 5. Submit a Pull Request
@@ -118,8 +118,8 @@ docs: update CONTRIBUTING.md with testing guidelines
 
 1. **Run code quality checks**
    ```bash
-   npx nx lint [app-name]
-   npx nx test [app-name]
+   yarn nx lint [app-name]
+   yarn nx test [app-name]
    ```
 
 2. **Ensure your branch is up to date** with the base branch
