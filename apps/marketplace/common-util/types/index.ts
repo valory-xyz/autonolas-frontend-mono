@@ -1,5 +1,4 @@
-import { mergeServiceActivity } from 'common-util/graphql/service-activity';
-import { mergeServicesDetails } from 'common-util/graphql/services';
+import { Activity } from 'common-util/graphql/service-activity';
 
 type Address = `0x${string}`;
 
@@ -7,50 +6,67 @@ type TransactionHash = `0x${string}`;
 
 export type Request = {
   id: string;
-  ipfsHash: string;
   blockTimestamp: string;
   transactionHash: TransactionHash;
   sender: {
     id: Address;
   };
-  delivery: {
+  mechRequest: {
     ipfsHash: string;
+  };
+  marketplaceRequest: {
+    ipfsHashBytes: string;
+  };
+  deliveries: {
     mech: Address;
     transactionHash: TransactionHash;
     blockTimestamp: string;
-    deliveryRate?: string;
-  };
+    marketplaceDelivery: {
+      ipfsHashBytes: string;
+      deliveryRate?: string;
+    };
+    mechDelivery: {
+      ipfsHash: string;
+    };
+  }[];
 };
 
 export type Delivery = {
   id: string;
-  ipfsHash: string;
   mech: Address;
   blockTimestamp: string;
   transactionHash: TransactionHash;
+  mechDelivery: {
+    ipfsHash: string;
+  };
+  marketplaceDelivery: {
+    ipfsHashBytes: string;
+    deliveryRate?: string;
+  };
   request: {
     id: string;
-    ipfsHash: string;
+    mechRequest: {
+      ipfsHash: string;
+    };
+    marketplaceRequest: {
+      ipfsHashBytes: string;
+    };
     sender: {
       id: Address;
     };
     blockTimestamp: string;
     transactionHash: TransactionHash;
   };
-  deliveryRate?: string;
 };
 
 export type Service = {
   id: string;
   totalRequests: number;
   totalDeliveries: number;
-  metadata: {
-    metadata: string;
-  };
-  requests: Request[];
-  deliveries: Delivery[];
+  metadata: string;
 };
 
-export type ServiceData = ReturnType<typeof mergeServicesDetails>;
-
-export type ServiceActivity = ReturnType<typeof mergeServiceActivity>;
+export type ServiceActivity = {
+  id: string;
+  activities: Activity[];
+};
