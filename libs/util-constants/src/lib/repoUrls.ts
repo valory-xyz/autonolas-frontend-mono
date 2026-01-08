@@ -8,9 +8,11 @@ export const OPERATE_REPO_URL =
 export const QUICKSTART_REPO_URL = 'https://github.com/valory-xyz/quickstart';
 export const BUILD_REPO_URL =
   `${REPO_URL}build`;
-  export const CONTRIBUTE_REPO_URL =
+export const CONTRIBUTE_REPO_URL =
   `${REPO_URL}contribute`;
-  export const BOND_REPO_URL =
+export const BOND_REPO_URL =
   `${REPO_URL}bond`;
-  export const DOCS_REPO_URL =
+export const DOCS_REPO_URL =
   `${REPO_URL}docs`;
+export const MARKETPLACE_REPO_URL =
+  `${REPO_URL}marketplace`;
