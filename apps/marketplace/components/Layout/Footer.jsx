@@ -2,7 +2,7 @@ import { useRouter } from 'next/router';
 import { Typography } from 'antd';
 import { useEffect, useState } from 'react';
 import { Footer as CommonFooter, FooterCenterContent } from 'libs/ui-components/src';
-import { EXPLORER_URLS } from 'libs/util-constants/src';
+import { EXPLORER_URLS, MARKETPLACE_REPO_URL } from 'libs/util-constants/src';
 
 import { PAGES_TO_LOAD_WITHOUT_CHAINID } from 'util/constants';
 import { ADDRESSES } from 'common-util/Contracts/addresses';
@@ -114,6 +114,7 @@ const Footer = () => (
     leftContent={<ContractInfo />}
     rightContent={<Socials />}
     centerContent={<FooterCenterContent fontSize={14} />}
+    githubUrl={MARKETPLACE_REPO_URL}
   />
 );
 
