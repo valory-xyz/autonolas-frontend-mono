@@ -13,14 +13,7 @@ const walletConnectMetadata = {
 };
 
 export const wagmiConfig = createConfig({
-  autoConnect: true,
   chains: SUPPORTED_CHAINS,
-  options: {
-    rpc: SUPPORTED_CHAINS.reduce(
-      (acc, chain) => Object.assign(acc, { [chain.id]: RPC_URLS[chain.id] }),
-      {},
-    ),
-  },
   connectors: [
     injected(),
     walletConnect({

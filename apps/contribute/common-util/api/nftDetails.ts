@@ -1,5 +1,4 @@
 /* eslint-disable no-await-in-loop */
-import axios from 'axios';
 import { findIndex, memoize, toLower } from 'lodash';
 
 import { getMintContract } from 'common-util/Contracts';
@@ -40,8 +39,12 @@ export const getLatestMintedNft = memoize(async (account) => {
       const infoUrl = await contract.methods.tokenURI(tokenId).call();
 
       if (infoUrl) {
-        const value = await axios.get(infoUrl);
-        return { details: value.data, tokenId };
+        const response = await fetch(infoUrl);
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+        return { details: data, tokenId };
       }
       return { details: null, tokenId: null };
     }
