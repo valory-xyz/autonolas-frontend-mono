@@ -9,23 +9,26 @@
   },
   "extends": ["next/core-web-vitals", "plugin:prettier/recommended"],
   "rules": {
-    "prettier/prettier": ["error", {
-      "endOfLine": "auto",
-      "semi": true,
-      "trailingComma": "all",
-      "singleQuote": true,
-      "printWidth": 100,
-      "tabWidth": 2,
-      "importOrderSeparation": true,
-      "importOrderSortSpecifiers": true,
-      "importOrder": [
-        "<THIRD_PARTY_MODULES>",
-        "^@autonolas/(.*)$",
-        "^libs/*",
-        "^(store|util|common-util|components|data|hooks|context|types)/(.*)$",
-        "^[./]"
-      ]
-    }]
+    "prettier/prettier": [
+      "error",
+      {
+        "endOfLine": "auto",
+        "semi": true,
+        "trailingComma": "all",
+        "singleQuote": true,
+        "printWidth": 100,
+        "tabWidth": 2,
+        "importOrderSeparation": true,
+        "importOrderSortSpecifiers": true,
+        "importOrder": [
+          "<THIRD_PARTY_MODULES>",
+          "^@autonolas/(.*)$",
+          "^libs/*",
+          "^(store|util|common-util|components|data|hooks|context|types)/(.*)$",
+          "^[./]"
+        ]
+      }
+    ]
   },
   "overrides": [
     {
@@ -55,12 +58,18 @@
     {
       "files": ["*.ts", "*.tsx"],
       "extends": ["plugin:@nx/typescript"],
-      "rules": {}
+      "rules": {
+        "@typescript-eslint/no-extra-semi": "error",
+        "no-extra-semi": "off"
+      }
     },
     {
       "files": ["*.js", "*.jsx"],
       "extends": ["plugin:@nx/javascript"],
-      "rules": {}
+      "rules": {
+        "@typescript-eslint/no-extra-semi": "error",
+        "no-extra-semi": "off"
+      }
     },
     {
       "files": [
