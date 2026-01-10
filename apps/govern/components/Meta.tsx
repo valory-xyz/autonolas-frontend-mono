@@ -5,6 +5,7 @@ const SITE_URL = 'https://govern.olas.network';
 const SITE_TITLE = 'Olas Govern';
 const SITE_DESCRIPTION =
   'View various contracts and join the decision-making process that drives growth in the Olas ecosystem; direct the future of Olas.';
+const SITE_IMAGE_URL = `${SITE_URL}/images/meta-image.png`;
 
 type MetaProps = {
   pageTitle?: string;
@@ -32,6 +33,7 @@ export const Meta = ({ pageTitle, description, pageUrl }: MetaProps) => {
         content={description || SITE_DESCRIPTION}
         key="og:description"
       />
+      <meta property="og:image" content={SITE_IMAGE_URL} key="og:image" />
 
       {/* <!-- Twitter --> */}
       <meta property="twitter:card" content="summary_large_image" key="twitter:card" />
@@ -42,6 +44,7 @@ export const Meta = ({ pageTitle, description, pageUrl }: MetaProps) => {
         content={description || SITE_DESCRIPTION}
         key="twitter:description"
       />
+      <meta property="twitter:image" content={SITE_IMAGE_URL} key="twitter:image" />
     </Head>
   );
 };
