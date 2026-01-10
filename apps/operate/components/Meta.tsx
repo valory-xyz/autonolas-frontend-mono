@@ -5,6 +5,7 @@ const SITE_URL = 'https://operate.olas.network';
 const SITE_TITLE = 'Olas Operate';
 const SITE_DESCRIPTION =
   'Become an Operator in the Olas ecosystem using Pearl. Run AI agents, stake assets, and earn rewards while helping to expand the crypto and AI agent network. Get involved in managing decentralized AI-powered systems today!';
+const SITE_IMAGE_URL = `${SITE_URL}/images/meta-image.png`;
 
 type MetaProps = {
   pageTitle?: string;
@@ -32,6 +33,7 @@ export const Meta = ({ pageTitle, description, pageUrl }: MetaProps) => {
         content={description || SITE_DESCRIPTION}
         key="og:description"
       />
+      <meta property="og:image" content={SITE_IMAGE_URL} key="og:image" />
 
       {/* <!-- Twitter --> */}
       <meta property="twitter:card" content="summary_large_image" key="twitter:card" />
@@ -42,6 +44,7 @@ export const Meta = ({ pageTitle, description, pageUrl }: MetaProps) => {
         content={description || SITE_DESCRIPTION}
         key="twitter:description"
       />
+      <meta property="twitter:image" content={SITE_IMAGE_URL} key="twitter:image" />
     </Head>
   );
 };
