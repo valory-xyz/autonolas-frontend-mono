@@ -5,6 +5,7 @@ import { AutonolasThemeProvider, GlobalStyles } from 'libs/ui-theme/src';
 
 /** antd theme config */
 import Layout from 'components/Layout';
+import Meta from 'components/Meta';
 
 import Web3ModalProvider from '../context/web3ModalProvider';
 import initStore from '../store';
@@ -17,6 +18,7 @@ type MyAppProps = {
 const MyApp = ({ Component, pageProps }: MyAppProps) => (
   <>
     <GlobalStyles />
+    <Meta />
     <AutonolasThemeProvider>
       <Web3ModalProvider>
         <Layout>

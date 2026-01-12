@@ -1,6 +1,5 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { createWeb3Modal, defaultWagmiConfig } from '@web3modal/wagmi';
-import Head from 'next/head';
 import { useRouter } from 'next/router';
 import PropTypes from 'prop-types';
 import { Provider } from 'react-redux';
@@ -12,6 +11,7 @@ import { AutonolasThemeProvider, COLOR, GlobalStyles, W3M_BORDER_RADIUS } from '
 
 import { SUPPORTED_CHAINS } from '../common-util/Login/config';
 import Layout from '../components/Layout';
+import { Meta } from '../components/Meta';
 import { wrapper } from '../store';
 
 const DESC =
@@ -60,10 +60,7 @@ const RegistryApp = ({
   return (
     <>
       <GlobalStyles />
-      <Head>
-        <title>{metadata.name}</title>
-        <meta name="description" content={metadata.description} />
-      </Head>
+      <Meta />
       <Provider store={store}>
         <AutonolasThemeProvider>
           {isNotLegal ? (
