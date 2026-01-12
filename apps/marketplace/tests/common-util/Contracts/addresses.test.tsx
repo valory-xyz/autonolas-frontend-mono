@@ -20,11 +20,6 @@ import {
   multisigSameAddresses,
   safeMultiSend,
 } from '../../../common-util/Contracts/addresses';
-import {
-  LOCAL_FORK_ID,
-  LOCAL_FORK_ID_GNOSIS,
-  LOCAL_FORK_ID_POLYGON,
-} from '../../../util/constants';
 
 const LOCAL_ARTIFACTS = [
   COMPONENT_REGISTRY_CONTRACT,
@@ -58,11 +53,6 @@ const chainIds = Object.keys(ADDRESSES);
 
 const isValidKey = (object: object, value: string): value is keyof typeof object => {
   return Object.keys(object).includes(value);
-};
-
-const isLocalChainId = (chainId: string): boolean => {
-  const id = Number(chainId);
-  return [LOCAL_FORK_ID, LOCAL_FORK_ID_GNOSIS, LOCAL_FORK_ID_POLYGON].includes(id);
 };
 
 describe('common-utils/addresses', () => {

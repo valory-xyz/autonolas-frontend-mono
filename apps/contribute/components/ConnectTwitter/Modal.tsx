@@ -6,7 +6,7 @@ import { useAppSelector } from 'store/setup';
 
 const { Title, Text } = Typography;
 
-export const ConnectTwitterModal = () => {
+export const ConnectTwitterModal = ({ disabled }: { disabled?: boolean }) => {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const account = useAppSelector((state) => state.setup.account);
 
@@ -22,7 +22,7 @@ export const ConnectTwitterModal = () => {
 
   return (
     <>
-      <Button onClick={() => setIsModalVisible(true)}>
+      <Button onClick={() => setIsModalVisible(true)} disabled={disabled}>
         <XOutlined /> Connect X
       </Button>
 
@@ -70,7 +70,7 @@ export const ConnectTwitterModal = () => {
         <Title className="mb-0" level={5}>
           Step 4:
         </Title>
-        <Text>@-mention Autonolas or use the #OlasNetwork hashtag to start receiving rewards.</Text>
+        <Text>@-mention Olas or use the #OlasNetwork hashtag to start receiving rewards.</Text>
       </Modal>
     </>
   );

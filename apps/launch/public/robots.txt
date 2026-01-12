@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://launch.olas.network/sitemap.xml

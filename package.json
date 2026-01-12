@@ -2,13 +2,15 @@
   "name": "@autonolas-frontend-mono/source",
   "version": "0.0.0",
   "license": "MIT",
-  "scripts": {},
+  "scripts": {
+    "build-all": "yarn nx build bond && yarn nx build build && yarn nx build contribute && yarn nx build docs && yarn nx build govern && yarn nx build launch && yarn nx build marketplace && yarn nx build operate && yarn nx build pearl-api",
+    "lint:fix-all": "yarn nx lint --fix bond && yarn nx lint --fix build && yarn nx lint --fix contribute && yarn nx lint --fix docs && yarn nx lint --fix govern && yarn nx lint --fix launch && yarn nx lint --fix marketplace && yarn nx lint --fix operate && yarn nx lint --fix pearl-api"
+  },
   "private": true,
   "dependencies": {
     "@ant-design/cssinjs": "^1.16.2",
     "@ant-design/icons": "^5.2.6",
     "@apollo/client": "3.8.5",
-    "@autonolas/frontend-library": "0.4.25",
     "@balancer-labs/sdk": "^1.1.5",
     "@binance/w3w-wagmi-connector-v2": "1.2.5",
     "@coral-xyz/anchor": "^0.29.0",
@@ -151,6 +153,6 @@
     "vitest": "^1.0.4"
   },
   "resolutions": {
-    "@gnosis.pm/safe-contracts/ethers": "^5.7.0"
+    "@gnosis.pm/safe-contracts/ethers": "5.7.2"
   }
 }

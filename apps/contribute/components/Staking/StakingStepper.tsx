@@ -18,7 +18,7 @@ import { base, mainnet } from 'viem/chains';
 import { DISCORD_CREATE_TICKET_URL } from 'libs/util-constants/src';
 import { useAccount, useReadContract, useSwitchChain } from 'wagmi';
 
-import { areAddressesEqual, notifyError } from '@autonolas/frontend-library';
+import { areAddressesEqual, notifyError } from 'libs/util-functions/src';
 
 import {
   CONTRIBUTE_MANAGER_ADDRESS_BASE,
@@ -58,7 +58,13 @@ const STAKING_CONTRACTS = Object.entries(STAKING_CONTRACTS_DETAILS)
     ...values,
   }));
 
-const ConnectTwitter = ({ account }: { account: string | null }) => {
+const ConnectTwitter = ({
+  account,
+  isDisabled,
+}: {
+  account: string | null;
+  isDisabled?: boolean;
+}) => {
   if (account) {
     return (
       <Text type="secondary">
@@ -72,7 +78,7 @@ const ConnectTwitter = ({ account }: { account: string | null }) => {
   return (
     <>
       <Paragraph type="secondary">Link your X account to your Contribute profile.</Paragraph>
-      <ConnectTwitterModal />
+      <ConnectTwitterModal disabled={isDisabled} />
     </>
   );
 };
@@ -432,7 +438,12 @@ export const StakingStepper = ({ profile }: { profile: LeaderboardUser | null })
           items={[
             {
               title: <Text className="block mb-8">Connect X</Text>,
-              description: <ConnectTwitter account={profile?.twitter_handle || null} />,
+              description: (
+                <ConnectTwitter
+                  account={profile?.twitter_handle || null}
+                  isDisabled={IS_STAKE_TEMPORARILY_DISABLED}
+                />
+              ),
             },
             {
               title: (

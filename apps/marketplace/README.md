@@ -1,5 +1,5 @@
 # Marketplace Frontend
-This repository contains the [Autonolas Registry](https://registry.olas.network/) frontend.
+This repository contains the [Olas Registry](https://registry.olas.network/) frontend.
 
 ## Tech Stack
 - ReactJS
@@ -32,6 +32,6 @@ To Visit App:
 
 `localhost:4200`
 
-Once you're running the app, you can connect to Valory's [Autonolas Registory](https://github.com/valory-xyz/autonolas-registries) through docker
+Once you're running the app, you can connect to Valory's [Olas Registry](https://github.com/valory-xyz/autonolas-registries) through docker
 
 <img width="723" alt="metamask-network-connect" src="https://user-images.githubusercontent.com/22061815/201097646-f9f6f1e5-ac89-4260-8a26-7ade8d20bd2d.png">

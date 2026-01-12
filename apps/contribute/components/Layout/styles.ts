@@ -1,7 +1,7 @@
 import { Alert, Layout, Menu } from 'antd';
 import styled from 'styled-components';
 
-import { COLOR, MEDIA_QUERY } from '@autonolas/frontend-library';
+import { COLOR, MEDIA_QUERY } from 'libs/ui-theme/src';
 
 import { MENU_WIDTH } from 'util/constants';
 

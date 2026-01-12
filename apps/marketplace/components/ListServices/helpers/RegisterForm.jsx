@@ -5,9 +5,7 @@ import PropTypes from 'prop-types';
 import { useEffect, useState } from 'react';
 import useDeepCompareEffect from 'use-deep-compare-effect';
 
-import { isValidAddress, notifyError } from '@autonolas/frontend-library';
-
-import { FORM_VALIDATION } from 'libs/util-functions/src';
+import { isValidAddress, notifyError, FORM_VALIDATION } from 'libs/util-functions/src';
 
 import { IpfsHashGenerationModal } from 'common-util/List/IpfsHashGenerationModal';
 import { DependencyLabel, commaMessage } from 'common-util/List/ListCommon';

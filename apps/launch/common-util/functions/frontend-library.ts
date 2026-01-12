@@ -4,7 +4,7 @@ import {
   getChainId as getChainIdFn,
   getProvider as getProviderFn,
   notifyError,
-} from '@autonolas/frontend-library';
+} from 'libs/util-functions/src';
 
 import { SUPPORTED_CHAINS } from 'common-util/config/wagmi';
 import { RPC_URLS } from 'libs/util-constants/src';

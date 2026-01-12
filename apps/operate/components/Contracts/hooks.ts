@@ -1,15 +1,16 @@
-import { useMemo, useState, useEffect, useCallback } from 'react';
+import { getPublicClient } from '@wagmi/core';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Nominee, StakingContract } from 'types';
-import { Abi, Address, formatEther, formatUnits, Block } from 'viem';
-import { useReadContracts } from 'wagmi';
+import { Abi, Address, Block, formatEther, formatUnits } from 'viem';
 import { getBlock } from 'viem/actions';
+import { useReadContracts } from 'wagmi';
 
 import { useNominees, useNomineesMetadata } from 'libs/common-contract-functions/src';
 import { RETAINER_ADDRESS } from 'libs/util-constants/src';
 import { STAKING_TOKEN } from 'libs/util-contracts/src';
 import { areAddressesEqual, getAddressFromBytes32 } from 'libs/util-functions/src';
+
 import { wagmiConfig } from 'common-util/config/wagmi';
-import { getPublicClient } from '@wagmi/core';
 
 const ONE_YEAR = 1 * 24 * 60 * 60 * 365;
 
@@ -342,6 +343,16 @@ const STAKING_CONTRACT_DETAILS: Record<Address, StakingContractDetailsInfo> = {
     minOperatingBalance: 11.5,
     minOperatingBalanceToken: 'xDAI',
   },
+  // Pett.AI Agent Staking Contract
+  '0x000000000000000000000000fa0ca3935758cb81d35a8f1395b9eb5a596ce301': {
+    availableOn: ['pearl'],
+    minOperatingBalanceToken: 'ETH',
+  },
+  // Pett.AI Agent Staking Contract 2
+  '0x00000000000000000000000000d544c10bdc0e9b0a71ceaf52c1342bb8f21c1d': {
+    availableOn: ['pearl'],
+    minOperatingBalanceToken: 'ETH',
+  },
 };
 
 const getApy = (
@@ -349,12 +360,16 @@ const getApy = (
   minStakingDeposit: bigint,
   maxNumAgentInstances: bigint,
 ) => {
+  if (!minStakingDeposit || !rewardsPerSecond) return null;
+
   const rewardsPerYear = rewardsPerSecond * BigInt(ONE_YEAR);
   const apy = (rewardsPerYear * BigInt(100)) / minStakingDeposit;
   return Number(apy) / (1 + Number(maxNumAgentInstances));
 };
 
 const getStakeRequired = (minStakingDeposit: bigint, numAgentInstances: bigint) => {
+  if (!minStakingDeposit || !numAgentInstances) return null;
+
   return formatEther(minStakingDeposit + minStakingDeposit * numAgentInstances);
 };
 

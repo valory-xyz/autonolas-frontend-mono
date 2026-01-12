@@ -1,41 +1,43 @@
 import Head from 'next/head';
 import React from 'react';
 
-import { META_TAGS_INFO } from 'util/constants';
+import { SITE_DESCRIPTION, SITE_META_TAG_IMAGE, SITE_TITLE, SITE_URL } from 'util/constants';
 
 type MetaProps = {
-  meta?: {
-    title?: string;
-    description?: string;
-    siteUrl?: string;
-    image?: string;
-  };
+  pageTitle?: string | null;
+  description?: string;
+  pageUrl?: string;
 };
 
-const Meta = ({ meta }: MetaProps) => {
-  const metaInfo = { ...META_TAGS_INFO, ...(meta || {}) };
+const Meta = ({ pageTitle, description, pageUrl }: MetaProps) => {
+  const title = pageTitle ? `${pageTitle} | ${SITE_TITLE}` : SITE_TITLE;
+  const url = `${SITE_URL}/${pageUrl || ''}`;
 
   return (
     <Head>
-      <title>{metaInfo.title}</title>
-      <meta name="title" content={metaInfo.title} key="title" />
-      <meta name="description" content={metaInfo.description} key="description" />
+      <title>{title}</title>
+      <meta name="title" content={title} key="title" />
+      <meta name="description" content={description || SITE_DESCRIPTION} key="description" />
 
       <meta property="og:type" content="website" key="og:type" />
-      <meta property="og:url" content={metaInfo.siteUrl} key="og:url" />
-      <meta property="og:title" content={metaInfo.title} key="og:title" />
-      <meta property="og:description" content={metaInfo.description} key="og.description" />
-      <meta property="og:image" content={metaInfo.image} key="og:image" />
+      <meta property="og:url" content={url} key="og:url" />
+      <meta property="og:title" content={title} key="og:title" />
+      <meta
+        property="og:description"
+        content={description || SITE_DESCRIPTION}
+        key="og:description"
+      />
+      <meta property="og:image" content={SITE_META_TAG_IMAGE} key="og:image" />
 
       <meta property="twitter:card" content="summary_large_image" key="twitter:card" />
-      <meta property="twitter:url" content={metaInfo.siteUrl} key="twitter:url" />
-      <meta property="twitter:title" content={metaInfo.title} key="twitter:title" />
+      <meta property="twitter:url" content={url} key="twitter:url" />
+      <meta property="twitter:title" content={title} key="twitter:title" />
       <meta
         property="twitter:description"
-        content={metaInfo.description}
+        content={description || SITE_DESCRIPTION}
         key="twitter:description"
       />
-      <meta property="twitter:image" content={metaInfo.image} key="twitter:image" />
+      <meta property="twitter:image" content={SITE_META_TAG_IMAGE} key="twitter:image" />
     </Head>
   );
 };

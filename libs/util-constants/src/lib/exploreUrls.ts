@@ -16,7 +16,7 @@ import {
   polygonMumbai,
 } from 'viem/chains';
 
-const MODE_EXPLORER = 'https://explorer.mode.network'
+const MODE_EXPLORER = 'https://explorer.mode.network';
 
 export const EXPLORER_URLS: Record<string, string> = {
   [mainnet.id]: mainnet.blockExplorers.default.url,

@@ -1,24 +1,22 @@
-import { Alert, Button, Card, Skeleton, Typography } from 'antd';
+import { Alert, Card, Typography } from 'antd';
 import { ethers } from 'ethers';
-import isNumber from 'lodash/isNumber';
 import Link from 'next/link';
 import { useState } from 'react';
 import { useAccount } from 'wagmi';
 
-import { NA, getFullFormattedDate, notifySuccess } from '@autonolas/frontend-library';
+import { NA } from 'libs/util-constants/src';
+import { notifySuccess } from 'libs/util-functions/src';
 
 import { notifyError } from 'libs/util-functions/src';
 
 import {
   checkServicesTerminatedOrNotDeployed,
-  checkpointRequest,
   depositServiceDonationRequest,
 } from 'common-util/functions';
 
 import { DonateForm } from './DonateForm';
 import { useThresholdData } from './hooks';
-import { DonateContainer, EpochCheckpointRow, EpochStatus } from './styles';
-import { ClaimStakingIncentives } from './ClaimStakingIncentives';
+import styled from 'styled-components';
 
 const { Title, Paragraph, Text } = Typography;
 
@@ -28,22 +26,19 @@ const sortUnitIdsAndAmounts = (unitIds: number[], amounts: number[]) => {
   return [sortedUnitIds, sortedAmounts];
 };
 
+const StyledMain = styled.main`
+  display: flex;
+  flex-direction: column;
+  max-width: 946px;
+  margin: 0 auto;
+`;
+
 export const DonatePage = () => {
   const { address: account } = useAccount();
 
   const [isDonationLoading, setIsDonationLoading] = useState(false);
-  const [isCheckpointLoading, setIsCheckpointLoading] = useState(false);
 
-  const {
-    isDataLoading,
-    refetchData,
-    veOLASThreshold,
-    minAcceptedETH,
-    epochCounter,
-    prevEpochEndTime,
-    epochLength,
-    nextEpochEndTime,
-  } = useThresholdData();
+  const { veOLASThreshold, minAcceptedETH } = useThresholdData();
 
   const onDepositServiceDonationSubmit = async (values: {
     unitIds: number[];
@@ -99,48 +94,10 @@ export const DonatePage = () => {
     }
   };
 
-  const onCheckpoint = async () => {
-    if (!account) return;
-
-    try {
-      setIsCheckpointLoading(true);
-      await checkpointRequest({ account });
-      await refetchData(); // update epoch details after checkpoint
-      notifySuccess('Started new epoch');
-    } catch (error) {
-      console.error(error);
-      notifyError('Error occurred on starting new epoch');
-    } finally {
-      setIsCheckpointLoading(false);
-    }
-  };
-
-  const epochStatusList = [
-    {
-      text: 'Earliest possible expected end time',
-      value: nextEpochEndTime ? getFullFormattedDate(nextEpochEndTime * 1000) : NA,
-    },
-    {
-      text: 'Epoch length',
-      value: isNumber(epochLength) ? `${epochLength / 3600 / 24} days` : NA,
-    },
-    {
-      text: 'Previous epoch end time',
-      value: prevEpochEndTime ? getFullFormattedDate(prevEpochEndTime * 1000) : NA,
-    },
-    {
-      text: 'Epoch counter',
-      value: epochCounter || NA,
-    },
-  ];
-
-  // disable checkpoint button if expected end time is in the future
-  const isExpectedEndTimeInFuture = (nextEpochEndTime || 0) * 1000 > Date.now();
-
   return (
-    <DonateContainer>
-      <Card className="donate-section">
-        <Title level={2} className="mt-0">
+    <StyledMain>
+      <Card>
+        <Title level={3} className="mt-0">
           Donate
         </Title>
         <Paragraph>
@@ -169,37 +126,6 @@ export const DonatePage = () => {
 
         <DonateForm isLoading={isDonationLoading} onSubmit={onDepositServiceDonationSubmit} />
       </Card>
-
-      <Card className="last-epoch-section">
-        <Title level={2} className="mt-0">
-          Epoch Status
-        </Title>
-
-        {epochStatusList.map(({ text, value }, index) => (
-          <EpochStatus key={`epoch-section-${index}`}>
-            <Title level={5}>{`${text}:`}</Title>
-            {isDataLoading ? (
-              <Skeleton.Input size="small" active />
-            ) : (
-              <Paragraph>{value}</Paragraph>
-            )}
-          </EpochStatus>
-        ))}
-
-        <EpochCheckpointRow>
-          <Button
-            size="large"
-            type="primary"
-            loading={isCheckpointLoading}
-            disabled={!account || isDataLoading || isExpectedEndTimeInFuture}
-            onClick={onCheckpoint}
-          >
-            Start new epoch
-          </Button>
-          <Text type="secondary">New epochs must be manually triggered by community members</Text>
-          <ClaimStakingIncentives />
-        </EpochCheckpointRow>
-      </Card>
-    </DonateContainer>
+    </StyledMain>
   );
 };

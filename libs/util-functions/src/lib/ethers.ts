@@ -1,4 +1,4 @@
-import { ethers, formatEther } from 'ethers';
+import { BigNumberish, ethers, formatEther } from 'ethers';
 import toLower from 'lodash/toLower';
 import { Address } from 'viem';
 
@@ -20,3 +20,13 @@ export const areAddressesEqual = (a1: string | Address, a2: string | Address) =>
  * @returns {String} eg: 1000000000000000000 => 1
  */
 export const parseToEth = (amount: string) => (amount ? formatEther(`${amount}`) : 0);
+
+/**
+ * Converts wei to ETH
+ * @param value - The value in wei to convert
+ * @returns The value in ETH as a string
+ */
+export const convertToEth = (value: BigNumberish): string => {
+  if (!value) return '0';
+  return formatEther(value);
+};

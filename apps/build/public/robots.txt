@@ -1,2 +1,3 @@
 User-agent: *
 Allow: /
+Sitemap: https://build.olas.network/sitemap.xml

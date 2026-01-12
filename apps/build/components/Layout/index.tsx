@@ -2,7 +2,7 @@ import { Flex, Layout, Menu } from 'antd';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import styled from 'styled-components';
-import { COLOR } from '@autonolas/frontend-library';
+import { COLOR } from 'libs/ui-theme/src';
 import { NavDropdown } from 'libs/ui-components/src';
 import Link from 'next/link';
 import { Logo } from 'components/Branding/Logo';

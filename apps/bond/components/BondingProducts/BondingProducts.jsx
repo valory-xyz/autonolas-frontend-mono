@@ -3,7 +3,7 @@ import { useRouter } from 'next/router';
 import { useState } from 'react';
 import styled from 'styled-components';
 
-import { useScreen } from '@autonolas/frontend-library';
+import { useScreen } from 'libs/ui-theme/src';
 
 import { BONDING_PRODUCTS } from 'common-util/enums';
 

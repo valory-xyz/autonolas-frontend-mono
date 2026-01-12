@@ -2,9 +2,8 @@ import { Typography } from 'antd';
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 
-import { Loader, notifyError, notifySuccess } from '@autonolas/frontend-library';
-
-import { getEstimatedGasLimit } from 'libs/util-functions/src';
+import { Loader } from 'libs/ui-components/src';
+import { getEstimatedGasLimit, notifyError, notifySuccess } from 'libs/util-functions/src';
 
 import { getServiceManagerContract } from '../../common-util/Contracts';
 import { AlertError, convertStringToArray } from '../../common-util/List/ListCommon';

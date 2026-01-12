@@ -2,7 +2,7 @@ import { useState } from 'react';
 import PropTypes from 'prop-types';
 import { useRouter } from 'next/router';
 import { Space } from 'antd';
-import { isLocalNetwork, notifyError, notifySuccess } from '@autonolas/frontend-library';
+import { isLocalNetwork, notifyError, notifySuccess } from 'libs/util-functions/src';
 
 import { useHelpers } from 'common-util/hooks';
 import { getTokenDetailsRequest } from 'common-util/Details/utils';

@@ -4,7 +4,8 @@ import { useRouter } from 'next/router';
 import dynamic from 'next/dynamic';
 import PropTypes from 'prop-types';
 import { Layout as AntdLayout, Select } from 'antd';
-import { VM_TYPE, useScreen } from '@autonolas/frontend-library';
+import { VM_TYPE } from 'libs/util-constants/src';
+import { useScreen } from 'libs/ui-theme/src';
 import { ConnectionProvider, WalletProvider } from '@solana/wallet-adapter-react';
 import { PhantomWalletAdapter } from '@solana/wallet-adapter-wallets';
 
@@ -80,7 +81,7 @@ const Layout = ({ children }) => {
                 sessionStorage.setItem('chainId', currentChainInfo.id);
 
                 if (PAGES_TO_LOAD_WITHOUT_CHAINID.find((e) => e === path)) {
-                  // eg. /disclaimer will be redirect to same page ie. /disclaimer
+                  // eg. /page-not-found will be redirect to same page
                   updateChainId(currentChainInfo.id);
                   router.push(`/${path}`);
                 } else {

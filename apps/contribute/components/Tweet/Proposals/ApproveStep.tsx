@@ -2,7 +2,7 @@ import { Button, Card, Progress, Typography } from 'antd';
 import { useMemo } from 'react';
 import { Address } from 'viem';
 
-import { NA } from '@autonolas/frontend-library';
+import { NA } from 'libs/util-constants/src';
 
 import { getNumberInMillions } from 'common-util/functions';
 import { getCurrentProposalInfo } from 'common-util/functions/proposal';

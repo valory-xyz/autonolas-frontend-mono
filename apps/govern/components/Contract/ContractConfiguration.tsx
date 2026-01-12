@@ -3,7 +3,7 @@ import { ReactNode, useMemo } from 'react';
 import { StakingContract } from 'types';
 import { Address, zeroHash } from 'viem';
 
-import { GATEWAY_URL, NA } from '@autonolas/frontend-library';
+import { GATEWAY_URL, NA } from 'libs/util-constants/src';
 
 import { EXPLORER_URLS, HASH_PREFIX, REGISTRY_URL, UNICODE_SYMBOLS } from 'libs/util-constants/src';
 import { truncateAddress } from 'libs/util-functions/src';
@@ -129,14 +129,14 @@ const NumAgentInstances = ({ address, chainId }: ConfigItemProps) => {
 
 const AgentIds = ({ address, chainId }: ConfigItemProps) => {
   const { data, isLoading } = useGetAgentIds({ address, chainId });
-  const networkName = 'gnosis';
+  const networkName = 'ethereum';
 
   const ids = useMemo(() => {
     if (!data || data.length === 0) return NA;
     return data.map((id) => (
       <a
         key={id}
-        href={`${REGISTRY_URL}${networkName}/services/${id}`}
+        href={`${REGISTRY_URL}${networkName}/agent-blueprints/${id}`}
         target="_blank"
         rel="noreferrer"
       >

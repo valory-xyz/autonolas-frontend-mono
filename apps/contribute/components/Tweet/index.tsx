@@ -5,7 +5,7 @@ import { v4 as uuid } from 'uuid';
 import { Address } from 'viem';
 import { useSignMessage } from 'wagmi';
 
-import { notifyError, notifySuccess } from '@autonolas/frontend-library';
+import { notifyError, notifySuccess } from 'libs/util-functions/src';
 
 import { EducationTitle } from 'components/Education/EducationTitle';
 import { useHelpers } from 'common-util/hooks/useHelpers';

@@ -1,9 +1,8 @@
 import { useRouter } from 'next/router';
-import Link from 'next/link';
 import { Typography } from 'antd';
 import { useEffect, useState } from 'react';
-import { Footer as CommonFooter } from 'libs/ui-components/src';
-import { getExplorerURL } from '@autonolas/frontend-library';
+import { Footer as CommonFooter, FooterCenterContent } from 'libs/ui-components/src';
+import { EXPLORER_URLS, MARKETPLACE_REPO_URL } from 'libs/util-constants/src';
 
 import { PAGES_TO_LOAD_WITHOUT_CHAINID } from 'util/constants';
 import { ADDRESSES } from 'common-util/Contracts/addresses';
@@ -80,7 +79,7 @@ const ContractInfo = () => {
     <div className="registry-contract">
       &nbsp;•&nbsp;
       <a
-        href={`${getExplorerURL(chainId)}/address/${addressToPoint}`}
+        href={`${EXPLORER_URLS[chainId]}/address/${addressToPoint}`}
         target="_blank"
         rel="noopener noreferrer"
       >
@@ -114,27 +113,8 @@ const Footer = () => (
   <CommonFooter
     leftContent={<ContractInfo />}
     rightContent={<Socials />}
-    centerContent={
-      <>
-        <Text type="secondary" style={{ fontSize: 14 }}>
-          ©&nbsp;Olas DAO&nbsp;
-          {new Date().getFullYear()}
-          &nbsp;•&nbsp;
-        </Text>
-        <Link href="/disclaimer" style={{ fontSize: 14 }}>
-          Disclaimer
-        </Link>
-        &nbsp;•&nbsp;
-        <a
-          style={{ fontSize: 14 }}
-          href="https://gateway.autonolas.tech/ipfs/bafybeibrhz6hnxsxcbv7dkzerq4chssotexb276pidzwclbytzj7m4t47u"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          DAO Constitution
-        </a>
-      </>
-    }
+    centerContent={<FooterCenterContent fontSize={14} />}
+    githubUrl={MARKETPLACE_REPO_URL}
   />
 );
 

@@ -58,6 +58,11 @@ const nextConfig = {
       permanent: true,
     },
     {
+      source: '/services/:id',
+      destination: '/ethereum/ai-agents/:id',
+      permanent: true,
+    },
+    {
       source: '/:network((?!api).+)/services',
       destination: '/:network/ai-agents',
       permanent: true,
@@ -97,6 +102,16 @@ const nextConfig = {
     {
       source: '/factory',
       destination: '/gnosis/ai-agents',
+      permanent: true,
+    },
+    {
+      source: '/optimism/:path*',
+      destination: '/op-mainnet/:path*',
+      permanent: true,
+    },
+    {
+      source: '/mode/:path*',
+      destination: '/mode-mainnet/:path*',
       permanent: true,
     },
   ],

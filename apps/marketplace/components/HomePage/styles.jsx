@@ -1,5 +1,5 @@
 import styled from 'styled-components';
-import { MEDIA_QUERY } from '@autonolas/frontend-library';
+import { MEDIA_QUERY } from 'libs/ui-theme/src';
 
 export const Container = styled.div``;
 

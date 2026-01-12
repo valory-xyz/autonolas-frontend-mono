@@ -2,9 +2,9 @@ import { Col, Row, Typography } from 'antd';
 import Link from 'next/link';
 import Image from 'next/image';
 
-import { useScreen } from 'common-util/hooks/useScreen';
 import { useHelpers } from 'common-util/hooks/useHelpers';
 import { ContentRow } from './styles';
+import { useScreen } from 'libs/ui-theme/src';
 
 const { Title, Text } = Typography;
 
@@ -36,7 +36,7 @@ export const AutonolasServicesArchitected = () => {
   return (
     <ContentRow className="row-2">
       <Title level={3} className="title">
-        How are Autonolas services architected?
+        How are Olas services architected?
       </Title>
 
       {LIST.map(({ title, desc, link, type }) => (

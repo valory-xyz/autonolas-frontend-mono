@@ -14,8 +14,7 @@ import { useAppDispatch, useAppSelector } from 'store/index';
 
 import { useNomineesWeights } from './useNomineesWeights';
 import { getBytes32FromAddress } from 'libs/util-functions/src';
-
-const WEEK_IN_SECONDS = 604_800;
+import { WEEK_IN_SECONDS } from 'common-util/constants/time';
 
 const getCurrentWeightTimestamp = (timeSum: number | undefined) => {
   if (!timeSum) return null;

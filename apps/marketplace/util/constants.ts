@@ -8,7 +8,6 @@ export const URL = {
   UPDATE_SERVICE: '/ai-agents/update',
 
   // pages without chain id
-  DISCLAIMER: '/disclaimer',
   PAGE_NOT_FOUND: '/page-not-found',
   NOT_LEGAL: '/not-legal',
 } as const;
@@ -48,11 +47,7 @@ export const SERVICE_STATE_KEY_MAP = {
 } as const;
 
 // should not display contracts on homepage nor load with chain Ids
-export const PAGES_TO_LOAD_WITHOUT_CHAINID = [
-  '/disclaimer',
-  '/page-not-found',
-  '/not-legal',
-] as const;
+export const PAGES_TO_LOAD_WITHOUT_CHAINID = ['/page-not-found', '/not-legal'] as const;
 
 export const HASH_PREFIX = 'f01701220';
 export const HASH_PREFIXES = {
@@ -72,31 +67,13 @@ export const DEFAULT_SERVICE_CREATION_ETH_TOKEN_ZEROS =
 
 export const SVM_EMPTY_ADDRESS = '11111111111111111111111111111111';
 
-// used for local testing
-export const LOCAL_FORK_ID = 100000;
-export const LOCAL_FORK_ID_GNOSIS = 100001;
-export const LOCAL_FORK_ID_POLYGON = 100002;
-
 export const DEFAULT_CHAIN_ID = 1;
-
-// TODO: move to autonolas-frontend-library
-export const EXTRA_COLORS = {
-  YELLOW_PRIMARY: '#eab308', // tailwind orange.500
-  YELLOW_SECONDARY: '#fefce8', // tailwind orange.50
-} as const;
-
-// These constants define the types of virtual machines supported
-export const VM_TYPE = {
-  EVM: 'EVM', // Ethereum Virtual Machine
-  SVM: 'SVM', // Solana Virtual Machine
-} as const;
 
 /**
  * Constants for Solana chain names
  */
 export const SOLANA_CHAIN_NAMES = {
   MAINNET: 'solana',
-  DEVNET: 'solana-devnet',
 } as const;
 
 /**

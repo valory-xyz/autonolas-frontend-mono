@@ -6,7 +6,8 @@ import styled from 'styled-components';
 import { useAccount, useBalance, useDisconnect } from 'wagmi';
 import Web3 from 'web3';
 
-import { CannotConnectAddressOfacError, notifyError } from '@autonolas/frontend-library';
+import { CannotConnectAddressOfacError } from 'libs/ui-components/src';
+import { notifyError } from 'libs/util-functions/src';
 
 import {
   getChainId,

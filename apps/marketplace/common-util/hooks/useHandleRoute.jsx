@@ -19,7 +19,6 @@ const getChainIdFromPath = (networkName) =>
 
 const isValidL1NetworkName = (name) => {
   if (name === 'ethereum') return true;
-  if (name === 'goerli') return true;
   return false;
 };
 

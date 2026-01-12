@@ -25,7 +25,8 @@ import styled from 'styled-components';
 import { base } from 'viem/chains';
 import { useAccount } from 'wagmi';
 
-import { COLOR, NA } from '@autonolas/frontend-library';
+import { COLOR } from 'libs/ui-theme/src';
+import { NA } from 'libs/util-constants/src';
 
 import { getBytes32FromAddress, truncateAddress } from 'common-util/functions';
 import { formatDynamicTimeRange, getTimestamp } from 'common-util/functions/time';

@@ -2,7 +2,7 @@ import { useCallback } from 'react';
 import { BN, BorshCoder, Idl } from '@project-serum/anchor';
 import { TransactionMessage, VersionedTransaction, PublicKey, Connection } from '@solana/web3.js';
 import { memoize } from 'lodash';
-import { areAddressesEqual } from '@autonolas/frontend-library';
+import { areAddressesEqual } from 'libs/util-functions/src';
 
 import { SERVICE_ROLE, SERVICE_STATE_KEY_MAP, TOTAL_VIEW_COUNT } from 'util/constants';
 import idl from 'common-util/AbiAndAddresses/ServiceRegistrySolana.json';

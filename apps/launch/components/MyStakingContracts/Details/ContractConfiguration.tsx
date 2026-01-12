@@ -2,9 +2,14 @@ import { Col, Flex, Row, Skeleton, Typography } from 'antd';
 import { FC, ReactNode, useMemo } from 'react';
 import { Address } from 'viem';
 
-import { GATEWAY_URL, NA } from '@autonolas/frontend-library';
-
-import { EXPLORER_URLS, HASH_PREFIX, REGISTRY_URL, UNICODE_SYMBOLS } from 'libs/util-constants/src';
+import {
+  GATEWAY_URL,
+  NA,
+  EXPLORER_URLS,
+  HASH_PREFIX,
+  REGISTRY_URL,
+  UNICODE_SYMBOLS,
+} from 'libs/util-constants/src';
 import { truncateAddress } from 'libs/util-functions/src';
 
 import { CONTRACT_DEFAULT_VALUES } from 'common-util/constants/stakingContract';

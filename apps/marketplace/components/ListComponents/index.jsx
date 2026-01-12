@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Tabs, Typography } from 'antd';
 import { useRouter } from 'next/router';
-import { notifyError } from '@autonolas/frontend-library';
+import { notifyError } from 'libs/util-functions/src';
 
 import { NAV_TYPES } from 'util/constants';
 import { isMyTab } from 'common-util/List/ListTable/helpers';
@@ -26,7 +26,7 @@ const ListComponents = () => {
 
   const [currentTab, setCurrentTab] = useState(isMyTab(router) ? MY_COMPONENTS : ALL_COMPONENTS);
 
-  const { account, chainId, links, isL1OnlyNetwork, isSvm, isMainnet } = useHelpers();
+  const { account, chainId, links, isL1Network, isSvm, isMainnet } = useHelpers();
 
   const getAllComponents = useAllComponents();
   const getMyComponents = useMyComponents();
@@ -54,7 +54,7 @@ const ListComponents = () => {
   useEffect(() => {
     (async () => {
       if (isSvm) return;
-      if (!isL1OnlyNetwork) return;
+      if (!isL1Network) return;
       if (searchValue !== '') return;
 
       try {
@@ -75,13 +75,13 @@ const ListComponents = () => {
         notifyError('Error fetching components');
       }
     })();
-  }, [account, chainId, isL1OnlyNetwork, currentTab, searchValue, isSvm]);
+  }, [account, chainId, isL1Network, currentTab, searchValue, isSvm]);
 
   // fetch the list (without search)
   useEffect(() => {
     (async () => {
       if (isSvm) return;
-      if (!isL1OnlyNetwork) return;
+      if (!isL1Network) return;
       if (searchValue) return;
 
       if (total && currentPage) {
@@ -116,7 +116,7 @@ const ListComponents = () => {
   }, [
     isSvm,
     searchValue,
-    isL1OnlyNetwork,
+    isL1Network,
     account,
     total,
     currentPage,
