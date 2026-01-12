@@ -4,16 +4,11 @@ import { kebabCase } from 'lodash';
 import {
   Chain,
   arbitrum,
-  arbitrumSepolia,
   base,
-  baseSepolia,
   celo,
-  celoAlfajores,
   gnosis,
-  gnosisChiado,
   mainnet,
   optimism,
-  optimismSepolia,
   polygon,
   mode,
 } from 'wagmi/chains';
@@ -25,16 +20,11 @@ import { VM_TYPE } from 'libs/util-constants/src';
 export const SUPPORTED_CHAINS: Chain[] = [
   mainnet,
   gnosis,
-  gnosisChiado,
   polygon,
   arbitrum,
-  arbitrumSepolia,
   base,
-  baseSepolia,
   optimism,
-  optimismSepolia,
   celo,
-  celoAlfajores,
   mode,
 ].map((chain) => {
   const defaultRpc = RPC_URLS[chain.id] || chain.rpcUrls.default.http[0];
@@ -60,25 +50,10 @@ export const SUPPORTED_CHAINS: Chain[] = [
 export const EVM_SUPPORTED_CHAINS = SUPPORTED_CHAINS.map((chain) => {
   const { name, id } = chain;
 
-  const getNetworkName = () => {
-    if (name === 'OP Mainnet') return 'optimism';
-    if (name === 'OP Sepolia') return 'optimism-sepolia';
-    if (name === 'Alfajores') return 'celo-alfajores';
-    if (name === 'Mode Mainnet') return 'mode';
-    return kebabCase(name);
-  };
-
-  const getNetworkDisplayName = () => {
-    if (name === 'OP Mainnet') return 'Optimism';
-    if (name === 'OP Sepolia') return 'Optimism Sepolia';
-    if (name === 'Alfajores') return 'Celo Alfajores';
-    return name;
-  };
-
   return {
     id,
-    networkDisplayName: getNetworkDisplayName(),
-    networkName: getNetworkName(),
+    networkDisplayName: name,
+    networkName: kebabCase(name),
     vmType: VM_TYPE.EVM,
   };
 });
@@ -102,18 +77,7 @@ const SVM_SOLANA_CHAIN: SolanaChain = {
   vmType: VM_TYPE.SVM,
 };
 
-const SVM_SOLANA_DEVNET_CHAIN: SolanaChain = {
-  id: null,
-  networkDisplayName: 'Solana Devnet',
-  networkName: SOLANA_CHAIN_NAMES.DEVNET,
-  clusterName: 'devnet',
-  vmType: 'SVM',
-};
-
-export const SVM_SUPPORTED_CHAINS: SolanaChain[] = [
-  { ...SVM_SOLANA_CHAIN },
-  { ...SVM_SOLANA_DEVNET_CHAIN },
-];
+export const SVM_SUPPORTED_CHAINS: SolanaChain[] = [SVM_SOLANA_CHAIN];
 
 const DEFAULT_SVM_CLUSTER = 'mainnet-beta';
 
@@ -148,15 +112,9 @@ export const ALL_SUPPORTED_CHAINS = [...EVM_SUPPORTED_CHAINS, ...SVM_SUPPORTED_C
       'Solana',
       'Arbitrum One',
       'Base',
-      'Optimism',
+      'OP Mainnet',
       'Celo',
       'Mode Mainnet',
-      'Gnosis Chiado',
-      'Solana Devnet',
-      'Arbitrum Sepolia',
-      'Base Sepolia',
-      'Optimism Sepolia',
-      'Celo Alfajores',
     ];
 
     const aIndex = chainNameOrder.indexOf(a.networkDisplayName);

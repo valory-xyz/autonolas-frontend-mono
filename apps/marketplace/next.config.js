@@ -104,6 +104,16 @@ const nextConfig = {
       destination: '/gnosis/ai-agents',
       permanent: true,
     },
+    {
+      source: '/optimism/:path*',
+      destination: '/op-mainnet/:path*',
+      permanent: true,
+    },
+    {
+      source: '/mode/:path*',
+      destination: '/mode-mainnet/:path*',
+      permanent: true,
+    },
   ],
 };
 
