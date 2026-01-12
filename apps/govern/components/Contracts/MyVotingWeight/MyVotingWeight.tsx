@@ -1,20 +1,23 @@
 import { LoadingOutlined, TableOutlined, WalletOutlined } from '@ant-design/icons';
-import { Button, Card as CardAntd, Flex, Spin, Typography } from 'antd';
+import { Button, Card as CardAntd, Flex, Spin, Statistic, Typography } from 'antd';
 import Image from 'next/image';
 import { useRouter } from 'next/router';
-import { Dispatch, SetStateAction, useMemo } from 'react';
+import { Dispatch, SetStateAction, useMemo, useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { Allocation } from 'types';
 import { useAccount } from 'wagmi';
 
+import { DAY_IN_SECONDS, WEEK_IN_SECONDS } from 'common-util/constants/time';
 import { LoginV2 } from 'components/Login';
 import { useVotingPower } from 'hooks/index';
 import { useAppSelector } from 'store/index';
 
+import { useThresholdData } from '../../Donate/hooks';
 import { EditVotes } from '../EditVotes';
 import { Votes } from './Votes';
 
-const { Title, Paragraph } = Typography;
+const { Title, Paragraph, Text } = Typography;
+const { Countdown: CountdownAntd } = Statistic;
 
 const Card = styled(CardAntd)`
   display: flex;
@@ -28,6 +31,13 @@ const Card = styled(CardAntd)`
     display: flex;
     flex-direction: column;
     flex: auto;
+  }
+`;
+
+const Countdown = styled(CountdownAntd)<{ isUrgent: boolean }>`
+  .ant-statistic-content {
+    font-size: 14px;
+    color: ${({ isUrgent }) => (isUrgent ? '#ff4d4f' : 'rgba(0, 0, 0, 0.5)')};
   }
 `;
 
@@ -102,6 +112,8 @@ export const MyVotingWeight = ({
 
   const { data: votingPower, isFetching: isVotingPowerLoading } = useVotingPower(account);
   const { userVotes, isUserVotesLoading } = useAppSelector((state) => state.govern);
+  const { nextEpochEndTime } = useThresholdData();
+  const [isOneDayLeftToVote, setIsOneDayLeftToVote] = useState(false);
 
   const content = useMemo(() => {
     // If the user didn't connect their wallet, suggest to connect
@@ -154,11 +166,45 @@ export const MyVotingWeight = ({
     votingPower,
   ]);
 
+  const lastVoteTime = useMemo(() => {
+    if (!nextEpochEndTime) return null;
+    return Math.floor(nextEpochEndTime / WEEK_IN_SECONDS) * WEEK_IN_SECONDS * 1000;
+  }, [nextEpochEndTime]);
+
+  useEffect(() => {
+    if (!lastVoteTime) return;
+
+    const checkTimeLeftToVote = () => {
+      const timeLeft = lastVoteTime - Date.now();
+      setIsOneDayLeftToVote(timeLeft < DAY_IN_SECONDS * 1000 && timeLeft > 0);
+    };
+
+    const timer = setInterval(checkTimeLeftToVote, 60 * 1000);
+    return () => clearInterval(timer);
+  }, [lastVoteTime]);
+
   return (
     <Card className="flex-none">
-      <Title level={3} className="m-0">
-        My voting weight
-      </Title>
+      <Flex justify="space-between" align="baseline" wrap="wrap">
+        <Title level={3} className="m-0">
+          My voting weight
+        </Title>
+
+        {lastVoteTime && (
+          <Flex gap={8} align="baseline">
+            <Paragraph type="secondary" className="m-0">
+              Time left to vote:
+            </Paragraph>
+            <Text type="secondary">
+              <Countdown
+                value={lastVoteTime}
+                format="D[d] H[h] m[m] s[s]"
+                isUrgent={isOneDayLeftToVote}
+              />
+            </Text>
+          </Flex>
+        )}
+      </Flex>
       <Paragraph type="secondary" className="mt-8 mb-16">
         Allocate your voting power to direct OLAS emissions to different staking contracts.
       </Paragraph>
