@@ -15,6 +15,7 @@ import { useAppSelector } from 'store/index';
 import { useThresholdData } from '../../Donate/hooks';
 import { EditVotes } from '../EditVotes';
 import { Votes } from './Votes';
+import { COLOR } from 'libs/ui-theme/src';
 
 const { Title, Paragraph, Text } = Typography;
 const { Countdown: CountdownAntd } = Statistic;
@@ -37,7 +38,7 @@ const Card = styled(CardAntd)`
 const Countdown = styled(CountdownAntd)<{ isUrgent: boolean }>`
   .ant-statistic-content {
     font-size: 14px;
-    color: ${({ isUrgent }) => (isUrgent ? '#ff4d4f' : 'rgba(0, 0, 0, 0.5)')};
+    color: ${({ isUrgent }) => (isUrgent ? COLOR.RED : COLOR.TEXT_PRIMARY)};
   }
 `;
 
