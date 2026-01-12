@@ -8,7 +8,7 @@ import { createGlobalStyle } from 'styled-components';
 import { Address } from 'viem';
 
 import { Web3AuthProvider } from 'context/Web3AuthProvider';
-
+import { useReconnectWeb3Auth } from 'hooks/useReconnectWeb3Auth';
 import {
   ChainIdMissingAlert,
   InitErrorAlert,
@@ -23,7 +23,6 @@ import {
   toHexChainId,
   waitForTransactionReceipt,
 } from '../../utils';
-import { useReconnectWeb3Auth } from './hooks/useReconnectWeb3Auth';
 
 const { Title, Text } = Typography;
 
