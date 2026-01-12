@@ -50,16 +50,10 @@ export const SUPPORTED_CHAINS: Chain[] = [
 export const EVM_SUPPORTED_CHAINS = SUPPORTED_CHAINS.map((chain) => {
   const { name, id } = chain;
 
-  const getNetworkName = () => {
-    if (name === 'OP Mainnet') return 'optimism';
-    if (name === 'Mode Mainnet') return 'mode';
-    return kebabCase(name);
-  };
-
   return {
     id,
     networkDisplayName: name,
-    networkName: getNetworkName(),
+    networkName: kebabCase(name),
     vmType: VM_TYPE.EVM,
   };
 });
