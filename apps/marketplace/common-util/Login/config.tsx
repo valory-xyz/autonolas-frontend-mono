@@ -56,14 +56,9 @@ export const EVM_SUPPORTED_CHAINS = SUPPORTED_CHAINS.map((chain) => {
     return kebabCase(name);
   };
 
-  const getNetworkDisplayName = () => {
-    if (name === 'OP Mainnet') return 'Optimism';
-    return name;
-  };
-
   return {
     id,
-    networkDisplayName: getNetworkDisplayName(),
+    networkDisplayName: name,
     networkName: getNetworkName(),
     vmType: VM_TYPE.EVM,
   };
@@ -123,7 +118,7 @@ export const ALL_SUPPORTED_CHAINS = [...EVM_SUPPORTED_CHAINS, ...SVM_SUPPORTED_C
       'Solana',
       'Arbitrum One',
       'Base',
-      'Optimism',
+      'OP Mainnet',
       'Celo',
       'Mode Mainnet',
     ];
