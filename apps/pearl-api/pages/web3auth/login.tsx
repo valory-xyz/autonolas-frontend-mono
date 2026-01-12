@@ -6,6 +6,7 @@ import { Address } from 'viem';
 
 import { Web3AuthProvider } from 'context/Web3AuthProvider';
 import { InitErrorAlert, Loading } from '../../components/web3auth';
+import { useReconnectWeb3Auth } from './hooks/useReconnectWeb3Auth';
 
 export const Styles = createGlobalStyle`
   .w3a-parent-container > div {
@@ -23,6 +24,7 @@ const Web3AuthModal = () => {
   const { provider, isInitialized, web3Auth, initError } = useWeb3Auth();
   const { connect, isConnected } = useWeb3AuthConnect();
   const { disconnect } = useWeb3AuthDisconnect();
+  const reconnect = useReconnectWeb3Auth(web3Auth);
   const isAddressUpdated = useRef(false);
 
   // Notify once initialized
@@ -35,9 +37,16 @@ const Web3AuthModal = () => {
   // Connect when the page is open
   useEffect(() => {
     if (isInitialized && !isConnected) {
-      connect();
+      try {
+        connect();
+      } catch (e) {
+        const message = (e as Error)?.message ?? '';
+        if (message.includes('Session Expired')) {
+          reconnect();
+        }
+      }
     }
-  }, [isInitialized, isConnected, connect]);
+  }, [isInitialized, isConnected, connect, reconnect]);
 
   // Receive connected wallet address and redirect to Pearl
   useEffect(() => {

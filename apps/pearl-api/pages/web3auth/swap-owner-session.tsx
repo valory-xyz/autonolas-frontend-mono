@@ -23,6 +23,7 @@ import {
   toHexChainId,
   waitForTransactionReceipt,
 } from '../../utils';
+import { useReconnectWeb3Auth } from './hooks/useReconnectWeb3Auth';
 
 const { Title, Text } = Typography;
 
@@ -59,6 +60,7 @@ type TransactionFailure = {
 const SwapOwnerSession = () => {
   const { provider, isInitialized, web3Auth, initError } = useWeb3Auth();
   const { connect, isConnected } = useWeb3AuthConnect();
+  const reconnect = useReconnectWeb3Auth(web3Auth);
   const router = useRouter();
   const hasExecuted = useRef(false);
   const [status, setStatus] = useState<string>('Initializing...');
@@ -92,9 +94,16 @@ const SwapOwnerSession = () => {
   useEffect(() => {
     if (isInitialized && !isConnected && !provider) {
       setStatus('Opening Web3Auth modal...');
-      connect();
+      try {
+        connect();
+      } catch (e) {
+        const message = (e as Error)?.message ?? '';
+        if (message.includes('Session Expired')) {
+          reconnect();
+        }
+      }
     }
-  }, [isInitialized, isConnected, provider, connect]);
+  }, [isInitialized, isConnected, provider, connect, web3Auth, reconnect]);
 
   useEffect(() => {
     const executeSwapOwner = async () => {
