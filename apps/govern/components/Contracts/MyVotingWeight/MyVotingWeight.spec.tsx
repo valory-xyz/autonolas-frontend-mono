@@ -6,6 +6,11 @@ import { MyVotingWeight } from './MyVotingWeight';
 
 jest.mock('wagmi', () => ({
   useAccount: jest.fn().mockReturnValue({ address: '0x1234', isConnected: true }),
+  useReadContract: jest.fn().mockReturnValue({
+    data: undefined,
+    isFetching: false,
+    refetch: jest.fn(),
+  }),
 }));
 jest.mock('hooks/index', () => ({ useVotingPower: jest.fn().mockReturnValue({ data: '75.05' }) }));
 jest.mock('store/index', () => ({
