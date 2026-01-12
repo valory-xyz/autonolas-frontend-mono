@@ -300,6 +300,8 @@ Deposit.defaultProps = {
   productLpTokenName: null,
   productLpPriceAfterDiscount: null,
   productSupply: null,
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
   closeModal: () => {},
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
   getProducts: () => {},
 };

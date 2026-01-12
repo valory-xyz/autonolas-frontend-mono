@@ -151,10 +151,6 @@ describe('listComponents/details.jsx', () => {
       name: 'Update Hash',
     });
 
-    if (!updateHashButton) {
-      console.log('Update Button not found');
-    }
-
     expect(updateHashButton).toBeInTheDocument();
 
     // Initially, the modal should not be visible

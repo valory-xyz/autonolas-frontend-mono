@@ -4,7 +4,8 @@
   "license": "MIT",
   "scripts": {
     "build-all": "yarn nx build bond && yarn nx build build && yarn nx build contribute && yarn nx build docs && yarn nx build govern && yarn nx build launch && yarn nx build marketplace && yarn nx build operate && yarn nx build pearl-api",
-    "lint:fix-all": "yarn nx lint --fix bond && yarn nx lint --fix build && yarn nx lint --fix contribute && yarn nx lint --fix docs && yarn nx lint --fix govern && yarn nx lint --fix launch && yarn nx lint --fix marketplace && yarn nx lint --fix operate && yarn nx lint --fix pearl-api"
+    "lint-all": "yarn nx lint bond && yarn nx lint build && yarn nx lint contribute && yarn nx lint docs && yarn nx lint govern && yarn nx lint launch && yarn nx lint marketplace && yarn nx lint operate && yarn nx lint pearl-api",
+    "lint:fix-all": "yarn nx lint bond --fix && yarn nx lint build --fix && yarn nx lint contribute --fix && yarn nx lint docs --fix && yarn nx lint govern --fix && yarn nx lint launch --fix && yarn nx lint marketplace --fix && yarn nx lint operate --fix && yarn nx lint pearl-api --fix"
   },
   "private": true,
   "dependencies": {

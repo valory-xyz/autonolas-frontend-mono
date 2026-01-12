@@ -54,7 +54,10 @@ const allocationsMock: Allocation[] = [
   },
 ];
 
-const ContractListExample: FC<{ handleAdd?: () => void }> = ({ handleAdd = () => {} }) => {
+const ContractListExample: FC<{ handleAdd?: () => void }> = ({
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
+  handleAdd = () => {},
+}) => {
   return <ContractsList isUpdating={true} handleAdd={handleAdd} allocations={allocationsMock} />;
 };
 

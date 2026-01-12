@@ -24,8 +24,10 @@ const MyVotingWeightExample = () => {
   return (
     <MyVotingWeight
       isUpdating={false}
+      // eslint-disable-next-line @typescript-eslint/no-empty-function
       setIsUpdating={() => {}}
       allocations={allocationsMock}
+      // eslint-disable-next-line @typescript-eslint/no-empty-function
       setAllocations={() => {}}
     />
   );

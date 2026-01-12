@@ -98,6 +98,7 @@ describe('listServices/index.jsx - EVM', () => {
 
     (useRouter as jest.Mock).mockReturnValue({ query: {}, push: jest.fn() });
     (useHelpers as jest.Mock).mockReturnValue(useHelpersEvmMock);
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
     (useServiceInfo as jest.Mock).mockReturnValue(jest.fn(() => {}));
   });
 

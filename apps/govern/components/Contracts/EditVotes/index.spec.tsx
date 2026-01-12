@@ -57,7 +57,9 @@ const EditVotesExample: FC<{
   return (
     <EditVotes
       allocations={allocationsMock}
+      // eslint-disable-next-line @typescript-eslint/no-empty-function
       setAllocations={setAllocationsMock || (() => {})}
+      // eslint-disable-next-line @typescript-eslint/no-empty-function
       setIsUpdating={() => {}}
     />
   );

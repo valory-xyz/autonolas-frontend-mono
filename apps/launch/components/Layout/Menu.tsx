@@ -63,9 +63,7 @@ const MenuInstance: FC<MenuInstanceProps> = ({ selectedMenu, handleMenuItemClick
   );
 };
 
-interface NavigationMenuProps {}
-
-const NavigationMenu: FC<NavigationMenuProps> = () => {
+const NavigationMenu: FC = () => {
   const router = useRouter();
   const [selectedMenu, setSelectedMenu] = useState('');
   const { pathname } = router;

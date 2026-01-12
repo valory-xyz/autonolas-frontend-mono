@@ -22,7 +22,11 @@ export const networkSlice = createSlice({
       state.networkName = action.payload.networkName;
       state.networkDisplayName = action.payload.networkDisplayName;
     },
-    clearState: (state) => {},
+    clearState: (state) => {
+      state.networkId = null;
+      state.networkName = null;
+      state.networkDisplayName = null;
+    },
   },
 });
 

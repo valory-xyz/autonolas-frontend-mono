@@ -1,6 +1,6 @@
 import { ZENDESK_CONFIG } from '../constants';
 
-export const getZendeskRequestHeaders = (contentType: string = 'application/json') => {
+export const getZendeskRequestHeaders = (contentType = 'application/json') => {
   if (!ZENDESK_CONFIG.API_EMAIL || !ZENDESK_CONFIG.API_TOKEN) {
     throw new Error('Zendesk API credentials are not set');
   }

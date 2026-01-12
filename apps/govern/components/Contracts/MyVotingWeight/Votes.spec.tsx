@@ -50,7 +50,14 @@ jest.mock('store/index', () => ({
 }));
 
 const VotesExample = () => {
-  return <Votes setIsUpdating={() => {}} setAllocations={() => {}} />;
+  return (
+    <Votes
+      // eslint-disable-next-line @typescript-eslint/no-empty-function
+      setIsUpdating={() => {}}
+      // eslint-disable-next-line @typescript-eslint/no-empty-function
+      setAllocations={() => {}}
+    />
+  );
 };
 
 describe('<Votes />', () => {

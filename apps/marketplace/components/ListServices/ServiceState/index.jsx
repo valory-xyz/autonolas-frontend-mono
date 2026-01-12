@@ -269,5 +269,6 @@ ServiceState.propTypes = {
 ServiceState.defaultProps = {
   details: [],
   isOwner: false,
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
   updateDetails: () => {},
 };

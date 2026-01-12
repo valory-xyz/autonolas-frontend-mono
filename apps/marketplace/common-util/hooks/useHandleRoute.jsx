@@ -131,7 +131,7 @@ export const useHandleRoute = () => {
     if (!isValidL1NetworkName(networkNameFromUrl) && doesPathIncludesComponentsOrAgents(path)) {
       router.push(`/${networkNameFromUrl}/ai-agents`);
     }
-  }, [path, networkNameFromUrl, isL1Network]);
+  }, [path, router, networkNameFromUrl, isL1Network]);
 
   const onHomeClick = () => {
     const isSvm =

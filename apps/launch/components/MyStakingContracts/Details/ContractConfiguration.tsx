@@ -142,7 +142,7 @@ const AgentIds: FC<{ address: Address }> = ({ address }) => {
         {id}
       </a>
     ));
-  }, [data, networkName]);
+  }, [data]);
 
   return <ShowContent isLoading={isLoading} data={ids} />;
 };

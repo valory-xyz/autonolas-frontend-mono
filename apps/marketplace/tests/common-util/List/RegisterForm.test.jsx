@@ -4,7 +4,9 @@ import RegisterForm, { FORM_NAME } from '../../../common-util/List/RegisterForm'
 import { fillIpfsGenerationModal } from '../../tests-helpers/prefillForm';
 import { wrapProvider, dummyAddress, mockV1Hash } from '../../tests-helpers';
 
+// eslint-disable-next-line @typescript-eslint/no-empty-function
 const handleSubmit = jest.fn(() => {});
+// eslint-disable-next-line @typescript-eslint/no-empty-function
 const handleCancel = jest.fn(() => {});
 
 jest.mock('../../../common-util/List/IpfsHashGenerationModal/helpers', () => ({

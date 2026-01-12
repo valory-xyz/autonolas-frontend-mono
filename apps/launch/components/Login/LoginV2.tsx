@@ -5,6 +5,10 @@ import { useAccountEffect, useConfig, useDisconnect } from 'wagmi';
 
 import { isAddressProhibited } from 'libs/util-prohibited-data/src/index';
 
+interface WindowWithModalProvider extends Window {
+  MODAL_PROVIDER?: unknown;
+}
+
 const LoginContainer = styled.div`
   display: flex;
   align-items: center;
@@ -23,14 +27,15 @@ export const LoginV2 = () => {
 
       if (connector) {
         const modalProvider = await connector.getProvider();
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (window as any).MODAL_PROVIDER = modalProvider;
+        (window as WindowWithModalProvider).MODAL_PROVIDER = modalProvider;
       }
     },
     [disconnect],
   );
 
-  const clearOnDisconnect = useCallback(() => {}, []);
+  const clearOnDisconnect = useCallback(() => {
+    delete (window as WindowWithModalProvider).MODAL_PROVIDER;
+  }, []);
 
   useAccountEffect({
     onConnect: handleConnect,
@@ -46,7 +51,7 @@ export const LoginV2 = () => {
       },
     });
     return () => unwatch();
-  }, [config, clearOnDisconnect, handleConnect]);
+  }, [config, handleConnect]);
 
   return (
     <LoginContainer>

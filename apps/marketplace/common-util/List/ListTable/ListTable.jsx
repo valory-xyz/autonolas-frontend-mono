@@ -115,8 +115,10 @@ ListTable.defaultProps = {
   list: [],
   total: 0,
   currentPage: 0,
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
   setCurrentPage: () => {},
   isAccountRequired: false,
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
   onViewClick: () => {},
   onUpdateClick: null,
   extra: { scrollX: 1200 },
