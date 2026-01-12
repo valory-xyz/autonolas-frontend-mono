@@ -5,10 +5,8 @@ import { Keypair, PublicKey } from '@solana/web3.js';
 import NodeWallet from '@project-serum/anchor/dist/cjs/nodewallet';
 import { web3, setProvider } from '@coral-xyz/anchor';
 
-import { SOLANA_CHAIN_NAMES } from '../../util/constants';
 import idl from '../AbiAndAddresses/ServiceRegistrySolana.json';
-import { SOLANA_ADDRESSES, SOLANA_DEVNET_ADDRESSES } from '../Contracts/addresses';
-import { useHelpers } from './index';
+import { SOLANA_ADDRESSES } from '../Contracts/addresses';
 
 const NODE_WALLET = new NodeWallet(Keypair.generate());
 const TEMP_PUBLIC_KEY = new web3.PublicKey(process.env.NEXT_PUBLIC_SVM_PUBLIC_KEY);
@@ -19,15 +17,11 @@ const TEMP_PUBLIC_KEY = new web3.PublicKey(process.env.NEXT_PUBLIC_SVM_PUBLIC_KE
 export const useSvmConnectivity = () => {
   const { connection } = useConnection();
   const wallet = useAnchorWallet();
-  const { chainName } = useHelpers();
 
   const actualWallet = useMemo(() => wallet?.publicKey || null, [wallet]);
 
   // program addresses
-  const solanaAddresses = useMemo(
-    () => (chainName === SOLANA_CHAIN_NAMES.MAINNET ? SOLANA_ADDRESSES : SOLANA_DEVNET_ADDRESSES),
-    [chainName],
-  );
+  const solanaAddresses = SOLANA_ADDRESSES;
 
   // provider for anchor, if wallet is not connected, use node wallet
   // (node wallet is used read-only operations, like fetching data from blockchain)
