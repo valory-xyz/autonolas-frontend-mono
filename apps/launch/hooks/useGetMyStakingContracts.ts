@@ -13,6 +13,7 @@ import { getBytes32FromAddress } from 'libs/util-functions/src';
 
 import { ChainId, blockNumbers } from 'common-util/constants/stakingContract';
 import { CONTRACT_TEMPLATES } from 'common-util/constants/stakingContract';
+import { hasSubgraphSupport, StakingContractsResponse } from 'common-util/graphql/my-contracts';
 import { useAppDispatch, useAppSelector } from 'store/index';
 import { setMyStakingContracts } from 'store/launch';
 import { MyStakingContract } from 'types/index';
@@ -129,6 +130,31 @@ const useGetInstanceAddresses = () => {
       setIsFetching(true);
 
       try {
+        // Try fetching from subgraph first if available
+        if (hasSubgraphSupport(currentNetworkId)) {
+          try {
+            const response = await fetch(
+              `/api/my-contracts?chainId=${currentNetworkId}&address=${account}`,
+            );
+
+            if (!response.ok) {
+              throw new Error(`API request failed: ${response.status}`);
+            }
+
+            const data: StakingContractsResponse = await response.json();
+
+            const addresses = data.stakingContracts.map((contract) => contract.instance as Address);
+            setInstanceAddresses(addresses);
+            return;
+          } catch (subgraphError) {
+            window.console.warn(
+              'Subgraph fetch failed, falling back to event logs:',
+              subgraphError,
+            );
+          }
+        }
+
+        // Fallback to fetching from logs
         const eventLogs = await client.getLogs({
           address: STAKING_FACTORY.addresses[`${currentNetworkId}`] as Address,
           event: {
