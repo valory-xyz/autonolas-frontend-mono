@@ -19,15 +19,42 @@ import { MyStakingContract } from 'types/index';
 
 type Metadata = { name: string; description: string };
 
+// Timeout for IPFS metadata fetches in ms
+// This prevents the UI from hanging indefinitely when IPFS content doesn't exist
+const IPFS_FETCH_TIMEOUT_MS = 5000;
+
 const getMetadata = async (tokenUri: undefined | null | string) => {
   if (!tokenUri) return null;
 
   try {
     const uri = `${HASH_PREFIX}${tokenUri.substring(2)}`;
     const ipfsUrl = `${GATEWAY_URL}${uri}`;
-    const response = await fetch(ipfsUrl);
-    const json = await response.json();
-    return json;
+
+    // Add timeout to prevent hanging when IPFS content doesn't exist
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), IPFS_FETCH_TIMEOUT_MS);
+
+    try {
+      const response = await fetch(ipfsUrl, { signal: controller.signal });
+
+      if (!response.ok) {
+        window.console.warn(`Failed to fetch IPFS metadata: ${response.status}`);
+        return null;
+      }
+
+      const json = await response.json();
+      return json;
+    } catch (fetchError) {
+      if ((fetchError as Error).name === 'AbortError') {
+        window.console.warn(
+          `IPFS metadata fetch timed out after ${IPFS_FETCH_TIMEOUT_MS}ms for ${uri}`,
+        );
+      } else {
+        throw fetchError;
+      }
+    } finally {
+      clearTimeout(timeoutId);
+    }
   } catch (e) {
     window.console.error(e);
   }
