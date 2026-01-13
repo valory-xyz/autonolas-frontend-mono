@@ -13,7 +13,7 @@ import { setStakingContracts } from 'store/govern';
 import { useAppDispatch, useAppSelector } from 'store/index';
 
 import { useNomineesWeights } from './useNomineesWeights';
-import { getBytes32FromAddress } from 'libs/util-functions/src';
+import { areAddressesEqual, getBytes32FromAddress } from 'libs/util-functions/src';
 import { WEEK_IN_SECONDS } from 'common-util/constants/time';
 
 // Blacklisted staking contracts that should not be displayed
@@ -82,10 +82,10 @@ export const useFetchStakingContractsList = () => {
       const stakingContractsList: StakingContract[] = [];
       nominees.forEach((item) => {
         // Check if the nominee is blacklisted
-        const isBlacklisted = BLACKLISTED_ADDRESSES.some(
-          (addr) => item.account === getBytes32FromAddress(addr)
+        const isBlacklisted = BLACKLISTED_ADDRESSES.some((addr) =>
+          areAddressesEqual(item.account, getBytes32FromAddress(addr)),
         );
-        
+
         if (!isBlacklisted) {
           stakingContractsList.push({
             address: item.account,

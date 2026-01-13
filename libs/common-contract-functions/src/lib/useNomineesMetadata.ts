@@ -12,9 +12,9 @@ import { getAddressFromBytes32, getBytes32FromAddress } from 'libs/util-function
 
 const BATCH_SIZE = 10;
 const CONCURRENCY_LIMIT = 5;
-// Timeout for IPFS metadata fetches (10 seconds)
+// Timeout for IPFS metadata fetches in ms
 // This prevents the UI from hanging indefinitely when IPFS content doesn't exist
-const IPFS_FETCH_TIMEOUT_MS = 10000;
+const IPFS_FETCH_TIMEOUT_MS = 5000;
 
 type HashesWithNominees = { nominee: Address; hash: string }[];
 type Metadata = { name: string; description: string };
@@ -22,7 +22,7 @@ type Metadata = { name: string; description: string };
 const fetchWithTimeout = async (url: string): Promise<Response> => {
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), IPFS_FETCH_TIMEOUT_MS);
-  
+
   try {
     const response = await fetch(url, { signal: controller.signal });
     clearTimeout(timeoutId);
