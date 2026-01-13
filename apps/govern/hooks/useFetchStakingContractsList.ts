@@ -17,6 +17,13 @@ import { getBytes32FromAddress } from 'libs/util-functions/src';
 
 const WEEK_IN_SECONDS = 604_800;
 
+// Blacklisted staking contracts that should not be displayed
+const BLACKLISTED_ADDRESSES = [
+  RETAINER_ADDRESS,
+  // Jinn staking contract with invalid IPFS metadata (keccak256 hash instead of IPFS CID)
+  '0x0dfafbf570e9e813507aae18aa08dfba0abc5139',
+];
+
 const getCurrentWeightTimestamp = (timeSum: number | undefined) => {
   if (!timeSum) return null;
   // If timeSum is in the future, subtract a week from it
@@ -75,7 +82,12 @@ export const useFetchStakingContractsList = () => {
     ) {
       const stakingContractsList: StakingContract[] = [];
       nominees.forEach((item) => {
-        if (item.account !== getBytes32FromAddress(RETAINER_ADDRESS)) {
+        // Check if the nominee is blacklisted
+        const isBlacklisted = BLACKLISTED_ADDRESSES.some(
+          (addr) => item.account === getBytes32FromAddress(addr)
+        );
+        
+        if (!isBlacklisted) {
           stakingContractsList.push({
             address: item.account,
             chainId: Number(item.chainId),
