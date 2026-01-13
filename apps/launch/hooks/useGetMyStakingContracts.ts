@@ -36,7 +36,6 @@ const getMetadata = async (tokenUri: undefined | null | string) => {
 
     try {
       const response = await fetch(ipfsUrl, { signal: controller.signal });
-      clearTimeout(timeoutId);
 
       if (!response.ok) {
         window.console.warn(`Failed to fetch IPFS metadata: ${response.status}`);
@@ -46,7 +45,6 @@ const getMetadata = async (tokenUri: undefined | null | string) => {
       const json = await response.json();
       return json;
     } catch (fetchError) {
-      clearTimeout(timeoutId);
       if ((fetchError as Error).name === 'AbortError') {
         window.console.warn(
           `IPFS metadata fetch timed out after ${IPFS_FETCH_TIMEOUT_MS}ms for ${uri}`,
@@ -54,6 +52,8 @@ const getMetadata = async (tokenUri: undefined | null | string) => {
       } else {
         throw fetchError;
       }
+    } finally {
+      clearTimeout(timeoutId);
     }
   } catch (e) {
     window.console.error(e);

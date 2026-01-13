@@ -6,7 +6,7 @@ import { getBlock } from 'viem/actions';
 import { useReadContracts } from 'wagmi';
 
 import { useNominees, useNomineesMetadata } from 'libs/common-contract-functions/src';
-import { RETAINER_ADDRESS } from 'libs/util-constants/src';
+import { BLACKLISTED_STAKING_ADDRESSES } from 'libs/util-constants/src';
 import { STAKING_TOKEN } from 'libs/util-contracts/src';
 import { areAddressesEqual, getAddressFromBytes32 } from 'libs/util-functions/src';
 
@@ -20,16 +20,6 @@ type StakingContractDetailsInfo = {
   minOperatingBalanceToken?: string;
   minOperatingBalanceHint?: string;
 };
-
-const BLACKLISTED_ADDRESSES = [
-  RETAINER_ADDRESS,
-  // Broken contribute staking contracts
-  '0x95146adf659f455f300d7521b3b62a3b6c4aba1f',
-  '0x2c8a5ac7b431ce04a037747519ba475884bce2fb',
-  '0x708e511d5fcb3bd5a5d42f42aa9a69ec5b0ee2e8',
-  // Jinn staking contract with invalid IPFS metadata (keccak256 hash instead of IPFS CID)
-  '0x0dfafbf570e9e813507aae18aa08dfba0abc5139',
-];
 
 const STAKING_CONTRACT_DETAILS: Record<Address, StakingContractDetailsInfo> = {
   // Quickstart Beta - Hobbyist
@@ -461,7 +451,7 @@ export const useStakingContractsList = () => {
   const nominees = useMemo(() => {
     return (nomineesData || []).filter(
       (nominee) =>
-        !BLACKLISTED_ADDRESSES.some((blackListedNominee) =>
+        !BLACKLISTED_STAKING_ADDRESSES.some((blackListedNominee) =>
           areAddressesEqual(blackListedNominee, getAddressFromBytes32(nominee.account)),
         ),
     );
