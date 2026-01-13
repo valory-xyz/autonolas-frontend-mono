@@ -15,31 +15,23 @@ type AgentEligibility = {
   reason_code?: ReasonCode;
 };
 
+type Source = 'vercel' | 'unknown';
+
 type EligibilityResponse = {
   checked_at: number;
-  geo?: {
-    country?: string; // optional; can be omitted via env toggle
-    source: 'vercel' | 'unknown';
-  };
+  geo?: { source: Source };
   eligibility: Record<AgentId, AgentEligibility>;
 };
 
+// TODO: to be confirmed from compliance team!
 /**
  * Policy config
  * ISO-3166-1 alpha-2 country codes. UK is "GB".
  */
 const RESTRICTED_COUNTRIES_BY_AGENT: Record<AgentId, Set<string>> = {
-  polymarket_trader: new Set([
-    'US',
-    // TODO: Add OFAC / other restricted codes here
-  ]),
+  polymarket_trader: new Set(['CU', 'KP', 'SY', 'IR', 'RU', 'UA']),
 };
 
-// Toggle whether we expose the derived country to the client.
-// Good for debugging; legal may want this off.
-const EXPOSE_COUNTRY = (process.env.GEO_EXPOSE_COUNTRY ?? 'false') === 'true';
-
-// Header commonly set by Vercel for country; may be missing in local dev.
 function getVercelCountry(req: NextApiRequest): string | undefined {
   const raw = req.headers['x-vercel-ip-country'];
   const value = Array.isArray(raw) ? raw[0] : raw;
@@ -47,13 +39,15 @@ function getVercelCountry(req: NextApiRequest): string | undefined {
   return value.toUpperCase();
 }
 
+/**
+ * Supports parsing ?agents=a,b,c or ?agents=a&agents=b
+ */
 function parseAgentsQuery(req: NextApiRequest): string[] | null {
-  // supports: ?agents=a,b,c or ?agents=a&agents=b
   const q = req.query.agents;
   if (!q) return null;
 
+  // ?agents=a&agents=b
   if (Array.isArray(q)) {
-    // ?agents=a&agents=b
     return q
       .flatMap((v) => v.split(','))
       .map((s) => s.trim())
@@ -72,7 +66,6 @@ function isKnownAgentId(id: string): id is AgentId {
 }
 
 export default function handler(req: NextApiRequest, res: NextApiResponse<EligibilityResponse>) {
-  // Only allow GET
   if (req.method !== 'GET') {
     res.setHeader('Allow', 'GET');
     return res.status(405).json({
@@ -85,9 +78,8 @@ export default function handler(req: NextApiRequest, res: NextApiResponse<Eligib
   }
 
   const checkedAt = Date.now();
-
   const country = getVercelCountry(req);
-  const geoSource: 'vercel' | 'unknown' = country ? 'vercel' : 'unknown';
+  const geoSource: Source = country ? 'vercel' : 'unknown';
 
   const requestedAgents = parseAgentsQuery(req);
   const agentIds = requestedAgents?.length
@@ -117,17 +109,12 @@ export default function handler(req: NextApiRequest, res: NextApiResponse<Eligib
       : { status: 'allowed' };
   }
 
-  // Cache headers: You can keep these conservative.
-  // This does NOT prevent your app from force-refreshing whenever needed.
-  // Adjust as you wish; or remove entirely.
+  // Cache headers for 5 minutes
   res.setHeader('Cache-Control', 'private, max-age=300'); // 5 minutes
 
   const response: EligibilityResponse = {
     checked_at: checkedAt,
-    geo: {
-      source: geoSource,
-      ...(EXPOSE_COUNTRY ? { country } : {}),
-    },
+    geo: { source: geoSource },
     eligibility,
   };
 
