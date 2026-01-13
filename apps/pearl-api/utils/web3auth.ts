@@ -1,4 +1,4 @@
-import { CONNECTOR_NAMESPACES, CustomChainConfig, Web3Auth } from '@web3auth/modal';
+import { CONNECTOR_NAMESPACES, CustomChainConfig } from '@web3auth/modal';
 import { base, Chain, gnosis, mode, optimism } from 'viem/chains';
 
 import { EvmChainDetails, EvmChainIdMap } from './chain';

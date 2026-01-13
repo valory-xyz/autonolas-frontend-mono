@@ -37,14 +37,22 @@ const Web3AuthModal = () => {
   // Connect when the page is open
   useEffect(() => {
     if (isInitialized && !isConnected) {
-      try {
-        connect();
-      } catch (e) {
-        const message = (e as Error)?.message ?? '';
-        if (message.includes('Session Expired')) {
-          reconnect();
+      const attemptConnect = async () => {
+        try {
+          await connect();
+        } catch (e) {
+          const message = (e as Error)?.message ?? '';
+          if (message.includes('Session Expired')) {
+            try {
+              await reconnect();
+            } catch (reconnectError) {
+              console.error('Error during Web3Auth reconnection:', reconnectError);
+            }
+          }
         }
-      }
+      };
+
+      attemptConnect();
     }
   }, [isInitialized, isConnected, connect, reconnect]);
 
