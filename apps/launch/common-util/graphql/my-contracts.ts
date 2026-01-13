@@ -30,7 +30,7 @@ export type StakingContractsResponse = {
 };
 
 type GetStakingContractsParams = {
-  chain: keyof typeof STAKING_GRAPH_CLIENTS;
+  chain: SupportedStakingChain;
   senderId: string;
 };
 
@@ -79,6 +79,6 @@ export async function getStakingContractsBySender({
 /**
  * Check if a chain ID has subgraph support
  */
-export function hasSubgraphSupport(chainId: number): chainId is keyof typeof STAKING_GRAPH_CLIENTS {
+export function hasSubgraphSupport(chainId: number): chainId is SupportedStakingChain {
   return chainId in STAKING_GRAPH_CLIENTS;
 }
