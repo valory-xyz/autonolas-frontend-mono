@@ -27,6 +27,7 @@ type StakingContractValues = {
   threshold: number;
   configHash: string;
   activityChecker: string;
+  proxyHash: string;
   chainId: ChainId;
 };
 export const getStakingContractInitPayload = ({
@@ -43,6 +44,7 @@ export const getStakingContractInitPayload = ({
   threshold,
   configHash,
   activityChecker,
+  proxyHash,
   chainId,
 }: StakingContractValues) => {
   const stakingParams = {
@@ -59,7 +61,7 @@ export const getStakingContractInitPayload = ({
     threshold,
     configHash,
     activityChecker,
-    proxyHash: CONTRACT_DEFAULT_VALUES.proxyHash,
+    proxyHash,
     serviceRegistry: SERVICE_REGISTRY_ADDRESSES[chainId],
   };
 

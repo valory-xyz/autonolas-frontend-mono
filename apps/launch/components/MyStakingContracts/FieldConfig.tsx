@@ -19,6 +19,7 @@ export type FormValues = {
   agentIds: string;
   threshold: number;
   configHash: string;
+  proxyHash: string;
   activityChecker: string;
 };
 
@@ -110,6 +111,10 @@ export const FieldConfig: Record<keyof FormValues, { name: string; desc?: string
   configHash: {
     name: 'Service configuration hash',
     desc: 'Service configuration hash requirement',
+  },
+  proxyHash: {
+    name: 'Approved multisig proxy hash',
+    desc: 'The hash of the approved multisig proxy.',
   },
   activityChecker: {
     name: 'Activity checker address',
