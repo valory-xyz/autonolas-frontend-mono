@@ -82,6 +82,10 @@ export const ServiceConfigHashLabel = () => (
   <LabelWithTooltip text={FieldConfig.configHash.name} description={FieldConfig.configHash.desc} />
 );
 
+export const ProxyHashLabel = () => (
+  <LabelWithTooltip text={FieldConfig.proxyHash.name} description={FieldConfig.proxyHash.desc} />
+);
+
 export const ActivityCheckerAddressLabel = () => (
   <LabelWithTooltip
     text={FieldConfig.activityChecker.name}

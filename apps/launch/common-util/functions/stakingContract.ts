@@ -6,7 +6,6 @@ import { HASH_PREFIX } from 'libs/util-constants/src';
 import { STAKING_TOKEN } from 'libs/util-contracts/src/lib/abiAndAddresses';
 
 import {
-  CONTRACT_DEFAULT_VALUES,
   ChainId,
   SERVICE_REGISTRY_ADDRESSES,
   SERVICE_REGISTRY_TOKEN_UTILITY_ADDRESSES,
@@ -27,6 +26,7 @@ type StakingContractValues = {
   threshold: number;
   configHash: string;
   activityChecker: string;
+  proxyHash: string;
   chainId: ChainId;
 };
 export const getStakingContractInitPayload = ({
@@ -43,6 +43,7 @@ export const getStakingContractInitPayload = ({
   threshold,
   configHash,
   activityChecker,
+  proxyHash,
   chainId,
 }: StakingContractValues) => {
   const stakingParams = {
@@ -59,7 +60,7 @@ export const getStakingContractInitPayload = ({
     threshold,
     configHash,
     activityChecker,
-    proxyHash: CONTRACT_DEFAULT_VALUES.proxyHash,
+    proxyHash,
     serviceRegistry: SERVICE_REGISTRY_ADDRESSES[chainId],
   };
 

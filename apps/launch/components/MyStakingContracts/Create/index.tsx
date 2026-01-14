@@ -51,6 +51,7 @@ import {
   NameLabel,
   RewardsPerSecondLabel,
   ServiceConfigHashLabel,
+  ProxyHashLabel,
   TemplateInfo,
   TimeForEmissionsLabel,
 } from '../FieldLabels';
@@ -142,6 +143,7 @@ export const CreateStakingContract = () => {
       threshold,
       configHash,
       activityChecker,
+      proxyHash,
     } = values;
 
     try {
@@ -165,6 +167,7 @@ export const CreateStakingContract = () => {
         threshold,
         configHash,
         activityChecker,
+        proxyHash,
         chainId: chain.id,
       });
 
@@ -353,6 +356,9 @@ export const CreateStakingContract = () => {
           </Row>
 
           <Form.Item label={<ServiceConfigHashLabel />} name="configHash">
+            <Input />
+          </Form.Item>
+          <Form.Item label={<ProxyHashLabel />} name="proxyHash">
             <Input />
           </Form.Item>
           <Form.Item
