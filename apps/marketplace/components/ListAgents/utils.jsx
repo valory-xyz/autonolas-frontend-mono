@@ -89,7 +89,6 @@ export const getTokenUri = async (id) => {
 
   if (unitHashes.length > 0) {
     // return the last updated hash if there are `updatedHashes`
-    console.log(`${GATEWAY_URL}${unitHashes[unitHashes.length - 1].replace('0x', HASH_PREFIX)}`);
     return `${GATEWAY_URL}${unitHashes[unitHashes.length - 1].replace('0x', HASH_PREFIX)}`;
   } else {
     // return initial hash if there are no updatedHashes
