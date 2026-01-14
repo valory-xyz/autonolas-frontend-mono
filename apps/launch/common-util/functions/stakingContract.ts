@@ -6,7 +6,6 @@ import { HASH_PREFIX } from 'libs/util-constants/src';
 import { STAKING_TOKEN } from 'libs/util-contracts/src/lib/abiAndAddresses';
 
 import {
-  CONTRACT_DEFAULT_VALUES,
   ChainId,
   SERVICE_REGISTRY_ADDRESSES,
   SERVICE_REGISTRY_TOKEN_UTILITY_ADDRESSES,
