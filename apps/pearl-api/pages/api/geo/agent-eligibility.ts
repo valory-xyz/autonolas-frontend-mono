@@ -65,16 +65,13 @@ function isKnownAgentId(id: string): id is AgentId {
   return Object.prototype.hasOwnProperty.call(RESTRICTED_COUNTRIES_BY_AGENT, id);
 }
 
-export default function handler(req: NextApiRequest, res: NextApiResponse<EligibilityResponse>) {
+export default function handler(
+  req: NextApiRequest,
+  res: NextApiResponse<EligibilityResponse | { error: string }>,
+) {
   if (req.method !== 'GET') {
     res.setHeader('Allow', 'GET');
-    return res.status(405).json({
-      checked_at: Date.now(),
-      geo: { source: 'unknown' },
-      eligibility: {
-        polymarket_trader: { status: 'unknown', reason_code: undefined },
-      },
-    });
+    return res.status(405).json({ error: 'Method Not Allowed' });
   }
 
   const checkedAt = Date.now();
