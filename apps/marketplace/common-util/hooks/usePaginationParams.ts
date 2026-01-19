@@ -23,12 +23,6 @@ export const usePaginationParams = () => {
     return parsed;
   }, [router.query.page]);
 
-  useEffect(() => {
-    if (router.isReady) {
-      setCurrentPage(getInitialPage());
-    }
-  }, [router.isReady, getInitialPage]);
-
   const updatePage = useCallback(
     (page: number) => {
       setCurrentPage(page);
@@ -51,6 +45,19 @@ export const usePaginationParams = () => {
   const resetPage = useCallback(() => {
     updatePage(DEFAULT_PAGE);
   }, [updatePage]);
+
+  useEffect(() => {
+    if (router.isReady) {
+      setCurrentPage(getInitialPage());
+    }
+  }, [router.isReady, getInitialPage]);
+
+  // Reset page when network changes
+  useEffect(() => {
+    if (router.isReady && router.query.page) {
+      resetPage();
+    }
+  }, [router.query.network]);
 
   return { currentPage, setCurrentPage: updatePage, resetPage };
 };
