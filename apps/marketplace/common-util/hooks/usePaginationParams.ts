@@ -10,16 +10,9 @@ export const usePaginationParams = () => {
   const getInitialPage = useCallback(() => {
     const pageParam = router.query.page;
 
-    if (typeof pageParam !== 'string') {
-      return DEFAULT_PAGE;
-    }
-
+    if (typeof pageParam !== 'string') return DEFAULT_PAGE;
     const parsed = parseInt(pageParam, 10);
-
-    if (isNaN(parsed) || parsed < 1) {
-      return DEFAULT_PAGE;
-    }
-
+    if (isNaN(parsed) || parsed < 1) return DEFAULT_PAGE;
     return parsed;
   }, [router.query.page]);
 
