@@ -15,11 +15,8 @@ type AgentEligibility = {
   reason_code?: ReasonCode;
 };
 
-type Source = 'vercel' | 'unknown';
-
 type EligibilityResponse = {
   checked_at: number;
-  geo?: { source: Source };
   eligibility: Record<AgentId, AgentEligibility>;
 };
 
@@ -27,6 +24,9 @@ type EligibilityResponse = {
 /**
  * Policy config
  * ISO-3166-1 alpha-2 country codes. UK is "GB".
+ *
+ * This list reflects the current compliance-approved geo restrictions for each agent.
+ * Update only in accordance with the latest compliance policy and review process.
  */
 const RESTRICTED_COUNTRIES_BY_AGENT: Record<AgentId, Set<string>> = {
   polymarket_trader: new Set(['CU', 'KP', 'SY', 'IR', 'RU', 'UA']),
@@ -43,21 +43,15 @@ function getVercelCountry(req: NextApiRequest): string | undefined {
  * Supports parsing ?agents=a,b,c or ?agents=a&agents=b
  */
 function parseAgentsQuery(req: NextApiRequest): string[] | null {
-  const q = req.query.agents;
-  if (!q) return null;
+  const agents = req.query.agents;
+  if (!agents) return null;
 
-  // ?agents=a&agents=b
-  if (Array.isArray(q)) {
-    return q
-      .flatMap((v) => v.split(','))
-      .map((s) => s.trim())
-      .filter(Boolean);
-  }
+  // ?agents=a&agents=b OR ?agents=a,b,c
+  const values = Array.isArray(agents) ? agents : [agents];
 
-  // ?agents=a,b,c
-  return q
-    .split(',')
-    .map((s) => s.trim())
+  return values
+    .flatMap((value) => value.split(','))
+    .map((string) => string.trim())
     .filter(Boolean);
 }
 
@@ -70,7 +64,6 @@ export default function handler(req: NextApiRequest, res: NextApiResponse<Eligib
     res.setHeader('Allow', 'GET');
     return res.status(405).json({
       checked_at: Date.now(),
-      geo: { source: 'unknown' },
       eligibility: {
         polymarket_trader: { status: 'unknown', reason_code: undefined },
       },
@@ -79,7 +72,6 @@ export default function handler(req: NextApiRequest, res: NextApiResponse<Eligib
 
   const checkedAt = Date.now();
   const country = getVercelCountry(req);
-  const geoSource: Source = country ? 'vercel' : 'unknown';
 
   const requestedAgents = parseAgentsQuery(req);
   const agentIds = requestedAgents?.length
@@ -92,7 +84,11 @@ export default function handler(req: NextApiRequest, res: NextApiResponse<Eligib
     // Unknown agent requested
     if (!isKnownAgentId(agentId)) {
       eligibility[agentId] = { status: 'unknown', reason_code: 'AGENT_UNKNOWN' };
-      continue;
+      const response: EligibilityResponse = {
+        checked_at: checkedAt,
+        eligibility,
+      };
+      return res.status(400).json(response);
     }
 
     // Can't infer geo (local dev, headers stripped, etc.)
@@ -109,12 +105,11 @@ export default function handler(req: NextApiRequest, res: NextApiResponse<Eligib
       : { status: 'allowed' };
   }
 
-  // Cache headers for 5 minutes
-  res.setHeader('Cache-Control', 'private, max-age=300'); // 5 minutes
+  // Do not cache geo-based eligibility responses to avoid stale geo-location data
+  res.setHeader('Cache-Control', 'no-store, max-age=0');
 
   const response: EligibilityResponse = {
     checked_at: checkedAt,
-    geo: { source: geoSource },
     eligibility,
   };
 
