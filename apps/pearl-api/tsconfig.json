@@ -21,6 +21,7 @@
     "paths": {
       "util/*": ["apps/pearl-api/util/*"],
       "context/*": ["apps/pearl-api/context/*"],
+      "hooks/*": ["apps/pearl-api/hooks/*"],
       "types": ["apps/pearl-api/types"]
     }
   },

@@ -13,11 +13,16 @@ import { getBytes32FromAddress } from 'libs/util-functions/src';
 
 import { ChainId, blockNumbers } from 'common-util/constants/stakingContract';
 import { CONTRACT_TEMPLATES } from 'common-util/constants/stakingContract';
+import { hasSubgraphSupport, StakingContractsResponse } from 'common-util/graphql/my-contracts';
 import { useAppDispatch, useAppSelector } from 'store/index';
 import { setMyStakingContracts } from 'store/launch';
 import { MyStakingContract } from 'types/index';
 
 type Metadata = { name: string; description: string };
+
+// Timeout for IPFS metadata fetches in ms
+// This prevents the UI from hanging indefinitely when IPFS content doesn't exist
+const IPFS_FETCH_TIMEOUT_MS = 5000;
 
 const getMetadata = async (tokenUri: undefined | null | string) => {
   if (!tokenUri) return null;
@@ -25,9 +30,32 @@ const getMetadata = async (tokenUri: undefined | null | string) => {
   try {
     const uri = `${HASH_PREFIX}${tokenUri.substring(2)}`;
     const ipfsUrl = `${GATEWAY_URL}${uri}`;
-    const response = await fetch(ipfsUrl);
-    const json = await response.json();
-    return json;
+
+    // Add timeout to prevent hanging when IPFS content doesn't exist
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), IPFS_FETCH_TIMEOUT_MS);
+
+    try {
+      const response = await fetch(ipfsUrl, { signal: controller.signal });
+
+      if (!response.ok) {
+        window.console.warn(`Failed to fetch IPFS metadata: ${response.status}`);
+        return null;
+      }
+
+      const json = await response.json();
+      return json;
+    } catch (fetchError) {
+      if ((fetchError as Error).name === 'AbortError') {
+        window.console.warn(
+          `IPFS metadata fetch timed out after ${IPFS_FETCH_TIMEOUT_MS}ms for ${uri}`,
+        );
+      } else {
+        throw fetchError;
+      }
+    } finally {
+      clearTimeout(timeoutId);
+    }
   } catch (e) {
     window.console.error(e);
   }
@@ -129,6 +157,31 @@ const useGetInstanceAddresses = () => {
       setIsFetching(true);
 
       try {
+        // Try fetching from subgraph first if available
+        if (hasSubgraphSupport(currentNetworkId)) {
+          try {
+            const response = await fetch(
+              `/api/my-contracts?chainId=${currentNetworkId}&address=${account}`,
+            );
+
+            if (!response.ok) {
+              throw new Error(`API request failed: ${response.status}`);
+            }
+
+            const data: StakingContractsResponse = await response.json();
+
+            const addresses = data.stakingContracts.map((contract) => contract.instance as Address);
+            setInstanceAddresses(addresses);
+            return;
+          } catch (subgraphError) {
+            window.console.warn(
+              'Subgraph fetch failed, falling back to event logs:',
+              subgraphError,
+            );
+          }
+        }
+
+        // Fallback to fetching from logs
         const eventLogs = await client.getLogs({
           address: STAKING_FACTORY.addresses[`${currentNetworkId}`] as Address,
           event: {

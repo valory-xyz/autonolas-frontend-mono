@@ -8,7 +8,7 @@ import { createGlobalStyle } from 'styled-components';
 import { Address } from 'viem';
 
 import { Web3AuthProvider } from 'context/Web3AuthProvider';
-
+import { useReconnectWeb3Auth } from 'hooks/useReconnectWeb3Auth';
 import {
   ChainIdMissingAlert,
   InitErrorAlert,
@@ -59,6 +59,7 @@ type TransactionFailure = {
 const SwapOwnerSession = () => {
   const { provider, isInitialized, web3Auth, initError } = useWeb3Auth();
   const { connect, isConnected } = useWeb3AuthConnect();
+  const reconnect = useReconnectWeb3Auth(web3Auth);
   const router = useRouter();
   const hasExecuted = useRef(false);
   const [status, setStatus] = useState<string>('Initializing...');
@@ -92,9 +93,24 @@ const SwapOwnerSession = () => {
   useEffect(() => {
     if (isInitialized && !isConnected && !provider) {
       setStatus('Opening Web3Auth modal...');
-      connect();
+      const attemptConnect = async () => {
+        try {
+          await connect();
+        } catch (e) {
+          const message = (e as Error)?.message ?? '';
+          if (message.includes('Session Expired')) {
+            try {
+              await reconnect();
+            } catch (reconnectError) {
+              console.error('Error during Web3Auth reconnection:', reconnectError);
+            }
+          }
+        }
+      };
+
+      attemptConnect();
     }
-  }, [isInitialized, isConnected, provider, connect]);
+  }, [isInitialized, isConnected, provider, connect, web3Auth, reconnect]);
 
   useEffect(() => {
     const executeSwapOwner = async () => {
@@ -137,7 +153,9 @@ const SwapOwnerSession = () => {
         setStatus('Getting connected wallet address...');
 
         // Get the connected wallet address from Web3Auth
-        const accounts = (await provider.request({ method: 'eth_accounts' })) as string[];
+        const accounts = (await provider.request({
+          method: 'eth_accounts',
+        })) as string[];
         const connectedAddress = accounts?.[0];
 
         if (!connectedAddress) {
@@ -170,7 +188,9 @@ const SwapOwnerSession = () => {
         });
 
         // Create Safe transaction
-        const safeTx = await protocolKit.createTransaction({ transactions: [swapOwnerTx.data] });
+        const safeTx = await protocolKit.createTransaction({
+          transactions: [swapOwnerTx.data],
+        });
         setStatus('Executing transaction (please sign in wallet)...');
 
         const executeTxResponse = await protocolKit.executeTransaction(safeTx);

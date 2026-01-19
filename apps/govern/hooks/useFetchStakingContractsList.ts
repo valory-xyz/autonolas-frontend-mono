@@ -5,7 +5,7 @@ import { mainnet } from 'viem/chains';
 import { useReadContract } from 'wagmi';
 
 import { useNominees, useNomineesMetadata } from 'libs/common-contract-functions/src';
-import { RETAINER_ADDRESS } from 'libs/util-constants/src';
+import { BLACKLISTED_STAKING_ADDRESSES } from 'libs/util-constants/src';
 import { VOTE_WEIGHTING } from 'libs/util-contracts/src/lib/abiAndAddresses';
 
 import { NEXT_RELATIVE_WEIGHTS_KEY, TIME_SUM_KEY } from 'common-util/constants/scopeKeys';
@@ -13,7 +13,7 @@ import { setStakingContracts } from 'store/govern';
 import { useAppDispatch, useAppSelector } from 'store/index';
 
 import { useNomineesWeights } from './useNomineesWeights';
-import { getBytes32FromAddress } from 'libs/util-functions/src';
+import { areAddressesEqual, getBytes32FromAddress } from 'libs/util-functions/src';
 import { WEEK_IN_SECONDS } from 'common-util/constants/time';
 
 const getCurrentWeightTimestamp = (timeSum: number | undefined) => {
@@ -74,7 +74,12 @@ export const useFetchStakingContractsList = () => {
     ) {
       const stakingContractsList: StakingContract[] = [];
       nominees.forEach((item) => {
-        if (item.account !== getBytes32FromAddress(RETAINER_ADDRESS)) {
+        // Check if the nominee is blacklisted
+        const isBlacklisted = BLACKLISTED_STAKING_ADDRESSES.some((addr) =>
+          areAddressesEqual(item.account, getBytes32FromAddress(addr)),
+        );
+
+        if (!isBlacklisted) {
           stakingContractsList.push({
             address: item.account,
             chainId: Number(item.chainId),
