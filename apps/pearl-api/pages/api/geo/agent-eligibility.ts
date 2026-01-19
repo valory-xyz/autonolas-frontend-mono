@@ -29,7 +29,7 @@ type EligibilityResponse = {
  * Update only in accordance with the latest compliance policy and review process.
  */
 const RESTRICTED_COUNTRIES_BY_AGENT: Record<AgentId, Set<string>> = {
-  polymarket_trader: new Set(['CU', 'KP', 'SY', 'IR', 'RU', 'UA']),
+  polymarket_trader: new Set(['KP']),
 };
 
 function getVercelCountry(req: NextApiRequest): string | undefined {
