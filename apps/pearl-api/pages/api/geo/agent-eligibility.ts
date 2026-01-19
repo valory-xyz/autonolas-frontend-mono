@@ -56,7 +56,7 @@ function parseAgentsQuery(req: NextApiRequest): string[] | null {
 }
 
 function isKnownAgentId(id: string): id is AgentId {
-  return Object.prototype.hasOwnProperty.call(RESTRICTED_COUNTRIES_BY_AGENT, id);
+  return id in RESTRICTED_COUNTRIES_BY_AGENT;
 }
 
 export default function handler(req: NextApiRequest, res: NextApiResponse<EligibilityResponse>) {
