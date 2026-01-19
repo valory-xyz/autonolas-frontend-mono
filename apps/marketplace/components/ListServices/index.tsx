@@ -7,7 +7,7 @@ import { notifyError } from 'libs/util-functions/src';
 import { PageMainContainer } from 'components/styles';
 import { getMyListOnPagination } from '../../common-util/ContractUtils/myList';
 import { ListTable, isMyTab, useExtraTabContent } from '../../common-util/List/ListTable';
-import { useHelpers } from '../../common-util/hooks';
+import { useHelpers, usePaginationParams } from '../../common-util/hooks';
 import { NAV_TYPES } from '../../util/constants';
 import { useAllServices, useMyServices, useSearchServices } from './hooks/useServicesList';
 import { useServiceInfo } from './hooks/useSvmService';
@@ -40,7 +40,7 @@ const ListServices = () => {
   );
   const [isLoading, setIsLoading] = useState(true);
   const [total, setTotal] = useState(0);
-  const [currentPage, setCurrentPage] = useState(1);
+  const { currentPage, setCurrentPage, resetPage } = usePaginationParams();
   const [list, setList] = useState<AI_AGENT[]>([]);
   const [isServicesOfferedModalVisible, setIsServicesOfferedModalVisible] = useState(false);
   const [selectedService, setSelectedService] = useState<AI_AGENT | null>(null);
@@ -251,17 +251,15 @@ const ListServices = () => {
           setCurrentTab(tabName);
 
           setTotal(0);
-          setCurrentPage(1);
           setIsLoading(true);
 
           // clear the search
           clearSearch();
 
-          // update the URL to keep track of my-services
-          router.push({
-            pathname: links.SERVICES,
-            query: tabName === ALL_AI_AGENTS ? {} : { tab: tabName },
-          });
+          // Reset page and update the URL to keep track of my-services
+          const query = tabName === ALL_AI_AGENTS ? {} : { tab: tabName };
+          router.push({ pathname: links.SERVICES, query }, undefined, { shallow: true });
+          resetPage();
         }}
         items={[
           {
