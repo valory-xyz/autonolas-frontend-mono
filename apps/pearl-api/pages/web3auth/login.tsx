@@ -6,6 +6,7 @@ import { Address } from 'viem';
 
 import { Web3AuthProvider } from 'context/Web3AuthProvider';
 import { useReconnectWeb3Auth } from 'hooks/useReconnectWeb3Auth';
+
 import { InitErrorAlert, Loading } from '../../components/web3auth';
 
 export const Styles = createGlobalStyle`
