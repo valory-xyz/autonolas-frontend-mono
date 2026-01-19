@@ -1,5 +1,5 @@
-import { useState, useEffect, useCallback } from "react";
-import { useRouter } from "next/router";
+import { useState, useEffect, useCallback } from 'react';
+import { useRouter } from 'next/router';
 
 const DEFAULT_PAGE = 1;
 
@@ -10,7 +10,7 @@ export const usePaginationParams = () => {
   const getInitialPage = useCallback(() => {
     const pageParam = router.query.page;
 
-    if (typeof pageParam !== "string") {
+    if (typeof pageParam !== 'string') {
       return DEFAULT_PAGE;
     }
 
