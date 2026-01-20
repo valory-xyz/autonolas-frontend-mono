@@ -6,7 +6,7 @@ import { notifyError } from 'libs/util-functions/src';
 import { NAV_TYPES } from 'util/constants';
 import { isMyTab } from 'common-util/List/ListTable/helpers';
 import { ListTable, useExtraTabContent } from 'common-util/List/ListTable';
-import { useHelpers } from 'common-util/hooks';
+import { useHelpers, usePaginationParams } from 'common-util/hooks';
 import { useAllComponents, useMyComponents, useSearchComponents } from './useComponentsList';
 import {
   getComponents,
@@ -47,7 +47,7 @@ const ListComponents = () => {
    */
   const [isLoading, setIsLoading] = useState(true);
   const [total, setTotal] = useState(0);
-  const [currentPage, setCurrentPage] = useState(1);
+  const { currentPage, setCurrentPage, resetPage } = usePaginationParams();
   const [list, setList] = useState([]);
 
   // fetch total
@@ -151,7 +151,7 @@ const ListComponents = () => {
           setList(filteredList);
         }
         setTotal(0); // total won't be used if search is used
-        setCurrentPage(1);
+        resetPage();
       } catch (e) {
         console.error(e);
         notifyError('Error fetching components');
@@ -184,17 +184,15 @@ const ListComponents = () => {
           setCurrentTab(tabName);
 
           setTotal(0);
-          setCurrentPage(1);
           setIsLoading(true);
 
           // clear the search
           clearSearch();
 
-          // update the URL to keep track of my-components
-          router.push({
-            pathname: links.COMPONENTS,
-            query: tabName === ALL_COMPONENTS ? {} : { tab: tabName },
-          });
+          // Reset page and update the URL to keep track of my-components
+          const query = tabName === ALL_COMPONENTS ? {} : { tab: tabName };
+          router.push({ pathname: links.COMPONENTS, query }, undefined, { shallow: true });
+          resetPage();
         }}
         items={[
           {
