@@ -2,12 +2,12 @@ import { useState } from 'react';
 import PropTypes from 'prop-types';
 import { useRouter } from 'next/router';
 import { Space } from 'antd';
-import { isLocalNetwork, notifyError, notifySuccess } from 'libs/util-functions/src';
+import { notifyError, notifySuccess } from 'libs/util-functions/src';
 
 import { useHelpers } from 'common-util/hooks';
 import { getTokenDetailsRequest } from 'common-util/Details/utils';
 import { SendTransactionButton } from 'common-util/TransactionHelpers/SendTransactionButton';
-import { checkAndApproveToken, mintTokenRequest } from '../utils';
+import { checkAndApproveToken } from '../utils';
 import { useGetActivateRegistration } from '../useSvmServiceStateManagement';
 
 export const PreRegistration = ({
@@ -37,12 +37,6 @@ export const PreRegistration = ({
           serviceId,
           amountToApprove: deposit.securityDeposit,
         });
-      }
-
-      // NOTE: just for testing, mint tokens for local network
-      if (isLocalNetwork(chainId)) {
-        // mint tokens before activating registration
-        await mintTokenRequest({ account, serviceId });
       }
 
       // any amount if not ETH token substitute with 1
