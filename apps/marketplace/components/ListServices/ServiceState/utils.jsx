@@ -120,15 +120,6 @@ export const checkIfEth = async (id) => {
   return token === DEFAULT_SERVICE_CREATION_ETH_TOKEN_ZEROS;
 };
 
-// NOTE: this function is used only for testing
-export const mintTokenRequest = async ({ account, serviceId }) => {
-  const { token } = await getTokenDetailsRequest(serviceId);
-  const contract = getGenericErc20Contract(token);
-  const fn = contract.methods.mint(account, ethers.parseEther('1000')).send({ from: account });
-  await sendTransaction(fn, account);
-  return null;
-};
-
 export const onActivateRegistration = async (id, account, deposit) => {
   const contract = await getServiceManagerContract();
   const activateRegistrationFn = contract.methods.activateRegistration(id);
