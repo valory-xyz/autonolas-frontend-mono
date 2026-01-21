@@ -1,8 +1,8 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 
-import { setCorsHeaders } from '../../../utils/cors';
-import { getLookupEntry } from '../../../utils/blob';
-import { parseAchievementApiQueryParams } from '../../../utils';
+import { setCorsHeaders } from 'utils/cors';
+import { getLookupEntry } from 'utils/blob';
+import { parseAchievementApiQueryParams } from 'utils';
 
 type ErrorResponse = {
   error: string;

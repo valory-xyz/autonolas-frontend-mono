@@ -1,6 +1,6 @@
 import React from 'react';
 
-import type { AchievementQueryParams } from '../../types/achievement';
+import type { AchievementQueryParams } from 'types/achievement';
 import { PolystratPayout } from './Agents/Polystrat';
 
 type AchievementUIProps = {

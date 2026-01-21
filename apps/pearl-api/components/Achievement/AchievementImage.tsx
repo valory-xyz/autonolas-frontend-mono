@@ -1,8 +1,8 @@
 import { ImageResponse } from '@takumi-rs/image-response';
 import type { PersistentImage } from '@takumi-rs/core';
 
-import type { AchievementQueryParams, AgentType } from '../../types/achievement';
-import { AGENT_LOGO_PATH_MAPPING, OG_IMAGE_CONFIG } from '../../constants/achievement';
+import type { AchievementQueryParams, AgentType } from 'types/achievement';
+import { AGENT_LOGO_PATH_MAPPING, OG_IMAGE_CONFIG } from 'constants/achievement';
 import { AchievementUI } from './AchievementUI';
 
 const getPersistentImages = async (

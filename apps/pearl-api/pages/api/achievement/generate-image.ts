@@ -1,10 +1,10 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 
-import { setCorsHeaders } from '../../../utils/cors';
-import { uploadImageToIpfs } from '../../../utils/ipfs';
-import { getLookupEntry, setLookupEntry } from '../../../utils/blob';
-import { generateAchievementImage } from '../../../components/Achievement';
-import { parseAchievementApiQueryParams } from '../../../utils';
+import { setCorsHeaders } from 'utils/cors';
+import { uploadImageToIpfs } from 'utils/ipfs';
+import { getLookupEntry, setLookupEntry } from 'utils/blob';
+import { generateAchievementImage } from 'components/Achievement';
+import { parseAchievementApiQueryParams } from 'utils';
 
 type GenerateImageResponse = {
   url: string;
