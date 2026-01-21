@@ -3,10 +3,7 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 import { setCorsHeaders } from '../../../utils/cors';
 import { uploadImageToIpfs } from '../../../utils/ipfs';
 import { getLookupEntry, setLookupEntry } from '../../../utils/blob';
-import {
-  generateAchievementImage,
-  imageResponseToBuffer,
-} from '../../../components/og/AchievementImage';
+import { generateAchievementImage } from '../../../components/Achievement';
 import { parseAchievementApiQueryParams } from '../../../utils';
 
 type GenerateImageResponse = {
@@ -17,6 +14,12 @@ type GenerateImageResponse = {
 type ErrorResponse = {
   error: string;
   message?: string;
+};
+
+const getOrigin = (req: NextApiRequest) => {
+  const protocol = req.headers['x-forwarded-proto'] || 'http';
+  const host = req.headers.host;
+  return `${protocol}://${host}`;
 };
 
 export default async function handler(
@@ -55,8 +58,7 @@ export default async function handler(
       });
     }
 
-    const imageResponse = await generateAchievementImage(params);
-    const imageBuffer = await imageResponseToBuffer(imageResponse);
+    const imageBuffer = await generateAchievementImage(params, getOrigin(req));
     const { hash, url } = await uploadImageToIpfs(imageBuffer);
 
     await setLookupEntry(params, {

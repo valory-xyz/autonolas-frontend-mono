@@ -8,7 +8,7 @@ export const IPFS_CONFIG = {
 
 export const ACHIEVEMENTS_LOOKUP_PREFIX = 'achievements-lookup';
 
-export const VALID_AGENT_TYPES = ['polymarket', 'trader', 'modius', 'optimus'] as const;
+export const VALID_AGENT_TYPES = ['polystrat', 'trader', 'agentsfun', 'optimus'] as const;
 
 export const VALID_ACHIEVEMENT_TYPES = ['payout'] as const;
 
