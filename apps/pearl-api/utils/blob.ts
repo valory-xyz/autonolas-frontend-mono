@@ -22,13 +22,13 @@ const getAchievementsLookupJson = async (agent: string): Promise<AchievementsLoo
     const response = await fetch(blobUrl);
 
     if (!response.ok) {
-      console.warn(`Failed to fetch achievements lookup table for ${agent}`);
+      console.warn(`Failed to fetch achievements lookup json for ${agent}`);
       return {};
     }
 
     return (await response.json()) as AchievementsLookupJson;
   } catch (error) {
-    console.error(`Error fetching achievements lookup table for ${agent}:`, error);
+    console.error(`Error fetching achievements lookup json for ${agent}:`, error);
     return {};
   }
 };
@@ -36,22 +36,22 @@ const getAchievementsLookupJson = async (agent: string): Promise<AchievementsLoo
 export const getLookupEntry = async (
   params: AchievementQueryParams,
 ): Promise<LookupEntry | null> => {
-  const table = await getAchievementsLookupJson(params.agent);
+  const json = await getAchievementsLookupJson(params.agent);
   const key = generateLookupKey(params);
-  return table[key] || null;
+  return json[key] || null;
 };
 
 export const setLookupEntry = async (
   params: AchievementQueryParams,
   entry: LookupEntry,
 ): Promise<void> => {
-  const table = await getAchievementsLookupJson(params.agent);
+  const json = await getAchievementsLookupJson(params.agent);
   const key = generateLookupKey(params);
 
-  table[key] = entry;
+  json[key] = entry;
 
   const fileName = getFileName(params.agent);
-  await put(fileName, JSON.stringify(table, null, 2), {
+  await put(fileName, JSON.stringify(json, null, 2), {
     access: 'public',
     addRandomSuffix: false,
     contentType: 'application/json',
