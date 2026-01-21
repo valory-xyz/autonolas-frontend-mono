@@ -1,5 +1,6 @@
 import { MenuOutlined } from '@ant-design/icons';
 import { Button, Dropdown, MenuProps } from 'antd';
+import type { ItemType, MenuItemType } from 'antd/es/menu/interface';
 
 const ExternalLink = ({ href, label }: { href: string; label: string }) => (
   <a href={href} target="_blank" rel="noopener noreferrer">
@@ -52,10 +53,18 @@ const navItems: MenuProps['items'] = [
 ];
 
 export const NavDropdown = ({ currentSite }: { currentSite: string }) => {
-  const newNavItems: MenuProps['items'] = navItems.map((item) => ({
-    ...item,
-    disabled: item?.key === currentSite,
-  }));
+  const newNavItems: MenuProps['items'] = navItems.map((item): ItemType => {
+    if (item && 'type' in item && item.type === 'divider') {
+      return item;
+    }
+    if (item && 'key' in item) {
+      return {
+        ...(item as MenuItemType),
+        disabled: item.key === currentSite,
+      };
+    }
+    return item;
+  });
 
   return (
     <Dropdown

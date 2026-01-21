@@ -139,7 +139,7 @@ export const useFetchDelegatee = (account: string | null) => {
  */
 export const useDelegate = (
   account: string | null,
-  balance: string = '0',
+  balance = '0',
   delegatee: string | null = null,
 ) => {
   const [isSending, setIsSending] = useState(false);
