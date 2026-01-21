@@ -98,7 +98,7 @@ describe('listServices/index.jsx - EVM', () => {
 
     (useRouter as jest.Mock).mockReturnValue({ query: {}, push: jest.fn() });
     (useHelpers as jest.Mock).mockReturnValue(useHelpersEvmMock);
-    (useServiceInfo as jest.Mock).mockReturnValue(jest.fn(() => {}));
+    (useServiceInfo as jest.Mock).mockReturnValue(jest.fn());
   });
 
   it('should display tabs with `All Tab` & Add AI Agent button', async () => {

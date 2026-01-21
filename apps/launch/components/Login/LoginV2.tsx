@@ -30,7 +30,7 @@ export const LoginV2 = () => {
     [disconnect],
   );
 
-  const clearOnDisconnect = useCallback(() => {}, []);
+  const clearOnDisconnect = useCallback(() => undefined, []);
 
   useAccountEffect({
     onConnect: handleConnect,
