@@ -1,3 +1,5 @@
+import { AgentType } from 'types';
+
 export const GATEWAY_URL = 'https://gateway.autonolas.tech/ipfs/';
 
 export const IPFS_CONFIG = {
@@ -15,4 +17,8 @@ export const VALID_ACHIEVEMENT_TYPES = ['payout'] as const;
 export const OG_IMAGE_CONFIG = {
   WIDTH: 1200,
   HEIGHT: 630,
+};
+
+export const AGENT_LOGO_PATH_MAPPING: Partial<Record<AgentType, string>> = {
+  polystrat: '/images/polystrat-logo.png',
 };
