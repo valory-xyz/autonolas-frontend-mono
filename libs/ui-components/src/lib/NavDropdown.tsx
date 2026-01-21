@@ -1,5 +1,5 @@
 import { MenuOutlined } from '@ant-design/icons';
-import { Button, Dropdown } from 'antd';
+import { Button, Dropdown, MenuProps } from 'antd';
 
 const ExternalLink = ({ href, label }: { href: string; label: string }) => (
   <a href={href} target="_blank" rel="noopener noreferrer">
@@ -7,7 +7,7 @@ const ExternalLink = ({ href, label }: { href: string; label: string }) => (
   </a>
 );
 
-const navItems = [
+const navItems: MenuProps['items'] = [
   { key: 'bond', label: <ExternalLink label="Bond" href="https://bond.olas.network/" /> },
   {
     key: 'build',
@@ -30,7 +30,7 @@ const navItems = [
     label: <ExternalLink label="Operate" href="https://operate.olas.network/" />,
   },
   {
-    key: 'divider',
+    key: 'divider-1',
     type: 'divider',
   },
   {
@@ -42,7 +42,7 @@ const navItems = [
     label: <ExternalLink label="Mech Marketplace" href="https://marketplace.olas.network/" />,
   },
   {
-    key: 'divider',
+    key: 'divider-2',
     type: 'divider',
   },
   {
@@ -52,9 +52,9 @@ const navItems = [
 ];
 
 export const NavDropdown = ({ currentSite }: { currentSite: string }) => {
-  const newNavItems = navItems.map((item) => ({
+  const newNavItems: MenuProps['items'] = navItems.map((item) => ({
     ...item,
-    disabled: item.key === currentSite,
+    disabled: item?.key === currentSite,
   }));
 
   return (
