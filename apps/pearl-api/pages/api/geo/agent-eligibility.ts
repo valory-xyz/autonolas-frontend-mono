@@ -1,5 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 
+import { setCorsHeaders } from '../../../utils/cors';
+
 /**
  * Supported agents that may become geo-restricted.
  * Keep these IDs same as in pearl to reference
@@ -63,6 +65,12 @@ export default function handler(
   req: NextApiRequest,
   res: NextApiResponse<EligibilityResponse | { error: string }>,
 ) {
+  setCorsHeaders(req, res);
+
+  if (req.method === 'OPTIONS') {
+    return res.status(204).end();
+  }
+
   if (req.method !== 'GET') {
     res.setHeader('Allow', 'GET');
     return res.status(405).json({ error: 'Method Not Allowed' });
