@@ -1,0 +1,60 @@
+import { put, list } from '@vercel/blob';
+
+import type {
+  LookupEntry,
+  AchievementQueryParams,
+  AchievementsLookupJson,
+} from '../types/achievement';
+import { ACHIEVEMENTS_LOOKUP_PREFIX } from '../constants/achievement';
+
+const generateLookupKey = (params: AchievementQueryParams): string => `${params.type}-${params.id}`;
+
+const getFileName = (agent: string): string => `${ACHIEVEMENTS_LOOKUP_PREFIX}/${agent}.json`;
+
+const getAchievementsLookupJson = async (agent: string): Promise<AchievementsLookupJson> => {
+  try {
+    const fileName = getFileName(agent);
+    const { blobs } = await list({ prefix: fileName });
+
+    if (blobs.length === 0) return {};
+
+    const blobUrl = blobs[0].url;
+    const response = await fetch(blobUrl);
+
+    if (!response.ok) {
+      console.warn(`Failed to fetch achievements lookup table for ${agent}`);
+      return {};
+    }
+
+    return (await response.json()) as AchievementsLookupJson;
+  } catch (error) {
+    console.error(`Error fetching achievements lookup table for ${agent}:`, error);
+    return {};
+  }
+};
+
+export const getLookupEntry = async (
+  params: AchievementQueryParams,
+): Promise<LookupEntry | null> => {
+  const table = await getAchievementsLookupJson(params.agent);
+  const key = generateLookupKey(params);
+  return table[key] || null;
+};
+
+export const setLookupEntry = async (
+  params: AchievementQueryParams,
+  entry: LookupEntry,
+): Promise<void> => {
+  const table = await getAchievementsLookupJson(params.agent);
+  const key = generateLookupKey(params);
+
+  table[key] = entry;
+
+  const fileName = getFileName(params.agent);
+  await put(fileName, JSON.stringify(table, null, 2), {
+    access: 'public',
+    addRandomSuffix: false,
+    contentType: 'application/json',
+    cacheControlMaxAge: 0,
+  });
+};

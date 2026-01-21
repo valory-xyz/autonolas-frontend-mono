@@ -9,6 +9,8 @@
   "private": true,
   "dependencies": {
     "@ant-design/cssinjs": "^1.16.2",
+    "@vercel/blob": "^0.23.4",
+    "@vercel/og": "^0.6.2",
     "@ant-design/icons": "^5.2.6",
     "@apollo/client": "3.8.5",
     "@balancer-labs/sdk": "^1.1.5",
