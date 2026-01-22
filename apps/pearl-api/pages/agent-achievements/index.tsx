@@ -13,13 +13,15 @@ export default function AgentAchievements() {
   const logoSrc = '/images/polystrat-logo.png';
 
   return (
-    <div
-      style={{
-        width: OG_IMAGE_CONFIG.WIDTH,
-        height: OG_IMAGE_CONFIG.HEIGHT,
-      }}
-    >
-      <AchievementUI params={params} logoSrc={logoSrc} />
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <div
+        style={{
+          width: OG_IMAGE_CONFIG.WIDTH,
+          height: OG_IMAGE_CONFIG.HEIGHT,
+        }}
+      >
+        <AchievementUI params={params} logoSrc={logoSrc} />
+      </div>
     </div>
   );
 }

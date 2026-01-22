@@ -1,68 +1,159 @@
 import { CSSProperties } from 'react';
 
-import { PearlLogo } from '../../../svgs/pearl';
+import { SquareArrowUpRight } from '../../../svgs/squareArrowUpRight';
+
 import { AchievementQueryParams } from 'types';
 
 const colors = {
   text: {
-    primary: '#111827',
-    secondary: '#6B7280',
+    primary: '#FFFFFF',
+    secondary: '#9F92B2',
   },
-  accent: '#7e22ce',
-  background: {
-    page: '#F8F9FC',
-    card: '#FFFFFF',
-    divider: '#E5E7EB',
+  accent: '#1AFF7B',
+  accentBackground: '#3B3B67',
+  card: {
+    background: '#3F2565',
+    inner: '#2B194A',
   },
 };
 
-const styles = {
+const styles: Record<string, CSSProperties> = {
   container: {
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    justifyContent: 'center',
-    width: '100%',
-    height: '100%',
-    backgroundColor: colors.background.page,
-    backgroundImage:
-      'linear-gradient(180deg, rgba(212, 221, 255, 0.4) 0%, rgba(248, 249, 252, 1) 50%)',
     fontFamily: 'Inter, sans-serif',
     position: 'relative',
-    padding: 48,
-  } as CSSProperties,
+    backgroundColor: colors.card.background,
+    width: 1200,
+    height: 630,
+  },
   card: {
     display: 'flex',
     flexDirection: 'column',
-    borderRadius: 16,
-    padding: 32,
-    marginTop: 24,
-    backgroundColor: colors.background.card,
-    width: '75%',
-    boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1)',
-  } as CSSProperties,
-  cardTitle: {
+    padding: '40px 40px 0',
+    backgroundColor: colors.card.background,
+    width: '100%',
+    height: '100%',
+  },
+  header: {
     display: 'flex',
-    fontSize: 24,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    width: '100%',
+    marginBottom: 36,
+  },
+  headerTitle: {
+    display: 'flex',
+    fontSize: '38px',
+    fontWeight: 500,
     color: colors.text.primary,
-    lineHeight: '1.4',
-    marginBottom: 24,
-    fontWeight: 600,
-  } as CSSProperties,
+    marginBottom: 8,
+  },
+  headerSubtitle: {
+    display: 'flex',
+    fontSize: 26,
+    fontWeight: 400,
+    gap: 12,
+    color: colors.text.secondary,
+    alignItems: 'center',
+  },
+  headerMultiplier: {
+    display: 'flex',
+    fontSize: 61,
+    fontWeight: 700,
+    color: colors.accent,
+    backgroundColor: colors.accentBackground,
+    padding: '16px 24px',
+    borderRadius: 12,
+  },
   divider: {
     display: 'flex',
     width: '100%',
     height: 1,
-    backgroundColor: colors.background.divider,
-    marginBottom: 24,
-  } as CSSProperties,
+    backgroundColor: '#FFFFFF33',
+  },
+  statItem: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'flex-start',
+    width: '300px',
+  },
+  statLabel: {
+    display: 'flex',
+    fontSize: 26,
+    color: colors.text.secondary,
+    marginBottom: 12,
+  },
+  statValue: {
+    display: 'flex',
+    fontSize: 38,
+    fontWeight: 600,
+    color: colors.text.primary,
+  },
   statsRow: {
     display: 'flex',
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    padding: '30px 40px',
+    gap: 24,
+  },
+  marketCard: {
+    display: 'flex',
+    flexDirection: 'column',
+    backgroundColor: colors.card.inner,
+    borderRadius: 16,
     width: '100%',
-  } as CSSProperties,
+  },
+  marketQuestion: {
+    display: 'flex',
+    fontWeight: 450,
+    color: colors.text.primary,
+    padding: '38px 40px',
+    lineHeight: 1.4,
+  },
+  ctaButton: {
+    display: 'flex',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#FFFFFF1A',
+    borderRadius: '10px',
+    padding: '16px 30px',
+    alignSelf: 'center',
+    gap: '16px',
+  },
+  ctaLogo: {
+    width: '46px',
+    height: '46px',
+  },
+  ctaText: {
+    display: 'flex',
+    fontSize: 30,
+    fontWeight: 500,
+    color: colors.text.primary,
+  },
 };
+
+type HeaderProps = {
+  title: string;
+  multiplier: string;
+  subtitle: string;
+};
+
+const Header = ({ title, multiplier, subtitle }: HeaderProps) => (
+  <div style={styles.header}>
+    <div style={{ display: 'flex', flexDirection: 'column' }}>
+      <div style={styles.headerTitle}>{title}</div>
+      <div style={styles.headerSubtitle}>
+        {subtitle}
+        <SquareArrowUpRight
+          style={{ width: '26px', height: '26px', color: colors.text.secondary }}
+        />
+      </div>
+    </div>
+    <div style={styles.headerMultiplier}>{multiplier}</div>
+  </div>
+);
+
+const DashedDivider = () => <div style={styles.divider} />;
 
 type StatItemProps = {
   label: string;
@@ -70,133 +161,51 @@ type StatItemProps = {
 };
 
 const StatItem = ({ label, value }: StatItemProps) => (
-  <div
-    style={{
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'flex-start',
-    }}
-  >
-    <div
-      style={{
-        display: 'flex',
-        fontSize: 16,
-        color: colors.text.secondary,
-        marginBottom: 8,
-      }}
-    >
-      {label}
-    </div>
-    <div
-      style={{
-        display: 'flex',
-        fontSize: 24,
-        fontWeight: 700,
-        color: colors.text.primary,
-      }}
-    >
-      {value}
-    </div>
+  <div style={styles.statItem}>
+    <div style={styles.statLabel}>{label}</div>
+    <div style={styles.statValue}>{value}</div>
   </div>
 );
 
-type BetDetailsProps = {
+type StatsRowProps = {
+  stats: StatItemProps[];
+};
+
+const StatsRow = ({ stats }: StatsRowProps) => (
+  <div style={styles.statsRow}>
+    {stats.map((stat) => (
+      <StatItem key={stat.label} label={stat.label} value={stat.value} />
+    ))}
+  </div>
+);
+
+type MarketCardProps = {
   question: string;
   stats: StatItemProps[];
 };
 
-const BetDetails = ({ question, stats }: BetDetailsProps) => (
-  <div style={styles.card}>
-    <div style={styles.cardTitle}>{question}</div>
-    <div style={styles.divider} />
-    <div style={styles.statsRow}>
-      {stats.map((stat) => (
-        <StatItem key={stat.label} label={stat.label} value={stat.value} />
-      ))}
-    </div>
-  </div>
-);
+const MarketCard = ({ question, stats }: MarketCardProps) => {
+  const isLongQuestion = question.length > 120;
 
-type HeadlineProps = {
-  title: string;
-  multiplier: string;
-  subtitle: string;
-  highlightValue: string;
+  return (
+    <div style={{ ...styles.marketCard, marginBottom: isLongQuestion ? 32 : 40 }}>
+      <div style={{ ...styles.marketQuestion, fontSize: isLongQuestion ? 24 : 30 }}>{question}</div>
+      <DashedDivider />
+      <StatsRow stats={stats} />
+    </div>
+  );
 };
 
-const Headline = ({ title, multiplier, subtitle, highlightValue }: HeadlineProps) => (
-  <div
-    style={{
-      display: 'flex',
-      justifyContent: 'center',
-      alignItems: 'center',
-      flexDirection: 'column',
-      marginBottom: 24,
-    }}
-  >
-    <div
-      style={{
-        display: 'flex',
-        alignItems: 'center',
-        marginBottom: 16,
-        fontSize: 48,
-        fontWeight: 700,
-        color: colors.text.primary,
-      }}
-    >
-      <div style={{ display: 'flex' }}>{title}</div>
-      <div
-        style={{
-          display: 'flex',
-          marginLeft: 12,
-          fontSize: 48,
-          fontWeight: 700,
-          color: colors.accent,
-        }}
-      >
-        {multiplier}
-      </div>
-    </div>
-    <div
-      style={{
-        display: 'flex',
-        fontSize: 20,
-        color: colors.text.secondary,
-        alignItems: 'center',
-      }}
-    >
-      <div style={{ display: 'flex' }}>{subtitle}</div>
-      <div
-        style={{
-          display: 'flex',
-          fontWeight: 700,
-          marginLeft: 6,
-          color: colors.text.primary,
-        }}
-      >
-        {highlightValue}
-      </div>
-    </div>
-  </div>
-);
-
-type AgentLogoProps = {
-  src?: string;
+type CTAButtonProps = {
+  logoSrc?: string;
 };
 
-const AgentLogo = ({ src }: AgentLogoProps) => (
-  <img
-    src={src}
-    alt="Agent Logo"
-    style={{
-      width: 'auto',
-      height: 'auto',
-      maxWidth: 100,
-      maxHeight: 100,
-      marginBottom: 32,
-      borderRadius: 20,
-    }}
-  />
+const CTAButton = ({ logoSrc }: CTAButtonProps) => (
+  <div style={styles.ctaButton}>
+    <img src={logoSrc} style={styles.ctaLogo} />
+    <div style={styles.ctaText}>Get your own Polystrat</div>
+    <SquareArrowUpRight style={{ width: '32px', height: '32px', color: '#FFFFFF' }} />
+  </div>
 );
 
 type PolystratPayoutProps = {
@@ -207,45 +216,30 @@ type PolystratPayoutProps = {
 export const PolystratPayout = ({ logoSrc }: PolystratPayoutProps) => {
   // TODO: Use real data from params
   const payoutData = {
-    headline: {
-      title: 'Big win',
-      multiplier: 'x2.4',
-      subtitle: 'Your Polystrat made a high-return prediction and collected',
-      highlightValue: '$2.4',
+    header: {
+      title: 'Successful prediction',
+      multiplier: '2.4x',
+      subtitle: 'Made by Polystrat AI agent on Polymarket',
     },
-    bet: {
-      question: 'Does Google have the best AI model end of January?',
-      stats: [
-        { label: 'Position', value: 'Yes' },
-        { label: 'Amount', value: '$1.0' },
-        { label: 'Won', value: '$2.4' },
-      ],
-    },
+    question:
+      'Will the Earth be proven flat by 2025?" (Often used to show how "No" shares can be a stable, low-yield investment).  (Often used to show how "No" shares can be a stable, low-yield investment). 2 lorem ipsum.asd fasdlsd asdlk',
+    stats: [
+      { label: 'Position', value: 'Yes' },
+      { label: 'Amount', value: '$1.0' },
+      { label: 'Won', value: '$2.4' },
+    ],
   };
 
   return (
     <div style={styles.container}>
-      <AgentLogo src={logoSrc} />
-
-      <Headline
-        title={payoutData.headline.title}
-        multiplier={payoutData.headline.multiplier}
-        subtitle={payoutData.headline.subtitle}
-        highlightValue={payoutData.headline.highlightValue}
-      />
-
-      <BetDetails question={payoutData.bet.question} stats={payoutData.bet.stats} />
-
-      <div
-        style={{
-          display: 'flex',
-          position: 'absolute',
-          bottom: 32,
-          right: 32,
-          alignItems: 'center',
-        }}
-      >
-        <PearlLogo logoWidth={104} logoHeight={32} />
+      <div style={styles.card}>
+        <Header
+          title={payoutData.header.title}
+          multiplier={payoutData.header.multiplier}
+          subtitle={payoutData.header.subtitle}
+        />
+        <MarketCard question={payoutData.question} stats={payoutData.stats} />
+        <CTAButton logoSrc={logoSrc} />
       </div>
     </div>
   );

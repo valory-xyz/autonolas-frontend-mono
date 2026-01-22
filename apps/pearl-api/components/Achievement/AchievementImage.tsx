@@ -33,7 +33,7 @@ export const generateAchievementImage = async (
   const persistentImages = await getPersistentImages(origin, params.agent);
 
   const imageResponse = new ImageResponse(
-    <AchievementUI params={params} logoSrc="polystrat-logo" />,
+    <AchievementUI params={params} logoSrc={params.agent} />,
     {
       width: OG_IMAGE_CONFIG.WIDTH,
       height: OG_IMAGE_CONFIG.HEIGHT,
