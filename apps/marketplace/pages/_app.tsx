@@ -90,8 +90,23 @@ type InitialProps = {
 };
 
 RegistryApp.getInitialProps = async ({ Component, ctx }: InitialProps) => {
-  const pageProps = Component.getInitialProps ? await Component.getInitialProps(ctx) : {};
-  return { pageProps };
+  // Add timeout to prevent hanging during build
+  const timeoutPromise = new Promise((_, reject) => {
+    setTimeout(() => reject(new Error('getInitialProps timeout')), 5000);
+  });
+  
+  const pagePropsPromise = Component.getInitialProps 
+    ? Component.getInitialProps(ctx) 
+    : Promise.resolve({});
+  
+  try {
+    const pageProps = await Promise.race([pagePropsPromise, timeoutPromise]);
+    return { pageProps };
+  } catch (error) {
+    // If timeout or error, return empty props to allow build to continue
+    console.warn('getInitialProps error or timeout:', error);
+    return { pageProps: {} };
+  }
 };
 
 RegistryApp.propTypes = {

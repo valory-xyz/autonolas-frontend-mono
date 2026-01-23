@@ -30,10 +30,74 @@ const nextConfig = {
     styledComponents: true,
   },
   transpilePackages: ['@ant-design', 'rc-util'],
-  webpack(config) {
+  // Increase timeout for page data collection to handle complex getInitialProps
+  staticPageGenerationTimeout: 300,
+  webpack(config, { isServer }) {
     config.resolve.fallback = {
+      ...config.resolve.fallback,
       fs: false,
+      net: false,
+      tls: false,
+      crypto: false,
     };
+    
+    // Force webpack to use root-level @noble packages instead of nested versions
+    // This fixes issues with @reown/appkit-utils and other packages having nested @noble dependencies
+    const path = require('path');
+    const rootNodeModules = path.resolve(__dirname, '../../node_modules');
+    
+    config.resolve.alias = {
+      ...config.resolve.alias,
+      // Alias @noble packages to root versions to avoid nested dependency conflicts
+      '@noble/hashes/utils': path.resolve(rootNodeModules, '@noble/hashes/utils'),
+      '@noble/hashes/_assert': path.resolve(rootNodeModules, '@noble/hashes/_assert'),
+      '@noble/hashes': path.resolve(rootNodeModules, '@noble/hashes'),
+      '@noble/curves': path.resolve(rootNodeModules, '@noble/curves'),
+      // Alias ethereum-cryptography to use root @noble packages
+      'ethereum-cryptography': path.resolve(rootNodeModules, 'ethereum-cryptography'),
+    };
+    
+    // Fix missing exports from @walletconnect/utils for @web3modal/siwe
+    // @web3modal/siwe depends on @walletconnect/utils@2.12.0 which doesn't have these functions
+    // Use NormalModuleReplacementPlugin to replace the import with a compatible version
+    const webpack = require('webpack');
+    config.plugins = config.plugins || [];
+    
+    // Replace @walletconnect/utils imports in @web3modal/siwe with root version
+    config.plugins.push(
+      new webpack.NormalModuleReplacementPlugin(
+        /^@walletconnect\/utils$/,
+        (resource) => {
+          // Only replace for @web3modal/siwe
+          if (resource.context && resource.context.includes('@web3modal/siwe')) {
+            resource.request = path.resolve(rootNodeModules, '@walletconnect/utils');
+          }
+        }
+      )
+    );
+    
+    // Exclude problematic Safe SDK modules from client bundle
+    if (!isServer) {
+      config.resolve.alias = {
+        ...config.resolve.alias,
+        '@safe-global/safe-apps-sdk': false,
+        '@safe-global/safe-apps-provider': false,
+      };
+    }
+    
+    // Prioritize root node_modules
+    config.resolve.modules = [
+      rootNodeModules,
+      ...(config.resolve.modules || []),
+    ];
+    
+    // Ignore problematic modules that cause build issues
+    config.plugins.push(
+      new webpack.IgnorePlugin({
+        resourceRegExp: /^@safe-global\/safe-apps-sdk\/node_modules\/@noble/,
+      })
+    );
+    
     return config;
   },
   redirects: async () => [
