@@ -1,5 +1,5 @@
-import type { NextPage, NextPageContext } from 'next';
-import { createWrapper } from 'next-redux-wrapper';
+import type { AppProps } from 'next/app';
+import { Provider } from 'react-redux';
 
 import { AutonolasThemeProvider, GlobalStyles } from 'libs/ui-theme/src';
 
@@ -8,38 +8,26 @@ import Layout from 'components/Layout';
 import Meta from 'components/Meta';
 
 import Web3ModalProvider from '../context/web3ModalProvider';
-import initStore from '../store';
+import { wrapper } from '../store';
 
-type MyAppProps = {
-  Component: NextPage;
-  pageProps: Record<string, unknown>;
+const MyApp = ({ Component, ...rest }: AppProps) => {
+  const { store, props } = wrapper.useWrappedStore(rest);
+
+  return (
+    <>
+      <GlobalStyles />
+      <Meta />
+      <Provider store={store}>
+        <AutonolasThemeProvider>
+          <Web3ModalProvider>
+            <Layout>
+              <Component {...props.pageProps} />
+            </Layout>
+          </Web3ModalProvider>
+        </AutonolasThemeProvider>
+      </Provider>
+    </>
+  );
 };
 
-const MyApp = ({ Component, pageProps }: MyAppProps) => (
-  <>
-    <GlobalStyles />
-    <Meta />
-    <AutonolasThemeProvider>
-      <Web3ModalProvider>
-        <Layout>
-          <Component {...pageProps} />
-        </Layout>
-      </Web3ModalProvider>
-    </AutonolasThemeProvider>
-  </>
-);
-
-MyApp.getInitialProps = async ({
-  Component,
-  ctx,
-}: {
-  Component: NextPage;
-  ctx: NextPageContext;
-}) => {
-  const pageProps = Component.getInitialProps ? await Component.getInitialProps(ctx) : {};
-
-  return { pageProps };
-};
-
-const wrapper = createWrapper(initStore);
-export default wrapper.withRedux(MyApp);
+export default MyApp;
