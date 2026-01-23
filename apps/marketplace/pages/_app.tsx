@@ -94,11 +94,11 @@ RegistryApp.getInitialProps = async ({ Component, ctx }: InitialProps) => {
   const timeoutPromise = new Promise((_, reject) => {
     setTimeout(() => reject(new Error('getInitialProps timeout')), 5000);
   });
-  
-  const pagePropsPromise = Component.getInitialProps 
-    ? Component.getInitialProps(ctx) 
+
+  const pagePropsPromise = Component.getInitialProps
+    ? Component.getInitialProps(ctx)
     : Promise.resolve({});
-  
+
   try {
     const pageProps = await Promise.race([pagePropsPromise, timeoutPromise]);
     return { pageProps };
