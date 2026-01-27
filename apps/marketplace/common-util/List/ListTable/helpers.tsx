@@ -9,6 +9,7 @@ import { truncateAddress } from 'libs/util-functions/src';
 import { Activity } from 'common-util/graphql/service-activity';
 
 import { HASH_PREFIX, NAV_TYPES, SERVICE_ROLE, TOTAL_VIEW_COUNT } from '../../../util/constants';
+import { isMarketplaceSupportedNetwork } from '../../functions';
 
 const TruncatedText = styled.div`
   display: -webkit-box;
@@ -92,7 +93,7 @@ export const getTableColumns = (
     onServicesHashClick: (serviceId: string) => void;
   },
 ) => {
-  const isGnosisOrBaseNetwork = !!chainId && (chainId === 100 || chainId === 8453);
+  const isMarketplaceSupportedChain = isMarketplaceSupportedNetwork(chainId);
 
   const addressLinkProps = {
     chainId,
@@ -236,7 +237,7 @@ export const getTableColumns = (
       },
     };
 
-    return !isGnosisOrBaseNetwork
+    return !isMarketplaceSupportedChain
       ? [idColumn, descriptionColumn, servicesOfferedColumn, marketplaceRoleColumn]
       : [
           idColumn,
