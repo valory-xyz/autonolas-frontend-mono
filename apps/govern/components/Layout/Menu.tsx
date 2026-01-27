@@ -1,4 +1,5 @@
 import { Menu } from 'antd';
+import type { MenuItemType } from 'antd/es/menu/interface';
 import { useRouter } from 'next/router';
 import { FC, useEffect, useState } from 'react';
 
@@ -8,13 +9,13 @@ interface MenuItem {
   path: string;
 }
 
-const items: MenuItem[] = [
-  { label: 'Staking contracts', key: 'contracts', path: '/contracts' },
-  { label: 'Proposals', key: 'proposals', path: '/proposals' },
-  { label: 'veOLAS', key: 'veolas', path: '/veolas' },
-  { label: 'Donate', key: 'donate', path: '/donate' },
-  { label: 'Epoch', key: 'epoch', path: '/epoch' },
-  { label: 'Docs', key: 'docs', path: '/docs' },
+const items: MenuItemType[] = [
+  { label: 'Staking contracts', key: 'contracts' },
+  { label: 'Proposals', key: 'proposals' },
+  { label: 'veOLAS', key: 'veolas' },
+  { label: 'Donate', key: 'donate' },
+  { label: 'Epoch', key: 'epoch' },
+  { label: 'Docs', key: 'docs' },
 ];
 
 interface MenuInstanceProps {

@@ -115,9 +115,9 @@ ListTable.defaultProps = {
   list: [],
   total: 0,
   currentPage: 0,
-  setCurrentPage: () => {},
+  setCurrentPage: () => undefined,
   isAccountRequired: false,
-  onViewClick: () => {},
+  onViewClick: () => undefined,
   onUpdateClick: null,
   extra: { scrollX: 1200 },
 };

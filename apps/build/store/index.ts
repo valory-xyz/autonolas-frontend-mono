@@ -1,21 +1,24 @@
-import { combineReducers, createStore, applyMiddleware, compose } from 'redux';
-import thunk from 'redux-thunk';
+import { configureStore } from '@reduxjs/toolkit';
+import { createWrapper } from 'next-redux-wrapper';
+import { TypedUseSelectorHook, useDispatch, useSelector } from 'react-redux';
+
 import setup from './setup';
 
-const rootReducer = combineReducers({ setup });
+export const store = configureStore({
+  reducer: {
+    setup,
+  },
+  devTools: process.env.NODE_ENV === 'development',
+});
 
-const middleware = [thunk];
+export const wrapper = createWrapper(() => store);
 
-const composeWithDevTools =
-  typeof window === 'object' &&
-  window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__?.() &&
-  process.env.NODE_ENV === 'development'
-    ? // @ts-expect-error we aren't passing any compose fns to devtools
-      window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__({})
-    : compose;
+export type RootState = ReturnType<typeof store.getState>;
+export type AppDispatch = typeof store.dispatch;
 
-const composedEnhancers = composeWithDevTools(applyMiddleware(...middleware));
+export const useAppDispatch: () => AppDispatch = useDispatch;
+export const useAppSelector: TypedUseSelectorHook<RootState> = useSelector;
 
-// TODO: `createStore` is deprecated, use the updated fns
-const Store = () => createStore(rootReducer, composedEnhancers);
-export default Store;
+// For backward compatibility with existing code that imports initStore
+const initStore = () => store;
+export default initStore;

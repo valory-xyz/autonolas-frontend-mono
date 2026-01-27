@@ -50,7 +50,7 @@ jest.mock('store/index', () => ({
 }));
 
 const VotesExample = () => {
-  return <Votes setIsUpdating={() => {}} setAllocations={() => {}} />;
+  return <Votes setIsUpdating={jest.fn()} setAllocations={jest.fn()} />;
 };
 
 describe('<Votes />', () => {

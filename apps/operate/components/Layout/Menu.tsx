@@ -1,5 +1,5 @@
 import { Menu } from 'antd';
-import { MenuItemType } from 'antd/es/menu/hooks/useItems';
+import type { MenuItemType } from 'antd/es/menu/interface';
 import { useRouter } from 'next/router';
 import { FC, useEffect, useState } from 'react';
 
@@ -21,7 +21,7 @@ export const NavigationMenu: FC = () => {
     }
   }, [pathname]);
 
-  const handleMenuItemClick = ({ key }: MenuItemType) => {
+  const handleMenuItemClick = ({ key }: { key: string }) => {
     const path = `/${key}`;
     router.push(path);
     setSelectedMenu(path);

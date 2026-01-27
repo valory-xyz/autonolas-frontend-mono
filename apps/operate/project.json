@@ -3,6 +3,7 @@
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "apps/operate",
   "projectType": "application",
+  "tags": ["app"],
   "targets": {
     "build": {
       "executor": "@nx/next:build",
@@ -52,8 +53,7 @@
       }
     },
     "lint": {
-      "executor": "@nx/eslint:lint",
-      "outputs": ["{options.outputFile}"]
+      "executor": "@nx/eslint:lint"
     },
     "test": {
       "executor": "@nx/jest:jest",
@@ -62,6 +62,5 @@
         "jestConfig": "apps/operate/jest.config.js"
       }
     }
-  },
-  "tags": ["app"]
+  }
 }

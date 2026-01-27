@@ -269,5 +269,5 @@ ServiceState.propTypes = {
 ServiceState.defaultProps = {
   details: [],
   isOwner: false,
-  updateDetails: () => {},
+  updateDetails: () => undefined,
 };

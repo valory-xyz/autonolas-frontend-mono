@@ -1,0 +1,57 @@
+yarn run v1.22.22
+$ C:\Users\pm200\Documents\GitHub\autonolas-frontend-mono\node_modules\.bin\nx build marketplace
+
+ NX   Running target build for project marketplace and 3 tasks it depends on:
+
+
+
+> nx run util-functions:build  [local cache]
+
+
+> nx run util-prohibited-data:build  [local cache]
+
+
+> nx run ui-components:build  [local cache]
+
+
+> nx run marketplace:build:production
+
+  [1m[38;2;173;127;168mΓû▓ Next.js 14.2.35[39m[22m
+ [37m[1m [22m[39m Skipping linting
+ [37m[1m [22m[39m Checking validity of types ...
+ [37m[1m [22m[39m Creating an optimized production build ...
+ [37m[1m [22m[39m Disabled SWC as replacement for Babel because of custom Babel configuration ".babelrc" https://nextjs.org/docs/messages/swc-disabled
+ [37m[1m [22m[39m `compiler` options in `next.config.js` will be ignored while using Babel https://nextjs.org/docs/messages/ignored-compiler-options
+ [32m[1mΓ£ô[22m[39m Compiled successfully
+ [37m[1m [22m[39m Collecting page data ...
+TypeError: Class extends value undefined is not a constructor or null
+    at Object.<anonymous> (C:\Users\pm200\Documents\GitHub\autonolas-frontend-mono\node_modules\@wagmi\connectors\node_modules\@walletconnect\core\dist\index.cjs.js:1:85591)
+    at Module._compile (node:internal/modules/cjs/loader:1688:14)
+    at Object..js (node:internal/modules/cjs/loader:1820:10)
+    at Module.load (node:internal/modules/cjs/loader:1423:32)
+    at Function._load (node:internal/modules/cjs/loader:1246:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Module.<anonymous> (node:internal/modules/cjs/loader:1445:12)
+    at mod.require (C:\Users\pm200\Documents\GitHub\autonolas-frontend-mono\node_modules\next\dist\server\require-hook.js:65:28)
+    at require (node:internal/modules/helpers:135:16)
+> Build error occurred
+Error: Failed to collect page data for /[network]/agent-blueprints/mint
+    at C:\Users\pm200\Documents\GitHub\autonolas-frontend-mono\node_modules\next\dist\build\utils.js:1269:15
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5) {
+  type: 'Error'
+}
+Build process exited due to code 1  
+
+
+
+ NX   Running target build for project marketplace and 3 tasks it depends on failed
+
+Failed tasks:
+
+- marketplace:build:production
+
+Hint: run the command with --verbose for more details.
+
+error Command failed with exit code 1.
+info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command.
