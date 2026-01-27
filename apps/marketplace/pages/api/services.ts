@@ -30,7 +30,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     if (!isMarketplaceSupportedNetwork(Number(chainId))) {
       return res.status(400).json({
-        error: "Invalid network. Must be 'gnosis' or 'base'",
+        error: "Invalid network. Must be 'optimism', 'gnosis', 'polygon', or 'base'",
       });
     }
 

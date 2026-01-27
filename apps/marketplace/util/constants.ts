@@ -90,4 +90,4 @@ export const CACHE_DURATION = {
   ONE_HOUR: 3600,
 } as const;
 
-export const MARKETPLACE_SUPPORTED_CHAIN_IDS = [100, 8453];
+export const MARKETPLACE_SUPPORTED_CHAIN_IDS = [10, 100, 137, 8453];
