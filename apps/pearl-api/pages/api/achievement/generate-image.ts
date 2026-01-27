@@ -77,6 +77,14 @@ export default async function handler(
     }
 
     const imageBuffer = await generateAchievementImage(params, getOrigin(req));
+
+    if (!imageBuffer) {
+      return res.status(404).json({
+        error: 'Not Found',
+        message: 'Achievement data not found or invalid.',
+      });
+    }
+
     const { hash, url } = await uploadImageToIpfs(imageBuffer);
 
     await setLookupEntry(params, {

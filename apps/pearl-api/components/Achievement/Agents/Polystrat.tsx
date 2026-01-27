@@ -2,7 +2,7 @@ import { CSSProperties } from 'react';
 
 import { SquareArrowUpRight } from '../../../svgs/squareArrowUpRight';
 
-import { AchievementQueryParams } from 'types';
+import { AchievementData, AchievementQueryParams } from 'types/achievement';
 
 const colors = {
   text: {
@@ -145,7 +145,11 @@ const Header = ({ title, multiplier, subtitle }: HeaderProps) => (
       <div style={styles.headerSubtitle}>
         {subtitle}
         <SquareArrowUpRight
-          style={{ width: '26px', height: '26px', color: colors.text.secondary }}
+          style={{
+            width: '26px',
+            height: '26px',
+            color: colors.text.secondary,
+          }}
         />
       </div>
     </div>
@@ -211,32 +215,31 @@ const CTAButton = ({ logoSrc }: CTAButtonProps) => (
 type PolystratPayoutProps = {
   params: AchievementQueryParams;
   logoSrc?: string;
+  data: AchievementData;
 };
 
-export const PolystratPayout = ({ logoSrc }: PolystratPayoutProps) => {
-  // TODO: Use real data from params
+export const PolystratPayout = ({ logoSrc, data }: PolystratPayoutProps) => {
+  if (!data) return null;
+
   const payoutData = {
-    header: {
-      title: 'Successful prediction',
-      multiplier: '2.4x',
-      subtitle: 'Made by Polystrat AI agent on Polymarket',
-    },
-    question:
-      'Will the Earth be proven flat by 2025?" (Often used to show how "No" shares can be a stable, low-yield investment).  (Often used to show how "No" shares can be a stable, low-yield investment). 2 lorem ipsum.asd fasdlsd asdlk',
+    question: data.question,
     stats: [
-      { label: 'Position', value: 'Yes' },
-      { label: 'Amount', value: '$1.0' },
-      { label: 'Won', value: '$2.4' },
+      { label: 'Position', value: data.position },
+      { label: 'Amount', value: data.betAmountFormatted },
+      { label: 'Won', value: data.amountWonFormatted },
     ],
+    header: {
+      multiplier: `${data.multiplier}x`,
+    },
   };
 
   return (
     <div style={styles.container}>
       <div style={styles.card}>
         <Header
-          title={payoutData.header.title}
+          title={'Successful prediction'}
           multiplier={payoutData.header.multiplier}
-          subtitle={payoutData.header.subtitle}
+          subtitle={'Made by Polystrat AI agent on Polymarket'}
         />
         <MarketCard question={payoutData.question} stats={payoutData.stats} />
         <CTAButton logoSrc={logoSrc} />

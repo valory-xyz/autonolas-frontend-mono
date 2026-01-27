@@ -19,3 +19,17 @@ export type LookupEntry = {
 export type AchievementsLookupJson = {
   [key: string]: LookupEntry;
 };
+
+export type PolymarketBetData = {
+  question: string;
+  position: string;
+  transactionHash: string;
+  betAmount: number;
+  amountWon: number;
+  betAmountFormatted: string;
+  amountWonFormatted: string;
+  multiplier: string;
+};
+
+// Union type of all possible achievement data
+export type AchievementData = PolymarketBetData;
