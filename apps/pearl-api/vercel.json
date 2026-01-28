@@ -5,6 +5,12 @@
     },
     "pages/api/zendesk/create-ticket.ts": {
       "maxDuration": 30
+    },
+    "pages/api/achievement/generate-image.ts": {
+      "maxDuration": 30
+    },
+    "pages/api/achievement/get-image.ts": {
+      "maxDuration": 10
     }
   }
 }
