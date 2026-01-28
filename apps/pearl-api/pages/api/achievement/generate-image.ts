@@ -20,9 +20,7 @@ const PRODUCTION_ALLOWED_HOSTS = ['pearl-api.vercel.app'];
 
 const isAllowedHost = (host: string): boolean => {
   if (process.env.NODE_ENV === 'development' && host.startsWith('localhost')) return true;
-
   if (process.env.VERCEL_ENV === 'preview' && host.endsWith('.vercel.app')) return true;
-
   if (process.env.VERCEL_ENV === 'production' && PRODUCTION_ALLOWED_HOSTS.includes(host))
     return true;
 
@@ -32,9 +30,7 @@ const isAllowedHost = (host: string): boolean => {
 const getOrigin = (req: NextApiRequest): string => {
   const host = req.headers.host;
 
-  if (!host || !isAllowedHost(host)) {
-    throw new Error('Invalid host');
-  }
+  if (!host || !isAllowedHost(host)) throw new Error('Invalid host');
 
   const protocol = req.headers['x-forwarded-proto'] || 'http';
   return `${protocol}://${host}`;

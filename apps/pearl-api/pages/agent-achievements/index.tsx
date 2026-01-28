@@ -4,9 +4,10 @@ import { OG_IMAGE_CONFIG } from '../../constants/achievement';
 import { AchievementQueryParams, PolymarketBetData } from '../../types/achievement';
 import { getPolymarketBet } from 'utils/polymarket';
 
+// Page to verify the achievement image, only required for testing.
 export default function AgentAchievements() {
   const [data, setData] = useState<PolymarketBetData | null>(null);
-    
+
   const params: AchievementQueryParams = {
     agent: 'polystrat',
     type: 'payout',
@@ -22,7 +23,7 @@ export default function AgentAchievements() {
     });
   }, [params.id]);
 
-  if(!data) return null;
+  if (!data) return null;
   return (
     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
       <div
