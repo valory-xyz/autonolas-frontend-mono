@@ -11,11 +11,6 @@ import { EVM_SUPPORTED_CHAINS } from 'common-util/Login/config';
 
 import { CACHE_DURATION } from 'util/constants';
 
-type RequestParams = {
-  network: string;
-  serviceId: string;
-};
-
 type Erc8004Response = {
   type: 'https://eips.ethereum.org/EIPS/eip-8004#registration-v1';
   name: string;
@@ -44,6 +39,9 @@ const getChainIdFromNetworkSlug = (network: string): number | null => {
 const getSupportedNetworkNames = (): string =>
   EVM_SUPPORTED_CHAINS.map((c) => c.networkName).join(', ');
 
+const normarlizeQueryParam = (param: NextApiRequest['query'][string]): string | undefined =>
+  Array.isArray(param) ? param[0] : param;
+
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<Erc8004Response | { error: string }>,
@@ -53,11 +51,19 @@ export default async function handler(
   }
 
   try {
-    const { network, serviceId } = req.query as RequestParams;
+    const { network: networkParam, serviceId: serviceIdParam } = req.query;
+    const network = normarlizeQueryParam(networkParam);
+    const serviceId = normarlizeQueryParam(serviceIdParam);
 
     if (!network || !serviceId) {
       return res.status(400).json({
         error: 'Missing required parameters: network and serviceId',
+      });
+    }
+
+    if (Number.isNaN(Number(serviceId)) || Number(serviceId) <= 0) {
+      return res.status(400).json({
+        error: 'Invalid serviceId: must be a positive integer',
       });
     }
 

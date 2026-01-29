@@ -43,7 +43,7 @@ export const SUPPORTED_CHAINS: Chain[] = [
  * @example
  * [
  *  { name: 'Mainnet', id: 1, network: 'ethereum' },
- *  { name: 'Gnosis', id: 5, network: 'gnosis' },
+ *  { name: 'Gnosis', id: 100, network: 'gnosis' },
  *  // ...
  * ]
  */
