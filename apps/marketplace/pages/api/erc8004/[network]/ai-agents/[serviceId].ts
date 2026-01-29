@@ -5,7 +5,7 @@ import { isL1Network } from 'libs/util-functions/src';
 
 import { SERVICE_REGISTRY_CONTRACT, SERVICE_REGISTRY_L2 } from 'common-util/AbiAndAddresses';
 import { ADDRESSES } from 'common-util/Contracts/addresses';
-import { RPC_URLS } from 'common-util/Contracts/rpc';
+import { RPC_URLS } from 'libs/util-constants/src';
 import { getIpfsResponse } from 'common-util/functions/ipfs';
 import { EVM_SUPPORTED_CHAINS } from 'common-util/Login/config';
 
@@ -58,13 +58,13 @@ export default async function handler(
 
     if (!network || !serviceId) {
       return res.status(400).json({
-        error: 'Missing required parameters: network and serviceId',
+        error: 'Missing required parameters: network or serviceId',
       });
     }
 
-    if (Number.isNaN(Number(serviceId)) || Number(serviceId) <= 0) {
+    if (!/^\d+$/.test(serviceId)) {
       return res.status(400).json({
-        error: 'Invalid serviceId: must be a positive integer',
+        error: 'Invalid serviceId: must be a valid serviceId',
       });
     }
 

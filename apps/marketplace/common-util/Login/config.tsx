@@ -13,7 +13,7 @@ import {
   mode,
 } from 'wagmi/chains';
 
-import { RPC_URLS } from 'common-util/Contracts/rpc';
+import { RPC_URLS } from 'libs/util-constants/src';
 import { SOLANA_CHAIN_NAMES } from 'util/constants';
 import { VM_TYPE } from 'libs/util-constants/src';
 

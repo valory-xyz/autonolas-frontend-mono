@@ -28,7 +28,7 @@ import {
 } from 'common-util/functions';
 
 import { ADDRESSES } from './addresses';
-import { RPC_URLS } from './rpc';
+import { RPC_URLS } from 'libs/util-constants/src';
 
 /**
  * returns the web3 details
