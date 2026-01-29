@@ -17,7 +17,7 @@ import {
 import { RpcUrl } from 'libs/util-functions/src/lib/sendTransaction/types';
 
 import { MARKETPLACE_SUPPORTED_CHAIN_IDS } from '../../util/constants';
-import { RPC_URLS } from '../Contracts';
+import { RPC_URLS } from '../Contracts/rpc';
 import { SUPPORTED_CHAINS } from '../Login';
 import { EVM_SUPPORTED_CHAINS, SVM_SUPPORTED_CHAINS, SolanaChain } from '../Login/config';
 import { VM_TYPE } from 'libs/util-constants/src';

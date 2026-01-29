@@ -28,25 +28,7 @@ import {
 } from 'common-util/functions';
 
 import { ADDRESSES } from './addresses';
-
-export const RPC_URLS = {
-  1: process.env.NEXT_PUBLIC_MAINNET_URL,
-  5: process.env.NEXT_PUBLIC_GOERLI_URL,
-  10: process.env.NEXT_PUBLIC_OPTIMISM_URL,
-  100: process.env.NEXT_PUBLIC_GNOSIS_URL,
-  137: process.env.NEXT_PUBLIC_POLYGON_URL,
-  8453: process.env.NEXT_PUBLIC_BASE_URL,
-  10200: process.env.NEXT_PUBLIC_GNOSIS_CHIADO_URL,
-  34443: process.env.NEXT_PUBLIC_MODE_URL,
-  42220: process.env.NEXT_PUBLIC_CELO_URL,
-  44787: process.env.NEXT_PUBLIC_CELO_ALFAJORES_URL,
-  80001: process.env.NEXT_PUBLIC_POLYGON_MUMBAI_URL,
-  31337: process.env.NEXT_PUBLIC_AUTONOLAS_URL,
-  42161: process.env.NEXT_PUBLIC_ARBITRUM_URL,
-  421614: process.env.NEXT_PUBLIC_ARBITRUM_SEPOLIA_URL,
-  84532: process.env.NEXT_PUBLIC_BASE_SEPOLIA_URL,
-  11155420: process.env.NEXT_PUBLIC_OPTIMISM_SEPOLIA_URL,
-};
+import { RPC_URLS } from './rpc';
 
 /**
  * returns the web3 details
