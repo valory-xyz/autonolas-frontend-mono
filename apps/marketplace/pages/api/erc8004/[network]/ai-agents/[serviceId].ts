@@ -9,7 +9,7 @@ import { RPC_URLS } from 'libs/util-constants/src';
 import { getIpfsResponse } from 'common-util/functions/ipfs';
 import { EVM_SUPPORTED_CHAINS } from 'common-util/Login/config';
 
-import { CACHE_DURATION } from 'util/constants';
+import { CACHE_DURATION, GATEWAY_URL } from 'util/constants';
 
 type Erc8004Response = {
   type: 'https://eips.ethereum.org/EIPS/eip-8004#registration-v1';
@@ -27,6 +27,11 @@ type Erc8004Response = {
     agentRegistry: string;
   }>;
   supportedTrust: string[];
+};
+
+const getImageUrl = (image: string | undefined) => {
+  if (!image) return '';
+  return image.replace('ipfs://', GATEWAY_URL);
 };
 
 const getChainIdFromNetworkSlug = (network: string): number | null => {
@@ -125,7 +130,7 @@ export default async function handler(
       type: 'https://eips.ethereum.org/EIPS/eip-8004#registration-v1',
       name: metadata?.name ?? '',
       description: metadata?.description ?? '',
-      image: metadata?.image ?? '',
+      image: getImageUrl(metadata?.image),
       services: [
         {
           name: 'web',
