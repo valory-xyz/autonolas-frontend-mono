@@ -30,8 +30,9 @@ type Erc8004Response = {
 };
 
 const getChainIdFromNetworkSlug = (network: string): number | null => {
+  if (typeof network !== 'string') return null;
   const chain = EVM_SUPPORTED_CHAINS.find(
-    (c) => c.networkName.toLowerCase() === network.toLowerCase(),
+    (chain) => chain.networkName.toLowerCase() === network.toLowerCase(),
   );
   return chain?.id ?? null;
 };
