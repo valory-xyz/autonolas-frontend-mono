@@ -13,7 +13,7 @@ import {
   mode,
 } from 'wagmi/chains';
 
-import { RPC_URLS } from 'common-util/Contracts';
+import { RPC_URLS } from 'libs/util-constants/src';
 import { SOLANA_CHAIN_NAMES } from 'util/constants';
 import { VM_TYPE } from 'libs/util-constants/src';
 
@@ -43,7 +43,7 @@ export const SUPPORTED_CHAINS: Chain[] = [
  * @example
  * [
  *  { name: 'Mainnet', id: 1, network: 'ethereum' },
- *  { name: 'Goerli', id: 5, network: 'goerli' },
+ *  { name: 'Gnosis', id: 100, network: 'gnosis' },
  *  // ...
  * ]
  */
