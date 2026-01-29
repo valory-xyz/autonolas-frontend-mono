@@ -40,7 +40,7 @@ const getChainIdFromNetworkSlug = (network: string): number | null => {
 const getSupportedNetworkNames = (): string =>
   EVM_SUPPORTED_CHAINS.map((c) => c.networkName).join(', ');
 
-const normarlizeQueryParam = (param: NextApiRequest['query'][string]): string | undefined =>
+const normalizeQueryParam = (param: NextApiRequest['query'][string]): string | undefined =>
   Array.isArray(param) ? param[0] : param;
 
 export default async function handler(
@@ -53,8 +53,8 @@ export default async function handler(
 
   try {
     const { network: networkParam, serviceId: serviceIdParam } = req.query;
-    const network = normarlizeQueryParam(networkParam);
-    const serviceId = normarlizeQueryParam(serviceIdParam);
+    const network = normalizeQueryParam(networkParam);
+    const serviceId = normalizeQueryParam(serviceIdParam);
 
     if (!network || !serviceId) {
       return res.status(400).json({
