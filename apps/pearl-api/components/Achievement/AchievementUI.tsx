@@ -1,7 +1,7 @@
 import React from 'react';
 
 import type { AchievementData, AchievementQueryParams } from 'types/achievement';
-import { PolystratPayout } from './Agents/Polystrat';
+import { Polystrat } from './Agents/Polystrat';
 
 type AchievementUIProps = {
   params: AchievementQueryParams;
@@ -12,7 +12,7 @@ type AchievementUIProps = {
 export const AchievementUI = ({ params, logoSrc, data }: AchievementUIProps) => {
   const { agent } = params;
 
-  if (agent === 'polystrat')
-    return <PolystratPayout params={params} logoSrc={logoSrc} data={data} />;
+  if (agent === 'polystrat') return <Polystrat params={params} logoSrc={logoSrc} data={data} />;
+
   return null;
 };

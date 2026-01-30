@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { AchievementUI } from '../../components/Achievement/AchievementUI';
 import { OG_IMAGE_CONFIG } from '../../constants/achievement';
 import { AchievementQueryParams, PolymarketBetData } from '../../types/achievement';
-import { getPolymarketBet } from 'utils/polymarket';
+import { getPolymarketBet } from 'utils/polystrat';
 
 // Page to verify the achievement image, only required for testing.
 export default function AgentAchievements() {

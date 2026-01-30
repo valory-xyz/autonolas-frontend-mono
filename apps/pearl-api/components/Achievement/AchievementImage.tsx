@@ -4,7 +4,7 @@ import type { PersistentImage } from '@takumi-rs/core';
 import type { AchievementData, AchievementQueryParams, AgentType } from 'types/achievement';
 import { AGENT_LOGO_PATH_MAPPING, OG_IMAGE_CONFIG } from 'constants/achievement';
 import { AchievementUI } from './AchievementUI';
-import { getPolymarketBet } from 'utils/polymarket';
+import { getPolymarketBet } from 'utils/polystrat';
 
 /**
  * Fetches the achievement data based on the agent type.
@@ -14,19 +14,21 @@ import { getPolymarketBet } from 'utils/polymarket';
 const getAchievementData = async (
   params: AchievementQueryParams,
 ): Promise<AchievementData | null> => {
-  if (params.agent === 'polystrat' && params.type === 'payout') {
-    try {
-      const data = await getPolymarketBet(params.id);
+  if (params.agent === 'polystrat') {
+    if (params.type === 'payout') {
+      try {
+        const data = await getPolymarketBet(params.id);
 
-      if (!data) {
-        console.error('Polymarket bet data not found or invalid.');
-        return null;
+        if (!data) {
+          console.error('Polymarket bet data not found or invalid.');
+          return null;
+        }
+
+        return data;
+      } catch (error) {
+        console.error('Error fetching Polymarket bet:', error);
+        throw error;
       }
-
-      return data;
-    } catch (error) {
-      console.error('Error fetching Polymarket bet:', error);
-      throw error;
     }
   }
 

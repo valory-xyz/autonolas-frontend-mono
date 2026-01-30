@@ -1,6 +1,6 @@
 import { CSSProperties } from 'react';
 
-import { SquareArrowUpRight } from '../../../svgs/squareArrowUpRight';
+import { SquareArrowUpRight } from '../../../../svgs/squareArrowUpRight';
 
 import { AchievementData, AchievementQueryParams } from 'types/achievement';
 
@@ -212,13 +212,13 @@ const CTAButton = ({ logoSrc }: CTAButtonProps) => (
   </div>
 );
 
-type PolystratPayoutProps = {
+type PayoutProps = {
   params: AchievementQueryParams;
   logoSrc?: string;
   data: AchievementData;
 };
 
-export const PolystratPayout = ({ logoSrc, data }: PolystratPayoutProps) => {
+export const Payout = ({ logoSrc, data }: PayoutProps) => {
   if (!data) return null;
 
   const payoutData = {

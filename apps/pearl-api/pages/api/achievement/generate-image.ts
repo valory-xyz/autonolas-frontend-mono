@@ -20,7 +20,7 @@ const PRODUCTION_ALLOWED_HOSTS = ['pearl-api.vercel.app'];
 
 const isAllowedHost = (host: string): boolean => {
   if (process.env.NODE_ENV === 'development' && host.startsWith('localhost')) return true;
-  if (process.env.VERCEL_ENV === 'preview' && host.endsWith('.vercel.app')) return true;
+  if (process.env.VERCEL_ENV === 'preview' && host.endsWith('autonolas.vercel.app')) return true;
   if (process.env.VERCEL_ENV === 'production' && PRODUCTION_ALLOWED_HOSTS.includes(host))
     return true;
 
