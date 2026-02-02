@@ -3,22 +3,27 @@ import { gql } from 'graphql-request';
 export const getPolymarketBetQuery = gql`
   query GetPolymarketBet($id: ID!) {
     bet(id: $id) {
-      id
       transactionHash
-      shares
       outcomeIndex
       amount
+      bettor {
+        id
+      }
       question {
+        id
         metadata {
           title
           outcomes
         }
-        resolution {
-          payouts
-          settledPrice
-          winningIndex
-        }
       }
+    }
+  }
+`;
+
+export const getPolymarketMarketParticipantQuery = gql`
+  query GetPolymarketMarketParticipant($id: ID!) {
+    marketParticipant(id: $id) {
+      totalPayout
     }
   }
 `;
