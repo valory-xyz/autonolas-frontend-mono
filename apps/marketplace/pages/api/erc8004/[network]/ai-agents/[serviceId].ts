@@ -13,6 +13,7 @@ import { getServiceFromRegistry } from 'common-util/graphql/registry';
 import { REGISTRY_SUBGRAPH_CLIENTS } from 'common-util/graphql';
 
 import { CACHE_DURATION, GATEWAY_URL } from 'util/constants';
+import { zeroAddress } from 'viem';
 
 type Erc8004Response = {
   type: 'https://eips.ethereum.org/EIPS/eip-8004#registration-v1';
@@ -70,9 +71,11 @@ const getServiceFromRegistrySafe = async (chainId: number, serviceId: string) =>
 
 const getAgentWallet = async (
   chainId: number,
-  agentId: string,
+  agentId: string | undefined,
   rpcUrl: string,
 ): Promise<string | undefined> => {
+  if (!agentId) return;
+
   const identityRegistryAddress =
     IDENTITY_REGISTRY_UPGRADEABLE.addresses[
       chainId as keyof typeof IDENTITY_REGISTRY_UPGRADEABLE.addresses
@@ -179,23 +182,12 @@ export default async function handler(
     ]);
 
     const registrations: Erc8004Response['registrations'] = [];
-    let agentWallet: string | undefined;
 
     if (serviceFromRegistry?.erc8004AgentId) {
       registrations.push({
         agentId: serviceFromRegistry.erc8004AgentId,
         agentRegistry: `eip155:${chainId}:${IDENTITY_REGISTRY_UPGRADEABLE.addresses[chainId as keyof typeof IDENTITY_REGISTRY_UPGRADEABLE.addresses]}`,
       });
-
-      const walletAddress = await getAgentWallet(
-        chainId,
-        serviceFromRegistry.erc8004AgentId,
-        rpcUrl,
-      );
-
-      if (walletAddress) {
-        agentWallet = `eip155:${chainId}:${walletAddress}`;
-      }
     }
 
     const services = [
@@ -205,10 +197,12 @@ export default async function handler(
       },
     ];
 
-    if (agentWallet) {
+    const agentWallet = await getAgentWallet(chainId, serviceFromRegistry?.erc8004AgentId, rpcUrl);
+
+    if (agentWallet && agentWallet !== zeroAddress) {
       services.push({
         name: 'agentWallet',
-        endpoint: agentWallet,
+        endpoint: `eip155:${chainId}:${agentWallet}`,
       });
     }
 
