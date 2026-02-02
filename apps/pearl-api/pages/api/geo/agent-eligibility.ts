@@ -22,7 +22,6 @@ type EligibilityResponse = {
   eligibility: Record<AgentId, AgentEligibility>;
 };
 
-// TODO: to be confirmed from compliance team!
 /**
  * Policy config
  * ISO-3166-1 alpha-2 country codes. UK is "GB".
@@ -31,7 +30,47 @@ type EligibilityResponse = {
  * Update only in accordance with the latest compliance policy and review process.
  */
 const RESTRICTED_COUNTRIES_BY_AGENT: Record<AgentId, Set<string>> = {
-  polymarket_trader: new Set(['KP']),
+  polymarket_trader: new Set([
+    'AF', // Afghanistan
+    'AU', // Australia
+    'BE', // Belgium
+    'BI', // Burundi
+    'BY', // Belarus
+    'CA', // Canada (Ontario)
+    'CD', // Democratic Republic of Congo
+    'CF', // Central African Republic
+    'CU', // Cuba
+    'DE', // Germany
+    'ER', // Eritrea
+    'ET', // Ethiopia
+    'FR', // France
+    'GB', // United Kingdom
+    'GW', // Guinea-Bissau
+    'IR', // Iran
+    'IQ', // Iraq
+    'IT', // Italy
+    'KP', // North Korea
+    'LB', // Lebanon
+    'LY', // Libya
+    'MD', // Transnistria (disputed)
+    'ML', // Mali
+    'MM', // Myanmar
+    'NI', // Nicaragua
+    'PL', // Poland
+    'RU', // Russia (includes Crimea, Donetsk, Luhansk)
+    'SD', // Sudan
+    'SG', // Singapore
+    'SO', // Somalia
+    'SS', // South Sudan
+    'SY', // Syria
+    'TH', // Thailand
+    'TW', // Taiwan
+    'UM', // United States Minor Outlying Islands
+    'US', // United States
+    'VE', // Venezuela
+    'YE', // Yemen
+    'ZW', // Zimbabwe
+  ]),
 };
 
 function getVercelCountry(req: NextApiRequest): string | undefined {
