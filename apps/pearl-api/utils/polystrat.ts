@@ -1,50 +1,48 @@
-import { getPolymarketBetQuery, getPolymarketMarketParticipantQuery } from './graphql/queries';
+import { getPolymarketDataQuery } from './graphql/queries';
 import { PREDICT_POLYMARKET_CLIENT } from './graphql/client';
 import { PolymarketBetData } from 'types';
 
 const USDC_DECIMALS = 6;
 
-type PolymarketBetResponse = {
-  bet: {
-    transactionHash: string;
-    outcomeIndex: string;
-    amount: string;
-    bettor: {
-      id: string;
-    };
+type PolymarketDataResponse = {
+  marketParticipants: Array<{
+    totalPayout: string;
+    bets: Array<{
+      transactionHash: string;
+      outcomeIndex: string;
+      amount: string;
+      bettor: {
+        id: string;
+      };
+    }>;
     question: {
-      id: string;
       metadata: {
         title: string;
         outcomes: string[];
-      };
-    };
-  } | null;
+      } | null;
+    } | null;
+  }>;
 };
 
-type MarketParticipantResponse = {
-  marketParticipant: {
-    totalPayout: string;
-  } | null;
-};
+const transformPolymarketData = (response: PolymarketDataResponse): PolymarketBetData | null => {
+  const participant = response.marketParticipants[0];
+  if (!participant) return null;
 
-const transformPolymarketBet = (
-  betResponse: PolymarketBetResponse,
-  participantResponse: MarketParticipantResponse,
-): PolymarketBetData | null => {
-  if (!betResponse?.bet || !participantResponse?.marketParticipant) return null;
+  const bet = participant.bets[0];
+  if (!bet) return null;
 
-  const { bet } = betResponse;
-  const { question, amount, transactionHash } = bet;
-  const outcomeIndex = parseInt(bet.outcomeIndex);
-  const position = question.metadata.outcomes[outcomeIndex];
+  const { question, totalPayout } = participant;
+  const { amount, transactionHash, outcomeIndex } = bet;
+  const parsedOutcomeIndex = parseInt(outcomeIndex);
+
+  const title = question?.metadata?.title ?? 'N/A';
+  const position = question?.metadata?.outcomes?.[parsedOutcomeIndex] ?? 'N/A';
 
   const betAmount = parseFloat(amount) / Math.pow(10, USDC_DECIMALS);
-  const amountWon =
-    parseFloat(participantResponse.marketParticipant.totalPayout) / Math.pow(10, USDC_DECIMALS);
+  const amountWon = parseFloat(totalPayout) / Math.pow(10, USDC_DECIMALS);
 
   return {
-    question: question.metadata.title,
+    question: title,
     position,
     transactionHash,
     betAmount,
@@ -63,20 +61,12 @@ export const getPolymarketBet = async (id: string) => {
   const headers = {
     Authorization: `Bearer ${process.env.POLYMARKET_SUBGRAPH_API_KEY}`,
   };
-  const betData = await PREDICT_POLYMARKET_CLIENT.request<PolymarketBetResponse>(
-    getPolymarketBetQuery,
+
+  const data = await PREDICT_POLYMARKET_CLIENT.request<PolymarketDataResponse>(
+    getPolymarketDataQuery,
     { id },
     headers,
   );
 
-  if (!betData?.bet) return null;
-
-  const marketParticipantId = `${betData.bet.bettor.id}_${betData.bet.question.id}`;
-  const marketParticipantData = await PREDICT_POLYMARKET_CLIENT.request<MarketParticipantResponse>(
-    getPolymarketMarketParticipantQuery,
-    { id: marketParticipantId },
-    headers,
-  );
-
-  return transformPolymarketBet(betData, marketParticipantData);
+  return transformPolymarketData(data);
 };
