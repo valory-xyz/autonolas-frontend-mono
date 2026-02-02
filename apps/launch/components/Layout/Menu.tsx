@@ -63,7 +63,7 @@ const MenuInstance: FC<MenuInstanceProps> = ({ selectedMenu, handleMenuItemClick
   );
 };
 
-interface NavigationMenuProps {}
+type NavigationMenuProps = Record<string, never>;
 
 const NavigationMenu: FC<NavigationMenuProps> = () => {
   const router = useRouter();

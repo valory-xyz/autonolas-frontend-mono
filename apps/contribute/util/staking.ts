@@ -51,7 +51,7 @@ export const useReadStakingContract = <
   address: Address | undefined,
   chainId: number,
   args?: ContractFunctionArgs<typeof STAKING_TOKEN_ABI, 'pure' | 'view', TFunctionName>,
-  enabled: boolean = true,
+  enabled = true,
 ) => {
   // TODO: The return type is correct based on the functionName provided,
   // but for some reason the below code is red

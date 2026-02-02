@@ -4,8 +4,8 @@ import RegisterForm, { FORM_NAME } from '../../../common-util/List/RegisterForm'
 import { fillIpfsGenerationModal } from '../../tests-helpers/prefillForm';
 import { wrapProvider, dummyAddress, mockV1Hash } from '../../tests-helpers';
 
-const handleSubmit = jest.fn(() => {});
-const handleCancel = jest.fn(() => {});
+const handleSubmit = jest.fn();
+const handleCancel = jest.fn();
 
 jest.mock('../../../common-util/List/IpfsHashGenerationModal/helpers', () => ({
   getIpfsHashHelper: jest.fn(() => mockV1Hash),

@@ -29,9 +29,9 @@ const MyVotingWeightExample = () => {
   return (
     <MyVotingWeight
       isUpdating={false}
-      setIsUpdating={() => {}}
+      setIsUpdating={jest.fn()}
       allocations={allocationsMock}
-      setAllocations={() => {}}
+      setAllocations={jest.fn()}
     />
   );
 };

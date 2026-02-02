@@ -300,6 +300,6 @@ Deposit.defaultProps = {
   productLpTokenName: null,
   productLpPriceAfterDiscount: null,
   productSupply: null,
-  closeModal: () => {},
-  getProducts: () => {},
+  closeModal: () => undefined,
+  getProducts: () => undefined,
 };

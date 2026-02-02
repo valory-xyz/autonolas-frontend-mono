@@ -57,8 +57,8 @@ const EditVotesExample: FC<{
   return (
     <EditVotes
       allocations={allocationsMock}
-      setAllocations={setAllocationsMock || (() => {})}
-      setIsUpdating={() => {}}
+      setAllocations={setAllocationsMock || jest.fn()}
+      setIsUpdating={jest.fn()}
     />
   );
 };

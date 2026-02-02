@@ -54,7 +54,7 @@ const allocationsMock: Allocation[] = [
   },
 ];
 
-const ContractListExample: FC<{ handleAdd?: () => void }> = ({ handleAdd = () => {} }) => {
+const ContractListExample: FC<{ handleAdd?: () => void }> = ({ handleAdd = jest.fn() }) => {
   return <ContractsList isUpdating={true} handleAdd={handleAdd} allocations={allocationsMock} />;
 };
 
