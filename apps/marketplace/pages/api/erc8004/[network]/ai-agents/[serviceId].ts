@@ -2,12 +2,15 @@ import { ethers } from 'ethers';
 import type { NextApiRequest, NextApiResponse } from 'next';
 
 import { isL1Network } from 'libs/util-functions/src';
+import { IDENTITY_REGISTRY_UPGRADEABLE } from 'libs/util-contracts/src/lib/abiAndAddresses/identityRegistryUpgradeable';
 
 import { SERVICE_REGISTRY_CONTRACT, SERVICE_REGISTRY_L2 } from 'common-util/AbiAndAddresses';
 import { ADDRESSES } from 'common-util/Contracts/addresses';
 import { RPC_URLS } from 'libs/util-constants/src';
 import { getIpfsResponse } from 'common-util/functions/ipfs';
 import { EVM_SUPPORTED_CHAINS } from 'common-util/Login/config';
+import { getServiceFromRegistry } from 'common-util/graphql/registry';
+import { REGISTRY_SUBGRAPH_CLIENTS } from 'common-util/graphql';
 
 import { CACHE_DURATION, GATEWAY_URL } from 'util/constants';
 
@@ -47,6 +50,51 @@ const getSupportedNetworkNames = (): string =>
 
 const normalizeQueryParam = (param: NextApiRequest['query'][string]): string | undefined =>
   Array.isArray(param) ? param[0] : param;
+
+const getServiceFromRegistrySafe = async (chainId: number, serviceId: string) => {
+  if (chainId in REGISTRY_SUBGRAPH_CLIENTS) {
+    try {
+      return await getServiceFromRegistry({
+        chainId: chainId as keyof typeof REGISTRY_SUBGRAPH_CLIENTS,
+        id: serviceId,
+      });
+    } catch (error) {
+      console.error(
+        `Error fetching service ${serviceId} from registry on chain ${chainId}:`,
+        error,
+      );
+    }
+  }
+  return null;
+};
+
+const getAgentWallet = async (
+  chainId: number,
+  agentId: string,
+  rpcUrl: string,
+): Promise<string | undefined> => {
+  const identityRegistryAddress =
+    IDENTITY_REGISTRY_UPGRADEABLE.addresses[
+      chainId as keyof typeof IDENTITY_REGISTRY_UPGRADEABLE.addresses
+    ];
+
+  if (!identityRegistryAddress) return;
+
+  try {
+    const provider = new ethers.JsonRpcProvider(rpcUrl);
+    const identityRegistryContract = new ethers.Contract(
+      identityRegistryAddress,
+      IDENTITY_REGISTRY_UPGRADEABLE.abi,
+      provider,
+    );
+
+    const agentWallet = await identityRegistryContract.getAgentWallet(agentId);
+    return agentWallet;
+  } catch (error) {
+    console.error(`Error fetching agent wallet for agent ${agentId} on chain ${chainId}:`, error);
+    return;
+  }
+};
 
 export default async function handler(
   req: NextApiRequest,
@@ -124,22 +172,55 @@ export default async function handler(
 
     const serviceData = await serviceRegistryContract.getService(serviceId);
     const configHash = serviceData.configHash;
-    const metadata = await getIpfsResponse(configHash);
+
+    const [metadata, serviceFromRegistry] = await Promise.all([
+      getIpfsResponse(configHash),
+      getServiceFromRegistrySafe(chainId, serviceId),
+    ]);
+
+    const registrations: Erc8004Response['registrations'] = [];
+    let agentWallet: string | undefined;
+
+    if (serviceFromRegistry?.erc8004AgentId) {
+      registrations.push({
+        agentId: serviceFromRegistry.erc8004AgentId,
+        agentRegistry: `eip155:${chainId}:0x0`,
+      });
+
+      const walletAddress = await getAgentWallet(
+        chainId,
+        serviceFromRegistry.erc8004AgentId,
+        rpcUrl,
+      );
+
+      if (walletAddress) {
+        agentWallet = `eip155:${chainId}:${walletAddress}`;
+      }
+    }
+
+    const services = [
+      {
+        name: 'web',
+        endpoint: `https://marketplace.olas.network/${network}/ai-agents/${serviceId}`,
+      },
+    ];
+
+    if (agentWallet) {
+      services.push({
+        name: 'agentWallet',
+        endpoint: agentWallet,
+      });
+    }
 
     const response: Erc8004Response = {
       type: 'https://eips.ethereum.org/EIPS/eip-8004#registration-v1',
       name: metadata?.name ?? '',
       description: metadata?.description ?? '',
       image: getImageUrl(metadata?.image),
-      services: [
-        {
-          name: 'web',
-          endpoint: `https://marketplace.olas.network/${network}/ai-agents/${serviceId}`,
-        },
-      ],
+      services,
       x402Support: false,
       active: true,
-      registrations: [],
+      registrations,
       supportedTrust: ['reputation'],
     };
 
