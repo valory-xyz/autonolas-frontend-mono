@@ -184,7 +184,7 @@ export default async function handler(
     if (serviceFromRegistry?.erc8004AgentId) {
       registrations.push({
         agentId: serviceFromRegistry.erc8004AgentId,
-        agentRegistry: `eip155:${chainId}:0x0`,
+        agentRegistry: `eip155:${chainId}:${IDENTITY_REGISTRY_UPGRADEABLE.addresses[chainId as keyof typeof IDENTITY_REGISTRY_UPGRADEABLE.addresses]}`,
       });
 
       const walletAddress = await getAgentWallet(
@@ -224,10 +224,7 @@ export default async function handler(
       supportedTrust: ['reputation'],
     };
 
-    res.setHeader(
-      'Cache-Control',
-      `public, s-maxage=${CACHE_DURATION.ONE_HOUR}, stale-while-revalidate=${CACHE_DURATION.ONE_HOUR}`,
-    );
+    res.setHeader('Cache-Control', `public, s-maxage=${CACHE_DURATION.FIVE_MINUTES}`);
 
     return res.status(200).json(response);
   } catch (error) {
