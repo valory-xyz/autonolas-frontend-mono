@@ -60,13 +60,13 @@ const Quickstart = () => (
                 {block}
               </CodeBlock>
             ))}
-            {item.moreText && <Paragraph>{item.moreText}</Paragraph>}
             {item.rpcs && (
               <>
                 <Paragraph>Then set the following environment variables:</Paragraph>
                 <CodeBlock canCopy>{item.rpcs}</CodeBlock>
               </>
             )}
+            {item.moreText && <Paragraph>{item.moreText}</Paragraph>}
           </div>
         </div>
       ))}
