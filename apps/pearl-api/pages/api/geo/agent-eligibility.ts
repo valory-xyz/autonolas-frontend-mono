@@ -56,7 +56,7 @@ const RESTRICTED_COUNTRIES_BY_AGENT: Record<AgentId, Set<string>> = {
     'MM', // Myanmar
     'NI', // Nicaragua
     'PL', // Poland
-    'RU', // Russia (includes Crimea, Donetsk, Luhansk)
+    'RU', // Russia
     'SD', // Sudan
     'SG', // Singapore
     'SO', // Somalia
