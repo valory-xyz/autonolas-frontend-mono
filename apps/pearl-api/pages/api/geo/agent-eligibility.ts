@@ -78,6 +78,7 @@ const AGENT_POLICIES: Record<AgentId, AgentPolicy> = {
     ]),
     restrictedRegions: new Set([
       'CA-ON', // Ontario
+      'MD-SN', // Transnistria (Stînga Nistrului)
       'UA-43', // Crimea
       'UA-14', // Donetsk
       'UA-09', // Luhansk
