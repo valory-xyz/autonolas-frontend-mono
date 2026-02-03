@@ -30,54 +30,58 @@ type EligibilityResponse = {
  * This list reflects the current compliance-approved geo restrictions for each agent.
  * Update only in accordance with the latest compliance policy and review process.
  */
-const RESTRICTED_COUNTRIES_BY_AGENT: Record<AgentId, Set<string>> = {
-  polymarket_trader: new Set([
-    'AF', // Afghanistan
-    'AU', // Australia
-    'BE', // Belgium
-    'BI', // Burundi
-    'BY', // Belarus
-    'CD', // Democratic Republic of Congo
-    'CF', // Central African Republic
-    'CU', // Cuba
-    'DE', // Germany
-    'ER', // Eritrea
-    'ET', // Ethiopia
-    'FR', // France
-    'GB', // United Kingdom
-    'GW', // Guinea-Bissau
-    'IR', // Iran
-    'IQ', // Iraq
-    'IT', // Italy
-    'KP', // North Korea
-    'LB', // Lebanon
-    'LY', // Libya
-    'ML', // Mali
-    'MM', // Myanmar
-    'NI', // Nicaragua
-    'PL', // Poland
-    'RU', // Russia
-    'SD', // Sudan
-    'SG', // Singapore
-    'SO', // Somalia
-    'SS', // South Sudan
-    'SY', // Syria
-    'TH', // Thailand
-    'TW', // Taiwan
-    'UM', // United States Minor Outlying Islands
-    'US', // United States
-    'VE', // Venezuela
-    'YE', // Yemen
-    'ZW', // Zimbabwe
-  ]),
+type AgentPolicy = {
+  restrictedCountries: Set<string>;
+  restrictedRegions: Set<string>;
 };
 
-const RESTRICTED_REGIONS_BY_AGENT: Record<AgentId, Set<string>> = {
-  polymarket_trader: new Set([
-    'CA-ON', // Ontario
-    'MD-SN', // Transnistria (Stînga Nistrului)
-  ]),
-};
+const AGENT_POLICIES: Record<AgentId, AgentPolicy> = {
+  polymarket_trader: {
+    restrictedCountries: new Set([
+      'AF', // Afghanistan
+      'AU', // Australia
+      'BE', // Belgium
+      'BI', // Burundi
+      'BY', // Belarus
+      'CD', // Democratic Republic of Congo
+      'CF', // Central African Republic
+      'CU', // Cuba
+      'DE', // Germany
+      'ER', // Eritrea
+      'ET', // Ethiopia
+      'FR', // France
+      'GB', // United Kingdom
+      'GW', // Guinea-Bissau
+      'IR', // Iran
+      'IQ', // Iraq
+      'IT', // Italy
+      'KP', // North Korea
+      'LB', // Lebanon
+      'LY', // Libya
+      'ML', // Mali
+      'MM', // Myanmar
+      'NI', // Nicaragua
+      'PL', // Poland
+      'RU', // Russia
+      'SD', // Sudan
+      'SG', // Singapore
+      'SO', // Somalia
+      'SS', // South Sudan
+      'SY', // Syria
+      'TH', // Thailand
+      'TW', // Taiwan
+      'UM', // United States Minor Outlying Islands
+      'US', // United States
+      'VE', // Venezuela
+      'YE', // Yemen
+      'ZW', // Zimbabwe
+    ]),
+    restrictedRegions: new Set([
+      'CA-ON', // Ontario
+      'MD-SN', // Transnistria (Stînga Nistrului)
+    ]),
+  },
+} as const;
 
 function getVercelCountry(req: NextApiRequest): string | undefined {
   const raw = req.headers['x-vercel-ip-country'];
@@ -86,6 +90,7 @@ function getVercelCountry(req: NextApiRequest): string | undefined {
   return value.toUpperCase();
 }
 
+const ISO_3166_REGION_PATTERN = /^[A-Z]{2}-[A-Z0-9]{1,3}$/;
 function getVercelCountryRegion(req: NextApiRequest, country?: string): string | undefined {
   const raw = req.headers['x-vercel-ip-country-region'];
   const value = Array.isArray(raw) ? raw[0] : raw;
@@ -93,9 +98,17 @@ function getVercelCountryRegion(req: NextApiRequest, country?: string): string |
 
   const normalized = value.toUpperCase();
 
-  if (normalized.includes('-')) return normalized;
+  if (normalized.includes('-')) {
+    if (!ISO_3166_REGION_PATTERN.test(normalized)) return undefined;
+    if (country && normalized.split('-')[0] !== country) return undefined;
+    return normalized;
+  }
+
   if (!country) return undefined;
-  return `${country}-${normalized}`;
+
+  const withCountry = `${country}-${normalized}`;
+  if (!ISO_3166_REGION_PATTERN.test(withCountry)) return undefined;
+  return withCountry;
 }
 
 /**
@@ -115,7 +128,7 @@ function parseAgentsQuery(req: NextApiRequest): string[] | null {
 }
 
 function isKnownAgentId(id: string): id is AgentId {
-  return id in RESTRICTED_COUNTRIES_BY_AGENT;
+  return id in AGENT_POLICIES;
 }
 
 export default function handler(
@@ -140,7 +153,7 @@ export default function handler(
   const requestedAgents = parseAgentsQuery(req);
   const agentIds = requestedAgents?.length
     ? requestedAgents
-    : (Object.keys(RESTRICTED_COUNTRIES_BY_AGENT) as AgentId[]);
+    : (Object.keys(AGENT_POLICIES) as AgentId[]);
 
   const eligibility: Record<string, AgentEligibility> = {};
 
@@ -161,9 +174,9 @@ export default function handler(
       continue;
     }
 
-    const restrictedSet = RESTRICTED_COUNTRIES_BY_AGENT[agentId];
+    const policy = AGENT_POLICIES[agentId];
 
-    if (restrictedSet.has(country)) {
+    if (policy.restrictedCountries.has(country)) {
       eligibility[agentId] = {
         status: 'restricted',
         reason_code: 'RESTRICTED_COUNTRY',
@@ -172,8 +185,7 @@ export default function handler(
     }
 
     if (region) {
-      const restrictedRegions = RESTRICTED_REGIONS_BY_AGENT[agentId];
-      if (restrictedRegions.has(region)) {
+      if (policy.restrictedRegions.has(region)) {
         eligibility[agentId] = {
           status: 'restricted',
           reason_code: 'RESTRICTED_REGION',
