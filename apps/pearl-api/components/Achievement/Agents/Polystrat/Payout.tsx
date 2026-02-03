@@ -206,7 +206,7 @@ type CTAButtonProps = {
 
 const CTAButton = ({ logoSrc }: CTAButtonProps) => (
   <div style={styles.ctaButton}>
-    <img src={logoSrc} style={styles.ctaLogo} />
+    <img src={logoSrc} alt="Polystrat logo" style={styles.ctaLogo} />
     <div style={styles.ctaText}>Get your own Polystrat</div>
     <SquareArrowUpRight style={{ width: '32px', height: '32px', color: '#FFFFFF' }} />
   </div>

@@ -14,5 +14,5 @@ export const AchievementUI = ({ params, logoSrc, data }: AchievementUIProps) => 
 
   if (agent === 'polystrat') return <Polystrat params={params} logoSrc={logoSrc} data={data} />;
 
-  return null;
+  return <div>Agent not yet supported.</div>;
 };

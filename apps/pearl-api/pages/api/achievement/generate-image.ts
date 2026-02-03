@@ -24,7 +24,7 @@ const isAllowedHost = (host: string): boolean => {
   if (process.env.VERCEL_ENV === 'production' && PRODUCTION_ALLOWED_HOSTS.includes(host))
     return true;
 
-  return PRODUCTION_ALLOWED_HOSTS.includes(host);
+  return false;
 };
 
 const getOrigin = (req: NextApiRequest): string => {
