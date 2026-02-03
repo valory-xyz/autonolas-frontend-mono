@@ -11,6 +11,10 @@ const CodeContainer = styled.div`
   width: fit-content;
   display: flex;
   margin-bottom: 12px;
+
+  code {
+    white-space: pre;
+  }
 `;
 
 type CodeBlockProps = {
@@ -27,6 +31,7 @@ export const CodeBlock = ({ canCopy = false, children }: CodeBlockProps) => {
             padding: '8px 8px 8px 16px',
             width: '100%',
             justifyContent: 'space-between',
+            alignItems: 'flex-start',
           }}
         >
           <code>{children}</code>
