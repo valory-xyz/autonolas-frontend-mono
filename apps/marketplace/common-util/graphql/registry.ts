@@ -5,14 +5,20 @@ const getService = gql`
   query Service($id: ID!) {
     service(id: $id) {
       id
-      erc8004AgentId
+      erc8004Agent {
+        id
+        agentWallet
+      }
     }
   }
 `;
 
 type ServiceFromRegistry = {
   id: string;
-  erc8004AgentId: string;
+  erc8004Agent: {
+    id: string;
+    agentWallet: string | null;
+  } | null;
 };
 
 type GetServiceFromRegistryParams = {

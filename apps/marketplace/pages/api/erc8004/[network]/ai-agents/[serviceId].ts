@@ -69,36 +69,6 @@ const getServiceFromRegistrySafe = async (chainId: number, serviceId: string) =>
   return null;
 };
 
-const getAgentWallet = async (
-  chainId: number,
-  agentId: string | undefined,
-  rpcUrl: string,
-): Promise<string | undefined> => {
-  if (!agentId) return;
-
-  const identityRegistryAddress =
-    IDENTITY_REGISTRY_UPGRADEABLE.addresses[
-      chainId as keyof typeof IDENTITY_REGISTRY_UPGRADEABLE.addresses
-    ];
-
-  if (!identityRegistryAddress) return;
-
-  try {
-    const provider = new ethers.JsonRpcProvider(rpcUrl);
-    const identityRegistryContract = new ethers.Contract(
-      identityRegistryAddress,
-      IDENTITY_REGISTRY_UPGRADEABLE.abi,
-      provider,
-    );
-
-    const agentWallet = await identityRegistryContract.getAgentWallet(agentId);
-    return agentWallet;
-  } catch (error) {
-    console.error(`Error fetching agent wallet for agent ${agentId} on chain ${chainId}:`, error);
-    return;
-  }
-};
-
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<Erc8004Response | { error: string }>,
@@ -183,9 +153,9 @@ export default async function handler(
 
     const registrations: Erc8004Response['registrations'] = [];
 
-    if (serviceFromRegistry?.erc8004AgentId) {
+    if (serviceFromRegistry?.erc8004Agent?.id) {
       registrations.push({
-        agentId: serviceFromRegistry.erc8004AgentId,
+        agentId: serviceFromRegistry.erc8004Agent.id,
         agentRegistry: `eip155:${chainId}:${IDENTITY_REGISTRY_UPGRADEABLE.addresses[chainId as keyof typeof IDENTITY_REGISTRY_UPGRADEABLE.addresses]}`,
       });
     }
@@ -197,9 +167,9 @@ export default async function handler(
       },
     ];
 
-    const agentWallet = await getAgentWallet(chainId, serviceFromRegistry?.erc8004AgentId, rpcUrl);
+    const agentWallet = serviceFromRegistry?.erc8004Agent?.agentWallet;
 
-    if (agentWallet && agentWallet !== zeroAddress) {
+    if (!!agentWallet && agentWallet !== zeroAddress) {
       services.push({
         name: 'agentWallet',
         endpoint: `eip155:${chainId}:${agentWallet}`,
