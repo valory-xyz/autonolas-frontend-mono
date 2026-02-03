@@ -1,5 +1,6 @@
 import { Divider, Flex, Typography } from 'antd';
 import { COLOR } from 'libs/ui-theme/src';
+import { STACK_URL } from 'libs/util-constants/src';
 import styled from 'styled-components';
 
 const { Paragraph, Title, Text } = Typography;
@@ -170,7 +171,7 @@ const FAQs = () => (
       </Text>
       <br />
       No, that&apos;s entirely optional. You can build your agent with any framework of your choice
-      and then wrap it using the <a href="https://docs.olas.network/olas-sdk/">Olas SDK</a>.
+      and then wrap it using the <a href={`${STACK_URL}/olas-sdk`}>Olas SDK</a>.
     </Paragraph>
     <Paragraph>
       <Text strong>Can I build multi-agent services?</Text>
