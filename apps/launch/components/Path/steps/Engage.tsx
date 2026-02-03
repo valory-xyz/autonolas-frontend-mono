@@ -23,13 +23,13 @@ const developData = {
       .
     </>,
     <>
-      Develop it yourself by attending the academy -{' '}
+      Develop it yourself by checking out the{' '}
       <a
         href="https://www.youtube.com/playlist?list=PLXztsZv11CTfXiQK9OJhMwBkfgf4ETZkl"
         target="_blank"
         rel="noopener noreferrer"
       >
-        sign up {UNICODE_SYMBOLS.EXTERNAL_LINK}
+        dev academy videos {UNICODE_SYMBOLS.EXTERNAL_LINK}
       </a>
       .
     </>,
