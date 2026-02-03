@@ -4,3 +4,6 @@ declare module '*.svg' {
   export const ReactComponent: any;
   export default content;
 }
+
+declare module 'ipfs-http-client';
+declare module 'multiformats/bases/base32';

@@ -19,10 +19,15 @@
     ],
     "types": ["jest", "node", "react", "react-dom"],
     "paths": {
-      "util/*": ["apps/pearl-api/util/*"],
+      "components/*": ["apps/pearl-api/components/*"],
+      "constants/*": ["apps/pearl-api/constants/*"],
       "context/*": ["apps/pearl-api/context/*"],
       "hooks/*": ["apps/pearl-api/hooks/*"],
-      "types": ["apps/pearl-api/types"]
+      "types": ["apps/pearl-api/types"],
+      "types/*": ["apps/pearl-api/types/*"],
+      "util/*": ["apps/pearl-api/util/*"],
+      "utils": ["apps/pearl-api/utils"],
+      "utils/*": ["apps/pearl-api/utils/*"]
     }
   },
   "include": [
