@@ -46,11 +46,7 @@ export const Copy = ({ text }: { text: string }) => {
 
   return (
     <CopyButton onClick={handleClick}>
-      {copied ? (
-        <CopiedText>Copied</CopiedText>
-      ) : (
-        <CopyIcon />
-      )}
+      {copied ? <CopiedText>Copied</CopiedText> : <CopyIcon />)}
     </CopyButton>
   );
 };
