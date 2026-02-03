@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import styled from 'styled-components';
 
 const CopyButton = styled.button`
@@ -6,6 +7,17 @@ const CopyButton = styled.button`
   padding: 2px;
   display: flex;
   margin-top: auto;
+  cursor: pointer;
+  align-items: center;
+  gap: 4px;
+
+  svg path {
+    transition: fill 0.15s ease;
+  }
+
+  &:hover svg path {
+    fill: #3d4d5f;
+  }
 `;
 
 const CopyIcon = () => (
@@ -17,15 +29,24 @@ const CopyIcon = () => (
   </svg>
 );
 
+const CopiedText = styled.span`
+  font-size: 12px;
+  color: #3d4d5f;
+`;
+
 export const Copy = ({ text }: { text: string }) => {
+  const [copied, setCopied] = useState(false);
+
+  const handleClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    navigator.clipboard.writeText(text);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
   return (
-    <CopyButton
-      onClick={(e) => {
-        e.stopPropagation();
-        navigator.clipboard.writeText(text);
-      }}
-    >
-      <CopyIcon />
+    <CopyButton onClick={handleClick}>
+      {copied ? <CopiedText>Copied</CopiedText> : <CopyIcon />}
     </CopyButton>
   );
 };
