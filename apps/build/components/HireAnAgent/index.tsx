@@ -37,7 +37,7 @@ const quickstartItems = [
   {
     title: '3. Hire On-chain Agent',
     codeBlocks: [
-      'mechx interact --prompts "Estimate the chance that Ethereum volatility exceeds 50,000 by the end of 2030" --priority-mech 0xb3c6319962484602b00d5587e965946890b82101 --tools superforcaster --chain-config gnosis',
+      'poetry run mechx interact --prompts "Estimate the chance that Ethereum volatility exceeds 50,000 by the end of 2030" --priority-mech 0xb3c6319962484602b00d5587e965946890b82101 --tools superforcaster --chain-config gnosis',
     ],
   },
 ];
