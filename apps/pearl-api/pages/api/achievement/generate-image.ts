@@ -16,7 +16,7 @@ type ErrorResponse = {
   message?: string;
 };
 
-const PRODUCTION_ALLOWED_HOSTS = ['pearl-api.vercel.app'];
+const PRODUCTION_ALLOWED_HOSTS = ['pearl-api.olas.network'];
 
 const isAllowedHost = (host: string): boolean => {
   if (process.env.NODE_ENV === 'development' && host.startsWith('localhost')) return true;
