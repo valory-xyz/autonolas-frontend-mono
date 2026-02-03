@@ -10,7 +10,7 @@ type AgentId = 'polymarket_trader';
 
 type EligibilityStatus = 'allowed' | 'restricted' | 'unknown';
 
-type ReasonCode = 'RESTRICTED_COUNTRY' | 'GEO_UNAVAILABLE' | 'AGENT_UNKNOWN';
+type ReasonCode = 'RESTRICTED_COUNTRY' | 'RESTRICTED_REGION' | 'GEO_UNAVAILABLE' | 'AGENT_UNKNOWN';
 
 type AgentEligibility = {
   status: EligibilityStatus;
@@ -25,6 +25,7 @@ type EligibilityResponse = {
 /**
  * Policy config
  * ISO-3166-1 alpha-2 country codes. UK is "GB".
+ * ISO-3166-2 region codes are formatted as COUNTRY-SUBDIVISION (e.g., CA-ON).
  *
  * This list reflects the current compliance-approved geo restrictions for each agent.
  * Update only in accordance with the latest compliance policy and review process.
@@ -36,7 +37,6 @@ const RESTRICTED_COUNTRIES_BY_AGENT: Record<AgentId, Set<string>> = {
     'BE', // Belgium
     'BI', // Burundi
     'BY', // Belarus
-    'CA', // Canada (Ontario)
     'CD', // Democratic Republic of Congo
     'CF', // Central African Republic
     'CU', // Cuba
@@ -52,7 +52,6 @@ const RESTRICTED_COUNTRIES_BY_AGENT: Record<AgentId, Set<string>> = {
     'KP', // North Korea
     'LB', // Lebanon
     'LY', // Libya
-    'MD', // Transnistria (disputed)
     'ML', // Mali
     'MM', // Myanmar
     'NI', // Nicaragua
@@ -73,11 +72,30 @@ const RESTRICTED_COUNTRIES_BY_AGENT: Record<AgentId, Set<string>> = {
   ]),
 };
 
+const RESTRICTED_REGIONS_BY_AGENT: Record<AgentId, Set<string>> = {
+  polymarket_trader: new Set([
+    'CA-ON', // Ontario
+    'MD-SN', // Transnistria (Stînga Nistrului)
+  ]),
+};
+
 function getVercelCountry(req: NextApiRequest): string | undefined {
   const raw = req.headers['x-vercel-ip-country'];
   const value = Array.isArray(raw) ? raw[0] : raw;
   if (!value) return undefined;
   return value.toUpperCase();
+}
+
+function getVercelCountryRegion(req: NextApiRequest, country?: string): string | undefined {
+  const raw = req.headers['x-vercel-ip-country-region'];
+  const value = Array.isArray(raw) ? raw[0] : raw;
+  if (!value) return undefined;
+
+  const normalized = value.toUpperCase();
+
+  if (normalized.includes('-')) return normalized;
+  if (!country) return undefined;
+  return `${country}-${normalized}`;
 }
 
 /**
@@ -117,6 +135,7 @@ export default function handler(
 
   const checkedAt = Date.now();
   const country = getVercelCountry(req);
+  const region = getVercelCountryRegion(req, country);
 
   const requestedAgents = parseAgentsQuery(req);
   const agentIds = requestedAgents?.length
@@ -143,11 +162,27 @@ export default function handler(
     }
 
     const restrictedSet = RESTRICTED_COUNTRIES_BY_AGENT[agentId];
-    const isRestricted = restrictedSet.has(country);
 
-    eligibility[agentId] = isRestricted
-      ? { status: 'restricted', reason_code: 'RESTRICTED_COUNTRY' }
-      : { status: 'allowed' };
+    if (restrictedSet.has(country)) {
+      eligibility[agentId] = {
+        status: 'restricted',
+        reason_code: 'RESTRICTED_COUNTRY',
+      };
+      continue;
+    }
+
+    if (region) {
+      const restrictedRegions = RESTRICTED_REGIONS_BY_AGENT[agentId];
+      if (restrictedRegions.has(region)) {
+        eligibility[agentId] = {
+          status: 'restricted',
+          reason_code: 'RESTRICTED_REGION',
+        };
+        continue;
+      }
+    }
+
+    eligibility[agentId] = { status: 'allowed' };
   }
 
   // Do not cache geo-based eligibility responses to avoid stale geo-location data
