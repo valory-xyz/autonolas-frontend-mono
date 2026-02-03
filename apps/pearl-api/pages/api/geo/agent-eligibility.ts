@@ -10,7 +10,7 @@ type AgentId = 'polymarket_trader';
 
 type EligibilityStatus = 'allowed' | 'restricted' | 'unknown';
 
-type ReasonCode = 'RESTRICTED_COUNTRY' | 'GEO_UNAVAILABLE' | 'AGENT_UNKNOWN';
+type ReasonCode = 'RESTRICTED_COUNTRY' | 'RESTRICTED_REGION' | 'GEO_UNAVAILABLE' | 'AGENT_UNKNOWN';
 
 type AgentEligibility = {
   status: EligibilityStatus;
@@ -22,23 +22,96 @@ type EligibilityResponse = {
   eligibility: Record<AgentId, AgentEligibility>;
 };
 
-// TODO: to be confirmed from compliance team!
 /**
  * Policy config
  * ISO-3166-1 alpha-2 country codes. UK is "GB".
+ * ISO-3166-2 region codes are formatted as COUNTRY-SUBDIVISION (e.g., CA-ON).
  *
  * This list reflects the current compliance-approved geo restrictions for each agent.
  * Update only in accordance with the latest compliance policy and review process.
  */
-const RESTRICTED_COUNTRIES_BY_AGENT: Record<AgentId, Set<string>> = {
-  polymarket_trader: new Set(['KP']),
+type AgentPolicy = {
+  restrictedCountries: Set<string>;
+  restrictedRegions: Set<string>;
 };
+
+const AGENT_POLICIES: Record<AgentId, AgentPolicy> = {
+  polymarket_trader: {
+    restrictedCountries: new Set([
+      'AF', // Afghanistan
+      'AU', // Australia
+      'BE', // Belgium
+      'BI', // Burundi
+      'BY', // Belarus
+      'CD', // Democratic Republic of Congo
+      'CF', // Central African Republic
+      'CU', // Cuba
+      'DE', // Germany
+      'ER', // Eritrea
+      'ET', // Ethiopia
+      'FR', // France
+      'GB', // United Kingdom
+      'GW', // Guinea-Bissau
+      'IR', // Iran
+      'IQ', // Iraq
+      'IT', // Italy
+      'KP', // North Korea
+      'LB', // Lebanon
+      'LY', // Libya
+      'ML', // Mali
+      'MM', // Myanmar
+      'NI', // Nicaragua
+      'PL', // Poland
+      'RU', // Russia
+      'SD', // Sudan
+      'SG', // Singapore
+      'SO', // Somalia
+      'SS', // South Sudan
+      'SY', // Syria
+      'TH', // Thailand
+      'TW', // Taiwan
+      'UM', // United States Minor Outlying Islands
+      'US', // United States
+      'VE', // Venezuela
+      'YE', // Yemen
+      'ZW', // Zimbabwe
+    ]),
+    restrictedRegions: new Set([
+      'CA-ON', // Ontario
+      'MD-SN', // Transnistria (Stînga Nistrului)
+      'UA-43', // Crimea
+      'UA-14', // Donetsk
+      'UA-09', // Luhansk
+    ]),
+  },
+} as const;
 
 function getVercelCountry(req: NextApiRequest): string | undefined {
   const raw = req.headers['x-vercel-ip-country'];
   const value = Array.isArray(raw) ? raw[0] : raw;
   if (!value) return undefined;
   return value.toUpperCase();
+}
+
+const ISO_3166_REGION_PATTERN = /^[A-Z]{2}-[A-Z0-9]{1,3}$/;
+function getVercelCountryRegion(req: NextApiRequest, country?: string): string | undefined {
+  const raw = req.headers['x-vercel-ip-country-region'];
+  const value = Array.isArray(raw) ? raw[0] : raw;
+  if (!value) return undefined;
+
+  const normalized = value.toUpperCase();
+
+  if (normalized.includes('-')) {
+    if (!ISO_3166_REGION_PATTERN.test(normalized)) return undefined;
+    if (country && normalized.split('-')[0] !== country) return undefined;
+    return normalized;
+  }
+
+  if (!country) return undefined;
+
+  const withCountry = `${country}-${normalized}`;
+  if (!ISO_3166_REGION_PATTERN.test(withCountry)) return undefined;
+  return withCountry;
 }
 
 /**
@@ -58,7 +131,7 @@ function parseAgentsQuery(req: NextApiRequest): string[] | null {
 }
 
 function isKnownAgentId(id: string): id is AgentId {
-  return id in RESTRICTED_COUNTRIES_BY_AGENT;
+  return id in AGENT_POLICIES;
 }
 
 export default function handler(
@@ -78,11 +151,12 @@ export default function handler(
 
   const checkedAt = Date.now();
   const country = getVercelCountry(req);
+  const region = getVercelCountryRegion(req, country);
 
   const requestedAgents = parseAgentsQuery(req);
   const agentIds = requestedAgents?.length
     ? requestedAgents
-    : (Object.keys(RESTRICTED_COUNTRIES_BY_AGENT) as AgentId[]);
+    : (Object.keys(AGENT_POLICIES) as AgentId[]);
 
   const eligibility: Record<string, AgentEligibility> = {};
 
@@ -103,12 +177,27 @@ export default function handler(
       continue;
     }
 
-    const restrictedSet = RESTRICTED_COUNTRIES_BY_AGENT[agentId];
-    const isRestricted = restrictedSet.has(country);
+    const policy = AGENT_POLICIES[agentId];
 
-    eligibility[agentId] = isRestricted
-      ? { status: 'restricted', reason_code: 'RESTRICTED_COUNTRY' }
-      : { status: 'allowed' };
+    if (policy.restrictedCountries.has(country)) {
+      eligibility[agentId] = {
+        status: 'restricted',
+        reason_code: 'RESTRICTED_COUNTRY',
+      };
+      continue;
+    }
+
+    if (region) {
+      if (policy.restrictedRegions.has(region)) {
+        eligibility[agentId] = {
+          status: 'restricted',
+          reason_code: 'RESTRICTED_REGION',
+        };
+        continue;
+      }
+    }
+
+    eligibility[agentId] = { status: 'allowed' };
   }
 
   // Do not cache geo-based eligibility responses to avoid stale geo-location data
