@@ -88,6 +88,7 @@ export const HASH_DETAILS_STATE = {
 export const CACHE_DURATION = {
   TWELVE_HOURS: 43200,
   ONE_HOUR: 3600,
+  FIVE_MINUTES: 300,
 } as const;
 
 export const MARKETPLACE_SUPPORTED_CHAIN_IDS = [10, 100, 137, 8453];
