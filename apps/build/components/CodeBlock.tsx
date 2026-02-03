@@ -13,7 +13,8 @@ const CodeContainer = styled.div`
   margin-bottom: 12px;
 
   code {
-    white-space: pre;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
   }
 `;
 
