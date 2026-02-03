@@ -31,8 +31,8 @@ const quickstartItems = [
   {
     title: '2. Configure Your Client',
     codeBlocks: ['echo -n YOUR_PRIVATE_KEY > ethereum_private_key.txt', 'touch .env'],
-    moreText: 'Optional: For improved reliability, update .env with your custom RPC endpoints.',
     rpcs: "export MECHX_RPC_URL='https://rpc.eu-central-2.gateway.fm/v4/gnosis/non-archival/mainnet' \nexport MECHX_LEDGER_ADDRESS='https://rpc.eu-central-2.gateway.fm/v4/gnosis/non-archival/mainnet' \nexport MECHX_MECH_OFFCHAIN_URL='http://localhost:8000/'",
+    moreText: 'Optional: For improved reliability, update .env with your custom RPC endpoints.',
   },
   {
     title: '3. Hire On-chain Agent',
