@@ -31,12 +31,24 @@ const quickstartItems = [
   {
     title: '2. Configure Your Client',
     codeBlocks: ['echo -n YOUR_PRIVATE_KEY > ethereum_private_key.txt', 'touch .env'],
-    rpcs: "export MECHX_RPC_URL='https://rpc.eu-central-2.gateway.fm/v4/gnosis/non-archival/mainnet' \nexport MECHX_LEDGER_ADDRESS='https://rpc.eu-central-2.gateway.fm/v4/gnosis/non-archival/mainnet' \nexport MECHX_MECH_OFFCHAIN_URL='http://localhost:8000/'",
-    moreText: 'Optional: For improved reliability, update .env with your custom RPC endpoints.',
+    moreItems: (
+      <>
+        <Paragraph>Then set the following environment variables:</Paragraph>
+        <CodeBlock canCopy>
+          export
+          MECHX_CHAIN_RPC=&apos;https://rpc.eu-central-2.gateway.fm/v4/gnosis/non-archival/mainnet&apos;
+        </CodeBlock>
+        <Paragraph>
+          Optional: For improved reliability, update .env with your custom RPC endpoint.
+        </Paragraph>
+        <CodeBlock canCopy>source .env</CodeBlock>
+      </>
+    ),
   },
   {
     title: '3. Hire On-chain Agent',
     codeBlocks: [
+      'poetry run mechx setup-agent-mode --chain-config gnosis',
       'poetry run mechx interact --prompts "Estimate the chance that Ethereum volatility exceeds 50,000 by the end of 2030" --priority-mech 0xb3c6319962484602b00d5587e965946890b82101 --tools superforcaster --chain-config gnosis',
     ],
   },
@@ -60,13 +72,7 @@ const Quickstart = () => (
                 {block}
               </CodeBlock>
             ))}
-            {item.rpcs && (
-              <>
-                <Paragraph>Then set the following environment variables:</Paragraph>
-                <CodeBlock canCopy>{item.rpcs}</CodeBlock>
-              </>
-            )}
-            {item.moreText && <Paragraph>{item.moreText}</Paragraph>}
+            {item.moreItems}
           </div>
         </div>
       ))}
