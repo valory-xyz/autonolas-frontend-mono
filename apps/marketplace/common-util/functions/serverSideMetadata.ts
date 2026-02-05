@@ -140,20 +140,6 @@ const fetchMetadataFromUrl = async (
 };
 
 /**
- * Fetch metadata from IPFS hash (used by service registry flow)
- */
-const fetchIpfsMetadata = async (
-  hash: string,
-): Promise<{
-  name?: string;
-  description?: string;
-  image?: string;
-} | null> => {
-  if (!hash) return null;
-  return fetchMetadataFromUrl(getIpfsUrl(hash));
-};
-
-/**
  * Fetch service token URI from contract
  */
 const getServiceTokenUri = async (chainId: number, serviceId: string): Promise<string | null> => {
@@ -217,7 +203,7 @@ export const getServiceMetadataServerSide = async (
     }
 
     // Fetch metadata from IPFS
-    const metadata = await fetchIpfsMetadata(tokenUri);
+    const metadata = await fetchMetadataFromUrl(normalizeMetadataUrl(tokenUri));
     if (!metadata) {
       return defaultMetadata;
     }
