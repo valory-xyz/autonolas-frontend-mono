@@ -18,5 +18,7 @@ export const MARKETPLACE_SUBGRAPH_CLIENTS = {
 
 export const REGISTRY_SUBGRAPH_CLIENTS = {
   1: new GraphQLClient(process.env.NEXT_PUBLIC_ETHEREUM_REGISTRY_SUBGRAPH!, requestConfig),
+  100: new GraphQLClient(process.env.NEXT_PUBLIC_GNOSIS_REGISTRY_SUBGRAPH!, requestConfig),
   137: new GraphQLClient(process.env.NEXT_PUBLIC_POLYGON_REGISTRY_SUBGRAPH!, requestConfig),
+  8453: new GraphQLClient(process.env.NEXT_PUBLIC_BASE_REGISTRY_SUBGRAPH!, requestConfig),
 } as const;
