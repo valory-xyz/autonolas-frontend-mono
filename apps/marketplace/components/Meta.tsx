@@ -10,11 +10,13 @@ type MetaProps = {
   pageTitle?: string | null;
   description?: string;
   pageUrl?: string;
+  imageUrl?: string | null;
 };
 
-export const Meta = ({ pageTitle, description, pageUrl }: MetaProps) => {
+export const Meta = ({ pageTitle, description, pageUrl, imageUrl }: MetaProps) => {
   const title = pageTitle ? `${pageTitle} | ${SITE_TITLE}` : SITE_TITLE;
   const url = `${SITE_URL}/${pageUrl || ''}`;
+  const image = imageUrl || SITE_IMAGE_URL;
 
   return (
     <Head>
@@ -32,7 +34,7 @@ export const Meta = ({ pageTitle, description, pageUrl }: MetaProps) => {
         content={description || SITE_DESCRIPTION}
         key="og:description"
       />
-      <meta property="og:image" content={SITE_IMAGE_URL} key="og:image" />
+      <meta property="og:image" content={image} key="og:image" />
 
       {/* <!-- Twitter --> */}
       <meta property="twitter:card" content="summary_large_image" key="twitter:card" />
@@ -43,7 +45,7 @@ export const Meta = ({ pageTitle, description, pageUrl }: MetaProps) => {
         content={description || SITE_DESCRIPTION}
         key="twitter:description"
       />
-      <meta property="twitter:image" content={SITE_IMAGE_URL} key="twitter:image" />
+      <meta property="twitter:image" content={image} key="twitter:image" />
     </Head>
   );
 };
