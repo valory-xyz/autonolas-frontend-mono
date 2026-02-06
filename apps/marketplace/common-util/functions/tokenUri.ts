@@ -2,7 +2,7 @@ import { GATEWAY_URL } from 'libs/util-constants/src';
 
 import { getIpfsUrl } from 'common-util/functions/ipfs';
 
-export const LOCALHOST_URI_PATTERN = /https:\/\/localhost\/(agent|component|service)\/+/g;
+export const LOCALHOST_URI_PATTERN = /https:\/\/localhost\/(agent|component|service)\/+/;
 
 /**
  * Normalize Autonolas token URI by replacing localhost placeholder with IPFS gateway URL.
