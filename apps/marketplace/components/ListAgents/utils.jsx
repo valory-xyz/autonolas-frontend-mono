@@ -3,8 +3,8 @@ import { TOKENOMICS_UNIT_TYPES } from 'libs/util-constants/src';
 import { getListByAccount } from '../../common-util/ContractUtils/myList';
 import { getAgentContract, getMechMinterContract } from '../../common-util/Contracts';
 import { getFirstAndLastIndex } from '../../common-util/List/functions';
+import { resolveUnitMetadataUrl } from '../../common-util/functions/tokenUri';
 import { sendTransaction } from '../../common-util/functions';
-import { GATEWAY_URL, HASH_PREFIX } from 'util/constants';
 
 // --------- HELPER METHODS ---------
 export const getAgentOwner = async (agentId) => {
@@ -83,15 +83,8 @@ export const updateAgentHashes = async (account, id, newHash) => {
 
 export const getTokenUri = async (id) => {
   const contract = getAgentContract();
-
   const updatedHashes = await contract.methods.getUpdatedHashes(id).call();
   const unitHashes = updatedHashes.unitHashes;
-
-  if (unitHashes.length > 0) {
-    // return the last updated hash if there are `updatedHashes`
-    return `${GATEWAY_URL}${unitHashes[unitHashes.length - 1].replace('0x', HASH_PREFIX)}`;
-  } else {
-    // return initial hash if there are no updatedHashes
-    return await contract.methods.tokenURI(id).call();
-  }
+  const tokenUri = unitHashes?.length ? undefined : await contract.methods.tokenURI(id).call();
+  return resolveUnitMetadataUrl(unitHashes, tokenUri);
 };

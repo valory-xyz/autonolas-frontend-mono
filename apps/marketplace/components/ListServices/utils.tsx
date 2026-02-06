@@ -9,6 +9,7 @@ import { convertStringToArray } from 'common-util/List/ListCommon';
 import { filterByOwner } from 'common-util/ContractUtils/myList';
 import { getTokenDetailsRequest } from 'common-util/Details/utils';
 import { getIpfsResponse } from 'common-util/functions/ipfs';
+import { normalizeMetadataUrl } from 'common-util/functions/tokenUri';
 import { getServicesFromSubgraph } from 'common-util/subgraphs';
 import { isMarketplaceSupportedNetwork } from 'common-util/functions';
 
@@ -191,7 +192,7 @@ export const getServiceHashes = async (id: string) => {
 export const getTokenUri = async (id: string) => {
   const contract = getServiceContract();
   const response = await contract.methods.tokenURI(id).call();
-  return response;
+  return normalizeMetadataUrl(response);
 };
 
 export const getTokenAddressRequest = async (id: string) => {

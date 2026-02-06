@@ -10,6 +10,92 @@ export const getIpfsUrl = (hash: string) => {
   return hasHashPrefix ? `${GATEWAY_URL}${cleanHash}` : `${GATEWAY_URL}${HASH_PREFIX}${cleanHash}`;
 };
 
+/**
+ * Transform IPFS image URL to gateway URL.
+ * Handles:
+ * - ipfs:// protocol URLs (ipfs://Qm... -> GATEWAY_URL/Qm...)
+ * - Raw IPFS hashes (Qm... or bafy... -> GATEWAY_URL/ipfs/Qm...)
+ * - Already-resolved gateway URLs (passed through unchanged)
+ * Shared by server-side metadata and useMetadata hook.
+ */
+export const transformImageUrl = (imageUrl: string | undefined): string | null => {
+  if (!imageUrl) return null;
+
+  // Handle ipfs:// protocol
+  if (imageUrl.startsWith('ipfs://')) {
+    return imageUrl.replace('ipfs://', GATEWAY_URL);
+  }
+
+  // Handle raw IPFS hashes (Qm... or bafy...)
+  const isRawHash = /^(Qm|bafy)[A-Za-z0-9]{40,}$/.test(imageUrl);
+  if (isRawHash) {
+    return getIpfsUrl(imageUrl);
+  }
+
+  return imageUrl;
+};
+
+/**
+ * Sanitize text for use in meta tags by:
+ * - Removing HTML tags
+ * - Escaping special characters
+ * - Limiting length to prevent abuse
+ * NOTE: React automatically escapes HTML in meta tags.
+ */
+export const sanitizeMetaText = (text: string | null | undefined, maxLength = 300): string => {
+  if (!text) return '';
+
+  let sanitized = text.replace(/<[^>]*>/g, '');
+
+  if (sanitized.length > maxLength) {
+    sanitized = sanitized.substring(0, maxLength).trim() + '...';
+  }
+
+  return sanitized;
+};
+
+/**
+ * Validate and sanitize image URL for use in meta tags.
+ * Only allows URLs from trusted sources (GATEWAY_URL or relative paths).
+ */
+export const validateMetaImageUrl = (imageUrl: string | null | undefined): string | null => {
+  if (!imageUrl) return null;
+
+  if (imageUrl.startsWith('/')) {
+    return imageUrl;
+  }
+
+  if (imageUrl.startsWith(GATEWAY_URL)) {
+    return imageUrl;
+  }
+
+  if (imageUrl.startsWith('ipfs://') || /^(Qm|bafy)[A-Za-z0-9]{40,}$/.test(imageUrl)) {
+    return transformImageUrl(imageUrl);
+  }
+
+  console.warn('Rejected untrusted image URL for meta tags:', imageUrl);
+  return null;
+};
+
+/** Display shape for service/agent/component metadata (name, description, imageUrl) */
+export type ServiceMetadataDisplay = {
+  name: string | null;
+  description: string | null;
+  imageUrl: string | null;
+};
+
+/**
+ * Map raw metadata JSON to display shape (name, description, imageUrl).
+ * Reused by serverSideMetadata and consistent with List* utils usage.
+ */
+export const metadataToServiceMetadataDisplay = (
+  metadata: { name?: string; description?: string; image?: string } | null | undefined,
+): ServiceMetadataDisplay => ({
+  name: metadata?.name ?? null,
+  description: metadata?.description ?? null,
+  imageUrl: transformImageUrl(metadata?.image) ?? null,
+});
+
 export type IpfsMetadata = {
   name?: string;
   description?: string;
