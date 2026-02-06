@@ -34,7 +34,7 @@ export const resolveUnitMetadataUrl = (
 ): string => {
   const length = unitHashes?.length ?? 0;
   if (length > 0) {
-    const last = unitHashes![length - 1];
+    const last = unitHashes?.[length - 1];
     const hashStr =
       typeof last === 'string'
         ? last
