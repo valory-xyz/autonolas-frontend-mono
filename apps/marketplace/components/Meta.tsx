@@ -1,5 +1,7 @@
 import Head from 'next/head';
 
+import { sanitizeMetaText, validateMetaImageUrl } from '../common-util/functions/ipfs';
+
 const SITE_URL = 'https://marketplace.olas.network';
 const SITE_TITLE = 'Mech Marketplace | Olas';
 const SITE_DESCRIPTION =
@@ -14,16 +16,22 @@ type MetaProps = {
 };
 
 export const Meta = ({ pageTitle, description, pageUrl, imageUrl }: MetaProps) => {
-  const title = pageTitle ? `${pageTitle} | ${SITE_TITLE}` : SITE_TITLE;
+  const sanitizedTitle = sanitizeMetaText(pageTitle);
+  const sanitizedDescription = sanitizeMetaText(description);
+  const title = sanitizedTitle ? `${sanitizedTitle} | ${SITE_TITLE}` : SITE_TITLE;
   const url = `${SITE_URL}/${pageUrl || ''}`;
-  const image = imageUrl || SITE_IMAGE_URL;
+  const image = validateMetaImageUrl(imageUrl) || SITE_IMAGE_URL;
 
   return (
     <Head>
       {/* <!-- Primary Meta Tags --> */}
       <title>{title}</title>
       <meta name="title" content={title} key="title" />
-      <meta name="description" content={description || SITE_DESCRIPTION} key="description" />
+      <meta
+        name="description"
+        content={sanitizedDescription || SITE_DESCRIPTION}
+        key="description"
+      />
 
       {/* <!-- Open Graph / Facebook --> */}
       <meta property="og:type" content="website" key="og:type" />
@@ -31,7 +39,7 @@ export const Meta = ({ pageTitle, description, pageUrl, imageUrl }: MetaProps) =
       <meta property="og:title" content={title} key="og:title" />
       <meta
         property="og:description"
-        content={description || SITE_DESCRIPTION}
+        content={sanitizedDescription || SITE_DESCRIPTION}
         key="og:description"
       />
       <meta property="og:image" content={image} key="og:image" />
@@ -42,7 +50,7 @@ export const Meta = ({ pageTitle, description, pageUrl, imageUrl }: MetaProps) =
       <meta property="twitter:title" content={title} key="twitter:title" />
       <meta
         property="twitter:description"
-        content={description || SITE_DESCRIPTION}
+        content={sanitizedDescription || SITE_DESCRIPTION}
         key="twitter:description"
       />
       <meta property="twitter:image" content={image} key="twitter:image" />

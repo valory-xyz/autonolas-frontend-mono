@@ -11,12 +11,70 @@ export const getIpfsUrl = (hash: string) => {
 };
 
 /**
- * Transform IPFS image URL to gateway URL (ipfs:// -> GATEWAY_URL).
+ * Transform IPFS image URL to gateway URL.
+ * Handles:
+ * - ipfs:// protocol URLs (ipfs://Qm... -> GATEWAY_URL/Qm...)
+ * - Raw IPFS hashes (Qm... or bafy... -> GATEWAY_URL/ipfs/Qm...)
+ * - Already-resolved gateway URLs (passed through unchanged)
  * Shared by server-side metadata and useMetadata hook.
  */
 export const transformImageUrl = (imageUrl: string | undefined): string | null => {
   if (!imageUrl) return null;
-  return imageUrl.replace('ipfs://', GATEWAY_URL);
+
+  // Handle ipfs:// protocol
+  if (imageUrl.startsWith('ipfs://')) {
+    return imageUrl.replace('ipfs://', GATEWAY_URL);
+  }
+
+  // Handle raw IPFS hashes (Qm... or bafy...)
+  const isRawHash = /^(Qm|bafy)[A-Za-z0-9]{40,}$/.test(imageUrl);
+  if (isRawHash) {
+    return getIpfsUrl(imageUrl);
+  }
+
+  return imageUrl;
+};
+
+/**
+ * Sanitize text for use in meta tags by:
+ * - Removing HTML tags
+ * - Escaping special characters
+ * - Limiting length to prevent abuse
+ * NOTE: React automatically escapes HTML in meta tags.
+ */
+export const sanitizeMetaText = (text: string | null | undefined, maxLength = 300): string => {
+  if (!text) return '';
+
+  let sanitized = text.replace(/<[^>]*>/g, '');
+
+  if (sanitized.length > maxLength) {
+    sanitized = sanitized.substring(0, maxLength).trim() + '...';
+  }
+
+  return sanitized;
+};
+
+/**
+ * Validate and sanitize image URL for use in meta tags.
+ * Only allows URLs from trusted sources (GATEWAY_URL or relative paths).
+ */
+export const validateMetaImageUrl = (imageUrl: string | null | undefined): string | null => {
+  if (!imageUrl) return null;
+
+  if (imageUrl.startsWith('/')) {
+    return imageUrl;
+  }
+
+  if (imageUrl.startsWith(GATEWAY_URL)) {
+    return imageUrl;
+  }
+
+  if (imageUrl.startsWith('ipfs://') || /^(Qm|bafy)[A-Za-z0-9]{40,}$/.test(imageUrl)) {
+    return transformImageUrl(imageUrl);
+  }
+
+  console.warn('Rejected untrusted image URL for meta tags:', imageUrl);
+  return null;
 };
 
 /** Display shape for service/agent/component metadata (name, description, imageUrl) */

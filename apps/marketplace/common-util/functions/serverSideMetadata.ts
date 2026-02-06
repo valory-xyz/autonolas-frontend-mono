@@ -178,7 +178,9 @@ const getAgentTokenUri = async (unitId: string): Promise<string | null> => {
     );
 
     const updatedHashes = await contract.getUpdatedHashes(unitId);
-    const unitHashes = updatedHashes.unitHashes ?? updatedHashes[1];
+    const unitHashes = Array.isArray(updatedHashes)
+      ? updatedHashes[1]
+      : (updatedHashes.unitHashes ?? updatedHashes[1]);
     const tokenUri = unitHashes?.length ? null : await contract.tokenURI(unitId);
     return resolveUnitMetadataUrl(unitHashes ?? null, tokenUri) || null;
   } catch (error) {
@@ -204,7 +206,9 @@ const getComponentTokenUri = async (unitId: string): Promise<string | null> => {
     );
 
     const updatedHashes = await contract.getUpdatedHashes(unitId);
-    const unitHashes = updatedHashes.unitHashes ?? updatedHashes[1];
+    const unitHashes = Array.isArray(updatedHashes)
+      ? updatedHashes[1]
+      : (updatedHashes.unitHashes ?? updatedHashes[1]);
     const tokenUri = unitHashes?.length ? null : await contract.tokenURI(unitId);
     return resolveUnitMetadataUrl(unitHashes ?? null, tokenUri) || null;
   } catch (error) {
