@@ -12,12 +12,10 @@ const AIAgentDetails = ({ agentMetadata }) => {
   const router = useRouter();
   const { network, id } = router.query;
 
-  // Build page title from agent name or fallback to default
   const pageTitle = agentMetadata?.name
     ? `${agentMetadata.name} - AI Agent #${id}`
     : `AI Agent #${id}`;
 
-  // Use agent description or fallback to default
   const description =
     agentMetadata?.description ||
     'View detailed information about this AI agent including its configuration, activity, and on-chain registration details.';

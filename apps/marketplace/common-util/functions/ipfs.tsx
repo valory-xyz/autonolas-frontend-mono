@@ -10,6 +10,34 @@ export const getIpfsUrl = (hash: string) => {
   return hasHashPrefix ? `${GATEWAY_URL}${cleanHash}` : `${GATEWAY_URL}${HASH_PREFIX}${cleanHash}`;
 };
 
+/**
+ * Transform IPFS image URL to gateway URL (ipfs:// -> GATEWAY_URL).
+ * Shared by server-side metadata and useMetadata hook.
+ */
+export const transformImageUrl = (imageUrl: string | undefined): string | null => {
+  if (!imageUrl) return null;
+  return imageUrl.replace('ipfs://', GATEWAY_URL);
+};
+
+/** Display shape for service/agent/component metadata (name, description, imageUrl) */
+export type ServiceMetadataDisplay = {
+  name: string | null;
+  description: string | null;
+  imageUrl: string | null;
+};
+
+/**
+ * Map raw metadata JSON to display shape (name, description, imageUrl).
+ * Reused by serverSideMetadata and consistent with List* utils usage.
+ */
+export const metadataToServiceMetadataDisplay = (
+  metadata: { name?: string; description?: string; image?: string } | null | undefined,
+): ServiceMetadataDisplay => ({
+  name: metadata?.name ?? null,
+  description: metadata?.description ?? null,
+  imageUrl: transformImageUrl(metadata?.image) ?? null,
+});
+
 export type IpfsMetadata = {
   name?: string;
   description?: string;

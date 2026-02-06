@@ -2,10 +2,10 @@ import { useState, useEffect, useMemo } from 'react';
 import { NA } from 'libs/util-constants/src';
 import { notifyError } from 'libs/util-functions/src';
 
-import { GATEWAY_URL, HASH_DETAILS_STATE } from '../../util/constants';
+import { transformImageUrl } from 'common-util/functions/ipfs';
+import { normalizeAutonolasTokenUri } from 'common-util/functions/tokenUri';
 
-const pattern = /https:\/\/localhost\/(agent|component|service)\/+/g;
-const getAutonolasTokenUri = (tokenUri) => (tokenUri || '').replace(pattern, GATEWAY_URL);
+import { HASH_DETAILS_STATE } from '../../util/constants';
 
 /**
  * NFT details: hook to fetch metadata from IPFS
@@ -20,7 +20,7 @@ export const useMetadata = (tokenUri) => {
     const getMetadata = async () => {
       setMetadataState(HASH_DETAILS_STATE.IS_LOADING);
       try {
-        const ipfsUrl = getAutonolasTokenUri(tokenUri);
+        const ipfsUrl = normalizeAutonolasTokenUri(tokenUri);
         const response = await fetch(ipfsUrl);
         const json = await response.json();
         setMetadata(json);
@@ -35,19 +35,11 @@ export const useMetadata = (tokenUri) => {
     if (tokenUri) getMetadata();
   }, [tokenUri]);
 
-  const hashUrl = useMemo(() => getAutonolasTokenUri(tokenUri), [tokenUri]);
+  const hashUrl = useMemo(() => normalizeAutonolasTokenUri(tokenUri), [tokenUri]);
 
-  const nftImageUrl = useMemo(() => {
-    const image = metadata?.image;
-    if (!image) return null;
-    return image.replace('ipfs://', GATEWAY_URL);
-  }, [metadata]);
+  const nftImageUrl = useMemo(() => transformImageUrl(metadata?.image), [metadata]);
 
-  const codeHref = useMemo(() => {
-    const codeUri = metadata?.code_uri;
-    if (!codeUri) return null;
-    return codeUri.replace('ipfs://', GATEWAY_URL);
-  }, [metadata]);
+  const codeHref = useMemo(() => transformImageUrl(metadata?.code_uri), [metadata]);
 
   return {
     metadata,
