@@ -24,6 +24,8 @@ type PolymarketDataResponse = {
   }>;
 };
 
+const OUTCOMES = ['Yes', 'No'];
+
 const transformPolymarketData = (response: PolymarketDataResponse): PolymarketBetData | null => {
   const participant = response.marketParticipants[0];
   if (!participant) return null;
@@ -36,7 +38,7 @@ const transformPolymarketData = (response: PolymarketDataResponse): PolymarketBe
   const parsedOutcomeIndex = parseInt(outcomeIndex);
 
   const title = question?.metadata?.title ?? 'N/A';
-  const position = question?.metadata?.outcomes?.[parsedOutcomeIndex] ?? 'N/A';
+  const position = OUTCOMES[parsedOutcomeIndex] ?? 'N/A';
 
   const betAmount = parseFloat(amount) / Math.pow(10, USDC_DECIMALS);
   const amountWon = parseFloat(totalPayout) / Math.pow(10, USDC_DECIMALS);
@@ -54,18 +56,9 @@ const transformPolymarketData = (response: PolymarketDataResponse): PolymarketBe
 };
 
 export const getPolymarketBet = async (id: string) => {
-  if (!process.env.POLYMARKET_SUBGRAPH_API_KEY) {
-    throw new Error('POLYMARKET_SUBGRAPH_API_KEY not found');
-  }
-
-  const headers = {
-    Authorization: `Bearer ${process.env.POLYMARKET_SUBGRAPH_API_KEY}`,
-  };
-
   const data = await PREDICT_POLYMARKET_CLIENT.request<PolymarketDataResponse>(
     getPolymarketDataQuery,
     { id },
-    headers,
   );
 
   return transformPolymarketData(data);
