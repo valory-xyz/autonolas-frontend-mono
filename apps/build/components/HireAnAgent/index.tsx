@@ -33,14 +33,11 @@ const quickstartItems = [
   },
   {
     title: '2. Configure Your Client',
-    codeBlocks: ['touch .env'],
+    codeBlocks: [
+      "echo MECHX_CHAIN_RPC='https://rpc.eu-central-2.gateway.fm/v4/gnosis/non-archival/mainnet' >> .env",
+    ],
     moreItems: (
       <>
-        <Paragraph>Then set the following environment variables:</Paragraph>
-        <CodeBlock canCopy>
-          export
-          MECHX_CHAIN_RPC=&apos;https://rpc.eu-central-2.gateway.fm/v4/gnosis/non-archival/mainnet&apos;
-        </CodeBlock>
         <Paragraph>
           Optional: For improved reliability, update .env with your custom RPC endpoint.
         </Paragraph>
