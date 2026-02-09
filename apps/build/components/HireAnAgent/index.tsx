@@ -18,7 +18,7 @@ const HireContainer = styled.div`
 const Prerequisites = () => (
   <div>
     <Title level={4}>Prerequisites</Title>
-    <CodeBlock>Python &gt;=3.10</CodeBlock>
+    <CodeBlock>Python &gt;=3.10 &amp;&amp; &lt;3.12</CodeBlock>
     <CodeBlock>Poetry &gt;=1.4.0 && &lt;2.x</CodeBlock>
   </div>
 );
@@ -26,18 +26,18 @@ const Prerequisites = () => (
 const quickstartItems = [
   {
     title: '1. Install Marketplace Client',
-    codeBlocks: ['poetry new my_prj && cd my_prj', 'poetry add mech-client'],
+    codeBlocks: [
+      'poetry new my_prj --python ">=3.10,<3.12" && cd my_prj',
+      'poetry add mech-client',
+    ],
   },
   {
     title: '2. Configure Your Client',
-    codeBlocks: ['echo -n YOUR_PRIVATE_KEY > ethereum_private_key.txt', 'touch .env'],
+    codeBlocks: [
+      "echo MECHX_CHAIN_RPC='https://rpc.eu-central-2.gateway.fm/v4/gnosis/non-archival/mainnet' >> .env",
+    ],
     moreItems: (
       <>
-        <Paragraph>Then set the following environment variables:</Paragraph>
-        <CodeBlock canCopy>
-          export
-          MECHX_CHAIN_RPC=&apos;https://rpc.eu-central-2.gateway.fm/v4/gnosis/non-archival/mainnet&apos;
-        </CodeBlock>
         <Paragraph>
           Optional: For improved reliability, update .env with your custom RPC endpoint.
         </Paragraph>
@@ -48,8 +48,8 @@ const quickstartItems = [
   {
     title: '3. Hire On-chain Agent',
     codeBlocks: [
-      'poetry run mechx setup-agent-mode --chain-config gnosis',
-      'poetry run mechx interact --prompts "Estimate the chance that Ethereum volatility exceeds 50,000 by the end of 2030" --priority-mech 0xb3c6319962484602b00d5587e965946890b82101 --tools superforcaster --chain-config gnosis',
+      'poetry run mechx setup --chain-config gnosis',
+      'poetry run mechx request --prompts "Estimate the chance that Ethereum volatility exceeds 50,000 by the end of 2030" --priority-mech 0xb3c6319962484602b00d5587e965946890b82101 --tools superforcaster --chain-config gnosis',
     ],
   },
 ];
