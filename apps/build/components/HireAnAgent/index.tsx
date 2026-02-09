@@ -33,7 +33,7 @@ const quickstartItems = [
   },
   {
     title: '2. Configure Your Client',
-    codeBlocks: ['echo -n YOUR_PRIVATE_KEY > ethereum_private_key.txt', 'touch .env'],
+    codeBlocks: ['touch .env'],
     moreItems: (
       <>
         <Paragraph>Then set the following environment variables:</Paragraph>
