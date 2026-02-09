@@ -8,9 +8,10 @@ import { SERVICE_REGISTRY_CONTRACT, SERVICE_REGISTRY_L2 } from 'common-util/AbiA
 import { ADDRESSES } from 'common-util/Contracts/addresses';
 import { RPC_URLS } from 'libs/util-constants/src';
 import { getIpfsResponse } from 'common-util/functions/ipfs';
+import { generateName } from 'common-util/functions/agentName';
 import { EVM_SUPPORTED_CHAINS } from 'common-util/Login/config';
 import { getServiceFromRegistry } from 'common-util/graphql/registry';
-import { REGISTRY_SUBGRAPH_CLIENTS } from 'common-util/graphql';
+import { REGISTRY_SUBGRAPH_CLIENTS, ERC8004_SUPPORTED_CHAINS } from 'common-util/graphql';
 
 import { CACHE_DURATION, GATEWAY_URL } from 'util/constants';
 import { zeroAddress } from 'viem';
@@ -55,9 +56,13 @@ const normalizeQueryParam = (param: NextApiRequest['query'][string]): string | u
 const getServiceFromRegistrySafe = async (chainId: number, serviceId: string) => {
   if (chainId in REGISTRY_SUBGRAPH_CLIENTS) {
     try {
+      const includeErc8004 = ERC8004_SUPPORTED_CHAINS.some(
+        (erc8004ChainId) => erc8004ChainId === chainId,
+      );
       return await getServiceFromRegistry({
         chainId: chainId as keyof typeof REGISTRY_SUBGRAPH_CLIENTS,
         id: serviceId,
+        includeErc8004,
       });
     } catch (error) {
       console.error(
@@ -168,6 +173,7 @@ export default async function handler(
     ];
 
     const agentWallet = serviceFromRegistry?.erc8004Agent?.agentWallet;
+    const multisig = serviceFromRegistry?.multisig;
 
     if (!!agentWallet && agentWallet !== zeroAddress) {
       services.push({
@@ -178,7 +184,7 @@ export default async function handler(
 
     const response: Erc8004Response = {
       type: 'https://eips.ethereum.org/EIPS/eip-8004#registration-v1',
-      name: metadata?.name ?? '',
+      name: multisig && multisig !== zeroAddress ? generateName(multisig) : (metadata?.name ?? ''),
       description: metadata?.description ?? '',
       image: getImageUrl(metadata?.image),
       services,
