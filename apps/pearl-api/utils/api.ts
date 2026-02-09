@@ -12,6 +12,10 @@ export const parseAchievementApiQueryParams = (
   const idStr = Array.isArray(id) ? id[0] : id;
 
   if (!agentStr || !typeStr || !idStr) return null;
+
+  const idRegex = /^[a-zA-Z0-9_-]{1,100}$/;
+  if (!idRegex.test(idStr)) return null;
+
   if (!VALID_AGENT_TYPES.includes(agentStr as AgentType)) return null;
   if (!VALID_ACHIEVEMENT_TYPES.includes(typeStr as AchievementType)) return null;
 
