@@ -155,7 +155,6 @@ export default async function handler(
       getIpfsResponse(configHash),
       getServiceFromRegistrySafe(chainId, serviceId),
     ]);
-
     const registrations: Erc8004Response['registrations'] = [];
 
     if (serviceFromRegistry?.erc8004Agent?.id) {
@@ -182,9 +181,13 @@ export default async function handler(
       });
     }
 
+    const agentName =
+      multisig && multisig !== zeroAddress ? generateName(multisig) : (metadata?.name ?? '');
+    const nameWithSuffix = `${agentName} by Olas`;
+
     const response: Erc8004Response = {
       type: 'https://eips.ethereum.org/EIPS/eip-8004#registration-v1',
-      name: multisig && multisig !== zeroAddress ? generateName(multisig) : (metadata?.name ?? ''),
+      name: nameWithSuffix,
       description: metadata?.description ?? '',
       image: getImageUrl(metadata?.image),
       services,
