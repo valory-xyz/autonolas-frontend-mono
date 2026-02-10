@@ -194,7 +194,7 @@ export default async function handler(
       supportedTrust: ['reputation'],
     };
 
-    res.setHeader('Cache-Control', `public, s-maxage=${CACHE_DURATION.FIVE_MINUTES}`);
+    res.setHeader('Cache-Control', `public, s-maxage=${CACHE_DURATION.HALF_HOUR}`);
 
     return res.status(200).json(response);
   } catch (error) {

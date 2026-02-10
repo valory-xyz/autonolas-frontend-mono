@@ -27,4 +27,4 @@ export const REGISTRY_SUBGRAPH_CLIENTS = {
   42220: new GraphQLClient(process.env.NEXT_PUBLIC_CELO_REGISTRY_SUBGRAPH!, requestConfig),
 } as const;
 
-export const ERC8004_SUPPORTED_CHAINS = [1, 100, 137, 8453] as const;
+export const ERC8004_SUPPORTED_CHAINS = [1, 100, 137, 8453, 42161] as const;
