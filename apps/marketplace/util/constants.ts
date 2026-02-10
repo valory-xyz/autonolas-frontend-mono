@@ -89,6 +89,7 @@ export const CACHE_DURATION = {
   FIVE_MINUTES: 300,
   HALF_HOUR: 1800,
   ONE_HOUR: 3600,
+  SIX_HOURS: 21600,
   TWELVE_HOURS: 43200,
 } as const;
 

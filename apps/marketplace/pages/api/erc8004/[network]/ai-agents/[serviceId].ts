@@ -190,7 +190,7 @@ export default async function handler(
 
     res.setHeader(
       'Cache-Control',
-      `public, s-maxage=${CACHE_DURATION.HALF_HOUR}, stale-while-revalidate=${CACHE_DURATION.FIVE_MINUTES}`,
+      `public, s-maxage=${CACHE_DURATION.SIX_HOURS}, stale-while-revalidate=${CACHE_DURATION.FIVE_MINUTES}`,
     );
 
     return res.status(200).json(response);
