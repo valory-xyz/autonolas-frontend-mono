@@ -8,6 +8,9 @@ const AgentDetails = dynamic(() => import('../../../components/ListAgents/detail
   ssr: false,
 });
 
+const DEFAULT_DESCRIPTION =
+  'View detailed information about this agent blueprint including its specification, dependencies, and on-chain registration.';
+
 const AgentBlueprintDetails = ({ agentMetadata }) => {
   const router = useRouter();
   const { network, id } = router.query;
@@ -16,10 +19,7 @@ const AgentBlueprintDetails = ({ agentMetadata }) => {
     ? `${agentMetadata.name} - Agent Blueprint #${id}`
     : `Agent Blueprint #${id}`;
 
-  const description =
-    agentMetadata?.description ||
-    'View detailed information about this agent blueprint including its specification, dependencies, and on-chain registration.';
-
+  const description = agentMetadata?.description || DEFAULT_DESCRIPTION;
   return (
     <>
       <Meta

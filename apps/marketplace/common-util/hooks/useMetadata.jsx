@@ -2,8 +2,8 @@ import { useState, useEffect, useMemo } from 'react';
 import { NA } from 'libs/util-constants/src';
 import { notifyError } from 'libs/util-functions/src';
 
-import { transformImageUrl } from 'common-util/functions/ipfs';
-import { normalizeAutonolasTokenUri } from 'common-util/functions/tokenUri';
+import { imageIpfsToGatewayUrl } from 'common-util/functions/ipfs';
+import { normalizeMetadataUrl } from 'common-util/functions/tokenUri';
 
 import { HASH_DETAILS_STATE } from '../../util/constants';
 
@@ -20,7 +20,7 @@ export const useMetadata = (tokenUri) => {
     const getMetadata = async () => {
       setMetadataState(HASH_DETAILS_STATE.IS_LOADING);
       try {
-        const ipfsUrl = normalizeAutonolasTokenUri(tokenUri);
+        const ipfsUrl = normalizeMetadataUrl(tokenUri);
         const response = await fetch(ipfsUrl);
         const json = await response.json();
         setMetadata(json);
@@ -35,11 +35,11 @@ export const useMetadata = (tokenUri) => {
     if (tokenUri) getMetadata();
   }, [tokenUri]);
 
-  const hashUrl = useMemo(() => normalizeAutonolasTokenUri(tokenUri), [tokenUri]);
+  const hashUrl = useMemo(() => normalizeMetadataUrl(tokenUri), [tokenUri]);
 
-  const nftImageUrl = useMemo(() => transformImageUrl(metadata?.image), [metadata]);
+  const nftImageUrl = useMemo(() => imageIpfsToGatewayUrl(metadata?.image), [metadata]);
 
-  const codeHref = useMemo(() => transformImageUrl(metadata?.code_uri), [metadata]);
+  const codeHref = useMemo(() => imageIpfsToGatewayUrl(metadata?.code_uri), [metadata]);
 
   return {
     metadata,

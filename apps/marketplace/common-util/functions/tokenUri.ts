@@ -1,25 +1,21 @@
-import { GATEWAY_URL } from 'libs/util-constants/src';
-
 import { getIpfsUrl } from 'common-util/functions/ipfs';
 
-export const LOCALHOST_URI_PATTERN = /https:\/\/localhost\/(agent|component|service)\/+/;
-
 /**
- * Normalize Autonolas token URI by replacing localhost placeholder with IPFS gateway URL.
- * @param tokenUri - Raw token URI (may be null/undefined)
- * @returns Fetchable URL with localhost placeholder replaced by GATEWAY_URL
- */
-export const normalizeAutonolasTokenUri = (tokenUri: string | null | undefined): string =>
-  (tokenUri ?? '').replace(LOCALHOST_URI_PATTERN, GATEWAY_URL);
-
-/**
- * Normalize token URI to a fetchable URL (localhost placeholder or IPFS hash).
+ * Normalize token URI to a fetchable URL.
+ * Handles:
+ * - IPFS hashes (raw hashes like Qm... or bafy...) → converted to gateway URL
+ * - Already-resolved gateway URLs (https://gateway/...) → passed through unchanged
+ *
  * Shared by serverSideMetadata and ListServices getTokenUri.
  */
 export const normalizeMetadataUrl = (tokenUri: string | null | undefined): string => {
   const s = tokenUri ?? '';
   if (!s) return '';
-  if (s.startsWith('http')) return normalizeAutonolasTokenUri(s);
+
+  if (s.startsWith('http')) {
+    return s;
+  }
+
   return getIpfsUrl(s);
 };
 

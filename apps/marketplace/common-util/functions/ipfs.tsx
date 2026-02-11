@@ -1,3 +1,5 @@
+import DOMPurify from 'isomorphic-dompurify';
+
 import { GATEWAY_URL, HASH_PREFIX } from 'libs/util-constants/src';
 
 const IPFS_TIMEOUT = 5_000;
@@ -10,7 +12,7 @@ export const getIpfsUrl = (hash: string) => {
   return hasHashPrefix ? `${GATEWAY_URL}${cleanHash}` : `${GATEWAY_URL}${HASH_PREFIX}${cleanHash}`;
 };
 
-export const transformImageUrl = (imageUrl: string | undefined): string | null => {
+export const imageIpfsToGatewayUrl = (imageUrl: string | undefined): string | null => {
   if (!imageUrl) return null;
 
   // Handle ipfs:// protocol
@@ -28,16 +30,16 @@ export const transformImageUrl = (imageUrl: string | undefined): string | null =
 };
 
 /**
- * Sanitize text for use in meta tags by:
- * - Removing HTML tags
- * - Escaping special characters
- * - Limiting length to prevent abuse
+ * Sanitize text for use in meta tags using DOMPurify.
+ * - Removes all HTML tags and returns plain text
+ * - Escapes special characters
+ * - Limits length to prevent abuse
  * NOTE: React automatically escapes HTML in meta tags.
  */
 export const sanitizeMetaText = (text: string | null | undefined, maxLength = 300): string => {
   if (!text) return '';
 
-  let sanitized = text.replace(/<[^>]*>/g, '');
+  let sanitized = DOMPurify.sanitize(text, { USE_PROFILES: { html: false } });
 
   if (sanitized.length > maxLength) {
     sanitized = sanitized.substring(0, maxLength).trim() + '...';
@@ -62,7 +64,7 @@ export const validateMetaImageUrl = (imageUrl: string | null | undefined): strin
   }
 
   if (imageUrl.startsWith('ipfs://') || /^(Qm|bafy)[A-Za-z0-9]{40,}$/.test(imageUrl)) {
-    return transformImageUrl(imageUrl);
+    return imageIpfsToGatewayUrl(imageUrl);
   }
 
   console.warn('Rejected untrusted image URL for meta tags:', imageUrl);
@@ -70,7 +72,7 @@ export const validateMetaImageUrl = (imageUrl: string | null | undefined): strin
 };
 
 /** Display shape for service/agent/component metadata (name, description, imageUrl) */
-export type ServiceMetadataDisplay = {
+export type ServiceMetadata = {
   name: string | null;
   description: string | null;
   imageUrl: string | null;
@@ -82,10 +84,10 @@ export type ServiceMetadataDisplay = {
  */
 export const metadataToServiceMetadataDisplay = (
   metadata: { name?: string; description?: string; image?: string } | null | undefined,
-): ServiceMetadataDisplay => ({
+): ServiceMetadata => ({
   name: metadata?.name ?? null,
   description: metadata?.description ?? null,
-  imageUrl: transformImageUrl(metadata?.image) ?? null,
+  imageUrl: imageIpfsToGatewayUrl(metadata?.image) ?? null,
 });
 
 export type IpfsMetadata = {
