@@ -10,14 +10,6 @@ export const getIpfsUrl = (hash: string) => {
   return hasHashPrefix ? `${GATEWAY_URL}${cleanHash}` : `${GATEWAY_URL}${HASH_PREFIX}${cleanHash}`;
 };
 
-/**
- * Transform IPFS image URL to gateway URL.
- * Handles:
- * - ipfs:// protocol URLs (ipfs://Qm... -> GATEWAY_URL/Qm...)
- * - Raw IPFS hashes (Qm... or bafy... -> GATEWAY_URL/ipfs/Qm...)
- * - Already-resolved gateway URLs (passed through unchanged)
- * Shared by server-side metadata and useMetadata hook.
- */
 export const transformImageUrl = (imageUrl: string | undefined): string | null => {
   if (!imageUrl) return null;
 
