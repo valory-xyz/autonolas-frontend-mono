@@ -11,7 +11,8 @@ import { SERVICE_REGISTRY_CONTRACT } from 'common-util/AbiAndAddresses/serviceRe
 import { SERVICE_REGISTRY_L2 } from 'common-util/AbiAndAddresses/serviceRegistryL2';
 import { ADDRESSES, type ChainIds } from 'common-util/Contracts/addresses';
 import { SUPPORTED_CHAINS } from 'common-util/Login/config';
-import { metadataToServiceMetadataDisplay, type ServiceMetadata } from 'common-util/functions/ipfs';
+import { metadataToServiceMetadataDisplay } from 'common-util/functions/ipfs';
+import type { ServiceMetadata } from 'common-util/functions/ipfs';
 import { normalizeMetadataUrl, resolveUnitMetadataUrl } from 'common-util/functions/tokenUri';
 
 const IPFS_TIMEOUT = 5_000;
@@ -35,8 +36,6 @@ const NETWORK_TO_CHAIN_ID: Record<string, number> = {
   celo: celo.id,
   'mode-mainnet': mode.id,
 };
-
-export type ServiceMetadata = ServiceMetadata;
 
 export const getChainIdFromNetwork = (network: string): number | null => {
   // Direct match
