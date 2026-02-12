@@ -174,7 +174,6 @@ export default async function handler(
     ];
 
     const agentWallet = serviceFromRegistry?.erc8004Agent?.agentWallet;
-    const multisig = serviceFromRegistry?.multisig;
 
     if (!!agentWallet && agentWallet !== zeroAddress) {
       services.push({
@@ -183,10 +182,7 @@ export default async function handler(
       });
     }
 
-    const agentName =
-      multisig && multisig !== zeroAddress
-        ? generateName(chainId, Number(serviceId))
-        : (metadata?.name ?? '');
+    const agentName = generateName(chainId, Number(serviceId));
     const nameWithSuffix = `${agentName} by Olas`;
 
     const response: Erc8004Response = {
