@@ -21,6 +21,7 @@ import { RewardsSection } from './RewardsSection';
 import { ServiceStatus } from './ServiceStatus';
 import { ViewHashAndCode } from './ViewHashAndCode';
 import { getTokenomicsUnitType } from './utils';
+import { generateName } from 'common-util/functions/agentName';
 
 const navTypesForRewards = [NAV_TYPES.COMPONENT, NAV_TYPES.AGENT_BLUEPRINTS];
 
@@ -76,6 +77,7 @@ export const DetailsSubInfo = ({
 
     if (HASH_DETAILS_STATE.LOADED === metadataLoadState) {
       details.push(
+        { title: 'Name', dataTestId: 'name', value: generateName(chainId, id) },
         { title: 'Description', dataTestId: 'description', value: description },
         { title: 'Version', dataTestId: 'version', value: version },
       );

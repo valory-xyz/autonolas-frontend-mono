@@ -99,13 +99,15 @@ export default async function handler(
       });
     }
 
-    const chainId = getChainIdFromNetworkSlug(network);
+    const unTypedChainId = getChainIdFromNetworkSlug(network);
 
-    if (!chainId) {
+    if (!unTypedChainId) {
       return res.status(400).json({
         error: `Invalid network: ${network}. Supported networks are: ${getSupportedNetworkNames()}`,
       });
     }
+
+    const chainId = unTypedChainId as keyof typeof ADDRESSES;
 
     const rpcUrl = RPC_URLS[chainId];
     if (!rpcUrl) {
@@ -172,7 +174,6 @@ export default async function handler(
     ];
 
     const agentWallet = serviceFromRegistry?.erc8004Agent?.agentWallet;
-    const multisig = serviceFromRegistry?.multisig;
 
     if (!!agentWallet && agentWallet !== zeroAddress) {
       services.push({
@@ -181,8 +182,7 @@ export default async function handler(
       });
     }
 
-    const agentName =
-      multisig && multisig !== zeroAddress ? generateName(multisig) : (metadata?.name ?? '');
+    const agentName = generateName(chainId, Number(serviceId));
     const nameWithSuffix = `${agentName} by Olas`;
 
     const response: Erc8004Response = {
