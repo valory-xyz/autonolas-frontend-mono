@@ -1,5 +1,4 @@
 import dynamic from 'next/dynamic';
-import { useRouter } from 'next/router';
 
 import { Meta } from '../../../components/Meta';
 

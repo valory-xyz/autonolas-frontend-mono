@@ -60,7 +60,6 @@ const RegistryApp = ({
   return (
     <>
       <GlobalStyles />
-      <Meta />
       <Provider store={store}>
         <AutonolasThemeProvider>
           {isNotLegal ? (
