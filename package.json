@@ -53,6 +53,7 @@
     "ipfs": "^0.63.5",
     "ipfs-http-client": "^57.0.3",
     "ipfs-only-hash": "^4.0.0",
+    "isomorphic-dompurify": "^2.9.0",
     "lodash": "^4.17.21",
     "markdown-to-jsx": "^7.4.7",
     "multiformats": "^9.7.1",
