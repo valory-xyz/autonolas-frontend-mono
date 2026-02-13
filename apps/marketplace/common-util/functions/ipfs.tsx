@@ -1,5 +1,3 @@
-import DOMPurify from 'isomorphic-dompurify';
-
 import { GATEWAY_URL, HASH_PREFIX } from 'libs/util-constants/src';
 
 const IPFS_TIMEOUT = 5_000;
@@ -30,16 +28,16 @@ export const imageIpfsToGatewayUrl = (imageUrl: string | undefined): string | nu
 };
 
 /**
- * Sanitize text for use in meta tags using DOMPurify.
- * - Removes all HTML tags and returns plain text
+ * Sanitize text for use in meta tags.
+ * - Removes HTML tags and returns plain text
  * - Escapes special characters
  * - Limits length to prevent abuse
- * NOTE: React automatically escapes HTML in meta tags.
+ * NOTE: React automatically escapes HTML in meta tags, so server-side we use simple regex.
  */
 export const sanitizeMetaText = (text: string | null | undefined, maxLength = 300): string => {
   if (!text) return '';
 
-  let sanitized = DOMPurify.sanitize(text, { USE_PROFILES: { html: false } });
+  let sanitized = text.replace(/<[^>]*>/g, '').trim();
 
   if (sanitized.length > maxLength) {
     sanitized = sanitized.substring(0, maxLength).trim() + '...';

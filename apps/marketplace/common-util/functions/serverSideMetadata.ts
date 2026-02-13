@@ -164,7 +164,7 @@ const getAgentTokenUri = async (unitId: string): Promise<string | null> => {
   try {
     const provider = new ethers.JsonRpcProvider(rpcUrl);
     const contract = new ethers.Contract(
-      ADDRESSES[mainnet.id].agentRegistry,
+      (ADDRESSES[mainnet.id as ChainIds] as { agentRegistry: string }).agentRegistry,
       AGENT_REGISTRY_CONTRACT.abi,
       provider,
     );
@@ -192,7 +192,7 @@ const getComponentTokenUri = async (unitId: string): Promise<string | null> => {
   try {
     const provider = new ethers.JsonRpcProvider(rpcUrl);
     const contract = new ethers.Contract(
-      ADDRESSES[mainnet.id].componentRegistry,
+      (ADDRESSES[mainnet.id as ChainIds] as { componentRegistry: string }).componentRegistry,
       COMPONENT_REGISTRY_CONTRACT.abi,
       provider,
     );
