@@ -1,5 +1,4 @@
 import dynamic from 'next/dynamic';
-import { useRouter } from 'next/router';
 
 import { Meta } from '../../components/Meta';
 
@@ -7,10 +6,7 @@ const HomePage = dynamic(() => import('../../components/HomePage'), {
   ssr: false,
 });
 
-const NetworkHome = () => {
-  const router = useRouter();
-  const { network } = router.query;
-
+const NetworkHome = ({ network }) => {
   return (
     <>
       <Meta
@@ -20,6 +16,16 @@ const NetworkHome = () => {
       <HomePage />
     </>
   );
+};
+
+export const getServerSideProps = async (context) => {
+  const { network } = context.params;
+
+  return {
+    props: {
+      network,
+    },
+  };
 };
 
 export default NetworkHome;

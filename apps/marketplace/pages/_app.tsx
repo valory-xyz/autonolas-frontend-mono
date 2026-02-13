@@ -11,7 +11,6 @@ import { AutonolasThemeProvider, COLOR, GlobalStyles, W3M_BORDER_RADIUS } from '
 
 import { SUPPORTED_CHAINS } from '../common-util/Login/config';
 import Layout from '../components/Layout';
-import { Meta } from '../components/Meta';
 import { wrapper } from '../store';
 
 const DESC =

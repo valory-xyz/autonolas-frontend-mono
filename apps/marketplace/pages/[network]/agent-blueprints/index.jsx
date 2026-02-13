@@ -1,5 +1,4 @@
 import dynamic from 'next/dynamic';
-import { useRouter } from 'next/router';
 
 import { Meta } from '../../../components/Meta';
 
@@ -7,10 +6,7 @@ const ListAgents = dynamic(() => import('../../../components/ListAgents'), {
   ssr: false,
 });
 
-const AgentBlueprints = () => {
-  const router = useRouter();
-  const { network } = router.query;
-
+const AgentBlueprints = ({ network }) => {
   return (
     <>
       <Meta
@@ -21,6 +17,16 @@ const AgentBlueprints = () => {
       <ListAgents />
     </>
   );
+};
+
+export const getServerSideProps = async (context) => {
+  const { network } = context.params;
+
+  return {
+    props: {
+      network,
+    },
+  };
 };
 
 export default AgentBlueprints;
