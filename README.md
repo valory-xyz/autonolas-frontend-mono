@@ -16,7 +16,7 @@ Monorepo for Olas (Autonolas) frontends. Built with **Nx** and **Next.js**; we p
 | [Operate](https://operate.olas.network/) | 3007 | Operate staking contracts |
 | [Pearl API](https://pearl.olas.network/) | 3010 | API (Zendesk, achievements, Web3Auth) |
 
-Apps differ by stack: some need **WalletConnect/Web3** (e.g. Bond, Build, Govern, Launch, Marketplace, Operate, Contribute); **Docs** is static; **Pearl API** is API + Web3Auth. See each app’s `CLAUDE.md` and `contribute.md` for details.
+Apps differ by stack: some need **WalletConnect/Web3** (e.g. Bond, Build, Govern, Launch, Marketplace, Operate, Contribute); **Docs** is static; **Pearl API** is API + Web3Auth. See each app’s `CLAUDE.md` and `CONTRIBUTING.md` for details.
 
 ## Quick start
 
@@ -51,7 +51,7 @@ See [CLAUDE.md](CLAUDE.md) for detailed architecture, commands, and conventions.
 
 - Use **conventional commits** for commits and **PR titles** (e.g. `feat:`, `fix:`, `docs:`).  
   Types: [Conventional commit types](https://gist.github.com/qoomon/5dfcdf8eec66a051ecd85625518cfd13#types).
-- Full guidelines: [contribute.md](contribute.md).
+- Full guidelines: [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## License
 ![MIT](https://img.shields.io/badge/License-MIT-yellow.svg)

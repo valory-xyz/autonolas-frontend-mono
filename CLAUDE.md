@@ -219,7 +219,7 @@ ESLint enforces import ordering (configured in .eslintrc.json):
 
 ## Contributing
 
-- See [contribute.md](contribute.md) for contribution guidelines.
+- See [CONTRIBUTING.md](CONTRIBUTING.md) for contribution guidelines.
 - Use **conventional commits** for commit messages and PR titles (e.g. `feat:`, `fix:`, `docs:`). Types: [Conventional commit types](https://gist.github.com/qoomon/5dfcdf8eec66a051ecd85625518cfd13#types).
 
 ## Notes
