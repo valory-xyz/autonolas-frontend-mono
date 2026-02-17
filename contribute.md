@@ -34,7 +34,7 @@ docs: update contribute.md with testing guidelines
 
 ### Before submitting
 
-1. Run the affected app: `yarn nx <app-name>:serve`
+1. Run the affected app: `yarn nx run <app-name>:serve`
 2. Lint: `yarn nx lint <app-name> --fix`
 3. Test: `yarn nx test <app-name>`
 4. Rebase on the base branch and ensure CI passes.
