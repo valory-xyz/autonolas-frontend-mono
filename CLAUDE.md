@@ -71,7 +71,7 @@ npx nx test <app-or-lib-name> --coverage
 
 Lint a specific app or library:
 ```bash
-npx nx lint <app-or-lib-name>
+yarn nx lint <app-or-lib-name>
 ```
 
 ### Cache Management
@@ -217,6 +217,11 @@ ESLint enforces import ordering (configured in .eslintrc.json):
 - Ant Design 5.9.0
 - Styled-components 6.0.7
 
+## Contributing
+
+- See [CONTRIBUTING.md](CONTRIBUTING.md) for contribution guidelines.
+- Use **conventional commits** for commit messages and PR titles (e.g. `feat:`, `fix:`, `docs:`). Types: [Conventional commit types](https://gist.github.com/qoomon/5dfcdf8eec66a051ecd85625518cfd13#types).
+
 ## Notes
 
 - Nx workspace with caching enabled for builds, lints, tests
@@ -224,3 +229,4 @@ ESLint enforces import ordering (configured in .eslintrc.json):
 - Multiple blockchain networks supported
 - Each app is independently deployable
 - Shared code should be extracted to libs/ to maintain separation
+- Use **Yarn** preferably for install and scripts
