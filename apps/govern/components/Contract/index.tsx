@@ -2,6 +2,7 @@ import { Alert, Card, Flex, Skeleton, Space, Typography } from 'antd';
 import { useRouter } from 'next/router';
 import styled from 'styled-components';
 import { StakingContract } from 'types';
+import type { Address } from 'viem';
 import { mainnet } from 'viem/chains';
 import { useEnsName } from 'wagmi';
 
@@ -11,7 +12,8 @@ import { getAddressFromBytes32, truncateAddress } from 'libs/util-functions/src'
 import { Meta } from 'components/Meta';
 import { useAppSelector } from 'store/index';
 
-import { ContractConfiguration } from './ContractConfiguration';
+import { ConfigHash, ContractConfiguration } from './ContractConfiguration';
+import { ServiceConfigHashLabel } from './FieldLabels';
 import { useContractParams } from './hooks';
 
 const StyledMain = styled.main`
@@ -84,6 +86,11 @@ const ContractPageContent = ({ contract }: ContractPageContentProps) => {
             >
               {`${truncateAddress(formattedAddress)} ${UNICODE_SYMBOLS.EXTERNAL_LINK}`}
             </a>
+          </Space>
+
+          <Space direction="vertical">
+            <ServiceConfigHashLabel />
+            <ConfigHash address={formattedAddress as Address} chainId={contract.chainId} />
           </Space>
         </Flex>
       </Card>

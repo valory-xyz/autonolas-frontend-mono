@@ -153,7 +153,7 @@ const MultisigThreshold = ({ address, chainId }: ConfigItemProps) => {
   return <ShowContent isLoading={isLoading} chainId={chainId} data={data} />;
 };
 
-const ConfigHash = ({ address, chainId }: ConfigItemProps) => {
+export const ConfigHash = ({ address, chainId }: ConfigItemProps) => {
   const { data: configHash, isLoading } = useGetConfigHash({ address, chainId });
   const isZeroAddress = configHash === zeroHash;
 
