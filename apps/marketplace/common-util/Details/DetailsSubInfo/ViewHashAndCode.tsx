@@ -90,7 +90,7 @@ export const ViewHashAndCode = ({
         <>
           &nbsp;•&nbsp;
           <Link target="_blank" data-testid="erc8004-api-link" href={erc8004ScanUrl}>
-            ERC-8004 Metadata {UNICODE_SYMBOLS.EXTERNAL_LINK}
+            ERC-8004 Scan {UNICODE_SYMBOLS.EXTERNAL_LINK}
           </Link>
         </>
       )}
