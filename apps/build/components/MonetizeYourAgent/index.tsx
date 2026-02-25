@@ -52,7 +52,7 @@ const quickstartItems = [
     codeBlocks: ['poetry run mech add-tool <author> <tool_name> -d "Tool description"'],
   },
   {
-    title: '3.Implement your tool logic',
+    title: '3. Implement your tool logic',
     description: (
       <>
         <Paragraph>Write your implementation in:</Paragraph>
