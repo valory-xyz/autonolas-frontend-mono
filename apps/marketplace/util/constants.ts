@@ -95,7 +95,7 @@ export const CACHE_DURATION = {
 
 export const MARKETPLACE_SUPPORTED_CHAIN_IDS = [10, 100, 137, 8453];
 
-export const ERC8004_CHAIN_MAPPING: Record<number, string> = {
+export const ERC8004_CHAIN_MAPPING = {
   1: 'ethereum',
   10: 'optimism',
   100: 'gnosis',
