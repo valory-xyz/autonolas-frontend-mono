@@ -35,20 +35,40 @@ const Prerequisites = () => (
 
 const quickstartItems = [
   {
-    title: '1. Install Agent Framework',
-    codeBlocks: [
-      'git clone https://github.com/valory-xyz/mech-tools-dev.git && cd mech-tools-dev',
-      'poetry shell && poetry install',
-      'autonomy packages sync --update-packages',
-    ],
+    title: '1. Setup your workspace',
+    description: 'Run the setup command to create the workspace and deploy the mech on-chain:',
+    codeBlocks: ['poetry run mech setup -c <chain>'],
   },
   {
-    title: '2. Configure Your Agent',
-    codeBlocks: ['python utils/configure_and_deploy.py'],
+    title: '2. Scaffold a tool',
+    description: 'Create a new tool using the CLI:',
+    codeBlocks: ['poetry run mech add-tool <author> <tool_name> -d "Tool description"'],
   },
   {
-    title: '3. Run Your Agent',
-    codeBlocks: ['bash run_service.sh'],
+    title: '3.Implement your tool logic',
+    description: (
+      <>
+        Write your implementation in{' '}
+        <Text code>
+          ~/.operate-mech/packages/&lt;author&gt;/customs/&lt;tool_name&gt;/&lt;tool_name&gt;.py
+        </Text>
+        . The scaffold provides a template with a <Text code>run()</Text> function you fill in.
+        <blockquote>
+          <Text strong>Note:</Text> If your tool requires API keys or other secrets, add them to{' '}
+          <Text code>~/.operate-mech/.env</Text>.
+        </blockquote>
+      </>
+    ),
+  },
+  {
+    title: '4. Publish metadata',
+    description: 'Generate metadata, push to IPFS, and update on-chain:',
+    codeBlocks: ['poetry run mech prepare-metadata', 'poetry run mech update-metadata -c <chain>'],
+  },
+  {
+    title: '5. Launch the agent',
+    description: 'Start the mech service:',
+    codeBlocks: ['poetry run mech run -c <chain>'],
   },
 ];
 
@@ -64,12 +84,14 @@ const Quickstart = () => (
           <Paragraph>
             <Text strong>{item.title}</Text>
           </Paragraph>
+          {item.description && <Paragraph>{item.description}</Paragraph>}
           <div>
-            {item.codeBlocks.map((block, index) => (
-              <CodeBlock key={`${item.title}${index}`} canCopy>
-                {block}
-              </CodeBlock>
-            ))}
+            {item.codeBlocks &&
+              item.codeBlocks.map((block, index) => (
+                <CodeBlock key={`${item.title}${index}`} canCopy>
+                  {block}
+                </CodeBlock>
+              ))}
           </div>
         </div>
       ))}
