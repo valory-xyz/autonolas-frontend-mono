@@ -1,6 +1,8 @@
 import { Alert, Button, Flex, Typography } from 'antd';
 import { CodeBlock } from 'components/CodeBlock';
+import { COLOR } from 'libs/ui-theme/src';
 import { STACK_URL } from 'libs/util-constants/src';
+import Link from 'next/link';
 import styled from 'styled-components';
 import { PageWrapper } from 'util/theme';
 
@@ -15,12 +17,14 @@ const MonetizeContainer = styled.div`
   }
 `;
 
-const prerequisiteItems = [
-  'Python >=3.10',
-  'Poetry >=1.4.0 && <2.x',
-  'Tendermint == 0.34.19',
-  'Docker',
-];
+const StyledBlockquote = styled.blockquote`
+  margin: 12px 0 0;
+  padding: 0 0 0 16px;
+  border-left: 4px solid ${COLOR.BORDER_GREY_2};
+  color: rgba(0, 0, 0, 0.65);
+`;
+
+const prerequisiteItems = ['Python >=3.10 && <3.12', 'Poetry >=1.4.0 && <2.x', 'Docker'];
 
 const Prerequisites = () => (
   <div>
@@ -33,10 +37,13 @@ const Prerequisites = () => (
   </div>
 );
 
+const IMPLEMENTATION_PATH = '~/.operate-mech/packages/<author>/customs/<tool_name>/<tool_name>.py';
+
 const quickstartItems = [
   {
     title: '1. Setup your workspace',
-    description: 'Run the setup command to create the workspace and deploy the mech on-chain:',
+    description:
+      'Run the setup command to create the workspace and deploy your mech - i.e. your AI agent that offers a service to other AI agents - on-chain:',
     codeBlocks: ['poetry run mech setup -c <chain>'],
   },
   {
@@ -48,26 +55,28 @@ const quickstartItems = [
     title: '3.Implement your tool logic',
     description: (
       <>
-        Write your implementation in{' '}
-        <Text code>
-          ~/.operate-mech/packages/&lt;author&gt;/customs/&lt;tool_name&gt;/&lt;tool_name&gt;.py
-        </Text>
-        . The scaffold provides a template with a <Text code>run()</Text> function you fill in.
-        <blockquote>
+        <Paragraph>Write your implementation in:</Paragraph>
+        <CodeBlock canCopy>{IMPLEMENTATION_PATH}</CodeBlock>
+        <Paragraph>
+          The scaffold provides a template with a stubbed <Text code>run()</Text> function. Extend
+          the function to encapsulate the service your AI agent is offering.
+        </Paragraph>
+        <StyledBlockquote>
           <Text strong>Note:</Text> If your tool requires API keys or other secrets, add them to{' '}
-          <Text code>~/.operate-mech/.env</Text>.
-        </blockquote>
+          <Text code>~/.operate-mech/.env</Text>. Tools can access the environment variables through
+          kwargs.get(&quot;api_keys&quot;) in the run() function
+        </StyledBlockquote>
       </>
     ),
   },
   {
     title: '4. Publish metadata',
-    description: 'Generate metadata, push to IPFS, and update on-chain:',
+    description: 'Generate metadata and update it on-chain:',
     codeBlocks: ['poetry run mech prepare-metadata', 'poetry run mech update-metadata -c <chain>'],
   },
   {
     title: '5. Launch the agent',
-    description: 'Start the mech service:',
+    description: 'Start the mech to serve other AI agents with it:',
     codeBlocks: ['poetry run mech run -c <chain>'],
   },
 ];
@@ -84,15 +93,23 @@ const Quickstart = () => (
           <Paragraph>
             <Text strong>{item.title}</Text>
           </Paragraph>
-          {item.description && <Paragraph>{item.description}</Paragraph>}
-          <div>
-            {item.codeBlocks &&
-              item.codeBlocks.map((block, index) => (
-                <CodeBlock key={`${item.title}${index}`} canCopy>
-                  {block}
-                </CodeBlock>
-              ))}
-          </div>
+          {item.description &&
+            (typeof item.description === 'string' ? (
+              <>
+                <Paragraph>{item.description}</Paragraph>
+                {item.codeBlocks && (
+                  <div>
+                    {item.codeBlocks.map((block, index) => (
+                      <CodeBlock key={`${item.title}${index}`} canCopy>
+                        {block}
+                      </CodeBlock>
+                    ))}
+                  </div>
+                )}
+              </>
+            ) : (
+              item.description
+            ))}
         </div>
       ))}
     </Flex>
@@ -115,10 +132,13 @@ export const MonetizeYourAgent = () => (
   <PageWrapper>
     <MonetizeContainer>
       <Title level={2} className="mt-0">
-        Monetize Your Agent
+        Monetize your Agent on Olas Marketplace
       </Title>
       <Prerequisites />
       <Quickstart />
+      <Paragraph>
+        You and anyone else can now <Link href="/hire">hire your mech agent</Link>.
+      </Paragraph>
       <Alert message={AlertMessage} type="info" showIcon />
     </MonetizeContainer>
   </PageWrapper>
