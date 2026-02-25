@@ -65,6 +65,8 @@ export const DetailsSubInfo = ({
       metadataLoadState={metadataLoadState}
       hashUrl={hashUrl}
       codeHref={codeHref}
+      chainId={chainId}
+      serviceId={id}
     />
   );
 
