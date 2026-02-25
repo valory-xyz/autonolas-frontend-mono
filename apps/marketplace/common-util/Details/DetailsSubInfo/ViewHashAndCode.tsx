@@ -41,7 +41,12 @@ const useErc8004ScanUrl = ({
 
   useEffect(() => {
     if (!chainId || !serviceId) return;
-    if (!ERC8004_SUPPORTED_CHAINS.some((id) => id === chainId)) return;
+    if (
+      !ERC8004_SUPPORTED_CHAINS.includes(
+        chainId as unknown as (typeof ERC8004_SUPPORTED_CHAINS)[number],
+      )
+    )
+      return;
     if (!(chainId in REGISTRY_SUBGRAPH_CLIENTS)) return;
 
     fetchAndSetErc8004AgentId(serviceId);
