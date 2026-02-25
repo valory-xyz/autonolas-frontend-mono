@@ -94,3 +94,15 @@ export const CACHE_DURATION = {
 } as const;
 
 export const MARKETPLACE_SUPPORTED_CHAIN_IDS = [10, 100, 137, 8453];
+
+export const ERC8004_CHAIN_MAPPING = {
+  1: 'ethereum',
+  10: 'optimism',
+  100: 'gnosis',
+  137: 'polygon',
+  8453: 'base',
+  42161: 'arbitrum',
+  42220: 'celo',
+} as const;
+
+export const ERC8004_BASEURL = 'https://www.8004scan.io/agents';

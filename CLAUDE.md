@@ -194,6 +194,7 @@ ESLint enforces import ordering (configured in .eslintrc.json):
   - Semicolons required
   - Trailing commas
 - TypeScript strict mode enabled
+- **Never use `any` type** — always use proper typed casts, type guards, or specific types instead of `as any` or `: any`
 - Console statements: only `console.warn` and `console.error` allowed (no console.log)
 - ESLint extends next/core-web-vitals and prettier
 

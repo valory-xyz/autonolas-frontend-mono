@@ -28,7 +28,7 @@ type Erc8004Response = {
   x402Support: boolean;
   active: boolean;
   registrations: Array<{
-    agentId: string;
+    agentId: number;
     agentRegistry: string;
   }>;
   supportedTrust: string[];
@@ -160,10 +160,13 @@ export default async function handler(
     const registrations: Erc8004Response['registrations'] = [];
 
     if (serviceFromRegistry?.erc8004Agent?.id) {
-      registrations.push({
-        agentId: serviceFromRegistry.erc8004Agent.id,
-        agentRegistry: `eip155:${chainId}:${IDENTITY_REGISTRY_UPGRADEABLE.addresses[chainId as keyof typeof IDENTITY_REGISTRY_UPGRADEABLE.addresses]}`,
-      });
+      const agentId = Number(serviceFromRegistry.erc8004Agent.id);
+      if (!Number.isNaN(agentId)) {
+        registrations.push({
+          agentId,
+          agentRegistry: `eip155:${chainId}:${IDENTITY_REGISTRY_UPGRADEABLE.addresses[chainId as keyof typeof IDENTITY_REGISTRY_UPGRADEABLE.addresses]}`,
+        });
+      }
     }
 
     const services = [
