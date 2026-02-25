@@ -85,7 +85,7 @@ const Quickstart = () => (
   <Flex gap={24} vertical>
     <div>
       <Title level={4}>Quickstart</Title>
-      <Text>Get started with monetizing your agent in three easy steps:</Text>
+      <Text>Get started with monetizing your agent in five easy steps:</Text>
     </div>
     <Flex vertical>
       {quickstartItems.map((item) => (
