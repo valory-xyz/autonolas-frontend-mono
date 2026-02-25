@@ -66,7 +66,7 @@ type ViewHashAndCodeProps = {
 };
 
 /**
- * Displays view hash, view code, and ERC-8004 API buttons redirecting to
+ * Displays view hash, view code, and ERC-8004 Scan buttons redirecting to
  * links respectively
  */
 export const ViewHashAndCode = ({
