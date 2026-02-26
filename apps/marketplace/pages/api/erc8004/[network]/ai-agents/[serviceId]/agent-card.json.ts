@@ -3,7 +3,7 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 import { IDENTITY_REGISTRY_UPGRADEABLE } from 'libs/util-contracts/src/lib/abiAndAddresses/identityRegistryUpgradeable';
 
 import { ADDRESSES } from 'common-util/Contracts/addresses';
-import { getIpfsResponse } from 'common-util/functions/ipfs';
+import { getIpfsCIDFromHash, getIpfsResponse } from 'common-util/functions/ipfs';
 import { MARKETPLACE_SUBGRAPH_CLIENTS } from 'common-util/graphql';
 import { getServicesFromMarketplaceSubgraph } from 'common-util/graphql/services';
 
@@ -222,7 +222,7 @@ export default async function handler(
       metadata: {
         network: erc8004Network,
         serviceId,
-        sourceToolMetadataCid: metadataHash,
+        sourceToolMetadataCid: getIpfsCIDFromHash(metadataHash),
         generatedAt: new Date().toISOString(),
         ...(mechMarketplaceAddress && {
           marketplaceAddress: `eip155:${chainId}:${mechMarketplaceAddress}`,
