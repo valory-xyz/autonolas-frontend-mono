@@ -64,6 +64,7 @@ export type Service = {
   totalRequests: number;
   totalDeliveries: number;
   metadata: string;
+  mechAddresses: string[];
 };
 
 export type ServiceActivity = {

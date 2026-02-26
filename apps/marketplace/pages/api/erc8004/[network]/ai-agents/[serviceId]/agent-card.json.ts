@@ -227,8 +227,9 @@ export default async function handler(
         ...(mechMarketplaceAddress && {
           marketplaceAddress: `eip155:${chainId}:${mechMarketplaceAddress}`,
         }),
-        // TODO: check with Pia
-        // mechAddress: '',
+        ...(serviceFromMarketplace.mechAddresses?.[0] && {
+          mechAddress: `eip155:${chainId}:${serviceFromMarketplace.mechAddresses[0]}`,
+        }),
         howToHire: {
           summary:
             'To hire this Mech, follow the Hire guide and submit a request via the Mech Marketplace client. The Marketplace page provides the service details for this network.',
