@@ -442,7 +442,7 @@ const getDate = (timeRemainingSeconds: number) => {
   const days = Math.floor(timeRemainingSeconds / 86400);
   const hours = Math.floor((timeRemainingSeconds % 86400) / 3600);
   const minutes = Math.floor((timeRemainingSeconds % 3600) / 60);
-  return `${days}d ${hours}h ${minutes}m`;
+  return `${days}D ${hours}H ${minutes}M`;
 };
 
 export const useStakingContractsList = () => {
