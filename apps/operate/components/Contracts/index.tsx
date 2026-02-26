@@ -7,7 +7,13 @@ import styled, { createGlobalStyle } from 'styled-components';
 import { AvailableOn, StakingContract } from 'types';
 
 import { Caption, TextWithTooltip } from 'libs/ui-components/src';
-import { CHAIN_NAMES, GOVERN_URL, NA, REPO_URL, UNICODE_SYMBOLS } from 'libs/util-constants/src';
+import {
+  CHAIN_NAMES,
+  GOVERN_URL,
+  NA,
+  OPERATE_REPO_URL,
+  UNICODE_SYMBOLS,
+} from 'libs/util-constants/src';
 import { formatWeiNumber } from 'libs/util-functions/src';
 
 import { RunAgentButton } from 'components/RunAgentButton';
@@ -139,20 +145,45 @@ const { Title, Paragraph, Text } = Typography;
 const TAB_LIVE = 'live';
 const TAB_NOT_AVAILABLE = 'not-available';
 
-const FILTER_CHAIN_IDS = [100, 10, 8_453, 34_443, 137] as const;
+const TAB_OPTIONS = [
+  { label: 'Live', value: TAB_LIVE },
+  { label: 'Not available', value: TAB_NOT_AVAILABLE },
+];
 
 const CHAIN_LOGOS: Partial<Record<number, string>> = {
+  1: '/images/ethereum-logo.svg',
   10: '/images/optimism-logo.svg',
   100: '/images/gnosis-logo.svg',
-  8_453: '/images/base-logo.svg',
   137: '/images/polygon-logo.svg',
+  8_453: '/images/base-logo.svg',
   34_443: '/images/mode-logo.svg',
+  42_161: '/images/arbitrum-logo.svg',
+  42_220: '/images/celo-logo.svg',
 };
 
 const PLATFORM_OPTIONS: { value: AvailableOn; label: string }[] = [
   { value: 'pearl', label: 'Pearl' },
   { value: 'quickstart', label: 'Quickstart' },
   { value: 'contribute', label: 'Contribute' },
+];
+
+const CHAIN_OPTIONS = [
+  { value: 'all', label: 'All chains' },
+  ...Object.entries(CHAIN_NAMES)
+    .sort(([a], [b]) => Number(a) - Number(b))
+    .map(([chainIdStr, name]) => {
+      const chainId = Number(chainIdStr);
+      const logoSrc = CHAIN_LOGOS[chainId];
+      return {
+        value: chainIdStr,
+        label: (
+          <Flex align="center" gap={8}>
+            {logoSrc && <Image src={logoSrc} alt={name} width={16} height={16} />}
+            <span>{name}</span>
+          </Flex>
+        ),
+      };
+    }),
 ];
 
 const isLiveContract = (c: StakingContract) => c.availableOn != null && c.availableOn.length > 0;
@@ -171,7 +202,13 @@ const getTableColumns = (): ColumnsType<StakingContract> => [
           <Flex align="center" gap={8}>
             <Text type="secondary">{chainLabel}</Text>
             {logoSrc && (
-              <Image src={logoSrc} alt="" width={20} height={20} style={{ flexShrink: 0 }} />
+              <Image
+                src={logoSrc}
+                alt={`${chainLabel} logo`}
+                width={20}
+                height={20}
+                style={{ flexShrink: 0 }}
+              />
             )}
           </Flex>
         </>
@@ -311,26 +348,6 @@ export const ContractsPage = () => {
 
   const columns = useMemo(() => getTableColumns(), []);
 
-  const chainOptions = useMemo(
-    () => [
-      { value: 'all', label: 'All chains' },
-      ...FILTER_CHAIN_IDS.map((chainId) => {
-        const name = CHAIN_NAMES[String(chainId)] ?? String(chainId);
-        const logoSrc = CHAIN_LOGOS[chainId];
-        return {
-          value: String(chainId),
-          label: (
-            <Flex align="center" gap={8}>
-              {logoSrc && <Image src={logoSrc} alt="" width={16} height={16} />}
-              <span>{name}</span>
-            </Flex>
-          ),
-        };
-      }),
-    ],
-    [],
-  );
-
   return (
     <StyledMain>
       <FilterDropdownStyles />
@@ -346,10 +363,7 @@ export const ContractsPage = () => {
         <LiveNotAvailableSwitch
           value={activeTab}
           onChange={(v) => setActiveTab(String(v))}
-          options={[
-            { label: 'Live', value: TAB_LIVE },
-            { label: 'Not available', value: TAB_NOT_AVAILABLE },
-          ]}
+          options={TAB_OPTIONS}
         />
 
         {activeTab === TAB_NOT_AVAILABLE && (
@@ -358,17 +372,15 @@ export const ContractsPage = () => {
             message={
               <>
                 Know some of the staking contracts here are available?{' '}
-                <a href={REPO_URL} target="_blank" rel="noreferrer">
+                <a href={OPERATE_REPO_URL} target="_blank" rel="noreferrer">
                   Open a PR on GitHub {UNICODE_SYMBOLS.EXTERNAL_LINK}
                 </a>{' '}
                 and add it.
               </>
             }
-            showIcon
             className="mb-16"
           />
         )}
-
         <FilterRow className="mb-16">
           <Input
             prefix={<SearchOutlined className="site-form-item-icon" />}
@@ -381,7 +393,7 @@ export const ContractsPage = () => {
           <Select
             value={chainFilter}
             onChange={setChainFilter}
-            options={chainOptions}
+            options={CHAIN_OPTIONS}
             optionLabelProp="label"
             style={{ minWidth: 220 }}
             placeholder="All chains"
@@ -394,7 +406,7 @@ export const ContractsPage = () => {
                 className={PLATFORM_SELECT_CLASS}
                 mode="multiple"
                 value={platformFilters}
-                onChange={(v: AvailableOn[]) => setPlatformFilters(v ?? [])}
+                onChange={setPlatformFilters}
                 options={PLATFORM_OPTIONS}
                 style={{ minWidth: 220 }}
                 placeholder="All platforms"
@@ -430,7 +442,11 @@ export const ContractsPage = () => {
                   <Paragraph className="mb-12" style={{ maxWidth: 500 }}>
                     {record.metadata ? record.metadata.description : NA}
                   </Paragraph>
-                  <a href={`${GOVERN_URL}/contracts/${record.address}`} target="_blank">
+                  <a
+                    href={`${GOVERN_URL}/contracts/${record.address}`}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
                     View full contract details {UNICODE_SYMBOLS.EXTERNAL_LINK}
                   </a>
                 </>
