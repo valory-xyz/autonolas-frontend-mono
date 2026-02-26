@@ -18,6 +18,7 @@ import {
   MinimumStakingDepositLabel,
   MinimumStakingPeriodsLabel,
   MultisigThresholdLabel,
+  ProxyHashLabel,
   RewardsPerSecondLabel,
   ServiceConfigHashLabel,
   TimeForEmissionsLabel,
@@ -31,6 +32,7 @@ import {
   useGetMinimumStakingDeposit,
   useGetMinimumStakingDuration,
   useGetMultisigThreshold,
+  useGetProxyHash,
   useMaxNumServices,
   useNumberOfAgentInstances,
   useRewardsPerSecond,
@@ -153,7 +155,7 @@ const MultisigThreshold = ({ address, chainId }: ConfigItemProps) => {
   return <ShowContent isLoading={isLoading} chainId={chainId} data={data} />;
 };
 
-export const ConfigHash = ({ address, chainId }: ConfigItemProps) => {
+const ConfigHash = ({ address, chainId }: ConfigItemProps) => {
   const { data: configHash, isLoading } = useGetConfigHash({ address, chainId });
   const isZeroAddress = configHash === zeroHash;
 
@@ -177,6 +179,12 @@ export const ConfigHash = ({ address, chainId }: ConfigItemProps) => {
   return <ShowContent isLoading={isLoading} chainId={chainId} data={calculatedConfigHash} />;
 };
 
+const ProxyHash = ({ address, chainId }: ConfigItemProps) => {
+  const { data: proxyHash, isLoading } = useGetProxyHash({ address, chainId });
+  const displayValue = proxyHash ?? NA;
+  return <ShowContent isLoading={isLoading} chainId={chainId} data={displayValue} />;
+};
+
 const ActivityCheckerAddress = ({ address, chainId }: ConfigItemProps) => {
   const { data: checkerAddress, isLoading } = useGetActivityChecker({ address, chainId });
   return (
@@ -188,11 +196,15 @@ const ActivityCheckerAddress = ({ address, chainId }: ConfigItemProps) => {
   );
 };
 
-type ColFlexContainerProps = { text: string | ReactNode; content: ReactNode };
+type ColFlexContainerProps = {
+  text: string | ReactNode;
+  content: ReactNode;
+  span?: number;
+};
 
-export const ColFlexContainer = ({ text, content, ...rest }: ColFlexContainerProps) => {
+export const ColFlexContainer = ({ text, content, span = 12, ...rest }: ColFlexContainerProps) => {
   return (
-    <Col span={12} {...rest}>
+    <Col span={span} {...rest}>
       <Flex vertical gap={4} align="flex-start">
         {typeof text === 'string' ? <Text type="secondary">{text}</Text> : text}
         {content}
@@ -284,6 +296,15 @@ export const ContractConfiguration = ({ contract }: { contract: StakingContract 
           text={<ActivityCheckerAddressLabel />}
           content={<ActivityCheckerAddress chainId={contract.chainId} address={contract.address} />}
           data-testid="activity-checker-address"
+        />
+      </Row>
+
+      <Row gutter={24}>
+        <ColFlexContainer
+          span={24}
+          text={<ProxyHashLabel />}
+          content={<ProxyHash chainId={contract.chainId} address={contract.address} />}
+          data-testid="proxy-hash"
         />
       </Row>
     </>
