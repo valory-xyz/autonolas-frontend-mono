@@ -21,7 +21,7 @@
 - Primary: #7e22ce, Text primary: #1F2229, Text secondary/tertiary: #606F85
 - styled-components used extensively - Section styles in `common-util/Details/styles.tsx`
 - `SectionContainer > EachSection > SubTitle + Info` is the standard detail layout pattern
-- `ViewHashAndCode` component shows external links inline with dot separators: `nbsp;bull;nbsp;`
+- `ViewHashAndCode` component shows external links inline with dot separators: `&nbsp;•&nbsp;`
 
 ## List Table Patterns
 - AI Agents table columns: ID, Description, Services Offered, Marketplace Role, Marketplace Activity
