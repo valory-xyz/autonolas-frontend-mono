@@ -74,3 +74,6 @@ export const buildServiceRegistryContext = (
 
   return { provider, serviceRegistryContract, serviceRegistryAddress };
 };
+
+export const getAgentCardUrl = (network: string, serviceId: string): string =>
+  `https://marketplace.olas.network/erc8004/${network}/ai-agents/${serviceId}/agent-card.json`;

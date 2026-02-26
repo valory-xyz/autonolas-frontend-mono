@@ -6,8 +6,10 @@ import { RPC_URLS } from 'libs/util-constants/src';
 import { ADDRESSES } from 'common-util/Contracts/addresses';
 import { getIpfsResponse } from 'common-util/functions/ipfs';
 import { generateName } from 'common-util/functions/agentName';
+import { MARKETPLACE_SUBGRAPH_CLIENTS } from 'common-util/graphql';
+import { getServicesFromMarketplaceSubgraph } from 'common-util/graphql/services';
 
-import { CACHE_DURATION, GATEWAY_URL } from 'util/constants';
+import { CACHE_DURATION, GATEWAY_URL, MARKETPLACE_SUPPORTED_CHAIN_IDS } from 'util/constants';
 import { zeroAddress } from 'viem';
 
 import {
@@ -16,6 +18,7 @@ import {
   normalizeQueryParam,
   getServiceFromRegistrySafe,
   buildServiceRegistryContext,
+  getAgentCardUrl,
 } from 'common-util/functions/erc8004Helpers';
 
 type Erc8004Response = {
@@ -103,9 +106,19 @@ export default async function handler(
     const serviceData = await serviceRegistryContract.getService(serviceId);
     const configHash = serviceData.configHash;
 
-    const [metadata, serviceFromRegistry] = await Promise.all([
+    const isMarketplaceChain = MARKETPLACE_SUPPORTED_CHAIN_IDS.includes(
+      chainId as (typeof MARKETPLACE_SUPPORTED_CHAIN_IDS)[number],
+    );
+
+    const [metadata, serviceFromRegistry, servicesFromMarketplace] = await Promise.all([
       getIpfsResponse(configHash),
       getServiceFromRegistrySafe(chainId, serviceId),
+      isMarketplaceChain
+        ? getServicesFromMarketplaceSubgraph({
+            chainId: chainId as keyof typeof MARKETPLACE_SUBGRAPH_CLIENTS,
+            serviceIds: [serviceId],
+          })
+        : Promise.resolve(null),
     ]);
     const registrations: Erc8004Response['registrations'] = [];
 
@@ -132,6 +145,15 @@ export default async function handler(
       services.push({
         name: 'agentWallet',
         endpoint: `eip155:${chainId}:${agentWallet}`,
+      });
+    }
+
+    // Add A2A Agent Card entry for services with Supply role (totalDeliveries >= 1)
+    const serviceFromMarketplace = servicesFromMarketplace?.[0];
+    if (serviceFromMarketplace && serviceFromMarketplace.totalDeliveries >= 1) {
+      services.push({
+        name: 'A2A',
+        endpoint: getAgentCardUrl(network, serviceId),
       });
     }
 

@@ -77,7 +77,6 @@ type AgentCardResponse = {
     sourceToolMetadataCid: string;
     generatedAt: string;
     marketplaceAddress?: string;
-    // TODO: resolve mech contract address from subgraph or on-chain
     mechAddress?: string;
     howToHire: {
       summary: string;
@@ -215,7 +214,6 @@ export default async function handler(
       ...(mechMetadata.url && { url: mechMetadata.url }),
       defaultInputModes: ['text/plain'],
       defaultOutputModes: ['application/json'],
-      // TODO: Check with Pia
       capabilities: {
         streaming: false,
         pushNotifications: false,
@@ -230,7 +228,7 @@ export default async function handler(
           marketplaceAddress: `eip155:${chainId}:${mechMarketplaceAddress}`,
         }),
         // TODO: check with Pia
-        mechAddress: '',
+        // mechAddress: '',
         howToHire: {
           summary:
             'To hire this Mech, follow the Hire guide and submit a request via the Mech Marketplace client. The Marketplace page provides the service details for this network.',
