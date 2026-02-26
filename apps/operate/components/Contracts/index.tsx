@@ -1,9 +1,8 @@
 import { DownOutlined, RightOutlined, SearchOutlined } from '@ant-design/icons';
-import { Alert, Button, Card, Flex, Input, Select, Segmented, Table, Tag, Typography } from 'antd';
+import { Alert, Button, Flex, Input, Select, Table, Tag, Typography } from 'antd';
 import { ColumnsType } from 'antd/es/table';
 import Image from 'next/image';
 import { useMemo, useState } from 'react';
-import styled, { createGlobalStyle } from 'styled-components';
 import { AvailableOn, StakingContract } from 'types';
 
 import { Caption, TextWithTooltip } from 'libs/ui-components/src';
@@ -18,173 +17,29 @@ import { formatWeiNumber } from 'libs/util-functions/src';
 
 import { RunAgentButton } from 'components/RunAgentButton';
 
+import {
+  CHAIN_LOGOS,
+  CHAIN_OPTIONS,
+  FILTER_DROPDOWN_CLASS,
+  PLATFORM_OPTIONS,
+  PLATFORM_SELECT_CLASS,
+  TAB_LIVE,
+  TAB_NOT_AVAILABLE,
+  TAB_OPTIONS,
+} from './constants';
 import { useStakingContractsList } from './hooks';
-
-const StyledMain = styled.main`
-  box-sizing: border-box;
-  display: flex;
-  flex-direction: column;
-  width: 100%;
-  padding: 32px;
-  margin: 0 auto;
-
-  @media (min-width: 2560px) {
-    max-width: 1400px;
-  }
-`;
-
-const StyledCard = styled(Card)`
-  border-width: 16px;
-`;
-
-const TableWrapper = styled.div`
-  .ant-table-thead > tr > th {
-    white-space: nowrap;
-  }
-`;
-
-const FILTER_CONTROL_HEIGHT = 32;
-
-const FilterRow = styled(Flex)`
-  font-size: 14px;
-  flex-wrap: wrap;
-  gap: 12px;
-  align-items: center;
-  .ant-input-affix-wrapper,
-  .ant-select-selector,
-  .ant-tag {
-    padding: 8px 12px !important;
-    font-size: 14px;
-  }
-  .ant-input-affix-wrapper,
-  .ant-select .ant-select-selector {
-    height: ${FILTER_CONTROL_HEIGHT}px !important;
-    min-height: ${FILTER_CONTROL_HEIGHT}px !important;
-    display: flex !important;
-    align-items: center !important;
-  }
-  .ant-select-single .ant-select-selector {
-    padding: 8px 12px !important;
-  }
-`;
-
-const FILTER_DROPDOWN_CLASS = 'contracts-filter-select-dropdown';
-
-const PLATFORM_SELECT_CLASS = 'contracts-platform-select';
-
-const PlatformSelectWrap = styled.div`
-  position: relative;
-  min-width: 220px;
-
-  .${PLATFORM_SELECT_CLASS}.ant-select .ant-select-selector {
-    padding: 2px 8px !important;
-    height: ${FILTER_CONTROL_HEIGHT}px !important;
-    min-height: ${FILTER_CONTROL_HEIGHT}px !important;
-  }
-  .${PLATFORM_SELECT_CLASS}.ant-select .ant-select-selection-placeholder {
-    visibility: hidden;
-  }
-  .${PLATFORM_SELECT_CLASS}.ant-select-multiple .ant-select-selection-item {
-    padding: 2px 8px !important;
-    margin-inline-end: 4px !important;
-  }
-`;
-
-const PlatformSelectLabel = styled.span`
-  position: absolute;
-  left: 8px;
-  top: 50%;
-  transform: translateY(-50%);
-  pointer-events: none;
-  font-size: 14px;
-  color: rgba(0, 0, 0, 0.88);
-  ${PlatformSelectWrap}:has(.ant-select-open) & {
-    color: rgba(0, 0, 0, 0.25);
-  }
-`;
-
-const FilterDropdownStyles = createGlobalStyle`
-  .${FILTER_DROPDOWN_CLASS} .ant-select-item {
-    padding: 8px 12px !important;
-    font-size: 14px;
-    min-height: unset;
-  }
-  .${FILTER_DROPDOWN_CLASS} .ant-select-item-option-content {
-    display: flex;
-    align-items: center;
-  }
-`;
-
-const LiveNotAvailableSwitch = styled(Segmented)`
-  background: #e0e3eb !important;
-  border-radius: 8px !important;
-  margin-bottom: 16px !important;
-
-  .ant-segmented-group {
-    background: transparent !important;
-  }
-  .ant-segmented-thumb {
-    background: #ffffff !important;
-    border-radius: 6px !important;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-  }
-  .ant-segmented-item {
-    color: #6c757d !important;
-    border-radius: 6px !important;
-  }
-  .ant-segmented-item-selected {
-    color: #333333 !important;
-  }
-  .ant-segmented-item-label {
-    padding: 6px 16px;
-  }
-`;
+import {
+  FilterDropdownStyles,
+  FilterRow,
+  LiveNotAvailableSwitch,
+  PlatformSelectLabel,
+  PlatformSelectWrap,
+  StyledCard,
+  StyledMain,
+  TableWrapper,
+} from './styles';
 
 const { Title, Paragraph, Text } = Typography;
-
-const TAB_LIVE = 'live';
-const TAB_NOT_AVAILABLE = 'not-available';
-
-const TAB_OPTIONS = [
-  { label: 'Live', value: TAB_LIVE },
-  { label: 'Not available', value: TAB_NOT_AVAILABLE },
-];
-
-const CHAIN_LOGOS: Partial<Record<number, string>> = {
-  1: '/images/ethereum-logo.svg',
-  10: '/images/optimism-logo.svg',
-  100: '/images/gnosis-logo.svg',
-  137: '/images/polygon-logo.svg',
-  8_453: '/images/base-logo.svg',
-  34_443: '/images/mode-logo.svg',
-  42_161: '/images/arbitrum-logo.svg',
-  42_220: '/images/celo-logo.svg',
-};
-
-const PLATFORM_OPTIONS: { value: AvailableOn; label: string }[] = [
-  { value: 'pearl', label: 'Pearl' },
-  { value: 'quickstart', label: 'Quickstart' },
-  { value: 'contribute', label: 'Contribute' },
-];
-
-const CHAIN_OPTIONS = [
-  { value: 'all', label: 'All chains' },
-  ...Object.entries(CHAIN_NAMES)
-    .sort(([a], [b]) => Number(a) - Number(b))
-    .map(([chainIdStr, name]) => {
-      const chainId = Number(chainIdStr);
-      const logoSrc = CHAIN_LOGOS[chainId];
-      return {
-        value: chainIdStr,
-        label: (
-          <Flex align="center" gap={8}>
-            {logoSrc && <Image src={logoSrc} alt={name} width={16} height={16} />}
-            <span>{name}</span>
-          </Flex>
-        ),
-      };
-    }),
-];
 
 const isLiveContract = (c: StakingContract) => c.availableOn != null && c.availableOn.length > 0;
 
