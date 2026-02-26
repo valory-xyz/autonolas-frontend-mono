@@ -19,6 +19,7 @@ import {
   getServiceFromRegistrySafe,
   buildServiceRegistryContext,
   getAgentCardUrl,
+  getMcpJsonUrl,
 } from 'common-util/functions/erc8004Helpers';
 
 type Erc8004Response = {
@@ -148,12 +149,16 @@ export default async function handler(
       });
     }
 
-    // Add A2A Agent Card entry for services with Supply role (totalDeliveries >= 1)
+    // Add A2A Agent Card and MCP entries for services with Supply role (totalDeliveries >= 1)
     const serviceFromMarketplace = servicesFromMarketplace?.[0];
     if (serviceFromMarketplace && serviceFromMarketplace.totalDeliveries >= 1) {
       services.push({
         name: 'A2A',
         endpoint: getAgentCardUrl(network, serviceId),
+      });
+      services.push({
+        name: 'MCP',
+        endpoint: getMcpJsonUrl(network, serviceId),
       });
     }
 
