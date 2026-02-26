@@ -37,6 +37,11 @@ const nextConfig = {
     return config;
   },
   rewrites: async () => [
+    // Agent Card endpoint
+    {
+      source: '/erc8004/:network/ai-agents/:serviceId/agent-card.json',
+      destination: '/api/erc8004/:network/ai-agents/:serviceId/agent-card.json',
+    },
     // Removes /api/ from the url. The endpoint can be accessed from both the paths.
     {
       source: '/erc8004/:network/ai-agents/:serviceId',
