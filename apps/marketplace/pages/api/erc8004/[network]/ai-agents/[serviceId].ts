@@ -1,20 +1,26 @@
-import { ethers } from 'ethers';
 import type { NextApiRequest, NextApiResponse } from 'next';
 
-import { isL1Network } from 'libs/util-functions/src';
 import { IDENTITY_REGISTRY_UPGRADEABLE } from 'libs/util-contracts/src/lib/abiAndAddresses/identityRegistryUpgradeable';
-
-import { SERVICE_REGISTRY_CONTRACT, SERVICE_REGISTRY_L2 } from 'common-util/AbiAndAddresses';
-import { ADDRESSES } from 'common-util/Contracts/addresses';
 import { RPC_URLS } from 'libs/util-constants/src';
+
+import { ADDRESSES } from 'common-util/Contracts/addresses';
 import { getIpfsResponse } from 'common-util/functions/ipfs';
 import { generateName } from 'common-util/functions/agentName';
-import { EVM_SUPPORTED_CHAINS } from 'common-util/Login/config';
-import { getServiceFromRegistry } from 'common-util/graphql/registry';
-import { REGISTRY_SUBGRAPH_CLIENTS, ERC8004_SUPPORTED_CHAINS } from 'common-util/graphql';
+import { MARKETPLACE_SUBGRAPH_CLIENTS } from 'common-util/graphql';
+import { getServicesFromMarketplaceSubgraph } from 'common-util/graphql/services';
 
-import { CACHE_DURATION, GATEWAY_URL } from 'util/constants';
+import { CACHE_DURATION, GATEWAY_URL, MARKETPLACE_SUPPORTED_CHAIN_IDS } from 'util/constants';
 import { zeroAddress } from 'viem';
+
+import {
+  getChainIdFromNetworkSlug,
+  getSupportedNetworkNames,
+  normalizeQueryParam,
+  getServiceFromRegistrySafe,
+  buildServiceRegistryContext,
+  getAgentCardUrl,
+  getMcpJsonUrl,
+} from 'common-util/functions/erc8004Helpers';
 
 type Erc8004Response = {
   type: 'https://eips.ethereum.org/EIPS/eip-8004#registration-v1';
@@ -37,41 +43,6 @@ type Erc8004Response = {
 const getImageUrl = (image: string | undefined) => {
   if (!image) return '';
   return image.replace('ipfs://', GATEWAY_URL);
-};
-
-const getChainIdFromNetworkSlug = (network: string): number | null => {
-  if (typeof network !== 'string') return null;
-  const chain = EVM_SUPPORTED_CHAINS.find(
-    (chain) => chain.networkName.toLowerCase() === network.toLowerCase(),
-  );
-  return chain?.id ?? null;
-};
-
-const getSupportedNetworkNames = (): string =>
-  EVM_SUPPORTED_CHAINS.map((c) => c.networkName).join(', ');
-
-const normalizeQueryParam = (param: NextApiRequest['query'][string]): string | undefined =>
-  Array.isArray(param) ? param[0] : param;
-
-const getServiceFromRegistrySafe = async (chainId: number, serviceId: string) => {
-  if (chainId in REGISTRY_SUBGRAPH_CLIENTS) {
-    try {
-      const includeErc8004 = ERC8004_SUPPORTED_CHAINS.some(
-        (erc8004ChainId) => erc8004ChainId === chainId,
-      );
-      return await getServiceFromRegistry({
-        chainId: chainId as keyof typeof REGISTRY_SUBGRAPH_CLIENTS,
-        id: serviceId,
-        includeErc8004,
-      });
-    } catch (error) {
-      console.error(
-        `Error fetching service ${serviceId} from registry on chain ${chainId}:`,
-        error,
-      );
-    }
-  }
-  return null;
 };
 
 export default async function handler(
@@ -116,31 +87,14 @@ export default async function handler(
       });
     }
 
-    const registryAddresses = ADDRESSES[chainId as keyof typeof ADDRESSES];
-    if (!registryAddresses) {
+    const registryCtx = buildServiceRegistryContext(chainId, rpcUrl);
+    if (!registryCtx) {
       return res.status(500).json({
         error: `No contract addresses configured for network: ${network}`,
       });
     }
 
-    const isL1 = isL1Network(chainId);
-    const serviceRegistryAddress = isL1
-      ? (registryAddresses as { serviceRegistry: string }).serviceRegistry
-      : (registryAddresses as { serviceRegistryL2: string }).serviceRegistryL2;
-    const serviceRegistryAbi = isL1 ? SERVICE_REGISTRY_CONTRACT.abi : SERVICE_REGISTRY_L2.abi;
-
-    if (!serviceRegistryAddress) {
-      return res.status(500).json({
-        error: `No service registry address configured for network: ${network}`,
-      });
-    }
-
-    const provider = new ethers.JsonRpcProvider(rpcUrl);
-    const serviceRegistryContract = new ethers.Contract(
-      serviceRegistryAddress,
-      serviceRegistryAbi,
-      provider,
-    );
+    const { serviceRegistryContract } = registryCtx;
 
     // Check if service exists
     const exists = await serviceRegistryContract.exists(serviceId);
@@ -153,9 +107,19 @@ export default async function handler(
     const serviceData = await serviceRegistryContract.getService(serviceId);
     const configHash = serviceData.configHash;
 
-    const [metadata, serviceFromRegistry] = await Promise.all([
+    const isMarketplaceChain = MARKETPLACE_SUPPORTED_CHAIN_IDS.includes(
+      chainId as (typeof MARKETPLACE_SUPPORTED_CHAIN_IDS)[number],
+    );
+
+    const [metadata, serviceFromRegistry, servicesFromMarketplace] = await Promise.all([
       getIpfsResponse(configHash),
       getServiceFromRegistrySafe(chainId, serviceId),
+      isMarketplaceChain
+        ? getServicesFromMarketplaceSubgraph({
+            chainId: chainId as keyof typeof MARKETPLACE_SUBGRAPH_CLIENTS,
+            serviceIds: [serviceId],
+          })
+        : Promise.resolve(null),
     ]);
     const registrations: Erc8004Response['registrations'] = [];
 
@@ -182,6 +146,19 @@ export default async function handler(
       services.push({
         name: 'agentWallet',
         endpoint: `eip155:${chainId}:${agentWallet}`,
+      });
+    }
+
+    // Add A2A Agent Card and MCP entries for services with Supply role (totalDeliveries >= 1)
+    const serviceFromMarketplace = servicesFromMarketplace?.[0];
+    if (serviceFromMarketplace && serviceFromMarketplace.totalDeliveries >= 1) {
+      services.push({
+        name: 'A2A',
+        endpoint: getAgentCardUrl(network, serviceId),
+      });
+      services.push({
+        name: 'MCP',
+        endpoint: getMcpJsonUrl(network, serviceId),
       });
     }
 

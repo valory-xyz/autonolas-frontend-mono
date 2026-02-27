@@ -2,12 +2,18 @@ import { GATEWAY_URL, HASH_PREFIX } from 'libs/util-constants/src';
 
 const IPFS_TIMEOUT = 5_000;
 
-export const getIpfsUrl = (hash: string) => {
+export const getIpfsCIDFromHash = (hash: string): string => {
   if (!hash) return '';
 
   const cleanHash = hash.startsWith('0x') ? hash.substring(2) : hash;
-  const hasHashPrefix = cleanHash.startsWith(HASH_PREFIX);
-  return hasHashPrefix ? `${GATEWAY_URL}${cleanHash}` : `${GATEWAY_URL}${HASH_PREFIX}${cleanHash}`;
+  return cleanHash.startsWith(HASH_PREFIX) ? cleanHash : `${HASH_PREFIX}${cleanHash}`;
+};
+
+export const getIpfsUrl = (hash: string) => {
+  if (!hash) return '';
+
+  const ipfsCID = getIpfsCIDFromHash(hash);
+  return `${GATEWAY_URL}${ipfsCID}`;
 };
 
 export const imageIpfsToGatewayUrl = (imageUrl: string | undefined): string | null => {

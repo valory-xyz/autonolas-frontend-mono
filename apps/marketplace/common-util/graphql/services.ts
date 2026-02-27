@@ -8,12 +8,16 @@ type ServiceDetails = {
   metadata: {
     metadata?: string;
   }[];
+  mechs: {
+    id: string;
+    address: string;
+  }[];
 };
 
 export const getQueryForServiceDetails = ({ serviceIds }: { serviceIds: string[] }) => `
     {
       services(
-        where: { 
+        where: {
           id_in: [${serviceIds.map((id) => `"${id}"`).join(', ')}]
         }
       ) {
@@ -21,7 +25,11 @@ export const getQueryForServiceDetails = ({ serviceIds }: { serviceIds: string[]
         totalRequests
         totalDeliveries
         metadata {
-          metadata 
+          metadata
+        }
+        mechs {
+          id
+          address
         }
       }
     }
@@ -45,6 +53,7 @@ export const getServicesFromMarketplaceSubgraph = async ({
   const services = response.services.map((service) => ({
     ...service,
     metadata: service.metadata?.[0]?.metadata || '',
+    mechAddresses: (service.mechs ?? []).map((mech) => mech.address),
   }));
   return services;
 };
