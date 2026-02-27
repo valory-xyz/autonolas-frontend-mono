@@ -197,8 +197,10 @@ export default async function handler(
     const mechMetadata = untypedIpfsMetadata as unknown as MechMetadata;
 
     if (!mechMetadata.name || !mechMetadata.description) {
+      console.warn(`Invalid IPFS metadata for agent card ${cacheKey}, falling back to cache`);
       const stale = getStaleFallback<AgentCardResponse>(cacheKey);
       if (stale) {
+        res.setHeader('X-Cache-Status', 'stale');
         res.setHeader(
           'Cache-Control',
           `public, s-maxage=${CACHE_DURATION.FIVE_MINUTES}, stale-while-revalidate=${CACHE_DURATION.FIVE_MINUTES}`,
@@ -288,6 +290,8 @@ export default async function handler(
     if (cacheKey) {
       const stale = getStaleFallback<AgentCardResponse>(cacheKey);
       if (stale) {
+        console.warn(`Serving stale agent card cache for ${cacheKey} due to upstream error`);
+        res.setHeader('X-Cache-Status', 'stale');
         res.setHeader(
           'Cache-Control',
           `public, s-maxage=${CACHE_DURATION.FIVE_MINUTES}, stale-while-revalidate=${CACHE_DURATION.FIVE_MINUTES}`,

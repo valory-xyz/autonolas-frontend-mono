@@ -194,8 +194,10 @@ export default async function handler(
     const mechMetadata = untypedIpfsMetadata as unknown as MechMetadata;
 
     if (!mechMetadata.name || !mechMetadata.description) {
+      console.warn(`Invalid IPFS metadata for MCP ${cacheKey}, falling back to cache`);
       const stale = getStaleFallback<McpResponse>(cacheKey);
       if (stale) {
+        res.setHeader('X-Cache-Status', 'stale');
         res.setHeader(
           'Cache-Control',
           `public, s-maxage=${CACHE_DURATION.FIVE_MINUTES}, stale-while-revalidate=${CACHE_DURATION.FIVE_MINUTES}`,
@@ -247,6 +249,8 @@ export default async function handler(
     if (cacheKey) {
       const stale = getStaleFallback<McpResponse>(cacheKey);
       if (stale) {
+        console.warn(`Serving stale MCP cache for ${cacheKey} due to upstream error`);
+        res.setHeader('X-Cache-Status', 'stale');
         res.setHeader(
           'Cache-Control',
           `public, s-maxage=${CACHE_DURATION.FIVE_MINUTES}, stale-while-revalidate=${CACHE_DURATION.FIVE_MINUTES}`,
