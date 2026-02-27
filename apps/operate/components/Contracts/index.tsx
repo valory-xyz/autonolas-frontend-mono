@@ -6,6 +6,7 @@ import { useMemo, useState } from 'react';
 import { AvailableOn, StakingContract } from 'types';
 
 import { Caption, TextWithTooltip } from 'libs/ui-components/src';
+import { COLOR } from 'libs/ui-theme/src';
 import {
   CHAIN_NAMES,
   GOVERN_URL,
@@ -286,7 +287,7 @@ export const ContractsPage = () => {
                 const Icon = expanded ? DownOutlined : RightOutlined;
                 return (
                   <Icon
-                    style={{ fontSize: '14px', color: '#606F85' }}
+                    style={{ fontSize: '14px', color: COLOR.TEXT_SECONDARY }}
                     onClick={(e) => onExpand(record, e)}
                   />
                 );
