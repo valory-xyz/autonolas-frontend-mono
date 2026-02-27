@@ -195,7 +195,7 @@ export const ContractsPage = () => {
       list = list.filter((c) => c.chainId === chainIdNum);
     }
 
-    if (platformFilters.length > 0) {
+    if (activeTab === TAB_LIVE && platformFilters.length > 0) {
       list = list.filter((c) => c.availableOn?.some((p) => platformFilters.includes(p)));
     }
 
