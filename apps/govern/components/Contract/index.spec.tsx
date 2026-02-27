@@ -48,6 +48,9 @@ jest.mock('components/Contract/hooks', () => ({
   useTimeForEmissions: jest.fn().mockReturnValue({ data: '2592000' }),
   useNumberOfAgentInstances: jest.fn().mockReturnValue({ data: '1' }),
   useGetMultisigThreshold: jest.fn().mockReturnValue({ data: '1' }),
+  useGetProxyHash: jest.fn().mockReturnValue({
+    data: '0xb89c1b3bdf2cf8827818646bce9a8f6e372885f8c55e5c07acbd307cb133b000',
+  }),
   useGetMinimumStakingDeposit: jest.fn().mockReturnValue({ data: '20' }),
   useMaxNumServices: jest.fn().mockReturnValue({ data: 200 }),
   useRewardsPerSecond: jest.fn().mockReturnValue({ data: 0.003 }),
@@ -152,6 +155,11 @@ describe('<ContractPage />', () => {
       testId: 'activity-checker-address',
       title: 'Activity checker address',
       value: '0x00000...00000 ↗',
+    },
+    {
+      testId: 'proxy-hash',
+      title: 'Approved multisig proxy hash',
+      value: '0xb89c1b3bdf2cf8827818646bce9a8f6e372885f8c55e5c07acbd307cb133b000',
     },
   ])('should display $title', async ({ testId, title, value }) => {
     render(<ContractPage />);

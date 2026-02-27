@@ -118,5 +118,8 @@ export const useGetMultisigThreshold = ({ address, chainId }: UseStakingContract
 export const useGetConfigHash = ({ address, chainId }: UseStakingContractConstantParams) =>
   useStakingContractConstant<string>({ address, chainId, name: 'configHash' });
 
+export const useGetProxyHash = ({ address, chainId }: UseStakingContractConstantParams) =>
+  useStakingContractConstant<string>({ address, chainId, name: 'proxyHash' });
+
 export const useGetActivityChecker = ({ address, chainId }: UseStakingContractConstantParams) =>
   useStakingContractConstant({ address, chainId, name: 'activityChecker' });
