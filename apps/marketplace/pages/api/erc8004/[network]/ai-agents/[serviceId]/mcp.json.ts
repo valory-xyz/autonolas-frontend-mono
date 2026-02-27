@@ -16,6 +16,7 @@ import {
   getSupportedNetworkNames,
   normalizeQueryParam,
 } from 'common-util/functions/erc8004Helpers';
+import { getCached, getStaleFallback, setCache } from 'util/apiCache';
 
 type ToolInputOutput = {
   type: string;
@@ -117,6 +118,8 @@ export default async function handler(
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
+  let cacheKey = '';
+
   try {
     const { network: networkParam, serviceId: serviceIdParam } = req.query;
     const network = normalizeQueryParam(networkParam);
@@ -153,6 +156,16 @@ export default async function handler(
       });
     }
 
+    cacheKey = `mcp:${network}:${serviceId}`;
+    const cached = getCached<McpResponse>(cacheKey);
+    if (cached) {
+      res.setHeader(
+        'Cache-Control',
+        `public, s-maxage=${CACHE_DURATION.SIX_HOURS}, stale-while-revalidate=${CACHE_DURATION.FIVE_MINUTES}`,
+      );
+      return res.status(200).json(cached);
+    }
+
     const marketplaceChainId = chainId as keyof typeof MARKETPLACE_SUBGRAPH_CLIENTS;
     const servicesFromMarketplace = await getServicesFromMarketplaceSubgraph({
       chainId: marketplaceChainId,
@@ -180,6 +193,18 @@ export default async function handler(
 
     const mechMetadata = untypedIpfsMetadata as unknown as MechMetadata;
 
+    if (!mechMetadata.name || !mechMetadata.description) {
+      const stale = getStaleFallback<McpResponse>(cacheKey);
+      if (stale) {
+        res.setHeader(
+          'Cache-Control',
+          `public, s-maxage=${CACHE_DURATION.FIVE_MINUTES}, stale-while-revalidate=${CACHE_DURATION.FIVE_MINUTES}`,
+        );
+        return res.status(200).json(stale);
+      }
+      return res.status(502).json({ error: 'Invalid metadata from IPFS' });
+    }
+
     const erc8004Network = ERC8004_CHAIN_MAPPING[chainId as keyof typeof ERC8004_CHAIN_MAPPING];
     const chainAddresses = ADDRESSES[chainId];
     const mechMarketplaceAddress =
@@ -192,8 +217,7 @@ export default async function handler(
       name: mechMetadata.name,
       description: mechMetadata.description,
       version: '1.0.0',
-      // TODO: Unsure about this.
-      endpoint: '',
+      endpoint: mechMetadata.url || '',
       capabilities: MCP_CAPABILITIES,
       auth: MCP_AUTH,
       metadata: {
@@ -211,6 +235,8 @@ export default async function handler(
       tools: buildMcpTools(mechMetadata),
     };
 
+    setCache(cacheKey, response);
+
     res.setHeader(
       'Cache-Control',
       `public, s-maxage=${CACHE_DURATION.SIX_HOURS}, stale-while-revalidate=${CACHE_DURATION.FIVE_MINUTES}`,
@@ -218,6 +244,17 @@ export default async function handler(
 
     return res.status(200).json(response);
   } catch (error) {
+    if (cacheKey) {
+      const stale = getStaleFallback<McpResponse>(cacheKey);
+      if (stale) {
+        res.setHeader(
+          'Cache-Control',
+          `public, s-maxage=${CACHE_DURATION.FIVE_MINUTES}, stale-while-revalidate=${CACHE_DURATION.FIVE_MINUTES}`,
+        );
+        return res.status(200).json(stale);
+      }
+    }
+
     console.error('Error generating MCP descriptor:', error);
     return res.status(500).json({
       error: 'Internal server error',

@@ -19,6 +19,7 @@ import {
   normalizeQueryParam,
   getServiceFromRegistrySafe,
 } from 'common-util/functions/erc8004Helpers';
+import { getCached, getStaleFallback, setCache } from 'util/apiCache';
 
 type ToolInputOutput = {
   type: string;
@@ -117,6 +118,8 @@ export default async function handler(
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
+  let cacheKey = '';
+
   try {
     const { network: networkParam, serviceId: serviceIdParam } = req.query;
     const network = normalizeQueryParam(networkParam);
@@ -153,6 +156,16 @@ export default async function handler(
       });
     }
 
+    cacheKey = `agentCard:${network}:${serviceId}`;
+    const cached = getCached<AgentCardResponse>(cacheKey);
+    if (cached) {
+      res.setHeader(
+        'Cache-Control',
+        `public, s-maxage=${CACHE_DURATION.SIX_HOURS}, stale-while-revalidate=${CACHE_DURATION.FIVE_MINUTES}`,
+      );
+      return res.status(200).json(cached);
+    }
+
     const marketplaceChainId = chainId as keyof typeof MARKETPLACE_SUBGRAPH_CLIENTS;
     const [servicesFromMarketplace, serviceFromRegistry] = await Promise.all([
       getServicesFromMarketplaceSubgraph({
@@ -182,6 +195,19 @@ export default async function handler(
     }
 
     const mechMetadata = untypedIpfsMetadata as unknown as MechMetadata;
+
+    if (!mechMetadata.name || !mechMetadata.description) {
+      const stale = getStaleFallback<AgentCardResponse>(cacheKey);
+      if (stale) {
+        res.setHeader(
+          'Cache-Control',
+          `public, s-maxage=${CACHE_DURATION.FIVE_MINUTES}, stale-while-revalidate=${CACHE_DURATION.FIVE_MINUTES}`,
+        );
+        return res.status(200).json(stale);
+      }
+      return res.status(502).json({ error: 'Invalid metadata from IPFS' });
+    }
+
     const registrations: AgentCardResponse['registrations'] = [];
 
     if (serviceFromRegistry?.erc8004Agent?.id) {
@@ -250,6 +276,8 @@ export default async function handler(
       skills: buildSkills(mechMetadata),
     };
 
+    setCache(cacheKey, response);
+
     res.setHeader(
       'Cache-Control',
       `public, s-maxage=${CACHE_DURATION.SIX_HOURS}, stale-while-revalidate=${CACHE_DURATION.FIVE_MINUTES}`,
@@ -257,6 +285,17 @@ export default async function handler(
 
     return res.status(200).json(response);
   } catch (error) {
+    if (cacheKey) {
+      const stale = getStaleFallback<AgentCardResponse>(cacheKey);
+      if (stale) {
+        res.setHeader(
+          'Cache-Control',
+          `public, s-maxage=${CACHE_DURATION.FIVE_MINUTES}, stale-while-revalidate=${CACHE_DURATION.FIVE_MINUTES}`,
+        );
+        return res.status(200).json(stale);
+      }
+    }
+
     console.error('Error generating agent card:', error);
     return res.status(500).json({
       error: 'Internal server error',
