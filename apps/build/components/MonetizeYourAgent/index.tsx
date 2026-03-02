@@ -71,8 +71,30 @@ const quickstartItems = [
   },
   {
     title: '4. Publish metadata',
-    description: 'Generate metadata and update it on-chain:',
-    codeBlocks: ['poetry run mech prepare-metadata', 'poetry run mech update-metadata -c <chain>'],
+    description: (
+      <>
+        <Paragraph>Generate metadata:</Paragraph>
+        <CodeBlock canCopy>{'poetry run mech prepare-metadata -c <chain>'}</CodeBlock>
+        <StyledBlockquote>
+          <Text strong>Offchain support:</Text> Mechs also support offchain requests. If you&apos;d
+          like to host your mech and make it accessible over HTTP, you can set a public URL using
+          the <Text code>--offchain-url</Text> flag when publishing metadata. This URL will be
+          included in your mech&apos;s on-chain metadata, making it discoverable by other agents.
+          The flag is optional — if omitted, the mech operates on-chain only as before.
+          <br />
+          <br />
+          <Paragraph>With offchain URL (optional):</Paragraph>
+          <CodeBlock canCopy>
+            {
+              'poetry run mech prepare-metadata -c <chain> --offchain-url https://your-mech.example.com/'
+            }
+          </CodeBlock>
+        </StyledBlockquote>
+        <Paragraph>Then update metadata on-chain:</Paragraph>
+        <CodeBlock canCopy>{'poetry run mech update-metadata -c <chain>'}</CodeBlock>
+      </>
+    ),
+    codeBlocks: [],
   },
   {
     title: '5. Launch the agent',
@@ -108,7 +130,18 @@ const Quickstart = () => (
                 )}
               </>
             ) : (
-              item.description
+              <>
+                {item.description}
+                {item.codeBlocks && (
+                  <div>
+                    {item.codeBlocks.map((block, index) => (
+                      <CodeBlock key={`${item.title}${index}`} canCopy>
+                        {block}
+                      </CodeBlock>
+                    ))}
+                  </div>
+                )}
+              </>
             ))}
         </div>
       ))}
