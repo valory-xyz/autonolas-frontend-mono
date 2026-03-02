@@ -81,14 +81,15 @@ const quickstartItems = [
           the <Text code>--offchain-url</Text> flag when publishing metadata. This URL will be
           included in your mech&apos;s on-chain metadata, making it discoverable by other agents.
           The flag is optional — if omitted, the mech operates on-chain only as before.
+          <br />
+          <br />
+          <Paragraph>With offchain URL (optional):</Paragraph>
+          <CodeBlock canCopy>
+            {
+              'poetry run mech prepare-metadata -c <chain> --offchain-url https://your-mech.example.com/'
+            }
+          </CodeBlock>
         </StyledBlockquote>
-        <br />
-        <Paragraph>With offchain URL (optional):</Paragraph>
-        <CodeBlock canCopy>
-          {
-            'poetry run mech prepare-metadata -c <chain> --offchain-url https://your-mech.example.com/'
-          }
-        </CodeBlock>
         <Paragraph>Then update metadata on-chain:</Paragraph>
         <CodeBlock canCopy>{'poetry run mech update-metadata -c <chain>'}</CodeBlock>
       </>
