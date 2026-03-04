@@ -15,6 +15,7 @@ type L1Addresses = {
   serviceRegistry: Address;
   serviceRegistryTokenUtility: Address;
   operatorWhitelist: Address;
+  mechMarketplace?: Address;
 };
 
 const MAINNET_ADDRESSES: L1Addresses = {
@@ -24,6 +25,7 @@ const MAINNET_ADDRESSES: L1Addresses = {
   serviceRegistry: '0x48b6af7B12C71f09e2fC8aF4855De4Ff54e775cA',
   serviceRegistryTokenUtility: '0x3Fb926116D454b95c669B6Bf2E7c3bad8d19affA',
   operatorWhitelist: '0x42042799B0DE38AdD2a70dc996f69f98E1a85260',
+  mechMarketplace: '0x3d6494CE09a9f40c0B5a92BdBD7c7A9b0e3912b1',
 };
 
 const GNOSIS_ADDRESSES: Addresses = {
@@ -37,6 +39,7 @@ const POLYGON_ADDRESSES: Addresses = {
   serviceRegistryL2: '0xE3607b00E75f6405248323A9417ff6b39B244b50',
   serviceRegistryTokenUtility: '0xa45E64d13A30a51b91ae0eb182e88a40e9b18eD8',
   operatorWhitelist: '0x526E064cB694E8f5B7DB299158e17F33055B3943',
+  mechMarketplace: '0x343F2B005cF6D70bA610CD9F1F1927049414B582',
 };
 
 const MODE_ADDRESSES: Addresses = {
@@ -53,6 +56,7 @@ export const ADDRESSES = {
     serviceRegistryL2: '0x3d77596beb0f130a4415df3D2D8232B3d3D31e44',
     serviceRegistryTokenUtility: '0xBb7e1D6Cb6F243D6bdE81CE92a9f2aFF7Fbe7eac',
     operatorWhitelist: '0x63e66d7ad413C01A7b49C7FF4e3Bb765C4E4bd1b',
+    mechMarketplace: '0x46C0D07F55d4F9B5Eed2Fc9680B5953e5fd7b461',
   },
   [gnosis.id]: GNOSIS_ADDRESSES,
   [polygon.id]: POLYGON_ADDRESSES,
@@ -66,11 +70,13 @@ export const ADDRESSES = {
     serviceRegistryL2: '0xE3607b00E75f6405248323A9417ff6b39B244b50',
     serviceRegistryTokenUtility: '0x3d77596beb0f130a4415df3D2D8232B3d3D31e44',
     operatorWhitelist: '0x3C1fF68f5aa342D296d4DEe4Bb1cACCA912D95fE',
+    mechMarketplace: '0xf76953444C35F1FcE2F6CA1b167173357d3F5C17',
   },
   [celo.id]: {
     serviceRegistryL2: '0xE3607b00E75f6405248323A9417ff6b39B244b50',
     serviceRegistryTokenUtility: '0x3d77596beb0f130a4415df3D2D8232B3d3D31e44',
     operatorWhitelist: '0x3C1fF68f5aa342D296d4DEe4Bb1cACCA912D95fE',
+    mechMarketplace: '0x17d96ba4532fe91809326092fE4D5606A7B7a0d8',
   },
   [mode.id]: MODE_ADDRESSES,
 } as const;
