@@ -15,6 +15,7 @@ import {
   getChainIdFromNetworkSlug,
   getSupportedNetworkNames,
   normalizeQueryParam,
+  normalizeToolSchema,
 } from 'common-util/functions/erc8004Helpers';
 import { getCached, getStaleFallback, setCache } from 'util/apiCache';
 
@@ -53,12 +54,9 @@ type McpResponse = {
   name: string;
   description: string;
   version: '1.0.0';
-  endpoint: string;
+  endpoint?: string;
   capabilities: {
-    tools: true;
-    resources: false;
-    prompts: false;
-    streaming: false;
+    tools: { listChanged: boolean };
   };
   auth: {
     methods: Array<
@@ -79,10 +77,7 @@ type McpResponse = {
 };
 
 const MCP_CAPABILITIES: McpResponse['capabilities'] = {
-  tools: true,
-  resources: false,
-  prompts: false,
-  streaming: false,
+  tools: { listChanged: false },
 };
 
 const MCP_AUTH: McpResponse['auth'] = {
@@ -104,8 +99,8 @@ const buildMcpTools = (metadata: MechMetadata): McpTool[] => {
       return {
         name: tool.name,
         description: tool.description,
-        inputSchema: tool.input,
-        outputSchema: tool.output,
+        inputSchema: normalizeToolSchema(tool.input),
+        outputSchema: normalizeToolSchema(tool.output),
       };
     });
 };
@@ -219,7 +214,7 @@ export default async function handler(
       name: mechMetadata.name,
       description: mechMetadata.description,
       version: '1.0.0',
-      endpoint: mechMetadata.url || '',
+      ...(mechMetadata.url && { endpoint: mechMetadata.url }),
       capabilities: MCP_CAPABILITIES,
       auth: MCP_AUTH,
       metadata: {

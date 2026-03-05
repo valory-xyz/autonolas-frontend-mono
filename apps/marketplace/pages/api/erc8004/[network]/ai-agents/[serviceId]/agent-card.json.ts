@@ -18,6 +18,7 @@ import {
   getSupportedNetworkNames,
   normalizeQueryParam,
   getServiceFromRegistrySafe,
+  normalizeToolSchema,
 } from 'common-util/functions/erc8004Helpers';
 import { getCached, getStaleFallback, setCache } from 'util/apiCache';
 
@@ -99,8 +100,8 @@ const buildSkills = (metadata: MechMetadata): AgentCardSkill[] => {
         id: `tool:${toolName}`,
         name: toolName,
         description: tool.description,
-        inputSchema: tool.input,
-        outputSchema: tool.output,
+        inputSchema: normalizeToolSchema(tool.input),
+        outputSchema: normalizeToolSchema(tool.output),
         metadata: {
           runtimeToolName: tool.name,
           inputFormat,

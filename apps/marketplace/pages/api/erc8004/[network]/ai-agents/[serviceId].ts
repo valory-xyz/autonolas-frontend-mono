@@ -30,6 +30,7 @@ type Erc8004Response = {
   services: Array<{
     name: string;
     endpoint: string;
+    version?: string;
   }>;
   x402Support: boolean;
   active: boolean;
@@ -155,10 +156,12 @@ export default async function handler(
       services.push({
         name: 'A2A',
         endpoint: getAgentCardUrl(network, serviceId),
+        version: '1.0.0',
       });
       services.push({
         name: 'MCP',
         endpoint: getMcpJsonUrl(network, serviceId),
+        version: '1.0.0',
       });
     }
 

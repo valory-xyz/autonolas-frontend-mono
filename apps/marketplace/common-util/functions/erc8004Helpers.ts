@@ -75,6 +75,24 @@ export const buildServiceRegistryContext = (
   return { provider, serviceRegistryContract, serviceRegistryAddress };
 };
 
+/**
+ * Normalize a tool schema from IPFS metadata so that:
+ * 1. `type: "text"` becomes `type: "string"`.
+ * 2. If a nested `schema` wrapper exists, its properties are spread to the
+ *    top level and the wrapper is removed. */
+export const normalizeToolSchema = (raw: {
+  type: string;
+  description: string;
+  schema?: Record<string, unknown>;
+}): { type: string; description: string } => {
+  const { schema, ...rest } = raw;
+  const base = schema ? { ...rest, ...schema } : rest;
+  return {
+    ...base,
+    type: base.type === 'text' ? 'string' : base.type,
+  };
+};
+
 export const getAgentCardUrl = (network: string, serviceId: string): string =>
   `https://marketplace.olas.network/erc8004/${network}/ai-agents/${serviceId}/agent-card.json`;
 
