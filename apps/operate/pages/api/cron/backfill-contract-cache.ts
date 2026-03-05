@@ -2,9 +2,18 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 import { createPublicClient, http, type Address, zeroAddress } from 'viem';
 import { mainnet } from 'viem/chains';
 
-import { BLACKLISTED_STAKING_ADDRESSES, GATEWAY_URL, HASH_PREFIX, RPC_URLS } from 'libs/util-constants/src';
+import {
+  BLACKLISTED_STAKING_ADDRESSES,
+  GATEWAY_URL,
+  HASH_PREFIX,
+  RPC_URLS,
+} from 'libs/util-constants/src';
 import { STAKING_TOKEN, VOTE_WEIGHTING } from 'libs/util-contracts/src';
-import { areAddressesEqual, getAddressFromBytes32, getBytes32FromAddress } from 'libs/util-functions/src';
+import {
+  areAddressesEqual,
+  getAddressFromBytes32,
+  getBytes32FromAddress,
+} from 'libs/util-functions/src';
 
 import { setContractCache } from 'common-util/blob';
 import type { ContractCacheData } from 'types';
@@ -24,7 +33,12 @@ function getChainClient(chainId: number) {
   const rpc = RPC_URLS[chainId];
   if (!rpc) return null;
   return createPublicClient({
-    chain: { id: chainId, name: '', nativeCurrency: { decimals: 18, name: '', symbol: '' }, rpcUrls: { default: { http: [rpc] } } },
+    chain: {
+      id: chainId,
+      name: '',
+      nativeCurrency: { decimals: 18, name: '', symbol: '' },
+      rpcUrls: { default: { http: [rpc] } },
+    },
     transport: http(rpc),
   });
 }
@@ -74,12 +88,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       functionName: 'getAllNominees',
     })) as { account: `0x${string}`; chainId: bigint }[];
 
-    const filtered = nominees.filter(
-      (n) => n.account !== getBytes32FromAddress(zeroAddress)
-    ).filter((n) => {
-      const addr = getAddressFromBytes32(n.account);
-      return !BLACKLISTED_STAKING_ADDRESSES.some((b) => areAddressesEqual(b, addr));
-    });
+    const filtered = nominees
+      .filter((n) => n.account !== getBytes32FromAddress(zeroAddress))
+      .filter((n) => {
+        const addr = getAddressFromBytes32(n.account);
+        return !BLACKLISTED_STAKING_ADDRESSES.some((b) => areAddressesEqual(b, addr));
+      });
 
     let written = 0;
     let failed = 0;
@@ -94,39 +108,45 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       }
 
       try {
-        const [maxNumServices, rewardsPerSecond, minStakingDeposit, numAgentInstances, livenessPeriod, metadataHash] =
-          await Promise.all([
-            client.readContract({
-              address: address as Address,
-              abi: STAKING_TOKEN.abi,
-              functionName: 'maxNumServices',
-            }),
-            client.readContract({
-              address: address as Address,
-              abi: STAKING_TOKEN.abi,
-              functionName: 'rewardsPerSecond',
-            }),
-            client.readContract({
-              address: address as Address,
-              abi: STAKING_TOKEN.abi,
-              functionName: 'minStakingDeposit',
-            }),
-            client.readContract({
-              address: address as Address,
-              abi: STAKING_TOKEN.abi,
-              functionName: 'numAgentInstances',
-            }),
-            client.readContract({
-              address: address as Address,
-              abi: STAKING_TOKEN.abi,
-              functionName: 'livenessPeriod',
-            }),
-            client.readContract({
-              address: address as Address,
-              abi: STAKING_TOKEN.abi,
-              functionName: 'metadataHash',
-            }),
-          ]);
+        const [
+          maxNumServices,
+          rewardsPerSecond,
+          minStakingDeposit,
+          numAgentInstances,
+          livenessPeriod,
+          metadataHash,
+        ] = await Promise.all([
+          client.readContract({
+            address: address as Address,
+            abi: STAKING_TOKEN.abi,
+            functionName: 'maxNumServices',
+          }),
+          client.readContract({
+            address: address as Address,
+            abi: STAKING_TOKEN.abi,
+            functionName: 'rewardsPerSecond',
+          }),
+          client.readContract({
+            address: address as Address,
+            abi: STAKING_TOKEN.abi,
+            functionName: 'minStakingDeposit',
+          }),
+          client.readContract({
+            address: address as Address,
+            abi: STAKING_TOKEN.abi,
+            functionName: 'numAgentInstances',
+          }),
+          client.readContract({
+            address: address as Address,
+            abi: STAKING_TOKEN.abi,
+            functionName: 'livenessPeriod',
+          }),
+          client.readContract({
+            address: address as Address,
+            abi: STAKING_TOKEN.abi,
+            functionName: 'metadataHash',
+          }),
+        ]);
 
         const metadataHashStr =
           typeof metadataHash === 'string'

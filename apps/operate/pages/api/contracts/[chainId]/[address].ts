@@ -3,14 +3,10 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 import { getContractCache, setContractCache } from 'common-util/blob';
 import type { ContractCacheData } from 'types';
 
-export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse,
-) {
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   const { chainId, address } = req.query;
 
-  const chainIdNum =
-    typeof chainId === 'string' && /^\d+$/.test(chainId) ? Number(chainId) : null;
+  const chainIdNum = typeof chainId === 'string' && /^\d+$/.test(chainId) ? Number(chainId) : null;
   const addressStr = typeof address === 'string' && address.length > 0 ? address : null;
 
   if (chainIdNum == null || addressStr == null) {
@@ -40,7 +36,9 @@ export default async function handler(
       !('metadata' in body) ||
       !('operateDetails' in body)
     ) {
-      return res.status(400).json({ error: 'Invalid payload: need config, metadata, operateDetails' });
+      return res
+        .status(400)
+        .json({ error: 'Invalid payload: need config, metadata, operateDetails' });
     }
     try {
       await setContractCache(chainIdNum, addressStr, body as ContractCacheData);
