@@ -134,7 +134,7 @@ export default async function handler(
       }
     }
 
-    const services = [
+    const services: Erc8004Response['services'] = [
       {
         name: 'web',
         endpoint: `https://marketplace.olas.network/${network}/ai-agents/${serviceId}`,
