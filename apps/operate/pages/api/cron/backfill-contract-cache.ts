@@ -15,7 +15,7 @@ import {
   getBytes32FromAddress,
 } from 'libs/util-functions/src';
 
-import { setContractCache } from 'common-util/blob';
+import { getContractCache, setContractCache } from 'common-util/blob';
 import type { ContractCacheData } from 'types';
 
 const IPFS_FETCH_TIMEOUT_MS = 5000;
@@ -64,8 +64,8 @@ async function fetchMetadata(metadataHash: string): Promise<{ name: string; desc
 }
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  if (req.method !== 'GET') {
-    res.setHeader('Allow', 'GET');
+  if (req.method !== 'GET' && req.method !== 'POST') {
+    res.setHeader('Allow', 'GET, POST');
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
@@ -96,11 +96,19 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       });
 
     let written = 0;
+    let skipped = 0;
     let failed = 0;
 
     for (const nominee of filtered) {
       const chainId = Number(nominee.chainId);
       const address = getAddressFromBytes32(nominee.account);
+
+      const existing = await getContractCache(chainId, address);
+      if (existing) {
+        skipped += 1;
+        continue;
+      }
+
       const client = getChainClient(chainId);
       if (!client) {
         failed += 1;
@@ -178,6 +186,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       ok: true,
       total: filtered.length,
       written,
+      skipped,
       failed,
     });
   } catch (error) {

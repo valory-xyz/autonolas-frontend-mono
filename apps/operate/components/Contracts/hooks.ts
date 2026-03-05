@@ -473,6 +473,16 @@ function useContractCacheMap(nominees: Nominee[]) {
         nominees.map(async (n) => {
           const address = getAddressFromBytes32(n.account);
           const chainId = Number(n.chainId);
+          if (
+            !address ||
+            typeof address !== 'string' ||
+            address.length < 42 ||
+            chainId == null ||
+            Number.isNaN(chainId) ||
+            chainId <= 0
+          ) {
+            return { account: n.account, payload: null };
+          }
           try {
             const res = await fetch(`/api/contracts/${chainId}/${address}`);
             if (!res.ok) return { account: n.account, payload: null };
@@ -843,6 +853,16 @@ export const useStakingContractsList = () => {
 
       const address = getAddressFromBytes32(n.account);
       const chainId = Number(n.chainId);
+      if (
+        !address ||
+        typeof address !== 'string' ||
+        address.length < 42 ||
+        chainId == null ||
+        Number.isNaN(chainId) ||
+        chainId <= 0
+      ) {
+        return;
+      }
       const details = STAKING_CONTRACT_DETAILS[n.account as Address];
       const payload: ContractCacheData = {
         config: {

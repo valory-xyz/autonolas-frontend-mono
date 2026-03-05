@@ -10,33 +10,27 @@ const requestConfig: RequestConfig = {
   },
 };
 
-export const STAKING_GRAPH_CLIENTS = {
-  [mode.id]: new GraphQLClient(
-    process.env.NEXT_PUBLIC_STAKING_CONTRACTS_MODE_SUBGRAPH_URL!,
-    requestConfig,
-  ),
-  [optimism.id]: new GraphQLClient(
-    process.env.NEXT_PUBLIC_STAKING_CONTRACTS_OPTIMISM_SUBGRAPH_URL!,
-    requestConfig,
-  ),
-  [gnosis.id]: new GraphQLClient(
-    process.env.NEXT_PUBLIC_STAKING_CONTRACTS_GNOSIS_SUBGRAPH_URL!,
-    requestConfig,
-  ),
-  [base.id]: new GraphQLClient(
-    process.env.NEXT_PUBLIC_STAKING_CONTRACTS_BASE_SUBGRAPH_URL!,
-    requestConfig,
-  ),
-  [polygon.id]: new GraphQLClient(
-    process.env.NEXT_PUBLIC_STAKING_CONTRACTS_POLYGON_SUBGRAPH_URL!,
-    requestConfig,
-  ),
-} as const;
+function buildStakingGraphClients(): Partial<Record<number, GraphQLClient>> {
+  const clients: Partial<Record<number, GraphQLClient>> = {};
+  const modeUrl = process.env.NEXT_PUBLIC_STAKING_CONTRACTS_MODE_SUBGRAPH_URL;
+  const optimismUrl = process.env.NEXT_PUBLIC_STAKING_CONTRACTS_OPTIMISM_SUBGRAPH_URL;
+  const gnosisUrl = process.env.NEXT_PUBLIC_STAKING_CONTRACTS_GNOSIS_SUBGRAPH_URL;
+  const baseUrl = process.env.NEXT_PUBLIC_STAKING_CONTRACTS_BASE_SUBGRAPH_URL;
+  const polygonUrl = process.env.NEXT_PUBLIC_STAKING_CONTRACTS_POLYGON_SUBGRAPH_URL;
+  if (modeUrl) clients[mode.id] = new GraphQLClient(modeUrl, requestConfig);
+  if (optimismUrl) clients[optimism.id] = new GraphQLClient(optimismUrl, requestConfig);
+  if (gnosisUrl) clients[gnosis.id] = new GraphQLClient(gnosisUrl, requestConfig);
+  if (baseUrl) clients[base.id] = new GraphQLClient(baseUrl, requestConfig);
+  if (polygonUrl) clients[polygon.id] = new GraphQLClient(polygonUrl, requestConfig);
+  return clients;
+}
+
+export const STAKING_GRAPH_CLIENTS = buildStakingGraphClients();
 
 export type SupportedStakingChain = keyof typeof STAKING_GRAPH_CLIENTS;
 
 export function hasSubgraphSupport(chainId: number): chainId is SupportedStakingChain {
-  return chainId in STAKING_GRAPH_CLIENTS;
+  return chainId in STAKING_GRAPH_CLIENTS && STAKING_GRAPH_CLIENTS[chainId] != null;
 }
 
 export type SubgraphStakingContract = {
