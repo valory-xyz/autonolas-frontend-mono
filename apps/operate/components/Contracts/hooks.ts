@@ -1,6 +1,6 @@
 import { getPublicClient } from '@wagmi/core';
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import { Nominee, StakingContract } from 'types';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { ContractCacheData, ContractCacheSnapshot, Nominee, StakingContract } from 'types';
 import { Abi, Address, Block, formatEther, formatUnits } from 'viem';
 import { getBlock } from 'viem/actions';
 import { useReadContracts } from 'wagmi';
@@ -11,6 +11,11 @@ import { STAKING_TOKEN } from 'libs/util-contracts/src';
 import { areAddressesEqual, getAddressFromBytes32 } from 'libs/util-functions/src';
 
 import { wagmiConfig } from 'common-util/config/wagmi';
+import {
+  fetchStakingDataFromSubgraph,
+  hasSubgraphSupport,
+  SubgraphStakingRow,
+} from 'common-util/graphql';
 
 const ONE_YEAR = 1 * 24 * 60 * 60 * 365;
 
@@ -445,6 +450,125 @@ const getDate = (timeRemainingSeconds: number) => {
   return `${days}D ${hours}H ${minutes}M`;
 };
 
+/**
+ * Fetches blob cache for each nominee; returns map of account (bytes32) -> cached payload.
+ */
+function useContractCacheMap(nominees: Nominee[]) {
+  const [cacheMap, setCacheMap] = useState<Map<string, ContractCacheSnapshot>>(new Map());
+  const nomineeCacheKey = useMemo(
+    () => nominees.map((n) => `${n.chainId}:${n.account}`).join(','),
+    [nominees],
+  );
+
+  useEffect(() => {
+    if (nominees.length === 0) {
+      setCacheMap(new Map());
+      return;
+    }
+
+    let cancelled = false;
+
+    const load = async () => {
+      const results = await Promise.all(
+        nominees.map(async (n) => {
+          const address = getAddressFromBytes32(n.account);
+          const chainId = Number(n.chainId);
+          try {
+            const res = await fetch(`/api/contracts/${chainId}/${address}`);
+            if (!res.ok) return { account: n.account, payload: null };
+            const payload = (await res.json()) as ContractCacheSnapshot;
+            return { account: n.account, payload };
+          } catch {
+            return { account: n.account, payload: null };
+          }
+        }),
+      );
+
+      if (cancelled) return;
+      const next = new Map<string, ContractCacheSnapshot>();
+      results.forEach(({ account, payload }) => {
+        if (payload) next.set(account, payload);
+      });
+      setCacheMap(next);
+    };
+
+    load();
+    return () => {
+      cancelled = true;
+    };
+  }, [nomineeCacheKey, nominees]);
+
+  return cacheMap;
+}
+
+/** Normalize address for subgraph lookup (id is lowercase in subgraph). */
+function normalizeAddress(addr: string): string {
+  return addr.toLowerCase().startsWith('0x') ? addr.toLowerCase() : addr;
+}
+
+/**
+ * Fetches APY, max/available slots, and rewards pool from staking subgraph for supported chains.
+ * Returns map of nominee.account (bytes32) -> SubgraphStakingRow; empty for unsupported chains.
+ */
+function useSubgraphStakingData(nominees: Nominee[]) {
+  const [subgraphMap, setSubgraphMap] = useState<Map<string, SubgraphStakingRow>>(new Map());
+  const [isLoading, setIsLoading] = useState(false);
+  const nomineeKey = useMemo(
+    () => nominees.map((n) => `${n.chainId}:${n.account}`).join(','),
+    [nominees],
+  );
+
+  useEffect(() => {
+    if (nominees.length === 0) {
+      setSubgraphMap(new Map());
+      return;
+    }
+
+    let cancelled = false;
+    setIsLoading(true);
+
+    const load = async () => {
+      const byChain = new Map<number, Nominee[]>();
+      for (const n of nominees) {
+        const c = Number(n.chainId);
+        if (!hasSubgraphSupport(c)) continue;
+        if (!byChain.has(c)) byChain.set(c, []);
+        byChain.get(c)!.push(n);
+      }
+
+      const results = await Promise.all(
+        [...byChain.entries()].map(([chainId, list]) => {
+          const addresses = list.map((n) => getAddressFromBytes32(n.account));
+          return fetchStakingDataFromSubgraph(chainId, addresses);
+        }),
+      );
+
+      if (cancelled) return;
+
+      const merged = new Map<string, SubgraphStakingRow>();
+      let idx = 0;
+      for (const [, list] of byChain) {
+        const data = results[idx++];
+        if (!data) continue;
+        for (const n of list) {
+          const addr = normalizeAddress(getAddressFromBytes32(n.account));
+          const row = data.get(addr);
+          if (row) merged.set(n.account, row);
+        }
+      }
+      setSubgraphMap(merged);
+      setIsLoading(false);
+    };
+
+    load();
+    return () => {
+      cancelled = true;
+    };
+  }, [nomineeKey, nominees]);
+
+  return { subgraphMap, isSubgraphLoading: isLoading };
+}
+
 export const useStakingContractsList = () => {
   // Get nominees list
   const { data: nomineesData, isFetching: isNomineesLoading } = useNominees();
@@ -457,143 +581,305 @@ export const useStakingContractsList = () => {
     );
   }, [nomineesData]);
 
+  const cacheMap = useContractCacheMap(nominees);
+  const { subgraphMap, isSubgraphLoading } = useSubgraphStakingData(nominees);
+
+  const nonSubgraphNominees = useMemo(
+    () => nominees.filter((n) => !subgraphMap.get(n.account)),
+    [nominees, subgraphMap],
+  );
+  const uncachedNominees = useMemo(
+    () => nominees.filter((n) => !cacheMap.get(n.account) && !subgraphMap.get(n.account)),
+    [nominees, cacheMap, subgraphMap],
+  );
+
   // Fetch blocks for each nominee's chain ID
   const { blocks, isLoading: areBlocksLoading } = useBlocksForNominees(nominees);
 
-  // Get contracts metadata
-  const { data: metadata, isLoading: isMetadataLoading } = useNomineesMetadata(nominees);
-  // Get maxNumServices
+  // Get contracts metadata (only for nominees not in blob cache)
+  const { data: metadata, isLoading: isMetadataLoading } = useNomineesMetadata(uncachedNominees);
+  // Get maxNumServices (only for uncached, i.e. no cache and no subgraph)
   const { data: maxNumServicesList, isFetching: isMaxNumServicesLoading } = useContractDetails(
-    nominees,
+    uncachedNominees,
     'maxNumServices',
   );
-  // Get serviceIds
+  // Get serviceIds via RPC only for nominees not on subgraph (subgraph has agentIds)
   const { data: serviceIdsList, isFetching: isServiceIdsLoading } = useContractDetails(
-    nominees,
+    nonSubgraphNominees,
     'getServiceIds',
   );
-  // Get rewardsPerSecond
+  // Get rewardsPerSecond (only for uncached)
   const { data: rewardsPerSecondList, isFetching: isRewardsPerSecondLoading } = useContractDetails(
-    nominees,
+    uncachedNominees,
     'rewardsPerSecond',
   );
-  // Get available rewards
+  // Get available rewards via RPC only for nominees not on subgraph (subgraph has latest checkpoint)
   const { data: availableRewardsList, isFetching: isAvailableRewardsLoading } = useContractDetails(
-    nominees,
+    nonSubgraphNominees,
     'availableRewards',
   );
-  // Get minStakingDeposit
+  // Get minStakingDeposit (only for uncached)
   const { data: minStakingDepositList, isFetching: isMinStakingDepositLoading } =
-    useContractDetails(nominees, 'minStakingDeposit');
-  // Get numAgentInstances
+    useContractDetails(uncachedNominees, 'minStakingDeposit');
+  // Get numAgentInstances (only for uncached)
   const { data: numAgentInstancesList, isFetching: isNumAgentInstancesLoading } =
-    useContractDetails(nominees, 'numAgentInstances');
+    useContractDetails(uncachedNominees, 'numAgentInstances');
 
-  // Get epochCounter
+  // Get epochCounter (live data, all nominees)
   const { data: epochCounter, isFetching: isEpochCounterLoading } = useContractDetails(
     nominees,
     'epochCounter',
   );
-
-  // Get livenessPeriod
+  // Get livenessPeriod (only for uncached)
   const { data: livenessPeriod, isFetching: isLivenessPeriodLoading } = useContractDetails(
-    nominees,
+    uncachedNominees,
     'livenessPeriod',
   );
-
-  // Get tsCheckpoint
+  // Get tsCheckpoint (live data, all nominees)
   const { data: tsCheckpoint, isFetching: isTsCheckpointLoading } = useContractDetails(
     nominees,
     'tsCheckpoint',
   );
 
-  /**
-   * Sets staking contracts list to the store
-   **/
-  const contracts = useMemo(() => {
-    if (
-      // Check if all data is loaded
-      !!nominees &&
-      !!metadata &&
-      !!maxNumServicesList &&
-      !!serviceIdsList &&
-      !!rewardsPerSecondList &&
-      !!availableRewardsList &&
-      !!minStakingDepositList &&
-      !!numAgentInstancesList &&
-      !!epochCounter &&
-      !!livenessPeriod &&
-      !!tsCheckpoint &&
-      !!blocks
-    ) {
-      return nominees.map((item, index) => {
-        const maxSlots = Number(maxNumServicesList[index]);
-        const servicesLength = ((serviceIdsList[index] as string[]) || []).length;
-        const availableRewardsInWei = availableRewardsList[index];
-        const availableSlots =
-          (availableRewardsInWei as bigint) > 0 && maxSlots > 0 ? maxSlots - servicesLength : 0;
-        const rewardsPerSecond = rewardsPerSecondList[index] as bigint;
-        const minStakingDeposit = minStakingDepositList[index] as bigint;
-        const numAgentInstances = (numAgentInstancesList[index] || 1n) as bigint;
+  /** Index of each nominee in nonSubgraphNominees (for RPC arrays when not using subgraph). */
+  const nonSubgraphIndexByAccount = useMemo(
+    () => new Map(nonSubgraphNominees.map((n, j) => [n.account, j])),
+    [nonSubgraphNominees],
+  );
 
-        const availableRewards =
-          availableRewardsInWei != null ? formatUnits(availableRewardsInWei as bigint, 18) : '0';
-
-        const apy = getApy(rewardsPerSecond, minStakingDeposit, numAgentInstances);
-        const stakeRequired = getStakeRequired(minStakingDeposit, numAgentInstances);
-        const details = STAKING_CONTRACT_DETAILS[item.account];
-        const epoch = Number(epochCounter[index]);
-        const livenessPeriodSeconds = Number(livenessPeriod[index]);
-        const tsCheckpointSeconds = Number(tsCheckpoint[index]);
-
-        // Get the block for this contract's specific chain
-        const contractBlock = blocks.get(item.chainId.toString());
-
-        // Calculate time remaining using the block from the contract's chain
-        const timeRemainingSeconds = contractBlock
-          ? livenessPeriodSeconds - (Number(contractBlock.timestamp) - tsCheckpointSeconds)
-          : 0;
-        const timeRemaining = getDate(timeRemainingSeconds);
-
-        return {
-          key: item.account,
-          address: item.account,
-          chainId: Number(item.chainId),
-          metadata: metadata[item.account],
-          availableSlots,
-          maxSlots,
-          apy,
-          stakeRequired,
-          availableOn: details?.availableOn || null,
-          minOperatingBalance: details?.minOperatingBalance,
-          minOperatingBalanceToken: details?.minOperatingBalanceToken || null,
-          minOperatingBalanceHint: details?.minOperatingBalanceHint || null,
-          availableRewards,
-          epoch,
-          timeRemaining,
-        };
-      }) as StakingContract[];
-    }
-    return [];
+  /** Map account -> config for uncached nominees (used when merging with blob cache). */
+  const uncachedConfigByAccount = useMemo(() => {
+    const maxNumServices = new Map<string, number>();
+    const rewardsPerSecond = new Map<string, bigint>();
+    const minStakingDeposit = new Map<string, bigint>();
+    const numAgentInstances = new Map<string, bigint>();
+    const livenessPeriodMap = new Map<string, number>();
+    uncachedNominees.forEach((n, i) => {
+      if (maxNumServicesList?.[i] != null)
+        maxNumServices.set(n.account, Number(maxNumServicesList[i]));
+      if (rewardsPerSecondList?.[i] != null)
+        rewardsPerSecond.set(n.account, rewardsPerSecondList[i] as bigint);
+      if (minStakingDepositList?.[i] != null)
+        minStakingDeposit.set(n.account, minStakingDepositList[i] as bigint);
+      if (numAgentInstancesList?.[i] != null)
+        numAgentInstances.set(n.account, (numAgentInstancesList[i] as bigint) || 1n);
+      if (livenessPeriod?.[i] != null) livenessPeriodMap.set(n.account, Number(livenessPeriod[i]));
+    });
+    return {
+      maxNumServices,
+      rewardsPerSecond,
+      minStakingDeposit,
+      numAgentInstances,
+      livenessPeriod: livenessPeriodMap,
+    };
   }, [
-    nominees,
-    metadata,
+    uncachedNominees,
     maxNumServicesList,
-    serviceIdsList,
     rewardsPerSecondList,
-    availableRewardsList,
     minStakingDepositList,
     numAgentInstancesList,
-    epochCounter,
     livenessPeriod,
+  ]);
+
+  /**
+   * Build staking contracts list: config/metadata from blob cache when present, else RPC;
+   * live data (slots, rewards pool, epoch, time remaining) always from RPC.
+   */
+  const contracts = useMemo(() => {
+    if (
+      !nominees.length ||
+      !serviceIdsList ||
+      serviceIdsList.length !== nonSubgraphNominees.length ||
+      !availableRewardsList ||
+      availableRewardsList.length !== nonSubgraphNominees.length ||
+      !epochCounter ||
+      epochCounter.length !== nominees.length ||
+      !tsCheckpoint ||
+      tsCheckpoint.length !== nominees.length ||
+      !blocks
+    ) {
+      return [];
+    }
+
+    const metadataReady = uncachedNominees.length === 0 || metadata != null;
+    const uncachedConfigReady =
+      uncachedNominees.length === 0 ||
+      (uncachedConfigByAccount.maxNumServices.size === uncachedNominees.length &&
+        uncachedConfigByAccount.rewardsPerSecond.size === uncachedNominees.length &&
+        uncachedConfigByAccount.minStakingDeposit.size === uncachedNominees.length &&
+        uncachedConfigByAccount.numAgentInstances.size === uncachedNominees.length &&
+        uncachedConfigByAccount.livenessPeriod.size === uncachedNominees.length);
+
+    if (!metadataReady || !uncachedConfigReady) return [];
+
+    return nominees.map((item, index) => {
+      const subgraphRow = subgraphMap.get(item.account);
+      const cached = cacheMap.get(item.account);
+      const nonSubIdx = nonSubgraphIndexByAccount.get(item.account);
+
+      const maxSlots = subgraphRow
+        ? subgraphRow.maxNumServices
+        : cached
+          ? cached.data.config.maxNumServices
+          : (uncachedConfigByAccount.maxNumServices.get(item.account) ?? 0);
+      const servicesLength = subgraphRow
+        ? subgraphRow.filledSlots
+        : nonSubIdx != null
+          ? ((serviceIdsList[nonSubIdx] as string[]) || []).length
+          : 0;
+      const availableRewardsInWei = subgraphRow
+        ? BigInt(subgraphRow.availableRewards)
+        : nonSubIdx != null
+          ? (availableRewardsList[nonSubIdx] as bigint)
+          : 0n;
+      const availableSlots =
+        availableRewardsInWei > 0n && maxSlots > 0 ? maxSlots - servicesLength : 0;
+
+      const rewardsPerSecond = subgraphRow
+        ? BigInt(subgraphRow.rewardsPerSecond)
+        : cached
+          ? BigInt(cached.data.config.rewardsPerSecond)
+          : (uncachedConfigByAccount.rewardsPerSecond.get(item.account) ?? 0n);
+      const minStakingDeposit = subgraphRow
+        ? BigInt(subgraphRow.minStakingDeposit)
+        : cached
+          ? BigInt(cached.data.config.minStakingDeposit)
+          : (uncachedConfigByAccount.minStakingDeposit.get(item.account) ?? 0n);
+      const numAgentInstances = subgraphRow
+        ? BigInt(subgraphRow.numAgentInstances)
+        : cached
+          ? BigInt(cached.data.config.numAgentInstances)
+          : (uncachedConfigByAccount.numAgentInstances.get(item.account) ?? 1n);
+
+      const availableRewards =
+        availableRewardsInWei != null ? formatUnits(availableRewardsInWei as bigint, 18) : '0';
+
+      const apy = getApy(rewardsPerSecond, minStakingDeposit, numAgentInstances);
+      const stakeRequired = getStakeRequired(minStakingDeposit, numAgentInstances);
+
+      const details = cached?.data.operateDetails ?? STAKING_CONTRACT_DETAILS[item.account];
+      const epoch = Number(epochCounter[index]);
+      const livenessPeriodSeconds = cached
+        ? Number(cached.data.config.livenessPeriod)
+        : (uncachedConfigByAccount.livenessPeriod.get(item.account) ?? 0);
+      const tsCheckpointSeconds = Number(tsCheckpoint[index]);
+
+      const contractBlock = blocks.get(item.chainId.toString());
+      const timeRemainingSeconds = contractBlock
+        ? livenessPeriodSeconds - (Number(contractBlock.timestamp) - tsCheckpointSeconds)
+        : 0;
+      const timeRemaining = getDate(timeRemainingSeconds);
+
+      const meta = cached?.data.metadata ?? metadata?.[item.account];
+
+      return {
+        key: item.account,
+        address: item.account,
+        chainId: Number(item.chainId),
+        metadata: meta ?? { name: '', description: '' },
+        availableSlots,
+        maxSlots,
+        apy,
+        stakeRequired,
+        availableOn: details?.availableOn ?? null,
+        minOperatingBalance: details?.minOperatingBalance,
+        minOperatingBalanceToken: details?.minOperatingBalanceToken ?? null,
+        minOperatingBalanceHint: details?.minOperatingBalanceHint,
+        availableRewards,
+        epoch,
+        timeRemaining,
+      };
+    }) as StakingContract[];
+  }, [
+    nominees,
+    cacheMap,
+    subgraphMap,
+    nonSubgraphNominees,
+    nonSubgraphIndexByAccount,
+    metadata,
+    uncachedNominees,
+    uncachedConfigByAccount,
+    serviceIdsList,
+    availableRewardsList,
+    epochCounter,
     tsCheckpoint,
     blocks,
   ]);
+
+  // When we have full RPC data for uncached contracts, write to blob so next load uses cache.
+  const writtenToBlobRef = useRef<Set<string>>(new Set());
+  useEffect(() => {
+    if (uncachedNominees.length === 0 || metadata == null) return;
+
+    const allConfigPresent =
+      uncachedConfigByAccount.maxNumServices.size === uncachedNominees.length &&
+      uncachedConfigByAccount.rewardsPerSecond.size === uncachedNominees.length &&
+      uncachedConfigByAccount.minStakingDeposit.size === uncachedNominees.length &&
+      uncachedConfigByAccount.numAgentInstances.size === uncachedNominees.length &&
+      uncachedConfigByAccount.livenessPeriod.size === uncachedNominees.length;
+    if (!allConfigPresent) return;
+
+    uncachedNominees.forEach((n) => {
+      const key = `${n.chainId}:${n.account}`;
+      if (writtenToBlobRef.current.has(key)) return;
+
+      const meta = metadata[n.account];
+      const maxNumServices = uncachedConfigByAccount.maxNumServices.get(n.account);
+      const rewardsPerSecond = uncachedConfigByAccount.rewardsPerSecond.get(n.account);
+      const minStakingDeposit = uncachedConfigByAccount.minStakingDeposit.get(n.account);
+      const numAgentInstances = uncachedConfigByAccount.numAgentInstances.get(n.account);
+      const livenessPeriod = uncachedConfigByAccount.livenessPeriod.get(n.account);
+
+      if (
+        meta == null ||
+        maxNumServices == null ||
+        rewardsPerSecond == null ||
+        minStakingDeposit == null ||
+        numAgentInstances == null ||
+        livenessPeriod == null
+      ) {
+        return;
+      }
+
+      const address = getAddressFromBytes32(n.account);
+      const chainId = Number(n.chainId);
+      const details = STAKING_CONTRACT_DETAILS[n.account as Address];
+      const payload: ContractCacheData = {
+        config: {
+          maxNumServices,
+          rewardsPerSecond: String(rewardsPerSecond),
+          minStakingDeposit: String(minStakingDeposit),
+          numAgentInstances: String(numAgentInstances),
+          livenessPeriod: String(livenessPeriod),
+        },
+        metadata: { name: meta.name ?? '', description: meta.description ?? '' },
+        operateDetails: details
+          ? {
+              availableOn: details.availableOn ?? null,
+              minOperatingBalance: details.minOperatingBalance,
+              minOperatingBalanceToken: details.minOperatingBalanceToken ?? null,
+              minOperatingBalanceHint: details.minOperatingBalanceHint,
+            }
+          : { availableOn: null },
+      };
+
+      writtenToBlobRef.current.add(key);
+      fetch(`/api/contracts/${chainId}/${address}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      }).catch((err) => {
+        writtenToBlobRef.current.delete(key);
+        console.warn(`Failed to write contract cache for ${address}:`, err);
+      });
+    });
+  }, [uncachedNominees, metadata, uncachedConfigByAccount]);
 
   return {
     contracts,
     isLoading:
       isNomineesLoading ||
+      isSubgraphLoading ||
       isMetadataLoading ||
       isMaxNumServicesLoading ||
       isServiceIdsLoading ||
