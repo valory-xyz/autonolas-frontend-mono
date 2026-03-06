@@ -26,9 +26,11 @@ const getCurrentWeightTimestamp = (timeSum: number | undefined) => {
  * Fetches blob cache for each nominee via the write-through API route.
  * On a cache miss the route fetches from RPC, writes to blob, and returns the data —
  * so subsequent calls are always served from blob.
+ * Returns the map and an isLoaded flag that becomes true once all fetches settle.
  */
 function useContractCacheMap(nominees: Nominee[]) {
   const [cacheMap, setCacheMap] = useState<Map<string, GovernContractCacheSnapshot>>(new Map());
+  const [isLoaded, setIsLoaded] = useState(false);
   const nomineeKey = useMemo(
     () => nominees.map((n) => `${n.chainId}:${n.account}`).join(','),
     [nominees],
@@ -37,9 +39,11 @@ function useContractCacheMap(nominees: Nominee[]) {
   useEffect(() => {
     if (nominees.length === 0) {
       setCacheMap(new Map());
+      setIsLoaded(true);
       return;
     }
 
+    setIsLoaded(false);
     let cancelled = false;
 
     const load = async () => {
@@ -64,6 +68,7 @@ function useContractCacheMap(nominees: Nominee[]) {
         if (payload) next.set(account, payload);
       });
       setCacheMap(next);
+      setIsLoaded(true);
     };
 
     load();
@@ -72,7 +77,7 @@ function useContractCacheMap(nominees: Nominee[]) {
     };
   }, [nomineeKey, nominees]);
 
-  return cacheMap;
+  return { cacheMap, isLoaded };
 }
 
 export const useFetchStakingContractsList = () => {
@@ -102,49 +107,42 @@ export const useFetchStakingContractsList = () => {
   );
 
   // Fetch metadata from blob (write-through: miss → RPC → blob → return)
-  const cacheMap = useContractCacheMap(nominees || []);
+  const { cacheMap, isLoaded: isCacheLoaded } = useContractCacheMap(nominees || []);
 
-  // Only fall back to IPFS for nominees the blob could not resolve
+  // Only fall back to IPFS for nominees the blob could not resolve.
+  // Computed only after cache has settled so the list is stable.
   const uncachedNominees = useMemo(
-    () => (nominees || []).filter((n) => !cacheMap.has(n.account)),
-    [nominees, cacheMap],
+    () => (isCacheLoaded ? (nominees || []).filter((n) => !cacheMap.has(n.account)) : []),
+    [nominees, cacheMap, isCacheLoaded],
   );
   const { data: fallbackMetadata } = useNomineesMetadata(uncachedNominees);
 
   useEffect(() => {
-    if (
-      !!nominees &&
-      !!currentWeight &&
-      !!nextWeight &&
-      stakingContracts.length === 0
-    ) {
-      // Wait until blob map has settled (all nominees resolved or fell through)
-      const allResolved = nominees.every(
-        (n) => cacheMap.has(n.account) || (fallbackMetadata && n.account in fallbackMetadata),
+    if (!nominees || !currentWeight || !nextWeight || !isCacheLoaded) return;
+    if (stakingContracts.length !== 0) return;
+    // If some nominees weren't in blob, wait for IPFS fallback to resolve
+    if (uncachedNominees.length > 0 && fallbackMetadata == null) return;
+
+    const stakingContractsList: StakingContract[] = [];
+    nominees.forEach((item) => {
+      const isBlacklisted = BLACKLISTED_STAKING_ADDRESSES.some((addr) =>
+        areAddressesEqual(item.account, getBytes32FromAddress(addr)),
       );
-      if (!allResolved) return;
+      if (isBlacklisted) return;
 
-      const stakingContractsList: StakingContract[] = [];
-      nominees.forEach((item) => {
-        const isBlacklisted = BLACKLISTED_STAKING_ADDRESSES.some((addr) =>
-          areAddressesEqual(item.account, getBytes32FromAddress(addr)),
-        );
-        if (isBlacklisted) return;
+      const cached = cacheMap.get(item.account);
+      const metadata =
+        cached?.data.metadata ?? fallbackMetadata?.[item.account] ?? { name: '', description: '' };
 
-        const cached = cacheMap.get(item.account);
-        const metadata =
-          cached?.data.metadata ?? fallbackMetadata?.[item.account] ?? { name: '', description: '' };
-
-        stakingContractsList.push({
-          address: item.account,
-          chainId: Number(item.chainId),
-          currentWeight: currentWeight[item.account],
-          nextWeight: nextWeight[item.account],
-          metadata,
-        });
+      stakingContractsList.push({
+        address: item.account,
+        chainId: Number(item.chainId),
+        currentWeight: currentWeight[item.account],
+        nextWeight: nextWeight[item.account],
+        metadata,
       });
+    });
 
-      dispatch(setStakingContracts(stakingContractsList));
-    }
-  }, [cacheMap, currentWeight, dispatch, fallbackMetadata, nextWeight, nominees, stakingContracts.length]);
+    dispatch(setStakingContracts(stakingContractsList));
+  }, [cacheMap, currentWeight, dispatch, fallbackMetadata, isCacheLoaded, nextWeight, nominees, stakingContracts.length, uncachedNominees.length]);
 };
