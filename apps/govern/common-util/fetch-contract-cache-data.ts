@@ -106,6 +106,15 @@ export async function fetchContractCacheDataFromChain(
       client.readContract({ ...contractArgs, functionName: 'metadataHash' }),
     ]);
 
+    const hasValidKeyCall =
+      maxNumServicesRes.status === 'fulfilled' ||
+      metadataHashRes.status === 'fulfilled' ||
+      configHashRes.status === 'fulfilled' ||
+      proxyHashRes.status === 'fulfilled';
+    if (!hasValidKeyCall) {
+      return null;
+    }
+
     const rawMetadataHash = settled(metadataHashRes, null);
     const metadataHashStr =
       typeof rawMetadataHash === 'string'

@@ -3,8 +3,8 @@
  * These values do not change for a given contract, so they are stored in blob once and read from cache.
  * Live data (availableRewards, serviceIds, epochCounter, tsCheckpoint) is not cached.
  *
- * Backfill: call setContractCache from a script or PUT /api/contracts/[chainId]/[address]
- * with payload from RPC or subgraph.
+ * Read-through flow (in GET /api/contracts/[chainId]/[address]): call getContractCache; on miss,
+ * fetch from chain via fetchContractCacheDataFromChain (RPC + IPFS), then setContractCache and return.
  */
 
 import { list, put } from '@vercel/blob';

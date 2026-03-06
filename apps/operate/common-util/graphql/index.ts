@@ -84,6 +84,7 @@ const STAKING_CONTRACTS_QUERY = gql`
 `;
 
 const CHECKPOINTS_CHUNK_SIZE = 10;
+const CHECKPOINT_CHUNK_CONCURRENCY = 2;
 
 function buildLatestCheckpointsChunkQuery(count: number): string {
   const fields = 'id contractAddress availableRewards blockTimestamp epoch';
@@ -98,6 +99,22 @@ function buildLatestCheckpointsChunkQuery(count: number): string {
 
 function normalizeAddress(addr: string): string {
   return addr.toLowerCase().startsWith('0x') ? addr.toLowerCase() : addr;
+}
+
+/**
+ * Runs promises in batches of `limit` to cap concurrency.
+ */
+async function runWithConcurrency<T>(
+  items: (() => Promise<T>)[],
+  limit: number,
+): Promise<PromiseSettledResult<T>[]> {
+  const results: PromiseSettledResult<T>[] = [];
+  for (let i = 0; i < items.length; i += limit) {
+    const batch = items.slice(i, i + limit).map((fn) => fn());
+    const settled = await Promise.allSettled(batch);
+    results.push(...settled);
+  }
+  return results;
 }
 
 /**
@@ -117,16 +134,18 @@ export async function fetchStakingDataFromSubgraph(
 
   const ids = addresses.map(normalizeAddress);
 
-  const contractsRes = await client.request<StakingContractsResponse>(STAKING_CONTRACTS_QUERY, {
-    ids,
-  });
-  const contracts = contractsRes.stakingContracts ?? [];
+  let contracts: SubgraphStakingContract[] = [];
+  try {
+    const contractsRes = await client.request<StakingContractsResponse>(STAKING_CONTRACTS_QUERY, {
+      ids,
+    });
+    contracts = contractsRes.stakingContracts ?? [];
+  } catch (err) {
+    console.warn('Subgraph staking contracts request failed:', err);
+  }
 
-  // Fetch latest checkpoint per contract in chunks (aliased subqueries) so inactive contracts
-  // are not skipped when active ones have many checkpoints.
-  const latestCheckpointByContract = new Map<string, SubgraphCheckpoint>();
   type ChunkResponse = Record<string, SubgraphCheckpoint[]>;
-  const chunkPromises: Promise<{ chunk: string[]; chunkRes: ChunkResponse }>[] = [];
+  const chunkTasks: (() => Promise<{ chunk: string[]; chunkRes: ChunkResponse }>)[] = [];
   for (let i = 0; i < ids.length; i += CHECKPOINTS_CHUNK_SIZE) {
     const chunk = ids.slice(i, i + CHECKPOINTS_CHUNK_SIZE);
     const variables: Record<string, string> = {};
@@ -134,12 +153,16 @@ export async function fetchStakingDataFromSubgraph(
       variables[`addr${j}`] = addr;
     });
     const query = buildLatestCheckpointsChunkQuery(chunk.length);
-    chunkPromises.push(
+    chunkTasks.push(() =>
       client.request<ChunkResponse>(query, variables).then((chunkRes) => ({ chunk, chunkRes })),
     );
   }
-  const chunkResults = await Promise.all(chunkPromises);
-  for (const { chunk, chunkRes } of chunkResults) {
+
+  const latestCheckpointByContract = new Map<string, SubgraphCheckpoint>();
+  const chunkResults = await runWithConcurrency(chunkTasks, CHECKPOINT_CHUNK_CONCURRENCY);
+  for (const settled of chunkResults) {
+    if (settled.status !== 'fulfilled') continue;
+    const { chunk, chunkRes } = settled.value;
     chunk.forEach((addr, j) => {
       const list = chunkRes[`cp${j}`];
       const cp = Array.isArray(list) && list.length > 0 ? list[0] : null;

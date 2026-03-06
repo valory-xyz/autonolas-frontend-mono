@@ -2,7 +2,7 @@ import { list, put } from '@vercel/blob';
 
 import type { GovernContractCacheData, GovernContractCacheSnapshot } from 'types';
 
-const BLOB_PREFIX = 'contracts';
+const BLOB_PREFIX = 'govern/contracts';
 
 function blobPath(chainId: number, address: string): string {
   return `${BLOB_PREFIX}/${chainId}/${address.toLowerCase()}.json`;
