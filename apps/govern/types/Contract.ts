@@ -31,16 +31,9 @@ export type GovernContractCacheConfig = {
   activityChecker: string;
 };
 
-export type GovernContractCacheInstanceParams = {
-  implementation: string;
-  deployer: string;
-  isEnabled: boolean;
-};
-
 export type GovernContractCacheData = {
   metadata: Metadata;
   config: GovernContractCacheConfig;
-  instanceParams: GovernContractCacheInstanceParams | null;
 };
 
 export type GovernContractCacheSnapshot = {

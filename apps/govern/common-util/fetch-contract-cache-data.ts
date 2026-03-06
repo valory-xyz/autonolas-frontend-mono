@@ -8,9 +8,9 @@ import { createPublicClient, http } from 'viem';
 import type { Address } from 'viem';
 
 import { GATEWAY_URL, HASH_PREFIX, RPC_URLS } from 'libs/util-constants/src';
-import { STAKING_FACTORY, STAKING_TOKEN } from 'libs/util-contracts/src/lib/abiAndAddresses';
+import { STAKING_TOKEN } from 'libs/util-contracts/src/lib/abiAndAddresses';
 
-import type { GovernContractCacheData, GovernContractCacheInstanceParams } from 'types';
+import type { GovernContractCacheData } from 'types';
 
 const IPFS_FETCH_TIMEOUT_MS = 5000;
 
@@ -60,7 +60,7 @@ function bigintToStr(value: unknown, fallback = '0'): string {
 }
 
 /**
- * Fetches config, metadata and instance params for a staking contract from RPC + IPFS.
+ * Fetches config and metadata for a staking contract from RPC + IPFS.
  * Returns null if the address is not a valid staking contract or RPC fails.
  * Uses Promise.allSettled so partial data is still written if some fields are unsupported.
  */
@@ -124,31 +124,6 @@ export async function fetchContractCacheDataFromChain(
           : '0x' + '0'.repeat(64);
     const meta = await fetchMetadata(metadataHashStr);
 
-    const stakingFactoryAddress = (STAKING_FACTORY.addresses as Record<number, Address>)[chainId];
-    let instanceParams: GovernContractCacheInstanceParams | null = null;
-    if (stakingFactoryAddress) {
-      const instanceParamsRes = await client
-        .readContract({
-          address: stakingFactoryAddress,
-          abi: STAKING_FACTORY.abi,
-          functionName: 'mapInstanceParams',
-          args: [address],
-        })
-        .catch(() => null);
-      if (instanceParamsRes) {
-        const [implementation, deployer, isEnabled] = instanceParamsRes as [
-          Address,
-          Address,
-          boolean,
-        ];
-        instanceParams = {
-          implementation: implementation ?? '',
-          deployer: deployer ?? '',
-          isEnabled: isEnabled ?? false,
-        };
-      }
-    }
-
     const rawAgentIds = settled(agentIdsRes, [] as bigint[]) as bigint[];
     const agentIds = Array.isArray(rawAgentIds) ? rawAgentIds.map((id) => id.toString()) : [];
 
@@ -178,7 +153,6 @@ export async function fetchContractCacheDataFromChain(
             ? (settled(activityCheckerRes, '') as string)
             : '',
       },
-      instanceParams,
     };
   } catch {
     return null;

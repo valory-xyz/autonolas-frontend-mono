@@ -1,7 +1,42 @@
+import { useEffect, useState } from 'react';
+import { GovernContractCacheSnapshot } from 'types';
 import { Address, formatEther } from 'viem';
 import { useReadContract } from 'wagmi';
 
 import { STAKING_FACTORY, STAKING_TOKEN } from 'libs/util-contracts/src/lib/abiAndAddresses';
+
+/**
+ * Fetches the blob cache for a single contract via the write-through API route.
+ * On miss the route fetches from RPC, writes to blob, and returns — so the
+ * second call is always served from blob.
+ */
+export const useContractBlobCache = (address: string, chainId: number) => {
+  const [cache, setCache] = useState<GovernContractCacheSnapshot | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    if (!address || !chainId) return;
+    let cancelled = false;
+
+    fetch(`/api/contracts/${chainId}/${address}`)
+      .then((res) => (res.ok ? (res.json() as Promise<GovernContractCacheSnapshot>) : null))
+      .then((data) => {
+        if (!cancelled) {
+          setCache(data);
+          setIsLoading(false);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) setIsLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [address, chainId]);
+
+  return { cache, isLoading };
+};
 
 export const useContractParams = (address: string, chainId: number) => {
   const { data } = useReadContract({
