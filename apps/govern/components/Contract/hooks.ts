@@ -1,8 +1,9 @@
-import { useEffect, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { GovernContractCacheSnapshot } from 'types';
 import { Address, formatEther } from 'viem';
 import { useReadContract } from 'wagmi';
 
+import { isGovernContractCacheSnapshot } from 'common-util/blob/contract-cache';
 import { STAKING_FACTORY, STAKING_TOKEN } from 'libs/util-contracts/src/lib/abiAndAddresses';
 
 /**
@@ -11,31 +12,18 @@ import { STAKING_FACTORY, STAKING_TOKEN } from 'libs/util-contracts/src/lib/abiA
  * second call is always served from blob.
  */
 export const useContractBlobCache = (address: string, chainId: number) => {
-  const [cache, setCache] = useState<GovernContractCacheSnapshot | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const { data: cache, isLoading } = useQuery({
+    queryKey: ['contract-blob-cache', chainId, address],
+    queryFn: async (): Promise<GovernContractCacheSnapshot | null> => {
+      const res = await fetch(`/api/contracts/${chainId}/${address}`);
+      if (!res.ok) return null;
+      const data = await res.json();
+      return isGovernContractCacheSnapshot(data) ? data : null;
+    },
+    enabled: !!address && !!chainId,
+  });
 
-  useEffect(() => {
-    if (!address || !chainId) return;
-    let cancelled = false;
-
-    fetch(`/api/contracts/${chainId}/${address}`)
-      .then((res) => (res.ok ? (res.json() as Promise<GovernContractCacheSnapshot>) : null))
-      .then((data) => {
-        if (!cancelled) {
-          setCache(data);
-          setIsLoading(false);
-        }
-      })
-      .catch(() => {
-        if (!cancelled) setIsLoading(false);
-      });
-
-    return () => {
-      cancelled = true;
-    };
-  }, [address, chainId]);
-
-  return { cache, isLoading };
+  return { cache: cache ?? null, isLoading };
 };
 
 export const useContractParams = (address: string, chainId: number) => {

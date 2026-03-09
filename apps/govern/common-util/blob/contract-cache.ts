@@ -8,7 +8,7 @@ function blobPath(chainId: number, address: string): string {
   return `${BLOB_PREFIX}/${chainId}/${address.toLowerCase()}.json`;
 }
 
-const isGovernContractCacheSnapshot = (data: unknown): data is GovernContractCacheSnapshot =>
+export const isGovernContractCacheSnapshot = (data: unknown): data is GovernContractCacheSnapshot =>
   typeof data === 'object' && data !== null && 'data' in data && 'timestamp' in data;
 
 /**

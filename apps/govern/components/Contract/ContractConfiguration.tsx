@@ -213,6 +213,8 @@ export const ColFlexContainer = ({ text, content, span = 12, ...rest }: ColFlexC
   );
 };
 
+const val = (v: string | number | ReactNode) => <Text>{v}</Text>;
+
 /**
  * Renders contract configuration directly from blob-cached values (no RPC calls).
  */
@@ -260,44 +262,93 @@ const ContractConfigurationFromCache = ({
     ));
   }, [config.agentIds]);
 
-  const val = (v: string | number | ReactNode) => <Text>{v}</Text>;
-
   return (
     <>
       <Row gutter={24}>
-        <ColFlexContainer text={<MaximumStakedAgentsLabel />} content={val(config.maxNumServices || NA)} data-testid="maximum-staked-agents" />
-        <ColFlexContainer text={<RewardsPerSecondLabel />} content={val(rewardsPerSecond)} data-testid="rewards-per-second" />
+        <ColFlexContainer
+          text={<MaximumStakedAgentsLabel />}
+          content={val(config.maxNumServices || NA)}
+          data-testid="maximum-staked-agents"
+        />
+        <ColFlexContainer
+          text={<RewardsPerSecondLabel />}
+          content={val(rewardsPerSecond)}
+          data-testid="rewards-per-second"
+        />
       </Row>
       <Row gutter={24}>
-        <ColFlexContainer text={<MinimumStakingDepositLabel />} content={val(minStakingDeposit)} data-testid="minimum-staking-deposit" />
-        <ColFlexContainer text={<MinimumStakingPeriodsLabel />} content={val(minimumStakingPeriods)} data-testid="minimum-staking-periods" />
+        <ColFlexContainer
+          text={<MinimumStakingDepositLabel />}
+          content={val(minStakingDeposit)}
+          data-testid="minimum-staking-deposit"
+        />
+        <ColFlexContainer
+          text={<MinimumStakingPeriodsLabel />}
+          content={val(minimumStakingPeriods)}
+          data-testid="minimum-staking-periods"
+        />
       </Row>
       <Row gutter={24}>
-        <ColFlexContainer text={<MaximumInactivityPeriodsLabel />} content={val(config.maxNumInactivityPeriods || NA)} data-testid="maximum-inactivity-periods" />
-        <ColFlexContainer text={<LivenessPeriodLabel />} content={val(config.livenessPeriod || NA)} data-testid="liveness-period" />
+        <ColFlexContainer
+          text={<MaximumInactivityPeriodsLabel />}
+          content={val(config.maxNumInactivityPeriods || NA)}
+          data-testid="maximum-inactivity-periods"
+        />
+        <ColFlexContainer
+          text={<LivenessPeriodLabel />}
+          content={val(config.livenessPeriod || NA)}
+          data-testid="liveness-period"
+        />
       </Row>
       <Row gutter={24}>
-        <ColFlexContainer text={<TimeForEmissionsLabel />} content={val(config.timeForEmissions || NA)} data-testid="time-for-emissions" />
-        <ColFlexContainer text={<AgentInstancesLabel />} content={val(config.numAgentInstances || NA)} data-testid="num-agent-instances" />
+        <ColFlexContainer
+          text={<TimeForEmissionsLabel />}
+          content={val(config.timeForEmissions || NA)}
+          data-testid="time-for-emissions"
+        />
+        <ColFlexContainer
+          text={<AgentInstancesLabel />}
+          content={val(config.numAgentInstances || NA)}
+          data-testid="num-agent-instances"
+        />
       </Row>
       <Row gutter={24}>
-        <ColFlexContainer text={<AgentIdsLabel />} content={val(agentIdsDisplay)} data-testid="agent-ids" />
-        <ColFlexContainer text={<MultisigThresholdLabel />} content={val(config.threshold || NA)} data-testid="multisig-threshold" />
+        <ColFlexContainer
+          text={<AgentIdsLabel />}
+          content={val(agentIdsDisplay)}
+          data-testid="agent-ids"
+        />
+        <ColFlexContainer
+          text={<MultisigThresholdLabel />}
+          content={val(config.threshold || NA)}
+          data-testid="multisig-threshold"
+        />
       </Row>
       <Row gutter={24}>
-        <ColFlexContainer text={<ServiceConfigHashLabel />} content={val(configHashDisplay)} data-testid="service-config-hash" />
+        <ColFlexContainer
+          text={<ServiceConfigHashLabel />}
+          content={val(configHashDisplay)}
+          data-testid="service-config-hash"
+        />
         <ColFlexContainer
           text={<ActivityCheckerAddressLabel />}
           content={val(
             config.activityChecker ? (
               <ShowNetworkAddress chainId={chainId} address={config.activityChecker as Address} />
-            ) : NA,
+            ) : (
+              NA
+            ),
           )}
           data-testid="activity-checker-address"
         />
       </Row>
       <Row gutter={24}>
-        <ColFlexContainer span={24} text={<ProxyHashLabel />} content={val(config.proxyHash || NA)} data-testid="proxy-hash" />
+        <ColFlexContainer
+          span={24}
+          text={<ProxyHashLabel />}
+          content={val(config.proxyHash || NA)}
+          data-testid="proxy-hash"
+        />
       </Row>
     </>
   );

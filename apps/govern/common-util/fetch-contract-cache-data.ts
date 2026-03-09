@@ -59,6 +59,12 @@ function bigintToStr(value: unknown, fallback = '0'): string {
   return fallback;
 }
 
+function toMetadataHashString(raw: unknown): string {
+  if (typeof raw === 'string') return raw;
+  if (typeof raw === 'bigint') return '0x' + raw.toString(16).padStart(64, '0');
+  return '0x' + '0'.repeat(64);
+}
+
 /**
  * Fetches config and metadata for a staking contract from RPC + IPFS.
  * Returns null if the address is not a valid staking contract or RPC fails.
@@ -116,12 +122,7 @@ export async function fetchContractCacheDataFromChain(
     }
 
     const rawMetadataHash = settled(metadataHashRes, null);
-    const metadataHashStr =
-      typeof rawMetadataHash === 'string'
-        ? rawMetadataHash
-        : typeof rawMetadataHash === 'bigint'
-          ? '0x' + rawMetadataHash.toString(16).padStart(64, '0')
-          : '0x' + '0'.repeat(64);
+    const metadataHashStr = toMetadataHashString(rawMetadataHash);
     const meta = await fetchMetadata(metadataHashStr);
 
     const rawAgentIds = settled(agentIdsRes, [] as bigint[]) as bigint[];
