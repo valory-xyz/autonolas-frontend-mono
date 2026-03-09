@@ -1,6 +1,6 @@
 import { getPublicClient } from '@wagmi/core';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { ContractCacheData, ContractCacheSnapshot, Nominee, StakingContract } from 'types';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { ContractCacheSnapshot, Nominee, StakingContract } from 'types';
 import { Abi, Address, Block, formatEther, formatUnits } from 'viem';
 import { getBlock } from 'viem/actions';
 import { useReadContracts } from 'wagmi';
@@ -815,85 +815,6 @@ export const useStakingContractsList = () => {
     tsCheckpoint,
     blocks,
   ]);
-
-  // When we have full RPC data for uncached contracts, write to blob so next load uses cache.
-  const writtenToBlobRef = useRef<Set<string>>(new Set());
-  useEffect(() => {
-    if (uncachedNominees.length === 0 || metadata == null) return;
-
-    const allConfigPresent =
-      uncachedConfigByAccount.maxNumServices.size === uncachedNominees.length &&
-      uncachedConfigByAccount.rewardsPerSecond.size === uncachedNominees.length &&
-      uncachedConfigByAccount.minStakingDeposit.size === uncachedNominees.length &&
-      uncachedConfigByAccount.numAgentInstances.size === uncachedNominees.length &&
-      uncachedConfigByAccount.livenessPeriod.size === uncachedNominees.length;
-    if (!allConfigPresent) return;
-
-    uncachedNominees.forEach((n) => {
-      const key = `${n.chainId}:${n.account}`;
-      if (writtenToBlobRef.current.has(key)) return;
-
-      const meta = metadata[n.account];
-      const maxNumServices = uncachedConfigByAccount.maxNumServices.get(n.account);
-      const rewardsPerSecond = uncachedConfigByAccount.rewardsPerSecond.get(n.account);
-      const minStakingDeposit = uncachedConfigByAccount.minStakingDeposit.get(n.account);
-      const numAgentInstances = uncachedConfigByAccount.numAgentInstances.get(n.account);
-      const livenessPeriod = uncachedConfigByAccount.livenessPeriod.get(n.account);
-
-      if (
-        meta == null ||
-        maxNumServices == null ||
-        rewardsPerSecond == null ||
-        minStakingDeposit == null ||
-        numAgentInstances == null ||
-        livenessPeriod == null
-      ) {
-        return;
-      }
-
-      const address = getAddressFromBytes32(n.account);
-      const chainId = Number(n.chainId);
-      if (
-        !address ||
-        typeof address !== 'string' ||
-        address.length < 42 ||
-        chainId == null ||
-        Number.isNaN(chainId) ||
-        chainId <= 0
-      ) {
-        return;
-      }
-      const details = STAKING_CONTRACT_DETAILS[n.account as Address];
-      const payload: ContractCacheData = {
-        config: {
-          maxNumServices,
-          rewardsPerSecond: String(rewardsPerSecond),
-          minStakingDeposit: String(minStakingDeposit),
-          numAgentInstances: String(numAgentInstances),
-          livenessPeriod: String(livenessPeriod),
-        },
-        metadata: { name: meta.name ?? '', description: meta.description ?? '' },
-        operateDetails: details
-          ? {
-              availableOn: details.availableOn ?? null,
-              minOperatingBalance: details.minOperatingBalance,
-              minOperatingBalanceToken: details.minOperatingBalanceToken ?? null,
-              minOperatingBalanceHint: details.minOperatingBalanceHint,
-            }
-          : { availableOn: null },
-      };
-
-      writtenToBlobRef.current.add(key);
-      fetch(`/api/contracts/${chainId}/${address}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      }).catch((err) => {
-        writtenToBlobRef.current.delete(key);
-        console.warn(`Failed to write contract cache for ${address}:`, err);
-      });
-    });
-  }, [uncachedNominees, metadata, uncachedConfigByAccount]);
 
   return {
     contracts,

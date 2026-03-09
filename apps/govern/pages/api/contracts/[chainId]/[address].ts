@@ -1,32 +1,16 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 
-import { isValidAddress } from 'libs/util-functions/src';
-
 import { fetchContractCacheDataFromChain } from 'common-util/fetch-contract-cache-data';
 import { getContractCache, setContractCache } from 'common-util/blob';
 
-/** Chain IDs we allow for contract cache (have RPC and are used for staking). */
-const ALLOWED_CHAIN_IDS = new Set([1, 10, 100, 137, 8453, 34443]);
-
-/**
- * GET: Returns cached contract data. On cache miss, performs read-through (RPC + IPFS + blob write).
- */
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   const { chainId, address } = req.query;
 
   const chainIdNum = typeof chainId === 'string' && /^\d+$/.test(chainId) ? Number(chainId) : null;
-  const addressStr = typeof address === 'string' && address.length > 0 ? address.trim() : null;
+  const addressStr = typeof address === 'string' && address.length > 0 ? address : null;
 
-  if (chainIdNum == null || addressStr == null) {
+  if (chainIdNum === null || addressStr === null) {
     return res.status(400).json({ error: 'Missing or invalid chainId or address' });
-  }
-
-  if (!isValidAddress(addressStr)) {
-    return res.status(400).json({ error: 'Invalid address format' });
-  }
-
-  if (!ALLOWED_CHAIN_IDS.has(chainIdNum)) {
-    return res.status(400).json({ error: 'Chain not allowed' });
   }
 
   if (req.method === 'GET') {

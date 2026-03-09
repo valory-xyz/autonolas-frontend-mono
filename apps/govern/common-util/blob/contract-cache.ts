@@ -1,23 +1,14 @@
-/**
- * Blob storage for operate app: cached staking contract config, metadata, and operate-specific details.
- * These values do not change for a given contract, so they are stored in blob once and read from cache.
- * Live data (availableRewards, serviceIds, epochCounter, tsCheckpoint) is not cached.
- *
- * Read-through flow (in GET /api/contracts/[chainId]/[address]): call getContractCache; on miss,
- * fetch from chain via fetchContractCacheDataFromChain (RPC + IPFS), then setContractCache and return.
- */
-
 import { list, put } from '@vercel/blob';
-import type { ContractCacheData, ContractCacheSnapshot } from 'types';
 
-const BLOB_PREFIX = 'operate/contracts';
+import type { GovernContractCacheData, GovernContractCacheSnapshot } from 'types';
+
+const BLOB_PREFIX = 'govern/contracts';
 
 function blobPath(chainId: number, address: string): string {
-  const addr = address.toLowerCase();
-  return `${BLOB_PREFIX}/${chainId}/${addr}.json`;
+  return `${BLOB_PREFIX}/${chainId}/${address.toLowerCase()}.json`;
 }
 
-const isContractCacheSnapshot = (data: unknown): data is ContractCacheSnapshot =>
+export const isGovernContractCacheSnapshot = (data: unknown): data is GovernContractCacheSnapshot =>
   typeof data === 'object' && data !== null && 'data' in data && 'timestamp' in data;
 
 /**
@@ -26,7 +17,7 @@ const isContractCacheSnapshot = (data: unknown): data is ContractCacheSnapshot =
 export async function getContractCache(
   chainId: number,
   address: string,
-): Promise<ContractCacheSnapshot | null> {
+): Promise<GovernContractCacheSnapshot | null> {
   try {
     const path = blobPath(chainId, address);
     const { blobs } = await list({ prefix: path, limit: 1 });
@@ -38,7 +29,7 @@ export async function getContractCache(
     if (!response.ok) return null;
 
     const data = await response.json();
-    return isContractCacheSnapshot(data) ? data : null;
+    return isGovernContractCacheSnapshot(data) ? data : null;
   } catch {
     return null;
   }
@@ -50,10 +41,10 @@ export async function getContractCache(
 export async function setContractCache(
   chainId: number,
   address: string,
-  data: ContractCacheData,
+  data: GovernContractCacheData,
 ): Promise<void> {
   const path = blobPath(chainId, address);
-  const snapshot: ContractCacheSnapshot = {
+  const snapshot: GovernContractCacheSnapshot = {
     data,
     timestamp: Date.now(),
   };
