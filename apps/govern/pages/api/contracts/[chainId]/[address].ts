@@ -9,7 +9,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   const chainIdNum = typeof chainId === 'string' && /^\d+$/.test(chainId) ? Number(chainId) : null;
   const addressStr = typeof address === 'string' && address.length > 0 ? address : null;
 
-  if (chainIdNum == null || addressStr == null) {
+  if (chainIdNum === null || addressStr === null) {
     return res.status(400).json({ error: 'Missing or invalid chainId or address' });
   }
 
