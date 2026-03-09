@@ -7,7 +7,11 @@ import { useReadContract } from 'wagmi';
 import { useNominees, useNomineesMetadata } from 'libs/common-contract-functions/src';
 import { BLACKLISTED_STAKING_ADDRESSES } from 'libs/util-constants/src';
 import { VOTE_WEIGHTING } from 'libs/util-contracts/src/lib/abiAndAddresses';
-import { areAddressesEqual, getAddressFromBytes32, getBytes32FromAddress } from 'libs/util-functions/src';
+import {
+  areAddressesEqual,
+  getAddressFromBytes32,
+  getBytes32FromAddress,
+} from 'libs/util-functions/src';
 
 import { NEXT_RELATIVE_WEIGHTS_KEY, TIME_SUM_KEY } from 'common-util/constants/scopeKeys';
 import { WEEK_IN_SECONDS } from 'common-util/constants/time';
@@ -131,8 +135,8 @@ export const useFetchStakingContractsList = () => {
       if (isBlacklisted) return;
 
       const cached = cacheMap.get(item.account);
-      const metadata =
-        cached?.data.metadata ?? fallbackMetadata?.[item.account] ?? { name: '', description: '' };
+      const metadata = cached?.data.metadata ??
+        fallbackMetadata?.[item.account] ?? { name: '', description: '' };
 
       stakingContractsList.push({
         address: item.account,
@@ -144,5 +148,15 @@ export const useFetchStakingContractsList = () => {
     });
 
     dispatch(setStakingContracts(stakingContractsList));
-  }, [cacheMap, currentWeight, dispatch, fallbackMetadata, isCacheLoaded, nextWeight, nominees, stakingContracts.length, uncachedNominees.length]);
+  }, [
+    cacheMap,
+    currentWeight,
+    dispatch,
+    fallbackMetadata,
+    isCacheLoaded,
+    nextWeight,
+    nominees,
+    stakingContracts.length,
+    uncachedNominees.length,
+  ]);
 };
