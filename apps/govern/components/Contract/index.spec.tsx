@@ -28,6 +28,7 @@ jest.mock('store/index', () => ({
 }));
 
 jest.mock('components/Contract/hooks', () => ({
+  useContractBlobCache: jest.fn().mockReturnValue({ cache: null, isLoading: false }),
   useContractParams: jest.fn().mockReturnValue({
     data: {
       implementation: '0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
