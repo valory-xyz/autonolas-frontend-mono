@@ -49,10 +49,37 @@ const formatTimestamp = (timestamp?: string) => {
   return `${formattedTime} • ${formattedDate}`;
 };
 
-const formatPaymentWithCurrency = (payment: string, chainId?: number) => {
-  const amount = parseToEth(payment);
-  const currency = (chainId && CHAIN_TO_NATIVE_CURRENCY[chainId]) || 'ETH';
-  return `${amount} ${currency}`;
+const formatPayment = (activity: Activity, chainId?: number): string | null => {
+  const { feeUnit, feeRaw, finalFeeUSD, payment } = activity;
+
+  if (feeUnit === 'USDC') {
+    return finalFeeUSD ? `$${Number(finalFeeUSD).toFixed(2)}` : null;
+  }
+  if (feeUnit === 'NATIVE') {
+    if (feeRaw == null) return null;
+    const amount = parseToEth(feeRaw);
+    const currency = (chainId && CHAIN_TO_NATIVE_CURRENCY[chainId]) || 'ETH';
+    return `${amount} ${currency}`;
+  }
+  if (feeUnit === 'TOKEN') {
+    if (feeRaw == null) return null;
+    const amount = parseToEth(feeRaw);
+    // TODO: can be any token, but there's no easy way currently to get the address
+    // We know it's always OLAS for now.
+    return `${amount} OLAS`;
+  }
+  if (feeUnit === 'CREDITS') {
+    return feeRaw ? `${feeRaw} Credits` : null;
+  }
+
+  // Legacy: no feeUnit, fall back to payment field
+  if (payment) {
+    const amount = parseToEth(payment);
+    const currency = (chainId && CHAIN_TO_NATIVE_CURRENCY[chainId]) || 'ETH';
+    return `${amount} ${currency}`;
+  }
+
+  return null;
 };
 
 export const ActivityDetails = ({
@@ -60,184 +87,186 @@ export const ActivityDetails = ({
   onCancel,
   activity,
   addressLinkProps,
-}: ActivityDetailsProps) => (
-  <Modal
-    open={open}
-    title="Activity Details"
-    onCancel={onCancel}
-    footer={null}
-    styles={{
-      content: {
-        padding: 32,
-      },
-    }}
-  >
-    {activity ? (
-      <Info>
-        <Title level={5}>Request</Title>
+}: ActivityDetailsProps) => {
+  const paymentText = activity ? formatPayment(activity, addressLinkProps.chainId) : null;
 
-        <DetailsDivider />
+  return (
+    <Modal
+      open={open}
+      title="Activity Details"
+      onCancel={onCancel}
+      footer={null}
+      styles={{
+        content: {
+          padding: 32,
+        },
+      }}
+    >
+      {activity ? (
+        <Info>
+          <Title level={5}>Request</Title>
 
-        <Row>
-          <Col span={8}>
-            <Text type="secondary">Request ID:</Text>{' '}
-          </Col>
-          <Col span={16}>
-            {activity.requestId ? (
-              <Flex align="center" justify="space-between">
-                <Text>{truncateAddress(activity.requestId)}</Text>
-                <Copy text={activity.requestId} />
-              </Flex>
-            ) : (
-              NA
-            )}
-          </Col>
-        </Row>
+          <DetailsDivider />
 
-        <Row>
-          <Col span={8}>
-            <Text type="secondary">Activity Type:</Text>{' '}
-          </Col>
-          <Col span={16}>
-            <span>{marketplaceRoleTag('', activity)}</span>
-          </Col>
-        </Row>
-
-        <Row>
-          <Col span={8}>
-            <Text type="secondary">Requested At:</Text>{' '}
-          </Col>
-          <Col span={16}>
-            <span>{formatTimestamp(activity.requestBlockTimestamp)}</span>
-          </Col>
-        </Row>
-
-        <Row>
-          <Col span={8}>
-            <Text type="secondary">Request Data:</Text>{' '}
-          </Col>
-          <Col span={16}>
-            {activity.requestIpfsHash ? (
-              <Flex align="center" justify="space-between">
-                <>
-                  <AddressLink {...addressLinkProps} address={activity.requestIpfsHash} isIpfs />
-                </>
-                <Copy text={activity.requestIpfsHash} />
-              </Flex>
-            ) : (
-              NA
-            )}
-          </Col>
-        </Row>
-
-        <Row>
-          <Col span={8}>
-            <Text type="secondary">Requested By:</Text>{' '}
-          </Col>
-          <Col span={16}>
-            {activity.requestedBy ? (
-              <Flex align="center" justify="space-between">
-                <AddressLink {...addressLinkProps} address={activity.requestedBy} />
-                <Copy text={activity.requestedBy} />
-              </Flex>
-            ) : (
-              NA
-            )}
-          </Col>
-        </Row>
-
-        <Row>
-          <Col span={8}>
-            <Text type="secondary">Request Tx Hash:</Text>{' '}
-          </Col>
-          <Col span={16}>
-            {activity.requestTransactionHash ? (
-              <Flex align="center" justify="space-between">
-                <AddressLink {...addressLinkProps} address={activity.requestTransactionHash} />
-                <Copy text={activity.requestTransactionHash} />
-              </Flex>
-            ) : (
-              NA
-            )}
-          </Col>
-        </Row>
-
-        <Typography.Title level={5} style={{ marginTop: 16 }}>
-          Delivery
-        </Typography.Title>
-
-        <DetailsDivider />
-
-        <Row>
-          <Col span={8}>
-            <Text type="secondary">Delivered At:</Text>{' '}
-          </Col>
-          <Col span={16}>
-            <span className="info-text">{formatTimestamp(activity.deliveryBlockTimestamp)}</span>
-          </Col>
-        </Row>
-
-        {!!activity.payment && (
           <Row>
             <Col span={8}>
-              <Text type="secondary">Payment:</Text>&nbsp;
+              <Text type="secondary">Request ID:</Text>{' '}
             </Col>
             <Col span={16}>
-              <span className="info-text">
-                {formatPaymentWithCurrency(activity.payment, addressLinkProps.chainId)}
-              </span>
+              {activity.requestId ? (
+                <Flex align="center" justify="space-between">
+                  <Text>{truncateAddress(activity.requestId)}</Text>
+                  <Copy text={activity.requestId} />
+                </Flex>
+              ) : (
+                NA
+              )}
             </Col>
           </Row>
-        )}
 
-        <Row>
-          <Col span={8}>
-            <Text type="secondary">Delivery Data:</Text>{' '}
-          </Col>
-          <Col span={16}>
-            {activity.deliveryIpfsHash ? (
-              <Flex align="center" justify="space-between">
-                <AddressLink {...addressLinkProps} address={activity.deliveryIpfsHash} isIpfs />
-                <Copy text={activity.deliveryIpfsHash} />
-              </Flex>
-            ) : (
-              NA
-            )}
-          </Col>
-        </Row>
+          <Row>
+            <Col span={8}>
+              <Text type="secondary">Activity Type:</Text>{' '}
+            </Col>
+            <Col span={16}>
+              <span>{marketplaceRoleTag('', activity)}</span>
+            </Col>
+          </Row>
 
-        <Row>
-          <Col span={8}>
-            <Text type="secondary">Delivered By:</Text>{' '}
-          </Col>
-          <Col span={16}>
-            {activity.deliveredBy ? (
-              <Flex align="center" justify="space-between">
-                <AddressLink {...addressLinkProps} address={activity.deliveredBy} />
-                <Copy text={activity.deliveredBy} />
-              </Flex>
-            ) : (
-              NA
-            )}
-          </Col>
-        </Row>
+          <Row>
+            <Col span={8}>
+              <Text type="secondary">Requested At:</Text>{' '}
+            </Col>
+            <Col span={16}>
+              <span>{formatTimestamp(activity.requestBlockTimestamp)}</span>
+            </Col>
+          </Row>
 
-        <Row>
-          <Col span={8}>
-            <Text type="secondary">Delivery Tx Hash:</Text>{' '}
-          </Col>
-          <Col span={16}>
-            {activity.deliveryTransactionHash ? (
-              <Flex align="center" justify="space-between">
-                <AddressLink {...addressLinkProps} address={activity.deliveryTransactionHash} />
-                <Copy text={activity.deliveryTransactionHash} />
-              </Flex>
-            ) : (
-              NA
-            )}
-          </Col>
-        </Row>
-      </Info>
-    ) : null}
-  </Modal>
-);
+          <Row>
+            <Col span={8}>
+              <Text type="secondary">Request Data:</Text>{' '}
+            </Col>
+            <Col span={16}>
+              {activity.requestIpfsHash ? (
+                <Flex align="center" justify="space-between">
+                  <>
+                    <AddressLink {...addressLinkProps} address={activity.requestIpfsHash} isIpfs />
+                  </>
+                  <Copy text={activity.requestIpfsHash} />
+                </Flex>
+              ) : (
+                NA
+              )}
+            </Col>
+          </Row>
+
+          <Row>
+            <Col span={8}>
+              <Text type="secondary">Requested By:</Text>{' '}
+            </Col>
+            <Col span={16}>
+              {activity.requestedBy ? (
+                <Flex align="center" justify="space-between">
+                  <AddressLink {...addressLinkProps} address={activity.requestedBy} />
+                  <Copy text={activity.requestedBy} />
+                </Flex>
+              ) : (
+                NA
+              )}
+            </Col>
+          </Row>
+
+          <Row>
+            <Col span={8}>
+              <Text type="secondary">Request Tx Hash:</Text>{' '}
+            </Col>
+            <Col span={16}>
+              {activity.requestTransactionHash ? (
+                <Flex align="center" justify="space-between">
+                  <AddressLink {...addressLinkProps} address={activity.requestTransactionHash} />
+                  <Copy text={activity.requestTransactionHash} />
+                </Flex>
+              ) : (
+                NA
+              )}
+            </Col>
+          </Row>
+
+          <Typography.Title level={5} style={{ marginTop: 16 }}>
+            Delivery
+          </Typography.Title>
+
+          <DetailsDivider />
+
+          <Row>
+            <Col span={8}>
+              <Text type="secondary">Delivered At:</Text>{' '}
+            </Col>
+            <Col span={16}>
+              <span className="info-text">{formatTimestamp(activity.deliveryBlockTimestamp)}</span>
+            </Col>
+          </Row>
+
+          {!!activity.deliveryBlockTimestamp && !!paymentText && (
+            <Row>
+              <Col span={8}>
+                <Text type="secondary">Payment:</Text>&nbsp;
+              </Col>
+              <Col span={16}>
+                <span className="info-text">{paymentText}</span>
+              </Col>
+            </Row>
+          )}
+
+          <Row>
+            <Col span={8}>
+              <Text type="secondary">Delivery Data:</Text>{' '}
+            </Col>
+            <Col span={16}>
+              {activity.deliveryIpfsHash ? (
+                <Flex align="center" justify="space-between">
+                  <AddressLink {...addressLinkProps} address={activity.deliveryIpfsHash} isIpfs />
+                  <Copy text={activity.deliveryIpfsHash} />
+                </Flex>
+              ) : (
+                NA
+              )}
+            </Col>
+          </Row>
+
+          <Row>
+            <Col span={8}>
+              <Text type="secondary">Delivered By:</Text>{' '}
+            </Col>
+            <Col span={16}>
+              {activity.deliveredBy ? (
+                <Flex align="center" justify="space-between">
+                  <AddressLink {...addressLinkProps} address={activity.deliveredBy} />
+                  <Copy text={activity.deliveredBy} />
+                </Flex>
+              ) : (
+                NA
+              )}
+            </Col>
+          </Row>
+
+          <Row>
+            <Col span={8}>
+              <Text type="secondary">Delivery Tx Hash:</Text>{' '}
+            </Col>
+            <Col span={16}>
+              {activity.deliveryTransactionHash ? (
+                <Flex align="center" justify="space-between">
+                  <AddressLink {...addressLinkProps} address={activity.deliveryTransactionHash} />
+                  <Copy text={activity.deliveryTransactionHash} />
+                </Flex>
+              ) : (
+                NA
+              )}
+            </Col>
+          </Row>
+        </Info>
+      ) : null}
+    </Modal>
+  );
+};

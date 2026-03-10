@@ -1,4 +1,4 @@
-import { Request, Delivery } from 'common-util/types';
+import { Request, Delivery, FeeUnit } from 'common-util/types';
 import { MARKETPLACE_SUBGRAPH_CLIENTS } from './index';
 
 type ActivityType = 'Demand' | 'Supply';
@@ -15,6 +15,10 @@ export type Activity = {
   deliveryTransactionHash: string;
   deliveryBlockTimestamp: string;
   payment?: string | null;
+  feeUSD?: string | null;
+  finalFeeUSD?: string | null;
+  feeRaw?: string | null;
+  feeUnit?: FeeUnit | null;
 };
 
 const LIMIT = 1_000;
@@ -45,6 +49,10 @@ export const getQueryForServiceActivity = ({ serviceId }: { serviceId: string })
         sender {
           id
         }
+        feeUSD
+        finalFeeUSD
+        feeRaw
+        feeUnit
         mechRequest {
           ipfsHash
         }
@@ -56,6 +64,10 @@ export const getQueryForServiceActivity = ({ serviceId }: { serviceId: string })
 
     requests (where: {service_: {id: "${serviceId}"}}, first: ${LIMIT}, orderBy: blockTimestamp, orderDirection: desc) {
       id
+      feeUSD
+      finalFeeUSD
+      feeRaw
+      feeUnit
       mechRequest {
         ipfsHash
       }
@@ -93,6 +105,10 @@ const convertRequestToActivity = (request: Request): Activity => {
     deliveries,
     blockTimestamp: requestBlockTimestamp,
     transactionHash: requestTransactionHash,
+    feeUSD,
+    finalFeeUSD,
+    feeRaw,
+    feeUnit,
   } = request || {};
   const {
     mech: deliveredBy,
@@ -123,6 +139,10 @@ const convertRequestToActivity = (request: Request): Activity => {
     deliveryTransactionHash,
     deliveryBlockTimestamp,
     payment,
+    feeUSD: feeUSD || null,
+    finalFeeUSD: finalFeeUSD || null,
+    feeRaw: feeRaw || null,
+    feeUnit: feeUnit || null,
   };
 };
 
@@ -142,6 +162,10 @@ const convertDeliveryToActivity = (delivery: Delivery): Activity => {
     sender,
     blockTimestamp: requestBlockTimestamp,
     transactionHash: requestTransactionHash,
+    feeUSD,
+    finalFeeUSD,
+    feeRaw,
+    feeUnit,
   } = request || {};
   const { id: requestedBy } = sender || {};
 
@@ -165,6 +189,10 @@ const convertDeliveryToActivity = (delivery: Delivery): Activity => {
     deliveryTransactionHash,
     deliveryBlockTimestamp,
     payment,
+    feeUSD: feeUSD || null,
+    finalFeeUSD: finalFeeUSD || null,
+    feeRaw: feeRaw || null,
+    feeUnit: feeUnit || null,
   };
 };
 
