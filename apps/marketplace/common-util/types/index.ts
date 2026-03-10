@@ -4,6 +4,8 @@ type Address = `0x${string}`;
 
 type TransactionHash = `0x${string}`;
 
+export type FeeUnit = 'NATIVE' | 'TOKEN' | 'USDC' | 'CREDITS';
+
 export type Request = {
   id: string;
   blockTimestamp: string;
@@ -11,6 +13,10 @@ export type Request = {
   sender: {
     id: Address;
   };
+  feeUSD?: string;
+  finalFeeUSD?: string;
+  feeRaw?: string;
+  feeUnit?: FeeUnit;
   mechRequest: {
     ipfsHash: string;
   };
@@ -45,6 +51,10 @@ export type Delivery = {
   };
   request: {
     id: string;
+    feeUSD?: string;
+    finalFeeUSD?: string;
+    feeRaw?: string;
+    feeUnit?: FeeUnit;
     mechRequest: {
       ipfsHash: string;
     };

@@ -49,10 +49,37 @@ const formatTimestamp = (timestamp?: string) => {
   return `${formattedTime} • ${formattedDate}`;
 };
 
-const formatPaymentWithCurrency = (payment: string, chainId?: number) => {
-  const amount = parseToEth(payment);
-  const currency = (chainId && CHAIN_TO_NATIVE_CURRENCY[chainId]) || 'ETH';
-  return `${amount} ${currency}`;
+const formatPayment = (activity: Activity, chainId?: number): string | null => {
+  const { feeUnit, feeRaw, finalFeeUSD, payment } = activity;
+
+  if (feeUnit === 'USDC') {
+    return finalFeeUSD ? `$${Number(finalFeeUSD).toFixed(2)}` : null;
+  }
+  if (feeUnit === 'NATIVE') {
+    if (feeRaw == null) return null;
+    const amount = parseToEth(feeRaw);
+    const currency = (chainId && CHAIN_TO_NATIVE_CURRENCY[chainId]) || 'ETH';
+    return `${amount} ${currency}`;
+  }
+  if (feeUnit === 'TOKEN') {
+    if (feeRaw == null) return null;
+    const amount = parseToEth(feeRaw);
+    // TODO: can be any token, but there's no easy way currently to get the address
+    // We know it's always OLAS for now.
+    return `${amount} OLAS`;
+  }
+  if (feeUnit === 'CREDITS') {
+    return feeRaw ? `${feeRaw} Credits` : null;
+  }
+
+  // Legacy: no feeUnit, fall back to payment field
+  if (payment) {
+    const amount = parseToEth(payment);
+    const currency = (chainId && CHAIN_TO_NATIVE_CURRENCY[chainId]) || 'ETH';
+    return `${amount} ${currency}`;
+  }
+
+  return null;
 };
 
 export const ActivityDetails = ({
@@ -177,15 +204,13 @@ export const ActivityDetails = ({
           </Col>
         </Row>
 
-        {!!activity.payment && (
+        {!!activity.deliveryBlockTimestamp && addressLinkProps.chainId && activity.feeUnit && (
           <Row>
             <Col span={8}>
               <Text type="secondary">Payment:</Text>&nbsp;
             </Col>
             <Col span={16}>
-              <span className="info-text">
-                {formatPaymentWithCurrency(activity.payment, addressLinkProps.chainId)}
-              </span>
+              <span className="info-text">{formatPayment(activity, addressLinkProps.chainId)}</span>
             </Col>
           </Row>
         )}

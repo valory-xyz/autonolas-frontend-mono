@@ -223,6 +223,10 @@ ESLint enforces import ordering (configured in .eslintrc.json):
 - See [CONTRIBUTING.md](CONTRIBUTING.md) for contribution guidelines.
 - Use **conventional commits** for commit messages and PR titles (e.g. `feat:`, `fix:`, `docs:`). Types: [Conventional commit types](https://gist.github.com/qoomon/5dfcdf8eec66a051ecd85625518cfd13#types).
 
+## App-Level CLAUDE.md Files
+
+Each app in `apps/` may have its own `CLAUDE.md` with app-specific guidance (routes, features, contracts, hooks, etc.). **When adding a new feature, route, hook, contract integration, or other significant change to an app, update that app's `CLAUDE.md` to reflect the change.** This keeps app-level documentation accurate for future development.
+
 ## Notes
 
 - Nx workspace with caching enabled for builds, lints, tests
