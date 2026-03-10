@@ -709,12 +709,16 @@ export const useStakingContractsList = () => {
    * live data (slots, rewards pool, epoch, time remaining) always from RPC.
    */
   const contracts = useMemo(() => {
+    const nonSubgraphRpcReady =
+      nonSubgraphNominees.length === 0 ||
+      (serviceIdsList != null &&
+        serviceIdsList.length === nonSubgraphNominees.length &&
+        availableRewardsList != null &&
+        availableRewardsList.length === nonSubgraphNominees.length);
+
     if (
       !nominees.length ||
-      !serviceIdsList ||
-      serviceIdsList.length !== nonSubgraphNominees.length ||
-      !availableRewardsList ||
-      availableRewardsList.length !== nonSubgraphNominees.length ||
+      !nonSubgraphRpcReady ||
       !epochCounter ||
       epochCounter.length !== nominees.length ||
       !tsCheckpoint ||
@@ -748,12 +752,12 @@ export const useStakingContractsList = () => {
       const servicesLength = subgraphRow
         ? subgraphRow.filledSlots
         : nonSubIdx != null
-          ? ((serviceIdsList[nonSubIdx] as string[]) || []).length
+          ? ((serviceIdsList?.[nonSubIdx] as string[]) || []).length
           : 0;
       const availableRewardsInWei = subgraphRow
         ? BigInt(subgraphRow.availableRewards)
         : nonSubIdx != null
-          ? (availableRewardsList[nonSubIdx] as bigint)
+          ? ((availableRewardsList?.[nonSubIdx] as bigint) ?? 0n)
           : 0n;
       const availableSlots =
         availableRewardsInWei > 0n && maxSlots > 0 ? maxSlots - servicesLength : 0;
@@ -780,6 +784,7 @@ export const useStakingContractsList = () => {
       const apy = getApy(rewardsPerSecond, minStakingDeposit, numAgentInstances);
       const stakeRequired = getStakeRequired(minStakingDeposit, numAgentInstances);
 
+      const contractAddress = getAddressFromBytes32(item.account);
       const details = cached?.data.operateDetails ?? STAKING_CONTRACT_DETAILS[item.account];
       const epoch = Number(epochCounter[index]);
       const livenessPeriodSeconds = cached
@@ -797,7 +802,7 @@ export const useStakingContractsList = () => {
 
       return {
         key: item.account,
-        address: item.account,
+        address: contractAddress,
         chainId: Number(item.chainId),
         metadata: meta ?? { name: '', description: '' },
         availableSlots,
