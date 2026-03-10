@@ -13,10 +13,10 @@ export type Request = {
   sender: {
     id: Address;
   };
-  feeUSD?: string;
-  finalFeeUSD?: string;
-  feeRaw?: string;
-  feeUnit?: FeeUnit;
+  feeUSD?: string | null;
+  finalFeeUSD?: string | null;
+  feeRaw?: string | null;
+  feeUnit?: FeeUnit | null;
   mechRequest: {
     ipfsHash: string;
   };
@@ -29,7 +29,7 @@ export type Request = {
     blockTimestamp: string;
     marketplaceDelivery: {
       ipfsHashBytes: string;
-      deliveryRate?: string;
+      deliveryRate?: string | null;
     };
     mechDelivery: {
       ipfsHash: string;
@@ -47,14 +47,14 @@ export type Delivery = {
   };
   marketplaceDelivery: {
     ipfsHashBytes: string;
-    deliveryRate?: string;
+    deliveryRate?: string | null;
   };
   request: {
     id: string;
-    feeUSD?: string;
-    finalFeeUSD?: string;
-    feeRaw?: string;
-    feeUnit?: FeeUnit;
+    feeUSD?: string | null;
+    finalFeeUSD?: string | null;
+    feeRaw?: string | null;
+    feeUnit?: FeeUnit | null;
     mechRequest: {
       ipfsHash: string;
     };
