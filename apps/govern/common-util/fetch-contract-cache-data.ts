@@ -9,6 +9,7 @@ import type { Address } from 'viem';
 
 import { GATEWAY_URL, HASH_PREFIX, RPC_URLS } from 'libs/util-constants/src';
 import { STAKING_TOKEN } from 'libs/util-contracts/src/lib/abiAndAddresses';
+import { bigintToStr } from 'libs/util-functions/src';
 
 import type { GovernContractCacheData } from 'types';
 
@@ -50,13 +51,6 @@ async function fetchMetadata(metadataHash: string): Promise<{ name: string; desc
 
 function settled<T>(result: PromiseSettledResult<T>, fallback: T): T {
   return result.status === 'fulfilled' ? result.value : fallback;
-}
-
-function bigintToStr(value: unknown, fallback = '0'): string {
-  if (typeof value === 'bigint') return value.toString();
-  if (typeof value === 'string') return value;
-  if (typeof value === 'number') return value.toString();
-  return fallback;
 }
 
 function toMetadataHashString(raw: unknown): string {

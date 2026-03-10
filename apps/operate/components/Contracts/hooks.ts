@@ -665,15 +665,16 @@ export const useStakingContractsList = () => {
     const numAgentInstances = new Map<string, bigint>();
     const livenessPeriodMap = new Map<string, number>();
     uncachedNominees.forEach((n, i) => {
-      if (maxNumServicesList?.[i] != null)
-        maxNumServices.set(n.account, Number(maxNumServicesList[i]));
-      if (rewardsPerSecondList?.[i] != null)
-        rewardsPerSecond.set(n.account, rewardsPerSecondList[i] as bigint);
-      if (minStakingDepositList?.[i] != null)
-        minStakingDeposit.set(n.account, minStakingDepositList[i] as bigint);
-      if (numAgentInstancesList?.[i] != null)
-        numAgentInstances.set(n.account, (numAgentInstancesList[i] as bigint) || 1n);
-      if (livenessPeriod?.[i] != null) livenessPeriodMap.set(n.account, Number(livenessPeriod[i]));
+      const maxNum = maxNumServicesList?.[i];
+      if (maxNum != null) maxNumServices.set(n.account, Number(maxNum));
+      const rewards = rewardsPerSecondList?.[i];
+      if (rewards != null) rewardsPerSecond.set(n.account, rewards as bigint);
+      const minDep = minStakingDepositList?.[i];
+      if (minDep != null) minStakingDeposit.set(n.account, minDep as bigint);
+      const numAg = numAgentInstancesList?.[i];
+      if (numAg != null) numAgentInstances.set(n.account, (numAg as bigint) || 1n);
+      const liveness = livenessPeriod?.[i];
+      if (liveness != null) livenessPeriodMap.set(n.account, Number(liveness));
     });
     return {
       maxNumServices,

@@ -198,22 +198,27 @@ const ActivityCheckerAddress = ({ address, chainId }: ConfigItemProps) => {
 
 type ColFlexContainerProps = {
   text: string | ReactNode;
-  content: ReactNode;
+  content?: ReactNode;
   span?: number;
 };
 
 export const ColFlexContainer = ({ text, content, span = 12, ...rest }: ColFlexContainerProps) => {
+  const displayContent = content == null || content === '' ? NA : content;
   return (
     <Col span={span} {...rest}>
       <Flex vertical gap={4} align="flex-start">
         {typeof text === 'string' ? <Text type="secondary">{text}</Text> : text}
-        {content}
+        {displayContent}
       </Flex>
     </Col>
   );
 };
 
-const val = (v: string | number | ReactNode) => <Text>{v}</Text>;
+const val = (v: ReactNode) => <Text>{v}</Text>;
+
+/** Renders value in Text if present; undefined so ColFlexContainer shows NA when missing. */
+const opt = (v: unknown): ReactNode | undefined =>
+  v != null && v !== '' ? val(v as ReactNode) : undefined;
 
 /**
  * Renders contract configuration directly from blob-cached values (no RPC calls).
@@ -267,7 +272,7 @@ const ContractConfigurationFromCache = ({
       <Row gutter={24}>
         <ColFlexContainer
           text={<MaximumStakedAgentsLabel />}
-          content={val(config.maxNumServices || NA)}
+          content={opt(config.maxNumServices)}
           data-testid="maximum-staked-agents"
         />
         <ColFlexContainer
@@ -291,24 +296,24 @@ const ContractConfigurationFromCache = ({
       <Row gutter={24}>
         <ColFlexContainer
           text={<MaximumInactivityPeriodsLabel />}
-          content={val(config.maxNumInactivityPeriods || NA)}
+          content={opt(config.maxNumInactivityPeriods)}
           data-testid="maximum-inactivity-periods"
         />
         <ColFlexContainer
           text={<LivenessPeriodLabel />}
-          content={val(config.livenessPeriod || NA)}
+          content={opt(config.livenessPeriod)}
           data-testid="liveness-period"
         />
       </Row>
       <Row gutter={24}>
         <ColFlexContainer
           text={<TimeForEmissionsLabel />}
-          content={val(config.timeForEmissions || NA)}
+          content={opt(config.timeForEmissions)}
           data-testid="time-for-emissions"
         />
         <ColFlexContainer
           text={<AgentInstancesLabel />}
-          content={val(config.numAgentInstances || NA)}
+          content={opt(config.numAgentInstances)}
           data-testid="num-agent-instances"
         />
       </Row>
@@ -320,7 +325,7 @@ const ContractConfigurationFromCache = ({
         />
         <ColFlexContainer
           text={<MultisigThresholdLabel />}
-          content={val(config.threshold || NA)}
+          content={opt(config.threshold)}
           data-testid="multisig-threshold"
         />
       </Row>
@@ -332,13 +337,11 @@ const ContractConfigurationFromCache = ({
         />
         <ColFlexContainer
           text={<ActivityCheckerAddressLabel />}
-          content={val(
+          content={
             config.activityChecker ? (
               <ShowNetworkAddress chainId={chainId} address={config.activityChecker as Address} />
-            ) : (
-              NA
-            ),
-          )}
+            ) : undefined
+          }
           data-testid="activity-checker-address"
         />
       </Row>
@@ -346,7 +349,7 @@ const ContractConfigurationFromCache = ({
         <ColFlexContainer
           span={24}
           text={<ProxyHashLabel />}
-          content={val(config.proxyHash || NA)}
+          content={opt(config.proxyHash)}
           data-testid="proxy-hash"
         />
       </Row>

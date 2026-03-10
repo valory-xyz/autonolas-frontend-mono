@@ -29,7 +29,8 @@ export async function getContractCache(
 ): Promise<ContractCacheSnapshot | null> {
   try {
     const path = blobPath(chainId, address);
-    const { blobs } = await list({ prefix: path, limit: 1 });
+    const token = process.env.OPERATE_BLOB_READ_WRITE_TOKEN;
+    const { blobs } = await list({ prefix: path, limit: 1, token: token ?? undefined });
 
     const blob = blobs.find((b) => b.pathname === path);
     if (!blob) return null;
@@ -57,10 +58,17 @@ export async function setContractCache(
     data,
     timestamp: Date.now(),
   };
-  await put(path, JSON.stringify(snapshot, null, 2), {
-    access: 'public',
-    addRandomSuffix: false,
-    contentType: 'application/json',
-    cacheControlMaxAge: 0,
-  });
+  try {
+    const token = process.env.OPERATE_BLOB_READ_WRITE_TOKEN;
+    await put(path, JSON.stringify(snapshot, null, 2), {
+      access: 'public',
+      addRandomSuffix: false,
+      contentType: 'application/json',
+      cacheControlMaxAge: 0,
+      token: token ?? undefined,
+    });
+  } catch (error) {
+    console.error('Contract cache blob put failed:', { chainId, address, path }, error);
+    throw error;
+  }
 }

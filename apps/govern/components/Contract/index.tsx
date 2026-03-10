@@ -96,7 +96,7 @@ const ContractPageContent = ({ contract }: ContractPageContentProps) => {
           </AntdTitle>
           <ContractConfiguration
             contract={{ ...contract, address: formattedAddress }}
-            cachedConfig={blobCache?.data.config}
+            cachedConfig={blobCache?.data?.config}
           />
         </Flex>
       </Card>
