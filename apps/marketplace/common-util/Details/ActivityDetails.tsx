@@ -87,18 +87,21 @@ export const ActivityDetails = ({
   onCancel,
   activity,
   addressLinkProps,
-}: ActivityDetailsProps) => (
-  <Modal
-    open={open}
-    title="Activity Details"
-    onCancel={onCancel}
-    footer={null}
-    styles={{
-      content: {
-        padding: 32,
-      },
-    }}
-  >
+}: ActivityDetailsProps) => {
+  const paymentText = activity ? formatPayment(activity, addressLinkProps.chainId) : null;
+
+  return (
+    <Modal
+      open={open}
+      title="Activity Details"
+      onCancel={onCancel}
+      footer={null}
+      styles={{
+        content: {
+          padding: 32,
+        },
+      }}
+    >
     {activity ? (
       <Info>
         <Title level={5}>Request</Title>
@@ -204,13 +207,13 @@ export const ActivityDetails = ({
           </Col>
         </Row>
 
-        {!!activity.deliveryBlockTimestamp && addressLinkProps.chainId && activity.feeUnit && (
+        {!!activity.deliveryBlockTimestamp && !!paymentText && (
           <Row>
             <Col span={8}>
               <Text type="secondary">Payment:</Text>&nbsp;
             </Col>
             <Col span={16}>
-              <span className="info-text">{formatPayment(activity, addressLinkProps.chainId)}</span>
+              <span className="info-text">{paymentText}</span>
             </Col>
           </Row>
         )}
@@ -265,4 +268,5 @@ export const ActivityDetails = ({
       </Info>
     ) : null}
   </Modal>
-);
+  );
+};
