@@ -1,6 +1,17 @@
 import { isNil } from 'lodash';
 
 /**
+ * Converts bigint, number, or string to string; returns fallback for other types.
+ * Useful when reading contract values that may be bigint or null.
+ */
+export function bigintToStr(value: unknown, fallback = '0'): string {
+  if (typeof value === 'bigint') return value.toString();
+  if (typeof value === 'string') return value;
+  if (typeof value === 'number') return value.toString();
+  return fallback;
+}
+
+/**
  * Return formatted number with appropriate suffix
  */
 export const formatWeiNumber = ({

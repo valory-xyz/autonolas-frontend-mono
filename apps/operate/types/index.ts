@@ -29,3 +29,34 @@ export type Nominee = {
   account: Address;
   chainId: bigint;
 };
+
+export type CachedContractConfig = {
+  maxNumServices: number;
+  rewardsPerSecond: string;
+  minStakingDeposit: string;
+  numAgentInstances: string;
+  livenessPeriod: string;
+};
+
+export type CachedContractMetadata = {
+  name: string;
+  description: string;
+};
+
+export type CachedOperateDetails = {
+  availableOn: AvailableOn[] | null;
+  minOperatingBalance?: number;
+  minOperatingBalanceToken?: string | null;
+  minOperatingBalanceHint?: string;
+};
+
+export type ContractCacheData = {
+  config: CachedContractConfig;
+  metadata: CachedContractMetadata;
+  operateDetails: CachedOperateDetails;
+};
+
+export type ContractCacheSnapshot = {
+  data: ContractCacheData;
+  timestamp: number;
+};

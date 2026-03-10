@@ -1,7 +1,7 @@
 import { Col, Flex, Row, Skeleton, Typography } from 'antd';
 import { ReactNode, useMemo } from 'react';
-import { StakingContract } from 'types';
-import { Address, zeroHash } from 'viem';
+import { GovernContractCacheConfig, StakingContract } from 'types';
+import { Address, formatEther, zeroHash } from 'viem';
 
 import { GATEWAY_URL, NA } from 'libs/util-constants/src';
 
@@ -198,25 +198,179 @@ const ActivityCheckerAddress = ({ address, chainId }: ConfigItemProps) => {
 
 type ColFlexContainerProps = {
   text: string | ReactNode;
-  content: ReactNode;
+  content?: ReactNode;
   span?: number;
 };
 
 export const ColFlexContainer = ({ text, content, span = 12, ...rest }: ColFlexContainerProps) => {
+  const displayContent = content == null || content === '' ? NA : content;
   return (
     <Col span={span} {...rest}>
       <Flex vertical gap={4} align="flex-start">
         {typeof text === 'string' ? <Text type="secondary">{text}</Text> : text}
-        {content}
+        {displayContent}
       </Flex>
     </Col>
+  );
+};
+
+const val = (v: ReactNode) => <Text>{v}</Text>;
+
+/** Renders value in Text if present; undefined so ColFlexContainer shows NA when missing. */
+const opt = (v: unknown): ReactNode | undefined =>
+  v != null && v !== '' ? val(v as ReactNode) : undefined;
+
+/**
+ * Renders contract configuration directly from blob-cached values (no RPC calls).
+ */
+const ContractConfigurationFromCache = ({
+  config,
+  chainId,
+}: {
+  config: GovernContractCacheConfig;
+  chainId: number;
+}) => {
+  const rewardsPerSecond = config.rewardsPerSecond
+    ? `${Number(formatEther(BigInt(config.rewardsPerSecond)))}`
+    : NA;
+  const minStakingDeposit = config.minStakingDeposit
+    ? `${Number(formatEther(BigInt(config.minStakingDeposit)))}`
+    : NA;
+  const minimumStakingPeriods =
+    config.livenessPeriod && config.minStakingDuration && Number(config.livenessPeriod) > 0
+      ? Number(config.minStakingDuration) / Number(config.livenessPeriod)
+      : NA;
+
+  const configHashDisplay = useMemo(() => {
+    if (!config.configHash || config.configHash === zeroHash) {
+      return config.configHash ? truncateAddress(config.configHash) : NA;
+    }
+    const uri = `${HASH_PREFIX}${config.configHash.substring(2)}`;
+    return (
+      <a href={`${GATEWAY_URL}${uri}`} target="_blank" rel="noreferrer">
+        {truncateAddress(config.configHash)} {UNICODE_SYMBOLS.EXTERNAL_LINK}
+      </a>
+    );
+  }, [config.configHash]);
+
+  const agentIdsDisplay = useMemo(() => {
+    if (!config.agentIds || config.agentIds.length === 0) return NA;
+    return config.agentIds.map((id) => (
+      <a
+        key={id}
+        href={`${REGISTRY_URL}ethereum/agent-blueprints/${id}`}
+        target="_blank"
+        rel="noreferrer"
+      >
+        {id}
+      </a>
+    ));
+  }, [config.agentIds]);
+
+  return (
+    <>
+      <Row gutter={24}>
+        <ColFlexContainer
+          text={<MaximumStakedAgentsLabel />}
+          content={opt(config.maxNumServices)}
+          data-testid="maximum-staked-agents"
+        />
+        <ColFlexContainer
+          text={<RewardsPerSecondLabel />}
+          content={val(rewardsPerSecond)}
+          data-testid="rewards-per-second"
+        />
+      </Row>
+      <Row gutter={24}>
+        <ColFlexContainer
+          text={<MinimumStakingDepositLabel />}
+          content={val(minStakingDeposit)}
+          data-testid="minimum-staking-deposit"
+        />
+        <ColFlexContainer
+          text={<MinimumStakingPeriodsLabel />}
+          content={val(minimumStakingPeriods)}
+          data-testid="minimum-staking-periods"
+        />
+      </Row>
+      <Row gutter={24}>
+        <ColFlexContainer
+          text={<MaximumInactivityPeriodsLabel />}
+          content={opt(config.maxNumInactivityPeriods)}
+          data-testid="maximum-inactivity-periods"
+        />
+        <ColFlexContainer
+          text={<LivenessPeriodLabel />}
+          content={opt(config.livenessPeriod)}
+          data-testid="liveness-period"
+        />
+      </Row>
+      <Row gutter={24}>
+        <ColFlexContainer
+          text={<TimeForEmissionsLabel />}
+          content={opt(config.timeForEmissions)}
+          data-testid="time-for-emissions"
+        />
+        <ColFlexContainer
+          text={<AgentInstancesLabel />}
+          content={opt(config.numAgentInstances)}
+          data-testid="num-agent-instances"
+        />
+      </Row>
+      <Row gutter={24}>
+        <ColFlexContainer
+          text={<AgentIdsLabel />}
+          content={val(agentIdsDisplay)}
+          data-testid="agent-ids"
+        />
+        <ColFlexContainer
+          text={<MultisigThresholdLabel />}
+          content={opt(config.threshold)}
+          data-testid="multisig-threshold"
+        />
+      </Row>
+      <Row gutter={24}>
+        <ColFlexContainer
+          text={<ServiceConfigHashLabel />}
+          content={val(configHashDisplay)}
+          data-testid="service-config-hash"
+        />
+        <ColFlexContainer
+          text={<ActivityCheckerAddressLabel />}
+          content={
+            config.activityChecker ? (
+              <ShowNetworkAddress chainId={chainId} address={config.activityChecker as Address} />
+            ) : undefined
+          }
+          data-testid="activity-checker-address"
+        />
+      </Row>
+      <Row gutter={24}>
+        <ColFlexContainer
+          span={24}
+          text={<ProxyHashLabel />}
+          content={opt(config.proxyHash)}
+          data-testid="proxy-hash"
+        />
+      </Row>
+    </>
   );
 };
 
 /**
  * contract configuration details component for details page
  */
-export const ContractConfiguration = ({ contract }: { contract: StakingContract }) => {
+export const ContractConfiguration = ({
+  contract,
+  cachedConfig,
+}: {
+  contract: StakingContract;
+  cachedConfig?: GovernContractCacheConfig;
+}) => {
+  if (cachedConfig) {
+    return <ContractConfigurationFromCache config={cachedConfig} chainId={contract.chainId} />;
+  }
+
   return (
     <>
       <Row gutter={24}>

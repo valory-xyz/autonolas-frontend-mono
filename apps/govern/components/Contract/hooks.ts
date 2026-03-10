@@ -1,7 +1,30 @@
+import { useQuery } from '@tanstack/react-query';
+import { GovernContractCacheSnapshot } from 'types';
 import { Address, formatEther } from 'viem';
 import { useReadContract } from 'wagmi';
 
+import { isGovernContractCacheSnapshot } from 'common-util/blob/contract-cache';
 import { STAKING_FACTORY, STAKING_TOKEN } from 'libs/util-contracts/src/lib/abiAndAddresses';
+
+/**
+ * Fetches the blob cache for a single contract via the write-through API route.
+ * On miss the route fetches from RPC, writes to blob, and returns — so the
+ * second call is always served from blob.
+ */
+export const useContractBlobCache = (address: string, chainId: number) => {
+  const { data: cache, isLoading } = useQuery({
+    queryKey: ['contract-blob-cache', chainId, address],
+    queryFn: async (): Promise<GovernContractCacheSnapshot | null> => {
+      const res = await fetch(`/api/contracts/${chainId}/${address}`);
+      if (!res.ok) return null;
+      const data = await res.json();
+      return isGovernContractCacheSnapshot(data) ? data : null;
+    },
+    enabled: !!address && !!chainId,
+  });
+
+  return { cache: cache ?? null, isLoading };
+};
 
 export const useContractParams = (address: string, chainId: number) => {
   const { data } = useReadContract({
