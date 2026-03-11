@@ -77,6 +77,7 @@ const ALLOWED_ORIGINS = [
   'https://explorer.mode.network',
   'https://rpc.mevblocker.io',
   'https://base-rpc.publicnode.com',
+  'https://ethereum-rpc.publicnode.com',
 
   // tenderly
   'https://virtual.mainnet.rpc.tenderly.co/',
