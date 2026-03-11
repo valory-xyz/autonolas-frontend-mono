@@ -785,7 +785,7 @@ export const useStakingContractsList = () => {
       const stakeRequired = getStakeRequired(minStakingDeposit, numAgentInstances);
 
       const contractAddress = getAddressFromBytes32(item.account);
-      const details = cached?.data.operateDetails ?? STAKING_CONTRACT_DETAILS[item.account];
+      const details = STAKING_CONTRACT_DETAILS[item.account] ?? cached?.data.operateDetails;
       const epoch = Number(epochCounter[index]);
       const livenessPeriodSeconds = cached
         ? Number(cached.data.config.livenessPeriod)
