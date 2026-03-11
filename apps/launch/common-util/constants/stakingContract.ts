@@ -99,12 +99,12 @@ type BlockNumbers = {
 };
 
 export const blockNumbers: BlockNumbers = {
-  [mainnet.id]: 20342524,
+  [mainnet.id]: 24634866,
   [optimism.id]: 122903952,
   [gnosis.id]: 35047282,
   [polygon.id]: 59560456,
   [base.id]: 17310019,
   [arbitrum.id]: 233883523,
-  [celo.id]: 26748574,
+  [celo.id]: 61345380,
   [mode.id]: 14444647,
 };
