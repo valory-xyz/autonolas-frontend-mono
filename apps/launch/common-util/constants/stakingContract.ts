@@ -84,6 +84,8 @@ export const OLAS_ADDRESSES: Addresses = {
   [polygon.id]: '0xFEF5d947472e72Efbb2E388c730B7428406F2F95',
   [base.id]: '0x54330d28ca3357F294334BDC454a032e7f353416',
   [arbitrum.id]: '0x064f8b858c2a603e1b106a2039f5446d32dc81c1',
+  // Note: there are two OLAS addresses on celo, this one
+  // should be used for staking contracts
   [celo.id]: '0xD80533CA29fF6F033a0b55732Ed792af9Fbb381E',
   [mode.id]: '0xcfD1D50ce23C46D3Cf6407487B2F8934e96DC8f9',
 };
