@@ -709,12 +709,16 @@ export const useStakingContractsList = () => {
    * live data (slots, rewards pool, epoch, time remaining) always from RPC.
    */
   const contracts = useMemo(() => {
+    const nonSubgraphRpcReady =
+      nonSubgraphNominees.length === 0 ||
+      (serviceIdsList != null &&
+        serviceIdsList.length === nonSubgraphNominees.length &&
+        availableRewardsList != null &&
+        availableRewardsList.length === nonSubgraphNominees.length);
+
     if (
       !nominees.length ||
-      !serviceIdsList ||
-      serviceIdsList.length !== nonSubgraphNominees.length ||
-      !availableRewardsList ||
-      availableRewardsList.length !== nonSubgraphNominees.length ||
+      !nonSubgraphRpcReady ||
       !epochCounter ||
       epochCounter.length !== nominees.length ||
       !tsCheckpoint ||
@@ -725,15 +729,7 @@ export const useStakingContractsList = () => {
     }
 
     const metadataReady = uncachedNominees.length === 0 || metadata != null;
-    const uncachedConfigReady =
-      uncachedNominees.length === 0 ||
-      (uncachedConfigByAccount.maxNumServices.size === uncachedNominees.length &&
-        uncachedConfigByAccount.rewardsPerSecond.size === uncachedNominees.length &&
-        uncachedConfigByAccount.minStakingDeposit.size === uncachedNominees.length &&
-        uncachedConfigByAccount.numAgentInstances.size === uncachedNominees.length &&
-        uncachedConfigByAccount.livenessPeriod.size === uncachedNominees.length);
-
-    if (!metadataReady || !uncachedConfigReady) return [];
+    if (!metadataReady) return [];
 
     return nominees.map((item, index) => {
       const subgraphRow = subgraphMap.get(item.account);
@@ -748,12 +744,12 @@ export const useStakingContractsList = () => {
       const servicesLength = subgraphRow
         ? subgraphRow.filledSlots
         : nonSubIdx != null
-          ? ((serviceIdsList[nonSubIdx] as string[]) || []).length
+          ? ((serviceIdsList?.[nonSubIdx] as readonly bigint[] | undefined) ?? []).length
           : 0;
       const availableRewardsInWei = subgraphRow
         ? BigInt(subgraphRow.availableRewards)
         : nonSubIdx != null
-          ? (availableRewardsList[nonSubIdx] as bigint)
+          ? ((availableRewardsList?.[nonSubIdx] as bigint) ?? 0n)
           : 0n;
       const availableSlots =
         availableRewardsInWei > 0n && maxSlots > 0 ? maxSlots - servicesLength : 0;
@@ -780,7 +776,10 @@ export const useStakingContractsList = () => {
       const apy = getApy(rewardsPerSecond, minStakingDeposit, numAgentInstances);
       const stakeRequired = getStakeRequired(minStakingDeposit, numAgentInstances);
 
-      const details = cached?.data.operateDetails ?? STAKING_CONTRACT_DETAILS[item.account];
+      const contractAddress = getAddressFromBytes32(item.account);
+      const cachedDetails = cached?.data.operateDetails;
+      const hardcodedDetails = STAKING_CONTRACT_DETAILS[item.account];
+      const details = { ...(cachedDetails ?? {}), ...(hardcodedDetails ?? {}) };
       const epoch = Number(epochCounter[index]);
       const livenessPeriodSeconds = cached
         ? Number(cached.data.config.livenessPeriod)
@@ -796,8 +795,8 @@ export const useStakingContractsList = () => {
       const meta = cached?.data.metadata ?? metadata?.[item.account];
 
       return {
-        key: item.account,
-        address: item.account,
+        key: item.account as Address,
+        address: contractAddress,
         chainId: Number(item.chainId),
         metadata: meta ?? { name: '', description: '' },
         availableSlots,
