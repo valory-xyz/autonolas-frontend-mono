@@ -13,6 +13,7 @@ import { STAKING_TOKEN } from 'libs/util-contracts/src';
 import type { ContractCacheData } from 'types';
 
 const IPFS_FETCH_TIMEOUT_MS = 5000;
+const ZERO_HASH = '0x' + '0'.repeat(64);
 
 function getChainClient(chainId: number) {
   const rpc = RPC_URLS[chainId];
@@ -29,7 +30,7 @@ function getChainClient(chainId: number) {
 }
 
 async function fetchMetadata(metadataHash: string): Promise<{ name: string; description: string }> {
-  if (!metadataHash || metadataHash === '0x' + '0'.repeat(64)) {
+  if (!metadataHash || metadataHash === ZERO_HASH) {
     return { name: '', description: '' };
   }
   const uri = `${HASH_PREFIX}${metadataHash.substring(2)}`;
@@ -112,6 +113,11 @@ export async function fetchContractCacheDataFromChain(
         ? metadataHash
         : '0x' + (metadataHash as bigint).toString(16).padStart(64, '0');
     const meta = await fetchMetadata(metadataHashStr);
+
+    // Do not cache when metadata was expected but fetch failed (empty name/description)
+    if (metadataHashStr !== ZERO_HASH && !meta.name && !meta.description) {
+      return null;
+    }
 
     return {
       config: {

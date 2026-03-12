@@ -729,15 +729,7 @@ export const useStakingContractsList = () => {
     }
 
     const metadataReady = uncachedNominees.length === 0 || metadata != null;
-    const uncachedConfigReady =
-      uncachedNominees.length === 0 ||
-      (uncachedConfigByAccount.maxNumServices.size === uncachedNominees.length &&
-        uncachedConfigByAccount.rewardsPerSecond.size === uncachedNominees.length &&
-        uncachedConfigByAccount.minStakingDeposit.size === uncachedNominees.length &&
-        uncachedConfigByAccount.numAgentInstances.size === uncachedNominees.length &&
-        uncachedConfigByAccount.livenessPeriod.size === uncachedNominees.length);
-
-    if (!metadataReady || !uncachedConfigReady) return [];
+    if (!metadataReady) return [];
 
     return nominees.map((item, index) => {
       const subgraphRow = subgraphMap.get(item.account);
