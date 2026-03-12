@@ -17,9 +17,6 @@ export type StakingContract = {
   apy: number;
   stakeRequired: string;
   availableOn: AvailableOn[] | null;
-  minOperatingBalance: number | null;
-  minOperatingBalanceToken: string | null;
-  minOperatingBalanceHint?: string;
   availableRewards: string;
   epoch: number;
   timeRemaining: string;
@@ -45,9 +42,6 @@ export type CachedContractMetadata = {
 
 export type CachedOperateDetails = {
   availableOn: AvailableOn[] | null;
-  minOperatingBalance?: number;
-  minOperatingBalanceToken?: string | null;
-  minOperatingBalanceHint?: string;
 };
 
 export type ContractCacheData = {

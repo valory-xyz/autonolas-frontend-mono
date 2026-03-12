@@ -14,7 +14,7 @@ import {
   OPERATE_REPO_URL,
   UNICODE_SYMBOLS,
 } from 'libs/util-constants/src';
-import { formatWeiNumber } from 'libs/util-functions/src';
+import { formatWeiNumber, getBytes32FromAddress } from 'libs/util-functions/src';
 
 import { RunAgentButton } from 'components/RunAgentButton';
 
@@ -300,7 +300,7 @@ export const ContractsPage = () => {
                     {record.metadata ? record.metadata.description : NA}
                   </Paragraph>
                   <a
-                    href={`${GOVERN_URL}/contracts/${record.address}`}
+                    href={`${GOVERN_URL}/contracts/${getBytes32FromAddress(record.address)}`}
                     target="_blank"
                     rel="noreferrer"
                   >
