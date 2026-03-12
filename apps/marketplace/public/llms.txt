@@ -1,0 +1,34 @@
+# Olas Marketplace (Mech Marketplace)
+
+> Decentralized marketplace for AI agents, components, and agent blueprints
+
+## Overview
+
+Marketplace is the Olas app for discovering, deploying, and trading AI agents, agent blueprints, and agent components. It serves as the central hub for the Olas AI agent ecosystem, supporting multiple blockchain networks.
+
+## Key Features
+
+- AI Agents: Browse and deploy autonomous AI agents (formerly called "services")
+- Agent Blueprints: Discover agent templates and architectural patterns
+- Components: Find and use reusable agent components
+- Minting: Create and register new agents, blueprints, and components
+- Multi-Network Support: Access agents on Ethereum, Solana and other supported networks
+- NFT Registry: Each agent, blueprint, and component is an NFT on-chain
+
+## Documentation
+
+- Website: https://marketplace.olas.network/
+- Ethereum Agents: https://marketplace.olas.network/ethereum/ai-agents
+- Gnosis Agents: https://marketplace.olas.network/gnosis/ai-agents
+- Polygon Agents: https://marketplace.olas.network/polygon/ai-agents
+- Solana Agents: https://marketplace.olas.network/solana/ai-agents
+- Arbitrum Agents: https://marketplace.olas.network/arbitrum-one/ai-agents
+- Base Agents: https://marketplace.olas.network/base/ai-agents
+- Optimism Agents: https://marketplace.olas.network/optimism/ai-agents
+- Celo Agents: https://marketplace.olas.network/celo/ai-agents
+- Mode Agents: https://marketplace.olas.network/mode/ai-agents
+- Disclaimer: https://olas.network/disclaimer
+
+## Technology
+
+Built with Next.js, React, and Web3 technologies. Integrates with IPFS for metadata storage and supports NFT-based agent registration across multiple blockchain networks.

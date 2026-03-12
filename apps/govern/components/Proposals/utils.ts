@@ -2,8 +2,8 @@ import { ethers } from 'ethers';
 import { Address } from 'viem';
 
 import { areAddressesEqual } from 'libs/util-functions/src';
+import { formatWeiNumber } from 'libs/util-functions/src';
 
-import { formatWeiNumber } from 'common-util/functions';
 import { Proposal } from 'common-util/graphql/types';
 
 export enum VoteSupport {
@@ -50,3 +50,14 @@ export const hasNotStarted = (proposal: Proposal, currentBlock: bigint | undefin
  */
 export const getUserVote = (proposal: Proposal, address: Address) =>
   proposal.voteCasts.find((vote) => areAddressesEqual(vote.voter, address));
+
+/**
+ * Returns true if the quorum is reached
+ */
+export const isQuorumReached = (proposal: Proposal) => {
+  const { votesFor, quorum } = proposal;
+  const votesForBigInt = BigInt(votesFor);
+  const quorumBigInt = BigInt(quorum);
+
+  return votesForBigInt >= quorumBigInt;
+};

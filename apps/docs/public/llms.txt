@@ -1,0 +1,22 @@
+# Olas Docs
+
+> Documentation hub for the Olas ecosystem
+
+## Overview
+
+Docs is the central documentation portal for the Olas ecosystem, providing links to comprehensive guides, references, and resources for developers, users, and community members.
+
+## Key Features
+
+- Comprehensive Documentation: Technical guides and tutorials
+- Protocol Documentation: Smart contract and protocol specifications
+- Developer Resources: APIs, SDKs, and integration guides
+- User Guides: Step-by-step instructions for using Olas products
+
+## Documentation
+
+- Website: https://docs.olas.network/
+
+## Technology
+
+Built with Next.js and React. Provides centralized access to all Olas documentation and learning resources.

@@ -2,6 +2,7 @@ import { InfoCircleOutlined } from '@ant-design/icons';
 import { Tooltip, Typography } from 'antd';
 import { ReactNode } from 'react';
 
+// eslint-disable-next-line @nx/enforce-module-boundaries
 import { COLOR } from 'libs/ui-theme/src';
 
 const { Paragraph, Text } = Typography;

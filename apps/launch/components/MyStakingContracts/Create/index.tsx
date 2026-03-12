@@ -19,13 +19,13 @@ import { mainnet } from 'viem/chains';
 import { useAccount } from 'wagmi';
 
 import { CHAIN_NAMES, EXPLORER_URLS, UNICODE_SYMBOLS } from 'libs/util-constants/src';
-import { notifyWarning } from 'libs/util-functions/src';
+import { allowOnlyNumbers, notifyWarning } from 'libs/util-functions/src';
 
 import { ErrorAlert } from 'common-util/ErrorAlert';
 import {
   CONTRACT_DEFAULT_VALUES,
   CONTRACT_TEMPLATES,
-  IMPLEMENTATION_ADDRESSES,
+  STAKING_TOKEN_ADDRESSES,
   isSupportedChainId,
 } from 'common-util/constants/stakingContract';
 import { URL } from 'common-util/constants/urls';
@@ -51,6 +51,7 @@ import {
   NameLabel,
   RewardsPerSecondLabel,
   ServiceConfigHashLabel,
+  ProxyHashLabel,
   TemplateInfo,
   TimeForEmissionsLabel,
 } from '../FieldLabels';
@@ -142,12 +143,16 @@ export const CreateStakingContract = () => {
       threshold,
       configHash,
       activityChecker,
+      proxyHash,
     } = values;
 
     try {
-      const metadataHash = await getIpfsHash({ name: contractName, description });
+      const metadataHash = await getIpfsHash({
+        name: contractName,
+        description,
+      });
 
-      const implementation = IMPLEMENTATION_ADDRESSES[chain.id];
+      const implementation = STAKING_TOKEN_ADDRESSES[chain.id];
       const initPayload = getStakingContractInitPayload({
         metadataHash,
         maxNumServices,
@@ -162,6 +167,7 @@ export const CreateStakingContract = () => {
         threshold,
         configHash,
         activityChecker,
+        proxyHash,
         chainId: chain.id,
       });
 
@@ -170,7 +176,11 @@ export const CreateStakingContract = () => {
         throw new Error('Validation failed');
       }
 
-      const result = await createStakingContract({ implementation, initPayload, account });
+      const result = await createStakingContract({
+        implementation,
+        initPayload,
+        account,
+      });
       if (result) {
         const eventLog = result.events?.InstanceCreated?.returnValues;
 
@@ -189,7 +199,7 @@ export const CreateStakingContract = () => {
         router.push(`/${networkName}/${URL.myStakingContracts}`);
       }
     } catch (error) {
-      console.log(error);
+      console.error(error);
 
       const { message, transactionHash } = getErrorInfo(Feature.CREATE, error as Error);
       setError({ message, transactionHash });
@@ -254,10 +264,10 @@ export const CreateStakingContract = () => {
                 name="rewardsPerSecond"
                 rules={rulesConfig.rewardsPerSecond.rules}
               >
-                <InputNumber
+                <Input
                   placeholder="e.g. 0.000001649305555557"
-                  step="0.0001"
                   style={INPUT_WIDTH_STYLE}
+                  onKeyDown={allowOnlyNumbers}
                 />
               </Form.Item>
             </Col>
@@ -346,6 +356,9 @@ export const CreateStakingContract = () => {
           </Row>
 
           <Form.Item label={<ServiceConfigHashLabel />} name="configHash">
+            <Input />
+          </Form.Item>
+          <Form.Item label={<ProxyHashLabel />} name="proxyHash">
             <Input />
           </Form.Item>
           <Form.Item

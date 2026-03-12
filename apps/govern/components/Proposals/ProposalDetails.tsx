@@ -11,7 +11,7 @@ import { estimateFutureBlockTimestamp, getFullFormattedDate } from 'common-util/
 import { Proposal } from 'common-util/graphql/types';
 
 import { VOTES_SUPPORT, formatWeiToEth } from './utils';
-import { NA } from 'libs/util-constants/src';
+import { EXPLORER_URLS, NA, UNICODE_SYMBOLS } from 'libs/util-constants/src';
 
 const { Paragraph, Text } = Typography;
 
@@ -87,6 +87,16 @@ export const ProposalDetails = ({
       </Flex>
       <Caption>Proposal ID</Caption>
       <Paragraph className="mb-16">{item.id}</Paragraph>
+
+      <Caption>Transaction</Caption>
+      <a
+        href={`${EXPLORER_URLS[mainnet.id]}/tx/${item.transactionHash}`}
+        target="_blank"
+        rel="noreferrer"
+        className="mb-16"
+      >
+        {`${item.transactionHash} ${UNICODE_SYMBOLS.EXTERNAL_LINK}`}
+      </a>
     </Flex>
   );
 };

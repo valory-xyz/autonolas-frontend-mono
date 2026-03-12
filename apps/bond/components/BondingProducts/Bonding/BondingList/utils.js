@@ -3,7 +3,8 @@ import { gql } from 'graphql-request';
 import { isNumber, isString, memoize } from 'lodash';
 import { celo } from 'viem/chains';
 
-import { VM_TYPE, notifyError } from '@autonolas/frontend-library';
+import { notifyError } from 'libs/util-functions/src';
+import { VM_TYPE } from 'libs/util-constants/src';
 
 import { ADDRESSES } from 'common-util/constants/addresses';
 import { ADDRESS_ZERO } from 'common-util/constants/numbers';
@@ -59,16 +60,18 @@ export const getSvmCalculatedPriceLp = (reserveOlas, totalSupply) => {
 /**
  * Function to get the link to the LP token
  */
-export const getLpTokenLink = ({ lpDex, lpChainId, lpPoolId, lpAddress }) => {
-  if (lpChainId === celo.id) {
-    return `https://celoscan.io/address/${lpAddress}`;
+export const getLpLink = ({ lpDex, lpChainId, lpPoolId, lpAddress }) => {
+  if (lpDex === DEX.UBESWAP.name) {
+    if (lpChainId === celo.id) {
+      return `https://info-v2.ubeswap.org/pair/${lpPoolId}`;
+    }
   }
 
-  if (lpDex === DEX.UNISWAP) {
+  if (lpDex === DEX.UNISWAP.name) {
     return `https://v2.info.uniswap.org/pair/${lpAddress}`;
   }
 
-  if (lpDex === DEX.BALANCER) {
+  if (lpDex === DEX.BALANCER.name) {
     if (lpChainId === 100) {
       return `https://app.balancer.fi/#/gnosis-chain/pool/${lpPoolId}`;
     }
@@ -90,7 +93,7 @@ export const getLpTokenLink = ({ lpDex, lpChainId, lpPoolId, lpAddress }) => {
     }
   }
 
-  if (lpDex === DEX.SOLANA) {
+  if (lpDex === DEX.SOLANA.name) {
     return `https://v1.orca.so/liquidity/browse?tokenMint=${
       ADDRESSES[VM_TYPE.SVM].olasAddress
     }&tokenMint=${ADDRESSES[VM_TYPE.SVM].wsolAddress}`;
@@ -103,16 +106,18 @@ export const getLpTokenLink = ({ lpDex, lpChainId, lpPoolId, lpAddress }) => {
  * Function to get the exchange link for the LP token
  */
 export const getCurrentPriceLpLink = ({ lpDex, lpChainId, lpAddress }) => {
-  if (lpChainId === celo.id) {
-    return `https://celoscan.io/address/${lpAddress}#readContract#F8`;
+  if (lpDex === DEX.UBESWAP.name) {
+    if (lpChainId === celo.id) {
+      return `https://celoscan.io/address/${lpAddress}#readContract#F8`;
+    }
   }
 
-  if (lpDex === DEX.UNISWAP) {
+  if (lpDex === DEX.UNISWAP.name) {
     const depositoryAddress = ADDRESSES[lpChainId].depository;
     return `https://etherscan.io/address/${depositoryAddress}#readContract#F7`;
   }
 
-  if (lpDex === DEX.BALANCER) {
+  if (lpDex === DEX.BALANCER.name) {
     if (lpChainId === 100) {
       return `https://gnosisscan.io/address/${ADDRESSES[lpChainId].balancerVault}#readContract#F10`;
     }
@@ -134,7 +139,7 @@ export const getCurrentPriceLpLink = ({ lpDex, lpChainId, lpAddress }) => {
     }
   }
 
-  if (lpDex === DEX.SOLANA) {
+  if (lpDex === DEX.SOLANA.name) {
     return `https://solscan.io/account/${ADDRESSES[lpChainId].balancerVault}`;
   }
 

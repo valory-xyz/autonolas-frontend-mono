@@ -23,9 +23,13 @@ const developData = {
       .
     </>,
     <>
-      Develop it yourself by attending the academy -{' '}
-      <a href="https://www.valory.xyz/academy" target="_blank" rel="noopener noreferrer">
-        sign up {UNICODE_SYMBOLS.EXTERNAL_LINK}
+      Develop it yourself by checking out the{' '}
+      <a
+        href="https://www.youtube.com/playlist?list=PLXztsZv11CTfXiQK9OJhMwBkfgf4ETZkl"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        dev academy videos {UNICODE_SYMBOLS.EXTERNAL_LINK}
       </a>
       .
     </>,

@@ -1,32 +1,57 @@
-# AutonolasFrontendMono
+# Autonolas Frontend Mono
 
-This mono repo contains the frontend for the Autonolas project. It is based on the Nx workspace and contains the following projects:
-- [Registry](https://registry.olas.network/)
-- [Bond](https://bond.olas.network/)
-- [Govern](https://govern.olas.network/)
-- [Launch](https://launch.olas.network/)
-- [Operate](https://operate.olas.network/)
+Monorepo for Olas (Autonolas) frontends. Built with **Nx** and **Next.js**; we preferably use **Yarn** for installs and scripts.
 
-## Start the app
+## Applications
 
-To start the development server run `npx nx run [app-name]:serve`. Open your browser and navigate to http://localhost:4200/. 
+| App | Port | Description |
+|-----|------|-------------|
+| [Bond](https://bond.olas.network/) | 3001 | Bonding products (EVM + Solana) |
+| [Build](https://build.olas.network/) | 3002 | Staking contract builder |
+| [Contribute](https://contribute.olas.network/) | 3003 | Contributions, staking, backend integration |
+| [Docs](https://docs.olas.network/) | 3000 | Documentation site (no wallet) |
+| [Govern](https://govern.olas.network/) | 3004 | Governance, voting, veOLAS |
+| [Launch](https://launch.olas.network/) | 3005 | Launch and nominate staking contracts |
+| [Marketplace](https://marketplace.olas.network/) | 3006 | Mech marketplace & [Registry](https://registry.olas.network/) (WalletConnect) |
+| [Operate](https://operate.olas.network/) | 3007 | Operate staking contracts |
+| [Pearl API](https://pearl.olas.network/) | 3010 | API (Zendesk, achievements, Web3Auth) |
 
-## Running tasks
+Apps differ by stack: some need **WalletConnect/Web3** (e.g. Bond, Build, Govern, Launch, Marketplace, Operate, Contribute); **Docs** is static; **Pearl API** is API + Web3Auth. See each app’s `CLAUDE.md` and `CONTRIBUTING.md` for details.
 
-To execute tasks with Nx use the following syntax:
+## Quick start
 
+```bash
+yarn
+yarn nx run <app-name>:serve
 ```
-nx <target> <project> <...options>
-```
 
-You can also run multiple targets:
+Open the app at `http://localhost:<port>` (see table above).
 
-```
-nx run-many -t <target1> <target2>
-```
+## Architecture (high level)
 
-..or add `-p` to filter specific projects
+- **apps/** – Next.js apps; each has its own pages, components, Redux store, and optional wallet/backend.
+- **libs/** – Shared code: `ui-components`, `ui-theme`, `util-functions`, `util-contracts`, `util-constants`, `common-contract-functions`, `common-middleware`, `util-ssr`, and feature libs. Shared logic lives here; apps stay thin.
+- **State** – Redux Toolkit per app; Wagmi/Web3Modal where a wallet is required.
+- **Styling** – styled-components + Ant Design; theme from `libs/ui-theme`.
 
-```
-nx run-many -t <target1> <target2> -p <proj1> <proj2>
-```
+See [CLAUDE.md](CLAUDE.md) for detailed architecture, commands, and conventions.
+
+## Commands
+
+| Task | Command |
+|------|---------|
+| Serve app | `yarn nx run <app-name>:serve` |
+| Build app | `yarn nx run <app-name>:build` |
+| Test | `yarn nx test <app-name>` |
+| Lint | `yarn nx lint <app-name>` |
+| Lint fix | `yarn nx lint <app-name> --fix` |
+| Clear cache | `yarn nx reset` |
+
+## Contributing
+
+- Use **conventional commits** for commits and **PR titles** (e.g. `feat:`, `fix:`, `docs:`).  
+  Types: [Conventional commit types](https://gist.github.com/qoomon/5dfcdf8eec66a051ecd85625518cfd13#types).
+- Full guidelines: [CONTRIBUTING.md](CONTRIBUTING.md).
+
+## License
+![MIT](https://img.shields.io/badge/License-MIT-yellow.svg)

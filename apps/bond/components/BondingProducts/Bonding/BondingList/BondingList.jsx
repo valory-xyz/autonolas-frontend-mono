@@ -4,13 +4,13 @@ import {
   UnorderedListOutlined,
 } from '@ant-design/icons';
 import { Button, Empty, Popconfirm, Skeleton, Spin, Table, Tag, Tooltip, Typography } from 'antd';
-import { isNaN, remove, round } from 'lodash';
+import { capitalize, isNaN, remove, round } from 'lodash';
 import Link from 'next/link';
 import PropTypes from 'prop-types';
 import { useCallback } from 'react';
 import styled from 'styled-components';
 
-import { NA, VM_TYPE, getNetworkName } from '@autonolas/frontend-library';
+import { CHAIN_NAMES, NA, VM_TYPE } from 'libs/util-constants/src';
 
 import { COLOR } from 'libs/ui-theme/src';
 
@@ -48,6 +48,10 @@ const getTitle = (title, tooltipDesc) => (
 );
 
 const getColumns = (onClick, isActive, acc, depositoryAddress, hideEmptyProducts) => {
+  const getChainName = (type) => {
+    if (type === VM_TYPE.SVM) return 'Solana';
+    return CHAIN_NAMES[type];
+  };
   const columns = [
     {
       title: 'ID',
@@ -59,24 +63,40 @@ const getColumns = (onClick, isActive, acc, depositoryAddress, hideEmptyProducts
       title: 'Network',
       dataIndex: 'lpChainId',
       key: 'lpChainId',
-      render: (x) => {
-        if (x === VM_TYPE.SVM) return 'Solana';
-        return getNetworkName(x);
-      },
+      render: (x) => getChainName(x),
     },
     {
       title: 'Guide',
       dataIndex: 'guide',
       key: 'guide',
       width: 100,
-      render: (x) => {
-        return <Link href={`/paths/olas-eth-via-uniswap-on-ethereum`}>Guide ↗</Link>;
+      render: (x, data) => {
+        return (
+          <Link href={`/paths/${data.guide || 'olas-eth-via-uniswap-on-ethereum'}`}>Guide</Link>
+        );
       },
     },
     {
-      title: getTitle('LP Token', 'LP token address enabled by the Treasury'),
+      title: getTitle('Liquidity Pool', 'Liquidity Pool on target network'),
+      dataIndex: 'lpLink',
+      key: 'lpLink',
+      width: 160,
+      render: (x, data) => {
+        return (
+          <a href={x} target="_blank" rel="noreferrer">
+            {`${capitalize(data.dexDisplayName)} on ${capitalize(getChainName(data.lpChainId))}`}
+          </a>
+        );
+      },
+    },
+    {
+      title: getTitle(
+        'LP Token on Ethereum',
+        'LP token address enabled by the Treasury on Ethereum',
+      ),
       dataIndex: 'lpTokenName',
       key: 'lpTokenName',
+      width: 140,
       render: (x, data) => {
         return (
           <a href={data.lpTokenLink} target="_blank" rel="noreferrer">
@@ -129,7 +149,7 @@ const getColumns = (onClick, isActive, acc, depositoryAddress, hideEmptyProducts
       render: (record) => {
         const { projectedChange } = record;
 
-        if (isNaN(projectedChange)) {
+        if (isNaN(projectedChange) || projectedChange === Infinity) {
           return <Text>{NA}</Text>;
         }
 

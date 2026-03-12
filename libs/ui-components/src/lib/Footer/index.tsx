@@ -4,6 +4,8 @@ import { ReactNode } from 'react';
 import { Socials } from './Socials';
 import { FooterContainer } from './styles';
 
+export { FooterCenterContent, DISCLAIMER_URL, DAO_CONSTITUTION_URL } from './FooterCenterContent';
+
 type FooterProps = {
   leftContent?: ReactNode;
   centerContent?: ReactNode;

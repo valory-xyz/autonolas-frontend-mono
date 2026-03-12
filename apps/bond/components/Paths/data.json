@@ -113,8 +113,8 @@
       "poolAddress": "0x5BB3E58887264B667f915130fD04bbB56116C278"
     },
     "bridge": {
-      "name": "Optimism Native Bridge",
-      "url": "https://app.optimism.io/bridge/deposit"
+      "name": "Superbridge App",
+      "url": "https://superbridge.app/optimism"
     },
     "bond": {
       "guideUrl": "https://olas.network/blog/bonding-guide-optimism",
@@ -140,8 +140,8 @@
       "poolAddress": "0x5332584890d6e415a6dc910254d6430b8aab7e69"
     },
     "bridge": {
-      "name": "BaseBridge contract",
-      "url": "https://etherscan.io/address/0x3154cf16ccdb4c6d922629664174b904d80f2c35"
+      "name": "Superbridge App",
+      "url": "https://superbridge.app/base"
     },
     "bond": {
       "guideUrl": "https://olas.network/blog/bonding-guide-base",
@@ -149,6 +149,33 @@
       "lpPairTokenTicker": "USDC",
       "lpPairTokenTickerLink": "https://basescan.org/address/0x833589fcd6edb6e08f4c7c32d4f71b54bda02913",
       "bridgedLpTokenAddress": "0x9946d6FD1210D85EC613Ca956F142D911C97a074",
+      "lpTokenBridge": {
+        "name": "Wormhole: Portal Token Bridge",
+        "url": "https://portalbridge.com/advanced-tools/#/transfer"
+      }
+    }
+  },
+  {
+    "id": "weth-olas-via-balancer-on-base",
+    "name": "WETH-OLAS via Balancer on Base",
+    "network": "Base",
+    "networkId": "base",
+    "address": "0x54330d28ca3357F294334BDC454a032e7f353416",
+    "explorerBaseUrl": "https://basescan.org/token/",
+    "exchange": {
+      "name": "Balancer",
+      "url": "https://app.balancer.fi/#/base/pool/0x2da6e67c45af2aaa539294d9fa27ea50ce4e2c5f0002000000000000000001a3",
+      "poolAddress": "0x2da6e67c45af2aaa539294d9fa27ea50ce4e2c5f"
+    },
+    "bridge": {
+      "name": "Superbridge App",
+      "url": "https://superbridge.app/base"
+    },
+    "bond": {
+      "guideUrl": "https://olas.network/blog/bonding-guide-base",
+      "lpTokenName": "WETH-OLAS",
+      "lpPairTokenTicker": "WETH",
+      "bridgedLpTokenAddress": "0xad47b6ffEe3ed15fCE55eCA42AcE9736901b94A1",
       "lpTokenBridge": {
         "name": "Wormhole: Portal Token Bridge",
         "url": "https://portalbridge.com/advanced-tools/#/transfer"
@@ -165,7 +192,7 @@
     "explorerBaseUrl": "https://solscan.io/account/",
     "exchange": {
       "name": "Orca",
-      "url": "https://www.orca.so/liquidity?address=5dMKUYJDsjZkAD3wiV3ViQkuq9pSmWQ5eAzcQLtDnUT3",
+      "url": "https://www.orca.so/?tokenIn=So11111111111111111111111111111111111111112&tokenOut=Ez3nzG9ofodYCvEmw73XhQ87LWNYVRM2s7diB5tBZPyM",
       "poolAddress": "5dMKUYJDsjZkAD3wiV3ViQkuq9pSmWQ5eAzcQLtDnUT3",
       "lpTokenExplorer": "https://solscan.io/account/",
       "lpTokenAddress": "CeZ77ti3nPAmcgRkBkUC1JcoAhR8jRti2DHaCcuyUnzR"

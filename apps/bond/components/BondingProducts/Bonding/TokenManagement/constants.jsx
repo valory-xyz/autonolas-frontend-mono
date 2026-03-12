@@ -1,6 +1,6 @@
 import { web3 } from '@coral-xyz/anchor';
 import { TickUtil } from '@orca-so/whirlpools-sdk';
-import { VM_TYPE } from '@autonolas/frontend-library';
+import { VM_TYPE } from 'libs/util-constants/src';
 
 import { ADDRESSES } from 'common-util/constants/addresses';
 
@@ -34,4 +34,5 @@ export const WHIRLPOOL_CONFIG_ID = new web3.PublicKey(
 export const [tickLowerIndex, tickUpperIndex] = TickUtil.getFullRangeTickIndex(TICK_SPACING);
 export const CONNECT_SVM_WALLET = 'Please connect your phantom wallet';
 
+// 10^8
 export const SVM_AMOUNT_DIVISOR = 100000000;

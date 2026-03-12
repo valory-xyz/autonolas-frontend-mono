@@ -6,8 +6,8 @@ import { Allocation, StakingContract } from 'types';
 import { useAccount } from 'wagmi';
 
 import { CHAIN_NAMES } from 'libs/util-constants/src';
+import { formatWeiNumber } from 'libs/util-functions/src';
 
-import { formatWeiNumber } from 'common-util/functions/balance';
 import { NextWeekTooltip } from 'components/NextWeekTooltip';
 import { useVotingPower } from 'hooks/useVotingPower';
 import { useAppSelector } from 'store/index';
@@ -58,9 +58,13 @@ const getColumns = ({
       dataIndex: 'currentWeight',
       render: (currentWeight) => (
         <Space size={2} direction="vertical">
-          <Text>{`${currentWeight?.percentage.toFixed(2)}%`}</Text>
+          <Text>{`${formatWeiNumber({
+            value: currentWeight?.percentage,
+            maximumFractionDigits: 3,
+          })}%`}</Text>
           <Text type="secondary">{`${formatWeiNumber({
             value: currentWeight?.value,
+            maximumFractionDigits: 3,
           })} veOLAS`}</Text>
         </Space>
       ),
@@ -71,8 +75,14 @@ const getColumns = ({
       dataIndex: 'nextWeight',
       render: (nextWeight) => (
         <Space size={2} direction="vertical">
-          <Text>{`${nextWeight?.percentage.toFixed(2)}%`}</Text>
-          <Text type="secondary">{`${formatWeiNumber({ value: nextWeight?.value })} veOLAS`}</Text>
+          <Text>{`${formatWeiNumber({
+            value: nextWeight?.percentage,
+            maximumFractionDigits: 3,
+          })}%`}</Text>
+          <Text type="secondary">{`${formatWeiNumber({
+            value: nextWeight?.value,
+            maximumFractionDigits: 3,
+          })} veOLAS`}</Text>
         </Space>
       ),
     },
@@ -116,7 +126,7 @@ export const ContractsList = ({ isUpdating, handleAdd, allocations }: ContractsL
         All staking contracts
       </Title>
       <Paragraph type="secondary" className="mt-8">
-        Decide which staking contracts receive the most incentives, attract the most agents, and
+        Decide which staking contracts receive the most incentives, attract the most AI agents, and
         grow.
       </Paragraph>
       <Table

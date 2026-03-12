@@ -6,11 +6,9 @@ import styled from 'styled-components';
 import { useAccount, useBalance, useDisconnect } from 'wagmi';
 import Web3 from 'web3';
 
-import {
-  CannotConnectAddressOfacError,
-  MEDIA_QUERY,
-  notifyError,
-} from '@autonolas/frontend-library';
+import { CannotConnectAddressOfacError } from 'libs/ui-components/src';
+import { MEDIA_QUERY } from 'libs/ui-theme/src';
+import { notifyError } from 'libs/util-functions/src';
 
 import { isAddressProhibited } from 'libs/util-prohibited-data/src/index';
 

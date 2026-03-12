@@ -59,17 +59,17 @@ export function getFormattedDate(ms: number): string {
 
 /**
  * Get formatted date from milliseconds including time
- * example, 1678320000000 => Mar 09 '2023 16:00
+ * example, 1678320000000 => Mar 09 '2023 16:00 (local time)
  */
 export function getFullFormattedDate(ms: number): string {
   if (ms == 0) return NA;
 
   const date = new Date(ms);
   const month = MONTHS[date.getMonth()];
-  const day = date.getUTCDate();
-  const year = date.getUTCFullYear();
-  const hours = date.getUTCHours();
-  const minutes = date.getUTCMinutes();
+  const day = date.getDate();
+  const year = date.getFullYear();
+  const hours = date.getHours();
+  const minutes = date.getMinutes();
 
   return (
     month +

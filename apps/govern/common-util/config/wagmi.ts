@@ -1,4 +1,4 @@
-import { createConfig, http } from 'wagmi';
+import { cookieStorage, createStorage, http } from 'wagmi';
 import {
   Chain,
   arbitrum,
@@ -9,30 +9,34 @@ import {
   mainnet,
   optimism,
   polygon,
+  mode,
 } from 'wagmi/chains';
-import { coinbaseWallet, injected, safe, walletConnect } from 'wagmi/connectors';
 
-import { RPC_URLS } from 'common-util/constants/rpcs';
-
-import { virtualGnosis, virtualMainnet, virtualPolygon } from '../../tenderly.config';
-
-const mainnetChain =
-  process.env.NEXT_PUBLIC_IS_CONNECTED_TO_TEST_NET === 'true' ? virtualMainnet : mainnet;
-const gnosisChain =
-  process.env.NEXT_PUBLIC_IS_CONNECTED_TO_TEST_NET === 'true' ? virtualGnosis : gnosis;
-const polygonChain =
-  process.env.NEXT_PUBLIC_IS_CONNECTED_TO_TEST_NET === 'true' ? virtualPolygon : polygon;
+import { RPC_URLS } from 'libs/util-constants/src';
+import { defaultWagmiConfig } from '@web3modal/wagmi';
 
 export const SUPPORTED_CHAINS: [Chain, ...Chain[]] = [
-  mainnetChain,
-  gnosisChain,
-  polygonChain,
+  mainnet,
+  gnosis,
+  polygon,
+  mode,
   optimism,
   base,
   arbitrum,
   celo,
   ...(process.env.NEXT_PUBLIC_IS_CONNECTED_TO_LOCAL === 'true' ? [hardhat] : []),
 ];
+
+const SUPPORTED_CHAINS_WITH_RPCS = SUPPORTED_CHAINS.map((chain) => {
+  const defaultRpc = RPC_URLS[chain.id] || chain.rpcUrls.default.http[0];
+  return {
+    ...chain,
+    rpcUrls: {
+      ...chain.rpcUrls,
+      default: { http: [defaultRpc] },
+    },
+  } as Chain;
+});
 
 const walletConnectMetadata = {
   name: 'OLAS Govern',
@@ -41,23 +45,15 @@ const walletConnectMetadata = {
   icons: ['https://avatars.githubusercontent.com/u/37784886'],
 };
 
-export const wagmiConfig = createConfig({
-  chains: SUPPORTED_CHAINS,
-  connectors: [
-    injected(),
-    walletConnect({
-      projectId: process.env.NEXT_PUBLIC_WALLET_PROJECT_ID || '',
-      metadata: walletConnectMetadata,
-      showQrModal: false,
-    }),
-    safe(),
-    coinbaseWallet({
-      appName: walletConnectMetadata.name,
-    }),
-  ],
+export const wagmiConfig = defaultWagmiConfig({
+  chains: SUPPORTED_CHAINS_WITH_RPCS as [Chain, ...Chain[]],
+  projectId: process.env.NEXT_PUBLIC_WALLET_PROJECT_ID || '',
+  metadata: walletConnectMetadata,
+  storage: createStorage({ storage: cookieStorage }),
   transports: SUPPORTED_CHAINS.reduce(
-    // TODO: merge two sources of RPCs into one?
-    (acc, chain) => Object.assign(acc, { [chain.id]: http(RPC_URLS[chain.id]) }),
+    (acc, chain) =>
+      Object.assign(acc, { [chain.id]: http(RPC_URLS[chain.id]) || chain.rpcUrls.default.http[0] }),
     {},
   ),
+  ssr: true,
 });

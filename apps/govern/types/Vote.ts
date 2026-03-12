@@ -5,4 +5,4 @@ export type UserVote = {
   end: number;
 };
 
-export type UserVotes = { current: UserVote; next: UserVote };
+export type UserVotes = { current: UserVote; next: UserVote; chainId: number };

@@ -146,7 +146,7 @@ describe('<CreateStakingContract />', () => {
 
     await clickCreateContractButton();
     expect(
-      screen.getByText('Minimum service staking deposit, OLAS must be at least 1 and at most 1000'),
+      screen.getByText(/Minimum service staking deposit, OLAS must be at least 1 and at most 1000/),
     ).toBeInTheDocument();
   });
 

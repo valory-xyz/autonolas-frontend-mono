@@ -94,6 +94,15 @@ export const GlobalStyles = createGlobalStyle`
   .p-0 {
     padding: 0 !important;
   }
+  .p-12 {
+    padding: 12px !important;
+  }
+  .px-12 {
+    padding: 0 12px !important;
+  }
+  .p-24 {
+    padding: 24px !important;
+  }
   .p-16 {
     padding: 16px !important;
   }
@@ -107,8 +116,45 @@ export const GlobalStyles = createGlobalStyle`
     padding-top: 48px !important;
   }
 
+  .ml-auto {
+    margin-left: auto !important;
+  }
+  .mr-auto {
+    margin-right: auto !important;
+  }
+  .my-4 {
+    margin: 4px 0 !important;
+  }
+  .my-8 {
+    margin: 8px 0 !important;
+  }
+  .mr-12 {
+    margin-right: 12px !important;
+  }
+  .mb-2 {
+    margin-bottom: 2px !important;
+  }
+  .mb-32 {
+    margin-bottom: 32px !important;
+  }
+  .w-100 {
+    width: 100%;
+  }
+  .font-weight-400 {
+    font-weight: 400 !important;
+  }
+  .font-weight-600 {
+    font-weight: 600 !important;
+  }
+
+
+
   .block {
     display: block;
+  }
+
+  .font-weight-600 {
+    font-weight: 600 !important;
   }
 
   .text-start {
@@ -176,6 +222,32 @@ export const GlobalStyles = createGlobalStyle`
     border-bottom: none;
   }
 
+  /* navbar dropdown */
+  .ant-dropdown-menu {
+    width: 180px;
+  }
+  .ant-dropdown-menu-item-disabled {
+    color: ${COLOR.PRIMARY} !important;
+    cursor: default !important;
+    &:hover {
+      background-color: #f7e6ff !important;
+    }
+  }
+
+  .nav-button {
+    padding: 3px;
+    margin-top: auto;
+    margin-bottom: auto;
+    width: 32px;
+    height: 32px;
+  }
+  
+  .header-left-content {
+    display: flex;
+    flex-direction: row;
+    margin-right: 32px;
+  }
+
   /* table */
   .ant-table {
     .ant-table-thead {
@@ -222,6 +294,25 @@ export const GlobalStyles = createGlobalStyle`
   }
 
   /* alert */
+  .ant-alert {
+    align-items: flex-start;
+    &-info {
+      color: #003EB3;
+    }
+    &-warning {
+      color: #612500;
+    }
+    &-error {
+      color: #A8071A;
+    }
+    .ant-typography {
+      color: inherit;
+    }
+    .anticon {
+      margin-top: 5px;
+    }
+  }
+
   .inherit-alert-info {
     background-color: inherit;
     border-color: ${COLOR.PRIMARY};

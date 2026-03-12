@@ -1,6 +1,5 @@
 import { Contract } from 'ethers';
 
-
 const ESTIMATED_GAS_LIMIT = 500_000;
 
 /**

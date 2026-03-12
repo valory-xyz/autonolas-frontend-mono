@@ -35,6 +35,7 @@ export const getExplorerBaseUrl = (networkId) => {
     optimism: 'https://optimistic.etherscan.io/address/',
     base: 'https://basescan.org/address/',
     solana: 'https://solscan.io/token/',
+    celo: 'https://celoscan.io/token/',
   };
   return networkMap[networkId] || 'https://etherscan.io/address/';
 };

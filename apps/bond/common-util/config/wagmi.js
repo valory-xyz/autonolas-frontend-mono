@@ -37,4 +37,5 @@ export const wagmiConfig = createConfig({
     (acc, chain) => Object.assign(acc, { [chain.id]: http(RPC_URLS[chain.id]) }),
     {},
   ),
+  ssr: true,
 });

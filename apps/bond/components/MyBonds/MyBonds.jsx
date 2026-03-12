@@ -3,7 +3,7 @@ import { Button, ConfigProvider, Empty, Radio, Table, Tooltip, Typography } from
 import { round } from 'lodash';
 import { useCallback, useEffect, useState } from 'react';
 
-import { getFormattedDate, notifyError, notifySuccess } from '@autonolas/frontend-library';
+import { getFormattedDate, notifyError, notifySuccess } from 'libs/util-functions/src';
 
 import { COLOR } from 'libs/ui-theme/src';
 

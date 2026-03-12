@@ -111,6 +111,7 @@ export const useFieldRules = (
       },
       threshold: { rules: undefined },
       configHash: { rules: undefined },
+      proxyHash: { rules: undefined },
       activityChecker: {
         rules: [
           ...getGenericFieldRules(FieldConfig.activityChecker.name),

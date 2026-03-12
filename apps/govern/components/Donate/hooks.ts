@@ -24,7 +24,7 @@ const useMinAcceptedETH = () =>
     functionName: 'minAcceptedETH',
   });
 
-const useEpochCounter = () =>
+export const useEpochCounter = () =>
   useReadContract({
     address: TOKENOMICS.addresses[mainnet.id],
     abi: TOKENOMICS.abi,
@@ -32,15 +32,15 @@ const useEpochCounter = () =>
     functionName: 'epochCounter',
   });
 
-const useEpochTokenomics = (epochCounter: number | undefined) =>
+export const useEpochTokenomics = (epochCounter: number | undefined | null) =>
   useReadContract({
     address: TOKENOMICS.addresses[mainnet.id],
     abi: TOKENOMICS.abi,
     chainId: mainnet.id,
     functionName: 'mapEpochTokenomics',
-    args: [BigInt(epochCounter || 0)],
+    args: epochCounter ? [BigInt(epochCounter)] : undefined,
     query: {
-      enabled: epochCounter !== undefined,
+      enabled: !!epochCounter,
     },
   });
 

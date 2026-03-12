@@ -12,8 +12,9 @@ import { useWallet } from '@solana/wallet-adapter-react';
 import { SystemProgram, Transaction } from '@solana/web3.js';
 import Decimal from 'decimal.js';
 import Link from 'next/link';
+import { useCallback, useEffect, useState } from 'react';
 
-import { notifyError, notifySuccess } from '@autonolas/frontend-library';
+import { notifyError, notifySuccess } from 'libs/util-functions/src';
 
 import { UNICODE_SYMBOLS } from 'libs/util-constants/src/lib/symbols';
 import idl from 'libs/util-contracts/src/lib/abiAndAddresses/liquidityLockbox.json';
@@ -30,6 +31,7 @@ import {
   POSITION_MINT,
   PROGRAM_ID,
   SOL,
+  SVM_AMOUNT_DIVISOR,
   TICK_ARRAY_LOWER,
   TICK_ARRAY_UPPER,
   TOKEN_VAULT_A,
@@ -118,9 +120,26 @@ export const useWsolDeposit = () => {
   const { svmWalletPublicKey, connection, anchorProvider } = useSvmConnectivity();
   const { getWhirlpoolData } = useWhirlpool();
   const { signTransaction } = useWallet();
+  const [bridgedTokenAmount, setBridgedTokenAmount] = useState(null);
 
   const customGetOrCreateAssociatedTokenAccount = useGetOrCreateAssociatedTokenAccount();
   const program = new Program(idl, PROGRAM_ID, anchorProvider);
+
+  const updateLatestBridgeTokenAmount = useCallback(async () => {
+    if (!svmWalletPublicKey) return;
+    if (!connection) return;
+
+    getBridgeTokenAmount(connection, svmWalletPublicKey).then((bridgedToken) => {
+      const token = bridgedToken.toString();
+      if (Number(token) > 0) {
+        setBridgedTokenAmount(token / SVM_AMOUNT_DIVISOR);
+      }
+    });
+  }, [connection, svmWalletPublicKey]);
+
+  useEffect(() => {
+    updateLatestBridgeTokenAmount();
+  }, [updateLatestBridgeTokenAmount]);
 
   const getDepositIncreaseLiquidityQuote = async ({ sol, slippage }) => {
     const { whirlpoolData, whirlpoolTokenA, whirlpoolTokenB } = await getWhirlpoolData();
@@ -169,7 +188,13 @@ export const useWsolDeposit = () => {
 
     const { whirlpoolTokenA, whirlpoolTokenB } = await getWhirlpoolData();
 
-    const quote = await getDepositIncreaseLiquidityQuote({ sol, slippage });
+    const solInputInLamportInBn = DecimalUtil.toBN(new Decimal(sol), 9);
+    const solInputInLamport = BigInt(solInputInLamportInBn.toString());
+
+    const quote = await getDepositIncreaseLiquidityQuote({
+      sol,
+      slippage,
+    });
     const { solMax, olasMax } = await getDepositTransformedQuote(quote);
 
     // OLAS associated token account MUST always exist when the person bonds
@@ -243,7 +268,7 @@ export const useWsolDeposit = () => {
     } else {
       // Check if the user has enough WSOL
       const wsolAmount = await getOlasAmount(connection, svmWalletPublicKey, whirlpoolTokenA.mint);
-      const noEnoughWsol = DecimalUtil.fromBN(solMax).greaterThan(DecimalUtil.fromBN(wsolAmount));
+      const noEnoughWsol = solInputInLamport > wsolAmount;
 
       if (noEnoughWsol) {
         isWrapRequired = true;
@@ -262,7 +287,7 @@ export const useWsolDeposit = () => {
       const transaction = createSolTransferTransaction(
         svmWalletPublicKey,
         tokenOwnerAccountA,
-        quote.tokenMaxA,
+        solInputInLamport,
       );
 
       try {
@@ -283,7 +308,7 @@ export const useWsolDeposit = () => {
 
     try {
       await program.methods
-        .deposit(quote.liquidityAmount, quote.tokenMaxA, quote.tokenMaxB)
+        .deposit(quote.liquidityAmount, solInputInLamportInBn, quote.tokenMaxB)
         .accounts({
           position: POSITION,
           positionMint: POSITION_MINT,
@@ -309,13 +334,17 @@ export const useWsolDeposit = () => {
       return null;
     }
 
-    const bridgedToken = await getBridgeTokenAmount(connection, svmWalletPublicKey);
-    return bridgedToken.toString();
+    // wait for 2 seconds to allow the transaction to be processed
+    await new Promise((resolve) => setTimeout(resolve, 2000));
+    await updateLatestBridgeTokenAmount(); // refetch bridged token amount
+
+    return quote.liquidityAmount.toString();
   };
 
   return {
     getDepositIncreaseLiquidityQuote,
     getDepositTransformedQuote,
     deposit,
+    bridgedTokenAmount,
   };
 };

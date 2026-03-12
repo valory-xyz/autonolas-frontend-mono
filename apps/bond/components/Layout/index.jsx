@@ -1,4 +1,3 @@
-import { ExportOutlined } from '@ant-design/icons';
 import { ConnectionProvider, WalletProvider } from '@solana/wallet-adapter-react';
 import { PhantomWalletAdapter } from '@solana/wallet-adapter-wallets';
 import { Layout as AntdLayout, Menu } from 'antd';
@@ -9,13 +8,14 @@ import { useEffect, useState } from 'react';
 import styled from 'styled-components';
 
 import { COLOR } from 'libs/ui-theme/src';
+import { NavDropdown } from 'libs/ui-components/src';
 
 import { useHelpers } from 'common-util/hooks/useHelpers';
 import { Logo as LogoSvg } from 'components/Branding/Logo';
 
 import Login from '../Login';
 import Footer from './Footer';
-import { CustomLayout, DocsLink, Logo } from './styles';
+import { CustomLayout, Logo } from './styles';
 
 const wallets = [new PhantomWalletAdapter()];
 
@@ -42,23 +42,21 @@ const Layout = ({ children }) => {
   }, [router.pathname]);
 
   const handleMenuItemClick = ({ key }) => {
-    if (key === 'docs') {
-      window.open('https://docs.autonolas.network/protocol/tokenomics/', '_blank');
-    } else {
-      router.push(`/${key}`);
-      setSelectedMenu(key);
-    }
+    router.push(`/${key}`);
+    setSelectedMenu(key);
   };
 
   return (
     <CustomLayout pathname={router.pathname}>
       <StyledHeader>
-        <div className="column-1">
+        <div className="column-1 header-left-content">
           <Link href="/">
             <Logo data-testid="tokenomics-logo">
               <LogoSvg />
             </Logo>
           </Link>
+
+          <NavDropdown currentSite="bond" />
         </div>
 
         <Menu
@@ -72,12 +70,7 @@ const Layout = ({ children }) => {
             { key: 'my-bonds', label: 'My Bonds' },
             {
               key: 'docs',
-              label: (
-                <DocsLink>
-                  Docs
-                  <ExportOutlined />
-                </DocsLink>
-              ),
+              label: 'Docs',
             },
           ]}
         />

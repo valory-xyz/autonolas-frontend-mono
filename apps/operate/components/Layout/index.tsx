@@ -5,6 +5,7 @@ import { Footer } from './Footer';
 import { LogoSvg } from './Logos';
 import { CustomLayout, Logo, OlasHeader } from './styles';
 import { NavigationMenu } from './Menu';
+import { NavDropdown } from 'libs/ui-components/src';
 
 const { Content } = AntdLayout;
 
@@ -16,9 +17,12 @@ export const Layout: FC<LayoutProps> = ({ children }) => {
   return (
     <CustomLayout>
       <OlasHeader>
-        <Logo href="/">
-          <LogoSvg />
-        </Logo>
+        <div className="header-left-content">
+          <Logo href="/">
+            <LogoSvg />
+          </Logo>
+          <NavDropdown currentSite="operate" />
+        </div>
         <NavigationMenu />
       </OlasHeader>
 

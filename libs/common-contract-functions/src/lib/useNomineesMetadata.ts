@@ -3,37 +3,68 @@ import { Abi } from 'viem';
 import { Address } from 'viem';
 import { useReadContracts } from 'wagmi';
 
+// eslint-disable-next-line @nx/enforce-module-boundaries
 import { GATEWAY_URL, HASH_PREFIX } from 'libs/util-constants/src';
+// eslint-disable-next-line @nx/enforce-module-boundaries
 import { STAKING_TOKEN } from 'libs/util-contracts/src';
+// eslint-disable-next-line @nx/enforce-module-boundaries
 import { getAddressFromBytes32, getBytes32FromAddress } from 'libs/util-functions/src';
 
 const BATCH_SIZE = 10;
 const CONCURRENCY_LIMIT = 5;
+// Timeout for IPFS metadata fetches in ms
+// This prevents the UI from hanging indefinitely when IPFS content doesn't exist
+const IPFS_FETCH_TIMEOUT_MS = 5000;
 
 type HashesWithNominees = { nominee: Address; hash: string }[];
 type Metadata = { name: string; description: string };
+
+const fetchWithTimeout = async (url: string): Promise<Response> => {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), IPFS_FETCH_TIMEOUT_MS);
+
+  try {
+    const response = await fetch(url, { signal: controller.signal });
+    clearTimeout(timeoutId);
+    return response;
+  } catch (error) {
+    clearTimeout(timeoutId);
+    throw error;
+  }
+};
 
 const fetchBatch = async (params: HashesWithNominees) => {
   const results = [];
   for (let i = 0; i < params.length; i += CONCURRENCY_LIMIT) {
     const batch = params.slice(i, i + CONCURRENCY_LIMIT);
     const responses = await Promise.allSettled(
-      batch.map((item) => fetch(`${GATEWAY_URL}${item.hash}`)),
+      batch.map((item) => fetchWithTimeout(`${GATEWAY_URL}${item.hash}`)),
     );
 
-    for (const response of responses) {
+    for (let j = 0; j < responses.length; j++) {
+      const response = responses[j];
       if (response.status === 'fulfilled' && response.value) {
-        const data = await response.value.json();
-        results.push(data);
+        try {
+          const data = await response.value.json();
+          results.push(data);
+        } catch {
+          // Failed to parse JSON
+          console.warn(`Failed to parse metadata for ${batch[j]?.hash}`);
+          results.push(null);
+        }
       } else {
-        results.push(null); // or handle error response
+        // Log timeout or fetch failure
+        if (response.status === 'rejected' && (response.reason as Error)?.name === 'AbortError') {
+          console.warn(`IPFS fetch timed out for ${batch[j]?.hash}`);
+        }
+        results.push(null);
       }
     }
   }
   return results;
 };
 
-export const useNomineesMetadata = (nominees: { account: Address; chainId: number }[]) => {
+export const useNomineesMetadata = (nominees: { account: Address; chainId: bigint }[]) => {
   const [isLoading, setIsLoading] = useState(false);
   const [contractsMetadata, setContractsMetadata] = useState<Record<string, Metadata> | null>(null);
 

@@ -21,6 +21,8 @@ const ALLOWED_ORIGINS = [
   "'self'",
   'https://*.olas.network/',
   'https://*.autonolas.tech/',
+  'https://pfp.staging.autonolas.tech/healthcheck',
+  'https://pfp.autonolas.tech/healthcheck',
 
   // web3modal and wallet connect
   ...WALLET_CONNECT_LINKS,
@@ -30,6 +32,12 @@ const ALLOWED_ORIGINS = [
   'https://explorer-api.walletconnect.com/',
   'wss://*.pusher.com/',
   'wss://www.walletlink.org/rpc',
+
+  // binance wallet
+  'wss://nbstream.binance.com/',
+  'https://binance.nodereal.io/',
+  'https://bscrpc.com/',
+  'https://bsc-dataseed2.ninicoin.io/',
 
   // gnosis safe
   'https://safe-transaction-mainnet.safe.global/api/v1/',
@@ -51,10 +59,13 @@ const ALLOWED_ORIGINS = [
   'wss://api.mainnet-beta.solana.com/',
   'https://holy-convincing-bird.solana-mainnet.quiknode.pro/',
   'wss://holy-convincing-bird.solana-mainnet.quiknode.pro/',
-  'https://arb1.arbitrum.io/rpc/',
+  'https://arb1.arbitrum.io/rpc',
   'https://sepolia-rollup.arbitrum.io/rpc',
   'https://rpc.gnosischain.com/',
+  'https://gnosis.drpc.org/',
+  'https://gnosis-rpc.publicnode.com/',
   'https://mainnet.base.org/',
+  'https://base.llamarpc.com',
   'https://sepolia.base.org/',
   'https://mainnet.optimism.io',
   'https://sepolia.optimism.io/',
@@ -62,12 +73,21 @@ const ALLOWED_ORIGINS = [
   'https://alfajores-forno.celo-testnet.org',
   'https://api.web3modal.com/',
   'https://rpc.ankr.com/',
+  'https://mainnet.mode.network/',
+  'https://explorer.mode.network',
+  'https://rpc.mevblocker.io',
+  'https://base-rpc.publicnode.com',
+  'https://ethereum-rpc.publicnode.com',
 
   // tenderly
   'https://virtual.mainnet.rpc.tenderly.co/',
   'https://virtual.gnosis.rpc.tenderly.co/',
   'https://virtual.polygon.rpc.tenderly.co/',
+  'https://virtual.mode.rpc.tenderly.co/',
   'https://rpc.tenderly.co/fork/',
+  'https://virtual.base.rpc.tenderly.co/',
+  'https://virtual.mainnet.eu.rpc.tenderly.co/',
+
   // others
   'https://api.thegraph.com/',
   'https://api.studio.thegraph.com/',
@@ -145,7 +165,10 @@ export const getCspHeaders = () => {
    */
   const headers = [
     ...getNextSafeHeaders(),
-    { key: 'Strict-Transport-Security', value: 'max-age=31536000; includeSubDomains' },
+    {
+      key: 'Strict-Transport-Security',
+      value: 'max-age=31536000; includeSubDomains',
+    },
   ];
 
   return headers;

@@ -5,7 +5,7 @@ import { AccountLayout, TOKEN_PROGRAM_ID, getAssociatedTokenAddress } from '@sol
 import Decimal from 'decimal.js';
 import { useCallback } from 'react';
 
-import { notifyError, notifySuccess } from '@autonolas/frontend-library';
+import { notifyError, notifySuccess } from 'libs/util-functions/src';
 
 import idl from 'libs/util-contracts/src/lib/abiAndAddresses/liquidityLockbox.json';
 

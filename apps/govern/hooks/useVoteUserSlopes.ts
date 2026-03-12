@@ -6,9 +6,10 @@ import { useReadContracts } from 'wagmi';
 import { VOTE_WEIGHTING } from 'libs/util-contracts/src/lib/abiAndAddresses';
 
 import { getNomineeHash } from 'common-util/functions/nominee-hash';
+import { Nominee } from 'types';
 
 export const useVoteUserSlopes = (
-  nominees: { account: Address; chainId: number }[],
+  nominees: Nominee[],
   account: Address | null,
   blockNumber: bigint | null,
   enabled: boolean,
@@ -19,7 +20,7 @@ export const useVoteUserSlopes = (
     abi: VOTE_WEIGHTING.abi as Abi,
     chainId: mainnet.id,
     functionName: 'voteUserSlopes',
-    args: [account, getNomineeHash(nominee.account, nominee.chainId)],
+    args: [account, getNomineeHash(nominee.account, Number(nominee.chainId))],
   }));
 
   const { data } = useReadContracts({

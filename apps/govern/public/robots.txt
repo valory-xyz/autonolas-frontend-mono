@@ -1,2 +1,3 @@
 User-agent: *
 Allow: /
+Sitemap: https://govern.olas.network/sitemap.xml

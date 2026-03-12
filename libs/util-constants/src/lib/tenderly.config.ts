@@ -44,3 +44,18 @@ export const virtualPolygon = defineChain({
     },
   },
 });
+
+export const virtualMode = defineChain({
+  id: 34443,
+  name: 'Mode Mainnet',
+  nativeCurrency: { name: 'Ether', symbol: 'ETH', decimals: 18 },
+  rpcUrls: {
+    default: { http: [`${process.env.NEXT_PUBLIC_MODE_TEST_RPC}`] },
+  },
+  blockExplorers: {
+    default: {
+      name: 'Tenderly Explorer',
+      url: '',
+    },
+  },
+});

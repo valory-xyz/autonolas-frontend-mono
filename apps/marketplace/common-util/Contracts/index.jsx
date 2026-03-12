@@ -1,0 +1,245 @@
+import { ethers } from 'ethers';
+import { mainnet } from 'viem/chains';
+import Web3 from 'web3';
+
+import { isL1Network } from 'libs/util-functions/src';
+
+import { DISPENSER, TOKENOMICS } from 'libs/util-contracts/src/lib/abiAndAddresses';
+
+import {
+  AGENT_REGISTRY_CONTRACT,
+  COMPONENT_REGISTRY_CONTRACT,
+  GENERIC_ERC20_CONTRACT,
+  GNOSIS_SAFE_CONTRACT,
+  MULTI_SEND_CONTRACT,
+  OPERATOR_WHITELIST_CONTRACT,
+  REGISTRIES_MANAGER_CONTRACT,
+  SERVICE_MANAGER_CONTRACT,
+  SERVICE_MANAGER_TOKEN_CONTRACT,
+  SERVICE_REGISTRY_CONTRACT,
+  SERVICE_REGISTRY_L2,
+  SERVICE_REGISTRY_TOKEN_UTILITY_CONTRACT,
+  SIGN_MESSAGE_LIB_CONTRACT,
+} from 'common-util/AbiAndAddresses';
+import {
+  doesNetworkHaveValidServiceManagerTokenFn,
+  getChainId,
+  getProvider,
+} from 'common-util/functions';
+
+import { ADDRESSES } from './addresses';
+import { RPC_URLS } from 'libs/util-constants/src';
+
+/**
+ * returns the web3 details
+ */
+export const getWeb3Details = () => {
+  const web3 = new Web3(getProvider());
+  const chainId = getChainId();
+  const address = ADDRESSES[chainId];
+
+  return { web3, address, chainId };
+};
+
+/**
+ * returns the contract instance
+ * @param {Array} abi - abi of the contract
+ * @param {String} contractAddress - address of the contract
+ */
+const getContract = (abi, contractAddress) => {
+  const { web3 } = getWeb3Details();
+  const contract = new web3.eth.Contract(abi, contractAddress);
+  return contract;
+};
+
+/**
+ * @returns componentRegistry contract
+ */
+export const getComponentContract = () => {
+  const { address } = getWeb3Details();
+  const { componentRegistry } = address;
+
+  const contract = getContract(COMPONENT_REGISTRY_CONTRACT.abi, componentRegistry);
+  return contract;
+};
+
+/**
+ * @returns agentRegistry contract
+ */
+export const getAgentContract = () => {
+  const { address } = getWeb3Details();
+  const { agentRegistry } = address;
+  const contract = getContract(AGENT_REGISTRY_CONTRACT.abi, agentRegistry);
+  return contract;
+};
+
+/**
+ * @returns registriesManager contract
+ */
+export const getMechMinterContract = () => {
+  const { address } = getWeb3Details();
+  const { registriesManager } = address;
+  const contract = getContract(REGISTRIES_MANAGER_CONTRACT.abi, registriesManager);
+
+  return contract;
+};
+
+/**
+ *
+ * @returns serviceRegistry contract
+ */
+export const getServiceContract = () => {
+  const { address, chainId } = getWeb3Details();
+  if (isL1Network(chainId)) {
+    const { serviceRegistry } = address;
+    const contract = getContract(SERVICE_REGISTRY_CONTRACT.abi, serviceRegistry);
+    return contract;
+  }
+
+  const { serviceRegistryL2 } = address;
+  const contract = getContract(SERVICE_REGISTRY_L2.abi, serviceRegistryL2);
+  return contract;
+};
+
+/**
+ * @returns serviceManager contract
+ */
+export const getServiceManagerContract = async () => {
+  const { address, chainId } = getWeb3Details();
+  if (doesNetworkHaveValidServiceManagerTokenFn(chainId)) {
+    const serviceManagerProxyAddress = await getServiceManagerAddress();
+    const contract = getContract(SERVICE_MANAGER_TOKEN_CONTRACT.abi, serviceManagerProxyAddress);
+    return contract;
+  }
+
+  const { serviceManager } = address;
+  const contract = getContract(SERVICE_MANAGER_CONTRACT.abi, serviceManager);
+  return contract;
+};
+
+/**
+ * Fetches the service manager proxy address for the selected chain
+ * by calling the manager function on the service registry contract.
+ */
+export const getServiceManagerAddress = async () => {
+  try {
+    const { chainId } = getWeb3Details();
+    const rpcUrl = RPC_URLS[chainId];
+    const provider = new ethers.JsonRpcProvider(rpcUrl);
+    const contractsAddresses = ADDRESSES[chainId];
+
+    if (!contractsAddresses) {
+      throw new Error(`No addresses found for chainId: ${chainId}`);
+    }
+
+    const registryAddress = isL1Network(chainId)
+      ? contractsAddresses.serviceRegistry
+      : contractsAddresses.serviceRegistryL2;
+    const registryAbi = isL1Network(chainId)
+      ? SERVICE_REGISTRY_CONTRACT.abi
+      : SERVICE_REGISTRY_L2.abi;
+
+    if (!registryAddress) {
+      throw new Error(`No service registry address found for chainId: ${chainId}`);
+    }
+
+    const serviceRegistryContract = new ethers.Contract(registryAddress, registryAbi, provider);
+    const serviceManagerAddress = await serviceRegistryContract.manager();
+    return serviceManagerAddress;
+  } catch (error) {
+    console.error('Error fetching service manager token address:', error);
+    throw error;
+  }
+};
+
+/**
+ * @returns serviceRegistryTokenUtility contract
+ */
+export const getServiceRegistryTokenUtilityContract = () => {
+  const { address } = getWeb3Details();
+  const { serviceRegistryTokenUtility } = address;
+  const contract = getContract(
+    SERVICE_REGISTRY_TOKEN_UTILITY_CONTRACT.abi,
+    serviceRegistryTokenUtility,
+  );
+  return contract;
+};
+
+/**
+ * @returns operatorWhitelist contract
+ */
+export const getOperatorWhitelistContract = () => {
+  const { address } = getWeb3Details();
+  const { operatorWhitelist } = address;
+  const contract = getContract(OPERATOR_WHITELIST_CONTRACT.abi, operatorWhitelist);
+  return contract;
+};
+
+/**
+ * @returns generic erc20 contract
+ */
+export const getGenericErc20Contract = (tokenAddress) => {
+  const contract = getContract(GENERIC_ERC20_CONTRACT.abi, tokenAddress);
+  return contract;
+};
+
+/**
+ * @returns signMessageLib contract
+ */
+export const getSignMessageLibContract = (address) => {
+  const contract = getContract(SIGN_MESSAGE_LIB_CONTRACT.abi, address);
+  return contract;
+};
+
+/**
+ * @returns multisig contract
+ */
+export const getServiceOwnerMultisigContract = (address) => {
+  const contract = getContract(GNOSIS_SAFE_CONTRACT.abi, address);
+  return contract;
+};
+
+/**
+ * @returns multiSend contract
+ */
+export const getMultiSendContract = (address) => {
+  const contract = getContract(MULTI_SEND_CONTRACT.abi, address);
+  return contract;
+};
+
+/**
+ * @returns tokenomics proxy contract
+ */
+export const getTokenomicsContract = (address) => {
+  const web3 = new Web3(getProvider());
+  const contract = new web3.eth.Contract(TOKENOMICS.abi, address);
+  return contract;
+};
+
+/**
+ * @returns ethers provider for ethereum
+ */
+export const getEthersProviderForEthereum = () => {
+  const provider = new ethers.JsonRpcProvider(RPC_URLS[1]);
+  return provider;
+};
+
+/**
+ * TODO: Remove this function once migrated to hooks
+ * @returns tokenomics ethers contract
+ */
+export const getTokenomicsEthersContract = (address) => {
+  const provider = getEthersProviderForEthereum();
+  const contract = new ethers.Contract(address, TOKENOMICS.abi, provider);
+  return contract;
+};
+
+/**
+ * @returns dispenser contract
+ */
+export const getDispenserContract = () => {
+  const abi = DISPENSER.abi;
+  const address = DISPENSER.addresses[mainnet.id];
+  const contract = getContract(abi, address);
+  return contract;
+};

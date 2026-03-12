@@ -1,11 +1,11 @@
 import {
   getChainId as getChainIdFn,
   getProvider as getProviderFn,
-  notifyError,
-} from '@autonolas/frontend-library';
+} from 'libs/util-functions/src/lib/sendTransaction/helpers';
+import { notifyError } from 'libs/util-functions/src';
 
 import { SUPPORTED_CHAINS } from 'common-util/config/wagmi';
-import { RPC_URLS } from 'common-util/constants/rpcs';
+import { RPC_URLS } from 'libs/util-constants/src';
 
 export const getProvider = () => {
   const provider = getProviderFn(SUPPORTED_CHAINS, RPC_URLS);

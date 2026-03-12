@@ -1,5 +1,6 @@
+import { formatWeiNumber } from 'libs/util-functions/src';
+
 import {
-  formatWeiNumber,
   getCommaSeparatedNumber,
   getFormattedDate,
   getFullFormattedDate,
@@ -62,7 +63,7 @@ export const VotingPercentComponent = ({
     isLoading={isLoading}
     title="% of total voting power"
     value={
-      Number(votingPower) === 0 || Number(totalSupply) === 0
+      votingPower === undefined || Number(votingPower) === 0 || Number(totalSupply) === 0
         ? '0%'
         : `${getTotalVotesPercentage(votingPower, totalSupply)}%`
     }

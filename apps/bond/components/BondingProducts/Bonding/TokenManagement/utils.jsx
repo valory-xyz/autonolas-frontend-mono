@@ -1,5 +1,5 @@
 /* eslint-disable no-param-reassign */
-import { notifyError } from '@autonolas/frontend-library';
+import { notifyError } from 'libs/util-functions/src';
 
 export const DEFAULT_SLIPPAGE = 1;
 

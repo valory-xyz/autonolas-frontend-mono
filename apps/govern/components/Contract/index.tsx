@@ -1,5 +1,4 @@
 import { Alert, Card, Flex, Skeleton, Space, Typography } from 'antd';
-import Head from 'next/head';
 import { useRouter } from 'next/router';
 import styled from 'styled-components';
 import { StakingContract } from 'types';
@@ -7,12 +6,13 @@ import { mainnet } from 'viem/chains';
 import { useEnsName } from 'wagmi';
 
 import { CHAIN_NAMES, EXPLORER_URLS, UNICODE_SYMBOLS } from 'libs/util-constants/src';
+import { getAddressFromBytes32, truncateAddress } from 'libs/util-functions/src';
 
-import { getAddressFromBytes32, truncateAddress } from 'common-util/functions/addresses';
+import { Meta } from 'components/Meta';
 import { useAppSelector } from 'store/index';
 
 import { ContractConfiguration } from './ContractConfiguration';
-import { useContractParams } from './hooks';
+import { useContractBlobCache, useContractParams } from './hooks';
 
 const StyledMain = styled.main`
   display: flex;
@@ -36,7 +36,10 @@ type ContractPageContentProps = {
 const ContractPageContent = ({ contract }: ContractPageContentProps) => {
   const formattedAddress = getAddressFromBytes32(contract.address);
 
+  const { cache: blobCache } = useContractBlobCache(formattedAddress, contract.chainId);
+
   const { data: contractParams } = useContractParams(formattedAddress, contract.chainId);
+
   const { data: ensName, isFetching: isEnsNameFetching } = useEnsName({
     address: contractParams?.deployer,
     chainId: mainnet.id,
@@ -61,9 +64,7 @@ const ContractPageContent = ({ contract }: ContractPageContentProps) => {
                 target="_blank"
                 data-testid="owner-address"
               >
-                {`${ensName || truncateAddress(contractParams.deployer)} ${
-                  UNICODE_SYMBOLS.EXTERNAL_LINK
-                }`}
+                {`${ensName || truncateAddress(contractParams.deployer)} ${UNICODE_SYMBOLS.EXTERNAL_LINK}`}
               </a>
             ) : (
               <Skeleton.Input active size="small" />
@@ -93,7 +94,10 @@ const ContractPageContent = ({ contract }: ContractPageContentProps) => {
           <AntdTitle level={5} className="m-0">
             Contract configuration
           </AntdTitle>
-          <ContractConfiguration contract={{ ...contract, address: formattedAddress }} />
+          <ContractConfiguration
+            contract={{ ...contract, address: formattedAddress }}
+            cachedConfig={blobCache?.data?.config}
+          />
         </Flex>
       </Card>
     </>
@@ -112,7 +116,10 @@ export const ContractPage = () => {
   const router = useRouter();
   const { isStakingContractsLoading, stakingContracts } = useAppSelector((state) => state.govern);
 
-  const contract = stakingContracts.find((item) => item.address === router?.query?.address);
+  const contract = stakingContracts.find(
+    (item) =>
+      item.address.toLowerCase() === ((router?.query?.address as string) || '').toLowerCase(),
+  );
 
   if (isStakingContractsLoading) {
     return <SkeletonPage />;
@@ -131,10 +138,7 @@ export const ContractPage = () => {
 
   return (
     <>
-      <Head>
-        <title>Govern | {contract.metadata.name}</title>
-        <meta name="description" content={contract.metadata.description} />
-      </Head>
+      <Meta pageTitle={contract.metadata.name} description={contract.metadata.description} />
 
       <StyledMain>
         <ContractPageContent contract={contract} />

@@ -5,7 +5,7 @@ import {
   createAssociatedTokenAccountInstruction,
 } from '@solana/spl-token';
 import { useConnection, useWallet } from '@solana/wallet-adapter-react';
-import { notifyError, notifySuccess } from '@autonolas/frontend-library';
+import { notifyError, notifySuccess } from 'libs/util-functions/src';
 
 import { useSvmConnectivity } from 'common-util/hooks/useSvmConnectivity';
 import { configureAndSendCurrentTransaction } from '../utils';

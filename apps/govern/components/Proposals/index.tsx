@@ -38,7 +38,7 @@ const SnapshotCard = () => (
         size="large"
         type="primary"
         ghost
-        href="https://snapshot.org/#/autonolas.eth"
+        href="https://snapshot.box/#/s:autonolas.eth"
         target="_blank"
       >
         {`Vote on Snapshot ${UNICODE_SYMBOLS.EXTERNAL_LINK}`}
@@ -53,7 +53,7 @@ export const ProposalsPage = () => (
     <Card>
       <Title>On-chain proposals</Title>
       <Paragraph type="secondary" className="mb-24">
-        Participate in Autonolas DAO governance by voting on on-chain proposals.
+        Participate in Olas DAO governance by voting on on-chain proposals.
       </Paragraph>
       <ProposalsList />
     </Card>

@@ -96,6 +96,10 @@ export const FieldConfig = {
     name: 'Service configuration hash',
     desc: 'Service configuration hash requirement',
   },
+  proxyHash: {
+    name: 'Approved multisig proxy hash',
+    desc: 'The hash of the approved multisig proxy.',
+  },
   activityChecker: {
     name: 'Activity checker address',
     desc: 'Activity checker handles the logic to monitor whether a specific service activity has been performed.',
@@ -194,6 +198,10 @@ export const MultisigThresholdLabel = () => (
 
 export const ServiceConfigHashLabel = () => (
   <TextWithTooltip text={FieldConfig.configHash.name} description={FieldConfig.configHash.desc} />
+);
+
+export const ProxyHashLabel = () => (
+  <TextWithTooltip text={FieldConfig.proxyHash.name} description={FieldConfig.proxyHash.desc} />
 );
 
 export const ActivityCheckerAddressLabel = () => (

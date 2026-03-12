@@ -1,6 +1,7 @@
 import { isUndefined } from 'lodash';
-import { COLOR } from '@autonolas-frontend-mono/ui-theme';
 import { StickyContainer } from '../styles';
+// eslint-disable-next-line @nx/enforce-module-boundaries
+import { COLOR } from 'libs/ui-theme/src';
 
 type MinimizedStatusProps = {
   isOperational?: boolean;

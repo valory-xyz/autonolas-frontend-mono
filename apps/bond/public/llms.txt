@@ -1,0 +1,24 @@
+# Olas Bond
+
+> Bonding app for liquidity provision in the Olas ecosystem
+
+## Overview
+
+Bond is the Olas liquidity bonding app where users can provide liquidity and participate in bonding programs to support the OLAS token ecosystem.
+
+## Key Features
+
+- Bonding Products: View and participate in various bonding programs
+- My Bonds: Manage and track your active bonds
+- Solana Liquidity: Manage liquidity on Solana blockchain
+- Paths: Explore different bonding opportunities and strategies
+
+## Documentation
+
+- Website: https://bond.olas.network/
+- Documentation: https://bond.olas.network/docs
+- Disclaimer: https://olas.network/disclaimer
+
+## Technology
+
+Built with Next.js, React, and Web3 technologies. Supports multiple blockchain networks including Ethereum, Gnosis, Polygon, Arbitrum, Optimism, Base, and Solana.

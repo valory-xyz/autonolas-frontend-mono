@@ -5,7 +5,8 @@ import { FC, useEffect, useState } from 'react';
 
 const items: MenuItemType[] = [
   { label: 'Live staking contracts', key: 'contracts' },
-  { label: 'Agents', key: 'agents' },
+  { label: 'AI Agents', key: 'agents' },
+  { label: 'Docs', key: 'docs' },
 ];
 
 export const NavigationMenu: FC = () => {

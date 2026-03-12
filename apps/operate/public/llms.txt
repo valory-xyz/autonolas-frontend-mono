@@ -1,0 +1,22 @@
+# Olas Operate
+
+> App for listing all the available staking contracts and agents for operators
+
+## Overview
+
+Operate is the Olas app that provides an overview of the available staking contracts in Olas, what products they can be used with (Pearl or Quickstart) and what agents are available for them.
+
+## Key Features
+
+- Agents: View available AI agents
+- Staking Contracts: View available staking contracts
+
+## Documentation
+
+- Website: https://operate.olas.network/
+- Documentation: https://operate.olas.network/docs
+- Disclaimer: https://olas.network/disclaimer
+
+## Technology
+
+Built with Next.js, React, and Web3 technologies. Provides operational tools for managing autonomous agents across multiple blockchain networks in the Olas ecosystem.
