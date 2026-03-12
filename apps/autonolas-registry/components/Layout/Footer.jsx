@@ -71,17 +71,18 @@ const ContractInfo = () => {
   );
 
   const { registry, manager, managerText, registryText } = getCurrentPageAddresses();
+  const hasContract = (registryText && registry) || (managerText && manager);
 
   return (
     <ContractsInfoContainer>
-      {!PAGES_TO_LOAD_WITHOUT_CHAINID.includes(pathname) && (
+      {!PAGES_TO_LOAD_WITHOUT_CHAINID.includes(pathname) && hasContract && (
         <>
           <div>
             <Image src="/images/etherscan-logo.svg" width={18} height={18} alt="Etherscan link" />
             <span>Contracts</span>
           </div>
-          {getContractInfo(registryText, registry)}
-          {getContractInfo(managerText, manager)}
+          {registryText && registry && getContractInfo(registryText, registry)}
+          {managerText && manager && getContractInfo(managerText, manager)}
         </>
       )}
     </ContractsInfoContainer>

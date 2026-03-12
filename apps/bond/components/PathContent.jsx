@@ -97,8 +97,7 @@ const PathContent = ({ path: { bond, network, exchange, bridge }, networkId, isE
       .
     </>,
     <>
-      <NextStyledLink href="/bonding-products">Bond LP tokens</NextStyledLink>
-      .
+      <NextStyledLink href="/bonding-products">Bond LP tokens</NextStyledLink>.
     </>,
   ];
 

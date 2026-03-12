@@ -66,15 +66,16 @@ const ContractInfo = () => {
   );
 
   const { textOne, addressOne, textTwo, addressTwo } = getCurrentPageAddresses();
+  const hasContract = (textOne && addressOne) || (textTwo && addressTwo);
 
   return (
     <ContractsInfoContainer>
-      {!PATHS_NOT_TO_SHOW.includes(pathname) && (
+      {!PATHS_NOT_TO_SHOW.includes(pathname) && hasContract && (
         <>
           <Image alt="Etherscan link" width={18} height={18} src="/images/etherscan-logo.svg" />
           <span>Contracts</span>
           &nbsp;•&nbsp;
-          {getContractInfo(textOne, addressOne)}
+          {textOne && addressOne && getContractInfo(textOne, addressOne)}
           {textTwo && addressTwo && (
             <>
               &nbsp;•&nbsp;
