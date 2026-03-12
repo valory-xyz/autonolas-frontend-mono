@@ -278,6 +278,7 @@ export const ContractsPage = () => {
 
         <TableWrapper>
           <Table<StakingContract>
+            rowKey={(record) => `${record.chainId}-${record.address}`}
             columns={columns}
             pagination={false}
             loading={isLoading}

@@ -752,7 +752,7 @@ export const useStakingContractsList = () => {
       const servicesLength = subgraphRow
         ? subgraphRow.filledSlots
         : nonSubIdx != null
-          ? ((serviceIdsList?.[nonSubIdx] as string[]) || []).length
+          ? ((serviceIdsList?.[nonSubIdx] as readonly bigint[] | undefined) ?? []).length
           : 0;
       const availableRewardsInWei = subgraphRow
         ? BigInt(subgraphRow.availableRewards)
@@ -785,7 +785,9 @@ export const useStakingContractsList = () => {
       const stakeRequired = getStakeRequired(minStakingDeposit, numAgentInstances);
 
       const contractAddress = getAddressFromBytes32(item.account);
-      const details = STAKING_CONTRACT_DETAILS[item.account] ?? cached?.data.operateDetails;
+      const cachedDetails = cached?.data.operateDetails;
+      const hardcodedDetails = STAKING_CONTRACT_DETAILS[item.account];
+      const details = { ...(cachedDetails ?? {}), ...(hardcodedDetails ?? {}) };
       const epoch = Number(epochCounter[index]);
       const livenessPeriodSeconds = cached
         ? Number(cached.data.config.livenessPeriod)
@@ -800,10 +802,11 @@ export const useStakingContractsList = () => {
 
       const meta = cached?.data.metadata ?? metadata?.[item.account];
 
+      const chainIdNum = Number(item.chainId);
       return {
-        key: item.account,
+        key: contractAddress,
         address: contractAddress,
-        chainId: Number(item.chainId),
+        chainId: chainIdNum,
         metadata: meta ?? { name: '', description: '' },
         availableSlots,
         maxSlots,
