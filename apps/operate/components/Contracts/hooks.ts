@@ -802,11 +802,10 @@ export const useStakingContractsList = () => {
 
       const meta = cached?.data.metadata ?? metadata?.[item.account];
 
-      const chainIdNum = Number(item.chainId);
       return {
-        key: contractAddress,
+        key: item.account as Address,
         address: contractAddress,
-        chainId: chainIdNum,
+        chainId: Number(item.chainId),
         metadata: meta ?? { name: '', description: '' },
         availableSlots,
         maxSlots,
