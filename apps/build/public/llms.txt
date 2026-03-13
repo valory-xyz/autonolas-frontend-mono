@@ -6,6 +6,14 @@
 
 Build is the Olas app for developers and businesses to create AI agents, monetize their work, and hire pre-built agents for various use cases.
 
+## AI Guides
+
+Detailed quickstart guides available as plain text:
+
+- Build an Agent: https://build.olas.network/api/ai-guide/build
+- Hire an Agent: https://build.olas.network/api/ai-guide/hire
+- Monetize Your Agent: https://build.olas.network/api/ai-guide/monetize
+
 ## Key Features
 
 - Build an Agent: Create custom AI agents with guided workflows
@@ -19,6 +27,7 @@ Build is the Olas app for developers and businesses to create AI agents, monetiz
 
 - Website: https://build.olas.network/
 - Documentation: https://build.olas.network/docs
+- Olas Stack: https://stack.olas.network/
 - Disclaimer: https://olas.network/disclaimer
 
 ## Technology

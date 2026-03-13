@@ -3,6 +3,8 @@ import styled from 'styled-components';
 
 import { COLOR } from 'libs/ui-theme/src';
 
+import data from './data.json';
+
 const { Text } = Typography;
 
 const CONTENT_MAX_WIDTH = 720;
@@ -35,23 +37,10 @@ const DocsCard = styled(Card)`
   }
 `;
 
-const resources = [
-  {
-    label: "Build with Olas' own agent framework",
-    linkText: 'Open Autonomy',
-    link: 'https://stack.olas.network/open-autonomy',
-  },
-  {
-    label: 'Build with other agent frameworks',
-    linkText: 'Olas SDK',
-    link: 'https://stack.olas.network/olas-sdk',
-  },
-];
-
 export const BuildAnAgent = () => (
   <BuildContainer>
     <Row gutter={[16, 16]}>
-      {resources.map((item, index) => (
+      {data.resources.map((item, index) => (
         <Col key={index} span={12} xs={24} sm={24} md={12}>
           <DocsCard>
             <Text className="mb-4" style={{ fontWeight: 500 }}>

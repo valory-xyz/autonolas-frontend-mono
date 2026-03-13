@@ -1,0 +1,15 @@
+{
+  "title": "Build an Agent",
+  "resources": [
+    {
+      "label": "Build with Olas' own agent framework",
+      "linkText": "Open Autonomy",
+      "link": "https://stack.olas.network/open-autonomy"
+    },
+    {
+      "label": "Build with other agent frameworks",
+      "linkText": "Olas SDK",
+      "link": "https://stack.olas.network/olas-sdk"
+    }
+  ]
+}
