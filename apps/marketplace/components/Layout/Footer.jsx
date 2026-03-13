@@ -90,10 +90,12 @@ const ContractInfo = () => {
 
   const { registry, manager, managerText, registryText, marketplaceText, marketplace } =
     getCurrentPageAddresses();
+  const hasContract =
+    (registryText && registry) || (managerText && manager) || (marketplaceText && marketplace);
 
   return (
     <ContractsInfoContainer>
-      {!PAGES_TO_LOAD_WITHOUT_CHAINID.includes(pathname) && (
+      {!PAGES_TO_LOAD_WITHOUT_CHAINID.includes(pathname) && hasContract && (
         <>
           <Text type="secondary" style={{ fontSize: 14 }}>
             Contracts
