@@ -1,12 +1,12 @@
 {
   "title": "Hire an Agent on Olas Marketplace",
-  "prerequisites": ["Python >=3.10 && <3.14", "Poetry >=1.4.0 && <2.x"],
+  "prerequisites": ["Python >=3.10 && <3.15", "Poetry >=1.4.0 && <2.x"],
   "quickstartIntro": "Get started with hiring an agent in three easy steps:",
   "quickstartItems": [
     {
       "title": "1. Install Marketplace Client",
       "codeBlocks": [
-        "poetry new my_prj --python \">=3.10,<3.14\" && cd my_prj",
+        "poetry new my_prj --python \">=3.10,<3.15\" && cd my_prj",
         "poetry add mech-client"
       ]
     },
