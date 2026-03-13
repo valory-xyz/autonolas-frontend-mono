@@ -4,6 +4,8 @@ import { STACK_URL } from 'libs/util-constants/src';
 import styled from 'styled-components';
 import { PageWrapper } from 'util/theme';
 
+import data from './data.json';
+
 const { Title, Text, Paragraph } = Typography;
 
 const HireContainer = styled.div`
@@ -18,50 +20,20 @@ const HireContainer = styled.div`
 const Prerequisites = () => (
   <div>
     <Title level={4}>Prerequisites</Title>
-    <CodeBlock>Python &gt;=3.10 &amp;&amp; &lt;3.12</CodeBlock>
-    <CodeBlock>Poetry &gt;=1.4.0 && &lt;2.x</CodeBlock>
+    {data.prerequisites.map((item) => (
+      <CodeBlock key={item}>{item}</CodeBlock>
+    ))}
   </div>
 );
-
-const quickstartItems = [
-  {
-    title: '1. Install Marketplace Client',
-    codeBlocks: [
-      'poetry new my_prj --python ">=3.10,<3.12" && cd my_prj',
-      'poetry add mech-client',
-    ],
-  },
-  {
-    title: '2. Configure Your Client',
-    codeBlocks: [
-      "echo MECHX_CHAIN_RPC='https://rpc.eu-central-2.gateway.fm/v4/gnosis/non-archival/mainnet' >> .env",
-    ],
-    moreItems: (
-      <>
-        <Paragraph>
-          Optional: For improved reliability, update .env with your custom RPC endpoint.
-        </Paragraph>
-        <CodeBlock canCopy>source .env</CodeBlock>
-      </>
-    ),
-  },
-  {
-    title: '3. Hire On-chain Agent',
-    codeBlocks: [
-      'poetry run mechx setup --chain-config gnosis',
-      'poetry run mechx request --prompts "Estimate the chance that Ethereum volatility exceeds 50,000 by the end of 2030" --priority-mech 0xb3c6319962484602b00d5587e965946890b82101 --tools superforcaster --chain-config gnosis',
-    ],
-  },
-];
 
 const Quickstart = () => (
   <Flex gap={24} vertical>
     <div>
       <Title level={4}>Quickstart</Title>
-      <Text>Get started with hiring an agent in three easy steps:</Text>
+      <Text>{data.quickstartIntro}</Text>
     </div>
     <Flex vertical>
-      {quickstartItems.map((item) => (
+      {data.quickstartItems.map((item) => (
         <div key={item.title} className="mb-20">
           <Paragraph>
             <Text strong>{item.title}</Text>
@@ -72,7 +44,16 @@ const Quickstart = () => (
                 {block}
               </CodeBlock>
             ))}
-            {item.moreItems}
+            {item.afterNote && (
+              <>
+                <Paragraph>{item.afterNote}</Paragraph>
+                {item.afterCodeBlocks?.map((block, index) => (
+                  <CodeBlock key={`${item.title}-after-${index}`} canCopy>
+                    {block}
+                  </CodeBlock>
+                ))}
+              </>
+            )}
           </div>
         </div>
       ))}
@@ -82,12 +63,9 @@ const Quickstart = () => (
 
 const AlertMessage = (
   <>
-    <p className="mt-0">
-      This quickstart covers the basics. For full details and advanced options, see the Olas Stack
-      Documentation.
-    </p>
+    <p className="mt-0">{data.alertText}</p>
     <Button type="default" size="large">
-      <a href={`${STACK_URL}/mech-client/`}>Explore Documentation</a>
+      <a href={`${STACK_URL}${data.docsLink}`}>Explore Documentation</a>
     </Button>
   </>
 );
@@ -96,7 +74,7 @@ export const HireAnAgent = () => (
   <PageWrapper>
     <HireContainer>
       <Title level={2} className="mb-0">
-        Hire an Agent on Olas Marketplace
+        {data.title}
       </Title>
       <Prerequisites />
       <Quickstart />

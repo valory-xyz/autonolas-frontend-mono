@@ -6,6 +6,8 @@ import Link from 'next/link';
 import styled from 'styled-components';
 import { PageWrapper } from 'util/theme';
 
+import data from './data.json';
+
 const { Title, Paragraph, Text } = Typography;
 
 const MonetizeContainer = styled.div`
@@ -24,125 +26,129 @@ const StyledBlockquote = styled.blockquote`
   color: rgba(0, 0, 0, 0.65);
 `;
 
-const prerequisiteItems = ['Python >=3.10 && <3.12', 'Poetry >=1.4.0 && <2.x', 'Docker'];
+type TextSegment = {
+  text: string;
+  code?: boolean;
+};
+
+type ContentBlock =
+  | { type: 'text'; value: string }
+  | { type: 'code'; value: string }
+  | { type: 'richText'; segments: TextSegment[] }
+  | {
+      type: 'note';
+      title: string;
+      value?: string;
+      segments?: TextSegment[];
+      children?: ContentBlock[];
+    };
+
+const RichTextSegments = ({ segments }: { segments: TextSegment[] }) => (
+  <>
+    {segments.map((seg, i) =>
+      seg.code ? (
+        <Text key={i} code>
+          {seg.text}
+        </Text>
+      ) : (
+        <span key={i}>{seg.text}</span>
+      ),
+    )}
+  </>
+);
+
+const ContentBlockRenderer = ({ block }: { block: ContentBlock }) => {
+  switch (block.type) {
+    case 'text':
+      return <Paragraph>{block.value}</Paragraph>;
+    case 'code':
+      return <CodeBlock canCopy>{block.value}</CodeBlock>;
+    case 'richText':
+      return (
+        <Paragraph>
+          <RichTextSegments segments={block.segments} />
+        </Paragraph>
+      );
+    case 'note':
+      return (
+        <StyledBlockquote>
+          <Text strong>{block.title}</Text>{' '}
+          {block.segments ? <RichTextSegments segments={block.segments} /> : block.value}
+          {block.children && (
+            <>
+              <br />
+              <br />
+              {block.children.map((child, index) => (
+                <ContentBlockRenderer key={index} block={child} />
+              ))}
+            </>
+          )}
+        </StyledBlockquote>
+      );
+    default:
+      return null;
+  }
+};
+
+type QuickstartItem = {
+  title: string;
+  description?: string;
+  contentBlocks?: ContentBlock[];
+  codeBlocks?: string[];
+};
 
 const Prerequisites = () => (
   <div>
     <Title level={4} className="mb-16">
       Prerequisites
     </Title>
-    {prerequisiteItems.map((item) => (
+    {data.prerequisites.map((item) => (
       <CodeBlock key={item}>{item}</CodeBlock>
     ))}
   </div>
 );
 
-const IMPLEMENTATION_PATH = '~/.operate-mech/packages/<author>/customs/<tool_name>/<tool_name>.py';
-
-const quickstartItems = [
-  {
-    title: '1. Setup your workspace',
-    description:
-      'Run the setup command to create the workspace and deploy your mech - i.e. your AI agent that offers a service to other AI agents - on-chain:',
-    codeBlocks: ['poetry run mech setup -c <chain>'],
-  },
-  {
-    title: '2. Scaffold a tool',
-    description: 'Create a new tool using the CLI:',
-    codeBlocks: ['poetry run mech add-tool <author> <tool_name> -d "Tool description"'],
-  },
-  {
-    title: '3. Implement your tool logic',
-    description: (
-      <>
-        <Paragraph>Write your implementation in:</Paragraph>
-        <CodeBlock canCopy>{IMPLEMENTATION_PATH}</CodeBlock>
-        <Paragraph>
-          The scaffold provides a template with a stubbed <Text code>run()</Text> function. Extend
-          the function to encapsulate the service your AI agent is offering.
-        </Paragraph>
-        <StyledBlockquote>
-          <Text strong>Note:</Text> If your tool requires API keys or other secrets, add them to{' '}
-          <Text code>~/.operate-mech/.env</Text>. Tools can access the environment variables through
-          kwargs.get(&quot;api_keys&quot;) in the run() function
-        </StyledBlockquote>
-      </>
-    ),
-  },
-  {
-    title: '4. Publish metadata',
-    description: (
-      <>
-        <Paragraph>Generate metadata:</Paragraph>
-        <CodeBlock canCopy>{'poetry run mech prepare-metadata -c <chain>'}</CodeBlock>
-        <StyledBlockquote>
-          <Text strong>Offchain support:</Text> Mechs also support offchain requests. If you&apos;d
-          like to host your mech and make it accessible over HTTP, you can set a public URL using
-          the <Text code>--offchain-url</Text> flag when publishing metadata. This URL will be
-          included in your mech&apos;s on-chain metadata, making it discoverable by other agents.
-          The flag is optional — if omitted, the mech operates on-chain only as before.
-          <br />
-          <br />
-          <Paragraph>With offchain URL (optional):</Paragraph>
-          <CodeBlock canCopy>
-            {
-              'poetry run mech prepare-metadata -c <chain> --offchain-url https://your-mech.example.com/'
-            }
-          </CodeBlock>
-        </StyledBlockquote>
-        <Paragraph>Then update metadata on-chain:</Paragraph>
-        <CodeBlock canCopy>{'poetry run mech update-metadata -c <chain>'}</CodeBlock>
-      </>
-    ),
-    codeBlocks: [],
-  },
-  {
-    title: '5. Launch the agent',
-    description: 'Start the mech to serve other AI agents with it:',
-    codeBlocks: ['poetry run mech run -c <chain>'],
-  },
-];
-
 const Quickstart = () => (
   <Flex gap={24} vertical>
     <div>
       <Title level={4}>Quickstart</Title>
-      <Text>Get started with monetizing your agent in five easy steps:</Text>
+      <Text>{data.quickstartIntro}</Text>
     </div>
     <Flex vertical>
-      {quickstartItems.map((item) => (
+      {(data.quickstartItems as QuickstartItem[]).map((item) => (
         <div key={item.title} className="mb-20">
           <Paragraph>
             <Text strong>{item.title}</Text>
           </Paragraph>
-          {item.description &&
-            (typeof item.description === 'string' ? (
-              <>
-                <Paragraph>{item.description}</Paragraph>
-                {item.codeBlocks && (
-                  <div>
-                    {item.codeBlocks.map((block, index) => (
-                      <CodeBlock key={`${item.title}${index}`} canCopy>
-                        {block}
-                      </CodeBlock>
-                    ))}
-                  </div>
-                )}
-              </>
-            ) : (
-              <>
-                {item.description}
-                {item.codeBlocks && (
-                  <div>
-                    {item.codeBlocks.map((block, index) => (
-                      <CodeBlock key={`${item.title}${index}`} canCopy>
-                        {block}
-                      </CodeBlock>
-                    ))}
-                  </div>
-                )}
-              </>
-            ))}
+          {item.contentBlocks ? (
+            <>
+              {item.contentBlocks.map((block, index) => (
+                <ContentBlockRenderer key={`${item.title}-block-${index}`} block={block} />
+              ))}
+              {item.codeBlocks && item.codeBlocks.length > 0 && (
+                <div>
+                  {item.codeBlocks.map((block, index) => (
+                    <CodeBlock key={`${item.title}${index}`} canCopy>
+                      {block}
+                    </CodeBlock>
+                  ))}
+                </div>
+              )}
+            </>
+          ) : item.description ? (
+            <>
+              <Paragraph>{item.description}</Paragraph>
+              {item.codeBlocks && (
+                <div>
+                  {item.codeBlocks.map((block, index) => (
+                    <CodeBlock key={`${item.title}${index}`} canCopy>
+                      {block}
+                    </CodeBlock>
+                  ))}
+                </div>
+              )}
+            </>
+          ) : null}
         </div>
       ))}
     </Flex>
@@ -151,12 +157,9 @@ const Quickstart = () => (
 
 const AlertMessage = (
   <>
-    <p className="mt-0">
-      This quickstart covers the basics. For full details and advanced options, see the Olas Stack
-      Documentation.
-    </p>
+    <p className="mt-0">{data.alertText}</p>
     <Button type="default" size="large">
-      <a href={`${STACK_URL}/mech-tools-dev/`}>Explore Documentation</a>
+      <a href={`${STACK_URL}${data.docsLink}`}>Explore Documentation</a>
     </Button>
   </>
 );
@@ -165,7 +168,7 @@ export const MonetizeYourAgent = () => (
   <PageWrapper>
     <MonetizeContainer>
       <Title level={2} className="mt-0">
-        Monetize your Agent on Olas Marketplace
+        {data.title}
       </Title>
       <Prerequisites />
       <Quickstart />
