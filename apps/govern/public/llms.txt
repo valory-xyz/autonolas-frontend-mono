@@ -4,16 +4,15 @@
 
 ## Overview
 
-Govern is the Olas governance app where token holders can participate in protocol governance, manage staking contract emissions, vote on proposals, and interact with the veOLAS token system.
+Govern is the Olas governance app where OLAS token holders participate in protocol governance. Users lock OLAS as veOLAS for voting power, vote on proposals, direct OLAS emissions to staking contracts, and donate ETH to support developers.
 
 ## Key Features
 
-- Proposals: View and vote on governance proposals
-- Staking Contracts: View and manage emissions to staking contracts
-- veOLAS: Lock OLAS tokens for governance voting power
-- Epoch: Monitor and manage protocol epochs
-- Donate: Donate to developers to drive code contributions
-- Documentation: Access governance guides and resources
+- veOLAS: Lock OLAS tokens to create veOLAS (voting power). Longer locks yield more voting power. Increase locks or withdraw after expiry.
+- Staking Contracts: Allocate veOLAS voting weight to staking contracts to direct OLAS emissions. Weights update weekly with a 10-day cooldown between changes.
+- Proposals: View and vote on on-chain governance proposals (For/Against). Track proposal status, quorum, and voter breakdown.
+- Epoch: Monitor protocol epochs. Start new epochs and claim staking incentives.
+- Donate: Donate ETH citing specific services to drive proportional rewards to developers. Requires minimum veOLAS holding for boost.
 
 ## Documentation
 

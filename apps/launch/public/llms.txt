@@ -4,14 +4,14 @@
 
 ## Overview
 
-Launch is the Olas app for creating, deploying, and managing staking contracts across multiple blockchain networks. Users can nominate contracts, create custom staking programs, and explore different staking paths.
+Launch is the Olas app for creating, deploying, and managing staking contracts that incentivise AI agent economies across multiple blockchain networks. Users follow a guided path to design their agent economy, deploy staking contracts with custom KPIs, and nominate them for OLAS emissions.
 
 ## Key Features
 
-- Path: Explore staking opportunities and guided workflows
-- My Staking Contracts: Manage and monitor your deployed staking contracts
-- Nominate Contract: Submit contracts for staking program consideration
-- Multi-Network Support: Deploy staking contracts across Ethereum, Gnosis, Polygon, and other supported networks
+- Launcher Path: Guided 6-step journey from defining goals and KPIs to launching an AI agent economy.
+- My Staking Contracts: Create, deploy, and manage staking contracts with configurable parameters (rewards, staking deposits, agent instances, activity checkers).
+- Nominate Contract: Submit deployed contracts for nomination, making them eligible to receive OLAS emissions via governance voting.
+- Multi-Network Support: Deploy staking contracts across Ethereum, Gnosis, Polygon, Arbitrum, Optimism, Base, Mode, and Celo.
 
 ## Documentation
 
@@ -21,7 +21,7 @@ Launch is the Olas app for creating, deploying, and managing staking contracts a
 
 ## Technology
 
-Built with Next.js, React, and Web3 technologies. Supports staking contract deployment and management across multiple blockchain networks including Ethereum, Gnosis, Polygon, Arbitrum, Optimism, Base, Mode, and Celo.
+Built with Next.js, React, and Web3 technologies. Supports staking contract deployment and management across multiple blockchain networks.
 
 ## Olas Ecosystem
 

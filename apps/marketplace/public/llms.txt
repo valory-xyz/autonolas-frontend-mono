@@ -1,19 +1,19 @@
 # Olas Marketplace (Mech Marketplace)
 
-> Decentralized marketplace for AI agents, components, and agent blueprints
+> Decentralized marketplace and on-chain registry for AI agents, components, and agent blueprints
 
 ## Overview
 
-Marketplace is the Olas app for discovering, deploying, and trading AI agents, agent blueprints, and agent components. It serves as the central hub for the Olas AI agent ecosystem, supporting multiple blockchain networks.
+Marketplace is the Olas app for discovering, registering, deploying, and managing AI agents (autonomous services), agent blueprints, and reusable components. Each entity is an NFT on-chain. The app supports a full service lifecycle from minting through deployment to termination, and tracks marketplace activity (requests and deliveries) for mech services.
 
 ## Key Features
 
-- AI Agents: Browse and deploy autonomous AI agents (formerly called "services")
-- Agent Blueprints: Discover agent templates and architectural patterns
-- Components: Find and use reusable agent components
-- Minting: Create and register new agents, blueprints, and components
-- Multi-Network Support: Access agents on Ethereum, Solana and other supported networks
-- NFT Registry: Each agent, blueprint, and component is an NFT on-chain
+- AI Agents: Browse, search, and deploy autonomous AI agents across all supported chains. View marketplace activity (requests, deliveries, fees). Mint new services and manage their full lifecycle (pre-registration → active registration → deployed → terminated).
+- Agent Blueprints: Discover and register agent templates and architectural patterns (Ethereum mainnet only).
+- Components: Find and register reusable agent building blocks (Ethereum mainnet only).
+- Marketplace Activity: Track mech service requests (demand) and deliveries (supply) with fee data in native tokens, OLAS, USDC, or credits.
+- ERC8004 Metadata: Standardised agent metadata with A2A agent cards and MCP server descriptors for AI-to-AI interoperability.
+- Multi-Network Support: Ethereum, Gnosis, Polygon, Arbitrum, Optimism, Base, Celo, Mode, and Solana.
 
 ## Documentation
 

@@ -4,14 +4,14 @@
 
 ## Overview
 
-Bond is the Olas liquidity bonding app where users can provide liquidity and participate in bonding programs to support the OLAS token ecosystem.
+Bond is the Olas liquidity bonding app. Users provide liquidity (LP tokens) and bond them to the protocol in exchange for OLAS tokens at a discount, subject to a vesting period. This builds protocol-owned liquidity for the Olas ecosystem.
 
 ## Key Features
 
-- Bonding Products: View and participate in various bonding programs
-- My Bonds: Manage and track your active bonds
-- Solana Liquidity: Manage liquidity on Solana blockchain
-- Paths: Explore different bonding opportunities and strategies
+- Bonding Products: Browse active bonding products across chains, see current OLAS price, discount, vesting period, and remaining supply. Bond LP tokens for discounted OLAS.
+- My Bonds: Track active bonds, view maturity status, and redeem vested OLAS tokens.
+- Paths: Step-by-step bonding paths showing the full Pool → Bridge → Bond flow across 9 chains (Ethereum, Gnosis, Polygon, Arbitrum, Optimism, Base, Celo, Mode, Solana).
+- Solana Liquidity: Wrap/unwrap SOL to WSOL for Orca whirlpool liquidity on Solana.
 
 ## Documentation
 
