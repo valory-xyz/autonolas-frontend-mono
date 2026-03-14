@@ -1,17 +1,18 @@
 # Olas Docs
 
-> Documentation hub for the Olas ecosystem
+> Landing page and ecosystem hub for the Olas ecosystem
 
 ## Overview
 
-Docs is the central documentation portal for the Olas ecosystem, providing links to comprehensive guides, references, and resources for developers, users, and community members.
+Docs is the Olas ecosystem landing page that introduces what Olas is, what users can build and use, and how to get involved. It links out to all Olas apps and developer documentation.
 
-## Key Features
+## Key Sections
 
-- Comprehensive Documentation: Technical guides and tutorials
-- Protocol Documentation: Smart contract and protocol specifications
-- Developer Resources: APIs, SDKs, and integration guides
-- User Guides: Step-by-step instructions for using Olas products
+- What is Olas: Links to About, Roadmap, and Timeline on olas.network
+- What Can I Use: Pearl (AI Agent App Store), Mech Marketplace (AI Agent Bazaar), OLAS Token
+- Get Involved: Six ecosystem roles — Contribute, Launch, Build, Govern, Bond, Operate
+- Developer Docs: Links to Open Autonomy, Olas SDK, and quickstart guides on build.olas.network
+- Community: Links to X, Discord, Blog, YouTube
 
 ## Documentation
 
@@ -19,4 +20,11 @@ Docs is the central documentation portal for the Olas ecosystem, providing links
 
 ## Technology
 
-Built with Next.js and React. Provides centralized access to all Olas documentation and learning resources.
+Built with Next.js and React. Single-page informational site linking to all parts of the Olas ecosystem.
+
+## Olas Ecosystem
+
+- Olas (hub): https://olas.network/llms.txt
+- Stack (developer docs, frameworks, tutorials): https://stack.olas.network/llms.txt
+- Build (build, hire, monetize agents): https://build.olas.network/llms.txt
+- Marketplace (browse agents, components, blueprints): https://marketplace.olas.network/llms.txt

@@ -4,12 +4,14 @@
 
 ## Overview
 
-Contribute is the Olas app where community members coordinate content marketing in Olas DAO. Community members earn points, climb a leaderboard, and more.
+Contribute is the Olas app where community members coordinate content marketing for Olas DAO. Users connect their X (Twitter) account, post about Olas using campaign keywords or mentioning @autonolas, earn points, climb a leaderboard, and can stake OLAS to earn rewards.
 
 ## Key Features
 
-- Leaderboard: View top contributors and community rankings
-- Staking: Stake tokens to earn rewards for posting on X
+- Leaderboard: View ranked contributors with points, tiers, and social links. See active Twitter campaigns with keywords to promote.
+- Staking: Stake OLAS tokens and earn rewards for posting about Olas on X.
+- Profiles: View individual contributor profiles with badge NFTs, points breakdown, and tweet history.
+- Badge NFT: Mint a free dynamically-generated badge NFT based on contribution tier.
 
 ## Documentation
 
@@ -19,4 +21,10 @@ Contribute is the Olas app where community members coordinate content marketing 
 
 ## Technology
 
-Built with Next.js, React, and Web3 technologies. Integrates with Twitter for social features and supports staking mechanisms across multiple blockchain networks.
+Built with Next.js, React, and Web3 technologies. Integrates with X (Twitter) for social features and supports staking mechanisms across multiple blockchain networks.
+
+## Olas Ecosystem
+
+- Olas (hub): https://olas.network/llms.txt
+- Govern (vote on proposals, manage veOLAS, direct staking emissions, make donations, manage epochs): https://govern.olas.network/llms.txt
+- Operate (review live staking contracts, run agents): https://operate.olas.network/llms.txt
