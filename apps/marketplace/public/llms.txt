@@ -32,3 +32,9 @@ Marketplace is the Olas app for discovering, deploying, and trading AI agents, a
 ## Technology
 
 Built with Next.js, React, and Web3 technologies. Integrates with IPFS for metadata storage and supports NFT-based agent registration across multiple blockchain networks.
+
+## Olas Ecosystem
+
+- Olas (hub): https://olas.network/llms.txt
+- Build (build, hire, monetize agents): https://build.olas.network/llms.txt
+- Operate (review live staking contracts, run agents): https://operate.olas.network/llms.txt

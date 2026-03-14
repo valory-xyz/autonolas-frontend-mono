@@ -22,3 +22,9 @@ Launch is the Olas app for creating, deploying, and managing staking contracts a
 ## Technology
 
 Built with Next.js, React, and Web3 technologies. Supports staking contract deployment and management across multiple blockchain networks including Ethereum, Gnosis, Polygon, Arbitrum, Optimism, Base, Mode, and Celo.
+
+## Olas Ecosystem
+
+- Olas (hub): https://olas.network/llms.txt
+- Govern (vote on proposals, manage veOLAS, direct staking emissions, make donations, manage epochs): https://govern.olas.network/llms.txt
+- Operate (review live staking contracts, run agents): https://operate.olas.network/llms.txt

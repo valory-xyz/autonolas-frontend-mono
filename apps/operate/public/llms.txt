@@ -20,3 +20,10 @@ Operate is the Olas app that provides an overview of the available staking contr
 ## Technology
 
 Built with Next.js, React, and Web3 technologies. Provides operational tools for managing autonomous agents across multiple blockchain networks in the Olas ecosystem.
+
+## Olas Ecosystem
+
+- Olas (hub): https://olas.network/llms.txt
+- Pearl (run agents on your own device): https://pearl.you/llms.txt
+- Launch (deploy staking contracts to incentivise AI agent economies): https://launch.olas.network/llms.txt
+- Marketplace (browse agents, components, blueprints): https://marketplace.olas.network/llms.txt

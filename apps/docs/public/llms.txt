@@ -20,3 +20,10 @@ Docs is the central documentation portal for the Olas ecosystem, providing links
 ## Technology
 
 Built with Next.js and React. Provides centralized access to all Olas documentation and learning resources.
+
+## Olas Ecosystem
+
+- Olas (hub): https://olas.network/llms.txt
+- Stack (developer docs, frameworks, tutorials): https://stack.olas.network/llms.txt
+- Build (build, hire, monetize agents): https://build.olas.network/llms.txt
+- Marketplace (browse agents, components, blueprints): https://marketplace.olas.network/llms.txt

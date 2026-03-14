@@ -24,3 +24,10 @@ Govern is the Olas governance app where token holders can participate in protoco
 ## Technology
 
 Built with Next.js, React, and Web3 technologies. Implements on-chain governance mechanisms and integrates with the Olas protocol smart contracts across multiple blockchain networks.
+
+## Olas Ecosystem
+
+- Olas (hub): https://olas.network/llms.txt
+- Bond (liquidity bonding): https://bond.olas.network/llms.txt
+- Launch (deploy staking contracts to incentivise AI agent economies): https://launch.olas.network/llms.txt
+- Operate (review live staking contracts, run agents): https://operate.olas.network/llms.txt

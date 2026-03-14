@@ -33,3 +33,10 @@ Detailed quickstart guides available as plain text:
 ## Technology
 
 Built with Next.js, React, and Web3 technologies. Supports multiple blockchain networks and integrates with the Olas protocol for AI agents.
+
+## Olas Ecosystem
+
+- Olas (hub): https://olas.network/llms.txt
+- Marketplace (browse agents, components, blueprints): https://marketplace.olas.network/llms.txt
+- Operate (review live staking contracts, run agents): https://operate.olas.network/llms.txt
+- Stack (developer docs, frameworks, tutorials): https://stack.olas.network/llms.txt

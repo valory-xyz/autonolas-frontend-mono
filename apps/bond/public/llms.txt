@@ -22,3 +22,10 @@ Bond is the Olas liquidity bonding app where users can provide liquidity and par
 ## Technology
 
 Built with Next.js, React, and Web3 technologies. Supports multiple blockchain networks including Ethereum, Gnosis, Polygon, Arbitrum, Optimism, Base, and Solana.
+
+## Olas Ecosystem
+
+- Olas (hub): https://olas.network/llms.txt
+- Govern (vote on proposals, manage veOLAS, direct staking emissions, make donations, manage epochs): https://govern.olas.network/llms.txt
+- Operate (review live staking contracts, run agents): https://operate.olas.network/llms.txt
+- Marketplace (browse agents, components, blueprints): https://marketplace.olas.network/llms.txt
