@@ -1,3 +1,4 @@
+import { ethers } from 'ethers';
 import type { NextApiRequest, NextApiResponse } from 'next';
 
 import { IDENTITY_REGISTRY_UPGRADEABLE } from 'libs/util-contracts/src/lib/abiAndAddresses/identityRegistryUpgradeable';
@@ -44,6 +45,43 @@ type Erc8004Response = {
 const getImageUrl = (image: string | undefined) => {
   if (!image) return '';
   return image.replace('ipfs://', GATEWAY_URL);
+};
+
+// Minimal ABI fragment for ERC-8004 Identity Registry getMetadata
+const IDENTITY_REGISTRY_ABI = [
+  'function getMetadata(uint256 tokenId, string key) view returns (bytes)',
+];
+
+/**
+ * Attempt to read the on-chain "name" metadata from the ERC-8004 Identity Registry.
+ * Returns the custom name if set, or null if not available / empty / on error.
+ */
+const getOnChainName = async (
+  provider: ethers.JsonRpcProvider,
+  chainId: number,
+  tokenId: number,
+): Promise<string | null> => {
+  try {
+    const registryAddress =
+      IDENTITY_REGISTRY_UPGRADEABLE.addresses[
+        chainId as keyof typeof IDENTITY_REGISTRY_UPGRADEABLE.addresses
+      ];
+    if (!registryAddress) return null;
+
+    const contract = new ethers.Contract(registryAddress, IDENTITY_REGISTRY_ABI, provider);
+    const rawBytes: string = await contract.getMetadata(tokenId, 'name');
+
+    // Empty bytes means no metadata set
+    if (!rawBytes || rawBytes === '0x') return null;
+
+    const decoded = ethers.AbiCoder.defaultAbiCoder().decode(['string'], rawBytes);
+    const name = decoded[0] as string;
+
+    return name && name.trim().length > 0 ? name.trim() : null;
+  } catch {
+    // If RPC call fails or contract doesn't exist on this chain, fall back gracefully
+    return null;
+  }
 };
 
 export default async function handler(
@@ -165,8 +203,11 @@ export default async function handler(
       });
     }
 
-    const agentName = generateName(chainId, Number(serviceId));
-    const nameWithSuffix = `${agentName} by Olas`;
+    // Check on-chain ERC-8004 metadata for a custom name first,
+    // fall back to the deterministic generated name if not set.
+    const onChainName = await getOnChainName(registryCtx.provider, chainId, Number(serviceId));
+    const agentName = onChainName ?? generateName(chainId, Number(serviceId));
+    const nameWithSuffix = onChainName ? agentName : `${agentName} by Olas`;
 
     const response: Erc8004Response = {
       type: 'https://eips.ethereum.org/EIPS/eip-8004#registration-v1',
