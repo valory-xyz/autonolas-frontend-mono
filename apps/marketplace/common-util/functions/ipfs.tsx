@@ -52,9 +52,18 @@ export const sanitizeMetaText = (text: string | null | undefined, maxLength = 30
   return sanitized;
 };
 
+/** Allowed image URL hosts when reading (must match IpfsHashGenerationModal upload list). */
+const isAllowedImageUrl = (url: string): boolean => {
+  if (url.startsWith('/') || url.startsWith('ipfs://')) return true;
+  if (url.startsWith(GATEWAY_URL)) return true;
+  if (url.startsWith('https://gateway.pinata.cloud/')) return true;
+  if (url.includes('.arweave.net')) return true;
+  return false;
+};
+
 /**
  * Validate and sanitize image URL for use in meta tags.
- * Only allows URLs from trusted sources (GATEWAY_URL or relative paths).
+ * Allows same sources as upload modal: Autonolas IPFS, Pinata IPFS, Arweave.
  */
 export const validateMetaImageUrl = (imageUrl: string | null | undefined): string | null => {
   if (!imageUrl) return null;
@@ -63,12 +72,12 @@ export const validateMetaImageUrl = (imageUrl: string | null | undefined): strin
     return imageUrl;
   }
 
-  if (imageUrl.startsWith(GATEWAY_URL)) {
-    return imageUrl;
-  }
-
   if (imageUrl.startsWith('ipfs://') || /^(Qm|bafy)[A-Za-z0-9]{40,}$/.test(imageUrl)) {
     return imageIpfsToGatewayUrl(imageUrl);
+  }
+
+  if (isAllowedImageUrl(imageUrl)) {
+    return imageUrl;
   }
 
   console.warn('Rejected untrusted image URL for meta tags:', imageUrl);
