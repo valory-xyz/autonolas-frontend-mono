@@ -49,6 +49,7 @@ Unlike other L2 chains (which use `0x` bridge payload and zero value), Arbitrum 
 
 - `hooks/useArbitrumBridgePayload.ts` — computes the bridge payload and ETH cost using `@arbitrum/sdk` (v4, uses ethers v5 internally via `ethers-v5` alias).
 - The bridge payload encodes 5 values for `ArbitrumDepositProcessorL1._sendMessage`: `(refundAccount, gasPriceBid, maxSubmissionCostToken, gasLimitMessage, maxSubmissionCostMessage)` — exactly 160 bytes.
+- `refundAccount` is the aliased L1 Timelock address on Arbitrum (`0x4d30F68F5AA342d296d4deE4bB1Cacca912dA70F`), hardcoded as `ARBITRUM_BRIDGE_MEDIATOR`. Excess gas fees on L2 are refunded to this address.
 - Gas parameters are estimated via `ParentToChildMessageGasEstimator.estimateAll()` and `estimateSubmissionFee()` with 30% safety buffers.
 - The deposit processor address is read on-chain from `Dispenser.mapChainIdDepositProcessors(42161)`, and `l2TargetDispenser` is read from the deposit processor.
 - Total ETH cost = token transfer cost (`maxSubmissionCostToken + TOKEN_GAS_LIMIT * gasPriceBid`) + message cost (`maxSubmissionCostMessage + gasLimitMessage * gasPriceBid`). Excess is refunded on L2.

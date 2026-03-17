@@ -3,6 +3,9 @@ import { encodeAbiParameters, parseAbiParameters } from 'viem';
 
 import { ARBITRUM_CHAIN_ID, getArbitrumBridgePayload } from './useArbitrumBridgePayload';
 
+// Aliased L1 Timelock address used as refundAccount
+const ARBITRUM_BRIDGE_MEDIATOR = '0x4d30F68F5AA342d296d4deE4bB1Cacca912dA70F';
+
 // Mock ethers-v5
 const mockMapChainIdDepositProcessors = jest.fn();
 const mockL2TargetDispenser = jest.fn();
@@ -65,7 +68,6 @@ describe('ARBITRUM_CHAIN_ID', () => {
 });
 
 describe('getArbitrumBridgePayload', () => {
-  const refundAccount = '0x1234567890123456789012345678901234567890' as const;
   const stakingTargets = [
     '0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa' as const,
     '0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb' as const,
@@ -94,14 +96,14 @@ describe('getArbitrumBridgePayload', () => {
   });
 
   it('should return a bridge payload of exactly 160 bytes (320 hex chars + 0x prefix)', async () => {
-    const result = await getArbitrumBridgePayload(refundAccount, stakingTargets);
+    const result = await getArbitrumBridgePayload(stakingTargets);
 
     // 160 bytes = 320 hex chars, plus "0x" prefix = 322 chars
     expect(result.bridgePayload).toMatch(/^0x[0-9a-f]{320}$/i);
   });
 
   it('should encode the correct parameters in the bridge payload', async () => {
-    const result = await getArbitrumBridgePayload(refundAccount, stakingTargets);
+    const result = await getArbitrumBridgePayload(stakingTargets);
 
     // The gas limit in the payload should include the 100k buffer
     const expectedGasLimitMessage = mockGasLimit.add(100_000);
@@ -109,7 +111,7 @@ describe('getArbitrumBridgePayload', () => {
     const expectedPayload = encodeAbiParameters(
       parseAbiParameters('address, uint256, uint256, uint256, uint256'),
       [
-        refundAccount,
+        ARBITRUM_BRIDGE_MEDIATOR,
         BigInt(mockGasPriceBid.toString()),
         BigInt(mockMaxSubmissionCostToken.toString()),
         BigInt(expectedGasLimitMessage.toString()),
@@ -121,7 +123,7 @@ describe('getArbitrumBridgePayload', () => {
   });
 
   it('should calculate the correct total cost', async () => {
-    const result = await getArbitrumBridgePayload(refundAccount, stakingTargets);
+    const result = await getArbitrumBridgePayload(stakingTargets);
 
     const gasLimitMessage = mockGasLimit.add(100_000);
     const TOKEN_GAS_LIMIT = 300_000;
@@ -136,33 +138,31 @@ describe('getArbitrumBridgePayload', () => {
   });
 
   it('should read deposit processor address from dispenser contract', async () => {
-    await getArbitrumBridgePayload(refundAccount, stakingTargets);
+    await getArbitrumBridgePayload(stakingTargets);
 
     expect(mockMapChainIdDepositProcessors).toHaveBeenCalledWith(ARBITRUM_CHAIN_ID);
   });
 
   it('should read l2TargetDispenser from deposit processor contract', async () => {
-    await getArbitrumBridgePayload(refundAccount, stakingTargets);
+    await getArbitrumBridgePayload(stakingTargets);
 
     expect(mockL2TargetDispenser).toHaveBeenCalled();
   });
 
-  it('should call estimateAll with correct parameters', async () => {
-    await getArbitrumBridgePayload(refundAccount, stakingTargets);
+  it('should use aliased L1 timelock as refund address in estimateAll', async () => {
+    await getArbitrumBridgePayload(stakingTargets);
 
     expect(mockEstimateAll).toHaveBeenCalledTimes(1);
     const callArgs = mockEstimateAll.mock.calls[0][0];
     expect(callArgs.from).toBe('0xDEADBEEF00000000000000000000000000000001');
     expect(callArgs.to).toBe('0xDEADBEEF00000000000000000000000000000002');
-    expect(callArgs.excessFeeRefundAddress).toBe(refundAccount);
-    expect(callArgs.callValueRefundAddress).toBe(refundAccount);
+    expect(callArgs.excessFeeRefundAddress).toBe(ARBITRUM_BRIDGE_MEDIATOR);
+    expect(callArgs.callValueRefundAddress).toBe(ARBITRUM_BRIDGE_MEDIATOR);
   });
 
   it('should propagate errors from SDK estimation', async () => {
     mockEstimateAll.mockRejectedValue(new Error('RPC error'));
 
-    await expect(getArbitrumBridgePayload(refundAccount, stakingTargets)).rejects.toThrow(
-      'RPC error',
-    );
+    await expect(getArbitrumBridgePayload(stakingTargets)).rejects.toThrow('RPC error');
   });
 });

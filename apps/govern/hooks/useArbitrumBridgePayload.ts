@@ -10,6 +10,13 @@ import { DISPENSER } from 'libs/util-contracts/src/lib/abiAndAddresses';
 export const ARBITRUM_CHAIN_ID = arbitrum.id;
 
 /**
+ * Aliased address of the L1 Timelock on Arbitrum, used as the refund account
+ * for excess gas fees on L2 retryable tickets.
+ * Source: https://github.com/valory-xyz/autonolas-tokenomics/blob/main/scripts/deployment/staking/arbitrum/globals_arbitrum_mainnet.json
+ */
+const ARBITRUM_BRIDGE_MEDIATOR: Address = '0x4d30F68F5AA342d296d4deE4bB1Cacca912dA70F';
+
+/**
  * TOKEN_GAS_LIMIT from DefaultDepositProcessorL1 contract.
  * This is the gas limit for the token bridge transfer on L2.
  */
@@ -47,12 +54,11 @@ export type ArbitrumBridgeParams = {
  * Computes the Arbitrum bridge payload and required ETH value for L1->L2 message passing.
  *
  * The bridge payload encodes 5 values expected by ArbitrumDepositProcessorL1._sendMessage:
- *   (refundAccount, gasPriceBid, maxSubmissionCostToken, gasLimitMessage, maxSubmissionCostMessage)
+ *   (ARBITRUM_BRIDGE_MEDIATOR, gasPriceBid, maxSubmissionCostToken, gasLimitMessage, maxSubmissionCostMessage)
  *
  * The value is the total cost: token transfer cost + message transfer cost.
  */
 export const getArbitrumBridgePayload = async (
-  refundAccount: Address,
   stakingTargets: Address[],
 ): Promise<ArbitrumBridgeParams> => {
   const l1Provider = new ethersV5.providers.JsonRpcProvider(RPC_URLS[mainnet.id]);
@@ -98,8 +104,8 @@ export const getArbitrumBridgePayload = async (
       from: l1DepositProcessorAddress,
       to: l2TargetDispenserAddress,
       l2CallValue: ethersV5.BigNumber.from(0),
-      excessFeeRefundAddress: refundAccount,
-      callValueRefundAddress: refundAccount,
+      excessFeeRefundAddress: ARBITRUM_BRIDGE_MEDIATOR,
+      callValueRefundAddress: ARBITRUM_BRIDGE_MEDIATOR,
       data: messageCalldata,
     },
     l1BaseFee,
@@ -123,9 +129,9 @@ export const getArbitrumBridgePayload = async (
     '0000000000000000000000000000000000000000000000000000000000000040' +
     '0000000000000000000000000000000000000000000000000000000000000000';
   const tokenCalldata = tokenIface.encodeFunctionData('finalizeInboundTransfer', [
-    refundAccount,
-    refundAccount,
-    refundAccount,
+    ARBITRUM_BRIDGE_MEDIATOR,
+    ARBITRUM_BRIDGE_MEDIATOR,
+    ARBITRUM_BRIDGE_MEDIATOR,
     100,
     dummyTokenData,
   ]);
@@ -147,7 +153,7 @@ export const getArbitrumBridgePayload = async (
   const bridgePayload = encodeAbiParameters(
     parseAbiParameters('address, uint256, uint256, uint256, uint256'),
     [
-      refundAccount,
+      ARBITRUM_BRIDGE_MEDIATOR,
       BigInt(gasPriceBid.toString()),
       BigInt(maxSubmissionCostToken.toString()),
       BigInt(gasLimitMessage.toString()),

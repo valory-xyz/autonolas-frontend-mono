@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import type { Address } from 'viem';
 import { mainnet } from 'viem/chains';
-import { useAccount, useWriteContract } from 'wagmi';
+import { useWriteContract } from 'wagmi';
 
 import { DISPENSER } from 'libs/util-contracts/src/lib/abiAndAddresses';
 
@@ -17,7 +17,6 @@ export const useClaimStakingIncentivesBatch = ({
   onError,
 }: ClaimStakingIncentivesBatchProps) => {
   const { writeContract, isPending: isWritePending } = useWriteContract();
-  const { address: account } = useAccount();
   const [isEstimating, setIsEstimating] = useState(false);
 
   const claimIncentivesForBatch = async (batch: [number[], Address[][]]) => {
@@ -28,15 +27,12 @@ export const useClaimStakingIncentivesBatch = ({
 
     const hasArbitrum = chainIds.includes(ARBITRUM_CHAIN_ID);
 
-    if (hasArbitrum && account) {
+    if (hasArbitrum) {
       setIsEstimating(true);
       try {
         for (let i = 0; i < chainIds.length; i++) {
           if (chainIds[i] === ARBITRUM_CHAIN_ID) {
-            const { bridgePayload, value } = await getArbitrumBridgePayload(
-              account,
-              stakingTargets[i],
-            );
+            const { bridgePayload, value } = await getArbitrumBridgePayload(stakingTargets[i]);
             bridgePayloads.push(bridgePayload);
             valueAmounts.push(value);
           } else {

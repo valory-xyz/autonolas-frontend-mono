@@ -6,15 +6,11 @@ import { ARBITRUM_CHAIN_ID } from './useArbitrumBridgePayload';
 
 // Mock wagmi hooks
 const mockWriteContract = jest.fn();
-const mockAccount = '0x1234567890123456789012345678901234567890';
 
 jest.mock('wagmi', () => ({
   useWriteContract: () => ({
     writeContract: mockWriteContract,
     isPending: false,
-  }),
-  useAccount: () => ({
-    address: mockAccount,
   }),
 }));
 
@@ -88,7 +84,7 @@ describe('useClaimStakingIncentivesBatch', () => {
       await result.current.claimIncentivesForBatch(batch);
     });
 
-    expect(mockGetArbitrumBridgePayload).toHaveBeenCalledWith(mockAccount, arbTargets);
+    expect(mockGetArbitrumBridgePayload).toHaveBeenCalledWith(arbTargets);
     expect(mockWriteContract).toHaveBeenCalledTimes(1);
 
     const callArgs = mockWriteContract.mock.calls[0][0];
