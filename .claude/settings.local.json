@@ -18,7 +18,9 @@
       "Skill(update-config)",
       "Bash(jq:*)",
       "Bash(git check-ignore:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(gh pr:*)",
+      "WebFetch(domain:github.com)"
     ]
   }
 }

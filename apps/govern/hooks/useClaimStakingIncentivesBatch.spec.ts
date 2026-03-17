@@ -42,9 +42,7 @@ describe('useClaimStakingIncentivesBatch', () => {
   });
 
   it('should use empty payloads and zero values for non-Arbitrum chains', async () => {
-    const { result } = renderHook(() =>
-      useClaimStakingIncentivesBatch({ onSuccess, onError }),
-    );
+    const { result } = renderHook(() => useClaimStakingIncentivesBatch({ onSuccess, onError }));
 
     const batch: [number[], Address[][]] = [
       [100, 137],
@@ -76,9 +74,7 @@ describe('useClaimStakingIncentivesBatch', () => {
       value: mockValue,
     });
 
-    const { result } = renderHook(() =>
-      useClaimStakingIncentivesBatch({ onSuccess, onError }),
-    );
+    const { result } = renderHook(() => useClaimStakingIncentivesBatch({ onSuccess, onError }));
 
     const arbTargets: Address[] = ['0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'];
     const otherTargets: Address[] = ['0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'];
@@ -104,9 +100,7 @@ describe('useClaimStakingIncentivesBatch', () => {
   it('should call onError when Arbitrum gas estimation fails', async () => {
     mockGetArbitrumBridgePayload.mockRejectedValue(new Error('Estimation failed'));
 
-    const { result } = renderHook(() =>
-      useClaimStakingIncentivesBatch({ onSuccess, onError }),
-    );
+    const { result } = renderHook(() => useClaimStakingIncentivesBatch({ onSuccess, onError }));
 
     const batch: [number[], Address[][]] = [
       [ARBITRUM_CHAIN_ID],
@@ -130,9 +124,7 @@ describe('useClaimStakingIncentivesBatch', () => {
       value: mockValue,
     });
 
-    const { result } = renderHook(() =>
-      useClaimStakingIncentivesBatch({ onSuccess, onError }),
-    );
+    const { result } = renderHook(() => useClaimStakingIncentivesBatch({ onSuccess, onError }));
 
     const batch: [number[], Address[][]] = [
       [10, ARBITRUM_CHAIN_ID, 137],

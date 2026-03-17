@@ -80,9 +80,7 @@ describe('getArbitrumBridgePayload', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
-    mockMapChainIdDepositProcessors.mockResolvedValue(
-      '0xDEADBEEF00000000000000000000000000000001',
-    );
+    mockMapChainIdDepositProcessors.mockResolvedValue('0xDEADBEEF00000000000000000000000000000001');
     mockL2TargetDispenser.mockResolvedValue('0xDEADBEEF00000000000000000000000000000002');
 
     mockEstimateAll.mockResolvedValue({
