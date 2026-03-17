@@ -51,7 +51,6 @@ export const useClaimStakingIncentivesBatch = ({
 
     const totalValue = valueAmounts.reduce((sum, v) => sum + v, BigInt(0));
 
-    console.log('bridgePayloads', bridgePayloads);
     return writeContract(
       {
         address: DISPENSER.addresses[mainnet.id],
