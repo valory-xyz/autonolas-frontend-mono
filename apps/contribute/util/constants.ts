@@ -90,7 +90,7 @@ export const DEPRECATED_CONTRACTS_ADDRESSES = Object.entries(STAKING_CONTRACTS_D
   return acc;
 }, []);
 
-export const STAKING_CONTRACTS_BASE_SUBGRAPH_URL = `${process.env.NEXT_PUBLIC_STAKING_CONTRACTS_BASE_SUBGRAPH_URL}`;
+export const STAKING_CONTRACTS_BASE_SUBGRAPH_URL = `${process.env.NEXT_PUBLIC_BASE_STAKING_SUBGRAPH_URL}`;
 // TODO: move to libs
 export const OLAS_UNICODE_SYMBOL = '☴';
 export const SERVICE_STAKING_STATE = ['Unstaked', 'Staked', 'Evicted'];
