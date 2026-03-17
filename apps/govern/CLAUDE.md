@@ -25,7 +25,7 @@ Olas governance: **voting**, **veOLAS**, **proposals**, **donations**, and **vot
 
 - `pages/` – Next.js routes.
 - `components/` – Contracts (MyVotingWeight, EditVotes, RevokePower), Donate, Proposals, Epoch, VeOlas, Login, Layout (Balance).
-- `hooks/` – e.g. `useFetchBalances`, `useFetchUserVotes`, `useClaimStakingIncentivesBatch`, `useArbitrumBridgePayload`.
+- `hooks/` – e.g. `useFetchBalances`, `useFetchUserVotes`, `useClaimStakingIncentivesBatch`.
 - `store/`, `context/`, `common-util/` (e.g. `resetState`).
 
 ## Commands
@@ -47,14 +47,10 @@ Staking incentives are claimed via the `Dispenser.claimStakingIncentivesBatch` c
 
 Unlike other L2 chains (which use `0x` bridge payload and zero value), Arbitrum (chain 42161) requires a proper bridge payload and ETH value for L1→L2 message passing via retryable tickets.
 
-- `hooks/useArbitrumBridgePayload.ts` — computes the bridge payload and ETH cost using `@arbitrum/sdk` (v4, uses ethers v5 internally via `ethers-v5` alias).
-- The bridge payload encodes 5 values for `ArbitrumDepositProcessorL1._sendMessage`: `(refundAccount, gasPriceBid, maxSubmissionCostToken, gasLimitMessage, maxSubmissionCostMessage)` — exactly 160 bytes.
-- `refundAccount` is the aliased L1 Timelock address on Arbitrum (`0x4d30F68F5AA342d296d4deE4bB1Cacca912dA70F`), hardcoded as `ARBITRUM_BRIDGE_MEDIATOR`. Excess gas fees on L2 are refunded to this address.
-- Gas parameters are estimated via `ParentToChildMessageGasEstimator.estimateAll()` and `estimateSubmissionFee()` with 30% safety buffers.
-- The deposit processor address is read on-chain from `Dispenser.mapChainIdDepositProcessors(42161)`, and `l2TargetDispenser` is read from the deposit processor.
-- Total ETH cost = token transfer cost (`maxSubmissionCostToken + TOKEN_GAS_LIMIT * gasPriceBid`) + message cost (`maxSubmissionCostMessage + gasLimitMessage * gasPriceBid`). Excess is refunded on L2.
+- `common-util/functions/arbitrum-bridge.ts` — computes the bridge payload and ETH cost using `@arbitrum/sdk` (v4, uses ethers v5 internally via `ethers-v5` alias).
+- The bridge payload encodes parameters for `ArbitrumDepositProcessorL1._sendMessage`. Gas parameters are estimated via `@arbitrum/sdk` with 30% safety buffers.
 - Contract references: [`ArbitrumDepositProcessorL1.sol`](https://github.com/valory-xyz/autonolas-tokenomics/blob/main/contracts/staking/ArbitrumDepositProcessorL1.sol), [`DefaultDepositProcessorL1.sol`](https://github.com/valory-xyz/autonolas-tokenomics/blob/main/contracts/staking/DefaultDepositProcessorL1.sol).
-- Tests: `hooks/useArbitrumBridgePayload.spec.ts` and `hooks/useClaimStakingIncentivesBatch.spec.ts` cover payload encoding, cost calculation, mixed-chain batches, and error propagation.
+- Tests: `common-util/functions/arbitrum-bridge.spec.ts` and `hooks/useClaimStakingIncentivesBatch.spec.ts`.
 
 ## Notes
 

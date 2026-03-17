@@ -1,11 +1,11 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { Address } from 'viem';
 import { mainnet } from 'viem/chains';
 import { useWriteContract } from 'wagmi';
 
 import { DISPENSER } from 'libs/util-contracts/src/lib/abiAndAddresses';
 
-import { ARBITRUM_CHAIN_ID, getArbitrumBridgePayload } from './useArbitrumBridgePayload';
+import { ARBITRUM_CHAIN_ID, getArbitrumBridgePayload } from 'common-util/functions/arbitrum-bridge';
 
 type ClaimStakingIncentivesBatchProps = {
   onSuccess: () => void;
@@ -18,43 +18,40 @@ export const useClaimStakingIncentivesBatch = ({
 }: ClaimStakingIncentivesBatchProps) => {
   const { writeContract, isPending: isWritePending } = useWriteContract();
   const [isEstimating, setIsEstimating] = useState(false);
+  const mountedRef = useRef(true);
+
+  useEffect(() => {
+    return () => {
+      mountedRef.current = false;
+    };
+  }, []);
 
   const claimIncentivesForBatch = async (batch: [number[], Address[][]]) => {
     const [chainIds, stakingTargets] = batch;
 
-    const bridgePayloads: `0x${string}`[] = [];
-    const valueAmounts: bigint[] = [];
+    const bridgePayloads: `0x${string}`[] = chainIds.map(() => '0x');
+    const valueAmounts: bigint[] = chainIds.map(() => BigInt(0));
 
-    const hasArbitrum = chainIds.includes(ARBITRUM_CHAIN_ID);
+    const arbIndex = chainIds.indexOf(ARBITRUM_CHAIN_ID);
+    const hasArbitrum = arbIndex !== -1;
 
     if (hasArbitrum) {
-      setIsEstimating(true);
+      if (mountedRef.current) setIsEstimating(true);
       try {
-        for (let i = 0; i < chainIds.length; i++) {
-          if (chainIds[i] === ARBITRUM_CHAIN_ID) {
-            const { bridgePayload, value } = await getArbitrumBridgePayload(stakingTargets[i]);
-            bridgePayloads.push(bridgePayload);
-            valueAmounts.push(value);
-          } else {
-            bridgePayloads.push('0x');
-            valueAmounts.push(BigInt(0));
-          }
-        }
+        const { bridgePayload, value } = await getArbitrumBridgePayload(stakingTargets[arbIndex]);
+        bridgePayloads[arbIndex] = bridgePayload;
+        valueAmounts[arbIndex] = value;
       } catch (error) {
         onError(error instanceof Error ? error : new Error('Failed to estimate Arbitrum gas'));
         return;
       } finally {
-        setIsEstimating(false);
-      }
-    } else {
-      for (let i = 0; i < chainIds.length; i++) {
-        bridgePayloads.push('0x');
-        valueAmounts.push(BigInt(0));
+        if (mountedRef.current) setIsEstimating(false);
       }
     }
 
     const totalValue = valueAmounts.reduce((sum, v) => sum + v, BigInt(0));
 
+    console.log('bridgePayloads', bridgePayloads);
     return writeContract(
       {
         address: DISPENSER.addresses[mainnet.id],
@@ -74,5 +71,5 @@ export const useClaimStakingIncentivesBatch = ({
     );
   };
 
-  return { claimIncentivesForBatch, isPending: isWritePending || isEstimating };
+  return { claimIncentivesForBatch, isPending: isWritePending || isEstimating, isEstimating };
 };

@@ -1,14 +1,18 @@
 import { BigNumber } from 'ethers-v5';
 import { encodeAbiParameters, parseAbiParameters } from 'viem';
 
-import { ARBITRUM_CHAIN_ID, getArbitrumBridgePayload } from './useArbitrumBridgePayload';
+import { ARBITRUM_CHAIN_ID, getArbitrumBridgePayload } from './arbitrum-bridge';
 
 // Aliased L1 Timelock address used as refundAccount
-const ARBITRUM_BRIDGE_MEDIATOR = '0x4d30F68F5AA342d296d4deE4bB1Cacca912dA70F';
+const ARBITRUM_REFUND_ADDRESS = '0x4d30F68F5AA342d296d4deE4bB1Cacca912dA70F';
 
 // Mock ethers-v5
 const mockMapChainIdDepositProcessors = jest.fn();
 const mockL2TargetDispenser = jest.fn();
+
+const mockGetBlock = jest.fn().mockResolvedValue({
+  baseFeePerGas: BigNumber.from('1000000000'), // 1 gwei
+});
 
 jest.mock('ethers-v5', () => {
   const actual = jest.requireActual('ethers-v5');
@@ -17,7 +21,9 @@ jest.mock('ethers-v5', () => {
     ethers: {
       ...actual.ethers,
       providers: {
-        JsonRpcProvider: jest.fn().mockImplementation(() => ({})),
+        JsonRpcProvider: jest.fn().mockImplementation(() => ({
+          getBlock: (...args: unknown[]) => mockGetBlock(...args),
+        })),
       },
       Contract: jest.fn().mockImplementation((_address: string, abi: string[]) => {
         if (abi[0].includes('mapChainIdDepositProcessors')) {
@@ -41,10 +47,6 @@ jest.mock('@arbitrum/sdk', () => ({
     estimateAll: mockEstimateAll,
     estimateSubmissionFee: mockEstimateSubmissionFee,
   })),
-}));
-
-jest.mock('@arbitrum/sdk/dist/lib/utils/lib', () => ({
-  getBaseFee: jest.fn().mockResolvedValue(BigNumber.from('1000000000')), // 1 gwei
 }));
 
 // Mock libs
@@ -82,6 +84,9 @@ describe('getArbitrumBridgePayload', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
+    mockGetBlock.mockResolvedValue({
+      baseFeePerGas: BigNumber.from('1000000000'), // 1 gwei
+    });
     mockMapChainIdDepositProcessors.mockResolvedValue('0xDEADBEEF00000000000000000000000000000001');
     mockL2TargetDispenser.mockResolvedValue('0xDEADBEEF00000000000000000000000000000002');
 
@@ -111,7 +116,7 @@ describe('getArbitrumBridgePayload', () => {
     const expectedPayload = encodeAbiParameters(
       parseAbiParameters('address, uint256, uint256, uint256, uint256'),
       [
-        ARBITRUM_BRIDGE_MEDIATOR,
+        ARBITRUM_REFUND_ADDRESS,
         BigInt(mockGasPriceBid.toString()),
         BigInt(mockMaxSubmissionCostToken.toString()),
         BigInt(expectedGasLimitMessage.toString()),
@@ -156,8 +161,8 @@ describe('getArbitrumBridgePayload', () => {
     const callArgs = mockEstimateAll.mock.calls[0][0];
     expect(callArgs.from).toBe('0xDEADBEEF00000000000000000000000000000001');
     expect(callArgs.to).toBe('0xDEADBEEF00000000000000000000000000000002');
-    expect(callArgs.excessFeeRefundAddress).toBe(ARBITRUM_BRIDGE_MEDIATOR);
-    expect(callArgs.callValueRefundAddress).toBe(ARBITRUM_BRIDGE_MEDIATOR);
+    expect(callArgs.excessFeeRefundAddress).toBe(ARBITRUM_REFUND_ADDRESS);
+    expect(callArgs.callValueRefundAddress).toBe(ARBITRUM_REFUND_ADDRESS);
   });
 
   it('should propagate errors from SDK estimation', async () => {

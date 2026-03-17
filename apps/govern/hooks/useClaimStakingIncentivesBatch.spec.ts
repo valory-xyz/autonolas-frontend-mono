@@ -2,7 +2,7 @@ import { renderHook, act } from '@testing-library/react';
 import type { Address } from 'viem';
 
 import { useClaimStakingIncentivesBatch } from './useClaimStakingIncentivesBatch';
-import { ARBITRUM_CHAIN_ID } from './useArbitrumBridgePayload';
+import { ARBITRUM_CHAIN_ID } from 'common-util/functions/arbitrum-bridge';
 
 // Mock wagmi hooks
 const mockWriteContract = jest.fn();
@@ -24,7 +24,7 @@ jest.mock('libs/util-contracts/src/lib/abiAndAddresses', () => ({
 
 // Mock the Arbitrum bridge payload
 const mockGetArbitrumBridgePayload = jest.fn();
-jest.mock('./useArbitrumBridgePayload', () => ({
+jest.mock('common-util/functions/arbitrum-bridge', () => ({
   ARBITRUM_CHAIN_ID: 42161,
   getArbitrumBridgePayload: (...args: unknown[]) => mockGetArbitrumBridgePayload(...args),
 }));
