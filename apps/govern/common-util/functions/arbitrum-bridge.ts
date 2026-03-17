@@ -155,7 +155,7 @@ export const getArbitrumBridgePayload = async (
     ARBITRUM_REFUND_ADDRESS,
     ARBITRUM_REFUND_ADDRESS,
     ARBITRUM_REFUND_ADDRESS,
-    0,
+    100,
     dummyTokenData,
   ]);
   const maxSubmissionCostToken = await gasEstimator.estimateSubmissionFee(
