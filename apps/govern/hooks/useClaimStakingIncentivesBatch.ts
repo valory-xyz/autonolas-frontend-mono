@@ -1,8 +1,11 @@
-import { mainnet } from 'viem/chains';
+import { useState } from 'react';
 import type { Address } from 'viem';
-import { useWriteContract } from 'wagmi';
+import { mainnet } from 'viem/chains';
+import { useAccount, useWriteContract } from 'wagmi';
 
 import { DISPENSER } from 'libs/util-contracts/src/lib/abiAndAddresses';
+
+import { ARBITRUM_CHAIN_ID, getArbitrumBridgePayload } from './useArbitrumBridgePayload';
 
 type ClaimStakingIncentivesBatchProps = {
   onSuccess: () => void;
@@ -13,16 +16,48 @@ export const useClaimStakingIncentivesBatch = ({
   onSuccess,
   onError,
 }: ClaimStakingIncentivesBatchProps) => {
-  const { writeContract, isPending } = useWriteContract();
+  const { writeContract, isPending: isWritePending } = useWriteContract();
+  const { address: account } = useAccount();
+  const [isEstimating, setIsEstimating] = useState(false);
 
   const claimIncentivesForBatch = async (batch: [number[], Address[][]]) => {
     const [chainIds, stakingTargets] = batch;
 
-    // Create bridge payloads - empty as they're not needed for claiming
-    const bridgePayloads = chainIds.map(() => '0x' as `0x${string}`);
+    const bridgePayloads: `0x${string}`[] = [];
+    const valueAmounts: bigint[] = [];
 
-    // Create value amounts - zero for all chains
-    const valueAmounts = chainIds.map(() => BigInt(0));
+    const hasArbitrum = chainIds.includes(ARBITRUM_CHAIN_ID);
+
+    if (hasArbitrum && account) {
+      setIsEstimating(true);
+      try {
+        for (let i = 0; i < chainIds.length; i++) {
+          if (chainIds[i] === ARBITRUM_CHAIN_ID) {
+            const { bridgePayload, value } = await getArbitrumBridgePayload(
+              account,
+              stakingTargets[i],
+            );
+            bridgePayloads.push(bridgePayload);
+            valueAmounts.push(value);
+          } else {
+            bridgePayloads.push('0x');
+            valueAmounts.push(BigInt(0));
+          }
+        }
+      } catch (error) {
+        onError(error instanceof Error ? error : new Error('Failed to estimate Arbitrum gas'));
+        return;
+      } finally {
+        setIsEstimating(false);
+      }
+    } else {
+      for (let i = 0; i < chainIds.length; i++) {
+        bridgePayloads.push('0x');
+        valueAmounts.push(BigInt(0));
+      }
+    }
+
+    const totalValue = valueAmounts.reduce((sum, v) => sum + v, BigInt(0));
 
     return writeContract(
       {
@@ -37,10 +72,11 @@ export const useClaimStakingIncentivesBatch = ({
           bridgePayloads,
           valueAmounts,
         ],
+        value: totalValue,
       },
       { onSuccess, onError },
     );
   };
 
-  return { claimIncentivesForBatch, isPending };
+  return { claimIncentivesForBatch, isPending: isWritePending || isEstimating };
 };

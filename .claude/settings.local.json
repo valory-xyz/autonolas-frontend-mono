@@ -1,7 +1,24 @@
 {
   "permissions": {
     "allow": [
-      "Bash(npx tsc:*)"
+      "Bash(npx tsc:*)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "WebFetch(domain:www.npmjs.com)",
+      "WebFetch(domain:registry.npmjs.org)",
+      "Bash(curl:*)",
+      "WebFetch(domain:api.github.com)",
+      "Bash(npm view:*)",
+      "WebFetch(domain:docs.arbitrum.io)",
+      "WebFetch(domain:unpkg.com)",
+      "WebFetch(domain:app.unpkg.com)",
+      "Bash(yarn install:*)",
+      "Bash(yarn nx:*)",
+      "Bash(npx nx:*)",
+      "Bash(python3:*)",
+      "Skill(update-config)",
+      "Bash(jq:*)",
+      "Bash(git check-ignore:*)",
+      "Bash(git add:*)"
     ]
   }
 }
