@@ -8,6 +8,7 @@
   },
   "private": true,
   "dependencies": {
+    "@arbitrum/sdk": "^4.0.4",
     "@ant-design/cssinjs": "^1.16.2",
     "@ant-design/icons": "^5.2.6",
     "@apollo/client": "3.8.5",

@@ -69,7 +69,7 @@ export const ClaimStakingIncentivesModal = ({ onClose }: ClaimStakingIncentivesM
 
   const { nomineesToClaimBatches, isLoadingClaimableBatches, clearClaimableBatches } =
     useClaimableNomineesBatches();
-  const { claimIncentivesForBatch, isPending } = useClaimStakingIncentivesBatch({
+  const { claimIncentivesForBatch, isPending, isEstimating } = useClaimStakingIncentivesBatch({
     onSuccess: () => {
       setClaimedBatches((prev) => [...prev, currentBatch]);
       // Only move to next batch, if more batches are remaining.
@@ -120,6 +120,7 @@ export const ClaimStakingIncentivesModal = ({ onClose }: ClaimStakingIncentivesM
           isCurrentBatchClaimed={isCurrentBatchClaimed}
           nomineesForCurrentBatch={nomineesForCurrentBatch}
           isPending={isPending}
+          isEstimating={isEstimating}
           handleClaimForBatch={handleClaimForBatch}
         />
       )}
@@ -148,6 +149,7 @@ type ModalContentProps = {
   isCurrentBatchClaimed: boolean;
   nomineesForCurrentBatch: StakingContract[];
   isPending: boolean;
+  isEstimating: boolean;
   handleClaimForBatch: () => void;
 };
 
@@ -157,6 +159,7 @@ const ModalContent = ({
   isCurrentBatchClaimed,
   nomineesForCurrentBatch,
   isPending,
+  isEstimating,
   handleClaimForBatch,
 }: ModalContentProps) => (
   <StakingIncentivesModalContainer>
@@ -194,7 +197,7 @@ const ModalContent = ({
 
       {!isCurrentBatchClaimed && (
         <Button type="primary" size="large" loading={isPending} onClick={handleClaimForBatch}>
-          Claim Incentives
+          {isEstimating ? 'Estimating Arbitrum bridge costs...' : 'Claim Incentives'}
         </Button>
       )}
     </Flex>
