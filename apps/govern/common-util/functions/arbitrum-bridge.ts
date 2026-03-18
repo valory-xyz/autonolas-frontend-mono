@@ -166,9 +166,7 @@ export const getArbitrumBridgePayload = async (
   // Apply the same safety buffer as GAS_OVERRIDES.maxSubmissionFee (30%).
   // Without this buffer, an L1 base fee increase between estimation and
   // transaction execution causes InsufficientSubmissionCost reverts.
-  const maxSubmissionCostToken = maxSubmissionCostTokenBase
-    .mul(100 + 30)
-    .div(100);
+  const maxSubmissionCostToken = maxSubmissionCostTokenBase.mul(100 + 30).div(100);
 
   // Calculate total cost:
   // cost[0] = maxSubmissionCostToken + TOKEN_GAS_LIMIT * gasPriceBid (token transfer)
