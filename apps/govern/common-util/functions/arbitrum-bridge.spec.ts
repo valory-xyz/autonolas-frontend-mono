@@ -113,7 +113,10 @@ describe('getArbitrumBridgePayload', () => {
     // The gas limit in the payload should include the 100k buffer
     const expectedGasLimitMessage = mockGasLimit.add(100_000);
     // Token submission cost includes the same safety buffer as GAS_OVERRIDES (ceiling division)
-    const bufferedTokenSubmissionCost = mockMaxSubmissionCostToken.mul(GAS_OVERRIDES.maxSubmissionFee.percentIncrease.add(100)).add(99).div(100);
+    const bufferedTokenSubmissionCost = mockMaxSubmissionCostToken
+      .mul(GAS_OVERRIDES.maxSubmissionFee.percentIncrease.add(100))
+      .add(99)
+      .div(100);
 
     const expectedPayload = encodeAbiParameters(
       parseAbiParameters('address, uint256, uint256, uint256, uint256'),
@@ -135,7 +138,10 @@ describe('getArbitrumBridgePayload', () => {
     const gasLimitMessage = mockGasLimit.add(100_000);
     const TOKEN_GAS_LIMIT = 300_000;
     // Token submission cost includes the same safety buffer as GAS_OVERRIDES (ceiling division)
-    const bufferedTokenSubmissionCost = mockMaxSubmissionCostToken.mul(GAS_OVERRIDES.maxSubmissionFee.percentIncrease.add(100)).add(99).div(100);
+    const bufferedTokenSubmissionCost = mockMaxSubmissionCostToken
+      .mul(GAS_OVERRIDES.maxSubmissionFee.percentIncrease.add(100))
+      .add(99)
+      .div(100);
 
     // tokenCost = bufferedMaxSubmissionCostToken + gasPriceBid * TOKEN_GAS_LIMIT
     const tokenCost = bufferedTokenSubmissionCost.add(mockGasPriceBid.mul(TOKEN_GAS_LIMIT));
