@@ -158,11 +158,17 @@ export const getArbitrumBridgePayload = async (
     100,
     dummyTokenData,
   ]);
-  const maxSubmissionCostToken = await gasEstimator.estimateSubmissionFee(
+  const maxSubmissionCostTokenBase = await gasEstimator.estimateSubmissionFee(
     l1Provider,
     l1BaseFee,
     ethersV5.utils.hexDataLength(tokenCalldata),
   );
+  // Apply the same safety buffer as GAS_OVERRIDES.maxSubmissionFee (30%).
+  // Without this buffer, an L1 base fee increase between estimation and
+  // transaction execution causes InsufficientSubmissionCost reverts.
+  const maxSubmissionCostToken = maxSubmissionCostTokenBase
+    .mul(100 + 30)
+    .div(100);
 
   // Calculate total cost:
   // cost[0] = maxSubmissionCostToken + TOKEN_GAS_LIMIT * gasPriceBid (token transfer)
