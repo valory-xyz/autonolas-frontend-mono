@@ -45,7 +45,7 @@ const TOKEN_GAS_LIMIT = 300_000;
  * Gas estimation overrides with 30% buffers for safety.
  * Minimum gasLimit set to 2M to meet contract's MESSAGE_GAS_LIMIT requirement.
  */
-const GAS_OVERRIDES = {
+export const GAS_OVERRIDES = {
   gasLimit: {
     base: undefined,
     min: ethersV5.BigNumber.from(2_000_000),
@@ -158,11 +158,19 @@ export const getArbitrumBridgePayload = async (
     100,
     dummyTokenData,
   ]);
-  const maxSubmissionCostToken = await gasEstimator.estimateSubmissionFee(
+  const maxSubmissionCostTokenBase = await gasEstimator.estimateSubmissionFee(
     l1Provider,
     l1BaseFee,
     ethersV5.utils.hexDataLength(tokenCalldata),
   );
+  // Apply the same safety buffer as GAS_OVERRIDES.maxSubmissionFee.percentIncrease.
+  // Without this buffer, an L1 base fee increase between estimation and
+  // transaction execution causes InsufficientSubmissionCost reverts.
+  // Ceiling division ensures the buffer is never truncated below the target percentage.
+  const maxSubmissionCostToken = maxSubmissionCostTokenBase
+    .mul(GAS_OVERRIDES.maxSubmissionFee.percentIncrease.add(100))
+    .add(99)
+    .div(100);
 
   // Calculate total cost:
   // cost[0] = maxSubmissionCostToken + TOKEN_GAS_LIMIT * gasPriceBid (token transfer)
