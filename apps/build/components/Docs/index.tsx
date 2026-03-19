@@ -138,11 +138,11 @@ const StepByStep = () => (
           </a>{' '}
           framework or bring your own. If you choose Open Autonomy, you can use the{' '}
           <a
-            href="https://github.com/valory-xyz/academy-learning-service"
+            href="https://github.com/valory-xyz/hello-world"
             target="_blank"
             rel="noopener noreferrer"
           >
-            learning service
+            Hello World example
           </a>{' '}
           as a template or to find useful code snippets.
         </li>
