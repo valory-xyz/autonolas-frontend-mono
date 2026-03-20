@@ -518,8 +518,8 @@ export const useStakingContractsList = () => {
     uncachedNominees,
     'maxNumServices',
   );
-  // Get serviceIds via RPC for all nominees — the subgraph agentIds field is config
-  // (whitelisted agent types), not the count of currently staked services.
+  // Get serviceIds via RPC for all nominees — the subgraph does not track the list of
+  // currently staked service IDs.
   const { data: serviceIdsList, isFetching: isServiceIdsLoading } = useContractDetails(
     nominees,
     'getServiceIds',

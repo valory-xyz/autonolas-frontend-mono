@@ -51,7 +51,6 @@ export type SubgraphStakingContract = {
   rewardsPerSecond: string;
   minStakingDeposit: string;
   numAgentInstances: string;
-  agentIds: string[];
 };
 
 export type SubgraphCheckpoint = {
@@ -80,7 +79,6 @@ const STAKING_CONTRACTS_QUERY = gql`
       rewardsPerSecond
       minStakingDeposit
       numAgentInstances
-      agentIds
     }
   }
 `;
