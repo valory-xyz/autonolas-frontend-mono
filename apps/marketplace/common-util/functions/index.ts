@@ -16,7 +16,10 @@ import {
 } from 'libs/util-functions/src';
 import { RpcUrl } from 'libs/util-functions/src/lib/sendTransaction/types';
 
-import { MARKETPLACE_SUPPORTED_CHAIN_IDS } from '../../util/constants';
+import {
+  MARKETPLACE_SUPPORTED_CHAIN_IDS,
+  SERVICE_ACTIVITY_SUBGRAPH_CHAIN_IDS,
+} from '../../util/constants';
 import { RPC_URLS } from 'libs/util-constants/src';
 import { SUPPORTED_CHAINS } from '../Login';
 import { EVM_SUPPORTED_CHAINS, SVM_SUPPORTED_CHAINS, SolanaChain } from '../Login/config';
@@ -231,5 +234,10 @@ export const isValidSolanaPublicKey = (publicKey: PublicKey) => {
   }
 };
 
+/** Legacy marketplace subgraph chains only */
 export const isMarketplaceSupportedNetwork = (chainId: number) =>
   MARKETPLACE_SUPPORTED_CHAIN_IDS.includes(chainId);
+
+/** Chains with mech / marketplace activity subgraph support */
+export const isServiceActivitySubgraphSupported = (chainId: number) =>
+  SERVICE_ACTIVITY_SUBGRAPH_CHAIN_IDS.includes(chainId);

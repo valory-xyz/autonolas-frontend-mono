@@ -95,6 +95,15 @@ export const CACHE_DURATION = {
 
 export const MARKETPLACE_SUPPORTED_CHAIN_IDS = [10, 100, 137, 8453];
 
+export const MECH_SUBGRAPH_CHAIN_IDS = [1, 42161, 42220] as const;
+
+export const MECH_FEES_SUBGRAPH_CHAIN_IDS = [1, 10, 137, 42161, 42220] as const;
+
+export const SERVICE_ACTIVITY_SUBGRAPH_CHAIN_IDS: readonly number[] = [
+  ...MARKETPLACE_SUPPORTED_CHAIN_IDS,
+  ...MECH_SUBGRAPH_CHAIN_IDS,
+];
+
 export const ERC8004_CHAIN_MAPPING = {
   1: 'ethereum',
   10: 'optimism',

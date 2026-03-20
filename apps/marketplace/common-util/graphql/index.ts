@@ -16,6 +16,35 @@ export const MARKETPLACE_SUBGRAPH_CLIENTS = {
   8453: new GraphQLClient(process.env.NEXT_PUBLIC_BASE_MARKETPLACE_SUBGRAPH!, requestConfig),
 };
 
+/** Mech activity subgraph (requests/deliveries/services) */
+export const MECH_SUBGRAPH_CLIENTS = {
+  1: new GraphQLClient(process.env.NEXT_PUBLIC_ETHEREUM_MECH_SUBGRAPH!, requestConfig),
+  42161: new GraphQLClient(process.env.NEXT_PUBLIC_ARBITRUM_MECH_SUBGRAPH!, requestConfig),
+  42220: new GraphQLClient(process.env.NEXT_PUBLIC_CELO_MECH_SUBGRAPH!, requestConfig),
+} as const;
+
+/**
+ * Mech-fees subgraph (fee analytics). Used by KPI surfaces or future merges; schema is subgraph-specific.
+ */
+export const MECH_FEES_SUBGRAPH_CLIENTS = {
+  1: new GraphQLClient(process.env.NEXT_PUBLIC_ETHEREUM_MECH_FEES_SUBGRAPH!, requestConfig),
+  10: new GraphQLClient(process.env.NEXT_PUBLIC_OPTIMISM_MECH_FEES_SUBGRAPH!, requestConfig),
+  137: new GraphQLClient(process.env.NEXT_PUBLIC_POLYGON_MECH_FEES_SUBGRAPH!, requestConfig),
+  42161: new GraphQLClient(process.env.NEXT_PUBLIC_ARBITRUM_MECH_FEES_SUBGRAPH!, requestConfig),
+  42220: new GraphQLClient(process.env.NEXT_PUBLIC_CELO_MECH_FEES_SUBGRAPH!, requestConfig),
+} as const;
+
+export type ActivitySubgraphChainId =
+  | keyof typeof MARKETPLACE_SUBGRAPH_CLIENTS
+  | keyof typeof MECH_SUBGRAPH_CLIENTS;
+
+export const getActivitySubgraphClient = (chainId: ActivitySubgraphChainId): GraphQLClient => {
+  if (Object.prototype.hasOwnProperty.call(MECH_SUBGRAPH_CLIENTS, chainId)) {
+    return MECH_SUBGRAPH_CLIENTS[chainId as keyof typeof MECH_SUBGRAPH_CLIENTS];
+  }
+  return MARKETPLACE_SUBGRAPH_CLIENTS[chainId as keyof typeof MARKETPLACE_SUBGRAPH_CLIENTS];
+};
+
 export const REGISTRY_SUBGRAPH_CLIENTS = {
   1: new GraphQLClient(process.env.NEXT_PUBLIC_ETHEREUM_REGISTRY_SUBGRAPH!, requestConfig),
   10: new GraphQLClient(process.env.NEXT_PUBLIC_OPTIMISM_REGISTRY_SUBGRAPH!, requestConfig),

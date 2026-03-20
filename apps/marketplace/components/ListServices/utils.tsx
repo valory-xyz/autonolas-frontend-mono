@@ -11,7 +11,7 @@ import { getTokenDetailsRequest } from 'common-util/Details/utils';
 import { getIpfsResponse } from 'common-util/functions/ipfs';
 import { normalizeMetadataUrl } from 'common-util/functions/tokenUri';
 import { getServicesFromSubgraph } from 'common-util/subgraphs';
-import { isMarketplaceSupportedNetwork } from 'common-util/functions';
+import { isServiceActivitySubgraphSupported } from 'common-util/functions';
 
 type Service = {
   id: string;
@@ -78,7 +78,7 @@ export const getMarketplaceRole = (service: Service) => {
   const { totalRequests, totalDeliveries } = service;
   const { chainId } = getWeb3Details();
 
-  if (!isMarketplaceSupportedNetwork(Number(chainId))) {
+  if (!isServiceActivitySubgraphSupported(Number(chainId))) {
     return SERVICE_ROLE.REGISTERED;
   }
 
@@ -134,7 +134,7 @@ export const getServices = async (
   );
 
   let servicesWithMetadata = await extractConfigDetailsForServices(results);
-  if (isMarketplaceSupportedNetwork(Number(chainId))) {
+  if (isServiceActivitySubgraphSupported(Number(chainId))) {
     const servicesDataFromSubgraph = await getServicesFromSubgraph({
       chainId: Number(chainId),
       serviceIds: validTokenIds.map(Number),
