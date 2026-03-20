@@ -16,6 +16,28 @@ export const MARKETPLACE_SUBGRAPH_CLIENTS = {
   8453: new GraphQLClient(process.env.NEXT_PUBLIC_BASE_MARKETPLACE_SUBGRAPH!, requestConfig),
 };
 
+/**
+ * Mech-fees subgraphs keyed by chain ID.
+ * Uses existing Vercel env var names.
+ */
+export const MECH_FEES_SUBGRAPH_CLIENTS = {
+  1: new GraphQLClient(process.env.NEXT_PUBLIC_MECH_FEES_ETHEREUM_SUBGRAPH!, requestConfig),
+  10: new GraphQLClient(process.env.NEXT_PUBLIC_MECH_FEES_OPTIMISM_SUBGRAPH!, requestConfig),
+  100: new GraphQLClient(process.env.NEXT_PUBLIC_NEW_MECH_FEES_GNOSIS_SUBGRAPH_URL!, requestConfig),
+  137: new GraphQLClient(process.env.NEXT_PUBLIC_MECH_FEES_POLYGON_SUBGRAPH!, requestConfig),
+  8453: new GraphQLClient(process.env.NEXT_PUBLIC_NEW_MECH_FEES_BASE_SUBGRAPH_URL!, requestConfig),
+  42161: new GraphQLClient(process.env.NEXT_PUBLIC_MECH_FEES_ARBITRUM_SUBGRAPH!, requestConfig),
+  42220: new GraphQLClient(process.env.NEXT_PUBLIC_MECH_FEES_CELO_SUBGRAPH!, requestConfig),
+} as const;
+
+/**
+ * Legacy Gnosis mech-fees endpoint kept separately for fallback/migration use.
+ */
+export const LEGACY_GNOSIS_MECH_FEES_SUBGRAPH_CLIENT = new GraphQLClient(
+  process.env.NEXT_PUBLIC_LEGACY_MECH_FEES_GNOSIS_SUBGRAPH_URL!,
+  requestConfig,
+);
+
 /** Mech activity subgraph (requests/deliveries/services) */
 export const MECH_SUBGRAPH_CLIENTS = {
   1: new GraphQLClient(process.env.NEXT_PUBLIC_ETHEREUM_MECH_SUBGRAPH!, requestConfig),
