@@ -64,7 +64,6 @@ export type SubgraphCheckpoint = {
 
 export type SubgraphStakingRow = {
   maxNumServices: number;
-  filledSlots: number;
   rewardsPerSecond: string;
   minStakingDeposit: string;
   numAgentInstances: string;
@@ -181,7 +180,6 @@ export async function fetchStakingDataFromSubgraph(
     const checkpoint = latestCheckpointByContract.get(key);
     result.set(key, {
       maxNumServices: Number(c.maxNumServices),
-      filledSlots: (c.agentIds ?? []).length,
       rewardsPerSecond: c.rewardsPerSecond,
       minStakingDeposit: c.minStakingDeposit,
       numAgentInstances: c.numAgentInstances,
