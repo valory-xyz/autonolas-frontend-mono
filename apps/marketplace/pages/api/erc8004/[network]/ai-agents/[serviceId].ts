@@ -6,10 +6,11 @@ import { RPC_URLS } from 'libs/util-constants/src';
 import { ADDRESSES } from 'common-util/Contracts/addresses';
 import { getIpfsResponse } from 'common-util/functions/ipfs';
 import { generateName } from 'common-util/functions/agentName';
+import { isMarketplaceSupportedNetwork } from 'common-util/functions';
 import type { ActivitySubgraphChainId } from 'common-util/graphql';
 import { getServicesFromMarketplaceSubgraph } from 'common-util/graphql/services';
 
-import { CACHE_DURATION, GATEWAY_URL, SERVICE_ACTIVITY_SUBGRAPH_CHAIN_IDS } from 'util/constants';
+import { CACHE_DURATION, GATEWAY_URL } from 'util/constants';
 import { zeroAddress } from 'viem';
 
 import {
@@ -108,12 +109,12 @@ export default async function handler(
     const serviceData = await serviceRegistryContract.getService(serviceId);
     const configHash = serviceData.configHash;
 
-    const hasActivitySubgraph = SERVICE_ACTIVITY_SUBGRAPH_CHAIN_IDS.includes(chainId);
+    const hasMarketplaceSubgraph = isMarketplaceSupportedNetwork(chainId);
 
     const [metadata, serviceFromRegistry, servicesFromMarketplace] = await Promise.all([
       getIpfsResponse(configHash),
       getServiceFromRegistrySafe(chainId, serviceId),
-      hasActivitySubgraph
+      hasMarketplaceSubgraph
         ? getServicesFromMarketplaceSubgraph({
             chainId: chainId as ActivitySubgraphChainId,
             serviceIds: [serviceId],

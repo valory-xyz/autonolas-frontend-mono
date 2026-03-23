@@ -1,7 +1,7 @@
 import { getServiceActivityFromMarketplaceSubgraph } from 'common-util/graphql/service-activity';
 import { NextApiRequest, NextApiResponse } from 'next';
-import { CACHE_DURATION, SERVICE_ACTIVITY_SUBGRAPH_CHAIN_IDS } from '../../util/constants';
-import { isServiceActivitySubgraphSupported } from 'common-util/functions';
+import { CACHE_DURATION, MARKETPLACE_SUPPORTED_CHAIN_IDS } from '../../util/constants';
+import { isMarketplaceSupportedNetwork } from 'common-util/functions';
 import type { ActivitySubgraphChainId } from 'common-util/graphql';
 
 type RequestQuery = {
@@ -24,9 +24,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       });
     }
 
-    if (!isServiceActivitySubgraphSupported(Number(chainId))) {
+    if (!isMarketplaceSupportedNetwork(Number(chainId))) {
       return res.status(400).json({
-        error: `Invalid network. Supported chain IDs: ${SERVICE_ACTIVITY_SUBGRAPH_CHAIN_IDS.join(', ')}`,
+        error: `Invalid network. Supported chain IDs: ${MARKETPLACE_SUPPORTED_CHAIN_IDS.join(', ')}`,
       });
     }
 

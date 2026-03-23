@@ -4,13 +4,14 @@ import { IDENTITY_REGISTRY_UPGRADEABLE } from 'libs/util-contracts/src/lib/abiAn
 
 import { ADDRESSES } from 'common-util/Contracts/addresses';
 import { getIpfsCIDFromHash, getIpfsResponse } from 'common-util/functions/ipfs';
+import { isMarketplaceSupportedNetwork } from 'common-util/functions';
 import type { ActivitySubgraphChainId } from 'common-util/graphql';
 import { getServicesFromMarketplaceSubgraph } from 'common-util/graphql/services';
 
 import {
   CACHE_DURATION,
   ERC8004_CHAIN_MAPPING,
-  SERVICE_ACTIVITY_SUBGRAPH_CHAIN_IDS,
+  MARKETPLACE_SUPPORTED_CHAIN_IDS,
 } from 'util/constants';
 
 import {
@@ -147,9 +148,9 @@ export default async function handler(
 
     const chainId = unTypedChainId as keyof typeof ADDRESSES;
 
-    if (!SERVICE_ACTIVITY_SUBGRAPH_CHAIN_IDS.includes(chainId)) {
+    if (!isMarketplaceSupportedNetwork(chainId)) {
       return res.status(400).json({
-        error: `Agent cards are not available for network: ${network}. Supported chain IDs: ${SERVICE_ACTIVITY_SUBGRAPH_CHAIN_IDS.join(', ')}`,
+        error: `Agent cards are not available for network: ${network}. Supported chain IDs: ${[...MARKETPLACE_SUPPORTED_CHAIN_IDS].join(', ')}`,
       });
     }
 
