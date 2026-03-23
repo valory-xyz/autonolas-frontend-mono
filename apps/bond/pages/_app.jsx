@@ -1,4 +1,3 @@
-import Head from 'next/head';
 import { useRouter } from 'next/router';
 import PropTypes from 'prop-types';
 import { Provider } from 'react-redux';
@@ -6,12 +5,10 @@ import { Provider } from 'react-redux';
 import { AutonolasThemeProvider, GlobalStyles } from 'libs/ui-theme/src';
 
 import Layout from 'components/Layout';
-import { SITE } from 'util/meta';
+import { Meta } from 'components/Meta';
 
 import Web3ModalProvider from '../context/Web3ModalProvider';
 import { store } from '../store';
-
-const { TITLE, DESCRIPTION, URL, SITE_IMAGE_URL } = SITE;
 
 const BondApp = ({ Component, pageProps }) => {
   const router = useRouter();
@@ -19,27 +16,8 @@ const BondApp = ({ Component, pageProps }) => {
 
   return (
     <>
-      <Head>
-        {/* <!-- Primary Meta Tags --> */}
-        <title>Bond | Olas</title>
-        <meta name="title" content={TITLE} />
-        <meta name="description" content={DESCRIPTION} />
-
-        {/* <!-- Open Graph / Facebook --> */}
-        <meta property="og:type" content="website" />
-        <meta property="og:url" content={URL} />
-        <meta property="og:title" content={TITLE} />
-        <meta property="og:description" content={DESCRIPTION} />
-        <meta property="og:image" content={SITE_IMAGE_URL} />
-
-        {/* <!-- Twitter --> */}
-        <meta property="twitter:card" content="summary_large_image" />
-        <meta property="twitter:url" content={URL} />
-        <meta property="twitter:title" content={TITLE} />
-        <meta property="twitter:description" content={DESCRIPTION} />
-        <meta property="twitter:image" content={SITE_IMAGE_URL} />
-      </Head>
       <GlobalStyles />
+      <Meta />
 
       <Provider store={store}>
         <AutonolasThemeProvider>

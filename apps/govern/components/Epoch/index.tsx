@@ -9,6 +9,7 @@ import { getFullFormattedDate } from 'common-util/functions/time';
 import { notifyError, notifySuccess } from 'libs/util-functions/src';
 
 import { checkpointRequest } from 'common-util/functions';
+import { EpochData } from 'common-util/functions/fetchEpochData';
 
 import { useThresholdData } from '../Donate/hooks';
 import { ClaimStakingIncentives } from '../Donate/ClaimStakingIncentives';
@@ -24,18 +25,28 @@ const StyledMain = styled.main`
   margin: 0 auto;
 `;
 
-export const EpochPage = () => {
+type EpochPageProps = {
+  initialEpochData?: EpochData | null;
+};
+
+export const EpochPage = ({ initialEpochData }: EpochPageProps) => {
   const { address: account } = useAccount();
   const [isCheckpointLoading, setIsCheckpointLoading] = useState(false);
 
   const {
     isDataLoading,
     refetchData,
-    epochCounter,
-    prevEpochEndTime,
-    epochLength,
-    nextEpochEndTime,
+    epochCounter: hookEpochCounter,
+    prevEpochEndTime: hookPrevEpochEndTime,
+    epochLength: hookEpochLength,
+    nextEpochEndTime: hookNextEpochEndTime,
   } = useThresholdData();
+
+  // Use SSR data as fallback while hooks are loading
+  const epochCounter = hookEpochCounter ?? initialEpochData?.epochCounter;
+  const prevEpochEndTime = hookPrevEpochEndTime ?? initialEpochData?.prevEpochEndTime;
+  const epochLength = hookEpochLength ?? initialEpochData?.epochLength;
+  const nextEpochEndTime = hookNextEpochEndTime ?? initialEpochData?.nextEpochEndTime;
 
   const onCheckpoint = async () => {
     if (!account) return;
@@ -84,7 +95,7 @@ export const EpochPage = () => {
         {epochStatusList.map(({ text, value }, index) => (
           <EpochStatus key={`epoch-section-${index}`}>
             <Title level={5}>{`${text}:`}</Title>
-            {isDataLoading ? (
+            {isDataLoading && !initialEpochData ? (
               <Skeleton.Input size="small" active />
             ) : (
               <Paragraph>{value}</Paragraph>

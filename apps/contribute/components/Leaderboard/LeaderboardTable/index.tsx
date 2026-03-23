@@ -117,9 +117,16 @@ const columns: ColumnsType<LeaderboardUser> = [
   },
 ];
 
-export const LeaderboardTable = () => {
+type LeaderboardTableProps = {
+  initialLeaderboard?: LeaderboardUser[];
+};
+
+export const LeaderboardTable = ({ initialLeaderboard }: LeaderboardTableProps) => {
   const isLoading = useAppSelector((state) => state.setup.isLeaderboardLoading);
   const leaderboard = useAppSelector((state) => state.setup.leaderboard);
+
+  // Use SSR data as fallback while Redux store is loading/empty
+  const displayData = leaderboard.length > 0 ? leaderboard : (initialLeaderboard ?? []);
 
   return (
     <Card className="section">
@@ -131,8 +138,8 @@ export const LeaderboardTable = () => {
       </Paragraph>
       <Table
         columns={columns}
-        dataSource={leaderboard}
-        loading={isLoading}
+        dataSource={displayData}
+        loading={isLoading && displayData.length === 0}
         pagination={false}
         rowKey="id"
         scroll={{ x: 'max-content' }}
