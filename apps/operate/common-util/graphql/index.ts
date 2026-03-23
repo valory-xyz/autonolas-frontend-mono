@@ -139,13 +139,11 @@ export async function fetchStakingDataFromSubgraph(
 
   let contracts: SubgraphStakingContract[] = [];
   try {
-    console.log('here', chainId);
     const contractsRes = await client.request<StakingContractsResponse>(STAKING_CONTRACTS_QUERY, {
       ids,
     });
     contracts = contractsRes.stakingContracts ?? [];
   } catch (err) {
-    console.log('error', chainId, 'addresses', addresses, client);
     console.warn('Subgraph staking contracts request failed:', err);
   }
 
