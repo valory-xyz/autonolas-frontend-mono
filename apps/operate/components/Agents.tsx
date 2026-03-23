@@ -104,7 +104,7 @@ const AgentCard = ({ agent }: { agent: Agent }) => {
         </Paragraph>
 
         {comingSoon ? (
-        <Button block disabled>
+          <Button block disabled>
             Coming soon...
           </Button>
         ) : (
