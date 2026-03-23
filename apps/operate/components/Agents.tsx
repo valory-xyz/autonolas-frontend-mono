@@ -101,7 +101,7 @@ const agents: Agent[] = [
     comingSoon: false,
     availableOn: ['pearl'],
     urls: {
-      learnMore: 'https://olas.network/services/babydegen#modius-agent',
+      learnMore: 'https://olas.network/agents/babydegen#modius-agent',
     },
     imageFilename: 'modius-agent.png',
   },
