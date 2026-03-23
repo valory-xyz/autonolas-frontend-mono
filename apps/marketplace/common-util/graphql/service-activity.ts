@@ -1,5 +1,5 @@
 import { Request, Delivery, FeeUnit } from 'common-util/types';
-import { MARKETPLACE_SUBGRAPH_CLIENTS } from './index';
+import { getActivitySubgraphClient, type ActivitySubgraphChainId } from './index';
 
 type ActivityType = 'Demand' | 'Supply';
 
@@ -238,10 +238,10 @@ export const getServiceActivityFromMarketplaceSubgraph = async ({
   chainId,
   serviceId,
 }: {
-  chainId: keyof typeof MARKETPLACE_SUBGRAPH_CLIENTS;
+  chainId: ActivitySubgraphChainId;
   serviceId: string;
 }) => {
-  const client = MARKETPLACE_SUBGRAPH_CLIENTS[chainId];
+  const client = getActivitySubgraphClient(chainId);
 
   const query = getQueryForServiceActivity({ serviceId });
   const response: Omit<ActivityResponse, 'id'> = await client.request(query);

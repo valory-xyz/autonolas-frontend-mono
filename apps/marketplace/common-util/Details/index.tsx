@@ -19,7 +19,7 @@ import { DetailsTable, DetailsTitle, Header } from './styles';
 import { ActivityDetails } from './ActivityDetails';
 import { useDetails } from './useDetails';
 import { useMetadata } from '../hooks/useMetadata';
-import { isMarketplaceSupportedNetwork } from 'common-util/functions';
+import { isServiceActivitySubgraphSupported } from 'common-util/functions';
 import { NftImage } from './NFTImage';
 import { NA } from 'libs/util-constants/src';
 
@@ -210,7 +210,7 @@ export const Details: FC<DetailsProps> = ({
   };
 
   useEffect(() => {
-    if (!isMarketplaceSupportedNetwork(Number(chainId))) return;
+    if (!isServiceActivitySubgraphSupported(Number(chainId))) return;
 
     const fetchActivity = async () => {
       try {
@@ -244,7 +244,7 @@ export const Details: FC<DetailsProps> = ({
     setIsModalVisible(true);
   }, []);
 
-  const showTabs = isMarketplaceSupportedNetwork(Number(chainId)) && activityRows.length > 0;
+  const showTabs = isServiceActivitySubgraphSupported(Number(chainId)) && activityRows.length > 0;
 
   return (
     <>

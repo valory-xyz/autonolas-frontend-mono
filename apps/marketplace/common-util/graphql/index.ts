@@ -10,11 +10,22 @@ const requestConfig: RequestConfig = {
 };
 
 export const MARKETPLACE_SUBGRAPH_CLIENTS = {
-  10: new GraphQLClient(process.env.NEXT_PUBLIC_OPTIMISM_MARKETPLACE_SUBGRAPH!, requestConfig),
-  100: new GraphQLClient(process.env.NEXT_PUBLIC_GNOSIS_MARKETPLACE_SUBGRAPH!, requestConfig),
-  137: new GraphQLClient(process.env.NEXT_PUBLIC_POLYGON_MARKETPLACE_SUBGRAPH!, requestConfig),
-  8453: new GraphQLClient(process.env.NEXT_PUBLIC_BASE_MARKETPLACE_SUBGRAPH!, requestConfig),
-};
+  1: new GraphQLClient(process.env.NEXT_PUBLIC_ETHEREUM_MARKETPLACE_SUBGRAPH_URL!, requestConfig),
+  10: new GraphQLClient(process.env.NEXT_PUBLIC_OPTIMISM_MARKETPLACE_SUBGRAPH_URL!, requestConfig),
+  100: new GraphQLClient(process.env.NEXT_PUBLIC_GNOSIS_MARKETPLACE_SUBGRAPH_URL!, requestConfig),
+  137: new GraphQLClient(process.env.NEXT_PUBLIC_POLYGON_MARKETPLACE_SUBGRAPH_URL!, requestConfig),
+  8453: new GraphQLClient(process.env.NEXT_PUBLIC_BASE_MARKETPLACE_SUBGRAPH_URL!, requestConfig),
+  42161: new GraphQLClient(
+    process.env.NEXT_PUBLIC_ARBITRUM_MARKETPLACE_SUBGRAPH_URL!,
+    requestConfig,
+  ),
+  42220: new GraphQLClient(process.env.NEXT_PUBLIC_CELO_MARKETPLACE_SUBGRAPH_URL!, requestConfig),
+} as const;
+
+export type ActivitySubgraphChainId = keyof typeof MARKETPLACE_SUBGRAPH_CLIENTS;
+
+export const getActivitySubgraphClient = (chainId: ActivitySubgraphChainId): GraphQLClient =>
+  MARKETPLACE_SUBGRAPH_CLIENTS[chainId];
 
 export const REGISTRY_SUBGRAPH_CLIENTS = {
   1: new GraphQLClient(process.env.NEXT_PUBLIC_ETHEREUM_REGISTRY_SUBGRAPH!, requestConfig),
