@@ -114,8 +114,9 @@ async function fetchRpcData(
 
       const data: Record<string, unknown> = {};
       functionNames.forEach((fn, i) => {
-        if (callResults[i].status === 'fulfilled') {
-          data[fn] = callResults[i].value;
+        const result = callResults[i];
+        if (result.status === 'fulfilled') {
+          data[fn] = result.value;
         }
       });
 
