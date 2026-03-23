@@ -503,10 +503,6 @@ export const useStakingContractsList = () => {
   const cacheMap = useContractCacheMap(nominees);
   const { subgraphMap, isSubgraphLoading } = useSubgraphStakingData(nominees);
 
-  const nonSubgraphNominees = useMemo(
-    () => nominees.filter((n) => !subgraphMap.get(n.account)),
-    [nominees, subgraphMap],
-  );
   const uncachedNominees = useMemo(
     () => nominees.filter((n) => !cacheMap.get(n.account) && !subgraphMap.get(n.account)),
     [nominees, cacheMap, subgraphMap],
@@ -522,9 +518,10 @@ export const useStakingContractsList = () => {
     uncachedNominees,
     'maxNumServices',
   );
-  // Get serviceIds via RPC only for nominees not on subgraph (subgraph has agentIds)
+  // Get serviceIds via RPC for all nominees — the subgraph agentIds field is config
+  // (whitelisted agent types), not the count of currently staked services.
   const { data: serviceIdsList, isFetching: isServiceIdsLoading } = useContractDetails(
-    nonSubgraphNominees,
+    nominees,
     'getServiceIds',
   );
   // Get rewardsPerSecond (only for uncached)
@@ -532,9 +529,10 @@ export const useStakingContractsList = () => {
     uncachedNominees,
     'rewardsPerSecond',
   );
-  // Get available rewards via RPC only for nominees not on subgraph (subgraph has latest checkpoint)
+  // Get available rewards via RPC for all nominees — subgraph checkpoint data is stale and
+  // returns '0' for contracts that have never had a checkpoint called.
   const { data: availableRewardsList, isFetching: isAvailableRewardsLoading } = useContractDetails(
-    nonSubgraphNominees,
+    nominees,
     'availableRewards',
   );
   // Get minStakingDeposit (only for uncached)
@@ -558,12 +556,6 @@ export const useStakingContractsList = () => {
   const { data: tsCheckpoint, isFetching: isTsCheckpointLoading } = useContractDetails(
     nominees,
     'tsCheckpoint',
-  );
-
-  /** Index of each nominee in nonSubgraphNominees (for RPC arrays when not using subgraph). */
-  const nonSubgraphIndexByAccount = useMemo(
-    () => new Map(nonSubgraphNominees.map((n, j) => [n.account, j])),
-    [nonSubgraphNominees],
   );
 
   /** Map account -> config for uncached nominees (used when merging with blob cache). */
@@ -607,11 +599,10 @@ export const useStakingContractsList = () => {
    */
   const contracts = useMemo(() => {
     const nonSubgraphRpcReady =
-      nonSubgraphNominees.length === 0 ||
-      (serviceIdsList != null &&
-        serviceIdsList.length === nonSubgraphNominees.length &&
-        availableRewardsList != null &&
-        availableRewardsList.length === nonSubgraphNominees.length);
+      serviceIdsList != null &&
+      serviceIdsList.length === nominees.length &&
+      availableRewardsList != null &&
+      availableRewardsList.length === nominees.length;
 
     if (
       !nominees.length ||
@@ -631,23 +622,17 @@ export const useStakingContractsList = () => {
     return nominees.map((item, index) => {
       const subgraphRow = subgraphMap.get(item.account);
       const cached = cacheMap.get(item.account);
-      const nonSubIdx = nonSubgraphIndexByAccount.get(item.account);
 
       const maxSlots = subgraphRow
         ? subgraphRow.maxNumServices
         : cached
           ? cached.data.config.maxNumServices
           : (uncachedConfigByAccount.maxNumServices.get(item.account) ?? 0);
-      const servicesLength = subgraphRow
-        ? subgraphRow.filledSlots
-        : nonSubIdx != null
-          ? ((serviceIdsList?.[nonSubIdx] as readonly bigint[] | undefined) ?? []).length
-          : 0;
-      const availableRewardsInWei = subgraphRow
-        ? BigInt(subgraphRow.availableRewards)
-        : nonSubIdx != null
-          ? ((availableRewardsList?.[nonSubIdx] as bigint) ?? 0n)
-          : 0n;
+      const servicesLength = ((serviceIdsList?.[index] as readonly bigint[] | undefined) ?? [])
+        .length;
+      const rpcAvailableRewards = availableRewardsList?.[index] as bigint | null;
+      const availableRewardsInWei =
+        rpcAvailableRewards ?? (subgraphRow ? BigInt(subgraphRow.availableRewards) : 0n);
       const availableSlots =
         availableRewardsInWei > 0n && maxSlots > 0 ? maxSlots - servicesLength : 0;
 
@@ -710,8 +695,6 @@ export const useStakingContractsList = () => {
     nominees,
     cacheMap,
     subgraphMap,
-    nonSubgraphNominees,
-    nonSubgraphIndexByAccount,
     metadata,
     uncachedNominees,
     uncachedConfigByAccount,

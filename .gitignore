@@ -51,3 +51,4 @@ Thumbs.db
 ganache_data
 .unlighthouse
 .swc
+*.tsbuildinfo
