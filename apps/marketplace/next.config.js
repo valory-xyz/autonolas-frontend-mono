@@ -14,10 +14,9 @@ const nextConfig = {
   },
   images: {
     remotePatterns: [
-      {
-        protocol: 'https',
-        hostname: 'gateway.autonolas.tech',
-      },
+      { protocol: 'https', hostname: 'gateway.autonolas.tech' },
+      { protocol: 'https', hostname: 'gateway.pinata.cloud' },
+      { protocol: 'https', hostname: '*.arweave.net' },
     ],
   },
   nx: {
