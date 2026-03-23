@@ -1,4 +1,4 @@
-import { BulbFilled } from '@ant-design/icons';
+import { BulbOutlined } from '@ant-design/icons';
 import { Button, Card, Col, Flex, Row, Typography, Grid } from 'antd';
 import Image from 'next/image';
 import styled from 'styled-components';
@@ -41,47 +41,69 @@ type Agent = {
 const agents: Agent[] = [
   {
     id: 'prediction-agent',
-    name: 'Prediction Agent',
-    description: 'Trades on prediction markets.',
+    name: 'Polystrat',
+    description: 'Trades Polymarket on autopilot while you do something else.',
+    comingSoon: false,
+    availableOn: ['pearl'],
+    urls: {
+      learnMore: 'https://www.pearl.you/polystrat',
+    },
+    imageFilename: 'polystrat.png',
+  },
+  {
+    id: 'omenstrat',
+    name: 'Omenstrat',
+    description: 'Trades Omen prediction markets on autopilot while you do something else.',
     comingSoon: false,
     availableOn: ['pearl', 'quickstart'],
     urls: {
-      learnMore: 'https://olas.network/services/prediction-agents',
+      learnMore: 'https://olas.network/agents/omenstrat',
     },
-    imageFilename: 'prediction-agent.png',
+    imageFilename: 'omenstrat.png',
   },
   {
     id: 'optimus-agent',
-    name: 'Optimus Agent',
-    description: 'Intelligently manages your DeFi assets across the Superchain.',
+    name: 'Optimus',
+    description: 'Intelligently manages your DeFi assets across multiple blockchains.',
     comingSoon: false,
     availableOn: ['pearl', 'quickstart'],
     urls: {
-      learnMore: 'https://olas.network/services/babydegen#optimus-agent',
+      learnMore: 'https://olas.network/agents/babydegen#optimus-agent',
     },
     imageFilename: 'optimus-agent.png',
   },
   {
+    id: 'pettbro',
+    name: 'PettBro by pett.ai',
+    description: 'Cares for and nurtures your digital pet autonomously, even when you’re away.',
+    comingSoon: false,
+    availableOn: ['pearl'],
+    urls: {
+      learnMore: 'https://agent.pett.ai/',
+    },
+    imageFilename: 'pettbro.png',
+  },
+  {
+    id: 'agents.fun-agent',
+    name: 'Agents.fun',
+    description: 'Define your persona and let your AI agent grow your X audience autonomously.',
+    comingSoon: false,
+    availableOn: ['pearl'],
+    urls: {
+      learnMore: 'https://olas.network/agents/agentsfun',
+    },
+    imageFilename: 'agents.fun-agent.png',
+  },
+  {
     id: 'modius-agent',
-    name: 'Modius Agent',
+    name: 'Modius',
     description: 'Manages your portfolio with cutting-edge strategies on Mode network.',
     comingSoon: false,
-    availableOn: ['pearl', 'quickstart'],
+    availableOn: ['pearl'],
     urls: {
       learnMore: 'https://olas.network/services/babydegen#modius-agent',
     },
     imageFilename: 'modius-agent.png',
-  },
-  {
-    id: 'agents.fun-agent',
-    name: 'Agents.fun agent',
-    description: 'Posts to X, creates and interacts with memecoins and other agents.',
-    comingSoon: false,
-    availableOn: ['pearl'],
-    urls: {
-      learnMore: 'https://olas.network/services/agentsfun',
-    },
-    imageFilename: 'agents.fun-agent.png',
   },
 ];
 
@@ -149,7 +171,7 @@ const WantPeopleToRunYourAgent = () => (
     />
     <div>
       <Title className="mt-0 mb-8" level={4}>
-        Want people to run <b>your</b> agent?
+        Want people to run your agent?
       </Title>
       <Paragraph type="secondary" className="mb-24">
         Build an autonomous service using Open Autonomy. Then, simply submit a pull request
@@ -157,7 +179,7 @@ const WantPeopleToRunYourAgent = () => (
       </Paragraph>
       <Button
         type="default"
-        icon={<BulbFilled />}
+        icon={<BulbOutlined />}
         href="https://olas.network/accelerator"
         target="_blank"
         rel="noopener noreferrer"
