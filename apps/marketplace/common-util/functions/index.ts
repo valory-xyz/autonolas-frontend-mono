@@ -236,7 +236,7 @@ export const isValidSolanaPublicKey = (publicKey: PublicKey) => {
 
 /** Legacy marketplace subgraph chains only */
 export const isMarketplaceSupportedNetwork = (chainId: number) =>
-  MARKETPLACE_SUPPORTED_CHAIN_IDS.includes(chainId);
+  (MARKETPLACE_SUPPORTED_CHAIN_IDS as readonly number[]).includes(chainId);
 
 /** Chains with mech / marketplace activity subgraph support */
 export const isServiceActivitySubgraphSupported = (chainId: number) =>
