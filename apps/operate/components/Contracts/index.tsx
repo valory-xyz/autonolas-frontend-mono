@@ -241,7 +241,8 @@ export const ContractsPage = ({ initialContracts }: ContractsPageProps) => {
                 <a href={OPERATE_REPO_URL} target="_blank" rel="noreferrer">
                   Open a PR on GitHub {UNICODE_SYMBOLS.EXTERNAL_LINK}
                 </a>{' '}
-                and add it.
+                and add it. Developers can also use the{' '}
+                <code>/enable-contract</code> command in Claude Code for a guided setup.
               </>
             }
             className="mb-16"
