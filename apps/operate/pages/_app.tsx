@@ -7,7 +7,7 @@ import { Web3ModalProvider } from 'context/Web3ModalProvider';
 import { Layout } from '../components/Layout';
 import { Meta } from 'components/Meta';
 
-const OperateApp = ({ Component, ...rest }: AppProps) => {
+const OperateApp = ({ Component, pageProps }: AppProps) => {
   return (
     <>
       <GlobalStyles />
@@ -16,7 +16,7 @@ const OperateApp = ({ Component, ...rest }: AppProps) => {
       <AutonolasThemeProvider>
         <Web3ModalProvider>
           <Layout>
-            <Component />
+            <Component {...pageProps} />
           </Layout>
         </Web3ModalProvider>
       </AutonolasThemeProvider>

@@ -168,8 +168,18 @@ const getTableColumns = (): ColumnsType<StakingContract> => [
   },
 ];
 
-export const ContractsPage = () => {
-  const { contracts, isLoading } = useStakingContractsList();
+type ContractsPageProps = {
+  initialContracts?: StakingContract[];
+};
+
+export const ContractsPage = ({ initialContracts }: ContractsPageProps) => {
+  const { contracts: hookContracts, isLoading } = useStakingContractsList();
+
+  // Use SSR data as fallback while hooks are loading
+  const contracts = useMemo(
+    () => (hookContracts.length > 0 ? hookContracts : (initialContracts ?? [])),
+    [hookContracts, initialContracts],
+  );
   const [activeTab, setActiveTab] = useState<string>(TAB_LIVE);
   const [searchQuery, setSearchQuery] = useState('');
   const [chainFilter, setChainFilter] = useState<string>('all');
@@ -281,7 +291,7 @@ export const ContractsPage = () => {
             rowKey={(record) => `${record.chainId}-${record.address}`}
             columns={columns}
             pagination={false}
-            loading={isLoading}
+            loading={isLoading && contracts.length === 0}
             dataSource={filteredContracts}
             expandable={{
               expandIcon: ({ expanded, onExpand, record }) => {

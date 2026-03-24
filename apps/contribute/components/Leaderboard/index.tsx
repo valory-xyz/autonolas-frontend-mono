@@ -1,11 +1,16 @@
 import { Alert, Col, Row } from 'antd';
 
 import { useAppSelector } from 'store/setup';
+import { LeaderboardUser } from 'store/types';
 
 import { Campaigns } from './Campaigns';
 import { LeaderboardTable } from './LeaderboardTable';
 
-export const Leaderboard = () => {
+type LeaderboardProps = {
+  initialLeaderboard?: LeaderboardUser[];
+};
+
+export const Leaderboard = ({ initialLeaderboard }: LeaderboardProps) => {
   const isVerified = useAppSelector((state) => state.setup.isVerified);
 
   return (
@@ -19,7 +24,7 @@ export const Leaderboard = () => {
             message="Contribute staking is temporarily unavailable. New sign-ups are not available at this time."
           />
         )}
-        <LeaderboardTable />
+        <LeaderboardTable initialLeaderboard={initialLeaderboard} />
       </Col>
       <Col xs={24} lg={10}>
         <Campaigns />
