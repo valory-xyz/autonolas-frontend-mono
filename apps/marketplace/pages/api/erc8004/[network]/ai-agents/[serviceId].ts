@@ -7,7 +7,7 @@ import { ADDRESSES } from 'common-util/Contracts/addresses';
 import { getIpfsResponse } from 'common-util/functions/ipfs';
 import { generateName } from 'common-util/functions/agentName';
 import { isMarketplaceSupportedNetwork } from 'common-util/functions';
-import type { ActivitySubgraphChainId } from 'common-util/graphql';
+import type { MarketplaceSubgraphChainId } from 'common-util/graphql';
 import { getServicesFromMarketplaceSubgraph } from 'common-util/graphql/services';
 
 import { CACHE_DURATION, GATEWAY_URL } from 'util/constants';
@@ -116,7 +116,7 @@ export default async function handler(
       getServiceFromRegistrySafe(chainId, serviceId),
       hasMarketplaceSubgraph
         ? getServicesFromMarketplaceSubgraph({
-            chainId: chainId as ActivitySubgraphChainId,
+            chainId: chainId as MarketplaceSubgraphChainId,
             serviceIds: [serviceId],
           })
         : Promise.resolve(null),

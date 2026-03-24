@@ -3,7 +3,7 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 import { ADDRESSES } from 'common-util/Contracts/addresses';
 import { getIpfsCIDFromHash, getIpfsResponse } from 'common-util/functions/ipfs';
 import { isMarketplaceSupportedNetwork } from 'common-util/functions';
-import type { ActivitySubgraphChainId } from 'common-util/graphql';
+import type { MarketplaceSubgraphChainId } from 'common-util/graphql';
 import { getServicesFromMarketplaceSubgraph } from 'common-util/graphql/services';
 
 import {
@@ -158,9 +158,9 @@ export default async function handler(
       return res.status(200).json(cached);
     }
 
-    const activitySubgraphChainId = chainId as ActivitySubgraphChainId;
+    const marketplaceSubgraphChainId = chainId as MarketplaceSubgraphChainId;
     const servicesFromMarketplace = await getServicesFromMarketplaceSubgraph({
-      chainId: activitySubgraphChainId,
+      chainId: marketplaceSubgraphChainId,
       serviceIds: [serviceId],
     });
 

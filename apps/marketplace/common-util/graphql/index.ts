@@ -22,10 +22,7 @@ export const MARKETPLACE_SUBGRAPH_CLIENTS = {
   42220: new GraphQLClient(process.env.NEXT_PUBLIC_CELO_MARKETPLACE_SUBGRAPH_URL!, requestConfig),
 } as const;
 
-export type ActivitySubgraphChainId = keyof typeof MARKETPLACE_SUBGRAPH_CLIENTS;
-
-export const getActivitySubgraphClient = (chainId: ActivitySubgraphChainId): GraphQLClient =>
-  MARKETPLACE_SUBGRAPH_CLIENTS[chainId];
+export type MarketplaceSubgraphChainId = keyof typeof MARKETPLACE_SUBGRAPH_CLIENTS;
 
 export const REGISTRY_SUBGRAPH_CLIENTS = {
   1: new GraphQLClient(process.env.NEXT_PUBLIC_ETHEREUM_REGISTRY_SUBGRAPH!, requestConfig),

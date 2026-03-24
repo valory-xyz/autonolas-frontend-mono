@@ -1,5 +1,5 @@
 import { Service } from 'common-util/types';
-import { getActivitySubgraphClient, type ActivitySubgraphChainId } from './index';
+import { MARKETPLACE_SUBGRAPH_CLIENTS, type MarketplaceSubgraphChainId } from './index';
 
 type ServiceDetails = {
   id: string;
@@ -43,10 +43,10 @@ export const getServicesFromMarketplaceSubgraph = async ({
   chainId,
   serviceIds,
 }: {
-  chainId: ActivitySubgraphChainId;
+  chainId: MarketplaceSubgraphChainId;
   serviceIds: string[];
 }): Promise<Service[]> => {
-  const client = getActivitySubgraphClient(chainId);
+  const client = MARKETPLACE_SUBGRAPH_CLIENTS[chainId];
 
   const query = getQueryForServiceDetails({ serviceIds });
   const response = await client.request<GraphQLResponse<ServiceDetails>>(query);

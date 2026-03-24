@@ -3,7 +3,7 @@ import { getServicesFromMarketplaceSubgraph } from 'common-util/graphql/services
 
 import { CACHE_DURATION, MARKETPLACE_SUPPORTED_CHAIN_IDS } from '../../util/constants';
 import { isMarketplaceSupportedNetwork } from 'common-util/functions';
-import type { ActivitySubgraphChainId } from 'common-util/graphql';
+import type { MarketplaceSubgraphChainId } from 'common-util/graphql';
 
 type RequestQuery = {
   chainId: string;
@@ -35,7 +35,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     const services = await getServicesFromMarketplaceSubgraph({
-      chainId: Number(chainId) as ActivitySubgraphChainId,
+      chainId: Number(chainId) as MarketplaceSubgraphChainId,
       serviceIds: parsedServiceIds,
     });
 

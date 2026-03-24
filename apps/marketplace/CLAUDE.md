@@ -104,7 +104,7 @@ Tracks **requests** (demand) and **deliveries** (supply) for mech services.
 - **Supported chains:** use `isMarketplaceSupportedNetwork()` and `MARKETPLACE_SUPPORTED_CHAIN_IDS` in `util/constants.ts` (all chains with a marketplace activity subgraph URL).
 
 **Key files:**
-- `common-util/graphql/index.ts` – `MARKETPLACE_SUBGRAPH_CLIENTS`, `getActivitySubgraphClient`
+- `common-util/graphql/index.ts` – `MARKETPLACE_SUBGRAPH_CLIENTS`, `MarketplaceSubgraphChainId`
 - `common-util/graphql/service-activity.ts` – Activity queries
 - `common-util/graphql/services.ts` – Service list queries
 - `common-util/Details/ActivityDetails.tsx` – Activity detail modal
