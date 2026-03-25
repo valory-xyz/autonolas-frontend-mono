@@ -208,6 +208,10 @@ export const STAKING_CONTRACT_DETAILS: Record<Address, StakingContractDetailsInf
   '0x00000000000000000000000099fe6b5c9980fc3a44b1dc32a76db6adfcf4c75e': {
     availableOn: ['quickstart'],
   },
+  // Quickstart Beta Mech MarketPlace - Expert 13
+  '0x0000000000000000000000001f81cf353051daa8919d1777c58b667025794ddc': {
+    availableOn: ['quickstart'],
+  },
   // Pearl Beta Mech MarketPlace I
   '0x000000000000000000000000ab10188207ea030555f53c8a84339a92f473aa5e': {
     availableOn: ['pearl'],
