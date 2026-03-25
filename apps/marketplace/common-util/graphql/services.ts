@@ -1,5 +1,5 @@
 import { Service } from 'common-util/types';
-import { MARKETPLACE_SUBGRAPH_CLIENTS } from './index';
+import { MARKETPLACE_SUBGRAPH_CLIENTS, type MarketplaceSubgraphChainId } from './index';
 
 type ServiceDetails = {
   id: string;
@@ -43,7 +43,7 @@ export const getServicesFromMarketplaceSubgraph = async ({
   chainId,
   serviceIds,
 }: {
-  chainId: keyof typeof MARKETPLACE_SUBGRAPH_CLIENTS;
+  chainId: MarketplaceSubgraphChainId;
   serviceIds: string[];
 }): Promise<Service[]> => {
   const client = MARKETPLACE_SUBGRAPH_CLIENTS[chainId];

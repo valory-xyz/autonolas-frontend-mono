@@ -232,4 +232,4 @@ export const isValidSolanaPublicKey = (publicKey: PublicKey) => {
 };
 
 export const isMarketplaceSupportedNetwork = (chainId: number) =>
-  MARKETPLACE_SUPPORTED_CHAIN_IDS.includes(chainId);
+  (MARKETPLACE_SUPPORTED_CHAIN_IDS as readonly number[]).includes(chainId);

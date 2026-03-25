@@ -1,8 +1,8 @@
 import { getServiceActivityFromMarketplaceSubgraph } from 'common-util/graphql/service-activity';
 import { NextApiRequest, NextApiResponse } from 'next';
-import { CACHE_DURATION } from '../../util/constants';
+import { CACHE_DURATION, MARKETPLACE_SUPPORTED_CHAIN_IDS } from '../../util/constants';
 import { isMarketplaceSupportedNetwork } from 'common-util/functions';
-import { MARKETPLACE_SUBGRAPH_CLIENTS } from 'common-util/graphql';
+import type { MarketplaceSubgraphChainId } from 'common-util/graphql';
 
 type RequestQuery = {
   chainId: string;
@@ -26,12 +26,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     if (!isMarketplaceSupportedNetwork(Number(chainId))) {
       return res.status(400).json({
-        error: "Invalid network. Must be 'optimism', 'gnosis', 'polygon', or 'base'",
+        error: `Invalid network. Supported chain IDs: ${MARKETPLACE_SUPPORTED_CHAIN_IDS.join(', ')}`,
       });
     }
 
     const services = await getServiceActivityFromMarketplaceSubgraph({
-      chainId: Number(chainId) as keyof typeof MARKETPLACE_SUBGRAPH_CLIENTS,
+      chainId: Number(chainId) as MarketplaceSubgraphChainId,
       serviceId,
     });
 

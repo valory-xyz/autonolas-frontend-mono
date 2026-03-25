@@ -93,7 +93,7 @@ export const CACHE_DURATION = {
   TWELVE_HOURS: 43200,
 } as const;
 
-export const MARKETPLACE_SUPPORTED_CHAIN_IDS = [10, 100, 137, 8453];
+export const MARKETPLACE_SUPPORTED_CHAIN_IDS = [1, 10, 100, 137, 8453, 42161, 42220] as const;
 
 export const ERC8004_CHAIN_MAPPING = {
   1: 'ethereum',

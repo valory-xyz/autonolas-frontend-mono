@@ -4,7 +4,8 @@ import { IDENTITY_REGISTRY_UPGRADEABLE } from 'libs/util-contracts/src/lib/abiAn
 
 import { ADDRESSES } from 'common-util/Contracts/addresses';
 import { getIpfsCIDFromHash, getIpfsResponse } from 'common-util/functions/ipfs';
-import { MARKETPLACE_SUBGRAPH_CLIENTS } from 'common-util/graphql';
+import { isMarketplaceSupportedNetwork } from 'common-util/functions';
+import type { MarketplaceSubgraphChainId } from 'common-util/graphql';
 import { getServicesFromMarketplaceSubgraph } from 'common-util/graphql/services';
 
 import {
@@ -147,13 +148,9 @@ export default async function handler(
 
     const chainId = unTypedChainId as keyof typeof ADDRESSES;
 
-    if (
-      !MARKETPLACE_SUPPORTED_CHAIN_IDS.includes(
-        chainId as (typeof MARKETPLACE_SUPPORTED_CHAIN_IDS)[number],
-      )
-    ) {
+    if (!isMarketplaceSupportedNetwork(chainId)) {
       return res.status(400).json({
-        error: `Agent cards are not available for network: ${network}. Supported chains: ${MARKETPLACE_SUPPORTED_CHAIN_IDS.join(', ')}`,
+        error: `Agent cards are not available for network: ${network}. Supported chain IDs: ${[...MARKETPLACE_SUPPORTED_CHAIN_IDS].join(', ')}`,
       });
     }
 
@@ -167,10 +164,10 @@ export default async function handler(
       return res.status(200).json(cached);
     }
 
-    const marketplaceChainId = chainId as keyof typeof MARKETPLACE_SUBGRAPH_CLIENTS;
+    const marketplaceSubgraphChainId = chainId as MarketplaceSubgraphChainId;
     const [servicesFromMarketplace, serviceFromRegistry] = await Promise.all([
       getServicesFromMarketplaceSubgraph({
-        chainId: marketplaceChainId,
+        chainId: marketplaceSubgraphChainId,
         serviceIds: [serviceId],
       }),
       getServiceFromRegistrySafe(chainId, serviceId),
