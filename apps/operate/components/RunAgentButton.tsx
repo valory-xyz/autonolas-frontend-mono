@@ -18,7 +18,7 @@ const props = {
   pearl: {
     icon: <Image src={`/images/pearl.svg`} alt="Pearl app" width={18} height={18} />,
     text: 'Pearl',
-    href: 'https://olas.network/pearl#download',
+    href: 'https://www.pearl.you/',
   },
   quickstart: {
     icon: <Image src={`/images/github.svg`} alt="Github" width={18} height={18} />,

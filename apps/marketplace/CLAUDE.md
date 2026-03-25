@@ -19,7 +19,7 @@ Discover, register, deploy, and interact with **mechs** (autonomous AI agents) a
 ## Env / Backends
 
 - **Registry**: `NEXT_PUBLIC_REGISTRY_URL`, `NEXT_PUBLIC_AUTONOLAS_URL`; Safe APIs per chain.
-- **Marketplace subgraphs**: Gnosis (100), Optimism (10), Polygon (137), Base (8453).
+- **Marketplace activity subgraphs** (per chain): `NEXT_PUBLIC_*_MARKETPLACE_SUBGRAPH_URL` for Ethereum (1), Optimism (10), Gnosis (100), Polygon (137), Base (8453), Arbitrum (42161), Celo (42220).
 - **Registry subgraphs**: Ethereum (1), Optimism (10), Gnosis (100), Polygon (137), Base (8453), Mode (34443), Arbitrum (42161), Celo (42220).
 - **Etherscan** API key; **Wallet Project ID**; optional **Solana** (SVM) config.
 - Optional: local registry via Docker (see app README).
@@ -47,8 +47,8 @@ All pages use dynamic `[network]` routing (e.g., `/ethereum/ai-agents`).
 
 | Route | Purpose |
 |-------|---------|
-| `/api/services` | Fetch services from marketplace subgraph |
-| `/api/service-activity` | Fetch mech request/delivery activity |
+| `/api/services` | Fetch services from marketplace subgraph (per chain) |
+| `/api/service-activity` | Fetch mech request/delivery activity from marketplace subgraph |
 | `/api/erc8004/[network]/ai-agents/[serviceId]` | ERC8004 registration metadata |
 | `/api/erc8004/[network]/ai-agents/[serviceId]/agent-card.json` | A2A agent card |
 | `/api/erc8004/[network]/ai-agents/[serviceId]/mcp.json` | MCP server descriptor |
@@ -101,9 +101,10 @@ Tracks **requests** (demand) and **deliveries** (supply) for mech services.
 - **Fee units:** `NATIVE`, `TOKEN` (OLAS), `USDC`, `CREDITS`.
 - **Payment fields:** `feeRaw`, `feeUSD`, `finalFeeUSD`, `feeUnit` (with legacy `payment` fallback).
 - **Service roles:** `Registered`, `Demand`, `Supply`, `Demand & Supply` – based on totalRequests/totalDeliveries.
-- **Marketplace subgraphs** only on chains 10, 100, 137, 8453.
+- **Supported chains:** use `isMarketplaceSupportedNetwork()` and `MARKETPLACE_SUPPORTED_CHAIN_IDS` in `util/constants.ts` (all chains with a marketplace activity subgraph URL).
 
 **Key files:**
+- `common-util/graphql/index.ts` – `MARKETPLACE_SUBGRAPH_CLIENTS`, `MarketplaceSubgraphChainId`
 - `common-util/graphql/service-activity.ts` – Activity queries
 - `common-util/graphql/services.ts` – Service list queries
 - `common-util/Details/ActivityDetails.tsx` – Activity detail modal
@@ -191,5 +192,5 @@ Tracks **requests** (demand) and **deliveries** (supply) for mech services.
 - Multi-chain: always consider which chain and which subgraph/registry URL a feature uses.
 - Some code is still `.jsx`; follow existing patterns when editing those files.
 - L1-only features (agents, components) must check `isL1Network()`.
-- Marketplace activity features only available on chains with marketplace subgraphs (10, 100, 137, 8453).
+- Marketplace activity features available on chains in `MARKETPLACE_SUPPORTED_CHAIN_IDS`.
 - ERC8004 endpoints are server-side API routes; they fetch from registry subgraph + IPFS.
