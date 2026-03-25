@@ -175,11 +175,13 @@ export async function fetchOperateContracts(): Promise<StakingContract[]> {
   const uncachedNominees = nominees.filter(
     (n) => !subgraphMap.has(n.account) && !cacheMap.has(n.account),
   );
-  const nonSubgraphNominees = nominees.filter((n) => !subgraphMap.has(n.account));
 
   // Fetch RPC data and block timestamps in parallel
+  // getServiceIds and availableRewards are fetched for ALL nominees because
+  // subgraph agentIds is config (whitelisted agent types), not staked service count,
+  // and subgraph checkpoint availableRewards can be stale or '0'.
   const uniqueChainIds = [...new Set(nominees.map((n) => Number(n.chainId)))];
-  const [uncachedRpc, nonSubRpc, blockTimestamps] = await Promise.all([
+  const [uncachedRpc, allNomineesRpc, blockTimestamps] = await Promise.all([
     fetchRpcData(uncachedNominees, [
       'maxNumServices',
       'rewardsPerSecond',
@@ -188,7 +190,7 @@ export async function fetchOperateContracts(): Promise<StakingContract[]> {
       'livenessPeriod',
       'metadataHash',
     ]),
-    fetchRpcData(nonSubgraphNominees, ['getServiceIds', 'availableRewards']),
+    fetchRpcData(nominees, ['getServiceIds', 'availableRewards']),
     fetchBlockTimestamps(uniqueChainIds),
   ]);
 
@@ -199,7 +201,7 @@ export async function fetchOperateContracts(): Promise<StakingContract[]> {
     const subgraphRow = subgraphMap.get(item.account);
     const cached = cacheMap.get(item.account);
     const uncachedData = uncachedRpc.get(item.account) ?? {};
-    const nonSubData = nonSubRpc.get(item.account) ?? {};
+    const allNomineesData = allNomineesRpc.get(item.account) ?? {};
     const allData = allRpc.get(item.account) ?? {};
 
     // Max slots
@@ -209,15 +211,14 @@ export async function fetchOperateContracts(): Promise<StakingContract[]> {
         ? cached.config.maxNumServices
         : Number(uncachedData.maxNumServices ?? 0);
 
-    // Filled slots
-    const servicesLength = subgraphRow
-      ? subgraphRow.filledSlots
-      : ((nonSubData.getServiceIds as readonly bigint[] | undefined) ?? []).length;
+    // Filled slots — always from RPC (subgraph agentIds is config, not staked count)
+    const servicesLength = ((allNomineesData.getServiceIds as readonly bigint[] | undefined) ?? [])
+      .length;
 
-    // Available rewards
-    const availableRewardsInWei = subgraphRow
-      ? BigInt(subgraphRow.availableRewards)
-      : ((nonSubData.availableRewards as bigint) ?? 0n);
+    // Available rewards — prefer RPC, fallback to subgraph
+    const rpcAvailableRewards = allNomineesData.availableRewards as bigint | undefined;
+    const availableRewardsInWei =
+      rpcAvailableRewards ?? (subgraphRow ? BigInt(subgraphRow.availableRewards) : 0n);
 
     const availableSlots =
       availableRewardsInWei > 0n && maxSlots > 0 ? maxSlots - servicesLength : 0;
