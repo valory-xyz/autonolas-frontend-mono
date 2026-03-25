@@ -1,20 +1,18 @@
 import { Button, Card, Skeleton, Typography } from 'antd';
 import isNumber from 'lodash/isNumber';
 import { useState } from 'react';
+import styled from 'styled-components';
 import { useAccount } from 'wagmi';
 
 import { NA } from 'libs/util-constants/src';
-import { getFullFormattedDate } from 'common-util/functions/time';
-
 import { notifyError, notifySuccess } from 'libs/util-functions/src';
 
 import { checkpointRequest } from 'common-util/functions';
-import { EpochData } from 'common-util/functions/fetchEpochData';
+import { getFullFormattedDate } from 'common-util/functions/time';
 
-import { useThresholdData } from '../Donate/hooks';
 import { ClaimStakingIncentives } from '../Donate/ClaimStakingIncentives';
+import { useThresholdData } from '../Donate/hooks';
 import { EpochCheckpointRow, EpochStatus } from './styles';
-import styled from 'styled-components';
 
 const { Title, Paragraph, Text } = Typography;
 
@@ -25,28 +23,18 @@ const StyledMain = styled.main`
   margin: 0 auto;
 `;
 
-type EpochPageProps = {
-  initialEpochData?: EpochData | null;
-};
-
-export const EpochPage = ({ initialEpochData }: EpochPageProps) => {
+export const EpochPage = () => {
   const { address: account } = useAccount();
   const [isCheckpointLoading, setIsCheckpointLoading] = useState(false);
 
   const {
     isDataLoading,
     refetchData,
-    epochCounter: hookEpochCounter,
-    prevEpochEndTime: hookPrevEpochEndTime,
-    epochLength: hookEpochLength,
-    nextEpochEndTime: hookNextEpochEndTime,
+    epochCounter,
+    prevEpochEndTime,
+    epochLength,
+    nextEpochEndTime,
   } = useThresholdData();
-
-  // Use SSR data as fallback while hooks are loading
-  const epochCounter = hookEpochCounter ?? initialEpochData?.epochCounter;
-  const prevEpochEndTime = hookPrevEpochEndTime ?? initialEpochData?.prevEpochEndTime;
-  const epochLength = hookEpochLength ?? initialEpochData?.epochLength;
-  const nextEpochEndTime = hookNextEpochEndTime ?? initialEpochData?.nextEpochEndTime;
 
   const onCheckpoint = async () => {
     if (!account) return;
@@ -95,7 +83,7 @@ export const EpochPage = ({ initialEpochData }: EpochPageProps) => {
         {epochStatusList.map(({ text, value }, index) => (
           <EpochStatus key={`epoch-section-${index}`}>
             <Title level={5}>{`${text}:`}</Title>
-            {isDataLoading && !initialEpochData ? (
+            {isDataLoading ? (
               <Skeleton.Input size="small" active />
             ) : (
               <Paragraph>{value}</Paragraph>
