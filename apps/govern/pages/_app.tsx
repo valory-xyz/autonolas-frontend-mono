@@ -9,12 +9,11 @@ import { Meta } from 'components/Meta';
 import { Web3ModalProvider } from 'context/Web3ModalProvider';
 
 import { Layout } from '../components/Layout';
-import { useFetchStakingContractsList, useFetchUserVotes } from '../hooks';
+import { useFetchStakingContractsList } from '../hooks';
 import { wrapper } from '../store';
 
 const DataProvider: FC<PropsWithChildren> = ({ children }) => {
   useFetchStakingContractsList();
-  useFetchUserVotes();
 
   return <>{children}</>;
 };

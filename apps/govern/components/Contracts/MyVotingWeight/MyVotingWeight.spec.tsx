@@ -11,6 +11,11 @@ jest.mock('wagmi', () => ({
     isFetching: false,
     refetch: jest.fn(),
   }),
+  useReadContracts: jest.fn().mockReturnValue({
+    data: undefined,
+    isFetching: false,
+    refetch: jest.fn(),
+  }),
 }));
 jest.mock('hooks/index', () => ({ useVotingPower: jest.fn().mockReturnValue({ data: '75.05' }) }));
 jest.mock('store/index', () => ({

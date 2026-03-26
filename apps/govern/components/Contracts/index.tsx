@@ -3,7 +3,9 @@ import { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { Allocation, StakingContract } from 'types';
 
-import { useAppSelector } from 'store/index';
+import { useFetchUserVotes } from 'hooks/useFetchUserVotes';
+import { setStakingContracts } from 'store/govern';
+import { useAppDispatch, useAppSelector } from 'store/index';
 
 import { ContractsList } from './ContractsList';
 import { MyVotingWeight } from './MyVotingWeight/MyVotingWeight';
@@ -14,8 +16,23 @@ const StyledMain = styled.main`
   margin: 0 auto;
 `;
 
-export const ContractsPage = () => {
-  const { userVotes, isUserVotesLoading } = useAppSelector((state) => state.govern);
+type ContractsPageProps = {
+  initialContracts?: StakingContract[];
+};
+
+export const ContractsPage = ({ initialContracts }: ContractsPageProps) => {
+  const dispatch = useAppDispatch();
+  useFetchUserVotes();
+  const { userVotes, isUserVotesLoading, stakingContracts } = useAppSelector(
+    (state) => state.govern,
+  );
+
+  // Pre-populate Redux store with ISR data if store is empty
+  useEffect(() => {
+    if (initialContracts && initialContracts.length > 0 && stakingContracts.length === 0) {
+      dispatch(setStakingContracts(initialContracts));
+    }
+  }, [initialContracts, stakingContracts.length, dispatch]);
 
   const [isUpdating, setIsUpdating] = useState(false);
   const [allocations, setAllocations] = useState<Allocation[]>([]);
