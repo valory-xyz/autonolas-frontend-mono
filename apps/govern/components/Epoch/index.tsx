@@ -70,7 +70,9 @@ export const EpochPage = ({ initialEpochData }: EpochPageProps) => {
     {
       text: 'Earliest possible expected end time',
       value: hasMounted
-        ? (nextEpochEndTime ? getFullFormattedDate(nextEpochEndTime * 1000) : NA)
+        ? nextEpochEndTime
+          ? getFullFormattedDate(nextEpochEndTime * 1000)
+          : NA
         : null,
     },
     {
@@ -80,7 +82,9 @@ export const EpochPage = ({ initialEpochData }: EpochPageProps) => {
     {
       text: 'Previous epoch end time',
       value: hasMounted
-        ? (prevEpochEndTime ? getFullFormattedDate(prevEpochEndTime * 1000) : NA)
+        ? prevEpochEndTime
+          ? getFullFormattedDate(prevEpochEndTime * 1000)
+          : NA
         : null,
     },
     {

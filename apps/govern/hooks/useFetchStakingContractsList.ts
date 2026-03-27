@@ -17,7 +17,7 @@ import { TIME_SUM_KEY } from 'common-util/constants/scopeKeys';
 import { WEEK_IN_SECONDS } from 'common-util/constants/time';
 import { useNomineesWeights } from 'hooks/useNomineesWeights';
 import { setStakingContracts } from 'store/govern';
-import { useAppDispatch, useAppSelector } from 'store/index';
+import { useAppDispatch } from 'store/index';
 
 type WeightsMap = Record<Address, { current: Weight; next: Weight }>;
 
