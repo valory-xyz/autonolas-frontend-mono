@@ -7,32 +7,34 @@ import type {
 } from '../types/achievement';
 import { ACHIEVEMENTS_LOOKUP_PREFIX } from '../constants/achievement';
 
-const generateLookupKey = (params: AchievementQueryParams): string => `${params.id}`;
+// New per-entry path: achievements-lookup/{agent}/{type}/{id}.json
+const getEntryFileName = (agent: string, type: string, id: string): string =>
+  `${ACHIEVEMENTS_LOOKUP_PREFIX}/${agent}/${type}/${id}.json`;
 
-const getFileName = (agent: string, type: string): string =>
+// Legacy monolithic path: achievements-lookup/{agent}/{type}.json
+const getLegacyFileName = (agent: string, type: string): string =>
   `${ACHIEVEMENTS_LOOKUP_PREFIX}/${agent}/${type}.json`;
 
-const getAchievementsLookupJson = async (
+const getLegacyLookupJson = async (
   agent: string,
   type: string,
 ): Promise<AchievementsLookupJson> => {
   try {
-    const fileName = getFileName(agent, type);
+    const fileName = getLegacyFileName(agent, type);
     const { blobs } = await list({ prefix: fileName });
 
     if (blobs.length === 0) return {};
 
-    const blobUrl = blobs[0].url;
-    const response = await fetch(blobUrl);
+    const response = await fetch(blobs[0].url);
 
     if (!response.ok) {
-      console.warn(`Failed to fetch achievements lookup json for ${agent}/${type}`);
+      console.warn(`Failed to fetch legacy lookup json for ${agent}/${type}`);
       return {};
     }
 
     return (await response.json()) as AchievementsLookupJson;
   } catch (error) {
-    console.error(`Error fetching achievements lookup json for ${agent}/${type}:`, error);
+    console.error(`Error fetching legacy lookup json for ${agent}/${type}:`, error);
     return {};
   }
 };
@@ -40,22 +42,32 @@ const getAchievementsLookupJson = async (
 export const getLookupEntry = async (
   params: AchievementQueryParams,
 ): Promise<LookupEntry | null> => {
-  const json = await getAchievementsLookupJson(params.agent, params.type);
-  const key = generateLookupKey(params);
-  return json[key] || null;
+  // Try new per-entry file first
+  try {
+    const entryPath = getEntryFileName(params.agent, params.type, params.id);
+    const { blobs } = await list({ prefix: entryPath, limit: 1 });
+
+    if (blobs.length > 0) {
+      const response = await fetch(blobs[0].url);
+      if (response.ok) {
+        return (await response.json()) as LookupEntry;
+      }
+    }
+  } catch (error) {
+    console.error(`Error fetching per-entry blob for ${params.id}:`, error);
+  }
+
+  // Fall back to legacy monolithic file
+  const json = await getLegacyLookupJson(params.agent, params.type);
+  return json[params.id] || null;
 };
 
 export const setLookupEntry = async (
   params: AchievementQueryParams,
   entry: LookupEntry,
 ): Promise<void> => {
-  const json = await getAchievementsLookupJson(params.agent, params.type);
-  const key = generateLookupKey(params);
-
-  json[key] = entry;
-
-  const fileName = getFileName(params.agent, params.type);
-  await put(fileName, JSON.stringify(json, null, 2), {
+  const fileName = getEntryFileName(params.agent, params.type, params.id);
+  await put(fileName, JSON.stringify(entry), {
     access: 'public',
     addRandomSuffix: false,
     contentType: 'application/json',
