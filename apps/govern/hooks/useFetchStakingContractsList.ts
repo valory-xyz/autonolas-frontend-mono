@@ -16,10 +16,10 @@ import { useAppDispatch, useAppSelector } from 'store/index';
 type WeightsMap = Record<Address, { current: Weight; next: Weight }>;
 
 /**
- * Fetches pre-computed nominee weights from the server-side API.
- * The API caches results for 5 minutes (s-maxage=300).
+ * Fetches pre-computed nominee weights from the /api/nominees/weights endpoint.
+ * The endpoint caches results for 5 minutes (s-maxage=300).
  */
-function useNomineeWeightsApi(nominees: Nominee[]) {
+function useNomineeWeightsApi(nominees: Nominee[], refetchKey: number) {
   const [weights, setWeights] = useState<WeightsMap | null>(null);
   const [isLoaded, setIsLoaded] = useState(false);
   const nomineeKey = useMemo(
@@ -57,7 +57,7 @@ function useNomineeWeightsApi(nominees: Nominee[]) {
     return () => {
       cancelled = true;
     };
-  }, [nomineeKey, nominees]);
+  }, [nomineeKey, nominees, refetchKey]);
 
   return { weights, isLoaded };
 }
@@ -143,8 +143,12 @@ export const useFetchStakingContractsList = () => {
 
   const { data: nominees } = useNominees();
 
-  // Fetch weights from server-side API (cached, 0 client RPC calls)
-  const { weights, isLoaded: isWeightsLoaded } = useNomineeWeightsApi(nominees || []);
+  // Pass stakingContracts.length so that when Redux is cleared after a vote
+  // (clearState resets to []), the weights are re-fetched from the API.
+  const { weights, isLoaded: isWeightsLoaded } = useNomineeWeightsApi(
+    nominees || [],
+    stakingContracts.length,
+  );
 
   // Fetch metadata from blob (write-through: miss → RPC → blob → return)
   const { cacheMap, isLoaded: isCacheLoaded } = useContractCacheMap(nominees || []);
@@ -159,7 +163,6 @@ export const useFetchStakingContractsList = () => {
 
   useEffect(() => {
     if (!nominees || !isWeightsLoaded || !weights || !isCacheLoaded) return;
-    if (stakingContracts.length !== 0) return;
     // If some nominees weren't in blob, wait for IPFS fallback to resolve
     if (uncachedNominees.length > 0 && fallbackMetadata == null) return;
 
@@ -195,7 +198,6 @@ export const useFetchStakingContractsList = () => {
     fallbackMetadata,
     isCacheLoaded,
     nominees,
-    stakingContracts.length,
     uncachedNominees.length,
   ]);
 };
