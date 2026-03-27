@@ -1,66 +1,25 @@
 import { useEffect, useMemo, useState } from 'react';
 import { GovernContractCacheSnapshot, Nominee, StakingContract, Weight } from 'types';
 import { Address } from 'viem';
+import { mainnet } from 'viem/chains';
+import { useReadContract } from 'wagmi';
 
 import { useNominees, useNomineesMetadata } from 'libs/common-contract-functions/src';
 import { BLACKLISTED_STAKING_ADDRESSES } from 'libs/util-constants/src';
+import { VOTE_WEIGHTING } from 'libs/util-contracts/src/lib/abiAndAddresses';
 import {
   areAddressesEqual,
   getAddressFromBytes32,
   getBytes32FromAddress,
 } from 'libs/util-functions/src';
 
+import { TIME_SUM_KEY } from 'common-util/constants/scopeKeys';
+import { WEEK_IN_SECONDS } from 'common-util/constants/time';
+import { useNomineesWeights } from 'hooks/useNomineesWeights';
 import { setStakingContracts } from 'store/govern';
 import { useAppDispatch, useAppSelector } from 'store/index';
 
 type WeightsMap = Record<Address, { current: Weight; next: Weight }>;
-
-/**
- * Fetches pre-computed nominee weights from the /api/nominees/weights endpoint.
- * The endpoint caches results for 5 minutes (s-maxage=300).
- */
-function useNomineeWeightsApi(nominees: Nominee[], refetchKey: number) {
-  const [weights, setWeights] = useState<WeightsMap | null>(null);
-  const [isLoaded, setIsLoaded] = useState(false);
-  const nomineeKey = useMemo(
-    () => nominees.map((n) => `${n.chainId}:${n.account}`).join(','),
-    [nominees],
-  );
-
-  useEffect(() => {
-    if (nominees.length === 0) {
-      setWeights(null);
-      setIsLoaded(true);
-      return;
-    }
-
-    setIsLoaded(false);
-    let cancelled = false;
-
-    const load = async () => {
-      try {
-        const res = await fetch('/api/nominees/weights');
-
-        if (cancelled) return;
-
-        if (res.ok) {
-          const data = (await res.json()) as WeightsMap;
-          if (!cancelled) setWeights(data);
-        }
-      } catch {
-        // Weights will remain null; the UI can show a loading state
-      }
-      if (!cancelled) setIsLoaded(true);
-    };
-
-    load();
-    return () => {
-      cancelled = true;
-    };
-  }, [nomineeKey, nominees, refetchKey]);
-
-  return { weights, isLoaded };
-}
 
 /**
  * Fetches blob cache for all nominees in a single batch request via
@@ -139,16 +98,44 @@ function useContractCacheMap(nominees: Nominee[]) {
 
 export const useFetchStakingContractsList = () => {
   const dispatch = useAppDispatch();
-  const { stakingContracts } = useAppSelector((state) => state.govern);
 
   const { data: nominees } = useNominees();
 
-  // Pass stakingContracts.length so that when Redux is cleared after a vote
-  // (clearState resets to []), the weights are re-fetched from the API.
-  const { weights, isLoaded: isWeightsLoaded } = useNomineeWeightsApi(
-    nominees || [],
-    stakingContracts.length,
-  );
+  // Read timeSum to derive current/next weight timestamps
+  const voteWeightingAddress = (VOTE_WEIGHTING.addresses as Record<number, Address>)[mainnet.id];
+  const { data: timeSumRaw } = useReadContract({
+    address: voteWeightingAddress,
+    abi: VOTE_WEIGHTING.abi,
+    chainId: mainnet.id,
+    functionName: 'timeSum',
+    scopeKey: TIME_SUM_KEY,
+  });
+
+  const { currentTimestamp, nextTimestamp } = useMemo(() => {
+    if (!timeSumRaw) return { currentTimestamp: null, nextTimestamp: null };
+    const timeSum = Number(timeSumRaw);
+    return {
+      currentTimestamp: timeSum * 1000 > Date.now() ? timeSum - WEEK_IN_SECONDS : timeSum,
+      nextTimestamp: timeSum,
+    };
+  }, [timeSumRaw]);
+
+  const { data: currentWeights } = useNomineesWeights(nominees || [], currentTimestamp);
+  const { data: nextWeights } = useNomineesWeights(nominees || [], nextTimestamp);
+
+  // Merge current + next weights into a single map
+  const weights: WeightsMap | null = useMemo(() => {
+    if (!currentWeights || !nextWeights) return null;
+    const defaultWeight: Weight = { percentage: 0, value: 0 };
+    const map: WeightsMap = {};
+    for (const key of Object.keys({ ...currentWeights, ...nextWeights })) {
+      map[key as Address] = {
+        current: currentWeights[key as Address] ?? defaultWeight,
+        next: nextWeights[key as Address] ?? defaultWeight,
+      };
+    }
+    return map;
+  }, [currentWeights, nextWeights]);
 
   // Fetch metadata from blob (write-through: miss → RPC → blob → return)
   const { cacheMap, isLoaded: isCacheLoaded } = useContractCacheMap(nominees || []);
@@ -162,7 +149,7 @@ export const useFetchStakingContractsList = () => {
   const { data: fallbackMetadata } = useNomineesMetadata(uncachedNominees);
 
   useEffect(() => {
-    if (!nominees || !isWeightsLoaded || !weights || !isCacheLoaded) return;
+    if (!nominees || !weights || !isCacheLoaded) return;
     // If some nominees weren't in blob, wait for IPFS fallback to resolve
     if (uncachedNominees.length > 0 && fallbackMetadata == null) return;
 
@@ -193,7 +180,6 @@ export const useFetchStakingContractsList = () => {
   }, [
     cacheMap,
     weights,
-    isWeightsLoaded,
     dispatch,
     fallbackMetadata,
     isCacheLoaded,
