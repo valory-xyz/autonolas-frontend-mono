@@ -1,6 +1,6 @@
 import { Button, Card, Skeleton, Typography } from 'antd';
 import isNumber from 'lodash/isNumber';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { useAccount } from 'wagmi';
 
@@ -31,6 +31,9 @@ type EpochPageProps = {
 export const EpochPage = ({ initialEpochData }: EpochPageProps) => {
   const { address: account } = useAccount();
   const [isCheckpointLoading, setIsCheckpointLoading] = useState(false);
+  const [hasMounted, setHasMounted] = useState(false);
+
+  useEffect(() => setHasMounted(true), []);
 
   const {
     isDataLoading,
@@ -66,7 +69,9 @@ export const EpochPage = ({ initialEpochData }: EpochPageProps) => {
   const epochStatusList = [
     {
       text: 'Earliest possible expected end time',
-      value: nextEpochEndTime ? getFullFormattedDate(nextEpochEndTime * 1000) : NA,
+      value: hasMounted
+        ? (nextEpochEndTime ? getFullFormattedDate(nextEpochEndTime * 1000) : NA)
+        : null,
     },
     {
       text: 'Epoch length',
@@ -74,7 +79,9 @@ export const EpochPage = ({ initialEpochData }: EpochPageProps) => {
     },
     {
       text: 'Previous epoch end time',
-      value: prevEpochEndTime ? getFullFormattedDate(prevEpochEndTime * 1000) : NA,
+      value: hasMounted
+        ? (prevEpochEndTime ? getFullFormattedDate(prevEpochEndTime * 1000) : NA)
+        : null,
     },
     {
       text: 'Epoch counter',
@@ -94,7 +101,7 @@ export const EpochPage = ({ initialEpochData }: EpochPageProps) => {
         {epochStatusList.map(({ text, value }, index) => (
           <EpochStatus key={`epoch-section-${index}`}>
             <Title level={5}>{`${text}:`}</Title>
-            {isDataLoading && !initialEpochData ? (
+            {(isDataLoading && !initialEpochData) || value === null ? (
               <Skeleton.Input size="small" active />
             ) : (
               <Paragraph>{value}</Paragraph>
