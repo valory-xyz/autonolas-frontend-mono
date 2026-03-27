@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { GovernContractCacheSnapshot, Nominee, StakingContract } from 'types';
+import { GovernContractCacheSnapshot, Nominee, StakingContract, Weight } from 'types';
 import { Address } from 'viem';
 import { mainnet } from 'viem/chains';
 import { useReadContract } from 'wagmi';
@@ -13,24 +13,20 @@ import {
   getBytes32FromAddress,
 } from 'libs/util-functions/src';
 
-import { NEXT_RELATIVE_WEIGHTS_KEY, TIME_SUM_KEY } from 'common-util/constants/scopeKeys';
+import { TIME_SUM_KEY } from 'common-util/constants/scopeKeys';
 import { WEEK_IN_SECONDS } from 'common-util/constants/time';
+import { useNomineesWeights } from 'hooks/useNomineesWeights';
 import { setStakingContracts } from 'store/govern';
-import { useAppDispatch, useAppSelector } from 'store/index';
+import { useAppDispatch } from 'store/index';
 
-import { useNomineesWeights } from './useNomineesWeights';
-
-const getCurrentWeightTimestamp = (timeSum: number | undefined) => {
-  if (!timeSum) return null;
-  if (timeSum * 1000 > Date.now()) return timeSum - WEEK_IN_SECONDS;
-  return timeSum;
-};
+type WeightsMap = Record<Address, { current: Weight; next: Weight }>;
 
 /**
- * Fetches blob cache for each nominee via the write-through API route.
+ * Fetches blob cache for all nominees in a single batch request via
+ * the `/api/contracts/batch` endpoint.
  * On a cache miss the route fetches from RPC, writes to blob, and returns the data —
  * so subsequent calls are always served from blob.
- * Returns the map and an isLoaded flag that becomes true once all fetches settle.
+ * Returns the map and an isLoaded flag that becomes true once the fetch settles.
  */
 function useContractCacheMap(nominees: Nominee[]) {
   const [cacheMap, setCacheMap] = useState<Map<string, GovernContractCacheSnapshot>>(new Map());
@@ -51,64 +47,98 @@ function useContractCacheMap(nominees: Nominee[]) {
     let cancelled = false;
 
     const load = async () => {
-      const results = await Promise.all(
-        nominees.map(async (n) => {
-          const address = getAddressFromBytes32(n.account);
-          const chainId = Number(n.chainId);
-          try {
-            const res = await fetch(`/api/contracts/${chainId}/${address}`);
-            if (!res.ok) return { account: n.account, payload: null };
-            const payload = (await res.json()) as GovernContractCacheSnapshot;
-            return { account: n.account, payload };
-          } catch {
-            return { account: n.account, payload: null };
-          }
-        }),
-      );
+      try {
+        const body = nominees.map((n) => ({
+          chainId: Number(n.chainId),
+          address: getAddressFromBytes32(n.account),
+        }));
 
-      if (cancelled) return;
-      const next = new Map<string, GovernContractCacheSnapshot>();
-      results.forEach(({ account, payload }) => {
-        if (payload) next.set(account, payload);
-      });
-      setCacheMap(next);
-      setIsLoaded(true);
+        const res = await fetch('/api/contracts/batch', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ nominees: body }),
+        });
+
+        if (cancelled) return;
+
+        if (!res.ok) {
+          setCacheMap(new Map());
+          setIsLoaded(true);
+          return;
+        }
+
+        const data = (await res.json()) as Record<string, GovernContractCacheSnapshot>;
+
+        if (cancelled) return;
+
+        // Map batch response keys (chainId:address) back to nominee accounts (bytes32)
+        const next = new Map<string, GovernContractCacheSnapshot>();
+        nominees.forEach((n) => {
+          const address = getAddressFromBytes32(n.account).toLowerCase();
+          const key = `${Number(n.chainId)}:${address}`;
+          const snapshot = data[key];
+          if (snapshot) next.set(n.account, snapshot);
+        });
+
+        setCacheMap(next);
+      } catch {
+        if (!cancelled) setCacheMap(new Map());
+      }
+      if (!cancelled) setIsLoaded(true);
     };
 
     load();
     return () => {
       cancelled = true;
     };
-  }, [nomineeKey, nominees]);
+  }, [nomineeKey]); // eslint-disable-line react-hooks/exhaustive-deps
+  // `nominees` is intentionally omitted: `nomineeKey` encodes the same content, so the effect
+  // only re-runs when the nominees list actually changes. This avoids duplicate fetches when the
+  // `nominees` array gets a new reference but keeps identical entries.
 
   return { cacheMap, isLoaded };
 }
 
 export const useFetchStakingContractsList = () => {
   const dispatch = useAppDispatch();
-  const { stakingContracts } = useAppSelector((state) => state.govern);
 
   const { data: nominees } = useNominees();
 
-  const { data: timeSum } = useReadContract({
-    address: (VOTE_WEIGHTING.addresses as Record<number, Address>)[mainnet.id],
+  // Read timeSum to derive current/next weight timestamps
+  const voteWeightingAddress = (VOTE_WEIGHTING.addresses as Record<number, Address>)[mainnet.id];
+  const { data: timeSumRaw } = useReadContract({
+    address: voteWeightingAddress,
     abi: VOTE_WEIGHTING.abi,
     chainId: mainnet.id,
     functionName: 'timeSum',
     scopeKey: TIME_SUM_KEY,
-    query: { select: (data) => Number(data) },
   });
 
-  const { data: currentWeight } = useNomineesWeights(
-    nominees || [],
-    getCurrentWeightTimestamp(timeSum),
-  );
+  const { currentTimestamp, nextTimestamp } = useMemo(() => {
+    if (!timeSumRaw) return { currentTimestamp: null, nextTimestamp: null };
+    const timeSum = Number(timeSumRaw);
+    return {
+      currentTimestamp: timeSum * 1000 > Date.now() ? timeSum - WEEK_IN_SECONDS : timeSum,
+      nextTimestamp: timeSum,
+    };
+  }, [timeSumRaw]);
 
-  const { data: nextWeight } = useNomineesWeights(
-    nominees || [],
-    timeSum || null,
-    NEXT_RELATIVE_WEIGHTS_KEY,
-  );
+  const { data: currentWeights } = useNomineesWeights(nominees || [], currentTimestamp);
+  const { data: nextWeights } = useNomineesWeights(nominees || [], nextTimestamp);
+
+  // Merge current + next weights into a single map
+  const weights: WeightsMap | null = useMemo(() => {
+    if (!currentWeights || !nextWeights) return null;
+    const defaultWeight: Weight = { percentage: 0, value: 0 };
+    const map: WeightsMap = {};
+    for (const key of Object.keys({ ...currentWeights, ...nextWeights })) {
+      map[key as Address] = {
+        current: currentWeights[key as Address] ?? defaultWeight,
+        next: nextWeights[key as Address] ?? defaultWeight,
+      };
+    }
+    return map;
+  }, [currentWeights, nextWeights]);
 
   // Fetch metadata from blob (write-through: miss → RPC → blob → return)
   const { cacheMap, isLoaded: isCacheLoaded } = useContractCacheMap(nominees || []);
@@ -122,11 +152,11 @@ export const useFetchStakingContractsList = () => {
   const { data: fallbackMetadata } = useNomineesMetadata(uncachedNominees);
 
   useEffect(() => {
-    if (!nominees || !currentWeight || !nextWeight || !isCacheLoaded) return;
-    if (stakingContracts.length !== 0) return;
+    if (!nominees || !weights || !isCacheLoaded) return;
     // If some nominees weren't in blob, wait for IPFS fallback to resolve
     if (uncachedNominees.length > 0 && fallbackMetadata == null) return;
 
+    const defaultWeight: Weight = { percentage: 0, value: 0 };
     const stakingContractsList: StakingContract[] = [];
     nominees.forEach((item) => {
       const isBlacklisted = BLACKLISTED_STAKING_ADDRESSES.some((addr) =>
@@ -138,11 +168,13 @@ export const useFetchStakingContractsList = () => {
       const metadata = cached?.data.metadata ??
         fallbackMetadata?.[item.account] ?? { name: '', description: '' };
 
+      const nomineeWeights = weights[item.account];
+
       stakingContractsList.push({
         address: item.account,
         chainId: Number(item.chainId),
-        currentWeight: currentWeight[item.account],
-        nextWeight: nextWeight[item.account],
+        currentWeight: nomineeWeights?.current ?? defaultWeight,
+        nextWeight: nomineeWeights?.next ?? defaultWeight,
         metadata,
       });
     });
@@ -150,13 +182,11 @@ export const useFetchStakingContractsList = () => {
     dispatch(setStakingContracts(stakingContractsList));
   }, [
     cacheMap,
-    currentWeight,
+    weights,
     dispatch,
     fallbackMetadata,
     isCacheLoaded,
-    nextWeight,
     nominees,
-    stakingContracts.length,
     uncachedNominees.length,
   ]);
 };

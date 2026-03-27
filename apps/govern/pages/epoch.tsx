@@ -1,26 +1,23 @@
-import { GetServerSideProps, InferGetServerSidePropsType } from 'next';
+import { GetStaticProps, InferGetStaticPropsType } from 'next';
 
-import { withTimeout } from 'libs/util-functions/src';
-
-import { Meta } from 'components/Meta';
 import { EpochPage } from 'components/Epoch';
+import { Meta } from 'components/Meta';
 import { EpochData, fetchEpochData } from 'common-util/functions/fetchEpochData';
 
-const SSR_TIMEOUT_MS = 8000;
-
-export const getServerSideProps: GetServerSideProps<{
+/** ISR: pre-render epoch data, revalidate every 60 seconds. */
+export const getStaticProps: GetStaticProps<{
   initialEpochData: EpochData | null;
 }> = async () => {
   try {
-    const data = await withTimeout(fetchEpochData(), SSR_TIMEOUT_MS);
-    return { props: { initialEpochData: data } };
+    const data = await fetchEpochData();
+    return { props: { initialEpochData: data }, revalidate: 60 };
   } catch (error) {
-    console.error('SSR epoch data fetch failed:', error);
-    return { props: { initialEpochData: null } };
+    console.error('ISR epoch data fetch failed:', error);
+    return { props: { initialEpochData: null }, revalidate: 30 };
   }
 };
 
-const Epoch = ({ initialEpochData }: InferGetServerSidePropsType<typeof getServerSideProps>) => (
+const Epoch = ({ initialEpochData }: InferGetStaticPropsType<typeof getStaticProps>) => (
   <>
     <Meta
       pageTitle="Epoch"
