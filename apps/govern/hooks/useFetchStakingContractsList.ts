@@ -91,7 +91,10 @@ function useContractCacheMap(nominees: Nominee[]) {
     return () => {
       cancelled = true;
     };
-  }, [nomineeKey, nominees]);
+  }, [nomineeKey]); // eslint-disable-line react-hooks/exhaustive-deps
+  // `nominees` is intentionally omitted: `nomineeKey` encodes the same content, so the effect
+  // only re-runs when the nominees list actually changes. This avoids duplicate fetches when the
+  // `nominees` array gets a new reference but keeps identical entries.
 
   return { cacheMap, isLoaded };
 }

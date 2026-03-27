@@ -11,14 +11,19 @@ export type EpochData = {
   nextEpochEndTime: number;
 };
 
+/** Request timeout in milliseconds for the ISR/SSR fetch path.
+ *  10 s gives slow RPCs enough time to respond while staying well under
+ *  typical serverless function limits (usually 10–60 s). */
+const ISR_TIMEOUT_MS = 10_000;
+
 /**
  * Fetches epoch data from the Tokenomics contract using viem.
- * Can be used in getServerSideProps.
+ * Can be used in getStaticProps / getServerSideProps.
  */
 export async function fetchEpochData(): Promise<EpochData> {
   const client = createPublicClient({
     chain: mainnet,
-    transport: http(RPC_URLS[1]),
+    transport: http(RPC_URLS[1], { timeout: ISR_TIMEOUT_MS }),
   });
 
   const contractConfig = {

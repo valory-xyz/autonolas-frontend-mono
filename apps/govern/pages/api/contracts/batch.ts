@@ -1,4 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
+import { isAddress } from 'viem';
 
 import { getContractCache, setContractCache } from 'common-util/blob';
 import { fetchContractCacheDataFromChain } from 'common-util/fetch-contract-cache-data';
@@ -48,6 +49,18 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   if (nominees.length > MAX_BATCH_SIZE) {
     return res.status(400).json({ error: `Batch size exceeds maximum of ${MAX_BATCH_SIZE}` });
+  }
+
+  const invalidIndex = nominees.findIndex(
+    (n) =>
+      typeof n.address !== 'string' ||
+      !isAddress(n.address) ||
+      !Number.isFinite(n.chainId) ||
+      !Number.isInteger(n.chainId) ||
+      n.chainId <= 0,
+  );
+  if (invalidIndex !== -1) {
+    return res.status(400).json({ error: `Invalid nominee at index ${invalidIndex}` });
   }
 
   const result: BatchResponse = {};
