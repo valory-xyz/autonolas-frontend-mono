@@ -21,7 +21,7 @@ const getLegacyLookupJson = async (
 ): Promise<AchievementsLookupJson> => {
   try {
     const fileName = getLegacyFileName(agent, type);
-    const { blobs } = await list({ prefix: fileName });
+    const { blobs } = await list({ prefix: fileName, limit: 1 });
 
     if (blobs.length === 0) return {};
 
@@ -51,10 +51,17 @@ export const getLookupEntry = async (
       const response = await fetch(blobs[0].url);
       if (response.ok) {
         return (await response.json()) as LookupEntry;
+      } else {
+        console.warn(
+          `Failed to fetch per-entry blob for ${entryPath}: ${response.status} ${response.statusText}`,
+        );
       }
     }
   } catch (error) {
-    console.error(`Error fetching per-entry blob for ${params.id}:`, error);
+    console.error(
+      `Error fetching per-entry blob for ${params.agent}/${params.type}/${params.id}:`,
+      error,
+    );
   }
 
   // Fall back to legacy monolithic file
