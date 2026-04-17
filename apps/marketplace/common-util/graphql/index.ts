@@ -19,7 +19,7 @@ export const MARKETPLACE_SUBGRAPH_CLIENTS = {
     process.env.NEXT_PUBLIC_ARBITRUM_MARKETPLACE_SUBGRAPH_URL!,
     requestConfig,
   ),
-  42220: new GraphQLClient(process.env.NEXT_PUBLIC_CELO_MARKETPLACE_SUBGRAPH_URL!, requestConfig),
+  // 42220: new GraphQLClient(process.env.NEXT_PUBLIC_CELO_MARKETPLACE_SUBGRAPH_URL!, requestConfig),
 } as const;
 
 export type MarketplaceSubgraphChainId = keyof typeof MARKETPLACE_SUBGRAPH_CLIENTS;
