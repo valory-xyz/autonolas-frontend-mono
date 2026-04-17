@@ -94,12 +94,7 @@ export const CACHE_DURATION = {
 } as const;
 
 export const MARKETPLACE_SUPPORTED_CHAIN_IDS = [
-  1,
-  10,
-  100,
-  137,
-  8453,
-  42161,
+  1, 10, 100, 137, 8453, 42161,
   // 42220,
 ] as const;
 
