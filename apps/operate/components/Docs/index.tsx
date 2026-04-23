@@ -48,21 +48,13 @@ const Intro = () => (
     <Paragraph className="mb-8 mt-20">
       Olas Operate empowers users to run fully self-custodial AI agents directly on their own
       devices. Through the <Link href="https://olas.network/pearl">Pearl app</Link> - AI Agent App
-      Store or through{' '}
-      <a
-        href="https://github.com/valory-xyz/quickstart?tab=readme-ov-file#olas-agents---quickstart"
-        target="_blank"
-        rel="noopener noreferrer"
-      >
-        Quickstart
-      </a>
-      , users become Olas Operators - gaining full ownership and autonomy as their agents act
+      Store, users become Olas Operators - gaining full ownership and autonomy as their agents act
       independently to fulfill defined tasks and goals.
     </Paragraph>
   </>
 );
 
-const QuickStart = () => (
+const GettingStarted = () => (
   <>
     <Title level={4} className="mt-0">
       Quick Start
@@ -72,14 +64,7 @@ const QuickStart = () => (
       <ul>
         <li className="mb-8">
           <Text strong>
-            Install <Link href="https://olas.network/pearl">Pearl</Link> (The AI Agent App Store) or{' '}
-            <a
-              href="https://github.com/valory-xyz/quickstart?tab=readme-ov-file#olas-agents---quickstart"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Quickstart
-            </a>
+            Install <Link href="https://olas.network/pearl">Pearl</Link> (The AI Agent App Store)
           </Text>{' '}
           <br />
           Choose the option suitable for your device and needs.
@@ -122,8 +107,8 @@ const CoreConcepts = () => (
         <li className="mb-8">
           <Text strong>Agent Activity</Text>
           <br />
-          Through Pearl (AI Agent App Store) and Quickstart, you can monitor your AI agent&apos;s
-          real-time actions.
+          Through Pearl (AI Agent App Store), you can monitor your AI agent&apos;s real-time
+          actions.
         </li>
         <li>
           <Text strong>AgentUI</Text>
@@ -131,9 +116,6 @@ const CoreConcepts = () => (
           The Pearl AgentUI allows you to monitor your agent&apos;s performance and activity. You
           can also engage with your agent via a chat interface to guide its strategy and direction
           (not universally available for all AI agents).
-          <br />
-          Similarly, on Quickstart, you can monitor your agent&apos;s performance and configure it
-          through the <Text strong>Quickstart scripts</Text>.
         </li>
       </ul>
     </Paragraph>
@@ -167,26 +149,6 @@ const StepByStep = () => (
       </li>
       <li>Start your agent.</li>
     </ol>
-
-    <Title level={4} className="mt-0 mb-0">
-      Quickstart Guide
-    </Title>
-
-    <ol>
-      <li className="mb-8">
-        Download the{' '}
-        <a
-          href="https://github.com/valory-xyz/quickstart?tab=readme-ov-file#olas-agents---quickstart"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Quickstart
-        </a>{' '}
-        repository from GitHub.
-      </li>
-      <li className="mb-8">Follow the instructions in the README.</li>
-      <li>Start your agent.</li>
-    </ol>
   </>
 );
 
@@ -204,8 +166,8 @@ const FAQs = () => (
     <Paragraph>
       <Text strong>Which AI agent can I find on Pearl?</Text>
       <br />
-      Pearl and QuickStart feature a growing collection of AI agents designed to perform various
-      tasks. All available AI agents can be found <Link href="/agents">here</Link>.
+      Pearl features a growing collection of AI agents designed to perform various tasks. All
+      available AI agents can be found <Link href="/agents">here</Link>.
     </Paragraph>
     <Paragraph>
       <Text strong>Why does my agent require funds?</Text>
@@ -222,20 +184,6 @@ const FAQs = () => (
           in prediction markets and pay for gas.
         </li>
       </ul>
-    </Paragraph>
-    <Paragraph>
-      <Text strong>Can I run an AI agent without using the Pearl app?</Text>
-      <br />
-      Yes, using the CLI (Command-Line Interface). For more technical control, you can set up and
-      run agents manually using Quickstart. Click{' '}
-      <a
-        href="https://github.com/valory-xyz/quickstart?tab=readme-ov-file#olas-agents---quickstart"
-        target="_blank"
-        rel="noopener noreferrer"
-      >
-        here
-      </a>{' '}
-      to get started.
     </Paragraph>
     <Paragraph>
       <Text strong>Where can I get support if I encounter issues?</Text>
@@ -302,7 +250,7 @@ export const DocsPage = () => (
       <Content>
         <Intro />
         <Divider style={DIVIDER_STYLE} />
-        <QuickStart />
+        <GettingStarted />
         <Divider style={DIVIDER_STYLE} />
         <CoreConcepts />
         <Divider style={DIVIDER_STYLE} />

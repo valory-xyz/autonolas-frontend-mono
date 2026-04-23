@@ -174,8 +174,8 @@ const WantPeopleToRunYourAgent = () => (
         Want people to run your agent?
       </Title>
       <Paragraph type="secondary" className="mb-24">
-        Build an autonomous service using Open Autonomy. Then, simply submit a pull request
-        including the quickstart.
+        Build an autonomous service using Open Autonomy. Then, simply submit a pull request to add
+        it.
       </Paragraph>
       <Button
         type="default"

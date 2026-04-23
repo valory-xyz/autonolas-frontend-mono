@@ -42,10 +42,7 @@ import {
 
 const { Title, Paragraph, Text } = Typography;
 
-const getVisibleAvailableOn = (availableOn: StakingContract['availableOn']) =>
-  (availableOn ?? []).filter((p) => p !== 'quickstart');
-
-const isLiveContract = (c: StakingContract) => getVisibleAvailableOn(c.availableOn).length > 0;
+const isLiveContract = (c: StakingContract) => c.availableOn != null && c.availableOn.length > 0;
 
 const getTableColumns = (): ColumnsType<StakingContract> => [
   {
@@ -153,11 +150,10 @@ const getTableColumns = (): ColumnsType<StakingContract> => [
     ),
     dataIndex: 'availableOn',
     key: 'availableOn',
-    render: (availableOn) => {
-      const visible = getVisibleAvailableOn(availableOn);
-      return visible.length !== 0 ? (
+    render: (availableOn) =>
+      availableOn && availableOn.length !== 0 ? (
         <Flex gap={4} vertical align="start">
-          {visible.map((type: AvailableOn) => (
+          {availableOn.map((type: AvailableOn) => (
             <RunAgentButton availableOn={type} key={type} type="text" />
           ))}
         </Flex>
@@ -165,8 +161,7 @@ const getTableColumns = (): ColumnsType<StakingContract> => [
         <Button type="text" disabled>
           Not available yet
         </Button>
-      );
-    },
+      ),
   },
 ];
 
