@@ -42,7 +42,10 @@ import {
 
 const { Title, Paragraph, Text } = Typography;
 
-const isLiveContract = (c: StakingContract) => c.availableOn != null && c.availableOn.length > 0;
+const getVisibleAvailableOn = (availableOn: StakingContract['availableOn']) =>
+  (availableOn ?? []).filter((p) => p !== 'quickstart');
+
+const isLiveContract = (c: StakingContract) => getVisibleAvailableOn(c.availableOn).length > 0;
 
 const getTableColumns = (): ColumnsType<StakingContract> => [
   {
@@ -142,9 +145,6 @@ const getTableColumns = (): ColumnsType<StakingContract> => [
           <>
             <Text strong>Pearl</Text> - desktop app for non-technical users to run agents.
             <br />
-            <Text strong>Quickstart</Text> - script for technical users to run agents with more
-            flexibility.
-            <br />
             <Text strong>Contribute</Text> - web app that enables you to get rewards for posting
             about Olas on X.
           </>
@@ -153,10 +153,11 @@ const getTableColumns = (): ColumnsType<StakingContract> => [
     ),
     dataIndex: 'availableOn',
     key: 'availableOn',
-    render: (availableOn) =>
-      availableOn && availableOn.length !== 0 ? (
+    render: (availableOn) => {
+      const visible = getVisibleAvailableOn(availableOn);
+      return visible.length !== 0 ? (
         <Flex gap={4} vertical align="start">
-          {availableOn.map((type: AvailableOn) => (
+          {visible.map((type: AvailableOn) => (
             <RunAgentButton availableOn={type} key={type} type="text" />
           ))}
         </Flex>
@@ -164,7 +165,8 @@ const getTableColumns = (): ColumnsType<StakingContract> => [
         <Button type="text" disabled>
           Not available yet
         </Button>
-      ),
+      );
+    },
   },
 ];
 
@@ -212,8 +214,8 @@ export const ContractsPage = () => {
           Staking contracts
         </Title>
         <Caption className="block mb-24">
-          Browse staking opportunities and start running them via Pearl or Quickstart for the
-          opportunity to earn OLAS rewards.
+          Browse staking opportunities and start running them via Pearl for the opportunity to earn
+          OLAS rewards.
         </Caption>
 
         <LiveNotAvailableSwitch

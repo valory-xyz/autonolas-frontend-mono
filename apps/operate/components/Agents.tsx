@@ -55,7 +55,7 @@ const agents: Agent[] = [
     name: 'Omenstrat',
     description: 'Trades Omen prediction markets on autopilot while you do something else.',
     comingSoon: false,
-    availableOn: ['pearl', 'quickstart'],
+    availableOn: ['pearl'],
     urls: {
       learnMore: 'https://olas.network/agents/omenstrat',
     },
@@ -66,7 +66,7 @@ const agents: Agent[] = [
     name: 'Optimus',
     description: 'Intelligently manages your DeFi assets across multiple blockchains.',
     comingSoon: false,
-    availableOn: ['pearl', 'quickstart'],
+    availableOn: ['pearl'],
     urls: {
       learnMore: 'https://olas.network/agents/babydegen#optimus-agent',
     },
