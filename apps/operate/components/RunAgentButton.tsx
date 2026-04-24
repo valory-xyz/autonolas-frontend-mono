@@ -28,7 +28,6 @@ const props: Record<AvailableOn, { icon: ReactNode; text: string; href: string }
 
 export const RunAgentButton = ({ availableOn, type = 'text', className }: RunAgentButtonProps) => {
   const agentProps = props[availableOn];
-  if (!agentProps) return null;
   return (
     <Button type={type} className={className} href={agentProps.href} target="_blank">
       <Flex gap={8} align="center" justify="center">

@@ -5,7 +5,6 @@ export const LAUNCH_REPO_URL =
   `${REPO_URL}launch`;
 export const OPERATE_REPO_URL =
   `${REPO_URL}operate`;
-export const QUICKSTART_REPO_URL = 'https://github.com/valory-xyz/quickstart';
 export const BUILD_REPO_URL =
   `${REPO_URL}build`;
 export const CONTRIBUTE_REPO_URL =
