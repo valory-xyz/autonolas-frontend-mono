@@ -32,28 +32,25 @@ jobs:
           corepack prepare yarn@1.22.22 --activate
           yarn --version
 
-      # Yarn 1.x `yarn audit` exits with a severity bitmask
-      # (1=info, 2=low, 4=moderate, 8=high, 16=critical) rather than a
-      # threshold comparison against --level. `--level high` filters
-      # printed output but does NOT affect the exit code. Gate on the
-      # raw exit code: fail only if the high|critical bits (8|16 = 24)
-      # are set. Production-tree only (`--groups dependencies`) — dev
-      # tooling (ESLint / Babel / TypeScript / Storybook / types)
-      # generates substantial transitive-advisory noise and does not
-      # ship to users.
-      - name: Run yarn audit (fail on high/critical in production tree)
-        run: |
-          set +e
-          yarn audit --groups dependencies
-          exit_code=$?
-          echo "yarn audit exit code: $exit_code"
-          # Bit 8 = high, bit 16 = critical → mask 24.
-          if [ $(( exit_code & 24 )) -ne 0 ]; then
-            echo "::error::yarn audit reported HIGH or CRITICAL advisories in the production dependency tree."
-            exit 1
-          fi
-          echo "No high/critical advisories in the production dependency tree."
-          exit 0
+      # Delegates to scripts/audit.mjs, which runs
+      # `yarn audit --groups dependencies --json` and applies:
+      #   • production-tree-only scoping (devDependencies generate
+      #     substantial transitive-advisory noise and do not ship to
+      #     users).
+      #   • a high/critical gate — Yarn 1.x `yarn audit` exits with a
+      #     severity bitmask, not a threshold, so the script parses
+      #     JSON and fails explicitly on unlisted high/critical.
+      #   • an allowlist at .supply-chain/audit-allowlist.json for
+      #     advisories that cannot be fixed in-branch (no upstream
+      #     patch, deferred major-version migration, etc.) — every
+      #     entry needs a reason and a review date.
+      - name: Run audit (fail on unlisted high/critical in production tree)
+        # NOT `yarn audit` — that invokes Yarn 1.x's built-in audit
+        # command, bypassing scripts/audit.mjs (which is where the
+        # allowlist + --groups dependencies filtering lives). The
+        # script is deliberately named `audit:prod` to prevent that
+        # collision from regressing.
+        run: yarn audit:prod
 
   lockfile-lint:
     name: lockfile-lint
