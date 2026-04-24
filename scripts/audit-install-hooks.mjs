@@ -19,7 +19,13 @@
 import { readFileSync, writeFileSync, readdirSync, statSync, existsSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 
-const ROOT = resolve(process.argv[2] && !process.argv[2].startsWith('--') ? process.argv[2] : '.');
+// Paths are anchored to the current working directory, not a CLI argument.
+// yarn scripts always run from the workspace root, which is what we want.
+// Taking a root path from argv would let it flow into readFileSync /
+// writeFileSync as an unvalidated path (a path-traversal sink flagged by
+// static analysis). The only CLI option the script accepts is `--update`,
+// matched as a literal string below — it is never used as a file path.
+const ROOT = resolve('.');
 const ALLOWLIST_PATH = resolve(ROOT, '.supply-chain/install-hooks.allowlist');
 const NODE_MODULES = resolve(ROOT, 'node_modules');
 const UPDATE = process.argv.includes('--update');
