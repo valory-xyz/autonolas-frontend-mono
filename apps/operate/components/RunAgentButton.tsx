@@ -2,9 +2,10 @@ import { Button, Flex } from 'antd';
 import { BaseButtonProps } from 'antd/es/button/button';
 import { NotificationOutlined } from '@ant-design/icons';
 import Image from 'next/image';
+import { ReactNode } from 'react';
 import { AvailableOn } from 'types';
 
-import { UNICODE_SYMBOLS } from 'libs/util-constants/src';
+import { QUICKSTART_REPO_URL, UNICODE_SYMBOLS } from 'libs/util-constants/src';
 
 type RunAgentButtonProps = {
   availableOn: AvailableOn;
@@ -12,11 +13,18 @@ type RunAgentButtonProps = {
   className?: string;
 };
 
-const props = {
+const QUICKSTART_URL = `${QUICKSTART_REPO_URL}?tab=readme-ov-file#olas-agents---quickstart`;
+
+const props: Record<AvailableOn, { icon: ReactNode; text: string; href: string }> = {
   pearl: {
     icon: <Image src={`/images/pearl.svg`} alt="Pearl app" width={18} height={18} />,
     text: 'Pearl',
     href: 'https://www.pearl.you/',
+  },
+  quickstart: {
+    icon: <Image src={`/images/github.svg`} alt="Github" width={18} height={18} />,
+    text: 'Quickstart',
+    href: QUICKSTART_URL,
   },
   contribute: {
     icon: <NotificationOutlined width={18} height={18} />,
@@ -27,6 +35,7 @@ const props = {
 
 export const RunAgentButton = ({ availableOn, type = 'text', className }: RunAgentButtonProps) => {
   const agentProps = props[availableOn];
+  if (!agentProps) return null;
   return (
     <Button type={type} className={className} href={agentProps.href} target="_blank">
       <Flex gap={8} align="center" justify="center">
