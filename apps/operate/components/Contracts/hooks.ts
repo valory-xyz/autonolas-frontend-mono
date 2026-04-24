@@ -23,7 +23,9 @@ import {
   getTimeRemainingFormatted,
 } from 'common-util/constants/contracts';
 
-const VALID_AVAILABLE_ON = new Set<AvailableOn>(['pearl', 'contribute']);
+import { PLATFORM_OPTIONS } from './constants';
+
+const VALID_AVAILABLE_ON = new Set<AvailableOn>(PLATFORM_OPTIONS.map((o) => o.value));
 
 const sanitizeAvailableOn = (value: unknown): AvailableOn[] | null => {
   if (!Array.isArray(value)) return null;
