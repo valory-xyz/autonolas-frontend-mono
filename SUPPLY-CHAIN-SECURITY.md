@@ -10,8 +10,8 @@ The attacks we care about:
 
 1. **Malicious publish** — a maintainer account is compromised (or a maintainer goes rogue) and a bad version of a legitimate package is published. Recent examples: `ua-parser-js` (2021), `node-ipc` protestware (2022), various `@ctrl/*` / `rspack`-related worms (2024–2025), the `shai-hulud` npm worm (2025).
 2. **Typosquatting / dependency confusion** — a look-alike name is installed instead of the intended package. Especially relevant for an Nx workspace with many internal `@autonolas-frontend-mono/*` packages — an attacker could publish a same-named package on the public registry.
-3. **Postinstall script abuse** — a compromised package runs arbitrary code during `yarn install`, exfiltrating env vars or tokens from the build environment. High-impact here because this is a Web3 app — a malicious postinstall could target wallet-connector / signing code.
-4. **Transitive compromise** — a deep, rarely-audited dependency is the attack vector. The Solana + Ethereum + wagmi stack pulls in a very large transitive tree.
+3. **Postinstall script abuse** — a compromised package runs arbitrary code during `yarn install`, exfiltrating env vars or tokens from the build environment. High-impact here because the workspace ships Web3 apps (Bond, Govern, Launch, Operate, Marketplace, etc.) and a malicious postinstall could target wallet-connector / signing code paths or drain per-app Vercel secrets.
+4. **Transitive compromise** — a deep, rarely-audited dependency is the attack vector. The Solana + Ethereum + wagmi + IPFS + Storybook + Cypress stack pulls in a very large transitive tree.
 
 ## Policies
 
@@ -20,26 +20,25 @@ The attacks we care about:
 All direct dependencies are pinned to **exact versions** — no `^`, no `~`, no `>=`, no floating major. This applies to:
 
 - Root [`package.json`](./package.json).
-- Every library in [`libs/*/package.json`](./libs/).
+- Every library under [`libs/*/package.json`](./libs/).
 - App-level deps (apps under `apps/*` inherit root deps via Nx; if any grow their own `package.json` with deps, they must follow the same rule).
 
 **Why:** `^` allows minor and patch updates; `~` allows patch updates. If a compromised patch is published and someone runs `yarn add <other-pkg>` or `yarn install` without a lockfile, the bad version can enter the tree silently. Exact pins make every version change an explicit, reviewable `package.json` diff.
 
 **How to update a dependency:** bump the exact version in `package.json`, run `yarn install`, review the `yarn.lock` diff, and commit both files in the same PR. Never run `yarn upgrade` without pinning the result.
 
-### 2. Lockfile is the source of truth
+**Transitive overrides follow the same rule.** Entries under `"resolutions"` in root [`package.json`](./package.json) are a transitive-pinning mechanism, not an escape hatch for ranges. Use `"1.2.3"`, not `"^1.2.3"` or `">=1.2.3"`, so a compromised patch cannot silently enter the tree through an override. When adding a resolution to clear a CVE, reference the advisory in the PR/commit message so future readers understand why the override exists.
 
-- [`yarn.lock`](./yarn.lock) is committed and required.
-- CI installs use `yarn install --frozen-lockfile` (or `--immutable` on Yarn Berry). This fails the build if `package.json` and `yarn.lock` disagree, preventing silent resolution drift.
-- Each app's deployment (Vercel, etc.) must also use frozen installs.
+### 2. Single lockfile, treated as source of truth
+
+[`yarn.lock`](./yarn.lock) is the canonical lockfile. The `packageManager` field in [`package.json`](./package.json) pins Yarn `1.22.22`; the Supply Chain CI job ([.github/workflows/supply-chain.yml](./.github/workflows/supply-chain.yml)) activates that version explicitly via `corepack enable` + `corepack prepare yarn@1.22.22 --activate` at the start of every Node job, so installs don't fall back to whatever Yarn the runner happens to ship with. `package-lock.json` / `pnpm-lock.yaml` are in [`.gitignore`](./.gitignore) so a stray `npm install` / `pnpm install` can't land a second lockfile that conflicts with `yarn.lock`. CI and Vercel both install with `yarn install --frozen-lockfile`, which fails if `package.json` and `yarn.lock` disagree — catching any silent resolution drift at build time.
 
 ### 3. Dependency-confusion protection for internal packages
 
-Our internal packages live under the `@autonolas-frontend-mono/*` scope. To prevent dependency confusion (attacker publishes a malicious `@autonolas-frontend-mono/util-functions` to the public registry):
+Our internal packages live under the `@autonolas-frontend-mono/*` scope. To prevent dependency confusion (an attacker publishes a malicious `@autonolas-frontend-mono/util-functions` to the public registry):
 
-- **Reserve the scope on npm** even if we never publish — register `@autonolas-frontend-mono` to the organization so no one else can publish to it. Alternatively, rename the scope to one that *is* registered and controlled (e.g. `@valory-xyz/*`).
-- Document any `.npmrc` / `.yarnrc` registry overrides.
-- In CI, consider `--strict-dependency-confusion` equivalents (or Socket/Snyk-style scanners).
+- **Reserve the scope on npm** even if we never publish — register `@autonolas-frontend-mono` to the organization so no one else can publish to it. Alternatively, rename the scope to one we already control (e.g. `@valory-xyz/*`).
+- Document any `.npmrc` / `.yarnrc` registry overrides (currently none — if one is ever added, it must pin the registry to `https://registry.npmjs.org/` or an equivalent trusted mirror).
 
 ### 4. Lockfile review in PRs
 
@@ -47,17 +46,29 @@ Any PR that touches `yarn.lock` requires a reviewer to confirm:
 
 - The diff is proportionate to the `package.json` change (adding one dep shouldn't balloon the lockfile by thousands of lines unless it's a heavy package like a Solana SDK).
 - No unexpected packages appear. Look for unfamiliar names, typos of known packages, or packages with very recent publish dates on high-traffic names.
-- Resolved URLs point to the official registry (`registry.yarnpkg.com` / `registry.npmjs.org`), not a fork or mirror.
+- Resolved URLs point to the official registry (`registry.yarnpkg.com` / `registry.npmjs.org`), not a fork or mirror. This is also enforced automatically by the `lockfile-lint` job — see [§6](#6-audit-in-ci).
 
 ### 5. Cooldown window on updates
 
 Prefer dependency versions that are **at least 7 days old**. Most malicious publishes are caught and unpublished within hours to days.
 
-For Renovate, use `minimumReleaseAge: "7 days"` in `renovate.json`. Dependabot does not natively support cooldown windows.
+This is enforced by **manual discipline on every PR**. When a PR bumps a dependency, the reviewer checks `npm view <pkg> time` (or the npm page) and confirms the target version is at least 7 days old. If the bump is for a disclosed security advisory, the cooldown does not apply — note the advisory ID in the PR description so the override is auditable.
+
+Vulnerability discovery does not depend on this rule. Already-disclosed CVEs are caught by the `yarn audit` job in [.github/workflows/supply-chain.yml](./.github/workflows/supply-chain.yml) on every PR (see [§6](#6-audit-in-ci)), and GitHub sends passive Dependabot alerts (Security tab / email) for advisories affecting our lockfile regardless of any repo configuration.
+
+**Known gap:** the GitHub Actions in the app workflows + [`.github/workflows/supply-chain.yml`](./.github/workflows/supply-chain.yml) and [`.github/workflows/snyk-security.yml`](./.github/workflows/snyk-security.yml) are SHA-pinned, but [`.github/workflows/gitleaks.yml`](./.github/workflows/gitleaks.yml) still uses floating `@v3` tags. Audit SHA pins periodically — at minimum once per major release of each action.
 
 ### 6. Audit in CI
 
-Run `yarn audit --level high` on every PR. Given the size of this tree (Web3 + Storybook + Cypress + Solana + Ethereum), expect noise — maintain an allowlist of acknowledged low-severity items but never allowlist high/critical without an explicit, dated exception.
+Three jobs in [.github/workflows/supply-chain.yml](./.github/workflows/supply-chain.yml) run on every PR and push to `main` / `staging`:
+
+- **`yarn audit` (production tree, blocking on high/critical)** — runs `yarn audit --groups dependencies` with high/critical gating enforced via exit-code bitmask (see the "Yarn 1.x audit quirk" note below). `--groups dependencies` restricts the audit to the production tree — `devDependencies` (ESLint / Babel / TypeScript / Storybook / Cypress / types) generate substantial transitive-advisory noise and do not ship to users, so they are excluded by policy. A high/critical advisory against a production dependency blocks merge unless the advisory is cleared (via a dependency bump, or via an exact-pinned Yarn `resolutions` entry per [§1](#1-exact-version-pinning-in-all-packagejson-files) with the advisory ID in the PR description).
+- **`lockfile-lint`** — runs [`lockfile-lint`](https://github.com/lirantal/lockfile-lint) to enforce that every `resolved` URL in `yarn.lock` points at `registry.yarnpkg.com` or `registry.npmjs.org`, uses HTTPS, and has an integrity hash — automating the registry-origin part of [§4](#4-lockfile-review-in-prs). The tool is pinned as a `devDependency` in [`package.json`](./package.json) (currently `5.0.0`) and invoked via the `yarn lint:lockfile` script, so the `lockfile-lint` binary used in CI is integrity-verified against `yarn.lock` rather than re-fetched on every run.
+- **`install-hook audit`** — runs [`scripts/audit-install-hooks.mjs`](./scripts/audit-install-hooks.mjs) to enumerate every package in `node_modules` with a non-trivial `preinstall` / `install` / `postinstall` script, and diffs that set against [`.supply-chain/install-hooks.allowlist`](./.supply-chain/install-hooks.allowlist). A new name in the tree not in the allowlist — or a stale allowlist entry not in the tree — fails the job. This turns the "a new package with a postinstall just entered my dep graph" scenario into an explicit allowlist diff that a reviewer has to sign off on, rather than a silent change buried in `yarn.lock`. See [§7](#7-avoid-postinstall-heavy-dependencies).
+
+All three jobs run in addition to [`.github/workflows/snyk-security.yml`](./.github/workflows/snyk-security.yml), which provides Snyk SAST (code analysis) and Snyk Open Source (SCA) monitoring. Snyk runs non-blocking (`continue-on-error: true`) and uploads results to GitHub Code Scanning; the blocking supply-chain gate is `yarn audit` + `lockfile-lint`.
+
+**Yarn 1.x audit quirk.** This repo uses Yarn `1.22.22`. Yarn 1.x `yarn audit` exits with a severity bitmask (`1`=info, `2`=low, `4`=moderate, `8`=high, `16`=critical) rather than a threshold comparison against `--level`, so `--level high` filters the *printed* output but does not affect the exit code. The workflow handles this by checking `exit_code & 24` (i.e. `high | critical`) and failing only when that bit is set — see the `audit` job in [.github/workflows/supply-chain.yml](./.github/workflows/supply-chain.yml). Revisit on a future Yarn Berry migration, which ships `yarn npm audit` with proper severity gating and makes the bitmask dance unnecessary.
 
 ### 7. Avoid postinstall-heavy dependencies
 
@@ -67,14 +78,44 @@ When adding a new dependency, check:
 - If yes, is the script necessary, and is the package well-known?
 - Prefer alternatives with no install scripts for new additions.
 
-**Web3-specific watch:** wallet connector libraries (`@web3modal/*`, `@solana/wallet-adapter-*`, `wagmi`, `viem`) and their transitive deps sign transactions on behalf of users in downstream Pearl/operate apps. A compromised version could alter addresses or drain funds. Scrutinize any bump.
+**Cautionary case — `ipfs@0.63.5` (removed).** `ipfs` (the archived `js-ipfs` package; Helia is its successor) was a direct dependency with no direct imports in application code — only `ipfs-http-client` was actually used. The transitive chain `ipfs → ipfs-cli → ipfs-daemon → electron-webrtc → electron-eval → headless` pulled in `electron@1.8.8` (a 2018-era Chromium with a `node install.js` postinstall that downloads a binary on every `yarn install`) and `wrtc@0.4.7` (ditto, via `node scripts/download-prebuilt.js`), plus `headless` from a GitHub tarball with no integrity hash — which by itself made `lockfile-lint` fail CI. A single-line removal from root [`package.json`](./package.json) cleared the `lockfile-lint` failure and two unnecessary postinstall binary-download steps. (The surviving `form-data@~2.3.2` entries in [`yarn.lock`](./yarn.lock) reach the tree independently — via `web3 → web3-bzz → swarm-js → eth-lib → servify → request → form-data` in the prod tree and `cypress → @cypress/request → form-data` in devDependencies — and are tracked as a separate line item in the TODO list below: `form-data < 2.5.5` / `< 3.0.4` / `< 4.0.4` is affected by CVE-2024-42459, so `2.3.3` is itself vulnerable, not a fix.) The lesson: a direct dep that is not imported anywhere is pure liability, and the postinstall blast radius of an archived package chain can be substantially worse than the package's stated purpose suggests. Before accepting a dep, `yarn why <new-pkg>` and grep for actual imports.
+
+**Live install-hook surface.** As of this writing, the production tree carries these non-trivial install hooks (enumerated by walking `node_modules` for `scripts.{pre,post,}install` that aren't pure `echo`):
+
+| Package | Hook | Notes |
+| --- | --- | --- |
+| `secp256k1`, `keccak`, `blake-hash`, `utf-8-validate`, `bufferutil`, `bigint-buffer`, `tiny-secp256k1`, `usb` | `node-gyp-build` | Native crypto / wallet-signing bindings and Trezor USB transport (`usb` reaches the tree via `@solana/wallet-adapter-wallets → @solana/wallet-adapter-trezor → @trezor/connect-web → @trezor/connect → @trezor/transport → usb`); legitimate. Each fallback-compiles to pure JS, so `--ignore-scripts` degrades gracefully. |
+| `protobufjs` | `node scripts/postinstall` | Resolves CLI shims; benign. |
+| `es5-ext` | `node -e "try{require('./_postinstall')}catch(e){}"` | Package behind the March 2024 protestware incident. Currently benign but single-maintainer — treat any `es5-ext` bump on its own merits. |
+| `web3`, `web3-bzz`, `web3-shh` | `echo` only | Harmless. |
+| `@swc/core` | `node postinstall.js` | Dev-only (not in production tree). |
+
+A new package entering the tree with an install script is caught automatically by the **install-hook audit job** in [.github/workflows/supply-chain.yml](./.github/workflows/supply-chain.yml). The job runs [`scripts/audit-install-hooks.mjs`](./scripts/audit-install-hooks.mjs) and diffs the set of packages declaring non-trivial `preinstall` / `install` / `postinstall` hooks against the checked-in allowlist at [`.supply-chain/install-hooks.allowlist`](./.supply-chain/install-hooks.allowlist). Any new name in the tree fails CI until the PR author explicitly updates the allowlist — at which point the allowlist diff becomes the reviewer's signal. Run `yarn audit:install-hooks:update` locally after any dependency change and commit the regenerated allowlist with the `package.json` / `yarn.lock` diff.
+
+The script filters out trivial hooks (`echo`, `true`, `:`, `exit 0`). Everything else counts, including wrapped `try/catch` shims like `es5-ext`'s postinstall — the point is to keep the surface explicit, not to triage "how scary" each hook is.
+
+**Web3 / monorepo-specific watches:**
+
+- [`wagmi`](https://www.npmjs.com/package/wagmi), [`viem`](https://www.npmjs.com/package/viem), [`@wagmi/core`](https://www.npmjs.com/package/@wagmi/core), [`@web3modal/*`](https://www.npmjs.com/package/@web3modal/wagmi), [`@web3auth/modal`](https://www.npmjs.com/package/@web3auth/modal), [`@binance/w3w-wagmi-connector-v2`](https://www.npmjs.com/package/@binance/w3w-wagmi-connector-v2) — wallet connector / EVM signing libraries. Scrutinize any bump: a compromised version could alter addresses or drain funds in downstream Pearl / Operate / Bond / Launch apps.
+- [`@solana/web3.js`](https://www.npmjs.com/package/@solana/web3.js), [`@solana/wallet-adapter-*`](https://www.npmjs.com/package/@solana/wallet-adapter-react), [`@coral-xyz/anchor`](https://www.npmjs.com/package/@coral-xyz/anchor), [`@orca-so/whirlpools-sdk`](https://www.npmjs.com/package/@orca-so/whirlpools-sdk), [`@project-serum/anchor`](https://www.npmjs.com/package/@project-serum/anchor) — Solana signing stack.
+- [`ethers`](https://www.npmjs.com/package/ethers) (v6, primary) + [`ethers-v5`](./package.json) (v5, aliased). Two parallel ethers versions both sign on behalf of users; audit both on any bump.
+- [`web3`](https://www.npmjs.com/package/web3) — large transitive tree; the web3 ecosystem has historically been a high-value target.
+- [`@safe-global/protocol-kit`](https://www.npmjs.com/package/@safe-global/protocol-kit), [`@gnosis.pm/safe-contracts`](https://www.npmjs.com/package/@gnosis.pm/safe-contracts) — Safe multisig interactions.
+- [`@vercel/blob`](https://www.npmjs.com/package/@vercel/blob) / [`@takumi-rs/*`](https://www.npmjs.com/package/@takumi-rs/image-response) — OG image generation path that reads Vercel runtime secrets in any app that uses it.
 
 ### 8. Secrets hygiene in the build environment
 
-- No long-lived secrets in CI env vars that a postinstall script could exfiltrate.
-- GitHub Actions secrets should be scoped per-workflow; avoid the `pull_request_target` trigger on PRs from forks.
-- Each app's build env vars in Vercel should be scoped to what that app needs — no deploy keys, no cloud provider credentials.
-- `.npmrc` / `.yarnrc` auth tokens: never committed.
+This is a multi-app monorepo: each deployed app (Bond, Build, Contribute, Docs, Govern, Launch, Marketplace, Operate, Pearl API) has its own Vercel project and its own set of environment variables (RPC URLs, subgraph URLs, API keys, Wallet Project ID, Etherscan keys, etc.) — see each app's `.env.example` for the exact list. There is no single centralized secrets surface, which is good for blast-radius isolation but makes per-app audit the auditor's responsibility.
+
+General hygiene:
+
+- **No long-lived secrets in CI env vars that a postinstall script could exfiltrate.** The app-level workflows in [.github/workflows/](./.github/workflows/) do not export repo or org secrets to the install step. [`.github/workflows/snyk-security.yml`](./.github/workflows/snyk-security.yml) uses `SNYK_TOKEN`, and as of the supply-chain hardening in this doc, the token is scoped **per-step** to the Snyk steps only — it is not set at the job level and is therefore not present in the environment during `yarn install --frozen-lockfile`. If a new job needs a secret, follow the same pattern: declare `env:` on the step that uses the secret, never on the job.
+- **`pull_request_target`** must not be used on PRs from forks (it exposes repo secrets to fork-controlled code). None of the current workflows use it.
+- **Per-app Vercel env vars:** anything only the running server needs (RPC URLs with keyed Alchemy/Infura endpoints, CMS API keys, `DUNE_API_KEY`-style metric-aggregator keys, Vercel Blob tokens, Etherscan API keys) must be marked **runtime-only** in the Vercel project settings so it is not present when `yarn install` runs. Build-time exposure is exactly what a compromised `postinstall` script exfiltrates. Audit each app's Vercel project periodically to confirm scoping.
+- **`NEXT_PUBLIC_*` variables** (subgraph URLs, Wallet Project ID, CMS URL, etc.) are inlined into the client bundle by Next.js and are visible to anyone who loads the site. Treat them as public configuration.
+- **RPC URLs are effectively secrets.** They typically embed an API key in the URL, and a compromised value can be used to drain our quota or impersonate reads from us. Do not mark an RPC URL `NEXT_PUBLIC_*` unless the endpoint is genuinely unkeyed.
+- **Vercel deploy tokens, GitHub tokens, and cloud-provider credentials** must never be available to the build environment of any app.
+- **`.npmrc` / `.yarnrc` auth tokens:** never committed. [`.gitignore`](./.gitignore) currently protects `.env`, `.env.local`, and `.env*.local` via the catch-all entry.
 
 ### 9. Dependency review on every new addition
 
@@ -84,32 +125,42 @@ Before adding a new direct dependency:
 - GitHub repo exists, is active, has reasonable star count and contributor history.
 - Maintainer is the expected one (check publish history: `npm view <pkg> time`).
 - No recently transferred ownership unless it's a known, announced transfer.
-- For wallet/signing/crypto libraries, additionally confirm the audit status on the project's site.
+- For wallet / signing / crypto libraries, additionally confirm the audit status on the project's site and check Socket.dev / Snyk advisories.
 
 ## Response playbook: "a dependency we use was just disclosed as compromised"
 
-1. **Identify exposure.** `yarn why <pkg>` — direct or transitive? Which version is in our lockfile? Which apps ship it?
-2. **Check the window.** When was the bad version published vs. when each app was last deployed? A Pearl-operate build from before the publish is safe in production, but any fresh `yarn install` would pull the bad one.
-3. **Pin to a safe version.** Edit `package.json` to a known-good version (or add a Yarn `resolutions` entry for transitive deps — the repo already uses resolutions, see root `package.json`). Commit lockfile.
-4. **Rotate secrets.** If the bad version ran on any CI job or dev machine since it was published, rotate anything it could have seen: npm tokens, Vercel deploy tokens, GitHub tokens, any `NEXT_PUBLIC_*` keys that are sensitive, CMS API keys, wallet-related secrets.
-5. **Redeploy every affected app.** `yarn nx build` for each app and redeploy. This is especially important if the compromised package touched wallet/signing paths.
+1. **Identify exposure.** `yarn why <pkg>` — direct or transitive? Which version is in our lockfile? Which apps ship it? (Use `yarn nx graph` or `yarn nx show project <app>` to map dep → deployed app.)
+2. **Check the window.** When was the bad version published vs. when each app was last deployed? An app last built from before the publish is safe in production, but any fresh `yarn install` would pull the bad one.
+3. **Pin to a safe version.** Edit `package.json` to a known-good version (or add a Yarn `resolutions` entry for transitive deps, following the exact-pinning rule in [§1](#1-exact-version-pinning-in-all-packagejson-files) — the repo already uses `resolutions`). Commit lockfile.
+4. **Rotate secrets per affected app.** If the bad version ran on any CI job or dev machine since it was published, rotate anything it could have seen: npm tokens, Vercel deploy tokens, GitHub tokens, the `SNYK_TOKEN`, and — for every affected app — its RPC URLs, CMS keys, subgraph API keys, wallet-related secrets, and any `NEXT_PUBLIC_*` keys that are actually sensitive. Because each app has its own Vercel project, scope the rotation to the apps whose builds or runtime actually imported the compromised package.
+5. **Redeploy every affected app.** `yarn nx build <app>` + Vercel redeploy for each one. This is especially important if the compromised package touched wallet / signing paths.
 6. **Post-mortem.** Record the incident: what package, which version, how we detected it, time-to-mitigate, what leaked (if anything). Update this document if a new class of attack needs a new policy.
 
 ## Current gaps / TODO
 
-- [x] Pin all direct dependencies in `package.json` (root) to exact versions.
-- [x] Pin deps in `libs/*/package.json` to exact versions.
-- [ ] Register / reserve the `@autonolas-frontend-mono` scope on npm, or rename to a scope we control.
-- [ ] Add `yarn audit` to CI (GitHub Actions) — wire into existing `.github/workflows`.
-- [ ] Evaluate Renovate with `minimumReleaseAge: "7 days"` to replace / supplement Dependabot.
-- [ ] Document which Vercel env vars are build-time vs runtime per app and scope accordingly.
-- [ ] Verify every app's deployment uses `--frozen-lockfile`.
-- [ ] Consider Socket.dev or Snyk integration for postinstall-script detection on the large Web3 dep tree.
+- [x] Pin all direct dependencies in [`package.json`](./package.json) (root) to exact versions.
+- [x] Pin deps in [`libs/*/package.json`](./libs/) to exact versions.
+- [x] Add a `packageManager` field to [`package.json`](./package.json) pinning `yarn@1.22.22`.
+- [x] Add `package-lock.json` / `pnpm-lock.yaml` to [`.gitignore`](./.gitignore) to prevent stray dual-lockfile creation.
+- [x] Add `yarn audit --groups dependencies` (with Yarn 1.x bitmask gating, **blocking on high/critical**) and `lockfile-lint` to CI — see [.github/workflows/supply-chain.yml](./.github/workflows/supply-chain.yml).
+- [x] Update every app workflow ([.github/workflows/build.yml](./.github/workflows/build.yml), [contribute.yml](./.github/workflows/contribute.yml), [govern.yml](./.github/workflows/govern.yml), [launch.yml](./.github/workflows/launch.yml), [marketplace.yml](./.github/workflows/marketplace.yml), [operate.yml](./.github/workflows/operate.yml)) to install with `yarn install --frozen-lockfile` instead of bare `yarn`.
+- [x] Remove unused `ipfs` direct dep from root [`package.json`](./package.json) (kills the `electron@1.8.8` + `wrtc` + `headless`-from-tarball transitive chain, unblocks `lockfile-lint`, clears `form-data` < 2.3.3 CVE).
+- [x] Bump direct deps with known CVEs: `axios` `1.2.1` → `1.7.7` (CVE-2023-45857, CVE-2024-39338), `node-fetch` `2.0.0` → `2.7.0` (CVE-2020-15168, CVE-2022-0235).
+- [x] Normalize `.github/workflows/marketplace.yml` from `actions/setup-node@v3` to `@v4` (the lone version outlier).
+- [x] Scope `SNYK_TOKEN` to Snyk steps only in [`.github/workflows/snyk-security.yml`](./.github/workflows/snyk-security.yml) (removes postinstall-exfil window).
+- [x] Pin transitive `axios@^0.24.x` reached via `@balancer-labs/sdk` to `1.7.7` with a Yarn `resolutions` entry (`"@balancer-labs/sdk/axios": "1.7.7"`). Clears CVE-2023-45857 / CVE-2024-39338 for the production tree. The remaining `axios@^0.21.x` / `axios@1.6.8` transitive entries are reached only through `cypress` and `nx` (devDependencies) and are out of scope for `yarn audit --groups dependencies`.
+- [x] Pin transitive `form-data` to `2.5.5` via a top-level Yarn `resolutions` entry (`"form-data": "2.5.5"`). Clears CVE-2024-42459 (affects `< 2.5.5` / `< 3.0.4` / `< 4.0.4`). Path-scoped resolutions (`"request/form-data"`, `"@cypress/request/form-data"`) were tried first but Yarn 1.x's `parent/child` resolution only hits when the parent is close to the root, which `request` isn't (it reaches the tree through six transitive hops via `web3 → web3-bzz → swarm-js → eth-lib → servify`). All `form-data` consumers — `axios`, `jsdom`, `cypress`, `@balancer-labs/sdk#graphql-request`, `nx`, `web3`, `@binance/w3w-*`, `@web3inbox/core`, etc. — now collapse to `form-data@2.5.5`. API is compatible across `form-data` `2.x` / `3.x` / `4.x`, so downgrading the `^3`/`^4` consumers to `2.5.5` is safe in practice. Yarn warns `"Resolution field \"form-data@2.5.5\" is incompatible with requested version \"form-data@^4.0.0\""` on install — that warning is expected and is just Yarn announcing the intentional override.
+- [x] Commit [`scripts/audit-install-hooks.mjs`](./scripts/audit-install-hooks.mjs) + [`.supply-chain/install-hooks.allowlist`](./.supply-chain/install-hooks.allowlist) and wire the `install-hook audit` job into [`.github/workflows/supply-chain.yml`](./.github/workflows/supply-chain.yml). A new package with a `preinstall` / `install` / `postinstall` script now fails CI until explicitly allowlisted.
+- [x] SHA-pin `actions/checkout`, `actions/setup-node`, and `actions/cache` in all six app workflows (`build`, `contribute`, `govern`, `launch`, `marketplace`, `operate`) to match the pattern already used in [snyk-security.yml](./.github/workflows/snyk-security.yml) and [supply-chain.yml](./.github/workflows/supply-chain.yml). Audit the pins periodically — at minimum once per major release of each action — until a bot with `pinDigests: true` is in place.
+- [ ] SHA-pin [.github/workflows/gitleaks.yml](./.github/workflows/gitleaks.yml) (currently `actions/checkout@v3` + `actions/setup-go@v3`) — same rationale as the app workflows above.
+- [ ] Register / reserve the `@autonolas-frontend-mono` scope on npm, or rename to a scope we already control.
+- [ ] Audit Vercel env-var scoping per app — every secret (RPC URLs, subgraph keys, CMS keys, Blob tokens, Wallet Project ID if it is ever moved to non-public scope) must be marked **runtime-only** in each app's Vercel project. Build-time exposure is exactly what a compromised `postinstall` script exfiltrates.
+- [ ] Verify every app's Vercel install command is `yarn install --frozen-lockfile` (either via a per-app `vercel.json` or the Vercel dashboard).
 
 ## References
 
-- [npm supply chain attacks — OWASP overview](https://owasp.org/www-project-top-10-ci-cd-security-risks/)
 - [GitHub advisory database](https://github.com/advisories)
 - [Socket.dev](https://socket.dev/) — supply chain scanner with postinstall script detection
-- [Shai-Hulud npm worm writeup (2025)](https://socket.dev/blog/shai-hulud-worm) — representative of modern npm worm class
+- [Shai-Hulud Strikes Again (v2) — Socket, Nov 2025](https://socket.dev/blog/shai-hulud-strikes-again-v2) — representative of modern npm worm class (500+ packages, 700+ versions affected)
 - [Dependency confusion — Alex Birsan's original writeup](https://medium.com/@alex.birsan/dependency-confusion-4a5d60fec610)
+- [lockfile-lint](https://github.com/lirantal/lockfile-lint) — validates `resolved` URLs, HTTPS, and integrity hashes in `yarn.lock`

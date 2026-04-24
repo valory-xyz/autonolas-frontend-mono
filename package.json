@@ -2,9 +2,14 @@
   "name": "@autonolas-frontend-mono/source",
   "version": "0.0.0",
   "license": "MIT",
+  "packageManager": "yarn@1.22.22",
   "scripts": {
     "build-all": "yarn nx build bond && yarn nx build build && yarn nx build contribute && yarn nx build docs && yarn nx build govern && yarn nx build launch && yarn nx build marketplace && yarn nx build operate && yarn nx build pearl-api",
-    "lint:fix-all": "yarn nx lint --fix bond && yarn nx lint --fix build && yarn nx lint --fix contribute && yarn nx lint --fix docs && yarn nx lint --fix govern && yarn nx lint --fix launch && yarn nx lint --fix marketplace && yarn nx lint --fix operate && yarn nx lint --fix pearl-api"
+    "lint:fix-all": "yarn nx lint --fix bond && yarn nx lint --fix build && yarn nx lint --fix contribute && yarn nx lint --fix docs && yarn nx lint --fix govern && yarn nx lint --fix launch && yarn nx lint --fix marketplace && yarn nx lint --fix operate && yarn nx lint --fix pearl-api",
+    "audit": "yarn audit --groups dependencies",
+    "audit:install-hooks": "node scripts/audit-install-hooks.mjs",
+    "audit:install-hooks:update": "node scripts/audit-install-hooks.mjs --update",
+    "lint:lockfile": "lockfile-lint --path yarn.lock --type yarn --allowed-hosts registry.yarnpkg.com registry.npmjs.org --validate-https --validate-integrity"
   },
   "private": true,
   "dependencies": {
@@ -40,7 +45,7 @@
     "@web3inbox/widget-react": "0.6.25",
     "@web3modal/wagmi": "4.1.11",
     "antd": "5.16.4",
-    "axios": "1.2.1",
+    "axios": "1.7.7",
     "bignumber.js": "9.1.2",
     "cors": "2.8.5",
     "dayjs": "1.11.9",
@@ -51,7 +56,6 @@
     "express": "4.19.2",
     "graphql": "16.8.1",
     "graphql-request": "6.1.0",
-    "ipfs": "0.63.5",
     "ipfs-http-client": "57.0.3",
     "ipfs-only-hash": "4.0.0",
     "isomorphic-dompurify": "2.36.0",
@@ -61,7 +65,7 @@
     "next": "14.2.35",
     "next-redux-wrapper": "8.1.0",
     "next-safe": "3.5.0",
-    "node-fetch": "2.0.0",
+    "node-fetch": "2.7.0",
     "p-debounce": "4.0.0",
     "prop-types": "15.8.1",
     "react": "18.2.0",
@@ -146,6 +150,7 @@
     "jest-environment-jsdom": "29.7.0",
     "jest-environment-node": "29.7.0",
     "jsdom": "22.1.0",
+    "lockfile-lint": "5.0.0",
     "next-router-mock": "0.9.13",
     "nx": "v17.2.5",
     "prettier": "3.3.3",
@@ -158,6 +163,8 @@
     "vitest": "1.5.0"
   },
   "resolutions": {
-    "@gnosis.pm/safe-contracts/ethers": "5.7.2"
+    "@gnosis.pm/safe-contracts/ethers": "5.7.2",
+    "@balancer-labs/sdk/axios": "1.7.7",
+    "form-data": "2.5.5"
   }
 }

@@ -8,6 +8,10 @@ tmp
 # dependencies
 node_modules
 
+# Only yarn.lock is authoritative — block stray npm / pnpm lockfiles
+package-lock.json
+pnpm-lock.yaml
+
 # IDEs and editors
 /.idea
 .project

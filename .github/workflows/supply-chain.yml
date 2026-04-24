@@ -1,0 +1,109 @@
+name: Supply Chain
+
+on:
+  push:
+    branches:
+      - main
+      - staging
+  pull_request:
+    branches:
+      - main
+      - staging
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    name: yarn audit (production deps)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
+
+      - name: Setup Node.js
+        uses: actions/setup-node@1e60f620b9541d16bece96c5465dc8ee9832be0b # v4.0.3
+        with:
+          node-version: '22.x'
+
+      - name: Pin Yarn via corepack
+        run: |
+          corepack enable
+          corepack prepare yarn@1.22.22 --activate
+          yarn --version
+
+      # Yarn 1.x `yarn audit` exits with a severity bitmask
+      # (1=info, 2=low, 4=moderate, 8=high, 16=critical) rather than a
+      # threshold comparison against --level. `--level high` filters
+      # printed output but does NOT affect the exit code. Gate on the
+      # raw exit code: fail only if the high|critical bits (8|16 = 24)
+      # are set. Production-tree only (`--groups dependencies`) — dev
+      # tooling (ESLint / Babel / TypeScript / Storybook / types)
+      # generates substantial transitive-advisory noise and does not
+      # ship to users.
+      - name: Run yarn audit (fail on high/critical in production tree)
+        run: |
+          set +e
+          yarn audit --groups dependencies
+          exit_code=$?
+          echo "yarn audit exit code: $exit_code"
+          # Bit 8 = high, bit 16 = critical → mask 24.
+          if [ $(( exit_code & 24 )) -ne 0 ]; then
+            echo "::error::yarn audit reported HIGH or CRITICAL advisories in the production dependency tree."
+            exit 1
+          fi
+          echo "No high/critical advisories in the production dependency tree."
+          exit 0
+
+  lockfile-lint:
+    name: lockfile-lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
+
+      - name: Setup Node.js
+        uses: actions/setup-node@1e60f620b9541d16bece96c5465dc8ee9832be0b # v4.0.3
+        with:
+          node-version: '22.x'
+
+      - name: Pin Yarn via corepack
+        run: |
+          corepack enable
+          corepack prepare yarn@1.22.22 --activate
+          yarn --version
+
+      - name: Install dependencies (frozen)
+        run: yarn install --frozen-lockfile
+
+      - name: Validate yarn.lock registry origins and integrity
+        run: yarn lint:lockfile
+
+  install-hooks:
+    # Diff the set of packages declaring non-trivial install hooks against
+    # .supply-chain/install-hooks.allowlist. A new package with an install
+    # hook (new attack surface during `yarn install`) fails the job and
+    # forces the PR author to explicitly add it to the allowlist — which
+    # becomes the reviewer's signal. See SUPPLY-CHAIN-SECURITY.md §7.
+    name: install-hook audit
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
+
+      - name: Setup Node.js
+        uses: actions/setup-node@1e60f620b9541d16bece96c5465dc8ee9832be0b # v4.0.3
+        with:
+          node-version: '22.x'
+
+      - name: Pin Yarn via corepack
+        run: |
+          corepack enable
+          corepack prepare yarn@1.22.22 --activate
+          yarn --version
+
+      - name: Install dependencies (frozen)
+        run: yarn install --frozen-lockfile
+
+      - name: Diff install-hook surface against allowlist
+        run: yarn audit:install-hooks
