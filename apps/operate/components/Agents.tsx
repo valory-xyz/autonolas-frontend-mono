@@ -55,7 +55,7 @@ const agents: Agent[] = [
     name: 'Omenstrat',
     description: 'Trades Omen prediction markets on autopilot while you do something else.',
     comingSoon: false,
-    availableOn: ['pearl', 'quickstart'],
+    availableOn: ['pearl'],
     urls: {
       learnMore: 'https://olas.network/agents/omenstrat',
     },
@@ -66,7 +66,7 @@ const agents: Agent[] = [
     name: 'Optimus',
     description: 'Intelligently manages your DeFi assets across multiple blockchains.',
     comingSoon: false,
-    availableOn: ['pearl', 'quickstart'],
+    availableOn: ['pearl'],
     urls: {
       learnMore: 'https://olas.network/agents/babydegen#optimus-agent',
     },
@@ -174,8 +174,8 @@ const WantPeopleToRunYourAgent = () => (
         Want people to run your agent?
       </Title>
       <Paragraph type="secondary" className="mb-24">
-        Build an autonomous service using Open Autonomy. Then, simply submit a pull request
-        including the quickstart.
+        Build an autonomous service using Open Autonomy. Then, simply submit a pull request to add
+        it.
       </Paragraph>
       <Button
         type="default"

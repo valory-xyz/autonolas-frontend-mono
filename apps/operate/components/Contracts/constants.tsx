@@ -30,7 +30,6 @@ export const CHAIN_LOGOS: Partial<Record<number, string>> = {
 
 export const PLATFORM_OPTIONS: { value: AvailableOn; label: string }[] = [
   { value: 'pearl', label: 'Pearl' },
-  { value: 'quickstart', label: 'Quickstart' },
   { value: 'contribute', label: 'Contribute' },
 ];
 

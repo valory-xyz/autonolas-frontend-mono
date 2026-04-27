@@ -1,6 +1,6 @@
 import { getPublicClient } from '@wagmi/core';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { ContractCacheSnapshot, Nominee, StakingContract } from 'types';
+import { AvailableOn, ContractCacheSnapshot, Nominee, StakingContract } from 'types';
 import { Abi, Address, Block, formatUnits } from 'viem';
 import { getBlock } from 'viem/actions';
 import { useReadContracts } from 'wagmi';
@@ -22,6 +22,15 @@ import {
   getStakeRequired,
   getTimeRemainingFormatted,
 } from 'common-util/constants/contracts';
+
+import { PLATFORM_OPTIONS } from './constants';
+
+const VALID_AVAILABLE_ON = new Set<AvailableOn>(PLATFORM_OPTIONS.map((o) => o.value));
+
+const sanitizeAvailableOn = (value: unknown): AvailableOn[] | null => {
+  if (!Array.isArray(value)) return null;
+  return value.filter((p): p is AvailableOn => VALID_AVAILABLE_ON.has(p as AvailableOn));
+};
 
 const useContractDetails = (nominees: Nominee[], functionName: string) => {
   const contracts = nominees.map((nominee) => ({
@@ -422,7 +431,7 @@ export const useStakingContractsList = () => {
         maxSlots,
         apy,
         stakeRequired,
-        availableOn: details?.availableOn ?? null,
+        availableOn: sanitizeAvailableOn(details?.availableOn),
         availableRewards,
         epoch,
         timeRemaining,
