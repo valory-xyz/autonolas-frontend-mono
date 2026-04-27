@@ -2,9 +2,10 @@ import { Button, Flex } from 'antd';
 import { BaseButtonProps } from 'antd/es/button/button';
 import { NotificationOutlined } from '@ant-design/icons';
 import Image from 'next/image';
+import { ReactNode } from 'react';
 import { AvailableOn } from 'types';
 
-import { QUICKSTART_REPO_URL, UNICODE_SYMBOLS } from 'libs/util-constants/src';
+import { UNICODE_SYMBOLS } from 'libs/util-constants/src';
 
 type RunAgentButtonProps = {
   availableOn: AvailableOn;
@@ -12,18 +13,11 @@ type RunAgentButtonProps = {
   className?: string;
 };
 
-const QUICKSTART_URL = `${QUICKSTART_REPO_URL}?tab=readme-ov-file#olas-agents---quickstart`;
-
-const props = {
+const props: Record<AvailableOn, { icon: ReactNode; text: string; href: string }> = {
   pearl: {
     icon: <Image src={`/images/pearl.svg`} alt="Pearl app" width={18} height={18} />,
     text: 'Pearl',
     href: 'https://www.pearl.you/',
-  },
-  quickstart: {
-    icon: <Image src={`/images/github.svg`} alt="Github" width={18} height={18} />,
-    text: 'Quickstart',
-    href: QUICKSTART_URL,
   },
   contribute: {
     icon: <NotificationOutlined width={18} height={18} />,

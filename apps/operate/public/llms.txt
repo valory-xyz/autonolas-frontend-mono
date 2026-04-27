@@ -4,13 +4,13 @@
 
 ## Overview
 
-Operate is the Olas app that helps operators find staking opportunities and AI agents to run. It lists all live staking contracts with their APY, available slots, rewards, and stake requirements, and shows which agents can be run via Pearl (desktop app), Quickstart (CLI), or Contribute (web app).
+Operate is the Olas app that helps operators find staking opportunities and AI agents to run. It lists all live staking contracts with their APY, available slots, rewards, and stake requirements, and shows which agents can be run via Pearl (desktop app) or Contribute (web app).
 
 ## Key Features
 
-- Staking Contracts: Browse live staking contracts with details on APY, available slots, rewards pool, stake required, and epoch timing. Filter by chain and platform. Launch Pearl, Quickstart, or Contribute directly from each contract.
+- Staking Contracts: Browse live staking contracts with details on APY, available slots, rewards pool, stake required, and epoch timing. Filter by chain and platform. Launch Pearl or Contribute directly from each contract.
 - AI Agents: View available agents including Prediction Agent, Optimus Agent, Modius Agent, and Agents.fun agent with descriptions and platform availability.
-- Documentation: Step-by-step guides for setting up Pearl (desktop) or Quickstart (CLI) to run agents and earn staking rewards.
+- Documentation: Step-by-step guide for setting up Pearl (desktop) to run agents and earn staking rewards.
 
 ## Documentation
 

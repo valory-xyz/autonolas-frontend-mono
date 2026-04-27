@@ -142,9 +142,6 @@ const getTableColumns = (): ColumnsType<StakingContract> => [
           <>
             <Text strong>Pearl</Text> - desktop app for non-technical users to run agents.
             <br />
-            <Text strong>Quickstart</Text> - script for technical users to run agents with more
-            flexibility.
-            <br />
             <Text strong>Contribute</Text> - web app that enables you to get rewards for posting
             about Olas on X.
           </>
@@ -212,8 +209,8 @@ export const ContractsPage = () => {
           Staking contracts
         </Title>
         <Caption className="block mb-24">
-          Browse staking opportunities and start running them via Pearl or Quickstart for the
-          opportunity to earn OLAS rewards.
+          Browse staking opportunities and start running them via Pearl for the opportunity to earn
+          OLAS rewards.
         </Caption>
 
         <LiveNotAvailableSwitch
