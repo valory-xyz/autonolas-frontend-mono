@@ -20,12 +20,26 @@ const ALLOWLIST_PATH = resolve(ROOT, '.supply-chain/audit-allowlist.json');
 
 function loadAllowlist() {
   if (!existsSync(ALLOWLIST_PATH)) return { entries: [] };
+  let data;
   try {
-    return JSON.parse(readFileSync(ALLOWLIST_PATH, 'utf8'));
+    data = JSON.parse(readFileSync(ALLOWLIST_PATH, 'utf8'));
   } catch (err) {
     console.error(`::error::failed to parse ${ALLOWLIST_PATH}: ${err.message}`);
     process.exit(2);
   }
+  for (const entry of data.entries || []) {
+    const errors = [];
+    if (typeof entry.id !== 'number') errors.push('`id` must be a number');
+    if (typeof entry.reason !== 'string' || !entry.reason.trim()) errors.push('`reason` is required');
+    if (typeof entry.review !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(entry.review)) {
+      errors.push('`review` must be YYYY-MM-DD');
+    }
+    if (errors.length) {
+      console.error(`::error::malformed entry in ${ALLOWLIST_PATH}: ${errors.join('; ')} — ${JSON.stringify(entry)}`);
+      process.exit(2);
+    }
+  }
+  return data;
 }
 
 function runYarnAudit() {
@@ -104,9 +118,13 @@ for (const { advisory, paths } of advisories) {
   }
 }
 
-// Entries allowlisted but no longer present in the tree — allowlist drift.
+// Entries allowlisted but no longer suppressing a high/critical advisory — drift.
+// Compare against the *suppressed* set, not the full advisory list: an advisory
+// whose severity has dropped below high/critical still appears in `advisories`,
+// but the allowlist entry is no longer doing any work.
+const suppressedIds = new Set(suppressed.map(({ advisory }) => advisory.id));
 for (const entry of allowlist.entries || []) {
-  if (!advisories.find((x) => x.advisory.id === entry.id)) {
+  if (!suppressedIds.has(entry.id)) {
     stale.push(entry);
   }
 }
