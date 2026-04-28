@@ -61,6 +61,7 @@ const AGENT_POLICIES: Record<AgentId, AgentPolicy> = {
       'ML', // Mali
       'MM', // Myanmar
       'NI', // Nicaragua
+      'NL', // Netherlands
       'PL', // Poland
       'RU', // Russia
       'SD', // Sudan
