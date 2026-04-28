@@ -1,0 +1,25 @@
+# .supply-chain/install-hooks.allowlist
+#
+# Every package in node_modules that declares a non-trivial
+# preinstall / install / postinstall script. Regenerate with
+# `node scripts/audit-install-hooks.mjs --update` after any
+# dependency change. CI runs the same script without --update
+# and fails if this file drifts from the tree.
+#
+# See SUPPLY-CHAIN-SECURITY.md §7 for the per-package rationale
+# (node-gyp-build native bindings, benign shim resolvers, etc.).
+
+@swc/core  # postinstall: node postinstall.js
+bigint-buffer  # install: npm run rebuild || echo "Couldn't build bindings. Non-native version used."
+blake-hash  # install: node-gyp-build || exit 0
+bufferutil  # install: node-gyp-build
+cypress  # postinstall: node index.js --exec install
+es5-ext  # postinstall: node -e "try{require('./_postinstall')}catch(e){}" || exit 0
+esbuild  # postinstall: node install.js
+keccak  # install: node-gyp-build || exit 0
+nx  # postinstall: node ./bin/post-install
+protobufjs  # postinstall: node scripts/postinstall
+secp256k1  # install: node-gyp-build || exit 0
+tiny-secp256k1  # install: npm run build || echo "secp256k1 bindings compilation fail. Pure JS implementation will be used."
+usb  # install: node-gyp-build
+utf-8-validate  # install: node-gyp-build
