@@ -39,8 +39,13 @@ const MAX_DEPTH = 20;
 
 // Hook commands we treat as trivial (no-op / log only). Everything else
 // counts as "carries an install hook".
+//
+// The echo pattern uses a negative lookahead to reject any shell metachar
+// that could chain a real command (e.g. `echo "ok" && node install.js`,
+// `echo $(curl …)`). Without this, an attacker prefixing `echo ` would slip
+// past the trivial filter.
 const TRIVIAL = [
-  /^echo(\s|$)/,
+  /^(?!.*[&|;`$()<>])echo(\s|$)/,
   /^true$/,
   /^:$/,
   /^exit\s+0$/,
@@ -53,7 +58,15 @@ function isTrivial(cmd) {
   return TRIVIAL.some((r) => r.test(t));
 }
 
-/** Recursively walk node_modules, yielding every package.json path. */
+/**
+ * Recursively walk node_modules, yielding every package.json path.
+ * Symlinked entries are skipped (Dirent.isDirectory() is false on a symlink) —
+ * rare in this tree because Yarn 1.x + Nx use TS path aliases for internal
+ * libs rather than node_modules symlinks. Out of scope for the registry-
+ * published-malicious-package threat model; if a workflow change ever
+ * introduces symlinked deps, this needs to follow symlinks via realpathSync
+ * with cycle detection.
+ */
 function* walkPackageJsons(dir, depth = 0) {
   if (depth > MAX_DEPTH) return;
   let entries;

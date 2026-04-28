@@ -55,6 +55,9 @@ function runYarnAudit() {
     let stderr = '';
     child.stdout.on('data', (d) => (stdout += d));
     child.stderr.on('data', (d) => (stderr += d));
+    // Without this, a spawn failure (yarn missing from PATH, EACCES, etc.)
+    // never fires `close` and the promise hangs to the CI job timeout.
+    child.on('error', (err) => resolvePromise({ stdout: '', stderr: String(err), code: 127 }));
     child.on('close', (code) => resolvePromise({ stdout, stderr, code }));
   });
 }
