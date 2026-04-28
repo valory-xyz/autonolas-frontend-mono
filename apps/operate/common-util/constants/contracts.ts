@@ -64,18 +64,6 @@ export const STAKING_CONTRACT_DETAILS: Record<Address, StakingContractDetailsInf
   '0x000000000000000000000000ca61633b03c54f64b6a7f1f9a9c0a6feb231cc4d': {
     availableOn: ['pearl'],
   },
-  // Contribute Beta I
-  '0x000000000000000000000000e2e68ddafbdc0ae48e39cdd1e778298e9d865cf4': {
-    availableOn: ['contribute'],
-  },
-  // Contribute Beta II
-  '0x0000000000000000000000006ce93e724606c365fc882d4d6dfb4a0a35fe2387': {
-    availableOn: ['contribute'],
-  },
-  // Contribute Beta III
-  '0x00000000000000000000000028877ffc6583170a4c9ed0121fc3195d06fd3a26': {
-    availableOn: ['contribute'],
-  },
   // Agents.fun 1
   '0x0000000000000000000000002585e63df7bd9de8e058884d496658a030b5c6ce': {
     availableOn: ['pearl'],
