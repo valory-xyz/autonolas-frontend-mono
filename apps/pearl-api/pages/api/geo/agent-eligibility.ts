@@ -45,6 +45,7 @@ const AGENT_POLICIES: Record<AgentId, AgentPolicy> = {
       'BY', // Belarus
       'CD', // Democratic Republic of Congo
       'CF', // Central African Republic
+      'CH', // Switzerland
       'CU', // Cuba
       'DE', // Germany
       'ER', // Eritrea
