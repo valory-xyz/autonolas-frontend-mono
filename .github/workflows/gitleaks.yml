@@ -7,14 +7,29 @@ on:
     branches:
       - main
 
+permissions:
+  contents: read
+
 jobs:
   scan:
     name: Gitleaks
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v3
+      # SHA-pinned to match the rest of the repo (snyk-security.yml,
+      # supply-chain.yml). Bumps actions/checkout v3 -> v4.1.7. See
+      # SUPPLY-CHAIN-SECURITY.md §5 — this was the last unpinned-action
+      # workflow. Behavior unchanged: same checkout semantics, same
+      # fetch-depth.
+      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
         with:
           fetch-depth: 0
+      # actions/setup-go remains unpinned (@v3) for now — the gitleaks
+      # binary downloaded below does not depend on Go at runtime, but
+      # this is left exactly as it was to avoid any behavior change
+      # outside the actions/checkout pin above. Tracked in
+      # SUPPLY-CHAIN-SECURITY.md TODOs as part of the gitleaks workflow
+      # hardening pass (bump binary version + checksum verification).
       - uses: actions/setup-go@v3
         with:
           go-version: '1.17.7'
