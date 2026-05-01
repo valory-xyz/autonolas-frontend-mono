@@ -1,0 +1,122 @@
+# Dependabot config for supply-chain hygiene.
+#
+# Behaviour-only: opens PRs for review. No auto-merge configured here.
+# Direct deps in package.json are pinned to exact versions per
+# SUPPLY-CHAIN-SECURITY.md §1, so `versioning-strategy: increase`
+# keeps the pin exact when Dependabot bumps a dep (a range strategy
+# would silently widen the pin).
+#
+# See SUPPLY-CHAIN-SECURITY.md §5 (cooldown) and §6 (audit gates) —
+# every Dependabot PR still has to pass yarn audit:prod, lockfile-lint,
+# and install-hook audit before it can be merged.
+version: 2
+updates:
+  # 1. npm dependencies (root package.json — single workspace)
+  #
+  # `directory: "/"` — this Nx monorepo has no Yarn/npm workspaces
+  # declared in the root package.json (Nx uses path aliases in
+  # tsconfig.base.json instead), so all deps live at the root and
+  # Dependabot only needs to scan one directory. Per-app
+  # apps/*/project.json files are Nx config, not package manifests,
+  # and contain no deps to surface.
+  - package-ecosystem: npm
+    directory: "/"
+    schedule:
+      interval: weekly
+      day: monday
+      time: "06:00"
+      timezone: Etc/UTC
+    open-pull-requests-limit: 10
+    versioning-strategy: increase
+    labels:
+      - dependencies
+      - supply-chain
+    commit-message:
+      prefix: chore
+      include: scope
+    # Group low-risk updates so reviewers aren't drowned in PRs.
+    groups:
+      types:
+        patterns:
+          - "@types/*"
+      eslint:
+        patterns:
+          - "eslint"
+          - "eslint-*"
+          - "@typescript-eslint/*"
+      jest:
+        patterns:
+          - "jest"
+          - "jest-*"
+          - "babel-jest"
+          - "@types/jest"
+      vitest:
+        patterns:
+          - "vitest"
+          - "@vitest/*"
+      storybook:
+        patterns:
+          - "@storybook/*"
+          - "storybook"
+      nx:
+        patterns:
+          - "nx"
+          - "@nx/*"
+      babel:
+        patterns:
+          - "@babel/*"
+          - "babel-*"
+      ant-design:
+        patterns:
+          - "antd"
+          - "@ant-design/*"
+      wagmi-viem:
+        patterns:
+          - "wagmi"
+          - "viem"
+          - "@wagmi/*"
+    # Ignore majors that need coordinated migration; bump manually.
+    # `next` is also tracked as the migration that clears advisories
+    # 1112653 / 1116376 — see .supply-chain/audit-allowlist.json.
+    ignore:
+      - dependency-name: "next"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "react"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "react-dom"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "antd"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "nx"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "@nx/*"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "eslint"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "@storybook/*"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "storybook"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "@types/node"
+        update-types: ["version-update:semver-major"]
+
+  # 2. GitHub Actions — every workflow file in .github/workflows
+  - package-ecosystem: github-actions
+    directory: "/"
+    schedule:
+      interval: weekly
+      day: monday
+      time: "06:00"
+      timezone: Etc/UTC
+    open-pull-requests-limit: 5
+    labels:
+      - github-actions
+      - supply-chain
+    commit-message:
+      prefix: chore
+      include: scope
+    groups:
+      actions-minor-and-patch:
+        update-types:
+          - minor
+          - patch

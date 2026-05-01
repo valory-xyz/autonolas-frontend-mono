@@ -188,15 +188,18 @@ ESLint enforces import ordering (configured in .eslintrc.json):
 
 ## Code Style
 
-- Prettier formatting with:
+- Prettier formatting (run via the `prettier/prettier` ESLint rule — no separate `.prettierrc.*` file):
   - Single quotes
   - 100 character line width
   - Semicolons required
-  - Trailing commas
+  - Trailing commas (multiline)
+  - 2-space indent
+- The Prettier config lives **only** in [.eslintrc.json](.eslintrc.json) under `rules → prettier/prettier`, with `usePrettierrc: false` so a stray `.prettierrc.*` cannot reintroduce a clash.
 - TypeScript strict mode enabled
 - **Never use `any` type** — always use proper typed casts, type guards, or specific types instead of `as any` or `: any`
 - Console statements: only `console.warn` and `console.error` allowed (no console.log)
-- ESLint extends next/core-web-vitals and prettier
+- ESLint extends `next/core-web-vitals` and `plugin:prettier/recommended`
+- Note: the `importOrder` block in the prettier rule is intentionally retained but **inert** — the `@trivago/prettier-plugin-sort-imports` plugin is not loaded into the prettier-rule options, so existing files are not reordered. To activate import sorting, add `"plugins": ["@trivago/prettier-plugin-sort-imports"]` to the rule options and run `yarn nx lint <app> --fix` across the workspace; do this in a focused PR since it will reshape many import blocks.
 
 ## Testing
 
@@ -217,6 +220,23 @@ ESLint enforces import ordering (configured in .eslintrc.json):
 - Ethers v6 (and v5 as ethers-v5)
 - Ant Design 5.9.0
 - Styled-components 6.0.7
+
+## Supply Chain & Security
+
+This repo has a hardened supply-chain setup. **Read [SUPPLY-CHAIN-SECURITY.md](SUPPLY-CHAIN-SECURITY.md) before changing dependencies, install scripts, or CI workflows** — there's policy and tooling here that isn't obvious from the file tree.
+
+Key things to know:
+
+- **Direct deps are pinned to exact versions** in [package.json](package.json) — no `^`, no `~`. The `resolutions` block (32+ entries) pins transitive deps too. When adding or bumping a dep, use exact versions and review the `yarn.lock` diff.
+- **Yarn is pinned** via `packageManager: yarn@1.22.22`. CI activates this version explicitly via `corepack`. Do not use npm or pnpm.
+- **Three blocking CI gates** run on every PR via [.github/workflows/supply-chain.yml](.github/workflows/supply-chain.yml):
+  - `yarn audit:prod` ([scripts/audit.mjs](scripts/audit.mjs)) — fails on unlisted high/critical advisories in the production tree. Allowlist (with reason + review date) is in [.supply-chain/audit-allowlist.json](.supply-chain/audit-allowlist.json).
+  - `yarn lint:lockfile` — validates `yarn.lock` registry origins, HTTPS, integrity hashes.
+  - `yarn audit:install-hooks` ([scripts/audit-install-hooks.mjs](scripts/audit-install-hooks.mjs)) — diffs the set of packages with `pre/post/install` scripts against [.supply-chain/install-hooks.allowlist](.supply-chain/install-hooks.allowlist). A new install hook in the tree fails CI.
+- **After any dependency change**, run `yarn install` then `yarn audit:install-hooks:update` and commit the regenerated allowlist alongside the `package.json` / `yarn.lock` diff.
+- **Adding a new env var**: anything not prefixed `NEXT_PUBLIC_` is server-only and won't ship to the browser. Anything prefixed `NEXT_PUBLIC_` is inlined into the client bundle — treat it as public configuration. RPC URLs with embedded API keys must NOT be `NEXT_PUBLIC_*` unless the endpoint is genuinely unkeyed.
+- **GitHub Actions**: SHA-pin every action you add. The pattern in [.github/workflows/snyk-security.yml](.github/workflows/snyk-security.yml) and [.github/workflows/supply-chain.yml](.github/workflows/supply-chain.yml) is the example to follow.
+- **Vulnerability reporting**: see [SECURITY.md](SECURITY.md).
 
 ## Contributing
 

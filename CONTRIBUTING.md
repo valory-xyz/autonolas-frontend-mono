@@ -37,7 +37,24 @@ docs: update CONTRIBUTING.md with testing guidelines
 1. Run the affected app: `yarn nx run <app-name>:serve`
 2. Lint: `yarn nx lint <app-name> --fix`
 3. Test: `yarn nx test <app-name>`
-4. Rebase on the base branch and ensure CI passes.
+4. If your change touched [package.json](package.json), [yarn.lock](yarn.lock), or any file under [.github/workflows/](.github/workflows/) or [.supply-chain/](.supply-chain/), run the supply-chain gates: `yarn supply-chain`.
+5. Rebase on the base branch and ensure CI passes.
+
+## Adding or updating dependencies
+
+This repo treats the dep tree as a security boundary — see [SUPPLY-CHAIN-SECURITY.md](SUPPLY-CHAIN-SECURITY.md) for the full policy. Quick rules for contributors:
+
+- **Pin to exact versions.** Use `"1.2.3"`, never `"^1.2.3"` / `"~1.2.3"` / `">=1.2.3"` — in `dependencies`, `devDependencies`, and any `resolutions` entry. The `^`/`~` ranges let a compromised patch enter the tree silently; exact pins make every version change a reviewable diff.
+- **Cooldown on bumps.** Prefer dep versions that are at least **7 days old** (most malicious publishes are caught within hours to days). Exception: bumps for a disclosed CVE — note the advisory ID in the PR description.
+- **Review the new dep first** ([§9](SUPPLY-CHAIN-SECURITY.md#9-dependency-review-on-every-new-addition)): npm download count, GitHub repo activity, maintainer history (`npm view <pkg> time`). For wallet/signing/crypto libraries, additionally check the audit status on Socket.dev or Snyk.
+- **If a new package brings a `pre/post/install` hook**, the install-hook audit job will fail until you add it to the allowlist. After `yarn install`:
+  ```
+  yarn audit:install-hooks:update
+  git add .supply-chain/install-hooks.allowlist
+  ```
+  Commit the regenerated allowlist alongside `package.json` / `yarn.lock`.
+- **Run `yarn supply-chain` locally** before pushing — it runs all three gates (`audit:prod`, `lint:lockfile`, `audit:install-hooks`) that block CI.
+- **High/critical advisory in the production tree?** Either bump the dep, add an exact-pinned `resolutions` entry, or add the advisory to [.supply-chain/audit-allowlist.json](.supply-chain/audit-allowlist.json) with a reason and review date.
 
 ## Code quality
 
@@ -55,7 +72,7 @@ docs: update CONTRIBUTING.md with testing guidelines
 
 - **Setup**: [README](README.md)
 - **Issues**: Search or open an issue on GitHub
-- **Security**: See [SECURITY.md](https://github.com/valory-xyz/autonolas-frontend-mono/security/policy)
+- **Security**: [SECURITY.md](SECURITY.md) for vulnerability reporting; [SUPPLY-CHAIN-SECURITY.md](SUPPLY-CHAIN-SECURITY.md) for the dep / install-hook / lockfile policy.
 
 ## License
 

@@ -56,3 +56,13 @@ ganache_data
 .unlighthouse
 .swc
 *.tsbuildinfo
+
+# Per-developer scratch space for local planning notes, design drafts,
+# task breakdowns, etc. Not committed.
+/.plans
+
+# One-off supply-chain audit artifacts (yarn audit / outdated / SBOM
+# snapshots). The living doc is SUPPLY-CHAIN-SECURITY.md and the
+# allowlists in .supply-chain/. Anything left in /audit/ is a snapshot
+# of a moment in time and goes stale quickly.
+/audit/

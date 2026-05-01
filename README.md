@@ -53,5 +53,11 @@ See [CLAUDE.md](CLAUDE.md) for detailed architecture, commands, and conventions.
   Types: [Conventional commit types](https://gist.github.com/qoomon/5dfcdf8eec66a051ecd85625518cfd13#types).
 - Full guidelines: [CONTRIBUTING.md](CONTRIBUTING.md).
 
+## Security
+
+- Vulnerability reporting and disclosure process: [SECURITY.md](SECURITY.md).
+- Supply-chain policy (dep pinning, install-hook auditing, lockfile review, response playbook): [SUPPLY-CHAIN-SECURITY.md](SUPPLY-CHAIN-SECURITY.md).
+- Run all supply-chain CI gates locally: `yarn supply-chain`.
+
 ## License
 ![MIT](https://img.shields.io/badge/License-MIT-yellow.svg)

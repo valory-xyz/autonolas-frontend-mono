@@ -9,7 +9,8 @@
     "audit:prod": "node scripts/audit.mjs",
     "audit:install-hooks": "node scripts/audit-install-hooks.mjs",
     "audit:install-hooks:update": "node scripts/audit-install-hooks.mjs --update",
-    "lint:lockfile": "lockfile-lint --path yarn.lock --type yarn --allowed-hosts registry.yarnpkg.com registry.npmjs.org --validate-https --validate-integrity"
+    "lint:lockfile": "lockfile-lint --path yarn.lock --type yarn --allowed-hosts registry.yarnpkg.com registry.npmjs.org --validate-https --validate-integrity",
+    "supply-chain": "yarn audit:prod && yarn lint:lockfile && yarn audit:install-hooks"
   },
   "private": true,
   "dependencies": {
