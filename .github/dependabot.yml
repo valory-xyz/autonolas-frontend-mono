@@ -12,6 +12,13 @@
 version: 2
 updates:
   # 1. npm dependencies (root package.json — single workspace)
+  #
+  # `directory: "/"` — this Nx monorepo has no Yarn/npm workspaces
+  # declared in the root package.json (Nx uses path aliases in
+  # tsconfig.base.json instead), so all deps live at the root and
+  # Dependabot only needs to scan one directory. Per-app
+  # apps/*/project.json files are Nx config, not package manifests,
+  # and contain no deps to surface.
   - package-ecosystem: npm
     directory: "/"
     schedule:
