@@ -1,3 +1,4 @@
+import '@ant-design/v5-patch-for-react-19';
 import type { NextPage, NextPageContext } from 'next';
 import { createWrapper } from 'next-redux-wrapper';
 

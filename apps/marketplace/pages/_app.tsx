@@ -1,3 +1,4 @@
+import '@ant-design/v5-patch-for-react-19';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { createWeb3Modal, defaultWagmiConfig } from '@web3modal/wagmi';
 import { useRouter } from 'next/router';
