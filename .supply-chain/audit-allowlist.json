@@ -18,24 +18,6 @@
       "reason": "No upstream patch available (npm advisory reports patched_versions: <0.0.0; the package is effectively abandoned). Reaches the tree via @solana/wallet-adapter-wallets > @solana/wallet-adapter-torus > crypto-browserify and the @solana/web3.js chain. CVE-2025-3194 is a buffer overflow in toBigIntLE(). The only way out is removing Solana support or waiting for an upstream fork. Track upstream: https://github.com/advisories/GHSA-3gc7-fjrx-p6mg.",
       "added": "2026-04-24",
       "review": "2026-07-24"
-    },
-    {
-      "id": 1112653,
-      "ghsa": "GHSA-h25m-26qc-wcjf",
-      "package": "next",
-      "severity": "high",
-      "reason": "Requires Next.js 14.2.35 → 15.x major migration (React 18 → 19, RSC API changes). Scoped to a separate PR — a Next 15 migration is not a supply-chain hardening change. Advisory is a DoS when using insecure React Server Components; apps in this monorepo use classic Next page-based routing without RSC on the hot path.",
-      "added": "2026-04-24",
-      "review": "2026-07-24"
-    },
-    {
-      "id": 1116376,
-      "ghsa": "GHSA-q4gf-8mx6-v5v3",
-      "package": "next",
-      "severity": "high",
-      "reason": "Same root cause as advisory 1112653 — Next 14 → 15 migration required. Also a RSC DoS, not RCE/credential-leak. Fixed alongside advisory 1112653 when the Next 15 migration PR lands.",
-      "added": "2026-04-24",
-      "review": "2026-07-24"
     }
   ]
 }

@@ -4,7 +4,11 @@ import { getCspHeaders } from './lib/cspHeader';
 import { getRedirectUrl } from './lib/prohibitedCountries';
 
 export const middleware = async (request: NextRequest) => {
-  const country = request.geo?.country;
+  // Next 15 removed `NextRequest.geo`; read the same data from the Vercel
+  // edge-set header instead (`x-vercel-ip-country` is what `request.geo.country`
+  // pulled under the hood pre-15). Behaviour identical on Vercel; falls back
+  // to undefined elsewhere, same as the previous optional-chain.
+  const country = request.headers.get('x-vercel-ip-country') ?? undefined;
   const redirectUrl = await getRedirectUrl(request.nextUrl.pathname, country);
 
   const response = redirectUrl

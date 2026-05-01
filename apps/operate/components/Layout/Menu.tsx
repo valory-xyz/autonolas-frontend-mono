@@ -22,7 +22,11 @@ export const NavigationMenu: FC = () => {
   }, [pathname]);
 
   const handleMenuItemClick = ({ key }: MenuItemType) => {
-    const path = `/${key}`;
+    // antd's MenuItemType.key is `React.Key` (string | number); React 19's
+    // stricter typings flag template-literal interpolation of a value that
+    // could (theoretically) be a symbol. Wrap in String() to satisfy the
+    // narrower type. Behaviour identical for string/number keys.
+    const path = `/${String(key)}`;
     router.push(path);
     setSelectedMenu(path);
   };
