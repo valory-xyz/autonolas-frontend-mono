@@ -1,9 +1,8 @@
 import { useMemo } from 'react';
 import { useAnchorWallet, useConnection } from '@solana/wallet-adapter-react';
-import { Program, AnchorProvider } from '@project-serum/anchor';
+import { Program, AnchorProvider, web3, setProvider } from '@coral-xyz/anchor';
 import { Keypair, PublicKey } from '@solana/web3.js';
-import NodeWallet from '@project-serum/anchor/dist/cjs/nodewallet';
-import { web3, setProvider } from '@coral-xyz/anchor';
+import NodeWallet from '@coral-xyz/anchor/dist/cjs/nodewallet';
 
 import idl from '../AbiAndAddresses/ServiceRegistrySolana.json';
 import { SOLANA_ADDRESSES } from '../Contracts/addresses';

@@ -1,4 +1,4 @@
-import { web3 } from '@project-serum/anchor';
+import { web3 } from '@coral-xyz/anchor';
 import { Cluster } from '@solana/web3.js';
 import { kebabCase } from 'lodash';
 import {

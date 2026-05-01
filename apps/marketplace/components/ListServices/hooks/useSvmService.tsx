@@ -1,5 +1,5 @@
 import { useCallback } from 'react';
-import { BN, BorshCoder, Idl } from '@project-serum/anchor';
+import { BN, BorshCoder, Idl } from '@coral-xyz/anchor';
 import { TransactionMessage, VersionedTransaction, PublicKey, Connection } from '@solana/web3.js';
 import { memoize } from 'lodash';
 import { areAddressesEqual } from 'libs/util-functions/src';
@@ -17,20 +17,17 @@ const getLatestBlockhash = memoize(async (connection: Connection) => {
 
 /**
  * deseralize the program data
- * @param {Uint8Array} serializedValue serialized program data
+ * @param {Buffer} serializedValue serialized program data
  * @param {string | "publicKey" | "string"} decodeTypeName type name to decode, check
  * ServiceRegistrySolana.json for the type names
  *
  * @example
- * serializedValue = Uint8Array(32) [0, 0, ...]
+ * serializedValue = Buffer.from([0, 0, ...])
  * @returns {object} deseralized program data
  * example: { name: "serviceOwner", type: "publicKey" },
  *
  */
-const deseralizeProgramData = (
-  serializedValue: Uint8Array,
-  decodeTypeName: string | null,
-): unknown => {
+const deseralizeProgramData = (serializedValue: Buffer, decodeTypeName: string | null): unknown => {
   if (decodeTypeName === 'string') {
     const value = serializedValue.toString();
     // NOTE: This is a hack to remove the extra bytes added by the program
@@ -47,7 +44,7 @@ const deseralizeProgramData = (
   if (!decodeTypeName) return null;
 
   const borshCoder = new BorshCoder(idl as Idl);
-  const decodedResult = borshCoder.types.decode(decodeTypeName, Buffer.from(serializedValue));
+  const decodedResult = borshCoder.types.decode(decodeTypeName, serializedValue);
   return decodedResult;
 };
 
