@@ -1,4 +1,11 @@
-# more info here - https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+# Code owners for autonolas-frontend-mono.
+# https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+#
+# A PR matching multiple rules uses the LAST matching rule. The
+# wildcard below makes the same trio review every change in the repo,
+# which intentionally covers the supply-chain surface (.github/,
+# .supply-chain/, scripts/, package.json, yarn.lock, root configs)
+# in addition to apps/ and libs/. Add more specific overrides below
+# the wildcard only if a path needs different owners.
 
-apps/ @mohandast52 @Tanya-atatakai @rajat2502
-libs/ @mohandast52 @Tanya-atatakai @rajat2502
+*  @mohandast52 @Tanya-atatakai @rajat2502

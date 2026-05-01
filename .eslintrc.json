@@ -9,23 +9,29 @@
   },
   "extends": ["next/core-web-vitals", "plugin:prettier/recommended"],
   "rules": {
-    "prettier/prettier": ["error", {
-      "endOfLine": "auto",
-      "semi": true,
-      "trailingComma": "all",
-      "singleQuote": true,
-      "printWidth": 100,
-      "tabWidth": 2,
-      "importOrderSeparation": true,
-      "importOrderSortSpecifiers": true,
-      "importOrder": [
-        "<THIRD_PARTY_MODULES>",
-        "^@autonolas/(.*)$",
-        "^libs/*",
-        "^(store|util|common-util|components|data|hooks|context|types)/(.*)$",
-        "^[./]"
-      ]
-    }]
+    "prettier/prettier": [
+      "error",
+      {
+        "endOfLine": "auto",
+        "semi": true,
+        "trailingComma": "all",
+        "singleQuote": true,
+        "printWidth": 100,
+        "tabWidth": 2,
+        "importOrder": [
+          "<THIRD_PARTY_MODULES>",
+          "^@autonolas/(.*)$",
+          "^libs/*",
+          "^(store|util|common-util|components|data|hooks|context|types)/(.*)$",
+          "^[./]"
+        ],
+        "importOrderSeparation": true,
+        "importOrderSortSpecifiers": true
+      },
+      {
+        "usePrettierrc": false
+      }
+    ]
   },
   "overrides": [
     {

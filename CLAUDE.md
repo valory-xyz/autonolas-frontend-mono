@@ -188,15 +188,18 @@ ESLint enforces import ordering (configured in .eslintrc.json):
 
 ## Code Style
 
-- Prettier formatting with:
+- Prettier formatting (run via the `prettier/prettier` ESLint rule — no separate `.prettierrc.*` file):
   - Single quotes
   - 100 character line width
   - Semicolons required
-  - Trailing commas
+  - Trailing commas (multiline)
+  - 2-space indent
+- The Prettier config lives **only** in [.eslintrc.json](.eslintrc.json) under `rules → prettier/prettier`, with `usePrettierrc: false` so a stray `.prettierrc.*` cannot reintroduce a clash.
 - TypeScript strict mode enabled
 - **Never use `any` type** — always use proper typed casts, type guards, or specific types instead of `as any` or `: any`
 - Console statements: only `console.warn` and `console.error` allowed (no console.log)
-- ESLint extends next/core-web-vitals and prettier
+- ESLint extends `next/core-web-vitals` and `plugin:prettier/recommended`
+- Note: the `importOrder` block in the prettier rule is intentionally retained but **inert** — the `@trivago/prettier-plugin-sort-imports` plugin is not loaded into the prettier-rule options, so existing files are not reordered. To activate import sorting, add `"plugins": ["@trivago/prettier-plugin-sort-imports"]` to the rule options and run `yarn nx lint <app> --fix` across the workspace; do this in a focused PR since it will reshape many import blocks.
 
 ## Testing
 
