@@ -29,8 +29,8 @@ const MenuInstance: FC<MenuInstanceProps> = ({ selectedMenu, handleMenuItemClick
       theme="light"
       mode={mode}
       selectedKeys={selectedMenu ? [selectedMenu.split('/')[1]] : []}
-      items={items}
-      onClick={({ key }) => handleMenuItemClick({ label: '', key, path: `/${key}` })}
+      items={items.map(({ label, key }) => ({ label, key }))}
+      onClick={({ key }) => handleMenuItemClick({ label: '', key: String(key), path: `/${String(key)}` })}
     />
   );
 };

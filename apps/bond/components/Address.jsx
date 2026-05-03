@@ -9,7 +9,7 @@ const AddressText = styled(Typography.Text)`
   title: ${(props) => props.title};
 `;
 
-const Address = ({ address, networkId, customExplorerUrl }) => {
+const Address = ({ address, networkId = 'ethereum', customExplorerUrl }) => {
   const explorerBaseUrl = customExplorerUrl ?? getExplorerBaseUrl(networkId);
 
   const explorerUrl = `${explorerBaseUrl}${address}`;
@@ -33,8 +33,4 @@ Address.propTypes = {
   customExplorerUrl: PropTypes.string,
 };
 
-Address.defaultProps = {
-  networkId: 'ethereum',
-  customExplorerUrl: undefined,
-};
 export default Address;

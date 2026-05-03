@@ -15,7 +15,7 @@ const getShimmerStringSVGMarkup = (w = DEFAULT_SIZE.width, h = DEFAULT_SIZE.heig
   </svg>
 `;
 
-export const NftImage = ({ imageUrl, isSmallSize }) => {
+export const NftImage = ({ imageUrl = /** @type {any} */ (''), isSmallSize = false }) => {
   const [imageSize, setImageSize] = useState(DEFAULT_SIZE);
   const { isMobile } = useScreen();
 
@@ -54,7 +54,3 @@ NftImage.propTypes = {
   isSmallSize: PropTypes.bool,
 };
 
-NftImage.defaultProps = {
-  imageUrl: '',
-  isSmallSize: false,
-};

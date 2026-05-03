@@ -146,8 +146,3 @@ LoginV2.propTypes = {
   onConnect: PropTypes.func,
   onDisconnect: PropTypes.func,
 };
-
-LoginV2.defaultProps = {
-  onConnect: undefined,
-  onDisconnect: undefined,
-};

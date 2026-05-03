@@ -248,5 +248,3 @@ export const ActiveRegistrationTable = ({
 ActiveRegistrationTable.propTypes = {
   data: PropTypes.arrayOf(PropTypes.oneOfType([PropTypes.array, PropTypes.object])).isRequired,
 };
-
-ActiveRegistrationTable.defaultProps = {};

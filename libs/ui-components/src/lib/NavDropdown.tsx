@@ -1,5 +1,6 @@
 import { MenuOutlined } from '@ant-design/icons';
 import { Button, Dropdown } from 'antd';
+import type { MenuProps } from 'antd';
 
 const ExternalLink = ({ href, label }: { href: string; label: string }) => (
   <a href={href} target="_blank" rel="noopener noreferrer">
@@ -7,7 +8,7 @@ const ExternalLink = ({ href, label }: { href: string; label: string }) => (
   </a>
 );
 
-const navItems = [
+const navItems: MenuProps['items'] = [
   { key: 'bond', label: <ExternalLink label="Bond" href="https://bond.olas.network/" /> },
   {
     key: 'build',
@@ -52,10 +53,11 @@ const navItems = [
 ];
 
 export const NavDropdown = ({ currentSite }: { currentSite: string }) => {
-  const newNavItems = navItems.map((item) => ({
-    ...item,
-    disabled: item.key === currentSite,
-  }));
+  const newNavItems = (navItems ?? []).map((item) => {
+    if (!item) return item;
+    if ('type' in item && item.type === 'divider') return item;
+    return { ...item, disabled: item.key === currentSite };
+  }) as MenuProps['items'];
 
   return (
     <Dropdown

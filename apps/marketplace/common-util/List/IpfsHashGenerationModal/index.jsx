@@ -37,10 +37,10 @@ export const getBase16Validator = (value, hashType = HASH_PREFIXES.type1) => {
 
 export const IpfsHashGenerationModal = ({
   visible,
-  type,
-  handleHashUpdate,
+  type = '',
+  handleHashUpdate = /** @type {any} */ (undefined),
   handleCancel,
-  callback,
+  callback = /** @type {any} */ (undefined),
 }) => {
   const { isConnectedToWrongNetwork } = useHelpers();
 
@@ -250,10 +250,4 @@ IpfsHashGenerationModal.propTypes = {
   handleHashUpdate: PropTypes.func,
   handleCancel: PropTypes.func.isRequired,
   callback: PropTypes.func,
-};
-
-IpfsHashGenerationModal.defaultProps = {
-  type: '',
-  handleHashUpdate: null,
-  callback: null,
 };

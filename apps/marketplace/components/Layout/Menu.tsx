@@ -15,13 +15,13 @@ const items = [
 const serviceItem = [{ label: 'AI Agents', key: 'ai-agents' }];
 
 const MenuInstance = ({
-  selectedMenu,
+  selectedMenu = '',
   handleMenuItemClick,
-  mode,
+  mode = 'horizontal',
 }: {
-  selectedMenu: string;
+  selectedMenu?: string;
   handleMenuItemClick: (e: { key: string }) => void;
-  mode: 'horizontal' | 'vertical';
+  mode?: 'horizontal' | 'vertical';
 }) => {
   const { isL1Network, isSvm } = useHelpers();
 
@@ -47,11 +47,6 @@ MenuInstance.propTypes = {
   selectedMenu: PropTypes.string,
   handleMenuItemClick: PropTypes.func.isRequired,
   mode: PropTypes.string,
-};
-
-MenuInstance.defaultProps = {
-  selectedMenu: '',
-  mode: 'horizontal',
 };
 
 const NavigationMenu = () => {
