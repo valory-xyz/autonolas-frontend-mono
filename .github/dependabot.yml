@@ -1,5 +1,15 @@
 # Dependabot config for supply-chain hygiene.
 #
+# Currently silenced: `open-pull-requests-limit: 0` on both ecosystems
+# stops Dependabot from opening version-update PRs while keeping the
+# scanner running so GitHub's Security tab still surfaces vulnerable
+# deps. To re-enable, raise the limits below (npm: 10, gh-actions: 5).
+#
+# Note: Dependabot *security* updates (advisory-driven) are governed
+# separately at the repo level (Settings → Code security → Dependabot
+# security updates), not by this file. Toggle there if those need to
+# go silent too.
+#
 # Behaviour-only: opens PRs for review. No auto-merge configured here.
 # Direct deps in package.json are pinned to exact versions per
 # SUPPLY-CHAIN-SECURITY.md §1, so `versioning-strategy: increase`
@@ -26,7 +36,8 @@ updates:
       day: monday
       time: "06:00"
       timezone: Etc/UTC
-    open-pull-requests-limit: 10
+    # Silenced (was 10) — set back to 10 to re-enable npm version PRs.
+    open-pull-requests-limit: 0
     versioning-strategy: increase
     labels:
       - dependencies
@@ -108,7 +119,8 @@ updates:
       day: monday
       time: "06:00"
       timezone: Etc/UTC
-    open-pull-requests-limit: 5
+    # Silenced (was 5) — set back to 5 to re-enable GitHub Actions version PRs.
+    open-pull-requests-limit: 0
     labels:
       - github-actions
       - supply-chain
