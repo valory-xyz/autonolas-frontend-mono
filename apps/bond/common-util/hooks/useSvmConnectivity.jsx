@@ -2,9 +2,23 @@ import { useMemo } from 'react';
 import { useAnchorWallet, useConnection, useWallet } from '@solana/wallet-adapter-react';
 import { AnchorProvider, setProvider } from '@coral-xyz/anchor';
 import { Keypair } from '@solana/web3.js';
-import NodeWallet from '@coral-xyz/anchor/dist/cjs/nodewallet';
 
-const NODE_WALLET = new NodeWallet(Keypair.generate());
+// Read-only Anchor wallet stub. Replaces `@coral-xyz/anchor/dist/cjs/nodewallet`,
+// which transitively imports `fs` and breaks Turbopack browser bundles in Next 16.
+const READONLY_KEYPAIR = Keypair.generate();
+const NODE_WALLET = {
+  publicKey: READONLY_KEYPAIR.publicKey,
+  payer: READONLY_KEYPAIR,
+  signTransaction: async (tx) => {
+    tx.partialSign(READONLY_KEYPAIR);
+    return tx;
+  },
+  signAllTransactions: async (txs) =>
+    txs.map((tx) => {
+      tx.partialSign(READONLY_KEYPAIR);
+      return tx;
+    }),
+};
 
 export const useSvmConnectivity = () => {
   const { connection } = useConnection();

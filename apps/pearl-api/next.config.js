@@ -29,6 +29,11 @@ const nextConfig = {
     styledComponents: true,
   },
   transpilePackages: ['@ant-design', 'rc-util'],
+  // pino (used by @walletconnect/logger) loads optional logger transports
+  // via dynamic require. Turbopack chases all conditional imports and tries
+  // to bundle the dev-only deps (tap, desm, pino-elasticsearch, etc.).
+  // Treating these as external keeps Node's require for them at runtime.
+  serverExternalPackages: ['pino', 'thread-stream', '@walletconnect/logger'],
 
   async headers() {
     return [

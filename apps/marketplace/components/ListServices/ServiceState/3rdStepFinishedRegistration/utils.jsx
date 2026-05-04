@@ -19,10 +19,11 @@
  */
 import { ethers } from 'ethers-v5';
 
+import { RPC_URLS } from 'libs/util-constants/src';
 import { getEthersV5Provider } from 'libs/util-functions/src';
 
 import { GNOSIS_SAFE_CONTRACT, MULTI_SEND_CONTRACT } from 'common-util/AbiAndAddresses';
-import { RPC_URLS, getServiceOwnerMultisigContract } from 'common-util/Contracts';
+import { getServiceOwnerMultisigContract } from 'common-util/Contracts';
 import { safeMultiSend } from 'common-util/Contracts/addresses';
 import { SUPPORTED_CHAINS } from 'common-util/Login';
 import { checkIfGnosisSafe } from 'common-util/functions';
