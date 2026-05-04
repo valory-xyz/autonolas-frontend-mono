@@ -53,4 +53,3 @@ NftImage.propTypes = {
   imageUrl: PropTypes.string,
   isSmallSize: PropTypes.bool,
 };
-
