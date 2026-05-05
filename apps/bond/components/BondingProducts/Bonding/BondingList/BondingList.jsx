@@ -3,7 +3,7 @@ import {
   QuestionCircleOutlined,
   UnorderedListOutlined,
 } from '@ant-design/icons';
-import { Button, Empty, Popconfirm, Skeleton, Spin, Table, Tag, Tooltip, Typography } from 'antd';
+import { Button, Empty, Flex, Popconfirm, Skeleton, Spin, Table, Tag, Tooltip, Typography } from 'antd';
 import { capitalize, isNaN, remove, round } from 'lodash';
 import Link from 'next/link';
 import PropTypes from 'prop-types';
@@ -291,13 +291,12 @@ const ErrorMessageAndReload = () => (
   <Container className="mt-16">
     <Empty
       description={
-        <>
-          <Text className="mb-8">Couldn&apos;t fetch products</Text>
-          <br />
+        <Flex vertical align="center" gap={16}>
+          <Text>Couldn&apos;t fetch products</Text>
           <Button size="large" onClick={() => window.location.reload()}>
             Try again
           </Button>
-        </>
+        </Flex>
       }
       image={<ExclamationCircleTwoTone style={{ fontSize: '7rem' }} twoToneColor={COLOR.GREY_1} />}
     />
