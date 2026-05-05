@@ -1,6 +1,4 @@
 /* eslint-disable jest/no-conditional-expect */
-import fetch from 'node-fetch';
-
 import {
   AGENT_REGISTRY_CONTRACT,
   COMPONENT_REGISTRY_CONTRACT,
@@ -132,9 +130,6 @@ describe('common-utils/addresses', () => {
         throw new Error(`Invalid chainId: ${chainId}`);
       }
 
-      // no need to check local chainIds
-      if (isLocalChainId(chainId)) return;
-
       const remoteFallbackHandlerAddressKey = fallbackHandler.networkAddresses[chainId];
 
       // could be an array or a string
@@ -165,9 +160,6 @@ describe('common-utils/addresses', () => {
       if (!isValidKey(ADDRESSES, chainId)) {
         throw new Error(`Invalid chainId: ${chainId}`);
       }
-
-      // no need to check local chainIds
-      if (isLocalChainId(chainId)) return;
 
       const remoteFallbackHandlerAddressKey = fallbackHandler.networkAddresses[chainId];
 

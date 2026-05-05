@@ -1,9 +1,8 @@
 import { useMemo } from 'react';
 import { useAnchorWallet, useConnection, useWallet } from '@solana/wallet-adapter-react';
-import { AnchorProvider } from '@project-serum/anchor';
+import { AnchorProvider, setProvider } from '@coral-xyz/anchor';
 import { Keypair } from '@solana/web3.js';
-import NodeWallet from '@project-serum/anchor/dist/cjs/nodewallet';
-import { setProvider } from '@coral-xyz/anchor';
+import NodeWallet from '@coral-xyz/anchor/dist/cjs/nodewallet';
 
 const NODE_WALLET = new NodeWallet(Keypair.generate());
 
