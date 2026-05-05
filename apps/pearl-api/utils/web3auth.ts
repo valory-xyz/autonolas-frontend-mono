@@ -1,5 +1,5 @@
 import { CONNECTOR_NAMESPACES, CustomChainConfig } from '@web3auth/modal';
-import { base, Chain, gnosis, mode, optimism } from 'viem/chains';
+import { base, Chain, gnosis, mode, optimism, polygon } from 'viem/chains';
 
 import { EvmChainDetails, EvmChainIdMap } from './chain';
 
@@ -21,4 +21,5 @@ export const CHAIN_CONFIGS: Record<string, CustomChainConfig> = {
   base: toWeb3AuthChainConfig(base, EvmChainDetails[EvmChainIdMap.Base].logo),
   optimism: toWeb3AuthChainConfig(optimism, EvmChainDetails[EvmChainIdMap.Optimism].logo),
   mode: toWeb3AuthChainConfig(mode, EvmChainDetails[EvmChainIdMap.Mode].logo),
+  polygon: toWeb3AuthChainConfig(polygon, EvmChainDetails[EvmChainIdMap.Polygon].logo),
 };
