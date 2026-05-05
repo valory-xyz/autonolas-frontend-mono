@@ -3,11 +3,15 @@ import { base, Chain, gnosis, mode, optimism, polygon } from 'viem/chains';
 
 import { EvmChainDetails, EvmChainIdMap } from './chain';
 
-const toWeb3AuthChainConfig = (chain: Chain, logo: string): CustomChainConfig => {
+const toWeb3AuthChainConfig = (
+  chain: Chain,
+  logo: string,
+  rpcTarget?: string,
+): CustomChainConfig => {
   return {
     chainNamespace: CONNECTOR_NAMESPACES.EIP155,
     chainId: `0x${chain.id.toString(16)}`,
-    rpcTarget: chain.rpcUrls.default.http[0],
+    rpcTarget: rpcTarget ?? chain.rpcUrls.default.http[0],
     displayName: chain.name,
     ticker: chain.nativeCurrency.symbol,
     tickerName: chain.nativeCurrency.name,
@@ -21,5 +25,9 @@ export const CHAIN_CONFIGS: Record<string, CustomChainConfig> = {
   base: toWeb3AuthChainConfig(base, EvmChainDetails[EvmChainIdMap.Base].logo),
   optimism: toWeb3AuthChainConfig(optimism, EvmChainDetails[EvmChainIdMap.Optimism].logo),
   mode: toWeb3AuthChainConfig(mode, EvmChainDetails[EvmChainIdMap.Mode].logo),
-  polygon: toWeb3AuthChainConfig(polygon, EvmChainDetails[EvmChainIdMap.Polygon].logo),
+  polygon: toWeb3AuthChainConfig(
+    polygon,
+    EvmChainDetails[EvmChainIdMap.Polygon].logo,
+    process.env.NEXT_PUBLIC_POLYGON_URL,
+  ),
 };
