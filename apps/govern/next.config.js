@@ -17,6 +17,14 @@ const nextConfig = {
   turbopack: {
     root: workspaceRoot,
   },
+  // Mirror @nx/next:build's output convention so `next build --webpack`
+  // writes to dist/apps/govern/.next (where Vercel's Output Directory
+  // looks for routes-manifest.json). Webpack is required here because Next
+  // 16's Vercel adapter mis-routes static-vs-dynamic page collisions in
+  // Turbopack output (e.g. `/api/contracts/batch` was matching the
+  // `[chainId]` dynamic route with chainId="batch" instead of `batch.ts`).
+  // Same fix as marketplace and pearl-api.
+  distDir: '../../dist/apps/govern/.next',
   i18n: {
     locales: ['en'],
     defaultLocale: 'en',

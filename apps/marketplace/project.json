@@ -5,16 +5,15 @@
   "projectType": "application",
   "targets": {
     "build": {
-      "executor": "@nx/next:build",
-      "outputs": ["{options.outputPath}"],
+      "executor": "nx:run-commands",
+      "outputs": ["{workspaceRoot}/dist/apps/marketplace"],
       "defaultConfiguration": "production",
       "options": {
-        "outputPath": "dist/apps/marketplace"
+        "cwd": "apps/marketplace",
+        "command": "next build --webpack"
       },
       "configurations": {
-        "development": {
-          "outputPath": "apps/marketplace"
-        },
+        "development": {},
         "production": {}
       }
     },

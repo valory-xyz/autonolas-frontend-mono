@@ -17,6 +17,13 @@ const nextConfig = {
   turbopack: {
     root: workspaceRoot,
   },
+  // Mirror @nx/next:build's output convention so `next build --webpack`
+  // writes to dist/apps/marketplace/.next (where Vercel's Output Directory
+  // looks for routes-manifest.json). Webpack is required here because Next
+  // 16's Vercel adapter mis-routes static-vs-dynamic page collisions in
+  // Turbopack output (e.g. `/[network]/ai-agents/mint` was matching
+  // `[id].jsx` with id="mint" instead of the static `mint.jsx` page).
+  distDir: '../../dist/apps/marketplace/.next',
   i18n: {
     locales: ['en'],
     defaultLocale: 'en',

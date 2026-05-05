@@ -5,16 +5,15 @@
   "projectType": "application",
   "targets": {
     "build": {
-      "executor": "@nx/next:build",
-      "outputs": ["{options.outputPath}"],
+      "executor": "nx:run-commands",
+      "outputs": ["{workspaceRoot}/dist/apps/govern"],
       "defaultConfiguration": "production",
       "options": {
-        "outputPath": "dist/apps/govern"
+        "cwd": "apps/govern",
+        "command": "next build --webpack"
       },
       "configurations": {
-        "development": {
-          "outputPath": "apps/govern"
-        },
+        "development": {},
         "production": {}
       }
     },

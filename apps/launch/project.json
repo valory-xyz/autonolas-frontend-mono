@@ -5,16 +5,15 @@
   "projectType": "application",
   "targets": {
     "build": {
-      "executor": "@nx/next:build",
-      "outputs": ["{options.outputPath}"],
+      "executor": "nx:run-commands",
+      "outputs": ["{workspaceRoot}/dist/apps/launch"],
       "defaultConfiguration": "production",
       "options": {
-        "outputPath": "dist/apps/launch"
+        "cwd": "apps/launch",
+        "command": "next build --webpack"
       },
       "configurations": {
-        "development": {
-          "outputPath": "apps/launch"
-        },
+        "development": {},
         "production": {}
       }
     },
