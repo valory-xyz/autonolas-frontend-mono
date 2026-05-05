@@ -21,5 +21,6 @@ nx  # postinstall: node ./bin/post-install
 protobufjs  # postinstall: node scripts/postinstall
 secp256k1  # install: node-gyp-build || exit 0
 tiny-secp256k1  # install: npm run build || echo "secp256k1 bindings compilation fail. Pure JS implementation will be used."
+unrs-resolver  # postinstall: napi-postinstall unrs-resolver 1.11.1 check
 usb  # install: node-gyp-build
 utf-8-validate  # install: node-gyp-build
