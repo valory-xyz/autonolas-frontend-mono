@@ -7,10 +7,33 @@ import { getServiceMetadataServerSide } from '../../../common-util/functions/ser
 const ServiceDetails = dynamic(() => import('../../../components/ListServices/details'), {
   ssr: false,
 });
+const MintService = dynamic(() => import('../../../components/ListServices/mint'), {
+  ssr: false,
+});
+
+// Vercel's Next 16 serverless adapter intermittently mis-routes the
+// client-side `_next/data/.../mint.json` request for `/[network]/ai-agents/mint`
+// to this [id] function with id="mint" instead of the sibling static
+// `mint.jsx`. Rendering the mint form here when id === "mint" keeps the
+// page correct regardless of which function Vercel picks.
+const MINT_SLUG = 'mint';
 
 const AIAgentDetails = ({ agentMetadata }) => {
   const router = useRouter();
   const { network, id } = router.query;
+
+  if (id === MINT_SLUG) {
+    return (
+      <>
+        <Meta
+          pageTitle="Mint AI Agent"
+          description="Register a new AI agent on-chain. Mint your autonomous agent to the Olas registry and make it discoverable in the marketplace."
+          pageUrl={`${network || ''}/ai-agents/mint`}
+        />
+        <MintService />
+      </>
+    );
+  }
 
   const pageTitle = agentMetadata?.name
     ? `${agentMetadata.name} - AI Agent #${id}`
@@ -35,6 +58,10 @@ const AIAgentDetails = ({ agentMetadata }) => {
 
 export const getServerSideProps = async (context) => {
   const { network, id } = context.params;
+
+  if (id === MINT_SLUG) {
+    return { props: { agentMetadata: null } };
+  }
 
   try {
     const agentMetadata = await getServiceMetadataServerSide(network, id);

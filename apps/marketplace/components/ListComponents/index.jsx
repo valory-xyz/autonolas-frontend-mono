@@ -36,10 +36,7 @@ const ListComponents = () => {
    * extra tab content & view click
    */
   const { searchValue, extraTabContent, clearSearch } = useExtraTabContent({
-    // Hard navigation: see ListServices/index.tsx for rationale.
-    onRegisterClick: () => {
-      window.location.href = links.MINT_COMPONENT;
-    },
+    onRegisterClick: () => router.push(links.MINT_COMPONENT),
     isMyTab: currentTab === MY_COMPONENTS,
     mintButtonText: 'Add Component',
   });

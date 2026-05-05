@@ -53,14 +53,7 @@ const ListServices = () => {
   const { getTotalForAllSvmServices, getTotalForMySvmServices, getSvmServices, getMySvmServices } =
     useServiceInfo();
   const { searchValue, clearSearch, extraTabContent } = useExtraTabContent({
-    // Hard navigation (window.location) intentionally bypasses Next's
-    // client router. On Vercel, Next 16's `_next/data/.../mint.json` data
-    // requests get mis-routed to the sibling `[id].jsx` serverless function
-    // (with id="mint"), which crashes the page. Direct page-load via
-    // window.location uses the SSR path that Vercel routes correctly.
-    onRegisterClick: () => {
-      window.location.href = links.MINT_SERVICE;
-    },
+    onRegisterClick: () => router.push(links.MINT_SERVICE),
     isSvm,
     isMyTab: currentTab === MY_AI_AGENTS,
     type: NAV_TYPES.AI_AGENTS,
