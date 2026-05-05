@@ -45,7 +45,7 @@
     "@web3inbox/widget-react": "0.6.25",
     "@web3modal/wagmi": "4.1.11",
     "antd": "5.16.4",
-    "axios": "1.13.5",
+    "axios": "1.15.2",
     "bignumber.js": "9.1.2",
     "cors": "2.8.5",
     "dayjs": "1.11.9",
@@ -163,7 +163,7 @@
   "resolutions": {
     "@gnosis.pm/safe-contracts/ethers": "5.7.2",
     "form-data": "2.5.5",
-    "axios": "1.13.5",
+    "axios": "1.15.2",
     "cipher-base": "1.0.5",
     "elliptic": "6.6.1",
     "pbkdf2": "3.1.3",
