@@ -1,4 +1,4 @@
-import { base, gnosis, mode, optimism } from 'viem/chains';
+import { base, gnosis, mode, optimism, polygon } from 'viem/chains';
 
 type ValueOf<T> = T[keyof T];
 
@@ -30,6 +30,11 @@ export const EvmChainDetails: Record<
     logo: 'https://cryptologos.cc/logos/optimism-ethereum-op-logo.png?v=040',
     explorer: optimism.blockExplorers?.default?.url || '',
   },
+  '137': {
+    displayName: 'Polygon',
+    logo: 'https://cryptologos.cc/logos/polygon-matic-logo.png?v=040',
+    explorer: polygon.blockExplorers?.default?.url || '',
+  },
 };
 
 export const EvmChainIdMap = {
@@ -37,6 +42,7 @@ export const EvmChainIdMap = {
   Base: 8453,
   Mode: 34443,
   Optimism: 10,
+  Polygon: 137,
 } as const;
 export type EvmChainId = (typeof EvmChainIdMap)[keyof typeof EvmChainIdMap];
 
@@ -45,6 +51,7 @@ export const EvmChainName = {
   [EvmChainIdMap.Base]: EvmChainDetails[EvmChainIdMap.Base].displayName,
   [EvmChainIdMap.Mode]: EvmChainDetails[EvmChainIdMap.Mode].displayName,
   [EvmChainIdMap.Optimism]: EvmChainDetails[EvmChainIdMap.Optimism].displayName,
+  [EvmChainIdMap.Polygon]: EvmChainDetails[EvmChainIdMap.Polygon].displayName,
 } as const;
 export type EvmChainName = ValueOf<typeof EvmChainName>;
 
