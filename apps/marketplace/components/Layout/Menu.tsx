@@ -1,6 +1,5 @@
 import { Button, Dropdown, Menu } from 'antd';
 import { useRouter } from 'next/router';
-import PropTypes from 'prop-types';
 import { useEffect, useMemo, useState } from 'react';
 
 import { useScreen } from 'libs/ui-theme/src';
@@ -41,12 +40,6 @@ const MenuInstance = ({
       onClick={handleMenuItemClick}
     />
   );
-};
-
-MenuInstance.propTypes = {
-  selectedMenu: PropTypes.string,
-  handleMenuItemClick: PropTypes.func.isRequired,
-  mode: PropTypes.string,
 };
 
 const NavigationMenu = () => {
