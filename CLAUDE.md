@@ -211,15 +211,15 @@ ESLint enforces import ordering (configured in .eslintrc.json):
 
 ## Key Dependencies
 
-- React 18.2.0
-- Next.js 14.2.35
+- React 19.2.5
+- Next.js 15.5.15
 - TypeScript 5.2.2
 - Nx v17.2.5
 - Redux Toolkit
-- Wagmi 2.5.19 / Viem 2.37.5
+- Wagmi 2.5.20 / Viem 2.37.5
 - Ethers v6 (and v5 as ethers-v5)
-- Ant Design 5.9.0
-- Styled-components 6.0.7
+- Ant Design 5.29.3
+- Styled-components 6.1.8
 
 ## Supply Chain & Security
 
