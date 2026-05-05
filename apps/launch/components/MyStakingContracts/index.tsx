@@ -53,12 +53,17 @@ const CreateContractMessage = () => (
 
 const CreateContractButton = () => {
   const { networkName } = useAppSelector((state) => state.network);
+  // Hard navigation via plain <a> (not next/link) intentionally bypasses
+  // Next's client router. On Vercel, Next 16's `_next/data/.../create.json`
+  // data requests get mis-routed to the sibling `[id].tsx` serverless
+  // function (with id="create"), so the create form never loads. Direct
+  // page-load via <a href> uses the SSR path Vercel routes correctly.
   return (
-    <Link href={`/${networkName}/${URL.myStakingContracts}/create`} passHref>
+    <a href={`/${networkName}/${URL.myStakingContracts}/create`}>
       <Button size="large" type="primary">
         Create staking contract
       </Button>
-    </Link>
+    </a>
   );
 };
 

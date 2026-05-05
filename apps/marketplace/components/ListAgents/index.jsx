@@ -31,7 +31,10 @@ const ListAgents = () => {
    * extra tab content & view click
    */
   const { searchValue, extraTabContent, clearSearch } = useExtraTabContent({
-    onRegisterClick: () => router.push(links.MINT_AGENT),
+    // Hard navigation: see ListServices/index.tsx for rationale.
+    onRegisterClick: () => {
+      window.location.href = links.MINT_AGENT;
+    },
     isMyTab: currentTab === MY_AGENTS,
     mintButtonText: 'Add Agent Blueprint',
   });
