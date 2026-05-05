@@ -14,7 +14,14 @@
           }
         }
       ],
-      ["import", { "libraryName": "antd", "libraryDirectory": "lib", "style": true }]
+      [
+        "styled-components",
+        {
+          "ssr": true,
+          "displayName": true,
+          "preprocess": false
+        }
+      ]
     ]
   }
   

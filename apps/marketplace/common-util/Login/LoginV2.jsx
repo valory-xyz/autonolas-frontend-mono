@@ -27,7 +27,7 @@ const LoginContainer = styled.div`
 `;
 
 export const LoginV2 = ({
-  isSvm,
+  isSvm = false,
   onConnect: onConnectCb,
   onDisconnect: onDisconnectCb,
   theme = 'light',
@@ -166,11 +166,4 @@ LoginV2.propTypes = {
   onConnect: PropTypes.func,
   onDisconnect: PropTypes.func,
   theme: PropTypes.string,
-};
-
-LoginV2.defaultProps = {
-  isSvm: false,
-  onConnect: undefined,
-  onDisconnect: undefined,
-  theme: 'light',
 };

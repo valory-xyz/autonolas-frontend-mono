@@ -29,7 +29,7 @@ MyLink.propTypes = {
 
 export const commaMessage = 'Each comma must be followed by a space ("1, 2" not "1,2").';
 
-export const DependencyLabel = ({ type }) => {
+export const DependencyLabel = ({ type = 'component' }) => {
   const { isL1Network, isSvm, chainName } = useHelpers();
   const dependencyHelperText = `Must be in ascending order – newest ${
     type === 'service' ? 'agents' : 'components'
@@ -73,9 +73,8 @@ export const DependencyLabel = ({ type }) => {
 DependencyLabel.propTypes = {
   type: PropTypes.string,
 };
-DependencyLabel.defaultProps = { type: 'component' };
 
-export const RegisterMessage = ({ handleCancel }) => (
+export const RegisterMessage = ({ handleCancel = null }) => (
   <RegisterFooter>
     <p>To mint, connect to wallet</p>
     {handleCancel && (
@@ -86,9 +85,8 @@ export const RegisterMessage = ({ handleCancel }) => (
   </RegisterFooter>
 );
 RegisterMessage.propTypes = { handleCancel: PropTypes.func };
-RegisterMessage.defaultProps = { handleCancel: null };
 
-export const ListEmptyMessage = ({ message = '', type }) => {
+export const ListEmptyMessage = ({ message = '', type = null }) => {
   const getValues = () => {
     switch (type) {
       case NAV_TYPES.COMPONENT:
@@ -129,11 +127,10 @@ ListEmptyMessage.propTypes = {
   type: PropTypes.string,
   message: PropTypes.string,
 };
-ListEmptyMessage.defaultProps = { type: null, message: '' };
 
 // AlertSuccess
 const WILL_TAKE_A_MINUTE = 'This is being indexed and will take a few minutes to show.';
-export const AlertSuccess = ({ type, information }) => {
+export const AlertSuccess = ({ type = null, information = null }) => {
   const { isMainnet } = useHelpers();
 
   const message = useMemo(() => {
@@ -149,13 +146,9 @@ AlertSuccess.propTypes = {
   information: PropTypes.shape({}),
   type: PropTypes.string,
 };
-AlertSuccess.defaultProps = {
-  information: null,
-  type: null,
-};
 
 // AlertError
-export const AlertError = ({ error }) => {
+export const AlertError = ({ error = null }) => {
   if (!error) return null;
   return (
     <Alert message={error.message} data-testid="alert-error-container" type="error" showIcon />
@@ -164,4 +157,3 @@ export const AlertError = ({ error }) => {
 AlertError.propTypes = {
   error: PropTypes.shape({ message: PropTypes.string }),
 };
-AlertError.defaultProps = { error: null };

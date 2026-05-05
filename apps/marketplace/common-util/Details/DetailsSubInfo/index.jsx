@@ -29,20 +29,20 @@ const navTypesForRewards = [NAV_TYPES.COMPONENT, NAV_TYPES.AGENT_BLUEPRINTS];
  * Agent | Component | Service - details component
  */
 export const DetailsSubInfo = ({
-  id,
-  isOwner,
-  type,
-  tokenUri,
+  id = '',
+  isOwner = false,
+  type = /** @type {any} */ (undefined),
+  tokenUri = /** @type {any} */ (undefined),
 
   // other details 👇
-  ownerAddress,
-  componentAndAgentDependencies,
-  serviceThreshold,
-  serviceCurrentState,
+  ownerAddress = /** @type {any} */ (undefined),
+  componentAndAgentDependencies = [],
+  serviceThreshold = '',
+  serviceCurrentState = '',
 
-  openUpdateHashModal,
-  handleHashUpdate,
-  navigateToDependency,
+  openUpdateHashModal = /** @type {any} */ (undefined),
+  handleHashUpdate = /** @type {any} */ (undefined),
+  navigateToDependency = /** @type {any} */ (undefined),
 }) => {
   const { isSvm, doesNetworkHaveValidServiceManagerToken, chainId } = useHelpers();
   const [tokenAddress, setTokenAddress] = useState(null);
@@ -286,18 +286,4 @@ DetailsSubInfo.propTypes = {
   handleHashUpdate: PropTypes.func,
   openUpdateHashModal: PropTypes.func,
   navigateToDependency: PropTypes.func,
-};
-
-DetailsSubInfo.defaultProps = {
-  id: '',
-  isOwner: false,
-  type: null,
-  tokenUri: '',
-  ownerAddress: '',
-  componentAndAgentDependencies: [],
-  serviceThreshold: '',
-  serviceCurrentState: '',
-  handleHashUpdate: null,
-  openUpdateHashModal: null,
-  navigateToDependency: null,
 };

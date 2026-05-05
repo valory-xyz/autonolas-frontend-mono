@@ -27,11 +27,6 @@ export const RegistryForm = ({ onFinish, children, ...rest }) => {
   );
 };
 
-RegistryForm.defaultProps = {
-  onFinish: null,
-  children: null,
-};
-
 RegistryForm.propTypes = {
   onFinish: PropTypes.func,
   children: PropTypes.node,

@@ -1,7 +1,9 @@
 import { Button, Col, Flex, Row, Tabs } from 'antd';
 import type { ColumnsType, ColumnType } from 'antd/es/table';
 import get from 'lodash/get';
+// React 19: `JSX` is no longer global, must be imported from 'react'.
 import { FC, useCallback, useState, useEffect, useMemo } from 'react';
+import type { JSX } from 'react';
 import { Address } from 'viem';
 import { useRouter } from 'next/router';
 

@@ -304,7 +304,7 @@ const ErrorMessageAndReload = () => (
   </Container>
 );
 
-export const BondingList = ({ bondingProgramType, hideEmptyProducts }) => {
+export const BondingList = ({ bondingProgramType = 'active', hideEmptyProducts = true }) => {
   const { account } = useHelpers();
 
   const isActive = bondingProgramType === BONDING_PRODUCTS.ACTIVE;
@@ -381,9 +381,4 @@ export const BondingList = ({ bondingProgramType, hideEmptyProducts }) => {
 BondingList.propTypes = {
   bondingProgramType: PropTypes.string,
   hideEmptyProducts: PropTypes.bool,
-};
-
-BondingList.defaultProps = {
-  bondingProgramType: 'active',
-  hideEmptyProducts: 'active',
 };

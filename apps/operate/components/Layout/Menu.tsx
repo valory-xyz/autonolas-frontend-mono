@@ -1,9 +1,8 @@
-import { Menu } from 'antd';
-import { MenuItemType } from 'antd/es/menu/hooks/useItems';
+import { Menu, type MenuProps } from 'antd';
 import { useRouter } from 'next/router';
 import { FC, useEffect, useState } from 'react';
 
-const items: MenuItemType[] = [
+const items: MenuProps['items'] = [
   { label: 'Live staking contracts', key: 'contracts' },
   { label: 'AI Agents', key: 'agents' },
   { label: 'Docs', key: 'docs' },
@@ -21,8 +20,8 @@ export const NavigationMenu: FC = () => {
     }
   }, [pathname]);
 
-  const handleMenuItemClick = ({ key }: MenuItemType) => {
-    const path = `/${key}`;
+  const handleMenuItemClick: NonNullable<MenuProps['onClick']> = ({ key }) => {
+    const path = `/${String(key)}`;
     router.push(path);
     setSelectedMenu(path);
   };

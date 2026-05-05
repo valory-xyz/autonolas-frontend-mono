@@ -1,6 +1,5 @@
 import { Button, Dropdown, Menu } from 'antd';
 import { useRouter } from 'next/router';
-import PropTypes from 'prop-types';
 import { useEffect, useMemo, useState } from 'react';
 
 import { useScreen } from 'libs/ui-theme/src';
@@ -15,13 +14,13 @@ const items = [
 const serviceItem = [{ label: 'AI Agents', key: 'ai-agents' }];
 
 const MenuInstance = ({
-  selectedMenu,
+  selectedMenu = '',
   handleMenuItemClick,
-  mode,
+  mode = 'horizontal',
 }: {
-  selectedMenu: string;
+  selectedMenu?: string;
   handleMenuItemClick: (e: { key: string }) => void;
-  mode: 'horizontal' | 'vertical';
+  mode?: 'horizontal' | 'vertical';
 }) => {
   const { isL1Network, isSvm } = useHelpers();
 
@@ -41,17 +40,6 @@ const MenuInstance = ({
       onClick={handleMenuItemClick}
     />
   );
-};
-
-MenuInstance.propTypes = {
-  selectedMenu: PropTypes.string,
-  handleMenuItemClick: PropTypes.func.isRequired,
-  mode: PropTypes.string,
-};
-
-MenuInstance.defaultProps = {
-  selectedMenu: '',
-  mode: 'horizontal',
 };
 
 const NavigationMenu = () => {

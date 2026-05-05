@@ -1,4 +1,7 @@
 import { isUndefined } from 'lodash';
+// In React 19 + @types/react 19, JSX is no longer a global namespace; it's
+// exported from 'react'. Import the type to keep `JSX.Element` working.
+import type { JSX } from 'react';
 import { StickyContainer } from '../styles';
 // eslint-disable-next-line @nx/enforce-module-boundaries
 import { COLOR } from 'libs/ui-theme/src';
