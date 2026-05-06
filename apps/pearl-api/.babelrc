@@ -4,19 +4,17 @@
     [
       "module-resolver",
       {
-        "extensions": [".js", ".jsx"],
+        "extensions": [".js", ".jsx", ".ts", ".tsx"],
         "alias": {
           "util": "./util",
-          "context": "./context"
+          "utils": "./utils",
+          "context": "./context",
+          "components": "./components",
+          "constants": "./constants",
+          "hooks": "./hooks",
+          "types": "./types",
+          "pages": "./pages"
         }
-      }
-    ],
-    [
-      "styled-components",
-      {
-        "ssr": true,
-        "displayName": true,
-        "preprocess": false
       }
     ]
   ]

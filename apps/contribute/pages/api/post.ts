@@ -1,6 +1,6 @@
 import { cloneDeep, omit } from 'lodash';
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { MODULE_DETAILS_API_BASE_URL } from 'pages/api/module-details';
+import { MODULE_DETAILS_API_BASE_URL } from './module-details';
 
 import { getSignature } from 'common-util/apiRoute';
 import { getNowTimestamp } from 'common-util/functions/time';
