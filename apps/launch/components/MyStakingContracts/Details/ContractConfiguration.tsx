@@ -22,6 +22,7 @@ import {
   useGetMinimumStakingDeposit,
   useGetMinimumStakingDuration,
   useGetMultisigThreshold,
+  useGetProxyHash,
   useMaxNumServices,
   useNumberOfAgentInstances,
   useRewardsPerSecond,
@@ -40,6 +41,7 @@ import {
   MinimumStakingDepositLabel,
   MinimumStakingPeriodsLabel,
   MultisigThresholdLabel,
+  ProxyHashLabel,
   RewardsPerSecondLabel,
   ServiceConfigHashLabel,
   TimeForEmissionsLabel,
@@ -127,7 +129,6 @@ const NumAgentInstances: FC<{ address: Address }> = ({ address }) => {
 
 const AgentIds: FC<{ address: Address }> = ({ address }) => {
   const { data, isLoading } = useGetAgentIds({ address });
-  const { networkName } = useAppSelector((state) => state.network);
 
   const ids = useMemo(() => {
     if (!data || data.length === 0) return NA;
@@ -142,7 +143,7 @@ const AgentIds: FC<{ address: Address }> = ({ address }) => {
         {id}
       </a>
     ));
-  }, [data, networkName]);
+  }, [data]);
 
   return <ShowContent isLoading={isLoading} data={ids} />;
 };
@@ -174,6 +175,17 @@ const ConfigHash: FC<{ address: Address }> = ({ address }) => {
   }, [configHash, isZeroAddress]);
 
   return <ShowContent isLoading={isLoading} data={calculatedConfigHash} />;
+};
+
+const ProxyHash: FC<{ address: Address }> = ({ address }) => {
+  const { data: proxyHash, isLoading } = useGetProxyHash({ address });
+
+  const truncatedProxyHash = useMemo(() => {
+    if (!proxyHash) return NA;
+    return truncateAddress(proxyHash);
+  }, [proxyHash]);
+
+  return <ShowContent isLoading={isLoading} data={truncatedProxyHash} />;
 };
 
 const ActivityCheckerAddress: FC<{ address: Address }> = ({ address }) => {
@@ -278,6 +290,14 @@ export const ContractConfiguration: FC<{ myStakingContract: MyStakingContract }>
           content={<ConfigHash address={myStakingContract.id} />}
           data-testid="service-config-hash"
         />
+        <ColFlexContainer
+          text={<ProxyHashLabel />}
+          content={<ProxyHash address={myStakingContract.id} />}
+          data-testid="proxy-hash"
+        />
+      </Row>
+
+      <Row gutter={24}>
         <ColFlexContainer
           text={<ActivityCheckerAddressLabel />}
           content={<ActivityCheckerAddress address={myStakingContract.id} />}

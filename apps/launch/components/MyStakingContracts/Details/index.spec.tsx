@@ -36,6 +36,9 @@ jest.mock('hooks/useGetStakingConstants', () => ({
   useGetConfigHash: jest.fn().mockReturnValue({
     data: '0x0000000000000000000000000000000000000000000000000000000000000000',
   }),
+  useGetProxyHash: jest.fn().mockReturnValue({
+    data: '0xb89c1b3bdf2cf8827818646bce9a8f6e372885f8c55e5c07acbd307cb133b000',
+  }),
   useGetLivenessPeriod: jest.fn().mockReturnValue({ data: '86400' }),
   useGetMaximumInactivityPeriods: jest.fn().mockReturnValue({ data: '2' }),
   useGetMinimumStakingDuration: jest.fn().mockReturnValue({ data: '259200' }),
@@ -160,6 +163,11 @@ describe('<Details />', () => {
       testId: 'service-config-hash',
       title: 'Service configuration hash',
       value: '0x00000...00000',
+    },
+    {
+      testId: 'proxy-hash',
+      title: 'Approved multisig proxy hash',
+      value: '0xb89c1...3b000',
     },
     {
       testId: 'activity-checker-address',
