@@ -15,8 +15,8 @@
   "private": true,
   "dependencies": {
     "@arbitrum/sdk": "4.0.4",
-    "@ant-design/cssinjs": "1.20.0",
-    "@ant-design/icons": "5.3.6",
+    "@ant-design/cssinjs": "2.1.2",
+    "@ant-design/icons": "6.2.2",
     "@ant-design/v5-patch-for-react-19": "1.0.3",
     "@apollo/client": "3.8.5",
     "@balancer-labs/sdk": "1.1.5",
