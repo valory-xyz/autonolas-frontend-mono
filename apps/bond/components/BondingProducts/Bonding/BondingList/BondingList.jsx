@@ -3,7 +3,18 @@ import {
   QuestionCircleOutlined,
   UnorderedListOutlined,
 } from '@ant-design/icons';
-import { Button, Empty, Flex, Popconfirm, Skeleton, Spin, Table, Tag, Tooltip, Typography } from 'antd';
+import {
+  Button,
+  Empty,
+  Flex,
+  Popconfirm,
+  Skeleton,
+  Spin,
+  Table,
+  Tag,
+  Tooltip,
+  Typography,
+} from 'antd';
 import { capitalize, isNaN, remove, round } from 'lodash';
 import Link from 'next/link';
 import PropTypes from 'prop-types';

@@ -137,7 +137,7 @@
     "cypress": "13.8.0",
     "eslint": "8.48.0",
     "eslint-config-airbnb": "19.0.4",
-    "eslint-config-next": "16.2.4",
+    "eslint-config-next": "15.5.15",
     "eslint-config-prettier": "9.1.0",
     "eslint-plugin-cypress": "2.15.2",
     "eslint-plugin-import": "2.27.5",
