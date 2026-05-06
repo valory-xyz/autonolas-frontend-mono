@@ -1,3 +1,4 @@
+import '@ant-design/v5-patch-for-react-19';
 import { useRouter } from 'next/router';
 import PropTypes from 'prop-types';
 import { Provider } from 'react-redux';

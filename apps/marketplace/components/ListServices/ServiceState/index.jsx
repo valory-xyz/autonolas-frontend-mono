@@ -59,7 +59,7 @@ const ServiceStateHeader = () => {
   );
 };
 
-export const ServiceState = ({ isOwner, id, details, updateDetails }) => {
+export const ServiceState = ({ isOwner = false, id, details = [], updateDetails = () => {} }) => {
   const { account, chainId, isSvm, doesNetworkHaveValidServiceManagerToken } = useHelpers();
   const [currentStep, setCurrentStep] = useState(1);
   const [dataSource, setDataSource] = useState([]);
@@ -264,10 +264,4 @@ ServiceState.propTypes = {
   isOwner: PropTypes.bool,
   details: PropTypes.oneOfType([PropTypes.array, PropTypes.object]),
   updateDetails: PropTypes.func,
-};
-
-ServiceState.defaultProps = {
-  details: [],
-  isOwner: false,
-  updateDetails: () => {},
 };

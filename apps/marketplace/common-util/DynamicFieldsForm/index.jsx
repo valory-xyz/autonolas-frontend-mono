@@ -9,11 +9,11 @@ import { DynamicFormContainer } from './styles';
 const { Text } = Typography;
 
 export const DynamicFieldsForm = ({
-  inputOneLabel,
-  inputTwoLabel,
-  buttonText,
-  isLoading,
-  submitButtonText,
+  inputOneLabel = 'Address',
+  inputTwoLabel = 'Status',
+  buttonText = 'Add row',
+  isLoading = false,
+  submitButtonText = 'Submit',
   onSubmit,
 }) => {
   const { account } = useHelpers();
@@ -66,12 +66,4 @@ DynamicFieldsForm.propTypes = {
   buttonText: PropTypes.string,
   submitButtonText: PropTypes.string,
   isLoading: PropTypes.bool,
-};
-
-DynamicFieldsForm.defaultProps = {
-  inputOneLabel: 'Address',
-  inputTwoLabel: 'Status',
-  buttonText: 'Add row',
-  submitButtonText: 'Submit',
-  isLoading: false,
 };

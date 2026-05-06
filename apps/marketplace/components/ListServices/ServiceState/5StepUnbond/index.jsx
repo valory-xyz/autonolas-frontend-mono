@@ -59,5 +59,3 @@ Unbond.propTypes = {
   getButton: PropTypes.func.isRequired,
   getOtherBtnProps: PropTypes.func.isRequired,
 };
-
-Unbond.defaultProps = {};

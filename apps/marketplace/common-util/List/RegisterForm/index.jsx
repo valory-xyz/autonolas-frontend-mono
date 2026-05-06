@@ -14,7 +14,7 @@ import { FormItemHash } from './helpers';
 
 export const FORM_NAME = 'register_form';
 
-const RegisterForm = ({ isLoading, listType, handleSubmit, handleCancel }) => {
+const RegisterForm = ({ isLoading = false, listType = '', handleSubmit, handleCancel }) => {
   const { account } = useHelpers();
 
   const [form] = Form.useForm();
@@ -180,11 +180,6 @@ RegisterForm.propTypes = {
   listType: PropTypes.string,
   handleSubmit: PropTypes.func.isRequired,
   handleCancel: PropTypes.func.isRequired,
-};
-
-RegisterForm.defaultProps = {
-  isLoading: false,
-  listType: '',
 };
 
 export default RegisterForm;

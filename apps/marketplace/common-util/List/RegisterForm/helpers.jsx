@@ -5,7 +5,7 @@ import { LinkOutlined } from '@ant-design/icons';
 import { GATEWAY_URL, HASH_PREFIX } from '../../../util/constants';
 import { getBase16Validator } from '../IpfsHashGenerationModal';
 
-export const FormItemHash = ({ listType, hashValue }) => (
+export const FormItemHash = ({ listType = '', hashValue = null }) => (
   <Form.Item
     label="Hash of Metadata File"
     name="hash"
@@ -43,9 +43,4 @@ export const FormItemHash = ({ listType, hashValue }) => (
 FormItemHash.propTypes = {
   listType: PropTypes.string,
   hashValue: PropTypes.string,
-};
-
-FormItemHash.defaultProps = {
-  listType: '',
-  hashValue: null,
 };

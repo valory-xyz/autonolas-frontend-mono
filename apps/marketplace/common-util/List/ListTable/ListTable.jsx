@@ -8,19 +8,22 @@ import { ListEmptyMessage } from '../ListCommon';
 import { useHelpers } from '../../hooks';
 import { convertTableRawData, getTableColumns } from './helpers';
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
+const noop = /** @type {any} */ (() => {});
+
 export const ListTable = ({
-  isLoading,
+  isLoading = false,
   type,
   searchValue,
-  isPaginationRequired,
-  list,
-  total,
-  currentPage,
-  setCurrentPage,
-  isAccountRequired,
-  onViewClick,
-  onUpdateClick,
-  extra,
+  isPaginationRequired = true,
+  list = [],
+  total = 0,
+  currentPage = 0,
+  setCurrentPage = noop,
+  isAccountRequired = false,
+  onViewClick = noop,
+  onUpdateClick = noop,
+  extra = { scrollX: 1200 },
   tableDataTestId,
   onServicesHashClick,
 }) => {
@@ -107,17 +110,4 @@ ListTable.propTypes = {
   extra: PropTypes.shape({
     scrollX: PropTypes.number,
   }),
-};
-
-ListTable.defaultProps = {
-  isLoading: false,
-  isPaginationRequired: true,
-  list: [],
-  total: 0,
-  currentPage: 0,
-  setCurrentPage: () => {},
-  isAccountRequired: false,
-  onViewClick: () => {},
-  onUpdateClick: null,
-  extra: { scrollX: 1200 },
 };

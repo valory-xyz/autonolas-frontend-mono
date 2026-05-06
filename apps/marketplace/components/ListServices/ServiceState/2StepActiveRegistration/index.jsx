@@ -52,7 +52,7 @@ const getIdsAndAgentInstances = (dataSource) => {
  * ActiveRegistration component
  */
 export const ActiveRegistration = ({
-  serviceId,
+  serviceId = null,
   dataSource,
   setDataSource,
   getOtherBtnProps,
@@ -230,8 +230,4 @@ ActiveRegistration.propTypes = {
   isOwner: PropTypes.bool.isRequired,
   isEthToken: PropTypes.bool.isRequired,
   updateDetails: PropTypes.func.isRequired,
-};
-
-ActiveRegistration.defaultProps = {
-  serviceId: null,
 };

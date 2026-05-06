@@ -32,9 +32,3 @@ SendTransactionButton.propTypes = {
   children: PropTypes.node,
   onClick: PropTypes.func,
 };
-
-SendTransactionButton.defaultProps = {
-  loading: false,
-  children: null,
-  onClick: null,
-};

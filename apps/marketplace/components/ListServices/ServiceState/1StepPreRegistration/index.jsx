@@ -11,9 +11,9 @@ import { checkAndApproveToken } from '../utils';
 import { useGetActivateRegistration } from '../useSvmServiceStateManagement';
 
 export const PreRegistration = ({
-  serviceId,
+  serviceId = null,
   isOwner,
-  securityDeposit,
+  securityDeposit = '0',
   isEthToken,
   getOtherBtnProps,
   getButton,
@@ -91,9 +91,4 @@ PreRegistration.propTypes = {
   isEthToken: PropTypes.bool.isRequired,
   securityDeposit: PropTypes.oneOfType([PropTypes.string, PropTypes.shape({})]),
   updateDetails: PropTypes.func.isRequired,
-};
-
-PreRegistration.defaultProps = {
-  serviceId: null,
-  securityDeposit: '0',
 };

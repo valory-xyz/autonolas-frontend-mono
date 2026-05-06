@@ -13,11 +13,11 @@ import { useAgentInstanceAndOperator } from '../../hooks/useSvmService';
 import { getAgentInstanceAndOperator } from '../utils';
 
 export const Deployed = ({
-  serviceId,
+  serviceId = null,
   multisig,
-  isShowAgentInstanceVisible,
+  isShowAgentInstanceVisible = false,
   currentStep,
-  isOwner,
+  isOwner = false,
   getButton,
   getOtherBtnProps,
   handleTerminate,
@@ -114,10 +114,4 @@ Deployed.propTypes = {
   updateDetails: PropTypes.func.isRequired,
   isOwner: PropTypes.bool,
   handleTerminate: PropTypes.func.isRequired,
-};
-
-Deployed.defaultProps = {
-  serviceId: null,
-  isShowAgentInstanceVisible: false,
-  isOwner: false,
 };

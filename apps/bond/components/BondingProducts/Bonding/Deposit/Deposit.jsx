@@ -26,12 +26,12 @@ const fullWidth = { width: '100%' };
 
 export const Deposit = ({
   productId,
-  productToken,
-  productLpTokenName,
-  productLpPriceAfterDiscount,
-  productSupply,
-  getProducts,
-  closeModal,
+  productToken = null,
+  productLpTokenName = null,
+  productLpPriceAfterDiscount = null,
+  productSupply = null,
+  getProducts = () => {},
+  closeModal = () => {},
 }) => {
   const { account } = useHelpers();
   const [form] = Form.useForm();
@@ -292,14 +292,4 @@ Deposit.propTypes = {
   ]),
   closeModal: PropTypes.func,
   getProducts: PropTypes.func,
-};
-
-Deposit.defaultProps = {
-  productId: undefined,
-  productToken: null,
-  productLpTokenName: null,
-  productLpPriceAfterDiscount: null,
-  productSupply: null,
-  closeModal: () => {},
-  getProducts: () => {},
 };

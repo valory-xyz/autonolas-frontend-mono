@@ -27,7 +27,7 @@ const StyledHeader = styled(Header)`
   border-bottom: 1px solid ${COLOR.BORDER_GREY_2};
 `;
 
-const Layout = ({ children }) => {
+const Layout = ({ children = null }) => {
   const router = useRouter();
   const { chainId } = useHelpers();
 
@@ -90,10 +90,6 @@ Layout.propTypes = {
   children: PropTypes.element,
 };
 
-Layout.defaultProps = {
-  children: null,
-};
-
 const LayoutWithWalletProvider = (props) => (
   <ConnectionProvider endpoint={endpoint}>
     <WalletProvider wallets={wallets} autoConnect>
@@ -103,5 +99,4 @@ const LayoutWithWalletProvider = (props) => (
 );
 
 LayoutWithWalletProvider.propTypes = { children: PropTypes.element };
-LayoutWithWalletProvider.defaultProps = { children: null };
 export default LayoutWithWalletProvider;

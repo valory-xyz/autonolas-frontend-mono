@@ -61,11 +61,11 @@ const validateOwnerAddress = async (isSvm, listType, value) => {
  * Service creation form
  */
 const RegisterForm = ({
-  isLoading,
-  listType,
-  isUpdateForm,
-  formInitialValues,
-  ethTokenAddress,
+  isLoading = false,
+  listType = 'Service',
+  isUpdateForm = false,
+  formInitialValues = {},
+  ethTokenAddress = DEFAULT_SERVICE_CREATION_ETH_TOKEN,
   handleSubmit,
 }) => {
   const { account, doesNetworkHaveValidServiceManagerToken, isSvm } = useHelpers();
@@ -395,14 +395,6 @@ RegisterForm.propTypes = {
   }),
   handleSubmit: PropTypes.func.isRequired,
   ethTokenAddress: PropTypes.string,
-};
-
-RegisterForm.defaultProps = {
-  isLoading: false,
-  isUpdateForm: false,
-  listType: 'Service',
-  formInitialValues: {},
-  ethTokenAddress: DEFAULT_SERVICE_CREATION_ETH_TOKEN,
 };
 
 export default RegisterForm;

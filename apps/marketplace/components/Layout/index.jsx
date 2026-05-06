@@ -24,7 +24,7 @@ const Footer = dynamic(() => import('./Footer'), { ssr: false });
 
 const { Content } = AntdLayout;
 
-const Layout = ({ children }) => {
+const Layout = ({ children = null }) => {
   const router = useRouter();
   const { isMobile, isTablet } = useScreen();
   const { isSvm, chainId, chainName } = useHelpers();
@@ -126,7 +126,6 @@ const Layout = ({ children }) => {
 };
 
 Layout.propTypes = { children: PropTypes.element };
-Layout.defaultProps = { children: null };
 
 // NOTE: cannot use useHelpers in this component
 // because Provider needs to be initialized before.
@@ -146,5 +145,4 @@ const LayoutWithWalletProvider = (props) => {
 };
 
 LayoutWithWalletProvider.propTypes = { children: PropTypes.element };
-LayoutWithWalletProvider.defaultProps = { children: null };
 export default LayoutWithWalletProvider;

@@ -1,3 +1,4 @@
+import '@ant-design/v5-patch-for-react-19';
 import type { AppProps } from 'next/app';
 import { FC, PropsWithChildren } from 'react';
 import { Provider } from 'react-redux';

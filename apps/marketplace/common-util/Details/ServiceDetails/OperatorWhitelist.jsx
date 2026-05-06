@@ -11,7 +11,7 @@ import { checkIfServiceIsWhitelisted, setOperatorsStatusesRequest } from '../uti
 
 const { Text } = Typography;
 
-export const OperatorWhitelist = ({ id, isWhiteListed, setOpWhitelist }) => {
+export const OperatorWhitelist = ({ id = '', isWhiteListed = false, setOpWhitelist = null }) => {
   const { account, chainId } = useHelpers();
   const [form] = Form.useForm();
 
@@ -73,13 +73,7 @@ OperatorWhitelist.propTypes = {
   isWhiteListed: PropTypes.bool,
   setOpWhitelist: PropTypes.func,
 };
-OperatorWhitelist.defaultProps = {
-  id: '',
-  isWhiteListed: false,
-  setOpWhitelist: null,
-};
-
-export const SetOperatorStatus = ({ id, setOpWhitelist }) => {
+export const SetOperatorStatus = ({ id = '', setOpWhitelist = null }) => {
   const { account } = useHelpers();
   const [isSubmitLoading, setIsSubmitLoading] = useState(false);
 
@@ -116,8 +110,4 @@ export const SetOperatorStatus = ({ id, setOpWhitelist }) => {
 SetOperatorStatus.propTypes = {
   id: PropTypes.string,
   setOpWhitelist: PropTypes.func,
-};
-SetOperatorStatus.defaultProps = {
-  id: '',
-  setOpWhitelist: null,
 };

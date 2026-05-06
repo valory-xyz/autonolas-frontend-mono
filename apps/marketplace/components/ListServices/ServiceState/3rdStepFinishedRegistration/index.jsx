@@ -32,7 +32,7 @@ const SvmFinishedRegistration = ({
   updateDetails,
   getButton,
   getOtherBtnProps,
-  terminateBtn,
+  terminateBtn = null,
 }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -120,10 +120,6 @@ SvmFinishedRegistration.propTypes = {
   updateDetails: PropTypes.func.isRequired,
 };
 
-SvmFinishedRegistration.defaultProps = {
-  terminateBtn: null,
-};
-
 /**
  * FinishedRegistration component
  */
@@ -134,7 +130,7 @@ export const FinishedRegistration = ({
   threshold,
   multisig,
   handleTerminate,
-  canShowMultisigSameAddress,
+  canShowMultisigSameAddress = false,
   getOtherBtnProps,
   getButton,
   updateDetails,
@@ -406,8 +402,4 @@ FinishedRegistration.propTypes = {
   canShowMultisigSameAddress: PropTypes.bool,
   getOtherBtnProps: PropTypes.func.isRequired,
   updateDetails: PropTypes.func.isRequired,
-};
-
-FinishedRegistration.defaultProps = {
-  canShowMultisigSameAddress: false,
 };

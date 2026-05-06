@@ -24,10 +24,6 @@
         "preprocess": false
       }
     ],
-    ["inline-react-svg"],
-    [
-      "import",
-      { "libraryName": "antd", "libraryDirectory": "lib", "style": true }
-    ]
+    ["inline-react-svg"]
   ]
 } 
