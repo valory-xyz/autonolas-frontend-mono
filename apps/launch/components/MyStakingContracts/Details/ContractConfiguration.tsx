@@ -1,4 +1,5 @@
-import { Col, Flex, Row, Skeleton, Typography } from 'antd';
+import { CopyOutlined } from '@ant-design/icons';
+import { Button, Col, Flex, Row, Skeleton, Typography } from 'antd';
 import { FC, ReactNode, useMemo } from 'react';
 import { Address } from 'viem';
 
@@ -22,6 +23,7 @@ import {
   useGetMinimumStakingDeposit,
   useGetMinimumStakingDuration,
   useGetMultisigThreshold,
+  useGetProxyHash,
   useMaxNumServices,
   useNumberOfAgentInstances,
   useRewardsPerSecond,
@@ -40,6 +42,7 @@ import {
   MinimumStakingDepositLabel,
   MinimumStakingPeriodsLabel,
   MultisigThresholdLabel,
+  ProxyHashLabel,
   RewardsPerSecondLabel,
   ServiceConfigHashLabel,
   TimeForEmissionsLabel,
@@ -127,7 +130,6 @@ const NumAgentInstances: FC<{ address: Address }> = ({ address }) => {
 
 const AgentIds: FC<{ address: Address }> = ({ address }) => {
   const { data, isLoading } = useGetAgentIds({ address });
-  const { networkName } = useAppSelector((state) => state.network);
 
   const ids = useMemo(() => {
     if (!data || data.length === 0) return NA;
@@ -142,7 +144,7 @@ const AgentIds: FC<{ address: Address }> = ({ address }) => {
         {id}
       </a>
     ));
-  }, [data, networkName]);
+  }, [data]);
 
   return <ShowContent isLoading={isLoading} data={ids} />;
 };
@@ -151,6 +153,17 @@ const MultisigThreshold: FC<{ address: Address }> = ({ address }) => {
   const { data, isLoading } = useGetMultisigThreshold({ address });
   return <ShowContent isLoading={isLoading} data={data} />;
 };
+
+const CopyButton: FC<{ value: string }> = ({ value }) => (
+  <Button
+    size="small"
+    type="primary"
+    ghost
+    icon={<CopyOutlined />}
+    onClick={() => navigator.clipboard.writeText(value)}
+    style={{ marginLeft: 8 }}
+  />
+);
 
 const ConfigHash: FC<{ address: Address }> = ({ address }) => {
   const { data: configHash, isLoading } = useGetConfigHash({ address });
@@ -161,19 +174,43 @@ const ConfigHash: FC<{ address: Address }> = ({ address }) => {
 
     const truncateConfigHash = truncateAddress(configHash);
 
-    // if configHash is zero address, no need to show external link
-    if (isZeroAddress) return truncateConfigHash;
-
-    const uri = `${HASH_PREFIX}${configHash.substring(2)}`;
-    const ipfsUrl = `${GATEWAY_URL}${uri}`;
-    return (
-      <a href={ipfsUrl} target="_blank" rel="noreferrer">
+    const display = isZeroAddress ? (
+      truncateConfigHash
+    ) : (
+      <a
+        href={`${GATEWAY_URL}${HASH_PREFIX}${configHash.substring(2)}`}
+        target="_blank"
+        rel="noreferrer"
+      >
         {truncateConfigHash} {UNICODE_SYMBOLS.EXTERNAL_LINK}
       </a>
+    );
+
+    return (
+      <>
+        {display}
+        <CopyButton value={configHash} />
+      </>
     );
   }, [configHash, isZeroAddress]);
 
   return <ShowContent isLoading={isLoading} data={calculatedConfigHash} />;
+};
+
+const ProxyHash: FC<{ address: Address }> = ({ address }) => {
+  const { data: proxyHash, isLoading } = useGetProxyHash({ address });
+
+  const truncatedProxyHash = useMemo(() => {
+    if (!proxyHash) return NA;
+    return (
+      <>
+        {truncateAddress(proxyHash)}
+        <CopyButton value={proxyHash} />
+      </>
+    );
+  }, [proxyHash]);
+
+  return <ShowContent isLoading={isLoading} data={truncatedProxyHash} />;
 };
 
 const ActivityCheckerAddress: FC<{ address: Address }> = ({ address }) => {
@@ -278,6 +315,14 @@ export const ContractConfiguration: FC<{ myStakingContract: MyStakingContract }>
           content={<ConfigHash address={myStakingContract.id} />}
           data-testid="service-config-hash"
         />
+        <ColFlexContainer
+          text={<ProxyHashLabel />}
+          content={<ProxyHash address={myStakingContract.id} />}
+          data-testid="proxy-hash"
+        />
+      </Row>
+
+      <Row gutter={24}>
         <ColFlexContainer
           text={<ActivityCheckerAddressLabel />}
           content={<ActivityCheckerAddress address={myStakingContract.id} />}

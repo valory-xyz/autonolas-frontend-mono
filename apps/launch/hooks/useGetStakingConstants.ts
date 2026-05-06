@@ -87,5 +87,8 @@ export const useGetMultisigThreshold = ({ address }: { address: Address }) =>
 export const useGetConfigHash = ({ address }: { address: Address }) =>
   useStakingContractConstant<string>({ address, name: 'configHash' });
 
+export const useGetProxyHash = ({ address }: { address: Address }) =>
+  useStakingContractConstant<string>({ address, name: 'proxyHash' });
+
 export const useGetActivityChecker = ({ address }: { address: Address }) =>
   useStakingContractConstant({ address, name: 'activityChecker' });
