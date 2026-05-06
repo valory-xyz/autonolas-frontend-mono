@@ -1,4 +1,5 @@
-import { Col, Flex, Row, Skeleton, Typography } from 'antd';
+import { CopyOutlined } from '@ant-design/icons';
+import { Button, Col, Flex, Row, Skeleton, Typography } from 'antd';
 import { FC, ReactNode, useMemo } from 'react';
 import { Address } from 'viem';
 
@@ -153,6 +154,17 @@ const MultisigThreshold: FC<{ address: Address }> = ({ address }) => {
   return <ShowContent isLoading={isLoading} data={data} />;
 };
 
+const CopyButton: FC<{ value: string }> = ({ value }) => (
+  <Button
+    size="small"
+    type="primary"
+    ghost
+    icon={<CopyOutlined />}
+    onClick={() => navigator.clipboard.writeText(value)}
+    style={{ marginLeft: 8 }}
+  />
+);
+
 const ConfigHash: FC<{ address: Address }> = ({ address }) => {
   const { data: configHash, isLoading } = useGetConfigHash({ address });
   const isZeroAddress = configHash === CONTRACT_DEFAULT_VALUES.configHash;
@@ -162,15 +174,23 @@ const ConfigHash: FC<{ address: Address }> = ({ address }) => {
 
     const truncateConfigHash = truncateAddress(configHash);
 
-    // if configHash is zero address, no need to show external link
-    if (isZeroAddress) return truncateConfigHash;
-
-    const uri = `${HASH_PREFIX}${configHash.substring(2)}`;
-    const ipfsUrl = `${GATEWAY_URL}${uri}`;
-    return (
-      <a href={ipfsUrl} target="_blank" rel="noreferrer">
+    const display = isZeroAddress ? (
+      truncateConfigHash
+    ) : (
+      <a
+        href={`${GATEWAY_URL}${HASH_PREFIX}${configHash.substring(2)}`}
+        target="_blank"
+        rel="noreferrer"
+      >
         {truncateConfigHash} {UNICODE_SYMBOLS.EXTERNAL_LINK}
       </a>
+    );
+
+    return (
+      <>
+        {display}
+        <CopyButton value={configHash} />
+      </>
     );
   }, [configHash, isZeroAddress]);
 
@@ -182,7 +202,12 @@ const ProxyHash: FC<{ address: Address }> = ({ address }) => {
 
   const truncatedProxyHash = useMemo(() => {
     if (!proxyHash) return NA;
-    return truncateAddress(proxyHash);
+    return (
+      <>
+        {truncateAddress(proxyHash)}
+        <CopyButton value={proxyHash} />
+      </>
+    );
   }, [proxyHash]);
 
   return <ShowContent isLoading={isLoading} data={truncatedProxyHash} />;
