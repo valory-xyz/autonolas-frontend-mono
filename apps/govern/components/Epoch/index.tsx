@@ -17,6 +17,9 @@ import { EpochCheckpointRow, EpochStatus } from './styles';
 
 const { Title, Paragraph, Text } = Typography;
 
+// Disable if the "Start new epoch" button should be shown
+const isStartNewEpochShown = false;
+
 const StyledMain = styled.main`
   display: flex;
   flex-direction: column;
@@ -114,15 +117,18 @@ export const EpochPage = ({ initialEpochData }: EpochPageProps) => {
         ))}
 
         <EpochCheckpointRow>
-          <Button
-            size="large"
-            type="primary"
-            loading={isCheckpointLoading}
-            disabled={!account || isDataLoading || isExpectedEndTimeInFuture}
-            onClick={onCheckpoint}
-          >
-            Start new epoch
-          </Button>
+          {isStartNewEpochShown && (
+            <Button
+              size="large"
+              type="primary"
+              loading={isCheckpointLoading}
+              disabled={!account || isDataLoading || isExpectedEndTimeInFuture}
+              onClick={onCheckpoint}
+            >
+              Start new epoch
+            </Button>
+          )}
+
           <Text type="secondary">New epochs must be manually triggered by community members</Text>
           <ClaimStakingIncentives />
         </EpochCheckpointRow>

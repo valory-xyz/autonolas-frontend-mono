@@ -1,25 +1,19 @@
-import { Menu } from 'antd';
+import { Menu, type MenuProps } from 'antd';
 import { useRouter } from 'next/router';
 import { FC, useEffect, useState } from 'react';
 
-interface MenuItem {
-  label: string;
-  key: string;
-  path: string;
-}
-
-const items: MenuItem[] = [
-  { label: 'Staking contracts', key: 'contracts', path: '/contracts' },
-  { label: 'Proposals', key: 'proposals', path: '/proposals' },
-  { label: 'veOLAS', key: 'veolas', path: '/veolas' },
-  { label: 'Donate', key: 'donate', path: '/donate' },
-  { label: 'Epoch', key: 'epoch', path: '/epoch' },
-  { label: 'Docs', key: 'docs', path: '/docs' },
+const items: MenuProps['items'] = [
+  { label: 'Staking contracts', key: 'contracts' },
+  { label: 'Proposals', key: 'proposals' },
+  { label: 'veOLAS', key: 'veolas' },
+  { label: 'Donate', key: 'donate' },
+  { label: 'Epoch', key: 'epoch' },
+  { label: 'Docs', key: 'docs' },
 ];
 
 interface MenuInstanceProps {
   selectedMenu: string;
-  handleMenuItemClick: (item: MenuItem) => void;
+  handleMenuItemClick: (key: string) => void;
   mode: 'horizontal' | 'vertical';
 }
 
@@ -29,10 +23,8 @@ const MenuInstance: FC<MenuInstanceProps> = ({ selectedMenu, handleMenuItemClick
       theme="light"
       mode={mode}
       selectedKeys={selectedMenu ? [selectedMenu.split('/')[1]] : []}
-      items={items.map(({ label, key }) => ({ label, key }))}
-      onClick={({ key }) =>
-        handleMenuItemClick({ label: '', key: String(key), path: `/${String(key)}` })
-      }
+      items={items}
+      onClick={({ key }) => handleMenuItemClick(String(key))}
     />
   );
 };
@@ -49,7 +41,8 @@ export const NavigationMenu: FC = () => {
     }
   }, [pathname]);
 
-  const handleMenuItemClick = ({ path }: MenuItem) => {
+  const handleMenuItemClick = (key: string) => {
+    const path = `/${key}`;
     router.push(path);
     setSelectedMenu(path);
   };
