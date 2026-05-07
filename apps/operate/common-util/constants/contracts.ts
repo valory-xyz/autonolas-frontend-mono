@@ -92,6 +92,22 @@ export const STAKING_CONTRACT_DETAILS: Record<Address, StakingContractDetailsInf
   '0x000000000000000000000000e2f80659db1069f3b6a08af1a62064190c119543': {
     availableOn: ['pearl'],
   },
+  // Pearl Beta Mech MarketPlace V
+  '0x000000000000000000000000536d04dbd9a2310152a0d2d8d18dadfca8bb26b0': {
+    availableOn: ['pearl'],
+  },
+  // Pearl Beta Mech MarketPlace VI
+  '0x000000000000000000000000ac3ed39d18d9c951bd2e7f0024114849c0a25295': {
+    availableOn: ['pearl'],
+  },
+  // Pearl Beta Mech MarketPlace VII
+  '0x000000000000000000000000b2303f9913f11131a74f4b05099ced2043cc72c4': {
+    availableOn: ['pearl'],
+  },
+  // Pearl Beta Mech MarketPlace VIII
+  '0x00000000000000000000000012bdd401ac300482f4017c64c6c930ee40424c08': {
+    availableOn: ['pearl'],
+  },
   // Pett.AI Agent Staking Contract
   '0x000000000000000000000000fa0ca3935758cb81d35a8f1395b9eb5a596ce301': {
     availableOn: ['pearl'],
