@@ -18,7 +18,7 @@ import { EpochCheckpointRow, EpochStatus } from './styles';
 const { Title, Paragraph, Text } = Typography;
 
 // Disable if the "Start new epoch" button should be shown
-const isStartNewEpochShown = false;
+const isStartNewEpochShown = true;
 
 const StyledMain = styled.main`
   display: flex;
