@@ -13,7 +13,7 @@ jest.mock('@wagmi/core', () => ({
   readContracts: jest.fn(),
 }));
 
-jest.mock('context/Web3ModalProvider', () => ({
+jest.mock('context/AppKitProvider', () => ({
   queryClient: jest.fn(),
 }));
 

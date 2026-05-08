@@ -1,17 +1,18 @@
-import { createConfig, http } from 'wagmi';
+import { WagmiAdapter } from '@reown/appkit-adapter-wagmi';
 import {
-  Chain,
   arbitrum,
   base,
   celo,
   gnosis,
   hardhat,
   mainnet,
+  mode,
   optimism,
   polygon,
-  mode,
-} from 'wagmi/chains';
-import { coinbaseWallet, injected, safe, walletConnect } from 'wagmi/connectors';
+} from '@reown/appkit/networks';
+import type { Chain } from 'viem';
+import { cookieStorage, createStorage, http } from 'wagmi';
+import { safe } from 'wagmi/connectors';
 
 import { RPC_URLS } from 'libs/util-constants/src';
 
@@ -27,30 +28,23 @@ export const SUPPORTED_CHAINS: [Chain, ...Chain[]] = [
   ...(process.env.NEXT_PUBLIC_IS_CONNECTED_TO_LOCAL === 'true' ? [hardhat] : []),
 ];
 
-const walletConnectMetadata = {
+export const appKitMetadata = {
   name: 'OLAS Launch',
-  description: 'OLAS Launch Web3 Modal',
+  description: 'OLAS Launch',
   url: 'https://launch.olas.network',
   icons: ['https://avatars.githubusercontent.com/u/37784886'],
 };
 
-export const wagmiConfig = createConfig({
-  chains: SUPPORTED_CHAINS,
-  connectors: [
-    injected(),
-    walletConnect({
-      projectId: process.env.NEXT_PUBLIC_WALLET_PROJECT_ID || '',
-      metadata: walletConnectMetadata,
-      showQrModal: false,
-    }),
-    safe(),
-    coinbaseWallet({
-      appName: walletConnectMetadata.name,
-    }),
-  ],
+export const wagmiAdapter = new WagmiAdapter({
+  networks: SUPPORTED_CHAINS,
+  projectId: process.env.NEXT_PUBLIC_WALLET_PROJECT_ID || '',
+  storage: createStorage({ storage: cookieStorage }),
   transports: SUPPORTED_CHAINS.reduce(
     (acc, chain) => Object.assign(acc, { [chain.id]: http(RPC_URLS[chain.id]) }),
     {},
   ),
+  connectors: [safe()],
   ssr: true,
 });
+
+export const wagmiConfig = wagmiAdapter.wagmiConfig;

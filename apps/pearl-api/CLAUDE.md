@@ -37,5 +37,5 @@ Guidance for working on the **Pearl API** app in this repo.
 
 ## Notes
 
-- This app is API- and auth-focused; it does not use the same WalletConnect/Web3Modal pattern as Bond, Marketplace, etc.
+- This app is API- and auth-focused; it does not use the same Reown AppKit / WalletConnect pattern as Bond, Marketplace, etc.
 - Zendesk and Web3Auth env vars must be set for those features to work. CORS is controlled via `NEXT_PUBLIC_ALLOWED_ORIGIN`.

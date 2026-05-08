@@ -1,12 +1,12 @@
+import { createAppKit } from '@reown/appkit/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
-import { createWeb3Modal } from '@web3modal/wagmi';
 import { PropsWithChildren } from 'react';
 import { WagmiProvider } from 'wagmi';
 
 import { COLOR, W3M_BORDER_RADIUS } from 'libs/ui-theme/src';
 
-import { wagmiConfig } from 'common-util/config/wagmi';
+import { SUPPORTED_CHAINS, appKitMetadata, wagmiAdapter } from 'common-util/config/wagmi';
 
 export const queryClient = new QueryClient({
   defaultOptions: {
@@ -17,8 +17,10 @@ export const queryClient = new QueryClient({
   },
 });
 
-createWeb3Modal({
-  wagmiConfig,
+createAppKit({
+  adapters: [wagmiAdapter],
+  networks: SUPPORTED_CHAINS,
+  metadata: appKitMetadata,
   projectId: `${process.env.NEXT_PUBLIC_WALLET_PROJECT_ID}`,
   themeMode: 'light',
   themeVariables: {
@@ -28,15 +30,16 @@ createWeb3Modal({
     '--w3m-border-radius-master': W3M_BORDER_RADIUS,
     '--w3m-font-size-master': '11px',
   },
+  features: { analytics: false, email: false, socials: false },
 });
 
-export const Web3ModalProvider = ({ children }: PropsWithChildren) => {
+export default function AppKitProvider({ children }: PropsWithChildren) {
   return (
-    <WagmiProvider config={wagmiConfig}>
+    <WagmiProvider config={wagmiAdapter.wagmiConfig}>
       <QueryClientProvider client={queryClient}>
         {children}
-        <ReactQueryDevtools initialIsOpen={false} buttonPosition="bottom-left" />
+        <ReactQueryDevtools initialIsOpen={false} />
       </QueryClientProvider>
     </WagmiProvider>
   );
-};
+}

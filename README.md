@@ -31,7 +31,7 @@ Open the app at `http://localhost:<port>` (see table above).
 
 - **apps/** – Next.js apps; each has its own pages, components, Redux store, and optional wallet/backend.
 - **libs/** – Shared code: `ui-components`, `ui-theme`, `util-functions`, `util-contracts`, `util-constants`, `common-contract-functions`, `common-middleware`, `util-ssr`, and feature libs. Shared logic lives here; apps stay thin.
-- **State** – Redux Toolkit per app; Wagmi/Web3Modal where a wallet is required.
+- **State** – Redux Toolkit per app; Wagmi + Reown AppKit where a wallet is required.
 - **Styling** – styled-components + Ant Design; theme from `libs/ui-theme`.
 
 See [CLAUDE.md](CLAUDE.md) for detailed architecture, commands, and conventions.

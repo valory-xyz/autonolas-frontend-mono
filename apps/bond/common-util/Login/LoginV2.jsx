@@ -135,9 +135,9 @@ export const LoginV2 = ({ onConnect: onConnectCb, onDisconnect: onDisconnectCb }
 
   return (
     <LoginContainer>
-      <w3m-network-button />
+      <appkit-network-button />
       &nbsp;&nbsp;
-      <w3m-button balance={screens.xs ? 'hide' : 'show'} />
+      <appkit-button balance={screens.xs ? 'hide' : 'show'} />
     </LoginContainer>
   );
 };

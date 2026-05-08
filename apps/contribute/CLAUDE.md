@@ -12,7 +12,7 @@ Contribute to Olas: staking, contributions, and profile. Integrates with a **bac
 
 ## Stack
 
-- **Wallet**: Yes. Web3Modal (Wagmi). See `pages/_app.tsx` (createWeb3Modal), `components/Login/`, `components/Staking/`, `components/Profile/`.
+- **Wallet**: Yes. Reown AppKit (Wagmi adapter). See `pages/_app.tsx` (createAppKit), `components/Login/`, `components/Staking/`, `components/Profile/`.
 - **State**: Redux (`store/`) + Apollo Client for GraphQL where used.
 - **Key libs**: `util-functions`, `util-constants`, `ui-theme`, `ui-components`, `feature-service-status-info`, `common-middleware`, `util-ssr`.
 
@@ -23,7 +23,7 @@ Contribute to Olas: staking, contributions, and profile. Integrates with a **bac
 - **Discord**: `NEXT_PUBLIC_DISCORD_VERIFICATION_ADDRESS`
 - **AFMDB**: `NEXT_PUBLIC_AFMDB_URL`
 - **Agent DB** (server-side): `AGENT_DB_WALLET_PRIVATE_KEY`, `AGENT_TYPE_ID`, `ATTRIBUTE_ID_MAPPING`
-- RPCs and Wallet Project ID for Web3Modal.
+- RPCs and Wallet Project ID for Reown AppKit.
 
 ## Structure
 

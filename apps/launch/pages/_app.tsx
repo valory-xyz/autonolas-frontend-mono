@@ -9,7 +9,7 @@ import { useGetMyStakingContracts } from 'hooks/useGetMyStakingContracts';
 import { useHandleRoute } from 'hooks/useHandleRoute';
 
 import Layout from '../components/Layout';
-import Web3ModalProvider from '../context/Web3ModalProvider';
+import AppKitProvider from '../context/AppKitProvider';
 import { wrapper } from '../store';
 import { Meta } from 'components/Meta';
 
@@ -30,13 +30,13 @@ const LaunchApp = ({ Component, ...rest }: AppProps) => {
 
       <Provider store={store}>
         <AutonolasThemeProvider>
-          <Web3ModalProvider>
+          <AppKitProvider>
             <DataProvider>
               <Layout>
                 <Component {...props.pageProps} />
               </Layout>
             </DataProvider>
-          </Web3ModalProvider>
+          </AppKitProvider>
         </AutonolasThemeProvider>
       </Provider>
     </>

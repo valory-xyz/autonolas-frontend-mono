@@ -141,7 +141,7 @@ Apps use Redux Toolkit for state management:
 - Wagmi for Ethereum interactions (using wagmi v2.x)
 - Multiple chain support (Mainnet, Gnosis, Polygon, Arbitrum, Optimism, Base, Mode, Celo)
 - Solana support via @solana/web3.js and @solana/wallet-adapter
-- Web3Modal for wallet connections
+- Reown AppKit (Wagmi adapter) for wallet connections
 - Ethers v6 as primary, ethers v5 available as `ethers-v5` alias
 
 ### Environment Configuration
@@ -216,7 +216,8 @@ ESLint enforces import ordering (configured in .eslintrc.json):
 - TypeScript 5.2.2
 - Nx v17.2.5
 - Redux Toolkit
-- Wagmi 2.5.20 / Viem 2.37.5
+- Wagmi 2.19.5 / Viem 2.48.8
+- Reown AppKit 1.8.19 (Wagmi adapter)
 - Ethers v6 (and v5 as ethers-v5)
 - Ant Design 5.29.3
 - Styled-components 6.1.8

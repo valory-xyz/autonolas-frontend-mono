@@ -1,17 +1,19 @@
 import { web3 } from '@coral-xyz/anchor';
-import { Cluster } from '@solana/web3.js';
-import { kebabCase } from 'lodash';
+import { WagmiAdapter } from '@reown/appkit-adapter-wagmi';
 import {
-  Chain,
   arbitrum,
   base,
   celo,
   gnosis,
   mainnet,
+  mode,
   optimism,
   polygon,
-  mode,
-} from 'wagmi/chains';
+} from '@reown/appkit/networks';
+import { Cluster } from '@solana/web3.js';
+import { kebabCase } from 'lodash';
+import type { Chain } from 'viem';
+import { cookieStorage, createStorage, http } from 'wagmi';
 
 import { RPC_URLS } from 'libs/util-constants/src';
 import { SOLANA_CHAIN_NAMES } from 'util/constants';
@@ -36,6 +38,30 @@ export const SUPPORTED_CHAINS: Chain[] = [
     },
   } as Chain;
 });
+
+export const projectId = process.env.NEXT_PUBLIC_WALLET_PROJECT_ID as string;
+
+export const appKitMetadata = {
+  name: 'Mech Marketplace | Olas',
+  description:
+    'Marketplace to discover, manage, and view activity of autonomous AI agents directly from the Olas on-chain registry.',
+  url: 'https://marketplace.olas.network/',
+  icons: ['https://avatars.githubusercontent.com/u/37784886'],
+};
+
+export const wagmiAdapter = new WagmiAdapter({
+  networks: SUPPORTED_CHAINS as [Chain, ...Chain[]],
+  projectId,
+  storage: createStorage({ storage: cookieStorage }),
+  transports: SUPPORTED_CHAINS.reduce(
+    (acc, chain) =>
+      Object.assign(acc, { [chain.id]: http(RPC_URLS[chain.id as keyof typeof RPC_URLS]) }),
+    {},
+  ),
+  ssr: true,
+});
+
+export const wagmiConfig = wagmiAdapter.wagmiConfig;
 
 /**
  * Returns the list of supported chains with more info such as

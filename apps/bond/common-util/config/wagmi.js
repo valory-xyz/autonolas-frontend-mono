@@ -1,41 +1,29 @@
-import { http, createConfig } from 'wagmi';
-import { mainnet, goerli } from 'wagmi/chains';
-import { safe, walletConnect, injected, coinbaseWallet } from 'wagmi/connectors';
+import { WagmiAdapter } from '@reown/appkit-adapter-wagmi';
+import { mainnet, goerli } from '@reown/appkit/networks';
+import { cookieStorage, createStorage, http } from 'wagmi';
+import { safe } from 'wagmi/connectors';
+
 import { RPC_URLS } from 'common-util/constants/rpcs';
 
 export const SUPPORTED_CHAINS = [mainnet, goerli];
 
-const walletConnectMetadata = {
+export const appKitMetadata = {
   name: 'OLAS Bond',
-  description: 'OLAS Bond Web3 Modal',
-  url: 'https://bond.olas.network', // origin must match your domain & subdomain
+  description: 'OLAS Bond',
+  url: 'https://bond.olas.network',
   icons: ['https://avatars.githubusercontent.com/u/37784886'],
 };
 
-export const wagmiConfig = createConfig({
-  autoConnect: true,
-  chains: SUPPORTED_CHAINS,
-  options: {
-    rpc: SUPPORTED_CHAINS.reduce(
-      (acc, chain) => Object.assign(acc, { [chain.id]: RPC_URLS[chain.id] }),
-      {},
-    ),
-  },
-  connectors: [
-    injected(),
-    walletConnect({
-      projectId: process.env.NEXT_PUBLIC_WALLET_PROJECT_ID,
-      metadata: walletConnectMetadata,
-      showQrModal: false,
-    }),
-    safe(),
-    coinbaseWallet({
-      appName: 'OLAS Tokenomics',
-    }),
-  ],
+export const wagmiAdapter = new WagmiAdapter({
+  networks: SUPPORTED_CHAINS,
+  projectId: process.env.NEXT_PUBLIC_WALLET_PROJECT_ID || '',
+  storage: createStorage({ storage: cookieStorage }),
   transports: SUPPORTED_CHAINS.reduce(
     (acc, chain) => Object.assign(acc, { [chain.id]: http(RPC_URLS[chain.id]) }),
     {},
   ),
+  connectors: [safe()],
   ssr: true,
 });
+
+export const wagmiConfig = wagmiAdapter.wagmiConfig;

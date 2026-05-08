@@ -1,23 +1,24 @@
 import '@ant-design/v5-patch-for-react-19';
 import { ApolloProvider } from '@apollo/client';
-
-/** wagmi config */
+import { createAppKit } from '@reown/appkit/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { createWeb3Modal } from '@web3modal/wagmi/react';
 import type { AppProps } from 'next/app';
 import { useEffect, useState } from 'react';
 import { Provider } from 'react-redux';
-import { cookieToInitialState, WagmiProvider } from 'wagmi';
+import { WagmiProvider, cookieToInitialState } from 'wagmi';
 
-import { COLOR } from 'libs/ui-theme/src';
-
-/** antd theme config */
-import { AutonolasThemeProvider, GlobalStyles } from 'libs/ui-theme/src';
+import { AutonolasThemeProvider, COLOR, GlobalStyles } from 'libs/ui-theme/src';
 
 import { Layout } from 'components/Layout';
 
 /* eslint-disable-line import/no-unresolved */
-import { wagmiConfig } from 'components/Login/config';
+import {
+  SUPPORTED_CHAINS,
+  appKitMetadata,
+  projectId,
+  wagmiAdapter,
+  wagmiConfig,
+} from 'components/Login/config';
 import Meta from 'components/meta';
 
 import client from '../apolloClient';
@@ -25,10 +26,10 @@ import { store } from '../store';
 
 const queryClient = new QueryClient();
 
-export const projectId = process.env.NEXT_PUBLIC_WALLET_PROJECT_ID as string;
-
-createWeb3Modal({
-  wagmiConfig,
+createAppKit({
+  adapters: [wagmiAdapter],
+  networks: SUPPORTED_CHAINS,
+  metadata: appKitMetadata,
   projectId,
   themeMode: 'light',
   themeVariables: {
@@ -44,6 +45,7 @@ createWeb3Modal({
     '8a0ee50d1f22f6651afcae7eb4253e52a3310b90af5daef78a8c4929a9bb99d4',
     'cbc11415130d01316513f735eac34fd1ad7a5d40a993bbb6772d2c02eeef3df8',
   ],
+  features: { analytics: false, email: false, socials: false },
 });
 
 const ContributeApp = ({ Component, pageProps }: AppProps) => {

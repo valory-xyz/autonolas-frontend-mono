@@ -1,5 +1,5 @@
 import { ActionCreatorWithoutPayload } from '@reduxjs/toolkit';
-import { queryClient } from 'context/Web3ModalProvider';
+import { queryClient } from 'context/AppKitProvider';
 import { clearState } from 'store/govern';
 import { AppDispatch } from 'store/index';
 

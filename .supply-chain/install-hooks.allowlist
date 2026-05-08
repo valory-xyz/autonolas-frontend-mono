@@ -9,6 +9,7 @@
 # See SUPPLY-CHAIN-SECURITY.md §7 for the per-package rationale
 # (node-gyp-build native bindings, benign shim resolvers, etc.).
 
+@reown/appkit  # postinstall: node scripts/appkit-version-check.js
 @swc/core  # postinstall: node postinstall.js
 bigint-buffer  # install: npm run rebuild || echo "Couldn't build bindings. Non-native version used."
 blake-hash  # install: node-gyp-build || exit 0

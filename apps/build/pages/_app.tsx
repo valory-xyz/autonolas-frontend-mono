@@ -8,7 +8,7 @@ import { AutonolasThemeProvider, GlobalStyles } from 'libs/ui-theme/src';
 import Layout from 'components/Layout';
 import Meta from 'components/Meta';
 
-import Web3ModalProvider from '../context/web3ModalProvider';
+import AppKitProvider from '../context/appKitProvider';
 import initStore from '../store';
 
 type MyAppProps = {
@@ -21,11 +21,11 @@ const MyApp = ({ Component, pageProps }: MyAppProps) => (
     <GlobalStyles />
     <Meta />
     <AutonolasThemeProvider>
-      <Web3ModalProvider>
+      <AppKitProvider>
         <Layout>
           <Component {...pageProps} />
         </Layout>
-      </Web3ModalProvider>
+      </AppKitProvider>
     </AutonolasThemeProvider>
   </>
 );

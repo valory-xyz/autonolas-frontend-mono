@@ -12,14 +12,14 @@ Guidance for working on the **Operate** app in this repo.
 
 ## Stack
 
-- **Wallet**: Web3Modal (Wagmi). See `context/Web3ModalProvider.tsx`, `pages/_app.tsx`.
+- **Wallet**: Reown AppKit (Wagmi adapter). See `context/AppKitProvider.tsx`, `pages/_app.tsx`.
 - **State**: Redux (`store/`).
 - **Key libs**: `util-constants`, `util-functions`, `ui-theme`, `common-contract-functions`, `util-contracts`, `ui-components`, `common-middleware`, `util-ssr`.
 
 ## Env / backends
 
 - Staking contract subgraphs and RPCs for supported chains.
-- Wallet Project ID for Web3Modal.
+- Wallet Project ID for Reown AppKit.
 
 ## Structure
 

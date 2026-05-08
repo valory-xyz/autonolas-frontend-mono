@@ -3,7 +3,7 @@ import type { AppProps } from 'next/app';
 
 import { AutonolasThemeProvider, GlobalStyles } from 'libs/ui-theme/src';
 
-import { Web3ModalProvider } from 'context/Web3ModalProvider';
+import { AppKitProvider } from 'context/AppKitProvider';
 
 import { Layout } from '../components/Layout';
 import { Meta } from 'components/Meta';
@@ -15,11 +15,11 @@ const OperateApp = ({ Component, pageProps }: AppProps) => {
       <Meta />
 
       <AutonolasThemeProvider>
-        <Web3ModalProvider>
+        <AppKitProvider>
           <Layout>
             <Component {...pageProps} />
           </Layout>
-        </Web3ModalProvider>
+        </AppKitProvider>
       </AutonolasThemeProvider>
     </>
   );

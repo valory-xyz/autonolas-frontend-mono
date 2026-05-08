@@ -6,7 +6,7 @@ This repository contains the [Olas Registry](https://registry.olas.network/) fro
 - NextJS
 - Ant Design
 - ethers
-- Web3Modal
+- Reown AppKit (Wagmi adapter)
 - Styled components
 - React testing library
 - Jest

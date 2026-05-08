@@ -8,7 +8,7 @@ import { AutonolasThemeProvider, GlobalStyles } from 'libs/ui-theme/src';
 import Layout from 'components/Layout';
 import { Meta } from 'components/Meta';
 
-import Web3ModalProvider from '../context/Web3ModalProvider';
+import AppKitProvider from '../context/AppKitProvider';
 import { store } from '../store';
 
 const BondApp = ({ Component, pageProps }) => {
@@ -25,11 +25,11 @@ const BondApp = ({ Component, pageProps }) => {
           {isNotLegal ? (
             <Component {...pageProps} />
           ) : (
-            <Web3ModalProvider>
+            <AppKitProvider>
               <Layout>
                 <Component {...pageProps} />
               </Layout>
-            </Web3ModalProvider>
+            </AppKitProvider>
           )}
         </AutonolasThemeProvider>
       </Provider>

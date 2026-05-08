@@ -7,7 +7,7 @@ import { Provider } from 'react-redux';
 import { AutonolasThemeProvider, GlobalStyles } from 'libs/ui-theme/src';
 
 import { Meta } from 'components/Meta';
-import { Web3ModalProvider } from 'context/Web3ModalProvider';
+import { AppKitProvider } from 'context/AppKitProvider';
 
 import { Layout } from '../components/Layout';
 import { useFetchStakingContractsList } from '../hooks';
@@ -29,13 +29,13 @@ const GovernApp = ({ Component, ...rest }: AppProps) => {
 
       <Provider store={store}>
         <AutonolasThemeProvider>
-          <Web3ModalProvider>
+          <AppKitProvider>
             <DataProvider>
               <Layout>
                 <Component {...props.pageProps} />
               </Layout>
             </DataProvider>
-          </Web3ModalProvider>
+          </AppKitProvider>
         </AutonolasThemeProvider>
       </Provider>
     </>

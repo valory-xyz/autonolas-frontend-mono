@@ -50,7 +50,7 @@ export const LoginV2 = () => {
 
   return (
     <LoginContainer>
-      <w3m-button balance="hide" />
+      <appkit-button balance="hide" />
     </LoginContainer>
   );
 };

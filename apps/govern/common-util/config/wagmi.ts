@@ -1,19 +1,19 @@
-import { cookieStorage, createStorage, http } from 'wagmi';
+import { WagmiAdapter } from '@reown/appkit-adapter-wagmi';
 import {
-  Chain,
   arbitrum,
   base,
   celo,
   gnosis,
   hardhat,
   mainnet,
+  mode,
   optimism,
   polygon,
-  mode,
-} from 'wagmi/chains';
+} from '@reown/appkit/networks';
+import type { Chain } from 'viem';
+import { cookieStorage, createStorage, http } from 'wagmi';
 
 import { RPC_URLS } from 'libs/util-constants/src';
-import { defaultWagmiConfig } from '@web3modal/wagmi';
 
 export const SUPPORTED_CHAINS: [Chain, ...Chain[]] = [
   mainnet,
@@ -38,17 +38,16 @@ const SUPPORTED_CHAINS_WITH_RPCS = SUPPORTED_CHAINS.map((chain) => {
   } as Chain;
 });
 
-const walletConnectMetadata = {
+export const appKitMetadata = {
   name: 'OLAS Govern',
-  description: 'OLAS Govern Web3 Modal',
+  description: 'OLAS Govern',
   url: 'https://govern.olas.network',
   icons: ['https://avatars.githubusercontent.com/u/37784886'],
 };
 
-export const wagmiConfig = defaultWagmiConfig({
-  chains: SUPPORTED_CHAINS_WITH_RPCS as [Chain, ...Chain[]],
+export const wagmiAdapter = new WagmiAdapter({
+  networks: SUPPORTED_CHAINS_WITH_RPCS as [Chain, ...Chain[]],
   projectId: process.env.NEXT_PUBLIC_WALLET_PROJECT_ID || '',
-  metadata: walletConnectMetadata,
   storage: createStorage({ storage: cookieStorage }),
   transports: SUPPORTED_CHAINS.reduce(
     (acc, chain) =>
@@ -57,3 +56,5 @@ export const wagmiConfig = defaultWagmiConfig({
   ),
   ssr: true,
 });
+
+export const wagmiConfig = wagmiAdapter.wagmiConfig;

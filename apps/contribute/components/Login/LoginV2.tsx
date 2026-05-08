@@ -159,7 +159,7 @@ export const LoginV2 = ({ onConnect: onConnectCb, onDisconnect: onDisconnectCb }
           </Link>
         </>
       )}
-      <w3m-button balance="hide" />
+      <appkit-button balance="hide" />
     </LoginContainer>
   );
 };

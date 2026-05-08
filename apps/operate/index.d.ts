@@ -16,7 +16,7 @@ declare module '*.svg' {
 declare module 'react' {
   namespace JSX {
     interface IntrinsicElements {
-      'w3m-button': {
+      'appkit-button': {
         disabled?: boolean;
         balance?: 'show' | 'hide';
         size?: 'md' | 'sm';

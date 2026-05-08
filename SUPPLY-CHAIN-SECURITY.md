@@ -88,6 +88,7 @@ When adding a new dependency, check:
 | --- | --- | --- |
 | `secp256k1`, `keccak`, `blake-hash`, `utf-8-validate`, `bufferutil`, `bigint-buffer`, `tiny-secp256k1`, `usb` | `node-gyp-build` | Native crypto / wallet-signing bindings and Trezor USB transport (`usb` reaches the tree via `@solana/wallet-adapter-wallets → @solana/wallet-adapter-trezor → @trezor/connect-web → @trezor/connect → @trezor/transport → usb`); legitimate. Each fallback-compiles to pure JS, so `--ignore-scripts` degrades gracefully. |
 | `protobufjs` | `node scripts/postinstall` | Resolves CLI shims; benign. |
+| `@reown/appkit` | `node scripts/appkit-version-check.js` | Walks up to the consumer `package.json` and verifies all `@reown/*` deps are aligned. No network I/O, no env exfiltration; pure version-consistency lint. |
 | `es5-ext` | `node -e "try{require('./_postinstall')}catch(e){}"` | Package behind the March 2024 protestware incident. Currently benign but single-maintainer — treat any `es5-ext` bump on its own merits. |
 | `web3`, `web3-bzz`, `web3-shh` | `echo` only | Harmless. |
 | `@swc/core` | `node postinstall.js` | Dev-only (not in production tree). |
@@ -98,7 +99,7 @@ The script filters out trivial hooks (`echo`, `true`, `:`, `exit 0`). Everything
 
 **Web3 / monorepo-specific watches:**
 
-- [`wagmi`](https://www.npmjs.com/package/wagmi), [`viem`](https://www.npmjs.com/package/viem), [`@wagmi/core`](https://www.npmjs.com/package/@wagmi/core), [`@web3modal/*`](https://www.npmjs.com/package/@web3modal/wagmi), [`@web3auth/modal`](https://www.npmjs.com/package/@web3auth/modal), [`@binance/w3w-wagmi-connector-v2`](https://www.npmjs.com/package/@binance/w3w-wagmi-connector-v2) — wallet connector / EVM signing libraries. Scrutinize any bump: a compromised version could alter addresses or drain funds in downstream Pearl / Operate / Bond / Launch apps.
+- [`wagmi`](https://www.npmjs.com/package/wagmi), [`viem`](https://www.npmjs.com/package/viem), [`@wagmi/core`](https://www.npmjs.com/package/@wagmi/core), [`@reown/appkit`](https://www.npmjs.com/package/@reown/appkit), [`@reown/appkit-adapter-wagmi`](https://www.npmjs.com/package/@reown/appkit-adapter-wagmi), [`@web3auth/modal`](https://www.npmjs.com/package/@web3auth/modal), [`@binance/w3w-wagmi-connector-v2`](https://www.npmjs.com/package/@binance/w3w-wagmi-connector-v2) — wallet connector / EVM signing libraries. Scrutinize any bump: a compromised version could alter addresses or drain funds in downstream Pearl / Operate / Bond / Launch apps.
 - [`@solana/web3.js`](https://www.npmjs.com/package/@solana/web3.js), [`@solana/wallet-adapter-*`](https://www.npmjs.com/package/@solana/wallet-adapter-react), [`@coral-xyz/anchor`](https://www.npmjs.com/package/@coral-xyz/anchor), [`@orca-so/whirlpools-sdk`](https://www.npmjs.com/package/@orca-so/whirlpools-sdk) — Solana signing stack.
 - [`ethers`](https://www.npmjs.com/package/ethers) (v6, primary) + [`ethers-v5`](./package.json) (v5, aliased). Two parallel ethers versions both sign on behalf of users; audit both on any bump.
 - [`web3`](https://www.npmjs.com/package/web3) — large transitive tree; the web3 ecosystem has historically been a high-value target.

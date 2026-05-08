@@ -12,7 +12,7 @@ jest.mock('wagmi', () => ({
   useAccount: jest.fn().mockReturnValue({ address: '0x1234', isConnected: true }),
 }));
 jest.mock('common-util/functions/requests', () => ({ voteForNomineeWeights: jest.fn() }));
-jest.mock('context/Web3ModalProvider', () => ({
+jest.mock('context/AppKitProvider', () => ({
   queryClient: jest.fn().mockReturnValue({ removeQueries: jest.fn() }),
 }));
 jest.mock('hooks/index', () => ({ useVotingPower: jest.fn() }));

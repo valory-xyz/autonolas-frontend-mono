@@ -12,7 +12,7 @@ Bonding products for Olas: buy/sell OLAS and related tokens. Supports **EVM** (B
 
 ## Stack
 
-- **Wallet**: Yes. Web3Modal (EVM) + Solana wallet adapter. See `context/Web3ModalProvider.jsx`, `common-util/Login/`, `common-util/hooks/useSvmConnectivity.jsx`.
+- **Wallet**: Yes. Reown AppKit (Wagmi adapter, EVM) + Solana wallet adapter. See `context/AppKitProvider.jsx`, `common-util/Login/`, `common-util/hooks/useSvmConnectivity.jsx`.
 - **State**: Redux (`store/`).
 - **Key libs**: `ui-components`, `ui-theme`, `util-functions`, `util-contracts`, `util-constants`, `util-prohibited-data`, `util-ssr`, `common-middleware`.
 

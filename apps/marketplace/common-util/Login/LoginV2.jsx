@@ -154,7 +154,7 @@ export const LoginV2 = ({
             </div>
           )}
 
-          <w3m-button balance={screens.xs ? 'hide' : 'show'} />
+          <appkit-button balance={screens.xs ? 'hide' : 'show'} />
         </>
       )}
     </LoginContainer>

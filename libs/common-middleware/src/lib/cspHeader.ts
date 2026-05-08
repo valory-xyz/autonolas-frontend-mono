@@ -24,12 +24,16 @@ const ALLOWED_ORIGINS = [
   'https://pfp.staging.autonolas.tech/healthcheck',
   'https://pfp.autonolas.tech/healthcheck',
 
-  // web3modal and wallet connect
+  // Reown AppKit (formerly Web3Modal) + WalletConnect
   ...WALLET_CONNECT_LINKS,
   'https://rpc.walletconnect.com/',
+  'https://rpc.walletconnect.org/',
   'wss://relay.walletconnect.org/',
   'wss://relay.walletconnect.com/',
   'https://explorer-api.walletconnect.com/',
+  'https://explorer-api.walletconnect.org/',
+  'https://pulse.walletconnect.org/',
+  'https://*.reown.com/',
   'wss://*.pusher.com/',
   'wss://www.walletlink.org/rpc',
 
@@ -72,6 +76,7 @@ const ALLOWED_ORIGINS = [
   'https://forno.celo.org',
   'https://alfajores-forno.celo-testnet.org',
   'https://api.web3modal.com/',
+  'https://api.web3modal.org/',
   'https://rpc.ankr.com/',
   'https://mainnet.mode.network/',
   'https://explorer.mode.network',
@@ -138,6 +143,7 @@ export const getCspHeaders = () => {
           'data:',
           'https://*.autonolas.tech/',
           'https://explorer-api.walletconnect.com/w3m/',
+          'https://explorer-api.walletconnect.org/w3m/',
           ...WALLET_CONNECT_LINKS,
           ...GATEWAY_LINKS,
           ...VERCEL_LINKS,

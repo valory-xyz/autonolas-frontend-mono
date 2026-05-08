@@ -24,7 +24,7 @@ Olas documentation site: static/content-focused. **No wallet or Web3**; no Redux
 
 - `pages/` – Next.js routes; content pages.
 - `components/` – Layout, Meta, doc content components.
-- No `store/` or Web3Modal/context.
+- No `store/` or AppKit/context.
 
 ## Commands
 
