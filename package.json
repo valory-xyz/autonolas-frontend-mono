@@ -163,6 +163,7 @@
     "vitest": "1.5.0"
   },
   "resolutions": {
+    "@babel/plugin-transform-modules-systemjs": "7.29.4",
     "@gnosis.pm/safe-contracts/ethers": "5.7.2",
     "@wagmi/connectors": "6.2.0",
     "form-data": "2.5.5",
