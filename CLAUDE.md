@@ -229,7 +229,7 @@ Key things to know:
 
 - **Direct deps are pinned to exact versions** in [package.json](package.json) — no `^`, no `~`. The `resolutions` block (32+ entries) pins transitive deps too. When adding or bumping a dep, use exact versions and review the `yarn.lock` diff.
 - **Yarn is pinned** via `packageManager: yarn@1.22.22`. CI activates this version explicitly via `corepack`. Do not use npm or pnpm.
-- **Three blocking CI gates** run on every PR via [.github/workflows/supply-chain.yml](.github/workflows/supply-chain.yml):
+- **Three blocking supply-chain CI gates** run on every PR via [.github/workflows/supply-chain.yml](.github/workflows/supply-chain.yml) (alongside the Gitleaks job in the same workflow):
   - `yarn audit:prod` ([scripts/audit.mjs](scripts/audit.mjs)) — fails on unlisted high/critical advisories in the production tree. Allowlist (with reason + review date) is in [.supply-chain/audit-allowlist.json](.supply-chain/audit-allowlist.json).
   - `yarn lint:lockfile` — validates `yarn.lock` registry origins, HTTPS, integrity hashes.
   - `yarn audit:install-hooks` ([scripts/audit-install-hooks.mjs](scripts/audit-install-hooks.mjs)) — diffs the set of packages with `pre/post/install` scripts against [.supply-chain/install-hooks.allowlist](.supply-chain/install-hooks.allowlist). A new install hook in the tree fails CI.
