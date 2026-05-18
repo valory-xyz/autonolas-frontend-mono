@@ -9,15 +9,5 @@
     "added": "YYYY-MM-DD when the entry was added",
     "review": "YYYY-MM-DD by which the entry must be re-evaluated. An expired entry prints a CI warning but does not fail the job."
   },
-  "entries": [
-    {
-      "id": 1103747,
-      "ghsa": "GHSA-3gc7-fjrx-p6mg",
-      "package": "bigint-buffer",
-      "severity": "high",
-      "reason": "No upstream patch available (npm advisory reports patched_versions: <0.0.0; the package is effectively abandoned). Reaches the tree via @solana/wallet-adapter-wallets > @solana/wallet-adapter-torus > crypto-browserify and the @solana/web3.js chain. CVE-2025-3194 is a buffer overflow in toBigIntLE(). The only way out is removing Solana support or waiting for an upstream fork. Track upstream: https://github.com/advisories/GHSA-3gc7-fjrx-p6mg.",
-      "added": "2026-04-24",
-      "review": "2026-07-24"
-    }
-  ]
+  "entries": []
 }
