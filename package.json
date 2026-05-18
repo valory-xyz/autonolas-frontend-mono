@@ -189,6 +189,11 @@
     "minimatch": "5.1.8",
     "secp256k1": "5.0.1",
     "undici": "7.24.0",
-    "ws": "8.17.1"
+    "ws": "8.17.1",
+    "handlebars": "4.7.9",
+    "flatted": "3.4.2",
+    "rollup": "4.59.0",
+    "**/@storybook/builder-vite/rollup": "3.30.0",
+    "playwright": "1.55.1"
   }
 }
