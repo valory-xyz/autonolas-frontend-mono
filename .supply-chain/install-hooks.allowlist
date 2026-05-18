@@ -9,6 +9,7 @@
 # See SUPPLY-CHAIN-SECURITY.md §7 for the per-package rationale
 # (node-gyp-build native bindings, benign shim resolvers, etc.).
 
+@stellar/stellar-sdk  # postinstall: yarn setup || true
 @swc/core  # postinstall: node postinstall.js
 bigint-buffer  # install: npm run rebuild || echo "Couldn't build bindings. Non-native version used."
 blake-hash  # install: node-gyp-build || exit 0
@@ -22,5 +23,6 @@ protobufjs  # postinstall: node scripts/postinstall
 secp256k1  # install: node-gyp-build || exit 0
 sharp  # install: node install/check.js || npm run build
 tiny-secp256k1  # install: npm run build || echo "secp256k1 bindings compilation fail. Pure JS implementation will be used."
+unrs-resolver  # postinstall: napi-postinstall unrs-resolver 1.11.1 check
 usb  # install: node-gyp-build
 utf-8-validate  # install: node-gyp-build
