@@ -18,8 +18,10 @@ export const ClaimIncentives = () => {
   useEffect(() => {
     const getData = async () => {
       try {
+        // Treasury `paused()` returns a uint8 (0/1/2 — three pause states);
+        // `pauseValue` is compared as a string downstream (`=== '0' / '1' / '2'`).
         const value = await getPausedValueRequest();
-        setPausedValue(value);
+        setPausedValue(String(value));
       } catch (error: unknown) {
         notifySpecificError(error as Error);
         console.error(error);
