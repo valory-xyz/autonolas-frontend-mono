@@ -9,7 +9,6 @@
 # See SUPPLY-CHAIN-SECURITY.md §7 for the per-package rationale
 # (node-gyp-build native bindings, benign shim resolvers, etc.).
 
-bigint-buffer  # install: npm run rebuild || echo "Couldn't build bindings. Non-native version used."
 blake-hash  # install: node-gyp-build || exit 0
 bufferutil  # install: node-gyp-build
 es5-ext  # postinstall: node -e "try{require('./_postinstall')}catch(e){}" || exit 0
