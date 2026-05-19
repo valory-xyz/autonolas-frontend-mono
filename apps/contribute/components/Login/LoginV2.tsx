@@ -4,7 +4,6 @@ import { useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
 import { useAccount, useBalance, useDisconnect } from 'wagmi';
-import Web3 from 'web3';
 
 import { CannotConnectAddressOfacError } from 'libs/ui-components/src';
 import { notifyError } from 'libs/util-functions/src';
@@ -93,16 +92,10 @@ export const LoginV2 = ({ onConnect: onConnectCb, onDisconnect: onDisconnectCb }
         const modalProvider = (await connector?.getProvider?.()) as any;
 
         if (modalProvider) {
-          // We plug the initial `provider` and get back
-          // a Web3Provider. This will add on methods and
-          // event listeners such as `.on()` will be different.
-          const wProvider = new Web3(modalProvider);
-
-          // *******************************************************
-          // ************ setting to the window object! ************
-          // *******************************************************
+          // libs/util-functions/getModalProvider reads window.MODAL_PROVIDER
+          // for the legacy gnosis-safe polling path. The previous web3-instance
+          // mirror (window.WEB3_PROVIDER) had no readers anywhere in the repo.
           window.MODAL_PROVIDER = modalProvider;
-          window.WEB3_PROVIDER = wProvider;
 
           if (modalProvider?.on) {
             // https://docs.ethers.io/v5/concepts/best-practices/#best-practices--network-changes

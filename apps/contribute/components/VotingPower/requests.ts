@@ -1,37 +1,48 @@
-import { getDelegateContributeContract, getVeolasContract } from 'common-util/Contracts';
-import { getEstimatedGasLimit } from 'common-util/functions/requests';
+import {
+  readContract,
+  simulateContract,
+  waitForTransactionReceipt,
+  writeContract,
+} from '@wagmi/core';
+import { Address } from 'viem';
 
-/**
- * delegatorList - those who delegated veOlas to the provided account
- */
+import { delegateContributeParams, veolasParams } from 'common-util/Contracts/params';
+import { wagmiConfig } from 'components/Login/config';
+
+/** delegatorList - those who delegated veOlas to the provided account */
 export const fetchDelegatorList = async ({ account }: { account: string }) => {
-  const contract = getDelegateContributeContract();
-  const delegatorList = await contract.methods.getDelegatorList(account).call();
-  return delegatorList;
+  return readContract(wagmiConfig, {
+    ...delegateContributeParams,
+    functionName: 'getDelegatorList',
+    args: [account as Address],
+  });
 };
 
-/**
- * delegatee - who you delegated to
- */
+/** delegatee - who you delegated to */
 export const fetchDelegatee = async ({ account }: { account: string }) => {
-  const contract = getDelegateContributeContract();
-  const delegatee = await contract.methods.mapDelegation(account).call();
-  return delegatee;
+  return readContract(wagmiConfig, {
+    ...delegateContributeParams,
+    functionName: 'mapDelegation',
+    args: [account as Address],
+  });
 };
 
-/**
- * delegates Contribute voting power to an address.
- */
+/** Delegate Contribute voting power to an address. */
 export const delegate = async ({ account, delegatee }: { account: string; delegatee: string }) => {
-  const contract = getDelegateContributeContract();
-  const delegateFn = contract.methods.delegate(delegatee);
-  const estimatedGas = await getEstimatedGasLimit(delegateFn, account);
-  const result = await delegateFn.send({ from: account, gas: estimatedGas });
-  return result;
+  const { request } = await simulateContract(wagmiConfig, {
+    ...delegateContributeParams,
+    functionName: 'delegate',
+    args: [delegatee as Address],
+    account: account as Address,
+  });
+  const hash = await writeContract(wagmiConfig, request);
+  return waitForTransactionReceipt(wagmiConfig, { hash });
 };
 
 export const fetchVeolasBalance = async ({ account }: { account: string }) => {
-  const contract = getVeolasContract();
-  const balance = await contract.methods.getVotes(account).call();
-  return balance;
+  return readContract(wagmiConfig, {
+    ...veolasParams,
+    functionName: 'getVotes',
+    args: [account as Address],
+  });
 };
