@@ -12,7 +12,6 @@
 bigint-buffer  # install: npm run rebuild || echo "Couldn't build bindings. Non-native version used."
 blake-hash  # install: node-gyp-build || exit 0
 bufferutil  # install: node-gyp-build
-cypress  # postinstall: node index.js --exec install
 es5-ext  # postinstall: node -e "try{require('./_postinstall')}catch(e){}" || exit 0
 keccak  # install: node-gyp-build || exit 0
 nx  # postinstall: node ./bin/post-install
