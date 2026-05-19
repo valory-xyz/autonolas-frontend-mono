@@ -181,23 +181,17 @@ export const CreateStakingContract = () => {
         initPayload,
         account,
       });
-      if (result) {
-        const eventLog = result.events?.InstanceCreated?.returnValues;
-
-        if (eventLog) {
-          dispatch(
-            addStakingContract({
-              id: eventLog.instance,
-              chainId: chain.id,
-              name: contractName,
-              description,
-              template: contractTemplate.title,
-              isNominated: false,
-            }),
-          );
-        }
-        router.push(`/${networkName}/${URL.myStakingContracts}`);
-      }
+      dispatch(
+        addStakingContract({
+          id: result.instance,
+          chainId: chain.id,
+          name: contractName,
+          description,
+          template: contractTemplate.title,
+          isNominated: false,
+        }),
+      );
+      router.push(`/${networkName}/${URL.myStakingContracts}`);
     } catch (error) {
       console.error(error);
 
