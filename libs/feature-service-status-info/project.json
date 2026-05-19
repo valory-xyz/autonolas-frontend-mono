@@ -15,49 +15,6 @@
       "options": {
         "jestConfig": "libs/feature-service-status-info/jest.config.ts"
       }
-    },
-    "storybook": {
-      "executor": "@nx/storybook:storybook",
-      "options": {
-        "port": 4400,
-        "configDir": "libs/feature-service-status-info/.storybook"
-      },
-      "configurations": {
-        "ci": {
-          "quiet": true
-        }
-      }
-    },
-    "build-storybook": {
-      "executor": "@nx/storybook:build",
-      "outputs": ["{options.outputDir}"],
-      "options": {
-        "outputDir": "dist/storybook/feature-service-status-info",
-        "configDir": "libs/feature-service-status-info/.storybook"
-      },
-      "configurations": {
-        "ci": {
-          "quiet": true
-        }
-      }
-    },
-    "test-storybook": {
-      "executor": "nx:run-commands",
-      "options": {
-        "command": "test-storybook -c libs/feature-service-status-info/.storybook --url=http://localhost:4400"
-      }
-    },
-    "static-storybook": {
-      "executor": "@nx/web:file-server",
-      "options": {
-        "buildTarget": "feature-service-status-info:build-storybook",
-        "staticFilePath": "dist/storybook/feature-service-status-info"
-      },
-      "configurations": {
-        "ci": {
-          "buildTarget": "feature-service-status-info:build-storybook:ci"
-        }
-      }
     }
   }
 }

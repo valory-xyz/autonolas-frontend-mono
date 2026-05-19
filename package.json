@@ -88,21 +88,8 @@
     "@nx/jest": "v17.2.5",
     "@nx/js": "v17.2.5",
     "@nx/react": "v17.2.5",
-    "@nx/storybook": "v17.2.5",
-    "@nx/vite": "v17.2.5",
     "@nx/web": "v17.2.5",
     "@nx/workspace": "v17.2.5",
-    "@storybook/addon-essentials": "7.6.17",
-    "@storybook/addon-interactions": "7.6.17",
-    "@storybook/core-server": "7.6.17",
-    "@storybook/jest": "0.2.3",
-    "@storybook/react-vite": "7.6.17",
-    "@storybook/test-runner": "0.13.0",
-    "@storybook/testing-library": "0.2.2",
-    "@swc-node/register": "1.6.8",
-    "@swc/cli": "0.1.65",
-    "@swc/core": "1.3.107",
-    "@swc/plugin-styled-components": "1.5.122",
     "@testing-library/jest-dom": "6.4.2",
     "@testing-library/react": "14.0.0",
     "@testing-library/user-event": "14.5.2",
@@ -117,9 +104,6 @@
     "@types/styled-components": "5.1.26",
     "@typescript-eslint/eslint-plugin": "6.21.0",
     "@typescript-eslint/parser": "6.21.0",
-    "@vitejs/plugin-react": "4.2.1",
-    "@vitest/coverage-v8": "1.5.0",
-    "@vitest/ui": "1.5.0",
     "babel-jest": "29.7.0",
     "babel-plugin-import": "1.13.8",
     "babel-plugin-inline-react-svg": "2.0.2",
@@ -150,9 +134,7 @@
     "ts-jest": "29.1.2",
     "ts-node": "10.9.1",
     "typescript": "5.2.2",
-    "util": "0.12.5",
-    "vite": "5.2.10",
-    "vitest": "1.5.0"
+    "util": "0.12.5"
   },
   "resolutions": {
     "@babel/plugin-transform-modules-systemjs": "7.29.4",
@@ -190,10 +172,6 @@
     "secp256k1": "5.0.1",
     "undici": "7.24.0",
     "ws": "8.17.1",
-    "handlebars": "4.7.9",
-    "flatted": "3.4.2",
-    "rollup": "4.59.0",
-    "**/@storybook/builder-vite/rollup": "3.30.0",
-    "playwright": "1.55.1"
+    "flatted": "3.4.2"
   }
 }
