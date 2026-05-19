@@ -1,19 +1,69 @@
-import { notifyError } from 'libs/util-functions/src';
-import { TOKENOMICS_UNIT_TYPES } from 'libs/util-constants/src';
-import { rewardsFormatter } from 'libs/common-contract-functions/src/lib/utils';
 import {
-  getAgentContract,
-  getBlockTimestamp,
-  getComponentContract,
-  getDispenserContract,
-  getTokenomicsContract,
-  getTreasuryContract,
-  sendTransaction,
-} from 'common-util/functions';
+  getBlock,
+  readContract,
+  simulateContract,
+  waitForTransactionReceipt,
+  writeContract,
+} from '@wagmi/core';
+import { Abi, Address } from 'viem';
 
-/**
- * fetches the owners of the units
- */
+import { rewardsFormatter } from 'libs/common-contract-functions/src/lib/utils';
+import { TOKENOMICS_UNIT_TYPES } from 'libs/util-constants/src';
+import {
+  AGENT_REGISTRY,
+  COMPONENT_REGISTRY,
+  DISPENSER,
+  TOKENOMICS,
+  TREASURY,
+} from 'libs/util-contracts/src/lib/abiAndAddresses';
+import { notifyError } from 'libs/util-functions/src';
+
+import { wagmiConfig } from 'components/Login/config';
+
+import { getChainId } from 'common-util/functions';
+
+const requireChainId = (): number => {
+  const chainId = getChainId();
+  if (chainId === undefined) throw new Error('Cannot determine chain ID');
+  return chainId;
+};
+
+const tokenomicsParams = (chainId: number) => ({
+  address: TOKENOMICS.addresses[chainId as keyof typeof TOKENOMICS.addresses] as Address,
+  abi: TOKENOMICS.abi,
+  chainId,
+});
+
+const treasuryParams = (chainId: number) => ({
+  address: TREASURY.addresses[chainId as keyof typeof TREASURY.addresses] as Address,
+  abi: TREASURY.abi,
+  chainId,
+});
+
+const dispenserParams = (chainId: number) => ({
+  address: DISPENSER.addresses[chainId as keyof typeof DISPENSER.addresses] as Address,
+  abi: DISPENSER.abi,
+  chainId,
+});
+
+// agent / component registry ABIs are not declared `as const` in the source `.js`
+// files, so viem can't infer return types — `as Abi` is required and the
+// `ownerOf` return must be cast manually.
+const agentParams = (chainId: number) => ({
+  address: AGENT_REGISTRY.addresses[chainId as keyof typeof AGENT_REGISTRY.addresses] as Address,
+  abi: AGENT_REGISTRY.abi as Abi,
+  chainId,
+});
+
+const componentParams = (chainId: number) => ({
+  address: COMPONENT_REGISTRY.addresses[
+    chainId as keyof typeof COMPONENT_REGISTRY.addresses
+  ] as Address,
+  abi: COMPONENT_REGISTRY.abi as Abi,
+  chainId,
+});
+
+/** Fetches the owners of the units. */
 export const getOwnersForUnits = async ({
   unitIds,
   unitTypes,
@@ -21,25 +71,23 @@ export const getOwnersForUnits = async ({
   unitIds: string[];
   unitTypes: string[];
 }) => {
-  const ownersList = [];
+  const chainId = requireChainId();
 
-  const agentContract = getAgentContract();
-  const componentContract = getComponentContract();
-
-  for (let i = 0; i < unitIds.length; i += 1) {
+  const ownersList = unitIds.map((unitId, i) => {
     // 1 = agent, 0 = component
-    if (unitTypes[i] === TOKENOMICS_UNIT_TYPES.AGENT) {
-      const result = agentContract.methods.ownerOf(unitIds[i]).call();
-      ownersList.push(result);
-    } else {
-      const result = componentContract.methods.ownerOf(unitIds[i]).call();
-      ownersList.push(result);
-    }
-  }
+    const params =
+      unitTypes[i] === TOKENOMICS_UNIT_TYPES.AGENT
+        ? agentParams(chainId)
+        : componentParams(chainId);
 
-  const list = await Promise.all(ownersList);
-  const results = await Promise.all(list.map((e) => e));
-  return results;
+    return readContract(wagmiConfig, {
+      ...params,
+      functionName: 'ownerOf',
+      args: [BigInt(unitId)],
+    }) as Promise<Address>;
+  });
+
+  return Promise.all(ownersList);
 };
 
 export const getOwnerIncentivesRequest = async ({
@@ -51,11 +99,13 @@ export const getOwnerIncentivesRequest = async ({
   unitTypes: string[];
   unitIds: string[];
 }) => {
-  const contract = getTokenomicsContract();
-  const response: { reward: string; topUp: string } = await contract.methods
-    .getOwnerIncentives(address, unitTypes, unitIds)
-    .call();
-  return response;
+  const chainId = requireChainId();
+  const [reward, topUp] = await readContract(wagmiConfig, {
+    ...tokenomicsParams(chainId),
+    functionName: 'getOwnerIncentives',
+    args: [address as Address, unitTypes.map(BigInt), unitIds.map(BigInt)],
+  });
+  return { reward, topUp };
 };
 
 export const claimOwnerIncentivesRequest = async ({
@@ -67,44 +117,69 @@ export const claimOwnerIncentivesRequest = async ({
   unitTypes: string[];
   unitIds: string[];
 }) => {
-  const contract = getDispenserContract();
-  const fn = contract.methods.claimOwnerIncentives(unitTypes, unitIds).send({ from: account });
-
-  const response = (await sendTransaction(fn, account)) as unknown as { transactionHash?: string };
-  return response?.transactionHash;
+  const chainId = requireChainId();
+  const { request } = await simulateContract(wagmiConfig, {
+    ...dispenserParams(chainId),
+    functionName: 'claimOwnerIncentives',
+    args: [unitTypes.map(BigInt), unitIds.map(BigInt)],
+    account: account as Address,
+  });
+  const hash = await writeContract(wagmiConfig, request);
+  const receipt = await waitForTransactionReceipt(wagmiConfig, { hash });
+  return receipt.transactionHash;
 };
 
 export const checkpointRequest = async ({ account }: { account: string }) => {
-  const contract = getTokenomicsContract();
-  const fn = contract.methods.checkpoint().send({ from: account });
-  const response = await sendTransaction(fn, account);
-  return response;
+  const chainId = requireChainId();
+  const { request } = await simulateContract(wagmiConfig, {
+    ...tokenomicsParams(chainId),
+    functionName: 'checkpoint',
+    account: account as Address,
+  });
+  const hash = await writeContract(wagmiConfig, request);
+  return waitForTransactionReceipt(wagmiConfig, { hash });
 };
 
 export const getEpochCounter = async () => {
-  const contract = getTokenomicsContract();
-  const response = await contract.methods.epochCounter().call();
-  return parseInt(response, 10);
+  const chainId = requireChainId();
+  const response = await readContract(wagmiConfig, {
+    ...tokenomicsParams(chainId),
+    functionName: 'epochCounter',
+  });
+  return Number(response);
 };
 
 const getEpochTokenomics = async (epochNum: number) => {
-  const contract = getTokenomicsContract();
-  const response = await contract.methods.mapEpochTokenomics(epochNum).call();
-  return response;
+  const chainId = requireChainId();
+  return readContract(wagmiConfig, {
+    ...tokenomicsParams(chainId),
+    functionName: 'mapEpochTokenomics',
+    args: [BigInt(epochNum)],
+  });
 };
 
 const getEpochLength = async () => {
-  const contract = getTokenomicsContract();
-  const response = await contract.methods.epochLen().call();
-  return parseInt(response, 10);
+  const chainId = requireChainId();
+  const response = await readContract(wagmiConfig, {
+    ...tokenomicsParams(chainId),
+    functionName: 'epochLen',
+  });
+  return Number(response);
+};
+
+const getBlockTimestamp = async () => {
+  const chainId = requireChainId();
+  const block = await getBlock(wagmiConfig, { blockTag: 'latest', chainId });
+  return Number(block.timestamp);
 };
 
 const getEpochDetails = async () => {
   const epCounter = await getEpochCounter();
-  const epTokenomics = await getEpochTokenomics(Number(epCounter) - 1);
+  const epTokenomics = await getEpochTokenomics(epCounter - 1);
   const epochLen = await getEpochLength();
   const blockTimestamp = await getBlockTimestamp();
-  const timeDiff = blockTimestamp - epTokenomics.endTime;
+  // `endTime` is a uint32 — viem returns it as `number` from the inferred ABI shape.
+  const timeDiff = blockTimestamp - Number(epTokenomics.endTime);
 
   return { timeDiff, epochLen };
 };
@@ -120,20 +195,25 @@ export const canShowCheckpoint = async () => {
   return false;
 };
 
+// Treasury `paused()` is a uint8 with three states (0 = unpaused, 1 = paused for
+// claiming only, 2 = fully paused), not a bool. Returns `number`.
 export const getPausedValueRequest = async () => {
-  const contract = getTreasuryContract();
-  const response = await contract.methods.paused().call();
-  return response;
+  const chainId = requireChainId();
+  const response = await readContract(wagmiConfig, {
+    ...treasuryParams(chainId),
+    functionName: 'paused',
+  });
+  return Number(response);
 };
 
 export const getLastEpochRequest = async () => {
   try {
     const epCounter = await getEpochCounter();
-    const prevEpochPoint = await getEpochTokenomics(Number(epCounter) - 1);
+    const prevEpochPoint = await getEpochTokenomics(epCounter - 1);
 
-    const prevEpochEndTime = prevEpochPoint.endTime;
+    const prevEpochEndTime = Number(prevEpochPoint.endTime);
     const epochLen = await getEpochLength();
-    const nextEpochEndTime = parseInt(prevEpochEndTime, 10) + epochLen;
+    const nextEpochEndTime = prevEpochEndTime + epochLen;
 
     return { epochLen, prevEpochEndTime, nextEpochEndTime };
   } catch (error) {
@@ -152,13 +232,17 @@ export const getPendingIncentives = async ({
   unitType: string;
   unitId: string;
 }) => {
-  const contract = getTokenomicsContract();
-
+  const chainId = requireChainId();
   const currentEpochCounter = await getEpochCounter();
 
-  const unitIncentives = await contract.methods.mapUnitIncentives(unitType, unitId).call();
-
-  const { pendingRelativeReward, pendingRelativeTopUp, lastEpoch } = unitIncentives;
+  // mapUnitIncentives returns 5 top-level outputs (uint96, uint96, uint96, uint96,
+  // uint32), so viem decodes it as a tuple — not an object with named fields.
+  const unitIncentives = await readContract(wagmiConfig, {
+    ...tokenomicsParams(chainId),
+    functionName: 'mapUnitIncentives',
+    args: [BigInt(unitType), BigInt(unitId)],
+  });
+  const [, pendingRelativeReward, , pendingRelativeTopUp, lastEpoch] = unitIncentives;
 
   const isCurrentEpochWithReward =
     currentEpochCounter === Number(lastEpoch) && pendingRelativeReward > BIG_INT_0;
@@ -171,31 +255,35 @@ export const getPendingIncentives = async ({
     };
   }
 
-  // Get the unit points of the current epoch
-  const unitInfo = await contract.methods.getUnitPoint(currentEpochCounter, unitType).call();
+  // getUnitPoint returns a struct with mixed uint8 (number) and uint96 (bigint)
+  // fields. The uint8 fields must be wrapped in BigInt() before multiplying with
+  // uint96 bigints — mixing throws `Cannot mix BigInt and other types`.
+  const unitInfo = await readContract(wagmiConfig, {
+    ...tokenomicsParams(chainId),
+    functionName: 'getUnitPoint',
+    args: [BigInt(currentEpochCounter), BigInt(unitType)],
+  });
 
-  const pendingReward =
-    (BigInt(pendingRelativeReward) * BigInt(unitInfo.rewardUnitFraction)) / BIG_INT_100;
+  const pendingReward = (pendingRelativeReward * BigInt(unitInfo.rewardUnitFraction)) / BIG_INT_100;
 
-  let totalIncentives = BigInt(pendingRelativeTopUp);
+  let totalIncentives = pendingRelativeTopUp;
   let pendingTopUp = BIG_INT_0;
 
-  /**
-   * the below calculation is done to get the reward and topup
-   * based on current epoch length
-   */
   if (totalIncentives > BIG_INT_0) {
-    const inflationPerSecond = await contract.methods.inflationPerSecond().call();
+    const inflationPerSecond = await readContract(wagmiConfig, {
+      ...tokenomicsParams(chainId),
+      functionName: 'inflationPerSecond',
+    });
 
     const { timeDiff, epochLen } = await getEpochDetails();
     const epochLength = timeDiff > epochLen ? timeDiff : epochLen;
 
-    const totalTopUps = inflationPerSecond * epochLength;
-    totalIncentives *= BigInt(totalTopUps);
+    const totalTopUps = inflationPerSecond * BigInt(epochLength);
+    totalIncentives *= totalTopUps;
 
     pendingTopUp =
-      (BigInt(totalIncentives) * BigInt(unitInfo.topUpUnitFraction)) /
-      (BigInt(unitInfo.sumUnitTopUpsOLAS) * BIG_INT_100);
+      (totalIncentives * BigInt(unitInfo.topUpUnitFraction)) /
+      (unitInfo.sumUnitTopUpsOLAS * BIG_INT_100);
   }
 
   return {
