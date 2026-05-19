@@ -50,7 +50,7 @@ export const useVotingPowerBreakdown = (account: string | null) => {
     if (!account) return;
     try {
       const list = await fetchDelegatorList({ account });
-      setDelegatorList(list);
+      setDelegatorList([...list]);
     } catch (error) {
       console.error(error);
     }
@@ -60,7 +60,7 @@ export const useVotingPowerBreakdown = (account: string | null) => {
     if (!account) return;
     try {
       const result = await fetchVeolasBalance({ account });
-      setBalance(result);
+      setBalance(String(result));
     } catch (error) {
       console.error(error);
     }
