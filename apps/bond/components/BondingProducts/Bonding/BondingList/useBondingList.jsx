@@ -1,3 +1,4 @@
+import { readContract } from '@wagmi/core';
 import { ethers } from 'ethers';
 import { find, memoize, round } from 'lodash';
 import { useCallback, useEffect, useState } from 'react';
@@ -9,19 +10,20 @@ import { VM_TYPE } from 'libs/util-constants/src';
 
 import { DEPOSITORY } from 'libs/util-contracts/src/lib/abiAndAddresses';
 
+import { wagmiConfig } from 'common-util/config/wagmi';
 import { ADDRESSES } from 'common-util/constants/addresses';
 import { ADDRESS_ZERO, ONE_ETH } from 'common-util/constants/numbers';
+import {
+  depositoryParams,
+  erc20Params,
+  tokenomicsParams,
+  uniswapV2PairParams,
+} from 'common-util/Contracts/params';
 import { DEX } from 'common-util/enums';
 import { notifySpecificError } from 'common-util/functions/errors';
 import { parseToEth } from 'common-util/functions/ethers';
 import { getChainId } from 'common-util/functions/frontend-library';
-import {
-  getDepositoryContract,
-  getErc20Contract,
-  getTokenomicsContract,
-  getUniswapV2PairContract,
-  getUniswapV2PairContractByChain,
-} from 'common-util/functions/web3';
+import { getUniswapV2PairContractByChain } from 'common-util/functions/web3';
 import { BALANCER_GRAPH_CLIENTS } from 'common-util/graphql/clients';
 import { balancerGetPoolQuery } from 'common-util/graphql/queries';
 import { useHelpers } from 'common-util/hooks/useHelpers';
@@ -126,8 +128,11 @@ export const isSvmLpAddress = (address) =>
  * fetches the IDF (discount factor) for the product
  */
 const getLastIDFRequest = async () => {
-  const contract = getTokenomicsContract();
-  const lastIdfResponse = await contract.methods.getLastIDF().call();
+  const chainId = getChainId();
+  const lastIdfResponse = await readContract(wagmiConfig, {
+    ...tokenomicsParams(chainId),
+    functionName: 'getLastIDF',
+  });
 
   /**
    * 1 ETH = 1e18
@@ -159,13 +164,21 @@ const getLpTokenDetails = memoize(async (address) => {
   const chainId = getChainId();
   let tokenSymbol = null;
   try {
-    const contract = getUniswapV2PairContract(address);
-    const token0 = await contract.methods.token0().call();
-    const token1 = await contract.methods.token1().call();
-    const erc20Contract = getErc20Contract(
-      token0 === ADDRESSES[chainId].olasAddress ? token1 : token0,
-    );
-    tokenSymbol = await erc20Contract.methods.symbol().call();
+    const [token0, token1] = await Promise.all([
+      readContract(wagmiConfig, {
+        ...uniswapV2PairParams(address, chainId),
+        functionName: 'token0',
+      }),
+      readContract(wagmiConfig, {
+        ...uniswapV2PairParams(address, chainId),
+        functionName: 'token1',
+      }),
+    ]);
+    const erc20Address = token0 === ADDRESSES[chainId].olasAddress ? token1 : token0;
+    tokenSymbol = await readContract(wagmiConfig, {
+      ...erc20Params(erc20Address, chainId),
+      functionName: 'symbol',
+    });
   } catch (error) {
     console.error('Error fetching token0 and token1 from the LP pair contract: ', address);
   }
@@ -531,8 +544,12 @@ const useProductListRequest = ({ isActive }) => {
   const getProductDetailsFromIds = useProductDetailsFromIds();
 
   return useCallback(async () => {
-    const contract = getDepositoryContract();
-    const productIdList = await contract.methods.getProducts(isActive).call();
+    const chainId = getChainId();
+    const productIdList = await readContract(wagmiConfig, {
+      ...depositoryParams(chainId),
+      functionName: 'getProducts',
+      args: [isActive],
+    });
     const response = await getProductDetailsFromIds(productIdList);
 
     const productList = response.map((product, index) => ({

@@ -1,21 +1,31 @@
-import { getDepositoryContract, sendTransaction } from 'common-util/functions';
+import {
+  readContract,
+  simulateContract,
+  waitForTransactionReceipt,
+  writeContract,
+} from '@wagmi/core';
+
+import { wagmiConfig } from 'common-util/config/wagmi';
+import { depositoryParams } from 'common-util/Contracts/params';
+import { getChainId } from 'common-util/functions/frontend-library';
 
 export const getBondInfoRequest = async (bondList) => {
-  const contract = getDepositoryContract();
+  const chainId = getChainId();
 
   try {
-    const bondListPromise = [];
-
-    for (let i = 0; i < bondList.length; i += 1) {
-      const result = contract.methods.mapUserBonds(bondList[i].bondId).call();
-      bondListPromise.push(result);
-    }
-
-    const lpTokenNameList = await Promise.all(bondListPromise);
+    const lpTokenNameList = await Promise.all(
+      bondList.map((bond) =>
+        readContract(wagmiConfig, {
+          ...depositoryParams(chainId),
+          functionName: 'mapUserBonds',
+          args: [bond.bondId],
+        }),
+      ),
+    );
 
     return bondList.map((component, index) => ({
       ...component,
-      maturityDate: lpTokenNameList[index].maturity * 1000,
+      maturityDate: Number(lpTokenNameList[index].maturity) * 1000,
     }));
   } catch (error) {
     window.console.log('Error on fetching bond info');
@@ -24,23 +34,27 @@ export const getBondInfoRequest = async (bondList) => {
 };
 
 const getBondsRequest = async ({ account, isActive: isBondMatured }) => {
-  const contract = getDepositoryContract();
+  const chainId = getChainId();
 
-  const response = await contract.methods.getBonds(account, isBondMatured).call();
+  const response = await readContract(wagmiConfig, {
+    ...depositoryParams(chainId),
+    functionName: 'getBonds',
+    args: [account, isBondMatured],
+  });
 
   const { bondIds } = response;
-  const allListPromise = [];
-  const idsList = [];
+  const idsList = bondIds.map((id) => `${id}`);
 
-  for (let i = 0; i < bondIds.length; i += 1) {
-    const id = `${bondIds[i]}`;
-    const result = contract.methods.getBondStatus(id).call();
+  const allListResponse = await Promise.all(
+    idsList.map((id) =>
+      readContract(wagmiConfig, {
+        ...depositoryParams(chainId),
+        functionName: 'getBondStatus',
+        args: [id],
+      }),
+    ),
+  );
 
-    allListPromise.push(result);
-    idsList.push(id);
-  }
-
-  const allListResponse = await Promise.all(allListPromise);
   const bondsListWithDetails = allListResponse.map((bond, index) => ({
     ...bond,
     bondId: idsList[index],
@@ -66,8 +80,14 @@ export const getAllBondsRequest = async ({ account }) => {
 };
 
 export const redeemRequest = async ({ account, bondIds }) => {
-  const contract = getDepositoryContract();
-  const fn = contract.methods.redeem(bondIds).send({ from: account });
-  const response = await sendTransaction(fn, account);
-  return response?.transactionHash;
+  const chainId = getChainId();
+  const { request } = await simulateContract(wagmiConfig, {
+    ...depositoryParams(chainId),
+    functionName: 'redeem',
+    args: [bondIds],
+    account,
+  });
+  const hash = await writeContract(wagmiConfig, request);
+  const receipt = await waitForTransactionReceipt(wagmiConfig, { hash });
+  return receipt.transactionHash;
 };
