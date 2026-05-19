@@ -168,7 +168,6 @@
     "flatted": "3.4.2",
     "bigint-buffer": "npm:@exodus/bigint-buffer@1.1.5-exodus.1",
     "@babel/runtime": "7.29.2",
-    "@tootallnate/once": "3.0.1",
     "cookie": "0.7.2",
     "express": "4.20.0",
     "follow-redirects": "1.16.0",
