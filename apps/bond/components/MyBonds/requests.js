@@ -23,10 +23,12 @@ export const getBondInfoRequest = async (bondList) => {
       ),
     );
 
-    return bondList.map((component, index) => ({
-      ...component,
-      maturityDate: Number(lpTokenNameList[index][2]) * 1000,
-    }));
+    return bondList.map((component, index) => {
+      // mapUserBonds returns (account, payout, maturity, productId) as a tuple;
+      // viem decodes multi-output reads positionally, not as a named object.
+      const [, , maturity] = lpTokenNameList[index];
+      return { ...component, maturityDate: Number(maturity) * 1000 };
+    });
   } catch (error) {
     window.console.log('Error on fetching bond info');
     return bondList;

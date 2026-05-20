@@ -1,5 +1,4 @@
 import {
-  BOND_CALCULATOR,
   DEPOSITORY,
   ERC20_ABI,
   TOKENOMICS,
@@ -20,12 +19,6 @@ export const depositoryParams = (chainId) => ({
 export const tokenomicsParams = (chainId) => ({
   address: ADDRESSES[chainId].tokenomics,
   abi: TOKENOMICS.abi,
-  chainId: Number(chainId),
-});
-
-export const bondCalculatorParams = (chainId) => ({
-  address: ADDRESSES[chainId].genericBondCalculator,
-  abi: BOND_CALCULATOR.abi,
   chainId: Number(chainId),
 });
 
