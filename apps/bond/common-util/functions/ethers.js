@@ -20,12 +20,3 @@ export const parseToSolDecimals = (amount) => ethers.parseUnits(`${amount}`, 8).
  * divides the amount by 10^8
  */
 export const parseToSol = (amount) => ethers.formatUnits(`${amount}`, 8);
-
-/**
- * TODO: move to autonolas-library and figure out a better way
- * to fetch timestamp
- */
-export const getBlockTimestamp = async (block = 'latest') => {
-  const temp = await window?.WEB3_PROVIDER.eth.getBlock(block);
-  return temp.timestamp * 1;
-};
