@@ -25,7 +25,7 @@ export const getBondInfoRequest = async (bondList) => {
 
     return bondList.map((component, index) => ({
       ...component,
-      maturityDate: Number(lpTokenNameList[index].maturity) * 1000,
+      maturityDate: Number(lpTokenNameList[index][2]) * 1000,
     }));
   } catch (error) {
     window.console.log('Error on fetching bond info');
@@ -42,7 +42,7 @@ const getBondsRequest = async ({ account, isActive: isBondMatured }) => {
     args: [account, isBondMatured],
   });
 
-  const { bondIds } = response;
+  const [bondIds] = response;
   const idsList = bondIds.map((id) => `${id}`);
 
   const allListResponse = await Promise.all(
@@ -55,8 +55,9 @@ const getBondsRequest = async ({ account, isActive: isBondMatured }) => {
     ),
   );
 
-  const bondsListWithDetails = allListResponse.map((bond, index) => ({
-    ...bond,
+  const bondsListWithDetails = allListResponse.map(([payout, matured], index) => ({
+    payout,
+    matured,
     bondId: idsList[index],
     key: idsList[index],
   }));
