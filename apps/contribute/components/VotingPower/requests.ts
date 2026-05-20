@@ -36,7 +36,10 @@ export const delegate = async ({ account, delegatee }: { account: string; delega
     account: account as Address,
   });
   const hash = await writeContract(wagmiConfig, request);
-  return waitForTransactionReceipt(wagmiConfig, { hash });
+  return waitForTransactionReceipt(wagmiConfig, {
+    hash,
+    chainId: delegateContributeParams.chainId,
+  });
 };
 
 export const fetchVeolasBalance = async ({ account }: { account: string }) => {
