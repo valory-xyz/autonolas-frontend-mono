@@ -30,6 +30,11 @@ jest.mock('store/index', () => ({
   useAppDispatch: jest.fn().mockReturnValue(jest.fn()),
   useAppSelector: jest.fn(),
 }));
+// Stops Jest from following the import chain into @wagmi/core, which ships ESM-only
+// and isn't covered by the default transformIgnorePatterns.
+jest.mock('common-util/functions/web3', () => ({
+  addNominee: jest.fn(),
+}));
 jest.mock('../Login', () => ({ LoginV2: 'ConnectWallet' }));
 
 describe('<NominateContract/>', () => {

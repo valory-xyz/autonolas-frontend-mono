@@ -1,64 +1,11 @@
-import { BaseContract, EventLog } from 'ethers';
-import { Address } from 'viem';
-import Web3 from 'web3';
-import { AbiItem } from 'web3-utils';
+import { simulateContract, waitForTransactionReceipt, writeContract } from '@wagmi/core';
+import { Abi, Address, decodeEventLog, getAddress } from 'viem';
+import { mainnet } from 'viem/chains';
 
-import { RPC_URLS } from 'libs/util-constants/src';
 import { STAKING_FACTORY, VOTE_WEIGHTING } from 'libs/util-contracts/src/lib/abiAndAddresses';
-import {
-  getEstimatedGasLimit,
-  sendTransaction as sendTransactionFn,
-} from 'libs/util-functions/src';
 
-import { SUPPORTED_CHAINS } from 'common-util/config/wagmi';
-import { getChainId, getProvider } from 'common-util/functions/frontend-library';
-
-/**
- * returns the web3 details
- */
-export const getWeb3Details = () => {
-  const chainId = getChainId();
-  const web3 = new Web3(getProvider());
-  return { web3, chainId };
-};
-
-/**
- * returns the contract instance
- * @param {Array} abi - abi of the contract
- * @param {String} contractAddress - address of the contract
- */
-const getContract = (abi: AbiItem[], contractAddress: string, chainId?: number) => {
-  const { web3 } = getWeb3Details();
-  const contract = new web3.eth.Contract(abi, contractAddress);
-  return contract;
-};
-
-export const getVoteWeightingContract = () => {
-  const { chainId } = getWeb3Details();
-  const abi = VOTE_WEIGHTING.abi as AbiItem[];
-  const address = (VOTE_WEIGHTING.addresses as Record<number, string>)[chainId as number];
-  const contract = getContract(abi, address);
-  return contract;
-};
-
-export const getStakingFactoryContract = () => {
-  const { chainId } = getWeb3Details();
-  const abi = STAKING_FACTORY.abi as AbiItem[];
-  const address = (STAKING_FACTORY.addresses as Record<number, string>)[chainId as number];
-  const contract = getContract(abi, address);
-  return contract;
-};
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const sendTransaction = async (methodFn: any, account: Address) => {
-  const estimatedGas = await getEstimatedGasLimit(methodFn, account);
-  const fn = methodFn.send({ from: account, estimatedGas });
-
-  return await sendTransactionFn(fn, account, {
-    supportedChains: SUPPORTED_CHAINS,
-    rpcUrls: RPC_URLS,
-  });
-};
+import { wagmiConfig } from 'common-util/config/wagmi';
+import { getChainId } from 'common-util/functions/frontend-library';
 
 type CreateContractParams = {
   implementation: Address;
@@ -66,38 +13,71 @@ type CreateContractParams = {
   account: Address;
 };
 
-type InstanceCreatedEvent = {
-  returnValues: {
-    implementation: Address;
-    instance: Address;
-    sender: Address;
-  };
-} & EventLog;
-
+/** Creates a new staking instance and returns its address from the InstanceCreated event. */
 export const createStakingContract = async ({
   implementation,
   initPayload,
   account,
-}: CreateContractParams) => {
-  const contract = getStakingFactoryContract();
-  const createFn = contract.methods.createStakingInstance(implementation, initPayload);
-  const result = await sendTransaction(createFn, account);
+}: CreateContractParams): Promise<{ instance: Address }> => {
+  const chainId = getChainId();
+  if (chainId === undefined) throw new Error('Cannot determine chain ID');
+  const address = (STAKING_FACTORY.addresses as Record<number, Address>)[chainId];
+  const expected = getAddress(address);
 
-  return result as BaseContract & {
-    events?: { InstanceCreated: InstanceCreatedEvent };
-  };
+  const { request } = await simulateContract(wagmiConfig, {
+    address,
+    abi: STAKING_FACTORY.abi as Abi,
+    functionName: 'createStakingInstance',
+    args: [implementation, initPayload],
+    account,
+    chainId,
+  });
+
+  const hash = await writeContract(wagmiConfig, { ...request, chainId });
+  const receipt = await waitForTransactionReceipt(wagmiConfig, { hash, chainId });
+
+  for (const log of receipt.logs) {
+    if (getAddress(log.address) !== expected) continue;
+    try {
+      const decoded = decodeEventLog({
+        abi: STAKING_FACTORY.abi as Abi,
+        data: log.data,
+        topics: log.topics,
+      });
+      if (decoded.eventName === 'InstanceCreated') {
+        const args = decoded.args as unknown as { instance: Address };
+        return { instance: args.instance };
+      }
+    } catch (err) {
+      console.warn('Unexpected StakingFactory log not decodable by ABI:', err);
+    }
+  }
+
+  throw new Error('InstanceCreated event not found in transaction receipt');
 };
 
 type AddNomineeParams = {
   address: Address;
-  chainId: number;
+  nomineeChainId: number;
   account: Address;
 };
 
-export const addNominee = async ({ address, chainId, account }: AddNomineeParams) => {
-  const contract = getVoteWeightingContract();
-  const createFn = contract.methods.addNomineeEVM(address, chainId);
-  const result = await sendTransaction(createFn, account);
+/** Adds an EVM nominee to the VoteWeighting contract on mainnet. */
+export const addNominee = async ({ address, nomineeChainId, account }: AddNomineeParams) => {
+  // Widen mainnet.id from literal `1` to `number` so wagmi's simulate/write/wait
+  // overloads accept it against the workspace's non-const chains tuple.
+  const txChainId: number = mainnet.id;
+  const voteWeightingAddress = (VOTE_WEIGHTING.addresses as Record<number, Address>)[txChainId];
 
-  return result;
+  const { request } = await simulateContract(wagmiConfig, {
+    address: voteWeightingAddress,
+    abi: VOTE_WEIGHTING.abi as Abi,
+    functionName: 'addNomineeEVM',
+    args: [address, nomineeChainId],
+    account,
+    chainId: txChainId,
+  });
+
+  const hash = await writeContract(wagmiConfig, { ...request, chainId: txChainId });
+  return waitForTransactionReceipt(wagmiConfig, { hash, chainId: txChainId });
 };

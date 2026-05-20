@@ -60,7 +60,11 @@ const NominatedContractContent: FC<NominatedContractContentProps> = ({
     if (!account) return;
     try {
       setIsPending(true);
-      await addNominee({ address: contractInfo.id, chainId: contractInfo.chainId, account });
+      await addNominee({
+        address: contractInfo.id,
+        nomineeChainId: contractInfo.chainId,
+        account,
+      });
 
       setIsSuccessful(true);
 
