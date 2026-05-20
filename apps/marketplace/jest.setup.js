@@ -1,8 +1,10 @@
 import '@testing-library/jest-dom/jest-globals';
 import '@testing-library/jest-dom';
-import { TextEncoder } from 'util';
+import { TextDecoder, TextEncoder } from 'util';
 
 global.TextEncoder = TextEncoder;
+// viem (via ox/core/Bytes) needs TextDecoder which jsdom doesn't provide.
+global.TextDecoder = TextDecoder;
 
 // import jest from 'jest';
 
@@ -44,6 +46,10 @@ jest.mock('./common-util/Login', () => ({
 jest.mock('./common-util/Login/config', () => ({
   EVM_SUPPORTED_CHAINS: [{ id: 1 }],
   SVM_SUPPORTED_CHAINS: [{ id: 1 }],
+  SUPPORTED_CHAINS: [{ id: 1 }],
+  // Tests don't actually exercise wagmi; the migrated common-util/* modules
+  // need this symbol to exist so their `import { wagmiConfig }` resolves.
+  wagmiConfig: {},
 }));
 
 const { mainnet, optimism, gnosis, polygon, base, arbitrum, celo, mode } = require('viem/chains');

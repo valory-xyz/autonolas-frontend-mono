@@ -26,14 +26,14 @@ export const filterByOwner = (results, { searchValue, account }) =>
   });
 
 /**
- * get all the list and filter by owner
+ * get all the list and filter by owner.
+ * `readUnit(id)` returns a Promise resolving to the unit struct — callers
+ * wrap whatever read mechanism they use (e.g. viem's readContract).
  */
-export const getListByAccount = async ({ searchValue, total, getUnit, getOwner, account }) => {
+export const getListByAccount = async ({ searchValue, total, readUnit, getOwner, account }) => {
   const allListPromise = [];
   for (let i = 1; i <= total; i += 1) {
-    const id = `${i}`;
-    const result = getUnit(id).call();
-    allListPromise.push(result);
+    allListPromise.push(readUnit(`${i}`));
   }
 
   const result = Promise.all(allListPromise).then(async (componentsList) => {

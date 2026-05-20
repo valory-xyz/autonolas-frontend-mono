@@ -1,44 +1,75 @@
+import {
+  readContract,
+  simulateContract,
+  waitForTransactionReceipt,
+  writeContract,
+} from '@wagmi/core';
+
 import { TOKENOMICS_UNIT_TYPES } from 'libs/util-constants/src';
 
+import { agentRegistryParams, mechMinterParams } from '../../common-util/Contracts/params';
 import { getListByAccount } from '../../common-util/ContractUtils/myList';
-import { getAgentContract, getMechMinterContract } from '../../common-util/Contracts';
 import { getFirstAndLastIndex } from '../../common-util/List/functions';
+import { wagmiConfig } from '../../common-util/Login/config';
+import { getChainId } from '../../common-util/functions';
 import { resolveUnitMetadataUrl } from '../../common-util/functions/tokenUri';
-import { sendTransaction } from '../../common-util/functions';
+
+const requireChainId = () => {
+  const chainId = getChainId();
+  if (chainId instanceof Error) throw chainId;
+  if (chainId === undefined || chainId === null) throw new Error('Cannot determine chain ID');
+  return chainId;
+};
 
 // --------- HELPER METHODS ---------
 export const getAgentOwner = async (agentId) => {
-  const contract = getAgentContract();
-  const owner = await contract.methods.ownerOf(agentId).call();
-  return owner;
+  const chainId = requireChainId();
+  return readContract(wagmiConfig, {
+    ...agentRegistryParams(chainId),
+    functionName: 'ownerOf',
+    args: [BigInt(agentId)],
+  });
 };
 
 export const getAgentDetails = async (agentId) => {
-  const contract = getAgentContract();
-  const response = await contract.methods.getUnit(agentId).call();
-  return response;
+  const chainId = requireChainId();
+  return readContract(wagmiConfig, {
+    ...agentRegistryParams(chainId),
+    functionName: 'getUnit',
+    args: [BigInt(agentId)],
+  });
 };
 
 // --------- CONTRACT METHODS ---------
 export const getTotalForAllAgents = async () => {
-  const contract = getAgentContract();
-  const total = await contract.methods.totalSupply().call();
-  return total;
+  const chainId = requireChainId();
+  return readContract(wagmiConfig, {
+    ...agentRegistryParams(chainId),
+    functionName: 'totalSupply',
+  });
 };
 
 export const getTotalForMyAgents = async (account) => {
-  const contract = getAgentContract();
-  const total = await contract.methods.balanceOf(account).call();
-  return total;
+  const chainId = requireChainId();
+  return readContract(wagmiConfig, {
+    ...agentRegistryParams(chainId),
+    functionName: 'balanceOf',
+    args: [account],
+  });
 };
 
 export const getFilteredAgents = async (searchValue, account) => {
-  const contract = getAgentContract();
+  const chainId = requireChainId();
   const total = await getTotalForAllAgents();
   const list = await getListByAccount({
     searchValue,
-    total,
-    getUnit: contract.methods.getUnit,
+    total: Number(total),
+    readUnit: (id) =>
+      readContract(wagmiConfig, {
+        ...agentRegistryParams(chainId),
+        functionName: 'getUnit',
+        args: [BigInt(id)],
+      }),
     getOwner: getAgentOwner,
     account,
   });
@@ -46,19 +77,28 @@ export const getFilteredAgents = async (searchValue, account) => {
 };
 
 export const getAgents = async (total, nextPage) => {
-  const contract = getAgentContract();
+  const chainId = requireChainId();
+  const totalNum = Number(total);
 
   const allAgentsPromises = [];
-  const { first, last } = getFirstAndLastIndex(total, nextPage);
+  const { first, last } = getFirstAndLastIndex(totalNum, nextPage);
   for (let i = first; i <= last; i += 1) {
-    allAgentsPromises.push(contract.methods.getUnit(`${total - (i + first - 1)}`).call());
+    const tokenId = totalNum - (i + first - 1);
+    allAgentsPromises.push(
+      readContract(wagmiConfig, {
+        ...agentRegistryParams(chainId),
+        functionName: 'getUnit',
+        args: [BigInt(tokenId)],
+      }),
+    );
   }
 
   const agents = await Promise.allSettled(allAgentsPromises);
   const results = await Promise.all(
     agents.map(async (info, i) => {
-      const owner = await getAgentOwner(`${total - (i + first - 1)}`);
-      return { ...info.value, owner };
+      const id = `${totalNum - (i + first - 1)}`;
+      const owner = await getAgentOwner(id);
+      return { ...(info.status === 'fulfilled' ? info.value : {}), owner };
     }),
   );
 
@@ -66,25 +106,41 @@ export const getAgents = async (total, nextPage) => {
 };
 
 export const getAgentHashes = async (id) => {
-  const contract = getAgentContract();
-  const response = await contract.methods.getUpdatedHashes(id).call();
-  return response;
+  const chainId = requireChainId();
+  return readContract(wagmiConfig, {
+    ...agentRegistryParams(chainId),
+    functionName: 'getUpdatedHashes',
+    args: [BigInt(id)],
+  });
 };
 
 export const updateAgentHashes = async (account, id, newHash) => {
-  const contract = getMechMinterContract();
-
-  const fn = contract.methods.updateHash(TOKENOMICS_UNIT_TYPES.AGENT, id, `0x${newHash}`).send({
-    from: account,
+  const chainId = requireChainId();
+  const { request } = await simulateContract(wagmiConfig, {
+    ...mechMinterParams(chainId),
+    functionName: 'updateHash',
+    args: [TOKENOMICS_UNIT_TYPES.AGENT, BigInt(id), `0x${newHash}`],
+    account,
   });
-  await sendTransaction(fn, account);
+  const hash = await writeContract(wagmiConfig, request);
+  await waitForTransactionReceipt(wagmiConfig, { hash });
   return null;
 };
 
 export const getTokenUri = async (id) => {
-  const contract = getAgentContract();
-  const updatedHashes = await contract.methods.getUpdatedHashes(id).call();
-  const unitHashes = updatedHashes.unitHashes;
-  const tokenUri = unitHashes?.length ? undefined : await contract.methods.tokenURI(id).call();
+  const chainId = requireChainId();
+  const updatedHashes = await readContract(wagmiConfig, {
+    ...agentRegistryParams(chainId),
+    functionName: 'getUpdatedHashes',
+    args: [BigInt(id)],
+  });
+  const unitHashes = updatedHashes?.unitHashes;
+  const tokenUri = unitHashes?.length
+    ? undefined
+    : await readContract(wagmiConfig, {
+        ...agentRegistryParams(chainId),
+        functionName: 'tokenURI',
+        args: [BigInt(id)],
+      });
   return resolveUnitMetadataUrl(unitHashes, tokenUri);
 };

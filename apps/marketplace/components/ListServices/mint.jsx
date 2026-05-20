@@ -1,14 +1,16 @@
+import { simulateContract, waitForTransactionReceipt, writeContract } from '@wagmi/core';
 import { Typography } from 'antd';
 import { useState } from 'react';
 
-import { notifyError, notifySuccess, getEstimatedGasLimit } from 'libs/util-functions/src';
+import { notifyError, notifySuccess } from 'libs/util-functions/src';
 
-import { getServiceManagerContract } from 'common-util/Contracts';
-import { sendTransaction } from 'common-util/functions';
+import { serviceManagerParams } from 'common-util/Contracts/params';
+import { getChainId, sendTransaction } from 'common-util/functions';
 import { checkIfERC721Receive } from 'common-util/functions/requests';
 import { useHelpers } from 'common-util/hooks';
 import { useSvmConnectivity } from 'common-util/hooks/useSvmConnectivity';
 import { AlertError, AlertSuccess, convertStringToArray } from 'common-util/List/ListCommon';
+import { wagmiConfig } from 'common-util/Login/config';
 import {
   DEFAULT_SERVICE_CREATION_ETH_TOKEN,
   DEFAULT_SERVICE_CREATION_ETH_TOKEN_ZEROS,
@@ -72,34 +74,40 @@ const MintService = () => {
     setError(null);
     setInformation(null);
 
-    let fn;
+    try {
+      let result;
 
-    if (isSvm) {
-      fn = await buildSvmCreateFn(values);
-    } else {
-      try {
-        const isValid = await checkIfERC721Receive(account, values.owner_address);
-        if (!isValid) {
+      if (isSvm) {
+        const fn = await buildSvmCreateFn(values);
+        result = await sendTransaction(fn, account || undefined, {
+          vmType,
+          registryAddress: solanaAddresses.serviceRegistry,
+        });
+      } else {
+        try {
+          const isValid = await checkIfERC721Receive(account, values.owner_address);
+          if (!isValid) {
+            setIsMinting(false);
+            return;
+          }
+        } catch (e) {
           setIsMinting(false);
-          return;
+          console.error(e);
         }
-      } catch (e) {
-        setIsMinting(false);
-        console.error(e);
+
+        const chainId = getChainId();
+        const contractParams = await serviceManagerParams(chainId);
+        const args = buildEvmParams(values);
+        const { request } = await simulateContract(wagmiConfig, {
+          ...contractParams,
+          functionName: 'create',
+          args,
+          account,
+        });
+        const hash = await writeContract(wagmiConfig, request);
+        result = await waitForTransactionReceipt(wagmiConfig, { hash });
       }
 
-      const contract = await getServiceManagerContract();
-      const params = buildEvmParams(values);
-      const createFn = contract.methods.create(...params);
-      const estimatedGas = await getEstimatedGasLimit(createFn, account);
-      fn = createFn.send({ from: account, gasLimit: estimatedGas });
-    }
-
-    try {
-      const result = await sendTransaction(fn, account || undefined, {
-        vmType,
-        registryAddress: solanaAddresses.serviceRegistry,
-      });
       setInformation(result);
       notifySuccess('AI Agent added');
     } catch (e) {

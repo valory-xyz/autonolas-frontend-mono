@@ -1,15 +1,17 @@
+import { simulateContract, waitForTransactionReceipt, writeContract } from '@wagmi/core';
 import { Typography } from 'antd';
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 
 import { Loader } from 'libs/ui-components/src';
-import { getEstimatedGasLimit, notifyError, notifySuccess } from 'libs/util-functions/src';
+import { notifyError, notifySuccess } from 'libs/util-functions/src';
 
-import { getServiceManagerContract } from '../../common-util/Contracts';
+import { serviceManagerParams } from '../../common-util/Contracts/params';
 import { AlertError, convertStringToArray } from '../../common-util/List/ListCommon';
-import { sendTransaction } from '../../common-util/functions';
+import { getChainId, sendTransaction } from '../../common-util/functions';
 import { useHelpers } from '../../common-util/hooks';
 import { useSvmConnectivity } from '../../common-util/hooks/useSvmConnectivity';
+import { wagmiConfig } from '../../common-util/Login/config';
 import {
   DEFAULT_SERVICE_CREATION_ETH_TOKEN,
   DEFAULT_SERVICE_CREATION_ETH_TOKEN_ZEROS,
@@ -100,22 +102,25 @@ const UpdateService = () => {
       setError(null);
 
       try {
-        let fn = null;
-
         if (isSvm) {
-          fn = await buildSvmUpdateFn(values);
+          const fn = await buildSvmUpdateFn(values);
+          await sendTransaction(fn, account || undefined, {
+            vmType,
+            registryAddress: solanaAddresses.serviceRegistry,
+          });
         } else {
-          const contract = await getServiceManagerContract();
-          const params = buildEvmParams(values);
-          const updateFn = contract.methods.update(...params);
-          const estimatedGas = await getEstimatedGasLimit(updateFn, account);
-          fn = updateFn.send({ from: account, gasLimit: estimatedGas });
+          const chainId = getChainId();
+          const contractParams = await serviceManagerParams(chainId);
+          const args = buildEvmParams(values);
+          const { request } = await simulateContract(wagmiConfig, {
+            ...contractParams,
+            functionName: 'update',
+            args,
+            account,
+          });
+          const hash = await writeContract(wagmiConfig, request);
+          await waitForTransactionReceipt(wagmiConfig, { hash });
         }
-
-        await sendTransaction(fn, account || undefined, {
-          vmType,
-          registryAddress: solanaAddresses.serviceRegistry,
-        });
         notifySuccess('Service updated');
       } catch (e) {
         console.error(e);

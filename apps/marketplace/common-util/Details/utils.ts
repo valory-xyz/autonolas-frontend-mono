@@ -1,27 +1,53 @@
+import {
+  readContract,
+  simulateContract,
+  waitForTransactionReceipt,
+  writeContract,
+} from '@wagmi/core';
 import { Address } from 'viem';
 
-import { getOperatorWhitelistContract, getServiceRegistryTokenUtilityContract } from '../Contracts';
-import { sendTransaction } from '../functions';
+import { wagmiConfig } from 'common-util/Login/config';
+import {
+  operatorWhitelistParams,
+  serviceRegistryTokenUtilityParams,
+} from 'common-util/Contracts/params';
+import { getChainId } from 'common-util/functions';
+
+const requireChainId = (): number => {
+  const chainId = getChainId();
+  if (chainId instanceof Error) throw chainId;
+  if (chainId === undefined || chainId === null) throw new Error('Cannot determine chain ID');
+  return chainId as number;
+};
 
 export const getTokenDetailsRequest = async (serviceId: string) => {
-  const contract = getServiceRegistryTokenUtilityContract();
-  const deposit = await contract.methods.mapServiceIdTokenDeposit(serviceId).call();
-  return deposit;
+  const chainId = requireChainId();
+  return readContract(wagmiConfig, {
+    ...serviceRegistryTokenUtilityParams(chainId),
+    functionName: 'mapServiceIdTokenDeposit',
+    args: [BigInt(serviceId)],
+  });
 };
 
 /* ----- operator whitelist functions ----- */
 export const checkIfServiceRequiresWhitelisting = async (serviceId: string) => {
-  const contract = getOperatorWhitelistContract();
+  const chainId = requireChainId();
   // if true: it is whitelisted by default
   // else we can whitelist using the input field
-  const response = await contract.methods.mapServiceIdOperatorsCheck(serviceId).call();
-  return response;
+  return readContract(wagmiConfig, {
+    ...operatorWhitelistParams(chainId),
+    functionName: 'mapServiceIdOperatorsCheck',
+    args: [BigInt(serviceId)],
+  });
 };
 
 export const checkIfServiceIsWhitelisted = async (serviceId: string, operatorAddress: Address) => {
-  const contract = getOperatorWhitelistContract();
-  const response = await contract.methods.isOperatorWhitelisted(serviceId, operatorAddress).call();
-  return response;
+  const chainId = requireChainId();
+  return readContract(wagmiConfig, {
+    ...operatorWhitelistParams(chainId),
+    functionName: 'isOperatorWhitelisted',
+    args: [BigInt(serviceId), operatorAddress],
+  });
 };
 
 export const setOperatorsCheckRequest = async ({
@@ -33,10 +59,15 @@ export const setOperatorsCheckRequest = async ({
   serviceId: string;
   isChecked: boolean;
 }) => {
-  const contract = getOperatorWhitelistContract();
-  const fn = contract.methods.setOperatorsCheck(serviceId, isChecked).send({ from: account });
-  const response = await sendTransaction(fn, account);
-  return response;
+  const chainId = requireChainId();
+  const { request } = await simulateContract(wagmiConfig, {
+    ...operatorWhitelistParams(chainId),
+    functionName: 'setOperatorsCheck',
+    args: [BigInt(serviceId), isChecked],
+    account,
+  });
+  const hash = await writeContract(wagmiConfig, request);
+  return waitForTransactionReceipt(wagmiConfig, { hash });
 };
 
 export const setOperatorsStatusesRequest = async ({
@@ -50,10 +81,13 @@ export const setOperatorsStatusesRequest = async ({
   operatorAddresses: Address[];
   operatorStatuses: boolean[];
 }) => {
-  const contract = getOperatorWhitelistContract();
-  const fn = contract.methods
-    .setOperatorsStatuses(serviceId, operatorAddresses, operatorStatuses, true)
-    .send({ from: account });
-  const response = await sendTransaction(fn, account);
-  return response;
+  const chainId = requireChainId();
+  const { request } = await simulateContract(wagmiConfig, {
+    ...operatorWhitelistParams(chainId),
+    functionName: 'setOperatorsStatuses',
+    args: [BigInt(serviceId), operatorAddresses, operatorStatuses, true],
+    account,
+  });
+  const hash = await writeContract(wagmiConfig, request);
+  return waitForTransactionReceipt(wagmiConfig, { hash });
 };
