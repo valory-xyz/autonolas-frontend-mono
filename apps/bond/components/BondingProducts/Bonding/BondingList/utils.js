@@ -21,7 +21,7 @@ import { AUTONOLAS_GRAPH_CLIENTS } from 'common-util/graphql/clients';
  */
 export const getEtherscanReadContractLink = (address, fragment = 'readContract#F10') => {
   if (!ethers.isAddress(address)) return null;
-  return `https://etherscan.io/address/${ethers.getAddress(address)}#${fragment}`;
+  return `https://etherscan.io/address/${encodeURIComponent(ethers.getAddress(address))}#${fragment}`;
 };
 
 export const getProductValueFromEvent = (product, events, keyName) => {

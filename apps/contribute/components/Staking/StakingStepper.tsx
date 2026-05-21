@@ -282,7 +282,7 @@ const SetUpAndStake = ({
     // reach the anchor `href` (guards against DOM-based XSS).
     const contractLink =
       contract && isAddress(contract)
-        ? `${GOVERN_APP_URL}/contracts/${getAddress(contract)}`
+        ? `${GOVERN_APP_URL}/contracts/${encodeURIComponent(getAddress(contract))}`
         : null;
     return (
       <Flex vertical gap={8}>
