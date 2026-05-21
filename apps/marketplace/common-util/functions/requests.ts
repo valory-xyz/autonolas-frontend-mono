@@ -86,7 +86,7 @@ export const claimOwnerIncentivesRequest = async ({
     const receipt = await waitForTransactionReceipt(wagmiConfig, { hash });
     return receipt.transactionHash;
   } catch (error) {
-    window.console.log('Error occurred on claiming owner incentives');
+    console.error('Error occurred on claiming owner incentives', error);
     throw error;
   }
 };

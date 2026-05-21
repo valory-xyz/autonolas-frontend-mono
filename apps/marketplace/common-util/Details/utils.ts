@@ -11,14 +11,7 @@ import {
   operatorWhitelistParams,
   serviceRegistryTokenUtilityParams,
 } from 'common-util/Contracts/params';
-import { getChainId } from 'common-util/functions';
-
-const requireChainId = (): number => {
-  const chainId = getChainId();
-  if (chainId instanceof Error) throw chainId;
-  if (chainId === undefined || chainId === null) throw new Error('Cannot determine chain ID');
-  return chainId as number;
-};
+import { requireChainId } from 'common-util/functions';
 
 export const getTokenDetailsRequest = async (serviceId: string) => {
   const chainId = requireChainId();

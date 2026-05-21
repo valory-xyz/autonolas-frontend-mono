@@ -11,15 +11,8 @@ import { componentRegistryParams, mechMinterParams } from 'common-util/Contracts
 import { getListByAccount } from 'common-util/ContractUtils/myList';
 import { getFirstAndLastIndex } from 'common-util/List/functions';
 import { wagmiConfig } from 'common-util/Login/config';
-import { getChainId } from 'common-util/functions';
+import { requireChainId } from 'common-util/functions';
 import { resolveUnitMetadataUrl } from 'common-util/functions/tokenUri';
-
-const requireChainId = () => {
-  const chainId = getChainId();
-  if (chainId instanceof Error) throw chainId;
-  if (chainId === undefined || chainId === null) throw new Error('Cannot determine chain ID');
-  return chainId;
-};
 
 // --------- HELPER METHODS ---------
 export const getComponentOwner = async (id) => {
@@ -41,12 +34,15 @@ export const getComponentDetails = async (id) => {
 };
 
 // --------- CONTRACT METHODS ---------
+// Coerced to `number` so callers can do arithmetic / pagination math against
+// page sizes without TypeErrors from mixing bigint and number.
 export const getTotalForAllComponents = async () => {
   const chainId = requireChainId();
-  return readContract(wagmiConfig, {
+  const total = await readContract(wagmiConfig, {
     ...componentRegistryParams(chainId),
     functionName: 'totalSupply',
   });
+  return Number(total);
 };
 
 export const getTotalForMyComponents = async (account) => {

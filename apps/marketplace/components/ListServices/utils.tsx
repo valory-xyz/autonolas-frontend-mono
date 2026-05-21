@@ -4,7 +4,7 @@ import { Address } from 'viem';
 import { serviceRegistryParams } from 'common-util/Contracts/params';
 import { filterByOwner } from 'common-util/ContractUtils/myList';
 import { getTokenDetailsRequest } from 'common-util/Details/utils';
-import { getChainId, isMarketplaceSupportedNetwork } from 'common-util/functions';
+import { getChainId, isMarketplaceSupportedNetwork, requireChainId } from 'common-util/functions';
 import { getIpfsResponse } from 'common-util/functions/ipfs';
 import { normalizeMetadataUrl } from 'common-util/functions/tokenUri';
 import { convertStringToArray } from 'common-util/List/ListCommon';
@@ -28,13 +28,6 @@ type Service = {
   totalDeliveries?: number;
   owner?: string;
   role?: string;
-};
-
-const requireChainId = (): number => {
-  const chainId = getChainId();
-  if (chainId instanceof Error) throw chainId;
-  if (chainId === undefined || chainId === null) throw new Error('Cannot determine chain ID');
-  return chainId as number;
 };
 
 // --------- HELPER METHODS ---------
@@ -70,14 +63,19 @@ export const getTotalForMyServices = async (account: string) => {
   });
 };
 
-/** Returns the total supply of services on the active chain. */
-export const getTotalForAllServices = async () => {
+/**
+ * Returns the total supply of services on the active chain. Coerced to `number`
+ * at the boundary — viem returns uint256 reads as `bigint`, but downstream
+ * callers do arithmetic with `Math.min` / `*` against page sizes which throw
+ * `TypeError: Cannot mix BigInt and other types` if they receive a raw bigint.
+ */
+export const getTotalForAllServices = async (): Promise<number> => {
   const chainId = requireChainId();
   const total = await readContract(wagmiConfig, {
     ...serviceRegistryParams(chainId),
     functionName: 'totalSupply',
   });
-  return total;
+  return Number(total);
 };
 
 export const extractConfigDetailsForServices = async (
@@ -179,8 +177,7 @@ export const getFilteredServices = async (
   account: string,
 ): Promise<Service[]> => {
   const total = await getTotalForAllServices();
-  const totalNum = Number(total);
-  const list = await getServices(totalNum, Math.round(totalNum / TOTAL_VIEW_COUNT + 1), true);
+  const list = await getServices(total, Math.round(total / TOTAL_VIEW_COUNT + 1), true);
 
   return new Promise((resolve) => {
     const filteredList = filterByOwner(list, { searchValue, account });

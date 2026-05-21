@@ -47,8 +47,14 @@ jest.mock('./common-util/Login/config', () => ({
   EVM_SUPPORTED_CHAINS: [{ id: 1 }],
   SVM_SUPPORTED_CHAINS: [{ id: 1 }],
   SUPPORTED_CHAINS: [{ id: 1 }],
-  // Tests don't actually exercise wagmi; the migrated common-util/* modules
-  // need this symbol to exist so their `import { wagmiConfig }` resolves.
+  // wagmiConfig is stubbed as an empty object only because no current spec
+  // exercises a real wagmi read/write path — the migrated specs that do mock
+  // the contract layer one level up (`.skip` with TODO(viem-migration), see
+  // tests/components/List*). When adding a NEW spec that touches a migrated
+  // function, mock @wagmi/core's readContract / simulateContract /
+  // writeContract / waitForTransactionReceipt directly instead of relying on
+  // this empty stub — passing `{}` into the real wagmi-core actions throws
+  // opaque "Invalid wagmi config" errors deep in the stack.
   wagmiConfig: {},
 }));
 

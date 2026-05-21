@@ -25,6 +25,13 @@ import { getServiceManagerAddress } from './index';
 // it against the workspace's non-const chains tuple. ABIs are cast to `Abi`
 // because the source modules use plain `export const` without `as const`, so
 // viem can't infer return types — manual casts on the call site stay.
+//
+// TODO(libs/util-contracts): convert the ABI modules in libs/util-contracts and
+// common-util/AbiAndAddresses to declare each export with `as const`. Once that
+// lands, the `as Abi` casts here (and the `as Promise<bigint>` / `as { token:
+// string }` etc. casts at each call site) can be removed and viem will infer
+// return shapes from the literal ABI — same payoff seen in the launch/build/
+// govern/contribute migrations where the ABIs were already `as const`.
 
 type Params = { address: Address; abi: Abi; chainId: number };
 

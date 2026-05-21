@@ -16,18 +16,11 @@ import {
 } from 'common-util/Contracts/params';
 import { ADDRESSES } from 'common-util/Contracts/addresses';
 import { getTokenDetailsRequest } from 'common-util/Details/utils';
-import { getChainId } from 'common-util/functions';
+import { requireChainId } from 'common-util/functions';
 import { wagmiConfig } from 'common-util/Login/config';
 import { DEFAULT_SERVICE_CREATION_ETH_TOKEN_ZEROS } from 'util/constants';
 
 import { transformDatasourceForServiceTable, transformSlotsAndBonds } from '../helpers/functions';
-
-const requireChainId = () => {
-  const chainId = getChainId();
-  if (chainId instanceof Error) throw chainId;
-  if (chainId === undefined || chainId === null) throw new Error('Cannot determine chain ID');
-  return chainId;
-};
 
 /* ----- helper functions ----- */
 

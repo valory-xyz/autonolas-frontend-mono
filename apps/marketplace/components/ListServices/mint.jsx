@@ -5,7 +5,7 @@ import { useState } from 'react';
 import { notifyError, notifySuccess } from 'libs/util-functions/src';
 
 import { serviceManagerParams } from 'common-util/Contracts/params';
-import { getChainId, sendTransaction } from 'common-util/functions';
+import { requireChainId, sendTransaction } from 'common-util/functions';
 import { checkIfERC721Receive } from 'common-util/functions/requests';
 import { useHelpers } from 'common-util/hooks';
 import { useSvmConnectivity } from 'common-util/hooks/useSvmConnectivity';
@@ -95,7 +95,7 @@ const MintService = () => {
           console.error(e);
         }
 
-        const chainId = getChainId();
+        const chainId = requireChainId();
         const contractParams = await serviceManagerParams(chainId);
         const args = buildEvmParams(values);
         const { request } = await simulateContract(wagmiConfig, {

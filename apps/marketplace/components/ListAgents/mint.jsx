@@ -9,7 +9,7 @@ import { mechMinterParams } from 'common-util/Contracts/params';
 import { AlertError, AlertSuccess } from 'common-util/List/ListCommon';
 import RegisterForm from 'common-util/List/RegisterForm';
 import { wagmiConfig } from 'common-util/Login/config';
-import { getChainId } from 'common-util/functions';
+import { requireChainId } from 'common-util/functions';
 import { checkIfERC721Receive } from 'common-util/functions/requests';
 import { useHelpers } from 'common-util/hooks';
 
@@ -44,7 +44,7 @@ const MintAgent = () => {
       }
 
       try {
-        const chainId = getChainId();
+        const chainId = requireChainId();
         const { request } = await simulateContract(wagmiConfig, {
           ...mechMinterParams(chainId),
           functionName: 'create',

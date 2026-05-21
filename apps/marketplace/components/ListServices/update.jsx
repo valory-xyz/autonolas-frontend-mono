@@ -8,7 +8,7 @@ import { notifyError, notifySuccess } from 'libs/util-functions/src';
 
 import { serviceManagerParams } from '../../common-util/Contracts/params';
 import { AlertError, convertStringToArray } from '../../common-util/List/ListCommon';
-import { getChainId, sendTransaction } from '../../common-util/functions';
+import { requireChainId, sendTransaction } from '../../common-util/functions';
 import { useHelpers } from '../../common-util/hooks';
 import { useSvmConnectivity } from '../../common-util/hooks/useSvmConnectivity';
 import { wagmiConfig } from '../../common-util/Login/config';
@@ -109,7 +109,7 @@ const UpdateService = () => {
             registryAddress: solanaAddresses.serviceRegistry,
           });
         } else {
-          const chainId = getChainId();
+          const chainId = requireChainId();
           const contractParams = await serviceManagerParams(chainId);
           const args = buildEvmParams(values);
           const { request } = await simulateContract(wagmiConfig, {
