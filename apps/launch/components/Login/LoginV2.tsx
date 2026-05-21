@@ -1,4 +1,6 @@
+import { ConnectButton } from '@rainbow-me/rainbowkit';
 import { GetAccountReturnType, watchAccount } from '@wagmi/core';
+import { Button, Space } from 'antd';
 import { useCallback, useEffect } from 'react';
 import styled from 'styled-components';
 import { useAccountEffect, useConfig, useDisconnect } from 'wagmi';
@@ -50,7 +52,38 @@ export const LoginV2 = () => {
 
   return (
     <LoginContainer>
-      <w3m-button balance="hide" />
+      <ConnectButton.Custom>
+        {({ account, chain, openAccountModal, openChainModal, openConnectModal, mounted }) => {
+          if (!mounted) return null;
+
+          if (!account || !chain) {
+            return (
+              <Button type="primary" onClick={openConnectModal}>
+                Connect Wallet
+              </Button>
+            );
+          }
+
+          if (chain.unsupported) {
+            return (
+              <Button danger onClick={openChainModal}>
+                Wrong network
+              </Button>
+            );
+          }
+
+          return (
+            <Space size={4}>
+              <Button size="small" onClick={openChainModal}>
+                {chain.name}
+              </Button>
+              <Button size="small" onClick={openAccountModal}>
+                {account.displayName}
+              </Button>
+            </Space>
+          );
+        }}
+      </ConnectButton.Custom>
     </LoginContainer>
   );
 };
