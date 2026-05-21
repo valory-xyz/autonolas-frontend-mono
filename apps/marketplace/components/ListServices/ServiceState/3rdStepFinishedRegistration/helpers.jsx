@@ -1,29 +1,33 @@
-/* eslint-disable consistent-return */
-export const isHashApproved = (contract, startingBlock, op) =>
-  new Promise((resolve, reject) => {
-    /**
-     * poll until the hash has been approved before deploy
-     */
-    const interval = setInterval(async () => {
-      window.console.log('Attempting to getPastEvents...');
+import { getContractEvents } from '@wagmi/core';
 
+import { gnosisSafeParams } from 'common-util/Contracts/params';
+import { wagmiConfig } from 'common-util/Login/config';
+
+/**
+ * Poll the multisig Safe for the `ApproveHash` event matching the supplied
+ * approvedHash + owner filter. Resolves once at least one event is seen on
+ * chain, which is how we detect that the queued Safe-owner approval has been
+ * confirmed before triggering the deploy step.
+ */
+export const isHashApproved = ({ multisig, chainId, startingBlock, approvedHash, owner }) =>
+  new Promise((resolve, reject) => {
+    const fromBlock = BigInt(Math.max(0, Number(startingBlock) - 10));
+    const interval = setInterval(async () => {
       try {
-        const pastEvents = await contract.getPastEvents('ApproveHash', {
-          filter: op,
-          fromBlock: startingBlock - 10,
+        const events = await getContractEvents(wagmiConfig, {
+          ...gnosisSafeParams(multisig, chainId),
+          eventName: 'ApproveHash',
+          args: { approvedHash, owner },
+          fromBlock,
           toBlock: 'latest',
         });
-        window.console.log('pastEvents:', pastEvents);
-
-        const hashApproved = pastEvents.length !== 0;
-        if (hashApproved) {
-          window.console.log('hashApproved');
+        if (events.length > 0) {
           clearInterval(interval);
-          return resolve();
+          resolve();
         }
       } catch (error) {
         clearInterval(interval);
-        return reject(error);
+        reject(error);
       }
     }, 5000);
   });
