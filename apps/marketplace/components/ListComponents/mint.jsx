@@ -1,16 +1,18 @@
-import { useState } from 'react';
-import { useRouter } from 'next/router';
+import { simulateContract, waitForTransactionReceipt, writeContract } from '@wagmi/core';
 import { Typography } from 'antd';
+import { useRouter } from 'next/router';
+import { useState } from 'react';
+
 import { notifyError, notifySuccess } from 'libs/util-functions/src';
 
-import { getEstimatedGasLimit } from 'libs/util-functions/src';
-
+import { mechMinterParams } from 'common-util/Contracts/params';
+import { AlertError, AlertSuccess } from 'common-util/List/ListCommon';
 import RegisterForm from 'common-util/List/RegisterForm';
-import { AlertSuccess, AlertError } from 'common-util/List/ListCommon';
-import { getMechMinterContract } from 'common-util/Contracts';
-import { sendTransaction } from 'common-util/functions';
+import { wagmiConfig } from 'common-util/Login/config';
+import { requireChainId } from 'common-util/functions';
 import { checkIfERC721Receive } from 'common-util/functions/requests';
 import { useHelpers } from 'common-util/hooks';
+
 import { FormContainer } from '../styles';
 
 const { Title } = Typography;
@@ -41,29 +43,30 @@ const MintComponent = () => {
         console.error(e);
       }
 
-      const contract = getMechMinterContract();
-      const createFn = contract.methods.create(
-        '0',
-        values.owner_address,
-        `0x${values.hash}`,
-        values.dependencies ? values.dependencies.split(', ') : [],
-      );
-      const estimatedGas = await getEstimatedGasLimit(createFn, account);
-      const fn = createFn.send({ from: account, gasLimit: estimatedGas });
-
-      sendTransaction(fn, account)
-        .then((result) => {
-          setInformation(result);
-          notifySuccess('Component minted');
-        })
-        .catch((e) => {
-          setError(e);
-          console.error(e);
-          notifyError('Error minting component');
-        })
-        .finally(() => {
-          setIsMinting(false);
+      try {
+        const chainId = requireChainId();
+        const { request } = await simulateContract(wagmiConfig, {
+          ...mechMinterParams(chainId),
+          functionName: 'create',
+          args: [
+            0n,
+            values.owner_address,
+            `0x${values.hash}`,
+            values.dependencies ? values.dependencies.split(', ').map(BigInt) : [],
+          ],
+          account,
         });
+        const hash = await writeContract(wagmiConfig, request);
+        const result = await waitForTransactionReceipt(wagmiConfig, { hash });
+        setInformation(result);
+        notifySuccess('Component minted');
+      } catch (e) {
+        setError(e);
+        console.error(e);
+        notifyError('Error minting component');
+      } finally {
+        setIsMinting(false);
+      }
     }
   };
 

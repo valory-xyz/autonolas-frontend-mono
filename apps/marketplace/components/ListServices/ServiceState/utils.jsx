@@ -1,33 +1,41 @@
+import {
+  readContract,
+  simulateContract,
+  waitForTransactionReceipt,
+  writeContract,
+} from '@wagmi/core';
 import { ethers } from 'ethers';
 
-import { notifyError, getEstimatedGasLimit } from 'libs/util-functions/src';
+import { notifyError } from 'libs/util-functions/src';
 
 import {
-  getGenericErc20Contract,
-  getServiceContract,
-  getServiceManagerContract,
-  getServiceRegistryTokenUtilityContract,
-} from 'common-util/Contracts';
+  genericErc20Params,
+  serviceManagerParams,
+  serviceRegistryParams,
+  serviceRegistryTokenUtilityParams,
+} from 'common-util/Contracts/params';
 import { ADDRESSES } from 'common-util/Contracts/addresses';
 import { getTokenDetailsRequest } from 'common-util/Details/utils';
-import { sendTransaction } from 'common-util/functions';
+import { requireChainId } from 'common-util/functions';
+import { wagmiConfig } from 'common-util/Login/config';
 import { DEFAULT_SERVICE_CREATION_ETH_TOKEN_ZEROS } from 'util/constants';
 
 import { transformDatasourceForServiceTable, transformSlotsAndBonds } from '../helpers/functions';
 
 /* ----- helper functions ----- */
 
-// params.agentParams.slots[i] = total initial available Slots for the i-th service.agentIds;
-
 /**
- *
  * @param {String} id serviceId
  * @param {Array} tableDataSource dataSource of the table and it can be null or undefined
  * @returns {Promise<Object>} { totalBonds, bondsArray, slotsArray }
  */
 export const getBonds = async (id, tableDataSource) => {
-  const serviceContract = getServiceContract();
-  const response = await serviceContract.methods.getAgentParams(id).call();
+  const chainId = requireChainId();
+  const response = await readContract(wagmiConfig, {
+    ...serviceRegistryParams(chainId),
+    functionName: 'getAgentParams',
+    args: [BigInt(id)],
+  });
 
   const bondsArray = [];
   const slotsArray = [];
@@ -37,33 +45,35 @@ export const getBonds = async (id, tableDataSource) => {
      * slotsArray = [2, 3]
      * bondsArray = [2000, 4000]
      */
-
     const { bond, slots } = response.agentParams[i];
     slotsArray.push(slots);
     bondsArray.push(bond);
   }
 
-  const transformedSlotsAndBonds = transformSlotsAndBonds(slotsArray, bondsArray, tableDataSource);
-  return transformedSlotsAndBonds;
+  return transformSlotsAndBonds(slotsArray, bondsArray, tableDataSource);
 };
 
 /* ----- common functions ----- */
 export const onTerminate = async (account, id) => {
-  const contract = await getServiceManagerContract();
-  const terminateFn = contract.methods.terminate(id);
-  const estimatedGas = await getEstimatedGasLimit(terminateFn, account);
-  const fn = terminateFn.send({
-    from: account,
-    gasLimit: estimatedGas,
+  const chainId = requireChainId();
+  const params = await serviceManagerParams(chainId);
+  const { request } = await simulateContract(wagmiConfig, {
+    ...params,
+    functionName: 'terminate',
+    args: [BigInt(id)],
+    account,
   });
-  const response = await sendTransaction(fn, account);
-  return response;
+  const hash = await writeContract(wagmiConfig, request);
+  return waitForTransactionReceipt(wagmiConfig, { hash });
 };
 
 export const getServiceOwner = async (id) => {
-  const contract = getServiceContract();
-  const response = await contract.methods.ownerOf(id).call();
-  return response;
+  const chainId = requireChainId();
+  return readContract(wagmiConfig, {
+    ...serviceRegistryParams(chainId),
+    functionName: 'ownerOf',
+    args: [BigInt(id)],
+  });
 };
 
 const hasSufficientTokenRequest = async ({ account, chainId, serviceId, amountToApprove }) => {
@@ -72,25 +82,25 @@ const hasSufficientTokenRequest = async ({ account, chainId, serviceId, amountTo
    * - fetch the allowance of the token using the token address
    */
   const { token } = await getTokenDetailsRequest(serviceId);
-  const contract = getGenericErc20Contract(token);
-  const response = await contract.methods
-    .allowance(account, ADDRESSES[chainId].serviceRegistryTokenUtility)
-    .call();
+  const response = await readContract(wagmiConfig, {
+    ...genericErc20Params(token, chainId),
+    functionName: 'allowance',
+    args: [account, ADDRESSES[chainId].serviceRegistryTokenUtility],
+  });
   return !(ethers.getBigInt(response) < amountToApprove);
 };
 
-/**
- * Approves token
- */
+/** Approves token */
 const approveToken = async ({ account, chainId, serviceId, amountToApprove }) => {
   const { token } = await getTokenDetailsRequest(serviceId);
-  const contract = getGenericErc20Contract(token);
-  const fn = contract.methods
-    .approve(ADDRESSES[chainId].serviceRegistryTokenUtility, amountToApprove)
-    .send({ from: account });
-
-  const response = await sendTransaction(fn, account);
-  return response;
+  const { request } = await simulateContract(wagmiConfig, {
+    ...genericErc20Params(token, chainId),
+    functionName: 'approve',
+    args: [ADDRESSES[chainId].serviceRegistryTokenUtility, amountToApprove],
+    account,
+  });
+  const hash = await writeContract(wagmiConfig, request);
+  return waitForTransactionReceipt(wagmiConfig, { hash });
 };
 
 export const checkAndApproveToken = async ({ account, chainId, serviceId, amountToApprove }) => {
@@ -102,13 +112,7 @@ export const checkAndApproveToken = async ({ account, chainId, serviceId, amount
   });
 
   if (!hasTokenBalance) {
-    const response = await approveToken({
-      account,
-      chainId,
-      serviceId,
-      amountToApprove,
-    });
-    return response;
+    return approveToken({ account, chainId, serviceId, amountToApprove });
   }
 
   return null;
@@ -121,48 +125,26 @@ export const checkIfEth = async (id) => {
 };
 
 export const onActivateRegistration = async (id, account, deposit) => {
-  const contract = await getServiceManagerContract();
-  const activateRegistrationFn = contract.methods.activateRegistration(id);
-  const estimatedGas = await getEstimatedGasLimit(activateRegistrationFn, account, deposit);
-  const fn = contract.methods.activateRegistration(id).send({
-    from: account,
-    gasLimit: estimatedGas,
-    value: deposit,
+  const chainId = requireChainId();
+  const params = await serviceManagerParams(chainId);
+  const { request } = await simulateContract(wagmiConfig, {
+    ...params,
+    functionName: 'activateRegistration',
+    args: [BigInt(id)],
+    account,
+    value: BigInt(deposit),
   });
-
-  const response = await sendTransaction(fn, account);
-  return response;
+  const hash = await writeContract(wagmiConfig, request);
+  return waitForTransactionReceipt(wagmiConfig, { hash });
 };
 
 /* ----- step 2 functions ----- */
 /**
- * @typedef {Object} DataSource
- * @property {string} key
- * @property {string} agentId
- * @property {number} availableSlots
- * @property {number} totalSlots
- * @property {number} bond
- * @property {string} agentAddresses
- *
- */
-/**
- *
  * @param {String} id
  * @param {String[]} agentIds
- * @returns {Promise<DataSource[]>}
- *
- * @example
- * {
- *   agentAddresses: null
- *   agentId: "2"
- *   availableSlots: 0
- *   bond: "1000000000000000"
- *   key: "2"
- *   totalSlots: "4"
- * }
  */
 export const getServiceTableDataSource = async (id, agentIds) => {
-  const contract = getServiceContract();
+  const chainId = requireChainId();
   const { slots, bonds } = await getBonds(id);
 
   /**
@@ -175,37 +157,45 @@ export const getServiceTableDataSource = async (id, agentIds) => {
    */
   const numAgentInstancesArray = await Promise.all(
     agentIds.map(async (agentId) => {
-      const info = await contract.methods.getInstancesForAgentId(id, agentId).call();
+      const info = await readContract(wagmiConfig, {
+        ...serviceRegistryParams(chainId),
+        functionName: 'getInstancesForAgentId',
+        args: [BigInt(id), BigInt(agentId)],
+      });
       return info.numAgentInstances;
     }),
   );
 
-  const dateSource = transformDatasourceForServiceTable({
+  return transformDatasourceForServiceTable({
     agentIds,
     numAgentInstances: numAgentInstancesArray,
     slots,
     bonds,
   });
-  return dateSource;
 };
 
 export const checkIfAgentInstancesAreValid = async ({ account, agentInstances }) => {
-  const contract = getServiceContract();
+  const chainId = requireChainId();
 
   // check if the operator is registered as an agent instance already
-  const operator = await contract.methods.mapAgentInstanceOperators(account).call();
+  const operator = await readContract(wagmiConfig, {
+    ...serviceRegistryParams(chainId),
+    functionName: 'mapAgentInstanceOperators',
+    args: [account],
+  });
   if (operator !== DEFAULT_SERVICE_CREATION_ETH_TOKEN_ZEROS) {
     notifyError('The operator is registered as an agent instance already.');
     return false;
   }
 
   // check if the agent instances are valid
-  const agentInstanceAddressesPromises = agentInstances.map(async (agentInstance) => {
-    const eachAgentInstance = await contract.methods
-      .mapAgentInstanceOperators(agentInstance)
-      .call();
-    return eachAgentInstance;
-  });
+  const agentInstanceAddressesPromises = agentInstances.map((agentInstance) =>
+    readContract(wagmiConfig, {
+      ...serviceRegistryParams(chainId),
+      functionName: 'mapAgentInstanceOperators',
+      args: [agentInstance],
+    }),
+  );
 
   const ifValidArray = (await Promise.all(agentInstanceAddressesPromises)).some(
     (eachAgentInstance) => eachAgentInstance === DEFAULT_SERVICE_CREATION_ETH_TOKEN_ZEROS,
@@ -226,53 +216,72 @@ export const onStep2RegisterAgents = async ({
   agentInstances,
   dataSource,
 }) => {
-  const contract = await getServiceManagerContract();
+  const chainId = requireChainId();
+  const params = await serviceManagerParams(chainId);
   const { totalBonds } = await getBonds(serviceId, dataSource);
 
-  const registerAgentsFn = contract.methods.registerAgents(serviceId, agentInstances, agentIds);
-  const estimatedGas = await getEstimatedGasLimit(registerAgentsFn, account, `${totalBonds}`);
-  const fn = registerAgentsFn.send({
-    from: account,
-    gasLimit: estimatedGas,
-    value: `${totalBonds}`,
+  const { request } = await simulateContract(wagmiConfig, {
+    ...params,
+    functionName: 'registerAgents',
+    args: [BigInt(serviceId), agentInstances, agentIds.map(BigInt)],
+    account,
+    value: BigInt(totalBonds),
   });
-  const response = await sendTransaction(fn, account);
-  return response;
+  const hash = await writeContract(wagmiConfig, request);
+  return waitForTransactionReceipt(wagmiConfig, { hash });
 };
 
 export const getTokenBondRequest = async (id, source) => {
-  const contract = getServiceRegistryTokenUtilityContract();
+  const chainId = requireChainId();
   return Promise.all(
-    (source || []).map(async ({ agentId }) => {
-      const bond = await contract.methods.getAgentBond(id, agentId).call();
-      return bond;
-    }),
+    (source || []).map(({ agentId }) =>
+      readContract(wagmiConfig, {
+        ...serviceRegistryTokenUtilityParams(chainId),
+        functionName: 'getAgentBond',
+        args: [BigInt(id), BigInt(agentId)],
+      }),
+    ),
   );
 };
 
 export const getServiceAgentInstances = async (id) => {
-  const contract = getServiceContract();
-  const response = await contract.methods.getAgentInstances(id).call();
+  const chainId = requireChainId();
+  const response = await readContract(wagmiConfig, {
+    ...serviceRegistryParams(chainId),
+    functionName: 'getAgentInstances',
+    args: [BigInt(id)],
+  });
   return response?.agentInstances;
 };
 
 export const onStep3Deploy = async (account, id, radioValue, payload = '0x') => {
-  const contract = await getServiceManagerContract();
-
-  const deployFn = contract.methods.deploy(id, radioValue, payload);
-  const estimatedGas = await getEstimatedGasLimit(deployFn, account);
-  const fn = deployFn.send({ from: account, gasLimit: estimatedGas });
-  const response = await sendTransaction(fn, account, { isLegacy: true });
-  return response;
+  const chainId = requireChainId();
+  const params = await serviceManagerParams(chainId);
+  const { request } = await simulateContract(wagmiConfig, {
+    ...params,
+    functionName: 'deploy',
+    args: [BigInt(id), radioValue, payload],
+    account,
+  });
+  const hash = await writeContract(wagmiConfig, request);
+  return waitForTransactionReceipt(wagmiConfig, { hash });
 };
 
 /* ----- step 4 functions ----- */
 export const getAgentInstanceAndOperator = async (id) => {
-  const contract = getServiceContract();
-  const response = await contract.methods.getAgentInstances(id).call();
+  const chainId = requireChainId();
+  const response = await readContract(wagmiConfig, {
+    ...serviceRegistryParams(chainId),
+    functionName: 'getAgentInstances',
+    args: [BigInt(id)],
+  });
   const data = await Promise.all(
     (response?.agentInstances || []).map(async (key, index) => {
-      const operatorAddress = await contract.methods.mapAgentInstanceOperators(key).call();
+      const operatorAddress = await readContract(wagmiConfig, {
+        ...serviceRegistryParams(chainId),
+        functionName: 'mapAgentInstanceOperators',
+        args: [key],
+      });
       return {
         id: `agent-instance-row-${index + 1}`,
         operatorAddress,
@@ -285,10 +294,14 @@ export const getAgentInstanceAndOperator = async (id) => {
 
 /* ----- step 5 functions ----- */
 export const onStep5Unbond = async (account, id) => {
-  const contract = await getServiceManagerContract();
-  const unbondFn = contract.methods.unbond(id);
-  const estimatedGas = await getEstimatedGasLimit(unbondFn, account);
-  const fn = unbondFn.send({ from: account, gasLimit: estimatedGas });
-  const response = await sendTransaction(fn, account);
-  return response;
+  const chainId = requireChainId();
+  const params = await serviceManagerParams(chainId);
+  const { request } = await simulateContract(wagmiConfig, {
+    ...params,
+    functionName: 'unbond',
+    args: [BigInt(id)],
+    account,
+  });
+  const hash = await writeContract(wagmiConfig, request);
+  return waitForTransactionReceipt(wagmiConfig, { hash });
 };
