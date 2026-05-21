@@ -31,7 +31,7 @@ import { useHelpers } from 'common-util/hooks/useHelpers';
 
 import { Deposit } from '../Deposit/Deposit';
 import { useProducts } from './useBondingList';
-import { getLpTokenWithDiscount } from './utils';
+import { getEtherscanReadContractLink, getLpTokenWithDiscount } from './utils';
 
 const { Text } = Typography;
 
@@ -63,6 +63,9 @@ const getColumns = (onClick, isActive, acc, depositoryAddress, hideEmptyProducts
     if (type === VM_TYPE.SVM) return 'Solana';
     return CHAIN_NAMES[type];
   };
+  // Validated once so the (dynamic) depository address is sanitized before it
+  // reaches any anchor `href` below (guards against DOM-based XSS).
+  const depositoryReadLink = getEtherscanReadContractLink(depositoryAddress);
   const columns = [
     {
       title: 'ID',
@@ -141,15 +144,14 @@ const getColumns = (onClick, isActive, acc, depositoryAddress, hideEmptyProducts
       dataIndex: 'roundedDiscountedOlasPerLpToken',
       key: 'roundedDiscountedOlasPerLpToken',
       width: 180,
-      render: (x) => (
-        <a
-          href={`https://etherscan.io/address/${depositoryAddress}#readContract#F10`}
-          rel="noopener noreferrer"
-          target="_blank"
-        >
-          {x}
-        </a>
-      ),
+      render: (x) =>
+        depositoryReadLink ? (
+          <a href={depositoryReadLink} rel="noopener noreferrer" target="_blank">
+            {x}
+          </a>
+        ) : (
+          x
+        ),
     },
     {
       title: getTitle(
@@ -177,15 +179,14 @@ const getColumns = (onClick, isActive, acc, depositoryAddress, hideEmptyProducts
       dataIndex: 'vesting',
       key: 'vesting',
       width: 120,
-      render: (seconds) => (
-        <a
-          href={`https://etherscan.io/address/${depositoryAddress}#readContract#F10`}
-          rel="noopener noreferrer"
-          target="_blank"
-        >
-          {`${seconds / 86400} days`}
-        </a>
-      ),
+      render: (seconds) =>
+        depositoryReadLink ? (
+          <a href={depositoryReadLink} rel="noopener noreferrer" target="_blank">
+            {`${seconds / 86400} days`}
+          </a>
+        ) : (
+          `${seconds / 86400} days`
+        ),
     },
     {
       title: getTitle('OLAS Supply', 'Remaining OLAS supply reserved for this bonding product'),
@@ -196,13 +197,13 @@ const getColumns = (onClick, isActive, acc, depositoryAddress, hideEmptyProducts
         const supplyLeftInPercent = isNaN(row.supplyLeft) ? 0 : round(row.supplyLeft * 100, 0);
         return (
           <>
-            <a
-              href={`https://etherscan.io/address/${depositoryAddress}#readContract#F10`}
-              rel="noopener noreferrer"
-              target="_blank"
-            >
-              {round(parseToEth(x), 2)}
-            </a>
+            {depositoryReadLink ? (
+              <a href={depositoryReadLink} rel="noopener noreferrer" target="_blank">
+                {round(parseToEth(x), 2)}
+              </a>
+            ) : (
+              round(parseToEth(x), 2)
+            )}
             &nbsp;&nbsp;
             <Tag color={supplyLeftInPercent < 6 ? COLOR.GREY_2 : COLOR.PRIMARY}>
               {`${supplyLeftInPercent}%`}

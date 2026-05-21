@@ -11,6 +11,19 @@ import { ADDRESS_ZERO } from 'common-util/constants/numbers';
 import { DEX } from 'common-util/enums';
 import { AUTONOLAS_GRAPH_CLIENTS } from 'common-util/graphql/clients';
 
+/**
+ * Builds an Etherscan link to a contract's read methods.
+ *
+ * Validates and checksums the address first so that only a well-formed `0x…`
+ * address can ever be interpolated into the URL. This guards against DOM-based
+ * XSS where a dynamic value flows into an anchor `href`. Returns `null` for an
+ * invalid/missing address so callers can fall back to plain text.
+ */
+export const getEtherscanReadContractLink = (address, fragment = 'readContract#F10') => {
+  if (!ethers.isAddress(address)) return null;
+  return `https://etherscan.io/address/${ethers.getAddress(address)}#${fragment}`;
+};
+
 export const getProductValueFromEvent = (product, events, keyName) => {
   if ((events || []).length === 0) {
     return product[keyName];

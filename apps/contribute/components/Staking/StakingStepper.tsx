@@ -278,13 +278,19 @@ const SetUpAndStake = ({
 
   if (multisig) {
     const selectedContract = contract ? STAKING_CONTRACTS_DETAILS[contract] : null;
+    // Validate + checksum the address so only a well-formed `0x…` address can
+    // reach the anchor `href` (guards against DOM-based XSS).
+    const contractLink =
+      contract && isAddress(contract)
+        ? `${GOVERN_APP_URL}/contracts/${getAddress(contract)}`
+        : null;
     return (
       <Flex vertical gap={8}>
         <Text type="secondary">
           Your staking contract:{' '}
           {isServiceInfoLoading && !selectedContract && <Skeleton.Input size="small" active />}
-          {selectedContract && (
-            <a href={`${GOVERN_APP_URL}/contracts/${contract}`} target="_blank">
+          {selectedContract && contractLink && (
+            <a href={contractLink} target="_blank">
               {selectedContract.name} ↗
             </a>
           )}
