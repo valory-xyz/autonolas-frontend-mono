@@ -1,13 +1,8 @@
 import { ethers } from 'ethers';
-import Web3 from 'web3';
 
 import { isL1Network } from 'libs/util-functions/src';
 
-import {
-  GNOSIS_SAFE_CONTRACT,
-  SERVICE_REGISTRY_CONTRACT,
-  SERVICE_REGISTRY_L2,
-} from 'common-util/AbiAndAddresses';
+import { SERVICE_REGISTRY_CONTRACT, SERVICE_REGISTRY_L2 } from 'common-util/AbiAndAddresses';
 import { getChainId, getProvider } from 'common-util/functions';
 
 import { ADDRESSES } from './addresses';
@@ -23,17 +18,6 @@ export const getWeb3Details = () => {
   const chainId = getChainId();
   const address = ADDRESSES[chainId];
   return { chainId, address, provider: getProvider() };
-};
-
-/**
- * Returns the multisig (Gnosis Safe) contract instance as a web3.js-shaped
- * object. Retained for `ServiceState/3rdStepFinishedRegistration/utils.jsx`,
- * which uses `getPastEvents` and the chained `.send().on('transactionHash', ...)`
- * pattern that hasn't been migrated to viem yet (see follow-up).
- */
-export const getServiceOwnerMultisigContract = (address) => {
-  const web3 = new Web3(getProvider());
-  return new web3.eth.Contract(GNOSIS_SAFE_CONTRACT.abi, address);
 };
 
 /**
