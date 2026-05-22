@@ -1,6 +1,8 @@
+import { defaultWagmiConfig } from '@web3modal/wagmi';
 import { web3 } from '@coral-xyz/anchor';
 import { Cluster } from '@solana/web3.js';
 import { kebabCase } from 'lodash';
+import { cookieStorage, createStorage } from 'wagmi';
 import {
   Chain,
   arbitrum,
@@ -35,6 +37,26 @@ export const SUPPORTED_CHAINS: Chain[] = [
       default: { http: [defaultRpc] },
     },
   } as Chain;
+});
+
+const projectId = process.env.NEXT_PUBLIC_WALLET_PROJECT_ID as string;
+
+export const wagmiMetadata = {
+  name: 'Mech Marketplace | Olas',
+  description:
+    'Marketplace to discover, manage, and view activity of autonomous AI agents directly from the Olas on-chain registry.',
+  url: 'https://marketplace.olas.network/',
+  icons: ['https://avatars.githubusercontent.com/u/37784886'],
+};
+
+// Exported so that read/write callers (common-util/Details/utils, ServiceState/utils, etc.)
+// can import the same instance the WagmiProvider in pages/_app.tsx uses.
+export const wagmiConfig = defaultWagmiConfig({
+  chains: SUPPORTED_CHAINS as [Chain, ...Chain[]],
+  projectId,
+  metadata: wagmiMetadata,
+  ssr: true,
+  storage: createStorage({ storage: cookieStorage }),
 });
 
 /**

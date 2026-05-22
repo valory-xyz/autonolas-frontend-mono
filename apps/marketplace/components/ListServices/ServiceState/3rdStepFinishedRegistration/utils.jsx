@@ -17,15 +17,23 @@
  *
  * NOTE: It's the same steps for gnosis-safe and metamask-like wallets.
  */
+import {
+  getBlockNumber,
+  getPublicClient,
+  simulateContract,
+  waitForTransactionReceipt,
+  writeContract,
+} from '@wagmi/core';
 import { ethers } from 'ethers-v5';
 
 import { RPC_URLS } from 'libs/util-constants/src';
 import { getEthersV5Provider } from 'libs/util-functions/src';
 
 import { GNOSIS_SAFE_CONTRACT, MULTI_SEND_CONTRACT } from 'common-util/AbiAndAddresses';
-import { getServiceOwnerMultisigContract } from 'common-util/Contracts';
+import { gnosisSafeParams } from 'common-util/Contracts/params';
 import { safeMultiSend } from 'common-util/Contracts/addresses';
 import { SUPPORTED_CHAINS } from 'common-util/Login';
+import { wagmiConfig } from 'common-util/Login/config';
 import { checkIfGnosisSafe } from 'common-util/functions';
 
 import { isHashApproved } from './helpers';
@@ -124,8 +132,14 @@ export const onMultisigSubmit = async ({
         safeTx.refundReceiver,
         nonce,
       );
-      const multisigContractServiceOwner = getServiceOwnerMultisigContract(multisig);
-      const startingBlock = await provider.getBlockNumber();
+      const numericChainId = Number(chainId);
+      const safeParams = gnosisSafeParams(multisig, numericChainId);
+      // @wagmi/core 2.6.17 doesn't export getContractEvents as a top-level
+      // action — only as a method on the public client returned by
+      // getPublicClient. Use that for both the initial filter query below
+      // and inside isHashApproved.
+      const publicClient = getPublicClient(wagmiConfig, { chainId: numericChainId });
+      const startingBlock = await getBlockNumber(wagmiConfig, { chainId: numericChainId });
 
       // Get the signature bytes based on the account address, since it had its tx pre-approved
       const signatureBytes = `0x${ZEROS_24}${account.slice(2)}${ZEROS_64}01`;
@@ -147,34 +161,40 @@ export const onMultisigSubmit = async ({
       const packedData = ethers.utils.solidityPack(['address', 'bytes'], [multisig, safeExecData]);
 
       // Check if the hash was already approved
-      const filterOption = { approvedHash: messageHash, owner: account };
-      await multisigContractServiceOwner.getPastEvents(
-        'ApproveHash',
-        {
-          filter: filterOption,
-          fromBlock: 0,
-          toBlock: 'latest',
-        },
-        async (_error, events) => {
-          // if hash was already approved, call the deploy function right away.
-          if (events.length > 0) {
-            await handleStep3Deploy(radioValue, packedData);
-          } else {
-            // else wait until the hash is approved and then call deploy function
-            multisigContractServiceOwner.methods
-              .approveHash(messageHash)
-              .send({ from: account })
-              .on('transactionHash', async (hash) => {
-                window.console.log('safeTx', hash);
+      const filterArgs = { approvedHash: messageHash, owner: account };
+      const existingEvents = await publicClient.getContractEvents({
+        address: multisig,
+        abi: GNOSIS_SAFE_CONTRACT.abi,
+        eventName: 'ApproveHash',
+        args: filterArgs,
+        fromBlock: 0n,
+        toBlock: 'latest',
+      });
 
-                await isHashApproved(multisigContractServiceOwner, startingBlock, filterOption);
-                await handleStep3Deploy(radioValue, packedData);
-              })
-              .then((information) => window.console.log(information))
-              .catch((e) => console.error(e));
-          }
-        },
-      );
+      // if hash was already approved, call the deploy function right away.
+      if (existingEvents.length > 0) {
+        await handleStep3Deploy(radioValue, packedData);
+      } else {
+        // else submit approveHash, wait until the on-chain event surfaces, then deploy
+        const { request } = await simulateContract(wagmiConfig, {
+          ...safeParams,
+          functionName: 'approveHash',
+          args: [messageHash],
+          account,
+        });
+        const txHash = await writeContract(wagmiConfig, request);
+        window.console.log('safeTx', txHash);
+        await waitForTransactionReceipt(wagmiConfig, { hash: txHash, chainId: numericChainId });
+
+        await isHashApproved({
+          multisig,
+          chainId: numericChainId,
+          startingBlock,
+          approvedHash: messageHash,
+          owner: account,
+        });
+        await handleStep3Deploy(radioValue, packedData);
+      }
     }
 
     // logic to deal with metamask like wallets

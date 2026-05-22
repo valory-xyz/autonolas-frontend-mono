@@ -1,44 +1,71 @@
+import {
+  readContract,
+  simulateContract,
+  waitForTransactionReceipt,
+  writeContract,
+} from '@wagmi/core';
+
 import { TOKENOMICS_UNIT_TYPES } from 'libs/util-constants/src';
 
+import { componentRegistryParams, mechMinterParams } from 'common-util/Contracts/params';
 import { getListByAccount } from 'common-util/ContractUtils/myList';
-import { getComponentContract, getMechMinterContract } from 'common-util/Contracts';
 import { getFirstAndLastIndex } from 'common-util/List/functions';
+import { wagmiConfig } from 'common-util/Login/config';
+import { requireChainId } from 'common-util/functions';
 import { resolveUnitMetadataUrl } from 'common-util/functions/tokenUri';
-import { sendTransaction } from 'common-util/functions';
 
 // --------- HELPER METHODS ---------
 export const getComponentOwner = async (id) => {
-  const contract = getComponentContract();
-  const owner = await contract.methods.ownerOf(id).call();
-  return owner;
+  const chainId = requireChainId();
+  return readContract(wagmiConfig, {
+    ...componentRegistryParams(chainId),
+    functionName: 'ownerOf',
+    args: [BigInt(id)],
+  });
 };
 
 export const getComponentDetails = async (id) => {
-  const contract = getComponentContract();
-  const response = await contract.methods.getUnit(id).call();
-  return response;
+  const chainId = requireChainId();
+  return readContract(wagmiConfig, {
+    ...componentRegistryParams(chainId),
+    functionName: 'getUnit',
+    args: [BigInt(id)],
+  });
 };
 
 // --------- CONTRACT METHODS ---------
+// Coerced to `number` so callers can do arithmetic / pagination math against
+// page sizes without TypeErrors from mixing bigint and number.
 export const getTotalForAllComponents = async () => {
-  const contract = getComponentContract();
-  const total = await contract.methods.totalSupply().call();
-  return total;
+  const chainId = requireChainId();
+  const total = await readContract(wagmiConfig, {
+    ...componentRegistryParams(chainId),
+    functionName: 'totalSupply',
+  });
+  return Number(total);
 };
 
 export const getTotalForMyComponents = async (account) => {
-  const contract = getComponentContract();
-  const balance = await contract.methods.balanceOf(account).call();
-  return balance;
+  const chainId = requireChainId();
+  return readContract(wagmiConfig, {
+    ...componentRegistryParams(chainId),
+    functionName: 'balanceOf',
+    args: [account],
+  });
 };
 
 export const getFilteredComponents = async (searchValue, account) => {
-  const contract = getComponentContract();
+  const chainId = requireChainId();
   const total = await getTotalForAllComponents();
   const list = await getListByAccount({
     searchValue,
-    total,
-    getUnit: contract.methods.getUnit,
+    total: Number(total),
+    readUnit: (id) =>
+      readContract(wagmiConfig, {
+        ...componentRegistryParams(chainId),
+        functionName: 'getUnit',
+        args: [BigInt(id)],
+      }),
     getOwner: getComponentOwner,
     account,
   });
@@ -46,19 +73,28 @@ export const getFilteredComponents = async (searchValue, account) => {
 };
 
 export const getComponents = async (total, nextPage) => {
-  const contract = getComponentContract();
+  const chainId = requireChainId();
+  const totalNum = Number(total);
 
   const allComponentsPromises = [];
-  const { first, last } = getFirstAndLastIndex(total, nextPage);
+  const { first, last } = getFirstAndLastIndex(totalNum, nextPage);
   for (let i = first; i <= last; i += 1) {
-    allComponentsPromises.push(contract.methods.getUnit(`${total - (i + first - 1)}`).call());
+    const tokenId = totalNum - (i + first - 1);
+    allComponentsPromises.push(
+      readContract(wagmiConfig, {
+        ...componentRegistryParams(chainId),
+        functionName: 'getUnit',
+        args: [BigInt(tokenId)],
+      }),
+    );
   }
 
   const components = await Promise.allSettled(allComponentsPromises);
   const results = await Promise.all(
     components.map(async (info, i) => {
-      const owner = await getComponentOwner(`${total - (i + first - 1)}`);
-      return { ...info.value, owner };
+      const id = `${totalNum - (i + first - 1)}`;
+      const owner = await getComponentOwner(id);
+      return { ...(info.status === 'fulfilled' ? info.value : {}), owner };
     }),
   );
 
@@ -66,25 +102,41 @@ export const getComponents = async (total, nextPage) => {
 };
 
 export const getComponentHashes = async (id) => {
-  const contract = getComponentContract();
-  const response = await contract.methods.getUpdatedHashes(id).call();
-  return response;
+  const chainId = requireChainId();
+  return readContract(wagmiConfig, {
+    ...componentRegistryParams(chainId),
+    functionName: 'getUpdatedHashes',
+    args: [BigInt(id)],
+  });
 };
 
 export const updateComponentHashes = async (account, id, newHash) => {
-  const contract = getMechMinterContract();
-
-  const fn = contract.methods.updateHash(TOKENOMICS_UNIT_TYPES.COMPONENT, id, `0x${newHash}`).send({
-    from: account,
+  const chainId = requireChainId();
+  const { request } = await simulateContract(wagmiConfig, {
+    ...mechMinterParams(chainId),
+    functionName: 'updateHash',
+    args: [TOKENOMICS_UNIT_TYPES.COMPONENT, BigInt(id), `0x${newHash}`],
+    account,
   });
-  await sendTransaction(fn, account);
+  const hash = await writeContract(wagmiConfig, request);
+  await waitForTransactionReceipt(wagmiConfig, { hash });
   return null;
 };
 
 export const getTokenUri = async (id) => {
-  const contract = getComponentContract();
-  const updatedHashes = await contract.methods.getUpdatedHashes(id).call();
-  const unitHashes = updatedHashes.unitHashes;
-  const tokenUri = unitHashes?.length ? undefined : await contract.methods.tokenURI(id).call();
+  const chainId = requireChainId();
+  const updatedHashes = await readContract(wagmiConfig, {
+    ...componentRegistryParams(chainId),
+    functionName: 'getUpdatedHashes',
+    args: [BigInt(id)],
+  });
+  const unitHashes = updatedHashes?.unitHashes;
+  const tokenUri = unitHashes?.length
+    ? undefined
+    : await readContract(wagmiConfig, {
+        ...componentRegistryParams(chainId),
+        functionName: 'tokenURI',
+        args: [BigInt(id)],
+      });
   return resolveUnitMetadataUrl(unitHashes, tokenUri);
 };
