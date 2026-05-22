@@ -4,7 +4,7 @@ Guidance for working on the **Marketplace** app in this repo. This app powers th
 
 ## Purpose
 
-Discover, register, deploy, and interact with **mechs** (autonomous AI agents) and **registry** entities (agents, components, services) across multiple chains. Users connect a wallet (WalletConnect/Web3Modal) to register, deploy, or use mechs. Multi-chain: Ethereum, Gnosis, Polygon, Arbitrum, Optimism, Base, Mode, Celo. Also supports **Solana (SVM)**.
+Discover, register, deploy, and interact with **mechs** (autonomous AI agents) and **registry** entities (agents, components, services) across multiple chains. Users connect a wallet (RainbowKit, via WalletConnect/MetaMask/Coinbase/Safe) to register, deploy, or use mechs. Multi-chain: Ethereum, Gnosis, Polygon, Arbitrum, Optimism, Base, Mode, Celo. Also supports **Solana (SVM)**.
 
 ## Port
 
@@ -12,7 +12,7 @@ Discover, register, deploy, and interact with **mechs** (autonomous AI agents) a
 
 ## Stack
 
-- **Wallet**: Web3Modal (Wagmi) for EVM chains; Solana wallet adapter for SVM. See `pages/_app.tsx`, `common-util/Login/LoginV2.jsx`, `common-util/hooks/useSvmConnectivity.jsx`, `common-util/hooks/useHelpers.tsx`.
+- **Wallet**: RainbowKit (over Wagmi) for EVM chains; Solana wallet adapter for SVM. See `pages/_app.tsx` (RainbowKitProvider), `common-util/Login/config.tsx` (`getDefaultConfig`), `common-util/Login/LoginV2.jsx`, `common-util/hooks/useSvmConnectivity.jsx`, `common-util/hooks/useHelpers.tsx`.
 - **State**: Redux Toolkit (`store/setup.ts`, `store/service.ts`).
 - **Key libs**: `util-functions`, `util-contracts`, `util-constants`, `ui-components`, `common-contract-functions`, `ui-theme`, `util-prohibited-data`, `common-middleware`, `util-ssr`.
 
@@ -188,7 +188,7 @@ Tracks **requests** (demand) and **deliveries** (supply) for mech services.
 
 ## Notes
 
-- **WalletConnect/Web3Modal is required** for core flows (registration, deployments, transactions).
+- **A wallet (via RainbowKit's connect modal) is required** for core flows (registration, deployments, transactions). RainbowKit needs a WalletConnect Cloud projectId — `NEXT_PUBLIC_WALLET_PROJECT_ID`.
 - Multi-chain: always consider which chain and which subgraph/registry URL a feature uses.
 - Some code is still `.jsx`; follow existing patterns when editing those files.
 - L1-only features (agents, components) must check `isL1Network()`.
