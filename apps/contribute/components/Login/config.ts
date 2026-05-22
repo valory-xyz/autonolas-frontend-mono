@@ -13,7 +13,7 @@ import { cookieStorage, createConfig, createStorage, http } from 'wagmi';
 import { Chain, base, mainnet } from 'wagmi/chains';
 
 import { RPC_URLS } from 'libs/util-constants/src';
-import { SITE_TITLE } from 'util/constants';
+import { SITE_DESCRIPTION, SITE_TITLE, SITE_URL } from 'util/constants';
 
 export const SUPPORTED_CHAINS: [Chain, ...Chain[]] = [mainnet, base];
 
@@ -45,7 +45,13 @@ const connectors = connectorsForWallets(
       wallets: [safeWallet, binanceWallet],
     },
   ],
-  { appName: SITE_TITLE, projectId },
+  {
+    appName: SITE_TITLE,
+    appDescription: SITE_DESCRIPTION,
+    appUrl: SITE_URL,
+    appIcon: 'https://avatars.githubusercontent.com/u/37784886',
+    projectId,
+  },
 );
 
 export const wagmiConfig = createConfig({
