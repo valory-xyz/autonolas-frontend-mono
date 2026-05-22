@@ -28,41 +28,45 @@ import { getUnixNextWeekStartTimestamp } from './time';
 
 // All governance contracts live on mainnet.
 const MAINNET = mainnet.id;
+// Widened version for wagmi simulate/write/wait overloads — the literal `1`
+// doesn't satisfy the chain-tuple constraint in wagmi 2.19+, so each params
+// bag passes `chainId: MAINNET_CHAIN_ID` instead of the literal mainnet.id.
+const MAINNET_CHAIN_ID: number = mainnet.id;
 
 const voteWeightingParams = {
   address: (VOTE_WEIGHTING.addresses as Record<number, Address>)[MAINNET],
   abi: VOTE_WEIGHTING.abi as Abi,
-  chainId: MAINNET,
+  chainId: MAINNET_CHAIN_ID,
 };
 
 const olasParams = {
   address: (OLAS.addresses as Record<number, Address>)[MAINNET],
   abi: OLAS.abi as Abi,
-  chainId: MAINNET,
+  chainId: MAINNET_CHAIN_ID,
 };
 
 const veOlasParams = {
   address: (VE_OLAS.addresses as Record<number, Address>)[MAINNET],
   abi: VE_OLAS.abi,
-  chainId: MAINNET,
+  chainId: MAINNET_CHAIN_ID,
 };
 
 const tokenomicsParams = {
   address: TOKENOMICS.addresses[MAINNET] as Address,
   abi: TOKENOMICS.abi as Abi,
-  chainId: MAINNET,
+  chainId: MAINNET_CHAIN_ID,
 };
 
 const treasuryParams = {
   address: TREASURY.addresses[MAINNET] as Address,
   abi: TREASURY.abi as Abi,
-  chainId: MAINNET,
+  chainId: MAINNET_CHAIN_ID,
 };
 
 const governorParams = {
   address: GOVERNOR_OLAS.addresses[MAINNET] as Address,
   abi: GOVERNOR_OLAS.abi as Abi,
-  chainId: MAINNET,
+  chainId: MAINNET_CHAIN_ID,
 };
 
 type VoteForNomineeWeightsParams = {
@@ -352,7 +356,7 @@ export const checkServicesTerminatedOrNotDeployed = async (ids: string[]) => {
       contracts: ids.map((id) => ({
         abi: SERVICE_REGISTRY.abi as Abi,
         address: (SERVICE_REGISTRY.addresses as Record<number, Address>)[MAINNET],
-        chainId: MAINNET,
+        chainId: MAINNET_CHAIN_ID,
         functionName: 'getService',
         args: [id],
       })),
