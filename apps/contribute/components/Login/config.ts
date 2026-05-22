@@ -1,4 +1,5 @@
 import { getWagmiConnectorV2 } from '@binance/w3w-wagmi-connector-v2';
+import type { Wallet } from '@rainbow-me/rainbowkit';
 import { connectorsForWallets } from '@rainbow-me/rainbowkit';
 import {
   coinbaseWallet,
@@ -18,13 +19,22 @@ export const SUPPORTED_CHAINS: [Chain, ...Chain[]] = [mainnet, base];
 
 export const projectId = process.env.NEXT_PUBLIC_WALLET_PROJECT_ID as string;
 
-// RainbowKit's default wallets + the Binance wagmi v2 connector. Binance is
-// not in RainbowKit's standard wallet registry, so we use the
-// `connectorsForWallets` escape hatch for RK wallets and append the binance
-// connector separately. The combined connector list is passed to wagmi's
-// `createConfig` (instead of RainbowKit's `getDefaultConfig`, which doesn't
-// accept a `connectors` override).
-const rkConnectors = connectorsForWallets(
+const binanceConnectorFn = getWagmiConnectorV2();
+
+// Wrap the Binance WaaS connector as a RainbowKit-compatible wallet so it
+// appears in the RainbowKit modal alongside the standard wallets.
+const binanceWallet = (): Wallet => ({
+  id: 'binance-w3w',
+  name: 'Binance Wallet',
+  iconUrl: '/images/binance-wallet.svg',
+  iconBackground: '#F0B90B',
+  createConnector: () => binanceConnectorFn(),
+});
+
+// RainbowKit wallets + custom Binance wallet. We use `connectorsForWallets`
+// (instead of `getDefaultConfig`) so the Binance connector is part of the
+// modal and clickable — not just registered as a wagmi connector.
+const connectors = connectorsForWallets(
   [
     {
       groupName: 'Recommended',
@@ -32,17 +42,15 @@ const rkConnectors = connectorsForWallets(
     },
     {
       groupName: 'Other',
-      wallets: [safeWallet],
+      wallets: [safeWallet, binanceWallet],
     },
   ],
   { appName: SITE_TITLE, projectId },
 );
 
-const binanceConnector = getWagmiConnectorV2();
-
 export const wagmiConfig = createConfig({
   chains: SUPPORTED_CHAINS,
-  connectors: [...rkConnectors, binanceConnector()],
+  connectors,
   ssr: true,
   storage: createStorage({ storage: cookieStorage }),
   transports: SUPPORTED_CHAINS.reduce(
