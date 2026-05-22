@@ -1,8 +1,8 @@
-import { defaultWagmiConfig } from '@web3modal/wagmi';
+import { getDefaultConfig } from '@rainbow-me/rainbowkit';
 import { web3 } from '@coral-xyz/anchor';
 import { Cluster } from '@solana/web3.js';
 import { kebabCase } from 'lodash';
-import { cookieStorage, createStorage } from 'wagmi';
+import { cookieStorage, createStorage, http } from 'wagmi';
 import {
   Chain,
   arbitrum,
@@ -19,7 +19,7 @@ import { RPC_URLS } from 'libs/util-constants/src';
 import { SOLANA_CHAIN_NAMES } from 'util/constants';
 import { VM_TYPE } from 'libs/util-constants/src';
 
-export const SUPPORTED_CHAINS: Chain[] = [
+export const SUPPORTED_CHAINS: [Chain, ...Chain[]] = [
   mainnet,
   gnosis,
   polygon,
@@ -28,16 +28,7 @@ export const SUPPORTED_CHAINS: Chain[] = [
   optimism,
   celo,
   mode,
-].map((chain) => {
-  const defaultRpc = RPC_URLS[chain.id] || chain.rpcUrls.default.http[0];
-  return {
-    ...chain,
-    rpcUrls: {
-      ...chain.rpcUrls,
-      default: { http: [defaultRpc] },
-    },
-  } as Chain;
-});
+];
 
 const projectId = process.env.NEXT_PUBLIC_WALLET_PROJECT_ID as string;
 
@@ -51,12 +42,17 @@ export const wagmiMetadata = {
 
 // Exported so that read/write callers (common-util/Details/utils, ServiceState/utils, etc.)
 // can import the same instance the WagmiProvider in pages/_app.tsx uses.
-export const wagmiConfig = defaultWagmiConfig({
-  chains: SUPPORTED_CHAINS as [Chain, ...Chain[]],
+export const wagmiConfig = getDefaultConfig({
+  appName: wagmiMetadata.name,
+  chains: SUPPORTED_CHAINS,
   projectId,
-  metadata: wagmiMetadata,
   ssr: true,
   storage: createStorage({ storage: cookieStorage }),
+  transports: SUPPORTED_CHAINS.reduce(
+    (acc, chain) =>
+      Object.assign(acc, { [chain.id]: http(RPC_URLS[chain.id] || chain.rpcUrls.default.http[0]) }),
+    {},
+  ),
 });
 
 /**
