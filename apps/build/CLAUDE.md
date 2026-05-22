@@ -12,7 +12,7 @@ Create and manage **staking contracts** for Olas: deploy and configure staking c
 
 ## Stack
 
-- **Wallet**: Yes. Web3Modal (Wagmi). See `context/web3ModalProvider.tsx`, `components/Layout/Login.tsx`, `components/Login/LoginV2.tsx`.
+- **Wallet**: Yes. RainbowKit (over Wagmi). See `context/web3ModalProvider.tsx` (filename kept pending a cross-app rename), `components/Layout/Login.tsx`, `components/Login/LoginV2.tsx`.
 - **State**: Redux (`store/`).
 - **Key libs**: `util-functions`, `util-constants`, `util-contracts`, `ui-theme`, `common-contract-functions`, `ui-components`, `common-middleware`, `util-ssr`.
 
@@ -20,7 +20,7 @@ Create and manage **staking contracts** for Olas: deploy and configure staking c
 
 - RPCs for supported chains.
 - Staking contract subgraphs (Gnosis, Base, Optimism, Polygon, Mode).
-- Wallet Project ID for Web3Modal.
+- Wallet Project ID for RainbowKit (WalletConnect Cloud projectId — required by `getDefaultConfig`).
 
 ## Structure
 
