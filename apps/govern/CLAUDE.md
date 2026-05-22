@@ -12,14 +12,14 @@ Olas governance: **voting**, **veOLAS**, **proposals**, **donations**, and **vot
 
 ## Stack
 
-- **Wallet**: Web3Modal (Wagmi). See `context/Web3ModalProvider.tsx`, `components/Login/`, `components/Contracts/`, `components/Donate/`, `components/Proposals/`, `components/VeOlas/`.
+- **Wallet**: RainbowKit (over Wagmi). See `context/Web3ModalProvider.tsx` (filename kept pending a cross-app rename), `components/Login/`, `components/Contracts/`, `components/Donate/`, `components/Proposals/`, `components/VeOlas/`.
 - **State**: Redux (`store/`).
 - **Key libs**: `util-constants`, `util-functions`, `util-contracts`, `ui-theme`, `ui-components`, `util-prohibited-data`, `common-contract-functions`, `common-middleware`, `util-ssr`.
 
 ## Env / backends
 
 - **Governor subgraph**: `NEXT_PUBLIC_GOVERNOR_SUBGRAPH_URL`
-- RPCs and Wallet Project ID for Web3Modal.
+- RPCs and Wallet Project ID for RainbowKit (WalletConnect Cloud projectId — required by `getDefaultConfig`).
 
 ## Structure
 
