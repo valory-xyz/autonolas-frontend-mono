@@ -19,7 +19,7 @@
  */
 import {
   getBlockNumber,
-  getContractEvents,
+  getPublicClient,
   simulateContract,
   waitForTransactionReceipt,
   writeContract,
@@ -134,6 +134,11 @@ export const onMultisigSubmit = async ({
       );
       const numericChainId = Number(chainId);
       const safeParams = gnosisSafeParams(multisig, numericChainId);
+      // @wagmi/core 2.6.17 doesn't export getContractEvents as a top-level
+      // action — only as a method on the public client returned by
+      // getPublicClient. Use that for both the initial filter query below
+      // and inside isHashApproved.
+      const publicClient = getPublicClient(wagmiConfig, { chainId: numericChainId });
       const startingBlock = await getBlockNumber(wagmiConfig, { chainId: numericChainId });
 
       // Get the signature bytes based on the account address, since it had its tx pre-approved
@@ -157,8 +162,9 @@ export const onMultisigSubmit = async ({
 
       // Check if the hash was already approved
       const filterArgs = { approvedHash: messageHash, owner: account };
-      const existingEvents = await getContractEvents(wagmiConfig, {
-        ...safeParams,
+      const existingEvents = await publicClient.getContractEvents({
+        address: multisig,
+        abi: GNOSIS_SAFE_CONTRACT.abi,
         eventName: 'ApproveHash',
         args: filterArgs,
         fromBlock: 0n,
