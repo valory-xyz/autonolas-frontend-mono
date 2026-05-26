@@ -41,7 +41,6 @@
     "@vercel/blob": "0.23.4",
     "@wagmi/core": "2.22.1",
     "@web3auth/modal": "10.0.7",
-    "@web3modal/wagmi": "4.1.11",
     "antd": "5.29.3",
     "axios": "1.15.2",
     "bignumber.js": "9.1.2",
