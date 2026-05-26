@@ -65,6 +65,7 @@ const Layout = ({ children = null }) => {
           {!PAGES_TO_LOAD_WITHOUT_CHAINID.some((e) => path.includes(e)) && (
             <SelectContainer style={{ marginRight: isMobile ? 8 : 0 }}>
               <Select
+                size="large"
                 showSearch
                 className="show-scrollbar"
                 style={{ width: isMobile ? 140 : 200 }}

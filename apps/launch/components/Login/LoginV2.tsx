@@ -58,7 +58,7 @@ export const LoginV2 = () => {
 
           if (!account || !chain) {
             return (
-              <Button type="primary" onClick={openConnectModal}>
+              <Button size="large" type="primary" onClick={openConnectModal}>
                 Connect Wallet
               </Button>
             );
@@ -66,7 +66,7 @@ export const LoginV2 = () => {
 
           if (chain.unsupported) {
             return (
-              <Button danger onClick={openChainModal}>
+              <Button size="large" danger onClick={openChainModal}>
                 Wrong network
               </Button>
             );
@@ -76,13 +76,13 @@ export const LoginV2 = () => {
           // don't render a chain pill here to avoid duplicating it. Only the
           // address pill.
           return (
-            <Button onClick={openAccountModal}>
+            <Button size="large" onClick={openAccountModal}>
               <span
                 aria-hidden
                 style={{
                   display: 'inline-block',
-                  width: 18,
-                  height: 18,
+                  width: 20,
+                  height: 20,
                   borderRadius: '50%',
                   marginRight: 8,
                   verticalAlign: 'middle',

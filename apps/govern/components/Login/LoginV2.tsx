@@ -72,7 +72,7 @@ export const LoginV2 = () => {
 
           if (!account || !chain) {
             return (
-              <Button type="primary" onClick={openConnectModal}>
+              <Button size="large" type="primary" onClick={openConnectModal}>
                 Connect Wallet
               </Button>
             );
@@ -80,7 +80,7 @@ export const LoginV2 = () => {
 
           if (chain.unsupported) {
             return (
-              <Button danger onClick={openChainModal}>
+              <Button size="large" danger onClick={openChainModal}>
                 Wrong network
               </Button>
             );
@@ -88,7 +88,7 @@ export const LoginV2 = () => {
 
           return (
             <Space size={8}>
-              <Button onClick={openChainModal}>
+              <Button size="large" onClick={openChainModal}>
                 {chain.iconUrl && (
                   <img
                     src={chain.iconUrl}
@@ -105,13 +105,13 @@ export const LoginV2 = () => {
                 {chain.name}
                 <DownOutlined style={{ fontSize: 10, marginLeft: 6 }} />
               </Button>
-              <Button onClick={openAccountModal}>
+              <Button size="large" onClick={openAccountModal}>
                 <span
                   aria-hidden
                   style={{
                     display: 'inline-block',
-                    width: 18,
-                    height: 18,
+                    width: 20,
+                    height: 20,
                     borderRadius: '50%',
                     marginRight: 8,
                     verticalAlign: 'middle',
