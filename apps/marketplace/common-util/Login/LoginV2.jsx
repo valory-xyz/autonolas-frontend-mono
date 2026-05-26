@@ -1,6 +1,6 @@
-import { DownOutlined, SwapOutlined } from '@ant-design/icons';
+import { SwapOutlined } from '@ant-design/icons';
 import { ConnectButton } from '@rainbow-me/rainbowkit';
-import { Button, Grid, Space } from 'antd';
+import { Button, Grid } from 'antd';
 import { isNil } from 'lodash';
 import PropTypes from 'prop-types';
 import { useCallback, useEffect } from 'react';
@@ -179,44 +179,28 @@ export const LoginV2 = ({
               // <w3m-button balance={screens.xs ? 'hide' : 'show'}> behavior.
               const showBalance = !screens.xs && balance?.formatted;
 
+              // marketplace's Layout has its own URL-routed chain Select, so
+              // we don't render a chain pill here to avoid duplicating it.
+              // Only the address pill.
               return (
-                <Space size={8}>
-                  <Button onClick={openChainModal}>
-                    {chain.iconUrl && (
-                      <img
-                        src={chain.iconUrl}
-                        alt={chain.name ?? ''}
-                        style={{
-                          width: 16,
-                          height: 16,
-                          marginRight: 6,
-                          borderRadius: '50%',
-                          verticalAlign: 'middle',
-                        }}
-                      />
-                    )}
-                    {chain.name}
-                    <DownOutlined style={{ fontSize: 10, marginLeft: 6 }} />
-                  </Button>
-                  <Button onClick={openAccountModal}>
-                    <span
-                      aria-hidden
-                      style={{
-                        display: 'inline-block',
-                        width: 18,
-                        height: 18,
-                        borderRadius: '50%',
-                        marginRight: 8,
-                        verticalAlign: 'middle',
-                        background: 'linear-gradient(135deg, #7e22ce, #b5179e)',
-                      }}
-                    />
-                    {showBalance
-                      ? `${Number(balance.formatted).toFixed(3)} ${balance.symbol} · `
-                      : ''}
-                    {account.displayName}
-                  </Button>
-                </Space>
+                <Button onClick={openAccountModal}>
+                  <span
+                    aria-hidden
+                    style={{
+                      display: 'inline-block',
+                      width: 18,
+                      height: 18,
+                      borderRadius: '50%',
+                      marginRight: 8,
+                      verticalAlign: 'middle',
+                      background: 'linear-gradient(135deg, #7e22ce, #b5179e)',
+                    }}
+                  />
+                  {showBalance
+                    ? `${Number(balance.formatted).toFixed(3)} ${balance.symbol} · `
+                    : ''}
+                  {account.displayName}
+                </Button>
               );
             }}
           </ConnectButton.Custom>
