@@ -1,6 +1,6 @@
 import '@ant-design/v5-patch-for-react-19';
 import type { AppProps } from 'next/app';
-import { FC, PropsWithChildren } from 'react';
+import { FC, PropsWithChildren, useEffect, useState } from 'react';
 import { Provider } from 'react-redux';
 
 import { AutonolasThemeProvider, GlobalStyles } from 'libs/ui-theme/src';
@@ -23,6 +23,16 @@ const DataProvider: FC<PropsWithChildren> = ({ children }) => {
 const LaunchApp = ({ Component, ...rest }: AppProps) => {
   const { store, props } = wrapper.useWrappedStore(rest);
 
+  // Defer mounting Web3ModalProvider until after first client render.
+  // RainbowKit + @reown's WalletConnect pairing flow has a known race
+  // condition where the first QR-modal render fails with "invalid border=0"
+  // because relayer state isn't ready yet; second click works. Mounting
+  // client-only side-steps the race entirely — same pattern as contribute.
+  const [isMounted, setIsMounted] = useState(false);
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
   return (
     <>
       <GlobalStyles />
@@ -30,13 +40,15 @@ const LaunchApp = ({ Component, ...rest }: AppProps) => {
 
       <Provider store={store}>
         <AutonolasThemeProvider>
-          <Web3ModalProvider>
-            <DataProvider>
-              <Layout>
-                <Component {...props.pageProps} />
-              </Layout>
-            </DataProvider>
-          </Web3ModalProvider>
+          {isMounted && (
+            <Web3ModalProvider>
+              <DataProvider>
+                <Layout>
+                  <Component {...props.pageProps} />
+                </Layout>
+              </DataProvider>
+            </Web3ModalProvider>
+          )}
         </AutonolasThemeProvider>
       </Provider>
     </>
