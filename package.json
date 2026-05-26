@@ -183,7 +183,6 @@
     "webpack": "5.104.1",
     "bn.js": "5.2.3",
     "ip-address": "10.1.1",
-    "js-cookie": "3.0.7",
     "@web3auth/no-modal/@metamask/sdk": "0.33.1",
     "@web3auth/no-modal/@metamask/sdk/@metamask/sdk-communication-layer": "0.33.1"
   }
