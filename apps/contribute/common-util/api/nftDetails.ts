@@ -35,9 +35,12 @@ export const getLatestMintedNft = memoize(async (account: Address | string | und
     const total = await getTotalSupply();
     if (total === undefined) return { details: null, tokenId: null };
 
-    // Batch the ownerOf reads into a single multicall request. The previous
-    // Promise.all over N parallel readContract calls hit RPC rate-limits on
-    // many-token contracts; multicall aggregates them into one eth_call.
+    // Batch the ownerOf reads via multicall. Chunked at 100 per request:
+    // a single multicall with thousands of entries hits Multicall3's ~30M-gas
+    // budget or the RPC's max-payload limit and silently returns empty
+    // strings under allowFailure: true — which would look like "no NFT
+    // minted" even when the user does own one.
+    const CHUNK_SIZE = 100;
     const calls = [];
     for (let i = 1n; i <= total; i += 1n) {
       calls.push({
@@ -46,13 +49,18 @@ export const getLatestMintedNft = memoize(async (account: Address | string | und
         args: [i],
       });
     }
-    const responses = await multicall(wagmiConfig, {
-      contracts: calls,
-      allowFailure: true,
-    });
-    const ownerList = responses.map((r) =>
-      r.status === 'success' ? (r.result as Address) : ('' as Address),
-    );
+    const ownerList: Address[] = [];
+    for (let start = 0; start < calls.length; start += CHUNK_SIZE) {
+      const chunk = calls.slice(start, start + CHUNK_SIZE);
+      // eslint-disable-next-line no-await-in-loop
+      const responses = await multicall(wagmiConfig, {
+        contracts: chunk,
+        allowFailure: true,
+      });
+      for (const r of responses) {
+        ownerList.push(r.status === 'success' ? (r.result as Address) : ('' as Address));
+      }
+    }
 
     // find the element in reverse order to fetch the latest
     const latestNftIndex = findIndex(ownerList, (e) => toLower(e) === toLower(account));
