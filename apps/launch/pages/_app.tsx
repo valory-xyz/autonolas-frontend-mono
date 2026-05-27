@@ -33,6 +33,25 @@ const LaunchApp = ({ Component, ...rest }: AppProps) => {
     setIsMounted(true);
   }, []);
 
+  // Suppress WC v2's "bring wallet to foreground" redirect for Safe-via-WC:
+  // after each wallet request, the universal-provider calls
+  // window.open(peerMeta.redirect.universal), which Safe sets to
+  // https://app.safe.global — opening an unwanted tab. The actual prompt
+  // still appears inside the user's existing Safe tab, so we just no-op
+  // the redirect to keep focus there.
+  useEffect(() => {
+    const originalOpen = window.open;
+    window.open = (url, target, features) => {
+      if (typeof url === 'string' && url.includes('app.safe.global')) {
+        return null;
+      }
+      return originalOpen.call(window, url, target, features);
+    };
+    return () => {
+      window.open = originalOpen;
+    };
+  }, []);
+
   return (
     <>
       <GlobalStyles />
