@@ -1,6 +1,6 @@
 import '@ant-design/v5-patch-for-react-19';
 import type { AppProps } from 'next/app';
-import { FC, PropsWithChildren, useEffect, useState } from 'react';
+import { FC, PropsWithChildren } from 'react';
 import { Provider } from 'react-redux';
 import { cookieToInitialState } from 'wagmi';
 
@@ -29,14 +29,6 @@ const GovernApp = ({ Component, ...rest }: AppProps) => {
 
   useSuppressSafeWcRedirect();
 
-  // Defer mounting the wallet provider until after first client render to
-  // avoid the RainbowKit + WalletConnect first-click "invalid border=0"
-  // race. See launch's _app.tsx for the original diagnosis.
-  const [isMounted, setIsMounted] = useState(false);
-  useEffect(() => {
-    setIsMounted(true);
-  }, []);
-
   return (
     <>
       <GlobalStyles />
@@ -44,19 +36,13 @@ const GovernApp = ({ Component, ...rest }: AppProps) => {
 
       <Provider store={store}>
         <AutonolasThemeProvider>
-          {isMounted ? (
-            <Web3ModalProvider initialState={initialState}>
-              <DataProvider>
-                <Layout>
-                  <Component {...props.pageProps} />
-                </Layout>
-              </DataProvider>
-            </Web3ModalProvider>
-          ) : (
-            <Layout>
-              <Component {...props.pageProps} />
-            </Layout>
-          )}
+          <Web3ModalProvider initialState={initialState}>
+            <DataProvider>
+              <Layout>
+                <Component {...props.pageProps} />
+              </Layout>
+            </DataProvider>
+          </Web3ModalProvider>
         </AutonolasThemeProvider>
       </Provider>
     </>

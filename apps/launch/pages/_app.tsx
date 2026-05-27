@@ -1,6 +1,6 @@
 import '@ant-design/v5-patch-for-react-19';
 import type { AppProps } from 'next/app';
-import { FC, PropsWithChildren, useEffect, useState } from 'react';
+import { FC, PropsWithChildren } from 'react';
 import { Provider } from 'react-redux';
 import { cookieToInitialState } from 'wagmi';
 
@@ -30,17 +30,6 @@ const LaunchApp = ({ Component, ...rest }: AppProps) => {
 
   useSuppressSafeWcRedirect();
 
-  // Defer mounting Web3ModalProvider until after first client render.
-  // RainbowKit + @reown's WalletConnect pairing flow has a known race
-  // condition where the first QR-modal render fails with "invalid border=0"
-  // because relayer state isn't ready yet; second click works. Mounting
-  // the provider client-only side-steps the race; Layout + page can SSR
-  // normally and just skip wallet-aware children until isMounted flips.
-  const [isMounted, setIsMounted] = useState(false);
-  useEffect(() => {
-    setIsMounted(true);
-  }, []);
-
   return (
     <>
       <GlobalStyles />
@@ -48,19 +37,13 @@ const LaunchApp = ({ Component, ...rest }: AppProps) => {
 
       <Provider store={store}>
         <AutonolasThemeProvider>
-          {isMounted ? (
-            <Web3ModalProvider initialState={initialState}>
-              <DataProvider>
-                <Layout>
-                  <Component {...props.pageProps} />
-                </Layout>
-              </DataProvider>
-            </Web3ModalProvider>
-          ) : (
-            <Layout>
-              <Component {...props.pageProps} />
-            </Layout>
-          )}
+          <Web3ModalProvider initialState={initialState}>
+            <DataProvider>
+              <Layout>
+                <Component {...props.pageProps} />
+              </Layout>
+            </DataProvider>
+          </Web3ModalProvider>
         </AutonolasThemeProvider>
       </Provider>
     </>
