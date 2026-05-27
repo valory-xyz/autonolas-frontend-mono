@@ -79,7 +79,7 @@ export const SwitchNetworkButton = ({
       onClick={onSwitchNetwork}
       icon={<SwapOutlined />}
     >
-      {!isMobile && 'Switch network'}
+      {isPending ? 'Confirm in wallet' : !isMobile && 'Switch network'}
     </YellowButton>
   );
 };
