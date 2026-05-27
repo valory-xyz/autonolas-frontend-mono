@@ -21,14 +21,7 @@ const MAX_POLL_MS = 5 * 60 * 1_000;
  * doesn't export `getContractEvents` as a top-level action, only as a method
  * on the public client returned by `getPublicClient`.
  */
-export const isHashApproved = ({
-  multisig,
-  chainId,
-  startingBlock,
-  approvedHash,
-  owner,
-  signal,
-}) =>
+export const isHashApproved = ({ multisig, chainId, startingBlock, approvedHash, owner, signal }) =>
   new Promise((resolve, reject) => {
     const publicClient = getPublicClient(wagmiConfig, { chainId });
     const fromBlock = BigInt(Math.max(0, Number(startingBlock) - 10));
