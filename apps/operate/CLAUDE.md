@@ -37,3 +37,4 @@ Guidance for working on the **Operate** app in this repo.
 ## Notes
 
 - Contract interactions and rewards often use `common-contract-functions` (e.g. useRewards, useNominees). Ensure correct chain when reading or writing.
+- Wallet session persists across refresh: wagmi config uses `storage: createStorage({ storage: cookieStorage })` and `_app.tsx` feeds `cookieToInitialState(wagmiConfig)` into the provider's `initialState`. Don't gate `WagmiProvider` behind an `isMounted` flag — pages calling `useConfig` at top-render fail SSR/static export when the provider isn't there.
