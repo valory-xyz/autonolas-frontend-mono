@@ -17,9 +17,9 @@ const rainbowKitTheme = lightTheme({
   fontStack: 'system',
 });
 
-export default function Web3ModalProvider({ children }) {
+export default function Web3ModalProvider({ children, initialState }) {
   return (
-    <WagmiProvider config={wagmiConfig}>
+    <WagmiProvider config={wagmiConfig} initialState={initialState}>
       <QueryClientProvider client={queryClient}>
         <RainbowKitProvider theme={rainbowKitTheme}>{children}</RainbowKitProvider>
       </QueryClientProvider>

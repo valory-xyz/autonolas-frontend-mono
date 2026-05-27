@@ -9,3 +9,4 @@ export * from './lib/dateTime';
 export * from './lib/numbers';
 export * from './lib/chains';
 export * from './lib/withTimeout';
+export * from './lib/useSuppressSafeWcRedirect';

@@ -1,6 +1,6 @@
 import { RainbowKitProvider, lightTheme } from '@rainbow-me/rainbowkit';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { WagmiProvider } from 'wagmi';
+import { State, WagmiProvider } from 'wagmi';
 
 import '@rainbow-me/rainbowkit/styles.css';
 
@@ -17,9 +17,15 @@ const rainbowKitTheme = lightTheme({
   fontStack: 'system',
 });
 
-export default function Web3ModalProvider({ children }: { children: React.ReactNode }) {
+export default function Web3ModalProvider({
+  children,
+  initialState,
+}: {
+  children: React.ReactNode;
+  initialState?: State | undefined;
+}) {
   return (
-    <WagmiProvider config={wagmiConfig}>
+    <WagmiProvider config={wagmiConfig} initialState={initialState}>
       <QueryClientProvider client={queryClient}>
         <RainbowKitProvider theme={rainbowKitTheme}>{children}</RainbowKitProvider>
       </QueryClientProvider>

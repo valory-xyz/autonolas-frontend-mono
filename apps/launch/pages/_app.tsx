@@ -2,8 +2,12 @@ import '@ant-design/v5-patch-for-react-19';
 import type { AppProps } from 'next/app';
 import { FC, PropsWithChildren, useEffect, useState } from 'react';
 import { Provider } from 'react-redux';
+import { cookieToInitialState } from 'wagmi';
 
 import { AutonolasThemeProvider, GlobalStyles } from 'libs/ui-theme/src';
+import { useSuppressSafeWcRedirect } from 'libs/util-functions/src';
+
+import { wagmiConfig } from 'common-util/config/wagmi';
 
 import { useGetMyStakingContracts } from 'hooks/useGetMyStakingContracts';
 import { useHandleRoute } from 'hooks/useHandleRoute';
@@ -22,34 +26,19 @@ const DataProvider: FC<PropsWithChildren> = ({ children }) => {
 
 const LaunchApp = ({ Component, ...rest }: AppProps) => {
   const { store, props } = wrapper.useWrappedStore(rest);
+  const initialState = cookieToInitialState(wagmiConfig);
+
+  useSuppressSafeWcRedirect();
 
   // Defer mounting Web3ModalProvider until after first client render.
   // RainbowKit + @reown's WalletConnect pairing flow has a known race
   // condition where the first QR-modal render fails with "invalid border=0"
   // because relayer state isn't ready yet; second click works. Mounting
-  // client-only side-steps the race entirely — same pattern as contribute.
+  // the provider client-only side-steps the race; Layout + page can SSR
+  // normally and just skip wallet-aware children until isMounted flips.
   const [isMounted, setIsMounted] = useState(false);
   useEffect(() => {
     setIsMounted(true);
-  }, []);
-
-  // Suppress WC v2's "bring wallet to foreground" redirect for Safe-via-WC:
-  // after each wallet request, the universal-provider calls
-  // window.open(peerMeta.redirect.universal), which Safe sets to
-  // https://app.safe.global — opening an unwanted tab. The actual prompt
-  // still appears inside the user's existing Safe tab, so we just no-op
-  // the redirect to keep focus there.
-  useEffect(() => {
-    const originalOpen = window.open;
-    window.open = (url, target, features) => {
-      if (typeof url === 'string' && url.includes('app.safe.global')) {
-        return null;
-      }
-      return originalOpen.call(window, url, target, features);
-    };
-    return () => {
-      window.open = originalOpen;
-    };
   }, []);
 
   return (
@@ -59,14 +48,18 @@ const LaunchApp = ({ Component, ...rest }: AppProps) => {
 
       <Provider store={store}>
         <AutonolasThemeProvider>
-          {isMounted && (
-            <Web3ModalProvider>
+          {isMounted ? (
+            <Web3ModalProvider initialState={initialState}>
               <DataProvider>
                 <Layout>
                   <Component {...props.pageProps} />
                 </Layout>
               </DataProvider>
             </Web3ModalProvider>
+          ) : (
+            <Layout>
+              <Component {...props.pageProps} />
+            </Layout>
           )}
         </AutonolasThemeProvider>
       </Provider>
