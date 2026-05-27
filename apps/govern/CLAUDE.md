@@ -20,6 +20,7 @@ Olas governance: **voting**, **veOLAS**, **proposals**, **donations**, and **vot
 
 - **Governor subgraph**: `NEXT_PUBLIC_GOVERNOR_SUBGRAPH_URL`
 - RPCs and Wallet Project ID for RainbowKit (WalletConnect Cloud projectId — required by `getDefaultConfig`).
+- **Tenderly virtual testnet** (for testing lock/vote without real ETH): set `NEXT_PUBLIC_IS_CONNECTED_TO_TEST_NET=true` and `NEXT_PUBLIC_MAINNET_TEST_RPC=<tenderly-rpc-url>` (Preview scope only). `libs/util-constants/src/lib/rpcUrls.ts` routes mainnet RPC traffic through the fork when these are set.
 
 ## Structure
 
