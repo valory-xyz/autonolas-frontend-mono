@@ -160,14 +160,20 @@ export const onMultisigSubmit = async ({
       // Redeploy the service updating the multisig with new owners and threshold
       const packedData = ethers.utils.solidityPack(['address', 'bytes'], [multisig, safeExecData]);
 
-      // Check if the hash was already approved
+      // Check if the hash was already approved. We bound the lookback to
+      // ~9k blocks (stays under Alchemy's 10k eth_getLogs window) before the
+      // current block — fromBlock: 0n would be rejected by most public RPCs
+      // on a 20M-block chain. The user reaches this step within minutes of
+      // approving, so 9k blocks (~30h on Ethereum, longer on L2s) is far
+      // more than enough to catch a fresh approval.
       const filterArgs = { approvedHash: messageHash, owner: account };
+      const eventsFromBlock = BigInt(Math.max(0, Number(startingBlock) - 9_000));
       const existingEvents = await publicClient.getContractEvents({
         address: multisig,
         abi: GNOSIS_SAFE_CONTRACT.abi,
         eventName: 'ApproveHash',
         args: filterArgs,
-        fromBlock: 0n,
+        fromBlock: eventsFromBlock,
         toBlock: 'latest',
       });
 
