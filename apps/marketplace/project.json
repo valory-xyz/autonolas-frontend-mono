@@ -10,7 +10,8 @@
       "defaultConfiguration": "production",
       "options": {
         "cwd": "apps/marketplace",
-        "command": "next build --webpack"
+        "command": "next build --webpack",
+        "outputPath": "dist/apps/marketplace"
       },
       "configurations": {
         "development": {},
