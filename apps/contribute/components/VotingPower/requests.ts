@@ -6,6 +6,8 @@ import {
 } from '@wagmi/core';
 import { Address } from 'viem';
 
+import { estimateGasWithBuffer } from 'libs/util-functions/src';
+
 import { delegateContributeParams, veolasParams } from 'common-util/Contracts/params';
 import { wagmiConfig } from 'components/Login/config';
 
@@ -29,13 +31,15 @@ export const fetchDelegatee = async ({ account }: { account: string }) => {
 
 /** Delegate Contribute voting power to an address. */
 export const delegate = async ({ account, delegatee }: { account: string; delegatee: string }) => {
-  const { request } = await simulateContract(wagmiConfig, {
+  const callParams = {
     ...delegateContributeParams,
-    functionName: 'delegate',
+    functionName: 'delegate' as const,
     args: [delegatee as Address],
     account: account as Address,
-  });
-  const hash = await writeContract(wagmiConfig, request);
+  };
+  const { request } = await simulateContract(wagmiConfig, callParams);
+  const gas = await estimateGasWithBuffer(wagmiConfig, callParams);
+  const hash = await writeContract(wagmiConfig, { ...request, gas });
   return waitForTransactionReceipt(wagmiConfig, {
     hash,
     chainId: delegateContributeParams.chainId,

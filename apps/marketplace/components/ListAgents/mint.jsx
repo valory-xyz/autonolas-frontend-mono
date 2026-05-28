@@ -3,7 +3,7 @@ import { Typography } from 'antd';
 import { useRouter } from 'next/router';
 import { useState } from 'react';
 
-import { notifyError, notifySuccess } from 'libs/util-functions/src';
+import { estimateGasWithBuffer, notifyError, notifySuccess } from 'libs/util-functions/src';
 
 import { mechMinterParams } from 'common-util/Contracts/params';
 import { AlertError, AlertSuccess } from 'common-util/List/ListCommon';
@@ -45,7 +45,7 @@ const MintAgent = () => {
 
       try {
         const chainId = requireChainId();
-        const { request } = await simulateContract(wagmiConfig, {
+        const callParams = {
           ...mechMinterParams(chainId),
           functionName: 'create',
           args: [
@@ -55,8 +55,10 @@ const MintAgent = () => {
             values.dependencies ? values.dependencies.split(', ').map(BigInt) : [],
           ],
           account,
-        });
-        const hash = await writeContract(wagmiConfig, request);
+        };
+        const { request } = await simulateContract(wagmiConfig, callParams);
+        const gas = await estimateGasWithBuffer(wagmiConfig, callParams);
+        const hash = await writeContract(wagmiConfig, { ...request, gas });
         const result = await waitForTransactionReceipt(wagmiConfig, { hash });
         setInformation(result);
         notifySuccess('Agent minted');

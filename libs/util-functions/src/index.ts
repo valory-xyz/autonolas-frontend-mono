@@ -10,3 +10,4 @@ export * from './lib/numbers';
 export * from './lib/chains';
 export * from './lib/withTimeout';
 export * from './lib/useSuppressSafeWcRedirect';
+export * from './lib/estimateGasWithBuffer';

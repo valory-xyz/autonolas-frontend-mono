@@ -7,6 +7,8 @@ import {
 import { Address } from 'viem';
 import { base } from 'wagmi/chains';
 
+import { estimateGasWithBuffer } from 'libs/util-functions/src';
+
 import { OLAS_ABI, OLAS_ADDRESS_BASE } from 'common-util/AbiAndAddresses';
 import { contributorsParams } from 'common-util/Contracts/params';
 import { wagmiConfig } from 'components/Login/config';
@@ -121,14 +123,16 @@ export const createAndStake = async ({
   stakingInstance: Address;
 }) => {
   try {
-    const { request } = await simulateContract(wagmiConfig, {
+    const callParams = {
       ...contributorsParams,
-      functionName: 'createAndStake',
+      functionName: 'createAndStake' as const,
       args: [BigInt(socialId), stakingInstance],
       account,
       value: CREATE_AND_STAKE_VALUE,
-    });
-    const hash = await writeContract(wagmiConfig, request);
+    };
+    const { request } = await simulateContract(wagmiConfig, callParams);
+    const gas = await estimateGasWithBuffer(wagmiConfig, callParams);
+    const hash = await writeContract(wagmiConfig, { ...request, gas });
     return waitForTransactionReceipt(wagmiConfig, { chainId: base.id, hash });
   } catch (error) {
     console.error('Error creating and staking:', error);

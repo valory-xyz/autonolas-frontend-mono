@@ -6,6 +6,8 @@ import {
 } from '@wagmi/core';
 import { useCallback } from 'react';
 
+import { estimateGasWithBuffer } from 'libs/util-functions/src';
+
 import { wagmiConfig } from 'common-util/config/wagmi';
 import { ADDRESSES } from 'common-util/constants/addresses';
 import { depositoryParams, uniswapV2PairParams } from 'common-util/Contracts/params';
@@ -47,13 +49,15 @@ export const useDeposit = () => {
   const approveRequest = useCallback(
     async ({ token, amountToApprove }) => {
       const treasuryAddress = ADDRESSES[chainId].treasury;
-      const { request } = await simulateContract(wagmiConfig, {
+      const callParams = {
         ...uniswapV2PairParams(token, chainId),
         functionName: 'approve',
         args: [treasuryAddress, amountToApprove],
         account,
-      });
-      const hash = await writeContract(wagmiConfig, request);
+      };
+      const { request } = await simulateContract(wagmiConfig, callParams);
+      const gas = await estimateGasWithBuffer(wagmiConfig, callParams);
+      const hash = await writeContract(wagmiConfig, { ...request, gas });
       return waitForTransactionReceipt(wagmiConfig, { hash });
     },
     [account, chainId],
@@ -61,13 +65,15 @@ export const useDeposit = () => {
 
   const depositRequest = useCallback(
     async ({ productId, tokenAmount }) => {
-      const { request } = await simulateContract(wagmiConfig, {
+      const callParams = {
         ...depositoryParams(chainId),
         functionName: 'deposit',
         args: [productId, tokenAmount],
         account,
-      });
-      const hash = await writeContract(wagmiConfig, request);
+      };
+      const { request } = await simulateContract(wagmiConfig, callParams);
+      const gas = await estimateGasWithBuffer(wagmiConfig, callParams);
+      const hash = await writeContract(wagmiConfig, { ...request, gas });
       const receipt = await waitForTransactionReceipt(wagmiConfig, { hash });
       return receipt.transactionHash;
     },

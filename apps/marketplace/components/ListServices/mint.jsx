@@ -2,7 +2,7 @@ import { simulateContract, waitForTransactionReceipt, writeContract } from '@wag
 import { Typography } from 'antd';
 import { useState } from 'react';
 
-import { notifyError, notifySuccess } from 'libs/util-functions/src';
+import { estimateGasWithBuffer, notifyError, notifySuccess } from 'libs/util-functions/src';
 
 import { serviceManagerParams } from 'common-util/Contracts/params';
 import { requireChainId, sendTransaction } from 'common-util/functions';
@@ -98,13 +98,15 @@ const MintService = () => {
         const chainId = requireChainId();
         const contractParams = await serviceManagerParams(chainId);
         const args = buildEvmParams(values);
-        const { request } = await simulateContract(wagmiConfig, {
+        const callParams = {
           ...contractParams,
           functionName: 'create',
           args,
           account,
-        });
-        const hash = await writeContract(wagmiConfig, request);
+        };
+        const { request } = await simulateContract(wagmiConfig, callParams);
+        const gas = await estimateGasWithBuffer(wagmiConfig, callParams);
+        const hash = await writeContract(wagmiConfig, { ...request, gas });
         result = await waitForTransactionReceipt(wagmiConfig, { hash });
       }
 

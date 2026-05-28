@@ -8,7 +8,7 @@ import get from 'lodash/get';
 import { Address, decodeEventLog, getAddress } from 'viem';
 
 import { GATEWAY_URL } from 'libs/util-constants/src';
-import { notifyError, notifySuccess } from 'libs/util-functions/src';
+import { estimateGasWithBuffer, notifyError, notifySuccess } from 'libs/util-functions/src';
 
 import { mintNftParams } from 'common-util/Contracts/params';
 import { getChainId } from 'common-util/functions';
@@ -25,12 +25,14 @@ export const mintNft = async (account: string): Promise<string> => {
   if (!params) throw new Error('Mint NFT contract not deployed on this chain');
 
   try {
-    const { request } = await simulateContract(wagmiConfig, {
+    const callParams = {
       ...params,
-      functionName: 'mint',
+      functionName: 'mint' as const,
       account: account as Address,
-    });
-    const hash = await writeContract(wagmiConfig, request);
+    };
+    const { request } = await simulateContract(wagmiConfig, callParams);
+    const gas = await estimateGasWithBuffer(wagmiConfig, callParams);
+    const hash = await writeContract(wagmiConfig, { ...request, gas });
     const receipt = await waitForTransactionReceipt(wagmiConfig, { hash });
 
     notifySuccess('Successfully Minted');

@@ -3,6 +3,7 @@ import { Abi, Address, decodeEventLog, getAddress } from 'viem';
 import { mainnet } from 'viem/chains';
 
 import { STAKING_FACTORY, VOTE_WEIGHTING } from 'libs/util-contracts/src/lib/abiAndAddresses';
+import { estimateGasWithBuffer } from 'libs/util-functions/src';
 
 import { wagmiConfig } from 'common-util/config/wagmi';
 import { getChainId } from 'common-util/functions/frontend-library';
@@ -24,16 +25,18 @@ export const createStakingContract = async ({
   const address = (STAKING_FACTORY.addresses as Record<number, Address>)[chainId];
   const expected = getAddress(address);
 
-  const { request } = await simulateContract(wagmiConfig, {
+  const callParams = {
     address,
     abi: STAKING_FACTORY.abi as Abi,
-    functionName: 'createStakingInstance',
+    functionName: 'createStakingInstance' as const,
     args: [implementation, initPayload],
     account,
     chainId,
-  });
+  };
+  const { request } = await simulateContract(wagmiConfig, callParams);
+  const gas = await estimateGasWithBuffer(wagmiConfig, callParams);
 
-  const hash = await writeContract(wagmiConfig, { ...request, chainId });
+  const hash = await writeContract(wagmiConfig, { ...request, gas, chainId });
   const receipt = await waitForTransactionReceipt(wagmiConfig, { hash, chainId });
 
   for (const log of receipt.logs) {
@@ -69,15 +72,17 @@ export const addNominee = async ({ address, nomineeChainId, account }: AddNomine
   const txChainId: number = mainnet.id;
   const voteWeightingAddress = (VOTE_WEIGHTING.addresses as Record<number, Address>)[txChainId];
 
-  const { request } = await simulateContract(wagmiConfig, {
+  const callParams = {
     address: voteWeightingAddress,
     abi: VOTE_WEIGHTING.abi as Abi,
-    functionName: 'addNomineeEVM',
+    functionName: 'addNomineeEVM' as const,
     args: [address, nomineeChainId],
     account,
     chainId: txChainId,
-  });
+  };
+  const { request } = await simulateContract(wagmiConfig, callParams);
+  const gas = await estimateGasWithBuffer(wagmiConfig, callParams);
 
-  const hash = await writeContract(wagmiConfig, { ...request, chainId: txChainId });
+  const hash = await writeContract(wagmiConfig, { ...request, gas, chainId: txChainId });
   return waitForTransactionReceipt(wagmiConfig, { hash, chainId: txChainId });
 };

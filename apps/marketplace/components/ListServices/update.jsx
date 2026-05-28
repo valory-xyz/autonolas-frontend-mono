@@ -4,7 +4,7 @@ import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 
 import { Loader } from 'libs/ui-components/src';
-import { notifyError, notifySuccess } from 'libs/util-functions/src';
+import { estimateGasWithBuffer, notifyError, notifySuccess } from 'libs/util-functions/src';
 
 import { serviceManagerParams } from '../../common-util/Contracts/params';
 import { AlertError, convertStringToArray } from '../../common-util/List/ListCommon';
@@ -112,13 +112,15 @@ const UpdateService = () => {
           const chainId = requireChainId();
           const contractParams = await serviceManagerParams(chainId);
           const args = buildEvmParams(values);
-          const { request } = await simulateContract(wagmiConfig, {
+          const callParams = {
             ...contractParams,
             functionName: 'update',
             args,
             account,
-          });
-          const hash = await writeContract(wagmiConfig, request);
+          };
+          const { request } = await simulateContract(wagmiConfig, callParams);
+          const gas = await estimateGasWithBuffer(wagmiConfig, callParams);
+          const hash = await writeContract(wagmiConfig, { ...request, gas });
           await waitForTransactionReceipt(wagmiConfig, { hash });
         }
         notifySuccess('Service updated');

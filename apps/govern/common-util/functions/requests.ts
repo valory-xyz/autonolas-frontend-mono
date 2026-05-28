@@ -19,7 +19,7 @@ import {
   VE_OLAS,
   VOTE_WEIGHTING,
 } from 'libs/util-contracts/src/lib/abiAndAddresses';
-import { getAddressFromBytes32 } from 'libs/util-functions/src';
+import { estimateGasWithBuffer, getAddressFromBytes32 } from 'libs/util-functions/src';
 
 import { wagmiConfig } from 'common-util/config/wagmi';
 import { Nominee } from 'types';
@@ -82,13 +82,15 @@ export const voteForNomineeWeights = async ({
   chainIds,
   weights,
 }: VoteForNomineeWeightsParams) => {
-  const { request } = await simulateContract(wagmiConfig, {
+  const callParams = {
     ...voteWeightingParams,
-    functionName: 'voteForNomineeWeightsBatch',
+    functionName: 'voteForNomineeWeightsBatch' as const,
     args: [nominees, chainIds, weights],
     account,
-  });
-  const hash = await writeContract(wagmiConfig, request);
+  };
+  const { request } = await simulateContract(wagmiConfig, callParams);
+  const gas = await estimateGasWithBuffer(wagmiConfig, callParams);
+  const hash = await writeContract(wagmiConfig, { ...request, gas });
   return waitForTransactionReceipt(wagmiConfig, { hash });
 };
 
@@ -178,13 +180,15 @@ export const approveOlasByOwner = async ({
 }) => {
   try {
     const spender = (VE_OLAS.addresses as Record<number, Address>)[MAINNET];
-    const { request } = await simulateContract(wagmiConfig, {
+    const callParams = {
       ...olasParams,
-      functionName: 'approve',
+      functionName: 'approve' as const,
       args: [spender, amount],
       account,
-    });
-    const hash = await writeContract(wagmiConfig, request);
+    };
+    const { request } = await simulateContract(wagmiConfig, callParams);
+    const gas = await estimateGasWithBuffer(wagmiConfig, callParams);
+    const hash = await writeContract(wagmiConfig, { ...request, gas });
     return waitForTransactionReceipt(wagmiConfig, { hash });
   } catch (error) {
     window.console.log('Error occurred on approving OLAS by owner');
@@ -240,13 +244,15 @@ export const createLockRequest = async ({
   unlockTime: number;
 }) => {
   try {
-    const { request } = await simulateContract(wagmiConfig, {
+    const callParams = {
       ...veOlasParams,
-      functionName: 'createLock',
+      functionName: 'createLock' as const,
       args: [amount, unlockTime],
       account,
-    });
-    const hash = await writeContract(wagmiConfig, request);
+    };
+    const { request } = await simulateContract(wagmiConfig, callParams);
+    const gas = await estimateGasWithBuffer(wagmiConfig, callParams);
+    const hash = await writeContract(wagmiConfig, { ...request, gas });
     const receipt = await waitForTransactionReceipt(wagmiConfig, { hash });
     return receipt.transactionHash;
   } catch (error) {
@@ -266,13 +272,15 @@ export const updateIncreaseAmount = async ({
   amount: string;
 }) => {
   try {
-    const { request } = await simulateContract(wagmiConfig, {
+    const callParams = {
       ...veOlasParams,
-      functionName: 'increaseAmount',
+      functionName: 'increaseAmount' as const,
       args: [amount],
       account,
-    });
-    const hash = await writeContract(wagmiConfig, request);
+    };
+    const { request } = await simulateContract(wagmiConfig, callParams);
+    const gas = await estimateGasWithBuffer(wagmiConfig, callParams);
+    const hash = await writeContract(wagmiConfig, { ...request, gas });
     const receipt = await waitForTransactionReceipt(wagmiConfig, { hash });
     return receipt.transactionHash;
   } catch (e) {
@@ -292,13 +300,15 @@ export const updateIncreaseUnlockTime = async ({
   time: number;
 }) => {
   try {
-    const { request } = await simulateContract(wagmiConfig, {
+    const callParams = {
       ...veOlasParams,
-      functionName: 'increaseUnlockTime',
+      functionName: 'increaseUnlockTime' as const,
       args: [time],
       account,
-    });
-    const hash = await writeContract(wagmiConfig, request);
+    };
+    const { request } = await simulateContract(wagmiConfig, callParams);
+    const gas = await estimateGasWithBuffer(wagmiConfig, callParams);
+    const hash = await writeContract(wagmiConfig, { ...request, gas });
     const receipt = await waitForTransactionReceipt(wagmiConfig, { hash });
     return receipt.transactionHash;
   } catch (error) {
@@ -312,12 +322,14 @@ export const updateIncreaseUnlockTime = async ({
  */
 export const withdrawVeolasRequest = async ({ account }: { account: Address }) => {
   try {
-    const { request } = await simulateContract(wagmiConfig, {
+    const callParams = {
       ...veOlasParams,
-      functionName: 'withdraw',
+      functionName: 'withdraw' as const,
       account,
-    });
-    const hash = await writeContract(wagmiConfig, request);
+    };
+    const { request } = await simulateContract(wagmiConfig, callParams);
+    const gas = await estimateGasWithBuffer(wagmiConfig, callParams);
+    const hash = await writeContract(wagmiConfig, { ...request, gas });
     const receipt = await waitForTransactionReceipt(wagmiConfig, { hash });
     return receipt.transactionHash;
   } catch (error) {
@@ -331,12 +343,14 @@ export const withdrawVeolasRequest = async ({ account }: { account: Address }) =
  */
 export const checkpointRequest = async ({ account }: { account: Address }) => {
   try {
-    const { request } = await simulateContract(wagmiConfig, {
+    const callParams = {
       ...tokenomicsParams,
-      functionName: 'checkpoint',
+      functionName: 'checkpoint' as const,
       account,
-    });
-    const hash = await writeContract(wagmiConfig, request);
+    };
+    const { request } = await simulateContract(wagmiConfig, callParams);
+    const gas = await estimateGasWithBuffer(wagmiConfig, callParams);
+    const hash = await writeContract(wagmiConfig, { ...request, gas });
     const receipt = await waitForTransactionReceipt(wagmiConfig, { hash });
     return receipt.transactionHash;
   } catch (error) {
@@ -391,14 +405,16 @@ export const depositServiceDonationRequest = async ({
   totalAmount: string;
 }) => {
   try {
-    const { request } = await simulateContract(wagmiConfig, {
+    const callParams = {
       ...treasuryParams,
-      functionName: 'depositServiceDonationsETH',
+      functionName: 'depositServiceDonationsETH' as const,
       args: [serviceIds, amounts],
       account,
       value: BigInt(totalAmount),
-    });
-    const hash = await writeContract(wagmiConfig, request);
+    };
+    const { request } = await simulateContract(wagmiConfig, callParams);
+    const gas = await estimateGasWithBuffer(wagmiConfig, callParams);
+    const hash = await writeContract(wagmiConfig, { ...request, gas });
     const receipt = await waitForTransactionReceipt(wagmiConfig, { hash });
     return receipt.transactionHash;
   } catch (error) {
@@ -419,13 +435,15 @@ export const voteForProposal = async ({
   proposalId: string;
   support: number;
 }) => {
-  const { request } = await simulateContract(wagmiConfig, {
+  const callParams = {
     ...governorParams,
-    functionName: 'castVote',
+    functionName: 'castVote' as const,
     args: [proposalId, support],
     account,
-  });
-  const hash = await writeContract(wagmiConfig, request);
+  };
+  const { request } = await simulateContract(wagmiConfig, callParams);
+  const gas = await estimateGasWithBuffer(wagmiConfig, callParams);
+  const hash = await writeContract(wagmiConfig, { ...request, gas });
   return waitForTransactionReceipt(wagmiConfig, { hash });
 };
 
@@ -439,12 +457,14 @@ type RevokePowerParams = {
 };
 
 export const revokePower = async ({ account, nominee, chainId }: RevokePowerParams) => {
-  const { request } = await simulateContract(wagmiConfig, {
+  const callParams = {
     ...voteWeightingParams,
-    functionName: 'revokeRemovedNomineeVotingPower',
+    functionName: 'revokeRemovedNomineeVotingPower' as const,
     args: [nominee, chainId],
     account,
-  });
-  const hash = await writeContract(wagmiConfig, request);
+  };
+  const { request } = await simulateContract(wagmiConfig, callParams);
+  const gas = await estimateGasWithBuffer(wagmiConfig, callParams);
+  const hash = await writeContract(wagmiConfig, { ...request, gas });
   return waitForTransactionReceipt(wagmiConfig, { hash });
 };

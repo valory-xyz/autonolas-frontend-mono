@@ -6,7 +6,7 @@ import {
 } from '@wagmi/core';
 import { ethers } from 'ethers';
 
-import { notifyError } from 'libs/util-functions/src';
+import { estimateGasWithBuffer, notifyError } from 'libs/util-functions/src';
 
 import {
   genericErc20Params,
@@ -57,13 +57,15 @@ export const getBonds = async (id, tableDataSource) => {
 export const onTerminate = async (account, id) => {
   const chainId = requireChainId();
   const params = await serviceManagerParams(chainId);
-  const { request } = await simulateContract(wagmiConfig, {
+  const callParams = {
     ...params,
     functionName: 'terminate',
     args: [BigInt(id)],
     account,
-  });
-  const hash = await writeContract(wagmiConfig, request);
+  };
+  const { request } = await simulateContract(wagmiConfig, callParams);
+  const gas = await estimateGasWithBuffer(wagmiConfig, callParams);
+  const hash = await writeContract(wagmiConfig, { ...request, gas });
   return waitForTransactionReceipt(wagmiConfig, { hash });
 };
 
@@ -93,13 +95,15 @@ const hasSufficientTokenRequest = async ({ account, chainId, serviceId, amountTo
 /** Approves token */
 const approveToken = async ({ account, chainId, serviceId, amountToApprove }) => {
   const { token } = await getTokenDetailsRequest(serviceId);
-  const { request } = await simulateContract(wagmiConfig, {
+  const callParams = {
     ...genericErc20Params(token, chainId),
     functionName: 'approve',
     args: [ADDRESSES[chainId].serviceRegistryTokenUtility, amountToApprove],
     account,
-  });
-  const hash = await writeContract(wagmiConfig, request);
+  };
+  const { request } = await simulateContract(wagmiConfig, callParams);
+  const gas = await estimateGasWithBuffer(wagmiConfig, callParams);
+  const hash = await writeContract(wagmiConfig, { ...request, gas });
   return waitForTransactionReceipt(wagmiConfig, { hash });
 };
 
@@ -127,14 +131,16 @@ export const checkIfEth = async (id) => {
 export const onActivateRegistration = async (id, account, deposit) => {
   const chainId = requireChainId();
   const params = await serviceManagerParams(chainId);
-  const { request } = await simulateContract(wagmiConfig, {
+  const callParams = {
     ...params,
     functionName: 'activateRegistration',
     args: [BigInt(id)],
     account,
     value: BigInt(deposit),
-  });
-  const hash = await writeContract(wagmiConfig, request);
+  };
+  const { request } = await simulateContract(wagmiConfig, callParams);
+  const gas = await estimateGasWithBuffer(wagmiConfig, callParams);
+  const hash = await writeContract(wagmiConfig, { ...request, gas });
   return waitForTransactionReceipt(wagmiConfig, { hash });
 };
 
@@ -220,14 +226,16 @@ export const onStep2RegisterAgents = async ({
   const params = await serviceManagerParams(chainId);
   const { totalBonds } = await getBonds(serviceId, dataSource);
 
-  const { request } = await simulateContract(wagmiConfig, {
+  const callParams = {
     ...params,
     functionName: 'registerAgents',
     args: [BigInt(serviceId), agentInstances, agentIds.map(BigInt)],
     account,
     value: BigInt(totalBonds),
-  });
-  const hash = await writeContract(wagmiConfig, request);
+  };
+  const { request } = await simulateContract(wagmiConfig, callParams);
+  const gas = await estimateGasWithBuffer(wagmiConfig, callParams);
+  const hash = await writeContract(wagmiConfig, { ...request, gas });
   return waitForTransactionReceipt(wagmiConfig, { hash });
 };
 
@@ -257,13 +265,15 @@ export const getServiceAgentInstances = async (id) => {
 export const onStep3Deploy = async (account, id, radioValue, payload = '0x') => {
   const chainId = requireChainId();
   const params = await serviceManagerParams(chainId);
-  const { request } = await simulateContract(wagmiConfig, {
+  const callParams = {
     ...params,
     functionName: 'deploy',
     args: [BigInt(id), radioValue, payload],
     account,
-  });
-  const hash = await writeContract(wagmiConfig, request);
+  };
+  const { request } = await simulateContract(wagmiConfig, callParams);
+  const gas = await estimateGasWithBuffer(wagmiConfig, callParams);
+  const hash = await writeContract(wagmiConfig, { ...request, gas });
   return waitForTransactionReceipt(wagmiConfig, { hash });
 };
 
@@ -296,12 +306,14 @@ export const getAgentInstanceAndOperator = async (id) => {
 export const onStep5Unbond = async (account, id) => {
   const chainId = requireChainId();
   const params = await serviceManagerParams(chainId);
-  const { request } = await simulateContract(wagmiConfig, {
+  const callParams = {
     ...params,
     functionName: 'unbond',
     args: [BigInt(id)],
     account,
-  });
-  const hash = await writeContract(wagmiConfig, request);
+  };
+  const { request } = await simulateContract(wagmiConfig, callParams);
+  const gas = await estimateGasWithBuffer(wagmiConfig, callParams);
+  const hash = await writeContract(wagmiConfig, { ...request, gas });
   return waitForTransactionReceipt(wagmiConfig, { hash });
 };

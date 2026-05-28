@@ -6,7 +6,7 @@ import {
 } from '@wagmi/core';
 import { Address } from 'viem';
 
-import { notifyError } from 'libs/util-functions/src';
+import { estimateGasWithBuffer, notifyError } from 'libs/util-functions/src';
 
 import { GNOSIS_SAFE_CONTRACT } from 'common-util/AbiAndAddresses';
 import { dispenserParams } from 'common-util/Contracts/params';
@@ -76,13 +76,15 @@ export const claimOwnerIncentivesRequest = async ({
   unitIds: string[];
 }) => {
   try {
-    const { request } = await simulateContract(wagmiConfig, {
+    const callParams = {
       ...dispenserParams,
-      functionName: 'claimOwnerIncentives',
+      functionName: 'claimOwnerIncentives' as const,
       args: [unitTypes.map(BigInt), unitIds.map(BigInt)],
       account,
-    });
-    const hash = await writeContract(wagmiConfig, request);
+    };
+    const { request } = await simulateContract(wagmiConfig, callParams);
+    const gas = await estimateGasWithBuffer(wagmiConfig, callParams);
+    const hash = await writeContract(wagmiConfig, { ...request, gas });
     const receipt = await waitForTransactionReceipt(wagmiConfig, { hash });
     return receipt.transactionHash;
   } catch (error) {
