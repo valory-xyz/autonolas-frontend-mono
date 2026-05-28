@@ -6,7 +6,8 @@ import {
 } from '@wagmi/core';
 import { ethers } from 'ethers';
 
-import { estimateGasWithBuffer, notifyError } from 'libs/util-functions/src';
+import { notifyError } from 'libs/util-functions/src';
+import { estimateGasWithBuffer } from 'libs/util-functions/src/lib/estimateGasWithBuffer';
 
 import {
   genericErc20Params,

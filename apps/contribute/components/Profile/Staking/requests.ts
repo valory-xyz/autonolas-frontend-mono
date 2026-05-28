@@ -2,7 +2,7 @@ import { simulateContract, waitForTransactionReceipt, writeContract } from '@wag
 import { Address } from 'viem';
 import { base } from 'wagmi/chains';
 
-import { estimateGasWithBuffer } from 'libs/util-functions/src';
+import { estimateGasWithBuffer } from 'libs/util-functions/src/lib/estimateGasWithBuffer';
 
 import { contributorsParams } from 'common-util/Contracts/params';
 import { wagmiConfig } from 'components/Login/config';

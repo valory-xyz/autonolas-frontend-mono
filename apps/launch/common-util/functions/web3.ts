@@ -3,7 +3,7 @@ import { Abi, Address, decodeEventLog, getAddress } from 'viem';
 import { mainnet } from 'viem/chains';
 
 import { STAKING_FACTORY, VOTE_WEIGHTING } from 'libs/util-contracts/src/lib/abiAndAddresses';
-import { estimateGasWithBuffer } from 'libs/util-functions/src';
+import { estimateGasWithBuffer } from 'libs/util-functions/src/lib/estimateGasWithBuffer';
 
 import { wagmiConfig } from 'common-util/config/wagmi';
 import { getChainId } from 'common-util/functions/frontend-library';

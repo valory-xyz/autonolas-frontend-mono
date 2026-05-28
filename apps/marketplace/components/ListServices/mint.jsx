@@ -2,7 +2,8 @@ import { simulateContract, waitForTransactionReceipt, writeContract } from '@wag
 import { Typography } from 'antd';
 import { useState } from 'react';
 
-import { estimateGasWithBuffer, notifyError, notifySuccess } from 'libs/util-functions/src';
+import { notifyError, notifySuccess } from 'libs/util-functions/src';
+import { estimateGasWithBuffer } from 'libs/util-functions/src/lib/estimateGasWithBuffer';
 
 import { serviceManagerParams } from 'common-util/Contracts/params';
 import { requireChainId, sendTransaction } from 'common-util/functions';

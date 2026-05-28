@@ -19,7 +19,8 @@ import {
   VE_OLAS,
   VOTE_WEIGHTING,
 } from 'libs/util-contracts/src/lib/abiAndAddresses';
-import { estimateGasWithBuffer, getAddressFromBytes32 } from 'libs/util-functions/src';
+import { getAddressFromBytes32 } from 'libs/util-functions/src';
+import { estimateGasWithBuffer } from 'libs/util-functions/src/lib/estimateGasWithBuffer';
 
 import { wagmiConfig } from 'common-util/config/wagmi';
 import { Nominee } from 'types';

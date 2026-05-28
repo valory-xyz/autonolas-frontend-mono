@@ -7,7 +7,7 @@ import {
 import { Address } from 'viem';
 import { base } from 'wagmi/chains';
 
-import { estimateGasWithBuffer } from 'libs/util-functions/src';
+import { estimateGasWithBuffer } from 'libs/util-functions/src/lib/estimateGasWithBuffer';
 
 import { OLAS_ABI, OLAS_ADDRESS_BASE } from 'common-util/AbiAndAddresses';
 import { contributorsParams } from 'common-util/Contracts/params';

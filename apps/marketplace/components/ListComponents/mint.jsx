@@ -3,7 +3,8 @@ import { Typography } from 'antd';
 import { useRouter } from 'next/router';
 import { useState } from 'react';
 
-import { estimateGasWithBuffer, notifyError, notifySuccess } from 'libs/util-functions/src';
+import { notifyError, notifySuccess } from 'libs/util-functions/src';
+import { estimateGasWithBuffer } from 'libs/util-functions/src/lib/estimateGasWithBuffer';
 
 import { mechMinterParams } from 'common-util/Contracts/params';
 import { AlertError, AlertSuccess } from 'common-util/List/ListCommon';

@@ -6,7 +6,7 @@ import {
 } from '@wagmi/core';
 import { Address } from 'viem';
 
-import { estimateGasWithBuffer } from 'libs/util-functions/src';
+import { estimateGasWithBuffer } from 'libs/util-functions/src/lib/estimateGasWithBuffer';
 
 import { delegateContributeParams, veolasParams } from 'common-util/Contracts/params';
 import { wagmiConfig } from 'components/Login/config';

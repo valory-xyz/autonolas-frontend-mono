@@ -8,7 +8,8 @@ import get from 'lodash/get';
 import { Address, decodeEventLog, getAddress } from 'viem';
 
 import { GATEWAY_URL } from 'libs/util-constants/src';
-import { estimateGasWithBuffer, notifyError, notifySuccess } from 'libs/util-functions/src';
+import { notifyError, notifySuccess } from 'libs/util-functions/src';
+import { estimateGasWithBuffer } from 'libs/util-functions/src/lib/estimateGasWithBuffer';
 
 import { mintNftParams } from 'common-util/Contracts/params';
 import { getChainId } from 'common-util/functions';

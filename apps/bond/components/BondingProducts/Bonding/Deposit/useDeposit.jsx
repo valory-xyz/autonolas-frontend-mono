@@ -6,7 +6,7 @@ import {
 } from '@wagmi/core';
 import { useCallback } from 'react';
 
-import { estimateGasWithBuffer } from 'libs/util-functions/src';
+import { estimateGasWithBuffer } from 'libs/util-functions/src/lib/estimateGasWithBuffer';
 
 import { wagmiConfig } from 'common-util/config/wagmi';
 import { ADDRESSES } from 'common-util/constants/addresses';

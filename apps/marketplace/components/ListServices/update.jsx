@@ -4,7 +4,8 @@ import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 
 import { Loader } from 'libs/ui-components/src';
-import { estimateGasWithBuffer, notifyError, notifySuccess } from 'libs/util-functions/src';
+import { notifyError, notifySuccess } from 'libs/util-functions/src';
+import { estimateGasWithBuffer } from 'libs/util-functions/src/lib/estimateGasWithBuffer';
 
 import { serviceManagerParams } from '../../common-util/Contracts/params';
 import { AlertError, convertStringToArray } from '../../common-util/List/ListCommon';

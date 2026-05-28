@@ -6,7 +6,8 @@ import {
 } from '@wagmi/core';
 import { Address } from 'viem';
 
-import { estimateGasWithBuffer, notifyError } from 'libs/util-functions/src';
+import { notifyError } from 'libs/util-functions/src';
+import { estimateGasWithBuffer } from 'libs/util-functions/src/lib/estimateGasWithBuffer';
 
 import { GNOSIS_SAFE_CONTRACT } from 'common-util/AbiAndAddresses';
 import { dispenserParams } from 'common-util/Contracts/params';
