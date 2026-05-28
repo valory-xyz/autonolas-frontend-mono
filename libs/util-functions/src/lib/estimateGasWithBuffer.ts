@@ -32,6 +32,11 @@ export const estimateGasWithBuffer = async (
   multiplierPercent = 120n,
 ): Promise<bigint> => {
   const publicClient = getPublicClient(config, { chainId: call.chainId });
+  if (!publicClient) {
+    throw new Error(
+      `estimateGasWithBuffer: no public client available for chainId=${call.chainId ?? 'default'}`,
+    );
+  }
   const estimate = await publicClient.estimateContractGas(call);
   return (estimate * multiplierPercent) / 100n;
 };
