@@ -30,6 +30,12 @@ const ALLOWED_ORIGINS = [
   'wss://relay.walletconnect.org/',
   'wss://relay.walletconnect.com/',
   'https://explorer-api.walletconnect.com/',
+  // RainbowKit 2.2 / Reown AppKit endpoints (replace the older
+  // `api.web3modal.com` entry below — kept for backwards-compat). Without
+  // these, the WalletConnect modal's mobile-wallet deeplink list comes back
+  // empty and the console fills with CSP `connect-src` violations.
+  'https://pulse.walletconnect.org',
+  'https://api.web3modal.org',
   'wss://*.pusher.com/',
   'wss://www.walletlink.org/rpc',
 
