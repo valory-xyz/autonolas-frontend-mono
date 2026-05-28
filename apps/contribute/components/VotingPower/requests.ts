@@ -31,14 +31,18 @@ export const fetchDelegatee = async ({ account }: { account: string }) => {
 
 /** Delegate Contribute voting power to an address. */
 export const delegate = async ({ account, delegatee }: { account: string; delegatee: string }) => {
-  const callParams = {
+  const { request } = await simulateContract(wagmiConfig, {
     ...delegateContributeParams,
-    functionName: 'delegate' as const,
+    functionName: 'delegate',
     args: [delegatee as Address],
     account: account as Address,
-  };
-  const { request } = await simulateContract(wagmiConfig, callParams);
-  const gas = await estimateGasWithBuffer(wagmiConfig, callParams);
+  });
+  const gas = await estimateGasWithBuffer(wagmiConfig, {
+    ...delegateContributeParams,
+    functionName: 'delegate',
+    args: [delegatee as Address],
+    account: account as Address,
+  });
   const hash = await writeContract(wagmiConfig, { ...request, gas });
   return waitForTransactionReceipt(wagmiConfig, {
     hash,

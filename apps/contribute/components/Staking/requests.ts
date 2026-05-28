@@ -123,15 +123,20 @@ export const createAndStake = async ({
   stakingInstance: Address;
 }) => {
   try {
-    const callParams = {
+    const { request } = await simulateContract(wagmiConfig, {
       ...contributorsParams,
-      functionName: 'createAndStake' as const,
+      functionName: 'createAndStake',
       args: [BigInt(socialId), stakingInstance],
       account,
       value: CREATE_AND_STAKE_VALUE,
-    };
-    const { request } = await simulateContract(wagmiConfig, callParams);
-    const gas = await estimateGasWithBuffer(wagmiConfig, callParams);
+    });
+    const gas = await estimateGasWithBuffer(wagmiConfig, {
+      ...contributorsParams,
+      functionName: 'createAndStake',
+      args: [BigInt(socialId), stakingInstance],
+      account,
+      value: CREATE_AND_STAKE_VALUE,
+    });
     const hash = await writeContract(wagmiConfig, { ...request, gas });
     return waitForTransactionReceipt(wagmiConfig, { chainId: base.id, hash });
   } catch (error) {

@@ -26,13 +26,16 @@ export const mintNft = async (account: string): Promise<string> => {
   if (!params) throw new Error('Mint NFT contract not deployed on this chain');
 
   try {
-    const callParams = {
+    const { request } = await simulateContract(wagmiConfig, {
       ...params,
-      functionName: 'mint' as const,
+      functionName: 'mint',
       account: account as Address,
-    };
-    const { request } = await simulateContract(wagmiConfig, callParams);
-    const gas = await estimateGasWithBuffer(wagmiConfig, callParams);
+    });
+    const gas = await estimateGasWithBuffer(wagmiConfig, {
+      ...params,
+      functionName: 'mint',
+      account: account as Address,
+    });
     const hash = await writeContract(wagmiConfig, { ...request, gas });
     const receipt = await waitForTransactionReceipt(wagmiConfig, { hash });
 

@@ -14,14 +14,18 @@ type RestakeParams = {
 
 export const restake = async ({ account, contractAddress }: RestakeParams) => {
   try {
-    const callParams = {
+    const { request } = await simulateContract(wagmiConfig, {
       ...contributorsParams,
-      functionName: 'reStake' as const,
+      functionName: 'reStake',
       args: [contractAddress],
       account,
-    };
-    const { request } = await simulateContract(wagmiConfig, callParams);
-    const gas = await estimateGasWithBuffer(wagmiConfig, callParams);
+    });
+    const gas = await estimateGasWithBuffer(wagmiConfig, {
+      ...contributorsParams,
+      functionName: 'reStake',
+      args: [contractAddress],
+      account,
+    });
     const hash = await writeContract(wagmiConfig, { ...request, gas });
     return waitForTransactionReceipt(wagmiConfig, { chainId: base.id, hash });
   } catch (error) {
