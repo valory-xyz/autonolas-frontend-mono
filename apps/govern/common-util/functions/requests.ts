@@ -1,33 +1,74 @@
-import { readContract, readContracts } from '@wagmi/core';
+import {
+  readContract,
+  readContracts,
+  simulateContract,
+  waitForTransactionReceipt,
+  writeContract,
+} from '@wagmi/core';
 import { ethers } from 'ethers';
-import { Abi, AbiFunction, parseUnits } from 'viem';
-import { Address } from 'viem';
+import { Abi, AbiFunction, Address, parseUnits } from 'viem';
 import { mainnet } from 'viem/chains';
 
 import {
+  GOVERNOR_OLAS,
+  OLAS,
   SERVICE_REGISTRY,
   STAKING_FACTORY,
+  TOKENOMICS,
+  TREASURY,
   VE_OLAS,
+  VOTE_WEIGHTING,
 } from 'libs/util-contracts/src/lib/abiAndAddresses';
-import {
-  getAddressFromBytes32,
-  getEstimatedGasLimit,
-  sendTransaction,
-} from 'libs/util-functions/src';
+import { getAddressFromBytes32 } from 'libs/util-functions/src';
+import { estimateGasWithBuffer } from 'libs/util-functions/src/lib/estimateGasWithBuffer';
 
-import { SUPPORTED_CHAINS, wagmiConfig } from 'common-util/config/wagmi';
+import { wagmiConfig } from 'common-util/config/wagmi';
+import { Nominee } from 'types';
 
 import { getUnixNextWeekStartTimestamp } from './time';
-import {
-  getGovernorContract,
-  getOlasContract,
-  getTokenomicsContract,
-  getTreasuryContract,
-  getVeOlasContract,
-  getVoteWeightingContract,
-} from './web3';
-import { RPC_URLS } from 'libs/util-constants/src';
-import { Nominee } from 'types';
+
+// All governance contracts live on mainnet.
+const MAINNET = mainnet.id;
+// Widened version for wagmi simulate/write/wait overloads — the literal `1`
+// doesn't satisfy the chain-tuple constraint in wagmi 2.19+, so each params
+// bag passes `chainId: MAINNET_CHAIN_ID` instead of the literal mainnet.id.
+const MAINNET_CHAIN_ID: number = mainnet.id;
+
+const voteWeightingParams = {
+  address: (VOTE_WEIGHTING.addresses as Record<number, Address>)[MAINNET],
+  abi: VOTE_WEIGHTING.abi as Abi,
+  chainId: MAINNET_CHAIN_ID,
+};
+
+const olasParams = {
+  address: (OLAS.addresses as Record<number, Address>)[MAINNET],
+  abi: OLAS.abi as Abi,
+  chainId: MAINNET_CHAIN_ID,
+};
+
+const veOlasParams = {
+  address: (VE_OLAS.addresses as Record<number, Address>)[MAINNET],
+  abi: VE_OLAS.abi,
+  chainId: MAINNET_CHAIN_ID,
+};
+
+const tokenomicsParams = {
+  address: TOKENOMICS.addresses[MAINNET] as Address,
+  abi: TOKENOMICS.abi as Abi,
+  chainId: MAINNET_CHAIN_ID,
+};
+
+const treasuryParams = {
+  address: TREASURY.addresses[MAINNET] as Address,
+  abi: TREASURY.abi as Abi,
+  chainId: MAINNET_CHAIN_ID,
+};
+
+const governorParams = {
+  address: GOVERNOR_OLAS.addresses[MAINNET] as Address,
+  abi: GOVERNOR_OLAS.abi as Abi,
+  chainId: MAINNET_CHAIN_ID,
+};
 
 type VoteForNomineeWeightsParams = {
   account: Address | undefined;
@@ -42,23 +83,23 @@ export const voteForNomineeWeights = async ({
   chainIds,
   weights,
 }: VoteForNomineeWeightsParams) => {
-  const contract = getVoteWeightingContract();
-  const voteFn = contract.methods.voteForNomineeWeightsBatch(nominees, chainIds, weights);
-
-  const estimatedGas = await getEstimatedGasLimit(voteFn, account);
-  const fn = voteFn.send({ from: account, estimatedGas });
-
-  const result = await sendTransaction(fn, account, {
-    supportedChains: SUPPORTED_CHAINS,
-    rpcUrls: RPC_URLS,
-  });
-
-  return result;
+  const callParams = {
+    ...voteWeightingParams,
+    functionName: 'voteForNomineeWeightsBatch' as const,
+    args: [nominees, chainIds, weights],
+    account,
+  };
+  const { request } = await simulateContract(wagmiConfig, callParams);
+  const gas = await estimateGasWithBuffer(wagmiConfig, callParams);
+  const hash = await writeContract(wagmiConfig, { ...request, gas });
+  return waitForTransactionReceipt(wagmiConfig, { hash });
 };
 
 export const checkIfNomineeRemoved = async (allocations: { address: Address }[]) => {
-  const contract = getVoteWeightingContract();
-  const result: Nominee[] = await contract.methods.getAllRemovedNominees().call();
+  const result = (await readContract(wagmiConfig, {
+    ...voteWeightingParams,
+    functionName: 'getAllRemovedNominees',
+  })) as Nominee[] | undefined;
 
   if (!result) return [];
 
@@ -108,9 +149,7 @@ export const checkIfContractDisabled = async (
 
 export const checkNegativeSlope = async (account: Address) => {
   const result = await readContract(wagmiConfig, {
-    abi: VE_OLAS.abi,
-    address: (VE_OLAS.addresses as Record<number, Address>)[mainnet.id],
-    chainId: mainnet.id,
+    ...veOlasParams,
     functionName: 'getLastUserPoint',
     args: [account],
   });
@@ -120,9 +159,7 @@ export const checkNegativeSlope = async (account: Address) => {
 
 export const checkLockExpired = async (account: Address) => {
   const result = await readContract(wagmiConfig, {
-    abi: VE_OLAS.abi,
-    address: (VE_OLAS.addresses as Record<number, Address>)[mainnet.id],
-    chainId: mainnet.id,
+    ...veOlasParams,
     functionName: 'lockedEnd',
     args: [account],
   });
@@ -143,16 +180,17 @@ export const approveOlasByOwner = async ({
   amount: bigint;
 }) => {
   try {
-    const contract = getOlasContract();
-    const spender = (VE_OLAS.addresses as Record<number, string>)[mainnet.id];
-    const fn = contract.methods.approve(spender, amount).send({ from: account });
-
-    const response = await sendTransaction(fn, account, {
-      supportedChains: SUPPORTED_CHAINS,
-      rpcUrls: RPC_URLS,
-    });
-
-    return response;
+    const spender = (VE_OLAS.addresses as Record<number, Address>)[MAINNET];
+    const callParams = {
+      ...olasParams,
+      functionName: 'approve' as const,
+      args: [spender, amount],
+      account,
+    };
+    const { request } = await simulateContract(wagmiConfig, callParams);
+    const gas = await estimateGasWithBuffer(wagmiConfig, callParams);
+    const hash = await writeContract(wagmiConfig, { ...request, gas });
+    return waitForTransactionReceipt(wagmiConfig, { hash });
   } catch (error) {
     window.console.log('Error occurred on approving OLAS by owner');
     throw error;
@@ -170,11 +208,14 @@ export const hasSufficientTokensRequest = async ({
   amount: number;
 }) => {
   try {
-    const contract = getOlasContract();
-    const spender = (VE_OLAS.addresses as Record<number, string>)[mainnet.id];
+    const spender = (VE_OLAS.addresses as Record<number, Address>)[MAINNET];
 
-    const response = await contract.methods.allowance(account, spender).call();
-    const responseInBg = ethers.toBigInt(response);
+    const response = await readContract(wagmiConfig, {
+      ...olasParams,
+      functionName: 'allowance',
+      args: [account, spender],
+    });
+    const responseInBg = ethers.toBigInt(response as bigint | string);
 
     // Resolve false if the response amount is zero
     if (responseInBg === ethers.toBigInt(0)) {
@@ -203,19 +244,18 @@ export const createLockRequest = async ({
   amount: string;
   unlockTime: number;
 }) => {
-  const contract = getVeOlasContract();
-
   try {
-    const createLockFn = contract.methods.createLock(amount, unlockTime);
-    const estimatedGas = await getEstimatedGasLimit(createLockFn, account);
-    const fn = createLockFn.send({ from: account, gasLimit: estimatedGas });
-
-    const response = await sendTransaction(fn, account, {
-      supportedChains: SUPPORTED_CHAINS,
-      rpcUrls: RPC_URLS,
-    });
-
-    return response?.transactionHash;
+    const callParams = {
+      ...veOlasParams,
+      functionName: 'createLock' as const,
+      args: [amount, unlockTime],
+      account,
+    };
+    const { request } = await simulateContract(wagmiConfig, callParams);
+    const gas = await estimateGasWithBuffer(wagmiConfig, callParams);
+    const hash = await writeContract(wagmiConfig, { ...request, gas });
+    const receipt = await waitForTransactionReceipt(wagmiConfig, { hash });
+    return receipt.transactionHash;
   } catch (error) {
     window.console.log('Error occurred on creating lock for veOLAS');
     throw error;
@@ -232,19 +272,18 @@ export const updateIncreaseAmount = async ({
   account: Address;
   amount: string;
 }) => {
-  const contract = getVeOlasContract();
-
   try {
-    const increaseAmountFn = contract.methods.increaseAmount(amount);
-    const estimatedGas = await getEstimatedGasLimit(increaseAmountFn, account);
-    const fn = increaseAmountFn.send({ from: account, gasLimit: estimatedGas });
-
-    const response = await sendTransaction(fn, account, {
-      supportedChains: SUPPORTED_CHAINS,
-      rpcUrls: RPC_URLS,
-    });
-
-    return response?.transactionHash;
+    const callParams = {
+      ...veOlasParams,
+      functionName: 'increaseAmount' as const,
+      args: [amount],
+      account,
+    };
+    const { request } = await simulateContract(wagmiConfig, callParams);
+    const gas = await estimateGasWithBuffer(wagmiConfig, callParams);
+    const hash = await writeContract(wagmiConfig, { ...request, gas });
+    const receipt = await waitForTransactionReceipt(wagmiConfig, { hash });
+    return receipt.transactionHash;
   } catch (e) {
     window.console.log('Error occurred on increasing amount with estimated gas');
     throw e;
@@ -261,22 +300,18 @@ export const updateIncreaseUnlockTime = async ({
   account: Address;
   time: number;
 }) => {
-  const contract = getVeOlasContract();
-
   try {
-    const increaseUnlockTimeFn = contract.methods.increaseUnlockTime(time);
-    const estimatedGas = await getEstimatedGasLimit(increaseUnlockTimeFn, account);
-    const fn = increaseUnlockTimeFn.send({
-      from: account,
-      gasLimit: estimatedGas,
-    });
-
-    const response = await sendTransaction(fn, account, {
-      supportedChains: SUPPORTED_CHAINS,
-      rpcUrls: RPC_URLS,
-    });
-
-    return response?.transactionHash;
+    const callParams = {
+      ...veOlasParams,
+      functionName: 'increaseUnlockTime' as const,
+      args: [time],
+      account,
+    };
+    const { request } = await simulateContract(wagmiConfig, callParams);
+    const gas = await estimateGasWithBuffer(wagmiConfig, callParams);
+    const hash = await writeContract(wagmiConfig, { ...request, gas });
+    const receipt = await waitForTransactionReceipt(wagmiConfig, { hash });
+    return receipt.transactionHash;
   } catch (error) {
     window.console.log('Error occurred on increasing unlock time');
     throw error;
@@ -287,19 +322,17 @@ export const updateIncreaseUnlockTime = async ({
  * Withdraw VeOlas
  */
 export const withdrawVeolasRequest = async ({ account }: { account: Address }) => {
-  const contract = getVeOlasContract();
-
   try {
-    const withdrawFn = contract.methods.withdraw();
-    const estimatedGas = await getEstimatedGasLimit(withdrawFn, account);
-    const fn = withdrawFn.send({ from: account, gasLimit: estimatedGas });
-
-    const response = await sendTransaction(fn, account, {
-      supportedChains: SUPPORTED_CHAINS,
-      rpcUrls: RPC_URLS,
-    });
-
-    return response?.transactionHash;
+    const callParams = {
+      ...veOlasParams,
+      functionName: 'withdraw' as const,
+      account,
+    };
+    const { request } = await simulateContract(wagmiConfig, callParams);
+    const gas = await estimateGasWithBuffer(wagmiConfig, callParams);
+    const hash = await writeContract(wagmiConfig, { ...request, gas });
+    const receipt = await waitForTransactionReceipt(wagmiConfig, { hash });
+    return receipt.transactionHash;
   } catch (error) {
     window.console.log('Error occurred on withdrawing veOlas');
     throw error;
@@ -310,18 +343,17 @@ export const withdrawVeolasRequest = async ({ account }: { account: Address }) =
  * Start new epoch
  */
 export const checkpointRequest = async ({ account }: { account: Address }) => {
-  const contract = getTokenomicsContract();
   try {
-    const checkpointFn = contract.methods.checkpoint();
-    const estimatedGas = await getEstimatedGasLimit(checkpointFn, account);
-    const fn = checkpointFn.send({ from: account, gasLimit: estimatedGas });
-
-    const response = await sendTransaction(fn, account, {
-      supportedChains: SUPPORTED_CHAINS,
-      rpcUrls: RPC_URLS,
-    });
-
-    return response?.transactionHash;
+    const callParams = {
+      ...tokenomicsParams,
+      functionName: 'checkpoint' as const,
+      account,
+    };
+    const { request } = await simulateContract(wagmiConfig, callParams);
+    const gas = await estimateGasWithBuffer(wagmiConfig, callParams);
+    const hash = await writeContract(wagmiConfig, { ...request, gas });
+    const receipt = await waitForTransactionReceipt(wagmiConfig, { hash });
+    return receipt.transactionHash;
   } catch (error) {
     window.console.log('Error occurred on starting new epoch');
     throw error;
@@ -338,8 +370,8 @@ export const checkServicesTerminatedOrNotDeployed = async (ids: string[]) => {
     const response = await readContracts(wagmiConfig, {
       contracts: ids.map((id) => ({
         abi: SERVICE_REGISTRY.abi as Abi,
-        address: (SERVICE_REGISTRY.addresses as Record<number, Address>)[mainnet.id],
-        chainId: mainnet.id,
+        address: (SERVICE_REGISTRY.addresses as Record<number, Address>)[MAINNET],
+        chainId: MAINNET_CHAIN_ID,
         functionName: 'getService',
         args: [id],
       })),
@@ -373,19 +405,19 @@ export const depositServiceDonationRequest = async ({
   amounts: string[];
   totalAmount: string;
 }) => {
-  const contract = getTreasuryContract();
-
   try {
-    const depositFn = contract.methods.depositServiceDonationsETH(serviceIds, amounts);
-    const estimatedGas = await getEstimatedGasLimit(depositFn, account, totalAmount);
-    const fn = depositFn.send({ from: account, value: totalAmount, gasLimit: estimatedGas });
-
-    const response = await sendTransaction(fn, account, {
-      supportedChains: SUPPORTED_CHAINS,
-      rpcUrls: RPC_URLS,
-    });
-
-    return response?.transactionHash;
+    const callParams = {
+      ...treasuryParams,
+      functionName: 'depositServiceDonationsETH' as const,
+      args: [serviceIds, amounts],
+      account,
+      value: BigInt(totalAmount),
+    };
+    const { request } = await simulateContract(wagmiConfig, callParams);
+    const gas = await estimateGasWithBuffer(wagmiConfig, callParams);
+    const hash = await writeContract(wagmiConfig, { ...request, gas });
+    const receipt = await waitForTransactionReceipt(wagmiConfig, { hash });
+    return receipt.transactionHash;
   } catch (error) {
     window.console.log('Error occurred on depositing service donation');
     throw error;
@@ -404,18 +436,16 @@ export const voteForProposal = async ({
   proposalId: string;
   support: number;
 }) => {
-  const contract = getGovernorContract();
-  const voteFn = contract.methods.castVote(proposalId, support);
-
-  const estimatedGas = await getEstimatedGasLimit(voteFn, account);
-  const fn = voteFn.send({ from: account, estimatedGas });
-
-  const result = await sendTransaction(fn, account, {
-    supportedChains: SUPPORTED_CHAINS,
-    rpcUrls: RPC_URLS,
-  });
-
-  return result;
+  const callParams = {
+    ...governorParams,
+    functionName: 'castVote' as const,
+    args: [proposalId, support],
+    account,
+  };
+  const { request } = await simulateContract(wagmiConfig, callParams);
+  const gas = await estimateGasWithBuffer(wagmiConfig, callParams);
+  const hash = await writeContract(wagmiConfig, { ...request, gas });
+  return waitForTransactionReceipt(wagmiConfig, { hash });
 };
 
 /**
@@ -428,16 +458,14 @@ type RevokePowerParams = {
 };
 
 export const revokePower = async ({ account, nominee, chainId }: RevokePowerParams) => {
-  const contract = getVoteWeightingContract();
-  const voteFn = contract.methods.revokeRemovedNomineeVotingPower(nominee, chainId);
-
-  const estimatedGas = await getEstimatedGasLimit(voteFn, account);
-  const fn = voteFn.send({ from: account, estimatedGas });
-
-  const result = await sendTransaction(fn, account, {
-    supportedChains: SUPPORTED_CHAINS,
-    rpcUrls: RPC_URLS,
-  });
-
-  return result;
+  const callParams = {
+    ...voteWeightingParams,
+    functionName: 'revokeRemovedNomineeVotingPower' as const,
+    args: [nominee, chainId],
+    account,
+  };
+  const { request } = await simulateContract(wagmiConfig, callParams);
+  const gas = await estimateGasWithBuffer(wagmiConfig, callParams);
+  const hash = await writeContract(wagmiConfig, { ...request, gas });
+  return waitForTransactionReceipt(wagmiConfig, { hash });
 };

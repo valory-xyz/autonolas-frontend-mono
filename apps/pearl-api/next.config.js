@@ -34,10 +34,9 @@ const nextConfig = {
     svgr: false,
   },
 
-  // Mirror @nx/next:build's output convention so `next build --webpack`
-  // writes to dist/apps/pearl-api/.next (where Vercel's Output Directory
-  // looks for routes-manifest.json).
-  distDir: '../../dist/apps/pearl-api/.next',
+  // `distDir` is computed by `@nx/next/plugins/with-nx` from the build
+  // target's `outputPath` in `project.json` — don't set it here, or
+  // withNx will double-join the paths.
 
   compiler: {
     // For other options, see https://styled-components.com/docs/tooling#babel-plugin

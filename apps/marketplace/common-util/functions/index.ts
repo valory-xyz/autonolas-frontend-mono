@@ -45,6 +45,21 @@ export const getChainId = (chainId = null) => {
   return chainIdFromSessionStorage || 1;
 };
 
+/**
+ * Wrapper around getChainId() that normalises its `number | Error | undefined`
+ * return into a definite `number`, throwing a descriptive Error otherwise.
+ * Callers that go on to do an address lookup or pass the chainId to viem
+ * should use this instead of `getChainId()` directly.
+ */
+export const requireChainId = (): number => {
+  const chainId = getChainId();
+  if (chainId instanceof Error) throw chainId;
+  if (chainId === undefined || chainId === null) {
+    throw new Error('Cannot determine chain ID — wallet not connected?');
+  }
+  return chainId as number;
+};
+
 export const getProvider = () => {
   const defaultChainId = getChainId();
   const rpcUrl = typeof defaultChainId === 'number' ? (RPC_URLS as RpcUrl)[defaultChainId] : null;

@@ -1,20 +1,27 @@
+import {
+  readContract,
+  simulateContract,
+  waitForTransactionReceipt,
+  writeContract,
+} from '@wagmi/core';
 import { Address } from 'viem';
 
-import { getEstimatedGasLimit, notifyError } from 'libs/util-functions/src';
+import { notifyError } from 'libs/util-functions/src';
+import { estimateGasWithBuffer } from 'libs/util-functions/src/lib/estimateGasWithBuffer';
 
-import { sendTransaction } from 'common-util/functions';
+import { GNOSIS_SAFE_CONTRACT } from 'common-util/AbiAndAddresses';
+import { dispenserParams } from 'common-util/Contracts/params';
+import { wagmiConfig } from 'common-util/Login/config';
 
 import { DEFAULT_SERVICE_CREATION_ETH_TOKEN_ZEROS } from '../../util/constants';
-import { getDispenserContract, getServiceOwnerMultisigContract } from '../Contracts';
 import { checkIfGnosisSafe, getEthersProvider } from './index';
 
 const FALLBACK_HANDLER_STORAGE_SLOT =
   '0x6c9a6c4a39284e37ed1cf53d337577d14212a4870fb976a4366c693b939918d5';
 
 /**
- * function to check the owner address can mint.
- * BE code: https://github.com/valory-xyz/autonolas-registries/pull/54#discussion_r1031510182
- * @returns {Promise<boolean>} true if the owner address can mint
+ * Check whether `account` can receive an ERC721 mint. For an EOA, always true;
+ * for a Gnosis Safe, additionally verifies threshold/owners/fallback handler.
  */
 export const checkIfERC721Receive = async (account: Address, ownerAddress: Address) => {
   const provider = getEthersProvider();
@@ -22,9 +29,18 @@ export const checkIfERC721Receive = async (account: Address, ownerAddress: Addre
 
   if (isSafe) {
     try {
-      const contract = getServiceOwnerMultisigContract(account);
-      const threshold = await contract.methods.getThreshold().call();
-      const owners = await contract.methods.getOwners().call();
+      const [threshold, owners] = await Promise.all([
+        readContract(wagmiConfig, {
+          address: account,
+          abi: GNOSIS_SAFE_CONTRACT.abi,
+          functionName: 'getThreshold',
+        }) as Promise<bigint>,
+        readContract(wagmiConfig, {
+          address: account,
+          abi: GNOSIS_SAFE_CONTRACT.abi,
+          functionName: 'getOwners',
+        }) as Promise<readonly Address[]>,
+      ]);
 
       if (Number(threshold) > 0 && owners.length > 0) {
         // TODO: check and fix error: Property 'getStorageAt' does not exist on type 'JsonRpcProvider | FallbackProvider'.
@@ -60,16 +76,20 @@ export const claimOwnerIncentivesRequest = async ({
   unitTypes: string[];
   unitIds: string[];
 }) => {
-  const contract = getDispenserContract();
   try {
-    const claimFn = contract.methods.claimOwnerIncentives(unitTypes, unitIds);
-    const estimatedGas = await getEstimatedGasLimit(claimFn, account);
-    const fn = claimFn.send({ from: account, gasLimit: estimatedGas });
-
-    const response = await sendTransaction(fn, account);
-    return response?.transactionHash;
+    const callParams = {
+      ...dispenserParams,
+      functionName: 'claimOwnerIncentives' as const,
+      args: [unitTypes.map(BigInt), unitIds.map(BigInt)],
+      account,
+    };
+    const { request } = await simulateContract(wagmiConfig, callParams);
+    const gas = await estimateGasWithBuffer(wagmiConfig, callParams);
+    const hash = await writeContract(wagmiConfig, { ...request, gas });
+    const receipt = await waitForTransactionReceipt(wagmiConfig, { hash });
+    return receipt.transactionHash;
   } catch (error) {
-    window.console.log('Error occurred on claiming owner incentives');
+    console.error('Error occurred on claiming owner incentives', error);
     throw error;
   }
 };

@@ -1,5 +1,6 @@
 import { SwapOutlined } from '@ant-design/icons';
-import { Grid } from 'antd';
+import { ConnectButton } from '@rainbow-me/rainbowkit';
+import { Button, Grid } from 'antd';
 import { isNil } from 'lodash';
 import PropTypes from 'prop-types';
 import { useCallback, useEffect } from 'react';
@@ -144,6 +145,7 @@ export const LoginV2 = ({
           {!hideWrongNetwork && (
             <div style={{ marginRight: 8 }}>
               <YellowButton
+                size="large"
                 loading={isPending}
                 type="default"
                 onClick={onSwitchNetwork}
@@ -154,7 +156,55 @@ export const LoginV2 = ({
             </div>
           )}
 
-          <w3m-button balance={screens.xs ? 'hide' : 'show'} />
+          <ConnectButton.Custom>
+            {({ account, chain, openAccountModal, openChainModal, openConnectModal, mounted }) => {
+              if (!mounted) return null;
+
+              if (!account || !chain) {
+                return (
+                  <Button size="large" type="primary" onClick={openConnectModal}>
+                    Connect Wallet
+                  </Button>
+                );
+              }
+
+              if (chain.unsupported) {
+                return (
+                  <Button size="large" danger onClick={openChainModal}>
+                    Wrong network
+                  </Button>
+                );
+              }
+
+              // On xs the balance is hidden — matches the previous
+              // <w3m-button balance={screens.xs ? 'hide' : 'show'}> behavior.
+              const showBalance = !screens.xs && balance?.formatted;
+
+              // marketplace's Layout has its own URL-routed chain Select, so
+              // we don't render a chain pill here to avoid duplicating it.
+              // Only the address pill.
+              return (
+                <Button size="large" onClick={openAccountModal}>
+                  <span
+                    aria-hidden
+                    style={{
+                      display: 'inline-block',
+                      width: 20,
+                      height: 20,
+                      borderRadius: '50%',
+                      marginRight: 8,
+                      verticalAlign: 'middle',
+                      background: 'linear-gradient(135deg, #7e22ce, #b5179e)',
+                    }}
+                  />
+                  {showBalance
+                    ? `${Number(balance.formatted).toFixed(3)} ${balance.symbol} · `
+                    : ''}
+                  {account.displayName}
+                </Button>
+              );
+            }}
+          </ConnectButton.Custom>
         </>
       )}
     </LoginContainer>

@@ -1,13 +1,16 @@
+import {
+  readContract,
+  simulateContract,
+  waitForTransactionReceipt,
+  writeContract,
+} from '@wagmi/core';
 import { useCallback } from 'react';
 
-import { getEstimatedGasLimit } from 'libs/util-functions/src';
+import { estimateGasWithBuffer } from 'libs/util-functions/src/lib/estimateGasWithBuffer';
 
+import { wagmiConfig } from 'common-util/config/wagmi';
 import { ADDRESSES } from 'common-util/constants/addresses';
-import {
-  getDepositoryContract,
-  getUniswapV2PairContract,
-  sendTransaction,
-} from 'common-util/functions';
+import { depositoryParams, uniswapV2PairParams } from 'common-util/Contracts/params';
 import { useHelpers } from 'common-util/hooks/useHelpers';
 
 export const useDeposit = () => {
@@ -15,25 +18,29 @@ export const useDeposit = () => {
 
   const hasSufficientTokenRequest = useCallback(
     async ({ token: productToken, tokenAmount }) => {
-      const contract = getUniswapV2PairContract(productToken);
       const treasuryAddress = ADDRESSES[chainId].treasury;
-      const response = await contract.methods.allowance(account, treasuryAddress).call();
+      const response = await readContract(wagmiConfig, {
+        ...uniswapV2PairParams(productToken, chainId),
+        functionName: 'allowance',
+        args: [account, treasuryAddress],
+      });
 
       // if allowance is greater than or equal to token amount
       // then user has sufficient token
-      const hasEnoughAllowance = response >= tokenAmount;
-      return hasEnoughAllowance;
+      return BigInt(response) >= BigInt(tokenAmount);
     },
     [account, chainId],
   );
 
   const getLpBalanceRequest = useCallback(
     async ({ token }) => {
-      const contract = getUniswapV2PairContract(token);
-      const response = await contract.methods.balanceOf(account).call();
-      return response;
+      return readContract(wagmiConfig, {
+        ...uniswapV2PairParams(token, chainId),
+        functionName: 'balanceOf',
+        args: [account],
+      });
     },
-    [account],
+    [account, chainId],
   );
 
   /**
@@ -41,27 +48,36 @@ export const useDeposit = () => {
    */
   const approveRequest = useCallback(
     async ({ token, amountToApprove }) => {
-      const contract = getUniswapV2PairContract(token);
       const treasuryAddress = ADDRESSES[chainId].treasury;
-      const fnApprove = contract.methods.approve(treasuryAddress, amountToApprove);
-      const estimatedGas = await getEstimatedGasLimit(fnApprove, account);
-      const fn = fnApprove.send({ from: account, gasLimit: estimatedGas });
-
-      const response = await sendTransaction(fn, account);
-      return response;
+      const callParams = {
+        ...uniswapV2PairParams(token, chainId),
+        functionName: 'approve',
+        args: [treasuryAddress, amountToApprove],
+        account,
+      };
+      const { request } = await simulateContract(wagmiConfig, callParams);
+      const gas = await estimateGasWithBuffer(wagmiConfig, callParams);
+      const hash = await writeContract(wagmiConfig, { ...request, gas });
+      return waitForTransactionReceipt(wagmiConfig, { hash });
     },
     [account, chainId],
   );
 
   const depositRequest = useCallback(
     async ({ productId, tokenAmount }) => {
-      const contract = getDepositoryContract();
-      const fn = contract.methods.deposit(productId, tokenAmount).send({ from: account });
-
-      const response = await sendTransaction(fn, account);
-      return response?.transactionHash;
+      const callParams = {
+        ...depositoryParams(chainId),
+        functionName: 'deposit',
+        args: [productId, tokenAmount],
+        account,
+      };
+      const { request } = await simulateContract(wagmiConfig, callParams);
+      const gas = await estimateGasWithBuffer(wagmiConfig, callParams);
+      const hash = await writeContract(wagmiConfig, { ...request, gas });
+      const receipt = await waitForTransactionReceipt(wagmiConfig, { hash });
+      return receipt.transactionHash;
     },
-    [account],
+    [account, chainId],
   );
 
   return {

@@ -2,8 +2,12 @@ import '@ant-design/v5-patch-for-react-19';
 import type { AppProps } from 'next/app';
 import { FC, PropsWithChildren } from 'react';
 import { Provider } from 'react-redux';
+import { cookieToInitialState } from 'wagmi';
 
 import { AutonolasThemeProvider, GlobalStyles } from 'libs/ui-theme/src';
+import { useSuppressSafeWcRedirect } from 'libs/util-functions/src';
+
+import { wagmiConfig } from 'common-util/config/wagmi';
 
 import { useGetMyStakingContracts } from 'hooks/useGetMyStakingContracts';
 import { useHandleRoute } from 'hooks/useHandleRoute';
@@ -22,6 +26,9 @@ const DataProvider: FC<PropsWithChildren> = ({ children }) => {
 
 const LaunchApp = ({ Component, ...rest }: AppProps) => {
   const { store, props } = wrapper.useWrappedStore(rest);
+  const initialState = cookieToInitialState(wagmiConfig);
+
+  useSuppressSafeWcRedirect();
 
   return (
     <>
@@ -30,7 +37,7 @@ const LaunchApp = ({ Component, ...rest }: AppProps) => {
 
       <Provider store={store}>
         <AutonolasThemeProvider>
-          <Web3ModalProvider>
+          <Web3ModalProvider initialState={initialState}>
             <DataProvider>
               <Layout>
                 <Component {...props.pageProps} />

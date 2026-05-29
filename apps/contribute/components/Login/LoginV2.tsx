@@ -1,10 +1,11 @@
-import { Button } from 'antd';
+import { DownOutlined } from '@ant-design/icons';
+import { ConnectButton } from '@rainbow-me/rainbowkit';
+import { Button, Space } from 'antd';
 import Link from 'next/link';
 import { useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
 import { useAccount, useBalance, useDisconnect } from 'wagmi';
-import Web3 from 'web3';
 
 import { CannotConnectAddressOfacError } from 'libs/ui-components/src';
 import { notifyError } from 'libs/util-functions/src';
@@ -93,16 +94,10 @@ export const LoginV2 = ({ onConnect: onConnectCb, onDisconnect: onDisconnectCb }
         const modalProvider = (await connector?.getProvider?.()) as any;
 
         if (modalProvider) {
-          // We plug the initial `provider` and get back
-          // a Web3Provider. This will add on methods and
-          // event listeners such as `.on()` will be different.
-          const wProvider = new Web3(modalProvider);
-
-          // *******************************************************
-          // ************ setting to the window object! ************
-          // *******************************************************
+          // libs/util-functions/getModalProvider reads window.MODAL_PROVIDER
+          // for the legacy gnosis-safe polling path. The previous web3-instance
+          // mirror (window.WEB3_PROVIDER) had no readers anywhere in the repo.
           window.MODAL_PROVIDER = modalProvider;
-          window.WEB3_PROVIDER = wProvider;
 
           if (modalProvider?.on) {
             // https://docs.ethers.io/v5/concepts/best-practices/#best-practices--network-changes
@@ -155,11 +150,68 @@ export const LoginV2 = ({ onConnect: onConnectCb, onDisconnect: onDisconnectCb }
         <>
           {/* <VotingPower /> */}
           <Link href={`/profile/${address}`} passHref>
-            <Button>Your profile</Button>
+            <Button size="large">Your profile</Button>
           </Link>
         </>
       )}
-      <w3m-button balance="hide" />
+      <ConnectButton.Custom>
+        {({ account, chain, openAccountModal, openChainModal, openConnectModal, mounted }) => {
+          if (!mounted) return null;
+
+          if (!account || !chain) {
+            return (
+              <Button size="large" type="primary" onClick={openConnectModal}>
+                Connect Wallet
+              </Button>
+            );
+          }
+
+          if (chain.unsupported) {
+            return (
+              <Button size="large" danger onClick={openChainModal}>
+                Wrong network
+              </Button>
+            );
+          }
+
+          return (
+            <Space size={8}>
+              <Button size="large" onClick={openChainModal}>
+                {chain.iconUrl && (
+                  <img
+                    src={chain.iconUrl}
+                    alt={chain.name ?? ''}
+                    style={{
+                      width: 16,
+                      height: 16,
+                      marginRight: 6,
+                      borderRadius: '50%',
+                      verticalAlign: 'middle',
+                    }}
+                  />
+                )}
+                {chain.name}
+                <DownOutlined style={{ fontSize: 10, marginLeft: 6 }} />
+              </Button>
+              <Button size="large" onClick={openAccountModal}>
+                <span
+                  aria-hidden
+                  style={{
+                    display: 'inline-block',
+                    width: 20,
+                    height: 20,
+                    borderRadius: '50%',
+                    marginRight: 8,
+                    verticalAlign: 'middle',
+                    background: 'linear-gradient(135deg, #7e22ce, #b5179e)',
+                  }}
+                />
+                {account.displayName}
+              </Button>
+            </Space>
+          );
+        }}
+      </ConnectButton.Custom>
     </LoginContainer>
   );
 };

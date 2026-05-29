@@ -1,10 +1,11 @@
-import { Grid } from 'antd';
+import { DownOutlined } from '@ant-design/icons';
+import { ConnectButton } from '@rainbow-me/rainbowkit';
+import { Button, Grid, Space } from 'antd';
 import PropTypes from 'prop-types';
 import { useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
 import { useAccount, useBalance, useDisconnect } from 'wagmi';
-import Web3 from 'web3';
 
 import { CannotConnectAddressOfacError } from 'libs/ui-components/src';
 import { MEDIA_QUERY } from 'libs/ui-theme/src';
@@ -82,16 +83,10 @@ export const LoginV2 = ({ onConnect: onConnectCb, onDisconnect: onDisconnectCb }
           connector?.options?.getProvider?.() || (await connector?.getProvider?.());
 
         if (modalProvider) {
-          // We plug the initial `provider` and get back
-          // a Web3Provider. This will add on methods and
-          // event listeners such as `.on()` will be different.
-          const wProvider = new Web3(modalProvider);
-
-          // *******************************************************
-          // ************ setting to the window object! ************
-          // *******************************************************
+          // libs/util-functions/getModalProvider reads window.MODAL_PROVIDER
+          // for the legacy gnosis-safe polling path. The previous web3-instance
+          // mirror (window.WEB3_PROVIDER) had no readers anywhere in the repo.
           window.MODAL_PROVIDER = modalProvider;
-          window.WEB3_PROVIDER = wProvider;
 
           if (modalProvider?.on) {
             // https://docs.ethers.io/v5/concepts/best-practices/#best-practices--network-changes
@@ -135,9 +130,69 @@ export const LoginV2 = ({ onConnect: onConnectCb, onDisconnect: onDisconnectCb }
 
   return (
     <LoginContainer>
-      <w3m-network-button />
-      &nbsp;&nbsp;
-      <w3m-button balance={screens.xs ? 'hide' : 'show'} />
+      <ConnectButton.Custom>
+        {({ account, chain, openAccountModal, openChainModal, openConnectModal, mounted }) => {
+          if (!mounted) return null;
+
+          if (!account || !chain) {
+            return (
+              <Button size="large" type="primary" onClick={openConnectModal}>
+                Connect Wallet
+              </Button>
+            );
+          }
+
+          if (chain.unsupported) {
+            return (
+              <Button size="large" danger onClick={openChainModal}>
+                Wrong network
+              </Button>
+            );
+          }
+
+          // On mobile (xs) the balance is hidden — matches the previous
+          // <w3m-button balance={screens.xs ? 'hide' : 'show'}> behavior.
+          const showBalance = !screens.xs && balance?.formatted;
+
+          return (
+            <Space size={8}>
+              <Button size="large" onClick={openChainModal}>
+                {chain.iconUrl && (
+                  <img
+                    src={chain.iconUrl}
+                    alt={chain.name ?? ''}
+                    style={{
+                      width: 16,
+                      height: 16,
+                      marginRight: 6,
+                      borderRadius: '50%',
+                      verticalAlign: 'middle',
+                    }}
+                  />
+                )}
+                {chain.name}
+                <DownOutlined style={{ fontSize: 10, marginLeft: 6 }} />
+              </Button>
+              <Button size="large" onClick={openAccountModal}>
+                <span
+                  aria-hidden
+                  style={{
+                    display: 'inline-block',
+                    width: 20,
+                    height: 20,
+                    borderRadius: '50%',
+                    marginRight: 8,
+                    verticalAlign: 'middle',
+                    background: 'linear-gradient(135deg, #7e22ce, #b5179e)',
+                  }}
+                />
+                {showBalance ? `${Number(balance.formatted).toFixed(3)} ${balance.symbol} · ` : ''}
+                {account.displayName}
+              </Button>
+            </Space>
+          );
+        }}
+      </ConnectButton.Custom>
     </LoginContainer>
   );
 };

@@ -1,4 +1,6 @@
+import { ConnectButton } from '@rainbow-me/rainbowkit';
 import { GetAccountReturnType, watchAccount } from '@wagmi/core';
+import { Button } from 'antd';
 import { useCallback, useEffect } from 'react';
 import styled from 'styled-components';
 import { useAccountEffect, useConfig, useDisconnect } from 'wagmi';
@@ -50,7 +52,48 @@ export const LoginV2 = () => {
 
   return (
     <LoginContainer>
-      <w3m-button balance="hide" />
+      <ConnectButton.Custom>
+        {({ account, chain, openAccountModal, openChainModal, openConnectModal, mounted }) => {
+          if (!mounted) return null;
+
+          if (!account || !chain) {
+            return (
+              <Button size="large" type="primary" onClick={openConnectModal}>
+                Connect Wallet
+              </Button>
+            );
+          }
+
+          if (chain.unsupported) {
+            return (
+              <Button size="large" danger onClick={openChainModal}>
+                Wrong network
+              </Button>
+            );
+          }
+
+          // launch's Layout has its own URL-routed SwitchNetworkSelect, so we
+          // don't render a chain pill here to avoid duplicating it. Only the
+          // address pill.
+          return (
+            <Button size="large" onClick={openAccountModal}>
+              <span
+                aria-hidden
+                style={{
+                  display: 'inline-block',
+                  width: 20,
+                  height: 20,
+                  borderRadius: '50%',
+                  marginRight: 8,
+                  verticalAlign: 'middle',
+                  background: 'linear-gradient(135deg, #7e22ce, #b5179e)',
+                }}
+              />
+              {account.displayName}
+            </Button>
+          );
+        }}
+      </ConnectButton.Custom>
     </LoginContainer>
   );
 };

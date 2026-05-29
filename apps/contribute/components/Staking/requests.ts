@@ -1,20 +1,24 @@
-import { readContract, waitForTransactionReceipt, writeContract } from '@wagmi/core';
+import {
+  readContract,
+  simulateContract,
+  waitForTransactionReceipt,
+  writeContract,
+} from '@wagmi/core';
 import { Address } from 'viem';
 import { base } from 'wagmi/chains';
 
+import { estimateGasWithBuffer } from 'libs/util-functions/src/lib/estimateGasWithBuffer';
+
 import { OLAS_ABI, OLAS_ADDRESS_BASE } from 'common-util/AbiAndAddresses';
-import { getContributorsContract } from 'common-util/Contracts';
+import { contributorsParams } from 'common-util/Contracts/params';
 import { wagmiConfig } from 'components/Login/config';
-import { getEstimatedGasLimit } from 'common-util/functions/requests';
 
 // Value in wei that should be sent with CreateAndStake transaction
 // 1 wei for the service registration activation,
 // and 1 wei for agent instance bond, which is always equal to 1 for now
-const CREATE_AND_STAKE_VALUE = 2;
+const CREATE_AND_STAKE_VALUE = 2n;
 
-/**
- * Check if user has enough OLAS balance
- */
+/** Check if user has enough OLAS balance */
 export const checkHasEnoughOlas = async ({
   account,
   amountInWei,
@@ -33,9 +37,7 @@ export const checkHasEnoughOlas = async ({
   return result ? BigInt(result) >= BigInt(amountInWei) : false;
 };
 
-/**
- * Check if the OLAS token allowance is sufficient for transfer to the Contributors
- */
+/** Check if the OLAS token allowance is sufficient for transfer to the Contributors */
 const hasSufficientOlasAllowanceForAddress = async ({
   account,
   addressToApprove,
@@ -60,9 +62,7 @@ const hasSufficientOlasAllowanceForAddress = async ({
   }
 };
 
-/**
- * Approve Olas transfer to the provided address
- */
+/** Approve Olas transfer to the provided address */
 // @ts-expect-error TODO: fix code paths issues
 const approveOlasForAddress = async ({
   addressToApprove,
@@ -79,20 +79,13 @@ const approveOlasForAddress = async ({
       functionName: 'approve',
       args: [addressToApprove, amountToApprove],
     });
-    // Wait for the transaction receipt
-    const receipt = await waitForTransactionReceipt(wagmiConfig, {
-      chainId: base.id,
-      hash,
-    });
-    return receipt;
+    return waitForTransactionReceipt(wagmiConfig, { chainId: base.id, hash });
   } catch (error) {
     console.error('Error approving tokens:', error);
   }
 };
 
-/**
- * Check and approve token transfer if not yet approved
- */
+/** Check and approve token transfer if not yet approved */
 export const checkAndApproveOlasForAddress = async ({
   account,
   addressToApprove,
@@ -119,9 +112,7 @@ export const checkAndApproveOlasForAddress = async ({
   return null;
 };
 
-/**
- * Create, deploy and stake a service
- */
+/** Create, deploy and stake a service. */
 export const createAndStake = async ({
   account,
   socialId,
@@ -132,23 +123,22 @@ export const createAndStake = async ({
   stakingInstance: Address;
 }) => {
   try {
-    const contract = getContributorsContract();
-    const createAndStakeFn = contract.methods.createAndStake(socialId, stakingInstance);
-    const estimatedGas = await getEstimatedGasLimit(
-      createAndStakeFn,
+    const { request } = await simulateContract(wagmiConfig, {
+      ...contributorsParams,
+      functionName: 'createAndStake',
+      args: [BigInt(socialId), stakingInstance],
       account,
-      CREATE_AND_STAKE_VALUE,
-    );
-    const result = await createAndStakeFn.send({
-      from: account,
-      gas: estimatedGas,
       value: CREATE_AND_STAKE_VALUE,
     });
-    const receipt = await waitForTransactionReceipt(wagmiConfig, {
-      chainId: base.id,
-      hash: result.transactionHash,
+    const gas = await estimateGasWithBuffer(wagmiConfig, {
+      ...contributorsParams,
+      functionName: 'createAndStake',
+      args: [BigInt(socialId), stakingInstance],
+      account,
+      value: CREATE_AND_STAKE_VALUE,
     });
-    return receipt;
+    const hash = await writeContract(wagmiConfig, { ...request, gas });
+    return waitForTransactionReceipt(wagmiConfig, { chainId: base.id, hash });
   } catch (error) {
     console.error('Error creating and staking:', error);
     throw error;

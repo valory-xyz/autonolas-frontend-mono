@@ -22,6 +22,13 @@ export const SwitchNetworkSelect: FC = () => {
   const path = router?.pathname || '';
   const dispatch = useAppDispatch();
 
+  // Only render on chain-aware pages — previously this rendered as a
+  // greyed-out disabled Select on every other page, which looked redundant
+  // next to RainbowKit's chain pill in LoginV2.
+  if (!PAGES_TO_LOAD_WITH_CHAIN_ID.some((e) => path.includes(e))) {
+    return null;
+  }
+
   const chainName = (router?.query?.network || 'ethereum') as string;
 
   return (
@@ -34,7 +41,6 @@ export const SwitchNetworkSelect: FC = () => {
         listHeight={800}
         value={chainName}
         placeholder="Select Network"
-        disabled={!PAGES_TO_LOAD_WITH_CHAIN_ID.some((e) => path.includes(e))}
         options={networkSelectOptions}
         onChange={async (value) => {
           // Set loading state

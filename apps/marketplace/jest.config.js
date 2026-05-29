@@ -29,6 +29,10 @@ module.exports = {
     ],
     '^(?!.*\\.(js|jsx|ts|tsx|css|json)$)': '@nx/react/plugins/jest',
   },
+  // `@wagmi/core` (and its viem peer) ship ESM-only and aren't covered by the
+  // default `transformIgnorePatterns`. Without this, any spec that transitively
+  // imports a migrated module fails with `SyntaxError: Unexpected token 'export'`.
+  transformIgnorePatterns: ['/node_modules/(?!(@wagmi|viem|@noble|@adraffy)/)'],
   globals: { fetch },
   coverageDirectory: '../../coverage/apps/marketplace',
   collectCoverageFrom: [

@@ -113,11 +113,11 @@ export const ActiveRegistration = ({
     getSvmBonds,
   ]);
 
-  let totalTokenBonds = 0;
+  let totalTokenBonds = 0n;
   isArray(ethTokenBonds) &&
     ethTokenBonds.forEach((bond, index) => {
       const addressCount = getNumberOfAgentAddress(dataSource[index].agentAddresses);
-      totalTokenBonds += addressCount * bond;
+      totalTokenBonds += BigInt(addressCount) * bond;
     });
 
   const handleStep2RegisterAgents = async () => {

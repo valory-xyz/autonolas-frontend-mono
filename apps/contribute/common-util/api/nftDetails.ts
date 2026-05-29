@@ -1,43 +1,77 @@
-/* eslint-disable no-await-in-loop */
+import { multicall, readContract } from '@wagmi/core';
 import axios from 'axios';
 import { findIndex, memoize, toLower } from 'lodash';
+import { Address } from 'viem';
 
-import { getMintContract } from 'common-util/Contracts';
+import { mintNftParams } from 'common-util/Contracts/params';
+import { getChainId } from 'common-util/functions';
+import { wagmiConfig } from 'components/Login/config';
 
 const getTotalSupply = memoize(async () => {
   try {
-    const contract = getMintContract();
-    if (!contract) return;
-    const total = await contract.methods.totalSupply().call();
-    return total;
+    const chainId = getChainId();
+    if (chainId === undefined) return;
+    const params = mintNftParams(chainId);
+    if (!params) return;
+    const total = await readContract(wagmiConfig, {
+      ...params,
+      functionName: 'totalSupply',
+    });
+    return total as bigint;
   } catch (e) {
     console.error(e);
     throw e;
   }
 });
 
-export const getLatestMintedNft = memoize(async (account) => {
+export const getLatestMintedNft = memoize(async (account: Address | string | undefined) => {
+  if (!account) return { details: null, tokenId: null };
   try {
-    const contract = getMintContract();
-    if (!contract) return { details: null, tokenId: null };
+    const chainId = getChainId();
+    if (chainId === undefined) return { details: null, tokenId: null };
+    const params = mintNftParams(chainId);
+    if (!params) return { details: null, tokenId: null };
 
     const total = await getTotalSupply();
-    const nftImages = [];
-    for (let i = 1; i <= total; i += 1) {
-      const result = await contract.methods.ownerOf(`${i}`).call();
-      nftImages.push(result);
+    if (total === undefined) return { details: null, tokenId: null };
+
+    // Batch the ownerOf reads via multicall. Chunked at 100 per request:
+    // a single multicall with thousands of entries hits Multicall3's ~30M-gas
+    // budget or the RPC's max-payload limit and silently returns empty
+    // strings under allowFailure: true — which would look like "no NFT
+    // minted" even when the user does own one.
+    const CHUNK_SIZE = 100;
+    const calls = [];
+    for (let i = 1n; i <= total; i += 1n) {
+      calls.push({
+        ...params,
+        functionName: 'ownerOf',
+        args: [i],
+      });
+    }
+    const ownerList: Address[] = [];
+    for (let start = 0; start < calls.length; start += CHUNK_SIZE) {
+      const chunk = calls.slice(start, start + CHUNK_SIZE);
+      // eslint-disable-next-line no-await-in-loop
+      const responses = await multicall(wagmiConfig, {
+        contracts: chunk,
+        allowFailure: true,
+      });
+      for (const r of responses) {
+        ownerList.push(r.status === 'success' ? (r.result as Address) : ('' as Address));
+      }
     }
 
-    const ownerList = await Promise.all(nftImages);
-
-    /**
-     * find the element in reverse order to fetch the latest
-     */
+    // find the element in reverse order to fetch the latest
     const latestNftIndex = findIndex(ownerList, (e) => toLower(e) === toLower(account));
 
     if (latestNftIndex !== -1) {
-      const tokenId = `${Number(latestNftIndex) + 1}`;
-      const infoUrl = await contract.methods.tokenURI(tokenId).call();
+      const tokenId = `${latestNftIndex + 1}`;
+      const infoUrl = (await readContract(wagmiConfig, {
+        ...params,
+        functionName: 'tokenURI',
+        args: [BigInt(tokenId)],
+      })) as string;
 
       if (infoUrl) {
         const value = await axios.get(infoUrl);

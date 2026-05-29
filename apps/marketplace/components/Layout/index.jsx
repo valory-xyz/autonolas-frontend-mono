@@ -59,51 +59,58 @@ const Layout = ({ children = null }) => {
 
         <NavigationMenu />
         <RightMenu>
-          <SelectContainer style={{ marginRight: isMobile ? 8 : 0 }}>
-            <Select
-              showSearch
-              className="show-scrollbar"
-              style={{ width: isMobile ? 140 : 200 }}
-              listHeight={800}
-              value={chainName}
-              placeholder="Select Network"
-              disabled={PAGES_TO_LOAD_WITHOUT_CHAINID.some((e) => path.includes(e))}
-              options={ALL_SUPPORTED_CHAINS.map((e) => ({
-                label: e.networkDisplayName,
-                value: e.networkName,
-              }))}
-              onChange={(value) => {
-                const currentChainInfo = ALL_SUPPORTED_CHAINS.find((e) => e.networkName === value);
+          {/* Hide the network Select on pages where it would be disabled —
+              previously this rendered as a greyed-out dropdown that looked
+              redundant next to RainbowKit's chain pill in LoginV2. */}
+          {!PAGES_TO_LOAD_WITHOUT_CHAINID.some((e) => path.includes(e)) && (
+            <SelectContainer style={{ marginRight: isMobile ? 8 : 0 }}>
+              <Select
+                size="large"
+                showSearch
+                className="show-scrollbar"
+                style={{ width: isMobile ? 140 : 200 }}
+                listHeight={800}
+                value={chainName}
+                placeholder="Select Network"
+                options={ALL_SUPPORTED_CHAINS.map((e) => ({
+                  label: e.networkDisplayName,
+                  value: e.networkName,
+                }))}
+                onChange={(value) => {
+                  const currentChainInfo = ALL_SUPPORTED_CHAINS.find(
+                    (e) => e.networkName === value,
+                  );
 
-                if (!currentChainInfo) return;
+                  if (!currentChainInfo) return;
 
-                // update session storage
-                sessionStorage.setItem('chainId', currentChainInfo.id);
+                  // update session storage
+                  sessionStorage.setItem('chainId', currentChainInfo.id);
 
-                if (PAGES_TO_LOAD_WITHOUT_CHAINID.find((e) => e === path)) {
-                  // eg. /page-not-found will be redirect to same page
-                  updateChainId(currentChainInfo.id);
-                  router.push(`/${path}`);
-                } else {
-                  // Check if current route is an AI agent detail page
-                  const aiAgentDetailPattern = /^\/[^/]+\/ai-agents\/[^/]+/;
-                  if (aiAgentDetailPattern.test(router.asPath)) {
-                    // If on AI agent detail page, redirect to AI agents listing page
-                    window.open(`/${value}/ai-agents`, '_self');
+                  if (PAGES_TO_LOAD_WITHOUT_CHAINID.find((e) => e === path)) {
+                    // eg. /page-not-found will be redirect to same page
+                    updateChainId(currentChainInfo.id);
+                    router.push(`/${path}`);
                   } else {
-                    // eg. /components, /agent-blueprints, /ai-agents will be redirect to
-                    // /<chainName>/components, /<chainName>/agent-blueprints, /<chainName>/ai-agents
-                    const replacedPath = router.asPath.replace(chainName, value);
-                    window.open(replacedPath, '_self');
+                    // Check if current route is an AI agent detail page
+                    const aiAgentDetailPattern = /^\/[^/]+\/ai-agents\/[^/]+/;
+                    if (aiAgentDetailPattern.test(router.asPath)) {
+                      // If on AI agent detail page, redirect to AI agents listing page
+                      window.open(`/${value}/ai-agents`, '_self');
+                    } else {
+                      // eg. /components, /agent-blueprints, /ai-agents will be redirect to
+                      // /<chainName>/components, /<chainName>/agent-blueprints, /<chainName>/ai-agents
+                      const replacedPath = router.asPath.replace(chainName, value);
+                      window.open(replacedPath, '_self');
+                    }
                   }
-                }
-              }}
-              filterOption={(input, option) => {
-                const { label } = option;
-                return label.toLowerCase().indexOf(input.toLowerCase()) >= 0;
-              }}
-            />
-          </SelectContainer>
+                }}
+                filterOption={(input, option) => {
+                  const { label } = option;
+                  return label.toLowerCase().indexOf(input.toLowerCase()) >= 0;
+                }}
+              />
+            </SelectContainer>
+          )}
 
           <Login />
         </RightMenu>

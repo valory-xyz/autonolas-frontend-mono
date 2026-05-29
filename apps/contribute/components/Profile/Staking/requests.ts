@@ -1,10 +1,11 @@
-import { waitForTransactionReceipt } from '@wagmi/core';
+import { simulateContract, waitForTransactionReceipt, writeContract } from '@wagmi/core';
 import { Address } from 'viem';
 import { base } from 'wagmi/chains';
 
-import { getContributorsContract } from 'common-util/Contracts';
+import { estimateGasWithBuffer } from 'libs/util-functions/src/lib/estimateGasWithBuffer';
+
+import { contributorsParams } from 'common-util/Contracts/params';
 import { wagmiConfig } from 'components/Login/config';
-import { getEstimatedGasLimit } from 'common-util/functions/requests';
 
 type RestakeParams = {
   account: Address;
@@ -13,15 +14,20 @@ type RestakeParams = {
 
 export const restake = async ({ account, contractAddress }: RestakeParams) => {
   try {
-    const contract = getContributorsContract();
-    const restakeFn = contract.methods.reStake(contractAddress);
-    const estimatedGas = await getEstimatedGasLimit(restakeFn, account);
-    const result = await restakeFn.send({ from: account, gas: estimatedGas });
-    const receipt = await waitForTransactionReceipt(wagmiConfig, {
-      chainId: base.id,
-      hash: result.transactionHash,
+    const { request } = await simulateContract(wagmiConfig, {
+      ...contributorsParams,
+      functionName: 'reStake',
+      args: [contractAddress],
+      account,
     });
-    return receipt;
+    const gas = await estimateGasWithBuffer(wagmiConfig, {
+      ...contributorsParams,
+      functionName: 'reStake',
+      args: [contractAddress],
+      account,
+    });
+    const hash = await writeContract(wagmiConfig, { ...request, gas });
+    return waitForTransactionReceipt(wagmiConfig, { chainId: base.id, hash });
   } catch (error) {
     console.error('Error restaking:', error);
     throw error;

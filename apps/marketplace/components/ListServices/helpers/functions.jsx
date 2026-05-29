@@ -53,7 +53,7 @@ export const getNumberOfAgentAddress = (agentAddresses) => {
  * output: 2 * 100 + 3 * 200 = 800
  */
 export const transformSlotsAndBonds = (slotsArray, bondsArray, tableDataSource) => {
-  let totalBonds = 0;
+  let totalBonds = 0n;
   (tableDataSource || []).forEach((data) => {
     const { agentAddresses, bond } = data;
 
@@ -65,7 +65,7 @@ export const transformSlotsAndBonds = (slotsArray, bondsArray, tableDataSource) 
     const numberOfAgentAddress = getNumberOfAgentAddress(agentAddresses);
 
     // multiply the number of addresses with the bond value of the agentId
-    totalBonds += numberOfAgentAddress * bond;
+    totalBonds += BigInt(numberOfAgentAddress) * BigInt(bond);
   });
 
   return { slots: slotsArray, bonds: bondsArray, totalBonds };

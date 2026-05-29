@@ -9,3 +9,8 @@ export * from './lib/dateTime';
 export * from './lib/numbers';
 export * from './lib/chains';
 export * from './lib/withTimeout';
+export * from './lib/useSuppressSafeWcRedirect';
+// NOTE: estimateGasWithBuffer is intentionally NOT exported from this barrel
+// — it imports `@wagmi/core` and would force any test that transitively
+// reaches `libs/util-functions/src` to handle wagmi's ESM transform.
+// Import it directly from 'libs/util-functions/src/lib/estimateGasWithBuffer'.

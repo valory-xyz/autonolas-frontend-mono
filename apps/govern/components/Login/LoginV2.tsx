@@ -1,4 +1,7 @@
+import { DownOutlined } from '@ant-design/icons';
+import { ConnectButton } from '@rainbow-me/rainbowkit';
 import { GetAccountReturnType, watchAccount } from '@wagmi/core';
+import { Button, Space } from 'antd';
 import { useCallback, useEffect } from 'react';
 import styled from 'styled-components';
 import { useAccountEffect, useConfig, useDisconnect } from 'wagmi';
@@ -63,7 +66,64 @@ export const LoginV2 = () => {
 
   return (
     <LoginContainer>
-      <w3m-button balance="hide" />
+      <ConnectButton.Custom>
+        {({ account, chain, openAccountModal, openChainModal, openConnectModal, mounted }) => {
+          if (!mounted) return null;
+
+          if (!account || !chain) {
+            return (
+              <Button size="large" type="primary" onClick={openConnectModal}>
+                Connect Wallet
+              </Button>
+            );
+          }
+
+          if (chain.unsupported) {
+            return (
+              <Button size="large" danger onClick={openChainModal}>
+                Wrong network
+              </Button>
+            );
+          }
+
+          return (
+            <Space size={8}>
+              <Button size="large" onClick={openChainModal}>
+                {chain.iconUrl && (
+                  <img
+                    src={chain.iconUrl}
+                    alt={chain.name ?? ''}
+                    style={{
+                      width: 16,
+                      height: 16,
+                      marginRight: 6,
+                      borderRadius: '50%',
+                      verticalAlign: 'middle',
+                    }}
+                  />
+                )}
+                {chain.name}
+                <DownOutlined style={{ fontSize: 10, marginLeft: 6 }} />
+              </Button>
+              <Button size="large" onClick={openAccountModal}>
+                <span
+                  aria-hidden
+                  style={{
+                    display: 'inline-block',
+                    width: 20,
+                    height: 20,
+                    borderRadius: '50%',
+                    marginRight: 8,
+                    verticalAlign: 'middle',
+                    background: 'linear-gradient(135deg, #7e22ce, #b5179e)',
+                  }}
+                />
+                {account.displayName}
+              </Button>
+            </Space>
+          );
+        }}
+      </ConnectButton.Custom>
     </LoginContainer>
   );
 };

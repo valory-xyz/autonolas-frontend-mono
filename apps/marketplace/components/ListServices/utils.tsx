@@ -1,17 +1,22 @@
-import {
-  DEFAULT_SERVICE_CREATION_ETH_TOKEN,
-  TOTAL_VIEW_COUNT,
-  DEFAULT_SERVICE_CREATION_ETH_TOKEN_ZEROS,
-  SERVICE_ROLE,
-} from 'util/constants';
-import { getServiceContract, getWeb3Details } from 'common-util/Contracts';
-import { convertStringToArray } from 'common-util/List/ListCommon';
+import { readContract } from '@wagmi/core';
+import { Address } from 'viem';
+
+import { serviceRegistryParams } from 'common-util/Contracts/params';
 import { filterByOwner } from 'common-util/ContractUtils/myList';
 import { getTokenDetailsRequest } from 'common-util/Details/utils';
+import { getChainId, isMarketplaceSupportedNetwork, requireChainId } from 'common-util/functions';
 import { getIpfsResponse } from 'common-util/functions/ipfs';
 import { normalizeMetadataUrl } from 'common-util/functions/tokenUri';
+import { convertStringToArray } from 'common-util/List/ListCommon';
+import { wagmiConfig } from 'common-util/Login/config';
 import { getServicesFromSubgraph } from 'common-util/subgraphs';
-import { isMarketplaceSupportedNetwork } from 'common-util/functions';
+
+import {
+  DEFAULT_SERVICE_CREATION_ETH_TOKEN,
+  DEFAULT_SERVICE_CREATION_ETH_TOKEN_ZEROS,
+  SERVICE_ROLE,
+  TOTAL_VIEW_COUNT,
+} from 'util/constants';
 
 type Service = {
   id: string;
@@ -27,38 +32,50 @@ type Service = {
 
 // --------- HELPER METHODS ---------
 export const getServiceOwner = async (id: string) => {
-  const contract = getServiceContract();
-  const response = await contract.methods.ownerOf(id).call();
-  return response;
+  const chainId = requireChainId();
+  return readContract(wagmiConfig, {
+    ...serviceRegistryParams(chainId),
+    functionName: 'ownerOf',
+    args: [BigInt(id)],
+  }) as Promise<Address>;
 };
 
 // --------- utils ---------
 export const getServiceDetails = async (id: string) => {
-  const contract = getServiceContract();
-  const response = await contract.methods.getService(id).call();
-  const owner = await getServiceOwner(id);
+  const chainId = requireChainId();
+  const [response, owner] = await Promise.all([
+    readContract(wagmiConfig, {
+      ...serviceRegistryParams(chainId),
+      functionName: 'getService',
+      args: [BigInt(id)],
+    }) as Promise<{ configHash: string; [key: string]: unknown }>,
+    getServiceOwner(id),
+  ]);
   return { ...response, owner };
 };
 
 export const getTotalForMyServices = async (account: string) => {
-  const contract = getServiceContract();
-  const total = await contract.methods.balanceOf(account).call();
-  return total;
+  const chainId = requireChainId();
+  return readContract(wagmiConfig, {
+    ...serviceRegistryParams(chainId),
+    functionName: 'balanceOf',
+    args: [account as Address],
+  });
 };
 
 /**
- * Function to return all services
+ * Returns the total supply of services on the active chain. Coerced to `number`
+ * at the boundary — viem returns uint256 reads as `bigint`, but downstream
+ * callers do arithmetic with `Math.min` / `*` against page sizes which throw
+ * `TypeError: Cannot mix BigInt and other types` if they receive a raw bigint.
  */
-export const getTotalForAllServices = async () => {
-  const { web3 } = getWeb3Details();
-
-  if (!web3) {
-    throw new Error('Web3 provider not available');
-  }
-
-  const contract = getServiceContract();
-  const total = await contract.methods.totalSupply().call();
-  return total;
+export const getTotalForAllServices = async (): Promise<number> => {
+  const chainId = requireChainId();
+  const total = await readContract(wagmiConfig, {
+    ...serviceRegistryParams(chainId),
+    functionName: 'totalSupply',
+  });
+  return Number(total);
 };
 
 export const extractConfigDetailsForServices = async (
@@ -76,7 +93,7 @@ export const extractConfigDetailsForServices = async (
 
 export const getMarketplaceRole = (service: Service) => {
   const { totalRequests, totalDeliveries } = service;
-  const { chainId } = getWeb3Details();
+  const chainId = getChainId();
 
   if (!isMarketplaceSupportedNetwork(Number(chainId))) {
     return SERVICE_ROLE.REGISTERED;
@@ -99,19 +116,21 @@ export const getServices = async (
   nextPage: number,
   fetchAll = false,
 ): Promise<Service[]> => {
-  const contract = getServiceContract();
-  const { chainId } = getWeb3Details();
-
-  const existsPromises = [];
+  const chainId = requireChainId();
 
   const first = fetchAll ? 1 : (nextPage - 1) * TOTAL_VIEW_COUNT + 1;
   const last = fetchAll ? total : Math.min(nextPage * TOTAL_VIEW_COUNT, total);
 
+  const existsPromises = [];
   for (let i = first; i <= last; i += 1) {
-    const result = contract.methods.exists(`${i}`).call();
-    existsPromises.push(result);
+    existsPromises.push(
+      readContract(wagmiConfig, {
+        ...serviceRegistryParams(chainId),
+        functionName: 'exists',
+        args: [BigInt(i)],
+      }),
+    );
   }
-
   existsPromises.reverse();
 
   const existsResult = await Promise.allSettled(existsPromises);
@@ -184,19 +203,26 @@ export const getAgentParams = (values: { agent_num_slots: string; bonds: string 
 };
 
 export const getServiceHashes = async (id: string) => {
-  const contract = getServiceContract();
-  const information = await contract.methods.getPreviousHashes(id).call();
-  return information;
+  const chainId = requireChainId();
+  return readContract(wagmiConfig, {
+    ...serviceRegistryParams(chainId),
+    functionName: 'getPreviousHashes',
+    args: [BigInt(id)],
+  });
 };
 
 export const getTokenUri = async (id: string) => {
-  const contract = getServiceContract();
-  const response = await contract.methods.tokenURI(id).call();
+  const chainId = requireChainId();
+  const response = (await readContract(wagmiConfig, {
+    ...serviceRegistryParams(chainId),
+    functionName: 'tokenURI',
+    args: [BigInt(id)],
+  })) as string;
   return normalizeMetadataUrl(response);
 };
 
 export const getTokenAddressRequest = async (id: string) => {
-  const response = await getTokenDetailsRequest(id);
+  const response = (await getTokenDetailsRequest(id)) as { token: string };
   return response.token === DEFAULT_SERVICE_CREATION_ETH_TOKEN_ZEROS
     ? DEFAULT_SERVICE_CREATION_ETH_TOKEN
     : response.token;
