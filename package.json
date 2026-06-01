@@ -10,6 +10,7 @@
     "audit:install-hooks": "node scripts/audit-install-hooks.mjs",
     "audit:install-hooks:update": "node scripts/audit-install-hooks.mjs --update",
     "lint:lockfile": "lockfile-lint --path yarn.lock --type yarn --allowed-hosts registry.yarnpkg.com registry.npmjs.org --validate-https --validate-integrity",
+    "license-check": "node scripts/license-check.mjs",
     "supply-chain": "yarn audit:prod && yarn lint:lockfile && yarn audit:install-hooks"
   },
   "private": true,
@@ -118,6 +119,7 @@
     "jest-environment-jsdom": "29.7.0",
     "jest-environment-node": "29.7.0",
     "jsdom": "22.1.0",
+    "license-checker-rseidelsohn": "4.4.2",
     "lockfile-lint": "5.0.0",
     "next-router-mock": "0.9.13",
     "nx": "v17.2.5",

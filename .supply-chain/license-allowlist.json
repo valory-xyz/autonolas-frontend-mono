@@ -1,0 +1,293 @@
+{
+  "_comment": "License allowlist gate config — frontend mirror of the backend valory-xyz/tomte `liccheck` PARANOID gate. `allowedSpdx` mirrors tomte's authorized list (permissive + LGPL-2.1/MPL-2.0 weak copyleft). Anything not allowed — including UNKNOWN/Custom — fails unless its exact package NAME is in `exemptions` (version-agnostic). `exemptionPrefixes` is ONLY for platform-binary families whose name varies by OS/arch. Scope is production deps (what ships), matching tomte's frozen-runtime check. See scripts/license-check.mjs and .plans/license-check-gate.md.",
+  "scope": "production",
+  "allowedSpdx": [
+    "MIT",
+    "ISC",
+    "Apache-2.0",
+    "BSD",
+    "BSD-2-Clause",
+    "BSD-3-Clause",
+    "0BSD",
+    "MPL-2.0",
+    "LGPL-2.1",
+    "LGPL-2.1-only",
+    "LGPL-2.1-or-later",
+    "LGPL-2.1+",
+    "BlueOak-1.0.0",
+    "CC0-1.0",
+    "Unlicense",
+    "WTFPL",
+    "Zlib",
+    "Python-2.0",
+    "OFL-1.1",
+    "CC-BY-4.0",
+    "CC-BY-3.0"
+  ],
+  "unauthorizedSpdx": ["GPL-2.0", "GPL-3.0", "LGPL-3.0", "MPL-1.1", "AGPL-3.0"],
+
+  "exemptionPrefixes": [
+    {
+      "prefix": "@img/sharp-libvips-",
+      "spdx": "LGPL-3.0-or-later",
+      "reason": "Platform-specific libvips binaries (image processing). Package name varies by OS/arch (@img/sharp-libvips-darwin-arm64 locally, @img/sharp-libvips-linux-x64 on CI), so a single exact name would be non-deterministic. LGPL-3.0 dynamically-linked native binary, not statically combined with our JS.",
+      "parents": ["sharp"],
+      "reviewDate": "2026-06-01"
+    }
+  ],
+
+  "exemptions": [
+    {
+      "package": "ua-parser-js",
+      "spdx": "AGPL-3.0-or-later",
+      "reason": "Transitive of @rainbow-me/rainbowkit@2.2.11 (browser detection). Already shipping since the RainbowKit migration (#416). NOT pinned to MIT 1.0.37 — that would force a RainbowKit major-version downgrade. AGPL-in-bundle acceptance is an open policy decision; revisit when RainbowKit upstream drops AGPL ua-parser-js.",
+      "parents": ["@rainbow-me/rainbowkit"],
+      "reviewDate": "2026-06-01"
+    },
+
+    {
+      "package": "@gnosis.pm/safe-contracts",
+      "spdx": "GPL-3.0",
+      "reason": "Solidity contract sources + ABIs (build-time / ABI-only); not linked into shipped JS. CONFIRM with consuming code before flipping the gate to required.",
+      "parents": ["@safe-global/protocol-kit"],
+      "reviewDate": "2026-06-01"
+    },
+    {
+      "package": "@toruslabs/ffjavascript",
+      "spdx": "GPL-3.0",
+      "reason": "GPL-3.0 finite-field math, pulled transitively by @web3auth/modal (Torus). Resolves itself if @web3auth/modal is replaced.",
+      "parents": ["@web3auth/modal"],
+      "reviewDate": "2026-06-01"
+    },
+
+    {
+      "package": "rpc-websockets",
+      "spdx": "LGPL-3.0-only",
+      "reason": "LGPL-3.0 websocket client, transitive of @solana/web3.js. Dynamically required, not statically combined.",
+      "parents": ["@solana/web3.js"],
+      "reviewDate": "2026-06-01"
+    },
+
+    {
+      "package": "@segment/facade",
+      "spdx": "MIT",
+      "reason": "Genuinely MIT (LICENSE file is the MIT text). package.json declares 'SEE LICENSE IN LICENSE', so the checker reports it as 'Custom: LICENSE' and PARANOID flags it. Confirmed MIT.",
+      "parents": ["@web3auth/modal"],
+      "reviewDate": "2026-06-01"
+    },
+    {
+      "package": "@segment/isodate",
+      "spdx": "MIT",
+      "reason": "Genuinely MIT (LICENSE file is the MIT text); package.json uses 'SEE LICENSE IN LICENSE'. Confirmed MIT.",
+      "parents": ["@segment/isodate-traverse"],
+      "reviewDate": "2026-06-01"
+    },
+    {
+      "package": "@segment/isodate-traverse",
+      "spdx": "MIT",
+      "reason": "Genuinely MIT (LICENSE file is the MIT text); package.json uses 'SEE LICENSE IN LICENSE'. Confirmed MIT.",
+      "parents": ["@segment/facade"],
+      "reviewDate": "2026-06-01"
+    },
+    {
+      "package": "new-date",
+      "spdx": "MIT",
+      "reason": "Genuinely MIT (LICENSE file is the MIT text); package.json uses 'SEE LICENSE IN LICENSE'. Confirmed MIT.",
+      "parents": ["@segment/isodate-traverse"],
+      "reviewDate": "2026-06-01"
+    },
+
+    {
+      "package": "jsonify",
+      "spdx": "Public Domain",
+      "reason": "Public domain (unrestricted), declared in package.json. More permissive than MIT.",
+      "parents": ["json-stable-stringify"],
+      "reviewDate": "2026-06-01"
+    },
+    {
+      "package": "text-encoding-utf-8",
+      "spdx": "Unlicense/Public Domain",
+      "reason": "LICENSE.md is the Unlicense (public-domain) text. No SPDX in package.json so reports as Public Domain. Unrestricted.",
+      "parents": ["@toruslabs/eccrypto"],
+      "reviewDate": "2026-06-01"
+    },
+
+    {
+      "package": "@web3auth/modal",
+      "spdx": "UNKNOWN (no SPDX declared)",
+      "reason": "Web3Auth SDK (direct dep, used by pearl-api). No license field in package.json so reports UNKNOWN. Accepted auth SDK — confirm upstream license terms.",
+      "parents": ["(root direct dependency)"],
+      "reviewDate": "2026-06-01"
+    },
+
+    {
+      "package": "@metamask/sdk",
+      "spdx": "UNKNOWN (no SPDX declared)",
+      "reason": "MetaMask wallet SDK, pulled via RainbowKit's MetaMask connector. No license field so reports UNKNOWN. Accepted wallet SDK.",
+      "parents": ["@rainbow-me/rainbowkit"],
+      "reviewDate": "2026-06-01"
+    },
+    {
+      "package": "@metamask/sdk-communication-layer",
+      "spdx": "UNKNOWN (no SPDX declared)",
+      "reason": "MetaMask SDK component (via RainbowKit). No license field. Accepted wallet SDK.",
+      "parents": ["@metamask/sdk"],
+      "reviewDate": "2026-06-01"
+    },
+    {
+      "package": "@metamask/sdk-install-modal-web",
+      "spdx": "UNKNOWN (no SPDX declared)",
+      "reason": "MetaMask SDK component (via RainbowKit). No license field. Accepted wallet SDK.",
+      "parents": ["@metamask/sdk"],
+      "reviewDate": "2026-06-01"
+    },
+    {
+      "package": "@metamask/eth-json-rpc-provider",
+      "spdx": "UNKNOWN (no SPDX declared)",
+      "reason": "MetaMask SDK component (via RainbowKit). No license field. Accepted wallet SDK.",
+      "parents": ["@metamask/sdk"],
+      "reviewDate": "2026-06-01"
+    },
+
+    {
+      "package": "@trezor/connect",
+      "spdx": "T-RSL (Trezor Reference Source License, proprietary)",
+      "reason": "Trezor hardware-wallet SDK, pulled via RainbowKit's Trezor connector. Source-available proprietary license (T-RSL). Accepted wallet SDK.",
+      "parents": ["@rainbow-me/rainbowkit"],
+      "reviewDate": "2026-06-01"
+    },
+    {
+      "package": "@trezor/connect-web",
+      "spdx": "T-RSL (proprietary)",
+      "reason": "Trezor SDK (web). T-RSL. Accepted wallet SDK.",
+      "parents": ["@rainbow-me/rainbowkit"],
+      "reviewDate": "2026-06-01"
+    },
+    {
+      "package": "@trezor/connect-common",
+      "spdx": "T-RSL (proprietary)",
+      "reason": "Trezor SDK component. T-RSL. Accepted wallet SDK.",
+      "parents": ["@trezor/connect"],
+      "reviewDate": "2026-06-01"
+    },
+    {
+      "package": "@trezor/blockchain-link",
+      "spdx": "T-RSL (proprietary)",
+      "reason": "Trezor SDK component. T-RSL. Accepted wallet SDK.",
+      "parents": ["@trezor/connect"],
+      "reviewDate": "2026-06-01"
+    },
+    {
+      "package": "@trezor/transport",
+      "spdx": "T-RSL (proprietary)",
+      "reason": "Trezor SDK component. T-RSL. Accepted wallet SDK.",
+      "parents": ["@trezor/connect"],
+      "reviewDate": "2026-06-01"
+    },
+    {
+      "package": "@trezor/utils",
+      "spdx": "T-RSL (proprietary)",
+      "reason": "Trezor SDK component. T-RSL. Accepted wallet SDK.",
+      "parents": ["@trezor/connect"],
+      "reviewDate": "2026-06-01"
+    },
+    {
+      "package": "@trezor/utxo-lib",
+      "spdx": "T-RSL (proprietary)",
+      "reason": "Trezor SDK component. T-RSL. Accepted wallet SDK.",
+      "parents": ["@trezor/connect"],
+      "reviewDate": "2026-06-01"
+    },
+    {
+      "package": "@trezor/analytics",
+      "spdx": "UNKNOWN (Trezor suite, no SPDX declared)",
+      "reason": "Trezor SDK sub-package, no license field (reports UNKNOWN); part of the T-RSL trezor-suite. Accepted wallet SDK.",
+      "parents": ["@trezor/connect"],
+      "reviewDate": "2026-06-01"
+    },
+    {
+      "package": "@trezor/blockchain-link-types",
+      "spdx": "UNKNOWN (Trezor suite)",
+      "reason": "Trezor SDK sub-package, no license field. Part of trezor-suite. Accepted wallet SDK.",
+      "parents": ["@trezor/blockchain-link"],
+      "reviewDate": "2026-06-01"
+    },
+    {
+      "package": "@trezor/blockchain-link-utils",
+      "spdx": "UNKNOWN (Trezor suite)",
+      "reason": "Trezor SDK sub-package, no license field. Part of trezor-suite. Accepted wallet SDK.",
+      "parents": ["@trezor/blockchain-link"],
+      "reviewDate": "2026-06-01"
+    },
+    {
+      "package": "@trezor/connect-analytics",
+      "spdx": "UNKNOWN (Trezor suite)",
+      "reason": "Trezor SDK sub-package, no license field. Part of trezor-suite. Accepted wallet SDK.",
+      "parents": ["@trezor/connect"],
+      "reviewDate": "2026-06-01"
+    },
+    {
+      "package": "@trezor/env-utils",
+      "spdx": "UNKNOWN (Trezor suite)",
+      "reason": "Trezor SDK sub-package, no license field. Part of trezor-suite. Accepted wallet SDK.",
+      "parents": ["@trezor/connect"],
+      "reviewDate": "2026-06-01"
+    },
+    {
+      "package": "@trezor/protobuf",
+      "spdx": "UNKNOWN (Trezor suite; package.json points to LICENSE.md)",
+      "reason": "Trezor SDK sub-package. package.json says 'See LICENSE.md in repo root' (T-RSL). Accepted wallet SDK.",
+      "parents": ["@trezor/connect"],
+      "reviewDate": "2026-06-01"
+    },
+    {
+      "package": "@trezor/protocol",
+      "spdx": "UNKNOWN (Trezor suite)",
+      "reason": "Trezor SDK sub-package, no license field. Part of trezor-suite. Accepted wallet SDK.",
+      "parents": ["@trezor/connect"],
+      "reviewDate": "2026-06-01"
+    },
+    {
+      "package": "@trezor/schema-utils",
+      "spdx": "UNKNOWN (Trezor suite)",
+      "reason": "Trezor SDK sub-package, no license field. Part of trezor-suite. Accepted wallet SDK.",
+      "parents": ["@trezor/connect"],
+      "reviewDate": "2026-06-01"
+    },
+    {
+      "package": "@trezor/type-utils",
+      "spdx": "UNKNOWN (Trezor suite)",
+      "reason": "Trezor SDK sub-package, no license field. Part of trezor-suite. Accepted wallet SDK.",
+      "parents": ["@trezor/connect"],
+      "reviewDate": "2026-06-01"
+    },
+
+    {
+      "package": "web3",
+      "spdx": "LGPL-3.0",
+      "reason": "TEMPORARY. web3 1.x is unused (no source imports; root-only dep, confirmed via yarn why). Scheduled for removal in a separate build-verified PR; delete this entry and all web3-* entries below once that lands.",
+      "parents": ["(root direct dependency)"],
+      "reviewDate": "2026-06-01"
+    },
+    { "package": "web3-bzz", "spdx": "LGPL-3.0", "reason": "TEMPORARY — web3 1.x family, removed with web3 (see web3 entry).", "parents": ["web3"], "reviewDate": "2026-06-01" },
+    { "package": "web3-core", "spdx": "LGPL-3.0", "reason": "TEMPORARY — web3 1.x family, removed with web3.", "parents": ["web3"], "reviewDate": "2026-06-01" },
+    { "package": "web3-core-helpers", "spdx": "LGPL-3.0", "reason": "TEMPORARY — web3 1.x family, removed with web3.", "parents": ["web3-core"], "reviewDate": "2026-06-01" },
+    { "package": "web3-core-method", "spdx": "LGPL-3.0", "reason": "TEMPORARY — web3 1.x family, removed with web3.", "parents": ["web3-core"], "reviewDate": "2026-06-01" },
+    { "package": "web3-core-promievent", "spdx": "LGPL-3.0", "reason": "TEMPORARY — web3 1.x family, removed with web3.", "parents": ["web3-core"], "reviewDate": "2026-06-01" },
+    { "package": "web3-core-requestmanager", "spdx": "LGPL-3.0", "reason": "TEMPORARY — web3 1.x family, removed with web3.", "parents": ["web3-core"], "reviewDate": "2026-06-01" },
+    { "package": "web3-core-subscriptions", "spdx": "LGPL-3.0", "reason": "TEMPORARY — web3 1.x family, removed with web3.", "parents": ["web3-core"], "reviewDate": "2026-06-01" },
+    { "package": "web3-eth", "spdx": "LGPL-3.0", "reason": "TEMPORARY — web3 1.x family, removed with web3.", "parents": ["web3"], "reviewDate": "2026-06-01" },
+    { "package": "web3-eth-abi", "spdx": "LGPL-3.0", "reason": "TEMPORARY — web3 1.x family, removed with web3.", "parents": ["web3-eth"], "reviewDate": "2026-06-01" },
+    { "package": "web3-eth-accounts", "spdx": "LGPL-3.0", "reason": "TEMPORARY — web3 1.x family, removed with web3.", "parents": ["web3-eth"], "reviewDate": "2026-06-01" },
+    { "package": "web3-eth-contract", "spdx": "LGPL-3.0", "reason": "TEMPORARY — web3 1.x family, removed with web3.", "parents": ["web3-eth"], "reviewDate": "2026-06-01" },
+    { "package": "web3-eth-ens", "spdx": "LGPL-3.0", "reason": "TEMPORARY — web3 1.x family, removed with web3.", "parents": ["web3-eth"], "reviewDate": "2026-06-01" },
+    { "package": "web3-eth-iban", "spdx": "LGPL-3.0", "reason": "TEMPORARY — web3 1.x family, removed with web3.", "parents": ["web3-eth"], "reviewDate": "2026-06-01" },
+    { "package": "web3-eth-personal", "spdx": "LGPL-3.0", "reason": "TEMPORARY — web3 1.x family, removed with web3.", "parents": ["web3-eth"], "reviewDate": "2026-06-01" },
+    { "package": "web3-net", "spdx": "LGPL-3.0", "reason": "TEMPORARY — web3 1.x family, removed with web3.", "parents": ["web3-eth"], "reviewDate": "2026-06-01" },
+    { "package": "web3-providers-http", "spdx": "LGPL-3.0", "reason": "TEMPORARY — web3 1.x family, removed with web3.", "parents": ["web3-core-requestmanager"], "reviewDate": "2026-06-01" },
+    { "package": "web3-providers-ipc", "spdx": "LGPL-3.0", "reason": "TEMPORARY — web3 1.x family, removed with web3.", "parents": ["web3-core-requestmanager"], "reviewDate": "2026-06-01" },
+    { "package": "web3-providers-ws", "spdx": "LGPL-3.0", "reason": "TEMPORARY — web3 1.x family, removed with web3.", "parents": ["web3-core-requestmanager"], "reviewDate": "2026-06-01" },
+    { "package": "web3-shh", "spdx": "LGPL-3.0", "reason": "TEMPORARY — web3 1.x family, removed with web3.", "parents": ["web3"], "reviewDate": "2026-06-01" },
+    { "package": "web3-utils", "spdx": "LGPL-3.0", "reason": "TEMPORARY — web3 1.x family, removed with web3.", "parents": ["web3-core"], "reviewDate": "2026-06-01" }
+  ]
+}
