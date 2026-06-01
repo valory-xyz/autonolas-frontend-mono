@@ -29,6 +29,10 @@ const CONFIG_PATH = path.join(ROOT, '.supply-chain', 'license-allowlist.json');
 
 const config = JSON.parse(fs.readFileSync(CONFIG_PATH, 'utf8'));
 const allowed = new Set((config.allowedSpdx || []).map((s) => s.trim().toLowerCase()));
+// Corrections for packages that ARE permissive but the checker can't map to SPDX (e.g.
+// package.json "SEE LICENSE IN LICENSE"). Applied BEFORE the allowlist check so they pass as
+// their real, confirmed license — these are corrections, not policy exceptions. { name: SPDX }.
+const overrides = config.licenseOverrides || {};
 const exemptByName = new Map((config.exemptions || []).map((e) => [e.package, e]));
 // Narrow prefixes ONLY for platform-binary families whose package name varies by OS/arch
 // (e.g. @img/sharp-libvips-<platform>: darwin-arm64 locally, linux-x64 on CI), where a single
@@ -79,9 +83,17 @@ checker.init(initOpts, (err, packages) => {
   const violations = [];
   const exemptedNamesHit = new Set();
   const prefixHits = new Set();
+  const overrideHits = new Set();
+  const installedNames = new Set();
   for (const [key, info] of Object.entries(packages)) {
-    if (licenseAllowed(info.licenses)) continue;
     const name = pkgName(key);
+    installedNames.add(name);
+    const overridden = Object.prototype.hasOwnProperty.call(overrides, name);
+    const effective = overridden ? overrides[name] : info.licenses;
+    if (overridden && !licenseAllowed(info.licenses) && licenseAllowed(effective)) {
+      overrideHits.add(name);
+    }
+    if (licenseAllowed(effective)) continue;
     if (exemptByName.has(name)) {
       exemptedNamesHit.add(name);
       continue;
@@ -104,15 +116,21 @@ checker.init(initOpts, (err, packages) => {
       `license-check: ${acceptedCount} exempted package group(s) accepted (see .supply-chain/license-allowlist.json).`,
     );
   }
+  if (overrideHits.size) {
+    console.log(
+      `license-check: ${overrideHits.size} license override(s) applied (permissive but mis-detected).`,
+    );
+  }
 
-  // Keep the exemption file honest: warn about entries that no longer match any violation.
+  // Keep the config honest: warn about entries that no longer match any installed package.
   const stale = [
     ...[...exemptByName.keys()].filter((n) => !exemptedNamesHit.has(n)),
     ...exemptPrefixes.filter((p) => !prefixHits.has(p)),
+    ...Object.keys(overrides).filter((n) => !installedNames.has(n)),
   ];
   if (stale.length) {
     console.warn(
-      `license-check: WARNING — ${stale.length} exemption(s) no longer needed (remove them): ${stale.join(', ')}`,
+      `license-check: WARNING — ${stale.length} stale config entr(y/ies) no longer match any package (remove them): ${stale.join(', ')}`,
     );
   }
 

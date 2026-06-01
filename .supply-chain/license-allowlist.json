@@ -1,5 +1,5 @@
 {
-  "_comment": "License allowlist gate config — frontend mirror of the backend valory-xyz/tomte `liccheck` PARANOID gate. `allowedSpdx` mirrors tomte's authorized list (permissive + LGPL-2.1/MPL-2.0 weak copyleft). Anything not allowed — including UNKNOWN/Custom — fails unless its exact package NAME is in `exemptions` (version-agnostic). `exemptionPrefixes` is ONLY for platform-binary families whose name varies by OS/arch. Scope is production deps (what ships), matching tomte's frozen-runtime check. See scripts/license-check.mjs and .plans/license-check-gate.md.",
+  "_comment": "License allowlist gate config — frontend mirror of the backend valory-xyz/tomte `liccheck` PARANOID gate. `allowedSpdx` mirrors tomte's authorized list (permissive + LGPL-2.1/MPL-2.0 weak copyleft). A package whose license is not allowed — including UNKNOWN/Custom — fails, unless (1) it has a `licenseOverrides` correction, (2) its exact NAME is in `exemptions` (version-agnostic), or (3) its name matches an `exemptionPrefixes` entry. Scope is production deps (what ships). See scripts/license-check.mjs and .plans/license-check-gate.md.",
   "scope": "production",
   "allowedSpdx": [
     "MIT",
@@ -17,6 +17,7 @@
     "BlueOak-1.0.0",
     "CC0-1.0",
     "Unlicense",
+    "Public Domain",
     "WTFPL",
     "Zlib",
     "Python-2.0",
@@ -26,11 +27,26 @@
   ],
   "unauthorizedSpdx": ["GPL-2.0", "GPL-3.0", "LGPL-3.0", "MPL-1.1", "AGPL-3.0"],
 
+  "_licenseOverrides_comment": "Permissive packages the checker can't map to SPDX because package.json declares 'SEE LICENSE IN LICENSE' instead of an SPDX id. Corrected to their real license, each confirmed by reading the actual LICENSE file (the MIT text). These are CORRECTIONS, not policy exceptions — they pass the allowlist as MIT.",
+  "licenseOverrides": {
+    "@segment/facade": "MIT",
+    "@segment/isodate": "MIT",
+    "@segment/isodate-traverse": "MIT",
+    "new-date": "MIT"
+  },
+
   "exemptionPrefixes": [
+    {
+      "prefix": "@trezor/",
+      "spdx": "T-RSL / UNKNOWN (Trezor suite)",
+      "reason": "Trezor hardware-wallet SDK suite (~16 sub-packages), pulled via RainbowKit's Trezor connector. Single vendor with a uniform license stance: source-available T-RSL (e.g. @trezor/connect) or no SPDX field. `@trezor` is a publisher-controlled npm scope, so this prefix stays vendor-bounded while avoiding per-sub-package churn on version bumps.",
+      "parents": ["@rainbow-me/rainbowkit"],
+      "reviewDate": "2026-06-01"
+    },
     {
       "prefix": "@img/sharp-libvips-",
       "spdx": "LGPL-3.0-or-later",
-      "reason": "Platform-specific libvips binaries (image processing). Package name varies by OS/arch (@img/sharp-libvips-darwin-arm64 locally, @img/sharp-libvips-linux-x64 on CI), so a single exact name would be non-deterministic. LGPL-3.0 dynamically-linked native binary, not statically combined with our JS.",
+      "reason": "Platform-specific libvips binaries (image processing). Package name varies by OS/arch (@img/sharp-libvips-darwin-arm64 locally, @img/sharp-libvips-linux-x64 on CI), so a single exact name would be non-deterministic. `@img` is a publisher-controlled scope. LGPL-3.0 dynamically-linked native binary, not statically combined with our JS.",
       "parents": ["sharp"],
       "reviewDate": "2026-06-01"
     }
@@ -69,50 +85,6 @@
     },
 
     {
-      "package": "@segment/facade",
-      "spdx": "MIT",
-      "reason": "Genuinely MIT (LICENSE file is the MIT text). package.json declares 'SEE LICENSE IN LICENSE', so the checker reports it as 'Custom: LICENSE' and PARANOID flags it. Confirmed MIT.",
-      "parents": ["@web3auth/modal"],
-      "reviewDate": "2026-06-01"
-    },
-    {
-      "package": "@segment/isodate",
-      "spdx": "MIT",
-      "reason": "Genuinely MIT (LICENSE file is the MIT text); package.json uses 'SEE LICENSE IN LICENSE'. Confirmed MIT.",
-      "parents": ["@segment/isodate-traverse"],
-      "reviewDate": "2026-06-01"
-    },
-    {
-      "package": "@segment/isodate-traverse",
-      "spdx": "MIT",
-      "reason": "Genuinely MIT (LICENSE file is the MIT text); package.json uses 'SEE LICENSE IN LICENSE'. Confirmed MIT.",
-      "parents": ["@segment/facade"],
-      "reviewDate": "2026-06-01"
-    },
-    {
-      "package": "new-date",
-      "spdx": "MIT",
-      "reason": "Genuinely MIT (LICENSE file is the MIT text); package.json uses 'SEE LICENSE IN LICENSE'. Confirmed MIT.",
-      "parents": ["@segment/isodate-traverse"],
-      "reviewDate": "2026-06-01"
-    },
-
-    {
-      "package": "jsonify",
-      "spdx": "Public Domain",
-      "reason": "Public domain (unrestricted), declared in package.json. More permissive than MIT.",
-      "parents": ["json-stable-stringify"],
-      "reviewDate": "2026-06-01"
-    },
-    {
-      "package": "text-encoding-utf-8",
-      "spdx": "Unlicense/Public Domain",
-      "reason": "LICENSE.md is the Unlicense (public-domain) text. No SPDX in package.json so reports as Public Domain. Unrestricted.",
-      "parents": ["@toruslabs/eccrypto"],
-      "reviewDate": "2026-06-01"
-    },
-
-    {
       "package": "@web3auth/modal",
       "spdx": "UNKNOWN (no SPDX declared)",
       "reason": "Web3Auth SDK (direct dep, used by pearl-api). No license field in package.json so reports UNKNOWN. Accepted auth SDK — confirm upstream license terms.",
@@ -123,7 +95,7 @@
     {
       "package": "@metamask/sdk",
       "spdx": "UNKNOWN (no SPDX declared)",
-      "reason": "MetaMask wallet SDK, pulled via RainbowKit's MetaMask connector. No license field so reports UNKNOWN. Accepted wallet SDK.",
+      "reason": "MetaMask wallet SDK, pulled via RainbowKit's MetaMask connector. No license field so reports UNKNOWN. Accepted wallet SDK. (Left as exact names rather than a @metamask/ prefix: that scope mixes permissive and unlicensed packages.)",
       "parents": ["@rainbow-me/rainbowkit"],
       "reviewDate": "2026-06-01"
     },
@@ -146,119 +118,6 @@
       "spdx": "UNKNOWN (no SPDX declared)",
       "reason": "MetaMask SDK component (via RainbowKit). No license field. Accepted wallet SDK.",
       "parents": ["@metamask/sdk"],
-      "reviewDate": "2026-06-01"
-    },
-
-    {
-      "package": "@trezor/connect",
-      "spdx": "T-RSL (Trezor Reference Source License, proprietary)",
-      "reason": "Trezor hardware-wallet SDK, pulled via RainbowKit's Trezor connector. Source-available proprietary license (T-RSL). Accepted wallet SDK.",
-      "parents": ["@rainbow-me/rainbowkit"],
-      "reviewDate": "2026-06-01"
-    },
-    {
-      "package": "@trezor/connect-web",
-      "spdx": "T-RSL (proprietary)",
-      "reason": "Trezor SDK (web). T-RSL. Accepted wallet SDK.",
-      "parents": ["@rainbow-me/rainbowkit"],
-      "reviewDate": "2026-06-01"
-    },
-    {
-      "package": "@trezor/connect-common",
-      "spdx": "T-RSL (proprietary)",
-      "reason": "Trezor SDK component. T-RSL. Accepted wallet SDK.",
-      "parents": ["@trezor/connect"],
-      "reviewDate": "2026-06-01"
-    },
-    {
-      "package": "@trezor/blockchain-link",
-      "spdx": "T-RSL (proprietary)",
-      "reason": "Trezor SDK component. T-RSL. Accepted wallet SDK.",
-      "parents": ["@trezor/connect"],
-      "reviewDate": "2026-06-01"
-    },
-    {
-      "package": "@trezor/transport",
-      "spdx": "T-RSL (proprietary)",
-      "reason": "Trezor SDK component. T-RSL. Accepted wallet SDK.",
-      "parents": ["@trezor/connect"],
-      "reviewDate": "2026-06-01"
-    },
-    {
-      "package": "@trezor/utils",
-      "spdx": "T-RSL (proprietary)",
-      "reason": "Trezor SDK component. T-RSL. Accepted wallet SDK.",
-      "parents": ["@trezor/connect"],
-      "reviewDate": "2026-06-01"
-    },
-    {
-      "package": "@trezor/utxo-lib",
-      "spdx": "T-RSL (proprietary)",
-      "reason": "Trezor SDK component. T-RSL. Accepted wallet SDK.",
-      "parents": ["@trezor/connect"],
-      "reviewDate": "2026-06-01"
-    },
-    {
-      "package": "@trezor/analytics",
-      "spdx": "UNKNOWN (Trezor suite, no SPDX declared)",
-      "reason": "Trezor SDK sub-package, no license field (reports UNKNOWN); part of the T-RSL trezor-suite. Accepted wallet SDK.",
-      "parents": ["@trezor/connect"],
-      "reviewDate": "2026-06-01"
-    },
-    {
-      "package": "@trezor/blockchain-link-types",
-      "spdx": "UNKNOWN (Trezor suite)",
-      "reason": "Trezor SDK sub-package, no license field. Part of trezor-suite. Accepted wallet SDK.",
-      "parents": ["@trezor/blockchain-link"],
-      "reviewDate": "2026-06-01"
-    },
-    {
-      "package": "@trezor/blockchain-link-utils",
-      "spdx": "UNKNOWN (Trezor suite)",
-      "reason": "Trezor SDK sub-package, no license field. Part of trezor-suite. Accepted wallet SDK.",
-      "parents": ["@trezor/blockchain-link"],
-      "reviewDate": "2026-06-01"
-    },
-    {
-      "package": "@trezor/connect-analytics",
-      "spdx": "UNKNOWN (Trezor suite)",
-      "reason": "Trezor SDK sub-package, no license field. Part of trezor-suite. Accepted wallet SDK.",
-      "parents": ["@trezor/connect"],
-      "reviewDate": "2026-06-01"
-    },
-    {
-      "package": "@trezor/env-utils",
-      "spdx": "UNKNOWN (Trezor suite)",
-      "reason": "Trezor SDK sub-package, no license field. Part of trezor-suite. Accepted wallet SDK.",
-      "parents": ["@trezor/connect"],
-      "reviewDate": "2026-06-01"
-    },
-    {
-      "package": "@trezor/protobuf",
-      "spdx": "UNKNOWN (Trezor suite; package.json points to LICENSE.md)",
-      "reason": "Trezor SDK sub-package. package.json says 'See LICENSE.md in repo root' (T-RSL). Accepted wallet SDK.",
-      "parents": ["@trezor/connect"],
-      "reviewDate": "2026-06-01"
-    },
-    {
-      "package": "@trezor/protocol",
-      "spdx": "UNKNOWN (Trezor suite)",
-      "reason": "Trezor SDK sub-package, no license field. Part of trezor-suite. Accepted wallet SDK.",
-      "parents": ["@trezor/connect"],
-      "reviewDate": "2026-06-01"
-    },
-    {
-      "package": "@trezor/schema-utils",
-      "spdx": "UNKNOWN (Trezor suite)",
-      "reason": "Trezor SDK sub-package, no license field. Part of trezor-suite. Accepted wallet SDK.",
-      "parents": ["@trezor/connect"],
-      "reviewDate": "2026-06-01"
-    },
-    {
-      "package": "@trezor/type-utils",
-      "spdx": "UNKNOWN (Trezor suite)",
-      "reason": "Trezor SDK sub-package, no license field. Part of trezor-suite. Accepted wallet SDK.",
-      "parents": ["@trezor/connect"],
       "reviewDate": "2026-06-01"
     },
 
