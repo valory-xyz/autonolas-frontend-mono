@@ -58,3 +58,46 @@ export const buildMultiSendSafeTx = (multiSend, txs, nonce, overrides) => {
     ...overrides,
   });
 };
+
+/**
+ * Build the Safe MultiSend transaction that adds the service's agent instances as
+ * owners and removes the service owner — the deterministic core of `onMultisigSubmit`.
+ * Kept here (a heavy-import-free module) so it can be characterization-tested without
+ * loading the wallet/wagmi graph in `utils.jsx`.
+ *
+ * @param multisigInterface ethers Interface of the GnosisSafe (for encoding owner ops)
+ * @param multiSendContract object exposing `.address` and `.interface` (MultiSend)
+ */
+export const buildMultisigUpdateSafeTx = ({
+  multisigInterface,
+  multiSendContract,
+  multisig,
+  agentInstances,
+  serviceOwner,
+  threshold,
+  nonce,
+}) => {
+  // Add each agent instance as an owner, keeping the threshold the same.
+  const txs = agentInstances.map((agentInstance) =>
+    buildSafeTransaction({
+      to: multisig,
+      data: multisigInterface.encodeFunctionData('addOwnerWithThreshold', [agentInstance, 1]),
+      nonce: 0,
+    }),
+  );
+
+  // Remove the original (service owner) owner.
+  txs.push(
+    buildSafeTransaction({
+      to: multisig,
+      data: multisigInterface.encodeFunctionData('removeOwner', [
+        agentInstances[0],
+        serviceOwner,
+        threshold,
+      ]),
+      nonce: 0,
+    }),
+  );
+
+  return buildMultiSendSafeTx(multiSendContract, txs, nonce);
+};

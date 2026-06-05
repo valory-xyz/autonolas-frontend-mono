@@ -37,7 +37,7 @@ import { safeMultiSend } from 'common-util/Contracts/addresses';
 import { SUPPORTED_CHAINS } from 'common-util/Login';
 import { wagmiConfig } from 'common-util/Login/config';
 import { checkIfGnosisSafe } from 'common-util/functions';
-import { buildMultiSendSafeTx, buildSafeTransaction } from 'common-util/functions/safeTransactions';
+import { buildMultisigUpdateSafeTx } from 'common-util/functions/safeTransactions';
 
 import { isHashApproved } from './helpers';
 
@@ -76,44 +76,21 @@ export const onMultisigSubmit = async ({
   );
   const nonce = await multisigContract.nonce();
 
-  const callData = [];
-  const txs = [];
-
-  // Add the addresses, but keep the threshold the same
-  for (let i = 0; i < agentInstances.length; i += 1) {
-    callData[i] = multisigContract.interface.encodeFunctionData('addOwnerWithThreshold', [
-      agentInstances[i],
-      1,
-    ]);
-    txs[i] = buildSafeTransaction({
-      to: multisig,
-      data: callData[i],
-      nonce: 0,
-    });
-  }
-
-  callData.push(
-    multisigContract.interface.encodeFunctionData('removeOwner', [
-      agentInstances[0],
-      serviceOwner,
-      threshold,
-    ]),
-  );
-  txs.push(
-    buildSafeTransaction({
-      to: multisig,
-      data: callData[callData.length - 1],
-      nonce: 0,
-    }),
-  );
-
   const multiSendContract = new ethers.Contract(
     safeMultiSend[chainId][0],
     MULTI_SEND_CONTRACT.abi,
     ethers.getDefaultProvider(RPC_URLS[chainId]),
   );
 
-  const safeTx = buildMultiSendSafeTx(multiSendContract, txs, nonce);
+  const safeTx = buildMultisigUpdateSafeTx({
+    multisigInterface: multisigContract.interface,
+    multiSendContract,
+    multisig,
+    agentInstances,
+    serviceOwner,
+    threshold,
+    nonce,
+  });
   const provider = getEthersV5Provider(SUPPORTED_CHAINS, RPC_URLS);
   const isSafe = await checkIfGnosisSafe(account, provider);
 
