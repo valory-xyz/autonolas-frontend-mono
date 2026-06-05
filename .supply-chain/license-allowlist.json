@@ -56,17 +56,17 @@
     {
       "package": "ua-parser-js",
       "spdx": "AGPL-3.0-or-later",
-      "reason": "Transitive of @rainbow-me/rainbowkit@2.2.11 (browser detection). Already shipping since the RainbowKit migration (#416). NOT pinned to MIT 1.0.37 — that would force a RainbowKit major-version downgrade. AGPL-in-bundle acceptance is an open policy decision; revisit when RainbowKit upstream drops AGPL ua-parser-js.",
+      "reason": "Transitive of @rainbow-me/rainbowkit@2.2.11 (browser detection). Shipping since the RainbowKit migration (#416). SETTLEMENT 2026-06-05: ACCEPTED — not pinned to MIT 1.0.37 (would force a major-version downgrade on the freshly-migrated RainbowKit wallet path) and not removable without dropping RainbowKit. Single low-surface browser-detection lib; legal ratification of AGPL-in-bundle remains the owner's call. Revisit when RainbowKit upstream drops AGPL ua-parser-js.",
       "parents": ["@rainbow-me/rainbowkit"],
-      "reviewDate": "2026-06-01"
+      "reviewDate": "2026-06-05"
     },
 
     {
       "package": "@gnosis.pm/safe-contracts",
       "spdx": "GPL-3.0",
-      "reason": "Solidity contract sources + ABIs (build-time / ABI-only); not linked into shipped JS. CONFIRM with consuming code before flipping the gate to required.",
-      "parents": ["@safe-global/protocol-kit"],
-      "reviewDate": "2026-06-01"
+      "reason": "GPL-3.0. INVESTIGATED 2026-06-05: NOT ABI/build-time-only. Direct dep, imported at RUNTIME by apps/marketplace via require('@gnosis.pm/safe-contracts'); it calls buildSafeTransaction()/buildMultiSendSafeTx() in the Safe multisig service-registration flow (components/ListServices/ServiceState/3rdStepFinishedRegistration/utils.jsx), so GPL JS helpers ARE bundled into the shipped marketplace app. SETTLEMENT: recommended removal by replacing those two helpers with @safe-global/protocol-kit (already a dep) and dropping this package — tracked as a follow-up. Until then GPL-in-bundle is accepted on this single dep, eyes open.",
+      "parents": ["(root direct dependency; runtime-imported by apps/marketplace)"],
+      "reviewDate": "2026-06-05"
     },
     {
       "package": "@toruslabs/ffjavascript",
