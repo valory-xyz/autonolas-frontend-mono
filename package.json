@@ -42,7 +42,7 @@
     "@wagmi/core": "2.22.1",
     "@web3auth/modal": "10.0.7",
     "antd": "5.29.3",
-    "axios": "1.15.2",
+    "axios": "1.17.0",
     "bignumber.js": "9.1.2",
     "dayjs": "1.11.9",
     "decimal.js": "10.4.3",
@@ -73,8 +73,7 @@
     "use-deep-compare-effect": "1.8.1",
     "uuid": "9.0.1",
     "viem": "2.50.4",
-    "wagmi": "2.19.5",
-    "web3": "1.10.4"
+    "wagmi": "2.19.5"
   },
   "devDependencies": {
     "@babel/core": "7.24.4",
@@ -133,7 +132,7 @@
     "@babel/plugin-transform-modules-systemjs": "7.29.4",
     "@gnosis.pm/safe-contracts/ethers": "5.7.2",
     "form-data": "2.5.5",
-    "axios": "1.15.2",
+    "axios": "1.17.0",
     "js-cookie": "3.0.7",
     "qr": "0.5.5",
     "cipher-base": "1.0.5",

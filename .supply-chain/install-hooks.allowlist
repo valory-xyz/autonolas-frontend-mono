@@ -11,11 +11,9 @@
 
 blake-hash  # install: node-gyp-build || exit 0
 bufferutil  # install: node-gyp-build
-es5-ext  # postinstall: node -e "try{require('./_postinstall')}catch(e){}" || exit 0
 keccak  # install: node-gyp-build || exit 0
 nx  # postinstall: node ./bin/post-install
 protobufjs  # postinstall: node scripts/postinstall
-secp256k1  # install: node-gyp-build || exit 0
 sharp  # install: node install/check.js || npm run build
 tiny-secp256k1  # install: npm run build || echo "secp256k1 bindings compilation fail. Pure JS implementation will be used."
 usb  # install: node-gyp-build
