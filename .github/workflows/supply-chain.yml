@@ -109,6 +109,37 @@ jobs:
       - name: Diff install-hook surface against allowlist
         run: yarn audit:install-hooks
 
+  license-check:
+    # Every production dependency's license must be on the allowlist in
+    # .supply-chain/license-allowlist.json, or be an explicitly-reasoned exemption.
+    # NON-BLOCKING PILOT: this job is deliberately NOT in the `all-checks-passed` aggregator
+    # below, so it reports a red/green signal without gating merges. Promote it to required by
+    # adding `license-check` to that job's `needs:` (+ branch protection) once the exemptions
+    # are signed off. See SUPPLY-CHAIN-SECURITY.md.
+    name: License allowlist gate
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
+
+      - name: Setup Node.js
+        uses: actions/setup-node@1e60f620b9541d16bece96c5465dc8ee9832be0b # v4.0.3
+        with:
+          node-version: '22.x'
+
+      - name: Pin Yarn via corepack
+        run: |
+          corepack enable
+          corepack prepare yarn@1.22.22 --activate
+          yarn --version
+
+      - name: Install dependencies (frozen)
+        run: yarn install --frozen-lockfile
+
+      - name: Check production dependency licenses
+        run: yarn license-check
+
   gitleaks:
     name: Gitleaks
     runs-on: ubuntu-latest
@@ -141,6 +172,9 @@ jobs:
     # this aggregator covers in-workflow jobs only — Snyk and Vercel run in
     # separate workflows and are not gated through here. Mirrors the
     # pattern used in valory-xyz/agent-scan (.github/workflows/ci.yml).
+    #
+    # `license-check` is intentionally NOT listed below — it runs as a
+    # non-blocking pilot. Add it to `needs:` to make it a required gate.
     name: All checks passed
     needs: [audit, lockfile-lint, install-hooks, gitleaks]
     if: always()

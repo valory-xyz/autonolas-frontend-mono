@@ -1,0 +1,124 @@
+{
+  "_comment": "License allowlist gate config. `allowedSpdx` is the set of accepted licenses (permissive plus the LGPL-2.1/MPL-2.0 weak-copyleft licenses). A production dependency whose license is not allowed — including UNKNOWN/Custom — fails the gate, unless (1) it has a `licenseOverrides` correction, (2) its exact NAME is in `exemptions` (version-agnostic), or (3) its name matches an `exemptionPrefixes` entry. Scope is production deps (what ships). See scripts/license-check.mjs.",
+  "scope": "production",
+  "allowedSpdx": [
+    "MIT",
+    "ISC",
+    "Apache-2.0",
+    "BSD",
+    "BSD-2-Clause",
+    "BSD-3-Clause",
+    "0BSD",
+    "MPL-2.0",
+    "LGPL-2.1",
+    "LGPL-2.1-only",
+    "LGPL-2.1-or-later",
+    "LGPL-2.1+",
+    "BlueOak-1.0.0",
+    "CC0-1.0",
+    "Unlicense",
+    "Public Domain",
+    "WTFPL",
+    "Zlib",
+    "Python-2.0",
+    "OFL-1.1",
+    "CC-BY-4.0",
+    "CC-BY-3.0"
+  ],
+  "unauthorizedSpdx": ["GPL-2.0", "GPL-3.0", "LGPL-3.0", "MPL-1.1", "AGPL-3.0"],
+
+  "_licenseOverrides_comment": "Permissive packages the checker can't map to SPDX because package.json declares 'SEE LICENSE IN LICENSE' instead of an SPDX id. Corrected to their real license, each confirmed by reading the actual LICENSE file (the MIT text). These are CORRECTIONS, not policy exceptions — they pass the allowlist as MIT.",
+  "licenseOverrides": {
+    "@segment/facade": "MIT",
+    "@segment/isodate": "MIT",
+    "@segment/isodate-traverse": "MIT",
+    "new-date": "MIT"
+  },
+
+  "exemptionPrefixes": [
+    {
+      "prefix": "@trezor/",
+      "spdx": "T-RSL / UNKNOWN (Trezor suite)",
+      "reason": "Trezor hardware-wallet SDK suite (~16 sub-packages), pulled via RainbowKit's Trezor connector. Single vendor with a uniform license stance: source-available T-RSL (e.g. @trezor/connect) or no SPDX field. `@trezor` is a publisher-controlled npm scope, so this prefix stays vendor-bounded while avoiding per-sub-package churn on version bumps.",
+      "parents": ["@rainbow-me/rainbowkit"],
+      "reviewDate": "2026-06-01"
+    },
+    {
+      "prefix": "@img/sharp-libvips-",
+      "spdx": "LGPL-3.0-or-later",
+      "reason": "Platform-specific libvips binaries (image processing). Package name varies by OS/arch (@img/sharp-libvips-darwin-arm64 locally, @img/sharp-libvips-linux-x64 on CI), so a single exact name would be non-deterministic. `@img` is a publisher-controlled scope. LGPL-3.0 dynamically-linked native binary, not statically combined with our JS.",
+      "parents": ["sharp"],
+      "reviewDate": "2026-06-01"
+    }
+  ],
+
+  "exemptions": [
+    {
+      "package": "ua-parser-js",
+      "spdx": "AGPL-3.0-or-later",
+      "reason": "Transitive of @rainbow-me/rainbowkit@2.2.11 (browser detection). Shipping since the RainbowKit migration (#416). SETTLEMENT 2026-06-05: ACCEPTED — not pinned to MIT 1.0.37 (would force a major-version downgrade on the freshly-migrated RainbowKit wallet path) and not removable without dropping RainbowKit. Single low-surface browser-detection lib; legal ratification of AGPL-in-bundle remains the owner's call. Revisit when RainbowKit upstream drops AGPL ua-parser-js.",
+      "parents": ["@rainbow-me/rainbowkit"],
+      "reviewDate": "2026-06-05"
+    },
+
+    {
+      "package": "@gnosis.pm/safe-contracts",
+      "spdx": "GPL-3.0",
+      "reason": "GPL-3.0. INVESTIGATED 2026-06-05: NOT ABI/build-time-only. Direct dep, imported at RUNTIME by apps/marketplace via require('@gnosis.pm/safe-contracts'); it calls buildSafeTransaction()/buildMultiSendSafeTx() in the Safe multisig service-registration flow (components/ListServices/ServiceState/3rdStepFinishedRegistration/utils.jsx), so GPL JS helpers ARE bundled into the shipped marketplace app. SETTLEMENT: recommended removal by replacing those two helpers with @safe-global/protocol-kit (already a dep) and dropping this package — tracked as a follow-up. Until then GPL-in-bundle is accepted on this single dep, eyes open.",
+      "parents": ["(root direct dependency; runtime-imported by apps/marketplace)"],
+      "reviewDate": "2026-06-05"
+    },
+    {
+      "package": "@toruslabs/ffjavascript",
+      "spdx": "GPL-3.0",
+      "reason": "GPL-3.0 finite-field math, pulled transitively by @web3auth/modal (Torus). Resolves itself if @web3auth/modal is replaced.",
+      "parents": ["@web3auth/modal"],
+      "reviewDate": "2026-06-01"
+    },
+
+    {
+      "package": "rpc-websockets",
+      "spdx": "LGPL-3.0-only",
+      "reason": "LGPL-3.0 websocket client, transitive of @solana/web3.js. Dynamically required, not statically combined.",
+      "parents": ["@solana/web3.js"],
+      "reviewDate": "2026-06-01"
+    },
+
+    {
+      "package": "@web3auth/modal",
+      "spdx": "UNKNOWN (no SPDX declared)",
+      "reason": "Web3Auth SDK (direct dep, used by pearl-api). No license field in package.json so reports UNKNOWN. Accepted auth SDK — confirm upstream license terms.",
+      "parents": ["(root direct dependency)"],
+      "reviewDate": "2026-06-01"
+    },
+
+    {
+      "package": "@metamask/sdk",
+      "spdx": "UNKNOWN (no SPDX declared)",
+      "reason": "MetaMask wallet SDK, pulled via RainbowKit's MetaMask connector. No license field so reports UNKNOWN. Accepted wallet SDK. (Left as exact names rather than a @metamask/ prefix: that scope mixes permissive and unlicensed packages.)",
+      "parents": ["@rainbow-me/rainbowkit"],
+      "reviewDate": "2026-06-01"
+    },
+    {
+      "package": "@metamask/sdk-communication-layer",
+      "spdx": "UNKNOWN (no SPDX declared)",
+      "reason": "MetaMask SDK component (via RainbowKit). No license field. Accepted wallet SDK.",
+      "parents": ["@metamask/sdk"],
+      "reviewDate": "2026-06-01"
+    },
+    {
+      "package": "@metamask/sdk-install-modal-web",
+      "spdx": "UNKNOWN (no SPDX declared)",
+      "reason": "MetaMask SDK component (via RainbowKit). No license field. Accepted wallet SDK.",
+      "parents": ["@metamask/sdk"],
+      "reviewDate": "2026-06-01"
+    },
+    {
+      "package": "@metamask/eth-json-rpc-provider",
+      "spdx": "UNKNOWN (no SPDX declared)",
+      "reason": "MetaMask SDK component (via RainbowKit). No license field. Accepted wallet SDK.",
+      "parents": ["@metamask/sdk"],
+      "reviewDate": "2026-06-01"
+    }
+  ]
+}
