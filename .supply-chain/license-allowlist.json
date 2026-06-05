@@ -1,5 +1,5 @@
 {
-  "_comment": "License allowlist gate config — frontend mirror of the backend valory-xyz/tomte `liccheck` PARANOID gate. `allowedSpdx` mirrors tomte's authorized list (permissive + LGPL-2.1/MPL-2.0 weak copyleft). A package whose license is not allowed — including UNKNOWN/Custom — fails, unless (1) it has a `licenseOverrides` correction, (2) its exact NAME is in `exemptions` (version-agnostic), or (3) its name matches an `exemptionPrefixes` entry. Scope is production deps (what ships). See scripts/license-check.mjs and .plans/license-check-gate.md.",
+  "_comment": "License allowlist gate config. `allowedSpdx` is the set of accepted licenses (permissive plus the LGPL-2.1/MPL-2.0 weak-copyleft licenses). A production dependency whose license is not allowed — including UNKNOWN/Custom — fails the gate, unless (1) it has a `licenseOverrides` correction, (2) its exact NAME is in `exemptions` (version-agnostic), or (3) its name matches an `exemptionPrefixes` entry. Scope is production deps (what ships). See scripts/license-check.mjs.",
   "scope": "production",
   "allowedSpdx": [
     "MIT",

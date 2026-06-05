@@ -110,13 +110,12 @@ jobs:
         run: yarn audit:install-hooks
 
   license-check:
-    # Frontend mirror of the backend `liccheck` PARANOID gate (valory-xyz/tomte): every
-    # production dependency's license must be on the allowlist in
+    # Every production dependency's license must be on the allowlist in
     # .supply-chain/license-allowlist.json, or be an explicitly-reasoned exemption.
     # NON-BLOCKING PILOT: this job is deliberately NOT in the `all-checks-passed` aggregator
     # below, so it reports a red/green signal without gating merges. Promote it to required by
     # adding `license-check` to that job's `needs:` (+ branch protection) once the exemptions
-    # are signed off. See .plans/license-check-gate.md and SUPPLY-CHAIN-SECURITY.md.
+    # are signed off. See SUPPLY-CHAIN-SECURITY.md.
     name: License allowlist gate
     runs-on: ubuntu-latest
     timeout-minutes: 10

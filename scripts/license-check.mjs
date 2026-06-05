@@ -1,7 +1,6 @@
 #!/usr/bin/env node
 /**
- * License allowlist gate — frontend mirror of the backend `liccheck` PARANOID gate
- * (valory-xyz/tomte). Sibling of scripts/audit.mjs and scripts/audit-install-hooks.mjs.
+ * License allowlist gate. Sibling of scripts/audit.mjs and scripts/audit-install-hooks.mjs.
  *
  * Engine: license-checker-rseidelsohn (reads actual LICENSE files, so packages that
  * declare no SPDX string in package.json are detected rather than reported UNKNOWN).
@@ -9,7 +8,7 @@
  * Config: .supply-chain/license-allowlist.json
  *   { allowedSpdx: string[], exemptions: [{ package, reason, ... }], scope?: "production" }
  *
- * Posture (PARANOID parity): a package whose license is not on `allowedSpdx` — including
+ * Posture: a package whose license is not on `allowedSpdx` — including
  * UNKNOWN / "Custom: <file>" / UNLICENSED — FAILS, unless its exact name is in `exemptions`.
  * Exemptions match by package NAME (version-agnostic): resilient to version bumps, but a
  * NEW unlisted package — even in an already-exempted namespace — still fails.
@@ -64,7 +63,7 @@ const expressionAllowed = (expr) => {
 const licenseAllowed = (lic) => {
   if (!lic) return false;
   if (Array.isArray(lic)) return lic.some((l) => licenseAllowed(l)); // array => alternatives (OR)
-  if (/^(unknown|unlicensed)$/i.test(lic) || /^custom:/i.test(lic)) return false; // PARANOID
+  if (/^(unknown|unlicensed)$/i.test(lic) || /^custom:/i.test(lic)) return false; // unresolved => fail
   return expressionAllowed(lic);
 };
 
