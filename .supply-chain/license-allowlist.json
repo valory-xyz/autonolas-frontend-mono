@@ -119,34 +119,6 @@
       "reason": "MetaMask SDK component (via RainbowKit). No license field. Accepted wallet SDK.",
       "parents": ["@metamask/sdk"],
       "reviewDate": "2026-06-01"
-    },
-
-    {
-      "package": "web3",
-      "spdx": "LGPL-3.0",
-      "reason": "TEMPORARY. web3 1.x is unused (no source imports; root-only dep, confirmed via yarn why). Scheduled for removal in a separate build-verified PR; delete this entry and all web3-* entries below once that lands.",
-      "parents": ["(root direct dependency)"],
-      "reviewDate": "2026-06-01"
-    },
-    { "package": "web3-bzz", "spdx": "LGPL-3.0", "reason": "TEMPORARY — web3 1.x family, removed with web3 (see web3 entry).", "parents": ["web3"], "reviewDate": "2026-06-01" },
-    { "package": "web3-core", "spdx": "LGPL-3.0", "reason": "TEMPORARY — web3 1.x family, removed with web3.", "parents": ["web3"], "reviewDate": "2026-06-01" },
-    { "package": "web3-core-helpers", "spdx": "LGPL-3.0", "reason": "TEMPORARY — web3 1.x family, removed with web3.", "parents": ["web3-core"], "reviewDate": "2026-06-01" },
-    { "package": "web3-core-method", "spdx": "LGPL-3.0", "reason": "TEMPORARY — web3 1.x family, removed with web3.", "parents": ["web3-core"], "reviewDate": "2026-06-01" },
-    { "package": "web3-core-promievent", "spdx": "LGPL-3.0", "reason": "TEMPORARY — web3 1.x family, removed with web3.", "parents": ["web3-core"], "reviewDate": "2026-06-01" },
-    { "package": "web3-core-requestmanager", "spdx": "LGPL-3.0", "reason": "TEMPORARY — web3 1.x family, removed with web3.", "parents": ["web3-core"], "reviewDate": "2026-06-01" },
-    { "package": "web3-core-subscriptions", "spdx": "LGPL-3.0", "reason": "TEMPORARY — web3 1.x family, removed with web3.", "parents": ["web3-core"], "reviewDate": "2026-06-01" },
-    { "package": "web3-eth", "spdx": "LGPL-3.0", "reason": "TEMPORARY — web3 1.x family, removed with web3.", "parents": ["web3"], "reviewDate": "2026-06-01" },
-    { "package": "web3-eth-abi", "spdx": "LGPL-3.0", "reason": "TEMPORARY — web3 1.x family, removed with web3.", "parents": ["web3-eth"], "reviewDate": "2026-06-01" },
-    { "package": "web3-eth-accounts", "spdx": "LGPL-3.0", "reason": "TEMPORARY — web3 1.x family, removed with web3.", "parents": ["web3-eth"], "reviewDate": "2026-06-01" },
-    { "package": "web3-eth-contract", "spdx": "LGPL-3.0", "reason": "TEMPORARY — web3 1.x family, removed with web3.", "parents": ["web3-eth"], "reviewDate": "2026-06-01" },
-    { "package": "web3-eth-ens", "spdx": "LGPL-3.0", "reason": "TEMPORARY — web3 1.x family, removed with web3.", "parents": ["web3-eth"], "reviewDate": "2026-06-01" },
-    { "package": "web3-eth-iban", "spdx": "LGPL-3.0", "reason": "TEMPORARY — web3 1.x family, removed with web3.", "parents": ["web3-eth"], "reviewDate": "2026-06-01" },
-    { "package": "web3-eth-personal", "spdx": "LGPL-3.0", "reason": "TEMPORARY — web3 1.x family, removed with web3.", "parents": ["web3-eth"], "reviewDate": "2026-06-01" },
-    { "package": "web3-net", "spdx": "LGPL-3.0", "reason": "TEMPORARY — web3 1.x family, removed with web3.", "parents": ["web3-eth"], "reviewDate": "2026-06-01" },
-    { "package": "web3-providers-http", "spdx": "LGPL-3.0", "reason": "TEMPORARY — web3 1.x family, removed with web3.", "parents": ["web3-core-requestmanager"], "reviewDate": "2026-06-01" },
-    { "package": "web3-providers-ipc", "spdx": "LGPL-3.0", "reason": "TEMPORARY — web3 1.x family, removed with web3.", "parents": ["web3-core-requestmanager"], "reviewDate": "2026-06-01" },
-    { "package": "web3-providers-ws", "spdx": "LGPL-3.0", "reason": "TEMPORARY — web3 1.x family, removed with web3.", "parents": ["web3-core-requestmanager"], "reviewDate": "2026-06-01" },
-    { "package": "web3-shh", "spdx": "LGPL-3.0", "reason": "TEMPORARY — web3 1.x family, removed with web3.", "parents": ["web3"], "reviewDate": "2026-06-01" },
-    { "package": "web3-utils", "spdx": "LGPL-3.0", "reason": "TEMPORARY — web3 1.x family, removed with web3.", "parents": ["web3-core"], "reviewDate": "2026-06-01" }
+    }
   ]
 }
