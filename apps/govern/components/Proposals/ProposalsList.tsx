@@ -159,6 +159,14 @@ export const ProposalsList = () => {
     }
   }, [query.proposalId]);
 
+  useEffect(() => {
+    // once proposals are loaded, scroll the deep-linked proposal into view
+    if (isLoading || !query.proposalId || typeof query.proposalId !== 'string') return;
+    document
+      .getElementById(`proposal-${query.proposalId}`)
+      ?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }, [isLoading, query.proposalId]);
+
   const handleExpand = (expanded: boolean, record: Proposal) => {
     const newKeys = expanded
       ? [...expandedRowKeys, record.proposalId]
@@ -207,6 +215,7 @@ export const ProposalsList = () => {
       loading={isLoading}
       dataSource={data}
       rowKey="id"
+      onRow={(record) => ({ id: `proposal-${record.proposalId}` })}
       expandable={{
         expandIcon: ({ expanded, onExpand, record }) => {
           const Icon = expanded ? DownOutlined : RightOutlined;

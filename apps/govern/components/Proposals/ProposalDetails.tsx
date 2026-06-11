@@ -1,10 +1,11 @@
-import { Col, Flex, Row, Skeleton, Typography } from 'antd';
+import { LinkOutlined } from '@ant-design/icons';
+import { Button, Col, Flex, Row, Skeleton, Typography } from 'antd';
 import { Block } from 'viem';
 import { mainnet } from 'viem/chains';
 import { useAccount, useBlock } from 'wagmi';
 
 import { Caption } from 'libs/ui-components/src';
-import { areAddressesEqual } from 'libs/util-functions/src';
+import { areAddressesEqual, notifySuccess } from 'libs/util-functions/src';
 import { AddressLink } from 'libs/ui-components/src';
 
 import { estimateFutureBlockTimestamp, getFullFormattedDate } from 'common-util/functions';
@@ -49,8 +50,19 @@ export const ProposalDetails = ({
   const startDateBlock = useBlockTimestamp(currentBlock, BigInt(item.startBlock));
   const endDateBlock = useBlockTimestamp(currentBlock, BigInt(item.endBlock));
 
+  const handleCopyLink = () => {
+    const url = `${window.location.origin}/proposals?proposalId=${item.proposalId}`;
+    navigator.clipboard.writeText(url);
+    notifySuccess('Link copied to clipboard');
+  };
+
   return (
     <Flex vertical>
+      <Flex justify="flex-end" className="mb-8">
+        <Button size="small" icon={<LinkOutlined />} onClick={handleCopyLink}>
+          Copy link
+        </Button>
+      </Flex>
       <Caption>Proposal description</Caption>
       <Paragraph className="mb-16">{item.description}</Paragraph>
       <Caption>Owner</Caption>
