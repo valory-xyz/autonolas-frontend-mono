@@ -2,7 +2,12 @@ import { render, waitFor } from '@testing-library/react';
 import { useEnsName } from 'wagmi';
 
 import AgentDetails from 'components/ListAgents/details';
-import { getAgentDetails, getAgentHashes, getAgentOwner, getTokenUri } from 'components/ListAgents/utils';
+import {
+  getAgentDetails,
+  getAgentHashes,
+  getAgentOwner,
+  getTokenUri,
+} from 'components/ListAgents/utils';
 import { NA } from 'libs/util-constants/src';
 
 import {
