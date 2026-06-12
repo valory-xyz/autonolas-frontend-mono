@@ -1,6 +1,7 @@
 import { Alert, Button } from 'antd';
 import PropTypes from 'prop-types';
 import { useEffect, useMemo, useState } from 'react';
+import { isAddress } from 'viem';
 import { useEnsName } from 'wagmi';
 
 import { NA } from 'libs/util-constants/src';
@@ -48,7 +49,15 @@ export const DetailsSubInfo = ({
   const [tokenAddress, setTokenAddress] = useState(null);
   const [canShowRewards, setCanShowRewards] = useState(null);
 
-  const { data: ownerEnsName } = useEnsName({ address: ownerAddress, chainId: 1 });
+  // Only attempt ENS reverse-resolution for a real address. `ownerAddress` is
+  // the `NA` ('n/a') placeholder until the owner read resolves; passing that to
+  // useEnsName makes viem encode 'n/a' into an ENS CCIP batch-gateway multicall,
+  // which the RPC rejects as "Invalid params" — and because the page's real
+  // reads are batched into the same multicall, they fail too (blank page).
+  const { data: ownerEnsName } = useEnsName({
+    address: isAddress(ownerAddress) ? ownerAddress : undefined,
+    chainId: 1,
+  });
 
   const { hashUrl, metadataLoadState, codeHref, nftImageUrl, description, version } =
     useMetadata(tokenUri);

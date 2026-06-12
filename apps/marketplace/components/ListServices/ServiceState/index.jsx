@@ -87,21 +87,25 @@ export const ServiceState = ({ isOwner = false, id, details = [], updateDetails 
   useEffect(() => {
     let isMounted = true;
     const getData = async () => {
-      if (id && (agentIds || []).length !== 0) {
-        const temp = isSvm
-          ? await getSvmServiceTableDataSource(id, agentIds || [])
-          : await getServiceTableDataSource(id, agentIds || []);
-        if (isMounted) {
-          setDataSource(temp);
+      try {
+        if (id && (agentIds || []).length !== 0) {
+          const temp = isSvm
+            ? await getSvmServiceTableDataSource(id, agentIds || [])
+            : await getServiceTableDataSource(id, agentIds || []);
+          if (isMounted) {
+            setDataSource(temp);
+          }
         }
-      }
-      // if valid service id, check if it's an eth token
-      // and SVM is not eth token
-      if (id && chainId && doesNetworkHaveValidServiceManagerToken && !isSvm) {
-        const isEth = await checkIfEth(id);
-        if (isMounted) {
-          setIsEthToken(isEth);
+        // if valid service id, check if it's an eth token
+        // and SVM is not eth token
+        if (id && chainId && doesNetworkHaveValidServiceManagerToken && !isSvm) {
+          const isEth = await checkIfEth(id);
+          if (isMounted) {
+            setIsEthToken(isEth);
+          }
         }
+      } catch (e) {
+        console.error(e);
       }
     };
 
