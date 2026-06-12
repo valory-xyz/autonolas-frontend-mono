@@ -32,7 +32,9 @@ import { transformDatasourceForServiceTable, transformSlotsAndBonds } from '../h
  */
 export const getBonds = async (id, tableDataSource) => {
   const chainId = requireChainId();
-  const response = await readContract(wagmiConfig, {
+  // viem returns multi-output reads as a positional array, not a named object
+  // (web3.js used to give `.agentParams`): getAgentParams -> [numAgentIds, agentParams]
+  const [, agentParams = []] = await readContract(wagmiConfig, {
     ...serviceRegistryParams(chainId),
     functionName: 'getAgentParams',
     args: [BigInt(id)],
@@ -40,13 +42,13 @@ export const getBonds = async (id, tableDataSource) => {
 
   const bondsArray = [];
   const slotsArray = [];
-  for (let i = 0; i < response.agentParams.length; i += 1) {
+  for (let i = 0; i < agentParams.length; i += 1) {
     /**
      * agentParams = [{ slots: 2, bond: 2000 }, { slots: 3, bond: 4000 }]
      * slotsArray = [2, 3]
      * bondsArray = [2000, 4000]
      */
-    const { bond, slots } = response.agentParams[i];
+    const { bond, slots } = agentParams[i];
     slotsArray.push(slots);
     bondsArray.push(bond);
   }
@@ -164,12 +166,14 @@ export const getServiceTableDataSource = async (id, agentIds) => {
    */
   const numAgentInstancesArray = await Promise.all(
     agentIds.map(async (agentId) => {
-      const info = await readContract(wagmiConfig, {
+      // viem returns multi-output reads as a positional array:
+      // getInstancesForAgentId -> [numAgentInstances, agentInstances]
+      const [numAgentInstances] = await readContract(wagmiConfig, {
         ...serviceRegistryParams(chainId),
         functionName: 'getInstancesForAgentId',
         args: [BigInt(id), BigInt(agentId)],
       });
-      return info.numAgentInstances;
+      return numAgentInstances;
     }),
   );
 
@@ -255,12 +259,14 @@ export const getTokenBondRequest = async (id, source) => {
 
 export const getServiceAgentInstances = async (id) => {
   const chainId = requireChainId();
-  const response = await readContract(wagmiConfig, {
+  // viem returns multi-output reads as a positional array:
+  // getAgentInstances -> [numAgentInstances, agentInstances]
+  const [, agentInstances] = await readContract(wagmiConfig, {
     ...serviceRegistryParams(chainId),
     functionName: 'getAgentInstances',
     args: [BigInt(id)],
   });
-  return response?.agentInstances;
+  return agentInstances;
 };
 
 export const onStep3Deploy = async (account, id, radioValue, payload = '0x') => {
@@ -281,13 +287,15 @@ export const onStep3Deploy = async (account, id, radioValue, payload = '0x') => 
 /* ----- step 4 functions ----- */
 export const getAgentInstanceAndOperator = async (id) => {
   const chainId = requireChainId();
-  const response = await readContract(wagmiConfig, {
+  // viem returns multi-output reads as a positional array:
+  // getAgentInstances -> [numAgentInstances, agentInstances]
+  const [, agentInstances] = await readContract(wagmiConfig, {
     ...serviceRegistryParams(chainId),
     functionName: 'getAgentInstances',
     args: [BigInt(id)],
   });
   const data = await Promise.all(
-    (response?.agentInstances || []).map(async (key, index) => {
+    (agentInstances || []).map(async (key, index) => {
       const operatorAddress = await readContract(wagmiConfig, {
         ...serviceRegistryParams(chainId),
         functionName: 'mapAgentInstanceOperators',
