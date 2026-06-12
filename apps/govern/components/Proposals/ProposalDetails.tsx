@@ -58,11 +58,6 @@ export const ProposalDetails = ({
 
   return (
     <Flex vertical>
-      <Flex justify="flex-end" className="mb-8">
-        <Button size="small" icon={<LinkOutlined />} onClick={handleCopyLink}>
-          Copy link
-        </Button>
-      </Flex>
       <Caption>Proposal description</Caption>
       <Paragraph className="mb-16">{item.description}</Paragraph>
       <Caption>Owner</Caption>
@@ -98,7 +93,12 @@ export const ProposalDetails = ({
         ))}
       </Flex>
       <Caption>Proposal ID</Caption>
-      <Paragraph className="mb-16">{item.id}</Paragraph>
+      <Flex align="center" gap={8} className="mb-16">
+        <Paragraph className="m-0">{item.id}</Paragraph>
+        <Button size="small" icon={<LinkOutlined />} onClick={handleCopyLink}>
+          Copy link
+        </Button>
+      </Flex>
 
       <Caption>Transaction</Caption>
       <a
