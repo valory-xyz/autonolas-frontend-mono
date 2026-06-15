@@ -53,7 +53,15 @@ Unlike other L2 chains (which use `0x` bridge payload and zero value), Arbitrum 
 - Contract references: [`ArbitrumDepositProcessorL1.sol`](https://github.com/valory-xyz/autonolas-tokenomics/blob/main/contracts/staking/ArbitrumDepositProcessorL1.sol), [`DefaultDepositProcessorL1.sol`](https://github.com/valory-xyz/autonolas-tokenomics/blob/main/contracts/staking/DefaultDepositProcessorL1.sol).
 - Tests: `common-util/functions/arbitrum-bridge.spec.ts` and `hooks/useClaimStakingIncentivesBatch.spec.ts`.
 
+## Proposal deep-linking
+
+Individual on-chain proposals are shareable via `/proposals?proposalId=<proposalId>`:
+
+- `components/Proposals/ProposalsList.tsx` reads `query.proposalId`, expands that row, and scrolls it into view (each row is anchored with `id="proposal-<proposalId>"` via `onRow`). Note the subgraph sets entity `id === proposalId`, so the table's `rowKey="id"` matches the `expandedRowKeys` (which use `proposalId`).
+- `components/Proposals/ProposalDetails.tsx` exposes a **Copy link** button that writes the absolute URL to the clipboard.
+
 ## Notes
 
 - Voting and delegation logic depends on governor contracts and subgraph; ensure correct chain and subgraph URL.
 - Balance and vote displays are wallet/contract-driven.
+- Quorum column: for settled/started proposals the displayed quorum equals on-chain `GovernorOLAS.quorum(startBlock)` (3% of veOLAS `getPastTotalSupply` at the snapshot block = creation + `votingDelay`, ~1.8 days). For not-yet-started proposals `hooks/useProposals.ts` shows an **approximate** value computed at the current block (prefixed `~`), identical across all pending proposals. `useBlock()` there is not pinned to `mainnet.id`, so status/approximation can be wrong if the wallet is on a non-mainnet chain.
