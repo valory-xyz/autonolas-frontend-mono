@@ -1,5 +1,7 @@
 /**
- * NOTE: Legacy code, needs to be refactored once gnosis.pm/safe-contracts updates ethers.js to v6
+ * NOTE: Safe multisig txs are built with local GPL-free helpers
+ * (common-util/functions/safeTransactions), replacing @gnosis.pm/safe-contracts (GPL-3.0).
+ * Still on ethers-v5 to match the historical encoding (verified byte-identical).
  *
  * How to test `onMultisigSubmit` function (step 3 in service)
  * - First, you’ll need two accounts; let's call them `account1` and `account2`.
@@ -35,10 +37,9 @@ import { safeMultiSend } from 'common-util/Contracts/addresses';
 import { SUPPORTED_CHAINS } from 'common-util/Login';
 import { wagmiConfig } from 'common-util/Login/config';
 import { checkIfGnosisSafe } from 'common-util/functions';
+import { buildMultisigUpdateSafeTx } from 'common-util/functions/safeTransactions';
 
 import { isHashApproved } from './helpers';
-
-const safeContracts = require('@gnosis.pm/safe-contracts');
 
 const ZEROS_24 = '0'.repeat(24);
 const ZEROS_64 = '0'.repeat(64);
@@ -75,44 +76,21 @@ export const onMultisigSubmit = async ({
   );
   const nonce = await multisigContract.nonce();
 
-  const callData = [];
-  const txs = [];
-
-  // Add the addresses, but keep the threshold the same
-  for (let i = 0; i < agentInstances.length; i += 1) {
-    callData[i] = multisigContract.interface.encodeFunctionData('addOwnerWithThreshold', [
-      agentInstances[i],
-      1,
-    ]);
-    txs[i] = safeContracts.buildSafeTransaction({
-      to: multisig,
-      data: callData[i],
-      nonce: 0,
-    });
-  }
-
-  callData.push(
-    multisigContract.interface.encodeFunctionData('removeOwner', [
-      agentInstances[0],
-      serviceOwner,
-      threshold,
-    ]),
-  );
-  txs.push(
-    safeContracts.buildSafeTransaction({
-      to: multisig,
-      data: callData[callData.length - 1],
-      nonce: 0,
-    }),
-  );
-
   const multiSendContract = new ethers.Contract(
     safeMultiSend[chainId][0],
     MULTI_SEND_CONTRACT.abi,
     ethers.getDefaultProvider(RPC_URLS[chainId]),
   );
 
-  const safeTx = safeContracts.buildMultiSendSafeTx(multiSendContract, txs, nonce);
+  const safeTx = buildMultisigUpdateSafeTx({
+    multisigInterface: multisigContract.interface,
+    multiSendContract,
+    multisig,
+    agentInstances,
+    serviceOwner,
+    threshold,
+    nonce,
+  });
   const provider = getEthersV5Provider(SUPPORTED_CHAINS, RPC_URLS);
   const isSafe = await checkIfGnosisSafe(account, provider);
 
