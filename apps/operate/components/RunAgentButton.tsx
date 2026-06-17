@@ -24,6 +24,11 @@ const props: Record<AvailableOn, { icon: ReactNode; text: string; href: string }
     text: 'Contribute',
     href: 'https://contribute.olas.network/staking',
   },
+  lst: {
+    icon: <Image src={`/images/lst.svg`} alt="LST" width={18} height={18} />,
+    text: 'LST',
+    href: 'https://lstolas.xyz/',
+  },
 };
 
 export const RunAgentButton = ({ availableOn, type = 'text', className }: RunAgentButtonProps) => {

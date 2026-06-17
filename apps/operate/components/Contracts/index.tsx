@@ -144,6 +144,8 @@ const getTableColumns = (): ColumnsType<StakingContract> => [
             <br />
             <Text strong>Contribute</Text> - web app that enables you to get rewards for posting
             about Olas on X.
+            <br />
+            <Text strong>LST</Text> - Liquid staking with stOLAS.
           </>
         }
       />

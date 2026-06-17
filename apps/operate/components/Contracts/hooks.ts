@@ -17,6 +17,7 @@ import {
   SubgraphStakingRow,
 } from 'common-util/graphql';
 import {
+  EXTRA_STAKING_CONTRACTS,
   STAKING_CONTRACT_DETAILS,
   getApy,
   getStakeRequired,
@@ -238,12 +239,21 @@ export const useStakingContractsList = () => {
   // Get nominees list
   const { data: nomineesData, isFetching: isNomineesLoading } = useNominees();
   const nominees = useMemo(() => {
-    return (nomineesData || []).filter(
+    const filtered = (nomineesData || []).filter(
       (nominee) =>
         !BLACKLISTED_STAKING_ADDRESSES.some((blackListedNominee) =>
           areAddressesEqual(blackListedNominee, getAddressFromBytes32(nominee.account)),
         ),
     );
+
+    // Surface contracts that are no longer (or not yet) registered as nominees but
+    // should still be listed (see EXTRA_STAKING_CONTRACTS). Skip any already present.
+    const existingAccounts = new Set(filtered.map((n) => n.account.toLowerCase()));
+    const extras = EXTRA_STAKING_CONTRACTS.filter(
+      (extra) => !existingAccounts.has(extra.account.toLowerCase()),
+    );
+
+    return [...filtered, ...extras];
   }, [nomineesData]);
 
   const cacheMap = useContractCacheMap(nominees);
