@@ -19,12 +19,28 @@ import { RpcUrl } from 'libs/util-functions/src/lib/sendTransaction/types';
 import { MARKETPLACE_SUPPORTED_CHAIN_IDS } from '../../util/constants';
 import { RPC_URLS } from 'libs/util-constants/src';
 import { SUPPORTED_CHAINS } from '../Login';
-import { EVM_SUPPORTED_CHAINS, SVM_SUPPORTED_CHAINS, SolanaChain } from '../Login/config';
+import {
+  ALL_SUPPORTED_CHAINS,
+  EVM_SUPPORTED_CHAINS,
+  SVM_SUPPORTED_CHAINS,
+  SolanaChain,
+} from '../Login/config';
 import { VM_TYPE } from 'libs/util-constants/src';
 
 // TODO: provide types for MODAL_PROVIDER
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const getModalProvider = () => (window as any)?.MODAL_PROVIDER;
+
+/**
+ * Maps a route network slug (e.g. "ethereum", "arbitrum-one") to its display
+ * name (e.g. "Ethereum", "Arbitrum One"). Used to differentiate page meta titles
+ * across networks so the same list type on different chains is not a duplicate.
+ */
+export const getNetworkDisplayName = (network?: string | string[]): string | null => {
+  if (typeof network !== 'string') return null;
+  const chain = ALL_SUPPORTED_CHAINS.find((c) => c.networkName === network);
+  return chain?.networkDisplayName ?? null;
+};
 
 // TODO: provide types for ethereum
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

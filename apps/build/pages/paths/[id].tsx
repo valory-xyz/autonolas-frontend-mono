@@ -31,21 +31,32 @@ const markdownOptions = {
 const PathDetailPage = () => {
   const { pathData, loading, markdownContent } = useFetchPathData();
 
-  if (loading) {
-    return (
-      <Container>
-        <div style={{ textAlign: 'center', padding: '50px 0' }}>
-          <Spin />
-        </div>
-      </Container>
-    );
-  }
-
-  if (!pathData) {
+  if (!loading && !pathData) {
     return (
       <Container>
         <Typography.Title level={2}>Path not found</Typography.Title>
       </Container>
+    );
+  }
+
+  // Render Meta as soon as the path entry is resolved (synchronously, incl. SSR)
+  // so crawlers always receive the per-path title/description.
+  if (loading || !pathData) {
+    return (
+      <>
+        {pathData && (
+          <Meta
+            title={pathData.name}
+            description={pathData.description}
+            path={`paths/${pathData.id}`}
+          />
+        )}
+        <Container>
+          <div style={{ textAlign: 'center', padding: '50px 0' }}>
+            <Spin />
+          </div>
+        </Container>
+      </>
     );
   }
 

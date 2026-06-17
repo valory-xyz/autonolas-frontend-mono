@@ -1,5 +1,5 @@
 import { useRouter } from 'next/router';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 
 import paths from 'components/Paths/data.json';
 
@@ -25,47 +25,42 @@ type PathData = {
 export const useFetchPathData = () => {
   const router = useRouter();
   const { id } = router.query;
-  const [pathData, setPathData] = useState<PathData>(null);
+
+  // Resolve the path entry synchronously so the title/description are available
+  // during SSR (the route param is present server-side via _app's getInitialProps).
+  // This ensures crawlers receive per-path meta tags instead of the default ones.
+  const pathData = useMemo<PathData>(() => {
+    if (!id || typeof id !== 'string') return null;
+    return paths.find((path) => path.id === id) ?? null;
+  }, [id]);
+
   const [markdownContent, setMarkdownContent] = useState<string>('');
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (!id || typeof id !== 'string') return;
 
-    const fetchPathData = async () => {
+    if (!pathData) {
+      setMarkdownContent('');
+      setLoading(false);
+      return;
+    }
+
+    const fetchMarkdown = async () => {
       try {
         setLoading(true);
-        const pathDetails = paths.find((path) => path.id === id);
-
-        if (!pathDetails) {
-          setPathData(null);
-          setMarkdownContent('');
-          setLoading(false);
-          return;
-        }
-
-        setPathData(pathDetails);
-
-        // Fetch markdown content
-        const response = await fetch(`/${pathDetails.markdownPath}`);
-
-        if (response.ok) {
-          const content = await response.text();
-          setMarkdownContent(content);
-        } else {
-          setMarkdownContent('');
-        }
+        const response = await fetch(`/${pathData.markdownPath}`);
+        setMarkdownContent(response.ok ? await response.text() : '');
       } catch (error) {
         console.error('Error fetching path data:', error);
-        setPathData(null);
         setMarkdownContent('');
       } finally {
         setLoading(false);
       }
     };
 
-    fetchPathData();
-  }, [id]);
+    fetchMarkdown();
+  }, [id, pathData]);
 
   return { pathData, loading, markdownContent };
 };

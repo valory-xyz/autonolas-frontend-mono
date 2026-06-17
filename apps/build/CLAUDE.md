@@ -38,3 +38,4 @@ Create and manage **staking contracts** for Olas: deploy and configure staking c
 ## Notes
 
 - Staking contract addresses and ABIs come from `util-contracts` and app config; ensure correct chain when reading/writing.
+- SEO: `pages/paths/[id].tsx` is SSR'd (no `getStaticProps`). `common-util/hooks/useFetchPathData.ts` resolves `pathData` **synchronously** (via `useMemo` from `components/Paths/data.json`) so the per-path `<title>`/`<meta>` render server-side for crawlers; only the markdown body is fetched async. Keep `<Meta>` rendered whenever `pathData` exists (including the loading state) — don't move it behind the spinner, or every path page falls back to the default title/description (duplicate-meta regression). `components/Meta.tsx` also emits a canonical link from `path`.

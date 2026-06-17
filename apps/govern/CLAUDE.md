@@ -59,6 +59,7 @@ Individual on-chain proposals are shareable via `/proposals?proposalId=<proposal
 
 - `components/Proposals/ProposalsList.tsx` reads `query.proposalId`, expands that row, and scrolls it into view (each row is anchored with `id="proposal-<proposalId>"` via `onRow`). Note the subgraph sets entity `id === proposalId`, so the table's `rowKey="id"` matches the `expandedRowKeys` (which use `proposalId`).
 - `components/Proposals/ProposalDetails.tsx` exposes a **Copy link** button that writes the absolute URL to the clipboard.
+- SEO: `/proposals?proposalId=...` is a deep-link variant of `/proposals`, not a distinct page. `components/Meta.tsx` emits `<link rel="canonical">` from `pageUrl` (query-string-free), so query-param variants consolidate onto the canonical `/proposals` URL instead of being flagged as duplicate titles.
 
 ## Notes
 
