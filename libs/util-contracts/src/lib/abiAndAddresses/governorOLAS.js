@@ -1,7 +1,7 @@
 export const GOVERNOR_OLAS = {
   contractName: 'GovernorOLAS',
   addresses: {
-    1: '0x8e84b5055492901988b831817e4ace5275a3b401',
+    1: '0x060D0CBdDFb0498d610E2EF55C01516B5B1251E6',
   },
   abi: [
     {
@@ -36,6 +36,11 @@ export const GOVERNOR_OLAS = {
           name: 'quorumFraction',
           type: 'uint256',
         },
+        {
+          internalType: 'uint256',
+          name: 'initialGovernorDelay',
+          type: 'uint256',
+        },
       ],
       stateMutability: 'nonpayable',
       type: 'constructor',
@@ -44,6 +49,35 @@ export const GOVERNOR_OLAS = {
       inputs: [],
       name: 'Empty',
       type: 'error',
+    },
+    {
+      inputs: [
+        {
+          internalType: 'uint256',
+          name: 'provided',
+          type: 'uint256',
+        },
+        {
+          internalType: 'uint256',
+          name: 'min',
+          type: 'uint256',
+        },
+      ],
+      name: 'Underflow',
+      type: 'error',
+    },
+    {
+      anonymous: false,
+      inputs: [
+        {
+          indexed: false,
+          internalType: 'uint256',
+          name: 'newGovernorDelay',
+          type: 'uint256',
+        },
+      ],
+      name: 'GovernorDelayChange',
+      type: 'event',
     },
     {
       anonymous: false,
@@ -729,6 +763,19 @@ export const GOVERNOR_OLAS = {
       type: 'function',
     },
     {
+      inputs: [],
+      name: 'governorDelay',
+      outputs: [
+        {
+          internalType: 'uint256',
+          name: '',
+          type: 'uint256',
+        },
+      ],
+      stateMutability: 'view',
+      type: 'function',
+    },
+    {
       inputs: [
         {
           internalType: 'uint256',
@@ -1198,6 +1245,25 @@ export const GOVERNOR_OLAS = {
       type: 'function',
     },
     {
+      inputs: [
+        {
+          internalType: 'uint256',
+          name: 'blockNumber',
+          type: 'uint256',
+        },
+      ],
+      name: 'quorumNumerator',
+      outputs: [
+        {
+          internalType: 'uint256',
+          name: '',
+          type: 'uint256',
+        },
+      ],
+      stateMutability: 'view',
+      type: 'function',
+    },
+    {
       inputs: [],
       name: 'quorumNumerator',
       outputs: [
@@ -1243,7 +1309,7 @@ export const GOVERNOR_OLAS = {
       ],
       name: 'relay',
       outputs: [],
-      stateMutability: 'nonpayable',
+      stateMutability: 'payable',
       type: 'function',
     },
     {
@@ -1347,6 +1413,19 @@ export const GOVERNOR_OLAS = {
         },
       ],
       stateMutability: 'view',
+      type: 'function',
+    },
+    {
+      inputs: [
+        {
+          internalType: 'uint256',
+          name: 'newGovernorDelay',
+          type: 'uint256',
+        },
+      ],
+      name: 'updateGovernorDelay',
+      outputs: [],
+      stateMutability: 'nonpayable',
       type: 'function',
     },
     {
