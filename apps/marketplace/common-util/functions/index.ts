@@ -38,7 +38,10 @@ export const getModalProvider = () => (window as any)?.MODAL_PROVIDER;
  */
 export const getNetworkDisplayName = (network?: string | string[]): string | null => {
   if (typeof network !== 'string') return null;
-  const chain = ALL_SUPPORTED_CHAINS.find((c) => c.networkName === network);
+  // Match case-insensitively: route validation (useHandleRoute) accepts mixed-case
+  // slugs, so a slug like "Gnosis" should still resolve to its display name.
+  const slug = network.toLowerCase();
+  const chain = ALL_SUPPORTED_CHAINS.find((c) => c.networkName.toLowerCase() === slug);
   return chain?.networkDisplayName ?? null;
 };
 
