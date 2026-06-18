@@ -14,11 +14,13 @@ type MetaProps = {
 
 const Meta = ({ title, description, path }: MetaProps) => {
   const pageTitle = title ? `${title} | ${SITE_TITLE}` : SITE_TITLE;
-  const pageUrl = `${SITE_URL}${path}`;
+  const pageUrl = `${SITE_URL}${path || ''}`;
 
   return (
     <Head>
       <title>{pageTitle}</title>
+      {/* Canonical URL (without query string) to consolidate duplicate URL variants */}
+      <link rel="canonical" href={pageUrl} key="canonical" />
 
       <meta name="title" content={pageTitle} />
       <meta name="description" content={description || SITE_DESCRIPTION} />

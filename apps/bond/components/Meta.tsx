@@ -19,6 +19,8 @@ export const Meta = ({ pageTitle, description, pageUrl }: MetaProps) => {
     <Head>
       {/* <!-- Primary Meta Tags --> */}
       <title>{title}</title>
+      {/* Canonical URL (without query string) to consolidate duplicate URL variants */}
+      <link rel="canonical" href={url} key="canonical" />
       <meta name="title" content={title} key="title" />
       <meta name="description" content={description || SITE_DESCRIPTION} key="description" />
 

@@ -31,17 +31,7 @@ const markdownOptions = {
 const PathDetailPage = () => {
   const { pathData, loading, markdownContent } = useFetchPathData();
 
-  if (loading) {
-    return (
-      <Container>
-        <div style={{ textAlign: 'center', padding: '50px 0' }}>
-          <Spin />
-        </div>
-      </Container>
-    );
-  }
-
-  if (!pathData) {
+  if (!loading && !pathData) {
     return (
       <Container>
         <Typography.Title level={2}>Path not found</Typography.Title>
@@ -49,13 +39,31 @@ const PathDetailPage = () => {
     );
   }
 
+  // Resolved synchronously (incl. SSR), so this lands in the initial server HTML
+  // and crawlers always receive the per-path title/description.
+  const meta = pathData && (
+    <Meta title={pathData.name} description={pathData.description} path={`paths/${pathData.id}`} />
+  );
+
+  // `!pathData` is kept for type-narrowing: it lets TS treat pathData as
+  // non-null in the final return below (after the first guard, !pathData
+  // implies loading, so this stays behaviourally equivalent to `if (loading)`).
+  if (loading || !pathData) {
+    return (
+      <>
+        {meta}
+        <Container>
+          <div style={{ textAlign: 'center', padding: '50px 0' }}>
+            <Spin />
+          </div>
+        </Container>
+      </>
+    );
+  }
+
   return (
     <PageWrapper>
-      <Meta
-        title={pathData.name}
-        description={pathData.description}
-        path={`paths/${pathData.id}`}
-      />
+      {meta}
       <Container>
         <Typography.Title className="mt-0 mb-16" level={1}>
           {pathData.name}
