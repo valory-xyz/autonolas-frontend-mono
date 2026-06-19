@@ -1,6 +1,6 @@
 import { Address, formatEther } from 'viem';
 
-import { StakingContract } from 'types';
+import { Nominee, StakingContract } from 'types';
 
 const ONE_YEAR = 1 * 24 * 60 * 60 * 365;
 
@@ -50,7 +50,7 @@ export const STAKING_CONTRACT_DETAILS: Record<Address, StakingContractDetailsInf
   },
   // Modius Alpha IV
   '0x0000000000000000000000008bcadb2c291c159f9385964e5ed95a9887302862': {
-    availableOn: ['pearl'],
+    availableOn: ['lst'],
   },
   // MemeBase Beta I
   '0x0000000000000000000000006011e09e7c095e76980b22498d69df18eb62bed8': {
@@ -128,7 +128,47 @@ export const STAKING_CONTRACT_DETAILS: Record<Address, StakingContractDetailsInf
   '0x0000000000000000000000008887c2852986e7cbac99b6065ffe53074a6bcc26': {
     availableOn: ['pearl'],
   },
+  // Quickstart Beta - Expert 5
+  '0x000000000000000000000000e56df1e563de1b10715cb313d514af350d207212': {
+    availableOn: ['lst'],
+  },
+  // LST
+  '0x00000000000000000000000022fa631064a99c43196ec5f8324b73211ced98f9': {
+    availableOn: ['lst'],
+  },
+  // Quickstart Beta Mech MarketPlace - Expert 7
+  '0x000000000000000000000000aaecdf4d0cbd6ca0622892ac6044472f3912a5f3': {
+    availableOn: ['lst'],
+  },
+  // Quickstart Beta Mech MarketPlace - Expert 12
+  '0x00000000000000000000000099fe6b5c9980fc3a44b1dc32a76db6adfcf4c75e': {
+    availableOn: ['lst'],
+  },
+  // Quickstart Beta Mech MarketPlace - Expert 13
+  '0x0000000000000000000000001f81cf353051daa8919d1777c58b667025794ddc': {
+    availableOn: ['lst'],
+  },
 };
+
+/**
+ * Staking contracts to display on the contracts page even though they are not
+ * currently registered as nominees in the VoteWeighting contract (e.g. de-nominated
+ * but still relevant for a platform). These are merged into the nominees list and
+ * fetched via RPC like any other contract. Live data (rewards pool, available slots)
+ * will reflect their real on-chain state, which may be zero for drained contracts.
+ */
+export const EXTRA_STAKING_CONTRACTS: Nominee[] = [
+  // Modius Alpha IV (Mode)
+  {
+    account: '0x0000000000000000000000008bcadb2c291c159f9385964e5ed95a9887302862',
+    chainId: 34443n,
+  },
+  // Quickstart Beta - Expert 5 (Gnosis)
+  {
+    account: '0x000000000000000000000000e56df1e563de1b10715cb313d514af350d207212',
+    chainId: 100n,
+  },
+];
 
 export const getApy = (
   rewardsPerSecond: bigint,

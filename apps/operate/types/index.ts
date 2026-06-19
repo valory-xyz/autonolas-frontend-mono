@@ -5,7 +5,7 @@ export type Metadata = {
   description: string;
 };
 
-export type AvailableOn = 'pearl' | 'contribute';
+export type AvailableOn = 'pearl' | 'contribute' | 'lst';
 
 export type StakingContract = {
   key: Address;
