@@ -138,7 +138,11 @@ export const ContractPage = () => {
 
   return (
     <>
-      <Meta pageTitle={contract.metadata.name} description={contract.metadata.description} />
+      <Meta
+        pageTitle={contract.metadata.name}
+        description={contract.metadata.description}
+        pageUrl={`contracts/${contract.address.toLowerCase()}`}
+      />
 
       <StyledMain>
         <ContractPageContent contract={contract} />

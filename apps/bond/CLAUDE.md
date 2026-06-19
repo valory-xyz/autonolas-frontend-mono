@@ -39,4 +39,5 @@ Bonding products for Olas: buy/sell OLAS and related tokens. Supports **EVM** (B
 ## Notes
 
 - Some files are still `.jsx`; follow existing patterns when adding or refactoring.
+- SEO: pages set per-page titles/descriptions via `components/Meta.tsx`, which also emits a `<link rel="canonical">` from `pageUrl` (query-string-free). Give each page a distinct `pageTitle` (the home page intentionally uses the bare `Olas Bond` brand title).
 - Solana and EVM flows are both used; ensure the right wallet and network are considered for each feature.

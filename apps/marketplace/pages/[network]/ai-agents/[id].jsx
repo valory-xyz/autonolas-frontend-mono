@@ -2,6 +2,7 @@ import dynamic from 'next/dynamic';
 import { useRouter } from 'next/router';
 
 import { Meta } from '../../../components/Meta';
+import { getNetworkDisplayName } from '../../../common-util/functions';
 import { getServiceMetadataServerSide } from '../../../common-util/functions/serverSideMetadata';
 
 const ServiceDetails = dynamic(() => import('../../../components/ListServices/details'), {
@@ -21,12 +22,13 @@ const MINT_SLUG = 'mint';
 const AIAgentDetails = ({ agentMetadata }) => {
   const router = useRouter();
   const { network, id } = router.query;
+  const networkName = getNetworkDisplayName(network);
 
   if (id === MINT_SLUG) {
     return (
       <>
         <Meta
-          pageTitle="Mint AI Agent"
+          pageTitle={networkName ? `Mint AI Agent on ${networkName}` : 'Mint AI Agent'}
           description="Register a new AI agent on-chain. Mint your autonomous agent to the Olas registry and make it discoverable in the marketplace."
           pageUrl={`${network || ''}/ai-agents/mint`}
         />

@@ -194,3 +194,8 @@ Tracks **requests** (demand) and **deliveries** (supply) for mech services.
 - L1-only features (agents, components) must check `isL1Network()`.
 - Marketplace activity features available on chains in `MARKETPLACE_SUPPORTED_CHAIN_IDS`.
 - ERC8004 endpoints are server-side API routes; they fetch from registry subgraph + IPFS.
+
+### SEO / Meta
+
+- `components/Meta.tsx` renders per-page `<title>`/`<meta>` plus a `<link rel="canonical">` built from `pageUrl` (query-string-free) — pass clean `pageUrl` values (no `?legacy=`, `?activity=`, etc.) so query-param variants consolidate onto one canonical URL.
+- Since list pages exist per network, their titles must include the network or the same list type on different chains is a duplicate title. Use `getNetworkDisplayName(network)` (`common-util/functions`) to map the route slug (e.g. `arbitrum-one`) to a display name (e.g. `Arbitrum One`); the AI Agents list/mint and `[network]` dashboard build titles like `AI Agents on Gnosis`.
