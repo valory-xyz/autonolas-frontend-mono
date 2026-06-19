@@ -1,7 +1,10 @@
 import '@testing-library/jest-dom';
-import { render, screen } from '@testing-library/react';
-import { useAccount } from 'wagmi';
+import { render, screen, waitFor } from '@testing-library/react';
+import { useParams } from 'next/navigation';
+import { mainnet } from 'viem/chains';
+import { useAccount, useSwitchChain } from 'wagmi';
 
+import { addNominee } from 'common-util/functions/web3';
 import { useAppSelector } from 'store/index';
 
 import { NominateContract } from './index';
@@ -15,9 +18,7 @@ jest.mock('next/navigation', () => ({
 }));
 jest.mock('next/router', () => ({
   useRouter: jest.fn().mockReturnValue({
-    router: {
-      replace: jest.fn(),
-    },
+    replace: jest.fn(),
   }),
 }));
 
@@ -159,5 +160,83 @@ describe('<NominateContract/>', () => {
 
     expect(screen.getByText(/Nominating staking contract.../)).toBeInTheDocument();
     expect(screen.getByText(/Waiting for transaction.../)).toBeInTheDocument();
+  });
+
+  // Regression tests for the runaway-transactions bug: background data refreshes
+  // recreate the nominate/switch callbacks, re-running the trigger effect. Without
+  // the ref guards (and the per-contract `key`), this fired a fresh transaction on
+  // every re-render — flooding the wallet with hundreds of signatures.
+  describe('auto-trigger guards', () => {
+    const oneContractOnMainnet = () => {
+      (useAccount as jest.Mock).mockReturnValue({ address: '0xMyAddress', chainId: mainnet.id });
+      // A fresh array/object on every render mimics Redux re-dispatching a new
+      // myStakingContracts reference from background wagmi refetches.
+      (useAppSelector as jest.Mock).mockImplementation(() => ({
+        networkDisplayName: 'Ethereum',
+        networkName: 'ethereum',
+        myStakingContracts: [{ id: '0x12345', name: 'My Staking Contract', isNominated: false }],
+      }));
+    };
+
+    it('should call addNominee only once despite repeated re-renders', async () => {
+      oneContractOnMainnet();
+
+      const { rerender } = render(<NominateContract />);
+
+      // Force re-renders, each producing a new contractInfo identity.
+      for (let i = 0; i < 5; i += 1) {
+        rerender(<NominateContract />);
+      }
+
+      await waitFor(() => expect(addNominee).toHaveBeenCalledTimes(1));
+    });
+
+    it('should attempt the network switch only once when on the wrong chain', async () => {
+      const switchChainAsync = jest.fn().mockResolvedValue(undefined);
+      (useSwitchChain as jest.Mock).mockReturnValue({ switchChainAsync });
+      // Gnosis (100), i.e. not mainnet.
+      (useAccount as jest.Mock).mockReturnValue({ address: '0xMyAddress', chainId: 100 });
+      (useAppSelector as jest.Mock).mockImplementation(() => ({
+        networkDisplayName: 'Gnosis',
+        networkName: 'gnosis',
+        myStakingContracts: [{ id: '0x12345', name: 'My Staking Contract', isNominated: false }],
+      }));
+
+      const { rerender } = render(<NominateContract />);
+      for (let i = 0; i < 5; i += 1) {
+        rerender(<NominateContract />);
+      }
+
+      await waitFor(() => expect(switchChainAsync).toHaveBeenCalledTimes(1));
+      // Still on the wrong chain, so the nominate transaction must not fire.
+      expect(addNominee).not.toHaveBeenCalled();
+    });
+
+    it('should nominate again when navigating to a different contract', async () => {
+      (useAccount as jest.Mock).mockReturnValue({ address: '0xMyAddress', chainId: mainnet.id });
+      (useAppSelector as jest.Mock).mockImplementation(() => ({
+        networkDisplayName: 'Ethereum',
+        networkName: 'ethereum',
+        myStakingContracts: [
+          { id: '0x11111', name: 'Contract A', isNominated: false },
+          { id: '0x22222', name: 'Contract B', isNominated: false },
+        ],
+      }));
+
+      let currentId = '0x11111';
+      (useParams as jest.Mock).mockImplementation(() => ({ id: currentId }));
+
+      const { rerender } = render(<NominateContract />);
+      await waitFor(() => expect(addNominee).toHaveBeenCalledTimes(1));
+      expect(addNominee).toHaveBeenLastCalledWith(expect.objectContaining({ address: '0x11111' }));
+
+      // Switch to another contract on the same route — the `key` remounts the
+      // inner component, resetting the guard so the new contract is nominated.
+      currentId = '0x22222';
+      rerender(<NominateContract />);
+
+      await waitFor(() => expect(addNominee).toHaveBeenCalledTimes(2));
+      expect(addNominee).toHaveBeenLastCalledWith(expect.objectContaining({ address: '0x22222' }));
+    });
   });
 });

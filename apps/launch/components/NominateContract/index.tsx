@@ -1,6 +1,6 @@
 import { useParams } from 'next/navigation';
 import { useRouter } from 'next/router';
-import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
+import React, { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { mainnet } from 'viem/chains';
 import { useAccount, useSwitchChain } from 'wagmi';
 
@@ -45,6 +45,14 @@ const NominatedContractContent: FC<NominatedContractContentProps> = ({
   const [isSuccessful, setIsSuccessful] = useState(false);
   const [error, setError] = useState<ErrorType>(null);
 
+  // Guards so the auto-triggered network switch and nominate transaction each fire
+  // at most once. Without these, background data refreshes (e.g. wagmi reads in
+  // useGetMyStakingContracts re-dispatching myStakingContracts) recreate the
+  // callbacks below, re-running the effect and enqueuing duplicate transactions
+  // while a transaction is still awaiting signature.
+  const hasSwitchedRef = useRef(false);
+  const hasNominatedRef = useRef(false);
+
   const switchNetworkCallback = useCallback(async () => {
     try {
       setIsPending(true);
@@ -82,11 +90,21 @@ const NominatedContractContent: FC<NominatedContractContentProps> = ({
   }, [account, contractInfo, dispatch, networkName, router]);
 
   useEffect(() => {
+    if (!account) return;
+
     if (chainId !== mainnet.id) {
+      // Prompt the network switch only once; on failure we show SwitchNetworkError
+      // rather than re-prompting in a loop.
+      if (hasSwitchedRef.current) return;
+      hasSwitchedRef.current = true;
       switchNetworkCallback();
-    } else {
-      addNomineeCallback();
+      return;
     }
+
+    // On mainnet: fire the nominate transaction exactly once.
+    if (hasNominatedRef.current) return;
+    hasNominatedRef.current = true;
+    addNomineeCallback();
   }, [chainId, account, addNomineeCallback, switchNetworkCallback]);
 
   const transactionInfo = useMemo(() => {
@@ -149,8 +167,9 @@ export const NominateContract = () => {
   return (
     <Container>
       <NominatedContractContent
+        key={contractInfo.id}
         contractName={contractName}
-        contractInfo={myStakingContracts[contractIndex]}
+        contractInfo={contractInfo}
       />
     </Container>
   );
