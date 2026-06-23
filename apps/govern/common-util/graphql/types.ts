@@ -14,7 +14,9 @@ export type Proposal = {
   description: string;
   votesFor: string;
   votesAgainst: string;
-  quorum: string;
+  // null when the subgraph has no quorum yet (e.g. a proposal that is not
+  // finalized) and the on-chain backfill in `useProposals` could not resolve it
+  quorum: string | null;
   transactionHash: string;
   voteCasts: {
     id: string;

@@ -24,9 +24,9 @@ export const VOTES_SORTED: VoteSupport[] = [
   VoteSupport.Abstain,
 ];
 
-export const formatWeiToEth = (value: string) =>
+export const formatWeiToEth = (value: string | null | undefined) =>
   formatWeiNumber({
-    value: ethers.formatUnits(value, 18),
+    value: value == null ? undefined : ethers.formatUnits(value, 18),
     maximumFractionDigits: 3,
   });
 
@@ -56,6 +56,11 @@ export const getUserVote = (proposal: Proposal, address: Address) =>
  */
 export const isQuorumReached = (proposal: Proposal) => {
   const { votesFor, quorum } = proposal;
+  // Quorum can be unavailable (e.g. a not-yet-finalized proposal whose on-chain
+  // quorum could not be backfilled). Without it we cannot confirm the quorum was
+  // reached, so treat it as not reached rather than crashing on BigInt(null).
+  if (quorum == null) return false;
+
   const votesForBigInt = BigInt(votesFor);
   const quorumBigInt = BigInt(quorum);
 
