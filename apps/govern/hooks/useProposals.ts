@@ -13,7 +13,10 @@ import { getProposals } from 'common-util/graphql/queries';
 import { useAppSelector } from 'store/index';
 
 export const useProposals = () => {
-  const { data: block, isLoading: isBlockLoading } = useBlock();
+  // Proposals' startBlock/endBlock and GovernorOLAS live on mainnet, so the
+  // current block used for status/quorum comparisons must come from mainnet too
+  // (otherwise a non-mainnet wallet yields meaningless block-number comparisons).
+  const { data: block, isLoading: isBlockLoading } = useBlock({ chainId: mainnet.id });
   const { proposalVotes } = useAppSelector((state) => state.govern);
 
   const { data: proposals, isLoading: isProposalsLoading } = useQuery({
@@ -62,7 +65,7 @@ export const useProposals = () => {
         // update the result with quorums
         return proposals.proposalCreateds.map((item) => ({
           ...item,
-          quorum: item.quorum || quorumByProposalId[item.proposalId],
+          quorum: item.quorum || quorumByProposalId[item.proposalId] || null,
         }));
       }
 
