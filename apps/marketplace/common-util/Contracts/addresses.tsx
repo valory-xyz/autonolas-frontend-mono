@@ -103,36 +103,6 @@ export const multisigAddresses: MultisigAddress = {
 };
 
 /**
- * check addresses here - GnosisSafeSameAddressMultisig
- * Addresses: https://github.com/valory-xyz/autonolas-registries/blob/main/docs/configuration.json
- */
-export const multisigSameAddresses: MultisigAddress = {
-  [mainnet.id]: ['0xfa517d01DaA100cB1932FA4345F68874f7E7eF46'],
-  [optimism.id]: ['0xb09CcF0Dbf0C178806Aaee28956c74bd66d21f73'],
-  [gnosis.id]: ['0x6e7f594f680f7aBad18b7a63de50F0FeE47dfD06'],
-  [polygon.id]: ['0xd8BCC126ff31d2582018715d5291A508530587b0'],
-  [base.id]: ['0xFbBEc0C8b13B38a9aC0499694A69a10204c5E2aB'],
-  [arbitrum.id]: ['0xBb7e1D6Cb6F243D6bdE81CE92a9f2aFF7Fbe7eac'],
-  [celo.id]: ['0xBb7e1D6Cb6F243D6bdE81CE92a9f2aFF7Fbe7eac'],
-  [mode.id]: ['0xFbBEc0C8b13B38a9aC0499694A69a10204c5E2aB'],
-};
-
-/**
- * check addresses here - MultiSendCallOnly
- * https://github.com/safe-global/safe-deployments/blob/main/src/assets/v1.3.0/multi_send_call_only.json
- */
-export const safeMultiSend: MultisigAddress = {
-  [mainnet.id]: ['0x40A2aCCbd92BCA938b02010E17A5b8929b49130D'],
-  [optimism.id]: ['0xA1dabEF33b3B82c7814B6D82A79e50F4AC44102B'],
-  [gnosis.id]: ['0x40A2aCCbd92BCA938b02010E17A5b8929b49130D'],
-  [polygon.id]: ['0x40A2aCCbd92BCA938b02010E17A5b8929b49130D'],
-  [base.id]: ['0xA1dabEF33b3B82c7814B6D82A79e50F4AC44102B'],
-  [arbitrum.id]: ['0x40A2aCCbd92BCA938b02010E17A5b8929b49130D'],
-  [celo.id]: ['0xA1dabEF33b3B82c7814B6D82A79e50F4AC44102B'],
-  [mode.id]: ['0x40A2aCCbd92BCA938b02010E17A5b8929b49130D'],
-};
-
-/**
  * check addresses here
  * https://github.com/safe-global/safe-deployments/blob/main/src/assets/v1.3.0/compatibility_fallback_handler.json
  */

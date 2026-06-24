@@ -8,7 +8,6 @@ import {
   AGENT_REGISTRY_CONTRACT,
   COMPONENT_REGISTRY_CONTRACT,
   GENERIC_ERC20_CONTRACT,
-  GNOSIS_SAFE_CONTRACT,
   OPERATOR_WHITELIST_CONTRACT,
   REGISTRIES_MANAGER_CONTRACT,
   SERVICE_MANAGER_CONTRACT,
@@ -111,12 +110,6 @@ export const operatorWhitelistParams = (chainId: number): Params => ({
 export const genericErc20Params = (tokenAddress: Address, chainId: number): Params => ({
   address: tokenAddress,
   abi: GENERIC_ERC20_CONTRACT.abi as Abi,
-  chainId: Number(chainId),
-});
-
-export const gnosisSafeParams = (safeAddress: Address, chainId: number): Params => ({
-  address: safeAddress,
-  abi: GNOSIS_SAFE_CONTRACT.abi as Abi,
   chainId: Number(chainId),
 });
 

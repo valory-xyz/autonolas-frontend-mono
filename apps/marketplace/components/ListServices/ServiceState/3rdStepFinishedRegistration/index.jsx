@@ -1,14 +1,10 @@
 import { Button, Divider, Form, Input, Radio } from 'antd';
 import { ethers } from 'ethers';
 import PropTypes from 'prop-types';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 
 import { notifyError, notifySuccess } from 'libs/util-functions/src';
-import {
-  FALLBACK_HANDLER,
-  multisigAddresses,
-  multisigSameAddresses,
-} from 'common-util/Contracts/addresses';
+import { FALLBACK_HANDLER, multisigAddresses } from 'common-util/Contracts/addresses';
 import { RegistryForm } from 'common-util/TransactionHelpers/RegistryForm';
 import { SendTransactionButton } from 'common-util/TransactionHelpers/SendTransactionButton';
 import { isValidSolanaPublicKey } from 'common-util/functions';
@@ -17,13 +13,10 @@ import { SVM_EMPTY_ADDRESS } from 'util/constants';
 
 import { RadioLabel } from '../styles';
 import { useFinishRegistration } from '../useSvmServiceStateManagement';
-import { getServiceAgentInstances, onStep3Deploy } from '../utils';
-import { onMultisigSubmit } from './utils';
+import { onStep3Deploy } from '../utils';
 
 const STEP = 3;
 const OPTION_1 = 'Creates a new service multisig with currently registered agent instances';
-const OPTION_2 =
-  'Updates an existent service multisig with currently registered agent instances. Please note that the only service multisig owner must be the current service owner address';
 
 const SvmFinishedRegistration = ({
   isOwner,
@@ -126,11 +119,8 @@ SvmFinishedRegistration.propTypes = {
 export const FinishedRegistration = ({
   isOwner,
   serviceId,
-  owner: serviceOwner,
-  threshold,
   multisig,
   handleTerminate,
-  canShowMultisigSameAddress = false,
   getOtherBtnProps,
   getButton,
   updateDetails,
@@ -139,25 +129,8 @@ export const FinishedRegistration = ({
 
   const [form] = Form.useForm();
   const [radioValue, setRadioValue] = useState(null);
-  const [agentInstances, setAgentInstances] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isTerminating, setIsTerminating] = useState(false);
-
-  useEffect(() => {
-    let isMounted = true;
-    (async () => {
-      if (!isSvm) {
-        const response = await getServiceAgentInstances(serviceId);
-        if (isMounted) {
-          setAgentInstances(response);
-        }
-      }
-    })();
-
-    return () => {
-      isMounted = false;
-    };
-  }, [serviceId, chainId, isSvm]);
 
   const handleStep3Deploy = async (radioValuePassed, payload) => {
     try {
@@ -194,9 +167,8 @@ export const FinishedRegistration = ({
     console.log('Failed:', errorInfo); /* eslint-disable-line no-console */
   };
 
-  const otherAddress = canShowMultisigSameAddress ? multisigSameAddresses[chainId] || [] : [];
-  const options = [...(multisigAddresses[chainId] || []), ...otherAddress];
-  const isMultiSig = (multisigAddresses[chainId] || [])[0];
+  const options = multisigAddresses[chainId] || [];
+  const isMultiSig = options[0];
   const btnProps = getOtherBtnProps(STEP);
 
   const terminateBtn = (
@@ -250,10 +222,7 @@ export const FinishedRegistration = ({
         >
           {options.map((multisigAddress) => (
             <div className="mb-12" key={`multisig-${multisigAddress}`}>
-              <RadioLabel disabled={btnProps.disabled}>
-                {multisigAddress === isMultiSig && OPTION_1}
-                {multisigAddress !== isMultiSig && OPTION_2}
-              </RadioLabel>
+              <RadioLabel disabled={btnProps.disabled}>{OPTION_1}</RadioLabel>
 
               <Radio key={multisigAddress} value={multisigAddress}>
                 {multisigAddress}
@@ -263,8 +232,7 @@ export const FinishedRegistration = ({
         </Radio.Group>
       ) : null}
 
-      {/* form should be shown only if 1st radio button is selected
-      2nd radio button means everything will be handled by the backend */}
+      {/* form is shown only once the multisig option is selected */}
       {radioValue === isMultiSig && (
         <RegistryForm
           form={form}
@@ -348,44 +316,6 @@ export const FinishedRegistration = ({
         </RegistryForm>
       )}
 
-      {/* submits the data for 2nd radio button (ie. 2nd multisig option) */}
-      {radioValue !== isMultiSig && (
-        <div className="mb-12 mt-8">
-          {getButton(
-            <SendTransactionButton
-              type="primary"
-              loading={isSubmitting}
-              onClick={async () => {
-                try {
-                  setIsSubmitting(true);
-                  await onMultisigSubmit({
-                    multisig,
-                    threshold,
-                    agentInstances,
-                    serviceOwner,
-                    chainId,
-                    handleStep3Deploy,
-                    radioValue,
-                    account,
-                  });
-                } catch (error) {
-                  console.error(error);
-                  notifyError('Error occurred while updating multisig. Please try again.');
-                } finally {
-                  setIsSubmitting(false);
-                }
-              }}
-              {...getOtherBtnProps(STEP, {
-                isDisabled: !radioValue || !isOwner,
-              })}
-            >
-              Submit
-            </SendTransactionButton>,
-            { step: STEP },
-          )}
-        </div>
-      )}
-
       {terminateBtn}
     </div>
   );
@@ -395,11 +325,8 @@ FinishedRegistration.propTypes = {
   isOwner: PropTypes.bool.isRequired,
   serviceId: PropTypes.string.isRequired,
   multisig: PropTypes.string.isRequired,
-  owner: PropTypes.string.isRequired,
-  threshold: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
   handleTerminate: PropTypes.func.isRequired,
   getButton: PropTypes.func.isRequired,
-  canShowMultisigSameAddress: PropTypes.bool,
   getOtherBtnProps: PropTypes.func.isRequired,
   updateDetails: PropTypes.func.isRequired,
 };
