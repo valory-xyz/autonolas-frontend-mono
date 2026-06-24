@@ -148,6 +148,18 @@ export const STAKING_CONTRACT_DETAILS: Record<Address, StakingContractDetailsInf
   '0x0000000000000000000000001f81cf353051daa8919d1777c58b667025794ddc': {
     availableOn: ['lst'],
   },
+  // Basius I
+  '0x0000000000000000000000000fb55cef7b12b76ea52900325461a5443f51b43f': {
+    availableOn: ['pearl'],
+  },
+  // Basius II
+  '0x000000000000000000000000728ca3b024ba4c273695df6e45e79db675b8c756': {
+    availableOn: ['pearl'],
+  },
+  // Basius III
+  '0x0000000000000000000000009593c4524df86f46935aa0ec996b4ccbe71c8234': {
+    availableOn: ['pearl'],
+  },
 };
 
 /**
