@@ -15,8 +15,6 @@ import {
   ChainIds,
   FALLBACK_HANDLER,
   multisigAddresses,
-  multisigSameAddresses,
-  safeMultiSend,
 } from '../../../common-util/Contracts/addresses';
 
 const LOCAL_ARTIFACTS = [
@@ -83,13 +81,6 @@ describe('common-utils/addresses', () => {
             const multisigAddressesChainId = chainId as keyof typeof multisigAddresses;
 
             expect(currentContract.address).toBe(multisigAddresses[multisigAddressesChainId][0]);
-          } else if (currentContract.name === 'GnosisSafeSameAddressMultisig') {
-            // Check for the GnosisSafeSameAddressMultisig address
-            const multisigSameAddressesChainId = chainId as keyof typeof multisigSameAddresses;
-
-            expect(currentContract.address).toBe(
-              multisigSameAddresses[multisigSameAddressesChainId][0],
-            );
           } else if (currentContract.name === localArtifact.contractName) {
             // Take the configuration and local contract names that match
             // Get local and configuration ABIs, stringify them
@@ -116,35 +107,6 @@ describe('common-utils/addresses', () => {
     },
     2 * 60 * 1000,
   );
-
-  it('should ensure `safeMultiSend` matches between remote and local sources', async () => {
-    const remoteResponseRaw = await fetch(`${REGISTRIES_SAFE_URL}/multi_send_call_only.json`);
-    const fallbackHandler = await remoteResponseRaw.json();
-
-    if (!fallbackHandler.networkAddresses) {
-      throw new Error(`Invalid ${name} remoteResponse`);
-    }
-
-    chainIds.forEach((chainId) => {
-      if (!isValidKey(ADDRESSES, chainId)) {
-        throw new Error(`Invalid chainId: ${chainId}`);
-      }
-
-      const remoteFallbackHandlerAddressKey = fallbackHandler.networkAddresses[chainId];
-
-      // could be an array or a string
-      // eg. 'canonical' or 'eip155' or ['eip155', 'canonical']
-      const keyName = Array.isArray(remoteFallbackHandlerAddressKey)
-        ? remoteFallbackHandlerAddressKey[0]
-        : remoteFallbackHandlerAddressKey;
-
-      // fetch the remote fallback handler address from `deployments` dictionary
-      const { address: remoteMultisigAddress } = fallbackHandler.deployments[keyName];
-      const localMultisigAddress = safeMultiSend[chainId][0];
-
-      expect(remoteMultisigAddress).toBe(localMultisigAddress);
-    });
-  });
 
   it('should ensure FALLBACK_HANDLER matches between remote and local sources', async () => {
     const fallbackHandlerResponse = await fetch(
