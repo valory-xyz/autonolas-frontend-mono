@@ -160,6 +160,58 @@ export const STAKING_CONTRACT_DETAILS: Record<Address, StakingContractDetailsInf
   '0x0000000000000000000000009593c4524df86f46935aa0ec996b4ccbe71c8234': {
     availableOn: ['pearl'],
   },
+  // Omenstrat I
+  '0x0000000000000000000000001e215da0541b4a77a66e21f17413a877b84ab129': {
+    availableOn: ['pearl'],
+  },
+  // Omenstrat II
+  '0x000000000000000000000000c2bbfc0d2f5a341dcdcc9f3b78faf7b04f0244ff': {
+    availableOn: ['pearl'],
+  },
+  // Omenstrat III
+  '0x000000000000000000000000abd4f159a088e7f18fee8241cf9367f1d746780f': {
+    availableOn: ['pearl'],
+  },
+  // Omenstrat IV
+  '0x000000000000000000000000c9940b9daca9fdf1b0cd6de8e3d25dddc8c9fd0d': {
+    availableOn: ['pearl'],
+  },
+  // Omenstrat V
+  '0x00000000000000000000000093aaa7155942700cad74c250263fb2d0c6f72b27': {
+    availableOn: ['pearl'],
+  },
+  // Omenstrat VI
+  '0x000000000000000000000000b7ab6f7e6993df1f0c6a9b177b169faf4b0c9cca': {
+    availableOn: ['pearl'],
+  },
+  // Omenstrat VII
+  '0x000000000000000000000000b801fd1728eef27418fe03720b1ff3e769f35152': {
+    availableOn: ['pearl'],
+  },
+  // Optimus I
+  '0x000000000000000000000000cda7deef16f6b1bfc1bb5c89b7e4faa91d9ebf7b': {
+    availableOn: ['pearl'],
+  },
+  // Optimus II
+  '0x000000000000000000000000746281b8fbdbd008729dc9382392810f771b1bfd': {
+    availableOn: ['pearl'],
+  },
+  // Optimus III
+  '0x0000000000000000000000005a4317a5695ad6e86744efc824414cf899f07c68': {
+    availableOn: ['pearl'],
+  },
+  // Polystrat I
+  '0x00000000000000000000000035c9c87a8cad9b7fd9d367eb4fd287365688e000': {
+    availableOn: ['pearl'],
+  },
+  // Polystrat II
+  '0x000000000000000000000000d7f69649691039e86f15153c7bd567aa0049d122': {
+    availableOn: ['pearl'],
+  },
+  // Polystrat III
+  '0x0000000000000000000000007dbf10769ca7528ec9aa440b668c716caf08e7ea': {
+    availableOn: ['pearl'],
+  },
 };
 
 /**

@@ -107,17 +107,22 @@ export async function fetchContractCacheDataFromChain(
       client.readContract({ ...contractArgs, functionName: 'metadataHash' }),
     ]);
 
-    const hasValidKeyCall =
-      maxNumServicesRes.status === 'fulfilled' ||
-      metadataHashRes.status === 'fulfilled' ||
-      configHashRes.status === 'fulfilled' ||
-      proxyHashRes.status === 'fulfilled';
-    if (!hasValidKeyCall) {
+    // All identity/config reads must succeed before we cache a snapshot. A failed read means
+    // either a non-staking address or a transient RPC error — in both cases caching is wrong.
+    // (Previously a failed `metadataHash` read was coerced to ZERO_HASH via `toMetadataHashString`,
+    // which bypassed the empty-metadata guard below and permanently poisoned the cache with an
+    // empty name/description and empty configHash/proxyHash/activityChecker. Because the
+    // write-through cache only fetches on a miss, that bad snapshot was then served forever.)
+    if (
+      metadataHashRes.status !== 'fulfilled' ||
+      configHashRes.status !== 'fulfilled' ||
+      proxyHashRes.status !== 'fulfilled' ||
+      activityCheckerRes.status !== 'fulfilled'
+    ) {
       return null;
     }
 
-    const rawMetadataHash = settled(metadataHashRes, null);
-    const metadataHashStr = toMetadataHashString(rawMetadataHash);
+    const metadataHashStr = toMetadataHashString(metadataHashRes.value);
     const meta = await fetchMetadata(metadataHashStr);
 
     // Do not cache when metadata was expected but fetch failed (empty name/description)
