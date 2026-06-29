@@ -2,7 +2,11 @@ import { list, put } from '@vercel/blob';
 
 import type { GovernContractCacheData, GovernContractCacheSnapshot } from 'types';
 
-const BLOB_PREFIX = 'govern/contracts';
+// Versioned prefix. Bump when the cached snapshot shape or the rules for what may be cached
+// change, so stale snapshots are treated as misses and repopulated. v2 invalidates snapshots
+// poisoned by transient RPC failures at population time (empty name / configHash / proxyHash /
+// activityChecker) written before the completeness guard in fetchContractCacheDataFromChain.
+const BLOB_PREFIX = 'govern/contracts/v2';
 
 function blobPath(chainId: number, address: string): string {
   return `${BLOB_PREFIX}/${chainId}/${address.toLowerCase()}.json`;
