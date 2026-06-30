@@ -12,7 +12,7 @@ import { GOVERNOR_OLAS } from 'libs/util-contracts/src/lib/abiAndAddresses';
  * (i.e. queued but not yet executed/cancelled); `enabled` should reflect that.
  */
 export const useProposalEta = (proposalId: string, enabled: boolean) => {
-  const { data, isLoading } = useReadContract({
+  const { data, isLoading, isError } = useReadContract({
     address: (GOVERNOR_OLAS.addresses as Record<number, Address>)[mainnet.id],
     abi: GOVERNOR_OLAS.abi as Abi,
     functionName: 'proposalEta',
@@ -20,6 +20,11 @@ export const useProposalEta = (proposalId: string, enabled: boolean) => {
     args: [BigInt(proposalId)],
     query: {
       enabled,
+      // Don't retry: the call either succeeds quickly or fails deterministically
+      // (e.g. on a forked/preview mainnet RPC that lacks this proposal's timelock
+      // state, `proposalEta` returns empty data). Retrying would leave the UI
+      // stuck on a loading skeleton instead of settling to a fallback.
+      retry: false,
     },
   });
 
@@ -30,5 +35,6 @@ export const useProposalEta = (proposalId: string, enabled: boolean) => {
     // executable timestamp in seconds, or undefined when not queued/unavailable
     eta: eta && eta > 0n ? eta : undefined,
     isLoading,
+    isError,
   };
 };
