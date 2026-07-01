@@ -61,6 +61,17 @@ Individual on-chain proposals are shareable via `/proposals?proposalId=<proposal
 - `components/Proposals/ProposalDetails.tsx` exposes a **Copy link** button that writes the absolute URL to the clipboard.
 - SEO: `/proposals?proposalId=...` is a deep-link variant of `/proposals`, not a distinct page. `components/Meta.tsx` emits `<link rel="canonical">` from `pageUrl` (query-string-free), so query-param variants consolidate onto the canonical `/proposals` URL instead of being flagged as duplicate titles.
 
+## Proposal execution ETA
+
+A queued proposal sits in the timelock until it can be executed:
+
+- `hooks/useProposalEta.ts` reads `GovernorOLAS.proposalEta(proposalId)` (mainnet), which returns the executable timestamp (0 when not queued). It's only enabled while a proposal is queued (`isQueued && !isExecuted && !isCancelled`).
+- `components/Proposals/ProposalDetails.tsx` shows an **Executable** field for queued proposals: the full date plus the time remaining (`in 1d 2h 3m`, or `ready to execute` once the ETA has passed), formatted via `formatDuration` in `common-util/functions/time.ts`.
+
+## Footer contracts (per tab)
+
+`components/Layout/Footer/index.tsx` shows different contract links depending on the route: the **/proposals** page links **GovernorOLAS** + veOLAS, while the other (voting) tabs link **VoteWeighting** + veOLAS.
+
 ## Notes
 
 - Voting and delegation logic depends on governor contracts and subgraph; ensure correct chain and subgraph URL.

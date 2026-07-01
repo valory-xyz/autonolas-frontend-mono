@@ -108,6 +108,26 @@ export const getRemainingTimeInSeconds = (unlockTime?: number) => {
 };
 
 /**
+ * Formats a duration (in seconds) into a short human-readable string,
+ * e.g. 90061 => "1d 1h 1m". Returns null for non-positive durations.
+ */
+export const formatDuration = (seconds: number): string | null => {
+  if (seconds <= 0) return null;
+
+  const days = Math.floor(seconds / 86400);
+  const hours = Math.floor((seconds % 86400) / 3600);
+  const minutes = Math.floor((seconds % 3600) / 60);
+
+  const parts: string[] = [];
+  if (days > 0) parts.push(`${days}d`);
+  if (hours > 0) parts.push(`${hours}h`);
+  // Always show minutes when there are no days, so very short durations aren't empty
+  if (minutes > 0 || days === 0) parts.push(`${minutes}m`);
+
+  return parts.join(' ');
+};
+
+/**
  * Returns estimated time in future based on provided block
  */
 export const estimateFutureBlockTimestamp = (

@@ -8,8 +8,13 @@ import { Caption } from 'libs/ui-components/src';
 import { areAddressesEqual, notifySuccess } from 'libs/util-functions/src';
 import { AddressLink } from 'libs/ui-components/src';
 
-import { estimateFutureBlockTimestamp, getFullFormattedDate } from 'common-util/functions';
+import {
+  estimateFutureBlockTimestamp,
+  formatDuration,
+  getFullFormattedDate,
+} from 'common-util/functions';
 import { Proposal } from 'common-util/graphql/types';
+import { useProposalEta } from 'hooks/useProposalEta';
 
 import { VOTES_SUPPORT, formatWeiToEth } from './utils';
 import { EXPLORER_URLS, NA, UNICODE_SYMBOLS } from 'libs/util-constants/src';
@@ -50,6 +55,12 @@ export const ProposalDetails = ({
   const startDateBlock = useBlockTimestamp(currentBlock, BigInt(item.startBlock));
   const endDateBlock = useBlockTimestamp(currentBlock, BigInt(item.endBlock));
 
+  // A queued proposal sits in the timelock until its ETA, after which it can be executed.
+  const isWaitingToExecute = item.isQueued && !item.isExecuted && !item.isCancelled;
+  const { eta, isLoading: isEtaLoading } = useProposalEta(item.proposalId, isWaitingToExecute);
+  const secondsUntilExecutable = eta ? Number(eta) - Math.floor(Date.now() / 1000) : 0;
+  const timeUntilExecutable = formatDuration(secondsUntilExecutable);
+
   const handleCopyLink = () => {
     const url = `${window.location.origin}/proposals?proposalId=${item.proposalId}`;
     navigator.clipboard.writeText(url);
@@ -78,6 +89,19 @@ export const ProposalDetails = ({
             <Text>{getFullFormattedDate(Number(endDateBlock.timestamp) * 1000)}</Text>
           )}
         </Flex>
+        {isWaitingToExecute && (
+          <Flex vertical>
+            <Caption>Executable</Caption>
+            {isEtaLoading && <Skeleton.Input active />}
+            {!isEtaLoading && eta && (
+              <Text>
+                {getFullFormattedDate(Number(eta) * 1000)}
+                {timeUntilExecutable ? ` (in ${timeUntilExecutable})` : ' (ready to execute)'}
+              </Text>
+            )}
+            {!isEtaLoading && !eta && NA}
+          </Flex>
+        )}
       </Flex>
       <Flex vertical gap={8} className="mb-16">
         <Caption>Voters ({item.voteCasts?.length})</Caption>
