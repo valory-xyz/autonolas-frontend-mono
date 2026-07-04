@@ -82,9 +82,9 @@ const Footer = () => {
         githubUrl={BOND_REPO_URL}
       />
       <RegulatoryNotice>
-        Marketing communication. This site has not been reviewed or approved by any competent
-        authority in any Member State of the European Union. Site content is set by the Olas DAO
-        and hosted on its behalf by the site operator — see the{' '}
+        This site has not been reviewed or approved by any competent authority in any Member State
+        of the European Union. Site content is set by the Olas DAO and hosted on its behalf by the
+        site operator — see the{' '}
         <a href="https://olas.network/disclaimer" target="_blank" rel="noopener noreferrer">
           Disclaimer
         </a>
