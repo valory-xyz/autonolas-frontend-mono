@@ -53,6 +53,7 @@ const AGENT_POLICIES: Record<AgentId, AgentPolicy> = {
       'FR', // France
       'GB', // United Kingdom
       'GW', // Guinea-Bissau
+      'HU', // Hungary
       'IR', // Iran
       'IQ', // Iraq
       'IT', // Italy
@@ -64,6 +65,7 @@ const AGENT_POLICIES: Record<AgentId, AgentPolicy> = {
       'NI', // Nicaragua
       'NL', // Netherlands
       'PL', // Poland
+      'PT', // Portugal
       'RU', // Russia
       'SD', // Sudan
       'SG', // Singapore
