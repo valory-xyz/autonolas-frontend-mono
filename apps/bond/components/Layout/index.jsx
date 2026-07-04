@@ -27,6 +27,15 @@ const StyledHeader = styled(Header)`
   border-bottom: 1px solid ${COLOR.BORDER_GREY_2};
 `;
 
+const RegulatoryNotice = styled.div`
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 16px 24px 0;
+  font-size: 12px;
+  color: #606060;
+  text-align: center;
+`;
+
 const Layout = ({ children = null }) => {
   const router = useRouter();
   const { chainId } = useHelpers();
@@ -81,6 +90,16 @@ const Layout = ({ children = null }) => {
         <div className="site-layout-background">{chainId ? children : null}</div>
       </Content>
 
+      <RegulatoryNotice>
+        Marketing communication. This site has not been reviewed or approved by any competent
+        authority in any Member State of the European Union. The operator of this site is solely
+        responsible for its content. OLAS is a crypto-asset: its value can go down as well as up
+        and you may lose the entire amount invested. See the{' '}
+        <a href="https://olas.network/disclaimer" target="_blank" rel="noopener noreferrer">
+          Disclaimer
+        </a>
+        .
+      </RegulatoryNotice>
       <Footer />
     </CustomLayout>
   );

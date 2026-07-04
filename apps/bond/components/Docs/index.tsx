@@ -73,8 +73,8 @@ const CoreConcepts = () => (
     <Paragraph>
       <ul>
         <li className="mb-8">
-          <Text strong>OLAS Bonding</Text> — Provide liquidity in exchange for discounted OLAS
-          tokens.
+          <Text strong>OLAS Bonding</Text> — Provide liquidity in exchange for OLAS tokens at a
+          fixed bond price.
         </li>
         <li className="mb-8">
           <Text strong>Protocol-Owned Liquidity (POL)</Text> — Liquidity owned by the protocol,
