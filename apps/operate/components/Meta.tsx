@@ -4,7 +4,7 @@ import React from 'react';
 const SITE_URL = 'https://operate.olas.network';
 const SITE_TITLE = 'Olas Operate';
 const SITE_DESCRIPTION =
-  'Become an Operator in the Olas ecosystem using Pearl. Run AI agents, stake assets, and earn rewards while helping to expand the crypto and AI agent network. Get involved in managing decentralized AI-powered systems today!';
+  'Become an Operator in the Olas ecosystem. Run AI agents and stake OLAS — staking rewards depend on agent activity and are not guaranteed. Get involved in running decentralized AI-powered systems.';
 const SITE_IMAGE_URL = `${SITE_URL}/images/meta-image.png`;
 
 type MetaProps = {

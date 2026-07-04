@@ -2,7 +2,7 @@ import Head from 'next/head';
 
 const SITE_TITLE = 'Build | Olas';
 const SITE_DESCRIPTION =
-  'Explore paths to build on Olas. Simplify your path to contributing and earning OLAS rewards.';
+  'Explore paths to build on Olas and contribute code. Builders may earn OLAS rewards when developer incentives are active.';
 const SITE_URL = 'https://build.olas.network/';
 const SITE_DEFAULT_IMAGE_URL = `${SITE_URL}images/metatags-image.png`;
 
