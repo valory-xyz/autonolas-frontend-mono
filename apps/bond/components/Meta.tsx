@@ -2,7 +2,8 @@ import Head from 'next/head';
 
 const SITE_URL = 'https://bond.olas.network';
 const SITE_TITLE = 'Olas Bond';
-const SITE_DESCRIPTION = 'Get access to discounted OLAS by bonding capital into the Olas protocol.';
+const SITE_DESCRIPTION =
+  'Bond capital into the Olas protocol and receive OLAS at the quoted bond price after a vesting period.';
 const SITE_IMAGE_URL = `${SITE_URL}/images/meta-image.png`;
 
 type MetaProps = {

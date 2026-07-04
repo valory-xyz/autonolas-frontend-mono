@@ -5,7 +5,7 @@ const Docs = () => (
   <>
     <Meta
       pageTitle="Documentation"
-      description="Learn how to use Olas Bond to get discounted OLAS. Understand bonding mechanics, vesting schedules, and how to maximize your returns."
+      description="Learn how Olas Bond works: bonding mechanics, bond pricing at a discount or premium, and vesting schedules."
       pageUrl="docs"
     />
     <DocsPage />
