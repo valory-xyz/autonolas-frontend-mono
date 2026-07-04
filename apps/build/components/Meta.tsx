@@ -1,9 +1,9 @@
-import Head from "next/head";
+import Head from 'next/head';
 
-const SITE_TITLE = "Build | Olas";
+const SITE_TITLE = 'Build | Olas';
 const SITE_DESCRIPTION =
-  "Explore paths to build on Olas and contribute code. Builders may earn OLAS rewards when developer incentives are active.";
-const SITE_URL = "https://build.olas.network/";
+  'Explore paths to build on Olas and contribute code. Builders may earn OLAS rewards when developer incentives are active.';
+const SITE_URL = 'https://build.olas.network/';
 const SITE_DEFAULT_IMAGE_URL = `${SITE_URL}images/metatags-image.png`;
 
 type MetaProps = {
@@ -14,7 +14,7 @@ type MetaProps = {
 
 const Meta = ({ title, description, path }: MetaProps) => {
   const pageTitle = title ? `${title} | ${SITE_TITLE}` : SITE_TITLE;
-  const pageUrl = `${SITE_URL}${path || ""}`;
+  const pageUrl = `${SITE_URL}${path || ''}`;
 
   return (
     <Head>
@@ -28,19 +28,13 @@ const Meta = ({ title, description, path }: MetaProps) => {
       <meta property="og:type" content="website" />
       <meta property="og:url" content={pageUrl} />
       <meta property="og:title" content={pageTitle} />
-      <meta
-        property="og:description"
-        content={description || SITE_DESCRIPTION}
-      />
+      <meta property="og:description" content={description || SITE_DESCRIPTION} />
       <meta property="og:image" content={SITE_DEFAULT_IMAGE_URL} />
 
       <meta property="twitter:card" content="summary_large_image" />
       <meta property="twitter:url" content={pageUrl} />
       <meta property="twitter:title" content={pageTitle} />
-      <meta
-        property="twitter:description"
-        content={description || SITE_DESCRIPTION}
-      />
+      <meta property="twitter:description" content={description || SITE_DESCRIPTION} />
       <meta property="twitter:image" content={SITE_DEFAULT_IMAGE_URL} />
     </Head>
   );

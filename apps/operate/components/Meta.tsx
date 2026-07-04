@@ -1,10 +1,10 @@
-import Head from "next/head";
-import React from "react";
+import Head from 'next/head';
+import React from 'react';
 
-const SITE_URL = "https://operate.olas.network";
-const SITE_TITLE = "Olas Operate";
+const SITE_URL = 'https://operate.olas.network';
+const SITE_TITLE = 'Olas Operate';
 const SITE_DESCRIPTION =
-  "Become an Operator in the Olas ecosystem. Run AI agents and stake OLAS — staking rewards depend on agent activity and are not guaranteed. Get involved in running decentralized AI-powered systems.";
+  'Become an Operator in the Olas ecosystem. Run AI agents and stake OLAS — staking rewards depend on agent activity and are not guaranteed. Get involved in running decentralized AI-powered systems.';
 const SITE_IMAGE_URL = `${SITE_URL}/images/meta-image.png`;
 
 type MetaProps = {
@@ -22,11 +22,7 @@ export const Meta = ({ pageTitle, description, pageUrl }: MetaProps) => {
       {/* <!-- Primary Meta Tags --> */}
       <title>{title}</title>
       <meta name="title" content={title} key="title" />
-      <meta
-        name="description"
-        content={description || SITE_DESCRIPTION}
-        key="description"
-      />
+      <meta name="description" content={description || SITE_DESCRIPTION} key="description" />
 
       {/* <!-- Open Graph / Facebook --> */}
       <meta property="og:type" content="website" key="og:type" />
@@ -40,11 +36,7 @@ export const Meta = ({ pageTitle, description, pageUrl }: MetaProps) => {
       <meta property="og:image" content={SITE_IMAGE_URL} key="og:image" />
 
       {/* <!-- Twitter --> */}
-      <meta
-        property="twitter:card"
-        content="summary_large_image"
-        key="twitter:card"
-      />
+      <meta property="twitter:card" content="summary_large_image" key="twitter:card" />
       <meta property="twitter:url" content={url} key="twitter:url" />
       <meta property="twitter:title" content={title} key="twitter:title" />
       <meta
@@ -52,11 +44,7 @@ export const Meta = ({ pageTitle, description, pageUrl }: MetaProps) => {
         content={description || SITE_DESCRIPTION}
         key="twitter:description"
       />
-      <meta
-        property="twitter:image"
-        content={SITE_IMAGE_URL}
-        key="twitter:image"
-      />
+      <meta property="twitter:image" content={SITE_IMAGE_URL} key="twitter:image" />
     </Head>
   );
 };
