@@ -15,7 +15,11 @@ export const middleware = async (request: NextRequest) => {
   // this header becomes user-controllable and the geo-block can be bypassed —
   // switch to a proxy-trusted alternative (e.g. CF-IPCountry) at that point.
   const country = request.headers.get('x-vercel-ip-country') ?? undefined;
-  const redirectUrl = await getRedirectUrl(request.nextUrl.pathname, country);
+  const redirectUrl = await getRedirectUrl(
+    request.nextUrl.pathname,
+    country,
+    request.nextUrl.hostname,
+  );
 
   const response = redirectUrl
     ? NextResponse.redirect(new URL(redirectUrl, request.nextUrl))
