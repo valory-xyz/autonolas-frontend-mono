@@ -11,7 +11,18 @@ const NotLegal = () => (
     <Result
       status="warning"
       title="Access restricted"
-      subTitle="Due to applicable legal and regulatory requirements, access to this site is not available from your current region."
+      subTitle={
+        <>
+          Due to applicable legal and regulatory requirements, access to this site is not available
+          from your current region. We use your approximate location data (region-level IP
+          information) solely for the purpose of enforcing this restriction and do not store this
+          information. For more details, please refer to our{' '}
+          <a href="https://olas.network/disclaimer" target="_blank" rel="noopener noreferrer">
+            Privacy Policy
+          </a>
+          .
+        </>
+      }
     />
   </NotLegalContainer>
 );
