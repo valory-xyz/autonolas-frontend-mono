@@ -9,5 +9,24 @@
     "added": "YYYY-MM-DD when the entry was added",
     "review": "YYYY-MM-DD by which the entry must be re-evaluated. An expired entry prints a CI warning but does not fail the job."
   },
-  "entries": []
+  "entries": [
+    {
+      "id": 1123911,
+      "ghsa": "GHSA-52cp-r559-cp3m",
+      "package": "js-yaml",
+      "severity": "high",
+      "reason": "DoS (quadratic CPU on crafted YAML merge-key chains) reachable only via nx build-time tooling (@nx/next > nx > js-yaml 4.x), which parses our own trusted config files and is not shipped in the Next.js runtime bundle. No untrusted-input path. A blanket js-yaml resolution to >=4.3.0 is unsafe because the 3.x line under @yarnpkg/parsers uses the safeLoad API removed in 4.x.",
+      "added": "2026-07-23",
+      "review": "2026-10-23"
+    },
+    {
+      "id": 1123912,
+      "ghsa": "GHSA-52cp-r559-cp3m",
+      "package": "js-yaml",
+      "severity": "high",
+      "reason": "Same GHSA on the js-yaml 3.x line, reached via nx build-time tooling (@nx/next > nx > @yarnpkg/parsers > js-yaml 3.x). Build-time only, trusted input, not in the shipped runtime. Cannot be co-resolved with the 4.x consumer via a single Yarn resolution without breaking API compatibility.",
+      "added": "2026-07-23",
+      "review": "2026-10-23"
+    }
+  ]
 }
