@@ -103,6 +103,31 @@ Tracks **requests** (demand) and **deliveries** (supply) for mech services.
 - **Service roles:** `Registered`, `Demand`, `Supply`, `Demand & Supply` – based on totalRequests/totalDeliveries.
 - **Supported chains:** use `isMarketplaceSupportedNetwork()` and `MARKETPLACE_SUPPORTED_CHAIN_IDS` in `util/constants.ts` (all chains with a marketplace activity subgraph URL).
 
+#### Counter sources (off-chain requests)
+
+Mech requests are moving off-chain. Once they do, the subgraph stops creating per-request `Request` entities, and `Service.totalRequests` / `Service.totalDeliveries` **freeze** — they are only incremented by the on-chain `handleMarketplaceRequest` and the legacy `handleMarketplaceDelivery` handlers, never by `handleMarketplaceDeliveryWithSignatures`.
+
+`common-util/graphql/services.ts` therefore reads the counters that are incremented on **both** paths, and merges them with the legacy `Service.*` totals via `Math.max` so services with only pre-switch history keep their role:
+
+| Role side | Source | Notes |
+|---|---|---|
+| Demand | `Sender.totalLegacyRequests`, summed over the service's `latestMultisig` + `historicalMultisigs` | Do **not** add `totalMarketplaceRequests` on top — the on-chain handler bumps both at once, so the sum over-counts every on-chain request |
+| Supply | `Mech.totalDeliveriesTransactions` | Incremented by delivered item count on the delivery mech by both handlers. `Mech.id` **is the service id**, so it joins directly on `serviceIds` (the address lives in `Mech.address`) |
+
+This needs two round trips: the multisigs are only known once `services` returns. `getMarketplaceRole()` and the ERC8004 routes are unchanged — the `Service` type keeps its `totalRequests` / `totalDeliveries` shape, only the source changed.
+
+Verified against the live gnosis subgraph:
+
+- **Demand is exact parity.** Services 10 / 1000 / 1001 report `totalRequests` 3796 / 13496 / 13104, and their multisigs' `totalLegacyRequests` are 3796 / 13496 / 13104. `totalMarketplaceRequests` equals `totalLegacyRequests` on every sender sampled — adding them would double the count exactly, which is why only the legacy field is read.
+- **Supply is not parity, and the `Math.max` is load-bearing.** Service 1722 reports `totalDeliveries` 619 but its `Mech.totalDeliveriesTransactions` is 38; services 1698 / 1812 report 4 deliveries and have **no `Mech` entity at all** (legacy agent-mech services — `Mech` rows only exist for marketplace mechs created via `handleCreateMech`). Without the max, those two would lose the Supply role outright. Off-chain traffic only settles through marketplace mechs, so the new counter covers exactly the future traffic while the max preserves legacy history.
+- `totalOffChainRequests` is still 0 across sampled senders, so today this change is numerically a no-op — it only starts to matter after the switch.
+
+Consequence: the merged `totalDeliveries` is `max()` of two different measures, so treat it as a **role/gate signal, not a displayable count**. Nothing renders it as a number today (it drives only the role tag and the ERC8004 `>= 1` gate); if that ever changes, revisit this.
+
+Note `Service.mechs` resolves to `MechAgent` (legacy path, only has `totalTransactions`), which is a **different entity** from `Mech` — hence the separate top-level `meches` query.
+
+Related: the "Request Data" / "Delivery Data" columns are IPFS **links only** (`AddressLink … isIpfs` builds an `href`, it never fetches). Off-chain payloads stay private by design, so those cells render `NA` — that is correct behaviour, not a regression, and the content must not be re-sourced (see mech-analytics PR #18).
+
 **Key files:**
 - `common-util/graphql/index.ts` – `MARKETPLACE_SUBGRAPH_CLIENTS`, `MarketplaceSubgraphChainId`
 - `common-util/graphql/service-activity.ts` – Activity queries
