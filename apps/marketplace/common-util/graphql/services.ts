@@ -2,22 +2,11 @@ import { Service } from 'common-util/types';
 import { MARKETPLACE_SUBGRAPH_CLIENTS, type MarketplaceSubgraphChainId } from './index';
 
 /**
- * Per-service request/delivery counts.
- *
- * `Service.totalRequests` / `Service.totalDeliveries` are only incremented by the
- * on-chain `MarketplaceRequest` / legacy `MarketplaceDelivery` handlers, so they
- * freeze for a service that receives off-chain traffic. The counters below are
- * bumped on both paths, so they are read as the primary source:
- *
- * - demand  -> `Sender.totalLegacyRequests`, keyed by the service's multisig(s).
- *   `totalMarketplaceRequests` must NOT be added on top: the on-chain handler
- *   bumps both at once, so the sum over-counts every on-chain request.
- * - supply  -> `Mech.totalDeliveriesTransactions`, incremented by the delivered
- *   item count on the delivery mech by both handlers. `Mech.id` is the service
- *   id, so it joins directly on `serviceIds`.
- *
- * The legacy `Service.*` totals are still read and merged with `Math.max` so a
- * service that only has history under the old counters keeps its role.
+ * `Service.totalRequests` / `totalDeliveries` freeze for off-chain traffic, so the
+ * counts come from fields both handlers bump — `Sender.totalLegacyRequests` (demand)
+ * and `Mech.totalDeliveriesTransactions` (supply) — merged with the legacy totals via
+ * `Math.max`. Do NOT add `totalMarketplaceRequests`: the on-chain handler bumps it
+ * alongside `totalLegacyRequests`, so the sum double-counts. Details in CLAUDE.md.
  */
 
 type ServiceDetails = {
