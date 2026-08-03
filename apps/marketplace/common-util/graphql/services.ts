@@ -138,6 +138,17 @@ export const getServicesFromMarketplaceSubgraph = async ({
 
   const requestsByMultisig = new Map<string, number>();
   if (multisigs.length > 0) {
+    // `services` and `meches` are bounded by `serviceIds`, but `multisigs` is the
+    // union of every service's multisig history, so it can outgrow PAGE_LIMIT on
+    // its own. The page would then truncate silently and `Math.max` would mask the
+    // under-count with the legacy total — warn so it is at least detectable.
+    if (multisigs.length >= PAGE_LIMIT) {
+      console.warn(
+        `[services] ${multisigs.length} multisigs >= page limit ${PAGE_LIMIT}; ` +
+          'sender counters may be truncated and demand-side counts under-reported',
+      );
+    }
+
     const senderResponse = await client.request<SenderCountersResponse>(
       getQueryForSenderCounters({ multisigs }),
     );
