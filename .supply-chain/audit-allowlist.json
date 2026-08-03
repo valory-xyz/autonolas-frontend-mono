@@ -27,15 +27,6 @@
       "reason": "Same GHSA on the js-yaml 3.x line, reached via nx build-time tooling (@nx/next > nx > @yarnpkg/parsers > js-yaml 3.x). Build-time only, trusted input, not in the shipped runtime. Cannot be co-resolved with the 4.x consumer via a single Yarn resolution without breaking API compatibility.",
       "added": "2026-07-23",
       "review": "2026-10-23"
-    },
-    {
-      "id": 1124334,
-      "ghsa": "GHSA-mh99-v99m-4gvg",
-      "package": "brace-expansion",
-      "severity": "high",
-      "reason": "DoS (unbounded expansion length -> OOM crash) on crafted glob patterns. All 10 paths reach it through minimatch in build-time tooling only (@nx/next > @nx/js > minimatch; @nx/devkit > ejs > jake > minimatch; tailwindcss > sucrase > glob > minimatch; expo-constants > @expo/fingerprint > minimatch) — the patterns are our own config globs, never untrusted input, and none of this is in the shipped Next.js runtime bundle. The fix is only on the 5.x line (>=5.0.8); the maintenance-v2 line tops out at 2.1.4, still inside the advisory range. Resolving to 5.0.9 was tested and breaks the build with 'expand is not a function' — brace-expansion 5.x's CJS export is not a drop-in for the 2.x default export that minimatch 5.x calls. Revisit when minimatch ships a release depending on brace-expansion >=5.0.8.",
-      "added": "2026-07-31",
-      "review": "2026-10-31"
     }
   ]
 }

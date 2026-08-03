@@ -116,11 +116,7 @@ Mech requests are moving off-chain. Once they do, the subgraph stops creating pe
 
 This needs two round trips: the multisigs are only known once `services` returns. `getMarketplaceRole()` and the ERC8004 routes are unchanged — the `Service` type keeps its `totalRequests` / `totalDeliveries` shape, only the source changed.
 
-Verified against the live gnosis subgraph:
-
-- **Demand is exact parity.** Services 10 / 1000 / 1001 report `totalRequests` 3796 / 13496 / 13104, and their multisigs' `totalLegacyRequests` are 3796 / 13496 / 13104. `totalMarketplaceRequests` equals `totalLegacyRequests` on every sender sampled — adding them would double the count exactly, which is why only the legacy field is read.
-- **Supply is not parity, and the `Math.max` is load-bearing.** Service 1722 reports `totalDeliveries` 619 but its `Mech.totalDeliveriesTransactions` is 38; services 1698 / 1812 report 4 deliveries and have **no `Mech` entity at all** (legacy agent-mech services — `Mech` rows only exist for marketplace mechs created via `handleCreateMech`). Without the max, those two would lose the Supply role outright. Off-chain traffic only settles through marketplace mechs, so the new counter covers exactly the future traffic while the max preserves legacy history.
-- `totalOffChainRequests` is still 0 across sampled senders, so today this change is numerically a no-op — it only starts to matter after the switch.
+Demand comes out at exact parity with the legacy counter; supply does **not**, which is what makes the `Math.max` load-bearing rather than defensive. `Mech` rows only exist for marketplace mechs created via `handleCreateMech`, so a legacy agent-mech service can report deliveries with no `Mech` entity at all — without the max it would lose the Supply role outright. Off-chain traffic only settles through marketplace mechs, so the new counter covers exactly the future traffic while the max preserves legacy history. (Sampled figures behind this are in the PR that introduced it, valory-xyz/autonolas-frontend-mono#441.)
 
 Consequence: the merged `totalDeliveries` is `max()` of two different measures, so treat it as a **role/gate signal, not a displayable count**. Nothing renders it as a number today (it drives only the role tag and the ERC8004 `>= 1` gate); if that ever changes, revisit this.
 

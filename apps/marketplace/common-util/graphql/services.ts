@@ -36,9 +36,16 @@ type SenderCounters = {
 
 const toQuotedList = (values: string[]) => values.map((value) => `"${value}"`).join(', ');
 
+/**
+ * `serviceIds` is an unbounded client-supplied param, and the-graph silently caps
+ * a page at 100 rows rather than erroring — a truncated page would undercount.
+ */
+const PAGE_LIMIT = 1000;
+
 export const getQueryForServiceDetails = ({ serviceIds }: { serviceIds: string[] }) => `
     {
       services(
+        first: ${PAGE_LIMIT}
         where: {
           id_in: [${toQuotedList(serviceIds)}]
         }
@@ -57,6 +64,7 @@ export const getQueryForServiceDetails = ({ serviceIds }: { serviceIds: string[]
         }
       }
       meches(
+        first: ${PAGE_LIMIT}
         where: {
           id_in: [${toQuotedList(serviceIds)}]
         }
@@ -70,6 +78,7 @@ export const getQueryForServiceDetails = ({ serviceIds }: { serviceIds: string[]
 export const getQueryForSenderCounters = ({ multisigs }: { multisigs: string[] }) => `
     {
       senders(
+        first: ${PAGE_LIMIT}
         where: {
           id_in: [${toQuotedList(multisigs)}]
         }
