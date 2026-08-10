@@ -42,6 +42,7 @@ const AGENT_POLICIES: Record<AgentId, AgentPolicy> = {
       'AU', // Australia
       'BE', // Belgium
       'BI', // Burundi
+      'BR', // Brazil
       'BY', // Belarus
       'CD', // Democratic Republic of Congo
       'CF', // Central African Republic
@@ -54,14 +55,17 @@ const AGENT_POLICIES: Record<AgentId, AgentPolicy> = {
       'GB', // United Kingdom
       'GW', // Guinea-Bissau
       'HU', // Hungary
+      'IE', // Ireland
       'IR', // Iran
       'IQ', // Iraq
       'IT', // Italy
+      'JP', // Japan
       'KP', // North Korea
       'LB', // Lebanon
       'LY', // Libya
       'ML', // Mali
       'MM', // Myanmar
+      'MT', // Malta
       'NI', // Nicaragua
       'NL', // Netherlands
       'PL', // Poland
@@ -69,6 +73,7 @@ const AGENT_POLICIES: Record<AgentId, AgentPolicy> = {
       'RU', // Russia
       'SD', // Sudan
       'SG', // Singapore
+      'SK', // Slovakia
       'SO', // Somalia
       'SS', // South Sudan
       'SY', // Syria
@@ -81,7 +86,10 @@ const AGENT_POLICIES: Record<AgentId, AgentPolicy> = {
       'ZW', // Zimbabwe
     ]),
     restrictedRegions: new Set([
+      'CA-AB', // Alberta
+      'CA-BC', // British Columbia
       'CA-ON', // Ontario
+      'CA-QC', // Quebec
       'MD-SN', // Transnistria (Stînga Nistrului)
       'UA-43', // Crimea
       'UA-14', // Donetsk
