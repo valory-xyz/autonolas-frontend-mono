@@ -221,18 +221,7 @@ export const STAKING_CONTRACT_DETAILS: Record<Address, StakingContractDetailsInf
  * fetched via RPC like any other contract. Live data (rewards pool, available slots)
  * will reflect their real on-chain state, which may be zero for drained contracts.
  */
-export const EXTRA_STAKING_CONTRACTS: Nominee[] = [
-  // Modius Alpha IV (Mode)
-  {
-    account: '0x0000000000000000000000008bcadb2c291c159f9385964e5ed95a9887302862',
-    chainId: 34443n,
-  },
-  // Quickstart Beta - Expert 5 (Gnosis)
-  {
-    account: '0x000000000000000000000000e56df1e563de1b10715cb313d514af350d207212',
-    chainId: 100n,
-  },
-];
+export const EXTRA_STAKING_CONTRACTS: Nominee[] = [];
 
 export const getApy = (
   rewardsPerSecond: bigint,
