@@ -21,12 +21,10 @@ export interface ScoredRow {
   request_tx_hash: string | null;
   delivery_tx_hash: string | null;
 
-  // Decimal-string on the wire — parse with BigInt, not Number.
-  // Native-currency values (18 decimals) overflow float53 above 0.01 xDAI.
+  // Decimal string; parse with BigInt, not Number.
   delivery_rate: string | null;
 
   // Wrap CIDs in a gateway <a href> only when true.
-  // Off-chain CIDs live in a private lake; a public gateway would 404.
   ipfs_retrievable: boolean;
 }
 

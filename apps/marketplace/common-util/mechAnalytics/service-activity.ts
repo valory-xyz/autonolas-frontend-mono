@@ -23,14 +23,7 @@ export const getServiceActivityFromMechAnalytics = async ({
   }
 
   const perMultisig = await Promise.all(
-    multisigs.map((multisig) =>
-      fetchAllScoredRows({
-        chainId,
-        // fetchAllScoredRows lowercases; see client.ts.
-        requester: multisig,
-        signal,
-      }),
-    ),
+    multisigs.map((multisig) => fetchAllScoredRows({ chainId, requester: multisig, signal })),
   );
 
   const activities = perMultisig.flat().map(mapScoredRowToActivity);
@@ -39,8 +32,8 @@ export const getServiceActivityFromMechAnalytics = async ({
   return { id: serviceId, activities };
 };
 
-// Timestamps converted ISO -> unix-seconds-string so `sortActivities`
-// on the subgraph side (which does `Number(...)`) stays interchangeable.
+// ISO -> unix-seconds-string so the subgraph-side `sortActivities`
+// (which does `Number(...)`) stays interchangeable.
 const mapScoredRowToActivity = (row: ScoredRow): Activity => {
   const requestedAtSeconds = String(Math.floor(new Date(row.requested_at).getTime() / 1000));
   const deliveredAtSeconds = String(Math.floor(new Date(row.delivered_at).getTime() / 1000));

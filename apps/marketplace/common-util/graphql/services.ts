@@ -116,12 +116,6 @@ const getServiceMultisigs = (service: ServiceDetails) =>
     ),
   );
 
-/**
- * Fetch the union of every multisig a service has ever held on the
- * marketplace subgraph. Used by the flag-on activity path so
- * multisig-swapped services still return their full history (matching
- * the subgraph path's serviceId-based envelope).
- */
 export const getServiceMultisigsFromMarketplaceSubgraph = async ({
   chainId,
   serviceId,
@@ -167,9 +161,8 @@ export const getServicesFromMarketplaceSubgraph = async ({
 
   const requestsByMultisig = new Map<string, number>();
   if (multisigs.length > 0) {
-    if (shouldUseMechAnalytics(chainId)) {
-      // Sender.totalLegacyRequests freezes for off-chain traffic;
-      // per-multisig failure falls back to the subgraph total via Math.max.
+    if (shouldUseMechAnalytics()) {
+      // Per-multisig failure falls back to the subgraph legacy total via Math.max below.
       const metricsPerMultisig = await Promise.all(
         multisigs.map((multisig) =>
           fetchRequesterMetrics(chainId, multisig).catch((error: unknown) => {

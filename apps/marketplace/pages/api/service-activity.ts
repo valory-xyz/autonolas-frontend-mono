@@ -34,7 +34,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       });
     }
 
-    const services = shouldUseMechAnalytics(chainIdNumber)
+    const services = shouldUseMechAnalytics()
       ? await getFromMechAnalytics(chainIdNumber, serviceId)
       : await getServiceActivityFromMarketplaceSubgraph({
           chainId: chainIdNumber as MarketplaceSubgraphChainId,
@@ -60,12 +60,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 }
 
-// Fetch the union of every multisig the service has held (latest +
-// historical) so the mech-analytics envelope matches the subgraph
-// path, which queries by serviceId. Multisig-swap history matters
-// for services that ever rotated their safe.
-// Subgraph failure or a not-yet-launched service degrades to an
-// empty activity page.
+// Union of latest + historical multisigs so multisig-swapped services
+// still return their full history. Subgraph failure → empty page.
 const getFromMechAnalytics = async (chainId: number, serviceId: string) => {
   const multisigs = await getServiceMultisigsFromMarketplaceSubgraph({
     chainId: chainId as MarketplaceSubgraphChainId,

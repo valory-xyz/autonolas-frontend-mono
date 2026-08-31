@@ -27,9 +27,6 @@ export async function* iterateScoredRows(
   params: FetchScoredRowsParams,
 ): AsyncGenerator<ScoredRow[], void, void> {
   const { chainId, signal } = params;
-  // Requester addresses are lowercased on the server side; normalise once
-  // here so callers don't repeat it (a mixed-case requester silently
-  // returns zero rows, which we'd rather never happen).
   const requester = params.requester.toLowerCase();
   const limit = Math.min(params.limit ?? DEFAULT_LIMIT, MAX_LIMIT);
   const maxPages = params.maxPages ?? DEFAULT_MAX_PAGES;
@@ -64,7 +61,6 @@ export async function* iterateScoredRows(
     yield body.rows;
 
     cursor = body.next_cursor;
-    // !cursor also handles undefined + '' on server drift, not just null.
     if (!cursor) {
       return;
     }

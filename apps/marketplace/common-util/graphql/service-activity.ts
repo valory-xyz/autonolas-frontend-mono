@@ -22,7 +22,6 @@ export type Activity = {
   // Populated only by the mech-analytics reader path.
   source?: string | null;
   ipfsRetrievable?: boolean;
-  // Decimal string; parse with BigInt, not Number.
   deliveryRate?: string | null;
 };
 
