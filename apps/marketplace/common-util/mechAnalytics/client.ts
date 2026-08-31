@@ -26,7 +26,11 @@ interface FetchScoredRowsParams {
 export async function* iterateScoredRows(
   params: FetchScoredRowsParams,
 ): AsyncGenerator<ScoredRow[], void, void> {
-  const { chainId, requester, signal } = params;
+  const { chainId, signal } = params;
+  // Requester addresses are lowercased on the server side; normalise once
+  // here so callers don't repeat it (a mixed-case requester silently
+  // returns zero rows, which we'd rather never happen).
+  const requester = params.requester.toLowerCase();
   const limit = Math.min(params.limit ?? DEFAULT_LIMIT, MAX_LIMIT);
   const maxPages = params.maxPages ?? DEFAULT_MAX_PAGES;
 
@@ -60,7 +64,8 @@ export async function* iterateScoredRows(
     yield body.rows;
 
     cursor = body.next_cursor;
-    if (cursor === null) {
+    // !cursor also handles undefined + '' on server drift, not just null.
+    if (!cursor) {
       return;
     }
     pageCount += 1;
@@ -80,7 +85,7 @@ export async function fetchRequesterMetrics(
   requester: string,
   signal?: AbortSignal,
 ): Promise<RequesterMetricsResponse> {
-  const url = `${getMechAnalyticsUrl()}/v1/metrics/requester/${chainId}/${requester}`;
+  const url = `${getMechAnalyticsUrl()}/v1/metrics/requester/${chainId}/${requester.toLowerCase()}`;
   const response = await fetchWithTimeout(url, signal);
   if (!response.ok) {
     throw new MechAnalyticsError(

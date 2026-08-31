@@ -26,7 +26,8 @@ export const getServiceActivityFromMechAnalytics = async ({
     multisigs.map((multisig) =>
       fetchAllScoredRows({
         chainId,
-        requester: multisig.toLowerCase(),
+        // fetchAllScoredRows lowercases; see client.ts.
+        requester: multisig,
         signal,
       }),
     ),

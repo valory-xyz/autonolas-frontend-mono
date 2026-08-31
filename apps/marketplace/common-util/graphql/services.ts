@@ -116,6 +116,33 @@ const getServiceMultisigs = (service: ServiceDetails) =>
     ),
   );
 
+/**
+ * Fetch the union of every multisig a service has ever held on the
+ * marketplace subgraph. Used by the flag-on activity path so
+ * multisig-swapped services still return their full history (matching
+ * the subgraph path's serviceId-based envelope).
+ */
+export const getServiceMultisigsFromMarketplaceSubgraph = async ({
+  chainId,
+  serviceId,
+}: {
+  chainId: MarketplaceSubgraphChainId;
+  serviceId: string;
+}): Promise<string[]> => {
+  const client = MARKETPLACE_SUBGRAPH_CLIENTS[chainId];
+  const query = `
+    {
+      service(id: "${serviceId}") {
+        id
+        latestMultisig
+        historicalMultisigs
+      }
+    }
+  `;
+  const response = await client.request<{ service: ServiceDetails | null }>(query);
+  return response.service ? getServiceMultisigs(response.service) : [];
+};
+
 export const getServicesFromMarketplaceSubgraph = async ({
   chainId,
   serviceIds,

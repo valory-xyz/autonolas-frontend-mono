@@ -14,7 +14,7 @@ export interface ScoredRow {
   delivered_at: string;
   computed_at: string;
 
-  source: MechAnalyticsSourceLabel | string | null;
+  source: MechAnalyticsSourceLabel | null;
 
   request_ipfs_hash: string | null;
   delivery_ipfs_hash: string | null;

@@ -1,5 +1,5 @@
 import { getServiceActivityFromMarketplaceSubgraph } from 'common-util/graphql/service-activity';
-import { getServiceFromRegistry } from 'common-util/graphql/registry';
+import { getServiceMultisigsFromMarketplaceSubgraph } from 'common-util/graphql/services';
 import { getServiceActivityFromMechAnalytics } from 'common-util/mechAnalytics/service-activity';
 import { shouldUseMechAnalytics } from 'common-util/mechAnalytics/config';
 import { NextApiRequest, NextApiResponse } from 'next';
@@ -60,19 +60,21 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 }
 
-// Registry failure or missing multisig degrades to an empty activity page,
-// same shape the subgraph path produces for a not-yet-launched service.
+// Fetch the union of every multisig the service has held (latest +
+// historical) so the mech-analytics envelope matches the subgraph
+// path, which queries by serviceId. Multisig-swap history matters
+// for services that ever rotated their safe.
+// Subgraph failure or a not-yet-launched service degrades to an
+// empty activity page.
 const getFromMechAnalytics = async (chainId: number, serviceId: string) => {
-  const service = await getServiceFromRegistry({
+  const multisigs = await getServiceMultisigsFromMarketplaceSubgraph({
     chainId: chainId as MarketplaceSubgraphChainId,
-    id: serviceId,
-    includeErc8004: false,
-  }).catch(() => null);
-  const multisig = service?.multisig ?? null;
+    serviceId,
+  }).catch(() => [] as string[]);
 
   return getServiceActivityFromMechAnalytics({
     chainId,
     serviceId,
-    multisigs: multisig ? [multisig] : [],
+    multisigs,
   });
 };
