@@ -1,4 +1,4 @@
-import { Button, Col, Flex, Row, Tabs } from 'antd';
+import { Alert, Button, Col, Flex, Row, Tabs } from 'antd';
 import type { ColumnsType, ColumnType } from 'antd/es/table';
 import get from 'lodash/get';
 // React 19: `JSX` is no longer global, must be imported from 'react'.
@@ -157,6 +157,7 @@ export const Details: FC<DetailsProps> = ({
 
   const [currentTab, setCurrentTab] = useState<CurrentTab>(null);
   const [activityRows, setActivityRows] = useState<Activity[]>([]);
+  const [activityHasMore, setActivityHasMore] = useState<boolean>(false);
   const [activityLoading, setActivityLoading] = useState(false);
   const [activityPage, setActivityPage] = useState(1);
   const [isActivityModalVisible, setIsActivityModalVisible] = useState(false);
@@ -235,9 +236,11 @@ export const Details: FC<DetailsProps> = ({
         });
 
         setActivityRows(json.activities || []);
+        setActivityHasMore(Boolean(json.hasMore));
         setActivityPage(1);
       } catch (e) {
         setActivityRows([]);
+        setActivityHasMore(false);
       } finally {
         setActivityLoading(false);
       }
@@ -300,6 +303,14 @@ export const Details: FC<DetailsProps> = ({
 
       {currentTab === 'activity' && (
         <div style={{ marginTop: showTabs ? 0 : 16 }}>
+          {activityHasMore && (
+            <Alert
+              type="info"
+              showIcon
+              style={{ marginBottom: 16 }}
+              message="Showing recent activity only. Older rows are truncated for performance."
+            />
+          )}
           <DetailsTable
             columns={getColumns({ addressLinkProps, openActivityModal }) as ColumnType<object>[]}
             dataSource={paginatedActivityRows}

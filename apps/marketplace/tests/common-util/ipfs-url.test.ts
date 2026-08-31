@@ -6,13 +6,16 @@ import { getIpfsUrl } from 'libs/ui-components/src/lib/AddressLink';
 // through unchanged or the gateway 404s.
 
 describe('getIpfsUrl', () => {
-  it('passes a base32 CIDv1 (bafy…) through unchanged', () => {
-    const cid = 'bafybeiftrasm4o7jmwos7fwg6lgwtwhrwk4frlv44o4fpveop6w2g4jh4q';
-    expect(getIpfsUrl(cid)).toBe(`https://gateway.autonolas.tech/ipfs/${cid}`);
-  });
-
-  it('passes a base58 CIDv0 (Qm…) through unchanged', () => {
-    const cid = 'QmYwAPJzv5CZsnA625s3Xf2nemtYgPpHdWEz79ojWnPbdG';
+  it.each([
+    // dag-pb CIDv1
+    'bafybeiftrasm4o7jmwos7fwg6lgwtwhrwk4frlv44o4fpveop6w2g4jh4q',
+    // raw-codec CIDv1 (what `ipfs add --raw-leaves` yields)
+    'bafkreidon7wwjt7yynzqhczbaflvirbtaxsrkyvbnjljyaxpzdhqzzu32e',
+    // dag-cbor CIDv1
+    'bafyreig5r2vh4nnrqfaocgjeq3rtjzt34loxrbe5bwq6ck7g2sc2ynkxbm',
+    // base58 CIDv0
+    'QmYwAPJzv5CZsnA625s3Xf2nemtYgPpHdWEz79ojWnPbdG',
+  ])('passes multibase CID %p through unchanged', (cid) => {
     expect(getIpfsUrl(cid)).toBe(`https://gateway.autonolas.tech/ipfs/${cid}`);
   });
 

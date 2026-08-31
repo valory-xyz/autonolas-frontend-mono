@@ -66,15 +66,27 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 // path shape. Swallowing here would pin an empty activity list at the
 // CDN for an hour on a transient blip.
 const getFromMechAnalytics = async (chainId: number, serviceId: string) => {
-  const { multisigs, mechAddresses } = await getServiceEndpointsFromMarketplaceSubgraph({
-    chainId: chainId as MarketplaceSubgraphChainId,
-    serviceId,
-  });
+  // Fire the endpoint lookup + subgraph activity fetch in parallel.
+  // Subgraph activity is unioned into the mech-analytics result for
+  // the pending-tail gap: mech-analytics holds undelivered requests
+  // out of its scored + unscored surfaces for ~24h, so a freshly-fired
+  // request would otherwise not render until the day-old floor lifts.
+  const [{ multisigs, mechAddresses }, subgraphActivity] = await Promise.all([
+    getServiceEndpointsFromMarketplaceSubgraph({
+      chainId: chainId as MarketplaceSubgraphChainId,
+      serviceId,
+    }),
+    getServiceActivityFromMarketplaceSubgraph({
+      chainId: chainId as MarketplaceSubgraphChainId,
+      serviceId,
+    }),
+  ]);
 
   return getServiceActivityFromMechAnalytics({
     chainId,
     serviceId,
     multisigs,
     mechAddresses,
+    subgraphActivities: subgraphActivity.activities,
   });
 };

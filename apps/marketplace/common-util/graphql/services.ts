@@ -1,34 +1,12 @@
 import { Service } from 'common-util/types';
 import { shouldUseMechAnalytics } from 'common-util/mechAnalytics/config';
 import { fetchRequesterMetrics } from 'common-util/mechAnalytics/client';
+import { mapWithConcurrency } from 'common-util/mechAnalytics/concurrency';
 import { MARKETPLACE_SUBGRAPH_CLIENTS, type MarketplaceSubgraphChainId } from './index';
 
-// Max in-flight requester-metrics fetches when flag is on. Higher =
-// faster response, more pressure on mech-analytics + the serverless
-// function's socket budget.
+// Max in-flight requester-metrics fetches. Higher = faster response,
+// more pressure on mech-analytics + the serverless function's socket budget.
 const REQUESTER_METRICS_CONCURRENCY = 8;
-
-/** Simple concurrency-limited map. Preserves input order in the result. */
-const mapWithConcurrency = async <T, R>(
-  items: readonly T[],
-  concurrency: number,
-  fn: (item: T, index: number) => Promise<R>,
-): Promise<R[]> => {
-  const results = new Array<R>(items.length);
-  let next = 0;
-  const worker = async () => {
-    let i = next;
-    next += 1;
-    while (i < items.length) {
-      results[i] = await fn(items[i], i);
-      i = next;
-      next += 1;
-    }
-  };
-  const workers = Array.from({ length: Math.min(concurrency, items.length) }, worker);
-  await Promise.all(workers);
-  return results;
-};
 
 /**
  * `Service.totalRequests` / `totalDeliveries` freeze for off-chain traffic, so the
@@ -218,9 +196,13 @@ export const getServicesFromMarketplaceSubgraph = async ({
           }),
       );
       multisigs.forEach((multisig, i) => {
-        const metrics = metricsPerMultisig[i];
-        if (metrics) {
-          requestsByMultisig.set(multisig.toLowerCase(), metrics.windows.all.n_mech_requests);
+        // Narrow shape guard rather than blind property access — the
+        // client cast is unchecked, so a 200 with a drifted response
+        // (renamed / missing windows) would otherwise throw here,
+        // outside the fetch's try/catch, and 500 the whole route.
+        const n = metricsPerMultisig[i]?.windows?.all?.n_mech_requests;
+        if (typeof n === 'number') {
+          requestsByMultisig.set(multisig.toLowerCase(), n);
         }
       });
     } else {

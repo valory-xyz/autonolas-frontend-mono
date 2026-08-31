@@ -80,4 +80,8 @@ export type Service = {
 export type ServiceActivity = {
   id: string;
   activities: Activity[];
+  // True when at least one of the underlying multisig / mech-address
+  // fetches truncated at the page cap. FE surfaces a "showing recent"
+  // hint. Absent on the subgraph path.
+  hasMore?: boolean;
 };

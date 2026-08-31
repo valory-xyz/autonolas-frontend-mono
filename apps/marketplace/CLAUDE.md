@@ -21,6 +21,9 @@ Discover, register, deploy, and interact with **mechs** (autonomous AI agents) a
 - **Registry**: `NEXT_PUBLIC_REGISTRY_URL`, `NEXT_PUBLIC_AUTONOLAS_URL`; Safe APIs per chain.
 - **Marketplace activity subgraphs** (per chain): `NEXT_PUBLIC_*_MARKETPLACE_SUBGRAPH_URL` for Ethereum (1), Optimism (10), Gnosis (100), Polygon (137), Base (8453), Arbitrum (42161), Celo (42220).
 - **Registry subgraphs**: Ethereum (1), Optimism (10), Gnosis (100), Polygon (137), Base (8453), Mode (34443), Arbitrum (42161), Celo (42220).
+- **mech-analytics** (activity read path, chains 10 / 100 / 137 / 8453):
+  - `NEXT_PUBLIC_MECH_ANALYTICS_URL` — API base (e.g. `https://mech-analytics-api.autonolas.tech`).
+  - `NEXT_PUBLIC_USE_MECH_ANALYTICS_ROWS` — off-switch. Default ON when unset; set to exactly `"false"` to fall back to the subgraph reader. `shouldUseMechAnalytics()` also requires the URL to be non-empty, so a missing base URL silently degrades to the subgraph path with no signal — set both env vars in every deployed environment.
 - **Etherscan** API key; **Wallet Project ID**; optional **Solana** (SVM) config.
 - Optional: local registry via Docker (see app README).
 
