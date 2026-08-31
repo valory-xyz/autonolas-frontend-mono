@@ -308,7 +308,7 @@ export const Details: FC<DetailsProps> = ({
               type="info"
               showIcon
               style={{ marginBottom: 16 }}
-              message="Showing recent activity only. Older rows are truncated for performance."
+              message="Showing activity from the last 30 days. Older rows are available via the mech-analytics API."
             />
           )}
           <DetailsTable

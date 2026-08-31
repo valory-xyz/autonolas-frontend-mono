@@ -60,18 +60,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 }
 
-// Union of latest + historical multisigs so multisig-swapped services
-// still return their full history. Registry / subgraph failure
-// propagates to the outer handler → 500 uncached, matching the subgraph
-// path shape. Swallowing here would pin an empty activity list at the
-// CDN for an hour on a transient blip.
+// Endpoint lookup failure propagates to the outer handler → 500 uncached:
+// we cannot run the mech-analytics fan-out without a multisigs / mech
+// address list. Subgraph activity failure, however, only costs us the
+// pending-tail rows — mech-analytics is intended to be authoritative
+// for the delivered surface on 10 / 100 / 137 / 8453, so a subgraph blip
+// downgrades to "no pending-tail rows this minute" rather than 500ing.
 const getFromMechAnalytics = async (chainId: number, serviceId: string) => {
-  // Fire the endpoint lookup + subgraph activity fetch in parallel.
-  // Subgraph activity is unioned into the mech-analytics result for
-  // the pending-tail gap: mech-analytics holds undelivered requests
-  // out of its scored + unscored surfaces for ~24h, so a freshly-fired
-  // request would otherwise not render until the day-old floor lifts.
-  const [{ multisigs, mechAddresses }, subgraphActivity] = await Promise.all([
+  const [endpoints, subgraphActivity] = await Promise.all([
     getServiceEndpointsFromMarketplaceSubgraph({
       chainId: chainId as MarketplaceSubgraphChainId,
       serviceId,
@@ -79,14 +75,20 @@ const getFromMechAnalytics = async (chainId: number, serviceId: string) => {
     getServiceActivityFromMarketplaceSubgraph({
       chainId: chainId as MarketplaceSubgraphChainId,
       serviceId,
+    }).catch((error: unknown) => {
+      console.warn(
+        `[service-activity] subgraph activity fetch failed for service ${serviceId} on ` +
+          `chain ${chainId}; serving mech-analytics rows only: ${String(error)}`,
+      );
+      return { activities: [] };
     }),
   ]);
 
   return getServiceActivityFromMechAnalytics({
     chainId,
     serviceId,
-    multisigs,
-    mechAddresses,
+    multisigs: endpoints.multisigs,
+    mechAddresses: endpoints.mechAddresses,
     subgraphActivities: subgraphActivity.activities,
   });
 };

@@ -102,4 +102,20 @@ describe('iterateScoredRows', () => {
     expect(url).toContain('chain_id=8453');
     expect(url).toContain(`requester=${REQUESTER}`);
   });
+
+  it('passes since= when provided so the ascending scan is window-bounded', async () => {
+    global.fetch = jest.fn().mockResolvedValueOnce(mockOk({ rows: [], next_cursor: null }));
+    const since = '2026-07-31T00:00:00.000Z';
+    await fetchAllScoredRows({ chainId: CHAIN_ID, requester: REQUESTER, since });
+    const url = (global.fetch as jest.Mock).mock.calls[0][0] as string;
+    expect(url).toContain('since=');
+    expect(decodeURIComponent(url.split('since=')[1].split('&')[0])).toBe(since);
+  });
+
+  it('omits since= when not provided', async () => {
+    global.fetch = jest.fn().mockResolvedValueOnce(mockOk({ rows: [], next_cursor: null }));
+    await fetchAllScoredRows({ chainId: CHAIN_ID, requester: REQUESTER });
+    const url = (global.fetch as jest.Mock).mock.calls[0][0] as string;
+    expect(url).not.toContain('since=');
+  });
 });

@@ -121,6 +121,13 @@ const getServiceMultisigs = (service: ServiceDetails) =>
     ),
   );
 
+// `service.mechs` derives from `MechAgent`, which is only ever populated
+// by the legacy AgentFactory / AgentRegistry mappings. The marketplace
+// handler creates a top-level `Mech` entity keyed by `serviceId.toString()`
+// with no reverse derivedFrom back onto Service. So a service whose mech
+// was created via MechMarketplace has an EMPTY `service.mechs`, and the
+// Supply fan-out below iterates zero mech addresses. Query both entities
+// and union the addresses so both eras resolve.
 export const getServiceEndpointsFromMarketplaceSubgraph = async ({
   chainId,
   serviceId,
@@ -140,14 +147,22 @@ export const getServiceEndpointsFromMarketplaceSubgraph = async ({
           address
         }
       }
+      mech(id: "${serviceId}") {
+        address
+      }
     }
   `;
-  const response = await client.request<{ service: ServiceDetails | null }>(query);
+  const response = await client.request<{
+    service: ServiceDetails | null;
+    mech: { address: string } | null;
+  }>(query);
   if (!response.service) return { multisigs: [], mechAddresses: [] };
+  const legacy = (response.service.mechs ?? []).map((m) => m.address);
+  const marketplace = response.mech?.address ? [response.mech.address] : [];
   return {
     multisigs: getServiceMultisigs(response.service),
     mechAddresses: Array.from(
-      new Set((response.service.mechs ?? []).map((m) => m.address.toLowerCase())),
+      new Set([...legacy, ...marketplace].map((address) => address.toLowerCase())),
     ),
   };
 };

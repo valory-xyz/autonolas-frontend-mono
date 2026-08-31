@@ -21,6 +21,11 @@ interface FetchRowsParams {
   mechAddress?: string;
   limit?: number;
   maxPages?: number;
+  // ISO-8601. Filters upstream by `requested_at >= since`. Bounding the
+  // window server-side is the honest way to cap the response; without
+  // it, the ascending ORDER BY keeps the OLDEST rows and drops the
+  // newest, which reads backwards to the user.
+  since?: string;
   signal?: AbortSignal;
 }
 
@@ -28,7 +33,7 @@ async function* iterateRows(
   endpoint: 'scored-rows' | 'unscored-rows',
   params: FetchRowsParams,
 ): AsyncGenerator<ScoredRow[], void, void> {
-  const { chainId, signal } = params;
+  const { chainId, signal, since } = params;
   const requester = params.requester?.toLowerCase();
   const mechAddress = params.mechAddress?.toLowerCase();
   const limit = Math.min(params.limit ?? DEFAULT_LIMIT, MAX_LIMIT);
@@ -48,6 +53,7 @@ async function* iterateRows(
     url.searchParams.set('chain_id', String(chainId));
     if (requester) url.searchParams.set('requester', requester);
     if (mechAddress) url.searchParams.set('mech_address', mechAddress);
+    if (since) url.searchParams.set('since', since);
     url.searchParams.set('limit', String(limit));
     if (cursor !== null) {
       url.searchParams.set('cursor', cursor);
