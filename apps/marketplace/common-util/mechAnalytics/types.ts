@@ -2,7 +2,9 @@ export type MechAnalyticsSourceLabel = 'mech_onchain' | 'mech_offchain' | 'ipfs_
 
 export interface ScoredRow {
   request_id: string;
-  tool: string;
+  // `null` on rows from /v1/data/unscored-rows (predict-api couldn't
+  // parse the payload) and empty string on some historical shell rows.
+  tool: string | null;
   mech_address: string;
   requester: string;
   chain_id: number;
@@ -11,7 +13,8 @@ export interface ScoredRow {
   question_title: string | null;
 
   requested_at: string;
-  delivered_at: string;
+  // `null` on unscored rows the mech never delivered.
+  delivered_at: string | null;
   computed_at: string;
 
   source: MechAnalyticsSourceLabel | null;
@@ -35,11 +38,11 @@ export interface ScoredRowsResponse {
 
 export interface RequesterMetricsWindow {
   n_mech_requests: number;
-  n_mech_deliveries: number;
+  tool_accuracy: number | null;
 }
 
 export interface RequesterMetricsResponse {
-  requester: string;
+  address: string;
   chain_id: number;
   windows: {
     all: RequesterMetricsWindow;

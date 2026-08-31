@@ -1,4 +1,9 @@
-import { isMechAnalyticsFlagOn, shouldUseMechAnalytics } from 'common-util/mechAnalytics/config';
+import {
+  isMechAnalyticsFlagOn,
+  isMechAnalyticsSupportedChain,
+  MECH_ANALYTICS_CHAIN_IDS,
+  shouldUseMechAnalytics,
+} from 'common-util/mechAnalytics/config';
 
 describe('mechAnalytics/config', () => {
   const originalEnv = process.env;
@@ -31,22 +36,41 @@ describe('mechAnalytics/config', () => {
     );
   });
 
+  describe('MECH_ANALYTICS_CHAIN_IDS', () => {
+    // Guards silent extension — moves in lockstep with etl/agents.py.
+    it('supports exactly optimism, gnosis, polygon, base', () => {
+      expect([...MECH_ANALYTICS_CHAIN_IDS].sort((a, b) => a - b)).toEqual([10, 100, 137, 8453]);
+    });
+
+    it.each([1, 42161])('does not support chain %p', (chainId) => {
+      expect(isMechAnalyticsSupportedChain(chainId)).toBe(false);
+    });
+  });
+
   describe('shouldUseMechAnalytics', () => {
+    beforeEach(() => {
+      process.env.NEXT_PUBLIC_MECH_ANALYTICS_URL = 'https://ma.example';
+    });
+
     it('is false when the flag is off', () => {
       process.env.NEXT_PUBLIC_USE_MECH_ANALYTICS_ROWS = 'false';
-      process.env.NEXT_PUBLIC_MECH_ANALYTICS_URL = 'https://ma.example';
-      expect(shouldUseMechAnalytics()).toBe(false);
+      expect(shouldUseMechAnalytics(100)).toBe(false);
     });
 
     it('is false when the URL is missing', () => {
       delete process.env.NEXT_PUBLIC_MECH_ANALYTICS_URL;
-      expect(shouldUseMechAnalytics()).toBe(false);
+      expect(shouldUseMechAnalytics(100)).toBe(false);
     });
 
-    it('is true with URL set and flag unset (default-on)', () => {
+    it('is false on unsupported chains (Ethereum, Arbitrum)', () => {
+      expect(shouldUseMechAnalytics(1)).toBe(false);
+      expect(shouldUseMechAnalytics(42161)).toBe(false);
+    });
+
+    it('is true on supported chains with URL set and flag unset (default-on)', () => {
       delete process.env.NEXT_PUBLIC_USE_MECH_ANALYTICS_ROWS;
-      process.env.NEXT_PUBLIC_MECH_ANALYTICS_URL = 'https://ma.example';
-      expect(shouldUseMechAnalytics()).toBe(true);
+      expect(shouldUseMechAnalytics(100)).toBe(true);
+      expect(shouldUseMechAnalytics(8453)).toBe(true);
     });
   });
 });

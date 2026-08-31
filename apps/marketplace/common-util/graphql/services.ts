@@ -3,6 +3,33 @@ import { shouldUseMechAnalytics } from 'common-util/mechAnalytics/config';
 import { fetchRequesterMetrics } from 'common-util/mechAnalytics/client';
 import { MARKETPLACE_SUBGRAPH_CLIENTS, type MarketplaceSubgraphChainId } from './index';
 
+// Max in-flight requester-metrics fetches when flag is on. Higher =
+// faster response, more pressure on mech-analytics + the serverless
+// function's socket budget.
+const REQUESTER_METRICS_CONCURRENCY = 8;
+
+/** Simple concurrency-limited map. Preserves input order in the result. */
+const mapWithConcurrency = async <T, R>(
+  items: readonly T[],
+  concurrency: number,
+  fn: (item: T, index: number) => Promise<R>,
+): Promise<R[]> => {
+  const results = new Array<R>(items.length);
+  let next = 0;
+  const worker = async () => {
+    let i = next;
+    next += 1;
+    while (i < items.length) {
+      results[i] = await fn(items[i], i);
+      i = next;
+      next += 1;
+    }
+  };
+  const workers = Array.from({ length: Math.min(concurrency, items.length) }, worker);
+  await Promise.all(workers);
+  return results;
+};
+
 /**
  * `Service.totalRequests` / `totalDeliveries` freeze for off-chain traffic, so the
  * counts come from fields both handlers bump — `Sender.totalLegacyRequests` (demand)
@@ -116,13 +143,13 @@ const getServiceMultisigs = (service: ServiceDetails) =>
     ),
   );
 
-export const getServiceMultisigsFromMarketplaceSubgraph = async ({
+export const getServiceEndpointsFromMarketplaceSubgraph = async ({
   chainId,
   serviceId,
 }: {
   chainId: MarketplaceSubgraphChainId;
   serviceId: string;
-}): Promise<string[]> => {
+}): Promise<{ multisigs: string[]; mechAddresses: string[] }> => {
   const client = MARKETPLACE_SUBGRAPH_CLIENTS[chainId];
   const query = `
     {
@@ -130,11 +157,21 @@ export const getServiceMultisigsFromMarketplaceSubgraph = async ({
         id
         latestMultisig
         historicalMultisigs
+        mechs {
+          id
+          address
+        }
       }
     }
   `;
   const response = await client.request<{ service: ServiceDetails | null }>(query);
-  return response.service ? getServiceMultisigs(response.service) : [];
+  if (!response.service) return { multisigs: [], mechAddresses: [] };
+  return {
+    multisigs: getServiceMultisigs(response.service),
+    mechAddresses: Array.from(
+      new Set((response.service.mechs ?? []).map((m) => m.address.toLowerCase())),
+    ),
+  };
 };
 
 export const getServicesFromMarketplaceSubgraph = async ({
@@ -161,10 +198,17 @@ export const getServicesFromMarketplaceSubgraph = async ({
 
   const requestsByMultisig = new Map<string, number>();
   if (multisigs.length > 0) {
-    if (shouldUseMechAnalytics()) {
-      // Per-multisig failure falls back to the subgraph legacy total via Math.max below.
-      const metricsPerMultisig = await Promise.all(
-        multisigs.map((multisig) =>
+    if (shouldUseMechAnalytics(chainId)) {
+      // Bounded fan-out: unlike the subgraph path's single `senders`
+      // query, mech-analytics is one HTTP request per multisig. A
+      // client-driven `?serviceIds=…` could union hundreds of multisigs,
+      // so we chunk to REQUESTER_METRICS_CONCURRENCY in flight instead
+      // of firing every request at once. Per-multisig failure falls
+      // back to the subgraph legacy total via Math.max below.
+      const metricsPerMultisig = await mapWithConcurrency(
+        multisigs,
+        REQUESTER_METRICS_CONCURRENCY,
+        (multisig) =>
           fetchRequesterMetrics(chainId, multisig).catch((error: unknown) => {
             console.warn(
               `[services] mech-analytics requester metrics failed for ${multisig} on ` +
@@ -172,7 +216,6 @@ export const getServicesFromMarketplaceSubgraph = async ({
             );
             return null;
           }),
-        ),
       );
       multisigs.forEach((multisig, i) => {
         const metrics = metricsPerMultisig[i];

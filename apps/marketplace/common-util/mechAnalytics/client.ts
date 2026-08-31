@@ -15,19 +15,22 @@ export class MechAnalyticsError extends Error {
   }
 }
 
-interface FetchScoredRowsParams {
+interface FetchRowsParams {
   chainId: number;
-  requester: string;
+  requester?: string;
+  mechAddress?: string;
   limit?: number;
   maxPages?: number;
   signal?: AbortSignal;
 }
 
-export async function* iterateScoredRows(
-  params: FetchScoredRowsParams,
+async function* iterateRows(
+  endpoint: 'scored-rows' | 'unscored-rows',
+  params: FetchRowsParams,
 ): AsyncGenerator<ScoredRow[], void, void> {
   const { chainId, signal } = params;
-  const requester = params.requester.toLowerCase();
+  const requester = params.requester?.toLowerCase();
+  const mechAddress = params.mechAddress?.toLowerCase();
   const limit = Math.min(params.limit ?? DEFAULT_LIMIT, MAX_LIMIT);
   const maxPages = params.maxPages ?? DEFAULT_MAX_PAGES;
 
@@ -37,13 +40,14 @@ export async function* iterateScoredRows(
   while (true) {
     if (pageCount >= maxPages) {
       throw new MechAnalyticsError(
-        `mech-analytics scored-rows: hit max_pages=${maxPages} without exhausting the cursor`,
+        `mech-analytics ${endpoint}: hit max_pages=${maxPages} without exhausting the cursor`,
       );
     }
 
-    const url = new URL(`${getMechAnalyticsUrl()}/v1/data/scored-rows`);
+    const url = new URL(`${getMechAnalyticsUrl()}/v1/data/${endpoint}`);
     url.searchParams.set('chain_id', String(chainId));
-    url.searchParams.set('requester', requester);
+    if (requester) url.searchParams.set('requester', requester);
+    if (mechAddress) url.searchParams.set('mech_address', mechAddress);
     url.searchParams.set('limit', String(limit));
     if (cursor !== null) {
       url.searchParams.set('cursor', cursor);
@@ -52,7 +56,7 @@ export async function* iterateScoredRows(
     const response = await fetchWithTimeout(url.toString(), signal);
     if (!response.ok) {
       throw new MechAnalyticsError(
-        `mech-analytics scored-rows failed: HTTP ${response.status} ${response.statusText}`,
+        `mech-analytics ${endpoint} failed: HTTP ${response.status} ${response.statusText}`,
         response.status,
       );
     }
@@ -68,7 +72,11 @@ export async function* iterateScoredRows(
   }
 }
 
-export async function fetchAllScoredRows(params: FetchScoredRowsParams): Promise<ScoredRow[]> {
+export const iterateScoredRows = (params: FetchRowsParams) => iterateRows('scored-rows', params);
+export const iterateUnscoredRows = (params: FetchRowsParams) =>
+  iterateRows('unscored-rows', params);
+
+export async function fetchAllScoredRows(params: FetchRowsParams): Promise<ScoredRow[]> {
   const all: ScoredRow[] = [];
   for await (const page of iterateScoredRows(params)) {
     all.push(...page);

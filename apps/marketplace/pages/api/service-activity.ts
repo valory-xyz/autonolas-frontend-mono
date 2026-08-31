@@ -1,5 +1,5 @@
 import { getServiceActivityFromMarketplaceSubgraph } from 'common-util/graphql/service-activity';
-import { getServiceMultisigsFromMarketplaceSubgraph } from 'common-util/graphql/services';
+import { getServiceEndpointsFromMarketplaceSubgraph } from 'common-util/graphql/services';
 import { getServiceActivityFromMechAnalytics } from 'common-util/mechAnalytics/service-activity';
 import { shouldUseMechAnalytics } from 'common-util/mechAnalytics/config';
 import { NextApiRequest, NextApiResponse } from 'next';
@@ -34,7 +34,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       });
     }
 
-    const services = shouldUseMechAnalytics()
+    const services = shouldUseMechAnalytics(chainIdNumber)
       ? await getFromMechAnalytics(chainIdNumber, serviceId)
       : await getServiceActivityFromMarketplaceSubgraph({
           chainId: chainIdNumber as MarketplaceSubgraphChainId,
@@ -61,16 +61,20 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 }
 
 // Union of latest + historical multisigs so multisig-swapped services
-// still return their full history. Subgraph failure → empty page.
+// still return their full history. Registry / subgraph failure
+// propagates to the outer handler → 500 uncached, matching the subgraph
+// path shape. Swallowing here would pin an empty activity list at the
+// CDN for an hour on a transient blip.
 const getFromMechAnalytics = async (chainId: number, serviceId: string) => {
-  const multisigs = await getServiceMultisigsFromMarketplaceSubgraph({
+  const { multisigs, mechAddresses } = await getServiceEndpointsFromMarketplaceSubgraph({
     chainId: chainId as MarketplaceSubgraphChainId,
     serviceId,
-  }).catch(() => [] as string[]);
+  });
 
   return getServiceActivityFromMechAnalytics({
     chainId,
     serviceId,
     multisigs,
+    mechAddresses,
   });
 };
