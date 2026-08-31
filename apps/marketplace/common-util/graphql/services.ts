@@ -1,4 +1,6 @@
 import { Service } from 'common-util/types';
+import { shouldUseMechAnalytics } from 'common-util/mechAnalytics/config';
+import { fetchRequesterMetrics } from 'common-util/mechAnalytics/client';
 import { MARKETPLACE_SUBGRAPH_CLIENTS, type MarketplaceSubgraphChainId } from './index';
 
 /**
@@ -138,22 +140,44 @@ export const getServicesFromMarketplaceSubgraph = async ({
 
   const requestsByMultisig = new Map<string, number>();
   if (multisigs.length > 0) {
-    // `services` and `meches` are bounded by `serviceIds`, but `multisigs` is the
-    // union of every service's multisig history, so it can outgrow PAGE_LIMIT on
-    // its own. The page would then truncate silently and `Math.max` would mask the
-    // under-count with the legacy total — warn so it is at least detectable.
-    if (multisigs.length >= PAGE_LIMIT) {
-      console.warn(
-        `[services] ${multisigs.length} multisigs >= page limit ${PAGE_LIMIT}; ` +
-          'sender counters may be truncated and demand-side counts under-reported',
+    if (shouldUseMechAnalytics(chainId)) {
+      // Sender.totalLegacyRequests freezes for off-chain traffic;
+      // per-multisig failure falls back to the subgraph total via Math.max.
+      const metricsPerMultisig = await Promise.all(
+        multisigs.map((multisig) =>
+          fetchRequesterMetrics(chainId, multisig).catch((error: unknown) => {
+            console.warn(
+              `[services] mech-analytics requester metrics failed for ${multisig} on ` +
+                `chain ${chainId}; falling back to subgraph totals: ${String(error)}`,
+            );
+            return null;
+          }),
+        ),
       );
-    }
+      multisigs.forEach((multisig, i) => {
+        const metrics = metricsPerMultisig[i];
+        if (metrics) {
+          requestsByMultisig.set(multisig.toLowerCase(), metrics.windows.all.n_mech_requests);
+        }
+      });
+    } else {
+      // `services` and `meches` are bounded by `serviceIds`, but `multisigs` is the
+      // union of every service's multisig history, so it can outgrow PAGE_LIMIT on
+      // its own. The page would then truncate silently and `Math.max` would mask the
+      // under-count with the legacy total — warn so it is at least detectable.
+      if (multisigs.length >= PAGE_LIMIT) {
+        console.warn(
+          `[services] ${multisigs.length} multisigs >= page limit ${PAGE_LIMIT}; ` +
+            'sender counters may be truncated and demand-side counts under-reported',
+        );
+      }
 
-    const senderResponse = await client.request<SenderCountersResponse>(
-      getQueryForSenderCounters({ multisigs }),
-    );
-    for (const sender of senderResponse.senders ?? []) {
-      requestsByMultisig.set(sender.id.toLowerCase(), toCount(sender.totalLegacyRequests));
+      const senderResponse = await client.request<SenderCountersResponse>(
+        getQueryForSenderCounters({ multisigs }),
+      );
+      for (const sender of senderResponse.senders ?? []) {
+        requestsByMultisig.set(sender.id.toLowerCase(), toCount(sender.totalLegacyRequests));
+      }
     }
   }
 

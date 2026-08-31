@@ -19,6 +19,11 @@ export type Activity = {
   finalFeeUSD?: string | null;
   feeRaw?: string | null;
   feeUnit?: FeeUnit | null;
+  // Populated only by the mech-analytics reader path.
+  source?: string | null;
+  ipfsRetrievable?: boolean;
+  // Decimal string; parse with BigInt, not Number.
+  deliveryRate?: string | null;
 };
 
 const LIMIT = 1_000;

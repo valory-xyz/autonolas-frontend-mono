@@ -1,4 +1,7 @@
 import { getServiceActivityFromMarketplaceSubgraph } from 'common-util/graphql/service-activity';
+import { getServiceFromRegistry } from 'common-util/graphql/registry';
+import { getServiceActivityFromMechAnalytics } from 'common-util/mechAnalytics/service-activity';
+import { shouldUseMechAnalytics } from 'common-util/mechAnalytics/config';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { CACHE_DURATION, MARKETPLACE_SUPPORTED_CHAIN_IDS } from '../../util/constants';
 import { isMarketplaceSupportedNetwork } from 'common-util/functions';
@@ -24,16 +27,19 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       });
     }
 
-    if (!isMarketplaceSupportedNetwork(Number(chainId))) {
+    const chainIdNumber = Number(chainId);
+    if (!isMarketplaceSupportedNetwork(chainIdNumber)) {
       return res.status(400).json({
         error: `Invalid network. Supported chain IDs: ${MARKETPLACE_SUPPORTED_CHAIN_IDS.join(', ')}`,
       });
     }
 
-    const services = await getServiceActivityFromMarketplaceSubgraph({
-      chainId: Number(chainId) as MarketplaceSubgraphChainId,
-      serviceId,
-    });
+    const services = shouldUseMechAnalytics(chainIdNumber)
+      ? await getFromMechAnalytics(chainIdNumber, serviceId)
+      : await getServiceActivityFromMarketplaceSubgraph({
+          chainId: chainIdNumber as MarketplaceSubgraphChainId,
+          serviceId,
+        });
 
     // If 'latest' parameter is present, disable caching to force fresh data
     if (latest) {
@@ -53,3 +59,20 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     });
   }
 }
+
+// Registry failure or missing multisig degrades to an empty activity page,
+// same shape the subgraph path produces for a not-yet-launched service.
+const getFromMechAnalytics = async (chainId: number, serviceId: string) => {
+  const service = await getServiceFromRegistry({
+    chainId: chainId as MarketplaceSubgraphChainId,
+    id: serviceId,
+    includeErc8004: false,
+  }).catch(() => null);
+  const multisig = service?.multisig ?? null;
+
+  return getServiceActivityFromMechAnalytics({
+    chainId,
+    serviceId,
+    multisigs: multisig ? [multisig] : [],
+  });
+};

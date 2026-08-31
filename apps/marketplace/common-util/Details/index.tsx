@@ -63,10 +63,15 @@ const getColumns = ({
       title: 'Request Data',
       dataIndex: 'requestIpfsHash',
       key: 'requestIpfsHash',
-      render: (text: string) =>
+      render: (text: string, record: Activity) =>
         text ? (
           <Flex align="center" gap={8}>
-            <AddressLink {...addressLinkProps} address={text} isIpfs />
+            <AddressLink
+              {...addressLinkProps}
+              address={text}
+              isIpfs
+              canNotClick={record.ipfsRetrievable === false}
+            />
           </Flex>
         ) : (
           NA
@@ -76,10 +81,15 @@ const getColumns = ({
       title: 'Delivery Data',
       dataIndex: 'deliveryIpfsHash',
       key: 'deliveryIpfsHash',
-      render: (text: string) =>
+      render: (text: string, record: Activity) =>
         text ? (
           <Flex align="center" gap={8}>
-            <AddressLink {...addressLinkProps} address={text} isIpfs />
+            <AddressLink
+              {...addressLinkProps}
+              address={text}
+              isIpfs
+              canNotClick={record.ipfsRetrievable === false}
+            />
           </Flex>
         ) : (
           NA
