@@ -5,7 +5,7 @@ import type { ScoredRow } from 'common-util/mechAnalytics/types';
 jest.mock('common-util/mechAnalytics/client', () => {
   const iter = (rows: ScoredRow[]) =>
     (async function* () {
-      yield rows;
+      yield { rows, nextCursor: null };
     })();
   return {
     iterateScoredRows: jest.fn(() => iter([])),
@@ -22,20 +22,17 @@ const { iterateScoredRows, iterateUnscoredRows } = jest.requireMock(
 
 const scoredRowIter = (rows: ScoredRow[]) =>
   (async function* () {
-    yield rows;
+    yield { rows, nextCursor: null };
   })();
 
-const scoredRowPaginator = (pages: ScoredRow[][], hasMore = false) =>
+// A paginator that yields a fixed set of pages, each with the given
+// nextCursor (null on the last page). Callers control whether the
+// final page carries a cursor so fetchCapped's exactly-at-cap
+// behaviour can be pinned.
+const scoredRowPaginator = (pages: { rows: ScoredRow[]; nextCursor: string | null }[]) =>
   async function* () {
     for (const page of pages) {
       yield page;
-    }
-    if (hasMore) {
-      // Never yield next_cursor=null so the app-level ACTIVITY_MAX_PAGES
-      // guard trips at 5 pages.
-      for (let i = 0; i < 100; i += 1) {
-        yield pages[pages.length - 1] ?? [];
-      }
     }
   };
 
@@ -151,9 +148,29 @@ describe('getServiceActivityFromMechAnalytics — column-level projection', () =
     expect(result.activities[0].finalFeeUSD).toBeNull();
   });
 
-  it('unknown payment_type leaves fee fields empty (no mislabel)', async () => {
+  it('maps payment_type=nvm_subscription to feeUnit=CREDITS', async () => {
     iterateScoredRows.mockImplementation(() =>
-      scoredRowIter([scoredRow({ payment_type: 'unknown_future_token', delivery_rate: '42' })]),
+      scoredRowIter([scoredRow({ payment_type: 'nvm_subscription', delivery_rate: '100' })]),
+    );
+    const result = await getServiceActivityFromMechAnalytics({
+      chainId: 100,
+      serviceId: '1',
+      multisigs: [REQUESTER],
+      mechAddresses: [],
+      subgraphActivities: [],
+    });
+    expect(result.activities[0].feeUnit).toBe('CREDITS');
+    expect(result.activities[0].feeRaw).toBe('100');
+    expect(result.activities[0].finalFeeUSD).toBeNull();
+  });
+
+  it('unknown payment_type leaves fee fields empty AND logs (drift signal)', async () => {
+    const warn = jest.spyOn(console, 'warn').mockImplementation(() => {});
+    // Include a random suffix so this test can be re-run without the
+    // in-module warned-set cache making the console.warn a no-op.
+    const drifted = `unknown_future_token_${Date.now()}_${Math.random()}`;
+    iterateScoredRows.mockImplementation(() =>
+      scoredRowIter([scoredRow({ payment_type: drifted, delivery_rate: '42' })]),
     );
 
     const result = await getServiceActivityFromMechAnalytics({
@@ -167,6 +184,85 @@ describe('getServiceActivityFromMechAnalytics — column-level projection', () =
     expect(result.activities[0].feeUnit).toBeNull();
     expect(result.activities[0].feeRaw).toBeNull();
     expect(result.activities[0].finalFeeUSD).toBeNull();
+    // Drift is a signal, not silent — every sibling degrade path in
+    // this file logs.
+    expect(warn).toHaveBeenCalledWith(expect.stringContaining(drifted));
+    warn.mockRestore();
+  });
+
+  it('payment_type=null (pre-013 tail) does NOT log (expected, not drift)', async () => {
+    const warn = jest.spyOn(console, 'warn').mockImplementation(() => {});
+    iterateScoredRows.mockImplementation(() =>
+      scoredRowIter([scoredRow({ payment_type: null, delivery_rate: '42' })]),
+    );
+
+    await getServiceActivityFromMechAnalytics({
+      chainId: 100,
+      serviceId: '1',
+      multisigs: [REQUESTER],
+      mechAddresses: [],
+      subgraphActivities: [],
+    });
+
+    expect(warn).not.toHaveBeenCalled();
+    warn.mockRestore();
+  });
+
+  it('payment_type=null falls back to the subgraph twin for payment / feeUnit / feeRaw', async () => {
+    // Regression test for the pre-013 historical tail. Previously
+    // dropped the Payment row for these rows because the merge
+    // narrowed to feeUSD / finalFeeUSD only.
+    iterateScoredRows.mockImplementation((params: { requester?: string }) =>
+      params.requester
+        ? scoredRowIter([scoredRow({ payment_type: null, delivery_rate: null })])
+        : scoredRowIter([]),
+    );
+    const twin = subgraphActivity({
+      requestId: TRIMMED_REQUEST_ID,
+      payment: '25000000000000000',
+      feeUnit: 'NATIVE',
+      feeRaw: '25000000000000000',
+    });
+    const result = await getServiceActivityFromMechAnalytics({
+      chainId: 100,
+      serviceId: '1',
+      multisigs: [REQUESTER],
+      mechAddresses: [],
+      subgraphActivities: [twin],
+    });
+    expect(result.activities[0].payment).toBe('25000000000000000');
+    expect(result.activities[0].feeUnit).toBe('NATIVE');
+    expect(result.activities[0].feeRaw).toBe('25000000000000000');
+  });
+
+  it('unknown payment_type does NOT fall back to the subgraph twin (drift stays blank)', async () => {
+    // Otherwise a future upstream drift would silently mislabel via
+    // whatever the twin happens to carry.
+    const warn = jest.spyOn(console, 'warn').mockImplementation(() => {});
+    const drifted = `unknown_future_token_${Date.now()}_${Math.random()}`;
+    iterateScoredRows.mockImplementation((params: { requester?: string }) =>
+      params.requester
+        ? scoredRowIter([scoredRow({ payment_type: drifted, delivery_rate: '42' })])
+        : scoredRowIter([]),
+    );
+    const twin = subgraphActivity({
+      requestId: TRIMMED_REQUEST_ID,
+      payment: '25000000000000000',
+      feeUnit: 'NATIVE',
+      feeRaw: '25000000000000000',
+    });
+    const result = await getServiceActivityFromMechAnalytics({
+      chainId: 100,
+      serviceId: '1',
+      multisigs: [REQUESTER],
+      mechAddresses: [],
+      subgraphActivities: [twin],
+    });
+    // Mapper returned nulls with a log; feeUnit stays null despite the
+    // twin having 'NATIVE'.
+    expect(result.activities[0].feeUnit).toBeNull();
+    expect(warn).toHaveBeenCalled();
+    warn.mockRestore();
   });
 
   it('merges feeUSD / finalFeeUSD from subgraph twin when mech-analytics leaves them null', async () => {
@@ -336,10 +432,16 @@ describe('getServiceActivityFromMechAnalytics — hasMore + degraded signals', (
     expect(result.hasMore).toBe(false);
   });
 
-  it('hasMore is true when the descending scan trips ACTIVITY_MAX_PAGES', async () => {
-    // Never yield next_cursor=null → the app-level cap kicks in.
+  it('hasMore is true when the cap trips AND the last page still had a cursor', async () => {
+    // ACTIVITY_MAX_PAGES = 5. Emit 5 pages, each with a non-null
+    // nextCursor: fetchCapped hits the cap at page 5 and the last
+    // page's cursor says "more upstream" → hasMore=true.
+    const fivePages = Array.from({ length: 5 }, (_, i) => ({
+      rows: [scoredRow({ request_id: `0x${(i + 1).toString(16).padStart(64, '0')}` })],
+      nextCursor: `cursor-${i + 1}`,
+    }));
     iterateScoredRows.mockImplementation((params: { requester?: string }) =>
-      params.requester ? scoredRowPaginator([[scoredRow()]], true)() : scoredRowIter([]),
+      params.requester ? scoredRowPaginator(fivePages)() : scoredRowIter([]),
     );
     const result = await getServiceActivityFromMechAnalytics({
       chainId: 100,
@@ -349,6 +451,27 @@ describe('getServiceActivityFromMechAnalytics — hasMore + degraded signals', (
       subgraphActivities: [],
     });
     expect(result.hasMore).toBe(true);
+  });
+
+  it('hasMore is FALSE when the cap trips exactly at exhaustion (F23)', async () => {
+    // Same 5 pages, but the LAST one has nextCursor=null: the shard
+    // has exactly ACTIVITY_MAX_PAGES pages of history. The banner
+    // must not fire because there's nothing behind the last page.
+    const fivePages = Array.from({ length: 5 }, (_, i) => ({
+      rows: [scoredRow({ request_id: `0x${(i + 1).toString(16).padStart(64, '0')}` })],
+      nextCursor: i === 4 ? null : `cursor-${i + 1}`,
+    }));
+    iterateScoredRows.mockImplementation((params: { requester?: string }) =>
+      params.requester ? scoredRowPaginator(fivePages)() : scoredRowIter([]),
+    );
+    const result = await getServiceActivityFromMechAnalytics({
+      chainId: 100,
+      serviceId: '1',
+      multisigs: [REQUESTER],
+      mechAddresses: [],
+      subgraphActivities: [],
+    });
+    expect(result.hasMore).toBe(false);
   });
 
   it('degraded is true when any shard rejects', async () => {

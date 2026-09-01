@@ -1,4 +1,8 @@
-import { MechAnalyticsError, iterateScoredRows } from 'common-util/mechAnalytics/client';
+import {
+  MechAnalyticsError,
+  iterateScoredRows,
+  type ScoredRowPage,
+} from 'common-util/mechAnalytics/client';
 import type { ScoredRow } from 'common-util/mechAnalytics/types';
 
 const originalFetch = global.fetch;
@@ -46,9 +50,9 @@ const mockFail = (status: number): Response =>
     json: async () => ({}),
   }) as unknown as Response;
 
-const drain = async (iter: AsyncGenerator<ScoredRow[]>) => {
+const drain = async (iter: AsyncGenerator<ScoredRowPage>) => {
   const rows: ScoredRow[] = [];
-  for await (const page of iter) rows.push(...page);
+  for await (const page of iter) rows.push(...page.rows);
   return rows;
 };
 
@@ -122,5 +126,26 @@ describe('iterateScoredRows', () => {
     expect(url).not.toContain('delivery_mech=');
     expect(url).not.toContain('sort_direction=');
     expect(url).not.toContain('mech_address=');
+  });
+
+  it('yields each page with its own nextCursor so a bounded caller can distinguish exhaustion from truncation', async () => {
+    // Page 1 has a cursor (more upstream); page 2 is the tail.
+    // fetchCapped in service-activity.ts reads page.nextCursor at
+    // the cap boundary to avoid a spurious hasMore=true.
+    global.fetch = jest
+      .fn()
+      .mockResolvedValueOnce(
+        mockOk({ rows: [mockScoredRow({ request_id: 'a' })], next_cursor: 'cursor-1' }),
+      )
+      .mockResolvedValueOnce(
+        mockOk({ rows: [mockScoredRow({ request_id: 'b' })], next_cursor: null }),
+      );
+    const pages: ScoredRowPage[] = [];
+    for await (const page of iterateScoredRows({ chainId: CHAIN_ID, requester: REQUESTER })) {
+      pages.push(page);
+    }
+    expect(pages).toHaveLength(2);
+    expect(pages[0].nextCursor).toBe('cursor-1');
+    expect(pages[1].nextCursor).toBeNull();
   });
 });

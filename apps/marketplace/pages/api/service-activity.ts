@@ -87,14 +87,16 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 // Endpoint lookup failure propagates to the outer handler → 500 uncached:
 // we cannot run the mech-analytics fan-out without a multisigs / mech
 // address list. Subgraph activity failure, however, only costs us the
-// pending-tail rows — mech-analytics is authoritative for the delivered
-// surface on 10 / 100 / 137 / 8453 via sort_direction=desc + delivery_mech
-// filter, so a subgraph blip downgrades to "no pending-tail rows this
-// minute" rather than 500ing.
+// pending-tail rows and the twin-side USD amounts, so it downgrades
+// to a partial response rather than 500ing. The failure gets folded
+// into ``degraded`` alongside mech-analytics shard failures so the
+// route's 60s TTL branch fires for either source (without this,
+// F22: a subgraph blip would still get cached for the full 1h + 1h).
 const getFromMechAnalytics = async (
   chainId: number,
   serviceId: string,
 ): Promise<ServiceActivity> => {
+  let subgraphDegraded = false;
   const [endpoints, subgraphActivity] = await Promise.all([
     getServiceEndpointsFromMarketplaceSubgraph({
       chainId: chainId as MarketplaceSubgraphChainId,
@@ -104,6 +106,7 @@ const getFromMechAnalytics = async (
       chainId: chainId as MarketplaceSubgraphChainId,
       serviceId,
     }).catch((error: unknown) => {
+      subgraphDegraded = true;
       console.warn(
         `[service-activity] subgraph activity fetch failed for service ${serviceId} on ` +
           `chain ${chainId}; serving mech-analytics rows only: ${String(error)}`,
@@ -112,11 +115,16 @@ const getFromMechAnalytics = async (
     }),
   ]);
 
-  return getServiceActivityFromMechAnalytics({
+  const result = await getServiceActivityFromMechAnalytics({
     chainId,
     serviceId,
     multisigs: endpoints.multisigs,
     mechAddresses: endpoints.mechAddresses,
     subgraphActivities: subgraphActivity.activities,
   });
+
+  return {
+    ...result,
+    degraded: result.degraded || subgraphDegraded,
+  };
 };

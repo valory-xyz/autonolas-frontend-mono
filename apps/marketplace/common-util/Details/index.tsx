@@ -158,6 +158,7 @@ export const Details: FC<DetailsProps> = ({
   const [currentTab, setCurrentTab] = useState<CurrentTab>(null);
   const [activityRows, setActivityRows] = useState<Activity[]>([]);
   const [activityHasMore, setActivityHasMore] = useState<boolean>(false);
+  const [activityDegraded, setActivityDegraded] = useState<boolean>(false);
   const [activityLoading, setActivityLoading] = useState(false);
   const [activityPage, setActivityPage] = useState(1);
   const [isActivityModalVisible, setIsActivityModalVisible] = useState(false);
@@ -237,10 +238,19 @@ export const Details: FC<DetailsProps> = ({
 
         setActivityRows(json.activities || []);
         setActivityHasMore(Boolean(json.hasMore));
+        setActivityDegraded(Boolean(json.degraded));
         setActivityPage(1);
       } catch (e) {
+        // Log so a 500 / network drop is distinguishable from a
+        // genuinely empty service in the browser console. The prior
+        // shape swallowed the error identically to "0 rows" with no
+        // trace to correlate against server logs.
+        console.warn(
+          `[service-activity] fetch failed for service ${id} on chain ${chainId}: ${String(e)}`,
+        );
         setActivityRows([]);
         setActivityHasMore(false);
+        setActivityDegraded(false);
       } finally {
         setActivityLoading(false);
       }
@@ -303,6 +313,14 @@ export const Details: FC<DetailsProps> = ({
 
       {currentTab === 'activity' && (
         <div style={{ marginTop: showTabs ? 0 : 16 }}>
+          {activityDegraded && (
+            <Alert
+              type="warning"
+              showIcon
+              style={{ marginBottom: 16 }}
+              message="Activity data source is partially degraded. Some rows or payment amounts may be missing until the upstream recovers."
+            />
+          )}
           {activityHasMore && (
             <Alert
               type="info"

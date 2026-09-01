@@ -142,7 +142,10 @@ The pending-tail gap (< 24h old, undelivered) is closed by unioning subgraph `Re
 Column semantics on mech-analytics rows (post alembic 017):
 
 - `deliveredBy` comes from `delivery_mech` directly. No more subgraph-twin merge for this field.
-- `payment` / `feeUnit` / `feeRaw` / `finalFeeUSD` come from `payment_type` + `delivery_rate`. `mapPaymentToFee()` handles `native` → NATIVE / raw wei, `usdc` → USDC / $X.XX (from micro-USDC), `nvm_subscription` → CREDITS. Unknown `payment_type` leaves the fee fields null so the modal drops the Payment row rather than mislabelling.
+- `feeUnit` / `feeRaw` / `finalFeeUSD` come from `payment_type` + `delivery_rate` via `mapPaymentToFee()`. `native` → NATIVE / raw wei, `usdc` → USDC / $X.XX (from micro-USDC), `nvm_subscription` → CREDITS. The legacy `Activity.payment` field is not set on mech-analytics rows: `formatPayment` prefers `feeUnit`-based rendering and only falls back to `payment` when no unit is set.
+- `payment_type` has two null shapes that must be handled differently:
+  - **Legitimate NULL (pre-013 historical tail)**: `mapPaymentToFee(null, rate)` returns `{null, null, null}`, and the twin-merge above falls back to the subgraph twin's `payment` / `feeUnit` / `feeRaw` so the Payment row still renders for these rows.
+  - **Unrecognised `payment_type` string (schema drift)**: same null output for the fields, but the mapper emits a `console.warn` (once per unknown value) so ops can add a case. The twin fallback intentionally does NOT fire on this branch so a new payment type doesn't silently mislabel via whatever the twin happens to carry.
 - `feeUSD` / `finalFeeUSD` for on-chain rows can be enriched from the subgraph twin (mech-analytics doesn't project USD) via the request-id merge.
 
 Failure isolation: each shard's fetch has its own `.catch()` so one 5xx doesn't discard the sibling fetches. Failures set `degraded=true` on the response; the API layer shortens the CDN TTL to 60 s in that case so a transient blip doesn't get pinned in cache.

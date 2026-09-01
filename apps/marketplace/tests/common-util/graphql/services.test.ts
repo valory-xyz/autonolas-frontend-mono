@@ -199,4 +199,131 @@ describe('getServicesFromMarketplaceSubgraph', () => {
       expect(service.mechAddresses).toEqual([]);
     });
   });
+
+  // Default-ON in production but was untested for five review rounds:
+  // the mech-analytics counter path (fan-out via mapWithConcurrency,
+  // per-multisig .catch(), shape guard, Math.max fallback).
+  describe('mech-analytics counter branch', () => {
+    const originalEnv = process.env;
+    const originalFetch = global.fetch;
+    const MECH_ANALYTICS_URL = 'https://ma.example';
+
+    const mockMechAnalyticsResponse = (body: unknown, ok = true, status = 200): Response =>
+      ({
+        ok,
+        status,
+        statusText: ok ? 'OK' : 'Server Error',
+        json: async () => body,
+      }) as unknown as Response;
+
+    beforeEach(() => {
+      process.env = {
+        ...originalEnv,
+        NEXT_PUBLIC_MECH_ANALYTICS_URL: MECH_ANALYTICS_URL,
+        // The counter branch is gated on shouldUseMechAnalytics
+        // returning true. Config also requires the URL to be set.
+        NEXT_PUBLIC_USE_MECH_ANALYTICS_ROWS: 'true',
+      };
+    });
+
+    afterEach(() => {
+      process.env = originalEnv;
+      global.fetch = originalFetch;
+    });
+
+    it('sums n_mech_requests across the service’s multisig union from mech-analytics', async () => {
+      const SAFE_A = SAFE.toLowerCase();
+      const SAFE_B = '0xbbb0000000000000000000000000000000000002';
+      mockSubgraph({
+        services: [
+          {
+            id: '1',
+            latestMultisig: SAFE_A,
+            historicalMultisigs: [SAFE_B],
+            totalRequests: '0',
+          },
+        ],
+      });
+      // Each safe returns its own count; the fan-out sums to 130.
+      global.fetch = jest
+        .fn()
+        .mockResolvedValueOnce(
+          mockMechAnalyticsResponse({
+            address: SAFE_A,
+            chain_id: 100,
+            windows: { all: { n_mech_requests: 100, tool_accuracy: null } },
+          }),
+        )
+        .mockResolvedValueOnce(
+          mockMechAnalyticsResponse({
+            address: SAFE_B.toLowerCase(),
+            chain_id: 100,
+            windows: { all: { n_mech_requests: 30, tool_accuracy: null } },
+          }),
+        );
+
+      const [service] = await getServices();
+
+      expect(service.totalRequests).toBe(130);
+      // Sender counter round-trip is skipped on the mech-analytics
+      // branch (senders response isn't consumed).
+      expect(global.fetch).toHaveBeenCalledTimes(2);
+    });
+
+    it('per-multisig 500 falls back to the subgraph legacy total via Math.max', async () => {
+      const SAFE_A = SAFE.toLowerCase();
+      mockSubgraph({
+        services: [
+          {
+            id: '1',
+            latestMultisig: SAFE_A,
+            historicalMultisigs: null,
+            // Legacy total says 42; mech-analytics fetch will fail.
+            // Math.max preserves the 42 rather than dropping to 0.
+            totalRequests: '42',
+          },
+        ],
+      });
+      global.fetch = jest.fn().mockResolvedValueOnce(mockMechAnalyticsResponse({}, false, 500));
+
+      const warn = jest.spyOn(console, 'warn').mockImplementation(() => {});
+      const [service] = await getServices();
+
+      expect(service.totalRequests).toBe(42);
+      expect(warn).toHaveBeenCalledWith(
+        expect.stringContaining('mech-analytics requester metrics failed'),
+      );
+      warn.mockRestore();
+    });
+
+    it('drifted response shape (missing windows.all) falls back rather than throwing', async () => {
+      // The narrow-shape guard is what stops a renamed field from
+      // 500-ing the whole route. Without it, `metrics.windows.all.
+      // n_mech_requests` would throw on undefined.
+      const SAFE_A = SAFE.toLowerCase();
+      mockSubgraph({
+        services: [
+          {
+            id: '1',
+            latestMultisig: SAFE_A,
+            historicalMultisigs: null,
+            totalRequests: '7',
+          },
+        ],
+      });
+      global.fetch = jest.fn().mockResolvedValueOnce(
+        mockMechAnalyticsResponse({
+          address: SAFE_A,
+          chain_id: 100,
+          // ``windows`` renamed / missing → the guard falls back
+          // without throwing.
+          windows: {},
+        }),
+      );
+
+      const [service] = await getServices();
+
+      expect(service.totalRequests).toBe(7);
+    });
+  });
 });

@@ -117,11 +117,41 @@ export const getServiceActivityFromMechAnalytics = async ({
     ...supplyScored.flatMap((r) => r.rows).map((row) => mapRowToActivity(row, 'Supply')),
   ];
 
-  // Merge subgraph twin data for columns mech-analytics doesn't
-  // project. deliveredBy + payment + feeUnit + feeRaw now come
-  // directly off the mech-analytics row (alembic 017 exposes
-  // delivery_mech + payment_type). Subgraph twin only contributes
-  // feeUSD / finalFeeUSD, which mech-analytics doesn't have.
+  // Track which mech-analytics rows had ``payment_type === null``
+  // upstream so the twin-merge below can distinguish that from an
+  // unrecognised (drifted) payment_type value — both surface as
+  // ``feeUnit === null`` on the Activity but must be treated
+  // differently at merge time.
+  const nullPaymentTypeIds = new Set(
+    [
+      ...demandScored.flatMap((r) => r.rows),
+      ...demandUnscored.flatMap((r) => r.rows),
+      ...supplyScored.flatMap((r) => r.rows),
+    ]
+      .filter((row) => row.payment_type === null)
+      .map((row) => canonicalRequestId(row.request_id)),
+  );
+
+  // Merge subgraph twin data for the columns mech-analytics either
+  // doesn't project (USD amounts) or leaves NULL on the pre-013
+  // historical tail (payment_type).
+  //
+  // deliveredBy comes directly off the mech-analytics row via
+  // row.delivery_mech (alembic 017), so it's never re-sourced from
+  // the twin. Payment fields (feeUnit / feeRaw / finalFeeUSD)
+  // usually come from row.payment_type via mapPaymentToFee, but on
+  // rows where payment_type is NULL (pre-013 tail) the mapper
+  // produces nulls — those rows fall back to the twin so the
+  // Payment row doesn't get silently dropped for a documented
+  // legitimate-null class. Unknown payment_type strings (schema
+  // drift) intentionally do NOT fall back: they stay blank and
+  // mapPaymentToFee's caller emits a console.warn so ops can chase
+  // upstream. Otherwise a new payment type would silently mislabel
+  // as whatever the twin happens to carry.
+  //
+  // feeUSD / finalFeeUSD always take the twin when the twin has
+  // them: mech-analytics doesn't project USD amounts at all, so the
+  // subgraph is authoritative for those two.
   //
   // Request-id canonicalisation: mech-analytics is 0x + 64 lowercase
   // hex; the marketplace subgraph legacy path uses BigInt.toHexString()
@@ -130,10 +160,18 @@ export const getServiceActivityFromMechAnalytics = async ({
   // the twin for that class of rows.
   const bySubgraph = new Map(subgraphActivities.map((a) => [canonicalRequestId(a.requestId), a]));
   const merged: Activity[] = fromMechAnalytics.map((a) => {
-    const twin = bySubgraph.get(canonicalRequestId(a.requestId));
+    const canonicalId = canonicalRequestId(a.requestId);
+    const twin = bySubgraph.get(canonicalId);
     if (!twin) return a;
+    // Only the pre-013 legitimate-null shape falls back to the twin
+    // for Payment. An unrecognised (drifted) payment_type stays
+    // blank + logged so we don't silently mislabel via the twin.
+    const shouldFallBackPayment = nullPaymentTypeIds.has(canonicalId);
     return {
       ...a,
+      payment: shouldFallBackPayment ? (twin.payment ?? a.payment ?? null) : a.payment,
+      feeUnit: shouldFallBackPayment ? (twin.feeUnit ?? a.feeUnit ?? null) : a.feeUnit,
+      feeRaw: shouldFallBackPayment ? (twin.feeRaw ?? a.feeRaw ?? null) : a.feeRaw,
       feeUSD: twin.feeUSD ?? a.feeUSD ?? null,
       finalFeeUSD: twin.finalFeeUSD ?? a.finalFeeUSD ?? null,
     };
@@ -191,7 +229,6 @@ const canonicalRequestId = (id: string): string => {
 type FetchParams = {
   chainId: number;
   requester?: string;
-  mechAddress?: string;
   deliveryMech?: string;
   sortDirection?: 'asc' | 'desc';
 };
@@ -207,10 +244,16 @@ const fetchCapped = async (
   const iterator =
     endpoint === 'scored-rows' ? iterateScoredRows(params) : iterateUnscoredRows(params);
   for await (const page of iterator) {
-    rows.push(...page);
+    rows.push(...page.rows);
     pages += 1;
     if (pages >= ACTIVITY_MAX_PAGES) {
-      return { rows, hasMore: true };
+      // Distinguish "cap hit AND upstream has more rows" from
+      // "cap hit exactly at exhaustion" via the cursor the API
+      // returned. Without this, a shard whose history is exactly
+      // ACTIVITY_MAX_PAGES * DEFAULT_LIMIT rows (~5000) would
+      // trip a spurious "some older rows were truncated" banner
+      // with nothing actually truncated.
+      return { rows, hasMore: page.nextCursor !== null };
     }
   }
   return { rows, hasMore: false };
@@ -220,6 +263,11 @@ const fetchCapped = async (
 // (which does Number(...)) stays interchangeable.
 const isoToUnixSecondsString = (iso: string | null): string =>
   iso ? String(Math.floor(new Date(iso).getTime() / 1000)) : '';
+
+// Cache of payment_type strings we've already warned about so a
+// batch of drift rows produces one log line per unrecognised value
+// rather than one per row.
+const warnedPaymentTypes = new Set<string>();
 
 // mech-analytics stores the token identifier separately from the raw
 // amount. Map it to the Activity.feeUnit enum so formatPayment
@@ -248,9 +296,26 @@ const mapPaymentToFee = (
       };
     case 'nvm_subscription':
       return { feeUnit: 'CREDITS', feeRaw: deliveryRate, finalFeeUSD: null };
+    case null:
+      // Legitimate pre-013 historical tail — no payment_type recorded
+      // upstream. Caller falls back to the subgraph twin for the
+      // Payment row. Silent: this is expected, not drift.
+      return { feeUnit: null, feeRaw: null, finalFeeUSD: null };
     default:
-      // Unknown payment_type: leave the fee fields empty so the
-      // modal drops the Payment row rather than mislabelling.
+      // Unrecognised payment_type is schema drift (mech-analytics
+      // started emitting a new value we don't know how to render).
+      // Stay blank so a new mislabel doesn't sneak in via the twin
+      // fallback, and log once per unknown value so ops can chase
+      // upstream. Every sibling degrade path in this file logs
+      // (services.ts:210, service-activity.ts:90) — this used to
+      // be the only silent one.
+      if (!warnedPaymentTypes.has(paymentType)) {
+        warnedPaymentTypes.add(paymentType);
+        console.warn(
+          `[service-activity] unrecognised payment_type=${JSON.stringify(paymentType)}; ` +
+            'leaving fee fields blank. Add a case to mapPaymentToFee or upstream this value.',
+        );
+      }
       return { feeUnit: null, feeRaw: null, finalFeeUSD: null };
   }
 };

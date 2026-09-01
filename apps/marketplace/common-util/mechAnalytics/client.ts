@@ -16,13 +16,17 @@ export class MechAnalyticsError extends Error {
 interface FetchRowsParams {
   chainId: number;
   requester?: string;
-  // ``mech_address`` filters on priority_mech (the routed mech).
-  mechAddress?: string;
   // ``delivery_mech`` filters on the mech that actually delivered.
   // Consumers rendering "requests this mech served" (Supply activity)
-  // MUST use this and not ``mechAddress``: under the non-priority
-  // delivery path, priority ≠ delivery. Available on mech-analytics
-  // since alembic 017.
+  // use this. Available on mech-analytics since alembic 017.
+  //
+  // A ``mechAddress`` param (mapping to the API's ``?mech_address=``
+  // filter on ``priority_mech``) was intentionally dropped from this
+  // interface: nothing in the app queries priority_mech and having
+  // both fields with opposite semantics (routed-to vs
+  // actually-delivered) is a copy-paste footgun that would silently
+  // reintroduce the mislabel ``delivery_mech`` was added to fix. Add
+  // it back when a caller genuinely needs the priority-mech filter.
   deliveryMech?: string;
   // ``asc`` (oldest first, historical default) or ``desc`` (newest
   // first). Newest-first is what any "recent activity" feed wants —
@@ -31,13 +35,22 @@ interface FetchRowsParams {
   sortDirection?: 'asc' | 'desc';
 }
 
+// Yielded page shape carries the ``nextCursor`` for that page so
+// callers with their own page cap (fetchCapped in service-activity.ts)
+// can distinguish "cap hit AND more rows exist upstream" from
+// "cap hit exactly at exhaustion" — the latter must not surface a
+// spurious hasMore banner.
+export type ScoredRowPage = {
+  rows: ScoredRow[];
+  nextCursor: string | null;
+};
+
 async function* iterateRows(
   endpoint: 'scored-rows' | 'unscored-rows',
   params: FetchRowsParams,
-): AsyncGenerator<ScoredRow[], void, void> {
+): AsyncGenerator<ScoredRowPage, void, void> {
   const { chainId, sortDirection } = params;
   const requester = params.requester?.toLowerCase();
-  const mechAddress = params.mechAddress?.toLowerCase();
   const deliveryMech = params.deliveryMech?.toLowerCase();
 
   let cursor: string | null = null;
@@ -46,7 +59,6 @@ async function* iterateRows(
     const url = new URL(`${getMechAnalyticsUrl()}/v1/data/${endpoint}`);
     url.searchParams.set('chain_id', String(chainId));
     if (requester) url.searchParams.set('requester', requester);
-    if (mechAddress) url.searchParams.set('mech_address', mechAddress);
     if (deliveryMech) url.searchParams.set('delivery_mech', deliveryMech);
     if (sortDirection) url.searchParams.set('sort_direction', sortDirection);
     url.searchParams.set('limit', String(DEFAULT_LIMIT));
@@ -62,7 +74,7 @@ async function* iterateRows(
       );
     }
 
-    yield response.body.rows;
+    yield { rows: response.body.rows, nextCursor: response.body.next_cursor };
 
     cursor = response.body.next_cursor;
     if (!cursor) {
