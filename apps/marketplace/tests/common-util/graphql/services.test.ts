@@ -48,6 +48,22 @@ const getServices = () => getServicesFromMarketplaceSubgraph({ chainId: 100, ser
 const SAFE = '0xAAA0000000000000000000000000000000000001';
 
 describe('getServicesFromMarketplaceSubgraph', () => {
+  // Nx jest loads the repo `.env.local` which sets
+  // NEXT_PUBLIC_MECH_ANALYTICS_URL. The counter path is default-ON
+  // whenever the URL is set, so without an explicit override these
+  // subgraph-side tests would silently route through
+  // ``fetchRequesterMetrics`` (unmocked → fails → totalRequests = 0).
+  // Pin the flag OFF at the outer describe; the inner
+  // `mech-analytics counter branch` describe re-enables it in its
+  // own beforeEach.
+  const originalEnv = process.env;
+  beforeEach(() => {
+    process.env = { ...originalEnv, NEXT_PUBLIC_USE_MECH_ANALYTICS_ROWS: 'false' };
+  });
+  afterEach(() => {
+    process.env = originalEnv;
+  });
+
   describe('demand counter', () => {
     // The single most important invariant in this file: the on-chain handler bumps
     // totalLegacyRequests and totalMarketplaceRequests together, so summing them

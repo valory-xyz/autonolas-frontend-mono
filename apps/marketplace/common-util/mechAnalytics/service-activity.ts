@@ -11,12 +11,22 @@ import type { ScoredRow } from './types';
 const ACTIVITY_FETCH_CONCURRENCY = 6;
 
 // Runaway guard on the descending scan. At DEFAULT_LIMIT=1000 rows /
-// page, 5 pages caps one shard fetch at 5000 rows / ~2.5MB. Combined
-// with sort_direction=desc these are the 5000 NEWEST rows per shard,
-// which is the "recent activity" the tab exists to show. A service
-// with more than 5000 delivered rows in the newest window is an
-// anomaly worth flagging via the hasMore signal rather than a
-// silent truncation.
+// page, 5 pages caps one shard fetch at 5000 rows / ~2.5MB.
+// Combined with sort_direction=desc these are the top-5000 rows by
+// mech-analytics' native sort key ``(computed_at, request_id)``.
+//
+// CAVEAT: for services whose history is dominated by the
+// ``ipfs_historical`` backfill, every backfill row shares one
+// ``computed_at`` (the moment the backfill wrote them), so DESC
+// ordering falls to the ``request_id`` tiebreak — arbitrary with
+// respect to request time. On those services the top-5000 is an
+// arbitrary time-sample of the backfill, not the newest by request
+// date. Freshly-scored rows still sort above the backfill by
+// ``computed_at``, so recent activity is preserved when it exists;
+// only services whose recent activity is entirely backfill hit the
+// caveat. Tracked as follow-up on mech-analytics — either a
+// ``sort=requested_at`` API param or a backfill that writes a
+// meaningful ``computed_at`` would close it.
 const ACTIVITY_MAX_PAGES = 5;
 
 export type MechAnalyticsServiceActivity = {
