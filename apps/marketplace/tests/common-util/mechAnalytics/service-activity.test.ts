@@ -1,5 +1,8 @@
 import type { Activity } from 'common-util/graphql/service-activity';
-import { getServiceActivityFromMechAnalytics } from 'common-util/mechAnalytics/service-activity';
+import {
+  getServiceActivityFromMechAnalytics,
+  isDriftedPaymentType,
+} from 'common-util/mechAnalytics/service-activity';
 import type { ScoredRow } from 'common-util/mechAnalytics/types';
 
 jest.mock('common-util/mechAnalytics/client', () => {
@@ -90,6 +93,32 @@ beforeEach(() => {
   iterateUnscoredRows.mockReset();
   iterateScoredRows.mockImplementation(() => scoredRowIter([]));
   iterateUnscoredRows.mockImplementation(() => scoredRowIter([]));
+});
+
+describe('isDriftedPaymentType — single source of truth with mapPaymentToFee', () => {
+  // If these two ever fall out of sync, the failure modes are bad
+  // in both directions (silent blanks vs permanent banner). We pin
+  // them jointly so adding / removing a payment type has to keep
+  // both sides consistent.
+  it('returns false for every known payment type mapPaymentToFee handles', async () => {
+    // The known set is derived from PAYMENT_TYPE_TO_FEE keys inside
+    // the module. If a caller adds a mapping without exporting the
+    // known-set, this test would catch a mismatch through
+    // isDriftedPaymentType flagging it as drift.
+    for (const known of ['native', 'usdc', 'nvm_subscription']) {
+      expect(isDriftedPaymentType(known)).toBe(false);
+    }
+  });
+
+  it('returns true for any string not registered in the mapping', () => {
+    expect(isDriftedPaymentType('unknown_future_token')).toBe(true);
+    expect(isDriftedPaymentType('')).toBe(true);
+    expect(isDriftedPaymentType('NATIVE')).toBe(true); // case-sensitive
+  });
+
+  it('returns false for the legitimate NULL tail (not drift)', () => {
+    expect(isDriftedPaymentType(null)).toBe(false);
+  });
 });
 
 describe('getServiceActivityFromMechAnalytics — column-level projection', () => {

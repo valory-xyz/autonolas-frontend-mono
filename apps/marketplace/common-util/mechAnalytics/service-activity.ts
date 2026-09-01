@@ -277,6 +277,44 @@ const fetchCapped = async (
 const isoToUnixSecondsString = (iso: string | null): string =>
   iso ? String(Math.floor(new Date(iso).getTime() / 1000)) : '';
 
+// Single source of truth for the payment_type → fee mapping.
+// mech-analytics stores the token identifier separately from the raw
+// amount; this table maps each known token to the fee-unit + decoded
+// fee it produces. Adding a new payment type is one line here, and
+// both ``mapPaymentToFee`` (below) and ``isDriftedPaymentType``
+// (derived via ``Object.keys``) pick it up automatically. Prior
+// shape had a hand-maintained ``knownPaymentTypes`` Set next to a
+// ``switch`` in ``mapPaymentToFee`` — updating one without the
+// other silently blanked Payment cells (Set stale) or fired the
+// degraded banner permanently (switch stale). Keeping them derived
+// from one table makes the "forgot to update the other half"
+// class impossible rather than merely unlikely.
+const PAYMENT_TYPE_TO_FEE: Record<
+  string,
+  (deliveryRate: string) => Pick<Activity, 'feeUnit' | 'feeRaw' | 'finalFeeUSD'>
+> = {
+  native: (rate) => ({ feeUnit: 'NATIVE', feeRaw: rate, finalFeeUSD: null }),
+  // USDC is 6-decimal micro-USDC on the wire. Small amounts
+  // (< 2^53 / 1e6 ≈ $9 billion) fit safely in float53, so a direct
+  // divide is safe here. formatPayment reads finalFeeUSD for the
+  // USDC branch and prints it as $X.XX.
+  usdc: (rate) => ({
+    feeUnit: 'USDC',
+    feeRaw: rate,
+    finalFeeUSD: (Number(rate) / 1e6).toFixed(2),
+  }),
+  nvm_subscription: (rate) => ({ feeUnit: 'CREDITS', feeRaw: rate, finalFeeUSD: null }),
+};
+
+// True when the row's payment_type is a non-null string that
+// ``mapPaymentToFee`` doesn't recognise (schema drift). Consumers OR
+// this into the response's ``degraded`` flag so the FE banner
+// renders when drift silently blanks a Payment row. Derived from
+// ``PAYMENT_TYPE_TO_FEE`` so adding / removing a payment type
+// automatically keeps this predicate in sync.
+export const isDriftedPaymentType = (paymentType: string | null): boolean =>
+  paymentType !== null && !(paymentType in PAYMENT_TYPE_TO_FEE);
+
 // Bounded LRU-ish cache of payment_type strings we've already warned
 // about, so a batch of drift rows produces one log line per
 // unrecognised value rather than one per row. Bounded because the
@@ -289,20 +327,6 @@ const isoToUnixSecondsString = (iso: string | null): string =>
 const WARNED_PAYMENT_TYPES_CAP = 100;
 const warnedPaymentTypes = new Set<string>();
 
-const knownPaymentTypes = new Set(['native', 'usdc', 'nvm_subscription']);
-
-// True when the row's payment_type is a non-null string that
-// mapPaymentToFee doesn't recognise (schema drift). Consumers OR
-// this into the response's ``degraded`` flag so the FE banner
-// renders when drift silently blanks a Payment row.
-export const isDriftedPaymentType = (paymentType: string | null): boolean =>
-  paymentType !== null && !knownPaymentTypes.has(paymentType);
-
-// mech-analytics stores the token identifier separately from the raw
-// amount. Map it to the Activity.feeUnit enum so formatPayment
-// picks the right decimals + label instead of the legacy
-// native-only branch (parseToEth) that would render USDC as
-// "0.000000000001 xDAI".
 const mapPaymentToFee = (
   paymentType: string | null,
   deliveryRate: string | null,
@@ -310,57 +334,41 @@ const mapPaymentToFee = (
   // ``== null`` (loose) not ``=== null``: the API response goes
   // through an unchecked cast on the client, so a drifted schema
   // could deliver ``undefined`` here while still typed
-  // ``string | null``. Strict-null would fall through to the USDC
-  // branch, ``Number(undefined) / 1e6`` gives ``NaN``, and
-  // ``NaN.toFixed(2)`` is the string ``"NaN"`` — truthy, so
-  // formatPayment would render ``$NaN`` as a payment amount instead
-  // of falling back to N/A. Loose null matches the NATIVE branch's
-  // ``feeRaw == null`` guard below and closes both cases.
+  // ``string | null``. Strict-null would fall through to a mapper
+  // whose numeric decode gives ``NaN``, and ``NaN.toFixed(2)`` is
+  // the string ``"NaN"`` — truthy, so formatPayment would render
+  // ``$NaN`` as a payment amount instead of falling back to N/A.
   if (deliveryRate == null) {
     return { feeUnit: null, feeRaw: null, finalFeeUSD: null };
   }
-  switch (paymentType) {
-    case 'native':
-      return { feeUnit: 'NATIVE', feeRaw: deliveryRate, finalFeeUSD: null };
-    case 'usdc':
-      // USDC is 6-decimal micro-USDC on the wire. Small amounts
-      // (< 2^53 / 1e6 ≈ $9 billion) fit safely in float53, so a
-      // direct divide is safe here. formatPayment reads finalFeeUSD
-      // for the USDC branch and prints it as $X.XX.
-      return {
-        feeUnit: 'USDC',
-        feeRaw: deliveryRate,
-        finalFeeUSD: (Number(deliveryRate) / 1e6).toFixed(2),
-      };
-    case 'nvm_subscription':
-      return { feeUnit: 'CREDITS', feeRaw: deliveryRate, finalFeeUSD: null };
-    case null:
-      // Legitimate pre-013 historical tail — no payment_type recorded
-      // upstream. Caller falls back to the subgraph twin for the
-      // Payment row. Silent: this is expected, not drift.
-      return { feeUnit: null, feeRaw: null, finalFeeUSD: null };
-    default:
-      // Unrecognised payment_type is schema drift. Stay blank so a
-      // new mislabel doesn't sneak in via the twin fallback (drift
-      // detection above ORs into ``degraded`` so the FE banner
-      // fires alongside this log).
-      if (!warnedPaymentTypes.has(paymentType)) {
-        if (warnedPaymentTypes.size >= WARNED_PAYMENT_TYPES_CAP) {
-          // Evict the oldest inserted value so the cap holds. If
-          // drift is long-lived enough to wrap around the cap, the
-          // same value re-warns after eviction rather than going
-          // silent for the life of the container.
-          const oldest = warnedPaymentTypes.values().next().value;
-          if (oldest !== undefined) warnedPaymentTypes.delete(oldest);
-        }
-        warnedPaymentTypes.add(paymentType);
-        console.warn(
-          `[service-activity] unrecognised payment_type=${JSON.stringify(paymentType)}; ` +
-            'leaving fee fields blank. Add a case to mapPaymentToFee or upstream this value.',
-        );
-      }
-      return { feeUnit: null, feeRaw: null, finalFeeUSD: null };
+  // Legitimate pre-013 historical tail — no payment_type recorded
+  // upstream. Caller falls back to the subgraph twin for the
+  // Payment row. Silent: this is expected, not drift.
+  if (paymentType === null) {
+    return { feeUnit: null, feeRaw: null, finalFeeUSD: null };
   }
+  const mapper = PAYMENT_TYPE_TO_FEE[paymentType];
+  if (mapper) return mapper(deliveryRate);
+  // Unrecognised payment_type is schema drift. Stay blank so a new
+  // mislabel doesn't sneak in via the twin fallback (drift
+  // detection above ORs into ``degraded`` so the FE banner fires
+  // alongside this log).
+  if (!warnedPaymentTypes.has(paymentType)) {
+    if (warnedPaymentTypes.size >= WARNED_PAYMENT_TYPES_CAP) {
+      // Evict the oldest inserted value so the cap holds. If drift
+      // is long-lived enough to wrap around the cap, the same
+      // value re-warns after eviction rather than going silent for
+      // the life of the container.
+      const oldest = warnedPaymentTypes.values().next().value;
+      if (oldest !== undefined) warnedPaymentTypes.delete(oldest);
+    }
+    warnedPaymentTypes.add(paymentType);
+    console.warn(
+      `[service-activity] unrecognised payment_type=${JSON.stringify(paymentType)}; ` +
+        'leaving fee fields blank. Add a case to PAYMENT_TYPE_TO_FEE or upstream this value.',
+    );
+  }
+  return { feeUnit: null, feeRaw: null, finalFeeUSD: null };
 };
 
 const mapRowToActivity = (row: ScoredRow, activityType: ActivityType): Activity => {

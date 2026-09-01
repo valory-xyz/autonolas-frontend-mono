@@ -231,6 +231,16 @@ export const Details: FC<DetailsProps> = ({
   const activityFetchGenRef = useRef(0);
 
   useEffect(() => {
+    // Bump the generation at the very top so every effect run
+    // (including ones that early-return on unsupported chains)
+    // invalidates any in-flight fetch from the previous run.
+    // Placing the increment below the network gate would leave the
+    // ref untouched on a Gnosis→Celo switch, letting a slow
+    // Gnosis fetch commit rows / degraded over the reset that just
+    // happened for Celo.
+    activityFetchGenRef.current += 1;
+    const gen = activityFetchGenRef.current;
+
     // Reset state BEFORE the unsupported-chain early-return so the
     // previous chain's rows / alerts don't linger when the user
     // switches networks — the render block is gated on ``currentTab``,
@@ -242,9 +252,6 @@ export const Details: FC<DetailsProps> = ({
     setActivityPage(1);
 
     if (!isMarketplaceSupportedNetwork(Number(chainId))) return;
-
-    activityFetchGenRef.current += 1;
-    const gen = activityFetchGenRef.current;
 
     const fetchActivity = async () => {
       try {
