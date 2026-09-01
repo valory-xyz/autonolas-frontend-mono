@@ -187,16 +187,19 @@ describe('getServiceActivityFromMechAnalytics — column-level projection', () =
     // Drift is a signal, not silent — every sibling degrade path in
     // this file logs.
     expect(warn).toHaveBeenCalledWith(expect.stringContaining(drifted));
+    // And the FE banner needs to fire alongside the log — drift OR's
+    // into the degraded flag on the response.
+    expect(result.degraded).toBe(true);
     warn.mockRestore();
   });
 
-  it('payment_type=null (pre-013 tail) does NOT log (expected, not drift)', async () => {
+  it('payment_type=null (pre-013 tail) does NOT log and does NOT flip degraded', async () => {
     const warn = jest.spyOn(console, 'warn').mockImplementation(() => {});
     iterateScoredRows.mockImplementation(() =>
       scoredRowIter([scoredRow({ payment_type: null, delivery_rate: '42' })]),
     );
 
-    await getServiceActivityFromMechAnalytics({
+    const result = await getServiceActivityFromMechAnalytics({
       chainId: 100,
       serviceId: '1',
       multisigs: [REQUESTER],
@@ -205,7 +208,37 @@ describe('getServiceActivityFromMechAnalytics — column-level projection', () =
     });
 
     expect(warn).not.toHaveBeenCalled();
+    // Legit null is expected data, not degradation.
+    expect(result.degraded).toBe(false);
     warn.mockRestore();
+  });
+
+  it('undefined delivery_rate (drifted response shape) does NOT render $NaN — falls back to null fee fields', async () => {
+    // The client's ``as T`` cast is unchecked, so a drifted API
+    // response with delivery_rate absent could arrive as undefined
+    // at runtime even though the type says string | null. Strict
+    // ``=== null`` would fall through to the USDC branch, and
+    // ``Number(undefined) / 1e6 = NaN`` would produce the string
+    // ``"NaN"`` (truthy → formatPayment renders ``$NaN``).
+    iterateScoredRows.mockImplementation(() =>
+      scoredRowIter([
+        scoredRow({
+          payment_type: 'usdc',
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          delivery_rate: undefined as any,
+        }),
+      ]),
+    );
+    const result = await getServiceActivityFromMechAnalytics({
+      chainId: 100,
+      serviceId: '1',
+      multisigs: [REQUESTER],
+      mechAddresses: [],
+      subgraphActivities: [],
+    });
+    expect(result.activities[0].feeUnit).toBeNull();
+    expect(result.activities[0].feeRaw).toBeNull();
+    expect(result.activities[0].finalFeeUSD).toBeNull();
   });
 
   it('payment_type=null falls back to the subgraph twin for payment / feeUnit / feeRaw', async () => {
@@ -453,7 +486,7 @@ describe('getServiceActivityFromMechAnalytics — hasMore + degraded signals', (
     expect(result.hasMore).toBe(true);
   });
 
-  it('hasMore is FALSE when the cap trips exactly at exhaustion (F23)', async () => {
+  it('hasMore is FALSE when the cap trips exactly at exhaustion', async () => {
     // Same 5 pages, but the LAST one has nextCursor=null: the shard
     // has exactly ACTIVITY_MAX_PAGES pages of history. The banner
     // must not fire because there's nothing behind the last page.

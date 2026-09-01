@@ -2,7 +2,7 @@ import { Alert, Button, Col, Flex, Row, Tabs } from 'antd';
 import type { ColumnsType, ColumnType } from 'antd/es/table';
 import get from 'lodash/get';
 // React 19: `JSX` is no longer global, must be imported from 'react'.
-import { FC, useCallback, useState, useEffect, useMemo } from 'react';
+import { FC, useCallback, useState, useEffect, useMemo, useRef } from 'react';
 import type { JSX } from 'react';
 import { Address } from 'viem';
 import { useRouter } from 'next/router';
@@ -223,8 +223,28 @@ export const Details: FC<DetailsProps> = ({
     }
   };
 
+  // Monotonic fetch generation. Increments on every effect run so a
+  // slower earlier response can't overwrite a faster later one — the
+  // Details component isn't keyed by service id at the page level,
+  // so navigating between services would otherwise race and attribute
+  // one service's ``degraded`` (or activity list) to another.
+  const activityFetchGenRef = useRef(0);
+
   useEffect(() => {
+    // Reset state BEFORE the unsupported-chain early-return so the
+    // previous chain's rows / alerts don't linger when the user
+    // switches networks — the render block is gated on ``currentTab``,
+    // not on ``showTabs``, so stale state would keep rendering
+    // otherwise.
+    setActivityRows([]);
+    setActivityHasMore(false);
+    setActivityDegraded(false);
+    setActivityPage(1);
+
     if (!isMarketplaceSupportedNetwork(Number(chainId))) return;
+
+    activityFetchGenRef.current += 1;
+    const gen = activityFetchGenRef.current;
 
     const fetchActivity = async () => {
       try {
@@ -236,6 +256,7 @@ export const Details: FC<DetailsProps> = ({
           latest,
         });
 
+        if (gen !== activityFetchGenRef.current) return;
         setActivityRows(json.activities || []);
         setActivityHasMore(Boolean(json.hasMore));
         setActivityDegraded(Boolean(json.degraded));
@@ -248,11 +269,16 @@ export const Details: FC<DetailsProps> = ({
         console.warn(
           `[service-activity] fetch failed for service ${id} on chain ${chainId}: ${String(e)}`,
         );
+        if (gen !== activityFetchGenRef.current) return;
         setActivityRows([]);
         setActivityHasMore(false);
-        setActivityDegraded(false);
+        // A hard failure is a stronger degradation than a partial
+        // one — keep the banner up so the user can tell an empty
+        // activity list came from "we couldn't reach the source"
+        // rather than "this service has no activity".
+        setActivityDegraded(true);
       } finally {
-        setActivityLoading(false);
+        if (gen === activityFetchGenRef.current) setActivityLoading(false);
       }
     };
 

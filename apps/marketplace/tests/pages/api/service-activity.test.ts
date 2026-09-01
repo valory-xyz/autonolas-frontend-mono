@@ -129,7 +129,7 @@ describe('GET /api/service-activity — cache TTL', () => {
   });
 });
 
-describe('GET /api/service-activity — subgraph blip degrades the response (F22)', () => {
+describe('GET /api/service-activity — subgraph blip degrades the response', () => {
   it('marks the response degraded=true when the subgraph activity fetch fails', async () => {
     getServiceActivityFromMarketplaceSubgraph.mockRejectedValueOnce(new Error('subgraph down'));
     // mech-analytics itself returns clean.
@@ -157,5 +157,32 @@ describe('GET /api/service-activity — endpoint lookup 500', () => {
     getServiceEndpointsFromMarketplaceSubgraph.mockRejectedValueOnce(new Error('subgraph down'));
     const res = await call({ chainId: '100', serviceId: '1' });
     expect(res.status).toHaveBeenCalledWith(500);
+  });
+});
+
+// The rollback path: shouldUseMechAnalytics returns false (flag
+// off, or URL unset, or chain not in the mech-analytics allowlist
+// [Ethereum, Arbitrum]) → route goes directly to the subgraph and
+// bypasses the mech-analytics fan-out entirely. Called out as the
+// documented rollback in the PR description, so it must have route-
+// level coverage — an inverted condition would pass CI otherwise.
+describe('GET /api/service-activity — subgraph fallback (mech-analytics flag OFF)', () => {
+  it('goes straight to the subgraph and does NOT call the mech-analytics helper', async () => {
+    shouldUseMechAnalytics.mockReturnValue(false);
+    getServiceActivityFromMarketplaceSubgraph.mockResolvedValue({
+      id: '1',
+      activities: [{ requestId: '0xabc' }],
+    });
+
+    const res = await call({ chainId: '100', serviceId: '1' });
+
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(getServiceActivityFromMarketplaceSubgraph).toHaveBeenCalledWith({
+      chainId: 100,
+      serviceId: '1',
+    });
+    expect(getServiceActivityFromMechAnalytics).not.toHaveBeenCalled();
+    // Subgraph result has no degraded flag → healthy 1h TTL branch.
+    expect(res.headers['Cache-Control']).toContain('s-maxage=3600');
   });
 });

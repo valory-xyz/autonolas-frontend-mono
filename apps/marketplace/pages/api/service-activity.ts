@@ -91,7 +91,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 // to a partial response rather than 500ing. The failure gets folded
 // into ``degraded`` alongside mech-analytics shard failures so the
 // route's 60s TTL branch fires for either source (without this,
-// F22: a subgraph blip would still get cached for the full 1h + 1h).
+// without this, a subgraph blip would still get cached for the full 1h + 1h).
 const getFromMechAnalytics = async (
   chainId: number,
   serviceId: string,

@@ -117,20 +117,29 @@ export const getServiceActivityFromMechAnalytics = async ({
     ...supplyScored.flatMap((r) => r.rows).map((row) => mapRowToActivity(row, 'Supply')),
   ];
 
+  const allRows = [
+    ...demandScored.flatMap((r) => r.rows),
+    ...demandUnscored.flatMap((r) => r.rows),
+    ...supplyScored.flatMap((r) => r.rows),
+  ];
+
   // Track which mech-analytics rows had ``payment_type === null``
   // upstream so the twin-merge below can distinguish that from an
   // unrecognised (drifted) payment_type value — both surface as
   // ``feeUnit === null`` on the Activity but must be treated
   // differently at merge time.
   const nullPaymentTypeIds = new Set(
-    [
-      ...demandScored.flatMap((r) => r.rows),
-      ...demandUnscored.flatMap((r) => r.rows),
-      ...supplyScored.flatMap((r) => r.rows),
-    ]
+    allRows
       .filter((row) => row.payment_type === null)
       .map((row) => canonicalRequestId(row.request_id)),
   );
+
+  // Drift detection: if any row's payment_type is a non-null string
+  // that mapPaymentToFee doesn't recognise, that row's Payment cell
+  // rendered blank silently. OR into ``degraded`` below so the FE
+  // banner fires — the ``mapPaymentToFee`` console.warn alone is
+  // ops-only and doesn't reach the user.
+  const paymentTypeDrifted = allRows.some((row) => isDriftedPaymentType(row.payment_type));
 
   // Merge subgraph twin data for the columns mech-analytics either
   // doesn't project (USD amounts) or leaves NULL on the pre-013
@@ -209,7 +218,11 @@ export const getServiceActivityFromMechAnalytics = async ({
     id: serviceId,
     activities,
     hasMore: pageCapTripped,
-    degraded: failedShards > 0,
+    // Fold payment-type drift into degraded so the FE banner
+    // surfaces silently-blanked Payment cells alongside shard
+    // failures. Drift and shard-failure are both "partial data",
+    // one signal is enough.
+    degraded: failedShards > 0 || paymentTypeDrifted,
   };
 };
 
@@ -264,10 +277,26 @@ const fetchCapped = async (
 const isoToUnixSecondsString = (iso: string | null): string =>
   iso ? String(Math.floor(new Date(iso).getTime() / 1000)) : '';
 
-// Cache of payment_type strings we've already warned about so a
-// batch of drift rows produces one log line per unrecognised value
-// rather than one per row.
+// Bounded LRU-ish cache of payment_type strings we've already warned
+// about, so a batch of drift rows produces one log line per
+// unrecognised value rather than one per row. Bounded because the
+// key is a string from an independently-deployed upstream and this
+// Set lives for the life of a warm container; without a cap a
+// malicious or malformed upstream could balloon it. Cap matches the
+// convention set by ``util/apiCache.ts``. When the cap trips we
+// evict the oldest, so a class of drift that lasts longer than the
+// cache re-fires occasionally rather than going permanently silent.
+const WARNED_PAYMENT_TYPES_CAP = 100;
 const warnedPaymentTypes = new Set<string>();
+
+const knownPaymentTypes = new Set(['native', 'usdc', 'nvm_subscription']);
+
+// True when the row's payment_type is a non-null string that
+// mapPaymentToFee doesn't recognise (schema drift). Consumers OR
+// this into the response's ``degraded`` flag so the FE banner
+// renders when drift silently blanks a Payment row.
+export const isDriftedPaymentType = (paymentType: string | null): boolean =>
+  paymentType !== null && !knownPaymentTypes.has(paymentType);
 
 // mech-analytics stores the token identifier separately from the raw
 // amount. Map it to the Activity.feeUnit enum so formatPayment
@@ -278,7 +307,16 @@ const mapPaymentToFee = (
   paymentType: string | null,
   deliveryRate: string | null,
 ): Pick<Activity, 'feeUnit' | 'feeRaw' | 'finalFeeUSD'> => {
-  if (deliveryRate === null) {
+  // ``== null`` (loose) not ``=== null``: the API response goes
+  // through an unchecked cast on the client, so a drifted schema
+  // could deliver ``undefined`` here while still typed
+  // ``string | null``. Strict-null would fall through to the USDC
+  // branch, ``Number(undefined) / 1e6`` gives ``NaN``, and
+  // ``NaN.toFixed(2)`` is the string ``"NaN"`` — truthy, so
+  // formatPayment would render ``$NaN`` as a payment amount instead
+  // of falling back to N/A. Loose null matches the NATIVE branch's
+  // ``feeRaw == null`` guard below and closes both cases.
+  if (deliveryRate == null) {
     return { feeUnit: null, feeRaw: null, finalFeeUSD: null };
   }
   switch (paymentType) {
@@ -302,14 +340,19 @@ const mapPaymentToFee = (
       // Payment row. Silent: this is expected, not drift.
       return { feeUnit: null, feeRaw: null, finalFeeUSD: null };
     default:
-      // Unrecognised payment_type is schema drift (mech-analytics
-      // started emitting a new value we don't know how to render).
-      // Stay blank so a new mislabel doesn't sneak in via the twin
-      // fallback, and log once per unknown value so ops can chase
-      // upstream. Every sibling degrade path in this file logs
-      // (services.ts:210, service-activity.ts:90) — this used to
-      // be the only silent one.
+      // Unrecognised payment_type is schema drift. Stay blank so a
+      // new mislabel doesn't sneak in via the twin fallback (drift
+      // detection above ORs into ``degraded`` so the FE banner
+      // fires alongside this log).
       if (!warnedPaymentTypes.has(paymentType)) {
+        if (warnedPaymentTypes.size >= WARNED_PAYMENT_TYPES_CAP) {
+          // Evict the oldest inserted value so the cap holds. If
+          // drift is long-lived enough to wrap around the cap, the
+          // same value re-warns after eviction rather than going
+          // silent for the life of the container.
+          const oldest = warnedPaymentTypes.values().next().value;
+          if (oldest !== undefined) warnedPaymentTypes.delete(oldest);
+        }
         warnedPaymentTypes.add(paymentType);
         console.warn(
           `[service-activity] unrecognised payment_type=${JSON.stringify(paymentType)}; ` +
