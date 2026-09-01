@@ -1,4 +1,12 @@
-import { getIpfsUrl } from 'libs/ui-components/src/lib/AddressLink';
+// Test lives in the marketplace app suite (not libs/ui-components)
+// because the ui-components jest setup has pre-existing config gaps
+// (ts-jest with jsx: 'preserve' can't compile JSX; util-constants
+// transitively imports ESM-only viem which the transform doesn't
+// handle). Fixing either is a broader repo change. Meanwhile the
+// helper lives at libs/ui-components/src/lib/getIpfsUrl.ts (extracted
+// from AddressLink.tsx so a test can import it without pulling the
+// whole JSX module).
+import { getIpfsUrl } from 'libs/ui-components/src/lib/getIpfsUrl';
 
 // The subgraph path emits raw 32-byte hex digests; mech-analytics
 // emits already-encoded base32/base58 CIDs. The prefixing must only
@@ -32,5 +40,9 @@ describe('getIpfsUrl', () => {
   it('does not double-prefix an already-prefixed raw hash', () => {
     const already = 'f01701220262153ef3b28eafa8fb577d01606dfb458a71bed48f6a8145486e9eaa9bf1a28';
     expect(getIpfsUrl(already)).toBe(`https://gateway.autonolas.tech/ipfs/${already}`);
+  });
+
+  it('returns empty string for empty input', () => {
+    expect(getIpfsUrl('')).toBe('');
   });
 });

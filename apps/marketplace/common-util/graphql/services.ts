@@ -33,6 +33,7 @@ type ServiceDetails = {
 
 type MechCounters = {
   id: string;
+  address: string;
   totalDeliveriesTransactions: string | number;
 };
 
@@ -77,6 +78,7 @@ export const getQueryForServiceDetails = ({ serviceIds }: { serviceIds: string[]
         }
       ) {
         id
+        address
         totalDeliveriesTransactions
       }
     }
@@ -241,10 +243,33 @@ export const getServicesFromMarketplaceSubgraph = async ({
     }
   }
 
+  // Marketplace-era mech address is keyed by ``serviceId`` on the
+  // top-level ``Mech`` entity (queried above as ``meches``). Legacy
+  // rows come from ``service.mechs`` (MechAgent). Union both so
+  // ERC8004 consumers (agent-card.json, mcp.json) that gate on a
+  // ``mechAddress`` truthy check see the address for marketplace-era
+  // services too. Same union as
+  // ``getServiceEndpointsFromMarketplaceSubgraph`` — a service
+  // whose mech was created via MechMarketplace has an empty
+  // ``service.mechs`` otherwise.
+  const marketplaceMechByServiceId = new Map(
+    (response.meches ?? []).map((mech) => [mech.id, mech.address]),
+  );
+
   return (response.services ?? []).map((service) => {
     const requestsFromSenders = getServiceMultisigs(service).reduce(
       (total, multisig) => total + (requestsByMultisig.get(multisig) ?? 0),
       0,
+    );
+
+    const legacyMechAddresses = (service.mechs ?? []).map((mech) => mech.address);
+    const marketplaceMechAddress = marketplaceMechByServiceId.get(service.id);
+    const mechAddresses = Array.from(
+      new Set(
+        [...legacyMechAddresses, marketplaceMechAddress]
+          .filter((address): address is string => Boolean(address))
+          .map((address) => address.toLowerCase()),
+      ),
     );
 
     return {
@@ -255,7 +280,7 @@ export const getServicesFromMarketplaceSubgraph = async ({
         toCount(service.totalDeliveries),
       ),
       metadata: service.metadata?.[0]?.metadata || '',
-      mechAddresses: (service.mechs ?? []).map((mech) => mech.address),
+      mechAddresses,
     };
   });
 };

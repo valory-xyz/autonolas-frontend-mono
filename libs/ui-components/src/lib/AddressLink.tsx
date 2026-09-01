@@ -1,26 +1,17 @@
 // eslint-disable-next-line @nx/enforce-module-boundaries
 import { truncateAddress } from 'libs/util-functions/src';
 // eslint-disable-next-line @nx/enforce-module-boundaries
-import { EXPLORER_URLS, GATEWAY_URL, HASH_PREFIX, UNICODE_SYMBOLS } from 'libs/util-constants/src';
+import { EXPLORER_URLS, UNICODE_SYMBOLS } from 'libs/util-constants/src';
 // eslint-disable-next-line @nx/enforce-module-boundaries
 import { COLOR } from 'libs/ui-theme/src';
 import { Flex, Typography } from 'antd';
 import { Copy } from './Copy';
+import { getIpfsUrl } from './getIpfsUrl';
 
 const { Text } = Typography;
 
-export const getIpfsUrl = (hash: string) => {
-  if (!hash) return '';
-
-  // Prefix only when the input is unambiguously the raw 32-byte digest.
-  // Any multibase-encoded CID (base32 CIDv1 with any codec — bafy/bafk/
-  // bafz/bagu…, base58 CIDv0 → Qm…) is already gateway-usable; a
-  // whitelist by prefix drifted on new codecs, so we invert it.
-  if (!/^(0x)?[0-9a-fA-F]{64}$/.test(hash)) return `${GATEWAY_URL}${hash}`;
-
-  const cleanHash = hash.startsWith('0x') ? hash.substring(2) : hash;
-  return `${GATEWAY_URL}${HASH_PREFIX}${cleanHash}`;
-};
+// Re-export for callers that used to import from AddressLink.
+export { getIpfsUrl };
 
 export const AddressLink = ({
   address,

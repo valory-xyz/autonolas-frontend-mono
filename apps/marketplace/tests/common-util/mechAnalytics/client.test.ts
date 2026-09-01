@@ -1,8 +1,4 @@
-import {
-  MechAnalyticsError,
-  fetchAllScoredRows,
-  iterateScoredRows,
-} from 'common-util/mechAnalytics/client';
+import { MechAnalyticsError, iterateScoredRows } from 'common-util/mechAnalytics/client';
 import type { ScoredRow } from 'common-util/mechAnalytics/types';
 
 const originalFetch = global.fetch;
@@ -28,6 +24,8 @@ const mockScoredRow = (overrides: Partial<ScoredRow> = {}): ScoredRow => ({
   request_tx_hash: '0x' + 'aa'.repeat(32),
   delivery_tx_hash: '0x' + 'bb'.repeat(32),
   delivery_rate: '10000000000000000',
+  delivery_mech: '0x' + 'cc'.repeat(20),
+  payment_type: 'native',
   ipfs_retrievable: true,
   ...overrides,
 });
@@ -47,6 +45,12 @@ const mockFail = (status: number): Response =>
     statusText: 'Server Error',
     json: async () => ({}),
   }) as unknown as Response;
+
+const drain = async (iter: AsyncGenerator<ScoredRow[]>) => {
+  const rows: ScoredRow[] = [];
+  for await (const page of iter) rows.push(...page);
+  return rows;
+};
 
 beforeEach(() => {
   process.env = { ...originalEnv, NEXT_PUBLIC_MECH_ANALYTICS_URL: 'https://ma.example' };
@@ -71,10 +75,7 @@ describe('iterateScoredRows', () => {
         mockOk({ rows: [mockScoredRow({ request_id: 'req-2' })], next_cursor: null }),
       );
 
-    const collected: ScoredRow[] = [];
-    for await (const page of iterateScoredRows({ chainId: CHAIN_ID, requester: REQUESTER })) {
-      collected.push(...page);
-    }
+    const collected = await drain(iterateScoredRows({ chainId: CHAIN_ID, requester: REQUESTER }));
     expect(collected.map((r) => r.request_id)).toEqual(['req-1', 'req-2']);
     expect(global.fetch).toHaveBeenCalledTimes(2);
     expect((global.fetch as jest.Mock).mock.calls[1][0]).toContain('cursor=cursor-a');
@@ -82,40 +83,44 @@ describe('iterateScoredRows', () => {
 
   it('throws on non-2xx', async () => {
     global.fetch = jest.fn().mockResolvedValueOnce(mockFail(500));
-    await expect(fetchAllScoredRows({ chainId: CHAIN_ID, requester: REQUESTER })).rejects.toThrow(
-      MechAnalyticsError,
-    );
-  });
-
-  it('caps at maxPages so a broken server does not loop forever', async () => {
-    global.fetch = jest.fn().mockResolvedValue(mockOk({ rows: [], next_cursor: 'never-null' }));
     await expect(
-      fetchAllScoredRows({ chainId: CHAIN_ID, requester: REQUESTER, maxPages: 3 }),
-    ).rejects.toThrow(/max_pages=3/);
-    expect(global.fetch).toHaveBeenCalledTimes(3);
+      drain(iterateScoredRows({ chainId: CHAIN_ID, requester: REQUESTER })),
+    ).rejects.toThrow(MechAnalyticsError);
   });
 
   it('passes chain_id and requester on the URL', async () => {
     global.fetch = jest.fn().mockResolvedValueOnce(mockOk({ rows: [], next_cursor: null }));
-    await fetchAllScoredRows({ chainId: 8453, requester: REQUESTER });
+    await drain(iterateScoredRows({ chainId: 8453, requester: REQUESTER }));
     const url = (global.fetch as jest.Mock).mock.calls[0][0] as string;
     expect(url).toContain('chain_id=8453');
     expect(url).toContain(`requester=${REQUESTER}`);
   });
 
-  it('passes since= when provided so the ascending scan is window-bounded', async () => {
+  it('passes sort_direction=desc when requested', async () => {
     global.fetch = jest.fn().mockResolvedValueOnce(mockOk({ rows: [], next_cursor: null }));
-    const since = '2026-07-31T00:00:00.000Z';
-    await fetchAllScoredRows({ chainId: CHAIN_ID, requester: REQUESTER, since });
+    await drain(
+      iterateScoredRows({ chainId: CHAIN_ID, requester: REQUESTER, sortDirection: 'desc' }),
+    );
     const url = (global.fetch as jest.Mock).mock.calls[0][0] as string;
-    expect(url).toContain('since=');
-    expect(decodeURIComponent(url.split('since=')[1].split('&')[0])).toBe(since);
+    expect(url).toContain('sort_direction=desc');
   });
 
-  it('omits since= when not provided', async () => {
+  it('passes delivery_mech filter when set (Supply query)', async () => {
     global.fetch = jest.fn().mockResolvedValueOnce(mockOk({ rows: [], next_cursor: null }));
-    await fetchAllScoredRows({ chainId: CHAIN_ID, requester: REQUESTER });
+    const mech = '0x' + 'de'.repeat(20);
+    await drain(iterateScoredRows({ chainId: CHAIN_ID, deliveryMech: mech }));
     const url = (global.fetch as jest.Mock).mock.calls[0][0] as string;
-    expect(url).not.toContain('since=');
+    expect(url).toContain(`delivery_mech=${mech}`);
+    // And it's distinct from mech_address (priority mech).
+    expect(url).not.toContain('mech_address=');
+  });
+
+  it('omits filters that were not passed', async () => {
+    global.fetch = jest.fn().mockResolvedValueOnce(mockOk({ rows: [], next_cursor: null }));
+    await drain(iterateScoredRows({ chainId: CHAIN_ID, requester: REQUESTER }));
+    const url = (global.fetch as jest.Mock).mock.calls[0][0] as string;
+    expect(url).not.toContain('delivery_mech=');
+    expect(url).not.toContain('sort_direction=');
+    expect(url).not.toContain('mech_address=');
   });
 });
