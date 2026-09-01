@@ -33,6 +33,17 @@ interface FetchRowsParams {
   // page 1 = the most recent ``limit`` rows. Direction is locked
   // into the cursor for the rest of the pagination on the server.
   sortDirection?: 'asc' | 'desc';
+  // Sort axis on the mech-analytics side. Default is ``computed_at``
+  // (when the row was scored) which is fine for fresh rows but
+  // degenerates on the ``ipfs_historical`` backfill — every backfill
+  // row shares one ``computed_at`` (the moment the backfill wrote
+  // them), so DESC on that axis falls to a ``request_id`` tiebreak
+  // that has no time meaning. ``requested_at`` (the actual per-row
+  // request time predict-api recorded) is populated on every source
+  // and gives genuine newest-by-request-time across
+  // ``mech_onchain`` / ``mech_offchain`` / ``ipfs_historical``.
+  // Available on mech-analytics since PR#40 (v0.0.20).
+  sort?: 'requested_at' | 'computed_at';
 }
 
 // Yielded page shape carries the ``nextCursor`` for that page so
@@ -49,7 +60,7 @@ async function* iterateRows(
   endpoint: 'scored-rows' | 'unscored-rows',
   params: FetchRowsParams,
 ): AsyncGenerator<ScoredRowPage, void, void> {
-  const { chainId, sortDirection } = params;
+  const { chainId, sortDirection, sort } = params;
   const requester = params.requester?.toLowerCase();
   const deliveryMech = params.deliveryMech?.toLowerCase();
 
@@ -61,6 +72,7 @@ async function* iterateRows(
     if (requester) url.searchParams.set('requester', requester);
     if (deliveryMech) url.searchParams.set('delivery_mech', deliveryMech);
     if (sortDirection) url.searchParams.set('sort_direction', sortDirection);
+    if (sort) url.searchParams.set('sort', sort);
     url.searchParams.set('limit', String(DEFAULT_LIMIT));
     if (cursor !== null) {
       url.searchParams.set('cursor', cursor);

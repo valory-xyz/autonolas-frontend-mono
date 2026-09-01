@@ -119,12 +119,33 @@ describe('iterateScoredRows', () => {
     expect(url).not.toContain('mech_address=');
   });
 
+  it('passes sort=requested_at when requested', async () => {
+    // The activity feed uses this to sort by actual per-row request
+    // time, not by mech-analytics' computed_at (which degenerates
+    // on backfill-heavy mechs where every ipfs_historical row
+    // shares one computed_at and DESC falls to request_id
+    // tiebreak). Available on mech-analytics since PR#40.
+    global.fetch = jest.fn().mockResolvedValueOnce(mockOk({ rows: [], next_cursor: null }));
+    await drain(
+      iterateScoredRows({
+        chainId: CHAIN_ID,
+        requester: REQUESTER,
+        sortDirection: 'desc',
+        sort: 'requested_at',
+      }),
+    );
+    const url = (global.fetch as jest.Mock).mock.calls[0][0] as string;
+    expect(url).toContain('sort=requested_at');
+    expect(url).toContain('sort_direction=desc');
+  });
+
   it('omits filters that were not passed', async () => {
     global.fetch = jest.fn().mockResolvedValueOnce(mockOk({ rows: [], next_cursor: null }));
     await drain(iterateScoredRows({ chainId: CHAIN_ID, requester: REQUESTER }));
     const url = (global.fetch as jest.Mock).mock.calls[0][0] as string;
     expect(url).not.toContain('delivery_mech=');
     expect(url).not.toContain('sort_direction=');
+    expect(url).not.toContain('sort=');
     expect(url).not.toContain('mech_address=');
   });
 

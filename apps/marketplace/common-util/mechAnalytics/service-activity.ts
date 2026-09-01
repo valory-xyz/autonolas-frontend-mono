@@ -12,21 +12,12 @@ const ACTIVITY_FETCH_CONCURRENCY = 6;
 
 // Runaway guard on the descending scan. At DEFAULT_LIMIT=1000 rows /
 // page, 5 pages caps one shard fetch at 5000 rows / ~2.5MB.
-// Combined with sort_direction=desc these are the top-5000 rows by
-// mech-analytics' native sort key ``(computed_at, request_id)``.
-//
-// CAVEAT: for services whose history is dominated by the
-// ``ipfs_historical`` backfill, every backfill row shares one
-// ``computed_at`` (the moment the backfill wrote them), so DESC
-// ordering falls to the ``request_id`` tiebreak — arbitrary with
-// respect to request time. On those services the top-5000 is an
-// arbitrary time-sample of the backfill, not the newest by request
-// date. Freshly-scored rows still sort above the backfill by
-// ``computed_at``, so recent activity is preserved when it exists;
-// only services whose recent activity is entirely backfill hit the
-// caveat. Tracked as follow-up on mech-analytics — either a
-// ``sort=requested_at`` API param or a backfill that writes a
-// meaningful ``computed_at`` would close it.
+// Combined with ``sort=requested_at&sort_direction=desc`` these are
+// the top-5000 rows by actual per-row request time across every
+// source (``mech_onchain`` / ``mech_offchain`` / ``ipfs_historical``)
+// — mech-analytics PR#40 exposed the requested_at sort axis
+// precisely so the backfill-dominated services no longer fall to a
+// ``request_id`` tiebreak with no time meaning.
 const ACTIVITY_MAX_PAGES = 5;
 
 export type MechAnalyticsServiceActivity = {
@@ -48,7 +39,8 @@ type ActivityType = Activity['activityType'];
 
 /**
  * Fetch three row families from mech-analytics newest-first
- * (sort_direction=desc) and merge with the subgraph pending tail:
+ * (``sort=requested_at&sort_direction=desc``) and merge with the
+ * subgraph pending tail:
  *
  *  - scored-rows keyed on requester → Demand (delivered) for each
  *    of the service's multisigs.
@@ -63,6 +55,14 @@ type ActivityType = Activity['activityType'];
  *    the non-priority delivery path resolves correctly at the query
  *    level — no more mislabelling a request routed to this mech but
  *    delivered by another as this service's Supply activity.
+ *
+ * Sort axis is ``requested_at`` (per-row request time from
+ * predict-api), not ``computed_at`` (when mech-analytics scored the
+ * row) — the ``ipfs_historical`` backfill stamped every row with
+ * one ``computed_at`` so sorting on that axis for backfill-heavy
+ * mechs falls to a ``request_id`` tiebreak with no time meaning.
+ * ``requested_at`` gives genuine newest-by-request-time across
+ * every source. Available on mech-analytics since PR#40 (v0.0.20).
  *
  * Subgraph rows are unioned only for the pending tail (no delivery
  * timestamp) so the mech-analytics ipfsRetrievable gate stays
@@ -104,10 +104,20 @@ export const getServiceActivityFromMechAnalytics = async ({
 
   const [demandScored, demandUnscored, supplyScored] = await Promise.all([
     mapWithConcurrency(multisigs, ACTIVITY_FETCH_CONCURRENCY, (multisig) =>
-      safe('scored-rows', { chainId, requester: multisig, sortDirection: 'desc' }),
+      safe('scored-rows', {
+        chainId,
+        requester: multisig,
+        sortDirection: 'desc',
+        sort: 'requested_at',
+      }),
     ),
     mapWithConcurrency(multisigs, ACTIVITY_FETCH_CONCURRENCY, (multisig) =>
-      safe('unscored-rows', { chainId, requester: multisig, sortDirection: 'desc' }),
+      safe('unscored-rows', {
+        chainId,
+        requester: multisig,
+        sortDirection: 'desc',
+        sort: 'requested_at',
+      }),
     ),
     // Supply query filters on delivery_mech, not mech_address (which
     // is priority_mech). Correct semantics for "requests this mech
@@ -117,6 +127,7 @@ export const getServiceActivityFromMechAnalytics = async ({
         chainId,
         deliveryMech: mechAddress,
         sortDirection: 'desc',
+        sort: 'requested_at',
       }),
     ),
   ]);
@@ -254,6 +265,7 @@ type FetchParams = {
   requester?: string;
   deliveryMech?: string;
   sortDirection?: 'asc' | 'desc';
+  sort?: 'requested_at' | 'computed_at';
 };
 
 type CappedResult = { rows: ScoredRow[]; hasMore: boolean };

@@ -395,6 +395,35 @@ describe('getServiceActivityFromMechAnalytics — Supply fan-out uses ?delivery_
     }
   });
 
+  it('passes sort=requested_at on every fan-out shard so newest is by request time', async () => {
+    // ``computed_at`` (mech-analytics' default sort) degenerates on
+    // the ``ipfs_historical`` backfill — every backfill row shares
+    // one ``computed_at`` (the backfill moment), so DESC falls to
+    // ``request_id`` tiebreak with no time meaning. Sorting on
+    // ``requested_at`` (per-row request time from predict-api)
+    // gives genuine newest-first across every source. The activity
+    // feed must apply this on every fan-out shard, not just some,
+    // otherwise a mech's rows would arrive on two different sort
+    // axes and the merged view would interleave wrong.
+    iterateScoredRows.mockImplementation(() => scoredRowIter([]));
+    iterateUnscoredRows.mockImplementation(() => scoredRowIter([]));
+
+    await getServiceActivityFromMechAnalytics({
+      chainId: 100,
+      serviceId: '1',
+      multisigs: [REQUESTER],
+      mechAddresses: [MECH_LOWER],
+      subgraphActivities: [],
+    });
+
+    for (const call of iterateScoredRows.mock.calls) {
+      expect((call[0] as { sort?: string }).sort).toBe('requested_at');
+    }
+    for (const call of iterateUnscoredRows.mock.calls) {
+      expect((call[0] as { sort?: string }).sort).toBe('requested_at');
+    }
+  });
+
   it('does not pass a since= window (mech-analytics leads newest via desc)', async () => {
     iterateScoredRows.mockImplementation(() => scoredRowIter([]));
     await getServiceActivityFromMechAnalytics({
