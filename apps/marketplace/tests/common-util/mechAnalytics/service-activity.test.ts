@@ -462,16 +462,16 @@ describe('getServiceActivityFromMechAnalytics — Supply fan-out uses ?delivery_
     }
   });
 
-  it('passes sort=requested_at on every fan-out shard so newest is by request time', async () => {
+  it('passes sort=requested_at on the Demand shards (requester filter) so newest is by request time', async () => {
     // ``computed_at`` (mech-analytics' default sort) degenerates on
     // the ``ipfs_historical`` backfill — every backfill row shares
     // one ``computed_at`` (the backfill moment), so DESC falls to
     // ``request_id`` tiebreak with no time meaning. Sorting on
     // ``requested_at`` (per-row request time from predict-api)
-    // gives genuine newest-first across every source. The activity
-    // feed must apply this on every fan-out shard, not just some,
-    // otherwise a mech's rows would arrive on two different sort
-    // axes and the merged view would interleave wrong.
+    // gives genuine newest-first. The Demand shards
+    // (``requester=`` filter) route through
+    // ``prs_requester_requested_at_idx`` which serves the axis
+    // natively.
     iterateScoredRows.mockImplementation(() => scoredRowIter([]));
     iterateUnscoredRows.mockImplementation(() => scoredRowIter([]));
 
@@ -483,12 +483,57 @@ describe('getServiceActivityFromMechAnalytics — Supply fan-out uses ?delivery_
       subgraphActivities: [],
     });
 
-    for (const call of iterateScoredRows.mock.calls) {
-      expect((call[0] as { sort?: string }).sort).toBe('requested_at');
-    }
-    for (const call of iterateUnscoredRows.mock.calls) {
-      expect((call[0] as { sort?: string }).sort).toBe('requested_at');
-    }
+    const demandScoredCalls = iterateScoredRows.mock.calls.filter(
+      (c) => (c[0] as { requester?: string }).requester,
+    );
+    const demandUnscoredCalls = iterateUnscoredRows.mock.calls.filter(
+      (c) => (c[0] as { requester?: string }).requester,
+    );
+    expect(demandScoredCalls).toHaveLength(1);
+    expect(demandUnscoredCalls).toHaveLength(1);
+    expect((demandScoredCalls[0][0] as { sort?: string }).sort).toBe('requested_at');
+    expect((demandUnscoredCalls[0][0] as { sort?: string }).sort).toBe('requested_at');
+  });
+
+  it('OMITS sort=requested_at on the Supply shard (delivery_mech filter) to avoid the B2 timeout', async () => {
+    // Measured on prod against ``0x77af…`` (4M+ scored rows):
+    // ``sort=requested_at&delivery_mech=`` runs
+    // ``Index Scan Backward using prs_scored_requested_at_idx``
+    // with the ``delivery_mech`` predicate as a post-filter,
+    // walking ~856K rows to find 1000 matches — 38s cold, over
+    // the 30s FE client timeout. Migration 018's covering
+    // ``(chain_id, delivery_mech, computed_at DESC, request_id DESC)``
+    // cannot serve ``ORDER BY requested_at``, so the fast path
+    // does not exist on this axis today. The Supply shard stays
+    // on the default ``computed_at`` axis (which uses the
+    // migration-018 covering index and takes ~95ms) until a
+    // mech-analytics follow-up ships the requested_at-axis
+    // sibling covering index.
+    //
+    // The merged view is re-sorted client-side by
+    // ``byActivityTimestampDescending``, so the axis mismatch
+    // between Demand (requested_at) and Supply (computed_at)
+    // doesn't leak into the final render.
+    iterateScoredRows.mockImplementation(() => scoredRowIter([]));
+
+    await getServiceActivityFromMechAnalytics({
+      chainId: 100,
+      serviceId: '1',
+      multisigs: [REQUESTER],
+      mechAddresses: [MECH_LOWER],
+      subgraphActivities: [],
+    });
+
+    const supplyCall = iterateScoredRows.mock.calls.find(
+      (c) => (c[0] as { deliveryMech?: string }).deliveryMech === MECH_LOWER,
+    );
+    expect(supplyCall).toBeDefined();
+    // Must NOT pass sort — regressing to sort=requested_at here
+    // reopens B2 on backfill-heavy mechs.
+    expect((supplyCall![0] as { sort?: string }).sort).toBeUndefined();
+    // Direction still desc so page 1 is newest by whatever axis
+    // mech-analytics picks (computed_at by inference).
+    expect((supplyCall![0] as { sortDirection?: string }).sortDirection).toBe('desc');
   });
 
   it('does not pass a since= window (mech-analytics leads newest via desc)', async () => {

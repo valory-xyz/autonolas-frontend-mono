@@ -12,12 +12,25 @@ const ACTIVITY_FETCH_CONCURRENCY = 6;
 
 // Runaway guard on the descending scan. At DEFAULT_LIMIT=1000 rows /
 // page, 5 pages caps one shard fetch at 5000 rows / ~2.5MB.
-// Combined with ``sort=requested_at&sort_direction=desc`` these are
-// the top-5000 rows by actual per-row request time across every
-// source (``mech_onchain`` / ``mech_offchain`` / ``ipfs_historical``)
-// — mech-analytics PR#40 exposed the requested_at sort axis
-// precisely so the backfill-dominated services no longer fall to a
-// ``request_id`` tiebreak with no time meaning.
+//
+// Demand shards (``requester=``) use
+// ``sort=requested_at&sort_direction=desc`` and get the top-5000
+// rows by actual per-row request time — mech-analytics PR#40
+// exposed the requested_at sort axis precisely so
+// backfill-dominated services no longer fall to a ``request_id``
+// tiebreak with no time meaning.
+//
+// The Supply shard (``delivery_mech=``) stays on the default
+// ``computed_at`` axis (see the fan-out below for the trade-off:
+// requested_at on Supply reintroduces B2's 30-45s timeout on
+// backfill-heavy mechs because no index covers
+// ``(chain_id, delivery_mech, requested_at DESC)`` today).
+// Consequence: the Supply cap slice is an arbitrary
+// ``request_id`` tiebreak of the ``ipfs_historical`` backfill on
+// mechs whose Supply is dominated by it, until the mech-analytics
+// follow-up ships the sibling covering index. Merged view is
+// re-sorted client-side by ``byActivityTimestampDescending`` so
+// axis mixing doesn't leak into the render.
 const ACTIVITY_MAX_PAGES = 5;
 
 export type MechAnalyticsServiceActivity = {
@@ -39,8 +52,9 @@ type ActivityType = Activity['activityType'];
 
 /**
  * Fetch three row families from mech-analytics newest-first
- * (``sort=requested_at&sort_direction=desc``) and merge with the
- * subgraph pending tail:
+ * (``sort_direction=desc``; ``sort=requested_at`` on Demand
+ * shards only — see the Supply-shard comment for why) and merge
+ * with the subgraph pending tail:
  *
  *  - scored-rows keyed on requester → Demand (delivered) for each
  *    of the service's multisigs.
@@ -122,12 +136,37 @@ export const getServiceActivityFromMechAnalytics = async ({
     // Supply query filters on delivery_mech, not mech_address (which
     // is priority_mech). Correct semantics for "requests this mech
     // actually served".
+    //
+    // NB — deliberately no ``sort: 'requested_at'`` here (unlike the
+    // two Demand shards above). mech-analytics v0.0.20 serves the
+    // requested_at axis via ``prs_scored_requested_at_idx``, which
+    // leads on ``requested_at`` alone — a ``?delivery_mech=`` filter
+    // becomes a post-filter after the index walk. Measured on
+    // ``0x77af31de935740567cf4ff1986d04b2c964a786a`` with 4M+
+    // matching rows: 38s cold-cache, over the 30s client timeout,
+    // reintroducing B2. Migration 018's covering
+    // ``(chain_id, delivery_mech, computed_at DESC, request_id DESC)``
+    // does not carry ``requested_at``, so it can't serve this
+    // axis; the fast path only exists on ``computed_at`` today.
+    //
+    // Staying on the default ``computed_at`` axis for the Supply
+    // shard trades B3 (backfill-heavy mechs' ``ipfs_historical``
+    // rows share one ``computed_at`` → cap is an arbitrary
+    // ``request_id`` tiebreak slice) for B2 avoidance (95ms cold
+    // via the migration-018 covering index). Merged view is
+    // re-sorted client-side by ``byActivityTimestampDescending``
+    // below, so mixed shard axes don't mis-interleave the final
+    // render. Follow-up on mech-analytics: sibling covering index
+    // ``(chain_id, delivery_mech, requested_at DESC, request_id DESC)
+    // WHERE tool IS NOT NULL AND delivered_at IS NOT NULL`` +
+    // extending the pure-filter direct-plan gate to the
+    // requested_at axis lets Supply pass ``sort: 'requested_at'``
+    // too. Then this branch flips to match the Demand shards.
     mapWithConcurrency(mechAddresses, ACTIVITY_FETCH_CONCURRENCY, (mechAddress) =>
       safe('scored-rows', {
         chainId,
         deliveryMech: mechAddress,
         sortDirection: 'desc',
-        sort: 'requested_at',
       }),
     ),
   ]);

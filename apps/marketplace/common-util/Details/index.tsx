@@ -245,11 +245,18 @@ export const Details: FC<DetailsProps> = ({
     // previous chain's rows / alerts don't linger when the user
     // switches networks — the render block is gated on ``currentTab``,
     // not on ``showTabs``, so stale state would keep rendering
-    // otherwise.
+    // otherwise. ``activityLoading`` is reset here too: an in-flight
+    // fetch at the moment of the switch to an unsupported chain is
+    // orphaned by the gen bump above, and both the ``catch`` and
+    // ``finally`` below are gen-guarded — nothing else clears the
+    // loading flag, so without this line the Activity table would
+    // sit in its loading state until the next supported-chain
+    // effect run.
     setActivityRows([]);
     setActivityHasMore(false);
     setActivityDegraded(false);
     setActivityPage(1);
+    setActivityLoading(false);
 
     if (!isMarketplaceSupportedNetwork(Number(chainId))) return;
 
