@@ -182,9 +182,7 @@ describe('mapPaymentToFee — drift on Object.prototype names is graceful, not f
       expect(activity.finalFeeUSD).toBeNull();
       // Drift signal fires so the FE banner renders.
       expect(result.degraded).toBe(true);
-      expect(warn).toHaveBeenCalledWith(
-        expect.stringContaining('unrecognised payment_type='),
-      );
+      expect(warn).toHaveBeenCalledWith(expect.stringContaining('unrecognised payment_type='));
       warn.mockRestore();
     },
   );
