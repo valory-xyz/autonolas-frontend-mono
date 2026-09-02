@@ -81,6 +81,24 @@
       "reason": "Cross-user information disclosure and parse-time crash via degenerate private cache directives on undici's private-cache path. Reached via @vercel/blob > undici. @vercel/blob is called on the request path in apps/pearl-api (get-image.ts, generate-image.ts via utils/blob.ts), so undici IS on the request path — earlier note claiming build-time-only was wrong (caught in review). Reachability of the CVE nonetheless requires an attacker-controlled Cache-Control response header from the Vercel Blob origin, which pearl-api treats as trusted (Vercel's own storage endpoint) — the tenant boundary the CVE crosses is not exposed to end-user input on this deployment. Fix in >=7.29.0; @vercel/blob currently pins <7.29.0. Short review leash — re-evaluate whichever comes first: (a) @vercel/blob release picking up the fix, (b) 2026-09-30 leash renewal.",
       "added": "2026-08-31",
       "review": "2026-09-30"
+    },
+    {
+      "id": 1153171,
+      "ghsa": "GHSA-c83g-rgw3-j3cx",
+      "package": "browserslist",
+      "severity": "high",
+      "reason": "Unbounded memory growth (no cache eviction) via distinct query results, leading to eventual OOM. Reached via @nx/next > @nx/js > @babel/core > @babel/helper-compilation-targets > browserslist — build-time tooling parsing our own trusted browserslist config, not in the shipped Next.js runtime bundle. Requires an attacker able to feed many distinct query strings to the resolver, which is not exposed to untrusted input on this path. Fix in >=4.28.7; @babel/helper-compilation-targets currently pins <4.28.7. Short review leash — bump when a new @babel/helper-compilation-targets picks up the fix.",
+      "added": "2026-09-02",
+      "review": "2026-10-02"
+    },
+    {
+      "id": 1153172,
+      "ghsa": "GHSA-73wf-gq98-2v4g",
+      "package": "browserslist",
+      "severity": "high",
+      "reason": "Uncaught crash / prototype write via untrusted browserslist-stats.json custom stats (normalizeStats). Reached via @nx/next > @nx/js > @babel/core > @babel/helper-compilation-targets > browserslist — build-time tooling only, not in the shipped Next.js runtime bundle. This repo does not configure a custom browserslist-stats.json, so the untrusted-stats path the CVE requires is not exercised. Fix in >=4.28.7; @babel/helper-compilation-targets currently pins <4.28.7. Short review leash — bump when a new @babel/helper-compilation-targets picks up the fix.",
+      "added": "2026-09-02",
+      "review": "2026-10-02"
     }
   ]
 }
