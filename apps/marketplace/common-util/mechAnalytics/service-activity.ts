@@ -303,39 +303,47 @@ const isoToUnixSecondsString = (iso: string | null): string =>
 // mech-analytics stores the token identifier separately from the raw
 // amount; this table maps each known token to the fee-unit + decoded
 // fee it produces. Adding a new payment type is one line here, and
-// both ``mapPaymentToFee`` (below) and ``isDriftedPaymentType``
-// (derived via ``Object.keys``) pick it up automatically. Prior
-// shape had a hand-maintained ``knownPaymentTypes`` Set next to a
-// ``switch`` in ``mapPaymentToFee`` — updating one without the
-// other silently blanked Payment cells (Set stale) or fired the
-// degraded banner permanently (switch stale). Keeping them derived
-// from one table makes the "forgot to update the other half"
-// class impossible rather than merely unlikely.
-const PAYMENT_TYPE_TO_FEE: Record<
+// both ``mapPaymentToFee`` (below) and ``isDriftedPaymentType`` pick
+// it up automatically via ``Map.has()`` / ``Map.get()``.
+//
+// A ``Map`` (rather than an object) matters here for correctness:
+// object keys share their namespace with ``Object.prototype``
+// members, so ``('toString' in obj)`` is ``true`` and
+// ``obj['valueOf']`` returns the prototype method. The prior
+// object-typed table let a drifted ``payment_type='valueOf'``
+// resolve to ``Object.prototype.valueOf`` and get called as
+// ``mapper(deliveryRate)`` inside the ``.map(mapRowToActivity)``
+// pass that runs outside the ``safe()`` wrapper — one row would
+// take down the whole activity request. ``Map`` has no prototype
+// surface at all, so lookups only find entries we put there.
+const PAYMENT_TYPE_TO_FEE = new Map<
   string,
   (deliveryRate: string) => Pick<Activity, 'feeUnit' | 'feeRaw' | 'finalFeeUSD'>
-> = {
-  native: (rate) => ({ feeUnit: 'NATIVE', feeRaw: rate, finalFeeUSD: null }),
+>([
+  ['native', (rate) => ({ feeUnit: 'NATIVE', feeRaw: rate, finalFeeUSD: null })],
   // USDC is 6-decimal micro-USDC on the wire. Small amounts
   // (< 2^53 / 1e6 ≈ $9 billion) fit safely in float53, so a direct
   // divide is safe here. formatPayment reads finalFeeUSD for the
   // USDC branch and prints it as $X.XX.
-  usdc: (rate) => ({
-    feeUnit: 'USDC',
-    feeRaw: rate,
-    finalFeeUSD: (Number(rate) / 1e6).toFixed(2),
-  }),
-  nvm_subscription: (rate) => ({ feeUnit: 'CREDITS', feeRaw: rate, finalFeeUSD: null }),
-};
+  [
+    'usdc',
+    (rate) => ({
+      feeUnit: 'USDC',
+      feeRaw: rate,
+      finalFeeUSD: (Number(rate) / 1e6).toFixed(2),
+    }),
+  ],
+  ['nvm_subscription', (rate) => ({ feeUnit: 'CREDITS', feeRaw: rate, finalFeeUSD: null })],
+]);
 
 // True when the row's payment_type is a non-null string that
 // ``mapPaymentToFee`` doesn't recognise (schema drift). Consumers OR
 // this into the response's ``degraded`` flag so the FE banner
 // renders when drift silently blanks a Payment row. Derived from
-// ``PAYMENT_TYPE_TO_FEE`` so adding / removing a payment type
-// automatically keeps this predicate in sync.
+// ``PAYMENT_TYPE_TO_FEE.has`` so adding / removing a payment type
+// keeps this predicate in sync automatically.
 export const isDriftedPaymentType = (paymentType: string | null): boolean =>
-  paymentType !== null && !(paymentType in PAYMENT_TYPE_TO_FEE);
+  paymentType !== null && !PAYMENT_TYPE_TO_FEE.has(paymentType);
 
 // Bounded LRU-ish cache of payment_type strings we've already warned
 // about, so a batch of drift rows produces one log line per
@@ -369,7 +377,7 @@ const mapPaymentToFee = (
   if (paymentType === null) {
     return { feeUnit: null, feeRaw: null, finalFeeUSD: null };
   }
-  const mapper = PAYMENT_TYPE_TO_FEE[paymentType];
+  const mapper = PAYMENT_TYPE_TO_FEE.get(paymentType);
   if (mapper) return mapper(deliveryRate);
   // Unrecognised payment_type is schema drift. Stay blank so a new
   // mislabel doesn't sneak in via the twin fallback (drift

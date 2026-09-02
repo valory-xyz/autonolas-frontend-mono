@@ -119,6 +119,75 @@ describe('isDriftedPaymentType — single source of truth with mapPaymentToFee',
   it('returns false for the legitimate NULL tail (not drift)', () => {
     expect(isDriftedPaymentType(null)).toBe(false);
   });
+
+  // Ojuswi review 2026-09-02 (round-8 approval): the prior
+  // ``paymentType in obj`` / ``obj[paymentType]`` shape walked the
+  // prototype chain, so ``'toString'`` was treated as a known
+  // payment type (silent blank) and ``'valueOf'`` / ``'__proto__'``
+  // threw ``TypeError`` inside the ``.map(mapRowToActivity)`` pass
+  // that runs outside the ``safe()`` per-shard wrapper — one drift
+  // row would 500 the whole activity request. Map's ``.has`` /
+  // ``.get`` have no prototype surface, so lookups only find
+  // entries we put there. Pinning that here so a future refactor
+  // back to an object literal is caught.
+  it.each(['toString', 'valueOf', 'hasOwnProperty', 'constructor', '__proto__'])(
+    'treats Object.prototype member %s as drift, not as a known payment type',
+    (prototypeMember) => {
+      expect(isDriftedPaymentType(prototypeMember)).toBe(true);
+    },
+  );
+});
+
+describe('mapPaymentToFee — drift on Object.prototype names is graceful, not fatal', () => {
+  // Regression guard for the same prototype-chain bug tested above,
+  // but on the lookup side. The prior ``PAYMENT_TYPE_TO_FEE[key]``
+  // access returned ``Object.prototype.valueOf`` etc. for these
+  // strings and then invoked them as ``mapper(deliveryRate)`` with
+  // no ``this``, which throws in strict mode. That throw landed in
+  // ``.map(mapRowToActivity)`` — outside the per-shard ``safe()``
+  // wrapper — so a single drift row would 500 the whole request.
+  // With Map, the lookup returns ``undefined`` and we fall through
+  // to the drift-warning path.
+  //
+  // We drive this end-to-end through the handler (rather than
+  // importing ``mapPaymentToFee`` directly, which isn't exported)
+  // so the test also proves the outer ``.map`` doesn't throw.
+  it.each(['toString', 'valueOf', 'hasOwnProperty', 'constructor', '__proto__'])(
+    'renders payment_type=%s as a blank Payment cell without throwing',
+    async (prototypeMember) => {
+      const warn = jest.spyOn(console, 'warn').mockImplementation(() => {});
+      iterateScoredRows.mockImplementation(
+        (params: { requester?: string; deliveryMech?: string }) =>
+          params.requester
+            ? scoredRowIter([
+                scoredRow({ payment_type: prototypeMember, delivery_rate: '1000000' }),
+              ])
+            : scoredRowIter([]),
+      );
+
+      const result = await getServiceActivityFromMechAnalytics({
+        chainId: 100,
+        serviceId: '1',
+        multisigs: [REQUESTER],
+        mechAddresses: [],
+        subgraphActivities: [],
+      });
+
+      expect(result.activities).toHaveLength(1);
+      const activity = result.activities[0];
+      // Blank fee fields (drift → fall back to twin merge, which is
+      // empty here so they end up null).
+      expect(activity.feeUnit).toBeNull();
+      expect(activity.feeRaw).toBeNull();
+      expect(activity.finalFeeUSD).toBeNull();
+      // Drift signal fires so the FE banner renders.
+      expect(result.degraded).toBe(true);
+      expect(warn).toHaveBeenCalledWith(
+        expect.stringContaining('unrecognised payment_type='),
+      );
+      warn.mockRestore();
+    },
+  );
 });
 
 describe('getServiceActivityFromMechAnalytics — column-level projection', () => {
