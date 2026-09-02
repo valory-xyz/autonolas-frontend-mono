@@ -1,4 +1,4 @@
-import type { Activity } from 'common-util/graphql/service-activity';
+import { LEGACY_DELIVERY_PAYMENT_WEI, type Activity } from 'common-util/graphql/service-activity';
 import type { FeeUnit } from 'common-util/types';
 import { iterateScoredRows, iterateUnscoredRows } from './client';
 import { mapWithConcurrency } from './concurrency';
@@ -338,41 +338,57 @@ const fetchCapped = async (
 const isoToUnixSecondsString = (iso: string | null): string =>
   iso ? String(Math.floor(new Date(iso).getTime() / 1000)) : '';
 
-// Single source of truth for the payment_type → fee mapping.
-// mech-analytics stores the token identifier separately from the raw
-// amount; this table maps each known token to the fee-unit + decoded
-// fee it produces. Adding a new payment type is one line here, and
-// both ``mapPaymentToFee`` (below) and ``isDriftedPaymentType`` pick
-// it up automatically via ``Map.has()`` / ``Map.get()``.
-//
-// A ``Map`` (rather than an object) matters here for correctness:
-// object keys share their namespace with ``Object.prototype``
-// members, so ``('toString' in obj)`` is ``true`` and
-// ``obj['valueOf']`` returns the prototype method. The prior
-// object-typed table let a drifted ``payment_type='valueOf'``
-// resolve to ``Object.prototype.valueOf`` and get called as
-// ``mapper(deliveryRate)`` inside the ``.map(mapRowToActivity)``
-// pass that runs outside the ``safe()`` wrapper — one row would
-// take down the whole activity request. ``Map`` has no prototype
-// surface at all, so lookups only find entries we put there.
+// paymentType() bytes32 hashes from the mech contract. Human-name
+// mapping (native/usdc/credits) lives here only — pipeline carries
+// the hash unchanged. Map (not object) so a drifted paymentType of
+// 'toString' doesn't resolve to Object.prototype.toString.
+const BLANK_FEE: Pick<Activity, 'feeUnit' | 'feeRaw' | 'finalFeeUSD'> = {
+  feeUnit: null,
+  feeRaw: null,
+  finalFeeUSD: null,
+};
+
+// keccak256("LegacyAgentMech"). Synthetic sentinel assigned by
+// mech-analytics' backfill_payment_type_from_delivery_mech.py to
+// pre-marketplace AgentMech rows that don't implement paymentType().
+const LEGACY_AGENTMECH_HASH = '3514d1d4aca84c9e8ebf71d05e547d8123a58c17c01e553257d55a25984d5f64';
+
 const PAYMENT_TYPE_TO_FEE = new Map<
   string,
-  (deliveryRate: string) => Pick<Activity, 'feeUnit' | 'feeRaw' | 'finalFeeUSD'>
+  (deliveryRate: string | null) => Pick<Activity, 'feeUnit' | 'feeRaw' | 'finalFeeUSD'>
 >([
-  ['native', (rate) => ({ feeUnit: 'NATIVE', feeRaw: rate, finalFeeUSD: null })],
-  // USDC is 6-decimal micro-USDC on the wire. Small amounts
-  // (< 2^53 / 1e6 ≈ $9 billion) fit safely in float53, so a direct
-  // divide is safe here. formatPayment reads finalFeeUSD for the
-  // USDC branch and prints it as $X.XX.
+  // FixedPriceNative — rate is wei on the chain's native currency.
   [
-    'usdc',
+    'ba699a34be8fe0e7725e93dcbce1701b0211a8ca61330aaeb8a05bf2ec7abed1',
+    (rate) => (rate == null ? BLANK_FEE : { feeUnit: 'NATIVE', feeRaw: rate, finalFeeUSD: null }),
+  ],
+  // FixedPriceTokenUSDC — 6-decimal micro-USDC.
+  [
+    '6406bb5f31a732f898e1ce9fdd988a80a808d36ab5d9a4a4805a8be8d197d5e3',
+    (rate) =>
+      rate == null
+        ? BLANK_FEE
+        : { feeUnit: 'USDC', feeRaw: rate, finalFeeUSD: (Number(rate) / 1e6).toFixed(2) },
+  ],
+  // NvmSubscriptionNative — rate is credits consumed.
+  [
+    '803dd08fe79d91027fc9024e254a0942372b92f3ccabc1bd19f4a5c2b251c316',
+    (rate) => (rate == null ? BLANK_FEE : { feeUnit: 'CREDITS', feeRaw: rate, finalFeeUSD: null }),
+  ],
+  // NvmSubscriptionTokenUSDC — same credits semantics.
+  [
+    '0d6fd99afa9c4c580fab5e341922c2a5c4b61d880da60506193d7bf88944dd14',
+    (rate) => (rate == null ? BLANK_FEE : { feeUnit: 'CREDITS', feeRaw: rate, finalFeeUSD: null }),
+  ],
+  // LegacyAgentMech — always native + LEGACY_DELIVERY_PAYMENT_WEI on null.
+  [
+    LEGACY_AGENTMECH_HASH,
     (rate) => ({
-      feeUnit: 'USDC',
-      feeRaw: rate,
-      finalFeeUSD: (Number(rate) / 1e6).toFixed(2),
+      feeUnit: 'NATIVE',
+      feeRaw: rate ?? LEGACY_DELIVERY_PAYMENT_WEI,
+      finalFeeUSD: null,
     }),
   ],
-  ['nvm_subscription', (rate) => ({ feeUnit: 'CREDITS', feeRaw: rate, finalFeeUSD: null })],
 ]);
 
 // True when the row's payment_type is a non-null string that
@@ -400,21 +416,9 @@ const mapPaymentToFee = (
   paymentType: string | null,
   deliveryRate: string | null,
 ): Pick<Activity, 'feeUnit' | 'feeRaw' | 'finalFeeUSD'> => {
-  // ``== null`` (loose) not ``=== null``: the API response goes
-  // through an unchecked cast on the client, so a drifted schema
-  // could deliver ``undefined`` here while still typed
-  // ``string | null``. Strict-null would fall through to a mapper
-  // whose numeric decode gives ``NaN``, and ``NaN.toFixed(2)`` is
-  // the string ``"NaN"`` — truthy, so formatPayment would render
-  // ``$NaN`` as a payment amount instead of falling back to N/A.
-  if (deliveryRate == null) {
-    return { feeUnit: null, feeRaw: null, finalFeeUSD: null };
-  }
-  // Legitimate pre-013 historical tail — no payment_type recorded
-  // upstream. Caller falls back to the subgraph twin for the
-  // Payment row. Silent: this is expected, not drift.
+  // Pre-013 tail: no payment_type upstream; caller falls back to twin.
   if (paymentType === null) {
-    return { feeUnit: null, feeRaw: null, finalFeeUSD: null };
+    return BLANK_FEE;
   }
   const mapper = PAYMENT_TYPE_TO_FEE.get(paymentType);
   if (mapper) return mapper(deliveryRate);
@@ -437,7 +441,7 @@ const mapPaymentToFee = (
         'leaving fee fields blank. Add a case to PAYMENT_TYPE_TO_FEE or upstream this value.',
     );
   }
-  return { feeUnit: null, feeRaw: null, finalFeeUSD: null };
+  return BLANK_FEE;
 };
 
 const mapRowToActivity = (row: ScoredRow, activityType: ActivityType): Activity => {

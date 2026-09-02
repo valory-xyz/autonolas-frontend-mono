@@ -46,6 +46,14 @@ const DELIVERY_MECH = '0x' + 'cd'.repeat(20);
 const PADDED_REQUEST_ID = `0x${'0'.repeat(62)}42`;
 const TRIMMED_REQUEST_ID = '0x42';
 
+// paymentType() bytes32 hashes recognised by mapPaymentToFee.
+const PT_NATIVE = 'ba699a34be8fe0e7725e93dcbce1701b0211a8ca61330aaeb8a05bf2ec7abed1';
+const PT_USDC = '6406bb5f31a732f898e1ce9fdd988a80a808d36ab5d9a4a4805a8be8d197d5e3';
+const PT_NVM_NATIVE = '803dd08fe79d91027fc9024e254a0942372b92f3ccabc1bd19f4a5c2b251c316';
+const PT_NVM_TOKEN = '0d6fd99afa9c4c580fab5e341922c2a5c4b61d880da60506193d7bf88944dd14';
+// keccak256("LegacyAgentMech"); see LEGACY_AGENTMECH_HASH in service-activity.ts.
+const PT_LEGACY = '3514d1d4aca84c9e8ebf71d05e547d8123a58c17c01e553257d55a25984d5f64';
+
 const scoredRow = (overrides: Partial<ScoredRow> = {}): ScoredRow => ({
   request_id: PADDED_REQUEST_ID,
   tool: 'superforcaster',
@@ -64,7 +72,7 @@ const scoredRow = (overrides: Partial<ScoredRow> = {}): ScoredRow => ({
   delivery_tx_hash: '0x' + 'bb'.repeat(32),
   delivery_rate: '10000000000000000',
   delivery_mech: DELIVERY_MECH,
-  payment_type: 'native',
+  payment_type: PT_NATIVE,
   ipfs_retrievable: true,
   ...overrides,
 });
@@ -105,7 +113,7 @@ describe('isDriftedPaymentType — single source of truth with mapPaymentToFee',
     // the module. If a caller adds a mapping without exporting the
     // known-set, this test would catch a mismatch through
     // isDriftedPaymentType flagging it as drift.
-    for (const known of ['native', 'usdc', 'nvm_subscription']) {
+    for (const known of [PT_NATIVE, PT_USDC, PT_NVM_NATIVE, PT_NVM_TOKEN, PT_LEGACY]) {
       expect(isDriftedPaymentType(known)).toBe(false);
     }
   });
@@ -113,7 +121,11 @@ describe('isDriftedPaymentType — single source of truth with mapPaymentToFee',
   it('returns true for any string not registered in the mapping', () => {
     expect(isDriftedPaymentType('unknown_future_token')).toBe(true);
     expect(isDriftedPaymentType('')).toBe(true);
-    expect(isDriftedPaymentType('NATIVE')).toBe(true); // case-sensitive
+    // Friendly labels from the pre-hash era are now drift.
+    expect(isDriftedPaymentType('native')).toBe(true);
+    expect(isDriftedPaymentType('usdc')).toBe(true);
+    // Case-sensitive: uppercase hex hash is drift.
+    expect(isDriftedPaymentType(PT_NATIVE.toUpperCase())).toBe(true);
   });
 
   it('returns false for the legitimate NULL tail (not drift)', () => {
@@ -208,7 +220,7 @@ describe('getServiceActivityFromMechAnalytics — column-level projection', () =
 
   it('maps payment_type=usdc to feeUnit=USDC + finalFeeUSD from micro-USDC', async () => {
     iterateScoredRows.mockImplementation(() =>
-      scoredRowIter([scoredRow({ payment_type: 'usdc', delivery_rate: '1234567' })]),
+      scoredRowIter([scoredRow({ payment_type: PT_USDC, delivery_rate: '1234567' })]),
     );
 
     const result = await getServiceActivityFromMechAnalytics({
@@ -228,7 +240,7 @@ describe('getServiceActivityFromMechAnalytics — column-level projection', () =
 
   it('maps payment_type=native to feeUnit=NATIVE (raw wei)', async () => {
     iterateScoredRows.mockImplementation(() =>
-      scoredRowIter([scoredRow({ payment_type: 'native', delivery_rate: '10000000000000000' })]),
+      scoredRowIter([scoredRow({ payment_type: PT_NATIVE, delivery_rate: '10000000000000000' })]),
     );
 
     const result = await getServiceActivityFromMechAnalytics({
@@ -246,7 +258,7 @@ describe('getServiceActivityFromMechAnalytics — column-level projection', () =
 
   it('maps payment_type=nvm_subscription to feeUnit=CREDITS', async () => {
     iterateScoredRows.mockImplementation(() =>
-      scoredRowIter([scoredRow({ payment_type: 'nvm_subscription', delivery_rate: '100' })]),
+      scoredRowIter([scoredRow({ payment_type: PT_NVM_NATIVE, delivery_rate: '100' })]),
     );
     const result = await getServiceActivityFromMechAnalytics({
       chainId: 100,
@@ -257,6 +269,45 @@ describe('getServiceActivityFromMechAnalytics — column-level projection', () =
     });
     expect(result.activities[0].feeUnit).toBe('CREDITS');
     expect(result.activities[0].feeRaw).toBe('100');
+    expect(result.activities[0].finalFeeUSD).toBeNull();
+  });
+
+  it('LegacyAgentMech + delivery_rate=null → NATIVE + LEGACY_DELIVERY_PAYMENT_WEI fallback', async () => {
+    // Legacy pre-marketplace AgentMech rows carry the sentinel hash
+    // with delivery_rate=null. Substituting LEGACY_DELIVERY_PAYMENT_WEI
+    // keeps the render byte-identical to the pre-migration subgraph
+    // legacy path.
+    iterateScoredRows.mockImplementation(() =>
+      scoredRowIter([scoredRow({ payment_type: PT_LEGACY, delivery_rate: null })]),
+    );
+    const result = await getServiceActivityFromMechAnalytics({
+      chainId: 100,
+      serviceId: '1',
+      multisigs: [REQUESTER],
+      mechAddresses: [],
+      subgraphActivities: [],
+    });
+    expect(result.activities[0].feeUnit).toBe('NATIVE');
+    expect(result.activities[0].feeRaw).toBe('10000000000000000');
+    expect(result.activities[0].finalFeeUSD).toBeNull();
+    expect(result.degraded).toBe(false);
+  });
+
+  it('LegacyAgentMech + non-null delivery_rate → NATIVE + that rate', async () => {
+    // Belt-and-braces: if a legacy row ever carries a real rate,
+    // don't override with the fallback.
+    iterateScoredRows.mockImplementation(() =>
+      scoredRowIter([scoredRow({ payment_type: PT_LEGACY, delivery_rate: '42' })]),
+    );
+    const result = await getServiceActivityFromMechAnalytics({
+      chainId: 100,
+      serviceId: '1',
+      multisigs: [REQUESTER],
+      mechAddresses: [],
+      subgraphActivities: [],
+    });
+    expect(result.activities[0].feeUnit).toBe('NATIVE');
+    expect(result.activities[0].feeRaw).toBe('42');
     expect(result.activities[0].finalFeeUSD).toBeNull();
   });
 
@@ -319,7 +370,7 @@ describe('getServiceActivityFromMechAnalytics — column-level projection', () =
     iterateScoredRows.mockImplementation(() =>
       scoredRowIter([
         scoredRow({
-          payment_type: 'usdc',
+          payment_type: PT_USDC,
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           delivery_rate: undefined as any,
         }),
@@ -398,7 +449,9 @@ describe('getServiceActivityFromMechAnalytics — column-level projection', () =
     // Request-id encoding differs across sources; the canonicaliser
     // must find the twin regardless of leading-zero trimming.
     iterateScoredRows.mockImplementation((params: { requester?: string }) =>
-      params.requester ? scoredRowIter([scoredRow({ payment_type: 'native' })]) : scoredRowIter([]),
+      params.requester
+        ? scoredRowIter([scoredRow({ payment_type: PT_NATIVE })])
+        : scoredRowIter([]),
     );
 
     const twin = subgraphActivity({

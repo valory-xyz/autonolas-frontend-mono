@@ -26,7 +26,8 @@ export type Activity = {
 };
 
 const LIMIT = 1_000;
-const LEGACY_DELIVERY_PAYMENT_WEI = '10000000000000000';
+// 0.01 xDAI. Fixed fee legacy pre-marketplace AgentMechs charged.
+export const LEGACY_DELIVERY_PAYMENT_WEI = '10000000000000000';
 
 export const getQueryForServiceActivity = ({ serviceId }: { serviceId: string }) => {
   return `
