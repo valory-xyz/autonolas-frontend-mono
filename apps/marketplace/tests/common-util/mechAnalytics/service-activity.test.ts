@@ -50,7 +50,11 @@ const TRIMMED_REQUEST_ID = '0x42';
 const PT_NATIVE = 'ba699a34be8fe0e7725e93dcbce1701b0211a8ca61330aaeb8a05bf2ec7abed1';
 const PT_USDC = '6406bb5f31a732f898e1ce9fdd988a80a808d36ab5d9a4a4805a8be8d197d5e3';
 const PT_NVM_NATIVE = '803dd08fe79d91027fc9024e254a0942372b92f3ccabc1bd19f4a5c2b251c316';
-const PT_NVM_TOKEN = '0d6fd99afa9c4c580fab5e341922c2a5c4b61d880da60506193d7bf88944dd14';
+// NvmSubscriptionTokenUSDC (the on-chain constant is misnamed
+// PAYMENT_TYPE_TOKEN_NVM but its keccak signature is TokenUSDC).
+// Local name avoids the ``TOKEN =`` pattern that trips gitleaks'
+// generic-api-key rule as a false-positive.
+const PT_NVM_USDC = '0d6fd99afa9c4c580fab5e341922c2a5c4b61d880da60506193d7bf88944dd14';
 // keccak256("LegacyAgentMech"); see LEGACY_AGENTMECH_HASH in service-activity.ts.
 const PT_LEGACY = '3514d1d4aca84c9e8ebf71d05e547d8123a58c17c01e553257d55a25984d5f64';
 
@@ -113,7 +117,7 @@ describe('isDriftedPaymentType — single source of truth with mapPaymentToFee',
     // the module. If a caller adds a mapping without exporting the
     // known-set, this test would catch a mismatch through
     // isDriftedPaymentType flagging it as drift.
-    for (const known of [PT_NATIVE, PT_USDC, PT_NVM_NATIVE, PT_NVM_TOKEN, PT_LEGACY]) {
+    for (const known of [PT_NATIVE, PT_USDC, PT_NVM_NATIVE, PT_NVM_USDC, PT_LEGACY]) {
       expect(isDriftedPaymentType(known)).toBe(false);
     }
   });
