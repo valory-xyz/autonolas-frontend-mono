@@ -27,6 +27,24 @@
       "reason": "Same GHSA on the js-yaml 3.x line, reached via nx build-time tooling (@nx/next > nx > @yarnpkg/parsers > js-yaml 3.x). Build-time only, trusted input, not in the shipped runtime. Cannot be co-resolved with the 4.x consumer via a single Yarn resolution without breaking API compatibility.",
       "added": "2026-07-23",
       "review": "2026-10-23"
+    },
+    {
+      "id": 1138114,
+      "ghsa": "GHSA-5p4m-2wfm-xmqj",
+      "package": "js-yaml",
+      "severity": "high",
+      "reason": "CVE-2026-59870 (quadratic CPU in !!omap resolution) on the js-yaml 3.x line, reached only via nx build-time tooling (@nx/next > nx > @yarnpkg/parsers > js-yaml 3.x). Build-time only, parses our own trusted config, not in the shipped runtime. Same co-resolution constraint as 1123912: the 3.x consumer uses the safeLoad API removed in 4.x, so a single Yarn resolution cannot fix both lines.",
+      "added": "2026-09-07",
+      "review": "2026-10-23"
+    },
+    {
+      "id": 1138115,
+      "ghsa": "GHSA-5p4m-2wfm-xmqj",
+      "package": "js-yaml",
+      "severity": "high",
+      "reason": "Same CVE-2026-59870 on the js-yaml 4.x line, reached only via nx build-time tooling (@nx/next > nx > js-yaml 4.x). Build-time only, trusted input, not in the shipped runtime. See 1123911 for why a blanket js-yaml resolution is unsafe.",
+      "added": "2026-09-07",
+      "review": "2026-10-23"
     }
   ]
 }
