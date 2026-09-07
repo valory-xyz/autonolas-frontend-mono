@@ -78,5 +78,15 @@ export const FEEDBACK_SHEET_RANGE = `${FEEDBACK_SHEET_TAB}!A:N`;
 /** Prefix for submissions buffered in Blob after a Sheets failure, drained by the cron route. */
 export const FEEDBACK_PENDING_PREFIX = 'feedback/pending';
 
-/** One cron run drains at most this many buffered submissions, so a large backlog cannot time out. */
-export const FEEDBACK_REPLAY_BATCH_SIZE = 100;
+/** Where the replay sets aside a pending blob it can never turn into a row, rather than deleting it. */
+export const FEEDBACK_UNREADABLE_PREFIX = 'feedback/unreadable';
+
+/**
+ * One cron run drains at most this many buffered submissions, so a large backlog cannot time out.
+ *
+ * Sized against the `maxDuration: 60` that `vercel.json` gives the replay route. The loop is
+ * sequential — one Blob read plus one Sheets append per submission — so at a conservative ~400ms
+ * per entry a full batch is ~20s, leaving room for the token exchange on the cold start a daily
+ * cron always is. A backlog larger than this simply drains over consecutive runs.
+ */
+export const FEEDBACK_REPLAY_BATCH_SIZE = 50;
