@@ -11,8 +11,18 @@
     },
     "pages/api/achievement/get-image.ts": {
       "maxDuration": 10
+    },
+    "pages/api/feedback/onboarding-survey.ts": {
+      "maxDuration": 30
+    },
+    "pages/api/feedback/replay-pending.ts": {
+      "maxDuration": 60
     }
-  }
+  },
+  "crons": [
+    {
+      "path": "/api/feedback/replay-pending",
+      "schedule": "0 3 * * *"
+    }
+  ]
 }
-
-
