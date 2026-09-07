@@ -1,5 +1,5 @@
-import { DownOutlined, RightOutlined } from '@ant-design/icons';
-import { Button, Table, Tag, Typography } from 'antd';
+import { DownOutlined, RightOutlined, WarningOutlined } from '@ant-design/icons';
+import { Button, Flex, Table, Tag, Tooltip, Typography } from 'antd';
 import { ColumnsType } from 'antd/es/table';
 import { useEffect, useState } from 'react';
 import { Address } from 'viem';
@@ -16,9 +16,11 @@ import { setProposalVotes } from 'store/govern';
 import { useAppDispatch } from 'store/index';
 
 import { ProposalDetails } from './ProposalDetails';
+import { isFlaggedProposal } from './flaggedProposals';
 import {
   VOTES_SORTED,
   VOTES_SUPPORT,
+  VoteSupport,
   formatWeiToEth,
   getUserVote,
   hasNotStarted,
@@ -48,10 +50,17 @@ const getColumns = (
     title: 'Name',
     dataIndex: 'description',
     key: 'name',
-    render: (description) => (
-      <Text strong ellipsis style={{ width: 200 }}>
-        {description}
-      </Text>
+    render: (description, record) => (
+      <Flex gap={8} align="center">
+        {isFlaggedProposal(record.proposalId) && (
+          <Tag color="red" icon={<WarningOutlined />} style={{ marginInlineEnd: 0 }}>
+            Malicious
+          </Tag>
+        )}
+        <Text strong ellipsis style={{ width: 200 }}>
+          {description}
+        </Text>
+      </Flex>
     ),
   },
   {
@@ -107,19 +116,36 @@ const getColumns = (
             </Button>
           );
         }
+        // A proposal flagged as hostile can still be voted Against or Abstain here; only For is
+        // withheld. See flaggedProposals.ts - the Governor itself remains permissionless.
+        const isFlagged = isFlaggedProposal(record.proposalId);
         return (
           <Button.Group>
-            {VOTES_SORTED.map((key) => (
-              <Button
-                key={key}
-                type="primary"
-                ghost
-                disabled={isVoting}
-                onClick={() => handleVote(record.proposalId, Number(key))}
-              >
-                {VOTES_SUPPORT[key]}
-              </Button>
-            ))}
+            {VOTES_SORTED.map((key) => {
+              const isWithheld = isFlagged && key === VoteSupport.For;
+              const button = (
+                <Button
+                  key={key}
+                  type="primary"
+                  ghost
+                  disabled={isVoting || isWithheld}
+                  onClick={() => handleVote(record.proposalId, Number(key))}
+                >
+                  {VOTES_SUPPORT[key]}
+                </Button>
+              );
+
+              return isWithheld ? (
+                <Tooltip
+                  key={key}
+                  title="This proposal is flagged as malicious and is not in alignment with the Autonolas DAO Constitution. Voting For is disabled in this interface — expand the proposal for details."
+                >
+                  {button}
+                </Tooltip>
+              ) : (
+                button
+              );
+            })}
           </Button.Group>
         );
       }
@@ -175,6 +201,15 @@ export const ProposalsList = () => {
   };
 
   const handleVote = (proposalId: string, support: number) => {
+    // Belt and braces: the For button is disabled for flagged proposals, so this only fires if the
+    // handler is reached some other way.
+    if (support === VoteSupport.For && isFlaggedProposal(proposalId)) {
+      notifyError(
+        'This proposal is flagged as malicious. Voting For is disabled in this interface.',
+      );
+      return;
+    }
+
     if (!address) {
       notifyError('Please connect your wallet');
       return;

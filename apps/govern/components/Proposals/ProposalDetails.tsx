@@ -1,5 +1,5 @@
 import { LinkOutlined } from '@ant-design/icons';
-import { Button, Col, Flex, Row, Skeleton, Typography } from 'antd';
+import { Alert, Button, Col, Flex, Row, Skeleton, Typography } from 'antd';
 import { Block } from 'viem';
 import { mainnet } from 'viem/chains';
 import { useAccount, useBlock } from 'wagmi';
@@ -16,6 +16,7 @@ import {
 import { Proposal } from 'common-util/graphql/types';
 import { useProposalEta } from 'hooks/useProposalEta';
 
+import { DAO_CONSTITUTION_URL, getFlaggedProposal } from './flaggedProposals';
 import { VOTES_SUPPORT, formatWeiToEth } from './utils';
 import { EXPLORER_URLS, NA, UNICODE_SYMBOLS } from 'libs/util-constants/src';
 
@@ -51,6 +52,7 @@ export const ProposalDetails = ({
   currentBlock?: Block | undefined;
 }) => {
   const { address } = useAccount();
+  const flagged = getFlaggedProposal(item.proposalId);
 
   const startDateBlock = useBlockTimestamp(currentBlock, BigInt(item.startBlock));
   const endDateBlock = useBlockTimestamp(currentBlock, BigInt(item.endBlock));
@@ -69,6 +71,37 @@ export const ProposalDetails = ({
 
   return (
     <Flex vertical>
+      {flagged && (
+        <Alert
+          type="error"
+          showIcon
+          className="mb-16"
+          message="Malicious proposal — not in alignment with the Autonolas DAO Constitution"
+          description={
+            <Flex vertical gap={8}>
+              <Text>{flagged.summary}</Text>
+              <div>
+                <Text strong>What its calldata does:</Text>
+                <ul className="m-0">
+                  {flagged.actions.map((action) => (
+                    <li key={action}>
+                      <Text code>{action}</Text>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              <Text type="secondary">
+                Voting For is disabled in this interface. Against and Abstain remain available, and
+                the Governor contract itself is permissionless — this flag has no effect on chain.
+                Verify the calldata yourself from the transaction linked below before voting.{' '}
+                <a href={DAO_CONSTITUTION_URL} target="_blank" rel="noreferrer">
+                  Read the DAO Constitution {UNICODE_SYMBOLS.EXTERNAL_LINK}
+                </a>
+              </Text>
+            </Flex>
+          }
+        />
+      )}
       <Caption>Proposal description</Caption>
       <Paragraph className="mb-16">{item.description}</Paragraph>
       <Caption>Owner</Caption>
