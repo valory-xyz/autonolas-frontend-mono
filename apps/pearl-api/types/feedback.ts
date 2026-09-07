@@ -43,6 +43,18 @@ export type PendingFeedbackRecord = {
   submission: OnboardingSurveySubmission;
 };
 
+/**
+ * Result of reading one buffered submission.
+ *
+ * `missing` is transient (the blob vanished between the list and the read) and worth retrying;
+ * `unreadable` never will be, and carries the raw bytes so the caller can set them aside without
+ * discarding them.
+ */
+export type PendingFeedbackRead =
+  | { status: 'ok'; record: PendingFeedbackRecord }
+  | { status: 'missing' }
+  | { status: 'unreadable'; raw: string };
+
 export type OnboardingSurveyResponse = {
   ok: true;
 };

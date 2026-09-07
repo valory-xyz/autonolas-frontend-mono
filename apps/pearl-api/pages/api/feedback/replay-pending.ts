@@ -8,6 +8,7 @@ import {
   deletePendingFeedback,
   getPendingFeedback,
   listPendingFeedbackPaths,
+  quarantinePendingFeedback,
 } from '../../../utils/blob';
 
 /**
@@ -46,11 +47,24 @@ export default async function handler(
 
     for (const pathname of pathnames) {
       try {
-        const record = await getPendingFeedback(pathname);
-        if (!record) {
+        const read = await getPendingFeedback(pathname);
+
+        // Never mappable to a row, so retrying it forever would hold a slot in every batch.
+        // Set it aside instead — the bytes are kept under the unreadable prefix.
+        if (read.status === 'unreadable') {
+          console.error(`Onboarding survey: quarantining unreadable pending blob ${pathname}`);
+          await quarantinePendingFeedback(pathname, read.raw);
           failed += 1;
           continue;
         }
+
+        // The blob vanished between the list and the read — nothing to append or delete.
+        if (read.status === 'missing') {
+          failed += 1;
+          continue;
+        }
+
+        const { record } = read;
 
         await appendSheetRow(
           FEEDBACK_SHEET_RANGE,

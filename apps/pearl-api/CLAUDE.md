@@ -68,6 +68,13 @@ Rules that are easy to break:
   analysis; a client must not auto-retry a 2xx.
 - Pending blobs are written `access: 'private'` — they hold free text and must not be readable by
   URL. This is why `@vercel/blob` is on the 2.x line; 0.x permitted `'public'` only.
+- **`put` needs `allowOverwrite: true` on any deterministic pathname.** Since 2.x it throws on an
+  existing pathname by default, so both `setLookupEntry` (achievements) and `putPendingFeedback`
+  opt in. Omitting it turns a repeat write into a 500.
+- The replay re-validates each blob it reads rather than trusting its shape. One it can never map
+  to a row is copied to `feedback/unreadable/` and removed from the pending prefix — the batch is
+  listed with no cursor, so an entry that always fails would otherwise hold a slot on every run.
+  Anything under that prefix means the writer has a bug and is worth reading by hand.
 
 **One-time Google setup** (not code): enable the Sheets API on the Google Cloud project; create a
 service account with no project roles; create a JSON key; share the spreadsheet with the
