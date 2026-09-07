@@ -6,3 +6,5 @@ export * from './waitForTransactionReceipt';
 export * from './ipfs';
 export * from './blob';
 export * from './api';
+export * from './feedback';
+export * from './googleSheets';

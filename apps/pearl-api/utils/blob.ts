@@ -1,11 +1,13 @@
-import { put, list } from '@vercel/blob';
+import { put, list, get, del } from '@vercel/blob';
 
 import type {
   LookupEntry,
   AchievementQueryParams,
   AchievementsLookupJson,
 } from '../types/achievement';
+import type { PendingFeedbackRecord } from '../types/feedback';
 import { ACHIEVEMENTS_LOOKUP_PREFIX } from '../constants/achievement';
+import { FEEDBACK_PENDING_PREFIX, FEEDBACK_REPLAY_BATCH_SIZE } from '../constants/feedback';
 
 // New per-entry path: achievements-lookup/{agent}/{type}/{id}.json
 const getEntryFileName = (agent: string, type: string, id: string): string =>
@@ -80,4 +82,46 @@ export const setLookupEntry = async (
     contentType: 'application/json',
     cacheControlMaxAge: 0,
   });
+};
+
+// ---------------------------------------------------------------------------
+// Onboarding-survey pending buffer
+//
+// A submission lands here only when the Google Sheets write failed, and lives here only until
+// the replay cron appends it. Unlike the achievement blobs above, these are written with
+// `access: 'private'`: they hold free-text feedback and must not be readable by URL.
+// ---------------------------------------------------------------------------
+
+const getPendingFeedbackPath = (submissionId: string): string =>
+  `${FEEDBACK_PENDING_PREFIX}/${submissionId}.json`;
+
+export const putPendingFeedback = async (record: PendingFeedbackRecord): Promise<void> => {
+  await put(getPendingFeedbackPath(record.submission.submissionId), JSON.stringify(record), {
+    access: 'private',
+    addRandomSuffix: false,
+    allowOverwrite: true,
+    contentType: 'application/json',
+  });
+};
+
+export const listPendingFeedbackPaths = async (): Promise<string[]> => {
+  const { blobs } = await list({
+    prefix: `${FEEDBACK_PENDING_PREFIX}/`,
+    limit: FEEDBACK_REPLAY_BATCH_SIZE,
+  });
+
+  return blobs.map((blob) => blob.pathname);
+};
+
+export const getPendingFeedback = async (
+  pathname: string,
+): Promise<PendingFeedbackRecord | null> => {
+  const result = await get(pathname, { access: 'private' });
+  if (!result?.stream) return null;
+
+  return (await new Response(result.stream).json()) as PendingFeedbackRecord;
+};
+
+export const deletePendingFeedback = async (pathname: string): Promise<void> => {
+  await del(pathname);
 };
