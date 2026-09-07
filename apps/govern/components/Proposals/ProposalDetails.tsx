@@ -4,7 +4,7 @@ import { Block } from 'viem';
 import { mainnet } from 'viem/chains';
 import { useAccount, useBlock } from 'wagmi';
 
-import { Caption } from 'libs/ui-components/src';
+import { Caption, DAO_CONSTITUTION_URL } from 'libs/ui-components/src';
 import { areAddressesEqual, notifySuccess } from 'libs/util-functions/src';
 import { AddressLink } from 'libs/ui-components/src';
 
@@ -16,7 +16,7 @@ import {
 import { Proposal } from 'common-util/graphql/types';
 import { useProposalEta } from 'hooks/useProposalEta';
 
-import { DAO_CONSTITUTION_URL, getFlaggedProposal } from './flaggedProposals';
+import { getFlaggedProposal } from './flaggedProposals';
 import { VOTES_SUPPORT, formatWeiToEth } from './utils';
 import { EXPLORER_URLS, NA, UNICODE_SYMBOLS } from 'libs/util-constants/src';
 
@@ -91,8 +91,9 @@ export const ProposalDetails = ({
                 </ul>
               </div>
               <Text type="secondary">
-                Voting For is disabled in this interface. Against and Abstain remain available, and
-                the Governor contract itself is permissionless — this flag has no effect on chain.
+                Only Against can be cast from this interface: For and Abstain are disabled, because
+                neither is a position the DAO should be offered on a proposal that takes its assets.
+                The Governor contract itself is permissionless — this flag has no effect on chain.
                 Verify the calldata yourself from the transaction linked below before voting.{' '}
                 <a href={DAO_CONSTITUTION_URL} target="_blank" rel="noreferrer">
                   Read the DAO Constitution {UNICODE_SYMBOLS.EXTERNAL_LINK}

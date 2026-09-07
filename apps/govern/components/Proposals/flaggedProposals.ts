@@ -2,8 +2,9 @@
  * Proposals identified as hostile to the protocol.
  *
  * Both entries below hand ownership of protocol assets to an externally owned account. They are
- * flagged here so the interface cannot be used to vote them through by accident: the `For` option is
- * disabled and a warning is shown on the proposal.
+ * flagged here so the interface cannot be used to endorse them: only `Against` can be cast, and a
+ * warning is shown on the proposal. `Abstain` is withheld with `For` — under Bravo counting it does
+ * not help an attacker reach quorum, but offering it reads as "no objection", which these are not.
  *
  * This is a safeguard in this interface only. GovernorOLAS is permissionless — a `For` vote can
  * still be cast directly against the contract, and the flag has no effect on chain.
@@ -19,10 +20,6 @@ export type FlaggedProposal = {
   /** One entry per action, in calldata order. */
   actions: string[];
 };
-
-/** Autonolas DAO Constitution, referenced by every legitimate proposal's description. */
-export const DAO_CONSTITUTION_URL =
-  'https://gateway.autonolas.tech/ipfs/bafybeibrhz6hnxsxcbv7dkzerq4chssotexb276pidzwclbytzj7m4t47u';
 
 const FLAGGED_PROPOSALS: Record<string, FlaggedProposal> = {
   '40206354484003228084362487350961959469393498496889094972132496370956127262976': {

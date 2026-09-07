@@ -116,13 +116,15 @@ const getColumns = (
             </Button>
           );
         }
-        // A proposal flagged as hostile can still be voted Against or Abstain here; only For is
-        // withheld. See flaggedProposals.ts - the Governor itself remains permissionless.
+        // On a proposal flagged as hostile, only Against can be cast here. For is withheld for the
+        // obvious reason, Abstain because it reads as "no objection" - mechanically it is neutral
+        // under Bravo counting, which counts only For votes toward quorum. See flaggedProposals.ts;
+        // the Governor itself remains permissionless.
         const isFlagged = isFlaggedProposal(record.proposalId);
         return (
           <Button.Group>
             {VOTES_SORTED.map((key) => {
-              const isWithheld = isFlagged && key === VoteSupport.For;
+              const isWithheld = isFlagged && key !== VoteSupport.Against;
               const button = (
                 <Button
                   key={key}
@@ -138,7 +140,7 @@ const getColumns = (
               return isWithheld ? (
                 <Tooltip
                   key={key}
-                  title="This proposal is flagged as malicious and is not in alignment with the Autonolas DAO Constitution. Voting For is disabled in this interface — expand the proposal for details."
+                  title="This proposal is flagged as malicious and is not in alignment with the Autonolas DAO Constitution. Only Against can be cast from this interface — expand the proposal for details."
                 >
                   {button}
                 </Tooltip>
@@ -201,8 +203,8 @@ export const ProposalsList = () => {
   };
 
   const handleVote = (proposalId: string, support: number) => {
-    // Belt and braces: the For button is disabled for flagged proposals, so this only fires if the
-    // handler is reached some other way.
+    // Belt and braces: For and Abstain are disabled for flagged proposals, so this only fires if
+    // the handler is reached some other way.
     if (support === VoteSupport.For && isFlaggedProposal(proposalId)) {
       notifyError(
         'This proposal is flagged as malicious. Voting For is disabled in this interface.',

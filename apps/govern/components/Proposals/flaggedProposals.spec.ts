@@ -1,3 +1,4 @@
+import * as flaggedProposalsModule from './flaggedProposals';
 import { getFlaggedProposal, isFlaggedProposal } from './flaggedProposals';
 
 const HOSTILE_TREASURY_OWNER =
@@ -21,6 +22,12 @@ describe('flaggedProposals', () => {
     expect(isFlaggedProposal(undefined)).toBe(false);
     expect(isFlaggedProposal(null)).toBe(false);
     expect(isFlaggedProposal('')).toBe(false);
+  });
+
+  it('does not carry a copy of the DAO Constitution URL', () => {
+    // It lives in libs/ui-components; duplicating the CID here tripped the repository's secret
+    // scanner, and a second copy would drift from the footer's.
+    expect(Object.keys(flaggedProposalsModule)).not.toContain('DAO_CONSTITUTION_URL');
   });
 
   it('describes every action in the flagged calldata', () => {
