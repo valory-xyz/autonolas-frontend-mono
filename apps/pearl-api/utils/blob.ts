@@ -5,9 +5,14 @@ import type {
   AchievementQueryParams,
   AchievementsLookupJson,
 } from '../types/achievement';
-import type { PendingFeedbackRecord } from '../types/feedback';
+import type { PendingFeedbackRead, PendingFeedbackRecord } from '../types/feedback';
 import { ACHIEVEMENTS_LOOKUP_PREFIX } from '../constants/achievement';
-import { FEEDBACK_PENDING_PREFIX, FEEDBACK_REPLAY_BATCH_SIZE } from '../constants/feedback';
+import {
+  FEEDBACK_PENDING_PREFIX,
+  FEEDBACK_REPLAY_BATCH_SIZE,
+  FEEDBACK_UNREADABLE_PREFIX,
+} from '../constants/feedback';
+import { parseOnboardingSurveySubmission } from './feedback';
 
 // New per-entry path: achievements-lookup/{agent}/{type}/{id}.json
 const getEntryFileName = (agent: string, type: string, id: string): string =>
@@ -79,6 +84,10 @@ export const setLookupEntry = async (
   await put(fileName, JSON.stringify(entry), {
     access: 'public',
     addRandomSuffix: false,
+    // Required since @vercel/blob 2.x: `put` throws on an existing pathname unless overwriting
+    // is opted into, and this path is deterministic. Two concurrent generations of the same
+    // entry, or a re-generation after an unreadable blob, must still replace it rather than 500.
+    allowOverwrite: true,
     contentType: 'application/json',
     cacheControlMaxAge: 0,
   });
@@ -113,15 +122,63 @@ export const listPendingFeedbackPaths = async (): Promise<string[]> => {
   return blobs.map((blob) => blob.pathname);
 };
 
-export const getPendingFeedback = async (
-  pathname: string,
-): Promise<PendingFeedbackRecord | null> => {
+/**
+ * Reads a buffered submission and re-validates it instead of asserting its shape.
+ *
+ * The only writer is `putPendingFeedback` with an already-validated submission, so `unreadable`
+ * should not happen. It matters anyway: the replay lists a bounded batch by prefix with no
+ * cursor, so a blob that can never be mapped to a row would consume a slot on every subsequent
+ * run. Telling the caller *why* the read failed is what lets it retry a transient failure and
+ * set the rest aside.
+ */
+export const getPendingFeedback = async (pathname: string): Promise<PendingFeedbackRead> => {
   const result = await get(pathname, { access: 'private' });
-  if (!result?.stream) return null;
+  if (!result?.stream) return { status: 'missing' };
 
-  return (await new Response(result.stream).json()) as PendingFeedbackRecord;
+  const raw = await new Response(result.stream).text();
+
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(raw);
+  } catch {
+    return { status: 'unreadable', raw };
+  }
+
+  if (typeof parsed !== 'object' || parsed === null || Array.isArray(parsed)) {
+    return { status: 'unreadable', raw };
+  }
+
+  const { submittedAt, submission } = parsed as Record<string, unknown>;
+  const validated = parseOnboardingSurveySubmission(submission);
+
+  if (typeof submittedAt !== 'string' || !submittedAt || !validated) {
+    return { status: 'unreadable', raw };
+  }
+
+  return { status: 'ok', record: { submittedAt, submission: validated } };
 };
 
 export const deletePendingFeedback = async (pathname: string): Promise<void> => {
+  await del(pathname);
+};
+
+/**
+ * Moves a blob the replay can never turn into a row out of the pending prefix.
+ *
+ * The bytes are copied verbatim before the original is deleted, so nothing a user wrote is thrown
+ * away — it just stops holding a slot in every batch. Anything landing under this prefix is a bug
+ * in the writer and worth looking at by hand.
+ */
+export const quarantinePendingFeedback = async (pathname: string, raw: string): Promise<void> => {
+  const fileName = pathname.startsWith(`${FEEDBACK_PENDING_PREFIX}/`)
+    ? pathname.slice(`${FEEDBACK_PENDING_PREFIX}/`.length)
+    : pathname;
+
+  await put(`${FEEDBACK_UNREADABLE_PREFIX}/${fileName}`, raw, {
+    access: 'private',
+    addRandomSuffix: false,
+    allowOverwrite: true,
+    contentType: 'application/json',
+  });
   await del(pathname);
 };
