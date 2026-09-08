@@ -23,6 +23,7 @@ const EXPECTATIONS = {
   // Each app registers the pages it pre-renders, in the PR that makes them pre-render.
   // Shape: { page, minReadableChars, minRows?, mustContain? }
   operate: [{ page: 'contracts', minReadableChars: 1500, minRows: 5 }],
+  govern: [{ page: 'contracts', minReadableChars: 1500, minRows: 5 }],
 };
 
 /** Empty-state strings that must never reach the served HTML of a data page. */
