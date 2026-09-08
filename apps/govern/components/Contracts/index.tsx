@@ -15,7 +15,14 @@ const StyledMain = styled.main`
   margin: 0 auto;
 `;
 
-export const ContractsPage = () => {
+type ContractsPageProps = {
+  /** Snapshot pre-rendered by `getStaticProps`, so the table ships as HTML. */
+  initialContracts?: StakingContract[];
+  /** When that snapshot was taken (ISO-8601 UTC), or null if the fetch failed. */
+  snapshotGeneratedAt?: string | null;
+};
+
+export const ContractsPage = ({ initialContracts, snapshotGeneratedAt }: ContractsPageProps) => {
   useFetchUserVotes();
   const { userVotes, isUserVotesLoading } = useAppSelector((state) => state.govern);
 
@@ -36,7 +43,13 @@ export const ContractsPage = () => {
   return (
     <StyledMain>
       <Flex gap={24}>
-        <ContractsList isUpdating={isUpdating} handleAdd={handleAdd} allocations={allocations} />
+        <ContractsList
+          isUpdating={isUpdating}
+          handleAdd={handleAdd}
+          allocations={allocations}
+          initialContracts={initialContracts}
+          snapshotGeneratedAt={snapshotGeneratedAt}
+        />
         <MyVotingWeight
           isUpdating={isUpdating}
           setIsUpdating={setIsUpdating}
