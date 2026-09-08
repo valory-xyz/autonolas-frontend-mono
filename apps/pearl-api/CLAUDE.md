@@ -22,9 +22,11 @@ Guidance for working on the **Pearl API** app in this repo.
 - **CORS**: no env var. `utils/cors.ts` hardcodes an allowlist of `http://localhost:*` and
   `http://127.0.0.1:*` origins, which is what lets Pearl's Electron renderer call these routes.
 - **Zendesk**: `ZENDESK_SUBDOMAIN`, `ZENDESK_API_TOKEN`, `ZENDESK_API_EMAIL` (see root `.env.example`)
+- **Achievements Blob store** (public): `BLOB_READ_WRITE_TOKEN`, resolved by the SDK from the
+  environment.
 - **Onboarding survey**: `GOOGLE_SHEETS_CLIENT_EMAIL`, `GOOGLE_SHEETS_PRIVATE_KEY`,
-  `PEARL_FEEDBACK_SHEET_ID`, `CRON_SECRET`, `BLOB_READ_WRITE_TOKEN`. All server-only — none may
-  be given a `NEXT_PUBLIC_` prefix, which would inline it into the client bundle.
+  `PEARL_FEEDBACK_SHEET_ID`, `CRON_SECRET`, `FEEDBACK_BLOB_READ_WRITE_TOKEN`. All server-only —
+  none may be given a `NEXT_PUBLIC_` prefix, which would inline it into the client bundle.
 
 ## Structure
 
@@ -51,7 +53,8 @@ Pearl shows a one-time post-setup questionnaire and posts the result here.
 - `GET /api/feedback/replay-pending` – cron-only, requires `Authorization: Bearer $CRON_SECRET`.
   Declared in `vercel.json` `crons` on `0 3 * * *`. Daily is deliberate: Vercel's Hobby plan
   rejects a more frequent expression at deploy time. On Pro, `0 * * * *` is a one-line change.
-  Deletes each pending blob only after its append succeeds.
+  Deletes each pending blob only after its append succeeds; a blob it cannot parse is moved to
+  `feedback/unreadable/` and never retried.
 
 Rules that are easy to break:
 
@@ -66,21 +69,35 @@ Rules that are easy to break:
   `=` from being evaluated as a formula.
 - **There is no server-side dedup.** `submissionId` exists so duplicates can be filtered during
   analysis; a client must not auto-retry a 2xx.
-- Pending blobs are written `access: 'private'` — they hold free text and must not be readable by
-  URL. This is why `@vercel/blob` is on the 2.x line; 0.x permitted `'public'` only.
-- **`put` needs `allowOverwrite: true` on any deterministic pathname.** Since 2.x it throws on an
-  existing pathname by default, so both `setLookupEntry` (achievements) and `putPendingFeedback`
-  opt in. Omitting it turns a repeat write into a 500.
+- **Pending blobs live in a separate private Blob store.** They hold free text and must not be
+  readable by URL. Store access is fixed at creation, so they cannot share the public achievements
+  store; every feedback call in `utils/blob.ts` passes `FEEDBACK_BLOB_READ_WRITE_TOKEN` explicitly
+  and throws if it is unset, otherwise the SDK would silently fall back to the achievements store's
+  credentials. Private access is why `@vercel/blob` is on the 2.x line; 0.x permitted `'public'`
+  only.
+- **`put` on a deterministic pathname: decide on overwrite explicitly.** Since 2.x `put` throws on
+  an existing pathname unless `allowOverwrite: true`. `setLookupEntry` (achievements) opts in
+  because re-generation must replace the entry. `putPendingFeedback` deliberately does **not**:
+  every attempt carries a fresh `submissionId`, so a repeat path is a bug that should surface
+  rather than silently replace an earlier buffered submission.
 - The replay re-validates each blob it reads rather than trusting its shape. One it can never map
   to a row is copied to `feedback/unreadable/` and removed from the pending prefix — the batch is
   listed with no cursor, so an entry that always fails would otherwise hold a slot on every run.
   Anything under that prefix means the writer has a bug and is worth reading by hand.
+- **Sheet cells keep their types.** The row mapper emits numbers and booleans as such (not
+  strings) so that under `valueInputOption=RAW` the rating, timing and "everything was smooth"
+  columns are numeric/boolean cells that AVERAGE and filters work on.
 
 **One-time Google setup** (not code): enable the Sheets API on the Google Cloud project; create a
 service account with no project roles; create a JSON key; share the spreadsheet with the
 service-account email as **Editor**; confirm the destination tab is named `Responses`; set
 `GOOGLE_SHEETS_CLIENT_EMAIL`, `GOOGLE_SHEETS_PRIVATE_KEY`, `PEARL_FEEDBACK_SHEET_ID` and
 `CRON_SECRET` in the Vercel **production** environment.
+
+**One-time Blob setup** (not code): in the pearl-api project's Storage tab create a second Blob
+store with access set to **Private**, and connect it to the project with the env-var prefix
+`FEEDBACK_` so it lands as `FEEDBACK_BLOB_READ_WRITE_TOKEN` without colliding with the
+achievements store's `BLOB_READ_WRITE_TOKEN`.
 
 **Also configure in the Vercel dashboard** (not in this repo): a WAF rate-limit rule on
 `/api/feedback/onboarding-survey`, keyed by IP, fixed window, `429` action. The endpoint is

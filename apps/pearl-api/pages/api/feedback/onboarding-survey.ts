@@ -1,16 +1,15 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 
 import { FEEDBACK_SHEET_RANGE } from '../../../constants';
-import type { ApiErrorResponse, OnboardingSurveyResponse } from '../../../types/feedback';
+import type { ApiErrorResponse, OnboardingSurveyResponse } from '../../../types';
 import { setCorsHeaders } from '../../../utils/cors';
-import { mapSubmissionToSheetRow, parseOnboardingSurveySubmission } from '../../../utils/feedback';
+import {
+  isJsonContentType,
+  mapSubmissionToSheetRow,
+  parseOnboardingSurveySubmission,
+} from '../../../utils/feedback';
 import { appendSheetRow } from '../../../utils/googleSheets';
 import { putPendingFeedback } from '../../../utils/blob';
-
-const isJsonContentType = (req: NextApiRequest): boolean => {
-  const contentType = req.headers['content-type'];
-  return typeof contentType === 'string' && contentType.split(';')[0].trim() === 'application/json';
-};
 
 /**
  * Receives one anonymous post-setup questionnaire submission from Pearl (OPE-1899) and appends
@@ -39,12 +38,14 @@ export default async function handler(
     return res.status(405).json({ error: 'Method Not Allowed', message: 'Use POST' });
   }
 
-  if (!isJsonContentType(req)) {
+  if (!isJsonContentType(req.headers['content-type'])) {
     return res
       .status(400)
       .json({ error: 'Bad request', message: 'Content-Type must be application/json' });
   }
 
+  // A body that is not valid JSON never reaches this point: Next's body parser rejects it with
+  // its own 400 before the handler runs (and therefore without the CORS headers set above).
   const submission = parseOnboardingSurveySubmission(req.body);
   if (!submission) {
     return res.status(400).json({

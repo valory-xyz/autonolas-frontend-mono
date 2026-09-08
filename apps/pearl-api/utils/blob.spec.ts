@@ -17,6 +17,14 @@ jest.mock('@vercel/blob', () => ({
   del: jest.fn(),
 }));
 
+// The feedback buffer lives in its own private store, so every call must carry that store's
+// token. Stub the config so the helpers resolve one without a real environment variable.
+const FEEDBACK_TOKEN = 'feedback-store-token';
+jest.mock('../constants/feedback', () => ({
+  ...jest.requireActual('../constants/feedback'),
+  FEEDBACK_BLOB_CONFIG: { READ_WRITE_TOKEN: 'feedback-store-token' },
+}));
+
 const mockGet = get as jest.MockedFunction<typeof get>;
 const mockPut = put as jest.MockedFunction<typeof put>;
 const mockDel = del as jest.MockedFunction<typeof del>;
@@ -39,8 +47,8 @@ const record: PendingFeedbackRecord = {
   },
 };
 
-/** `get` hands back a readable stream; only the bytes matter to the code under test. */
-const streamOf = (body: string) => ({ stream: new Response(body).body });
+/** `get` hands back a 200 with a readable stream; only the bytes matter to the code under test. */
+const streamOf = (body: string) => ({ statusCode: 200, stream: new Response(body).body });
 
 const mockStoredBody = (body: string) => {
   mockGet.mockResolvedValue(streamOf(body) as unknown as Awaited<ReturnType<typeof get>>);
@@ -93,9 +101,19 @@ describe('quarantinePendingFeedback', () => {
     expect(mockPut).toHaveBeenCalledWith(
       `${FEEDBACK_UNREADABLE_PREFIX}/${VALID_UUID}.json`,
       raw,
-      expect.objectContaining({ access: 'private', addRandomSuffix: false }),
+      expect.objectContaining({ access: 'private', addRandomSuffix: false, token: FEEDBACK_TOKEN }),
     );
-    expect(mockDel).toHaveBeenCalledWith(PATHNAME);
+    expect(mockDel).toHaveBeenCalledWith(PATHNAME, { token: FEEDBACK_TOKEN });
     expect(mockPut.mock.invocationCallOrder[0]).toBeLessThan(mockDel.mock.invocationCallOrder[0]);
+  });
+});
+
+describe('feedback store token', () => {
+  it('reads with the feedback store token, never the default achievements credentials', async () => {
+    mockStoredBody(JSON.stringify(record));
+
+    await getPendingFeedback(PATHNAME);
+
+    expect(mockGet).toHaveBeenCalledWith(PATHNAME, { access: 'private', token: FEEDBACK_TOKEN });
   });
 });

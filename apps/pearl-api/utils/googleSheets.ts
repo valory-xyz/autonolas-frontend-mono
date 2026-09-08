@@ -6,7 +6,9 @@ import {
   GOOGLE_SHEETS_CONFIG,
   GOOGLE_SHEETS_SCOPE,
 } from '../constants';
+import type { SheetCell } from '../types';
 
+/** Assertion lifetime; Google rejects anything over one hour. */
 const TOKEN_LIFETIME_SECONDS = 3600;
 /** Renew a little early so a token cannot expire between the check and the append. */
 const TOKEN_EXPIRY_SKEW_SECONDS = 60;
@@ -37,9 +39,9 @@ const buildSignedAssertion = (clientEmail: string, privateKey: string): string =
 
   const header = base64Url(JSON.stringify({ alg: 'RS256', typ: 'JWT' }));
   const claims = base64Url(
+    // No `sub`: Google documents it only for domain-wide delegation (impersonating a user).
     JSON.stringify({
       iss: clientEmail,
-      sub: clientEmail,
       scope: GOOGLE_SHEETS_SCOPE,
       aud: GOOGLE_OAUTH_TOKEN_URL,
       iat: issuedAt,
@@ -82,18 +84,25 @@ const getAccessToken = async (): Promise<string> => {
   }
 
   const body: unknown = await response.json();
-  const accessToken =
-    typeof body === 'object' && body !== null && 'access_token' in body
-      ? (body as { access_token: unknown }).access_token
-      : undefined;
+  const tokenResponse =
+    typeof body === 'object' && body !== null
+      ? (body as { access_token?: unknown; expires_in?: unknown })
+      : {};
 
+  const accessToken = tokenResponse.access_token;
   if (typeof accessToken !== 'string' || !accessToken) {
     throw new Error('Google token response did not contain an access token');
   }
 
+  // The access token's real lifetime comes from the response, not from the assertion's `exp`.
+  const expiresInSeconds =
+    typeof tokenResponse.expires_in === 'number'
+      ? tokenResponse.expires_in
+      : TOKEN_LIFETIME_SECONDS;
+
   cachedToken = {
     accessToken,
-    expiresAtMs: Date.now() + (TOKEN_LIFETIME_SECONDS - TOKEN_EXPIRY_SKEW_SECONDS) * 1000,
+    expiresAtMs: Date.now() + (expiresInSeconds - TOKEN_EXPIRY_SKEW_SECONDS) * 1000,
   };
 
   return accessToken;
@@ -106,7 +115,7 @@ const getAccessToken = async (): Promise<string> => {
  * detected table rather than inserting a row. `valueInputOption=RAW` keeps a free-text answer
  * beginning with `=` or `+` stored as text instead of evaluated as a formula.
  */
-export const appendSheetRow = async (range: string, row: readonly string[]): Promise<void> => {
+export const appendSheetRow = async (range: string, row: readonly SheetCell[]): Promise<void> => {
   const { SHEET_ID } = GOOGLE_SHEETS_CONFIG;
 
   if (!SHEET_ID) {

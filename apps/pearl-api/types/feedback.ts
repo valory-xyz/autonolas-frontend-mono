@@ -46,14 +46,20 @@ export type PendingFeedbackRecord = {
 /**
  * Result of reading one buffered submission.
  *
- * `missing` is transient (the blob vanished between the list and the read) and worth retrying;
- * `unreadable` never will be, and carries the raw bytes so the caller can set them aside without
- * discarding them.
+ * `missing` means the blob vanished between the list and the read (a concurrent run took it) and
+ * there is nothing left to do; `unreadable` can never be mapped to a row, and carries the raw
+ * bytes so the caller can set them aside without discarding them.
  */
 export type PendingFeedbackRead =
   | { status: 'ok'; record: PendingFeedbackRecord }
   | { status: 'missing' }
   | { status: 'unreadable'; raw: string };
+
+/**
+ * One sheet cell. Numbers and booleans are kept typed rather than stringified so the sheet
+ * gets numeric/boolean cells under `valueInputOption=RAW` and AVERAGE/filters work on them.
+ */
+export type SheetCell = string | number | boolean;
 
 export type OnboardingSurveyResponse = {
   ok: true;
@@ -61,8 +67,12 @@ export type OnboardingSurveyResponse = {
 
 export type ReplayPendingResponse = {
   ok: true;
+  /** Appended to the sheet and deleted from the pending prefix. */
   replayed: number;
+  /** Append failed; left in the pending prefix for the next run. */
   failed: number;
+  /** Unparseable; moved to the failed prefix and never retried. */
+  quarantined: number;
 };
 
 export type ApiErrorResponse = {

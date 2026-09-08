@@ -72,13 +72,31 @@ export const FEEDBACK_SHEET_COLUMNS = [
   'Time to complete survey (s)',
 ] as const;
 
-/** `Responses!A:N` — N is the 14th column, matching FEEDBACK_SHEET_COLUMNS. */
-export const FEEDBACK_SHEET_RANGE = `${FEEDBACK_SHEET_TAB}!A:N`;
+/**
+ * Append range. The tab name alone is valid A1 notation: the Sheets API searches it for the
+ * logical table and appends after its last row, so there is no column letter to keep in sync
+ * with FEEDBACK_SHEET_COLUMNS.
+ */
+export const FEEDBACK_SHEET_RANGE = FEEDBACK_SHEET_TAB;
+
+/**
+ * The feedback buffer lives in its own **private** Blob store, separate from the public store
+ * the achievements feature uses. Store access is fixed at creation, so the two cannot share one.
+ * The token is passed explicitly on every feedback call, otherwise the SDK would resolve the
+ * achievements store's credentials from the environment.
+ */
+export const FEEDBACK_BLOB_CONFIG = {
+  READ_WRITE_TOKEN: process.env.FEEDBACK_BLOB_READ_WRITE_TOKEN,
+};
 
 /** Prefix for submissions buffered in Blob after a Sheets failure, drained by the cron route. */
 export const FEEDBACK_PENDING_PREFIX = 'feedback/pending';
 
-/** Where the replay sets aside a pending blob it can never turn into a row, rather than deleting it. */
+/**
+ * Where the replay sets aside a pending blob it can never turn into a row, rather than deleting
+ * it. Moving it out of the pending prefix keeps a poisoned file from being retried every run and
+ * from crowding out valid ones once the batch limit is reached.
+ */
 export const FEEDBACK_UNREADABLE_PREFIX = 'feedback/unreadable';
 
 /**

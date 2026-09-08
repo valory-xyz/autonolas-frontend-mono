@@ -1,7 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 
 import { FEEDBACK_SHEET_RANGE } from '../../../constants';
-import type { ApiErrorResponse, ReplayPendingResponse } from '../../../types/feedback';
+import type { ApiErrorResponse, ReplayPendingResponse } from '../../../types';
 import { mapSubmissionToSheetRow } from '../../../utils/feedback';
 import { appendSheetRow } from '../../../utils/googleSheets';
 import {
@@ -22,6 +22,10 @@ import {
  * if the append failed. Vercel documents cron delivery as best-effort and may invoke the same
  * run twice, so a replay can double-write a row — that is accepted, and `submissionId` in
  * column 2 is what lets analysis filter it.
+ *
+ * A blob that cannot be parsed is moved to the failed prefix rather than left in place: the
+ * batch is bounded, so poisoned files would otherwise be retried every run and eventually crowd
+ * out valid ones.
  */
 export default async function handler(
   req: NextApiRequest,
@@ -41,6 +45,7 @@ export default async function handler(
 
   let replayed = 0;
   let failed = 0;
+  let quarantined = 0;
 
   try {
     const pathnames = await listPendingFeedbackPaths();
@@ -49,18 +54,16 @@ export default async function handler(
       try {
         const read = await getPendingFeedback(pathname);
 
+        // The blob vanished between the list and the read (a concurrent run took it);
+        // nothing to append or delete.
+        if (read.status === 'missing') continue;
+
         // Never mappable to a row, so retrying it forever would hold a slot in every batch.
         // Set it aside instead — the bytes are kept under the unreadable prefix.
         if (read.status === 'unreadable') {
           console.error(`Onboarding survey: quarantining unreadable pending blob ${pathname}`);
           await quarantinePendingFeedback(pathname, read.raw);
-          failed += 1;
-          continue;
-        }
-
-        // The blob vanished between the list and the read — nothing to append or delete.
-        if (read.status === 'missing') {
-          failed += 1;
+          quarantined += 1;
           continue;
         }
 
@@ -73,7 +76,7 @@ export default async function handler(
         await deletePendingFeedback(pathname);
         replayed += 1;
       } catch (error) {
-        // One poisoned blob must not stall the batch; it is retried on the next run.
+        // A failed append (or Blob call) must not stall the batch; the blob stays for next run.
         failed += 1;
         console.error(`Onboarding survey: replay failed for ${pathname}:`, error);
       }
@@ -85,5 +88,5 @@ export default async function handler(
       .json({ error: 'Bad gateway', message: 'Could not list pending submissions' });
   }
 
-  return res.status(200).json({ ok: true, replayed, failed });
+  return res.status(200).json({ ok: true, replayed, failed, quarantined });
 }

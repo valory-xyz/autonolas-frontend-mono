@@ -9,6 +9,8 @@ import {
 import type {
   FrictionArea,
   OnboardingSurveySubmission,
+  PendingFeedbackRecord,
+  SheetCell,
   SurveyOs,
   SurveyRating,
 } from '../types/feedback';
@@ -132,14 +134,12 @@ export const parseOnboardingSurveySubmission = (
 export const mapSubmissionToSheetRow = (
   submission: OnboardingSurveySubmission,
   submittedAt: string,
-): string[] => [
+): SheetCell[] => [
   submittedAt,
   submission.submissionId,
   submission.frictionAreas.join(', '),
-  String(
-    submission.frictionAreas.length === 1 && submission.frictionAreas[0] === EVERYTHING_SMOOTH,
-  ).toUpperCase(),
-  String(submission.rating),
+  submission.frictionAreas.length === 1 && submission.frictionAreas[0] === EVERYTHING_SMOOTH,
+  submission.rating,
   submission.comment,
   submission.os.type,
   submission.os.platform,
@@ -147,8 +147,36 @@ export const mapSubmissionToSheetRow = (
   submission.os.release,
   submission.agentType,
   submission.pearlVersion,
-  submission.timeToFirstSuccessSeconds === null
-    ? TIME_TO_FIRST_SUCCESS_UNAVAILABLE
-    : String(submission.timeToFirstSuccessSeconds),
-  String(submission.timeToCompleteSurveySeconds),
+  submission.timeToFirstSuccessSeconds ?? TIME_TO_FIRST_SUCCESS_UNAVAILABLE,
+  submission.timeToCompleteSurveySeconds,
 ];
+
+/**
+ * Parses the text of a buffered blob back into a record the replay can append.
+ *
+ * The submission is re-run through the same validator the submit route uses, so the replay
+ * path carries the same "only the typed value reaches the sheet" guarantee. Returns `null` for
+ * anything unparseable so the caller can quarantine it instead of retrying forever.
+ */
+export const parsePendingFeedbackRecord = (body: string): PendingFeedbackRecord | null => {
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(body);
+  } catch {
+    return null;
+  }
+
+  if (!isRecord(parsed)) return null;
+  if (typeof parsed.submittedAt !== 'string' || Number.isNaN(Date.parse(parsed.submittedAt))) {
+    return null;
+  }
+
+  const submission = parseOnboardingSurveySubmission(parsed.submission);
+  if (!submission) return null;
+
+  return { submittedAt: parsed.submittedAt, submission };
+};
+
+/** `application/json`, with or without a `; charset=...` parameter. */
+export const isJsonContentType = (contentType: string | string[] | undefined): boolean =>
+  typeof contentType === 'string' && contentType.split(';')[0].trim() === 'application/json';

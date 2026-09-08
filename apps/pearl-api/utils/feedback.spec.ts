@@ -1,6 +1,11 @@
 import { FEEDBACK_SHEET_COLUMNS } from '../constants';
 import type { OnboardingSurveySubmission } from '../types/feedback';
-import { mapSubmissionToSheetRow, parseOnboardingSurveySubmission } from './feedback';
+import {
+  isJsonContentType,
+  mapSubmissionToSheetRow,
+  parseOnboardingSurveySubmission,
+  parsePendingFeedbackRecord,
+} from './feedback';
 
 const VALID_UUID = '9f1c2b7e-5a3d-4f2e-8c11-6b0d7a4e93f5';
 
@@ -103,8 +108,8 @@ describe('parseOnboardingSurveySubmission', () => {
     expect(parseOnboardingSurveySubmission(bodyBuilder({ submissionId }))).toBeNull();
   });
 
-  it('treats an omitted comment as empty', () => {
-    expect(parseOnboardingSurveySubmission(bodyBuilder({ comment: undefined }))?.comment).toBe('');
+  it.each([undefined, null])('treats a %p comment as empty', (comment) => {
+    expect(parseOnboardingSurveySubmission(bodyBuilder({ comment }))?.comment).toBe('');
   });
 
   it('accepts a comment at the 2000-character cap', () => {
@@ -179,8 +184,8 @@ describe('mapSubmissionToSheetRow', () => {
       submittedAt,
       VALID_UUID,
       'backup_wallet, funding_agent',
-      'FALSE',
-      '2',
+      false,
+      2,
       'Took a while.',
       'Darwin',
       'darwin',
@@ -188,9 +193,17 @@ describe('mapSubmissionToSheetRow', () => {
       '24.3.0',
       'polymarket_trader',
       '0.9.4',
-      '93600',
-      '42',
+      93600,
+      42,
     ]);
+  });
+
+  it('keeps numeric and boolean cells typed rather than stringified', () => {
+    const row = mapSubmissionToSheetRow(submissionBuilder(), submittedAt);
+    expect(typeof row[3]).toBe('boolean');
+    expect(typeof row[4]).toBe('number');
+    expect(typeof row[12]).toBe('number');
+    expect(typeof row[13]).toBe('number');
   });
 
   it('derives the everything-smooth column rather than taking it from the client', () => {
@@ -198,7 +211,7 @@ describe('mapSubmissionToSheetRow', () => {
       submissionBuilder({ frictionAreas: ['everything_smooth'], rating: 3 }),
       submittedAt,
     );
-    expect(row[3]).toBe('TRUE');
+    expect(row[3]).toBe(true);
   });
 
   it('writes unavailable for a null time to first success', () => {
@@ -214,7 +227,7 @@ describe('mapSubmissionToSheetRow', () => {
       submissionBuilder({ timeToFirstSuccessSeconds: 0 }),
       submittedAt,
     );
-    expect(row[12]).toBe('0');
+    expect(row[12]).toBe(0);
   });
 
   it('reuses the original timestamp on replay rather than the replay time', () => {
@@ -230,4 +243,57 @@ describe('mapSubmissionToSheetRow', () => {
     const row = mapSubmissionToSheetRow(parsed as OnboardingSurveySubmission, submittedAt);
     expect(row.join('|')).not.toContain('0xdeadbeef');
   });
+});
+
+describe('parsePendingFeedbackRecord', () => {
+  const submittedAt = '2026-09-07T12:00:00.000Z';
+
+  it('round-trips a record written by the submit route', () => {
+    const record = { submittedAt, submission: submissionBuilder() };
+    expect(parsePendingFeedbackRecord(JSON.stringify(record))).toEqual(record);
+  });
+
+  it.each([
+    ['not json', '{not json'],
+    ['a non-object', '"just a string"'],
+    ['a missing submittedAt', JSON.stringify({ submission: submissionBuilder() })],
+    [
+      'a non-date submittedAt',
+      JSON.stringify({ submittedAt: 'yesterday', submission: submissionBuilder() }),
+    ],
+    ['a missing submission', JSON.stringify({ submittedAt })],
+    [
+      'an invalid submission',
+      JSON.stringify({ submittedAt, submission: submissionBuilder({ rating: 9 as never }) }),
+    ],
+  ])('returns null for %s', (_label, body) => {
+    expect(parsePendingFeedbackRecord(body)).toBeNull();
+  });
+
+  it('re-validates the submission so an injected property does not survive the replay', () => {
+    const body = JSON.stringify({
+      submittedAt,
+      submission: { ...submissionBuilder(), walletAddress: '0xdeadbeef' },
+    });
+    const record = parsePendingFeedbackRecord(body);
+    expect(record).not.toBeNull();
+    expect(Object.keys(record?.submission ?? {})).not.toContain('walletAddress');
+  });
+});
+
+describe('isJsonContentType', () => {
+  it.each([
+    'application/json',
+    'application/json; charset=utf-8',
+    'Application/JSON'.toLowerCase(),
+  ])('accepts %s', (contentType) => {
+    expect(isJsonContentType(contentType)).toBe(true);
+  });
+
+  it.each([undefined, '', 'text/plain', 'application/x-www-form-urlencoded', ['application/json']])(
+    'rejects %p',
+    (contentType) => {
+      expect(isJsonContentType(contentType)).toBe(false);
+    },
+  );
 });
