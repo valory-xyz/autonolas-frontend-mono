@@ -3,7 +3,7 @@ import Image from 'next/image';
 
 import { CHAIN_NAMES } from 'libs/util-constants/src';
 
-import type { AvailableOn } from 'types';
+import { AVAILABLE_ON_LABELS, AVAILABLE_ON_VALUES } from 'common-util/constants/contracts';
 
 export const TAB_LIVE = 'live';
 export const TAB_NOT_AVAILABLE = 'not-available';
@@ -28,11 +28,10 @@ export const CHAIN_LOGOS: Partial<Record<number, string>> = {
   42_220: '/images/celo-logo.svg',
 };
 
-export const PLATFORM_OPTIONS: { value: AvailableOn; label: string }[] = [
-  { value: 'pearl', label: 'Pearl' },
-  { value: 'contribute', label: 'Contribute' },
-  { value: 'lst', label: 'LST' },
-];
+export const PLATFORM_OPTIONS = AVAILABLE_ON_VALUES.map((value) => ({
+  value,
+  label: AVAILABLE_ON_LABELS[value],
+}));
 
 export const CHAIN_OPTIONS = [
   { value: 'all', label: 'All chains' },
