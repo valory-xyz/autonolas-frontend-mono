@@ -1,0 +1,7 @@
+{
+  "functions": {
+    "pages/contracts.tsx": {
+      "maxDuration": 120
+    }
+  }
+}

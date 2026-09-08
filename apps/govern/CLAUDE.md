@@ -94,6 +94,16 @@ revalidates every 5 minutes (ISR), so the rows ship as HTML rather than `No data
 - **Published figures carry scope and an as-of time**, per the Phase 1 standard. Pre-rendered HTML
   is read long after it was generated, so a hidden (`.sr-only`) line states what the table counts
   and when the snapshot was taken. Hidden, not visible — the visible design is unchanged.
+- **The ISR fetch needs a raised `maxDuration`.** `vercel.json` sets 120 s for this page and the
+  in-code timeout is 90 s. 45 s was not enough: the fan-out measured ~36 s on one run and then
+  exceeded 45 s on the next, which in production means intermittently shipping the fallback
+  instead of the table. Vercel's default function duration is well below this, so the platform
+  would cut the fetch short without that file.
+- The blob cache's storage logic lives in `libs/util-functions/src/lib/contractCacheStore.ts`,
+  shared with the other app. Only the prefix, token and payload shape differ. The *data* is not
+  shared: operate and govern cache different shapes (govern reads 13 contract fields, operate 6,
+  and they disagree on whether `maxNumServices` is a string or a number), so sharing one store
+  would need both fetchers and schemas unified first.
 - **Guarded by tests, not just by review.** `*.prerender.spec.tsx` asserts the table renders rows
   from `initialContracts` and never renders a bare `No data`; both run in CI. `yarn
   check:served-text <app>` makes the same assertions against real built HTML after `nx build`.

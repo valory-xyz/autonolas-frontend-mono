@@ -8,8 +8,11 @@ import { fetchOperateContracts } from 'common-util/functions/fetchContracts';
 import { StakingContract } from 'types';
 
 /** Budget for the whole fan-out (nominees + subgraph + per-contract RPC).
- *  Keep below the deployment's function `maxDuration` or the platform cuts it short first. */
-const ISR_TIMEOUT_MS = 45_000;
+ *  Kept below the `maxDuration` set for this page in vercel.json, or the platform would cut
+ *  the fetch short first. 45 s was not enough: the govern fan-out measured ~36 s once and then
+ *  exceeded 45 s on the next run, which would intermittently ship the fallback instead of the
+ *  table. */
+const ISR_TIMEOUT_MS = 90_000;
 /** Contract config moves slowly, and the client refreshes live figures after hydration. */
 const REVALIDATE_SECONDS = 300;
 const REVALIDATE_ON_ERROR_SECONDS = 60;
