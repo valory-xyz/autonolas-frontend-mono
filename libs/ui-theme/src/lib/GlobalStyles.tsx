@@ -9,6 +9,21 @@ export const GlobalStyles = createGlobalStyle`
     box-sizing: border-box;
   }
 
+  /* Text served to crawlers, assistants and screen readers but not shown on screen.
+     Used to attach scope and an as-of time to published figures without altering the
+     visible design. Kept clipped rather than display:none so assistive tech still reads it. */
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
   body,
   html {
     width: 100%;
