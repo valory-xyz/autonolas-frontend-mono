@@ -20,10 +20,24 @@ import { join } from 'node:path';
 
 /** Pages that must carry real, server-rendered data — not just chrome. */
 const EXPECTATIONS = {
-  // Each app registers the pages it pre-renders, in the PR that makes them pre-render.
   // Shape: { page, minReadableChars, minRows?, mustContain? }
   operate: [{ page: 'contracts', minReadableChars: 1500, minRows: 5 }],
   govern: [{ page: 'contracts', minReadableChars: 1500, minRows: 5 }],
+  // No data fetching here — the risk is rendering only the selected step, which published one
+  // step of six. Every step's content must be in the HTML whether or not it is on screen.
+  launch: [
+    {
+      page: 'path',
+      minReadableChars: 1500,
+      mustContain: [
+        'Intro',
+        'Define goals and KPIs',
+        'Design agent economy',
+        'Engage Builders',
+        'Watch your metrics grow',
+      ],
+    },
+  ],
 };
 
 /** Empty-state strings that must never reach the served HTML of a data page. */
