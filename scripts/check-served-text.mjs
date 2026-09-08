@@ -11,6 +11,15 @@
  * Run it after `nx build <app>`:
  *   node scripts/check-served-text.mjs operate govern
  *
+ * Or against a deployed site — a Vercel preview, or production after a merge:
+ *   node scripts/check-served-text.mjs --url https://operate.olas.network operate
+ *
+ * Checking a deployment is the stronger signal: it exercises the real env vars and, for ISR
+ * pages, a real revalidation rather than a build-time render. Vercel preview deployments sit
+ * behind Vercel Authentication, so set VERCEL_AUTOMATION_BYPASS_SECRET (Project Settings →
+ * Deployment Protection → Protection Bypass for Automation) or the fetch just returns a login
+ * page. Production URLs need no secret.
+ *
  * Note it asserts on built output, so it only means something where a real build has run with
  * the RPC and subgraph env vars set. With no build output for an app it reports a skip rather
  * than a pass, so an empty CI run cannot look like a green one.
@@ -29,12 +38,12 @@ const EXPECTATIONS = {
     {
       page: 'path',
       minReadableChars: 1500,
+      // Body copy from steps that are never the initial selection — deliberately not the step
+      // titles, which the stepper nav renders whether or not the content does. Checking titles
+      // would have passed against the broken page this guard exists to catch.
       mustContain: [
-        'Intro',
-        'Define goals and KPIs',
-        'Design agent economy',
-        'Engage Builders',
-        'Watch your metrics grow',
+        'Sit back and relax as AI agents become your DAUs',
+        'Showcase your agent economy and how it all works',
       ],
     },
   ],
@@ -66,7 +75,37 @@ const findPageHtml = (dir, page) => {
   return null;
 };
 
-const apps = process.argv.slice(2);
+/** Vercel serves its login interstitial with HTTP 200, so detect it by content. */
+const isProtectionInterstitial = (finalUrl, html) =>
+  /vercel\.com\/(login|sso)/.test(finalUrl) || html.includes('Log in to Vercel');
+
+async function fetchPage(baseUrl, page) {
+  const url = `${baseUrl.replace(/\/$/, '')}/${page}`;
+  const secret = process.env.VERCEL_AUTOMATION_BYPASS_SECRET;
+  const res = await fetch(url, {
+    redirect: 'follow',
+    headers: secret ? { 'x-vercel-protection-bypass': secret } : {},
+    signal: AbortSignal.timeout(30_000),
+  });
+  const html = await res.text();
+  if (!res.ok) throw new Error(`HTTP ${res.status} for ${url}`);
+  if (isProtectionInterstitial(res.url, html)) {
+    throw new Error(
+      `${url} is behind Deployment Protection — set VERCEL_AUTOMATION_BYPASS_SECRET to check it`,
+    );
+  }
+  return { html, url };
+}
+
+const argv = process.argv.slice(2);
+const urlFlag = argv.indexOf('--url');
+const baseUrl = urlFlag === -1 ? null : argv[urlFlag + 1];
+const apps = urlFlag === -1 ? argv : argv.filter((_, i) => i !== urlFlag && i !== urlFlag + 1);
+
+if (urlFlag !== -1 && !baseUrl) {
+  console.error('--url needs a value, e.g. --url https://operate.olas.network');
+  process.exit(2);
+}
 if (apps.length === 0) {
   console.error('Usage: node scripts/check-served-text.mjs <app> [<app>...]');
   process.exit(2);
@@ -85,14 +124,30 @@ for (const app of apps) {
 
   const pagesDir = join('dist', 'apps', app, '.next', 'server', 'pages');
   for (const { page, minReadableChars, minRows, mustContain } of expectations) {
-    const file = findPageHtml(pagesDir, page);
-    if (!file) {
-      console.warn(`- ${app}/${page}: skipped, no build output under ${pagesDir}`);
-      continue;
+    let html;
+    let source;
+
+    if (baseUrl) {
+      try {
+        const fetched = await fetchPage(baseUrl, page);
+        html = fetched.html;
+        source = fetched.url;
+      } catch (error) {
+        failures += 1;
+        console.error(`✗ ${app}/${page}: ${error.message}`);
+        continue;
+      }
+    } else {
+      const file = findPageHtml(pagesDir, page);
+      if (!file) {
+        console.warn(`- ${app}/${page}: skipped, no build output under ${pagesDir}`);
+        continue;
+      }
+      html = readFileSync(file, 'utf8');
+      source = file;
     }
 
     checked += 1;
-    const html = readFileSync(file, 'utf8');
     const text = readableText(html);
     const rows = (html.match(/class="ant-table-row/g) ?? []).length;
     const problems = [];
@@ -112,7 +167,7 @@ for (const app of apps) {
 
     if (problems.length > 0) {
       failures += 1;
-      console.error(`✗ ${app}/${page} (${file})`);
+      console.error(`✗ ${app}/${page} (${source})`);
       for (const problem of problems) console.error(`    ${problem}`);
     } else {
       const detail = minRows ? `, ${rows} rows` : '';
