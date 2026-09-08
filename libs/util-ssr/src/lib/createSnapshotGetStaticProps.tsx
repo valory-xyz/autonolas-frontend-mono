@@ -1,4 +1,4 @@
-import { GetStaticProps } from 'next';
+import { GetStaticProps, GetStaticPropsContext } from 'next';
 import { PHASE_PRODUCTION_BUILD } from 'next/constants';
 
 /** A point-in-time copy of remote data, plus when it was taken. */
@@ -9,8 +9,11 @@ export type Snapshot<T> = {
 };
 
 type Options<T, P extends { [key: string]: unknown }> = {
-  /** Fetches the data. Should reject, not resolve empty, when it cannot get it. */
-  fetchSnapshot: () => Promise<T>;
+  /**
+   * Fetches the data. Should reject, not resolve empty, when it cannot get it.
+   * Receives the Next context, so a dynamic route can read its params.
+   */
+  fetchSnapshot: (context: GetStaticPropsContext) => Promise<T>;
   /** Rendered when the fetch fails during a build. Must not read as real data. */
   emptyValue: T;
   /** Upper bound on the fetch. Keep it below the deployment's function `maxDuration`. */
@@ -44,9 +47,9 @@ export function createSnapshotGetStaticProps<T, P extends { [key: string]: unkno
   label,
   toProps,
 }: Options<T, P>): GetStaticProps<P> {
-  return async () => {
+  return async (context) => {
     try {
-      const data = await withTimeout(fetchSnapshot(), timeoutMs, label);
+      const data = await withTimeout(fetchSnapshot(context), timeoutMs, label);
       return {
         props: toProps({ data, generatedAt: new Date().toISOString() }),
         revalidate: revalidateSeconds,
