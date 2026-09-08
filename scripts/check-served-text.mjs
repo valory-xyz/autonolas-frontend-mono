@@ -25,7 +25,7 @@
  * than a pass, so an empty CI run cannot look like a green one.
  */
 import { readFileSync, existsSync, readdirSync, statSync } from 'node:fs';
-import { join } from 'node:path';
+import { join, sep } from 'node:path';
 
 /** Pages that must carry real, server-rendered data — not just chrome. */
 const EXPECTATIONS = {
@@ -34,6 +34,19 @@ const EXPECTATIONS = {
   govern: [{ page: 'contracts', minReadableChars: 1500, minRows: 5 }],
   // No data fetching here — the risk is rendering only the selected step, which published one
   // step of six. Every step's content must be in the HTML whether or not it is on screen.
+  // One network is enough: the listing reads a single global subgraph, so every network page
+  // serves the same rows. The assertion is on the summary block, which is omitted entirely when
+  // the fetch returns nothing — item names change as new units are registered, so matching those
+  // would be flaky.
+  marketplace: [
+    { page: 'ethereum/ai-agents', minReadableChars: 1000, mustContain: ['most recently registered'] },
+    { page: 'ethereum/components', minReadableChars: 1000, mustContain: ['most recently registered'] },
+    {
+      page: 'ethereum/agent-blueprints',
+      minReadableChars: 1000,
+      mustContain: ['most recently registered'],
+    },
+  ],
   launch: [
     {
       page: 'path',
@@ -60,15 +73,20 @@ const readableText = (html) =>
     .replace(/\s+/g, ' ')
     .trim();
 
-/** Built HTML may sit under a locale directory (i18n), so search for the file. */
+/**
+ * Built HTML may sit under a locale directory (i18n) and, for dynamic routes, under further
+ * segments — so match on the path ending rather than the filename. `page` may therefore be
+ * either "contracts" or "ethereum/ai-agents".
+ */
 const findPageHtml = (dir, page) => {
   if (!existsSync(dir)) return null;
+  const wanted = `${page}.html`.split('/').join(sep);
   for (const entry of readdirSync(dir)) {
     const full = join(dir, entry);
     if (statSync(full).isDirectory()) {
       const found = findPageHtml(full, page);
       if (found) return found;
-    } else if (entry === `${page}.html`) {
+    } else if (full.endsWith(sep + wanted) || full.endsWith(wanted)) {
       return full;
     }
   }

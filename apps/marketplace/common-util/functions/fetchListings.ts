@@ -38,9 +38,22 @@ const SERVICES_QUERY = gql`
   }
 `;
 
-const UNITS_QUERY = (collection: string) => gql`
+/**
+ * Components and agent blueprints are both `units`, separated by packageType — the same filters
+ * the two list hooks use. `description` is requested here even though the visible table does not
+ * show it, because it is the most useful text a reader gets.
+ */
+const COMPONENT_PACKAGE_TYPES =
+  'packageType_in: [connection,skill,protocol,contract,custom,unknown]';
+
+const unitsQuery = (where: string) => gql`
   {
-    ${collection}(first: ${TOTAL_VIEW_COUNT}, orderBy: tokenId, orderDirection: desc) {
+    units(
+      first: ${TOTAL_VIEW_COUNT}
+      where: { ${where} }
+      orderBy: tokenId
+      orderDirection: desc
+    ) {
       id
       tokenId
       publicId
@@ -57,6 +70,14 @@ export async function fetchServices(): Promise<ListedUnit[]> {
 
 /** The most recent components. */
 export async function fetchComponents(): Promise<ListedUnit[]> {
-  const data = await client().request<{ units?: ListedUnit[] }>(UNITS_QUERY('units'));
+  const data = await client().request<{ units?: ListedUnit[] }>(
+    unitsQuery(COMPONENT_PACKAGE_TYPES),
+  );
+  return data?.units ?? [];
+}
+
+/** The most recent agent blueprints. */
+export async function fetchAgentBlueprints(): Promise<ListedUnit[]> {
+  const data = await client().request<{ units?: ListedUnit[] }>(unitsQuery('packageType: agent'));
   return data?.units ?? [];
 }

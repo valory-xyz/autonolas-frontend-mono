@@ -58,7 +58,6 @@ const AIAgents = ({ initialUnits, snapshotGeneratedAt }) => {
       <ListingSummary
         units={initialUnits}
         label="AI agents"
-        networkName={networkName}
         snapshotGeneratedAt={snapshotGeneratedAt}
       />
       <ListServices />
