@@ -12,10 +12,13 @@ import {
 } from 'common-util/graphql';
 import { fetchContractCacheDataFromChain } from 'common-util/fetch-contract-cache-data';
 import {
+  EXTRA_STAKING_CONTRACTS,
   STAKING_CONTRACT_DETAILS,
   getApy,
+  getEpochEndsAt,
   getStakeRequired,
   getTimeRemainingFormatted,
+  sanitizeAvailableOn,
 } from 'common-util/constants/contracts';
 import { ContractCacheData, StakingContract } from 'types';
 
@@ -29,7 +32,9 @@ function getChainClient(chainId: number) {
       nativeCurrency: { decimals: 18, name: '', symbol: '' },
       rpcUrls: { default: { http: [rpc] } },
     },
-    transport: http(rpc),
+    // Batch the per-contract reads into single JSON-RPC requests. These chain objects are
+    // built inline and carry no multicall3 address, so request batching is what is available.
+    transport: http(rpc, { batch: true }),
   });
 }
 
@@ -158,11 +163,23 @@ async function fetchBlockTimestamps(chainIds: number[]): Promise<Map<number, big
 }
 
 /**
+ * Nominees from VoteWeighting plus the extra contracts the page surfaces.
+ * Mirrors the client hook so the pre-rendered table and the hydrated table
+ * list the same contracts. `fetchNominees` already drops blacklisted entries.
+ */
+async function getNominees(): Promise<Nominee[]> {
+  const nominees = await fetchNominees();
+  const existing = new Set(nominees.map((n) => n.account.toLowerCase()));
+  const extras = EXTRA_STAKING_CONTRACTS.filter((e) => !existing.has(e.account.toLowerCase()));
+  return [...nominees, ...extras];
+}
+
+/**
  * Fetches all operate staking contracts with their constants.
- * Can be used in getServerSideProps.
+ * Used by the `/contracts` ISR render (`getStaticProps`), so the table ships as HTML.
  */
 export async function fetchOperateContracts(): Promise<StakingContract[]> {
-  const nominees = await fetchNominees();
+  const nominees = await getNominees();
   if (nominees.length === 0) return [];
 
   // Fetch subgraph data and cache data in parallel
@@ -276,10 +293,11 @@ export async function fetchOperateContracts(): Promise<StakingContract[]> {
       maxSlots,
       apy: apy ?? 0,
       stakeRequired: stakeRequired ?? '0',
-      availableOn: details?.availableOn ?? null,
+      availableOn: sanitizeAvailableOn(details?.availableOn),
       availableRewards,
       epoch,
       timeRemaining,
+      epochEndsAt: getEpochEndsAt(tsCheckpointSeconds, livenessPeriodSeconds),
     };
   });
 }

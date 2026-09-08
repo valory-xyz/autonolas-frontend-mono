@@ -2,7 +2,7 @@ import { DownOutlined, RightOutlined, SearchOutlined } from '@ant-design/icons';
 import { Alert, Button, Flex, Input, Select, Table, Tag, Typography } from 'antd';
 import { ColumnsType } from 'antd/es/table';
 import Image from 'next/image';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { AvailableOn, StakingContract } from 'types';
 
 import { Caption, TextWithTooltip } from 'libs/ui-components/src';
@@ -14,7 +14,11 @@ import {
   OPERATE_REPO_URL,
   UNICODE_SYMBOLS,
 } from 'libs/util-constants/src';
-import { formatWeiNumber, getBytes32FromAddress } from 'libs/util-functions/src';
+import {
+  formatUtcTimestamp,
+  formatWeiNumber,
+  getBytes32FromAddress,
+} from 'libs/util-functions/src';
 
 import { RunAgentButton } from 'components/RunAgentButton';
 
@@ -79,13 +83,25 @@ const getTableColumns = (): ColumnsType<StakingContract> => [
       />
     ),
     key: 'currentEpoch',
-    render: (_, record) => (
-      <>
-        <Text>{record.epoch}</Text>
-        <br />
-        <Text type="secondary">{record.timeRemaining}</Text>
-      </>
-    ),
+    render: (_, record) => {
+      const epochEndsAt = formatUtcTimestamp(record.epochEndsAt);
+      return (
+        <>
+          <Text>{record.epoch}</Text>
+          <br />
+          <Text type="secondary">{record.timeRemaining}</Text>
+          {/* The countdown above is correct only at render time; this page is served from
+              cache for minutes at a time. State the absolute end too, for readers who get
+              the HTML rather than the running app. */}
+          {epochEndsAt && (
+            <span className="sr-only">
+              {' '}
+              Epoch {record.epoch} ends {epochEndsAt}.
+            </span>
+          )}
+        </>
+      );
+    },
     width: 160,
     className: 'text-center',
   },
@@ -167,8 +183,74 @@ const getTableColumns = (): ColumnsType<StakingContract> => [
   },
 ];
 
-export const ContractsPage = () => {
-  const { contracts, isLoading } = useStakingContractsList();
+/**
+ * Hidden scope-and-provenance line for the table below.
+ *
+ * Phase 1's standard: every published figure states what it counts, over what scope, and as of
+ * when. The table publishes epochs, slot counts, APY, rewards pools and stake requirements with
+ * none of that attached, and pre-rendered HTML can be read long after it was generated — so say
+ * it in text. Hidden rather than visible because this layer is for machines and screen readers;
+ * the visible design is unchanged.
+ */
+const ContractsSummary = ({
+  listedContracts,
+  totalCount,
+  isShowingSnapshot,
+  snapshotGeneratedAt,
+}: {
+  /** Exactly the rows rendered below — not the full set. */
+  listedContracts: StakingContract[];
+  totalCount: number;
+  isShowingSnapshot: boolean;
+  snapshotGeneratedAt: string | null;
+}) => {
+  const asOf = formatUtcTimestamp(snapshotGeneratedAt);
+  if (listedContracts.length === 0) return null;
+
+  const chains = [
+    ...new Set(listedContracts.map((c) => CHAIN_NAMES[c.chainId] ?? `chain ${c.chainId}`)),
+  ];
+  const notListed = totalCount - listedContracts.length;
+
+  return (
+    <p className="sr-only">
+      {`${listedContracts.length} Olas staking contracts are listed below, across ${chains.length} chains (${chains.join(', ')}). `}
+      {notListed > 0 &&
+        `${notListed} further registered contracts are not listed here: they are not yet available on any platform, and appear under the "Not available" tab, which this page does not render until it is selected. `}
+      {`For each listed contract this page publishes the current epoch and when it ends, filled and total staking slots, APY, the rewards pool in OLAS, the OLAS stake required to run it, and the platforms it can be run on. `}
+      {isShowingSnapshot && asOf
+        ? `Figures are a server-rendered snapshot taken ${asOf}; the running app refreshes them from chain.`
+        : 'Figures are read live from chain and subgraphs in the browser.'}
+    </p>
+  );
+};
+
+type ContractsPageProps = {
+  /** Snapshot pre-rendered by `getStaticProps`, so the table ships as HTML. */
+  initialContracts?: StakingContract[];
+  /** When that snapshot was taken (ISO-8601 UTC), or null if the fetch failed. */
+  snapshotGeneratedAt?: string | null;
+};
+
+export const ContractsPage = ({
+  initialContracts = [],
+  snapshotGeneratedAt = null,
+}: ContractsPageProps) => {
+  const { contracts: liveContracts, isLoading } = useStakingContractsList();
+
+  // The client refetches everything on mount; until it resolves, keep showing the pre-rendered
+  // snapshot rather than an empty table. `hasClientSettled` is set from an effect, which never
+  // runs during the server render and runs only after the first client render — so that first
+  // render still uses the snapshot and matches the server markup exactly. Once the client has
+  // settled we trust it even when it returns nothing, otherwise a genuinely empty list would
+  // leave the stale snapshot on screen forever.
+  const [hasClientSettled, setHasClientSettled] = useState(false);
+  useEffect(() => {
+    if (!isLoading) setHasClientSettled(true);
+  }, [isLoading]);
+
+  const contracts = hasClientSettled || liveContracts.length > 0 ? liveContracts : initialContracts;
+
   const [activeTab, setActiveTab] = useState<string>(TAB_LIVE);
   const [searchQuery, setSearchQuery] = useState('');
   const [chainFilter, setChainFilter] = useState<string>('all');
@@ -214,6 +296,15 @@ export const ContractsPage = () => {
           Browse staking opportunities and start running them via Pearl for the opportunity to earn
           OLAS rewards.
         </Caption>
+
+        {/* Describes the rows actually rendered. Passing the full set instead would claim
+            contracts the HTML does not contain: only the selected tab is rendered. */}
+        <ContractsSummary
+          listedContracts={filteredContracts}
+          totalCount={contracts.length}
+          isShowingSnapshot={liveContracts.length === 0}
+          snapshotGeneratedAt={snapshotGeneratedAt}
+        />
 
         <LiveNotAvailableSwitch
           value={activeTab}
@@ -285,6 +376,21 @@ export const ContractsPage = () => {
             pagination={false}
             loading={isLoading && contracts.length === 0}
             dataSource={filteredContracts}
+            locale={{
+              emptyText:
+                contracts.length > 0 ? (
+                  <Paragraph type="secondary" className="m-0">
+                    No staking contracts match the current filters.
+                  </Paragraph>
+                ) : (
+                  <Paragraph type="secondary" className="m-0">
+                    No staking contract data is available right now. When it loads, each contract in
+                    this table lists its chain, current epoch and time to the next one, available
+                    and total slots, APY, rewards pool in OLAS, the OLAS stake required to run it,
+                    and the platforms it can be run on.
+                  </Paragraph>
+                ),
+            }}
             expandable={{
               expandIcon: ({ expanded, onExpand, record }) => {
                 const Icon = expanded ? DownOutlined : RightOutlined;
