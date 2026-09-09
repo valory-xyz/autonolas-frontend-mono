@@ -17,6 +17,25 @@ export const listingStaticPaths = async () => ({
 });
 
 /**
+ * Components and agent blueprints are registered on Ethereum L1 only — `useHandleRoute`
+ * redirects every other network on those routes to `/[network]/ai-agents`. Pre-rendering them
+ * for all eight networks published seven crawlable copies of the same list at URLs a reader is
+ * immediately bounced away from, so they pre-render Ethereum alone.
+ *
+ * `fallback` stays `'blocking'`: a direct hit on `/base/components` still renders and then
+ * redirects on the client, exactly as before. It just carries no listing to index.
+ */
+const L1_NETWORK = 'ethereum';
+
+const isL1Network = (network?: string | string[]) =>
+  typeof network === 'string' && network.toLowerCase() === L1_NETWORK;
+
+export const l1ListingStaticPaths = async () => ({
+  paths: [{ params: { network: L1_NETWORK } }],
+  fallback: 'blocking' as const,
+});
+
+/**
  * The three listing pages differ only in which fetcher they call, so the ISR wiring lives here.
  *
  * Each visible list is client-only, so the same first page is fetched here and rendered as
@@ -25,9 +44,12 @@ export const listingStaticPaths = async () => ({
 export const createListingStaticProps = ({
   fetchSnapshot,
   label,
+  l1Only = false,
 }: {
   fetchSnapshot: () => Promise<ListedUnit[]>;
   label: string;
+  /** Set for the L1-only listings, so the other networks serve no rows to index. */
+  l1Only?: boolean;
 }) =>
   createSnapshotGetStaticProps<
     ListedUnit[],
@@ -38,6 +60,7 @@ export const createListingStaticProps = ({
       // the wrong list. `getChainIdFromPath` returns undefined for it, and unlike a direct
       // comparison it matches slugs case-insensitively, as the route validation does.
       if (!getChainIdFromPath(context.params?.network)) return [];
+      if (l1Only && !isL1Network(context.params?.network)) return [];
       return fetchSnapshot();
     },
     emptyValue: [],

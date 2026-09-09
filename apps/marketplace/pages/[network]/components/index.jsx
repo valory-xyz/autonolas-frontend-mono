@@ -5,7 +5,7 @@ import { Meta } from '../../../components/Meta';
 import { fetchComponents } from '../../../common-util/functions/fetchListings';
 import {
   createListingStaticProps,
-  listingStaticPaths,
+  l1ListingStaticPaths,
 } from '../../../common-util/functions/createListingStaticProps';
 import { ListingSummary } from '../../../components/ListingSummary';
 
@@ -13,11 +13,12 @@ const ListComponents = dynamic(() => import('../../../components/ListComponents'
   ssr: false,
 });
 
-export const getStaticPaths = listingStaticPaths;
+export const getStaticPaths = l1ListingStaticPaths;
 
 export const getStaticProps = createListingStaticProps({
   fetchSnapshot: fetchComponents,
   label: 'marketplace/components',
+  l1Only: true,
 });
 
 const Components = ({ initialUnits, snapshotGeneratedAt }) => {

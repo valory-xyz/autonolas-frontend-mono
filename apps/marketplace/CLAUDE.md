@@ -84,9 +84,15 @@ once mounted, so the server render, the first client render and Redux all agree.
 ## Listing pages (`/[network]/ai-agents`, `/components`, `/agent-blueprints`)
 
 Each pre-renders its first page of results with ISR (`getStaticProps`, 5-minute revalidate,
-`getStaticPaths` over the EVM networks with `fallback: 'blocking'`). The interactive tables are
-untouched; the data is rendered a second time inside a `hidden` block by
-`components/ListingSummary`, so crawlers read it and nothing changes on screen.
+`fallback: 'blocking'`). The interactive tables are untouched; the data is rendered a second time
+inside a `hidden` block by `components/ListingSummary`, so crawlers read it and nothing changes on
+screen.
+
+- **`ai-agents` pre-renders every EVM network; `components` and `agent-blueprints` pre-render
+  Ethereum alone** (`l1ListingStaticPaths` + `l1Only: true`). Those two are L1-only registries and
+  `useHandleRoute` redirects any other network on those routes to `/[network]/ai-agents` — so
+  pre-rendering all eight published seven crawlable copies of one list at URLs a reader never
+  stays on. The other networks still render and redirect as before; they just carry no listing.
 
 - `hidden`, not `.sr-only` — the visible table renders the same rows after hydration, so
   exposing both to assistive tech would announce every entry twice.

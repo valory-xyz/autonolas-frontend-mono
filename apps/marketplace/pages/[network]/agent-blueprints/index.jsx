@@ -5,7 +5,7 @@ import { Meta } from '../../../components/Meta';
 import { fetchAgentBlueprints } from '../../../common-util/functions/fetchListings';
 import {
   createListingStaticProps,
-  listingStaticPaths,
+  l1ListingStaticPaths,
 } from '../../../common-util/functions/createListingStaticProps';
 import { ListingSummary } from '../../../components/ListingSummary';
 
@@ -13,11 +13,12 @@ const ListAgents = dynamic(() => import('../../../components/ListAgents'), {
   ssr: false,
 });
 
-export const getStaticPaths = listingStaticPaths;
+export const getStaticPaths = l1ListingStaticPaths;
 
 export const getStaticProps = createListingStaticProps({
   fetchSnapshot: fetchAgentBlueprints,
   label: 'marketplace/agent-blueprints',
+  l1Only: true,
 });
 
 const AgentBlueprints = ({ initialUnits, snapshotGeneratedAt }) => {
