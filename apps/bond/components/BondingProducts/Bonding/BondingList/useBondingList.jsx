@@ -197,9 +197,9 @@ const getLpTokenDetails = memoize(async (address, chainIdArg) => {
 /**
  * Fetches the current "price of the LP token" from Balancer
  */
-const getCurrentPriceBalancerFn = memoize(async (tokenAddress) => {
+const getCurrentPriceBalancerFn = memoize(async (tokenAddress, chainIdArg) => {
   try {
-    const { lpChainId, poolId } = await getLpTokenDetails(tokenAddress);
+    const { lpChainId, poolId } = await getLpTokenDetails(tokenAddress, chainIdArg);
 
     const { pool } = await BALANCER_GRAPH_CLIENTS[lpChainId].request(balancerGetPoolQuery(poolId));
 
@@ -280,7 +280,7 @@ export const addCurrentLpPriceToProducts = async (
       otherRequests[i] = 0;
     } else {
       /* eslint-disable-next-line no-await-in-loop */
-      const { lpChainId, dex } = await getLpTokenDetails(productList[i].token);
+      const { lpChainId, dex } = await getLpTokenDetails(productList[i].token, chainId);
 
       if (isL1Network(lpChainId)) {
         multicallRequests[i] = {
@@ -295,7 +295,7 @@ export const addCurrentLpPriceToProducts = async (
           currentLpPrice = getCurrentPriceUniswap(productList[i].token);
           otherRequests[i] = currentLpPrice;
         } else if (dex === DEX.BALANCER.name) {
-          currentLpPrice = getCurrentPriceBalancer(productList[i].token);
+          currentLpPrice = getCurrentPriceBalancer(productList[i].token, chainId);
           otherRequests[i] = currentLpPrice;
         } else if (dex === DEX.SOLANA.name) {
           otherRequests[i] = svmPriceLp;
@@ -339,12 +339,12 @@ export const addCurrentLpPriceToProducts = async (
  *   lpTokenName: 'OLAS-ETH',
  * }]
  */
-const getLpTokenNamesForProducts = async (productList, events) => {
+const getLpTokenNamesForProducts = async (productList, events, chainIdArg) => {
   const lpTokenNamePromiseList = [];
 
   for (let i = 0; i < productList.length; i += 1) {
     const tokenAddress = getProductValueFromEvent(productList[i], events, 'token');
-    const tokenDetailsPromise = getLpTokenDetails(tokenAddress);
+    const tokenDetailsPromise = getLpTokenDetails(tokenAddress, chainIdArg);
     lpTokenNamePromiseList.push(tokenDetailsPromise);
   }
 
@@ -520,6 +520,7 @@ export const getProductDetailsFromIds = async (productIdList, deps) => {
   const listWithLpTokens = await getLpTokenNamesForProducts(
     listWithCurrentLpPrice,
     createEventList,
+    chainId,
   );
 
   const listWithSupplyList = await addSupplyLeftToProducts(
