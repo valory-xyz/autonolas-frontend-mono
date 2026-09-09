@@ -33,72 +33,18 @@
       "ghsa": "GHSA-5p4m-2wfm-xmqj",
       "package": "js-yaml",
       "severity": "high",
-      "reason": "New CVE (CVE-2026-59870): quadratic CPU consumption in !!omap resolution. Reached via nx build-time tooling on the js-yaml 3.x line (@nx/next > nx > @yarnpkg/parsers > js-yaml 3.x); build-time only, trusted input, not in the shipped Next.js runtime bundle. Fix backported to 3.15.1 but @yarnpkg/parsers still pins <3.15.1. Short review leash — bump when a new @yarnpkg/parsers cuts a release that picks up the fix.",
-      "added": "2026-08-31",
-      "review": "2026-09-30"
+      "reason": "CVE-2026-59870 (quadratic CPU in !!omap resolution) on the js-yaml 3.x line, reached only via nx build-time tooling (@nx/next > nx > @yarnpkg/parsers > js-yaml 3.x). Build-time only, parses our own trusted config, not in the shipped runtime. Same co-resolution constraint as 1123912: the 3.x consumer uses the safeLoad API removed in 4.x, so a single Yarn resolution cannot fix both lines.",
+      "added": "2026-09-07",
+      "review": "2026-10-23"
     },
     {
       "id": 1138115,
       "ghsa": "GHSA-5p4m-2wfm-xmqj",
       "package": "js-yaml",
       "severity": "high",
-      "reason": "Same GHSA on the js-yaml 4.x line (@nx/next > nx > js-yaml 4.x). Fix in >=4.3.1; nx currently pins <4.3.1. Same build-time-only trust boundary as the 3.x sibling above. Short review leash — bump when nx cuts a release that picks up the 4.3.1 fix.",
-      "added": "2026-08-31",
-      "review": "2026-09-30"
-    },
-    {
-      "id": 1130722,
-      "ghsa": "GHSA-mwp4-54f8-5fhr",
-      "package": "ip-address",
-      "severity": "high",
-      "reason": "SSRF via leading-zero octet decoding mismatch. Reached via @solana/wallet-adapter-trezor > @trezor/connect-web > … > socks-proxy-agent > socks > ip-address. Only exercised by the Trezor hardware-wallet SOCKS proxy fallback path; not on the main wallet-connect path. Fix in >=10.3.1; @trezor/blockchain-link-types has not published a bump yet. Short review leash — bump when Trezor cuts a release.",
-      "added": "2026-08-31",
-      "review": "2026-09-30"
-    },
-    {
-      "id": 1130713,
-      "ghsa": "GHSA-2m8v-j782-fhvr",
-      "package": "socket.io-parser",
-      "severity": "high",
-      "reason": "Zero-attachment memory exhaustion. Reached via @web3auth/no-modal > @metamask/sdk > socket.io-client > socket.io-parser. Only exercised by the MetaMask SDK's WebSocket transport path used for MetaMask Mobile pairing; not reachable from injected-provider flows. Fix in >=4.2.7; MetaMask SDK still pins <4.2.7. Short review leash — bump when MetaMask SDK cuts a release.",
-      "added": "2026-08-31",
-      "review": "2026-09-30"
-    },
-    {
-      "id": 1139427,
-      "ghsa": "GHSA-2v37-7h3g-55p8",
-      "package": "nanoid",
-      "severity": "high",
-      "reason": "Custom generators can loop indefinitely when size is zero. Reached via next > postcss > nanoid. postcss uses nanoid with a fixed non-zero size for id generation; the zero-size path is not exercised. Fix in >=3.3.18; next currently pins <3.3.18. Short review leash — bump when Next.js cuts a release.",
-      "added": "2026-08-31",
-      "review": "2026-09-30"
-    },
-    {
-      "id": 1130718,
-      "ghsa": "GHSA-4cwx-7wf7-3272",
-      "package": "undici",
-      "severity": "high",
-      "reason": "Cross-user information disclosure and parse-time crash via degenerate private cache directives on undici's private-cache path. Reached via @vercel/blob > undici. @vercel/blob is called on the request path in apps/pearl-api (get-image.ts, generate-image.ts via utils/blob.ts), so undici IS on the request path — earlier note claiming build-time-only was wrong (caught in review). Reachability of the CVE nonetheless requires an attacker-controlled Cache-Control response header from the Vercel Blob origin, which pearl-api treats as trusted (Vercel's own storage endpoint) — the tenant boundary the CVE crosses is not exposed to end-user input on this deployment. Fix in >=7.29.0; @vercel/blob currently pins <7.29.0. Short review leash — re-evaluate whichever comes first: (a) @vercel/blob release picking up the fix, (b) 2026-09-30 leash renewal.",
-      "added": "2026-08-31",
-      "review": "2026-09-30"
-    },
-    {
-      "id": 1153171,
-      "ghsa": "GHSA-c83g-rgw3-j3cx",
-      "package": "browserslist",
-      "severity": "high",
-      "reason": "Unbounded memory growth (no cache eviction) via distinct query results, leading to eventual OOM. Reached via @nx/next > @nx/js > @babel/core > @babel/helper-compilation-targets > browserslist — build-time tooling parsing our own trusted browserslist config, not in the shipped Next.js runtime bundle. Requires an attacker able to feed many distinct query strings to the resolver, which is not exposed to untrusted input on this path. Fix in >=4.28.7; @babel/helper-compilation-targets currently pins <4.28.7. Short review leash — bump when a new @babel/helper-compilation-targets picks up the fix.",
-      "added": "2026-09-02",
-      "review": "2026-10-02"
-    },
-    {
-      "id": 1153172,
-      "ghsa": "GHSA-73wf-gq98-2v4g",
-      "package": "browserslist",
-      "severity": "high",
-      "reason": "Uncaught crash / prototype write via untrusted browserslist-stats.json custom stats (normalizeStats). Reached via @nx/next > @nx/js > @babel/core > @babel/helper-compilation-targets > browserslist — build-time tooling only, not in the shipped Next.js runtime bundle. This repo does not configure a custom browserslist-stats.json, so the untrusted-stats path the CVE requires is not exercised. Fix in >=4.28.7; @babel/helper-compilation-targets currently pins <4.28.7. Short review leash — bump when a new @babel/helper-compilation-targets picks up the fix.",
-      "added": "2026-09-02",
-      "review": "2026-10-02"
+      "reason": "Same CVE-2026-59870 on the js-yaml 4.x line, reached only via nx build-time tooling (@nx/next > nx > js-yaml 4.x). Build-time only, trusted input, not in the shipped runtime. See 1123911 for why a blanket js-yaml resolution is unsafe.",
+      "added": "2026-09-07",
+      "review": "2026-10-23"
     }
   ]
 }
