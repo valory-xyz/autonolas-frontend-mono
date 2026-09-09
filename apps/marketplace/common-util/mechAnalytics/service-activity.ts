@@ -70,13 +70,15 @@ type ActivityType = Activity['activityType'];
  *    level — no more mislabelling a request routed to this mech but
  *    delivered by another as this service's Supply activity.
  *
- * Sort axis is ``requested_at`` (per-row request time from
- * predict-api), not ``computed_at`` (when mech-analytics scored the
- * row) — the ``ipfs_historical`` backfill stamped every row with
- * one ``computed_at`` so sorting on that axis for backfill-heavy
- * mechs falls to a ``request_id`` tiebreak with no time meaning.
- * ``requested_at`` gives genuine newest-by-request-time across
- * every source. Available on mech-analytics since PR#40 (v0.0.20).
+ * Sort axis differs per shard. Demand shards use ``requested_at``
+ * (per-row request time from predict-api), which gives genuine
+ * newest-by-request-time across every source (mech-analytics PR#40,
+ * v0.0.20). The Supply shard stays on the default ``computed_at``
+ * axis (when mech-analytics scored the row); the ``ipfs_historical``
+ * backfill stamped every row with one ``computed_at``, so on
+ * backfill-heavy mechs that capped slice falls to a ``request_id``
+ * tiebreak with no time meaning. See the Supply fan-out comment below
+ * for the index trade-off behind that.
  *
  * Subgraph rows are unioned only for the pending tail (no delivery
  * timestamp) so the mech-analytics ipfsRetrievable gate stays

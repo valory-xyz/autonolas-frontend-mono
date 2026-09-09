@@ -366,7 +366,7 @@ export const Details: FC<DetailsProps> = ({
               type="info"
               showIcon
               style={{ marginBottom: 16 }}
-              message="Showing recent activity. Some older rows were truncated to keep the tab responsive."
+              message="Showing a capped slice of activity. Requested rows are the most recent by request time. Delivered rows are capped by processing order, so on mechs with a large backfilled history they are not necessarily the newest."
             />
           )}
           <DetailsTable
