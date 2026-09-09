@@ -156,7 +156,11 @@ const getLpTokenDetails = memoize(async (address, chainIdArg) => {
 
   // if the address is in the LP_PAIRS list
   if (currentLpPairDetails) {
-    return { ...LP_PAIRS[address] };
+    // Index with the key we matched, not the incoming address: LP_PAIRS keys are checksummed
+    // while addresses from the subgraph events are lowercase, so `LP_PAIRS[address]` was
+    // undefined and spread to `{}` — losing `dex`, which then made `find(DEX, ...)` return
+    // undefined and threw on `.displayName`.
+    return { ...LP_PAIRS[currentLpPairDetails] };
   }
 
   // Not `window.console`: this also runs on the server now.
@@ -415,9 +419,12 @@ export const addSupplyLeftToProducts = async (
 
     const eventSupply = Number(ethers.toBigInt(createProductEvent.supply) / ONE_ETH);
 
+    // 10 of the subgraph's closeProducts rows carry a null supply, and `toBigInt(null)` throws —
+    // which broke the whole list, not just those rows. Fall back to the product's own supply.
+    const closedSupply = closeProductEvent?.supply ?? product.supply ?? 0;
     const productSupply = !closeProductEvent
-      ? Number(ethers.toBigInt(product.supply) / ONE_ETH)
-      : Number(ethers.toBigInt(closeProductEvent.supply) / ONE_ETH);
+      ? Number(ethers.toBigInt(product.supply ?? 0) / ONE_ETH)
+      : Number(ethers.toBigInt(closedSupply) / ONE_ETH);
 
     const supplyLeft = productSupply / Number(eventSupply);
 

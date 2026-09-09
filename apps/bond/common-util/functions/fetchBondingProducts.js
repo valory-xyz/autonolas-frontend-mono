@@ -34,7 +34,9 @@ export async function fetchBondingProducts({ isActive = true } = {}) {
   const products = await getProductDetailsFromIds(productIdList, {
     chainId,
     multicall: ({ contracts }) => readContracts(wagmiConfig, { contracts }),
-    getCurrentPriceWhirlpool: async () => null,
+    // 0, not null: downstream runs `ethers.toBigInt` over this and null is not a BigNumberish.
+    // The summary omits a falsy price rather than printing 0, so nothing wrong is published.
+    getCurrentPriceWhirlpool: async () => 0,
   });
 
   return products.map((product, index) => ({
