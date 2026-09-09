@@ -73,6 +73,19 @@ const EXPECTATIONS = {
         'Showcase your agent economy and how it all works',
       ],
     },
+    // The guides used to be fetched from the browser, so both paths served the same
+    // 105-character shell. A line from the body of each, not its title — the title alone would
+    // pass against the shell, which already carried the path name in its nav.
+    {
+      page: 'paths/start-from-a-kit',
+      minReadableChars: 800,
+      mustContain: ['Pick a service development kit'],
+    },
+    {
+      page: 'paths/launch-your-own-idea',
+      minReadableChars: 800,
+      mustContain: ['Spec your service out'],
+    },
   ],
 };
 
