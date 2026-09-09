@@ -1,11 +1,11 @@
 {
-  "_doc": "Allowlist for yarn audit high/critical advisories that cannot be fixed in the current branch. Every entry needs a reason and a review date. See SUPPLY-CHAIN-SECURITY.md \u00c2\u00a76.",
+  "_doc": "Allowlist for yarn audit high/critical advisories that cannot be fixed in the current branch. Every entry needs a reason and a review date. See SUPPLY-CHAIN-SECURITY.md §6.",
   "_fields": {
     "id": "npm advisory numeric ID (from `yarn audit --json` advisory.id)",
-    "ghsa": "GitHub Security Advisory ID, for humans \u00e2\u20ac\u201d not used for matching",
+    "ghsa": "GitHub Security Advisory ID, for humans — not used for matching",
     "package": "package name, for humans",
     "severity": "advisory severity, for humans",
-    "reason": "why the advisory is allowlisted \u00e2\u20ac\u201d upstream has no fix, major version bump deferred, not on a reachable code path, etc.",
+    "reason": "why the advisory is allowlisted — upstream has no fix, major version bump deferred, not on a reachable code path, etc.",
     "added": "YYYY-MM-DD when the entry was added",
     "review": "YYYY-MM-DD by which the entry must be re-evaluated. An expired entry prints a CI warning but does not fail the job."
   },
@@ -60,7 +60,7 @@
       "ghsa": "GHSA-2883-xcg3-v3hh",
       "package": "js-yaml",
       "severity": "high",
-      "reason": "Same advisory on the js-yaml 4.x line, reached only via nx build-time tooling (@nx/next > @nx/workspace > nx > js-yaml 4.x). Build-time only, trusted input, not in the shipped runtime. See 1123911 for why a blanket js-yaml resolution is unsafe. Reviewed together with the other js-yaml entries on 2026-10-23.",
+      "reason": "Same advisory on the js-yaml 4.x line, reached only via nx build-time tooling (@nx/next > @nx/workspace > nx > js-yaml 4.x). Build-time only, trusted input, not in the shipped runtime. See 1123911 for why a blanket js-yaml resolution is unsafe. Review together with the other js-yaml entries by 2026-10-23.",
       "added": "2026-09-09",
       "review": "2026-10-23"
     }

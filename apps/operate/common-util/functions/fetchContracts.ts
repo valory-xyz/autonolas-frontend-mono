@@ -1,4 +1,5 @@
-import { Address, createPublicClient, formatUnits, http } from 'viem';
+import { Address, Chain, createPublicClient, formatUnits, http } from 'viem';
+import { arbitrum, base, celo, gnosis, mainnet, mode, optimism, polygon } from 'viem/chains';
 
 import { RPC_URLS } from 'libs/util-constants/src';
 import { STAKING_TOKEN } from 'libs/util-contracts/src';
@@ -12,28 +13,35 @@ import {
 } from 'common-util/graphql';
 import { fetchContractCacheDataFromChain } from 'common-util/fetch-contract-cache-data';
 import {
-  EXTRA_STAKING_CONTRACTS,
   STAKING_CONTRACT_DETAILS,
   getApy,
   getEpochEndsAt,
   getStakeRequired,
   getTimeRemainingFormatted,
   sanitizeAvailableOn,
+  withExtraStakingContracts,
 } from 'common-util/constants/contracts';
 import { ContractCacheData, StakingContract } from 'types';
 
+/** The chains this app reads staking contracts from, by id. */
+const CHAINS_BY_ID: Record<number, Chain> = Object.fromEntries(
+  [mainnet, optimism, gnosis, polygon, base, mode, arbitrum, celo].map((chain) => [
+    chain.id,
+    chain,
+  ]),
+);
+
 function getChainClient(chainId: number) {
   const rpc = RPC_URLS[chainId];
-  if (!rpc) return null;
+  const chain = CHAINS_BY_ID[chainId];
+  if (!rpc || !chain) return null;
+
   return createPublicClient({
-    chain: {
-      id: chainId,
-      name: '',
-      nativeCurrency: { decimals: 18, name: '', symbol: '' },
-      rpcUrls: { default: { http: [rpc] } },
-    },
-    // Batch the per-contract reads into single JSON-RPC requests. These chain objects are
-    // built inline and carry no multicall3 address, so request batching is what is available.
+    // The real viem chain, not an inline stub: it carries the multicall3 address, so the
+    // per-contract reads aggregate into a handful of calls instead of one round trip each.
+    // `batch` then coalesces whatever is left into single JSON-RPC requests.
+    chain,
+    batch: { multicall: true },
     transport: http(rpc, { batch: true }),
   });
 }
@@ -163,23 +171,11 @@ async function fetchBlockTimestamps(chainIds: number[]): Promise<Map<number, big
 }
 
 /**
- * Nominees from VoteWeighting plus the extra contracts the page surfaces.
- * Mirrors the client hook so the pre-rendered table and the hydrated table
- * list the same contracts. `fetchNominees` already drops blacklisted entries.
- */
-async function getNominees(): Promise<Nominee[]> {
-  const nominees = await fetchNominees();
-  const existing = new Set(nominees.map((n) => n.account.toLowerCase()));
-  const extras = EXTRA_STAKING_CONTRACTS.filter((e) => !existing.has(e.account.toLowerCase()));
-  return [...nominees, ...extras];
-}
-
-/**
  * Fetches all operate staking contracts with their constants.
  * Used by the `/contracts` ISR render (`getStaticProps`), so the table ships as HTML.
  */
 export async function fetchOperateContracts(): Promise<StakingContract[]> {
-  const nominees = await getNominees();
+  const nominees = withExtraStakingContracts(await fetchNominees());
   if (nominees.length === 0) return [];
 
   // Fetch subgraph data and cache data in parallel

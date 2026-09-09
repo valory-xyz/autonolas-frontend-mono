@@ -48,7 +48,5 @@ jobs:
       # Includes the pre-render guard: the govern staking table must ship real rows in the
       # server HTML, never a bare "No data". Server rendering here was silently removed once
       # before (PR #350) with every check still green.
-      - name: Run tests
-        run: yarn nx test govern
       - name: Run Test
         run: yarn nx test govern

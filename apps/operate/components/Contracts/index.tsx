@@ -2,7 +2,7 @@ import { DownOutlined, RightOutlined, SearchOutlined } from '@ant-design/icons';
 import { Alert, Button, Flex, Input, Select, Table, Tag, Typography } from 'antd';
 import { ColumnsType } from 'antd/es/table';
 import Image from 'next/image';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { AvailableOn, StakingContract } from 'types';
 
 import { Caption, TextWithTooltip } from 'libs/ui-components/src';
@@ -194,13 +194,19 @@ const getTableColumns = (): ColumnsType<StakingContract> => [
  */
 const ContractsSummary = ({
   listedContracts,
-  totalCount,
+  notAvailableCount,
   isShowingSnapshot,
   snapshotGeneratedAt,
 }: {
   /** Exactly the rows rendered below — not the full set. */
   listedContracts: StakingContract[];
-  totalCount: number;
+  /**
+   * How many contracts sit under the "Not available" tab. Passed in rather than derived from
+   * `listedContracts`, which also has the search and chain filters applied: subtracting from the
+   * total would count filtered-out live contracts as "not available on any platform", which is
+   * false, and this text is read aloud by screen readers.
+   */
+  notAvailableCount: number;
   isShowingSnapshot: boolean;
   snapshotGeneratedAt: string | null;
 }) => {
@@ -210,13 +216,14 @@ const ContractsSummary = ({
   const chains = [
     ...new Set(listedContracts.map((c) => CHAIN_NAMES[c.chainId] ?? `chain ${c.chainId}`)),
   ];
-  const notListed = totalCount - listedContracts.length;
+  const contractWord = listedContracts.length === 1 ? 'contract is' : 'contracts are';
+  const chainWord = chains.length === 1 ? 'chain' : 'chains';
 
   return (
     <p className="sr-only">
-      {`${listedContracts.length} Olas staking contracts are listed below, across ${chains.length} chains (${chains.join(', ')}). `}
-      {notListed > 0 &&
-        `${notListed} further registered contracts are not listed here: they are not yet available on any platform, and appear under the "Not available" tab, which this page does not render until it is selected. `}
+      {`${listedContracts.length} Olas staking ${contractWord} listed below, across ${chains.length} ${chainWord} (${chains.join(', ')}). `}
+      {notAvailableCount > 0 &&
+        `A further ${notAvailableCount} registered ${notAvailableCount === 1 ? 'contract is' : 'contracts are'} not yet available on any platform; they appear under the "Not available" tab, which this page does not render until it is selected. `}
       {`For each listed contract this page publishes the current epoch and when it ends, filled and total staking slots, APY, the rewards pool in OLAS, the OLAS stake required to run it, and the platforms it can be run on. `}
       {isShowingSnapshot && asOf
         ? `Figures are a server-rendered snapshot taken ${asOf}; the running app refreshes them from chain.`
@@ -239,14 +246,23 @@ export const ContractsPage = ({
   const { contracts: liveContracts, isLoading } = useStakingContractsList();
 
   // The client refetches everything on mount; until it resolves, keep showing the pre-rendered
-  // snapshot rather than an empty table. `hasClientSettled` is set from an effect, which never
-  // runs during the server render and runs only after the first client render — so that first
-  // render still uses the snapshot and matches the server markup exactly. Once the client has
-  // settled we trust it even when it returns nothing, otherwise a genuinely empty list would
-  // leave the stale snapshot on screen forever.
+  // snapshot rather than an empty table. Set from an effect, which never runs during the server
+  // render and runs only after the first client render, so that first render still uses the
+  // snapshot and matches the server markup exactly.
+  //
+  // We only treat the client as settled once loading has actually been observed to start and
+  // then finish. `isLoading` ORs several flags that begin false and are only set inside effects
+  // (blocks, subgraph), so there can be a render — after nominees resolve but before those
+  // effects fire — where everything reads false while no data exists yet. Settling on that would
+  // drop the snapshot permanently and flash an empty table.
+  const hasStartedLoading = useRef(false);
   const [hasClientSettled, setHasClientSettled] = useState(false);
   useEffect(() => {
-    if (!isLoading) setHasClientSettled(true);
+    if (isLoading) {
+      hasStartedLoading.current = true;
+    } else if (hasStartedLoading.current) {
+      setHasClientSettled(true);
+    }
   }, [isLoading]);
 
   const contracts = hasClientSettled || liveContracts.length > 0 ? liveContracts : initialContracts;
@@ -283,6 +299,12 @@ export const ContractsPage = ({
     return list;
   }, [contracts, activeTab, searchQuery, chainFilter, platformFilters]);
 
+  // The "Not available" tab's size, from the unfiltered list — see ContractsSummary.
+  const notAvailableCount = useMemo(
+    () => contracts.filter((c) => !isLiveContract(c)).length,
+    [contracts],
+  );
+
   const columns = useMemo(() => getTableColumns(), []);
 
   return (
@@ -301,7 +323,7 @@ export const ContractsPage = ({
             contracts the HTML does not contain: only the selected tab is rendered. */}
         <ContractsSummary
           listedContracts={filteredContracts}
-          totalCount={contracts.length}
+          notAvailableCount={notAvailableCount}
           isShowingSnapshot={liveContracts.length === 0}
           snapshotGeneratedAt={snapshotGeneratedAt}
         />
