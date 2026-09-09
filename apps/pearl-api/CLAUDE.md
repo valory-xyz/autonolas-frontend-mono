@@ -66,7 +66,13 @@ Rules that are easy to break:
   both write through it.
 - **The append must keep `insertDataOption=INSERT_ROWS`** — without it the Sheets API can
   overwrite cells below the detected table. `valueInputOption=RAW` keeps free text starting with
-  `=` from being evaluated as a formula.
+  `=` from being evaluated as a formula *in Sheets*. The literal survives into a CSV export, and
+  Excel or Numbers will evaluate a leading `=`, `+`, `-` or `@` when an analyst opens that file —
+  export with care rather than trusting the cell.
+- **Both Google calls carry `AbortSignal.timeout`.** Without it a stalled connection runs to the
+  route's `maxDuration`, Vercel kills the function, and the Blob fallback never runs.
+- **The replay cron answers 500 when anything failed or was left undeleted**, so a backlog that
+  never drains shows up in Vercel's cron history.
 - **There is no server-side dedup.** `submissionId` exists so duplicates can be filtered during
   analysis; a client must not auto-retry a 2xx.
 - **Pending blobs live in a separate private Blob store.** They hold free text and must not be

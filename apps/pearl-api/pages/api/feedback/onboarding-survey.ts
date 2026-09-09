@@ -12,16 +12,8 @@ import { appendSheetRow } from '../../../utils/googleSheets';
 import { putPendingFeedback } from '../../../utils/blob';
 
 /**
- * Receives one anonymous post-setup questionnaire submission from Pearl (OPE-1899) and appends
- * it to the configured Google Sheet.
- *
- * Delivery is two-tier so a Google outage stays invisible to the user: the Sheets append is
- * primary, and any failure falls through to a Blob buffer that the replay cron drains later.
- * The caller still gets 200 in that case and treats the submission as complete. 502 is returned
- * only when both tiers fail — that is the one case where Pearl keeps its sidebar nudge.
- *
- * There is no server-side dedup, so the caller must not auto-retry a 2xx; `submissionId` exists
- * so any duplicate row can be filtered during analysis.
+ * One anonymous post-setup questionnaire submission (OPE-1899): Sheets append first, Blob buffer
+ * on failure (still 200), 502 only when both fail. No server-side dedup.
  */
 export default async function handler(
   req: NextApiRequest,

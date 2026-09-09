@@ -120,11 +120,7 @@ const getPendingFeedbackPath = (submissionId: string): string =>
 const getUnreadableFeedbackPath = (pendingPathname: string): string =>
   pendingPathname.replace(`${FEEDBACK_PENDING_PREFIX}/`, `${FEEDBACK_UNREADABLE_PREFIX}/`);
 
-/**
- * Overwrites are left at the SDK default (rejected): the contract gives every attempt a fresh
- * `submissionId`, so a second write to the same path is a bug and should surface, not silently
- * replace an earlier buffered submission.
- */
+/** No `allowOverwrite`: every attempt has a fresh `submissionId`, so a repeat path is a bug. */
 export const putPendingFeedback = async (record: PendingFeedbackRecord): Promise<void> => {
   await put(getPendingFeedbackPath(record.submission.submissionId), JSON.stringify(record), {
     access: 'private',
@@ -144,17 +140,7 @@ export const listPendingFeedbackPaths = async (): Promise<string[]> => {
   return blobs.map((blob) => blob.pathname);
 };
 
-/**
- * Reads a buffered submission and re-validates it instead of asserting its shape.
- *
- * The only writer is `putPendingFeedback` with an already-validated submission, so `unreadable`
- * should not happen. It matters anyway: the replay lists a bounded batch by prefix with no
- * cursor, so a blob that can never be mapped to a row would consume a slot on every subsequent
- * run. Telling the caller *why* the read failed is what lets it skip a vanished blob and set the
- * rest aside. Validation goes through `parsePendingFeedbackRecord`, the same path the unit tests
- * cover, so the replay carries the same "only the typed value reaches the sheet" guarantee as
- * the submit route.
- */
+/** Re-validates a buffered submission; `unreadable` lets the caller quarantine it instead of retrying forever. */
 export const getPendingFeedback = async (pathname: string): Promise<PendingFeedbackRead> => {
   const result = await get(pathname, { access: 'private', token: getFeedbackBlobToken() });
   if (result?.statusCode !== 200 || !result.stream) return { status: 'missing' };
@@ -169,13 +155,7 @@ export const deletePendingFeedback = async (pathname: string): Promise<void> => 
   await del(pathname, { token: getFeedbackBlobToken() });
 };
 
-/**
- * Moves a blob the replay can never turn into a row out of the pending prefix.
- *
- * The bytes are copied verbatim before the original is deleted, so nothing a user wrote is thrown
- * away — it just stops holding a slot in every batch. Anything landing under this prefix is a bug
- * in the writer and worth looking at by hand.
- */
+/** Copies the bytes to the unreadable prefix, then deletes the original. */
 export const quarantinePendingFeedback = async (pathname: string, raw: string): Promise<void> => {
   const token = getFeedbackBlobToken();
   await put(getUnreadableFeedbackPath(pathname), raw, {

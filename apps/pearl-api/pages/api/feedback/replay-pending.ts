@@ -1,3 +1,4 @@
+import { timingSafeEqual } from 'node:crypto';
 import type { NextApiRequest, NextApiResponse } from 'next';
 
 import { FEEDBACK_SHEET_RANGE } from '../../../constants';
@@ -11,21 +12,16 @@ import {
   quarantinePendingFeedback,
 } from '../../../utils/blob';
 
+/** Constant-time comparison so the secret cannot be probed byte by byte. */
+const isAuthorizedCronCall = (authorization: string | undefined, secret: string): boolean => {
+  const provided = Buffer.from(authorization ?? '');
+  const expected = Buffer.from(`Bearer ${secret}`);
+  return provided.length === expected.length && timingSafeEqual(provided, expected);
+};
+
 /**
- * Drains submissions buffered by the onboarding-survey route after a Sheets failure.
- *
- * Cron-only: Vercel sends `Authorization: Bearer ${CRON_SECRET}` on scheduled invocations, and
- * anything else is rejected, so finding the URL is not enough to trigger it. No CORS — it is
- * never browser-invoked.
- *
- * Each blob is deleted only after its append succeeds; deleting first would lose the submission
- * if the append failed. Vercel documents cron delivery as best-effort and may invoke the same
- * run twice, so a replay can double-write a row — that is accepted, and `submissionId` in
- * column 2 is what lets analysis filter it.
- *
- * A blob that cannot be parsed is moved to the failed prefix rather than left in place: the
- * batch is bounded, so poisoned files would otherwise be retried every run and eventually crowd
- * out valid ones.
+ * Cron-only drain of submissions buffered after a Sheets failure. Vercel may deliver a scheduled
+ * run more than once, so a replayed row can appear twice; `submissionId` lets analysis filter it.
  */
 export default async function handler(
   req: NextApiRequest,
@@ -37,7 +33,12 @@ export default async function handler(
   }
 
   const cronSecret = process.env.CRON_SECRET;
-  if (!cronSecret || req.headers.authorization !== `Bearer ${cronSecret}`) {
+  if (!cronSecret) {
+    // Distinct from a bad caller: with no secret configured the daily drain 401s forever.
+    console.error('Onboarding survey: CRON_SECRET is not configured; replay cannot run');
+    return res.status(401).json({ error: 'Unauthorized', message: 'Cron secret not configured' });
+  }
+  if (!isAuthorizedCronCall(req.headers.authorization, cronSecret)) {
     return res.status(401).json({ error: 'Unauthorized', message: 'Invalid cron credentials' });
   }
 
@@ -46,6 +47,7 @@ export default async function handler(
   let replayed = 0;
   let failed = 0;
   let quarantined = 0;
+  let undeleted = 0;
 
   try {
     const pathnames = await listPendingFeedbackPaths();
@@ -54,12 +56,9 @@ export default async function handler(
       try {
         const read = await getPendingFeedback(pathname);
 
-        // The blob vanished between the list and the read (a concurrent run took it);
-        // nothing to append or delete.
+        // Vanished between the list and the read (a concurrent run took it).
         if (read.status === 'missing') continue;
 
-        // Never mappable to a row, so retrying it forever would hold a slot in every batch.
-        // Set it aside instead — the bytes are kept under the unreadable prefix.
         if (read.status === 'unreadable') {
           console.error(`Onboarding survey: quarantining unreadable pending blob ${pathname}`);
           await quarantinePendingFeedback(pathname, read.raw);
@@ -68,17 +67,28 @@ export default async function handler(
         }
 
         const { record } = read;
-
         await appendSheetRow(
           FEEDBACK_SHEET_RANGE,
           mapSubmissionToSheetRow(record.submission, record.submittedAt),
         );
-        await deletePendingFeedback(pathname);
         replayed += 1;
       } catch (error) {
-        // A failed append (or Blob call) must not stall the batch; the blob stays for next run.
+        // The blob stays for the next run.
         failed += 1;
         console.error(`Onboarding survey: replay failed for ${pathname}:`, error);
+        continue;
+      }
+
+      // Delete only after a successful append, and account for it separately: a failed delete is
+      // an appended row that the next run will append again, not a failed replay.
+      try {
+        await deletePendingFeedback(pathname);
+      } catch (error) {
+        undeleted += 1;
+        console.error(
+          `Onboarding survey: appended ${pathname} but could not delete it; it will be replayed again:`,
+          error,
+        );
       }
     }
   } catch (error) {
@@ -88,5 +98,8 @@ export default async function handler(
       .json({ error: 'Bad gateway', message: 'Could not list pending submissions' });
   }
 
-  return res.status(200).json({ ok: true, replayed, failed, quarantined });
+  // A non-2xx marks the run as failed in Vercel's cron history, so a backlog that never drains is
+  // visible without extra monitoring.
+  const status = failed > 0 || undeleted > 0 ? 500 : 200;
+  return res.status(status).json({ ok: status === 200, replayed, failed, quarantined, undeleted });
 }

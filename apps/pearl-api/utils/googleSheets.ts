@@ -12,6 +12,12 @@ import type { SheetCell } from '../types';
 const TOKEN_LIFETIME_SECONDS = 3600;
 /** Renew a little early so a token cannot expire between the check and the append. */
 const TOKEN_EXPIRY_SKEW_SECONDS = 60;
+/**
+ * Per-call timeouts, well under the submit route's 30s `maxDuration`. Without them a stalled
+ * connection runs until Vercel kills the function, and the Blob fallback never gets to run.
+ */
+const TOKEN_EXCHANGE_TIMEOUT_MS = 10_000;
+const APPEND_TIMEOUT_MS = 15_000;
 
 type CachedToken = {
   accessToken: string;
@@ -75,6 +81,7 @@ const getAccessToken = async (): Promise<string> => {
       grant_type: 'urn:ietf:params:oauth:grant-type:jwt-bearer',
       assertion: buildSignedAssertion(CLIENT_EMAIL, PRIVATE_KEY),
     }),
+    signal: AbortSignal.timeout(TOKEN_EXCHANGE_TIMEOUT_MS),
   });
 
   if (!response.ok) {
@@ -137,12 +144,33 @@ export const appendSheetRow = async (range: string, row: readonly SheetCell[]): 
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({ values: [row] }),
+    signal: AbortSignal.timeout(APPEND_TIMEOUT_MS),
   });
 
   if (!response.ok) {
     // A stale cached token is the most likely cause of a 401; drop it so the next call re-signs.
     if (response.status === 401) cachedToken = null;
-    console.error(`Google Sheets append failed: ${response.status} ${response.statusText}`);
+    // Unlike the token exchange, the append body names the actual problem (PERMISSION_DENIED for
+    // a revoked share, NOT_FOUND for a wrong sheet id, INVALID_ARGUMENT for a renamed tab) and
+    // is the only signal an operator gets, since the user is shown a success either way.
+    const detail = await describeSheetsError(response);
+    console.error(
+      `Google Sheets append failed: ${response.status} ${response.statusText}${detail}`,
+    );
     throw new Error('Failed to append the row to the Google Sheet');
+  }
+};
+
+const describeSheetsError = async (response: Response): Promise<string> => {
+  try {
+    const body: unknown = await response.json();
+    const error =
+      typeof body === 'object' && body !== null && 'error' in body
+        ? (body as { error?: { status?: unknown; message?: unknown } }).error
+        : undefined;
+    if (!error) return '';
+    return ` — ${String(error.status ?? '')}: ${String(error.message ?? '')}`;
+  } catch {
+    return '';
   }
 };

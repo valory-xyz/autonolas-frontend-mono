@@ -66,13 +66,16 @@ export type OnboardingSurveyResponse = {
 };
 
 export type ReplayPendingResponse = {
-  ok: true;
-  /** Appended to the sheet and deleted from the pending prefix. */
+  /** `false` when anything failed or was left undeleted; the route then answers 500. */
+  ok: boolean;
+  /** Appended to the sheet. */
   replayed: number;
   /** Append failed; left in the pending prefix for the next run. */
   failed: number;
-  /** Unparseable; moved to the failed prefix and never retried. */
+  /** Unparseable; moved to the unreadable prefix and never retried. */
   quarantined: number;
+  /** Appended but the delete failed, so the next run will append it again. */
+  undeleted: number;
 };
 
 export type ApiErrorResponse = {

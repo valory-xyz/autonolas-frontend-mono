@@ -1,4 +1,4 @@
-import { FEEDBACK_SHEET_COLUMNS } from '../constants';
+import { EVERYTHING_SMOOTH, FEEDBACK_SHEET_COLUMNS, VALID_FRICTION_AREAS } from '../constants';
 import type { OnboardingSurveySubmission } from '../types/feedback';
 import {
   isJsonContentType,
@@ -9,22 +9,7 @@ import {
 
 const VALID_UUID = '9f1c2b7e-5a3d-4f2e-8c11-6b0d7a4e93f5';
 
-const bodyBuilder = (overrides: Record<string, unknown> = {}) => ({
-  submissionId: VALID_UUID,
-  frictionAreas: ['backup_wallet', 'funding_agent'],
-  rating: 2,
-  comment: 'Took me a while to find the deposit address.',
-  os: { type: 'Darwin', platform: 'darwin', arch: 'arm64', release: '24.3.0' },
-  agentType: 'polymarket_trader',
-  pearlVersion: '0.9.4',
-  timeToFirstSuccessSeconds: 93600,
-  timeToCompleteSurveySeconds: 42,
-  ...overrides,
-});
-
-const submissionBuilder = (
-  overrides: Partial<OnboardingSurveySubmission> = {},
-): OnboardingSurveySubmission => ({
+const DEFAULT_SUBMISSION: OnboardingSurveySubmission = {
   submissionId: VALID_UUID,
   frictionAreas: ['backup_wallet', 'funding_agent'],
   rating: 2,
@@ -34,22 +19,27 @@ const submissionBuilder = (
   pearlVersion: '0.9.4',
   timeToFirstSuccessSeconds: 93600,
   timeToCompleteSurveySeconds: 42,
+};
+
+/** A request body; loosely typed so the intentionally invalid cases can be expressed. */
+const bodyBuilder = (overrides: Record<string, unknown> = {}) => ({
+  ...DEFAULT_SUBMISSION,
   ...overrides,
 });
+
+const submissionBuilder = (
+  overrides: Partial<OnboardingSurveySubmission> = {},
+): OnboardingSurveySubmission => ({ ...DEFAULT_SUBMISSION, ...overrides });
+
+/** Every friction option except the fast exit, derived so a new one is covered automatically. */
+const FRICTION_AREAS = VALID_FRICTION_AREAS.filter((area) => area !== EVERYTHING_SMOOTH);
 
 describe('parseOnboardingSurveySubmission', () => {
   it('accepts a complete submission', () => {
     expect(parseOnboardingSurveySubmission(bodyBuilder())).not.toBeNull();
   });
 
-  it.each([
-    'backup_wallet',
-    'choosing_agent',
-    'activity_rewards',
-    'funding_agent',
-    'agent_activity',
-    'other',
-  ])('accepts the friction area %s', (area) => {
+  it.each(FRICTION_AREAS)('accepts the friction area %s', (area) => {
     const result = parseOnboardingSurveySubmission(bodyBuilder({ frictionAreas: [area] }));
     expect(result?.frictionAreas).toEqual([area]);
   });
