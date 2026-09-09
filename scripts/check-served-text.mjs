@@ -47,6 +47,17 @@ const EXPECTATIONS = {
       mustContain: ['most recently registered'],
     },
   ],
+  // Bond renders per request, so there is no build output to inspect — check a running server
+  // or a deployment with --url. `/paths` is static content; `/bonding-products` still loads its
+  // rows on the client, so the assertion is on the table structure and the empty-state prose.
+  bond: [
+    { page: 'paths', minReadableChars: 800, mustContain: ['via Balancer on Gnosis Chain'] },
+    {
+      page: 'bonding-products',
+      minReadableChars: 800,
+      mustContain: ['OLAS minted per LP token', 'No bonding products are available'],
+    },
+  ],
   launch: [
     {
       page: 'path',
