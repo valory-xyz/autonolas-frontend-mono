@@ -127,8 +127,9 @@ export const isSvmLpAddress = (address) =>
 /**
  * fetches the IDF (discount factor) for the product
  */
-const getLastIDFRequest = async () => {
-  const chainId = getChainId();
+/** `chainId` is passed in on the server, where `getChainId` has no window to read. */
+const getLastIDFRequest = async (chainIdArg) => {
+  const chainId = chainIdArg ?? getChainId();
   const lastIdfResponse = await readContract(wagmiConfig, {
     ...tokenomicsParams(chainId),
     functionName: 'getLastIDF',
@@ -150,7 +151,7 @@ const getLastIDFRequest = async () => {
  *
  * @returns {Object} { lpChainId, originAddress, dex, name, poolId }
  */
-const getLpTokenDetails = memoize(async (address) => {
+const getLpTokenDetails = memoize(async (address, chainIdArg) => {
   const currentLpPairDetails = Object.keys(LP_PAIRS).find((key) => areAddressesEqual(key, address));
 
   // if the address is in the LP_PAIRS list
@@ -158,10 +159,11 @@ const getLpTokenDetails = memoize(async (address) => {
     return { ...LP_PAIRS[address] };
   }
 
-  window.console.warn('LP pair not found in the LP_PAIRS list');
+  // Not `window.console`: this also runs on the server now.
+  console.warn('LP pair not found in the LP_PAIRS list');
 
   // if the address is not in the LP_PAIRS list (mainnet and goerli)
-  const chainId = getChainId();
+  const chainId = chainIdArg ?? getChainId();
   let tokenSymbol = null;
   try {
     const [token0, token1] = await Promise.all([
@@ -256,74 +258,72 @@ const getCurrentPriceUniswapFn = memoize(async (tokenAddress) => {
 /**
  * hook to add the current LP price to the products
  */
-const useAddCurrentLpPriceToProducts = () => {
-  const getCurrentPriceWhirlpool = useWhirlPoolInformation();
-  const publicClient = usePublicClient();
+/**
+ * Plain function, so the server-side fetch can reuse it. Everything React- or wallet-specific is
+ * injected: `chainId` (getChainId returns undefined without a window), `multicall` (a wagmi
+ * public client on the client, wagmi-core on the server), and `getCurrentPriceWhirlpool`, which
+ * is a Solana wallet-adapter hook and has no server equivalent — the server passes a stub that
+ * resolves null, leaving Solana products without a current price rather than a wrong one.
+ */
+export const addCurrentLpPriceToProducts = async (
+  productList,
+  { chainId, multicall, getCurrentPriceWhirlpool },
+) => {
+  const getCurrentPriceBalancer = getCurrentPriceBalancerFn;
+  const getCurrentPriceUniswap = getCurrentPriceUniswapFn;
+  const svmPriceLp = await getCurrentPriceWhirlpool();
+  const multicallRequests = {};
+  const otherRequests = {};
 
-  const getCurrentPriceBalancer = useCallback(getCurrentPriceBalancerFn, [
-    getCurrentPriceBalancerFn,
-  ]);
-  const getCurrentPriceUniswap = useCallback(getCurrentPriceUniswapFn, [getCurrentPriceUniswapFn]);
+  for (let i = 0; i < productList.length; i += 1) {
+    if (productList[i].token === ADDRESS_ZERO) {
+      otherRequests[i] = 0;
+    } else {
+      /* eslint-disable-next-line no-await-in-loop */
+      const { lpChainId, dex } = await getLpTokenDetails(productList[i].token);
 
-  return useCallback(
-    async (productList) => {
-      const chainId = getChainId();
-      const svmPriceLp = await getCurrentPriceWhirlpool();
-      const multicallRequests = {};
-      const otherRequests = {};
-
-      for (let i = 0; i < productList.length; i += 1) {
-        if (productList[i].token === ADDRESS_ZERO) {
-          otherRequests[i] = 0;
+      if (isL1Network(lpChainId)) {
+        multicallRequests[i] = {
+          address: DEPOSITORY.addresses[chainId],
+          abi: DEPOSITORY.abi,
+          functionName: 'getCurrentPriceLP',
+          args: [productList[i].token],
+        };
+      } else {
+        let currentLpPrice = null;
+        if (dex === DEX.UNISWAP.name || dex === DEX.UBESWAP.name) {
+          currentLpPrice = getCurrentPriceUniswap(productList[i].token);
+          otherRequests[i] = currentLpPrice;
+        } else if (dex === DEX.BALANCER.name) {
+          currentLpPrice = getCurrentPriceBalancer(productList[i].token);
+          otherRequests[i] = currentLpPrice;
+        } else if (dex === DEX.SOLANA.name) {
+          otherRequests[i] = svmPriceLp;
         } else {
-          /* eslint-disable-next-line no-await-in-loop */
-          const { lpChainId, dex } = await getLpTokenDetails(productList[i].token);
-
-          if (isL1Network(lpChainId)) {
-            multicallRequests[i] = {
-              address: DEPOSITORY.addresses[chainId],
-              abi: DEPOSITORY.abi,
-              functionName: 'getCurrentPriceLP',
-              args: [productList[i].token],
-            };
-          } else {
-            let currentLpPrice = null;
-            if (dex === DEX.UNISWAP.name || dex === DEX.UBESWAP.name) {
-              currentLpPrice = getCurrentPriceUniswap(productList[i].token);
-              otherRequests[i] = currentLpPrice;
-            } else if (dex === DEX.BALANCER.name) {
-              currentLpPrice = getCurrentPriceBalancer(productList[i].token);
-              otherRequests[i] = currentLpPrice;
-            } else if (dex === DEX.SOLANA.name) {
-              otherRequests[i] = svmPriceLp;
-            } else {
-              throw new Error('Dex not supported');
-            }
-          }
+          throw new Error('Dex not supported');
         }
       }
+    }
+  }
 
-      const multicallResponses = await publicClient.multicall({
-        contracts: Object.values(multicallRequests),
-      });
-      const otherResponses = await Promise.all(Object.values(otherRequests));
+  const multicallResponses = await multicall({
+    contracts: Object.values(multicallRequests),
+  });
+  const otherResponses = await Promise.all(Object.values(otherRequests));
 
-      // Combine multicall responses with other responses into resolvedList
-      const resolvedList = [];
-      Object.keys(multicallRequests).forEach((index) => {
-        resolvedList[index] = multicallResponses.shift().result.toString();
-      });
-      Object.keys(otherRequests).forEach((index) => {
-        resolvedList[index] = otherResponses.shift();
-      });
+  // Combine multicall responses with other responses into resolvedList
+  const resolvedList = [];
+  Object.keys(multicallRequests).forEach((index) => {
+    resolvedList[index] = multicallResponses.shift().result.toString();
+  });
+  Object.keys(otherRequests).forEach((index) => {
+    resolvedList[index] = otherResponses.shift();
+  });
 
-      return productList.map((product, index) => ({
-        ...product,
-        currentPriceLp: resolvedList[index],
-      }));
-    },
-    [publicClient, getCurrentPriceBalancer, getCurrentPriceUniswap, getCurrentPriceWhirlpool],
-  );
+  return productList.map((product, index) => ({
+    ...product,
+    currentPriceLp: resolvedList[index],
+  }));
 };
 
 /**
@@ -389,38 +389,43 @@ const getLpTokenNamesForProducts = async (productList, events) => {
  *   priceLp
  * }]
  */
-const useAddSupplyLeftToProducts = () =>
-  useCallback(
-    async (list, createProductEvents, closedProductEvents = []) =>
-      list.map((product) => {
-        const createProductEvent = createProductEvents?.find(
-          (event) => event.productId === `${product.id}`,
-        );
+/**
+ * Plain function so the server-side product fetch can reuse it; the hook below is a thin
+ * wrapper that keeps the existing call sites unchanged.
+ */
+export const addSupplyLeftToProducts = async (
+  list,
+  createProductEvents,
+  closedProductEvents = [],
+) =>
+  list.map((product) => {
+    const createProductEvent = createProductEvents?.find(
+      (event) => event.productId === `${product.id}`,
+    );
 
-        const closeProductEvent = closedProductEvents?.find(
-          (event) => event.productId === `${product.id}`,
-        );
+    const closeProductEvent = closedProductEvents?.find(
+      (event) => event.productId === `${product.id}`,
+    );
 
-        // Should not happen but we will warn if it does
-        if (!createProductEvent) {
-          window.console.warn(`Product ${product.id} not found in the event list`);
-        }
+    // Should not happen but we will warn if it does
+    if (!createProductEvent) {
+      // Not `window.console`: this now also runs on the server, where there is no window.
+      console.warn(`Product ${product.id} not found in the event list`);
+    }
 
-        const eventSupply = Number(ethers.toBigInt(createProductEvent.supply) / ONE_ETH);
+    const eventSupply = Number(ethers.toBigInt(createProductEvent.supply) / ONE_ETH);
 
-        const productSupply = !closeProductEvent
-          ? Number(ethers.toBigInt(product.supply) / ONE_ETH)
-          : Number(ethers.toBigInt(closeProductEvent.supply) / ONE_ETH);
+    const productSupply = !closeProductEvent
+      ? Number(ethers.toBigInt(product.supply) / ONE_ETH)
+      : Number(ethers.toBigInt(closeProductEvent.supply) / ONE_ETH);
 
-        const supplyLeft = productSupply / Number(eventSupply);
+    const supplyLeft = productSupply / Number(eventSupply);
 
-        const priceLp =
-          product.token !== ADDRESS_ZERO ? product.priceLp : createProductEvent?.priceLp || 0;
+    const priceLp =
+      product.token !== ADDRESS_ZERO ? product.priceLp : createProductEvent?.priceLp || 0;
 
-        return { ...product, supplyLeft, priceLp };
-      }),
-    [],
-  );
+    return { ...product, supplyLeft, priceLp };
+  });
 
 /**
  * Adds the projected change & discounted olas per LP token to the list.
@@ -434,106 +439,110 @@ const useAddSupplyLeftToProducts = () =>
  *  }
  * ]
  */
-const useAddProjectChangeToProducts = () =>
-  useCallback(
-    (productList) =>
-      productList.map((record) => {
-        // To calculate the price of LP we need to multiply (olasReserve / TotalSupply) by 2
-        const currentPriceLpIn = ethers.toBigInt(`${record.currentPriceLp || 0}`);
-        const doubledCurrentPriceLp = (currentPriceLpIn * 2n).toString();
+export const addProjectedChangeToProducts = (productList) =>
+  productList.map((record) => {
+    // To calculate the price of LP we need to multiply (olasReserve / TotalSupply) by 2
+    const currentPriceLpIn = ethers.toBigInt(`${record.currentPriceLp || 0}`);
+    const doubledCurrentPriceLp = (currentPriceLpIn * 2n).toString();
 
-        const parsedDoubledCurrentPriceLp =
-          parseToEth(doubledCurrentPriceLp) / (isSvmLpAddress(record.token) ? 10 ** 10 : 1);
+    const parsedDoubledCurrentPriceLp =
+      parseToEth(doubledCurrentPriceLp) / (isSvmLpAddress(record.token) ? 10 ** 10 : 1);
 
-        const fullCurrentPriceLp = Number(round(parsedDoubledCurrentPriceLp, 2)) || '0';
+    const fullCurrentPriceLp = Number(round(parsedDoubledCurrentPriceLp, 2)) || '0';
 
-        // get the discounted OLAS per LP token
-        const discountedOlasPerLpTokenInBg = getLpTokenWithDiscount(
-          record.priceLp || 0,
-          record.discount || 0,
-        );
+    // get the discounted OLAS per LP token
+    const discountedOlasPerLpTokenInBg = getLpTokenWithDiscount(
+      record.priceLp || 0,
+      record.discount || 0,
+    );
 
-        // parse to eth and round to 2 decimal places
-        const roundedDiscountedOlasPerLpToken = round(
-          parseToEth(discountedOlasPerLpTokenInBg) / (isSvmLpAddress(record.token) ? 10 ** 10 : 1),
-          2,
-        );
+    // parse to eth and round to 2 decimal places
+    const roundedDiscountedOlasPerLpToken = round(
+      parseToEth(discountedOlasPerLpTokenInBg) / (isSvmLpAddress(record.token) ? 10 ** 10 : 1),
+      2,
+    );
 
-        // calculate the projected change
-        const difference = roundedDiscountedOlasPerLpToken - fullCurrentPriceLp;
-        const projectedChange = round((difference / fullCurrentPriceLp) * 100, 2);
+    // calculate the projected change
+    const difference = roundedDiscountedOlasPerLpToken - fullCurrentPriceLp;
+    const projectedChange = round((difference / fullCurrentPriceLp) * 100, 2);
 
-        return {
-          ...record,
-          fullCurrentPriceLp,
-          roundedDiscountedOlasPerLpToken,
-          projectedChange,
-        };
-      }),
-    [],
-  );
+    return {
+      ...record,
+      fullCurrentPriceLp,
+      roundedDiscountedOlasPerLpToken,
+      projectedChange,
+    };
+  });
 
 /**
  * Fetches product details from the product ids and updates the list
  * to include other details such as the LP token name, supply left, etc.
  * and returns the updated list.
  */
+/**
+ * Plain composition of the steps above, shared by the hook and the server-side fetch.
+ * `deps` carries what cannot be resolved on the server on its own — see
+ * `addCurrentLpPriceToProducts`.
+ */
+export const getProductDetailsFromIds = async (productIdList, deps) => {
+  const { chainId, multicall } = deps;
+
+  const response = await multicall({
+    contracts: productIdList.map((id) => ({
+      address: DEPOSITORY.addresses[chainId],
+      abi: DEPOSITORY.abi,
+      functionName: 'mapBondProducts',
+      args: [id],
+    })),
+  });
+
+  // discount factor is same for all the products
+  const discount = await getLastIDFRequest(chainId);
+
+  const productList = response.map(({ result: product }, index) => {
+    const [priceLP, vesting, token, supply] = product;
+
+    return {
+      id: productIdList[index],
+      discount,
+      priceLp: priceLP,
+      vesting,
+      token,
+      supply,
+    };
+  });
+
+  const listWithCurrentLpPrice = await addCurrentLpPriceToProducts(productList, deps);
+
+  const createEventList = await getCreateProductEvents();
+  const closedEventList = await getCloseProductEvents();
+
+  const listWithLpTokens = await getLpTokenNamesForProducts(
+    listWithCurrentLpPrice,
+    createEventList,
+  );
+
+  const listWithSupplyList = await addSupplyLeftToProducts(
+    listWithLpTokens,
+    createEventList,
+    closedEventList,
+  );
+
+  return addProjectedChangeToProducts(listWithSupplyList);
+};
+
 const useProductDetailsFromIds = () => {
   const publicClient = usePublicClient();
-  const addSupplyLeftToProducts = useAddSupplyLeftToProducts();
-  const addCurrentLpPriceToProducts = useAddCurrentLpPriceToProducts();
-  const addProjectedChange = useAddProjectChangeToProducts();
+  const getCurrentPriceWhirlpool = useWhirlPoolInformation();
 
   return useCallback(
-    async (productIdList) => {
-      const chainId = getChainId();
-
-      const response = await publicClient.multicall({
-        contracts: productIdList.map((id) => ({
-          address: DEPOSITORY.addresses[chainId],
-          abi: DEPOSITORY.abi,
-          functionName: 'mapBondProducts',
-          args: [id],
-        })),
-      });
-
-      // discount factor is same for all the products
-      const discount = await getLastIDFRequest();
-
-      const productList = response.map(({ result: product }, index) => {
-        const [priceLP, vesting, token, supply] = product;
-
-        return {
-          id: productIdList[index],
-          discount,
-          priceLp: priceLP,
-          vesting,
-          token,
-          supply,
-        };
-      });
-
-      const listWithCurrentLpPrice = await addCurrentLpPriceToProducts(productList);
-
-      const createEventList = await getCreateProductEvents();
-      const closedEventList = await getCloseProductEvents();
-
-      const listWithLpTokens = await getLpTokenNamesForProducts(
-        listWithCurrentLpPrice,
-        createEventList,
-      );
-
-      const listWithSupplyList = await addSupplyLeftToProducts(
-        listWithLpTokens,
-        createEventList,
-        closedEventList,
-      );
-
-      const listWithProjectedChange = addProjectedChange(listWithSupplyList);
-
-      return listWithProjectedChange;
-    },
-    [publicClient, addCurrentLpPriceToProducts, addSupplyLeftToProducts, addProjectedChange],
+    (productIdList) =>
+      getProductDetailsFromIds(productIdList, {
+        chainId: getChainId(),
+        multicall: (args) => publicClient.multicall(args),
+        getCurrentPriceWhirlpool,
+      }),
+    [publicClient, getCurrentPriceWhirlpool],
   );
 };
 
