@@ -55,7 +55,10 @@ const EXPECTATIONS = {
     {
       page: 'bonding-products',
       minReadableChars: 800,
-      mustContain: ['OLAS minted per LP token', 'No bonding products are available'],
+      // The table's own column headers, which are served whether or not there are products.
+      // Deliberately not the empty-state copy: asserting that would start failing the day bond
+      // actually has products to list.
+      mustContain: ['OLAS minted per LP token', 'Liquidity Pool'],
     },
   ],
   launch: [
@@ -97,7 +100,9 @@ const findPageHtml = (dir, page) => {
     if (statSync(full).isDirectory()) {
       const found = findPageHtml(full, page);
       if (found) return found;
-    } else if (full.endsWith(sep + wanted) || full.endsWith(wanted)) {
+      // `sep + wanted` only — `join` always inserts a separator, and a bare `endsWith(wanted)`
+      // would also match a file called `xcontracts.html`.
+    } else if (full.endsWith(sep + wanted)) {
       return full;
     }
   }

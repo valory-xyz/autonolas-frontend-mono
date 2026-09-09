@@ -34,7 +34,7 @@ const getColumns = ({
   allocations,
   actionsVisible,
   actionsDisabled,
-}: Omit<ContractsListProps, 'isUpdating' | 'initialContracts'> & {
+}: Omit<ContractsListProps, 'isUpdating' | 'initialContracts' | 'snapshotGeneratedAt'> & {
   actionsVisible: boolean;
   actionsDisabled: boolean;
 }): ColumnsType<StakingContract> => {
