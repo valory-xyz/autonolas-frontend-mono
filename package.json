@@ -189,6 +189,9 @@
     "browserslist": "4.28.7",
     "toml": "4.2.0",
     "@web3auth/no-modal/@metamask/sdk": "0.33.1",
-    "@web3auth/no-modal/@metamask/sdk/@metamask/sdk-communication-layer": "0.33.1"
+    "@web3auth/no-modal/@metamask/sdk/@metamask/sdk-communication-layer": "0.33.1",
+    "**/@yarnpkg/parsers/js-yaml": "3.15.2",
+    "**/nx/js-yaml": "4.3.2",
+    "**/cosmiconfig/js-yaml": "4.3.2"
   }
 }
