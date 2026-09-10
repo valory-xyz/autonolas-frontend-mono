@@ -43,5 +43,8 @@ jobs:
         run: yarn install --frozen-lockfile
       - name: Run ESLint
         run: yarn nx lint contribute
+      # Includes the pre-render guard: the leaderboard must ship real rows and live campaigns in
+      # the server HTML, never a bare "No data". The whole app once sat behind an isMounted flag
+      # and served 15 characters per page. See components/Leaderboard/Leaderboard.prerender.spec.tsx.
       - name: Run Test
         run: yarn nx test contribute
