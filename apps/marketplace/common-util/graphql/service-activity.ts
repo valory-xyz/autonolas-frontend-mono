@@ -19,10 +19,15 @@ export type Activity = {
   finalFeeUSD?: string | null;
   feeRaw?: string | null;
   feeUnit?: FeeUnit | null;
+  // Populated only by the mech-analytics reader path.
+  source?: string | null;
+  ipfsRetrievable?: boolean;
+  deliveryRate?: string | null;
 };
 
 const LIMIT = 1_000;
-const LEGACY_DELIVERY_PAYMENT_WEI = '10000000000000000';
+// 0.01 xDAI. Fixed fee legacy pre-marketplace AgentMechs charged.
+export const LEGACY_DELIVERY_PAYMENT_WEI = '10000000000000000';
 
 export const getQueryForServiceActivity = ({ serviceId }: { serviceId: string }) => {
   return `
