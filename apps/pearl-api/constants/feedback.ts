@@ -51,25 +51,27 @@ export const GOOGLE_SHEETS_SCOPE = 'https://www.googleapis.com/auth/spreadsheets
 export const FEEDBACK_SHEET_TAB = 'Responses';
 
 /**
- * Fixed column order. The sheet carries a matching header row and a "do not reorder these
- * columns" note; this constant is the code-side half of that contract, so both the submit
- * handler and the cron replay write the same shape.
+ * Fixed column order, matching the sheet's header row exactly. This constant is the code-side
+ * half of that contract, so both the submit handler and the cron replay write the same shape.
+ * One boolean column per friction option, so a response can be filtered per step.
  */
 export const FEEDBACK_SHEET_COLUMNS = [
-  'Submitted at',
-  'Submission ID',
-  'Friction areas',
-  'Everything was smooth',
-  'Rating',
-  'Comment',
-  'OS type',
-  'OS platform',
-  'OS arch',
-  'OS release',
-  'Agent type',
-  'Pearl version',
-  'Time to first success (s)',
-  'Time to complete survey (s)',
+  'response_id',
+  'submitted_at',
+  'rating (1-3)',
+  'step_backup_wallet',
+  'step_choose_agent',
+  'step_rewards_staking',
+  'step_funding',
+  'step_understanding_agent',
+  'step_no_issues',
+  'open_text',
+  'pearl_version',
+  'os',
+  'agent',
+  'time_to_first_success_min',
+  'time_to_complete_survey_sec',
+  'step_other',
 ] as const;
 
 /**

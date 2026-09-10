@@ -121,35 +121,46 @@ export const parseOnboardingSurveySubmission = (
   };
 };
 
+const SECONDS_PER_MINUTE = 60;
+
+/** `2026-09-02T14:32:10Z`, the second-precision form the sheet's examples use. */
+const toSheetTimestamp = (isoTimestamp: string): string => isoTimestamp.replace(/\.\d{3}Z$/, 'Z');
+
 /**
- * Maps a validated submission to the sheet's fixed 14-column row.
+ * Maps a validated submission to the sheet's row, in `FEEDBACK_SHEET_COLUMNS` order.
  *
- * Takes the submission rather than the request body: that is the mechanical guarantee behind the
- * anonymity requirement — no header, IP-derived value or unexpected request field can reach a
- * cell, because none of them exists on the typed value this reads from.
- *
- * `submittedAt` is supplied by the caller so a cron replay writes the original submission time
- * rather than the replay time.
+ * Reads the typed submission rather than the request body, so nothing outside the validated
+ * fields can reach a cell. `submittedAt` is supplied by the caller so a cron replay writes the
+ * original submission time.
  */
 export const mapSubmissionToSheetRow = (
   submission: OnboardingSurveySubmission,
   submittedAt: string,
-): SheetCell[] => [
-  submittedAt,
-  submission.submissionId,
-  submission.frictionAreas.join(', '),
-  submission.frictionAreas.length === 1 && submission.frictionAreas[0] === EVERYTHING_SMOOTH,
-  submission.rating,
-  submission.comment,
-  submission.os.type,
-  submission.os.platform,
-  submission.os.arch,
-  submission.os.release,
-  submission.agentType,
-  submission.pearlVersion,
-  submission.timeToFirstSuccessSeconds ?? TIME_TO_FIRST_SUCCESS_UNAVAILABLE,
-  submission.timeToCompleteSurveySeconds,
-];
+): SheetCell[] => {
+  const picked = (area: FrictionArea) => submission.frictionAreas.includes(area);
+  const { os } = submission;
+
+  return [
+    submission.submissionId,
+    toSheetTimestamp(submittedAt),
+    submission.rating,
+    picked('backup_wallet'),
+    picked('choosing_agent'),
+    picked('activity_rewards'),
+    picked('funding_agent'),
+    picked('agent_activity'),
+    picked(EVERYTHING_SMOOTH),
+    submission.comment,
+    submission.pearlVersion,
+    `${os.type} ${os.release} (${os.arch})`,
+    submission.agentType,
+    submission.timeToFirstSuccessSeconds === null
+      ? TIME_TO_FIRST_SUCCESS_UNAVAILABLE
+      : Math.round(submission.timeToFirstSuccessSeconds / SECONDS_PER_MINUTE),
+    submission.timeToCompleteSurveySeconds,
+    picked('other'),
+  ];
+};
 
 /**
  * Parses the text of a buffered blob back into a record the replay can append.

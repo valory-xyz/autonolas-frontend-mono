@@ -162,46 +162,62 @@ describe('parseOnboardingSurveySubmission', () => {
 describe('mapSubmissionToSheetRow', () => {
   const submittedAt = '2026-09-07T12:00:00.000Z';
 
+  const column = (name: (typeof FEEDBACK_SHEET_COLUMNS)[number]) =>
+    FEEDBACK_SHEET_COLUMNS.indexOf(name);
+
   it('produces one cell per declared column', () => {
     const row = mapSubmissionToSheetRow(submissionBuilder(), submittedAt);
     expect(row).toHaveLength(FEEDBACK_SHEET_COLUMNS.length);
-    expect(row).toHaveLength(14);
+    expect(row).toHaveLength(16);
   });
 
-  it('writes the columns in the documented order', () => {
+  it('writes the columns in the sheet header order', () => {
     const row = mapSubmissionToSheetRow(submissionBuilder(), submittedAt);
     expect(row).toEqual([
-      submittedAt,
       VALID_UUID,
-      'backup_wallet, funding_agent',
-      false,
+      '2026-09-07T12:00:00Z',
       2,
+      true, // step_backup_wallet
+      false, // step_choose_agent
+      false, // step_rewards_staking
+      true, // step_funding
+      false, // step_understanding_agent
+      false, // step_no_issues
       'Took a while.',
-      'Darwin',
-      'darwin',
-      'arm64',
-      '24.3.0',
-      'polymarket_trader',
       '0.9.4',
-      93600,
+      'Darwin 24.3.0 (arm64)',
+      'polymarket_trader',
+      1560, // 93600 s in minutes
       42,
+      false, // step_other
     ]);
   });
 
   it('keeps numeric and boolean cells typed rather than stringified', () => {
     const row = mapSubmissionToSheetRow(submissionBuilder(), submittedAt);
-    expect(typeof row[3]).toBe('boolean');
-    expect(typeof row[4]).toBe('number');
-    expect(typeof row[12]).toBe('number');
-    expect(typeof row[13]).toBe('number');
+    expect(typeof row[column('rating (1-3)')]).toBe('number');
+    expect(typeof row[column('step_backup_wallet')]).toBe('boolean');
+    expect(typeof row[column('time_to_first_success_min')]).toBe('number');
+    expect(typeof row[column('time_to_complete_survey_sec')]).toBe('number');
   });
 
-  it('derives the everything-smooth column rather than taking it from the client', () => {
+  it('sets only step_no_issues for the fast exit', () => {
     const row = mapSubmissionToSheetRow(
       submissionBuilder({ frictionAreas: ['everything_smooth'], rating: 3 }),
       submittedAt,
     );
-    expect(row[3]).toBe(true);
+    const stepColumns = row.slice(column('step_backup_wallet'), column('open_text'));
+    expect(stepColumns).toEqual([false, false, false, false, false, true]);
+    expect(row[column('step_other')]).toBe(false);
+  });
+
+  it('records other in its own column', () => {
+    const row = mapSubmissionToSheetRow(
+      submissionBuilder({ frictionAreas: ['other'] }),
+      submittedAt,
+    );
+    expect(row[column('step_other')]).toBe(true);
+    expect(row[column('step_no_issues')]).toBe(false);
   });
 
   it('writes unavailable for a null time to first success', () => {
@@ -209,21 +225,29 @@ describe('mapSubmissionToSheetRow', () => {
       submissionBuilder({ timeToFirstSuccessSeconds: null }),
       submittedAt,
     );
-    expect(row[12]).toBe('unavailable');
+    expect(row[column('time_to_first_success_min')]).toBe('unavailable');
   });
 
-  it('writes 0 rather than unavailable for a zero time to first success', () => {
+  it('writes 0 minutes rather than unavailable for a zero time to first success', () => {
     const row = mapSubmissionToSheetRow(
       submissionBuilder({ timeToFirstSuccessSeconds: 0 }),
       submittedAt,
     );
-    expect(row[12]).toBe(0);
+    expect(row[column('time_to_first_success_min')]).toBe(0);
+  });
+
+  it('rounds time to first success to whole minutes', () => {
+    const row = mapSubmissionToSheetRow(
+      submissionBuilder({ timeToFirstSuccessSeconds: 2249 }),
+      submittedAt,
+    );
+    expect(row[column('time_to_first_success_min')]).toBe(37);
   });
 
   it('reuses the original timestamp on replay rather than the replay time', () => {
     const originalSubmittedAt = '2026-09-01T08:30:00.000Z';
     const row = mapSubmissionToSheetRow(submissionBuilder(), originalSubmittedAt);
-    expect(row[0]).toBe(originalSubmittedAt);
+    expect(row[column('submitted_at')]).toBe('2026-09-01T08:30:00Z');
   });
 
   it('never emits a value that was not validated onto the row', () => {
