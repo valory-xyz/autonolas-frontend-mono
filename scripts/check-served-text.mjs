@@ -61,6 +61,21 @@ const EXPECTATIONS = {
       mustContain: ['OLAS minted per LP token', 'Liquidity Pool'],
     },
   ],
+  // Same bug as launch: the guides were fetched from the browser and the whole body sat behind a
+  // `loading` flag, so each page served nav, footer and a title. Two of the six, one with a
+  // Service section and one without.
+  build: [
+    {
+      page: 'paths/prediction-agents-mechs-ai-tool',
+      minReadableChars: 900,
+      mustContain: ['Prediction Agents', 'eligible for Build Rewards'],
+    },
+    {
+      page: 'paths/build-your-own-service',
+      minReadableChars: 700,
+      mustContain: ['eligible for Build Rewards'],
+    },
+  ],
   launch: [
     {
       page: 'path',
