@@ -1,5 +1,6 @@
-// Lazy so tests can flip process.env per-test without jest.resetModules.
-export const getMechAnalyticsUrl = (): string => process.env.NEXT_PUBLIC_MECH_ANALYTICS_URL ?? '';
+// Built in rather than read from an env var, so merging the consumer is the
+// whole switch (same as olas-website). The flag below is the only rollback.
+export const MECH_ANALYTICS_URL = 'https://mech-analytics-api.autonolas.tech';
 
 // Default ON. Set exactly "false" to fall back to the subgraph path.
 export const isMechAnalyticsFlagOn = (): boolean =>
@@ -16,4 +17,4 @@ export const isMechAnalyticsSupportedChain = (chainId: number): boolean =>
   MECH_ANALYTICS_CHAIN_IDS.includes(chainId);
 
 export const shouldUseMechAnalytics = (chainId: number): boolean =>
-  isMechAnalyticsFlagOn() && isMechAnalyticsSupportedChain(chainId) && getMechAnalyticsUrl() !== '';
+  isMechAnalyticsFlagOn() && isMechAnalyticsSupportedChain(chainId);

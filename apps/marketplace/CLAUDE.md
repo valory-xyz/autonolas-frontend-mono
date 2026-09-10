@@ -22,8 +22,8 @@ Discover, register, deploy, and interact with **mechs** (autonomous AI agents) a
 - **Marketplace activity subgraphs** (per chain): `NEXT_PUBLIC_*_MARKETPLACE_SUBGRAPH_URL` for Ethereum (1), Optimism (10), Gnosis (100), Polygon (137), Base (8453), Arbitrum (42161), Celo (42220).
 - **Registry subgraphs**: Ethereum (1), Optimism (10), Gnosis (100), Polygon (137), Base (8453), Mode (34443), Arbitrum (42161), Celo (42220).
 - **mech-analytics** (activity read path, chains 10 / 100 / 137 / 8453):
-  - `NEXT_PUBLIC_MECH_ANALYTICS_URL` — API base (e.g. `https://mech-analytics-api.autonolas.tech`).
-  - `NEXT_PUBLIC_USE_MECH_ANALYTICS_ROWS` — off-switch. Default ON when unset; set to exactly `"false"` to fall back to the subgraph reader. `shouldUseMechAnalytics()` also requires the URL to be non-empty, so a missing base URL silently degrades to the subgraph path with no signal — set both env vars in every deployed environment.
+  - API base URL is built in, not an env var: `MECH_ANALYTICS_URL` in `common-util/mechAnalytics/config.ts` (`https://mech-analytics-api.autonolas.tech`). If the endpoint moves, change the constant.
+  - `NEXT_PUBLIC_USE_MECH_ANALYTICS_ROWS` — the only switch. Default ON when unset; set to exactly `"false"` to fall back to the subgraph reader.
 - **Etherscan** API key; **Wallet Project ID**; optional **Solana** (SVM) config.
 - Optional: local registry via Docker (see app README).
 
@@ -127,7 +127,7 @@ Note `Service.mechs` resolves to `MechAgent` (legacy path, only has `totalTransa
 
 #### mech-analytics read path (chains 10 / 100 / 137 / 8453)
 
-The activity tab reads from mech-analytics behind `NEXT_PUBLIC_USE_MECH_ANALYTICS_ROWS`. Default is ON when `NEXT_PUBLIC_MECH_ANALYTICS_URL` is set; either env unset falls back to the subgraph path.
+The activity tab reads from mech-analytics behind `NEXT_PUBLIC_USE_MECH_ANALYTICS_ROWS`: default ON, set to exactly `"false"` to fall back to the subgraph path. The API base URL is built in (`MECH_ANALYTICS_URL` in `common-util/mechAnalytics/config.ts`).
 
 Three fan-outs per request (all `sort_direction=desc` so page 1 is the newest rows):
 

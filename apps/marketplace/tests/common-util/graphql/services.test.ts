@@ -48,11 +48,10 @@ const getServices = () => getServicesFromMarketplaceSubgraph({ chainId: 100, ser
 const SAFE = '0xAAA0000000000000000000000000000000000001';
 
 describe('getServicesFromMarketplaceSubgraph', () => {
-  // Nx jest loads the repo `.env.local` which sets
-  // NEXT_PUBLIC_MECH_ANALYTICS_URL. The counter path is default-ON
-  // whenever the URL is set, so without an explicit override these
-  // subgraph-side tests would silently route through
-  // ``fetchRequesterMetrics`` (unmocked → fails → totalRequests = 0).
+  // The mech-analytics counter path is default-ON (the API URL is built
+  // in), so without an explicit override these subgraph-side tests would
+  // silently route through ``fetchRequesterMetrics`` (unmocked → fails →
+  // totalRequests = 0).
   // Pin the flag OFF at the outer describe; the inner
   // `mech-analytics counter branch` describe re-enables it in its
   // own beforeEach.
@@ -222,7 +221,6 @@ describe('getServicesFromMarketplaceSubgraph', () => {
   describe('mech-analytics counter branch', () => {
     const originalEnv = process.env;
     const originalFetch = global.fetch;
-    const MECH_ANALYTICS_URL = 'https://ma.example';
 
     const mockMechAnalyticsResponse = (body: unknown, ok = true, status = 200): Response =>
       ({
@@ -235,9 +233,8 @@ describe('getServicesFromMarketplaceSubgraph', () => {
     beforeEach(() => {
       process.env = {
         ...originalEnv,
-        NEXT_PUBLIC_MECH_ANALYTICS_URL: MECH_ANALYTICS_URL,
         // The counter branch is gated on shouldUseMechAnalytics
-        // returning true. Config also requires the URL to be set.
+        // returning true; the outer describe pins the flag off.
         NEXT_PUBLIC_USE_MECH_ANALYTICS_ROWS: 'true',
       };
     });

@@ -1,4 +1,4 @@
-import { getMechAnalyticsUrl } from './config';
+import { MECH_ANALYTICS_URL } from './config';
 import type { RequesterMetricsResponse, ScoredRow, ScoredRowsResponse } from './types';
 
 const DEFAULT_LIMIT = 1000;
@@ -67,7 +67,7 @@ async function* iterateRows(
   let cursor: string | null = null;
 
   while (true) {
-    const url = new URL(`${getMechAnalyticsUrl()}/v1/data/${endpoint}`);
+    const url = new URL(`${MECH_ANALYTICS_URL}/v1/data/${endpoint}`);
     url.searchParams.set('chain_id', String(chainId));
     if (requester) url.searchParams.set('requester', requester);
     if (deliveryMech) url.searchParams.set('delivery_mech', deliveryMech);
@@ -103,7 +103,7 @@ export async function fetchRequesterMetrics(
   chainId: number,
   requester: string,
 ): Promise<RequesterMetricsResponse> {
-  const url = `${getMechAnalyticsUrl()}/v1/metrics/requester/${chainId}/${requester.toLowerCase()}`;
+  const url = `${MECH_ANALYTICS_URL}/v1/metrics/requester/${chainId}/${requester.toLowerCase()}`;
   const response = await fetchWithTimeout<RequesterMetricsResponse>(url);
   if (!response.ok || !response.body) {
     throw new MechAnalyticsError(

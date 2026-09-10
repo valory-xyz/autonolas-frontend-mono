@@ -48,18 +48,17 @@ describe('mechAnalytics/config', () => {
   });
 
   describe('shouldUseMechAnalytics', () => {
-    beforeEach(() => {
-      process.env.NEXT_PUBLIC_MECH_ANALYTICS_URL = 'https://ma.example';
-    });
-
     it('is false when the flag is off', () => {
       process.env.NEXT_PUBLIC_USE_MECH_ANALYTICS_ROWS = 'false';
       expect(shouldUseMechAnalytics(100)).toBe(false);
     });
 
-    it('is false when the URL is missing', () => {
+    it('is true with no env set at all, since the API URL is built in', () => {
+      // A deploy that never sets any mech-analytics env must still take the
+      // mech-analytics path, not silently fall back to the subgraph.
+      delete process.env.NEXT_PUBLIC_USE_MECH_ANALYTICS_ROWS;
       delete process.env.NEXT_PUBLIC_MECH_ANALYTICS_URL;
-      expect(shouldUseMechAnalytics(100)).toBe(false);
+      expect(shouldUseMechAnalytics(100)).toBe(true);
     });
 
     it('is false on unsupported chains (Ethereum, Arbitrum)', () => {
@@ -67,10 +66,11 @@ describe('mechAnalytics/config', () => {
       expect(shouldUseMechAnalytics(42161)).toBe(false);
     });
 
-    it('is true on supported chains with URL set and flag unset (default-on)', () => {
+    it('is true on every supported chain with the flag unset (default-on)', () => {
       delete process.env.NEXT_PUBLIC_USE_MECH_ANALYTICS_ROWS;
-      expect(shouldUseMechAnalytics(100)).toBe(true);
-      expect(shouldUseMechAnalytics(8453)).toBe(true);
+      for (const chainId of MECH_ANALYTICS_CHAIN_IDS) {
+        expect(shouldUseMechAnalytics(chainId)).toBe(true);
+      }
     });
   });
 });

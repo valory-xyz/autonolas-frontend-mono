@@ -3,6 +3,7 @@ import {
   iterateScoredRows,
   type ScoredRowPage,
 } from 'common-util/mechAnalytics/client';
+import { MECH_ANALYTICS_URL } from 'common-util/mechAnalytics/config';
 import type { ScoredRow } from 'common-util/mechAnalytics/types';
 
 const originalFetch = global.fetch;
@@ -57,7 +58,7 @@ const drain = async (iter: AsyncGenerator<ScoredRowPage>) => {
 };
 
 beforeEach(() => {
-  process.env = { ...originalEnv, NEXT_PUBLIC_MECH_ANALYTICS_URL: 'https://ma.example' };
+  process.env = { ...originalEnv };
 });
 
 afterEach(() => {
@@ -98,6 +99,17 @@ describe('iterateScoredRows', () => {
     const url = (global.fetch as jest.Mock).mock.calls[0][0] as string;
     expect(url).toContain('chain_id=8453');
     expect(url).toContain(`requester=${REQUESTER}`);
+  });
+
+  it('calls the built-in API URL even when a stale env URL is set', async () => {
+    // The URL is deliberately not configurable; a leftover env var from the
+    // old setup must not redirect requests.
+    process.env.NEXT_PUBLIC_MECH_ANALYTICS_URL = 'https://stale.example';
+    global.fetch = jest.fn().mockResolvedValueOnce(mockOk({ rows: [], next_cursor: null }));
+    await drain(iterateScoredRows({ chainId: CHAIN_ID, requester: REQUESTER }));
+    const url = (global.fetch as jest.Mock).mock.calls[0][0] as string;
+    expect(url.startsWith(`${MECH_ANALYTICS_URL}/v1/data/scored-rows?`)).toBe(true);
+    expect(url).not.toContain('stale.example');
   });
 
   it('passes sort_direction=desc when requested', async () => {
