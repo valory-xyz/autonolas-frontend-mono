@@ -2,17 +2,8 @@ import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
 
 /**
- * Reads a file from an app's `public/` directory during a server render.
- *
- * Several pages kept their prose as markdown in `public/` and fetched it from the browser, which
- * left the served HTML holding a shell — the same shell for every id on a dynamic route. Reading
- * the file here puts the prose in the HTML instead.
- *
- * Next resolves `process.cwd()` to the app directory, but an Nx build can run from the workspace
- * root, so both are tried rather than assuming one.
- *
- * @param app  Directory name under `apps/`, e.g. `launch`.
- * @param relativePath  Path within that app's `public/`, e.g. `paths-markdown/my-path.md`.
+ * Reads a file from `apps/<app>/public/` during a server render. Both the app dir and the
+ * workspace root are tried, since `process.cwd()` differs between a Next and an Nx build.
  */
 export async function readPublicFile(app: string, relativePath: string): Promise<string> {
   const candidates = [

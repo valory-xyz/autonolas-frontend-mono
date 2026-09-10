@@ -1,28 +1,11 @@
 #!/usr/bin/env node
 /**
- * Fails when a page that is supposed to pre-render its data ships an empty shell.
+ * Fails when a page that should pre-render its data ships an empty shell. Server rendering was
+ * silently removed once before (PR #350) with every other check green; this is what catches it.
  *
- * This guard exists because the work has already been lost once: server rendering was added to
- * the operate and govern staking tables, then removed by PR #350 for unrelated performance
- * reasons, and nobody noticed until an audit measured the served HTML months later. Lint, tests
- * and typecheck all passed throughout — nothing described what these pages owe a reader who does
- * not run JavaScript.
- *
- * Run it after `nx build <app>`:
- *   node scripts/check-served-text.mjs operate govern
- *
- * Or against a deployed site — a Vercel preview, or production after a merge:
- *   node scripts/check-served-text.mjs --url https://operate.olas.network operate
- *
- * Checking a deployment is the stronger signal: it exercises the real env vars and, for ISR
- * pages, a real revalidation rather than a build-time render. Vercel preview deployments sit
- * behind Vercel Authentication, so set VERCEL_AUTOMATION_BYPASS_SECRET (Project Settings →
- * Deployment Protection → Protection Bypass for Automation) or the fetch just returns a login
- * page. Production URLs need no secret.
- *
- * Note it asserts on built output, so it only means something where a real build has run with
- * the RPC and subgraph env vars set. With no build output for an app it reports a skip rather
- * than a pass, so an empty CI run cannot look like a green one.
+ * After a build:   node scripts/check-served-text.mjs operate govern
+ * Or deployed:     node scripts/check-served-text.mjs --url https://operate.olas.network operate
+ * Vercel previews need VERCEL_AUTOMATION_BYPASS_SECRET set; production does not.
  */
 import { readFileSync, existsSync, readdirSync, statSync } from 'node:fs';
 import { join, sep } from 'node:path';
@@ -32,12 +15,8 @@ const EXPECTATIONS = {
   // Shape: { page, minReadableChars, minRows?, mustContain? }
   operate: [{ page: 'contracts', minReadableChars: 1500, minRows: 5 }],
   govern: [{ page: 'contracts', minReadableChars: 1500, minRows: 5 }],
-  // No data fetching here — the risk is rendering only the selected step, which published one
-  // step of six. Every step's content must be in the HTML whether or not it is on screen.
-  // One network is enough: the listing reads a single global subgraph, so every network page
-  // serves the same rows. The assertion is on the summary block, which is omitted entirely when
-  // the fetch returns nothing — item names change as new units are registered, so matching those
-  // would be flaky.
+  // One network is enough: the listings read one global subgraph, so every network page serves
+  // the same rows. Asserting on the summary block rather than item names, which change.
   marketplace: [
     { page: 'ethereum/ai-agents', minReadableChars: 1000, mustContain: ['most recently registered'] },
     { page: 'ethereum/components', minReadableChars: 1000, mustContain: ['most recently registered'] },
@@ -122,11 +101,7 @@ const readableText = (html) =>
     .replace(/\s+/g, ' ')
     .trim();
 
-/**
- * Built HTML may sit under a locale directory (i18n) and, for dynamic routes, under further
- * segments — so match on the path ending rather than the filename. `page` may therefore be
- * either "contracts" or "ethereum/ai-agents".
- */
+/** Built HTML may sit under a locale dir and further route segments, so match on the path ending. */
 const findPageHtml = (dir, page) => {
   if (!existsSync(dir)) return null;
   const wanted = `${page}.html`.split('/').join(sep);

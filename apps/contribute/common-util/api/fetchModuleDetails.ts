@@ -1,12 +1,6 @@
 import { ContributeModuleDetails } from 'types/moduleDetails';
 
-/**
- * Reads the module details straight from AFMDB.
- *
- * A pure async function so both `/api/module-details` and `getStaticProps` can call it — the
- * campaigns table is rendered on the leaderboard page, and fetching it only from the browser left
- * the served HTML saying "No data" where the live campaigns belong.
- */
+/** Reads module details from AFMDB. Shared by `/api/module-details` and `getStaticProps`. */
 export async function fetchModuleDetails(): Promise<ContributeModuleDetails[]> {
   const afmdbUrl = process.env.NEXT_PUBLIC_AFMDB_URL;
   const agentTypeId = process.env.AGENT_TYPE_ID;

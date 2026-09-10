@@ -19,12 +19,8 @@ type PathDetailPageProps = {
 };
 
 /**
- * The path and its guide arrive from `getStaticProps`, so both are in the served HTML.
- *
- * They used to be resolved in the browser — the guide via `fetch('/paths-markdown/<id>.md')` and
- * the path from `router.query`, which is empty during a pre-render. That left one 105-character
- * shell standing in for every path. Taking them as props also removes the loading and
- * not-found states: an unknown id never reaches this component now, it 404s in `getStaticPaths`.
+ * Path and guide come from `getStaticProps`, so both are in the served HTML. They used to be
+ * resolved in the browser, which left one empty shell standing in for every path.
  */
 export const PathDetailPage = ({ path, markdown }: PathDetailPageProps) => (
   <>

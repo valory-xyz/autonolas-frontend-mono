@@ -17,13 +17,9 @@ export const listingStaticPaths = async () => ({
 });
 
 /**
- * Components and agent blueprints are registered on Ethereum L1 only — `useHandleRoute`
- * redirects every other network on those routes to `/[network]/ai-agents`. Pre-rendering them
- * for all eight networks published seven crawlable copies of the same list at URLs a reader is
- * immediately bounced away from, so they pre-render Ethereum alone.
- *
- * `fallback` stays `'blocking'`: a direct hit on `/base/components` still renders and then
- * redirects on the client, exactly as before. It just carries no listing to index.
+ * Components and agent blueprints are L1-only (`useHandleRoute` redirects other networks), so
+ * pre-rendering all eight networks published seven duplicates. Other networks still render on
+ * demand and redirect as before; they just carry no listing.
  */
 const L1_NETWORK = 'ethereum';
 
@@ -36,10 +32,8 @@ export const l1ListingStaticPaths = async () => ({
 });
 
 /**
- * The three listing pages differ only in which fetcher they call, so the ISR wiring lives here.
- *
- * Each visible list is client-only, so the same first page is fetched here and rendered as
- * hidden text — a crawler gets the listing, the interactive table is untouched.
+ * Shared ISR wiring for the three listing pages. Each visible list is client-only, so the first
+ * page is fetched here and rendered as hidden text for crawlers.
  */
 export const createListingStaticProps = ({
   fetchSnapshot,

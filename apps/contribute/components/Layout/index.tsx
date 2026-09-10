@@ -30,12 +30,8 @@ export const Layout = ({ children }: { children: React.ReactNode }) => {
   const isMounted = useIsMounted();
   const router = useRouter();
 
-  /**
-   * `useBreakpoint` returns `{}` on the server, so branching on it directly renders one thing in
-   * the HTML and another on hydration. Assume desktop until mounted: the server then emits the
-   * sidebar and its links rather than an empty aside, and a narrow viewport corrects itself on
-   * the render straight after hydration.
-   */
+  // `useBreakpoint` is `{}` on the server. Assume desktop until mounted so the sidebar is in the
+  // HTML; a narrow viewport corrects itself right after hydration.
   const isDesktop = isMounted ? !!screens.md : true;
   const [isMenuVisible, setIsMenuVisible] = useState(false);
   const { pathname } = router;

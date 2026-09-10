@@ -12,21 +12,13 @@ type PathDetailProps = {
   markdown: string;
 };
 
-/**
- * The two paths are a checked-in constant, so an unknown id is a 404 rather than a page to
- * generate. It used to answer 200 with an empty shell — a soft 404, which tells a crawler the
- * page exists and has nothing on it.
- */
+/** The paths are a checked-in constant, so an unknown id is a real 404, not a 200 with a shell. */
 export const getStaticPaths: GetStaticPaths = async () => ({
   paths: PATHS.map(({ id }) => ({ params: { id } })),
   fallback: false,
 });
 
-/**
- * The guide lives in `public/paths-markdown/<id>.md` and used to be fetched from the browser, so
- * the served HTML carried 105 characters of nav and none of the content — the same shell for both
- * paths and for any typo.
- */
+/** The guide used to be fetched in the browser, so the served HTML carried none of it. */
 export const getStaticProps: GetStaticProps<PathDetailProps> = async ({ params }) => {
   const id = String(params?.id);
   const path = PATHS.find((candidate) => candidate.id === id);

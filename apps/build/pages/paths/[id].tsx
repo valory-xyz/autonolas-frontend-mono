@@ -45,12 +45,8 @@ export const getStaticPaths: GetStaticPaths = async () => ({
 });
 
 /**
- * Every one of these pages served 473-476 characters: nav, footer and a per-path title, with the
- * entire body missing. `useFetchPathData` started `loading` at `true` and only cleared it from an
- * effect, so a server render always took the spinner branch — losing not just the guide but the
- * description, service, rewards and mechs-tool sections, none of which need a browser.
- *
- * Reading the markdown here and dropping the loading gate puts all of it in the HTML.
+ * The guide used to be fetched in the browser behind a `loading` flag, so the server rendered a
+ * spinner and none of the body. Reading it here puts the whole page in the HTML.
  */
 export const getStaticProps: GetStaticProps<PathDetailProps> = async ({ params }) => {
   const id = String(params?.id);

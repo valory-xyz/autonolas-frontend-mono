@@ -18,14 +18,8 @@ type LeaderboardSnapshot = {
 const ISR_TIMEOUT_MS = 20_000;
 
 /**
- * Both tables on this page — the rankings and the live campaigns — used to fill from the browser
- * only, the rankings by way of the health-check poll in `ServiceStatus`, of all things. The served
- * HTML carried the words "No data" in each. That is the one empty state that must never reach a
- * crawler: it reads as "this leaderboard has nobody on it".
- *
- * Both fetchers are plain server functions, so they are called here directly rather than through
- * `/api/*`. The client still refreshes into Redux, which takes precedence over these rows as soon
- * as it arrives.
+ * Both tables used to fill from the browser only, so the served HTML said "No data" twice.
+ * Fetched here directly; Redux takes over once the client refreshes.
  */
 export const getStaticProps = createSnapshotGetStaticProps<
   LeaderboardSnapshot,
