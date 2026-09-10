@@ -52,7 +52,7 @@
       "package": "js-yaml",
       "severity": "high",
       "reason": "maxTotalMergeKeys does not limit CPU use for empty merge sources, on the js-yaml 3.x line reached only via nx build-time tooling (@nx/next > @nx/workspace > nx > @yarnpkg/parsers > js-yaml 3.x). Build-time only, parses our own trusted config, not in the shipped runtime. Same co-resolution constraint as 1123912 and 1138114: the 3.x consumer uses the safeLoad API removed in 4.x, so a single Yarn resolution cannot fix both lines.",
-      "added": "2026-09-09",
+      "added": "2026-09-10",
       "review": "2026-10-23"
     },
     {
@@ -61,7 +61,7 @@
       "package": "js-yaml",
       "severity": "high",
       "reason": "Same advisory on the js-yaml 4.x line, reached only via nx build-time tooling (@nx/next > @nx/workspace > nx > js-yaml 4.x). Build-time only, trusted input, not in the shipped runtime. See 1123911 for why a blanket js-yaml resolution is unsafe. Review together with the other js-yaml entries by 2026-10-23.",
-      "added": "2026-09-09",
+      "added": "2026-09-10",
       "review": "2026-10-23"
     }
   ]
