@@ -61,6 +61,13 @@ const EXPECTATIONS = {
       mustContain: ['OLAS minted per LP token', 'Liquidity Pool'],
     },
   ],
+  // The whole app used to sit behind an `isMounted` flag in `_app.tsx`, so every page served its
+  // <title> and nothing else. `docs` is static prose; `leaderboard` is the one page here that
+  // fetches, and it published the words "No data" the moment the body started rendering.
+  contribute: [
+    { page: 'docs', minReadableChars: 1500 },
+    { page: 'leaderboard', minReadableChars: 1000, minRows: 5 },
+  ],
   // Same bug as launch: the guides were fetched from the browser and the whole body sat behind a
   // `loading` flag, so each page served nav, footer and a title. Two of the six, one with a
   // Service section and one without.

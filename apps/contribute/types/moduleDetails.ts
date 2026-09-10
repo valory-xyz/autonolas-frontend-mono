@@ -29,7 +29,7 @@ type ExecutionAttempt = {
 // Currently only one type
 type CampaignStatus = 'live';
 
-type Campaign = {
+export type Campaign = {
   id: string;
   start_ts: number;
   end_ts: number;

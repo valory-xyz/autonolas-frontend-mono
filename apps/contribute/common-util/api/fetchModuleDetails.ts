@@ -1,0 +1,35 @@
+import { ContributeModuleDetails } from 'types/moduleDetails';
+
+/**
+ * Reads the module details straight from AFMDB.
+ *
+ * A pure async function so both `/api/module-details` and `getStaticProps` can call it — the
+ * campaigns table is rendered on the leaderboard page, and fetching it only from the browser left
+ * the served HTML saying "No data" where the live campaigns belong.
+ */
+export async function fetchModuleDetails(): Promise<ContributeModuleDetails[]> {
+  const afmdbUrl = process.env.NEXT_PUBLIC_AFMDB_URL;
+  const agentTypeId = process.env.AGENT_TYPE_ID;
+  const attributeIdMappingRaw = process.env.ATTRIBUTE_ID_MAPPING;
+
+  if (!afmdbUrl || !agentTypeId || !attributeIdMappingRaw) {
+    throw new Error(
+      'Missing required environment variables for module details fetch. ' +
+        'Ensure NEXT_PUBLIC_AFMDB_URL, AGENT_TYPE_ID, and ATTRIBUTE_ID_MAPPING are set.',
+    );
+  }
+
+  // Written as a JSON number ({"MODULE_DATA":10}) and only ever used in a URL, so accept either.
+  const attributeTypeId = String(
+    (JSON.parse(attributeIdMappingRaw) as Record<string, string | number>).MODULE_DATA,
+  );
+
+  const url = `${afmdbUrl}/api/agent-types/${agentTypeId}/attributes/${attributeTypeId}/values`;
+  const response = await fetch(url);
+
+  if (!response.ok) {
+    throw new Error(`Failed to fetch module details: ${response.status}`);
+  }
+
+  return response.json();
+}
