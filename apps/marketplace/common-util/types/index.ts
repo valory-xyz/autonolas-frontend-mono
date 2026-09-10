@@ -80,4 +80,15 @@ export type Service = {
 export type ServiceActivity = {
   id: string;
   activities: Activity[];
+  // True when at least one mech-analytics shard hit its per-shard
+  // page cap on the descending scan (i.e. this service has more
+  // recent activity than the tab could load in one request). FE
+  // surfaces a "some older rows truncated" hint. Absent on the
+  // subgraph path.
+  hasMore?: boolean;
+  // True when at least one mech-analytics shard failed and its
+  // rows are missing from the response. API layer uses this to
+  // shorten the CDN TTL so a transient blip doesn't stick.
+  // Absent on the subgraph path.
+  degraded?: boolean;
 };

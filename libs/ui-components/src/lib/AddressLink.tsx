@@ -1,21 +1,17 @@
 // eslint-disable-next-line @nx/enforce-module-boundaries
 import { truncateAddress } from 'libs/util-functions/src';
 // eslint-disable-next-line @nx/enforce-module-boundaries
-import { EXPLORER_URLS, GATEWAY_URL, HASH_PREFIX, UNICODE_SYMBOLS } from 'libs/util-constants/src';
+import { EXPLORER_URLS, UNICODE_SYMBOLS } from 'libs/util-constants/src';
 // eslint-disable-next-line @nx/enforce-module-boundaries
 import { COLOR } from 'libs/ui-theme/src';
 import { Flex, Typography } from 'antd';
 import { Copy } from './Copy';
+import { getIpfsUrl } from './getIpfsUrl';
 
 const { Text } = Typography;
 
-const getIpfsUrl = (hash: string) => {
-  if (!hash) return '';
-
-  const cleanHash = hash.startsWith('0x') ? hash.substring(2) : hash;
-  const hasHashPrefix = cleanHash.startsWith(HASH_PREFIX);
-  return hasHashPrefix ? `${GATEWAY_URL}${cleanHash}` : `${GATEWAY_URL}${HASH_PREFIX}${cleanHash}`;
-};
+// Re-export for callers that used to import from AddressLink.
+export { getIpfsUrl };
 
 export const AddressLink = ({
   address,
