@@ -1,5 +1,5 @@
 import { EVERYTHING_SMOOTH, FEEDBACK_SHEET_COLUMNS, VALID_FRICTION_AREAS } from '../constants';
-import type { OnboardingSurveySubmission } from '../types/feedback';
+import type { FrictionArea, OnboardingSurveySubmission } from '../types/feedback';
 import {
   isJsonContentType,
   mapSubmissionToSheetRow,
@@ -162,92 +162,85 @@ describe('parseOnboardingSurveySubmission', () => {
 describe('mapSubmissionToSheetRow', () => {
   const submittedAt = '2026-09-07T12:00:00.000Z';
 
-  const column = (name: (typeof FEEDBACK_SHEET_COLUMNS)[number]) =>
-    FEEDBACK_SHEET_COLUMNS.indexOf(name);
+  /** The row keyed by header name, so each expectation labels itself. */
+  const namedRow = (submission = submissionBuilder(), at = submittedAt) => {
+    const row = mapSubmissionToSheetRow(submission, at);
+    return Object.fromEntries(FEEDBACK_SHEET_COLUMNS.map((name, i) => [name, row[i]]));
+  };
+
+  /**
+   * Spelled out here rather than imported from the mapper, so a swapped `picked(...)` line is
+   * caught. `other` has no column: it is recorded through `open_text` only.
+   */
+  const EXPECTED_STEP_COLUMN: Record<FrictionArea, string | null> = {
+    backup_wallet: 'step_backup_wallet',
+    choosing_agent: 'step_choose_agent',
+    activity_rewards: 'step_rewards_staking',
+    funding_agent: 'step_funding',
+    agent_activity: 'step_understanding_agent',
+    everything_smooth: 'step_no_issues',
+    other: null,
+  };
 
   it('produces one cell per declared column', () => {
     const row = mapSubmissionToSheetRow(submissionBuilder(), submittedAt);
     expect(row).toHaveLength(FEEDBACK_SHEET_COLUMNS.length);
-    expect(row).toHaveLength(16);
+    expect(row).toHaveLength(15);
   });
 
   it('writes the columns in the sheet header order', () => {
-    const row = mapSubmissionToSheetRow(submissionBuilder(), submittedAt);
-    expect(row).toEqual([
-      VALID_UUID,
-      '2026-09-07T12:00:00Z',
-      2,
-      true, // step_backup_wallet
-      false, // step_choose_agent
-      false, // step_rewards_staking
-      true, // step_funding
-      false, // step_understanding_agent
-      false, // step_no_issues
-      'Took a while.',
-      '0.9.4',
-      'Darwin 24.3.0 (arm64)',
-      'polymarket_trader',
-      1560, // 93600 s in minutes
-      42,
-      false, // step_other
-    ]);
+    expect(namedRow()).toEqual({
+      response_id: VALID_UUID,
+      submitted_at: '2026-09-07T12:00:00Z',
+      'rating (1-3)': 2,
+      step_backup_wallet: true,
+      step_choose_agent: false,
+      step_rewards_staking: false,
+      step_funding: true,
+      step_understanding_agent: false,
+      step_no_issues: false,
+      open_text: 'Took a while.',
+      pearl_version: '0.9.4',
+      os: 'Darwin 24.3.0 (arm64)',
+      agent: 'polymarket_trader',
+      time_to_first_success_min: 1560, // 93600 s
+      time_to_complete_survey_sec: 42,
+    });
   });
 
   it('keeps numeric and boolean cells typed rather than stringified', () => {
-    const row = mapSubmissionToSheetRow(submissionBuilder(), submittedAt);
-    expect(typeof row[column('rating (1-3)')]).toBe('number');
-    expect(typeof row[column('step_backup_wallet')]).toBe('boolean');
-    expect(typeof row[column('time_to_first_success_min')]).toBe('number');
-    expect(typeof row[column('time_to_complete_survey_sec')]).toBe('number');
+    const named = namedRow();
+    expect(typeof named['rating (1-3)']).toBe('number');
+    expect(typeof named.step_backup_wallet).toBe('boolean');
+    expect(typeof named.time_to_first_success_min).toBe('number');
+    expect(typeof named.time_to_complete_survey_sec).toBe('number');
   });
 
-  it('sets only step_no_issues for the fast exit', () => {
-    const row = mapSubmissionToSheetRow(
-      submissionBuilder({ frictionAreas: ['everything_smooth'], rating: 3 }),
-      submittedAt,
-    );
-    const stepColumns = row.slice(column('step_backup_wallet'), column('open_text'));
-    expect(stepColumns).toEqual([false, false, false, false, false, true]);
-    expect(row[column('step_other')]).toBe(false);
-  });
-
-  it('records other in its own column', () => {
-    const row = mapSubmissionToSheetRow(
-      submissionBuilder({ frictionAreas: ['other'] }),
-      submittedAt,
-    );
-    expect(row[column('step_other')]).toBe(true);
-    expect(row[column('step_no_issues')]).toBe(false);
+  it.each(VALID_FRICTION_AREAS)('sets only the column for %s', (area) => {
+    const row = mapSubmissionToSheetRow(submissionBuilder({ frictionAreas: [area] }), submittedAt);
+    const selected = FEEDBACK_SHEET_COLUMNS.filter((_name, i) => row[i] === true);
+    const expected = EXPECTED_STEP_COLUMN[area];
+    expect(selected).toEqual(expected ? [expected] : []);
   });
 
   it('writes unavailable for a null time to first success', () => {
-    const row = mapSubmissionToSheetRow(
-      submissionBuilder({ timeToFirstSuccessSeconds: null }),
-      submittedAt,
-    );
-    expect(row[column('time_to_first_success_min')]).toBe('unavailable');
+    const named = namedRow(submissionBuilder({ timeToFirstSuccessSeconds: null }));
+    expect(named.time_to_first_success_min).toBe('unavailable');
   });
 
   it('writes 0 minutes rather than unavailable for a zero time to first success', () => {
-    const row = mapSubmissionToSheetRow(
-      submissionBuilder({ timeToFirstSuccessSeconds: 0 }),
-      submittedAt,
-    );
-    expect(row[column('time_to_first_success_min')]).toBe(0);
+    const named = namedRow(submissionBuilder({ timeToFirstSuccessSeconds: 0 }));
+    expect(named.time_to_first_success_min).toBe(0);
   });
 
   it('rounds time to first success to whole minutes', () => {
-    const row = mapSubmissionToSheetRow(
-      submissionBuilder({ timeToFirstSuccessSeconds: 2249 }),
-      submittedAt,
-    );
-    expect(row[column('time_to_first_success_min')]).toBe(37);
+    const named = namedRow(submissionBuilder({ timeToFirstSuccessSeconds: 2249 }));
+    expect(named.time_to_first_success_min).toBe(37);
   });
 
   it('reuses the original timestamp on replay rather than the replay time', () => {
-    const originalSubmittedAt = '2026-09-01T08:30:00.000Z';
-    const row = mapSubmissionToSheetRow(submissionBuilder(), originalSubmittedAt);
-    expect(row[column('submitted_at')]).toBe('2026-09-01T08:30:00Z');
+    const named = namedRow(submissionBuilder(), '2026-09-01T08:30:00.000Z');
+    expect(named.submitted_at).toBe('2026-09-01T08:30:00Z');
   });
 
   it('never emits a value that was not validated onto the row', () => {

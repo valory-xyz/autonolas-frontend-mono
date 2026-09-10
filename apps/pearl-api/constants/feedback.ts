@@ -51,9 +51,8 @@ export const GOOGLE_SHEETS_SCOPE = 'https://www.googleapis.com/auth/spreadsheets
 export const FEEDBACK_SHEET_TAB = 'Responses';
 
 /**
- * Fixed column order, matching the sheet's header row exactly. This constant is the code-side
- * half of that contract, so both the submit handler and the cron replay write the same shape.
- * One boolean column per friction option, so a response can be filtered per step.
+ * Column order, matching the sheet's header row exactly. `mapSubmissionToSheetRow` emits cells
+ * in this order, so this is the only place it is defined.
  */
 export const FEEDBACK_SHEET_COLUMNS = [
   'response_id',
@@ -71,8 +70,9 @@ export const FEEDBACK_SHEET_COLUMNS = [
   'agent',
   'time_to_first_success_min',
   'time_to_complete_survey_sec',
-  'step_other',
 ] as const;
+
+export type FeedbackSheetColumn = (typeof FEEDBACK_SHEET_COLUMNS)[number];
 
 /**
  * Append range. The tab name alone is valid A1 notation: the Sheets API searches it for the
