@@ -34,17 +34,15 @@ export const PLATFORM_OPTIONS = AVAILABLE_ON_VALUES.map((value) => ({
   label: AVAILABLE_ON_LABELS[value],
 }));
 
-// Only chains that actually have a listed contract: CHAIN_NAMES also holds chains
-// with no staking contracts yet (e.g. Robinhood), which would filter to an empty table.
-export const buildChainOptions = (chainIds: number[]) => [
+export const CHAIN_OPTIONS = [
   { value: 'all', label: 'All chains' },
-  ...[...new Set(chainIds)]
-    .sort((a, b) => a - b)
-    .map((chainId) => {
-      const name = CHAIN_NAMES[chainId] ?? String(chainId);
+  ...Object.entries(CHAIN_NAMES)
+    .sort(([a], [b]) => Number(a) - Number(b))
+    .map(([chainIdStr, name]) => {
+      const chainId = Number(chainIdStr);
       const logoSrc = CHAIN_LOGOS[chainId];
       return {
-        value: String(chainId),
+        value: chainIdStr,
         label: (
           <Flex align="center" gap={8}>
             {logoSrc && <Image src={logoSrc} alt={name} width={16} height={16} />}
