@@ -2,7 +2,7 @@ import { ethers } from 'ethers';
 import { kebabCase } from 'lodash';
 import { mainnet, gnosis, polygon, arbitrum, base, optimism, celo, mode } from 'viem/chains';
 
-import { RPC_URLS } from 'libs/util-constants/src';
+import { RPC_URLS, robinhood } from 'libs/util-constants/src';
 import { isL1Network } from 'libs/util-functions/src';
 
 import { AGENT_REGISTRY_CONTRACT } from 'common-util/AbiAndAddresses/agentRegistry';
@@ -35,6 +35,7 @@ const NETWORK_TO_CHAIN_ID: Record<string, number> = {
   'op-mainnet': optimism.id,
   celo: celo.id,
   'mode-mainnet': mode.id,
+  'robinhood-chain': robinhood.id,
 };
 
 export const getChainIdFromNetwork = (network: string): number | null => {

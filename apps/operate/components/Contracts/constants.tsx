@@ -24,6 +24,7 @@ export const CHAIN_LOGOS: Partial<Record<number, string>> = {
   137: '/images/polygon-logo.svg',
   8_453: '/images/base-logo.svg',
   34_443: '/images/mode-logo.svg',
+  4_663: '/images/robinhood-logo.png',
   42_161: '/images/arbitrum-logo.svg',
   42_220: '/images/celo-logo.svg',
 };
