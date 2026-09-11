@@ -4,7 +4,6 @@ import {
   TrophyOutlined,
   // XOutlined,
 } from '@ant-design/icons';
-import { Grid } from 'antd';
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 
@@ -17,17 +16,25 @@ const menuItems = [
   { key: 'docs', label: 'Docs', icon: <FileTextOutlined /> },
 ];
 
-const { useBreakpoint } = Grid;
-
 type MenuProps = {
   isBannerVisible: boolean;
   onBannerClose: () => void;
   isMenuVisible: boolean;
   onMenuClose: () => void;
+  /**
+   * Passed in rather than read from `useBreakpoint` here, so the sidebar makes the same call as
+   * the Layout and both agree with what the server rendered.
+   */
+  isDesktop: boolean;
 };
 
-export const Menu = ({ isBannerVisible, onBannerClose, isMenuVisible, onMenuClose }: MenuProps) => {
-  const screens = useBreakpoint();
+export const Menu = ({
+  isBannerVisible,
+  onBannerClose,
+  isMenuVisible,
+  onMenuClose,
+  isDesktop,
+}: MenuProps) => {
   const router = useRouter();
   const [selectedMenu, setSelectedMenu] = useState('leaderboard');
   const { pathname } = router;
@@ -47,12 +54,12 @@ export const Menu = ({ isBannerVisible, onBannerClose, isMenuVisible, onMenuClos
   const handleMenuItemClick = ({ key }: { key: string }) => {
     router.push(`/${key}`);
     setSelectedMenu(key);
-    if (!screens.md) {
+    if (!isDesktop) {
       onMenuClose();
     }
   };
 
-  if (screens.md || isMenuVisible)
+  if (isDesktop || isMenuVisible)
     return (
       <CustomMenu
         theme="light"

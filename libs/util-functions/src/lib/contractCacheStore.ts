@@ -46,7 +46,7 @@ export function createContractCacheStore<T>({ prefix, getToken }: ContractCacheS
   ): Promise<ContractCacheSnapshot<T> | null> {
     try {
       const path = blobPath(chainId, address);
-      const { blobs } = await list({ prefix: path, limit: 1, token: getToken() ?? undefined });
+      const { blobs } = await list({ prefix: path, limit: 1, token: getToken() });
 
       const blob = blobs.find((b) => b.pathname === path);
       if (!blob) return null;
@@ -61,8 +61,14 @@ export function createContractCacheStore<T>({ prefix, getToken }: ContractCacheS
     }
   }
 
-  /** Writes a snapshot, stamping it. Rethrows, so callers decide whether a failed warm matters. */
+  /**
+   * Writes a snapshot, stamping it. Rethrows, so callers decide whether a failed warm matters.
+   * With no token configured it does nothing: the store owns the token, so callers do not have
+   * to check for it before deciding whether a warm is possible.
+   */
   async function setContractCache(chainId: number, address: string, data: T): Promise<void> {
+    if (!getToken()) return;
+
     const path = blobPath(chainId, address);
     const snapshot: ContractCacheSnapshot<T> = { data, timestamp: Date.now() };
 
@@ -72,7 +78,7 @@ export function createContractCacheStore<T>({ prefix, getToken }: ContractCacheS
         addRandomSuffix: false,
         contentType: 'application/json',
         cacheControlMaxAge: 0,
-        token: getToken() ?? undefined,
+        token: getToken(),
       });
     } catch (error) {
       console.error('Contract cache blob put failed:', { chainId, address, path }, error);

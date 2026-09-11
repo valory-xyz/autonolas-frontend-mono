@@ -18,9 +18,10 @@ type Options<T, P extends { [key: string]: unknown }> = {
   emptyValue: T;
   /** Upper bound on the fetch. Keep it below the deployment's function `maxDuration`. */
   timeoutMs: number;
-  revalidateSeconds: number;
+  /** How long a good snapshot is served before regenerating. Defaults to 5 minutes. */
+  revalidateSeconds?: number;
   /** Retry sooner after a failure so a stale snapshot is not held for a full window. */
-  revalidateOnErrorSeconds: number;
+  revalidateOnErrorSeconds?: number;
   /** Identifies the page in error logs. */
   label: string;
   toProps: (snapshot: Snapshot<T>) => P;
@@ -37,13 +38,22 @@ type Options<T, P extends { [key: string]: unknown }> = {
  *   retries later — this is what "render the last known snapshot" actually requires.
  * - **During the build**, swallow. A throw here fails the whole build, and there is no previous
  *   page to fall back to. The page ships with `emptyValue` and the first revalidation fills it in.
+ *
+ * Note `next dev` is neither of those phases, so it takes the rethrow branch: a slow or failing
+ * RPC surfaces as the error overlay rather than an empty table. That is deliberate — it is the
+ * same signal production gets — but it does mean local work on these pages needs the RPC and
+ * subgraph env vars set.
  */
+/** Every caller wanted the same cadence, so it lives here rather than in each page. */
+const DEFAULT_REVALIDATE_SECONDS = 300;
+const DEFAULT_REVALIDATE_ON_ERROR_SECONDS = 60;
+
 export function createSnapshotGetStaticProps<T, P extends { [key: string]: unknown }>({
   fetchSnapshot,
   emptyValue,
   timeoutMs,
-  revalidateSeconds,
-  revalidateOnErrorSeconds,
+  revalidateSeconds = DEFAULT_REVALIDATE_SECONDS,
+  revalidateOnErrorSeconds = DEFAULT_REVALIDATE_ON_ERROR_SECONDS,
   label,
   toProps,
 }: Options<T, P>): GetStaticProps<P> {

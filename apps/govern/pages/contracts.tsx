@@ -12,6 +12,14 @@ import { StakingContract } from 'types';
  *  the fetch short first. 45 s was not enough: the govern fan-out measured ~36 s once and then
  *  exceeded 45 s on the next run, which would intermittently ship the fallback instead of the
  *  table. */
+/**
+ * Vercel's default function duration is far below what this fetch needs, and it cuts the fetch
+ * short whatever `ISR_TIMEOUT_MS` says. Set here rather than in a `vercel.json` so it does not
+ * depend on the project's Root Directory being the app folder, and so the two numbers sit
+ * together.
+ */
+export const config = { maxDuration: 120 };
+
 const ISR_TIMEOUT_MS = 90_000;
 /** Weights change once a week; the client refreshes them after hydration anyway. */
 const REVALIDATE_SECONDS = 300;

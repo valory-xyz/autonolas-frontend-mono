@@ -19,15 +19,6 @@ const StyledMain = styled.main`
 `;
 
 const STEP_CONTENT_STYLE = { maxWidth: '720px', width: '100%' };
-
-/* Inactive steps stay in the DOM so the served HTML carries all six, but must not render or
-   take focus. `hidden` covers both, and the explicit rule stops any inherited `display` from
-   overriding the attribute's default. */
-const StepPanels = styled.div`
-  [hidden] {
-    display: none !important;
-  }
-`;
 const LAST_STEP_KEY = 'path_last_step';
 
 const renderStep = (
@@ -72,13 +63,11 @@ export const PathPage = () => {
               once, so rendering only `steps[step]` published one step of six and gave no sign
               the rest existed. Only the selected panel is visible; the others are `hidden`, so
               the page looks and behaves exactly as before for anyone running the app. */}
-          <StepPanels>
-            {steps.map(({ title, content }, index) => (
-              <div key={title} hidden={index !== step}>
-                {renderStep(content, setPrevStep, setNextStep, index === steps.length - 1)}
-              </div>
-            ))}
-          </StepPanels>
+          {steps.map(({ title, content }, index) => (
+            <div key={title} hidden={index !== step}>
+              {renderStep(content, setPrevStep, setNextStep, index === steps.length - 1)}
+            </div>
+          ))}
         </Card>
       </Flex>
     </StyledMain>

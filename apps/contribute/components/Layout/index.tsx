@@ -8,6 +8,7 @@ import { useDispatch } from 'react-redux';
 
 import { LogoSvg } from 'components/SVGs/logo';
 import { useFetchApplicationData } from 'common-util/hooks/useFetchApplicationData';
+import { useIsMounted } from 'common-util/hooks/useIsMounted';
 import Login from 'components/Login';
 import { setIsVerified, useAppSelector } from 'store/setup';
 import { MENU_WIDTH } from 'util/constants';
@@ -26,7 +27,12 @@ const { Text } = Typography;
 
 export const Layout = ({ children }: { children: React.ReactNode }) => {
   const screens = useBreakpoint();
+  const isMounted = useIsMounted();
   const router = useRouter();
+
+  // `useBreakpoint` is `{}` on the server. Assume desktop until mounted so the sidebar is in the
+  // HTML; a narrow viewport corrects itself right after hydration.
+  const isDesktop = isMounted ? !!screens.md : true;
   const [isMenuVisible, setIsMenuVisible] = useState(false);
   const { pathname } = router;
 
@@ -92,7 +98,7 @@ export const Layout = ({ children }: { children: React.ReactNode }) => {
               </Logo>
             </Link>
             <NavDropdown currentSite="contribute" />
-            {!screens.md && (
+            {!isDesktop && (
               <Button className="ml-4" onClick={() => setIsMenuVisible((prev) => !prev)}>
                 Menu
               </Button>
@@ -109,9 +115,10 @@ export const Layout = ({ children }: { children: React.ReactNode }) => {
         onBannerClose={handleBannerClose}
         isMenuVisible={isMenuVisible}
         onMenuClose={() => setIsMenuVisible(false)}
+        isDesktop={isDesktop}
       />
 
-      <Content className="site-layout" style={{ marginLeft: screens.md ? `${MENU_WIDTH}px` : '0' }}>
+      <Content className="site-layout" style={{ marginLeft: isDesktop ? `${MENU_WIDTH}px` : '0' }}>
         <div className="site-layout-background">{children}</div>
 
         {!isPadded && (
@@ -121,7 +128,9 @@ export const Layout = ({ children }: { children: React.ReactNode }) => {
         )}
       </Content>
 
-      {!isPadded && <ServiceStatus />}
+      {/* Deferred to the client: `ServiceStatusInfo` branches on `useBreakpoint` too, and a
+          health widget is of no use to a reader who cannot run it. */}
+      {!isPadded && isMounted && <ServiceStatus />}
     </CustomLayout>
   );
 };

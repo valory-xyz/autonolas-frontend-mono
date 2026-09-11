@@ -1,6 +1,6 @@
 import { CheckOutlined, PlusOutlined } from '@ant-design/icons';
 import { Button, Card as CardAntd, Space, Table, Typography } from 'antd';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { ColumnsType } from 'antd/es/table';
 import styled from 'styled-components';
 import { Allocation, StakingContract } from 'types';
@@ -34,7 +34,7 @@ const getColumns = ({
   allocations,
   actionsVisible,
   actionsDisabled,
-}: Omit<ContractsListProps, 'isUpdating' | 'initialContracts'> & {
+}: Omit<ContractsListProps, 'isUpdating' | 'initialContracts' | 'snapshotGeneratedAt'> & {
   actionsVisible: boolean;
   actionsDisabled: boolean;
 }): ColumnsType<StakingContract> => {
@@ -134,9 +134,16 @@ export const ContractsList = ({
   // server and runs only after the first client render, so that first render still matches the
   // server markup. Once the client has settled we trust it even when it returns nothing, or a
   // genuinely empty list would leave the stale snapshot on screen forever.
+  // Only settle once loading has been observed to start and then finish: settling on an initial
+  // all-false reading would drop the snapshot permanently and flash an empty table.
+  const hasStartedLoading = useRef(false);
   const [hasClientSettled, setHasClientSettled] = useState(false);
   useEffect(() => {
-    if (!isStakingContractsLoading) setHasClientSettled(true);
+    if (isStakingContractsLoading) {
+      hasStartedLoading.current = true;
+    } else if (hasStartedLoading.current) {
+      setHasClientSettled(true);
+    }
   }, [isStakingContractsLoading]);
 
   const contracts =

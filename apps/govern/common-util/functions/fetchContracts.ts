@@ -8,6 +8,7 @@ import { getAddressFromBytes32 } from 'libs/util-functions/src';
 import { fetchNominees, Nominee } from 'libs/common-contract-functions/src';
 
 import { getContractCache, setContractCache } from 'common-util/blob';
+import { mapWithConcurrency } from 'common-util/functions/mapWithConcurrency';
 import { fetchContractCacheDataFromChain } from 'common-util/fetch-contract-cache-data';
 import { WEEK_IN_SECONDS } from 'common-util/constants/time';
 import { Metadata, StakingContract, Weight } from 'types';
@@ -98,26 +99,6 @@ async function fetchWeights(
 /** Concurrency limit for cache-miss fetches, matching `/api/contracts/batch`. */
 const CACHE_MISS_CONCURRENCY = 5;
 
-/** Runs `fn` over `items` with bounded concurrency. */
-async function mapWithConcurrency<T, R>(
-  items: T[],
-  limit: number,
-  fn: (item: T) => Promise<R>,
-): Promise<R[]> {
-  const results: R[] = new Array(items.length);
-  let nextIndex = 0;
-
-  async function worker() {
-    while (nextIndex < items.length) {
-      const i = nextIndex++;
-      results[i] = await fn(items[i]);
-    }
-  }
-
-  await Promise.all(Array.from({ length: Math.min(limit, items.length) }, () => worker()));
-  return results;
-}
-
 const EMPTY_METADATA: Metadata = { name: '', description: '' };
 
 /**
@@ -166,9 +147,9 @@ async function fetchMetadataForNominees(nominees: Nominee[]): Promise<Record<str
 
       // Warming the cache is best-effort and must not affect what we just read:
       // `setContractCache` rethrows on failure, so sharing a try block with the fetch above
-      // would let a failed blob write discard metadata we had already resolved. Skip entirely
-      // without a token — a build environment with none would log one error per contract.
-      if (!data || !process.env.GOVERN_BLOB_READ_WRITE_TOKEN) return;
+      // would let a failed blob write discard metadata we had already resolved. The store
+      // itself no-ops when no token is configured.
+      if (!data) return;
       try {
         await setContractCache(chainId, address, data);
       } catch (error) {

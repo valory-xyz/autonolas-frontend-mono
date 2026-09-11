@@ -59,7 +59,7 @@ describe('ContractsPage pre-rendered snapshot', () => {
       <ContractsPage initialContracts={SNAPSHOT} snapshotGeneratedAt="2026-09-07T18:00:00.000Z" />,
     );
 
-    expect(screen.getByText(/1 Olas staking contracts are listed below/)).toBeInTheDocument();
+    expect(screen.getByText(/1 Olas staking contract is listed below/)).toBeInTheDocument();
     expect(screen.getByText(/snapshot taken 7 Sep 2026, 18:00 UTC/)).toBeInTheDocument();
   });
 
@@ -80,9 +80,9 @@ describe('ContractsPage pre-rendered snapshot', () => {
     expect(screen.getByText('Prerendered Contract')).toBeInTheDocument();
     expect(screen.queryByText('Not Available Contract')).not.toBeInTheDocument();
 
-    expect(screen.getByText(/1 Olas staking contracts are listed below/)).toBeInTheDocument();
+    expect(screen.getByText(/1 Olas staking contract is listed below/)).toBeInTheDocument();
     expect(
-      screen.getByText(/1 further registered contracts are not listed here/),
+      screen.getByText(/A further 1 registered contract is not yet available on any platform/),
     ).toBeInTheDocument();
   });
 

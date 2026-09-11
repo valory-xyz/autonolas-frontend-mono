@@ -1,20 +1,12 @@
-import { gql, GraphQLClient } from 'graphql-request';
+import { gql } from 'graphql-request';
 
+import { REGISTRY_GRAPHQL_CLIENT } from 'common-util/graphql';
 import { TOTAL_VIEW_COUNT } from 'util/constants';
 
 /**
  * Server-side reads of the registry subgraph for the listing pages. The queries mirror the ones
  * in each list's hooks — if those change, change these too.
  */
-
-const client = () => {
-  const url = process.env.NEXT_PUBLIC_AUTONOLAS_SUB_GRAPH_URL;
-  if (!url) throw new Error('NEXT_PUBLIC_AUTONOLAS_SUB_GRAPH_URL is not set');
-  return new GraphQLClient(url, {
-    method: 'POST',
-    jsonSerializer: { parse: JSON.parse, stringify: JSON.stringify },
-  });
-};
 
 export type ListedUnit = {
   id: string;
@@ -64,13 +56,13 @@ const unitsQuery = (where: string) => gql`
 
 /** The most recent AI agents (services), matching the list's default first page. */
 export async function fetchServices(): Promise<ListedUnit[]> {
-  const data = await client().request<{ services?: ListedUnit[] }>(SERVICES_QUERY);
+  const data = await REGISTRY_GRAPHQL_CLIENT.request<{ services?: ListedUnit[] }>(SERVICES_QUERY);
   return data?.services ?? [];
 }
 
 /** The most recent components. */
 export async function fetchComponents(): Promise<ListedUnit[]> {
-  const data = await client().request<{ units?: ListedUnit[] }>(
+  const data = await REGISTRY_GRAPHQL_CLIENT.request<{ units?: ListedUnit[] }>(
     unitsQuery(COMPONENT_PACKAGE_TYPES),
   );
   return data?.units ?? [];
@@ -78,6 +70,8 @@ export async function fetchComponents(): Promise<ListedUnit[]> {
 
 /** The most recent agent blueprints. */
 export async function fetchAgentBlueprints(): Promise<ListedUnit[]> {
-  const data = await client().request<{ units?: ListedUnit[] }>(unitsQuery('packageType: agent'));
+  const data = await REGISTRY_GRAPHQL_CLIENT.request<{ units?: ListedUnit[] }>(
+    unitsQuery('packageType: agent'),
+  );
   return data?.units ?? [];
 }

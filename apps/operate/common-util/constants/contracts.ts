@@ -229,6 +229,17 @@ export const EXTRA_STAKING_CONTRACTS: Nominee[] = [];
  * survives on one path cannot be dropped on the other and change the Live/Not-available
  * split between the pre-rendered HTML and the hydrated table.
  */
+/**
+ * Nominees plus the extra contracts this app surfaces, skipping any already present.
+ * Used by both the ISR fetch and the client hook — if they build different lists, the
+ * pre-rendered table and the hydrated one disagree.
+ */
+export const withExtraStakingContracts = <T extends { account: string }>(nominees: T[]): T[] => {
+  const existing = new Set(nominees.map((n) => n.account.toLowerCase()));
+  const extras = EXTRA_STAKING_CONTRACTS.filter((e) => !existing.has(e.account.toLowerCase()));
+  return [...nominees, ...(extras as unknown as T[])];
+};
+
 export const AVAILABLE_ON_VALUES: AvailableOn[] = ['pearl', 'contribute', 'lst'];
 
 export const AVAILABLE_ON_LABELS: Record<AvailableOn, string> = {

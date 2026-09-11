@@ -20,11 +20,15 @@ export async function fetchLeaderboardData(): Promise<ContributeAgent[]> {
 
   let attributeTypeId: string;
   try {
-    const parsedMapping = JSON.parse(attributeIdMappingRaw) as Record<string, string>;
-    if (typeof parsedMapping.USER !== 'string') {
-      throw new Error('ATTRIBUTE_ID_MAPPING.USER must be a string');
+    const parsedMapping = JSON.parse(attributeIdMappingRaw) as Record<string, string | number>;
+    const userAttributeId = parsedMapping.USER;
+    // The ids are written as JSON numbers ({"USER":8}), and requiring a string here rejected
+    // them: every call threw before reaching AFMDB, which is why /api/leaderboard answered 500
+    // and the table stood empty. It only ever goes into a URL, so accept either and coerce.
+    if (typeof userAttributeId !== 'string' && typeof userAttributeId !== 'number') {
+      throw new Error('ATTRIBUTE_ID_MAPPING.USER must be a string or a number');
     }
-    attributeTypeId = parsedMapping.USER;
+    attributeTypeId = String(userAttributeId);
   } catch (error) {
     throw new Error('Invalid ATTRIBUTE_ID_MAPPING environment variable');
   }

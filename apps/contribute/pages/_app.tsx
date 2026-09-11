@@ -4,7 +4,6 @@ import { ApolloProvider } from '@apollo/client';
 import { RainbowKitProvider, lightTheme } from '@rainbow-me/rainbowkit';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import type { AppProps } from 'next/app';
-import { useEffect, useState } from 'react';
 import { Provider } from 'react-redux';
 import { cookieToInitialState, WagmiProvider } from 'wagmi';
 
@@ -34,17 +33,6 @@ const rainbowKitTheme = lightTheme({
 const ContributeApp = ({ Component, pageProps }: AppProps) => {
   const initialState = cookieToInitialState(wagmiConfig);
 
-  /**
-   * Fixes hydration error caused by ServiceStatus component,
-   * also, currently sidebar depends on a hook,
-   * in future we can handle it using a custom request header.
-   */
-  const [isMounted, setIsMounted] = useState(false);
-
-  useEffect(() => {
-    setIsMounted(true);
-  }, []);
-
   return (
     <>
       <GlobalStyles />
@@ -52,19 +40,17 @@ const ContributeApp = ({ Component, pageProps }: AppProps) => {
 
       <Provider store={store}>
         <AutonolasThemeProvider>
-          {isMounted && (
-            <WagmiProvider config={wagmiConfig} initialState={initialState}>
-              <QueryClientProvider client={queryClient}>
-                <RainbowKitProvider theme={rainbowKitTheme}>
-                  <ApolloProvider client={client}>
-                    <Layout>
-                      <Component {...pageProps} />
-                    </Layout>
-                  </ApolloProvider>
-                </RainbowKitProvider>
-              </QueryClientProvider>
-            </WagmiProvider>
-          )}
+          <WagmiProvider config={wagmiConfig} initialState={initialState}>
+            <QueryClientProvider client={queryClient}>
+              <RainbowKitProvider theme={rainbowKitTheme}>
+                <ApolloProvider client={client}>
+                  <Layout>
+                    <Component {...pageProps} />
+                  </Layout>
+                </ApolloProvider>
+              </RainbowKitProvider>
+            </QueryClientProvider>
+          </WagmiProvider>
         </AutonolasThemeProvider>
       </Provider>
     </>

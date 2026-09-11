@@ -17,13 +17,13 @@ import {
   SubgraphStakingRow,
 } from 'common-util/graphql';
 import {
-  EXTRA_STAKING_CONTRACTS,
   STAKING_CONTRACT_DETAILS,
   getApy,
   getEpochEndsAt,
   getStakeRequired,
   getTimeRemainingFormatted,
   sanitizeAvailableOn,
+  withExtraStakingContracts,
 } from 'common-util/constants/contracts';
 
 const useContractDetails = (nominees: Nominee[], functionName: string) => {
@@ -239,14 +239,9 @@ export const useStakingContractsList = () => {
         ),
     );
 
-    // Surface contracts that are no longer (or not yet) registered as nominees but
-    // should still be listed (see EXTRA_STAKING_CONTRACTS). Skip any already present.
-    const existingAccounts = new Set(filtered.map((n) => n.account.toLowerCase()));
-    const extras = EXTRA_STAKING_CONTRACTS.filter(
-      (extra) => !existingAccounts.has(extra.account.toLowerCase()),
-    );
-
-    return [...filtered, ...extras];
+    // Surface contracts that are no longer (or not yet) registered as nominees but should still
+    // be listed. Shared with the ISR fetch so both build the same list.
+    return withExtraStakingContracts(filtered);
   }, [nomineesData]);
 
   const cacheMap = useContractCacheMap(nominees);

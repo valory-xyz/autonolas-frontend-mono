@@ -2,15 +2,17 @@ import { Alert, Col, Row } from 'antd';
 
 import { useAppSelector } from 'store/setup';
 import { LeaderboardUser } from 'store/types';
+import { Campaign } from 'types/moduleDetails';
 
 import { Campaigns } from './Campaigns';
 import { LeaderboardTable } from './LeaderboardTable';
 
 type LeaderboardProps = {
   initialLeaderboard?: LeaderboardUser[];
+  initialCampaigns?: Campaign[];
 };
 
-export const Leaderboard = ({ initialLeaderboard }: LeaderboardProps) => {
+export const Leaderboard = ({ initialLeaderboard, initialCampaigns }: LeaderboardProps) => {
   const isVerified = useAppSelector((state) => state.setup.isVerified);
 
   return (
@@ -27,7 +29,7 @@ export const Leaderboard = ({ initialLeaderboard }: LeaderboardProps) => {
         <LeaderboardTable initialLeaderboard={initialLeaderboard} />
       </Col>
       <Col xs={24} lg={10}>
-        <Campaigns />
+        <Campaigns initialCampaigns={initialCampaigns} />
       </Col>
     </Row>
   );
