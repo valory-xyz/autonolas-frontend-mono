@@ -61,9 +61,11 @@ Rules that are easy to break:
 - **The payload is anonymous and must stay that way.** No wallet address, account id, email or
   IP-derived value may be added to the request type, the sheet row or the pending blob. The row
   mapper reads the validated submission rather than `req.body`, which is what enforces this.
-- **Do not reorder the sheet columns.** `FEEDBACK_SHEET_COLUMNS` in `constants/feedback.ts` is the
-  code-side half of a contract with the sheet's header row; the submit route and the cron replay
-  both write through it.
+- **Do not reorder the sheet columns.** `FEEDBACK_SHEET_COLUMNS` in `constants/feedback.ts` must
+  match the `Responses` header row; `mapSubmissionToSheetRow` emits cells in that order, so both
+  the submit route and the cron replay write through it. Each friction option maps to its
+  `step_*` column in `FRICTION_AREA_COLUMN` (`utils/feedback.ts`); "Other" has no column and is
+  recorded through `open_text` only.
 - **The append must keep `insertDataOption=INSERT_ROWS`** — without it the Sheets API can
   overwrite cells below the detected table. `valueInputOption=RAW` keeps free text starting with
   `=` from being evaluated as a formula *in Sheets*. The literal survives into a CSV export, and
@@ -91,8 +93,8 @@ Rules that are easy to break:
   listed with no cursor, so an entry that always fails would otherwise hold a slot on every run.
   Anything under that prefix means the writer has a bug and is worth reading by hand.
 - **Sheet cells keep their types.** The row mapper emits numbers and booleans as such (not
-  strings) so that under `valueInputOption=RAW` the rating, timing and "everything was smooth"
-  columns are numeric/boolean cells that AVERAGE and filters work on.
+  strings) so that under `valueInputOption=RAW` the rating, timing and `step_*` columns are
+  numeric/boolean cells that AVERAGE and filters work on.
 
 **One-time Google setup** (not code): enable the Sheets API on the Google Cloud project; create a
 service account with no project roles; create a JSON key; share the spreadsheet with the

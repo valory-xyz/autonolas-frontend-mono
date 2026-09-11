@@ -1,7 +1,9 @@
 import {
   EVERYTHING_SMOOTH,
   FEEDBACK_COMMENT_MAX_LENGTH,
+  FEEDBACK_SHEET_COLUMNS,
   FEEDBACK_SHORT_FIELD_MAX_LENGTH,
+  FeedbackSheetColumn,
   TIME_TO_FIRST_SUCCESS_UNAVAILABLE,
   VALID_FRICTION_AREAS,
   VALID_RATINGS,
@@ -126,6 +128,23 @@ const SECONDS_PER_MINUTE = 60;
 /** `2026-09-02T14:32:10Z`, the second-precision form the sheet's examples use. */
 const toSheetTimestamp = (isoTimestamp: string): string => isoTimestamp.replace(/\.\d{3}Z$/, 'Z');
 
+type StepColumn = Extract<FeedbackSheetColumn, `step_${string}`>;
+
+/**
+ * Which sheet column records each friction option. Keyed by every `FrictionArea`, so adding an
+ * option without deciding where it lands is a type error. `null` means deliberately unrecorded:
+ * "Other" has no column of its own; whatever the user meant is in `open_text`.
+ */
+const FRICTION_AREA_COLUMN: Record<FrictionArea, StepColumn | null> = {
+  backup_wallet: 'step_backup_wallet',
+  choosing_agent: 'step_choose_agent',
+  activity_rewards: 'step_rewards_staking',
+  funding_agent: 'step_funding',
+  agent_activity: 'step_understanding_agent',
+  [EVERYTHING_SMOOTH]: 'step_no_issues',
+  other: null,
+};
+
 /**
  * Maps a validated submission to the sheet's row, in `FEEDBACK_SHEET_COLUMNS` order.
  *
@@ -137,29 +156,33 @@ export const mapSubmissionToSheetRow = (
   submission: OnboardingSurveySubmission,
   submittedAt: string,
 ): SheetCell[] => {
-  const picked = (area: FrictionArea) => submission.frictionAreas.includes(area);
   const { os } = submission;
 
-  return [
-    submission.submissionId,
-    toSheetTimestamp(submittedAt),
-    submission.rating,
-    picked('backup_wallet'),
-    picked('choosing_agent'),
-    picked('activity_rewards'),
-    picked('funding_agent'),
-    picked('agent_activity'),
-    picked(EVERYTHING_SMOOTH),
-    submission.comment,
-    submission.pearlVersion,
-    `${os.type} ${os.release} (${os.arch})`,
-    submission.agentType,
-    submission.timeToFirstSuccessSeconds === null
-      ? TIME_TO_FIRST_SUCCESS_UNAVAILABLE
-      : Math.round(submission.timeToFirstSuccessSeconds / SECONDS_PER_MINUTE),
-    submission.timeToCompleteSurveySeconds,
-    picked('other'),
-  ];
+  // Every step column is filled below because every one is the target of some friction area in
+  // FRICTION_AREA_COLUMN; the cast only papers over the loop's construction.
+  const stepCells = {} as Record<StepColumn, boolean>;
+  for (const area of VALID_FRICTION_AREAS) {
+    const column = FRICTION_AREA_COLUMN[area];
+    if (column) stepCells[column] = submission.frictionAreas.includes(area);
+  }
+
+  const cells: Record<FeedbackSheetColumn, SheetCell> = {
+    response_id: submission.submissionId,
+    submitted_at: toSheetTimestamp(submittedAt),
+    'rating (1-3)': submission.rating,
+    ...stepCells,
+    open_text: submission.comment,
+    pearl_version: submission.pearlVersion,
+    os: `${os.type} ${os.release} (${os.arch})`,
+    agent: submission.agentType,
+    time_to_first_success_min:
+      submission.timeToFirstSuccessSeconds === null
+        ? TIME_TO_FIRST_SUCCESS_UNAVAILABLE
+        : Math.round(submission.timeToFirstSuccessSeconds / SECONDS_PER_MINUTE),
+    time_to_complete_survey_sec: submission.timeToCompleteSurveySeconds,
+  };
+
+  return FEEDBACK_SHEET_COLUMNS.map((column) => cells[column]);
 };
 
 /**

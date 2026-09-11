@@ -1,8 +1,8 @@
-import { Button, Col, Flex, Row, Tabs } from 'antd';
+import { Alert, Button, Col, Flex, Row, Tabs } from 'antd';
 import type { ColumnsType, ColumnType } from 'antd/es/table';
 import get from 'lodash/get';
 // React 19: `JSX` is no longer global, must be imported from 'react'.
-import { FC, useCallback, useState, useEffect, useMemo } from 'react';
+import { FC, useCallback, useState, useEffect, useMemo, useRef } from 'react';
 import type { JSX } from 'react';
 import { Address } from 'viem';
 import { useRouter } from 'next/router';
@@ -63,10 +63,15 @@ const getColumns = ({
       title: 'Request Data',
       dataIndex: 'requestIpfsHash',
       key: 'requestIpfsHash',
-      render: (text: string) =>
+      render: (text: string, record: Activity) =>
         text ? (
           <Flex align="center" gap={8}>
-            <AddressLink {...addressLinkProps} address={text} isIpfs />
+            <AddressLink
+              {...addressLinkProps}
+              address={text}
+              isIpfs
+              canNotClick={record.ipfsRetrievable === false}
+            />
           </Flex>
         ) : (
           NA
@@ -76,10 +81,15 @@ const getColumns = ({
       title: 'Delivery Data',
       dataIndex: 'deliveryIpfsHash',
       key: 'deliveryIpfsHash',
-      render: (text: string) =>
+      render: (text: string, record: Activity) =>
         text ? (
           <Flex align="center" gap={8}>
-            <AddressLink {...addressLinkProps} address={text} isIpfs />
+            <AddressLink
+              {...addressLinkProps}
+              address={text}
+              isIpfs
+              canNotClick={record.ipfsRetrievable === false}
+            />
           </Flex>
         ) : (
           NA
@@ -147,6 +157,8 @@ export const Details: FC<DetailsProps> = ({
 
   const [currentTab, setCurrentTab] = useState<CurrentTab>(null);
   const [activityRows, setActivityRows] = useState<Activity[]>([]);
+  const [activityHasMore, setActivityHasMore] = useState<boolean>(false);
+  const [activityDegraded, setActivityDegraded] = useState<boolean>(false);
   const [activityLoading, setActivityLoading] = useState(false);
   const [activityPage, setActivityPage] = useState(1);
   const [isActivityModalVisible, setIsActivityModalVisible] = useState(false);
@@ -211,7 +223,41 @@ export const Details: FC<DetailsProps> = ({
     }
   };
 
+  // Monotonic fetch generation. Increments on every effect run so a
+  // slower earlier response can't overwrite a faster later one — the
+  // Details component isn't keyed by service id at the page level,
+  // so navigating between services would otherwise race and attribute
+  // one service's ``degraded`` (or activity list) to another.
+  const activityFetchGenRef = useRef(0);
+
   useEffect(() => {
+    // Bump the generation at the very top so every effect run
+    // (including ones that early-return on unsupported chains)
+    // invalidates any in-flight fetch from the previous run.
+    // Placing the increment below the network gate would leave the
+    // ref untouched on a Gnosis→Celo switch, letting a slow
+    // Gnosis fetch commit rows / degraded over the reset that just
+    // happened for Celo.
+    activityFetchGenRef.current += 1;
+    const gen = activityFetchGenRef.current;
+
+    // Reset state BEFORE the unsupported-chain early-return so the
+    // previous chain's rows / alerts don't linger when the user
+    // switches networks — the render block is gated on ``currentTab``,
+    // not on ``showTabs``, so stale state would keep rendering
+    // otherwise. ``activityLoading`` is reset here too: an in-flight
+    // fetch at the moment of the switch to an unsupported chain is
+    // orphaned by the gen bump above, and both the ``catch`` and
+    // ``finally`` below are gen-guarded — nothing else clears the
+    // loading flag, so without this line the Activity table would
+    // sit in its loading state until the next supported-chain
+    // effect run.
+    setActivityRows([]);
+    setActivityHasMore(false);
+    setActivityDegraded(false);
+    setActivityPage(1);
+    setActivityLoading(false);
+
     if (!isMarketplaceSupportedNetwork(Number(chainId))) return;
 
     const fetchActivity = async () => {
@@ -224,12 +270,29 @@ export const Details: FC<DetailsProps> = ({
           latest,
         });
 
+        if (gen !== activityFetchGenRef.current) return;
         setActivityRows(json.activities || []);
+        setActivityHasMore(Boolean(json.hasMore));
+        setActivityDegraded(Boolean(json.degraded));
         setActivityPage(1);
       } catch (e) {
+        // Log so a 500 / network drop is distinguishable from a
+        // genuinely empty service in the browser console. The prior
+        // shape swallowed the error identically to "0 rows" with no
+        // trace to correlate against server logs.
+        console.warn(
+          `[service-activity] fetch failed for service ${id} on chain ${chainId}: ${String(e)}`,
+        );
+        if (gen !== activityFetchGenRef.current) return;
         setActivityRows([]);
+        setActivityHasMore(false);
+        // A hard failure is a stronger degradation than a partial
+        // one — keep the banner up so the user can tell an empty
+        // activity list came from "we couldn't reach the source"
+        // rather than "this service has no activity".
+        setActivityDegraded(true);
       } finally {
-        setActivityLoading(false);
+        if (gen === activityFetchGenRef.current) setActivityLoading(false);
       }
     };
 
@@ -290,6 +353,22 @@ export const Details: FC<DetailsProps> = ({
 
       {currentTab === 'activity' && (
         <div style={{ marginTop: showTabs ? 0 : 16 }}>
+          {activityDegraded && (
+            <Alert
+              type="warning"
+              showIcon
+              style={{ marginBottom: 16 }}
+              message="Activity data source is partially degraded. Some rows or payment amounts may be missing until the upstream recovers."
+            />
+          )}
+          {activityHasMore && (
+            <Alert
+              type="info"
+              showIcon
+              style={{ marginBottom: 16 }}
+              message="Showing a capped slice of activity. Requested rows are the most recent by request time. Delivered rows are capped by processing order, so on mechs with a large backfilled history they are not necessarily the newest."
+            />
+          )}
           <DetailsTable
             columns={getColumns({ addressLinkProps, openActivityModal }) as ColumnType<object>[]}
             dataSource={paginatedActivityRows}

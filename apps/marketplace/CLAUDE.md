@@ -21,6 +21,9 @@ Discover, register, deploy, and interact with **mechs** (autonomous AI agents) a
 - **Registry**: `NEXT_PUBLIC_REGISTRY_URL`, `NEXT_PUBLIC_AUTONOLAS_URL`; Safe APIs per chain.
 - **Marketplace activity subgraphs** (per chain): `NEXT_PUBLIC_*_MARKETPLACE_SUBGRAPH_URL` for Ethereum (1), Optimism (10), Gnosis (100), Polygon (137), Base (8453), Arbitrum (42161), Celo (42220).
 - **Registry subgraphs**: Ethereum (1), Optimism (10), Gnosis (100), Polygon (137), Base (8453), Mode (34443), Arbitrum (42161), Celo (42220).
+- **mech-analytics** (activity read path, chains 10 / 100 / 137 / 8453):
+  - API base URL is built in, not an env var: `MECH_ANALYTICS_URL` in `common-util/mechAnalytics/config.ts` (`https://mech-analytics-api.autonolas.tech`). If the endpoint moves, change the constant.
+  - `NEXT_PUBLIC_USE_MECH_ANALYTICS_ROWS` — the only switch. Default ON when unset; set to exactly `"false"` to fall back to the subgraph reader.
 - **Etherscan** API key; **Wallet Project ID**; optional **Solana** (SVM) config.
 - Optional: local registry via Docker (see app README).
 
@@ -47,8 +50,8 @@ All pages use dynamic `[network]` routing (e.g., `/ethereum/ai-agents`).
 
 | Route | Purpose |
 |-------|---------|
-| `/api/services` | Fetch services from marketplace subgraph (per chain) |
-| `/api/service-activity` | Fetch mech request/delivery activity from marketplace subgraph |
+| `/api/services` | Fetch services from marketplace subgraph (per chain). Requester counters can source from mech-analytics under the flag (see below). |
+| `/api/service-activity` | Fetch mech request/delivery activity. Reads from mech-analytics under the flag on chains 10 / 100 / 137 / 8453; falls through to the marketplace subgraph otherwise. |
 | `/api/erc8004/[network]/ai-agents/[serviceId]` | ERC8004 registration metadata |
 | `/api/erc8004/[network]/ai-agents/[serviceId]/agent-card.json` | A2A agent card |
 | `/api/erc8004/[network]/ai-agents/[serviceId]/mcp.json` | MCP server descriptor |
@@ -122,14 +125,46 @@ Consequence: the merged `totalDeliveries` is `max()` of two different measures, 
 
 Note `Service.mechs` resolves to `MechAgent` (legacy path, only has `totalTransactions`), which is a **different entity** from `Mech` — hence the separate top-level `meches` query.
 
-Related: the "Request Data" / "Delivery Data" columns are IPFS **links only** (`AddressLink … isIpfs` builds an `href`, it never fetches). Off-chain payloads stay private by design, so those cells render `NA` — that is correct behaviour, not a regression, and the content must not be re-sourced (see mech-analytics PR #18).
+#### mech-analytics read path (chains 10 / 100 / 137 / 8453)
+
+The activity tab reads from mech-analytics behind `NEXT_PUBLIC_USE_MECH_ANALYTICS_ROWS`: default ON, set to exactly `"false"` to fall back to the subgraph path. The API base URL is built in (`MECH_ANALYTICS_URL` in `common-util/mechAnalytics/config.ts`).
+
+Three fan-outs per request (all `sort_direction=desc` so page 1 is the newest rows):
+
+| Fan-out | Filter | Semantic |
+|---|---|---|
+| Demand delivered | `?requester=<multisig>` on `/v1/data/scored-rows` | Requests this service's safes made and that landed a delivery |
+| Demand pending / abandoned | `?requester=<multisig>` on `/v1/data/unscored-rows` | Requests the mech never delivered (mech-analytics gates admission on `requested_at > 24h` — freshly-fired in-flight requests won't appear for their first day) |
+| Supply | `?delivery_mech=<mech address>` on `/v1/data/scored-rows` | Requests this mech actually delivered. Filters on `delivery_mech`, NOT `mech_address` (which is `priority_mech`), so priority-vs-delivery divergence resolves at the query layer |
+
+The pending-tail gap (< 24h old, undelivered) is closed by unioning subgraph `Request` entities that have no delivery timestamp. Delivered subgraph rows are dropped from the union because mech-analytics covers those via `sort_direction=desc` and unioning them would bypass the `ipfsRetrievable` gate (subgraph rows don't set it).
+
+Column semantics on mech-analytics rows (post alembic 017):
+
+- `deliveredBy` comes from `delivery_mech` directly. No more subgraph-twin merge for this field.
+- `feeUnit` / `feeRaw` / `finalFeeUSD` come from `payment_type` + `delivery_rate` via `mapPaymentToFee()`. `native` → NATIVE / raw wei, `usdc` → USDC / $X.XX (from micro-USDC), `nvm_subscription` → CREDITS. The legacy `Activity.payment` field is not set on mech-analytics rows: `formatPayment` prefers `feeUnit`-based rendering and only falls back to `payment` when no unit is set.
+- `payment_type` has two null shapes that must be handled differently:
+  - **Legitimate NULL (pre-013 historical tail)**: `mapPaymentToFee(null, rate)` returns `{null, null, null}`, and the twin-merge above falls back to the subgraph twin's `payment` / `feeUnit` / `feeRaw` so the Payment row still renders for these rows.
+  - **Unrecognised `payment_type` string (schema drift)**: same null output for the fields, but the mapper emits a `console.warn` (once per unknown value) so ops can add a case. The twin fallback intentionally does NOT fire on this branch so a new payment type doesn't silently mislabel via whatever the twin happens to carry.
+- `feeUSD` / `finalFeeUSD` for on-chain rows can be enriched from the subgraph twin (mech-analytics doesn't project USD) via the request-id merge.
+
+Failure isolation: each shard's fetch has its own `.catch()` so one 5xx doesn't discard the sibling fetches. Failures set `degraded=true` on the response; the API layer shortens the CDN TTL to 60 s in that case so a transient blip doesn't get pinned in cache.
+
+`hasMore` fires only when the descending scan hits `ACTIVITY_MAX_PAGES` (5 pages of 1000 rows). FE renders a "some older rows were truncated" hint. Not fired just because the response is non-empty.
+
+Request-id canonicalisation: mech-analytics writes `0x` + 64 lowercase hex; the marketplace subgraph legacy path uses `BigInt.toHexString()` which trims leading zeros (~1 in 16 ids loses a nibble). `canonicalRequestId()` normalises both sides so the merge / dedup key agrees.
+
+The `ipfsRetrievable` gate on `AddressLink` renders CIDs as text always, and wraps them in a gateway `<a href>` only when `ipfsRetrievable === true`. Off-chain rows (`source = 'mech_offchain'`) come back with `ipfsRetrievable = false` — the mech's local CIDv1 is stored end-to-end but not pinned to public IPFS, so the link would 404.
 
 **Key files:**
 - `common-util/graphql/index.ts` – `MARKETPLACE_SUBGRAPH_CLIENTS`, `MarketplaceSubgraphChainId`
-- `common-util/graphql/service-activity.ts` – Activity queries
-- `common-util/graphql/services.ts` – Service list queries
-- `common-util/Details/ActivityDetails.tsx` – Activity detail modal
-- `common-util/types/index.ts` – `Activity`, `Request`, `Delivery`, `FeeUnit` types
+- `common-util/graphql/service-activity.ts` – Subgraph activity queries (fallback + pending-tail source)
+- `common-util/graphql/services.ts` – Service list queries + optional mech-analytics counter branch
+- `common-util/mechAnalytics/client.ts` – Typed thin wrapper over `/v1/data/scored-rows` etc, with 30 s aborted-fetch + body-read
+- `common-util/mechAnalytics/service-activity.ts` – Fan-out orchestrator with column-level projection
+- `common-util/mechAnalytics/config.ts` – Flag / URL / supported-chain helpers
+- `common-util/Details/ActivityDetails.tsx` – Activity detail modal (fee rendering)
+- `common-util/types/index.ts` – `Activity`, `Request`, `Delivery`, `FeeUnit`, `ServiceActivity` types
 
 ### Registry (Agents, Components, Services)
 
