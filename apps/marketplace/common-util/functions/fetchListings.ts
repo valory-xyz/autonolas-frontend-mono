@@ -18,9 +18,14 @@ export type ListedUnit = {
   tokenId?: string | null;
 };
 
+/** Shared with the list hooks, so the pre-rendered first page and the live table agree. */
+export const SERVICES_ORDER = 'orderBy: serviceId, orderDirection: desc';
+export const COMPONENT_PACKAGE_TYPES =
+  'packageType_in: [connection,skill,protocol,contract,custom,unknown]';
+
 const SERVICES_QUERY = gql`
   {
-    services(first: ${TOTAL_VIEW_COUNT}, orderBy: serviceId, orderDirection: desc) {
+    services(first: ${TOTAL_VIEW_COUNT}, ${SERVICES_ORDER}) {
       id
       serviceId
       publicId
@@ -30,14 +35,7 @@ const SERVICES_QUERY = gql`
   }
 `;
 
-/**
- * Components and agent blueprints are both `units`, separated by packageType — the same filters
- * the two list hooks use. `description` is requested here even though the visible table does not
- * show it, because it is the most useful text a reader gets.
- */
-const COMPONENT_PACKAGE_TYPES =
-  'packageType_in: [connection,skill,protocol,contract,custom,unknown]';
-
+/** Components and agent blueprints are both `units`, split by packageType. `description` is the most useful text a reader gets. */
 const unitsQuery = (where: string) => gql`
   {
     units(

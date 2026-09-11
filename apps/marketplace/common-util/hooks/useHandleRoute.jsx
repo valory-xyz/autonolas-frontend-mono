@@ -10,17 +10,13 @@ import { ALL_SUPPORTED_CHAINS } from '../Login/config';
 import {
   doesPathIncludesComponentsOrAgents,
   getChainIdFromPath,
+  isL1NetworkName,
   isPageWithSolana,
 } from '../functions';
 
 const isValidNetworkName = (name) => {
   const isValid = ALL_SUPPORTED_CHAINS.some((e) => toLower(e.networkName) === toLower(name));
   return isValid;
-};
-
-const isValidL1NetworkName = (name) => {
-  if (name === 'ethereum') return true;
-  return false;
 };
 
 /**
@@ -128,7 +124,7 @@ export const useHandleRoute = () => {
      * because components & agents are not supported on gnosis
      */
 
-    if (!isValidL1NetworkName(networkNameFromUrl) && doesPathIncludesComponentsOrAgents(path)) {
+    if (!isL1NetworkName(networkNameFromUrl) && doesPathIncludesComponentsOrAgents(path)) {
       router.push(`/${networkNameFromUrl}/ai-agents`);
     }
   }, [path, networkNameFromUrl, isL1Network]);

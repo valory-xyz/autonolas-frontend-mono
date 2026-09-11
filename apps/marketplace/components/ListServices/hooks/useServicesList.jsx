@@ -7,6 +7,7 @@ import { useCallback } from 'react';
 import { gql } from 'graphql-request';
 
 import { GRAPHQL_CLIENT } from '../../../common-util/hooks/useSubgraph';
+import { SERVICES_ORDER } from '../../../common-util/functions/fetchListings';
 import { HASH_PREFIX, SERVICE_ROLE, TOTAL_VIEW_COUNT } from '../../../util/constants';
 
 const SERVICE_FIELDS = `{
@@ -26,8 +27,7 @@ const getAllAndMyServicesQuery = (currentPage, ownerAddress = null) => {
       services(
         first: ${TOTAL_VIEW_COUNT}
         skip: ${TOTAL_VIEW_COUNT * (currentPage - 1)}
-        orderBy: serviceId
-        orderDirection: desc
+        ${SERVICES_ORDER}
         ${ownerAddress ? `where: { owner_contains_nocase: "${ownerAddress}" }` : ''}
       ) ${SERVICE_FIELDS}
     }
@@ -68,8 +68,7 @@ const getServicesBySearchQuery = (searchValue, currentPage, ownerAddress = null)
             ${getSearchFilterSubQueryForServices(searchValue)},
           ]
         }
-        orderBy: serviceId
-        orderDirection: desc
+        ${SERVICES_ORDER}
       ) ${SERVICE_FIELDS}
     }
   `;

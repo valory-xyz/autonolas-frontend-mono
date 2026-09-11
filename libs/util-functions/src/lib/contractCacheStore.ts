@@ -76,8 +76,11 @@ export function createContractCacheStore<T>({ prefix, getToken }: ContractCacheS
       await put(path, JSON.stringify(snapshot, null, 2), {
         access: 'public',
         addRandomSuffix: false,
+        // @vercel/blob >= 1.0 throws on an existing path without this; the path is fixed by design.
+        allowOverwrite: true,
         contentType: 'application/json',
-        cacheControlMaxAge: 0,
+        // 60 s is the SDK minimum. Well inside the 5-minute ISR window this cache sits behind.
+        cacheControlMaxAge: 60,
         token: getToken(),
       });
     } catch (error) {
@@ -86,5 +89,5 @@ export function createContractCacheStore<T>({ prefix, getToken }: ContractCacheS
     }
   }
 
-  return { getContractCache, setContractCache, blobPath };
+  return { getContractCache, setContractCache };
 }

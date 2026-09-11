@@ -1,7 +1,7 @@
 import { createSnapshotGetStaticProps } from 'libs/util-ssr/src';
 
 import { EVM_SUPPORTED_CHAINS } from 'common-util/Login/config';
-import { getChainIdFromPath } from 'common-util/functions';
+import { L1_NETWORK_NAME, getChainIdFromPath, isL1NetworkName } from 'common-util/functions';
 import type { ListedUnit } from 'common-util/functions/fetchListings';
 
 /** Budget for one subgraph page. */
@@ -21,13 +21,8 @@ export const listingStaticPaths = async () => ({
  * pre-rendering all eight networks published seven duplicates. Other networks still render on
  * demand and redirect as before; they just carry no listing.
  */
-const L1_NETWORK = 'ethereum';
-
-const isL1Network = (network?: string | string[]) =>
-  typeof network === 'string' && network.toLowerCase() === L1_NETWORK;
-
 export const l1ListingStaticPaths = async () => ({
-  paths: [{ params: { network: L1_NETWORK } }],
+  paths: [{ params: { network: L1_NETWORK_NAME } }],
   fallback: 'blocking' as const,
 });
 
@@ -54,7 +49,7 @@ export const createListingStaticProps = ({
       // the wrong list. `getChainIdFromPath` returns undefined for it, and unlike a direct
       // comparison it matches slugs case-insensitively, as the route validation does.
       if (!getChainIdFromPath(context.params?.network)) return [];
-      if (l1Only && !isL1Network(context.params?.network)) return [];
+      if (l1Only && !isL1NetworkName(context.params?.network)) return [];
       return fetchSnapshot();
     },
     emptyValue: [],

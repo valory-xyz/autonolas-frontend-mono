@@ -62,8 +62,8 @@ readable text with `No data` where the table belongs, which contradicted what `l
 - **Published figures carry scope and an as-of time**, per the Phase 1 standard. Pre-rendered HTML
   is read long after it was generated, so a hidden (`.sr-only`) line states what the table counts
   and when the snapshot was taken. Hidden, not visible — the visible design is unchanged.
-- **The ISR fetch needs a raised `maxDuration`.** `vercel.json` sets 120 s for this page and the
-  in-code timeout is 90 s. 45 s was not enough: the fan-out measured ~36 s on one run and then
+- **The ISR fetch needs a raised `maxDuration`.** `pages/contracts.tsx` exports
+  `config = { maxDuration: 120 }` and the in-code timeout is 90 s. 45 s was not enough: the fan-out measured ~36 s on one run and then
   exceeded 45 s on the next, which in production means intermittently shipping the fallback
   instead of the table. Vercel's default function duration is well below this, so the platform
   would cut the fetch short without that file.
