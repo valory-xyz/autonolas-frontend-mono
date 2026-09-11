@@ -150,7 +150,12 @@ export const ActivityDetails = ({
               {activity.requestIpfsHash ? (
                 <Flex align="center" justify="space-between">
                   <>
-                    <AddressLink {...addressLinkProps} address={activity.requestIpfsHash} isIpfs />
+                    <AddressLink
+                      {...addressLinkProps}
+                      address={activity.requestIpfsHash}
+                      isIpfs
+                      canNotClick={activity.ipfsRetrievable === false}
+                    />
                   </>
                   <Copy text={activity.requestIpfsHash} />
                 </Flex>
@@ -225,7 +230,12 @@ export const ActivityDetails = ({
             <Col span={16}>
               {activity.deliveryIpfsHash ? (
                 <Flex align="center" justify="space-between">
-                  <AddressLink {...addressLinkProps} address={activity.deliveryIpfsHash} isIpfs />
+                  <AddressLink
+                    {...addressLinkProps}
+                    address={activity.deliveryIpfsHash}
+                    isIpfs
+                    canNotClick={activity.ipfsRetrievable === false}
+                  />
                   <Copy text={activity.deliveryIpfsHash} />
                 </Flex>
               ) : (
