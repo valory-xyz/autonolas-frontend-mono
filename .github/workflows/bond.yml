@@ -1,0 +1,51 @@
+# TODO: figure out how to trigger workflow from vercel for nx
+
+name: Bond
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'apps/bond/**'
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'apps/bond/**'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    continue-on-error: False
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@1e60f620b9541d16bece96c5465dc8ee9832be0b # v4.0.3
+        with:
+          node-version: '22.x'
+      - name: Cache node modules
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+        with:
+          path: |
+            node_modules
+            ~/.cache/yarn
+          key: ${{ runner.os }}-yarn-${{ hashFiles('yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-yarn-
+      - name: Install modules
+        run: yarn install --frozen-lockfile
+      - name: Run ESLint
+        run: yarn nx lint bond
+      # Includes the pre-render guard: the bonding products summary must serve every product in the
+      # server HTML. See components/BondingProducts/ProductsSummary.prerender.spec.jsx.
+      - name: Run Test
+        run: yarn nx test bond

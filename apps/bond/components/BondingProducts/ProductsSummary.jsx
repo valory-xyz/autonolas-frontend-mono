@@ -3,17 +3,9 @@ import PropTypes from 'prop-types';
 import { formatUtcTimestamp } from 'libs/util-functions/src';
 
 /**
- * A server-rendered copy of the bonding products, hidden from view.
- *
- * The visible table loads its rows in the browser, so a crawler fetching this page received the
- * table headers and an empty state. This puts the same products into the HTML as text.
- *
- * `hidden` rather than `.sr-only`: the interactive table renders the same products once loaded,
- * so exposing both to assistive tech would announce every product twice. `hidden` keeps them in
- * the markup for crawlers while removing them from the visual render and the accessibility tree.
- *
- * Solana products carry no `fullCurrentPriceLp` here — that price comes from a wallet-adapter
- * hook with no server equivalent — so their price is omitted rather than shown as zero.
+ * A server-rendered copy of the products, for crawlers. `hidden` rather than `.sr-only`: the
+ * table renders the same rows once loaded, so both would announce every product twice.
+ * Solana products have no server-side price, so a falsy price is omitted rather than shown as 0.
  */
 export const ProductsSummary = ({ products = [], snapshotGeneratedAt = null }) => {
   if (products.length === 0) return null;

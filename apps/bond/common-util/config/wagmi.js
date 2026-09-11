@@ -6,6 +6,9 @@ import { RPC_URLS } from 'common-util/constants/rpcs';
 
 export const SUPPORTED_CHAINS = [mainnet, goerli];
 
+/** What a visitor with no wallet resolves to — and the server, which has no window to ask. */
+export const DEFAULT_CHAIN_ID = SUPPORTED_CHAINS[0].id;
+
 export const wagmiConfig = getDefaultConfig({
   appName: 'OLAS Bond',
   projectId: process.env.NEXT_PUBLIC_WALLET_PROJECT_ID || '',

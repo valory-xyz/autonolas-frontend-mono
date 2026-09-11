@@ -156,14 +156,10 @@ const getLpTokenDetails = memoize(async (address, chainIdArg) => {
 
   // if the address is in the LP_PAIRS list
   if (currentLpPairDetails) {
-    // Index with the key we matched, not the incoming address: LP_PAIRS keys are checksummed
-    // while addresses from the subgraph events are lowercase, so `LP_PAIRS[address]` was
-    // undefined and spread to `{}` — losing `dex`, which then made `find(DEX, ...)` return
-    // undefined and threw on `.displayName`.
+    // Index with the matched key: LP_PAIRS keys are checksummed, subgraph addresses are lowercase.
     return { ...LP_PAIRS[currentLpPairDetails] };
   }
 
-  // Not `window.console`: this also runs on the server now.
   console.warn('LP pair not found in the LP_PAIRS list');
 
   // if the address is not in the LP_PAIRS list (mainnet and goerli)
@@ -263,11 +259,8 @@ const getCurrentPriceUniswapFn = memoize(async (tokenAddress) => {
  * hook to add the current LP price to the products
  */
 /**
- * Plain function, so the server-side fetch can reuse it. Everything React- or wallet-specific is
- * injected: `chainId` (getChainId returns undefined without a window), `multicall` (a wagmi
- * public client on the client, wagmi-core on the server), and `getCurrentPriceWhirlpool`, which
- * is a Solana wallet-adapter hook and has no server equivalent — the server passes a stub that
- * resolves null, leaving Solana products without a current price rather than a wrong one.
+ * Plain function so the server fetch can reuse it. Everything React- or wallet-bound is injected:
+ * `chainId`, `multicall`, and `getCurrentPriceWhirlpool` (a Solana wallet hook; the server stubs 0).
  */
 export const addCurrentLpPriceToProducts = async (
   productList,
@@ -393,10 +386,7 @@ const getLpTokenNamesForProducts = async (productList, events, chainIdArg) => {
  *   priceLp
  * }]
  */
-/**
- * Plain function so the server-side product fetch can reuse it; the hook below is a thin
- * wrapper that keeps the existing call sites unchanged.
- */
+/** Plain function so the server fetch can reuse it; `useProductDetailsFromIds` wraps it. */
 export const addSupplyLeftToProducts = async (
   list,
   createProductEvents,
@@ -413,14 +403,12 @@ export const addSupplyLeftToProducts = async (
 
     // Should not happen but we will warn if it does
     if (!createProductEvent) {
-      // Not `window.console`: this now also runs on the server, where there is no window.
       console.warn(`Product ${product.id} not found in the event list`);
     }
 
     const eventSupply = Number(ethers.toBigInt(createProductEvent.supply) / ONE_ETH);
 
-    // 10 of the subgraph's closeProducts rows carry a null supply, and `toBigInt(null)` throws —
-    // which broke the whole list, not just those rows. Fall back to the product's own supply.
+    // Some closeProducts rows carry a null supply and `toBigInt(null)` throws; fall back.
     const closedSupply = closeProductEvent?.supply ?? product.supply ?? 0;
     const productSupply = !closeProductEvent
       ? Number(ethers.toBigInt(product.supply ?? 0) / ONE_ETH)
@@ -486,11 +474,7 @@ export const addProjectedChangeToProducts = (productList) =>
  * to include other details such as the LP token name, supply left, etc.
  * and returns the updated list.
  */
-/**
- * Plain composition of the steps above, shared by the hook and the server-side fetch.
- * `deps` carries what cannot be resolved on the server on its own — see
- * `addCurrentLpPriceToProducts`.
- */
+/** The steps above composed; shared by the hook and the server fetch. `deps`: see `addCurrentLpPriceToProducts`. */
 export const getProductDetailsFromIds = async (productIdList, deps) => {
   const { chainId, multicall } = deps;
 

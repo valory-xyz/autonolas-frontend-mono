@@ -1,25 +1,13 @@
 import { readContract, readContracts } from '@wagmi/core';
 
-import { wagmiConfig, SUPPORTED_CHAINS } from 'common-util/config/wagmi';
+import { DEFAULT_CHAIN_ID, wagmiConfig } from 'common-util/config/wagmi';
 import { depositoryParams } from 'common-util/Contracts/params';
 import { getProductDetailsFromIds } from 'components/BondingProducts/Bonding/BondingList/useBondingList';
 
 /**
- * Server-side read of the bonding products, for the `/bonding-products` ISR render.
- *
- * Reuses the exact composition the client uses (`getProductDetailsFromIds`), so the pre-rendered
- * rows cannot drift from the interactive table. Only the three things that hook could not resolve
- * without a browser are supplied differently:
- *
- * - `chainId` — `getChainId()` returns undefined with no `window`, so default to the first
- *   supported chain, which is what it resolves to for a visitor without a wallet anyway.
- * - `multicall` — wagmi-core's `readContracts` rather than a `usePublicClient` instance.
- * - `getCurrentPriceWhirlpool` — the Solana price comes from a wallet-adapter hook with no
- *   server equivalent. It resolves to null here, so Solana products are still listed but carry
- *   no current LP price rather than a wrong one. Callers must not present a price for them.
+ * Server-side read of the bonding products, composed exactly as the client hook composes them so
+ * the two cannot drift. Only what needs a browser is supplied differently — see the `deps` below.
  */
-const DEFAULT_CHAIN_ID = SUPPORTED_CHAINS[0].id;
-
 export async function fetchBondingProducts({ isActive = true } = {}) {
   const chainId = DEFAULT_CHAIN_ID;
 
@@ -34,8 +22,8 @@ export async function fetchBondingProducts({ isActive = true } = {}) {
   const products = await getProductDetailsFromIds(productIdList, {
     chainId,
     multicall: ({ contracts }) => readContracts(wagmiConfig, { contracts }),
-    // 0, not null: downstream runs `ethers.toBigInt` over this and null is not a BigNumberish.
-    // The summary omits a falsy price rather than printing 0, so nothing wrong is published.
+    // The Solana price is a wallet-adapter hook with no server equivalent. 0 rather than null
+    // (downstream runs `toBigInt` on it); the summary omits a falsy price rather than printing it.
     getCurrentPriceWhirlpool: async () => 0,
   });
 
