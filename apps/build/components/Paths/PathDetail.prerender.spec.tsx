@@ -3,7 +3,8 @@ import { render, screen } from '@testing-library/react';
 
 import paths from 'components/Paths/data.json';
 
-import PathDetailPage from './[id]';
+// Lives here rather than beside the page: Next builds every .tsx under pages/ as a route.
+import PathDetailPage from '../../pages/paths/[id]';
 
 const GUIDE = '1. Build a tool that answers a question.\n1. Submit it to the Mechs marketplace.';
 

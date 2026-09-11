@@ -44,6 +44,6 @@ jobs:
       - name: Run ESLint
         run: yarn nx lint build
       # Includes the pre-render guard: each /paths/<id> page must ship its guide and sections in
-      # the server HTML, not a spinner. See pages/paths/PathDetail.prerender.spec.tsx.
+      # the server HTML, not a spinner. See components/Paths/PathDetail.prerender.spec.tsx.
       - name: Run Test
         run: yarn nx test build
