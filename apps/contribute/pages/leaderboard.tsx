@@ -14,6 +14,8 @@ type LeaderboardSnapshot = {
   campaigns: Campaign[];
 };
 
+type LeaderboardPageProps = LeaderboardSnapshot & { snapshotGeneratedAt: string | null };
+
 /** Budget for the paginated AFMDB read. */
 const ISR_TIMEOUT_MS = 20_000;
 
@@ -23,7 +25,7 @@ const ISR_TIMEOUT_MS = 20_000;
  */
 export const getStaticProps = createSnapshotGetStaticProps<
   LeaderboardSnapshot,
-  LeaderboardSnapshot
+  LeaderboardPageProps
 >({
   fetchSnapshot: async () => {
     const [agents, moduleDetails] = await Promise.all([
@@ -38,17 +40,21 @@ export const getStaticProps = createSnapshotGetStaticProps<
   emptyValue: { users: [], campaigns: [] },
   timeoutMs: ISR_TIMEOUT_MS,
   label: 'contribute/leaderboard',
-  toProps: ({ data }) => data,
+  toProps: ({ data, generatedAt }) => ({ ...data, snapshotGeneratedAt: generatedAt }),
 });
 
-const LeaderboardPage = ({ users, campaigns }: LeaderboardSnapshot) => (
+const LeaderboardPage = ({ users, campaigns, snapshotGeneratedAt }: LeaderboardPageProps) => (
   <>
     <Meta
       pageTitle="Leaderboard"
       description="View the Olas Contribute leaderboard. See top contributors ranked by points, track your position, and discover who's leading the community."
       pageUrl="leaderboard"
     />
-    <Leaderboard initialLeaderboard={users} initialCampaigns={campaigns} />
+    <Leaderboard
+      initialLeaderboard={users}
+      initialCampaigns={campaigns}
+      snapshotGeneratedAt={snapshotGeneratedAt}
+    />
   </>
 );
 

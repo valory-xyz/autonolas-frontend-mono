@@ -27,6 +27,10 @@ type Options<T, P extends { [key: string]: unknown }> = {
   toProps: (snapshot: Snapshot<T>) => P;
 };
 
+/** Every caller wanted the same cadence, so it lives here rather than in each page. */
+const DEFAULT_REVALIDATE_SECONDS = 300;
+const DEFAULT_REVALIDATE_ON_ERROR_SECONDS = 60;
+
 /**
  * Builds a `getStaticProps` that pre-renders a remote-data snapshot into the HTML.
  *
@@ -44,10 +48,6 @@ type Options<T, P extends { [key: string]: unknown }> = {
  * same signal production gets — but it does mean local work on these pages needs the RPC and
  * subgraph env vars set.
  */
-/** Every caller wanted the same cadence, so it lives here rather than in each page. */
-const DEFAULT_REVALIDATE_SECONDS = 300;
-const DEFAULT_REVALIDATE_ON_ERROR_SECONDS = 60;
-
 export function createSnapshotGetStaticProps<T, P extends { [key: string]: unknown }>({
   fetchSnapshot,
   emptyValue,

@@ -224,12 +224,6 @@ export const STAKING_CONTRACT_DETAILS: Record<Address, StakingContractDetailsInf
 export const EXTRA_STAKING_CONTRACTS: Nominee[] = [];
 
 /**
- * The platforms a staking contract can be run on. Single source of truth: the server
- * (ISR) and the client both sanitize `availableOn` against this list, so a value that
- * survives on one path cannot be dropped on the other and change the Live/Not-available
- * split between the pre-rendered HTML and the hydrated table.
- */
-/**
  * Nominees plus the extra contracts this app surfaces, skipping any already present.
  * Used by both the ISR fetch and the client hook — if they build different lists, the
  * pre-rendered table and the hydrated one disagree.
@@ -240,6 +234,11 @@ export const withExtraStakingContracts = <T extends { account: string }>(nominee
   return [...nominees, ...(extras as unknown as T[])];
 };
 
+/**
+ * The platforms a staking contract can be run on. The server (ISR) and the client both sanitize
+ * `availableOn` against this list, so the Live / Not-available split cannot differ between the
+ * pre-rendered HTML and the hydrated table.
+ */
 export const AVAILABLE_ON_VALUES: AvailableOn[] = ['pearl', 'contribute', 'lst'];
 
 export const AVAILABLE_ON_LABELS: Record<AvailableOn, string> = {

@@ -7,22 +7,14 @@ import { ContractsPage } from 'components/Contracts';
 import { fetchOperateContracts } from 'common-util/functions/fetchContracts';
 import { StakingContract } from 'types';
 
-/** Budget for the whole fan-out (nominees + subgraph + per-contract RPC).
- *  Kept below this page's configured `maxDuration`, or the platform would cut the fetch short
- *  first. 45 s was not enough: this fan-out and govern's both ran close to it and intermittently
- *  went over, which ships the fallback instead of the table. */
 /**
- * Vercel's default function duration is far below what this fetch needs, and it cuts the fetch
- * short whatever `ISR_TIMEOUT_MS` says. Set here rather than in a `vercel.json` so it does not
- * depend on the project's Root Directory being the app folder, and so the two numbers sit
- * together.
+ * Vercel cuts the function short whatever `ISR_TIMEOUT_MS` says, so the two are set together
+ * here. 45 s was not enough for this fan-out; it ran close to it and intermittently went over.
  */
 export const config = { maxDuration: 120 };
 
+/** Budget for the whole fan-out (nominees + subgraph + per-contract RPC). */
 const ISR_TIMEOUT_MS = 90_000;
-/** Contract config moves slowly, and the client refreshes live figures after hydration. */
-const REVALIDATE_SECONDS = 300;
-const REVALIDATE_ON_ERROR_SECONDS = 60;
 
 /**
  * ISR rather than `getServerSideProps`: this fan-out is far too slow to run per request
@@ -37,8 +29,6 @@ export const getStaticProps = createSnapshotGetStaticProps<
   fetchSnapshot: fetchOperateContracts,
   emptyValue: [],
   timeoutMs: ISR_TIMEOUT_MS,
-  revalidateSeconds: REVALIDATE_SECONDS,
-  revalidateOnErrorSeconds: REVALIDATE_ON_ERROR_SECONDS,
   label: 'operate/contracts',
   toProps: ({ data, generatedAt }) => ({
     initialContracts: data,

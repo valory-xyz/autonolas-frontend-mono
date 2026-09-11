@@ -1,5 +1,7 @@
 import { ContributeAgent } from 'types/users';
 
+import { AfmdbError, getAfmdbAttributeValuesUrl } from './afmdb';
+
 const LIMIT = 1000;
 
 /**
@@ -7,33 +9,7 @@ const LIMIT = 1000;
  * This is a pure async function that can be used both in API routes and getServerSideProps.
  */
 export async function fetchLeaderboardData(): Promise<ContributeAgent[]> {
-  const afmdbUrl = process.env.NEXT_PUBLIC_AFMDB_URL;
-  const agentTypeId = process.env.AGENT_TYPE_ID;
-  const attributeIdMappingRaw = process.env.ATTRIBUTE_ID_MAPPING;
-
-  if (!afmdbUrl || !agentTypeId || !attributeIdMappingRaw) {
-    throw new Error(
-      'Missing required environment variables for leaderboard fetch. ' +
-        'Ensure NEXT_PUBLIC_AFMDB_URL, AGENT_TYPE_ID, and ATTRIBUTE_ID_MAPPING are set.',
-    );
-  }
-
-  let attributeTypeId: string;
-  try {
-    const parsedMapping = JSON.parse(attributeIdMappingRaw) as Record<string, string | number>;
-    const userAttributeId = parsedMapping.USER;
-    // The ids are written as JSON numbers ({"USER":8}), and requiring a string here rejected
-    // them: every call threw before reaching AFMDB, which is why /api/leaderboard answered 500
-    // and the table stood empty. It only ever goes into a URL, so accept either and coerce.
-    if (typeof userAttributeId !== 'string' && typeof userAttributeId !== 'number') {
-      throw new Error('ATTRIBUTE_ID_MAPPING.USER must be a string or a number');
-    }
-    attributeTypeId = String(userAttributeId);
-  } catch (error) {
-    throw new Error('Invalid ATTRIBUTE_ID_MAPPING environment variable');
-  }
-
-  const baseUrl = `${afmdbUrl}/api/agent-types/${agentTypeId}/attributes/${attributeTypeId}/values`;
+  const baseUrl = getAfmdbAttributeValuesUrl('USER');
 
   let skip = 0;
   let allResults: ContributeAgent[] = [];
@@ -44,7 +20,7 @@ export async function fetchLeaderboardData(): Promise<ContributeAgent[]> {
     const response = await fetch(url);
 
     if (!response.ok) {
-      throw new Error(`Failed to fetch leaderboard: ${response.status}`);
+      throw new AfmdbError(`Failed to fetch leaderboard: ${response.status}`, response.status);
     }
 
     const pageData = await response.json();

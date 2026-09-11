@@ -89,5 +89,5 @@ export function createContractCacheStore<T>({ prefix, getToken }: ContractCacheS
     }
   }
 
-  return { getContractCache, setContractCache, blobPath };
+  return { getContractCache, setContractCache };
 }

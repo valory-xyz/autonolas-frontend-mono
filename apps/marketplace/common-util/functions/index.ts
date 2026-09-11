@@ -52,6 +52,12 @@ export const getNetworkDisplayName = (network?: string | string[]): string | nul
  * Derived from the URL, so unlike the chainId in Redux this is available during a server
  * render. `useHandleRoute` dispatches the same value into Redux once mounted.
  */
+/** Ethereum L1 slug — where components and agent blueprints live. Case-insensitive, like the route validation. */
+export const L1_NETWORK_NAME = 'ethereum';
+
+export const isL1NetworkName = (network?: string | string[]): boolean =>
+  typeof network === 'string' && network.toLowerCase() === L1_NETWORK_NAME;
+
 export const getChainIdFromPath = (network?: string | string[]): number | undefined => {
   if (typeof network !== 'string') return undefined;
   const slug = network.toLowerCase();

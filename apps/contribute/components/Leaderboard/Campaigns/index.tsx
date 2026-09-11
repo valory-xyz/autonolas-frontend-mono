@@ -95,8 +95,8 @@ export const Campaigns = ({ initialCampaigns }: CampaignsProps) => {
   const fetchedCampaigns = (moduleDetails?.twitter_campaigns?.campaigns || []).filter(
     (campaign) => campaign.status === 'live',
   );
-  const activeTwitterCampaigns =
-    fetchedCampaigns.length > 0 ? fetchedCampaigns : (initialCampaigns ?? []);
+  // Once the client fetch has completed its answer wins, even if that answer is "none live".
+  const activeTwitterCampaigns = moduleDetails ? fetchedCampaigns : (initialCampaigns ?? []);
 
   return (
     <Card>

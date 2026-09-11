@@ -110,11 +110,11 @@ const findPageHtml = (dir, page) => {
     if (statSync(full).isDirectory()) {
       const found = findPageHtml(full, page);
       if (found) return found;
-      // `sep + wanted` only — `join` always inserts a separator, and a bare `endsWith(wanted)`
-      // would also match a file called `xcontracts.html`.
-    } else if (full.endsWith(sep + wanted)) {
-      return full;
+      continue;
     }
+    // `sep + wanted` only — `join` always inserts a separator, and a bare `endsWith(wanted)`
+    // would also match a file called `xcontracts.html`.
+    if (full.endsWith(sep + wanted)) return full;
   }
   return null;
 };
