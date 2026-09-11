@@ -4,7 +4,7 @@ Guidance for working on the **Marketplace** app in this repo. This app powers th
 
 ## Purpose
 
-Discover, register, deploy, and interact with **mechs** (autonomous AI agents) and **registry** entities (agents, components, services) across multiple chains. Users connect a wallet (RainbowKit, via WalletConnect/MetaMask/Coinbase/Safe) to register, deploy, or use mechs. Multi-chain: Ethereum, Gnosis, Polygon, Arbitrum, Optimism, Base, Mode, Celo. Also supports **Solana (SVM)**.
+Discover, register, deploy, and interact with **mechs** (autonomous AI agents) and **registry** entities (agents, components, services) across multiple chains. Users connect a wallet (RainbowKit, via WalletConnect/MetaMask/Coinbase/Safe) to register, deploy, or use mechs. Multi-chain: Ethereum, Gnosis, Polygon, Arbitrum, Optimism, Base, Mode, Celo, Robinhood Chain. Also supports **Solana (SVM)**.
 
 ## Port
 
@@ -21,6 +21,7 @@ Discover, register, deploy, and interact with **mechs** (autonomous AI agents) a
 - **Registry**: `NEXT_PUBLIC_REGISTRY_URL`, `NEXT_PUBLIC_AUTONOLAS_URL`; Safe APIs per chain.
 - **Marketplace activity subgraphs** (per chain): `NEXT_PUBLIC_*_MARKETPLACE_SUBGRAPH_URL` for Ethereum (1), Optimism (10), Gnosis (100), Polygon (137), Base (8453), Arbitrum (42161), Celo (42220).
 - **Registry subgraphs**: Ethereum (1), Optimism (10), Gnosis (100), Polygon (137), Base (8453), Mode (34443), Arbitrum (42161), Celo (42220).
+- **Robinhood Chain (4663)** — route slug `robinhood-chain`. Contract reads only for now: no registry or marketplace subgraph/squid yet, so listings/details come from `ServiceRegistryL2` over `NEXT_PUBLIC_ROBINHOOD_URL` and every agent shows as *Registered*. The chain definition lives in `libs/util-constants/src/lib/chains.ts` (`robinhood`, viem has no entry). Follow the `TODO(robinhood)` markers in `common-util/graphql/index.ts` and `util/constants.ts` once the squids are deployed.
 - **mech-analytics** (activity read path, chains 10 / 100 / 137 / 8453):
   - API base URL is built in, not an env var: `MECH_ANALYTICS_URL` in `common-util/mechAnalytics/config.ts` (`https://mech-analytics-api.autonolas.tech`). If the endpoint moves, change the constant.
   - `NEXT_PUBLIC_USE_MECH_ANALYTICS_ROWS` — the only switch. Default ON when unset; set to exactly `"false"` to fall back to the subgraph reader.

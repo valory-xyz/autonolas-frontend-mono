@@ -16,6 +16,8 @@ import {
   polygonMumbai,
 } from 'viem/chains';
 
+import { robinhood } from './chains';
+
 const MODE_EXPLORER = 'https://explorer.mode.network';
 
 export const EXPLORER_URLS: Record<string, string> = {
@@ -27,6 +29,7 @@ export const EXPLORER_URLS: Record<string, string> = {
   [arbitrum.id]: arbitrum.blockExplorers.default.url,
   [celo.id]: celo.blockExplorers.default.url,
   [mode.id]: MODE_EXPLORER,
+  [robinhood.id]: robinhood.blockExplorers.default.url,
   [goerli.id]: goerli.blockExplorers.default.url,
   [gnosisChiado.id]: gnosisChiado.blockExplorers.default.url,
   [polygonMumbai.id]: polygonMumbai.blockExplorers.default.url,

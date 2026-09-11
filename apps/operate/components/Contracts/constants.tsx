@@ -24,6 +24,7 @@ export const CHAIN_LOGOS: Partial<Record<number, string>> = {
   137: '/images/polygon-logo.svg',
   8_453: '/images/base-logo.svg',
   34_443: '/images/mode-logo.svg',
+  4_663: '/images/robinhood-logo.png',
   42_161: '/images/arbitrum-logo.svg',
   42_220: '/images/celo-logo.svg',
 };
@@ -33,15 +34,17 @@ export const PLATFORM_OPTIONS = AVAILABLE_ON_VALUES.map((value) => ({
   label: AVAILABLE_ON_LABELS[value],
 }));
 
-export const CHAIN_OPTIONS = [
+// Only chains that actually have a listed contract: CHAIN_NAMES also holds chains
+// with no staking contracts yet (e.g. Robinhood), which would filter to an empty table.
+export const buildChainOptions = (chainIds: number[]) => [
   { value: 'all', label: 'All chains' },
-  ...Object.entries(CHAIN_NAMES)
-    .sort(([a], [b]) => Number(a) - Number(b))
-    .map(([chainIdStr, name]) => {
-      const chainId = Number(chainIdStr);
+  ...[...new Set(chainIds)]
+    .sort((a, b) => a - b)
+    .map((chainId) => {
+      const name = CHAIN_NAMES[chainId] ?? String(chainId);
       const logoSrc = CHAIN_LOGOS[chainId];
       return {
-        value: chainIdStr,
+        value: String(chainId),
         label: (
           <Flex align="center" gap={8}>
             {logoSrc && <Image src={logoSrc} alt={name} width={16} height={16} />}

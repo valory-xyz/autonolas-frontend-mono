@@ -24,13 +24,13 @@ import { RunAgentButton } from 'components/RunAgentButton';
 
 import {
   CHAIN_LOGOS,
-  CHAIN_OPTIONS,
   FILTER_DROPDOWN_CLASS,
   PLATFORM_OPTIONS,
   PLATFORM_SELECT_CLASS,
   TAB_LIVE,
   TAB_NOT_AVAILABLE,
   TAB_OPTIONS,
+  buildChainOptions,
 } from './constants';
 import { useStakingContractsList } from './hooks';
 import {
@@ -266,6 +266,10 @@ export const ContractsPage = ({
   }, [isLoading]);
 
   const contracts = hasClientSettled || liveContracts.length > 0 ? liveContracts : initialContracts;
+  const chainOptions = useMemo(
+    () => buildChainOptions(contracts.map((c) => c.chainId)),
+    [contracts],
+  );
 
   const [activeTab, setActiveTab] = useState<string>(TAB_LIVE);
   const [searchQuery, setSearchQuery] = useState('');
@@ -364,7 +368,7 @@ export const ContractsPage = ({
           <Select
             value={chainFilter}
             onChange={setChainFilter}
-            options={CHAIN_OPTIONS}
+            options={chainOptions}
             optionLabelProp="label"
             style={{ minWidth: 220 }}
             placeholder="All chains"
