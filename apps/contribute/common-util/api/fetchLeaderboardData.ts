@@ -2,36 +2,30 @@ import { ContributeAgent } from 'types/users';
 
 import { AfmdbError, getAfmdbAttributeValuesUrl } from './afmdb';
 
-const LIMIT = 1000;
-
 /**
- * Fetches all leaderboard data from AFMDB with pagination.
- * This is a pure async function that can be used both in API routes and getServerSideProps.
+ * Well above the ~6,200 rows the table holds today. Hitting it is an error, not a cue to page:
+ * AFMDB returns rows in no stable order and ignores `order_by`, so `skip`/`limit` pages overlap
+ * and drop rows — a paged read came back with duplicates and 50–90% of the real set.
  */
+const LIMIT = 50_000;
+
+/** Fetches all leaderboard rows from AFMDB in one request. Shared by the API route and the snapshot. */
 export async function fetchLeaderboardData(): Promise<ContributeAgent[]> {
-  const baseUrl = getAfmdbAttributeValuesUrl('USER');
+  const url = `${getAfmdbAttributeValuesUrl('USER')}?skip=0&limit=${LIMIT}`;
+  const response = await fetch(url);
 
-  let skip = 0;
-  let allResults: ContributeAgent[] = [];
-
-  // eslint-disable-next-line no-constant-condition
-  while (true) {
-    const url = `${baseUrl}?skip=${skip}&limit=${LIMIT}`;
-    const response = await fetch(url);
-
-    if (!response.ok) {
-      throw new AfmdbError(`Failed to fetch leaderboard: ${response.status}`, response.status);
-    }
-
-    const pageData = await response.json();
-
-    allResults = allResults.concat(pageData);
-    skip += LIMIT;
-
-    if (!Array.isArray(pageData) || pageData.length === 0 || pageData.length < LIMIT) {
-      break;
-    }
+  if (!response.ok) {
+    throw new AfmdbError(`Failed to fetch leaderboard: ${response.status}`, response.status);
   }
 
-  return allResults;
+  const rows: ContributeAgent[] = await response.json();
+
+  if (!Array.isArray(rows)) {
+    throw new Error('Leaderboard response was not a list');
+  }
+  if (rows.length >= LIMIT) {
+    throw new Error(`Leaderboard has reached the ${LIMIT}-row fetch limit; raise it`);
+  }
+
+  return rows;
 }
