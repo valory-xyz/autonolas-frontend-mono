@@ -1,10 +1,33 @@
+import { lowerCase, orderBy } from 'lodash';
+
+import { getName } from 'common-util/functions';
 import { LeaderboardUser } from 'store/types';
 import { ContributeAgent } from 'types/users';
 
-/**
- * Shared by the browser path below and by `getStaticProps` on the leaderboard page, so the
- * pre-rendered rows and the ones the client later fetches are filtered identically.
- */
+/** Sorts by points then name and assigns ranks, ties sharing a rank. Used by the store and the snapshot. */
+export const rankLeaderboardUsers = (leaderboard: LeaderboardUser[]): LeaderboardUser[] => {
+  const users = orderBy(
+    leaderboard,
+    [(user) => user.points, (user) => lowerCase(getName(user))],
+    ['desc', 'asc'],
+  );
+
+  const rankedUsers: LeaderboardUser[] = [];
+  users.forEach((user, index) => {
+    if (index === 0) {
+      rankedUsers.push({ ...user, rank: 1 });
+    } else {
+      const previousUser = rankedUsers[index - 1];
+      const rank =
+        previousUser.points === user.points ? previousUser.rank : (previousUser.rank || 1) + 1;
+      rankedUsers.push({ ...user, rank });
+    }
+  });
+
+  return rankedUsers;
+};
+
+/** Shared by the browser fetch and the snapshot, so both filter identically. */
 export const toLeaderboardUsers = (agents: ContributeAgent[]): LeaderboardUser[] => {
   const usersList: LeaderboardUser[] = [];
 
