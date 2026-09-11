@@ -59,7 +59,15 @@ export const PathPage = () => {
           <Steps direction="vertical" current={step} items={steps} onChange={onChangeStep} />
         </Card>
         <Card style={STEP_CONTENT_STYLE}>
-          {renderStep(steps[step].content, setPrevStep, setNextStep, isLastStep)}
+          {/* Every step is rendered, not just the selected one. A crawler fetches this page
+              once, so rendering only `steps[step]` published one step of six and gave no sign
+              the rest existed. Only the selected panel is visible; the others are `hidden`, so
+              the page looks and behaves exactly as before for anyone running the app. */}
+          {steps.map(({ title, content }, index) => (
+            <div key={title} hidden={index !== step}>
+              {renderStep(content, setPrevStep, setNextStep, index === steps.length - 1)}
+            </div>
+          ))}
         </Card>
       </Flex>
     </StyledMain>

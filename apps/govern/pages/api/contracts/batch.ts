@@ -3,6 +3,7 @@ import { isAddress } from 'viem';
 
 import { getContractCache, setContractCache } from 'common-util/blob';
 import { fetchContractCacheDataFromChain } from 'common-util/fetch-contract-cache-data';
+import { mapWithConcurrency } from 'common-util/functions/mapWithConcurrency';
 import type { GovernContractCacheSnapshot } from 'types';
 
 type NomineeInput = { chainId: number; address: string };
@@ -13,28 +14,6 @@ const MAX_BATCH_SIZE = 200;
 
 /** Concurrency limit for cache-miss RPC fetches. */
 const CONCURRENCY_LIMIT = 5;
-
-/**
- * Runs promises with bounded concurrency.
- */
-async function mapWithConcurrency<T, R>(
-  items: T[],
-  limit: number,
-  fn: (item: T) => Promise<R>,
-): Promise<R[]> {
-  const results: R[] = new Array(items.length);
-  let nextIndex = 0;
-
-  async function worker() {
-    while (nextIndex < items.length) {
-      const i = nextIndex++;
-      results[i] = await fn(items[i]);
-    }
-  }
-
-  await Promise.all(Array.from({ length: Math.min(limit, items.length) }, () => worker()));
-  return results;
-}
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') {

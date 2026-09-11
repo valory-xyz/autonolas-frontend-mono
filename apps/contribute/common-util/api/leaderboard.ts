@@ -1,15 +1,17 @@
 import { LeaderboardUser } from 'store/types';
 import { ContributeAgent } from 'types/users';
 
-export const getLeaderboardList = async () => {
-  const response = await fetch('/api/leaderboard');
-  const json: ContributeAgent[] = await response.json();
+/**
+ * Shared by the browser path below and by `getStaticProps` on the leaderboard page, so the
+ * pre-rendered rows and the ones the client later fetches are filtered identically.
+ */
+export const toLeaderboardUsers = (agents: ContributeAgent[]): LeaderboardUser[] => {
   const usersList: LeaderboardUser[] = [];
 
   // TODO: consider filtering and convenient mapping
   // right inside the api endpoint
-  if (json && Array.isArray(json)) {
-    json.forEach((user) => {
+  if (agents && Array.isArray(agents)) {
+    agents.forEach((user) => {
       if (!user.json_value.wallet_address) return;
       if (user.json_value.points === 0) return;
       usersList.push({
@@ -21,6 +23,12 @@ export const getLeaderboardList = async () => {
   }
 
   return usersList;
+};
+
+export const getLeaderboardList = async () => {
+  const response = await fetch('/api/leaderboard');
+  const json: ContributeAgent[] = await response.json();
+  return toLeaderboardUsers(json);
 };
 
 type UpdateUserStakingDataParams = {

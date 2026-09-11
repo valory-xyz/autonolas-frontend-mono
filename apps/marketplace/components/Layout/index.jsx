@@ -14,6 +14,7 @@ import { NavDropdown } from 'libs/ui-components/src';
 import { PAGES_TO_LOAD_WITHOUT_CHAINID } from '../../util/constants';
 import { useHelpers } from '../../common-util/hooks';
 import { ALL_SUPPORTED_CHAINS, getSvmEndpoint } from '../../common-util/Login/config';
+import { getChainIdFromPath } from '../../common-util/functions';
 import { useHandleRoute } from '../../common-util/hooks/useHandleRoute';
 import { LogoSvg, LogoIconSvg } from '../Logos';
 import { CustomLayout, Logo, OlasHeader, RightMenu, SelectContainer } from './styles';
@@ -29,6 +30,7 @@ const Layout = ({ children = null }) => {
   const { isMobile, isTablet } = useScreen();
   const { isSvm, chainId, chainName } = useHelpers();
   const path = router?.pathname || '';
+  const chainIdFromUrl = getChainIdFromPath(router?.query?.network);
 
   const shouldShowWhiteBg = useMemo(() => {
     const currentPath = router?.asPath || '';
@@ -118,10 +120,19 @@ const Layout = ({ children = null }) => {
 
       <Content className="site-layout">
         <div className="site-layout-background">
-          {/* chainId has to be set in redux before rendering any components
-              OR the page doesn't depends on the chain Id
-              OR it is SOLANA */}
-          {chainId || isSvm || PAGES_TO_LOAD_WITHOUT_CHAINID.some((e) => e === path)
+          {/* Render once we know which chain we are on:
+              from redux, OR derived from the URL, OR the page does not depend on a chain id,
+              OR it is SOLANA.
+
+              The redux value is only set from an effect, so it is null during a server render
+              and on the first client render — which meant every page in this app served an
+              empty body to crawlers. `getChainIdFromPath` reads the same value from the route
+              that `useHandleRoute` later dispatches, so the server and the first client render
+              now agree instead of both rendering nothing. */}
+          {chainId ||
+          chainIdFromUrl ||
+          isSvm ||
+          PAGES_TO_LOAD_WITHOUT_CHAINID.some((e) => e === path)
             ? children
             : null}
         </div>

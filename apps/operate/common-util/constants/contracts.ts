@@ -1,6 +1,6 @@
 import { Address, formatEther } from 'viem';
 
-import { Nominee, StakingContract } from 'types';
+import { AvailableOn, Nominee, StakingContract } from 'types';
 
 const ONE_YEAR = 1 * 24 * 60 * 60 * 365;
 
@@ -223,6 +223,38 @@ export const STAKING_CONTRACT_DETAILS: Record<Address, StakingContractDetailsInf
  */
 export const EXTRA_STAKING_CONTRACTS: Nominee[] = [];
 
+/**
+ * Nominees plus the extra contracts this app surfaces, skipping any already present.
+ * Used by both the ISR fetch and the client hook — if they build different lists, the
+ * pre-rendered table and the hydrated one disagree.
+ */
+export const withExtraStakingContracts = <T extends { account: string }>(nominees: T[]): T[] => {
+  const existing = new Set(nominees.map((n) => n.account.toLowerCase()));
+  const extras = EXTRA_STAKING_CONTRACTS.filter((e) => !existing.has(e.account.toLowerCase()));
+  return [...nominees, ...(extras as unknown as T[])];
+};
+
+/**
+ * The platforms a staking contract can be run on. The server (ISR) and the client both sanitize
+ * `availableOn` against this list, so the Live / Not-available split cannot differ between the
+ * pre-rendered HTML and the hydrated table.
+ */
+export const AVAILABLE_ON_VALUES: AvailableOn[] = ['pearl', 'contribute', 'lst'];
+
+export const AVAILABLE_ON_LABELS: Record<AvailableOn, string> = {
+  pearl: 'Pearl',
+  contribute: 'Contribute',
+  lst: 'LST',
+};
+
+const AVAILABLE_ON_SET = new Set<AvailableOn>(AVAILABLE_ON_VALUES);
+
+/** Keeps only recognised platforms; returns null when the value is not a list. */
+export const sanitizeAvailableOn = (value: unknown): AvailableOn[] | null => {
+  if (!Array.isArray(value)) return null;
+  return value.filter((p): p is AvailableOn => AVAILABLE_ON_SET.has(p as AvailableOn));
+};
+
 export const getApy = (
   rewardsPerSecond: bigint,
   minStakingDeposit: bigint,
@@ -242,6 +274,19 @@ export const getStakeRequired = (
   if (!minStakingDeposit || !numAgentInstances) return null;
 
   return formatEther(minStakingDeposit + minStakingDeposit * numAgentInstances);
+};
+
+/**
+ * Absolute end of the current epoch as ISO-8601 UTC: the last checkpoint plus the liveness
+ * period. Independent of the current block, so the server and client agree, and unlike a
+ * countdown it does not decay while the pre-rendered HTML sits in cache.
+ */
+export const getEpochEndsAt = (
+  tsCheckpointSeconds: number,
+  livenessPeriodSeconds: number,
+): string | null => {
+  if (!tsCheckpointSeconds || !livenessPeriodSeconds) return null;
+  return new Date((tsCheckpointSeconds + livenessPeriodSeconds) * 1000).toISOString();
 };
 
 export const getTimeRemainingFormatted = (timeRemainingSeconds: number): string => {

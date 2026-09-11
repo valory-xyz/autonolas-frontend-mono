@@ -45,6 +45,27 @@ export const getNetworkDisplayName = (network?: string | string[]): string | nul
   return chain?.networkDisplayName ?? null;
 };
 
+/**
+ * Maps a route network slug to its EVM chain id, e.g. "arbitrum-one" -> 42161.
+ * Returns undefined for an unknown slug or a non-EVM one such as Solana.
+ *
+ * Derived from the URL, so unlike the chainId in Redux this is available during a server
+ * render. `useHandleRoute` dispatches the same value into Redux once mounted.
+ */
+/** Ethereum L1 slug — where components and agent blueprints live. Case-insensitive, like the route validation. */
+export const L1_NETWORK_NAME = 'ethereum';
+
+export const isL1NetworkName = (network?: string | string[]): boolean =>
+  typeof network === 'string' && network.toLowerCase() === L1_NETWORK_NAME;
+
+export const getChainIdFromPath = (network?: string | string[]): number | undefined => {
+  if (typeof network !== 'string') return undefined;
+  const slug = network.toLowerCase();
+  // Optional chaining is deliberate: this runs inside the Layout render, so a chain entry
+  // without a networkName would throw there and blank the whole page.
+  return EVM_SUPPORTED_CHAINS.find((c) => c.networkName?.toLowerCase() === slug)?.id;
+};
+
 // TODO: provide types for ethereum
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const getWindowEthereum = () => (window as any)?.ethereum;

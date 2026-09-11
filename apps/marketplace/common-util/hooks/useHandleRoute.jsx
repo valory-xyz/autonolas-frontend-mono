@@ -6,20 +6,17 @@ import { toLower } from 'lodash';
 import { setVmInfo, setChainId } from 'store/setup';
 import { PAGES_TO_LOAD_WITHOUT_CHAINID, SOLANA_CHAIN_NAMES, URL } from 'util/constants';
 import { useHelpers } from '../hooks';
-import { ALL_SUPPORTED_CHAINS, EVM_SUPPORTED_CHAINS } from '../Login/config';
-import { doesPathIncludesComponentsOrAgents, isPageWithSolana } from '../functions';
+import { ALL_SUPPORTED_CHAINS } from '../Login/config';
+import {
+  doesPathIncludesComponentsOrAgents,
+  getChainIdFromPath,
+  isL1NetworkName,
+  isPageWithSolana,
+} from '../functions';
 
 const isValidNetworkName = (name) => {
   const isValid = ALL_SUPPORTED_CHAINS.some((e) => toLower(e.networkName) === toLower(name));
   return isValid;
-};
-
-const getChainIdFromPath = (networkName) =>
-  EVM_SUPPORTED_CHAINS.find((e) => toLower(e.networkName) === toLower(networkName))?.id;
-
-const isValidL1NetworkName = (name) => {
-  if (name === 'ethereum') return true;
-  return false;
 };
 
 /**
@@ -127,7 +124,7 @@ export const useHandleRoute = () => {
      * because components & agents are not supported on gnosis
      */
 
-    if (!isValidL1NetworkName(networkNameFromUrl) && doesPathIncludesComponentsOrAgents(path)) {
+    if (!isL1NetworkName(networkNameFromUrl) && doesPathIncludesComponentsOrAgents(path)) {
       router.push(`/${networkNameFromUrl}/ai-agents`);
     }
   }, [path, networkNameFromUrl, isL1Network]);

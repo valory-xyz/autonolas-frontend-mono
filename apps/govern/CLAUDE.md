@@ -72,6 +72,48 @@ A queued proposal sits in the timelock until it can be executed:
 
 `components/Layout/Footer/index.tsx` shows different contract links depending on the route: the **/proposals** page links **GovernorOLAS** + veOLAS, while the other (voting) tabs link **VoteWeighting** + veOLAS.
 
+## Contracts page rendering (`/contracts`)
+
+`getStaticProps` pre-renders the staking-contract table via `fetchGovernContracts()` and
+revalidates every 5 minutes (ISR), so the rows ship as HTML rather than `No data`.
+
+- **ISR, not `getServerSideProps`.** PR #350 moved this page to client-only because per-request
+  SSR hung serverless workers on slow RPCs. `/epoch` already uses this pattern.
+- The snapshot is passed down as a prop (`ContractsPage` -> `ContractsList`), *not* dispatched
+  into Redux from a `useEffect`. An earlier attempt did the latter, which runs only after mount
+  and so left the server HTML empty — the exact problem this is meant to fix.
+- `ContractsList` renders `stakingContracts` from the store once populated, falling back to
+  `initialContracts` before then, and suppresses the loading spinner while the snapshot is showing.
+- **Never let this page render `No data`.** The table's `locale.emptyText` describes what the
+  table lists instead.
+- **Failure semantics matter.** `createSnapshotGetStaticProps` (in `libs/util-ssr`) rethrows when
+  a *revalidation* fails, so Next keeps serving the last good page. Returning empty props instead
+  looks safe but is a successful render to Next: it caches the empty result and overwrites the
+  working table. Failures during the *build* are swallowed, because a throw there fails the whole
+  build and there is no previous page to fall back to.
+- **Published figures carry scope and an as-of time**, per the Phase 1 standard. Pre-rendered HTML
+  is read long after it was generated, so a hidden (`.sr-only`) line states what the table counts
+  and when the snapshot was taken. Hidden, not visible — the visible design is unchanged.
+- **The ISR fetch needs a raised `maxDuration`.** `pages/contracts.tsx` exports
+  `config = { maxDuration: 120 }` and the in-code timeout is 90 s. 45 s was not enough: the fan-out measured ~36 s on one run and then
+  exceeded 45 s on the next, which in production means intermittently shipping the fallback
+  instead of the table. Vercel's default function duration is well below this, so the platform
+  would cut the fetch short without that file.
+- The blob cache's storage logic lives in `libs/util-functions/src/lib/contractCacheStore.ts`,
+  shared with the other app. Only the prefix, token and payload shape differ. The *data* is not
+  shared: operate and govern cache different shapes (govern reads 13 contract fields, operate 6,
+  and they disagree on whether `maxNumServices` is a string or a number), so sharing one store
+  would need both fetchers and schemas unified first.
+- **Guarded by tests, not just by review.** `*.prerender.spec.tsx` asserts the table renders rows
+  from `initialContracts` and never renders a bare `No data`; both run in CI. `yarn
+  check:served-text <app>` makes the same assertions against real built HTML after `nx build`.
+- Keeping the fetch inside the ISR budget needed two things: the mainnet client uses
+  `batch: { multicall: true }` plus `http(url, { batch: true })` (one
+  `nomineeRelativeWeightWrite` eth_call per nominee, twice over, is ~100 round trips), and
+  `fetchMetadataForNominees` reads the Vercel Blob cache first and writes through on a miss, the
+  same two-phase path as `/api/contracts/batch`. Resolving metadata straight from chain + IPFS
+  took ~70 s on its own.
+
 ## Notes
 
 - Voting and delegation logic depends on governor contracts and subgraph; ensure correct chain and subgraph URL.

@@ -4,6 +4,7 @@ import React from 'react';
 import styled from 'styled-components';
 
 import { useAppSelector } from 'store/setup';
+import { Campaign } from 'types/moduleDetails';
 
 const { Title, Paragraph } = Typography;
 
@@ -82,13 +83,20 @@ const columns = [
   Table.EXPAND_COLUMN,
 ];
 
-export const Campaigns = () => {
+type CampaignsProps = {
+  /** Pre-rendered on the server; Redux takes over once the client has fetched. */
+  initialCampaigns?: Campaign[];
+};
+
+export const Campaigns = ({ initialCampaigns }: CampaignsProps) => {
   const { moduleDetails, isModuleDetailsLoading: isLoading } = useAppSelector(
     (state) => state.setup,
   );
-  const activeTwitterCampaigns = (moduleDetails?.twitter_campaigns?.campaigns || []).filter(
+  const fetchedCampaigns = (moduleDetails?.twitter_campaigns?.campaigns || []).filter(
     (campaign) => campaign.status === 'live',
   );
+  // Once the client fetch has completed its answer wins, even if that answer is "none live".
+  const activeTwitterCampaigns = moduleDetails ? fetchedCampaigns : (initialCampaigns ?? []);
 
   return (
     <Card>

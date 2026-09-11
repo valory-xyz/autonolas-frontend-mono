@@ -1,7 +1,6 @@
 import { cloneDeep, omit } from 'lodash';
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { MODULE_DETAILS_API_BASE_URL } from './module-details';
-
+import { fetchModuleDetails } from 'common-util/api/fetchModuleDetails';
 import { getSignature } from 'common-util/apiRoute';
 import { getNowTimestamp } from 'common-util/functions/time';
 import type { ContributeModuleDetails, ScheduledTweet } from 'types/moduleDetails';
@@ -12,15 +11,8 @@ const ENDPOINT_URL = '/api/agent-attributes';
 const BASE_URL = `${process.env.NEXT_PUBLIC_AFMDB_URL}${ENDPOINT_URL}`;
 const ERROR_MESSAGE = 'Failed to update agent attributes.';
 
-const getLatestModuleDetails = async () => {
-  // fetch latest module data
-  const moduleDetailsResponse = await fetch(MODULE_DETAILS_API_BASE_URL);
-  const moduleDetails: ContributeModuleDetails[] = await moduleDetailsResponse.json();
-  return moduleDetails;
-};
-
 const getUpdatedModuleDetailsOnPostProposal = async (post: ScheduledTweet) => {
-  const moduleDetails = await getLatestModuleDetails();
+  const moduleDetails = await fetchModuleDetails();
   const updatedModuleDetails = cloneDeep(moduleDetails);
   const existingTweets = updatedModuleDetails[0].json_value.scheduled_tweet.tweets;
   updatedModuleDetails[0].json_value.scheduled_tweet.tweets = [...existingTweets, post];
@@ -29,7 +21,7 @@ const getUpdatedModuleDetailsOnPostProposal = async (post: ScheduledTweet) => {
 };
 
 const getUpdatedModuleDetailsAfterPostMutation = async (post: ScheduledTweet) => {
-  const moduleDetails = await getLatestModuleDetails();
+  const moduleDetails = await fetchModuleDetails();
   const updatedModuleDetails = cloneDeep(moduleDetails);
   const updatedTweets = updatedModuleDetails[0].json_value.scheduled_tweet.tweets.map((tweet) =>
     tweet.request_id === post.request_id ? post : tweet,

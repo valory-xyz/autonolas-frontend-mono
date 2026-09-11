@@ -64,6 +64,51 @@ All pages use dynamic `[network]` routing (e.g., `/ethereum/ai-agents`).
 - `store/` – Redux slices (`setup.ts` for wallet state, `service.ts` for agent instances).
 - `types/` – TypeScript type definitions.
 
+## Server rendering (read this before touching Layout)
+
+Until recently **every page in this app served 38 characters of readable text** — the `<title>`
+and nothing else, including pages that already had `getServerSideProps`. The cause was one line
+in `components/Layout/index.jsx`: the page body was gated behind `chainId`, which lives in Redux
+and is only set from an effect in `useHandleRoute`. On the server, and on the first client
+render, it is always `null`, so `children` rendered as `null`.
+
+The gate now also accepts a chain id derived from the route
+(`getChainIdFromPath` in `common-util/functions`). `useHandleRoute` dispatches that same value
+once mounted, so the server render, the first client render and Redux all agree.
+
+- **Do not re-gate the body on a value that only exists client-side.** That is the bug this
+  fixed, and it is invisible in the browser — the page looks fine, but crawlers and AI
+  assistants get nothing.
+- Solana still falls through to the `isSvm` branch. Its listings come from a different source,
+  so nothing is pre-rendered for it.
+- Every page's main component is still `dynamic(..., { ssr: false })`. Opening the gate does not
+  make them render on the server; it only allows content that *can* render to get through.
+
+## Listing pages (`/[network]/ai-agents`, `/components`, `/agent-blueprints`)
+
+Each pre-renders its first page of results with ISR (`getStaticProps`, 5-minute revalidate,
+`fallback: 'blocking'`). The interactive tables are untouched; the data is rendered a second time
+inside a `hidden` block by `components/ListingSummary`, so crawlers read it and nothing changes on
+screen.
+
+- **`ai-agents` pre-renders every EVM network; `components` and `agent-blueprints` pre-render
+  Ethereum alone** (`l1ListingStaticPaths` + `l1Only: true`). Those two are L1-only registries and
+  `useHandleRoute` redirects any other network on those routes to `/[network]/ai-agents` — so
+  pre-rendering all eight published seven crawlable copies of one list at URLs a reader never
+  stays on. The other networks still render and redirect as before; they just carry no listing.
+
+- `hidden`, not `.sr-only` — the visible table renders the same rows after hydration, so
+  exposing both to assistive tech would announce every entry twice.
+- `common-util/functions/fetchListings.ts` mirrors the queries in each list's hooks. **If those
+  queries change, change these too** — nothing enforces that link.
+- **The summary deliberately makes no claim about which network the rows belong to.** The
+  listings read one global subgraph (`NEXT_PUBLIC_AUTONOLAS_SUB_GRAPH_URL`), so every
+  `/[network]/...` page shows the *same* rows. Saying "on Base" would be false on seven networks
+  out of eight. (That per-network duplication looks like a pre-existing bug — per-network
+  clients exist in `common-util/graphql` but the listings do not use them.)
+- Guarded by `yarn check:served-text marketplace`, which fails if a listing page ships without
+  its summary block.
+
 ## Key Features
 
 ### ERC8004 Metadata Standard

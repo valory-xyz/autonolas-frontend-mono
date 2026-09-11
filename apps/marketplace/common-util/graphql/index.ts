@@ -9,6 +9,16 @@ const requestConfig: RequestConfig = {
   },
 };
 
+/**
+ * The Olas on-chain registry subgraph, backing the AI agents / components / agent blueprints
+ * listings. Lives here rather than in `hooks/useSubgraph` because it is not a hook and is used
+ * from `getStaticProps` as well as the client.
+ */
+export const REGISTRY_GRAPHQL_CLIENT = new GraphQLClient(
+  process.env.NEXT_PUBLIC_AUTONOLAS_SUB_GRAPH_URL as string,
+  requestConfig,
+);
+
 export const MARKETPLACE_SUBGRAPH_CLIENTS = {
   1: new GraphQLClient(process.env.NEXT_PUBLIC_ETHEREUM_MARKETPLACE_SUBGRAPH_URL!, requestConfig),
   10: new GraphQLClient(process.env.NEXT_PUBLIC_OPTIMISM_MARKETPLACE_SUBGRAPH_URL!, requestConfig),
