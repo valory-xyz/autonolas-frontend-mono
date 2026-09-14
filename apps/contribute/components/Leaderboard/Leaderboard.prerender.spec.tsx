@@ -80,6 +80,15 @@ describe('Leaderboard pre-rendered snapshot', () => {
     expect(screen.getByText('olas')).toBeInTheDocument();
   });
 
+  it('states when the snapshot was taken', () => {
+    renderLeaderboard({
+      initialLeaderboard: [user('alice', 900)],
+      snapshotGeneratedAt: '2026-09-08T14:33:00.000Z',
+    });
+
+    expect(screen.getByText(/snapshot taken 8 Sep 2026, 14:33 UTC/)).toBeInTheDocument();
+  });
+
   it('never serves the bare "No data" empty state', () => {
     renderLeaderboard({ initialLeaderboard: [user('alice', 900)], initialCampaigns: [CAMPAIGN] });
 

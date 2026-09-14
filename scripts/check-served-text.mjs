@@ -45,6 +45,8 @@ const EXPECTATIONS = {
   // fetches, and it published the words "No data" the moment the body started rendering.
   contribute: [
     { page: 'docs', minReadableChars: 1500 },
+    // `/` and `/leaderboard` render the same page from one snapshot; both must carry its rows.
+    { page: 'index', minReadableChars: 1000, minRows: 5 },
     { page: 'leaderboard', minReadableChars: 1000, minRows: 5 },
   ],
   // Same bug as launch: the guides were fetched from the browser and the whole body sat behind a
@@ -104,6 +106,14 @@ const readableText = (html) =>
 /** Built HTML may sit under a locale dir and further route segments, so match on the path ending. */
 const findPageHtml = (dir, page) => {
   if (!existsSync(dir)) return null;
+  // Under i18n the root route is emitted as `<locale>.html` beside the `<locale>/` directory,
+  // not as `<locale>/index.html`.
+  if (page === 'index') {
+    for (const entry of readdirSync(dir)) {
+      const sibling = join(dir, `${entry}.html`);
+      if (statSync(join(dir, entry)).isDirectory() && existsSync(sibling)) return sibling;
+    }
+  }
   const wanted = `${page}.html`.split('/').join(sep);
   for (const entry of readdirSync(dir)) {
     const full = join(dir, entry);
