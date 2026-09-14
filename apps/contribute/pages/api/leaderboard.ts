@@ -1,5 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 
+import { AfmdbError } from 'common-util/api/afmdb';
 import { fetchLeaderboardData } from 'common-util/api/fetchLeaderboardData';
 
 const ERROR_MESSAGE = 'Failed to fetch leaderboard.';
@@ -10,6 +11,7 @@ export default async function handler(_req: NextApiRequest, res: NextApiResponse
     res.status(200).json(allResults);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: ERROR_MESSAGE, details: error });
+    const status = error instanceof AfmdbError ? error.status : 500;
+    res.status(status).json({ error: ERROR_MESSAGE, details: error });
   }
 }

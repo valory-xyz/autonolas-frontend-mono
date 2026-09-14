@@ -1,6 +1,6 @@
 import { getPublicClient } from '@wagmi/core';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { AvailableOn, ContractCacheSnapshot, Nominee, StakingContract } from 'types';
+import { ContractCacheSnapshot, Nominee, StakingContract } from 'types';
 import { Abi, Address, Block, formatUnits } from 'viem';
 import { getBlock } from 'viem/actions';
 import { useReadContracts } from 'wagmi';
@@ -17,21 +17,14 @@ import {
   SubgraphStakingRow,
 } from 'common-util/graphql';
 import {
-  EXTRA_STAKING_CONTRACTS,
   STAKING_CONTRACT_DETAILS,
   getApy,
+  getEpochEndsAt,
   getStakeRequired,
   getTimeRemainingFormatted,
+  sanitizeAvailableOn,
+  withExtraStakingContracts,
 } from 'common-util/constants/contracts';
-
-import { PLATFORM_OPTIONS } from './constants';
-
-const VALID_AVAILABLE_ON = new Set<AvailableOn>(PLATFORM_OPTIONS.map((o) => o.value));
-
-const sanitizeAvailableOn = (value: unknown): AvailableOn[] | null => {
-  if (!Array.isArray(value)) return null;
-  return value.filter((p): p is AvailableOn => VALID_AVAILABLE_ON.has(p as AvailableOn));
-};
 
 const useContractDetails = (nominees: Nominee[], functionName: string) => {
   const contracts = nominees.map((nominee) => ({
@@ -246,14 +239,9 @@ export const useStakingContractsList = () => {
         ),
     );
 
-    // Surface contracts that are no longer (or not yet) registered as nominees but
-    // should still be listed (see EXTRA_STAKING_CONTRACTS). Skip any already present.
-    const existingAccounts = new Set(filtered.map((n) => n.account.toLowerCase()));
-    const extras = EXTRA_STAKING_CONTRACTS.filter(
-      (extra) => !existingAccounts.has(extra.account.toLowerCase()),
-    );
-
-    return [...filtered, ...extras];
+    // Surface contracts that are no longer (or not yet) registered as nominees but should still
+    // be listed. Shared with the ISR fetch so both build the same list.
+    return withExtraStakingContracts(filtered);
   }, [nomineesData]);
 
   const cacheMap = useContractCacheMap(nominees);
@@ -445,6 +433,7 @@ export const useStakingContractsList = () => {
         availableRewards,
         epoch,
         timeRemaining,
+        epochEndsAt: getEpochEndsAt(tsCheckpointSeconds, livenessPeriodSeconds),
       };
     }) as StakingContract[];
   }, [

@@ -4,7 +4,7 @@ Guidance for working on the **Marketplace** app in this repo. This app powers th
 
 ## Purpose
 
-Discover, register, deploy, and interact with **mechs** (autonomous AI agents) and **registry** entities (agents, components, services) across multiple chains. Users connect a wallet (RainbowKit, via WalletConnect/MetaMask/Coinbase/Safe) to register, deploy, or use mechs. Multi-chain: Ethereum, Gnosis, Polygon, Arbitrum, Optimism, Base, Mode, Celo. Also supports **Solana (SVM)**.
+Discover, register, deploy, and interact with **mechs** (autonomous AI agents) and **registry** entities (agents, components, services) across multiple chains. Users connect a wallet (RainbowKit, via WalletConnect/MetaMask/Coinbase/Safe) to register, deploy, or use mechs. Multi-chain: Ethereum, Gnosis, Polygon, Arbitrum, Optimism, Base, Mode, Celo, Robinhood Chain. Also supports **Solana (SVM)**.
 
 ## Port
 
@@ -21,6 +21,7 @@ Discover, register, deploy, and interact with **mechs** (autonomous AI agents) a
 - **Registry**: `NEXT_PUBLIC_REGISTRY_URL`, `NEXT_PUBLIC_AUTONOLAS_URL`; Safe APIs per chain.
 - **Marketplace activity subgraphs** (per chain): `NEXT_PUBLIC_*_MARKETPLACE_SUBGRAPH_URL` for Ethereum (1), Optimism (10), Gnosis (100), Polygon (137), Base (8453), Arbitrum (42161), Celo (42220).
 - **Registry subgraphs**: Ethereum (1), Optimism (10), Gnosis (100), Polygon (137), Base (8453), Mode (34443), Arbitrum (42161), Celo (42220).
+- **Robinhood Chain (4663)** — route slug `robinhood-chain`. Contract reads only for now: no registry or marketplace subgraph/squid yet, so listings/details come from `ServiceRegistryL2` over `NEXT_PUBLIC_ROBINHOOD_URL` and every agent shows as *Registered*. The chain definition lives in `libs/util-constants/src/lib/chains.ts` (`robinhood`, viem has no entry). Follow the `TODO(robinhood)` markers in `common-util/graphql/index.ts` and `util/constants.ts` once the squids are deployed.
 - **mech-analytics** (activity read path, chains 10 / 100 / 137 / 8453):
   - API base URL is built in, not an env var: `MECH_ANALYTICS_URL` in `common-util/mechAnalytics/config.ts` (`https://mech-analytics-api.autonolas.tech`). If the endpoint moves, change the constant.
   - `NEXT_PUBLIC_USE_MECH_ANALYTICS_ROWS` — the only switch. Default ON when unset; set to exactly `"false"` to fall back to the subgraph reader.
@@ -63,6 +64,51 @@ All pages use dynamic `[network]` routing (e.g., `/ethereum/ai-agents`).
 - `common-util/` – Shared utilities, hooks, contract ABIs, GraphQL queries, IPFS helpers.
 - `store/` – Redux slices (`setup.ts` for wallet state, `service.ts` for agent instances).
 - `types/` – TypeScript type definitions.
+
+## Server rendering (read this before touching Layout)
+
+Until recently **every page in this app served 38 characters of readable text** — the `<title>`
+and nothing else, including pages that already had `getServerSideProps`. The cause was one line
+in `components/Layout/index.jsx`: the page body was gated behind `chainId`, which lives in Redux
+and is only set from an effect in `useHandleRoute`. On the server, and on the first client
+render, it is always `null`, so `children` rendered as `null`.
+
+The gate now also accepts a chain id derived from the route
+(`getChainIdFromPath` in `common-util/functions`). `useHandleRoute` dispatches that same value
+once mounted, so the server render, the first client render and Redux all agree.
+
+- **Do not re-gate the body on a value that only exists client-side.** That is the bug this
+  fixed, and it is invisible in the browser — the page looks fine, but crawlers and AI
+  assistants get nothing.
+- Solana still falls through to the `isSvm` branch. Its listings come from a different source,
+  so nothing is pre-rendered for it.
+- Every page's main component is still `dynamic(..., { ssr: false })`. Opening the gate does not
+  make them render on the server; it only allows content that *can* render to get through.
+
+## Listing pages (`/[network]/ai-agents`, `/components`, `/agent-blueprints`)
+
+Each pre-renders its first page of results with ISR (`getStaticProps`, 5-minute revalidate,
+`fallback: 'blocking'`). The interactive tables are untouched; the data is rendered a second time
+inside a `hidden` block by `components/ListingSummary`, so crawlers read it and nothing changes on
+screen.
+
+- **`ai-agents` pre-renders every EVM network; `components` and `agent-blueprints` pre-render
+  Ethereum alone** (`l1ListingStaticPaths` + `l1Only: true`). Those two are L1-only registries and
+  `useHandleRoute` redirects any other network on those routes to `/[network]/ai-agents` — so
+  pre-rendering all eight published seven crawlable copies of one list at URLs a reader never
+  stays on. The other networks still render and redirect as before; they just carry no listing.
+
+- `hidden`, not `.sr-only` — the visible table renders the same rows after hydration, so
+  exposing both to assistive tech would announce every entry twice.
+- `common-util/functions/fetchListings.ts` mirrors the queries in each list's hooks. **If those
+  queries change, change these too** — nothing enforces that link.
+- **The summary deliberately makes no claim about which network the rows belong to.** The
+  listings read one global subgraph (`NEXT_PUBLIC_AUTONOLAS_SUB_GRAPH_URL`), so every
+  `/[network]/...` page shows the *same* rows. Saying "on Base" would be false on seven networks
+  out of eight. (That per-network duplication looks like a pre-existing bug — per-network
+  clients exist in `common-util/graphql` but the listings do not use them.)
+- Guarded by `yarn check:served-text marketplace`, which fails if a listing page ships without
+  its summary block.
 
 ## Key Features
 

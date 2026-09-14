@@ -1,69 +1,25 @@
-import { list, put } from '@vercel/blob';
+/**
+ * Blob storage for the govern app: cached staking contract config and IPFS metadata.
+ *
+ * The storage logic is shared with operate; only the prefix, token and payload shape differ.
+ * The prefix is versioned — v2 invalidates snapshots poisoned by transient RPC failures at
+ * population time (empty name / configHash / proxyHash / activityChecker) written before the
+ * completeness guard in fetchContractCacheDataFromChain.
+ */
 
 import type { GovernContractCacheData, GovernContractCacheSnapshot } from 'types';
 
-// Versioned prefix. Bump when the cached snapshot shape or the rules for what may be cached
-// change, so stale snapshots are treated as misses and repopulated. v2 invalidates snapshots
-// poisoned by transient RPC failures at population time (empty name / configHash / proxyHash /
-// activityChecker) written before the completeness guard in fetchContractCacheDataFromChain.
-const BLOB_PREFIX = 'govern/contracts/v2';
+import {
+  createContractCacheStore,
+  isContractCacheSnapshot,
+} from 'libs/util-functions/src/lib/contractCacheStore';
 
-function blobPath(chainId: number, address: string): string {
-  return `${BLOB_PREFIX}/${chainId}/${address.toLowerCase()}.json`;
-}
+export const { getContractCache, setContractCache } =
+  createContractCacheStore<GovernContractCacheData>({
+    prefix: 'govern/contracts/v2',
+    getToken: () => process.env.GOVERN_BLOB_READ_WRITE_TOKEN,
+  });
 
+/** Used by the client-side contract page, which fetches a blob URL directly. */
 export const isGovernContractCacheSnapshot = (data: unknown): data is GovernContractCacheSnapshot =>
-  typeof data === 'object' && data !== null && 'data' in data && 'timestamp' in data;
-
-/**
- * Reads cached contract snapshot from blob. Returns null on miss or error.
- */
-export async function getContractCache(
-  chainId: number,
-  address: string,
-): Promise<GovernContractCacheSnapshot | null> {
-  try {
-    const path = blobPath(chainId, address);
-    const token = process.env.GOVERN_BLOB_READ_WRITE_TOKEN;
-    const { blobs } = await list({ prefix: path, limit: 1, token: token ?? undefined });
-
-    const blob = blobs.find((b) => b.pathname === path);
-    if (!blob) return null;
-
-    const response = await fetch(blob.url, { cache: 'no-store' });
-    if (!response.ok) return null;
-
-    const data = await response.json();
-    return isGovernContractCacheSnapshot(data) ? data : null;
-  } catch {
-    return null;
-  }
-}
-
-/**
- * Writes contract data to blob, setting timestamp automatically.
- */
-export async function setContractCache(
-  chainId: number,
-  address: string,
-  data: GovernContractCacheData,
-): Promise<void> {
-  const path = blobPath(chainId, address);
-  const snapshot: GovernContractCacheSnapshot = {
-    data,
-    timestamp: Date.now(),
-  };
-  try {
-    const token = process.env.GOVERN_BLOB_READ_WRITE_TOKEN;
-    await put(path, JSON.stringify(snapshot, null, 2), {
-      access: 'public',
-      addRandomSuffix: false,
-      contentType: 'application/json',
-      cacheControlMaxAge: 0,
-      token: token ?? undefined,
-    });
-  } catch (error) {
-    console.error('Contract cache blob put failed:', { chainId, address, path }, error);
-    throw error;
-  }
-}
+  isContractCacheSnapshot<GovernContractCacheData>(data);

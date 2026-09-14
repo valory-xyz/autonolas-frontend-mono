@@ -35,6 +35,22 @@ Guidance for working on the **Launch** app in this repo.
 - Test: `yarn nx test launch`
 - Lint: `yarn nx lint launch`
 
+## Path page rendering (`/path`, and `/` redirects here)
+
+This page fetches nothing — the steps are static React components. The risk is different from
+the other apps: it used to render only `steps[step].content`, so the served HTML carried one step
+of six and no sign the rest existed. A crawler fetches the page once and never clicks.
+
+- **All six steps are rendered.** Inactive ones use the `hidden` attribute, which keeps them in
+  the HTML while removing them from both the visual render and the accessibility tree — so
+  crawlers get every step and a screen-reader user does not hear all six at once. `.sr-only`
+  would have been wrong here for that second reason.
+- The visible page is unchanged: exactly one panel is visible, still `steps[0]` on first render.
+- **Rendering every step runs every step's hooks.** `Engage` reads Redux, so any test rendering
+  `PathPage` needs its own `<Provider>`; `_app.tsx` supplies one in the app.
+- Guarded by `PathPage.prerender.spec.tsx` (runs in CI) and by
+  `yarn check:served-text launch` against built HTML, which asserts every step title is served.
+
 ## Notes
 
 - Staking contract creation and nomination are chain-specific; use correct network and subgraph for the target chain.

@@ -96,6 +96,7 @@ export const CACHE_DURATION = {
 export const MARKETPLACE_SUPPORTED_CHAIN_IDS = [
   1, 10, 100, 137, 8453, 42161,
   // 42220,
+  // TODO(robinhood): 4663 once its marketplace subgraph/squid is live (see common-util/graphql).
 ] as const;
 
 export const ERC8004_CHAIN_MAPPING = {

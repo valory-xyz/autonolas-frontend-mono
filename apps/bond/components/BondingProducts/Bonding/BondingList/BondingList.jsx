@@ -291,11 +291,15 @@ const sortProducts = (list) =>
     return b.projectedChange - a.projectedChange;
   });
 
+/* Server-rendered before the client has fetched anything, so a bare "No products" told crawlers
+   and AI assistants that Olas has no bonding products at all. Say what the table lists instead. */
 const NoProducts = () => (
   <>
     <UnorderedListOutlined style={{ fontSize: 64 }} className="mb-8" />
     <br />
-    No products
+    No bonding products are available right now. When they load, each product in this table shows
+    its liquidity pool and LP token, the current LP token price, how much OLAS it mints per LP
+    token, the current difference in value, the vesting period and the OLAS supply remaining.
   </>
 );
 

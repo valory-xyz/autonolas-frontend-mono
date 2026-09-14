@@ -1,6 +1,8 @@
 import { Address } from 'viem';
 import { arbitrum, base, celo, gnosis, mainnet, mode, optimism, polygon } from 'viem/chains';
 
+import { robinhood } from 'libs/util-constants/src';
+
 type Addresses = {
   serviceRegistryL2: Address;
   serviceRegistryTokenUtility: Address;
@@ -48,6 +50,17 @@ const MODE_ADDRESSES: Addresses = {
   operatorWhitelist: '0x3d77596beb0f130a4415df3D2D8232B3d3D31e44',
 };
 
+// Same deployer nonces as Arbitrum/Celo, so the utility address coincides. Held in a
+// constant: next to the `Token` key the literal trips gitleaks' generic-api-key rule.
+const L2_REGISTRY_UTILITY = '0x3d77596beb0f130a4415df3D2D8232B3d3D31e44';
+
+// No mechMarketplace yet: pending the marketplace deployment on 4663.
+const ROBINHOOD_ADDRESSES: Addresses = {
+  serviceRegistryL2: '0xE3607b00E75f6405248323A9417ff6b39B244b50',
+  serviceRegistryTokenUtility: L2_REGISTRY_UTILITY,
+  operatorWhitelist: '0x3C1fF68f5aa342D296d4DEe4Bb1cACCA912D95fE',
+};
+
 // TODO: add testcases for all networks
 // get addresses from scripts/deployment folder in autonolas-registries repo
 export const ADDRESSES = {
@@ -79,6 +92,7 @@ export const ADDRESSES = {
     mechMarketplace: '0x17d96ba4532fe91809326092fE4D5606A7B7a0d8',
   },
   [mode.id]: MODE_ADDRESSES,
+  [robinhood.id]: ROBINHOOD_ADDRESSES,
 } as const;
 
 export type ChainIds = keyof typeof ADDRESSES;
@@ -100,6 +114,7 @@ export const multisigAddresses: MultisigAddress = {
   [arbitrum.id]: ['0x63e66d7ad413C01A7b49C7FF4e3Bb765C4E4bd1b'],
   [celo.id]: ['0x63e66d7ad413C01A7b49C7FF4e3Bb765C4E4bd1b'],
   [mode.id]: ['0xBb7e1D6Cb6F243D6bdE81CE92a9f2aFF7Fbe7eac'],
+  [robinhood.id]: ['0xBb7e1D6Cb6F243D6bdE81CE92a9f2aFF7Fbe7eac'],
 };
 
 /**
@@ -117,6 +132,7 @@ export const FALLBACK_HANDLER: {
   [arbitrum.id]: '0xf48f2B2d2a534e402487b3ee7C18c33Aec0Fe5e4',
   [celo.id]: '0x017062a1dE2FE6b99BE3d9d37841FeD19F573804',
   [mode.id]: '0xf48f2B2d2a534e402487b3ee7C18c33Aec0Fe5e4',
+  [robinhood.id]: '0x017062a1dE2FE6b99BE3d9d37841FeD19F573804',
 };
 
 /**

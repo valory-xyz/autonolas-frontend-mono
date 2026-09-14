@@ -10,38 +10,36 @@ const requestConfig: RequestConfig = {
   },
 };
 
-export const STAKING_GRAPH_CLIENTS = {
-  [mode.id]: new GraphQLClient(process.env.NEXT_PUBLIC_MODE_STAKING_SUBGRAPH_URL!, requestConfig),
-  [optimism.id]: new GraphQLClient(
-    process.env.NEXT_PUBLIC_OPTIMISM_STAKING_SUBGRAPH_URL!,
-    requestConfig,
-  ),
-  [gnosis.id]: new GraphQLClient(
-    process.env.NEXT_PUBLIC_GNOSIS_STAKING_SUBGRAPH_URL!,
-    requestConfig,
-  ),
-  [base.id]: new GraphQLClient(process.env.NEXT_PUBLIC_BASE_STAKING_SUBGRAPH_URL!, requestConfig),
-  [polygon.id]: new GraphQLClient(
-    process.env.NEXT_PUBLIC_POLYGON_STAKING_SUBGRAPH_URL!,
-    requestConfig,
-  ),
-  [mainnet.id]: new GraphQLClient(
-    process.env.NEXT_PUBLIC_ETHEREUM_STAKING_SUBGRAPH_URL!,
-    requestConfig,
-  ),
-  [arbitrum.id]: new GraphQLClient(
-    process.env.NEXT_PUBLIC_ARBITRUM_STAKING_SUBGRAPH_URL!,
-    requestConfig,
-  ),
-  [celo.id]: new GraphQLClient(process.env.NEXT_PUBLIC_CELO_STAKING_SUBGRAPH_URL!, requestConfig),
+const STAKING_SUBGRAPH_URLS = {
+  [mode.id]: process.env.NEXT_PUBLIC_MODE_STAKING_SUBGRAPH_URL,
+  [optimism.id]: process.env.NEXT_PUBLIC_OPTIMISM_STAKING_SUBGRAPH_URL,
+  [gnosis.id]: process.env.NEXT_PUBLIC_GNOSIS_STAKING_SUBGRAPH_URL,
+  [base.id]: process.env.NEXT_PUBLIC_BASE_STAKING_SUBGRAPH_URL,
+  [polygon.id]: process.env.NEXT_PUBLIC_POLYGON_STAKING_SUBGRAPH_URL,
+  [mainnet.id]: process.env.NEXT_PUBLIC_ETHEREUM_STAKING_SUBGRAPH_URL,
+  [arbitrum.id]: process.env.NEXT_PUBLIC_ARBITRUM_STAKING_SUBGRAPH_URL,
+  [celo.id]: process.env.NEXT_PUBLIC_CELO_STAKING_SUBGRAPH_URL,
 } as const;
 
-export type SupportedStakingChain = keyof typeof STAKING_GRAPH_CLIENTS;
+export type SupportedStakingChain = keyof typeof STAKING_SUBGRAPH_URLS;
+
+/** An unset env var used to reach `GraphQLClient` as `undefined`, which only surfaced later as
+ *  "Only absolute URLs are supported" — one failed request per contract on that chain, each
+ *  then retried over RPC. Chains without a configured URL now report as unsupported instead. */
+const isConfigured = (url: string | undefined): url is string =>
+  typeof url === 'string' && /^https?:\/\//.test(url);
+
+export const STAKING_GRAPH_CLIENTS = Object.fromEntries(
+  Object.entries(STAKING_SUBGRAPH_URLS).map(([chainId, url]) => [
+    Number(chainId),
+    isConfigured(url) ? new GraphQLClient(url, requestConfig) : null,
+  ]),
+) as Record<SupportedStakingChain, GraphQLClient | null>;
 
 export function hasSubgraphSupport(chainId: number): chainId is SupportedStakingChain {
   return (
     chainId in STAKING_GRAPH_CLIENTS &&
-    STAKING_GRAPH_CLIENTS[chainId as keyof typeof STAKING_GRAPH_CLIENTS] != null
+    STAKING_GRAPH_CLIENTS[chainId as SupportedStakingChain] != null
   );
 }
 

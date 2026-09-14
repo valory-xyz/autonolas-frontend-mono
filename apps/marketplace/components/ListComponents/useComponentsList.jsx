@@ -11,9 +11,10 @@ import {
   UNIT_FIELDS,
   getSearchFilterSubQueryForUnitFields,
 } from '../../common-util/hooks/useSubgraph';
+import { COMPONENT_PACKAGE_TYPES } from '../../common-util/functions/fetchListings';
 import { TOTAL_VIEW_COUNT } from '../../util/constants';
 
-const componentPackageType = 'packageType_in: [connection,skill,protocol,contract,custom,unknown]';
+const componentPackageType = COMPONENT_PACKAGE_TYPES;
 
 const getAllAndMyComponentsQuery = (currentPage, ownerAddress = null) => {
   return gql`

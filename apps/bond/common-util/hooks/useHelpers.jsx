@@ -1,12 +1,24 @@
 import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { SUPPORTED_CHAINS } from 'common-util/config/wagmi';
 import { getChainId } from 'common-util/functions';
 import { setChainId } from 'store/setup';
+
+/** What `getChainId` itself falls back to for a visitor with no wallet — which includes every
+ *  crawler, and the server, where it returns undefined because there is no `window`. */
+const DEFAULT_CHAIN_ID = SUPPORTED_CHAINS[0].id;
 
 export const useHelpers = () => {
   const dispatch = useDispatch();
   const account = useSelector((state) => state?.setup?.account);
-  const chainId = useSelector((state) => state?.setup?.chainId);
+  const storedChainId = useSelector((state) => state?.setup?.chainId);
+
+  // Redux holds null until the effect below runs, so during a server render and on the first
+  // client render every consumer saw null. The Layout gates the whole page body on this, so the
+  // app served no content to crawlers at all; and `ADDRESSES[chainId]` would throw for anything
+  // that did render. Defaulting matches what an unconnected visitor resolves to anyway, and a
+  // connected wallet still wins as soon as the effect lands.
+  const chainId = storedChainId ?? DEFAULT_CHAIN_ID;
 
   /**
    * Set chainId to redux on page load.
@@ -14,10 +26,10 @@ export const useHelpers = () => {
    */
   const currentChainId = getChainId();
   useEffect(() => {
-    if (currentChainId !== chainId) {
+    if (currentChainId && currentChainId !== storedChainId) {
       dispatch(setChainId(currentChainId));
     }
-  }, [chainId, currentChainId, dispatch]);
+  }, [storedChainId, currentChainId, dispatch]);
 
   return {
     chainId,

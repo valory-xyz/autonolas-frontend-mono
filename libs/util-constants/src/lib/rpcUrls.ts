@@ -1,5 +1,7 @@
 import { arbitrum, base, celo, gnosis, mainnet, optimism, polygon, mode } from 'wagmi/chains';
 
+import { robinhood } from './chains';
+
 export const RPC_URLS: Record<number, string> = {
   1:
     (process.env.NEXT_PUBLIC_IS_CONNECTED_TO_TEST_NET === 'true'
@@ -15,6 +17,7 @@ export const RPC_URLS: Record<number, string> = {
     (process.env.NEXT_PUBLIC_IS_CONNECTED_TO_TEST_NET === 'true'
       ? process.env.NEXT_PUBLIC_POLYGON_TEST_RPC
       : process.env.NEXT_PUBLIC_POLYGON_URL) ?? polygon.rpcUrls.default.http[0],
+  4663: process.env.NEXT_PUBLIC_ROBINHOOD_URL ?? robinhood.rpcUrls.default.http[0],
   8453: process.env.NEXT_PUBLIC_BASE_URL ?? base.rpcUrls.default.http[0],
   34443:
     (process.env.NEXT_PUBLIC_IS_CONNECTED_TO_TEST_NET === 'true'

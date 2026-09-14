@@ -1,13 +1,8 @@
-import { GraphQLClient } from 'graphql-request';
 import { HASH_PREFIX } from '../../util/constants';
+import { REGISTRY_GRAPHQL_CLIENT } from '../graphql';
 
-export const GRAPHQL_CLIENT = new GraphQLClient(process.env.NEXT_PUBLIC_AUTONOLAS_SUB_GRAPH_URL, {
-  method: 'POST',
-  jsonSerializer: {
-    parse: JSON.parse,
-    stringify: JSON.stringify,
-  },
-});
+/** Re-exported so existing call sites keep working; the client itself lives in common-util/graphql. */
+export const GRAPHQL_CLIENT = REGISTRY_GRAPHQL_CLIENT;
 
 export const UNIT_FIELDS = `{
   id

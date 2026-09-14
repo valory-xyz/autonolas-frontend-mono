@@ -36,6 +36,28 @@ Bonding products for Olas: buy/sell OLAS and related tokens. Supports **EVM** (B
 - Test: `yarn nx test bond`
 - Lint: `yarn nx lint bond`
 
+## Server rendering (`useHelpers` and the Layout gate)
+
+Every page in this app used to serve only its nav and disclaimer — 412 characters — because
+`components/Layout/index.jsx` renders the page body only when `chainId` is set, and `chainId`
+lives in Redux, populated by an effect in `useHelpers`. On the server it was always null.
+
+- `useHelpers` now falls back to `SUPPORTED_CHAINS[0].id` when Redux has no chain yet. That is
+  what `getChainId` itself resolves to for a visitor with no wallet — which includes every
+  crawler — and a connected wallet still wins as soon as the effect lands.
+- **Default in the hook, not in the gate.** Opening the gate alone would let children render
+  with a null chainId, and `ADDRESSES[chainId].depository` (`common-util/Contracts/params.js`,
+  and several places in `useBondingList`) would throw during the server render.
+- The `NoProducts` empty state describes what the table lists. It renders server-side before the
+  client has fetched anything, so a bare "No products" told crawlers Olas has none at all.
+- Guarded by `yarn check:served-text --url <host> bond`. Bond renders per request, so there is
+  no build output to inspect — point it at a running server or a deployment.
+
+**Still client-only:** the product rows themselves. `useBondingList` is a ~613-line hook chain
+spanning depository reads, Balancer and Uniswap LP pricing across six chains, and a Solana
+whirlpool path that uses wallet-adapter hooks rather than plain functions. `/bonding-products`
+currently serves the table structure and the empty-state prose, not the products.
+
 ## Notes
 
 - Some files are still `.jsx`; follow existing patterns when adding or refactoring.

@@ -15,7 +15,7 @@ import {
   mode,
 } from 'wagmi/chains';
 
-import { RPC_URLS } from 'libs/util-constants/src';
+import { RPC_URLS, robinhood } from 'libs/util-constants/src';
 import { SOLANA_CHAIN_NAMES } from 'util/constants';
 import { VM_TYPE } from 'libs/util-constants/src';
 
@@ -28,6 +28,7 @@ export const SUPPORTED_CHAINS: [Chain, ...Chain[]] = [
   optimism,
   celo,
   mode,
+  robinhood,
 ];
 
 const projectId = process.env.NEXT_PUBLIC_WALLET_PROJECT_ID as string;
@@ -133,6 +134,7 @@ export const ALL_SUPPORTED_CHAINS = [...EVM_SUPPORTED_CHAINS, ...SVM_SUPPORTED_C
       'OP Mainnet',
       'Celo',
       'Mode Mainnet',
+      'Robinhood Chain',
     ];
 
     const aIndex = chainNameOrder.indexOf(a.networkDisplayName);

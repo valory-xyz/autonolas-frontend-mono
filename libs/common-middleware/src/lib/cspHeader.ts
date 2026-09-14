@@ -81,6 +81,8 @@ const ALLOWED_ORIGINS = [
   'https://rpc.ankr.com/',
   'https://mainnet.mode.network/',
   'https://explorer.mode.network',
+  'https://rpc.mainnet.chain.robinhood.com',
+  'https://robinhoodchain.blockscout.com',
   'https://rpc.mevblocker.io',
   'https://base-rpc.publicnode.com',
   'https://ethereum-rpc.publicnode.com',

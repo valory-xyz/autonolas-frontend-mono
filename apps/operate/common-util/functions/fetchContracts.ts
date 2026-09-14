@@ -1,4 +1,5 @@
-import { Address, createPublicClient, formatUnits, http } from 'viem';
+import { Address, Chain, createPublicClient, formatUnits, http } from 'viem';
+import { arbitrum, base, celo, gnosis, mainnet, mode, optimism, polygon } from 'viem/chains';
 
 import { RPC_URLS } from 'libs/util-constants/src';
 import { STAKING_TOKEN } from 'libs/util-contracts/src';
@@ -14,22 +15,34 @@ import { fetchContractCacheDataFromChain } from 'common-util/fetch-contract-cach
 import {
   STAKING_CONTRACT_DETAILS,
   getApy,
+  getEpochEndsAt,
   getStakeRequired,
   getTimeRemainingFormatted,
+  sanitizeAvailableOn,
+  withExtraStakingContracts,
 } from 'common-util/constants/contracts';
 import { ContractCacheData, StakingContract } from 'types';
 
+/** The chains this app reads staking contracts from, by id. */
+const CHAINS_BY_ID: Record<number, Chain> = Object.fromEntries(
+  [mainnet, optimism, gnosis, polygon, base, mode, arbitrum, celo].map((chain) => [
+    chain.id,
+    chain,
+  ]),
+);
+
 function getChainClient(chainId: number) {
   const rpc = RPC_URLS[chainId];
-  if (!rpc) return null;
+  const chain = CHAINS_BY_ID[chainId];
+  if (!rpc || !chain) return null;
+
   return createPublicClient({
-    chain: {
-      id: chainId,
-      name: '',
-      nativeCurrency: { decimals: 18, name: '', symbol: '' },
-      rpcUrls: { default: { http: [rpc] } },
-    },
-    transport: http(rpc),
+    // The real viem chain, not an inline stub: it carries the multicall3 address, so the
+    // per-contract reads aggregate into a handful of calls instead of one round trip each.
+    // `batch` then coalesces whatever is left into single JSON-RPC requests.
+    chain,
+    batch: { multicall: true },
+    transport: http(rpc, { batch: true }),
   });
 }
 
@@ -159,10 +172,10 @@ async function fetchBlockTimestamps(chainIds: number[]): Promise<Map<number, big
 
 /**
  * Fetches all operate staking contracts with their constants.
- * Can be used in getServerSideProps.
+ * Used by the `/contracts` ISR render (`getStaticProps`), so the table ships as HTML.
  */
 export async function fetchOperateContracts(): Promise<StakingContract[]> {
-  const nominees = await fetchNominees();
+  const nominees = withExtraStakingContracts(await fetchNominees());
   if (nominees.length === 0) return [];
 
   // Fetch subgraph data and cache data in parallel
@@ -276,10 +289,11 @@ export async function fetchOperateContracts(): Promise<StakingContract[]> {
       maxSlots,
       apy: apy ?? 0,
       stakeRequired: stakeRequired ?? '0',
-      availableOn: details?.availableOn ?? null,
+      availableOn: sanitizeAvailableOn(details?.availableOn),
       availableRewards,
       epoch,
       timeRemaining,
+      epochEndsAt: getEpochEndsAt(tsCheckpointSeconds, livenessPeriodSeconds),
     };
   });
 }

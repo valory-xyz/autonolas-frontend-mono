@@ -21,10 +21,18 @@ Object.defineProperty(window, 'matchMedia', {
   })),
 });
 
-const { gnosis, mainnet, polygon } = require('viem/chains');
+// Must cover every chain `libs/util-constants/src/lib/rpcUrls.ts` reads. That module is pulled
+// in transitively by `libs/ui-components`, and a missing export there fails at import time with
+// "Cannot read properties of undefined (reading 'rpcUrls')" rather than anything about chains.
+const { mainnet, optimism, gnosis, polygon, base, arbitrum, celo, mode } = require('viem/chains');
 
 jest.mock('wagmi/chains', () => ({
-  gnosis,
   mainnet,
+  optimism,
+  gnosis,
   polygon,
+  base,
+  arbitrum,
+  celo,
+  mode,
 }));
