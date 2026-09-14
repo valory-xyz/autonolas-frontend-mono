@@ -3,6 +3,7 @@ import { shouldUseMechAnalytics } from 'common-util/mechAnalytics/config';
 import { fetchRequesterMetrics } from 'common-util/mechAnalytics/client';
 import { mapWithConcurrency } from 'common-util/mechAnalytics/concurrency';
 import { MARKETPLACE_SUBGRAPH_CLIENTS, type MarketplaceSubgraphChainId } from './index';
+import { getSubgraphDialect, type SubgraphDialect } from './dialect';
 
 // Max in-flight requester-metrics fetches. Higher = faster response,
 // more pressure on mech-analytics + the serverless function's socket budget.
@@ -25,7 +26,8 @@ type ServiceDetails = {
   metadata: {
     metadata?: string;
   }[];
-  mechs: {
+  /** Legacy `MechAgent` rows. Not requested on the squid, which has no legacy entities. */
+  mechs?: {
     id: string;
     address: string;
   }[];
@@ -50,10 +52,24 @@ const toQuotedList = (values: string[]) => values.map((value) => `"${value}"`).j
  */
 const PAGE_LIMIT = 1000;
 
-export const getQueryForServiceDetails = ({ serviceIds }: { serviceIds: string[] }) => `
+/** `first` (The Graph) vs `limit` (OpenReader) — the only pagination delta the app uses. */
+const pageArg = (dialect: SubgraphDialect) =>
+  dialect === 'squid' ? `limit: ${PAGE_LIMIT}` : `first: ${PAGE_LIMIT}`;
+
+/**
+ * The squid has no legacy `MechAgent` entities, so `Service.mechs` does not exist
+ * there; the top-level `meches` query (same name in both dialects) is the only mech source.
+ */
+export const getQueryForServiceDetails = ({
+  serviceIds,
+  dialect = 'graph',
+}: {
+  serviceIds: string[];
+  dialect?: SubgraphDialect;
+}) => `
     {
       services(
-        first: ${PAGE_LIMIT}
+        ${pageArg(dialect)}
         where: {
           id_in: [${toQuotedList(serviceIds)}]
         }
@@ -66,13 +82,10 @@ export const getQueryForServiceDetails = ({ serviceIds }: { serviceIds: string[]
         metadata {
           metadata
         }
-        mechs {
-          id
-          address
-        }
+        ${dialect === 'squid' ? '' : 'mechs { id address }'}
       }
       meches(
-        first: ${PAGE_LIMIT}
+        ${pageArg(dialect)}
         where: {
           id_in: [${toQuotedList(serviceIds)}]
         }
@@ -84,10 +97,16 @@ export const getQueryForServiceDetails = ({ serviceIds }: { serviceIds: string[]
     }
 `;
 
-export const getQueryForSenderCounters = ({ multisigs }: { multisigs: string[] }) => `
+export const getQueryForSenderCounters = ({
+  multisigs,
+  dialect = 'graph',
+}: {
+  multisigs: string[];
+  dialect?: SubgraphDialect;
+}) => `
     {
       senders(
-        first: ${PAGE_LIMIT}
+        ${pageArg(dialect)}
         where: {
           id_in: [${toQuotedList(multisigs)}]
         }
@@ -138,7 +157,22 @@ export const getServiceEndpointsFromMarketplaceSubgraph = async ({
   serviceId: string;
 }): Promise<{ multisigs: string[]; mechAddresses: string[] }> => {
   const client = MARKETPLACE_SUBGRAPH_CLIENTS[chainId];
-  const query = `
+  const dialect = getSubgraphDialect(chainId);
+  const query =
+    dialect === 'squid'
+      ? `
+    {
+      serviceById(id: "${serviceId}") {
+        id
+        latestMultisig
+        historicalMultisigs
+      }
+      mechById(id: "${serviceId}") {
+        address
+      }
+    }
+  `
+      : `
     {
       service(id: "${serviceId}") {
         id
@@ -155,14 +189,18 @@ export const getServiceEndpointsFromMarketplaceSubgraph = async ({
     }
   `;
   const response = await client.request<{
-    service: ServiceDetails | null;
-    mech: { address: string } | null;
+    service?: ServiceDetails | null;
+    serviceById?: ServiceDetails | null;
+    mech?: { address: string } | null;
+    mechById?: { address: string } | null;
   }>(query);
-  if (!response.service) return { multisigs: [], mechAddresses: [] };
-  const legacy = (response.service.mechs ?? []).map((m) => m.address);
-  const marketplace = response.mech?.address ? [response.mech.address] : [];
+  const service = dialect === 'squid' ? response.serviceById : response.service;
+  const mech = dialect === 'squid' ? response.mechById : response.mech;
+  if (!service) return { multisigs: [], mechAddresses: [] };
+  const legacy = (service.mechs ?? []).map((m) => m.address);
+  const marketplace = mech?.address ? [mech.address] : [];
   return {
-    multisigs: getServiceMultisigs(response.service),
+    multisigs: getServiceMultisigs(service),
     mechAddresses: Array.from(
       new Set([...legacy, ...marketplace].map((address) => address.toLowerCase())),
     ),
@@ -177,12 +215,14 @@ export const getServicesFromMarketplaceSubgraph = async ({
   serviceIds: string[];
 }): Promise<Service[]> => {
   const client = MARKETPLACE_SUBGRAPH_CLIENTS[chainId];
+  const dialect = getSubgraphDialect(chainId);
 
-  const query = getQueryForServiceDetails({ serviceIds });
+  const query = getQueryForServiceDetails({ serviceIds, dialect });
   const response = await client.request<ServiceDetailsResponse>(query);
+  const mechRows = response.meches ?? [];
 
   const deliveriesByServiceId = new Map(
-    (response.meches ?? []).map((mech) => [mech.id, toCount(mech.totalDeliveriesTransactions)]),
+    mechRows.map((mech) => [mech.id, toCount(mech.totalDeliveriesTransactions)]),
   );
 
   // The multisigs are only known once the services come back, so the sender
@@ -235,7 +275,7 @@ export const getServicesFromMarketplaceSubgraph = async ({
       }
 
       const senderResponse = await client.request<SenderCountersResponse>(
-        getQueryForSenderCounters({ multisigs }),
+        getQueryForSenderCounters({ multisigs, dialect }),
       );
       for (const sender of senderResponse.senders ?? []) {
         requestsByMultisig.set(sender.id.toLowerCase(), toCount(sender.totalLegacyRequests));
@@ -252,9 +292,7 @@ export const getServicesFromMarketplaceSubgraph = async ({
   // ``getServiceEndpointsFromMarketplaceSubgraph`` — a service
   // whose mech was created via MechMarketplace has an empty
   // ``service.mechs`` otherwise.
-  const marketplaceMechByServiceId = new Map(
-    (response.meches ?? []).map((mech) => [mech.id, mech.address]),
-  );
+  const marketplaceMechByServiceId = new Map(mechRows.map((mech) => [mech.id, mech.address]));
 
   return (response.services ?? []).map((service) => {
     const requestsFromSenders = getServiceMultisigs(service).reduce(

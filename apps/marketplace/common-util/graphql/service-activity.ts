@@ -1,5 +1,6 @@
 import { Request, Delivery, FeeUnit } from 'common-util/types';
 import { MARKETPLACE_SUBGRAPH_CLIENTS, type MarketplaceSubgraphChainId } from './index';
+import { getSubgraphDialect, type SubgraphDialect } from './dialect';
 
 type ActivityType = 'Demand' | 'Supply';
 
@@ -29,10 +30,32 @@ const LIMIT = 1_000;
 // 0.01 xDAI. Fixed fee legacy pre-marketplace AgentMechs charged.
 export const LEGACY_DELIVERY_PAYMENT_WEI = '10000000000000000';
 
-export const getQueryForServiceActivity = ({ serviceId }: { serviceId: string }) => {
+/**
+ * Per-dialect fragments. The squid has no legacy (pre-marketplace) mech entities,
+ * so `mechRequest` / `mechDelivery` are not requested there — every Robinhood
+ * request and delivery carries its payload in `*.ipfsHashBytes`.
+ */
+const activityArgs = (serviceId: string, dialect: SubgraphDialect) =>
+  dialect === 'squid'
+    ? `where: {service: {id_eq: "${serviceId}"}}, limit: ${LIMIT}, orderBy: blockTimestamp_DESC`
+    : `where: {service_: {id: "${serviceId}"}}, first: ${LIMIT}, orderBy: blockTimestamp, orderDirection: desc`;
+
+const mechRequestFields = (dialect: SubgraphDialect) =>
+  dialect === 'squid' ? '' : 'mechRequest { ipfsHash }';
+
+const mechDeliveryFields = (dialect: SubgraphDialect) =>
+  dialect === 'squid' ? '' : 'mechDelivery { ipfsHash }';
+
+export const getQueryForServiceActivity = ({
+  serviceId,
+  dialect = 'graph',
+}: {
+  serviceId: string;
+  dialect?: SubgraphDialect;
+}) => {
   return `
   {
-    delivers (where: {service_: {id: "${serviceId}"}}, first: ${LIMIT}, orderBy: blockTimestamp, orderDirection: desc) {
+    delivers (${activityArgs(serviceId, dialect)}) {
       id
       mech
       blockTimestamp
@@ -40,9 +63,7 @@ export const getQueryForServiceActivity = ({ serviceId }: { serviceId: string })
       service {
         id
       }
-      mechDelivery {
-        ipfsHash
-      }
+      ${mechDeliveryFields(dialect)}
       marketplaceDelivery {
         ipfsHashBytes
         deliveryRate
@@ -58,24 +79,20 @@ export const getQueryForServiceActivity = ({ serviceId }: { serviceId: string })
         finalFeeUSD
         feeRaw
         feeUnit
-        mechRequest {
-          ipfsHash
-        }
+        ${mechRequestFields(dialect)}
         marketplaceRequest {
           ipfsHashBytes
         }
       }
     }
 
-    requests (where: {service_: {id: "${serviceId}"}}, first: ${LIMIT}, orderBy: blockTimestamp, orderDirection: desc) {
+    requests (${activityArgs(serviceId, dialect)}) {
       id
       feeUSD
       finalFeeUSD
       feeRaw
       feeUnit
-      mechRequest {
-        ipfsHash
-      }
+      ${mechRequestFields(dialect)}
       marketplaceRequest {
         ipfsHashBytes
       }
@@ -92,9 +109,7 @@ export const getQueryForServiceActivity = ({ serviceId }: { serviceId: string })
           ipfsHashBytes
           deliveryRate
         }
-        mechDelivery {
-          ipfsHash
-        }
+        ${mechDeliveryFields(dialect)}
       }
     }
   }
@@ -248,7 +263,7 @@ export const getServiceActivityFromMarketplaceSubgraph = async ({
 }) => {
   const client = MARKETPLACE_SUBGRAPH_CLIENTS[chainId];
 
-  const query = getQueryForServiceActivity({ serviceId });
+  const query = getQueryForServiceActivity({ serviceId, dialect: getSubgraphDialect(chainId) });
   const response: Omit<ActivityResponse, 'id'> = await client.request(query);
   const serviceActivity = mergeServiceActivity({ id: serviceId, ...response });
   return serviceActivity;

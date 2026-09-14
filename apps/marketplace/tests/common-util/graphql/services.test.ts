@@ -9,6 +9,12 @@ jest.mock('common-util/graphql/index', () => ({
         return mockRequest;
       },
     },
+    // Robinhood: squid dialect (see common-util/graphql/dialect.ts)
+    4663: {
+      get request() {
+        return mockRequest;
+      },
+    },
   },
 }));
 
@@ -337,6 +343,48 @@ describe('getServicesFromMarketplaceSubgraph', () => {
       const [service] = await getServices();
 
       expect(service.totalRequests).toBe(7);
+    });
+  });
+
+  describe('squid dialect (Robinhood, 4663)', () => {
+    const getSquidServices = () =>
+      getServicesFromMarketplaceSubgraph({ chainId: 4663, serviceIds: ['1'] });
+
+    it('sends OpenReader paging and still reads the top-level `meches`', async () => {
+      mockRequest.mockReset();
+      mockRequest
+        .mockResolvedValueOnce({
+          services: [{ id: '1', totalDeliveries: '0', latestMultisig: SAFE }],
+          meches: [{ id: '1', address: '0xMechOnRobinhood', totalDeliveriesTransactions: '3' }],
+        })
+        .mockResolvedValueOnce({ senders: [{ id: SAFE.toLowerCase(), totalLegacyRequests: '4' }] })
+        .mockRejectedValue(new Error('unexpected third request'));
+
+      const [service] = await getSquidServices();
+
+      const [detailsQuery] = mockRequest.mock.calls[0];
+      expect(detailsQuery).toContain('limit: 1000');
+      expect(detailsQuery).not.toContain('first:');
+      expect(detailsQuery).toContain('meches(');
+      expect(detailsQuery).not.toContain('mechs { id address }');
+      const [sendersQuery] = mockRequest.mock.calls[1];
+      expect(sendersQuery).toContain('limit: 1000');
+
+      expect(service.totalDeliveries).toBe(3);
+      expect(service.totalRequests).toBe(4);
+      expect(service.mechAddresses).toEqual(['0xmechonrobinhood']);
+    });
+
+    it('reports zero deliveries and no mech address when the squid has no Mech row', async () => {
+      mockRequest.mockReset();
+      mockRequest
+        .mockResolvedValueOnce({ services: [{ id: '1' }], meches: [] })
+        .mockRejectedValue(new Error('unexpected second request'));
+
+      const [service] = await getSquidServices();
+
+      expect(service.totalDeliveries).toBe(0);
+      expect(service.mechAddresses).toEqual([]);
     });
   });
 });
