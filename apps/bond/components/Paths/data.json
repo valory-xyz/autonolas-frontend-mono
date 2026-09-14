@@ -48,7 +48,7 @@
       "bridgedLpTokenAddress": "0x36B203Cb3086269f005a4b987772452243c0767f",
       "lpTokenBridge": {
         "name": "Wormhole: Portal Token Bridge",
-        "url": "https://portalbridge.com/advanced-tools/#/transfer"
+        "url": "https://portalbridge.com/"
       }
     }
   },
@@ -75,7 +75,7 @@
       "bridgedLpTokenAddress": "0xf9825A563222f9eFC81e369311DAdb13D68e60a4",
       "lpTokenBridge": {
         "name": "Wormhole: Portal Token Bridge",
-        "url": "https://portalbridge.com/advanced-tools/#/transfer"
+        "url": "https://portalbridge.com/"
       }
     }
   },
@@ -123,7 +123,7 @@
       "bridgedLpTokenAddress": "0x2FD007a534eB7527b535a1DF35aba6bD2a8b660F",
       "lpTokenBridge": {
         "name": "Wormhole: Portal Token Bridge",
-        "url": "https://portalbridge.com/advanced-tools/#/transfer"
+        "url": "https://portalbridge.com/"
       }
     }
   },
@@ -151,7 +151,7 @@
       "bridgedLpTokenAddress": "0x9946d6FD1210D85EC613Ca956F142D911C97a074",
       "lpTokenBridge": {
         "name": "Wormhole: Portal Token Bridge",
-        "url": "https://portalbridge.com/advanced-tools/#/transfer"
+        "url": "https://portalbridge.com/"
       }
     }
   },
@@ -178,7 +178,7 @@
       "bridgedLpTokenAddress": "0xad47b6ffEe3ed15fCE55eCA42AcE9736901b94A1",
       "lpTokenBridge": {
         "name": "Wormhole: Portal Token Bridge",
-        "url": "https://portalbridge.com/advanced-tools/#/transfer"
+        "url": "https://portalbridge.com/"
       }
     }
   },
@@ -199,7 +199,7 @@
     },
     "bridge": {
       "name": "Wormhole: Portal Token Bridge",
-      "url": "https://portalbridge.com/advanced-tools/#/transfer"
+      "url": "https://portalbridge.com/"
     },
     "bond": {
       "lpTokenName": "WSOL-OLAS",
@@ -208,7 +208,7 @@
       "isFungible": true,
       "lpTokenBridge": {
         "name": "Wormhole: Portal Token Bridge",
-        "url": "https://portalbridge.com/advanced-tools/#/transfer"
+        "url": "https://portalbridge.com/"
       }
     }
   },
@@ -226,7 +226,7 @@
     },
     "bridge": {
       "name": "Wormhole: Portal Token Bridge",
-      "url": "https://portalbridge.com/advanced-tools/#/transfer"
+      "url": "https://portalbridge.com/"
     },
     "bond": {
       "guideUrl": "https://olas.network/blog/bonding-guide-base",
@@ -235,7 +235,7 @@
       "bridgedLpTokenAddress": "0xC085F31E4ca659fF8A17042dDB26f1dcA2fBdAB4",
       "lpTokenBridge": {
         "name": "Wormhole: Portal Token Bridge",
-        "url": "https://portalbridge.com/advanced-tools/#/transfer"
+        "url": "https://portalbridge.com/"
       }
     }
   }
