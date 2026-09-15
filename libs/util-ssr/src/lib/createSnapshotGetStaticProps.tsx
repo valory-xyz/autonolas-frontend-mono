@@ -88,7 +88,7 @@ export function createSnapshotGetStaticProps<T, P extends { [key: string]: unkno
  * above ends the invocation, and during a build the process is short-lived. Cancelling for real
  * would mean threading an `AbortSignal` through every RPC and IPFS call in the fan-out.
  */
-export async function withTimeout<T>(promise: Promise<T>, ms: number, label: string): Promise<T> {
+async function withTimeout<T>(promise: Promise<T>, ms: number, label: string): Promise<T> {
   let timeoutId: ReturnType<typeof setTimeout> | undefined;
 
   const timeout = new Promise<never>((_, reject) => {
