@@ -1,4 +1,4 @@
-import { SeoHead } from 'libs/ui-components/src';
+import { SeoHead } from 'libs/ui-components/src/lib/SeoHead';
 import { SITE_DESCRIPTION, SITE_META_TAG_IMAGE, SITE_TITLE, SITE_URL } from 'util/constants';
 
 type MetaProps = {

@@ -1,4 +1,4 @@
-import { SeoHead } from 'libs/ui-components/src';
+import { SeoHead } from 'libs/ui-components/src/lib/SeoHead';
 
 const SITE_TITLE = 'Build | Olas';
 const SITE_DESCRIPTION =

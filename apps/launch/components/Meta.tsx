@@ -1,4 +1,4 @@
-import { SeoHead } from 'libs/ui-components/src';
+import { SeoHead } from 'libs/ui-components/src/lib/SeoHead';
 
 const SITE_URL = 'https://launch.olas.network';
 const SITE_TITLE = 'Olas Launch';

@@ -39,6 +39,10 @@ export type SeoHeadProps = {
 /**
  * The head tags every app renders, in one place.
  *
+ * Import this file directly, not the `ui-components` barrel: the barrel also exports
+ * `SwitchNetworkButton`, which pulls wagmi/viem into anything that renders a page head —
+ * including the jsdom prerender tests, where viem's `TextEncoder` use has no global.
+ *
  * Eight apps each carried a copy of this component; half of them had a canonical tag
  * and half did not, and none had structured data. Each app's own `Meta` still composes
  * its title and URL exactly as before — this only renders them — so nothing users see

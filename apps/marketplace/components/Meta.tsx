@@ -1,4 +1,4 @@
-import { SeoHead } from 'libs/ui-components/src';
+import { SeoHead } from 'libs/ui-components/src/lib/SeoHead';
 
 import { sanitizeMetaText, validateMetaImageUrl } from '../common-util/functions/ipfs';
 
