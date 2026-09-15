@@ -1,5 +1,4 @@
 import { GetStaticPaths, GetStaticProps } from 'next';
-import Head from 'next/head';
 import { getAddress, isAddress } from 'viem';
 
 import { truncateAddress, withTimeout } from 'libs/util-functions/src';
@@ -17,8 +16,6 @@ type ProfilePageProps = {
   id: string;
   pageTitle: string;
   description: string;
-  /** Unknown wallets still render (a new user's own profile) but should not be indexed. */
-  isKnown: boolean;
 };
 
 const REVALIDATE_SECONDS = 300;
@@ -38,7 +35,6 @@ const toProps = (id: string, profile: LeaderboardUser | undefined): ProfilePageP
       id,
       pageTitle: `${name}'s Profile`,
       description: `View ${name}'s Olas Contribute profile: points earned, badge level, completed actions and contribution history.`,
-      isKnown: false,
     };
   }
 
@@ -47,7 +43,6 @@ const toProps = (id: string, profile: LeaderboardUser | undefined): ProfilePageP
     id,
     pageTitle: `${name}'s Profile`,
     description: `${name} has earned ${points} points (${getTier(profile.points)} tier) on Olas Contribute. See their badge, completed actions and contribution history.`,
-    isKnown: true,
   };
 };
 
@@ -66,21 +61,19 @@ export const getStaticProps: GetStaticProps<ProfilePageProps> = async ({ params 
   try {
     const agents = await withTimeout(fetchLeaderboardData(), SSR_TIMEOUT_MS);
     const profile = toLeaderboardUsers(agents).find((user) => user.wallet_address === id);
+    // Wallets not on the leaderboard are not pages: otherwise any address is an indexable URL.
+    if (!profile) return { notFound: true, revalidate: REVALIDATE_SECONDS };
     return { props: toProps(id, profile), revalidate: REVALIDATE_SECONDS };
   } catch (error) {
+    // Address-only meta rather than a 404, so an AFMDB blip does not cache a real profile away.
     console.error('[contribute/profile] leaderboard lookup failed:', error);
     return { props: toProps(id, undefined), revalidate: REVALIDATE_ON_ERROR_SECONDS };
   }
 };
 
-const ProfilePage = ({ id, pageTitle, description, isKnown }: ProfilePageProps) => (
+const ProfilePage = ({ id, pageTitle, description }: ProfilePageProps) => (
   <>
     <Meta pageTitle={pageTitle} description={description} pageUrl={`profile/${id}`} />
-    {!isKnown && (
-      <Head>
-        <meta name="robots" content="noindex" key="robots" />
-      </Head>
-    )}
     <Profile />
   </>
 );
