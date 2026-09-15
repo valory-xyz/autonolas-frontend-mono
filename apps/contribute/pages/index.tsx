@@ -8,8 +8,7 @@ import Meta from 'components/meta';
 import { getName } from 'common-util/functions';
 import { fetchLeaderboardData } from 'common-util/api/fetchLeaderboardData';
 import { LeaderboardUser } from 'store/types';
-
-const SSR_TIMEOUT_MS = 8000;
+import { SSR_TIMEOUT_MS } from 'util/constants';
 
 export const getServerSideProps: GetServerSideProps<{
   initialLeaderboard: LeaderboardUser[];

@@ -11,6 +11,9 @@ export const META_TAGS_INFO = {
   image: SITE_META_TAG_IMAGE,
 };
 
+/** Budget for the AFMDB leaderboard read on server-rendered pages. */
+export const SSR_TIMEOUT_MS = 8000;
+
 export const MENU_WIDTH = 248;
 
 export const DEFAULT_COORDINATE_ID = '2';
