@@ -9,7 +9,7 @@
  * | The Graph                                   | OpenReader (squid)                      |
  * |---------------------------------------------|-----------------------------------------|
  * | `service(id: "1")`                          | `serviceById(id: "1")`                  |
- * | `services(first: 10, skip: 20)`             | `services(limit: 10, offset: 20)`       |
+ * | `services(first: 10)`                       | `services(limit: 10)`                   |
  * | `where: { service_: { id: "1" } }`          | `where: { service: { id_eq: "1" } }`    |
  * | `orderBy: blockTimestamp, orderDirection: desc` | `orderBy: blockTimestamp_DESC`      |
  *
@@ -18,13 +18,25 @@
  * Field names on the entities the app reads are the same in both. The
  * squid has no legacy (pre-marketplace) entities, so `Service.mechs`,
  * `Request.mechRequest` and `Deliver.mechDelivery` do not exist there —
- * the squid-side queries simply do not ask for them.
+ * the squid-side queries simply do not ask for them (see `omitOnSquid`).
  *
  * Reference: squids/marketplace/MIGRATION.md in valory-xyz/autonolas-subgraph.
  */
+import type { MarketplaceSubgraphChainId, RegistrySubgraphChainId } from './index';
+
 export type SubgraphDialect = 'graph' | 'squid';
 
-export const SQUID_CHAIN_IDS: ReadonlyArray<number> = [4663];
+export const SQUID_CHAIN_IDS = [4663] as const;
 
-export const getSubgraphDialect = (chainId: number): SubgraphDialect =>
-  SQUID_CHAIN_IDS.includes(chainId) ? 'squid' : 'graph';
+type SquidChainId = (typeof SQUID_CHAIN_IDS)[number];
+
+const isSquidChain = (chainId: number): chainId is SquidChainId =>
+  (SQUID_CHAIN_IDS as ReadonlyArray<number>).includes(chainId);
+
+export const getSubgraphDialect = (
+  chainId: MarketplaceSubgraphChainId | RegistrySubgraphChainId,
+): SubgraphDialect => (isSquidChain(chainId) ? 'squid' : 'graph');
+
+/** A selection that only the graph-node subgraphs have (legacy pre-marketplace entities). */
+export const omitOnSquid = (dialect: SubgraphDialect, fragment: string) =>
+  dialect === 'squid' ? '' : fragment;

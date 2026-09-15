@@ -52,4 +52,6 @@ export const REGISTRY_SUBGRAPH_CLIENTS = {
   4663: new GraphQLClient(process.env.NEXT_PUBLIC_ROBINHOOD_REGISTRY_SUBGRAPH!, requestConfig),
 } as const;
 
+export type RegistrySubgraphChainId = keyof typeof REGISTRY_SUBGRAPH_CLIENTS;
+
 export const ERC8004_SUPPORTED_CHAINS = [1, 10, 100, 137, 8453, 42161, 42220, 4663] as const;
