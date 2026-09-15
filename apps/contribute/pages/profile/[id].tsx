@@ -23,18 +23,14 @@ const LOOKUP_TIMEOUT_MS = 20_000;
 const REVALIDATE_SECONDS = 300;
 const REVALIDATE_ON_ERROR_SECONDS = 60;
 
-/** Like `getName`, but never the full 42-char address: that would push the title past 60 chars. */
+/** Like `getName`, but with the address truncated so the title stays short. */
 const getDisplayName = (profile: LeaderboardUser | undefined, id: string) =>
   profile?.twitter_handle || profile?.discord_handle || truncateAddress(id);
 
 /** Profiles are one per wallet, so they are rendered on first request rather than at build. */
 export const getStaticPaths: GetStaticPaths = async () => ({ paths: [], fallback: 'blocking' });
 
-/**
- * Every profile used to ship the same "Profile | Olas Contribute" title and description, which
- * crawlers flag as hundreds of duplicate pages. The handle (or address) makes each one unique;
- * the leaderboard lookup only enriches, so a failed fetch still renders address-based meta.
- */
+/** Per-profile meta so crawlers stop seeing every profile as a duplicate page. */
 export const getStaticProps: GetStaticProps<ProfilePageProps> = async ({ params }) => {
   const id = String(params?.id ?? '');
   if (!isAddress(id, { strict: false })) return { notFound: true };
