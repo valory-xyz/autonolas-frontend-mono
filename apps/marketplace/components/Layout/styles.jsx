@@ -176,6 +176,13 @@ export const RightMenu = styled.div`
   align-items: center;
 `;
 
+/** Wraps the collapsed section menu so it sits a step away from the site burger. */
+export const CompactMenu = styled.div`
+  display: flex;
+  align-items: center;
+  margin-left: 12px;
+`;
+
 export const ContractsInfoContainer = styled.div`
   display: flex;
   align-items: center;

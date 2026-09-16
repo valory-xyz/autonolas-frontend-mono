@@ -54,11 +54,13 @@ const MODE_ADDRESSES: Addresses = {
 // constant: next to the `Token` key the literal trips gitleaks' generic-api-key rule.
 const L2_REGISTRY_UTILITY = '0x3d77596beb0f130a4415df3D2D8232B3d3D31e44';
 
-// No mechMarketplace yet: pending the marketplace deployment on 4663.
+// mechMarketplace is the MechMarketplaceProxy from autonolas-marketplace
+// scripts/deployment/globals_robinhood_mainnet.json.
 const ROBINHOOD_ADDRESSES: Addresses = {
   serviceRegistryL2: '0xE3607b00E75f6405248323A9417ff6b39B244b50',
   serviceRegistryTokenUtility: L2_REGISTRY_UTILITY,
   operatorWhitelist: '0x3C1fF68f5aa342D296d4DEe4Bb1cACCA912D95fE',
+  mechMarketplace: '0xa45E64d13A30a51b91ae0eb182e88a40e9b18eD8',
 };
 
 // TODO: add testcases for all networks

@@ -17,7 +17,8 @@ export type Request = {
   finalFeeUSD?: string | null;
   feeRaw?: string | null;
   feeUnit?: FeeUnit | null;
-  mechRequest: {
+  /** Legacy (pre-marketplace) path only; absent on chains served by a squid. */
+  mechRequest?: {
     ipfsHash: string;
   };
   marketplaceRequest: {
@@ -31,7 +32,8 @@ export type Request = {
       ipfsHashBytes: string;
       deliveryRate?: string | null;
     };
-    mechDelivery: {
+    /** Legacy (pre-marketplace) path only; absent on chains served by a squid. */
+    mechDelivery?: {
       ipfsHash: string;
     };
   }[];
@@ -42,7 +44,8 @@ export type Delivery = {
   mech: Address;
   blockTimestamp: string;
   transactionHash: TransactionHash;
-  mechDelivery: {
+  /** Legacy (pre-marketplace) path only; absent on chains served by a squid. */
+  mechDelivery?: {
     ipfsHash: string;
   };
   marketplaceDelivery: {
@@ -55,7 +58,8 @@ export type Delivery = {
     finalFeeUSD?: string | null;
     feeRaw?: string | null;
     feeUnit?: FeeUnit | null;
-    mechRequest: {
+    /** Legacy (pre-marketplace) path only; absent on chains served by a squid. */
+    mechRequest?: {
       ipfsHash: string;
     };
     marketplaceRequest: {

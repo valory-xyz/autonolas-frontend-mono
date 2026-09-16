@@ -94,9 +94,8 @@ export const CACHE_DURATION = {
 } as const;
 
 export const MARKETPLACE_SUPPORTED_CHAIN_IDS = [
-  1, 10, 100, 137, 8453, 42161,
+  1, 10, 100, 137, 8453, 42161, 4663,
   // 42220,
-  // TODO(robinhood): 4663 once its marketplace subgraph/squid is live (see common-util/graphql).
 ] as const;
 
 export const ERC8004_CHAIN_MAPPING = {
@@ -107,6 +106,8 @@ export const ERC8004_CHAIN_MAPPING = {
   8453: 'base',
   42161: 'arbitrum',
   42220: 'celo',
+  // 8004scan's slug, same as our route slug and the bridger's base URI.
+  4663: 'robinhood-chain',
 } as const;
 
 export const ERC8004_BASEURL = 'https://www.8004scan.io/agents';

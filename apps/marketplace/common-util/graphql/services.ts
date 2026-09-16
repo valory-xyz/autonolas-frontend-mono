@@ -3,6 +3,7 @@ import { shouldUseMechAnalytics } from 'common-util/mechAnalytics/config';
 import { fetchRequesterMetrics } from 'common-util/mechAnalytics/client';
 import { mapWithConcurrency } from 'common-util/mechAnalytics/concurrency';
 import { MARKETPLACE_SUBGRAPH_CLIENTS, type MarketplaceSubgraphChainId } from './index';
+import { getSubgraphDialect, omitOnSquid, type SubgraphDialect } from './dialect';
 
 // Max in-flight requester-metrics fetches. Higher = faster response,
 // more pressure on mech-analytics + the serverless function's socket budget.
@@ -25,7 +26,8 @@ type ServiceDetails = {
   metadata: {
     metadata?: string;
   }[];
-  mechs: {
+  /** Legacy `MechAgent` rows. Not requested on the squid, which has no legacy entities. */
+  mechs?: {
     id: string;
     address: string;
   }[];
@@ -46,14 +48,29 @@ const toQuotedList = (values: string[]) => values.map((value) => `"${value}"`).j
 
 /**
  * `serviceIds` is an unbounded client-supplied param, and the-graph silently caps
- * a page at 100 rows rather than erroring — a truncated page would undercount.
+ * a page at 1000 rows (its maximum `first`) rather than erroring — a truncated page
+ * would undercount, so we page at that maximum and warn when a list reaches it.
  */
 const PAGE_LIMIT = 1000;
 
-export const getQueryForServiceDetails = ({ serviceIds }: { serviceIds: string[] }) => `
+/** `first` (The Graph) vs `limit` (OpenReader) — the only pagination delta the app uses. */
+const pageArg = (dialect: SubgraphDialect) =>
+  dialect === 'squid' ? `limit: ${PAGE_LIMIT}` : `first: ${PAGE_LIMIT}`;
+
+/**
+ * The squid has no legacy `MechAgent` entities, so `Service.mechs` does not exist
+ * there; the top-level `meches` query (same name in both dialects) is the only mech source.
+ */
+export const getQueryForServiceDetails = ({
+  serviceIds,
+  dialect,
+}: {
+  serviceIds: string[];
+  dialect: SubgraphDialect;
+}) => `
     {
       services(
-        first: ${PAGE_LIMIT}
+        ${pageArg(dialect)}
         where: {
           id_in: [${toQuotedList(serviceIds)}]
         }
@@ -66,13 +83,10 @@ export const getQueryForServiceDetails = ({ serviceIds }: { serviceIds: string[]
         metadata {
           metadata
         }
-        mechs {
-          id
-          address
-        }
+        ${omitOnSquid(dialect, 'mechs { id address }')}
       }
       meches(
-        first: ${PAGE_LIMIT}
+        ${pageArg(dialect)}
         where: {
           id_in: [${toQuotedList(serviceIds)}]
         }
@@ -84,10 +98,16 @@ export const getQueryForServiceDetails = ({ serviceIds }: { serviceIds: string[]
     }
 `;
 
-export const getQueryForSenderCounters = ({ multisigs }: { multisigs: string[] }) => `
+export const getQueryForSenderCounters = ({
+  multisigs,
+  dialect,
+}: {
+  multisigs: string[];
+  dialect: SubgraphDialect;
+}) => `
     {
       senders(
-        first: ${PAGE_LIMIT}
+        ${pageArg(dialect)}
         where: {
           id_in: [${toQuotedList(multisigs)}]
         }
@@ -130,17 +150,27 @@ const getServiceMultisigs = (service: ServiceDetails) =>
 // was created via MechMarketplace has an EMPTY `service.mechs`, and the
 // Supply fan-out below iterates zero mech addresses. Query both entities
 // and union the addresses so both eras resolve.
-export const getServiceEndpointsFromMarketplaceSubgraph = async ({
-  chainId,
-  serviceId,
-}: {
-  chainId: MarketplaceSubgraphChainId;
-  serviceId: string;
-}): Promise<{ multisigs: string[]; mechAddresses: string[] }> => {
-  const client = MARKETPLACE_SUBGRAPH_CLIENTS[chainId];
-  const query = `
-    {
-      service(id: "${serviceId}") {
+//
+// The id is a GraphQL variable, never interpolated: `service(id: ID!)` /
+// `mech(id: ID!)` on The Graph, `serviceById(id: String!)` / `mechById` on
+// the squid.
+export const getQueryForServiceEndpoints = (dialect: SubgraphDialect) =>
+  dialect === 'squid'
+    ? `
+    query ServiceEndpoints($id: String!) {
+      serviceById(id: $id) {
+        id
+        latestMultisig
+        historicalMultisigs
+      }
+      mechById(id: $id) {
+        address
+      }
+    }
+  `
+    : `
+    query ServiceEndpoints($id: ID!) {
+      service(id: $id) {
         id
         latestMultisig
         historicalMultisigs
@@ -149,20 +179,34 @@ export const getServiceEndpointsFromMarketplaceSubgraph = async ({
           address
         }
       }
-      mech(id: "${serviceId}") {
+      mech(id: $id) {
         address
       }
     }
   `;
+
+export const getServiceEndpointsFromMarketplaceSubgraph = async ({
+  chainId,
+  serviceId,
+}: {
+  chainId: MarketplaceSubgraphChainId;
+  serviceId: string;
+}): Promise<{ multisigs: string[]; mechAddresses: string[] }> => {
+  const client = MARKETPLACE_SUBGRAPH_CLIENTS[chainId];
+  const dialect = getSubgraphDialect(chainId);
   const response = await client.request<{
-    service: ServiceDetails | null;
-    mech: { address: string } | null;
-  }>(query);
-  if (!response.service) return { multisigs: [], mechAddresses: [] };
-  const legacy = (response.service.mechs ?? []).map((m) => m.address);
-  const marketplace = response.mech?.address ? [response.mech.address] : [];
+    service?: ServiceDetails | null;
+    serviceById?: ServiceDetails | null;
+    mech?: { address: string } | null;
+    mechById?: { address: string } | null;
+  }>(getQueryForServiceEndpoints(dialect), { id: serviceId });
+  const service = dialect === 'squid' ? response.serviceById : response.service;
+  const mech = dialect === 'squid' ? response.mechById : response.mech;
+  if (!service) return { multisigs: [], mechAddresses: [] };
+  const legacy = (service.mechs ?? []).map((m) => m.address);
+  const marketplace = mech?.address ? [mech.address] : [];
   return {
-    multisigs: getServiceMultisigs(response.service),
+    multisigs: getServiceMultisigs(service),
     mechAddresses: Array.from(
       new Set([...legacy, ...marketplace].map((address) => address.toLowerCase())),
     ),
@@ -177,12 +221,22 @@ export const getServicesFromMarketplaceSubgraph = async ({
   serviceIds: string[];
 }): Promise<Service[]> => {
   const client = MARKETPLACE_SUBGRAPH_CLIENTS[chainId];
+  const dialect = getSubgraphDialect(chainId);
 
-  const query = getQueryForServiceDetails({ serviceIds });
+  const query = getQueryForServiceDetails({ serviceIds, dialect });
   const response = await client.request<ServiceDetailsResponse>(query);
+  // `meches` is the only mech source on the squid; a renamed / missing field
+  // would silently drop every service's Supply role, so make drift visible.
+  if (response.meches == null) {
+    console.warn(
+      `[services] no \`meches\` field in the chain ${chainId} response; ` +
+        'mech addresses and delivery counts will be empty',
+    );
+  }
+  const mechRows = response.meches ?? [];
 
   const deliveriesByServiceId = new Map(
-    (response.meches ?? []).map((mech) => [mech.id, toCount(mech.totalDeliveriesTransactions)]),
+    mechRows.map((mech) => [mech.id, toCount(mech.totalDeliveriesTransactions)]),
   );
 
   // The multisigs are only known once the services come back, so the sender
@@ -235,7 +289,7 @@ export const getServicesFromMarketplaceSubgraph = async ({
       }
 
       const senderResponse = await client.request<SenderCountersResponse>(
-        getQueryForSenderCounters({ multisigs }),
+        getQueryForSenderCounters({ multisigs, dialect }),
       );
       for (const sender of senderResponse.senders ?? []) {
         requestsByMultisig.set(sender.id.toLowerCase(), toCount(sender.totalLegacyRequests));
@@ -252,9 +306,7 @@ export const getServicesFromMarketplaceSubgraph = async ({
   // ``getServiceEndpointsFromMarketplaceSubgraph`` — a service
   // whose mech was created via MechMarketplace has an empty
   // ``service.mechs`` otherwise.
-  const marketplaceMechByServiceId = new Map(
-    (response.meches ?? []).map((mech) => [mech.id, mech.address]),
-  );
+  const marketplaceMechByServiceId = new Map(mechRows.map((mech) => [mech.id, mech.address]));
 
   return (response.services ?? []).map((service) => {
     const requestsFromSenders = getServiceMultisigs(service).reduce(
