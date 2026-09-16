@@ -12,7 +12,6 @@ export const OLAS_ORGANIZATION = {
   '@type': 'Organization',
   '@id': 'https://olas.network/#organization',
   name: 'Olas',
-  alternateName: 'Autonolas',
   url: 'https://olas.network',
   logo: 'https://olas.network/images/olas-logo.svg',
   description: 'Olas enables everyone to own and monetize their AI agents.',
@@ -39,9 +38,10 @@ export type SeoHeadProps = {
 /**
  * The head tags every app renders, in one place.
  *
- * Import this file directly, not the `ui-components` barrel: the barrel also exports
+ * Deliberately not exported from the `ui-components` barrel: that also exports
  * `SwitchNetworkButton`, which pulls wagmi/viem into anything that renders a page head —
  * including the jsdom prerender tests, where viem's `TextEncoder` use has no global.
+ * Import this file by path.
  *
  * Eight apps each carried a copy of this component; half of them had a canonical tag
  * and half did not, and none had structured data. Each app's own `Meta` still composes

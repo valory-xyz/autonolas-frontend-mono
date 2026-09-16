@@ -7,4 +7,3 @@ export * from './lib/TextWithTooltip';
 export * from './lib/Copy';
 export * from './lib/Loader';
 export * from './lib/CannotConnectAddressOfacError';
-export * from './lib/SeoHead';
