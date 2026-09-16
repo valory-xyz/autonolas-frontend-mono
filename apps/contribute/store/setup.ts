@@ -1,8 +1,7 @@
 import { PayloadAction, createSlice } from '@reduxjs/toolkit';
-import { lowerCase, orderBy } from 'lodash';
 import { TypedUseSelectorHook, useSelector } from 'react-redux';
 
-import { getName } from 'common-util/functions';
+import { rankLeaderboardUsers } from 'common-util/api/leaderboard';
 import { ContributeAgent } from 'types/users';
 
 import { store } from '.';
@@ -58,34 +57,6 @@ const initialState: SetupState = {
   nftDetails: null,
 };
 
-const getRankedUsers = (leaderboard: LeaderboardUser[]): LeaderboardUser[] => {
-  // orderBy (sort) 1. points, 2. name
-  const users = orderBy(
-    leaderboard,
-    [(user) => user.points, (user) => lowerCase(getName(user))],
-    ['desc', 'asc'],
-  );
-
-  const rankedUsers: LeaderboardUser[] = [];
-  users.forEach((user, index) => {
-    // setting rank for the first index
-    if (index === 0) {
-      rankedUsers.push({ ...user, rank: 1 });
-    } else {
-      const previousUser = rankedUsers[index - 1];
-      const rank =
-        previousUser.points === user.points ? previousUser.rank : (previousUser.rank || 1) + 1;
-
-      rankedUsers.push({
-        ...user,
-        rank,
-      });
-    }
-  });
-
-  return rankedUsers;
-};
-
 export const setupSlice = createSlice({
   name: 'setup',
   initialState,
@@ -110,7 +81,7 @@ export const setupSlice = createSlice({
     },
     setLeaderboard: (state, action: PayloadAction<LeaderboardUser[]>) => {
       const leaderboard = action.payload;
-      const rankedUsers = getRankedUsers(leaderboard);
+      const rankedUsers = rankLeaderboardUsers(leaderboard);
       state.leaderboard = rankedUsers;
     },
     updateLeaderboardUser: (state, action: PayloadAction<ContributeAgent>) => {
@@ -125,7 +96,7 @@ export const setupSlice = createSlice({
         return user;
       });
 
-      const rankedUsers = getRankedUsers(leaderboard);
+      const rankedUsers = rankLeaderboardUsers(leaderboard);
       state.leaderboard = rankedUsers;
     },
     setIsTweetsLoading: (state, action: PayloadAction<SetupState['isTweetsLoading']>) => {

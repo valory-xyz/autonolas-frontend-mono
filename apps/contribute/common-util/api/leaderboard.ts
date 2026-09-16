@@ -1,3 +1,6 @@
+import { lowerCase, orderBy } from 'lodash';
+
+import { getName } from 'common-util/functions';
 import { LeaderboardUser } from 'store/types';
 import { ContributeAgent } from 'types/users';
 
@@ -23,6 +26,36 @@ export const toLeaderboardUsers = (agents: ContributeAgent[]): LeaderboardUser[]
   }
 
   return usersList;
+};
+
+/**
+ * Sorts by points, then name, and numbers the rows — users on equal points share a rank.
+ *
+ * The store ran this on the rows it fetched in the browser, so a pre-rendered page served an
+ * empty Rank column until hydration. Shared here so the served HTML and the hydrated table
+ * agree on both the order and the numbers.
+ */
+export const rankLeaderboardUsers = (leaderboard: LeaderboardUser[]): LeaderboardUser[] => {
+  const users = orderBy(
+    leaderboard,
+    [(user) => user.points, (user) => lowerCase(getName(user))],
+    ['desc', 'asc'],
+  );
+
+  const rankedUsers: LeaderboardUser[] = [];
+  users.forEach((user, index) => {
+    if (index === 0) {
+      rankedUsers.push({ ...user, rank: 1 });
+      return;
+    }
+
+    const previousUser = rankedUsers[index - 1];
+    const rank =
+      previousUser.points === user.points ? previousUser.rank : (previousUser.rank || 1) + 1;
+    rankedUsers.push({ ...user, rank });
+  });
+
+  return rankedUsers;
 };
 
 export const getLeaderboardList = async () => {

@@ -6,7 +6,7 @@ import { truncateAddress, withTimeout } from 'libs/util-functions/src';
 import { Profile } from 'components/Profile';
 import Meta from 'components/meta';
 
-import { fetchLeaderboardData } from 'common-util/api/fetchLeaderboardData';
+import { readLeaderboardForPrerender } from 'common-util/api/leaderboardCache';
 import { toLeaderboardUsers } from 'common-util/api/leaderboard';
 import { getTier } from 'common-util/functions';
 import { LeaderboardUser } from 'store/types';
@@ -18,7 +18,11 @@ type ProfilePageProps = {
   description: string;
 };
 
-const REVALIDATE_SECONDS = 300;
+/**
+ * Matched to the leaderboard pages. A profile only needs one wallet's points for its meta, but
+ * the read behind it is the whole leaderboard, so regenerating these often is expensive.
+ */
+const REVALIDATE_SECONDS = 3600;
 const REVALIDATE_ON_ERROR_SECONDS = 60;
 
 /** Profiles are one per wallet, so they are rendered on first request rather than at build. */
@@ -59,7 +63,7 @@ export const getStaticProps: GetStaticProps<ProfilePageProps> = async ({ params 
   }
 
   try {
-    const agents = await withTimeout(fetchLeaderboardData(), SSR_TIMEOUT_MS);
+    const agents = await withTimeout(readLeaderboardForPrerender(), SSR_TIMEOUT_MS);
     const profile = toLeaderboardUsers(agents).find((user) => user.wallet_address === id);
     // Wallets not on the leaderboard are not pages: otherwise any address is an indexable URL.
     if (!profile) return { notFound: true, revalidate: REVALIDATE_SECONDS };
