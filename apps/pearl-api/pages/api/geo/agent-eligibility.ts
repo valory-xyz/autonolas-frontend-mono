@@ -68,6 +68,7 @@ const AGENT_POLICIES: Record<AgentId, AgentPolicy> = {
       'MT', // Malta
       'NI', // Nicaragua
       'NL', // Netherlands
+      'NZ', // New Zealand
       'PL', // Poland
       'PT', // Portugal
       'RU', // Russia
