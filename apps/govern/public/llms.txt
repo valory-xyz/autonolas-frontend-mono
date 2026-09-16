@@ -20,7 +20,7 @@ Govern is the Olas governance app where OLAS token holders participate in protoc
 
 - Website: https://govern.olas.network/
 - Documentation: https://govern.olas.network/docs
-- Disclaimer: https://govern.olas.network/disclaimer
+- Disclaimer: https://olas.network/disclaimer
 
 ## Technology
 
