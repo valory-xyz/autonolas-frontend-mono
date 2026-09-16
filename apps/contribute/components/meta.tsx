@@ -11,7 +11,8 @@ const Meta = ({ pageTitle, description, pageUrl }: MetaProps) => (
   <SeoHead
     title={pageTitle ? `${pageTitle} | ${SITE_TITLE}` : SITE_TITLE}
     description={description || SITE_DESCRIPTION}
-    url={`${SITE_URL}/${pageUrl || ''}`}
+    siteUrl={SITE_URL}
+    url={pageUrl ? `${SITE_URL}/${pageUrl}` : undefined}
     imageUrl={SITE_META_TAG_IMAGE}
   />
 );
