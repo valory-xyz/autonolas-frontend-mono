@@ -1,5 +1,7 @@
 # Olas Docs
 
+last-updated: 2026-09-16
+
 > Landing page and ecosystem hub for the Olas ecosystem
 
 ## Overview

@@ -1,5 +1,7 @@
 # Olas Launch
 
+last-updated: 2026-09-16
+
 > App for launching and managing staking contracts in the Olas ecosystem
 
 ## Overview

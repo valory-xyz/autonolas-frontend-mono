@@ -1,5 +1,7 @@
 # Olas Build
 
+last-updated: 2026-09-16
+
 > App for building, monetizing, and hiring AI agents in the Olas ecosystem
 
 ## Overview
