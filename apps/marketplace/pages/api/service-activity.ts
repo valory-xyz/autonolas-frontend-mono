@@ -15,12 +15,9 @@ type RequestQuery = {
 };
 
 // Marketplace subgraph service ids are numeric strings (the on-chain
-// serviceId). The value flows straight into a GraphQL doc via
-// interpolation in getServiceEndpointsFromMarketplaceSubgraph and
-// getServiceActivityFromMarketplaceSubgraph, so a query-string with
-// `") { id } ...` in it could reshape the query. Bounding to digits
-// closes that at the boundary; the field is uint256 upstream so
-// digits-only is the correct shape anyway.
+// serviceId). It travels to the indexers as a GraphQL variable, so it
+// cannot reshape a query, but the field is uint256 upstream and
+// digits-only is the correct shape at the boundary anyway.
 const SERVICE_ID_RE = /^\d+$/;
 
 // Shortened TTL when at least one mech-analytics shard failed. Any

@@ -17,7 +17,7 @@ import { ALL_SUPPORTED_CHAINS, getSvmEndpoint } from '../../common-util/Login/co
 import { getChainIdFromPath } from '../../common-util/functions';
 import { useHandleRoute } from '../../common-util/hooks/useHandleRoute';
 import { LogoSvg, LogoIconSvg } from '../Logos';
-import { CustomLayout, Logo, OlasHeader, RightMenu, SelectContainer } from './styles';
+import { CompactMenu, CustomLayout, Logo, OlasHeader, RightMenu, SelectContainer } from './styles';
 
 const Login = dynamic(() => import('../Login'), { ssr: false });
 const NavigationMenu = dynamic(() => import('./Menu'), { ssr: false });
@@ -27,7 +27,12 @@ const { Content } = AntdLayout;
 
 const Layout = ({ children = null }) => {
   const router = useRouter();
-  const { isMobile, isTablet } = useScreen();
+  const { isMobile, isTablet, lg } = useScreen();
+  // Below the `xl` breakpoint (1200px) the header collapses: the section menu
+  // folds into a "Menu" button next to the site burger. The full logo (290px)
+  // still fits down to `lg` (992px); below that only the icon.
+  const isCompact = isMobile || isTablet;
+  const isIconLogo = isMobile || (isTablet && !lg);
   const { isSvm, chainId, chainName } = useHelpers();
   const path = router?.pathname || '';
   const chainIdFromUrl = getChainIdFromPath(router?.query?.network);
@@ -53,13 +58,20 @@ const Layout = ({ children = null }) => {
       <OlasHeader ismobile={`${isMobile}`}>
         <div className="header-left-content">
           <Logo onClick={onHomeClick} data-testid="protocol-logo" ismobile={`${isMobile}`}>
-            {isTablet ? <LogoIconSvg /> : <LogoSvg />}
+            {isIconLogo ? <LogoIconSvg /> : <LogoSvg />}
           </Logo>
 
           <NavDropdown currentSite="mech-marketplace" />
+          {/* Compact: keep the "Menu" button beside the burger. As a direct child of
+              the space-between header it would be centred on its own. */}
+          {isCompact && (
+            <CompactMenu>
+              <NavigationMenu />
+            </CompactMenu>
+          )}
         </div>
 
-        <NavigationMenu />
+        {!isCompact && <NavigationMenu />}
         <RightMenu>
           {/* Hide the network Select on pages where it would be disabled —
               previously this rendered as a greyed-out dropdown that looked

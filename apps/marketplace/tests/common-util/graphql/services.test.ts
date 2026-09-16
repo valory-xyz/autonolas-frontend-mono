@@ -1,10 +1,19 @@
-import { getServicesFromMarketplaceSubgraph } from 'common-util/graphql/services';
+import {
+  getServiceEndpointsFromMarketplaceSubgraph,
+  getServicesFromMarketplaceSubgraph,
+} from 'common-util/graphql/services';
 
 const mockRequest = jest.fn();
 
 jest.mock('common-util/graphql/index', () => ({
   MARKETPLACE_SUBGRAPH_CLIENTS: {
     100: {
+      get request() {
+        return mockRequest;
+      },
+    },
+    // Robinhood: squid dialect (see common-util/graphql/dialect.ts)
+    4663: {
       get request() {
         return mockRequest;
       },
@@ -213,6 +222,78 @@ describe('getServicesFromMarketplaceSubgraph', () => {
       expect(service.metadata).toBe('');
       expect(service.mechAddresses).toEqual([]);
     });
+
+    // Both eras at once: a legacy MechAgent on service.mechs AND a marketplace
+    // Mech row in `meches`. The union must keep both, deduped and lowercased.
+    it('unions legacy service.mechs with the marketplace meches row', async () => {
+      mockRequest.mockReset();
+      mockRequest
+        .mockResolvedValueOnce({
+          services: [{ id: '1', mechs: [{ id: '0xa', address: '0xLegacyMech' }] }],
+          meches: [{ id: '1', address: '0xMarketMech', totalDeliveriesTransactions: '2' }],
+        })
+        .mockRejectedValue(new Error('unexpected second request'));
+
+      const [service] = await getServices();
+
+      expect(service.mechAddresses).toEqual(['0xlegacymech', '0xmarketmech']);
+      expect(service.totalDeliveries).toBe(2);
+    });
+
+    it('warns when the response has no `meches` field at all (schema drift)', async () => {
+      mockRequest.mockReset();
+      mockRequest
+        .mockResolvedValueOnce({ services: [{ id: '1' }] })
+        .mockRejectedValue(new Error('unexpected second request'));
+      const warn = jest.spyOn(console, 'warn').mockImplementation(() => {});
+
+      const [service] = await getServices();
+
+      expect(service.mechAddresses).toEqual([]);
+      expect(warn).toHaveBeenCalledWith(expect.stringContaining('no `meches` field'));
+      warn.mockRestore();
+    });
+  });
+
+  describe('getServiceEndpointsFromMarketplaceSubgraph', () => {
+    it('passes the service id as a variable, so a hostile id cannot reshape the query', async () => {
+      const hostile = '1") } mutation { x';
+      mockRequest.mockReset();
+      mockRequest.mockResolvedValueOnce({ service: null, mech: null });
+
+      const result = await getServiceEndpointsFromMarketplaceSubgraph({
+        chainId: 100,
+        serviceId: hostile,
+      });
+
+      const [doc, variables] = mockRequest.mock.calls[0];
+      expect(doc).not.toContain(hostile);
+      expect(doc).toContain('service(id: $id)');
+      expect(variables).toEqual({ id: hostile });
+      expect(result).toEqual({ multisigs: [], mechAddresses: [] });
+    });
+
+    it('reads serviceById / mechById on the squid and unions the addresses', async () => {
+      mockRequest.mockReset();
+      mockRequest.mockResolvedValueOnce({
+        serviceById: { id: '1', latestMultisig: SAFE, historicalMultisigs: null },
+        mechById: { address: '0xMechOnRobinhood' },
+      });
+
+      const result = await getServiceEndpointsFromMarketplaceSubgraph({
+        chainId: 4663,
+        serviceId: '1',
+      });
+
+      const [doc, variables] = mockRequest.mock.calls[0];
+      expect(doc).toContain('serviceById(id: $id)');
+      expect(doc).toContain('mechById(id: $id)');
+      expect(variables).toEqual({ id: '1' });
+      expect(result).toEqual({
+        multisigs: [SAFE.toLowerCase()],
+        mechAddresses: ['0xmechonrobinhood'],
+      });
+    });
   });
 
   // Default-ON in production but was untested for five review rounds:
@@ -337,6 +418,48 @@ describe('getServicesFromMarketplaceSubgraph', () => {
       const [service] = await getServices();
 
       expect(service.totalRequests).toBe(7);
+    });
+  });
+
+  describe('squid dialect (Robinhood, 4663)', () => {
+    const getSquidServices = () =>
+      getServicesFromMarketplaceSubgraph({ chainId: 4663, serviceIds: ['1'] });
+
+    it('sends OpenReader paging and still reads the top-level `meches`', async () => {
+      mockRequest.mockReset();
+      mockRequest
+        .mockResolvedValueOnce({
+          services: [{ id: '1', totalDeliveries: '0', latestMultisig: SAFE }],
+          meches: [{ id: '1', address: '0xMechOnRobinhood', totalDeliveriesTransactions: '3' }],
+        })
+        .mockResolvedValueOnce({ senders: [{ id: SAFE.toLowerCase(), totalLegacyRequests: '4' }] })
+        .mockRejectedValue(new Error('unexpected third request'));
+
+      const [service] = await getSquidServices();
+
+      const [detailsQuery] = mockRequest.mock.calls[0];
+      expect(detailsQuery).toContain('limit: 1000');
+      expect(detailsQuery).not.toContain('first:');
+      expect(detailsQuery).toContain('meches(');
+      expect(detailsQuery).not.toContain('mechs { id address }');
+      const [sendersQuery] = mockRequest.mock.calls[1];
+      expect(sendersQuery).toContain('limit: 1000');
+
+      expect(service.totalDeliveries).toBe(3);
+      expect(service.totalRequests).toBe(4);
+      expect(service.mechAddresses).toEqual(['0xmechonrobinhood']);
+    });
+
+    it('reports zero deliveries and no mech address when the squid has no Mech row', async () => {
+      mockRequest.mockReset();
+      mockRequest
+        .mockResolvedValueOnce({ services: [{ id: '1' }], meches: [] })
+        .mockRejectedValue(new Error('unexpected second request'));
+
+      const [service] = await getSquidServices();
+
+      expect(service.totalDeliveries).toBe(0);
+      expect(service.mechAddresses).toEqual([]);
     });
   });
 });
