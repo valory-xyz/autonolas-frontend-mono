@@ -22,7 +22,7 @@ const StakingContractDetails = () => {
         <Meta
           pageTitle="Create Staking Contract"
           description="Create a new staking contract for your AI agent service. Configure reward parameters, eligibility criteria, and deployment settings."
-          pageUrl={`${network || ''}/my-staking-contracts/create`}
+          pageUrl={network ? `${network}/my-staking-contracts/create` : undefined}
         />
         <CreateStakingContract />
       </>
@@ -34,7 +34,7 @@ const StakingContractDetails = () => {
       <Meta
         pageTitle="Staking Contract Details"
         description="View detailed information about your staking contract. Monitor staking activity, rewards distribution, and manage contract settings."
-        pageUrl={`${network || ''}/my-staking-contracts/${id || ''}`}
+        pageUrl={network && id ? `${network}/my-staking-contracts/${id}` : undefined}
       />
       <Details />
     </>
