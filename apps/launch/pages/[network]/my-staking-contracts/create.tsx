@@ -12,7 +12,7 @@ const Create = () => {
       <Meta
         pageTitle="Create Staking Contract"
         description="Create a new staking contract for your AI agent service. Configure reward parameters, eligibility criteria, and deployment settings."
-        pageUrl={`${network || ''}/my-staking-contracts/create`}
+        pageUrl={network ? `${network}/my-staking-contracts/create` : undefined}
       />
       <CreateStakingContract />
     </>

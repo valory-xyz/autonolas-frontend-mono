@@ -12,7 +12,7 @@ const MyStakingContractsPage = () => {
       <Meta
         pageTitle="My Staking Contracts"
         description="View and manage your staking contracts for AI agent services. Monitor performance, rewards, and configure staking parameters for your deployed agents."
-        pageUrl={`${network || ''}/my-staking-contracts`}
+        pageUrl={network ? `${network}/my-staking-contracts` : undefined}
       />
       <MyStakingContracts />
     </>

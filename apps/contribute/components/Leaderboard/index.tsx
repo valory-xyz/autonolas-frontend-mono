@@ -2,15 +2,15 @@ import { Alert, Col, Row } from 'antd';
 
 import { formatUtcTimestamp } from 'libs/util-functions/src';
 
+import { LeaderboardRow } from 'common-util/api/leaderboard';
 import { useAppSelector } from 'store/setup';
-import { LeaderboardUser } from 'store/types';
 import { Campaign } from 'types/moduleDetails';
 
 import { Campaigns } from './Campaigns';
 import { LeaderboardTable } from './LeaderboardTable';
 
 type LeaderboardProps = {
-  initialLeaderboard?: LeaderboardUser[];
+  initialLeaderboard?: LeaderboardRow[];
   initialCampaigns?: Campaign[];
   snapshotGeneratedAt?: string | null;
 };

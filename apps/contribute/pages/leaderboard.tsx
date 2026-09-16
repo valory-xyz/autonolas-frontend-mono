@@ -5,18 +5,20 @@ import Meta from 'components/meta';
 
 import { fetchLeaderboardData } from 'common-util/api/fetchLeaderboardData';
 import { fetchModuleDetails } from 'common-util/api/fetchModuleDetails';
-import { toLeaderboardUsers } from 'common-util/api/leaderboard';
-import { LeaderboardUser } from 'store/types';
+import { LeaderboardRow, toLeaderboardRow, toLeaderboardUsers } from 'common-util/api/leaderboard';
+import { getRankedUsers } from 'store/setup';
 import { Campaign } from 'types/moduleDetails';
 
 type LeaderboardSnapshot = {
-  users: LeaderboardUser[];
+  users: LeaderboardRow[];
   campaigns: Campaign[];
 };
 
-type LeaderboardPageProps = LeaderboardSnapshot & { snapshotGeneratedAt: string | null };
+type LeaderboardPageProps = LeaderboardSnapshot & {
+  snapshotGeneratedAt: string | null;
+};
 
-/** Budget for the paginated AFMDB read. */
+/** Budget for the AFMDB read. */
 const ISR_TIMEOUT_MS = 20_000;
 
 /**
@@ -35,12 +37,17 @@ export const getStaticProps = createSnapshotGetStaticProps<
     const campaigns = (moduleDetails?.[0]?.json_value?.twitter_campaigns?.campaigns ?? []).filter(
       (campaign) => campaign.status === 'live',
     );
-    return { users: toLeaderboardUsers(agents), campaigns };
+    // Ranked here too, so the served rows carry the rank the client will show.
+    const users = getRankedUsers(toLeaderboardUsers(agents)).map(toLeaderboardRow);
+    return { users, campaigns };
   },
   emptyValue: { users: [], campaigns: [] },
   timeoutMs: ISR_TIMEOUT_MS,
   label: 'contribute/leaderboard',
-  toProps: ({ data, generatedAt }) => ({ ...data, snapshotGeneratedAt: generatedAt }),
+  toProps: ({ data, generatedAt }) => ({
+    ...data,
+    snapshotGeneratedAt: generatedAt,
+  }),
 });
 
 const LeaderboardPage = ({ users, campaigns, snapshotGeneratedAt }: LeaderboardPageProps) => (

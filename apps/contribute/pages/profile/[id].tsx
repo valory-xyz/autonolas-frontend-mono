@@ -62,6 +62,8 @@ export const getStaticProps: GetStaticProps<ProfilePageProps> = async ({ params 
     const agents = await withTimeout(fetchLeaderboardData(), SSR_TIMEOUT_MS);
     const profile = toLeaderboardUsers(agents).find((user) => user.wallet_address === id);
     // Wallets not on the leaderboard are not pages: otherwise any address is an indexable URL.
+    // This is only safe because `fetchLeaderboardData` returns every row: a partial list would
+    // cache a 404 for a real contributor for `REVALIDATE_SECONDS`.
     if (!profile) return { notFound: true, revalidate: REVALIDATE_SECONDS };
     return { props: toProps(id, profile), revalidate: REVALIDATE_SECONDS };
   } catch (error) {

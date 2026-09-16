@@ -16,7 +16,7 @@ const Contract = () => {
       <Meta
         pageTitle="Contract Details"
         description="View detailed information about a specific Olas protocol smart contract, including its address, ABI, and interaction capabilities."
-        pageUrl={`contracts/${address}`}
+        pageUrl={address ? `contracts/${address}` : undefined}
       />
       <ContractPage />
     </>
