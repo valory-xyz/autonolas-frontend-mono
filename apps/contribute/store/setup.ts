@@ -58,7 +58,7 @@ const initialState: SetupState = {
   nftDetails: null,
 };
 
-const getRankedUsers = (leaderboard: LeaderboardUser[]): LeaderboardUser[] => {
+export const getRankedUsers = (leaderboard: LeaderboardUser[]): LeaderboardUser[] => {
   // orderBy (sort) 1. points, 2. name
   const users = orderBy(
     leaderboard,
