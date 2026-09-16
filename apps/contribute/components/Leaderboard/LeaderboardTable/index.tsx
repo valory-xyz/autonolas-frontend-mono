@@ -6,9 +6,9 @@ import styled from 'styled-components';
 import { COLOR } from 'libs/ui-theme/src';
 import { NA } from 'libs/util-constants/src';
 
+import { LeaderboardRow } from 'common-util/api/leaderboard';
 import { getName, getTier } from 'common-util/functions';
 import { useAppSelector } from 'store/setup';
-import { LeaderboardUser } from 'store/types';
 
 const { Text, Title, Paragraph } = Typography;
 
@@ -20,7 +20,7 @@ const Name = styled.a`
   white-space: nowrap;
 `;
 
-const columns: ColumnsType<LeaderboardUser> = [
+const columns: ColumnsType<LeaderboardRow> = [
   { title: 'Rank', dataIndex: 'rank', width: 50 },
   {
     title: 'Name',
@@ -118,7 +118,7 @@ const columns: ColumnsType<LeaderboardUser> = [
 ];
 
 type LeaderboardTableProps = {
-  initialLeaderboard?: LeaderboardUser[];
+  initialLeaderboard?: LeaderboardRow[];
 };
 
 export const LeaderboardTable = ({ initialLeaderboard }: LeaderboardTableProps) => {
@@ -126,7 +126,8 @@ export const LeaderboardTable = ({ initialLeaderboard }: LeaderboardTableProps) 
   const leaderboard = useAppSelector((state) => state.setup.leaderboard);
 
   // Use SSR data as fallback while Redux store is loading/empty
-  const displayData = leaderboard.length > 0 ? leaderboard : (initialLeaderboard ?? []);
+  const displayData: LeaderboardRow[] =
+    leaderboard.length > 0 ? leaderboard : (initialLeaderboard ?? []);
 
   return (
     <Card className="section">
