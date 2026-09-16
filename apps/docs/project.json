@@ -5,6 +5,21 @@
   "projectType": "application",
   "targets": {
     "build": {
+      "executor": "nx:run-commands",
+      "outputs": ["{options.outputPath}"],
+      "defaultConfiguration": "production",
+      "options": {
+        "command": "nx run docs:next-build:production && node scripts/check-llms.mjs --host docs.olas.network --next dist/apps/docs/.next --public apps/docs/public --llms apps/docs/public/llms.txt",
+        "outputPath": "dist/apps/docs"
+      },
+      "configurations": {
+        "development": {
+          "command": "nx run docs:next-build:development && node scripts/check-llms.mjs --host docs.olas.network --next dist/apps/docs/.next --public apps/docs/public --llms apps/docs/public/llms.txt"
+        },
+        "production": {}
+      }
+    },
+    "next-build": {
       "executor": "@nx/next:build",
       "outputs": ["{options.outputPath}"],
       "defaultConfiguration": "production",

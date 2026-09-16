@@ -10,7 +10,7 @@
       "defaultConfiguration": "production",
       "options": {
         "cwd": "apps/launch",
-        "command": "next build --webpack",
+        "command": "next build --webpack && node ../../scripts/check-llms.mjs --host launch.olas.network --next ../../dist/apps/launch/.next",
         "outputPath": "dist/apps/launch"
       },
       "configurations": {
