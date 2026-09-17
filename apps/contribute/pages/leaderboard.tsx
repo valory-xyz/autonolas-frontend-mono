@@ -1,54 +1,16 @@
-import { createSnapshotGetStaticProps } from 'libs/util-ssr/src';
-
 import { Leaderboard } from 'components/Leaderboard';
 import Meta from 'components/meta';
 
-import { fetchLeaderboardData } from 'common-util/api/fetchLeaderboardData';
-import { fetchModuleDetails } from 'common-util/api/fetchModuleDetails';
-import { LeaderboardRow, toLeaderboardRow, toLeaderboardUsers } from 'common-util/api/leaderboard';
-import { getRankedUsers } from 'store/setup';
-import { Campaign } from 'types/moduleDetails';
-
-type LeaderboardSnapshot = {
-  users: LeaderboardRow[];
-  campaigns: Campaign[];
-};
-
-type LeaderboardPageProps = LeaderboardSnapshot & {
-  snapshotGeneratedAt: string | null;
-};
-
-/** Budget for the AFMDB read. */
-const ISR_TIMEOUT_MS = 20_000;
+import {
+  LeaderboardPageProps,
+  getLeaderboardStaticProps,
+} from 'common-util/api/leaderboardSnapshot';
 
 /**
  * Both tables used to fill from the browser only, so the served HTML said "No data" twice.
- * Fetched here directly; Redux takes over once the client refreshes.
+ * Fetched in the shared snapshot instead; Redux takes over once the client refreshes.
  */
-export const getStaticProps = createSnapshotGetStaticProps<
-  LeaderboardSnapshot,
-  LeaderboardPageProps
->({
-  fetchSnapshot: async () => {
-    const [agents, moduleDetails] = await Promise.all([
-      fetchLeaderboardData(),
-      fetchModuleDetails(),
-    ]);
-    const campaigns = (moduleDetails?.[0]?.json_value?.twitter_campaigns?.campaigns ?? []).filter(
-      (campaign) => campaign.status === 'live',
-    );
-    // Ranked here too, so the served rows carry the rank the client will show.
-    const users = getRankedUsers(toLeaderboardUsers(agents)).map(toLeaderboardRow);
-    return { users, campaigns };
-  },
-  emptyValue: { users: [], campaigns: [] },
-  timeoutMs: ISR_TIMEOUT_MS,
-  label: 'contribute/leaderboard',
-  toProps: ({ data, generatedAt }) => ({
-    ...data,
-    snapshotGeneratedAt: generatedAt,
-  }),
-});
+export const getStaticProps = getLeaderboardStaticProps;
 
 const LeaderboardPage = ({ users, campaigns, snapshotGeneratedAt }: LeaderboardPageProps) => (
   <>
