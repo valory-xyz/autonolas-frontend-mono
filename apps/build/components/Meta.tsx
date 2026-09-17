@@ -16,7 +16,7 @@ const Meta = ({ title, description, path }: MetaProps) => (
   <SeoHead
     title={title ? `${title} | ${SITE_TITLE}` : SITE_TITLE}
     description={description || SITE_DESCRIPTION}
-    siteUrl={SITE_URL.replace(/\/$/, '')}
+    siteUrl={SITE_URL}
     url={path ? `${SITE_URL}${path}` : undefined}
     imageUrl={SITE_DEFAULT_IMAGE_URL}
   />

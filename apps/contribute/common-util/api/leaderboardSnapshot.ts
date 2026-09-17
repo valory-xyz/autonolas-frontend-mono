@@ -1,11 +1,15 @@
 import { createSnapshotGetStaticProps } from 'libs/util-ssr/src';
 
-import { getRankedUsers } from 'store/setup';
 import { Campaign } from 'types/moduleDetails';
 
 import { fetchLeaderboardData } from './fetchLeaderboardData';
 import { fetchModuleDetails } from './fetchModuleDetails';
-import { LeaderboardRow, toLeaderboardRow, toLeaderboardUsers } from './leaderboard';
+import {
+  LeaderboardRow,
+  getRankedUsers,
+  toLeaderboardRow,
+  toLeaderboardUsers,
+} from './leaderboard';
 
 export type LeaderboardSnapshot = {
   users: LeaderboardRow[];
