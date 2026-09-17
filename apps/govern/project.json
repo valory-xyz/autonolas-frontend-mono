@@ -10,7 +10,7 @@
       "defaultConfiguration": "production",
       "options": {
         "cwd": "apps/govern",
-        "command": "next build --webpack",
+        "command": "next build --webpack && node ../../scripts/check-llms-app.mjs govern",
         "outputPath": "dist/apps/govern"
       },
       "configurations": {

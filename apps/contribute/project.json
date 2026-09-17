@@ -5,6 +5,22 @@
     "projectType": "application",
     "targets": {
       "build": {
+        "executor": "nx:run-commands",
+        "outputs": ["{options.outputPath}"],
+        "defaultConfiguration": "production",
+        "options": {
+          "command": "nx run contribute:next-build:production && node scripts/check-llms-app.mjs contribute",
+          "outputPath": "dist/apps/contribute"
+        },
+        "configurations": {
+          "development": {
+            "command": "nx run contribute:next-build:development && node scripts/check-llms-app.mjs contribute --dev",
+            "outputPath": "apps/contribute"
+          },
+          "production": {}
+        }
+      },
+      "next-build": {
         "executor": "@nx/next:build",
         "outputs": ["{options.outputPath}"],
         "defaultConfiguration": "production",

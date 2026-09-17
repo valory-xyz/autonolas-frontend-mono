@@ -13,6 +13,8 @@
     "license-check": "node scripts/license-check.mjs",
     "supply-chain": "yarn audit:prod && yarn lint:lockfile && yarn audit:install-hooks",
     "check:served-text": "node scripts/check-served-text.mjs",
+    "check:llms": "node scripts/check-llms-app.mjs",
+    "check:llms:test": "node --test scripts/check-llms.test.mjs",
     "check:rpc": "node scripts/check-rpc-freshness.mjs"
   },
   "private": true,

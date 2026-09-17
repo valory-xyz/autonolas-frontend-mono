@@ -1,5 +1,7 @@
 # Olas Bond
 
+last-updated: 2026-09-17
+
 > Bonding app for liquidity provision in the Olas ecosystem
 
 ## Overview
@@ -8,10 +10,10 @@ Bond is the Olas liquidity bonding app. Users provide liquidity (LP tokens) and 
 
 ## Key Features
 
-- Bonding Products: Browse active bonding products across chains, see current OLAS price, discount, vesting period, and remaining supply. Bond LP tokens for discounted OLAS.
-- My Bonds: Track active bonds, view maturity status, and redeem vested OLAS tokens.
-- Paths: Step-by-step bonding paths showing the full Pool → Bridge → Bond flow across 9 chains (Ethereum, Gnosis, Polygon, Arbitrum, Optimism, Base, Celo, Mode, Solana).
-- Solana Liquidity: Wrap/unwrap SOL to WSOL for Orca whirlpool liquidity on Solana.
+- Bonding Products (https://bond.olas.network/bonding-products): Browse active bonding products across chains, see current OLAS price, discount, vesting period, and remaining supply. Bond LP tokens for discounted OLAS.
+- My Bonds (https://bond.olas.network/my-bonds): Track active bonds, view maturity status, and redeem vested OLAS tokens.
+- Paths (https://bond.olas.network/paths): Step-by-step bonding paths showing the full Pool → Bridge → Bond flow across 9 chains (Ethereum, Gnosis, Polygon, Arbitrum, Optimism, Base, Celo, Mode, Solana).
+- Solana Liquidity (https://bond.olas.network/manage-solana-liquidity): Wrap/unwrap SOL to WSOL for Orca whirlpool liquidity on Solana.
 
 ## Documentation
 

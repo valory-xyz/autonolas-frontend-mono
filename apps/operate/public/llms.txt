@@ -1,5 +1,7 @@
 # Olas Operate
 
+last-updated: 2026-09-17
+
 > App for discovering staking contracts and AI agents available for operators
 
 ## Overview
@@ -8,8 +10,8 @@ Operate is the Olas app that helps operators find staking opportunities and AI a
 
 ## Key Features
 
-- Staking Contracts: Browse live staking contracts with details on APY, available slots, rewards pool, stake required, and epoch timing. Filter by chain and platform. Launch Pearl or Contribute directly from each contract.
-- AI Agents: View available agents including Prediction Agent, Optimus Agent, Modius Agent, and Agents.fun agent with descriptions and platform availability.
+- Staking Contracts (https://operate.olas.network/contracts): Browse live staking contracts with details on APY, available slots, rewards pool, stake required, and epoch timing. Filter by chain and platform. Launch Pearl or Contribute directly from each contract.
+- AI Agents (https://operate.olas.network/agents): View available agents — Polystrat, Omenstrat, Optimus, Modius, Agents.fun and PettBro by pett.ai — with descriptions and platform availability.
 - Documentation: Step-by-step guide for setting up Pearl (desktop) to run agents and earn staking rewards.
 
 ## Documentation
