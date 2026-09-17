@@ -1,6 +1,6 @@
 # Olas Launch
 
-last-updated: 2026-09-16
+last-updated: 2026-09-17
 
 > App for launching and managing staking contracts in the Olas ecosystem
 
@@ -10,8 +10,8 @@ Launch is the Olas app for creating, deploying, and managing staking contracts t
 
 ## Key Features
 
-- Launcher Path: Guided 6-step journey from defining goals and KPIs to launching an AI agent economy.
-- My Staking Contracts: Create, deploy, and manage staking contracts with configurable parameters (rewards, staking deposits, agent instances, activity checkers).
+- Launcher Path (https://launch.olas.network/path): Guided 6-step journey from defining goals and KPIs to launching an AI agent economy.
+- My Staking Contracts (https://launch.olas.network/ethereum/my-staking-contracts): Create, deploy, and manage staking contracts with configurable parameters (rewards, staking deposits, agent instances, activity checkers).
 - Nominate Contract: Submit deployed contracts for nomination, making them eligible to receive OLAS emissions via governance voting.
 - Multi-Network Support: Deploy staking contracts across Ethereum, Gnosis, Polygon, Arbitrum, Optimism, Base, Mode, and Celo.
 

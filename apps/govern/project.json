@@ -10,7 +10,7 @@
       "defaultConfiguration": "production",
       "options": {
         "cwd": "apps/govern",
-        "command": "next build --webpack && node ../../scripts/check-llms.mjs --host govern.olas.network --next ../../dist/apps/govern/.next",
+        "command": "next build --webpack && node ../../scripts/check-llms-app.mjs govern",
         "outputPath": "dist/apps/govern"
       },
       "configurations": {

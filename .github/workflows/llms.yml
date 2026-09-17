@@ -1,0 +1,34 @@
+# The llms.txt guard runs inside every app's `nx build` (see scripts/check-llms-app.mjs), which
+# only Vercel runs. This keeps the guard's own tests honest whenever the guard or a file changes.
+name: llms.txt guard
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'scripts/check-llms*.mjs'
+      - 'apps/*/public/llms.txt'
+      - '.github/workflows/llms.yml'
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'scripts/check-llms*.mjs'
+      - 'apps/*/public/llms.txt'
+      - '.github/workflows/llms.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
+      - uses: actions/setup-node@1e60f620b9541d16bece96c5465dc8ee9832be0b # v4.0.3
+        with:
+          node-version: '22.x'
+      - name: Test the guard
+        run: node --test scripts/check-llms.test.mjs

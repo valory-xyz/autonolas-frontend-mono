@@ -9,12 +9,13 @@
       "outputs": ["{options.outputPath}"],
       "defaultConfiguration": "production",
       "options": {
-        "command": "nx run operate:next-build:production && node scripts/check-llms.mjs --host operate.olas.network --next dist/apps/operate/.next --public apps/operate/public --llms apps/operate/public/llms.txt",
+        "command": "nx run operate:next-build:production && node scripts/check-llms-app.mjs operate",
         "outputPath": "dist/apps/operate"
       },
       "configurations": {
         "development": {
-          "command": "nx run operate:next-build:development && node scripts/check-llms.mjs --host operate.olas.network --next dist/apps/operate/.next --public apps/operate/public --llms apps/operate/public/llms.txt"
+          "command": "nx run operate:next-build:development && node scripts/check-llms-app.mjs operate --dev",
+          "outputPath": "apps/operate"
         },
         "production": {}
       }

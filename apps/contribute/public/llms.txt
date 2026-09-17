@@ -1,6 +1,6 @@
 # Olas Contribute
 
-last-updated: 2026-09-16
+last-updated: 2026-09-17
 
 > Community contribution app for the Olas ecosystem
 
@@ -10,10 +10,11 @@ Contribute is the Olas app where community members coordinate content marketing 
 
 ## Key Features
 
-- Leaderboard: View ranked contributors with points, tiers, and social links. See active Twitter campaigns with keywords to promote.
-- Staking: Stake OLAS tokens and earn rewards for posting about Olas on X.
+- Leaderboard (https://contribute.olas.network/leaderboard): View ranked contributors with points, tiers, and social links. See active Twitter campaigns with keywords to promote.
+- Staking (https://contribute.olas.network/staking): Stake OLAS tokens and earn rewards for posting about Olas on X.
 - Profiles: View individual contributor profiles with badge NFTs, points breakdown, and tweet history.
 - Badge NFT: Mint a free dynamically-generated badge NFT based on contribution tier.
+- State (https://contribute.olas.network/state): The current state of the Contribute system — active campaigns, point distributions and contribution statistics.
 
 ## Documentation
 

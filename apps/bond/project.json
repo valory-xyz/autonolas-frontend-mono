@@ -9,12 +9,13 @@
       "outputs": ["{options.outputPath}"],
       "defaultConfiguration": "production",
       "options": {
-        "command": "nx run bond:next-build:production && node scripts/check-llms.mjs --host bond.olas.network --next dist/apps/bond/.next --public apps/bond/public --llms apps/bond/public/llms.txt",
+        "command": "nx run bond:next-build:production && node scripts/check-llms-app.mjs bond",
         "outputPath": "dist/apps/bond"
       },
       "configurations": {
         "development": {
-          "command": "nx run bond:next-build:development && node scripts/check-llms.mjs --host bond.olas.network --next dist/apps/bond/.next --public apps/bond/public --llms apps/bond/public/llms.txt"
+          "command": "nx run bond:next-build:development && node scripts/check-llms-app.mjs bond --dev",
+          "outputPath": "apps/bond"
         },
         "production": {}
       }

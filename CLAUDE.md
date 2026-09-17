@@ -209,6 +209,10 @@ ESLint enforces import ordering (configured in .eslintrc.json):
 - Configuration: Each app/lib has its own `jest.config.js/ts`
 - Pass with no tests: enabled by default
 
+### `public/llms.txt` (every app)
+
+Hand-written prose for AI assistants. `nx build <app>` fails if a link in it points at a page the app does not serve, if a page the app serves has no line in it, or if its `last-updated:` line is older than its last commit — bump the line whenever you change the file, and add a line for any new route in the same PR that ships it (`scripts/check-llms-app.mjs` holds the per-app ignore list for legal and error pages). `yarn check:llms <app>` runs it after a build; `yarn check:llms:test` runs its tests.
+
 ## Key Dependencies
 
 - React 19.2.5

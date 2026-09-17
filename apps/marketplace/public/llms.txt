@@ -1,6 +1,6 @@
 # Olas Marketplace (Mech Marketplace)
 
-last-updated: 2026-09-16
+last-updated: 2026-09-17
 
 > Decentralized marketplace and on-chain registry for AI agents, components, and agent blueprints
 

@@ -1,6 +1,6 @@
 # Olas Govern
 
-last-updated: 2026-09-16
+last-updated: 2026-09-17
 
 > Governance and protocol management platform for the Olas ecosystem
 
@@ -10,11 +10,11 @@ Govern is the Olas governance app where OLAS token holders participate in protoc
 
 ## Key Features
 
-- veOLAS: Lock OLAS tokens to create veOLAS (voting power). Longer locks yield more voting power. Increase locks or withdraw after expiry.
-- Staking Contracts: Allocate veOLAS voting weight to staking contracts to direct OLAS emissions. Weights update weekly with a 10-day cooldown between changes.
-- Proposals: View and vote on on-chain governance proposals (For/Against). Track proposal status, quorum, and voter breakdown.
-- Epoch: Monitor protocol epochs. Start new epochs and claim staking incentives.
-- Donate: Donate ETH citing specific services to drive proportional rewards to developers. Requires minimum veOLAS holding for boost.
+- veOLAS (https://govern.olas.network/veolas): Lock OLAS tokens to create veOLAS (voting power). Longer locks yield more voting power. Increase locks or withdraw after expiry.
+- Staking Contracts (https://govern.olas.network/contracts): Allocate veOLAS voting weight to staking contracts to direct OLAS emissions. Weights update weekly with a 10-day cooldown between changes.
+- Proposals (https://govern.olas.network/proposals): View and vote on on-chain governance proposals (For/Against). Track proposal status, quorum, and voter breakdown.
+- Epoch (https://govern.olas.network/epoch): Monitor protocol epochs. Start new epochs and claim staking incentives.
+- Donate (https://govern.olas.network/donate): Donate ETH citing specific services to drive proportional rewards to developers. Requires minimum veOLAS holding for boost.
 
 ## Documentation
 

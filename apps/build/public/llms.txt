@@ -1,6 +1,6 @@
 # Olas Build
 
-last-updated: 2026-09-16
+last-updated: 2026-09-17
 
 > App for building, monetizing, and hiring AI agents in the Olas ecosystem
 
@@ -18,12 +18,12 @@ Detailed quickstart guides available as plain text:
 
 ## Key Features
 
-- Build an Agent: Create custom AI agents with guided workflows
-- Hire an Agent: Browse and deploy pre-built AI agents
-- Monetize Your Agent: Earn rewards by sharing your agents
-- Dev Incentives: Access developer rewards and incentive programs
-- Opportunities: Discover building opportunities in the ecosystem
-- Paths: Follow structured learning paths for agent development
+- Build an Agent (https://build.olas.network/build): Create custom AI agents with guided workflows
+- Hire an Agent (https://build.olas.network/hire): Browse and deploy pre-built AI agents
+- Monetize Your Agent (https://build.olas.network/monetize): Earn rewards by sharing your agents
+- Dev Incentives (https://build.olas.network/dev-incentives): Access developer rewards and incentive programs
+- Opportunities (https://build.olas.network/opportunities): Discover building opportunities in the ecosystem
+- Paths (https://build.olas.network/paths): Follow structured learning paths for agent development
 
 ## Documentation
 
