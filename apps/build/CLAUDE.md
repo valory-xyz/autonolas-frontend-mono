@@ -37,5 +37,10 @@ Create and manage **staking contracts** for Olas: deploy and configure staking c
 
 ## Notes
 
+- Static pages: every non-dynamic page is prerendered at build time and served from the CDN. Do
+  **not** add `getInitialProps` to `pages/_app.tsx` — it turns every page into a per-request
+  serverless render, and 4 s cold starts got `/hire` and `/dev-incentives` flagged as slow by
+  Semrush. The proxy matcher deliberately skips `robots.txt`, `sitemap.xml` and `llms.txt` so the
+  geo-redirect never hides crawler metadata.
 - Staking contract addresses and ABIs come from `util-contracts` and app config; ensure correct chain when reading/writing.
 - SEO: `pages/paths/[id].tsx` is SSR'd (no `getStaticProps`). `common-util/hooks/useFetchPathData.ts` resolves `pathData` **synchronously** (via `useMemo` from `components/Paths/data.json`) so the per-path `<title>`/`<meta>` render server-side for crawlers; only the markdown body is fetched async. Keep `<Meta>` rendered whenever `pathData` exists (including the loading state) — don't move it behind the spinner, or every path page falls back to the default title/description (duplicate-meta regression). `components/Meta.tsx` also emits a canonical link from `path`.
