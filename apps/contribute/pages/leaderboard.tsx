@@ -5,8 +5,12 @@ import Meta from 'components/meta';
 
 import { fetchLeaderboardData } from 'common-util/api/fetchLeaderboardData';
 import { fetchModuleDetails } from 'common-util/api/fetchModuleDetails';
-import { LeaderboardRow, toLeaderboardRow, toLeaderboardUsers } from 'common-util/api/leaderboard';
-import { getRankedUsers } from 'store/setup';
+import {
+  LeaderboardRow,
+  getRankedUsers,
+  toLeaderboardRow,
+  toLeaderboardUsers,
+} from 'common-util/api/leaderboard';
 import { Campaign } from 'types/moduleDetails';
 
 type LeaderboardSnapshot = {
@@ -14,9 +18,7 @@ type LeaderboardSnapshot = {
   campaigns: Campaign[];
 };
 
-type LeaderboardPageProps = LeaderboardSnapshot & {
-  snapshotGeneratedAt: string | null;
-};
+type LeaderboardPageProps = LeaderboardSnapshot & { snapshotGeneratedAt: string | null };
 
 /** Budget for the AFMDB read. */
 const ISR_TIMEOUT_MS = 20_000;
@@ -44,10 +46,7 @@ export const getStaticProps = createSnapshotGetStaticProps<
   emptyValue: { users: [], campaigns: [] },
   timeoutMs: ISR_TIMEOUT_MS,
   label: 'contribute/leaderboard',
-  toProps: ({ data, generatedAt }) => ({
-    ...data,
-    snapshotGeneratedAt: generatedAt,
-  }),
+  toProps: ({ data, generatedAt }) => ({ ...data, snapshotGeneratedAt: generatedAt }),
 });
 
 const LeaderboardPage = ({ users, campaigns, snapshotGeneratedAt }: LeaderboardPageProps) => (

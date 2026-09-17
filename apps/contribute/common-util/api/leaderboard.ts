@@ -1,3 +1,6 @@
+import { lowerCase, orderBy } from 'lodash';
+
+import { getName } from 'common-util/functions';
 import { LeaderboardUser } from 'store/types';
 import { ContributeAgent } from 'types/users';
 
@@ -23,6 +26,35 @@ export const toLeaderboardUsers = (agents: ContributeAgent[]): LeaderboardUser[]
   }
 
   return usersList;
+};
+
+/** Ranks users by points, then name; equal points share a rank. Used by the store and by the pages that pre-render rows. */
+export const getRankedUsers = (leaderboard: LeaderboardUser[]): LeaderboardUser[] => {
+  // orderBy (sort) 1. points, 2. name
+  const users = orderBy(
+    leaderboard,
+    [(user) => user.points, (user) => lowerCase(getName(user))],
+    ['desc', 'asc'],
+  );
+
+  const rankedUsers: LeaderboardUser[] = [];
+  users.forEach((user, index) => {
+    // setting rank for the first index
+    if (index === 0) {
+      rankedUsers.push({ ...user, rank: 1 });
+    } else {
+      const previousUser = rankedUsers[index - 1];
+      const rank =
+        previousUser.points === user.points ? previousUser.rank : (previousUser.rank || 1) + 1;
+
+      rankedUsers.push({
+        ...user,
+        rank,
+      });
+    }
+  });
+
+  return rankedUsers;
 };
 
 /** What the leaderboard table renders. Server-rendered rows carry only this. */
@@ -72,11 +104,7 @@ export const updateUserStakingData = async ({
   const response = await fetch('/api/agent-staking', {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      attributeId,
-      service_multisig: multisig,
-      service_id: serviceId,
-    }),
+    body: JSON.stringify({ attributeId, service_multisig: multisig, service_id: serviceId }),
   });
 
   if (!response.ok) {
@@ -91,11 +119,7 @@ export const clearUserOldStakingData = async (attributeId: number) => {
   const response = await fetch('/api/agent-staking', {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      attributeId,
-      service_multisig_old: null,
-      service_id_old: null,
-    }),
+    body: JSON.stringify({ attributeId, service_multisig_old: null, service_id_old: null }),
   });
 
   if (!response.ok) {
