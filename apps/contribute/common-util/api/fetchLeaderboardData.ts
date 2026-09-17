@@ -11,8 +11,12 @@ import { AfmdbError, getAfmdbAttributeValuesUrl } from './afmdb';
  */
 const LIMIT = 20000;
 
-/** How long one fetched leaderboard is reused by every page and API route on this instance. */
-const REUSE_MS = 60_000;
+/**
+ * How long one fetched leaderboard is reused by every page and API route on this instance.
+ * Shorter than the browser's one-minute poll (`useHealthCheckup`), so each poll gets a fresh
+ * snapshot rather than one up to a minute old on top of its own interval.
+ */
+const REUSE_MS = 30_000;
 
 let cached: { at: number; result: Promise<ContributeAgent[]> } | null = null;
 
@@ -45,8 +49,8 @@ const fetchAllRows = async (): Promise<ContributeAgent[]> => {
   }
 
   // Belt and braces: the same row twice would render twice and share a React key.
-  const seen = new Set<number>();
-  return allResults.filter((row) => !seen.has(row.attribute_id) && seen.add(row.attribute_id));
+  const byId = new Map(allResults.map((row) => [row.attribute_id, row]));
+  return [...byId.values()];
 };
 
 /**

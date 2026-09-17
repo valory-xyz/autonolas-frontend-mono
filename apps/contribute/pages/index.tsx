@@ -5,8 +5,12 @@ import { withTimeout } from 'libs/util-functions/src';
 import { Leaderboard } from 'components/Leaderboard';
 import Meta from 'components/meta';
 import { fetchLeaderboardData } from 'common-util/api/fetchLeaderboardData';
-import { LeaderboardRow, toLeaderboardRow, toLeaderboardUsers } from 'common-util/api/leaderboard';
-import { getRankedUsers } from 'store/setup';
+import {
+  LeaderboardRow,
+  getRankedUsers,
+  toLeaderboardRow,
+  toLeaderboardUsers,
+} from 'common-util/api/leaderboard';
 import { SSR_TIMEOUT_MS } from 'util/constants';
 
 export const getServerSideProps: GetServerSideProps<{
