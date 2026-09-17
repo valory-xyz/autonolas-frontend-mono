@@ -6,7 +6,7 @@ import { truncateAddress, withTimeout } from 'libs/util-functions/src';
 import { Profile } from 'components/Profile';
 import Meta from 'components/meta';
 
-import { readLeaderboardForPrerender } from 'common-util/api/leaderboardCache';
+import { fetchLeaderboardData } from 'common-util/api/fetchLeaderboardData';
 import { toLeaderboardUsers } from 'common-util/api/leaderboard';
 import { getTier } from 'common-util/functions';
 import { LeaderboardUser } from 'store/types';
@@ -24,6 +24,14 @@ type ProfilePageProps = {
  */
 const REVALIDATE_SECONDS = 3600;
 const REVALIDATE_ON_ERROR_SECONDS = 60;
+
+/**
+ * Deliberately not `REVALIDATE_SECONDS`. `toLeaderboardUsers` filters out zero-point wallets, so
+ * a freshly connected wallet 404s here — and Login and staking both link a user to their own
+ * profile. On the hourly window that 404 would be cached past the moment their first points
+ * land, leaving them looking at a 404 of their own page for the rest of the window.
+ */
+const REVALIDATE_NOT_FOUND_SECONDS = 60;
 
 /** Profiles are one per wallet, so they are rendered on first request rather than at build. */
 export const getStaticPaths: GetStaticPaths = async () => ({ paths: [], fallback: 'blocking' });
@@ -63,10 +71,12 @@ export const getStaticProps: GetStaticProps<ProfilePageProps> = async ({ params 
   }
 
   try {
-    const agents = await withTimeout(readLeaderboardForPrerender(), SSR_TIMEOUT_MS);
+    const agents = await withTimeout(fetchLeaderboardData(), SSR_TIMEOUT_MS);
     const profile = toLeaderboardUsers(agents).find((user) => user.wallet_address === id);
     // Wallets not on the leaderboard are not pages: otherwise any address is an indexable URL.
-    if (!profile) return { notFound: true, revalidate: REVALIDATE_SECONDS };
+    // This is only safe because `fetchLeaderboardData` returns every row: a partial list would
+    // cache a 404 for a real contributor.
+    if (!profile) return { notFound: true, revalidate: REVALIDATE_NOT_FOUND_SECONDS };
     return { props: toProps(id, profile), revalidate: REVALIDATE_SECONDS };
   } catch (error) {
     // Address-only meta rather than a 404, so an AFMDB blip does not cache a real profile away.

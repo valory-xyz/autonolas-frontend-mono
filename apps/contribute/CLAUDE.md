@@ -43,17 +43,15 @@ Contribute to Olas: staking, contributions, and profile. Integrates with a **bac
 
 - `/` and `/leaderboard` render the same tables and share one snapshot,
   `common-util/api/leaderboardSnapshot.ts` (hourly ISR via `createSnapshotGetStaticProps`). Do
-  not move either back to `getServerSideProps`: the AFMDB leaderboard read is seven pages and
-  ~6k rows, so per-request rendering put the homepage at a ~4s floor and made its uptime track
-  AFMDB's. `yarn check:served-text contribute` guards `/leaderboard`, and the shared snapshot
-  means `/` cannot regress on its own.
-- `/profile/[id]` is ISR (hourly) with `fallback: 'blocking'`, and 404s wallets that are not on
-  the leaderboard so any address is not an indexable URL. It needs one wallet's points, but the
-  read behind it is the whole leaderboard — see below.
-- All three pre-render paths read through `readLeaderboardForPrerender`
-  (`common-util/api/leaderboardCache.ts`), which collapses reads that land close together so a
-  crawler walking profile URLs does not start a full ~6k-row fetch per address.
-  `/api/leaderboard`, which the browser polls for live rows, is deliberately left uncached.
+  not move either back to `getServerSideProps`: that ran a function and re-rendered every row
+  on each visit, behind a `no-store` response.
+- `/profile/[id]` is ISR with `fallback: 'blocking'`. It 404s wallets that are not on the
+  leaderboard, so any address is not an indexable URL — but on a short window, because
+  `toLeaderboardUsers` filters zero-point wallets and a new wallet must stop 404ing as soon as
+  its first points land.
+- All three read through `fetchLeaderboardData`, which holds one result for a minute across
+  every page and API route on a warm instance. AFMDB's `values` endpoint has no ORDER BY, so it
+  reads the attribute in one query rather than paging — see the note there before changing it.
 
 ## Notes
 

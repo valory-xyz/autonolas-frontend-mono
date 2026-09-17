@@ -2,25 +2,28 @@ import { ContributeAgent } from 'types/users';
 
 import { AfmdbError, getAfmdbAttributeValuesUrl } from './afmdb';
 
-const LIMIT = 1000;
-
 /**
- * Bounds the loop below. At `LIMIT` rows a page this allows far more than the real row count,
- * so it only trips if AFMDB stops honouring `skip` and keeps returning the same page.
+ * Well above the ~6,200 rows the USER attribute holds today, so the whole leaderboard comes
+ * back from one query. AFMDB's `values` endpoint has no ORDER BY, so `skip` pages are cut
+ * from an arbitrary order: walking it in pages of 1,000 returned a third of the rows twice
+ * and missed as many entirely, differently on every fetch. One query is one consistent
+ * snapshot.
  */
-const MAX_PAGES = 100;
+const LIMIT = 20000;
 
-/**
- * Fetches all leaderboard data from AFMDB with pagination.
- * This is a pure async function that can be used both in API routes and getStaticProps.
- */
-export async function fetchLeaderboardData(): Promise<ContributeAgent[]> {
+/** How long one fetched leaderboard is reused by every page and API route on this instance. */
+const REUSE_MS = 60_000;
+
+let cached: { at: number; result: Promise<ContributeAgent[]> } | null = null;
+
+const fetchAllRows = async (): Promise<ContributeAgent[]> => {
   const baseUrl = getAfmdbAttributeValuesUrl('USER');
 
   let skip = 0;
   let allResults: ContributeAgent[] = [];
 
-  for (let page = 0; page < MAX_PAGES; page += 1) {
+  // eslint-disable-next-line no-constant-condition
+  while (true) {
     const url = `${baseUrl}?skip=${skip}&limit=${LIMIT}`;
     const response = await fetch(url);
 
@@ -30,22 +33,39 @@ export async function fetchLeaderboardData(): Promise<ContributeAgent[]> {
 
     const pageData = await response.json();
 
-    // Anything but an array means the read failed in a way the status code did not report.
-    // Concatenating it would push an error body into the table as a row.
-    if (!Array.isArray(pageData)) {
-      throw new AfmdbError(`Unexpected leaderboard payload at skip=${skip}`, 502);
-    }
-
-    if (pageData.length === 0) return allResults;
-
     allResults = allResults.concat(pageData);
+    skip += LIMIT;
 
-    // Advance by what came back, not by LIMIT, and keep going. A short page used to end the
-    // loop, so whenever AFMDB answered with fewer rows than asked for the rest of the
-    // leaderboard was dropped silently — no error, just a shorter table.
-    skip += pageData.length;
+    if (!Array.isArray(pageData) || pageData.length === 0 || pageData.length < LIMIT) {
+      break;
+    }
+    console.warn(
+      `[contribute/leaderboard] more than ${LIMIT} rows; paging is unordered, raise LIMIT`,
+    );
   }
 
-  // Truncating here would look like a working page with contributors missing, so say so instead.
-  throw new AfmdbError(`Leaderboard pagination exceeded ${MAX_PAGES} pages`, 502);
+  // Belt and braces: the same row twice would render twice and share a React key.
+  const seen = new Set<number>();
+  return allResults.filter((row) => !seen.has(row.attribute_id) && seen.add(row.attribute_id));
+};
+
+/**
+ * Fetches the whole leaderboard from AFMDB. Usable from API routes and `getServerSideProps` /
+ * `getStaticProps` alike.
+ *
+ * The 4 MB result is shared for a minute across the homepage (rendered per request), profile
+ * pages (rendered on first visit) and `/api/leaderboard` on a warm instance, so a crawl of the
+ * profiles does not re-download it per page. A failed fetch is not kept.
+ */
+export async function fetchLeaderboardData(): Promise<ContributeAgent[]> {
+  const now = Date.now();
+  if (cached && now - cached.at < REUSE_MS) return cached.result;
+
+  const result = fetchAllRows();
+  const entry = { at: now, result };
+  cached = entry;
+  result.catch(() => {
+    if (cached === entry) cached = null;
+  });
+  return result;
 }

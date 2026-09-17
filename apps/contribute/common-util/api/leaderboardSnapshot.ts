@@ -1,20 +1,20 @@
 import { createSnapshotGetStaticProps } from 'libs/util-ssr/src';
 
-import { LeaderboardUser } from 'store/types';
+import { getRankedUsers } from 'store/setup';
 import { Campaign } from 'types/moduleDetails';
 
-import { readLeaderboardForPrerender } from './leaderboardCache';
+import { fetchLeaderboardData } from './fetchLeaderboardData';
 import { fetchModuleDetails } from './fetchModuleDetails';
-import { rankLeaderboardUsers, toLeaderboardUsers } from './leaderboard';
+import { LeaderboardRow, toLeaderboardRow, toLeaderboardUsers } from './leaderboard';
 
 export type LeaderboardSnapshot = {
-  users: LeaderboardUser[];
+  users: LeaderboardRow[];
   campaigns: Campaign[];
 };
 
 export type LeaderboardPageProps = LeaderboardSnapshot & { snapshotGeneratedAt: string | null };
 
-/** Budget for the paginated AFMDB read. */
+/** Budget for the AFMDB read. */
 const ISR_TIMEOUT_MS = 20_000;
 
 /**
@@ -27,10 +27,11 @@ const ISR_TIMEOUT_MS = 20_000;
 const REVALIDATE_SECONDS = 3600;
 
 /**
- * `/` and `/leaderboard` render the same tables, so they share one snapshot rather than each
- * reading AFMDB their own way. `/` used to do this read per request in `getServerSideProps`:
- * seven sequential AFMDB pages and ~6k rows on every hit, uncached, which put the homepage at
- * a 4s floor and coupled its uptime to AFMDB. Here it is read once per revalidation window.
+ * `/` and `/leaderboard` render the same two tables, so they share one snapshot rather than
+ * each reading AFMDB their own way.
+ *
+ * `/` used to build this per request in `getServerSideProps`, so every visit ran a function and
+ * re-rendered every row behind a `no-store` response. Read once per window here instead.
  */
 export const getLeaderboardStaticProps = createSnapshotGetStaticProps<
   LeaderboardSnapshot,
@@ -38,13 +39,15 @@ export const getLeaderboardStaticProps = createSnapshotGetStaticProps<
 >({
   fetchSnapshot: async () => {
     const [agents, moduleDetails] = await Promise.all([
-      readLeaderboardForPrerender(),
+      fetchLeaderboardData(),
       fetchModuleDetails(),
     ]);
     const campaigns = (moduleDetails?.[0]?.json_value?.twitter_campaigns?.campaigns ?? []).filter(
       (campaign) => campaign.status === 'live',
     );
-    return { users: rankLeaderboardUsers(toLeaderboardUsers(agents)), campaigns };
+    // The same filter and ranking the client applies once its own fetch lands.
+    const users = getRankedUsers(toLeaderboardUsers(agents)).map(toLeaderboardRow);
+    return { users, campaigns };
   },
   emptyValue: { users: [], campaigns: [] },
   timeoutMs: ISR_TIMEOUT_MS,
