@@ -39,6 +39,20 @@ Contribute to Olas: staking, contributions, and profile. Integrates with a **bac
 - Test: `yarn nx test contribute`
 - Lint: `yarn nx lint contribute`
 
+## Rendering
+
+- `/` and `/leaderboard` render the same tables and share one snapshot,
+  `common-util/api/leaderboardSnapshot.ts` (hourly ISR via `createSnapshotGetStaticProps`). Do
+  not move either back to `getServerSideProps`: that ran a function and re-rendered every row
+  on each visit, behind a `no-store` response.
+- `/profile/[id]` is ISR with `fallback: 'blocking'`. It 404s wallets that are not on the
+  leaderboard, so any address is not an indexable URL — but on a short window, because
+  `toLeaderboardUsers` filters zero-point wallets and a new wallet must stop 404ing as soon as
+  its first points land.
+- All three read through `fetchLeaderboardData`, which holds one result for a minute across
+  every page and API route on a warm instance. AFMDB's `values` endpoint has no ORDER BY, so it
+  reads the attribute in one query rather than paging — see the note there before changing it.
+
 ## Notes
 
 - Backend and external services are required for full functionality; ensure env vars are set for local runs.

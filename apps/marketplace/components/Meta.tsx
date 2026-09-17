@@ -23,7 +23,8 @@ export const Meta = ({ pageTitle, description, pageUrl, imageUrl }: MetaProps) =
     <SeoHead
       title={sanitizedTitle ? `${sanitizedTitle} | ${SITE_TITLE}` : SITE_TITLE}
       description={sanitizedDescription || SITE_DESCRIPTION}
-      url={`${SITE_URL}/${pageUrl || ''}`}
+      siteUrl={SITE_URL}
+      url={pageUrl ? `${SITE_URL}/${pageUrl}` : undefined}
       imageUrl={validateMetaImageUrl(imageUrl) || SITE_IMAGE_URL}
     />
   );
