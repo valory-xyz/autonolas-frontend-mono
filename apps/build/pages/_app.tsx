@@ -1,5 +1,5 @@
 import '@ant-design/v5-patch-for-react-19';
-import type { NextPage, NextPageContext } from 'next';
+import type { NextPage } from 'next';
 import { createWrapper } from 'next-redux-wrapper';
 import { cookieToInitialState } from 'wagmi';
 
@@ -34,18 +34,6 @@ const MyApp = ({ Component, pageProps }: MyAppProps) => {
       </AutonolasThemeProvider>
     </>
   );
-};
-
-MyApp.getInitialProps = async ({
-  Component,
-  ctx,
-}: {
-  Component: NextPage;
-  ctx: NextPageContext;
-}) => {
-  const pageProps = Component.getInitialProps ? await Component.getInitialProps(ctx) : {};
-
-  return { pageProps };
 };
 
 const wrapper = createWrapper(initStore);
