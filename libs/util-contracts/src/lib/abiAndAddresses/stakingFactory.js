@@ -1,5 +1,7 @@
 import { arbitrum, base, celo, gnosis, mainnet, optimism, polygon, mode } from 'viem/chains';
 
+import { robinhood } from 'libs/util-constants/src';
+
 export const STAKING_FACTORY = {
   contractName: 'StakingFactory',
   addresses: {
@@ -11,6 +13,7 @@ export const STAKING_FACTORY = {
     [arbitrum.id]: '0xEB5638eefE289691EcE01943f768EDBF96258a80',
     [celo.id]: '0x1c2cD884127b080F940b7546c1e9aaf525b1FA55',
     [mode.id]: '0x75D529FAe220bC8db714F0202193726b46881B76',
+    [robinhood.id]: '0x1BD1505B711Fb58C54ca3712e6BEf47A133892d9',
   },
   abi: [
     {

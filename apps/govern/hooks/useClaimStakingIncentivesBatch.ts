@@ -5,7 +5,7 @@ import { useWriteContract } from 'wagmi';
 
 import { DISPENSER } from 'libs/util-contracts/src/lib/abiAndAddresses';
 
-import { ARBITRUM_CHAIN_ID, getArbitrumBridgePayload } from 'common-util/functions/arbitrum-bridge';
+import { getArbitrumBridgePayload, isOrbitChainId } from 'common-util/functions/arbitrum-bridge';
 
 type ClaimStakingIncentivesBatchProps = {
   onSuccess: () => void;
@@ -32,17 +32,25 @@ export const useClaimStakingIncentivesBatch = ({
     const bridgePayloads: `0x${string}`[] = chainIds.map(() => '0x');
     const valueAmounts: bigint[] = chainIds.map(() => BigInt(0));
 
-    const arbIndex = chainIds.indexOf(ARBITRUM_CHAIN_ID);
-    const hasArbitrum = arbIndex !== -1;
+    // Orbit chains (Arbitrum One, Robinhood Chain) bridge through retryable tickets and need
+    // a gas-priced payload plus ETH; every other chain claims with `0x` and zero value.
+    const orbitClaims = chainIds.flatMap((chainId, index) =>
+      isOrbitChainId(chainId) ? [{ chainId, index }] : [],
+    );
 
-    if (hasArbitrum) {
+    if (orbitClaims.length > 0) {
       if (mountedRef.current) setIsEstimating(true);
       try {
-        const { bridgePayload, value } = await getArbitrumBridgePayload(stakingTargets[arbIndex]);
-        bridgePayloads[arbIndex] = bridgePayload;
-        valueAmounts[arbIndex] = value;
+        for (const { chainId, index } of orbitClaims) {
+          const { bridgePayload, value } = await getArbitrumBridgePayload(
+            stakingTargets[index],
+            chainId,
+          );
+          bridgePayloads[index] = bridgePayload;
+          valueAmounts[index] = value;
+        }
       } catch (error) {
-        onError(error instanceof Error ? error : new Error('Failed to estimate Arbitrum gas'));
+        onError(error instanceof Error ? error : new Error('Failed to estimate bridge gas'));
         return;
       } finally {
         if (mountedRef.current) setIsEstimating(false);

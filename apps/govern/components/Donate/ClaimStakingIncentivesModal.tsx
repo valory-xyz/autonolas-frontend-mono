@@ -197,7 +197,7 @@ const ModalContent = ({
 
       {!isCurrentBatchClaimed && (
         <Button type="primary" size="large" loading={isPending} onClick={handleClaimForBatch}>
-          {isEstimating ? 'Estimating Arbitrum bridge costs...' : 'Claim Incentives'}
+          {isEstimating ? 'Estimating bridge costs...' : 'Claim Incentives'}
         </Button>
       )}
     </Flex>

@@ -4,7 +4,7 @@ Guidance for working on the **Launch** app in this repo.
 
 ## Purpose
 
-**Launch** and **nominate** staking contracts: create and manage staking contracts, nominate contracts for programs. Users connect a wallet and interact with staking contracts on supported chains (e.g. Gnosis, Base, Mode).
+**Launch** and **nominate** staking contracts: create and manage staking contracts, nominate contracts for programs. Users connect a wallet and interact with staking contracts on supported chains (Ethereum, Gnosis, Polygon, Mode, Optimism, Base, Arbitrum, Celo, Robinhood Chain).
 
 ## Port
 
@@ -18,7 +18,7 @@ Guidance for working on the **Launch** app in this repo.
 
 ## Env / backends
 
-- Staking contract subgraphs (Gnosis, Base, Optimism, Polygon, Mode).
+- Staking contract subgraphs (Gnosis, Base, Optimism, Polygon, Mode, Ethereum, Arbitrum, Celo) in `common-util/graphql/index.ts`. **Robinhood Chain (4663)** has no staking subgraph yet: `hasSubgraphSupport` is false so `hooks/useGetMyStakingContracts.ts` falls back to `InstanceCreated` logs from the `StakingFactory`, scanned from its deployment block in `common-util/constants/stakingContract.ts` (`blockNumbers`). Add a `NEXT_PUBLIC_ROBINHOOD_STAKING_SUBGRAPH_URL` client there once one is deployed.
 - RPCs and Wallet Project ID for RainbowKit (WalletConnect Cloud projectId — required by `getDefaultConfig`).
 
 ## Structure
@@ -54,4 +54,5 @@ of six and no sign the rest existed. A crawler fetches the page once and never c
 ## Notes
 
 - Staking contract creation and nomination are chain-specific; use correct network and subgraph for the target chain.
+- Adding a chain: add it to `SUPPORTED_CHAINS` in `common-util/config/wagmi.ts` (route slug is `kebabCase(chain.name)`, e.g. `robinhood-chain`), every address map + `blockNumbers` in `common-util/constants/stakingContract.ts`, `STAKING_FACTORY.addresses` in `libs/util-contracts`, and `RPC_URLS` / `CHAINS` in `libs/util-constants`. Chains missing from `viem/chains` (Robinhood) are defined in `libs/util-constants/src/lib/chains.ts`.
 - Wallet session persists across refresh: wagmi config uses `storage: createStorage({ storage: cookieStorage })` and `_app.tsx` feeds `cookieToInitialState(wagmiConfig)` into the provider's `initialState`. Don't gate `WagmiProvider` behind an `isMounted` flag — pages calling `useConfig` at top-render fail SSR/static export when the provider isn't there.
