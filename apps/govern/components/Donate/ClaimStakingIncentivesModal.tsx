@@ -82,7 +82,10 @@ export const ClaimStakingIncentivesModal = ({ onClose }: ClaimStakingIncentivesM
     },
     onError: (error) => {
       console.error(error);
-      notifyError(`Failed to claim staking incentives for batch ${currentBatch + 1}`);
+      notifyError(
+        `Failed to claim staking incentives for batch ${currentBatch + 1}`,
+        error instanceof Error ? error.message : undefined,
+      );
     },
   });
 

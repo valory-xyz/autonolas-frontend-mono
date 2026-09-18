@@ -41,11 +41,16 @@ export const useClaimStakingIncentivesBatch = ({
     if (orbitClaims.length > 0) {
       if (mountedRef.current) setIsEstimating(true);
       try {
-        for (const { chainId, index } of orbitClaims) {
-          const { bridgePayload, value } = await getArbitrumBridgePayload(
-            stakingTargets[index],
-            chainId,
-          );
+        // Each estimate is several RPC round-trips, so run the chains concurrently.
+        const estimates = await Promise.all(
+          orbitClaims.map(({ chainId, index }) =>
+            getArbitrumBridgePayload(stakingTargets[index], chainId).then((result) => ({
+              ...result,
+              index,
+            })),
+          ),
+        );
+        for (const { index, bridgePayload, value } of estimates) {
           bridgePayloads[index] = bridgePayload;
           valueAmounts[index] = value;
         }

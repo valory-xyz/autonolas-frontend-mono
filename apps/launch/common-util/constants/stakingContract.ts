@@ -114,5 +114,8 @@ export const blockNumbers: BlockNumbers = {
   [arbitrum.id]: 233883523,
   [celo.id]: 61345380,
   [mode.id]: 14444647,
+  // StakingFactory creation tx (deployer 0xeb2a…14e, nonce 16) — found by scanning blocks on the
+  // 4663 RPC since it is non-archive and Blockscout is Cloudflare-gated; the factory's first log
+  // is at 60148213 and its next deployer tx (nonce 17) at 58662633, both later.
   [robinhood.id]: 58661778,
 };

@@ -1,6 +1,6 @@
 import { arbitrum, base, celo, gnosis, mainnet, optimism, polygon, mode } from 'viem/chains';
 
-import { robinhood } from 'libs/util-constants/src';
+import { robinhood } from 'libs/util-constants/src/lib/chains';
 
 export const STAKING_FACTORY = {
   contractName: 'StakingFactory',

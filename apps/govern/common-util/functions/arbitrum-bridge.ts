@@ -74,11 +74,14 @@ const getL1BaseFee = async (provider: ethersV5.providers.JsonRpcProvider) => {
 
 /**
  * Aliased address of the L1 Timelock on the L2, used as the refund account for excess gas fees
- * on L2 retryable tickets. Address aliasing is deterministic, so it is the same on every Orbit
- * chain (`bridgeMediatorAddress` in the arbitrum and robinhood globals).
- * Source: https://github.com/valory-xyz/autonolas-tokenomics/blob/main/scripts/deployment/staking/arbitrum/globals_arbitrum_mainnet.json
+ * on L2 retryable tickets. It is the same on Arbitrum One and Robinhood Chain only because both
+ * alias the same L1 Timelock (`0x3C1fF6…95FE` + `0x1111…1111`); an Orbit chain with a different
+ * L1 mediator would need its own value, so check `bridgeMediatorAddress` in that chain's globals
+ * before adding it to `ORBIT_CHAIN_IDS`.
+ * Sources: https://github.com/valory-xyz/autonolas-tokenomics/blob/main/scripts/deployment/staking/arbitrum/globals_arbitrum_mainnet.json
+ * and https://github.com/valory-xyz/autonolas-tokenomics/blob/main/scripts/deployment/staking/robinhood/globals_robinhood_mainnet.json
  */
-const ARBITRUM_BRIDGE_MEDIATOR: Address = '0x4d30F68F5AA342d296d4deE4bB1Cacca912dA70F';
+const ORBIT_BRIDGE_MEDIATOR: Address = '0x4d30F68F5AA342d296d4deE4bB1Cacca912dA70F';
 
 /**
  * TOKEN_GAS_LIMIT from DefaultDepositProcessorL1 contract.
@@ -116,7 +119,7 @@ export type ArbitrumBridgeParams = {
 
 /**
  * Computes the Arbitrum-style bridge payload and required ETH value for L1->L2 message passing
- * to an Orbit chain (Arbitrum One by default).
+ * to an Orbit chain.
  *
  * The bridge payload encodes 5 values expected by ArbitrumDepositProcessorL1._sendMessage:
  *   (refundAddress, gasPriceBid, maxSubmissionCostToken, gasLimitMessage, maxSubmissionCostMessage)
@@ -125,7 +128,7 @@ export type ArbitrumBridgeParams = {
  */
 export const getArbitrumBridgePayload = async (
   stakingTargets: Address[],
-  chainId: OrbitChainId = ARBITRUM_CHAIN_ID,
+  chainId: OrbitChainId,
 ): Promise<ArbitrumBridgeParams> => {
   if (chainId === ROBINHOOD_CHAIN_ID) ensureRobinhoodNetworkRegistered();
 
@@ -163,7 +166,7 @@ export const getArbitrumBridgePayload = async (
   // The contract sends: abi.encodeWithSelector(RECEIVE_MESSAGE, abi.encode(targets, stakingIncentives, batchHash))
   // We use dummy values since only the calldata size matters for gas estimation.
   // Note: stakingTargets may be bytes32-padded, so we use dummy addresses of the same length.
-  const dummyTargets = stakingTargets.map(() => ARBITRUM_BRIDGE_MEDIATOR);
+  const dummyTargets = stakingTargets.map(() => ORBIT_BRIDGE_MEDIATOR);
   const dummyAmounts = stakingTargets.map(() => ethersV5.BigNumber.from(100));
   const dummyBatchHash = ethersV5.constants.HashZero;
   const innerData = ethersV5.utils.defaultAbiCoder.encode(
@@ -182,8 +185,8 @@ export const getArbitrumBridgePayload = async (
       from: l1DepositProcessorAddress,
       to: l2TargetDispenserAddress,
       l2CallValue: ethersV5.BigNumber.from(0),
-      excessFeeRefundAddress: ARBITRUM_BRIDGE_MEDIATOR,
-      callValueRefundAddress: ARBITRUM_BRIDGE_MEDIATOR,
+      excessFeeRefundAddress: ORBIT_BRIDGE_MEDIATOR,
+      callValueRefundAddress: ORBIT_BRIDGE_MEDIATOR,
       data: messageCalldata,
     },
     l1BaseFee,
@@ -207,9 +210,9 @@ export const getArbitrumBridgePayload = async (
     '0000000000000000000000000000000000000000000000000000000000000040' +
     '0000000000000000000000000000000000000000000000000000000000000000';
   const tokenCalldata = tokenIface.encodeFunctionData('finalizeInboundTransfer', [
-    ARBITRUM_BRIDGE_MEDIATOR,
-    ARBITRUM_BRIDGE_MEDIATOR,
-    ARBITRUM_BRIDGE_MEDIATOR,
+    ORBIT_BRIDGE_MEDIATOR,
+    ORBIT_BRIDGE_MEDIATOR,
+    ORBIT_BRIDGE_MEDIATOR,
     100,
     dummyTokenData,
   ]);
@@ -239,7 +242,7 @@ export const getArbitrumBridgePayload = async (
   const bridgePayload = encodeAbiParameters(
     parseAbiParameters('address, uint256, uint256, uint256, uint256'),
     [
-      ARBITRUM_BRIDGE_MEDIATOR,
+      ORBIT_BRIDGE_MEDIATOR,
       BigInt(gasPriceBid.toString()),
       BigInt(maxSubmissionCostToken.toString()),
       BigInt(gasLimitMessage.toString()),
