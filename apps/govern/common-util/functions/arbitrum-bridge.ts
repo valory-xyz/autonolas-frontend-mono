@@ -1,24 +1,68 @@
-import { ParentToChildMessageGasEstimator } from '@arbitrum/sdk';
+import { ParentToChildMessageGasEstimator, registerCustomArbitrumNetwork } from '@arbitrum/sdk';
 import { ethers as ethersV5 } from 'ethers-v5';
 import { type Address, encodeAbiParameters, parseAbiParameters } from 'viem';
 import { arbitrum, mainnet } from 'viem/chains';
 
-import { RPC_URLS } from 'libs/util-constants/src';
+import { RPC_URLS, robinhood } from 'libs/util-constants/src';
 import { DISPENSER } from 'libs/util-contracts/src/lib/abiAndAddresses';
 
 export const ARBITRUM_CHAIN_ID = arbitrum.id;
+export const ROBINHOOD_CHAIN_ID = robinhood.id;
+
+/**
+ * Chains whose staking incentives are bridged through `ArbitrumDepositProcessorL1` (Arbitrum One
+ * and the Orbit rollups deployed with the same processor). Each needs a retryable-ticket bridge
+ * payload and an ETH value on claim; every other chain passes `0x` and zero.
+ */
+export const ORBIT_CHAIN_IDS = [ARBITRUM_CHAIN_ID, ROBINHOOD_CHAIN_ID] as const;
+export type OrbitChainId = (typeof ORBIT_CHAIN_IDS)[number];
+
+export const isOrbitChainId = (chainId: number): chainId is OrbitChainId =>
+  (ORBIT_CHAIN_IDS as readonly number[]).includes(chainId);
+
+/**
+ * Robinhood Chain is an Arbitrum Orbit rollup settling to Ethereum that @arbitrum/sdk does not
+ * ship, so its core bridge contracts are registered before the gas estimator resolves the Inbox.
+ * Sources: bridge / inbox / outbox from autonolas-tokenomics
+ * scripts/deployment/staking/globals_mainnet.json (`robinhood*` keys); rollup and sequencerInbox
+ * read from `Bridge.rollup()` / `Bridge.sequencerInbox()`; confirmPeriodBlocks from
+ * `Rollup.confirmPeriodBlocks()`. The bridge is ETH-native (no `nativeToken`).
+ */
+let isRobinhoodNetworkRegistered = false;
+const ensureRobinhoodNetworkRegistered = () => {
+  if (isRobinhoodNetworkRegistered) return;
+  registerCustomArbitrumNetwork({
+    chainId: ROBINHOOD_CHAIN_ID,
+    name: robinhood.name,
+    parentChainId: mainnet.id,
+    confirmPeriodBlocks: 45_818,
+    ethBridge: {
+      bridge: '0xDf8755334ce7A73cCF6b581C02eA649AE3E864b3',
+      inbox: '0x1A07cc4BD17E0118BdB54D70990D2158AbAD7a2D',
+      outbox: '0xf0ce991ea4A0d2400A4AB49b20ae333f6Dce3DE9',
+      rollup: '0x23A19d23e89166adedbDcB432518AB01e4272D94',
+      sequencerInbox: '0xBd0D173EEb87D57A09521c24388a12789F33ba96',
+    },
+    isCustom: true,
+    isTestnet: false,
+  });
+  isRobinhoodNetworkRegistered = true;
+};
 
 /**
  * Cached ethers v5 providers — required because @arbitrum/sdk v4 only accepts ethers v5 providers.
  * Once the SDK adds viem support, these can be removed in favor of viem's publicClient.
  */
-let l1ProviderInstance: ethersV5.providers.JsonRpcProvider | null = null;
-let l2ProviderInstance: ethersV5.providers.JsonRpcProvider | null = null;
+const providerInstances = new Map<number, ethersV5.providers.JsonRpcProvider>();
 
-const getL1Provider = () =>
-  (l1ProviderInstance ??= new ethersV5.providers.JsonRpcProvider(RPC_URLS[mainnet.id]));
-const getL2Provider = () =>
-  (l2ProviderInstance ??= new ethersV5.providers.JsonRpcProvider(RPC_URLS[ARBITRUM_CHAIN_ID]));
+const getProvider = (chainId: number) => {
+  let provider = providerInstances.get(chainId);
+  if (!provider) {
+    provider = new ethersV5.providers.JsonRpcProvider(RPC_URLS[chainId]);
+    providerInstances.set(chainId, provider);
+  }
+  return provider;
+};
 
 const getL1BaseFee = async (provider: ethersV5.providers.JsonRpcProvider) => {
   const block = await provider.getBlock('latest');
@@ -29,11 +73,15 @@ const getL1BaseFee = async (provider: ethersV5.providers.JsonRpcProvider) => {
 };
 
 /**
- * Aliased address of the L1 Timelock on Arbitrum, used as the refund account
- * for excess gas fees on L2 retryable tickets.
- * Source: https://github.com/valory-xyz/autonolas-tokenomics/blob/main/scripts/deployment/staking/arbitrum/globals_arbitrum_mainnet.json
+ * Aliased address of the L1 Timelock on the L2, used as the refund account for excess gas fees
+ * on L2 retryable tickets. It is the same on Arbitrum One and Robinhood Chain only because both
+ * alias the same L1 Timelock (`0x3C1fF6…95FE` + `0x1111…1111`); an Orbit chain with a different
+ * L1 mediator would need its own value, so check `bridgeMediatorAddress` in that chain's globals
+ * before adding it to `ORBIT_CHAIN_IDS`.
+ * Sources: https://github.com/valory-xyz/autonolas-tokenomics/blob/main/scripts/deployment/staking/arbitrum/globals_arbitrum_mainnet.json
+ * and https://github.com/valory-xyz/autonolas-tokenomics/blob/main/scripts/deployment/staking/robinhood/globals_robinhood_mainnet.json
  */
-const ARBITRUM_BRIDGE_MEDIATOR: Address = '0x4d30F68F5AA342d296d4deE4bB1Cacca912dA70F';
+const ORBIT_BRIDGE_MEDIATOR: Address = '0x4d30F68F5AA342d296d4deE4bB1Cacca912dA70F';
 
 /**
  * TOKEN_GAS_LIMIT from DefaultDepositProcessorL1 contract.
@@ -70,7 +118,8 @@ export type ArbitrumBridgeParams = {
 };
 
 /**
- * Computes the Arbitrum bridge payload and required ETH value for L1->L2 message passing.
+ * Computes the Arbitrum-style bridge payload and required ETH value for L1->L2 message passing
+ * to an Orbit chain.
  *
  * The bridge payload encodes 5 values expected by ArbitrumDepositProcessorL1._sendMessage:
  *   (refundAddress, gasPriceBid, maxSubmissionCostToken, gasLimitMessage, maxSubmissionCostMessage)
@@ -79,11 +128,14 @@ export type ArbitrumBridgeParams = {
  */
 export const getArbitrumBridgePayload = async (
   stakingTargets: Address[],
+  chainId: OrbitChainId,
 ): Promise<ArbitrumBridgeParams> => {
-  const l1Provider = getL1Provider();
-  const l2Provider = getL2Provider();
+  if (chainId === ROBINHOOD_CHAIN_ID) ensureRobinhoodNetworkRegistered();
 
-  // Read ArbitrumDepositProcessorL1 address from Dispenser contract
+  const l1Provider = getProvider(mainnet.id);
+  const l2Provider = getProvider(chainId);
+
+  // Read the chain's ArbitrumDepositProcessorL1 address from Dispenser contract
   const dispenserContract = new ethersV5.Contract(
     DISPENSER.addresses[mainnet.id],
     ['function mapChainIdDepositProcessors(uint256) view returns (address)'],
@@ -92,9 +144,15 @@ export const getArbitrumBridgePayload = async (
 
   // Fetch deposit processor address and L1 base fee in parallel (independent calls)
   const [l1DepositProcessorAddress, l1BaseFee] = await Promise.all([
-    dispenserContract.mapChainIdDepositProcessors(ARBITRUM_CHAIN_ID) as Promise<string>,
+    dispenserContract.mapChainIdDepositProcessors(chainId) as Promise<string>,
     getL1BaseFee(l1Provider),
   ]);
+
+  // The Dispenser maps a chain to its processor via governance; until that lands the claim
+  // cannot be bridged, so fail here instead of calling into the zero address.
+  if (l1DepositProcessorAddress === ethersV5.constants.AddressZero) {
+    throw new Error(`No deposit processor is registered on the Dispenser for chain ${chainId}`);
+  }
 
   // Read l2TargetDispenser from the ArbitrumDepositProcessorL1 contract
   const depositProcessorContract = new ethersV5.Contract(
@@ -108,7 +166,7 @@ export const getArbitrumBridgePayload = async (
   // The contract sends: abi.encodeWithSelector(RECEIVE_MESSAGE, abi.encode(targets, stakingIncentives, batchHash))
   // We use dummy values since only the calldata size matters for gas estimation.
   // Note: stakingTargets may be bytes32-padded, so we use dummy addresses of the same length.
-  const dummyTargets = stakingTargets.map(() => ARBITRUM_BRIDGE_MEDIATOR);
+  const dummyTargets = stakingTargets.map(() => ORBIT_BRIDGE_MEDIATOR);
   const dummyAmounts = stakingTargets.map(() => ethersV5.BigNumber.from(100));
   const dummyBatchHash = ethersV5.constants.HashZero;
   const innerData = ethersV5.utils.defaultAbiCoder.encode(
@@ -127,8 +185,8 @@ export const getArbitrumBridgePayload = async (
       from: l1DepositProcessorAddress,
       to: l2TargetDispenserAddress,
       l2CallValue: ethersV5.BigNumber.from(0),
-      excessFeeRefundAddress: ARBITRUM_BRIDGE_MEDIATOR,
-      callValueRefundAddress: ARBITRUM_BRIDGE_MEDIATOR,
+      excessFeeRefundAddress: ORBIT_BRIDGE_MEDIATOR,
+      callValueRefundAddress: ORBIT_BRIDGE_MEDIATOR,
       data: messageCalldata,
     },
     l1BaseFee,
@@ -152,9 +210,9 @@ export const getArbitrumBridgePayload = async (
     '0000000000000000000000000000000000000000000000000000000000000040' +
     '0000000000000000000000000000000000000000000000000000000000000000';
   const tokenCalldata = tokenIface.encodeFunctionData('finalizeInboundTransfer', [
-    ARBITRUM_BRIDGE_MEDIATOR,
-    ARBITRUM_BRIDGE_MEDIATOR,
-    ARBITRUM_BRIDGE_MEDIATOR,
+    ORBIT_BRIDGE_MEDIATOR,
+    ORBIT_BRIDGE_MEDIATOR,
+    ORBIT_BRIDGE_MEDIATOR,
     100,
     dummyTokenData,
   ]);
@@ -184,7 +242,7 @@ export const getArbitrumBridgePayload = async (
   const bridgePayload = encodeAbiParameters(
     parseAbiParameters('address, uint256, uint256, uint256, uint256'),
     [
-      ARBITRUM_BRIDGE_MEDIATOR,
+      ORBIT_BRIDGE_MEDIATOR,
       BigInt(gasPriceBid.toString()),
       BigInt(maxSubmissionCostToken.toString()),
       BigInt(gasLimitMessage.toString()),

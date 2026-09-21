@@ -44,11 +44,12 @@ Staking incentives are claimed via the `Dispenser.claimStakingIncentivesBatch` c
 2. `hooks/useClaimStakingIncentivesBatch.ts` — executes the on-chain claim transaction for a batch.
 3. `components/Donate/ClaimStakingIncentivesModal.tsx` — UI modal that steps through batches.
 
-### Arbitrum Bridge Payload
+### Arbitrum Bridge Payload (Orbit chains)
 
-Unlike other L2 chains (which use `0x` bridge payload and zero value), Arbitrum (chain 42161) requires a proper bridge payload and ETH value for L1→L2 message passing via retryable tickets.
+Unlike other L2 chains (which use `0x` bridge payload and zero value), chains served by `ArbitrumDepositProcessorL1` — Arbitrum One (42161) and Robinhood Chain (4663, an Arbitrum Orbit rollup) — require a proper bridge payload and ETH value for L1→L2 message passing via retryable tickets. `ORBIT_CHAIN_IDS` / `isOrbitChainId` in `common-util/functions/arbitrum-bridge.ts` is the list; `useClaimStakingIncentivesBatch` estimates one payload per Orbit chain in the batch.
 
-- `common-util/functions/arbitrum-bridge.ts` — computes the bridge payload and ETH cost using `@arbitrum/sdk` (v4, uses ethers v5 internally via `ethers-v5` alias).
+- `common-util/functions/arbitrum-bridge.ts` — `getArbitrumBridgePayload(targets, chainId)` computes the bridge payload and ETH cost using `@arbitrum/sdk` (v4, uses ethers v5 internally via `ethers-v5` alias). Robinhood Chain is not shipped by the SDK, so its core bridge contracts (bridge/inbox/outbox/rollup/sequencerInbox on mainnet) are registered lazily via `registerCustomArbitrumNetwork` before the first estimate.
+- The helper throws if `Dispenser.mapChainIdDepositProcessors(chainId)` is the zero address, i.e. governance has not yet wired the chain's deposit processor. The message is passed through to the claim modal's error notification so the user sees why the batch could not be bridged. (4663 is wired: `mapChainIdDepositProcessors(4663)` → `0xb9DfcC6155Ba4F211DCf8e6eCc9976Be11bB7a77`, set by governance proposal 16.)
 - The bridge payload encodes parameters for `ArbitrumDepositProcessorL1._sendMessage`. Gas parameters are estimated via `@arbitrum/sdk` with 30% safety buffers.
 - Contract references: [`ArbitrumDepositProcessorL1.sol`](https://github.com/valory-xyz/autonolas-tokenomics/blob/main/contracts/staking/ArbitrumDepositProcessorL1.sol), [`DefaultDepositProcessorL1.sol`](https://github.com/valory-xyz/autonolas-tokenomics/blob/main/contracts/staking/DefaultDepositProcessorL1.sol).
 - Tests: `common-util/functions/arbitrum-bridge.spec.ts` and `hooks/useClaimStakingIncentivesBatch.spec.ts`.

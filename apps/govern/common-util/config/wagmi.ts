@@ -13,7 +13,7 @@ import {
   mode,
 } from 'wagmi/chains';
 
-import { RPC_URLS } from 'libs/util-constants/src';
+import { RPC_URLS, robinhood } from 'libs/util-constants/src';
 
 export const SUPPORTED_CHAINS: [Chain, ...Chain[]] = [
   mainnet,
@@ -24,6 +24,7 @@ export const SUPPORTED_CHAINS: [Chain, ...Chain[]] = [
   base,
   arbitrum,
   celo,
+  robinhood,
   ...(process.env.NEXT_PUBLIC_IS_CONNECTED_TO_LOCAL === 'true' ? [hardhat] : []),
 ];
 
