@@ -2,22 +2,23 @@ import { renderToString } from 'react-dom/server';
 
 import { ProductsSummary } from './ProductsSummary';
 
+// The shape `fetchBondingProducts` serves: plain JSON, ids as strings, vesting in seconds.
 const PRODUCTS = [
   {
-    id: 7n,
+    id: '7',
     lpTokenName: 'OLAS-WXDAI',
     roundedDiscountedOlasPerLpToken: 12.5,
     fullCurrentPriceLp: 40.2,
-    vesting: 604800n,
+    vesting: 604800,
     supplyLeft: 0.75,
   },
   {
-    id: 9n,
+    id: '9',
     lpTokenName: 'WSOL-OLAS',
     roundedDiscountedOlasPerLpToken: 3.1,
     // Solana: no server-side price. Must be omitted, not printed as 0.
     fullCurrentPriceLp: 0,
-    vesting: 604800n,
+    vesting: 604800,
     supplyLeft: 0.5,
   },
 ];
@@ -35,6 +36,7 @@ describe('ProductsSummary server render', () => {
     expect(html).toContain('WSOL-OLAS');
     expect(html).toContain('bond ID 9');
     expect(html).toContain('2 active Olas bonding products');
+    expect(html).toContain('vesting 7 days');
   });
 
   it('omits a Solana price rather than publishing 0', () => {

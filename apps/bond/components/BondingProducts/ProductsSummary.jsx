@@ -15,7 +15,7 @@ export const ProductsSummary = ({ products = [], snapshotGeneratedAt = null }) =
   return (
     <div hidden>
       <p>
-        {`${products.length} active Olas bonding products. Each one exchanges a liquidity-pool token for discounted OLAS: the list gives the LP token, how much OLAS it mints per LP token, the vesting period in seconds and the OLAS supply remaining. `}
+        {`${products.length} active Olas bonding products. Each one exchanges a liquidity-pool token for discounted OLAS: the list gives the LP token, how much OLAS it mints per LP token, the vesting period in days and the OLAS supply remaining. `}
         {asOf ? `Server-rendered snapshot taken ${asOf}.` : ''}
       </p>
       <ul>
@@ -29,7 +29,7 @@ export const ProductsSummary = ({ products = [], snapshotGeneratedAt = null }) =
             {product.fullCurrentPriceLp
               ? `, current LP token price ${product.fullCurrentPriceLp}`
               : ''}
-            {product.vesting ? `, vesting ${product.vesting} seconds` : ''}
+            {product.vesting ? `, vesting ${Number(product.vesting) / 86400} days` : ''}
             {product.supplyLeft != null
               ? `, ${Math.round(product.supplyLeft * 100)}% of supply remaining`
               : ''}
@@ -42,6 +42,15 @@ export const ProductsSummary = ({ products = [], snapshotGeneratedAt = null }) =
 };
 
 ProductsSummary.propTypes = {
-  products: PropTypes.arrayOf(PropTypes.shape({})),
+  products: PropTypes.arrayOf(
+    PropTypes.shape({
+      id: PropTypes.string,
+      lpTokenName: PropTypes.string,
+      roundedDiscountedOlasPerLpToken: PropTypes.number,
+      fullCurrentPriceLp: PropTypes.number,
+      vesting: PropTypes.number,
+      supplyLeft: PropTypes.number,
+    }),
+  ),
   snapshotGeneratedAt: PropTypes.string,
 };

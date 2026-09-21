@@ -2,11 +2,12 @@ import { readContract, readContracts } from '@wagmi/core';
 
 import { DEFAULT_CHAIN_ID, wagmiConfig } from 'common-util/config/wagmi';
 import { depositoryParams } from 'common-util/Contracts/params';
-import { getProductDetailsFromIds } from 'components/BondingProducts/Bonding/BondingList/useBondingList';
+import { getProductDetailsFromIds } from 'common-util/functions/bondingProducts';
+import { toSummaryProduct } from 'common-util/functions/summaryProduct';
 
 /**
  * Server-side read of the bonding products, composed exactly as the client hook composes them so
- * the two cannot drift. Only what needs a browser is supplied differently — see the `deps` below.
+ * the two cannot drift. Only what needs a browser is supplied differently - see the `deps` below.
  */
 export async function fetchBondingProducts({ isActive = true } = {}) {
   const chainId = DEFAULT_CHAIN_ID;
@@ -27,9 +28,5 @@ export async function fetchBondingProducts({ isActive = true } = {}) {
     getCurrentPriceWhirlpool: async () => 0,
   });
 
-  return products.map((product, index) => ({
-    ...product,
-    id: productIdList[index],
-    key: productIdList[index],
-  }));
+  return products.map((product, index) => toSummaryProduct(product, productIdList[index]));
 }

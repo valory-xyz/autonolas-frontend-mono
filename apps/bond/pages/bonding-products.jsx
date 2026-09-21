@@ -5,7 +5,12 @@ import { ProductsSummary } from 'components/BondingProducts/ProductsSummary';
 import { Meta } from 'components/Meta';
 import { fetchBondingProducts } from 'common-util/functions/fetchBondingProducts';
 
-/** Depository reads plus LP pricing across several chains and two subgraphs. */
+/**
+ * Vercel cuts the function short whatever `ISR_TIMEOUT_MS` says, so the two are set together
+ * (as govern's and operate's `contracts.tsx` do). The budget covers the depository reads plus
+ * LP pricing across several chains and two subgraphs.
+ */
+export const config = { maxDuration: 60 };
 const ISR_TIMEOUT_MS = 45_000;
 
 /** The visible table is client-only, so the same products are served as hidden text for crawlers. */
