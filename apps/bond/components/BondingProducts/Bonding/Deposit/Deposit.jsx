@@ -18,7 +18,7 @@ import {
 } from 'common-util/functions';
 import { useHelpers } from 'common-util/hooks/useHelpers';
 
-import { isSvmLpAddress } from '../BondingList/useBondingList';
+import { isSvmLpAddress } from 'common-util/functions/bondingProducts';
 import { useDeposit } from './useDeposit';
 
 const { Text } = Typography;

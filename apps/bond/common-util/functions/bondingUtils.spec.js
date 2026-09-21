@@ -3,7 +3,7 @@
 // test only depends on ethers, so stub the constant it consumes.
 jest.mock('libs/util-constants/src', () => ({ VM_TYPE: { SVM: 'svm', EVM: 'evm' } }));
 
-import { getEtherscanReadContractLink } from './utils';
+import { getEtherscanReadContractLink } from './bondingUtils';
 
 describe('getEtherscanReadContractLink', () => {
   // Lower-cased input; getAddress should checksum it in the output.

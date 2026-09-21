@@ -1,12 +1,8 @@
 import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { SUPPORTED_CHAINS } from 'common-util/config/wagmi';
+import { DEFAULT_CHAIN_ID } from 'common-util/config/wagmi';
 import { getChainId } from 'common-util/functions';
 import { setChainId } from 'store/setup';
-
-/** What `getChainId` itself falls back to for a visitor with no wallet — which includes every
- *  crawler, and the server, where it returns undefined because there is no `window`. */
-const DEFAULT_CHAIN_ID = SUPPORTED_CHAINS[0].id;
 
 export const useHelpers = () => {
   const dispatch = useDispatch();

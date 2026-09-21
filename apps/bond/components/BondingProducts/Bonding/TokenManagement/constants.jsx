@@ -3,6 +3,7 @@ import { TickUtil } from '@orca-so/whirlpools-sdk';
 import { VM_TYPE } from 'libs/util-constants/src';
 
 import { ADDRESSES } from 'common-util/constants/addresses';
+import { SVM_POSITION_ADDRESS } from 'common-util/functions/bondingProducts';
 
 export const PROGRAM_ID = new web3.PublicKey('1BoXeb8hobfLCHNsyCoG1jpEv41ez4w4eDrJ48N1jY3');
 export const ORCA = new web3.PublicKey('whirLbMiicVdio4qvUfM5KAg6Ct8VwpYzGff3uctyCc');
@@ -21,7 +22,7 @@ export const FEE_COLLECTOR_TOKEN_OWNER_ACCOUNT_B = new web3.PublicKey(
   'FPaBgHbaJR39WBNn6xZRAmurQCBH9QSNWZ5Kk26cGs9d',
 );
 export const LOCKBOX = new web3.PublicKey('3UaaD3puPemoZk7qFYJWWCvmN6diS7P63YR4Si9QRpaW');
-export const POSITION = new web3.PublicKey('EHQbFx7m5gPBqXXiViNBfHJDRUuFgqqYsLzuWu18ckaR');
+export const POSITION = new web3.PublicKey(SVM_POSITION_ADDRESS);
 export const POSITION_MINT = new web3.PublicKey('36WxSP8trn5czobJaa2Ka7jN58B7sCN7xx2HDom6TDEh');
 export const TOKEN_VAULT_A = new web3.PublicKey('CLA8hU8SkdCZ9cJVLMfZQfcgAsywZ9txBJ6qrRAqthLx');
 export const TOKEN_VAULT_B = new web3.PublicKey('6E8pzDK8uwpENc49kp5xo5EGydYjtamPSmUKXxum4ybb');
