@@ -1,7 +1,13 @@
 import { BigNumber } from 'ethers-v5';
 import { encodeAbiParameters, parseAbiParameters } from 'viem';
 
-import { ARBITRUM_CHAIN_ID, GAS_OVERRIDES, getArbitrumBridgePayload } from './arbitrum-bridge';
+import {
+  ARBITRUM_CHAIN_ID,
+  GAS_OVERRIDES,
+  ROBINHOOD_CHAIN_ID,
+  getArbitrumBridgePayload,
+  isOrbitChainId,
+} from './arbitrum-bridge';
 
 // Aliased L1 Timelock address used as refundAccount
 const ARBITRUM_REFUND_ADDRESS = '0x4d30F68F5AA342d296d4deE4bB1Cacca912dA70F';
@@ -41,20 +47,24 @@ jest.mock('ethers-v5', () => {
 // Mock @arbitrum/sdk
 const mockEstimateAll = jest.fn();
 const mockEstimateSubmissionFee = jest.fn();
+const mockRegisterCustomArbitrumNetwork = jest.fn();
 
 jest.mock('@arbitrum/sdk', () => ({
   ParentToChildMessageGasEstimator: jest.fn().mockImplementation(() => ({
     estimateAll: mockEstimateAll,
     estimateSubmissionFee: mockEstimateSubmissionFee,
   })),
+  registerCustomArbitrumNetwork: (...args: unknown[]) => mockRegisterCustomArbitrumNetwork(...args),
 }));
 
 // Mock libs
 jest.mock('libs/util-constants/src', () => ({
   RPC_URLS: {
     1: 'https://eth-mainnet.example.com',
+    4663: 'https://robinhood-mainnet.example.com',
     42161: 'https://arb-mainnet.example.com',
   },
+  robinhood: { id: 4663, name: 'Robinhood Chain' },
 }));
 
 jest.mock('libs/util-contracts/src/lib/abiAndAddresses', () => ({
@@ -66,6 +76,15 @@ jest.mock('libs/util-contracts/src/lib/abiAndAddresses', () => ({
 describe('ARBITRUM_CHAIN_ID', () => {
   it('should be 42161', () => {
     expect(ARBITRUM_CHAIN_ID).toBe(42161);
+  });
+});
+
+describe('isOrbitChainId', () => {
+  it('should accept Arbitrum One and Robinhood Chain only', () => {
+    expect(isOrbitChainId(ARBITRUM_CHAIN_ID)).toBe(true);
+    expect(isOrbitChainId(ROBINHOOD_CHAIN_ID)).toBe(true);
+    expect(isOrbitChainId(100)).toBe(false);
+    expect(isOrbitChainId(34443)).toBe(false);
   });
 });
 
@@ -101,14 +120,14 @@ describe('getArbitrumBridgePayload', () => {
   });
 
   it('should return a bridge payload of exactly 160 bytes (320 hex chars + 0x prefix)', async () => {
-    const result = await getArbitrumBridgePayload(stakingTargets);
+    const result = await getArbitrumBridgePayload(stakingTargets, ARBITRUM_CHAIN_ID);
 
     // 160 bytes = 320 hex chars, plus "0x" prefix = 322 chars
     expect(result.bridgePayload).toMatch(/^0x[0-9a-f]{320}$/i);
   });
 
   it('should encode the correct parameters in the bridge payload', async () => {
-    const result = await getArbitrumBridgePayload(stakingTargets);
+    const result = await getArbitrumBridgePayload(stakingTargets, ARBITRUM_CHAIN_ID);
 
     // The gas limit in the payload should include the 100k buffer
     const expectedGasLimitMessage = mockGasLimit.add(100_000);
@@ -133,7 +152,7 @@ describe('getArbitrumBridgePayload', () => {
   });
 
   it('should calculate the correct total cost', async () => {
-    const result = await getArbitrumBridgePayload(stakingTargets);
+    const result = await getArbitrumBridgePayload(stakingTargets, ARBITRUM_CHAIN_ID);
 
     const gasLimitMessage = mockGasLimit.add(100_000);
     const TOKEN_GAS_LIMIT = 300_000;
@@ -153,19 +172,19 @@ describe('getArbitrumBridgePayload', () => {
   });
 
   it('should read deposit processor address from dispenser contract', async () => {
-    await getArbitrumBridgePayload(stakingTargets);
+    await getArbitrumBridgePayload(stakingTargets, ARBITRUM_CHAIN_ID);
 
     expect(mockMapChainIdDepositProcessors).toHaveBeenCalledWith(ARBITRUM_CHAIN_ID);
   });
 
   it('should read l2TargetDispenser from deposit processor contract', async () => {
-    await getArbitrumBridgePayload(stakingTargets);
+    await getArbitrumBridgePayload(stakingTargets, ARBITRUM_CHAIN_ID);
 
     expect(mockL2TargetDispenser).toHaveBeenCalled();
   });
 
   it('should use aliased L1 timelock as refund address in estimateAll', async () => {
-    await getArbitrumBridgePayload(stakingTargets);
+    await getArbitrumBridgePayload(stakingTargets, ARBITRUM_CHAIN_ID);
 
     expect(mockEstimateAll).toHaveBeenCalledTimes(1);
     const callArgs = mockEstimateAll.mock.calls[0][0];
@@ -178,6 +197,51 @@ describe('getArbitrumBridgePayload', () => {
   it('should propagate errors from SDK estimation', async () => {
     mockEstimateAll.mockRejectedValue(new Error('RPC error'));
 
-    await expect(getArbitrumBridgePayload(stakingTargets)).rejects.toThrow('RPC error');
+    await expect(getArbitrumBridgePayload(stakingTargets, ARBITRUM_CHAIN_ID)).rejects.toThrow(
+      'RPC error',
+    );
+  });
+
+  describe('Robinhood Chain', () => {
+    it('should register the Orbit network once and read the 4663 deposit processor', async () => {
+      await getArbitrumBridgePayload(stakingTargets, ROBINHOOD_CHAIN_ID);
+      await getArbitrumBridgePayload(stakingTargets, ROBINHOOD_CHAIN_ID);
+
+      expect(mockRegisterCustomArbitrumNetwork).toHaveBeenCalledTimes(1);
+      expect(mockRegisterCustomArbitrumNetwork).toHaveBeenCalledWith(
+        expect.objectContaining({
+          chainId: ROBINHOOD_CHAIN_ID,
+          parentChainId: 1,
+          ethBridge: expect.objectContaining({
+            inbox: '0x1A07cc4BD17E0118BdB54D70990D2158AbAD7a2D',
+          }),
+        }),
+      );
+      expect(mockMapChainIdDepositProcessors).toHaveBeenCalledWith(ROBINHOOD_CHAIN_ID);
+    });
+
+    it('should not register the custom network for Arbitrum One', async () => {
+      await getArbitrumBridgePayload(stakingTargets, ARBITRUM_CHAIN_ID);
+
+      expect(mockRegisterCustomArbitrumNetwork).not.toHaveBeenCalled();
+    });
+
+    it('should still produce a 160-byte payload', async () => {
+      const result = await getArbitrumBridgePayload(stakingTargets, ROBINHOOD_CHAIN_ID);
+
+      expect(result.bridgePayload).toMatch(/^0x[0-9a-f]{320}$/i);
+    });
+
+    it('should fail before estimating while the Dispenser has no 4663 deposit processor', async () => {
+      mockMapChainIdDepositProcessors.mockResolvedValue(
+        '0x0000000000000000000000000000000000000000',
+      );
+
+      await expect(getArbitrumBridgePayload(stakingTargets, ROBINHOOD_CHAIN_ID)).rejects.toThrow(
+        'No deposit processor is registered on the Dispenser for chain 4663',
+      );
+      expect(mockL2TargetDispenser).not.toHaveBeenCalled();
+      expect(mockEstimateAll).not.toHaveBeenCalled();
+    });
   });
 });
