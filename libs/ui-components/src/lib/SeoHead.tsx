@@ -31,7 +31,7 @@ export type SeoHeadProps = {
   /** The final document title, already composed by the app. */
   title: string;
   description: string;
-  /** The site's origin, no trailing slash, e.g. `https://bond.olas.network`. */
+  /** The site's origin, with or without a trailing slash, e.g. `https://bond.olas.network`. */
   siteUrl: string;
   /**
    * The page's own absolute URL, when the app knows it. Otherwise it is derived from the
@@ -44,11 +44,14 @@ export type SeoHeadProps = {
   imageUrl: string;
 };
 
+/** The path alone: no query string, no hash. */
+export const stripQueryAndHash = (path: string) => path.split('?')[0].split('#')[0];
+
 /**
  * A dynamic page prerendered without `getStaticProps` / `getServerSideProps` renders with
  * its params unresolved until the client hydrates: `asPath` is the template, `/paths/[id]`.
  */
-const isRouteTemplate = (path: string) => path.includes('[');
+export const isRouteTemplate = (path: string) => stripQueryAndHash(path).includes('[');
 
 /**
  * The current route's `asPath`, or `/` where no router is mounted. `useRouter` throws
@@ -71,9 +74,12 @@ const useCurrentPath = (): string | undefined => {
 };
 
 /** The current route as an absolute URL, without query string, hash or trailing slash. */
-const selfUrl = (siteUrl: string, asPath: string) => {
-  const cleanPath = (asPath || '/').split('?')[0].split('#')[0].replace(/\/$/, '');
-  return cleanPath === '' ? `${siteUrl}/` : `${siteUrl}${cleanPath}`;
+export const selfUrl = (siteUrl: string, asPath: string) => {
+  // Normalised here, once: two apps' `SITE_URL` end in a slash and the rest do not, and an
+  // adapter that forgets the difference would serve `https://docs.olas.network//paths`.
+  const origin = siteUrl.replace(/\/$/, '');
+  const cleanPath = stripQueryAndHash(asPath || '/').replace(/\/$/, '');
+  return cleanPath === '' ? `${origin}/` : `${origin}${cleanPath}`;
 };
 
 export const SeoHead = ({
