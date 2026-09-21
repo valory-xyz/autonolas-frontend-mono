@@ -2,7 +2,8 @@ import { isSerializableProps } from 'next/dist/lib/is-serializable-props';
 
 import { toSummaryProduct } from './summaryProduct';
 
-// What viem hands back for a product: bigints for the ids, vesting and prices. This is the exact
+// What viem hands back for a product (minus `token`, which the conversion never reads): bigints
+// for the ids, vesting and prices. This is the exact
 // shape Next's `isSerializableProps` rejects, so `getStaticProps` must never see it as-is.
 const RAW_PRODUCT = {
   id: 7n,
@@ -10,7 +11,6 @@ const RAW_PRODUCT = {
   discount: 12.5,
   priceLp: 40200000000000000000n,
   vesting: 604800n,
-  token: '0x27df632fd0dcf191C418c803801D521cd579F18e',
   supply: 1000000000000000000000n,
   currentPriceLp: 80400000000000000000n,
   lpTokenName: 'OLAS-WXDAI',
