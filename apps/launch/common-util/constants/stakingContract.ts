@@ -1,6 +1,8 @@
 import { Address } from 'viem';
 import { arbitrum, base, celo, gnosis, mainnet, optimism, polygon, mode } from 'viem/chains';
 
+import { robinhood } from 'libs/util-constants/src';
+
 export const CONTRACT_TEMPLATES = [
   {
     title: 'Staking Token',
@@ -38,7 +40,8 @@ export type ChainId =
   | typeof base.id
   | typeof arbitrum.id
   | typeof celo.id
-  | typeof mode.id;
+  | typeof mode.id
+  | typeof robinhood.id;
 
 type Addresses = {
   [key in ChainId]: Address;
@@ -53,6 +56,7 @@ export const STAKING_TOKEN_ADDRESSES: Addresses = {
   [arbitrum.id]: '0x04b0007b2aFb398015B76e5f22993a1fddF83644',
   [celo.id]: '0xe1E1B286EbE95b39F785d8069f2248ae9C41b7a9',
   [mode.id]: '0xE49CB081e8d96920C38aA7AB90cb0294ab4Bc8EA',
+  [robinhood.id]: '0x87c511c8aE3fAF0063b3F3CF9C6ab96c4AA5C60c',
 };
 
 export const SERVICE_REGISTRY_ADDRESSES: Addresses = {
@@ -64,6 +68,7 @@ export const SERVICE_REGISTRY_ADDRESSES: Addresses = {
   [arbitrum.id]: '0xE3607b00E75f6405248323A9417ff6b39B244b50',
   [celo.id]: '0xE3607b00E75f6405248323A9417ff6b39B244b50',
   [mode.id]: '0x3C1fF68f5aa342D296d4DEe4Bb1cACCA912D95fE',
+  [robinhood.id]: '0xE3607b00E75f6405248323A9417ff6b39B244b50',
 };
 
 export const SERVICE_REGISTRY_TOKEN_UTILITY_ADDRESSES: Addresses = {
@@ -75,6 +80,7 @@ export const SERVICE_REGISTRY_TOKEN_UTILITY_ADDRESSES: Addresses = {
   [arbitrum.id]: '0x3d77596beb0f130a4415df3D2D8232B3d3D31e44',
   [celo.id]: '0x3d77596beb0f130a4415df3D2D8232B3d3D31e44',
   [mode.id]: '0x34C895f302D0b5cf52ec0Edd3945321EB0f83dd5',
+  [robinhood.id]: '0x3d77596beb0f130a4415df3D2D8232B3d3D31e44',
 };
 
 export const OLAS_ADDRESSES: Addresses = {
@@ -88,6 +94,7 @@ export const OLAS_ADDRESSES: Addresses = {
   // should be used for staking contracts
   [celo.id]: '0xD80533CA29fF6F033a0b55732Ed792af9Fbb381E',
   [mode.id]: '0xcfD1D50ce23C46D3Cf6407487B2F8934e96DC8f9',
+  [robinhood.id]: '0x092963938deBD8013a2e545b3549f8A5ec0D2286',
 };
 
 export const isSupportedChainId = (chainId: number): chainId is ChainId => {
@@ -107,4 +114,8 @@ export const blockNumbers: BlockNumbers = {
   [arbitrum.id]: 233883523,
   [celo.id]: 61345380,
   [mode.id]: 14444647,
+  // StakingFactory creation tx (deployer 0xeb2a…14e, nonce 16) — found by scanning blocks on the
+  // 4663 RPC since it is non-archive and Blockscout is Cloudflare-gated; the factory's first log
+  // is at 60148213 and its next deployer tx (nonce 17) at 58662633, both later.
+  [robinhood.id]: 58661778,
 };
