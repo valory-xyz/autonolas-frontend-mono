@@ -8,6 +8,10 @@ import { AfmdbError, getAfmdbAttributeValuesUrl } from './afmdb';
  * from an arbitrary order: walking it in pages of 1,000 returned a third of the rows twice
  * and missed as many entirely, differently on every fetch. One query is one consistent
  * snapshot.
+ *
+ * The proper fix is an `ORDER BY` in AFMDB's `read_attribute_values_by_type`
+ * (agents-mirror-db, `app/api/endpoints.py`); until then the limit is the guard, and the
+ * warning below is what says it has been outgrown.
  */
 const LIMIT = 20000;
 
@@ -57,7 +61,7 @@ const fetchAllRows = async (): Promise<ContributeAgent[]> => {
  * Fetches the whole leaderboard from AFMDB. Usable from API routes and `getServerSideProps` /
  * `getStaticProps` alike.
  *
- * The 4 MB result is shared for a minute across the homepage (rendered per request), profile
+ * The 4 MB result is shared for `REUSE_MS` across the homepage (rendered per request), profile
  * pages (rendered on first visit) and `/api/leaderboard` on a warm instance, so a crawl of the
  * profiles does not re-download it per page. A failed fetch is not kept.
  */
