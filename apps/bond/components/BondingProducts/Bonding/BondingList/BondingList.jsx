@@ -31,7 +31,10 @@ import { useHelpers } from 'common-util/hooks/useHelpers';
 
 import { Deposit } from '../Deposit/Deposit';
 import { useProducts } from './useBondingList';
-import { getEtherscanReadContractLink, getLpTokenWithDiscount } from './utils';
+import {
+  getEtherscanReadContractLink,
+  getLpTokenWithDiscount,
+} from 'common-util/functions/bondingUtils';
 
 const { Text } = Typography;
 

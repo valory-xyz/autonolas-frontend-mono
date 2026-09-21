@@ -14,7 +14,7 @@ import { VM_TYPE } from 'libs/util-constants/src';
 import { ADDRESSES } from 'common-util/constants/addresses';
 import { useSvmConnectivity } from 'common-util/hooks/useSvmConnectivity';
 
-import { getSvmCalculatedPriceLp } from '../../BondingList/utils';
+import { getSvmCalculatedPriceLp } from 'common-util/functions/bondingUtils';
 import { ORCA, WHIRLPOOL } from '../constants';
 
 const whirlpoolQuery = async () => {
