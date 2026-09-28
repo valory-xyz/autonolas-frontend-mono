@@ -44,16 +44,18 @@ export type PendingFeedbackRecord = {
 };
 
 /**
- * Result of reading one buffered submission.
+ * Result of reading one buffered record (a survey submission or a funding request).
  *
  * `missing` means the blob vanished between the list and the read (a concurrent run took it) and
  * there is nothing left to do; `unreadable` can never be mapped to a row, and carries the raw
  * bytes so the caller can set them aside without discarding them.
  */
-export type PendingFeedbackRead =
-  | { status: 'ok'; record: PendingFeedbackRecord }
+export type PendingRecordRead<T> =
+  | { status: 'ok'; record: T }
   | { status: 'missing' }
   | { status: 'unreadable'; raw: string };
+
+export type PendingFeedbackRead = PendingRecordRead<PendingFeedbackRecord>;
 
 /**
  * One sheet cell. Numbers and booleans are kept typed rather than stringified so the sheet
@@ -65,9 +67,8 @@ export type OnboardingSurveyResponse = {
   ok: true;
 };
 
-export type ReplayPendingResponse = {
-  /** `false` when anything failed or was left undeleted; the route then answers 500. */
-  ok: boolean;
+/** What one replay run did with one kind of buffered record. */
+export type ReplayCounts = {
   /** Appended to the sheet. */
   replayed: number;
   /** Append failed; left in the pending prefix for the next run. */
@@ -76,6 +77,13 @@ export type ReplayPendingResponse = {
   quarantined: number;
   /** Appended but the delete failed, so the next run will append it again. */
   undeleted: number;
+};
+
+/** Top-level counts are the onboarding survey's; funding requests are reported alongside. */
+export type ReplayPendingResponse = ReplayCounts & {
+  /** `false` when anything failed or was left undeleted; the route then answers 500. */
+  ok: boolean;
+  fundingRequests: ReplayCounts;
 };
 
 export type ApiErrorResponse = {

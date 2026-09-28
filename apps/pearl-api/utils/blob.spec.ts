@@ -4,11 +4,24 @@
  *
  * @jest-environment node
  */
-import { del, get, put } from '@vercel/blob';
+import { del, get, list, put } from '@vercel/blob';
 
-import { FEEDBACK_PENDING_PREFIX, FEEDBACK_UNREADABLE_PREFIX } from '../constants';
+import {
+  FEEDBACK_PENDING_PREFIX,
+  FEEDBACK_UNREADABLE_PREFIX,
+  FUNDING_REQUEST_PENDING_PREFIX,
+} from '../constants';
 import type { PendingFeedbackRecord } from '../types/feedback';
-import { getPendingFeedback, quarantinePendingFeedback } from './blob';
+import type { PendingFundingRequestRecord } from '../types/fundingRequest';
+import {
+  getPendingFeedback,
+  getPendingRecord,
+  listPendingPaths,
+  putPendingFeedback,
+  putPendingFundingRequest,
+  quarantinePendingRecord,
+} from './blob';
+import { parsePendingFundingRequestRecord } from './fundingRequest';
 
 jest.mock('@vercel/blob', () => ({
   put: jest.fn(),
@@ -28,6 +41,7 @@ jest.mock('../constants/feedback', () => ({
 const mockGet = get as jest.MockedFunction<typeof get>;
 const mockPut = put as jest.MockedFunction<typeof put>;
 const mockDel = del as jest.MockedFunction<typeof del>;
+const mockList = list as jest.MockedFunction<typeof list>;
 
 const VALID_UUID = '9f1c2b7e-5a3d-4f2e-8c11-6b0d7a4e93f5';
 const PATHNAME = `${FEEDBACK_PENDING_PREFIX}/${VALID_UUID}.json`;
@@ -92,11 +106,11 @@ describe('getPendingFeedback', () => {
   });
 });
 
-describe('quarantinePendingFeedback', () => {
+describe('quarantinePendingRecord', () => {
   it('copies the bytes under the unreadable prefix before deleting the original', async () => {
     const raw = '{"broken":true}';
 
-    await quarantinePendingFeedback(PATHNAME, raw);
+    await quarantinePendingRecord(FEEDBACK_PENDING_PREFIX, PATHNAME, raw);
 
     expect(mockPut).toHaveBeenCalledWith(
       `${FEEDBACK_UNREADABLE_PREFIX}/${VALID_UUID}.json`,
@@ -115,5 +129,74 @@ describe('feedback store token', () => {
     await getPendingFeedback(PATHNAME);
 
     expect(mockGet).toHaveBeenCalledWith(PATHNAME, { access: 'private', token: FEEDBACK_TOKEN });
+  });
+});
+
+const fundingRecord: PendingFundingRequestRecord = {
+  submittedAt: '2026-09-28T10:00:00.000Z',
+  submission: {
+    submissionId: VALID_UUID,
+    kind: 'token',
+    requestedName: 'USDT',
+    contextChain: 'base',
+  },
+};
+const FUNDING_PATHNAME = `${FUNDING_REQUEST_PENDING_PREFIX}/${VALID_UUID}.json`;
+
+describe('pending prefixes', () => {
+  it('buffers each kind of record under its own prefix, never overwriting', async () => {
+    await putPendingFeedback(record);
+    await putPendingFundingRequest(fundingRecord);
+
+    expect(mockPut).toHaveBeenNthCalledWith(
+      1,
+      PATHNAME,
+      JSON.stringify(record),
+      expect.objectContaining({ access: 'private', token: FEEDBACK_TOKEN }),
+    );
+    expect(mockPut).toHaveBeenNthCalledWith(
+      2,
+      FUNDING_PATHNAME,
+      JSON.stringify(fundingRecord),
+      expect.objectContaining({ access: 'private', token: FEEDBACK_TOKEN }),
+    );
+    for (const [, , options] of mockPut.mock.calls) {
+      expect(options).not.toHaveProperty('allowOverwrite');
+    }
+  });
+
+  it('lists only the requested prefix', async () => {
+    mockList.mockResolvedValue({
+      blobs: [{ pathname: FUNDING_PATHNAME }],
+    } as unknown as Awaited<ReturnType<typeof list>>);
+
+    await expect(listPendingPaths(FUNDING_REQUEST_PENDING_PREFIX)).resolves.toEqual([
+      FUNDING_PATHNAME,
+    ]);
+    expect(mockList).toHaveBeenCalledWith(
+      expect.objectContaining({
+        prefix: `${FUNDING_REQUEST_PENDING_PREFIX}/`,
+        token: FEEDBACK_TOKEN,
+      }),
+    );
+  });
+
+  it('reads a funding request back through its own parser', async () => {
+    mockStoredBody(JSON.stringify(fundingRecord));
+
+    await expect(
+      getPendingRecord(FUNDING_PATHNAME, parsePendingFundingRequestRecord),
+    ).resolves.toEqual({ status: 'ok', record: fundingRecord });
+  });
+
+  it('quarantines a funding request into the shared unreadable prefix', async () => {
+    await quarantinePendingRecord(FUNDING_REQUEST_PENDING_PREFIX, FUNDING_PATHNAME, 'x');
+
+    expect(mockPut).toHaveBeenCalledWith(
+      `${FEEDBACK_UNREADABLE_PREFIX}/${VALID_UUID}.json`,
+      'x',
+      expect.objectContaining({ token: FEEDBACK_TOKEN }),
+    );
+    expect(mockDel).toHaveBeenCalledWith(FUNDING_PATHNAME, { token: FEEDBACK_TOKEN });
   });
 });
