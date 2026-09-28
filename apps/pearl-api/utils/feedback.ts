@@ -17,9 +17,10 @@ import type {
   SurveyRating,
 } from '../types/feedback';
 
-const UUID_V4_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+export const UUID_V4_PATTERN =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
-const isRecord = (value: unknown): value is Record<string, unknown> =>
+export const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
 
 const isFrictionArea = (value: unknown): value is FrictionArea =>
@@ -126,7 +127,8 @@ export const parseOnboardingSurveySubmission = (
 const SECONDS_PER_MINUTE = 60;
 
 /** `2026-09-02T14:32:10Z`, the second-precision form the sheet's examples use. */
-const toSheetTimestamp = (isoTimestamp: string): string => isoTimestamp.replace(/\.\d{3}Z$/, 'Z');
+export const toSheetTimestamp = (isoTimestamp: string): string =>
+  isoTimestamp.replace(/\.\d{3}Z$/, 'Z');
 
 type StepColumn = Extract<FeedbackSheetColumn, `step_${string}`>;
 
