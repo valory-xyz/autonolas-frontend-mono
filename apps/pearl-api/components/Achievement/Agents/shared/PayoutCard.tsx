@@ -107,7 +107,6 @@ const styles: Record<string, CSSProperties> = {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 24,
-    padding: '38px 40px',
   },
   marketIcon: {
     width: 92,
@@ -206,7 +205,8 @@ const MarketCard = ({ question, stats, marketImageSrc }: MarketCardProps) => {
 
   return (
     <div style={{ ...styles.marketCard, marginBottom: isLongQuestion ? 32 : 40 }}>
-      <div style={styles.marketInfo}>
+      {/* The icon is taller than one line of text; trim padding so the CTA stays in frame. */}
+      <div style={{ ...styles.marketInfo, padding: marketImageSrc ? '24px 40px' : '38px 40px' }}>
         {marketImageSrc && <img src={marketImageSrc} alt="Market" style={styles.marketIcon} />}
         <div style={{ ...styles.marketQuestion, fontSize: isLongQuestion ? 24 : 30 }}>
           {question}

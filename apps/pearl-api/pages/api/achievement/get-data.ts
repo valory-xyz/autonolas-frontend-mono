@@ -51,7 +51,11 @@ export default async function handler(
 
     return res.status(200).json(data);
   } catch (error) {
-    console.error('Error getting achievement data:', error);
+    const { agent, type, id } = req.query;
+    console.error(
+      `Error getting achievement data for agent=${agent}, type=${type}, id=${id}:`,
+      error,
+    );
     return res.status(500).json({
       error: 'Internal Server Error',
       message: error instanceof Error ? error.message : 'An unknown error occurred',

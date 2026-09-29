@@ -68,6 +68,14 @@ describe('getMarketImageUrl', () => {
 describe('fetchMarketImage', () => {
   afterEach(() => jest.restoreAllMocks());
 
+  it('returns the image bytes on success', async () => {
+    jest.spyOn(global, 'fetch').mockResolvedValue(new Response(new Uint8Array([1, 2, 3])));
+
+    const image = await fetchMarketImage('https://example.com/x.png');
+
+    expect(Array.from(new Uint8Array(image as ArrayBuffer))).toEqual([1, 2, 3]);
+  });
+
   it('returns null on a non-OK response', async () => {
     jest.spyOn(console, 'error').mockImplementation(() => undefined);
     jest.spyOn(global, 'fetch').mockResolvedValue(new Response(null, { status: 404 }));
