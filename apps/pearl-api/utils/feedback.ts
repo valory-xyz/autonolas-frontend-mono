@@ -194,7 +194,10 @@ export const mapSubmissionToSheetRow = (
  * path carries the same "only the typed value reaches the sheet" guarantee. Returns `null` for
  * anything unparseable so the caller can quarantine it instead of retrying forever.
  */
-export const parsePendingFeedbackRecord = (body: string): PendingFeedbackRecord | null => {
+export const parsePendingRecord = <T>(
+  body: string,
+  parseSubmission: (value: unknown) => T | null,
+): { submittedAt: string; submission: T } | null => {
   let parsed: unknown;
   try {
     parsed = JSON.parse(body);
@@ -207,11 +210,14 @@ export const parsePendingFeedbackRecord = (body: string): PendingFeedbackRecord 
     return null;
   }
 
-  const submission = parseOnboardingSurveySubmission(parsed.submission);
+  const submission = parseSubmission(parsed.submission);
   if (!submission) return null;
 
   return { submittedAt: parsed.submittedAt, submission };
 };
+
+export const parsePendingFeedbackRecord = (body: string): PendingFeedbackRecord | null =>
+  parsePendingRecord(body, parseOnboardingSurveySubmission);
 
 /** `application/json`, with or without a `; charset=...` parameter. */
 export const isJsonContentType = (contentType: string | string[] | undefined): boolean =>
