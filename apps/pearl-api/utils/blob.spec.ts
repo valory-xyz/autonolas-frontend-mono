@@ -181,6 +181,14 @@ describe('pending prefixes', () => {
     );
   });
 
+  it('lists at most the given number of paths', async () => {
+    mockList.mockResolvedValue({ blobs: [] } as unknown as Awaited<ReturnType<typeof list>>);
+
+    await listPendingPaths(FUNDING_REQUEST_PENDING_PREFIX, 7);
+
+    expect(mockList).toHaveBeenCalledWith(expect.objectContaining({ limit: 7 }));
+  });
+
   it('reads a funding request back through its own parser', async () => {
     mockStoredBody(JSON.stringify(fundingRecord));
 

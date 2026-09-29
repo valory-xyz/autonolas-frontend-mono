@@ -1,14 +1,26 @@
 /**
  * @jest-environment node
  */
+import { FEEDBACK_REPLAY_BATCH_SIZE } from '../constants';
 import type { ReplayCounts } from '../types';
-import { deletePendingRecord, getPendingRecord, quarantinePendingRecord } from './blob';
+import {
+  deletePendingRecord,
+  getPendingRecord,
+  listPendingPaths,
+  quarantinePendingRecord,
+} from './blob';
 import { appendSheetRow } from './googleSheets';
-import { PendingSource, drainPendingSource, hasReplayFailures } from './replayPending';
+import {
+  PendingSource,
+  drainPendingSource,
+  hasReplayFailures,
+  listPendingPathsWithinBatch,
+} from './replayPending';
 
 jest.mock('./blob', () => ({
   getPendingRecord: jest.fn(),
   deletePendingRecord: jest.fn(),
+  listPendingPaths: jest.fn(),
   quarantinePendingRecord: jest.fn(),
 }));
 
@@ -24,6 +36,7 @@ const mockQuarantinePendingRecord = quarantinePendingRecord as jest.MockedFuncti
   typeof quarantinePendingRecord
 >;
 const mockAppendSheetRow = appendSheetRow as jest.MockedFunction<typeof appendSheetRow>;
+const mockListPendingPaths = listPendingPaths as jest.MockedFunction<typeof listPendingPaths>;
 
 const PREFIX = 'test/pending';
 const PATHNAME = `${PREFIX}/a.json`;
@@ -120,5 +133,33 @@ describe('hasReplayFailures', () => {
 
   it('is true when a source left an appended record undeleted', () => {
     expect(hasReplayFailures([{ ...noCounts, replayed: 1, undeleted: 1 }, noCounts])).toBe(true);
+  });
+});
+
+describe('listPendingPathsWithinBatch', () => {
+  beforeEach(() => {
+    jest.resetAllMocks();
+  });
+
+  const paths = (prefix: string, count: number) =>
+    Array.from({ length: count }, (_, i) => `${prefix}/${i}.json`);
+
+  it('gives the next prefix only what the earlier ones left of the batch', async () => {
+    mockListPendingPaths.mockResolvedValueOnce(paths('a', 30)).mockResolvedValueOnce(paths('b', 5));
+
+    const result = await listPendingPathsWithinBatch(['a', 'b']);
+
+    expect(mockListPendingPaths).toHaveBeenNthCalledWith(1, 'a', FEEDBACK_REPLAY_BATCH_SIZE);
+    expect(mockListPendingPaths).toHaveBeenNthCalledWith(2, 'b', FEEDBACK_REPLAY_BATCH_SIZE - 30);
+    expect(result).toEqual([paths('a', 30), paths('b', 5)]);
+  });
+
+  it('does not list a prefix once the batch is used up', async () => {
+    mockListPendingPaths.mockResolvedValueOnce(paths('a', FEEDBACK_REPLAY_BATCH_SIZE));
+
+    const result = await listPendingPathsWithinBatch(['a', 'b']);
+
+    expect(mockListPendingPaths).toHaveBeenCalledTimes(1);
+    expect(result).toEqual([paths('a', FEEDBACK_REPLAY_BATCH_SIZE), []]);
   });
 });

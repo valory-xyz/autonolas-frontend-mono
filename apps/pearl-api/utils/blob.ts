@@ -147,10 +147,13 @@ export const putPendingFeedback = (record: PendingFeedbackRecord): Promise<void>
 export const putPendingFundingRequest = (record: PendingFundingRequestRecord): Promise<void> =>
   putPendingRecord(FUNDING_REQUEST_PENDING_PREFIX, record.submission.submissionId, record);
 
-export const listPendingPaths = async (prefix: string): Promise<string[]> => {
+export const listPendingPaths = async (
+  prefix: string,
+  limit: number = FEEDBACK_REPLAY_BATCH_SIZE,
+): Promise<string[]> => {
   const { blobs } = await list({
     prefix: `${prefix}/`,
-    limit: FEEDBACK_REPLAY_BATCH_SIZE,
+    limit,
     token: getFeedbackBlobToken(),
   });
 

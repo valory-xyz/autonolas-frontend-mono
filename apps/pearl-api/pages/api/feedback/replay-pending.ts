@@ -2,12 +2,12 @@ import { timingSafeEqual } from 'node:crypto';
 import type { NextApiRequest, NextApiResponse } from 'next';
 
 import type { ApiErrorResponse, ReplayPendingResponse } from '../../../types';
-import { listPendingPaths } from '../../../utils/blob';
 import {
   FUNDING_REQUEST_SOURCE,
   SURVEY_SOURCE,
   drainPendingSource,
   hasReplayFailures,
+  listPendingPathsWithinBatch,
 } from '../../../utils/replayPending';
 
 /** Constant-time comparison so the secret cannot be probed byte by byte. */
@@ -46,9 +46,9 @@ export default async function handler(
   let surveyPaths: string[];
   let fundingRequestPaths: string[];
   try {
-    [surveyPaths, fundingRequestPaths] = await Promise.all([
-      listPendingPaths(SURVEY_SOURCE.prefix),
-      listPendingPaths(FUNDING_REQUEST_SOURCE.prefix),
+    [surveyPaths, fundingRequestPaths] = await listPendingPathsWithinBatch([
+      SURVEY_SOURCE.prefix,
+      FUNDING_REQUEST_SOURCE.prefix,
     ]);
   } catch (error) {
     console.error('Feedback replay: could not list pending submissions:', error);

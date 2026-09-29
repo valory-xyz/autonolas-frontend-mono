@@ -1,5 +1,6 @@
 import {
   FEEDBACK_PENDING_PREFIX,
+  FEEDBACK_REPLAY_BATCH_SIZE,
   FEEDBACK_SHEET_RANGE,
   FUNDING_REQUEST_PENDING_PREFIX,
   FUNDING_REQUEST_SHEET_RANGE,
@@ -10,7 +11,12 @@ import type {
   ReplayCounts,
   SheetCell,
 } from '../types';
-import { deletePendingRecord, getPendingRecord, quarantinePendingRecord } from './blob';
+import {
+  deletePendingRecord,
+  getPendingRecord,
+  listPendingPaths,
+  quarantinePendingRecord,
+} from './blob';
 import { mapSubmissionToSheetRow, parsePendingFeedbackRecord } from './feedback';
 import { mapFundingRequestToSheetRow, parsePendingFundingRequestRecord } from './fundingRequest';
 import { appendSheetRow } from './googleSheets';
@@ -38,6 +44,23 @@ export const FUNDING_REQUEST_SOURCE: PendingSource<PendingFundingRequestRecord> 
   range: FUNDING_REQUEST_SHEET_RANGE,
   parse: parsePendingFundingRequestRecord,
   toRow: (record) => mapFundingRequestToSheetRow(record.submission, record.submittedAt),
+};
+
+/**
+ * Lists each prefix's pending paths in order, sharing one `FEEDBACK_REPLAY_BATCH_SIZE` budget so a
+ * run stays within the time the batch size was sized for however many sources there are.
+ */
+export const listPendingPathsWithinBatch = async (prefixes: string[]): Promise<string[][]> => {
+  const pathsPerPrefix: string[][] = [];
+  let remaining = FEEDBACK_REPLAY_BATCH_SIZE;
+
+  for (const prefix of prefixes) {
+    const paths = remaining > 0 ? await listPendingPaths(prefix, remaining) : [];
+    pathsPerPrefix.push(paths);
+    remaining -= paths.length;
+  }
+
+  return pathsPerPrefix;
 };
 
 /** Appends each pending record of one source to its sheet, deleting it only once appended. */
