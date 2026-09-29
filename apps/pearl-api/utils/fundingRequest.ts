@@ -11,7 +11,7 @@ import type {
   FundingRequestSubmission,
   PendingFundingRequestRecord,
 } from '../types/fundingRequest';
-import { UUID_V4_PATTERN, isRecord, toSheetTimestamp } from './feedback';
+import { UUID_V4_PATTERN, isRecord, parsePendingRecord, toSheetTimestamp } from './feedback';
 
 const isFundingRequestKind = (value: unknown): value is FundingRequestKind =>
   typeof value === 'string' && (FUNDING_REQUEST_KINDS as readonly string[]).includes(value);
@@ -39,15 +39,17 @@ export const parseFundingRequestSubmission = (body: unknown): FundingRequestSubm
 
   // A token request is only interpretable with the chain it was asked for; a chain request has
   // no context.
-  let contextChain: string | null = null;
   if (kind === 'token') {
-    contextChain = parseBoundedText(body.contextChain, FUNDING_REQUEST_CONTEXT_CHAIN_MAX_LENGTH);
+    const contextChain = parseBoundedText(
+      body.contextChain,
+      FUNDING_REQUEST_CONTEXT_CHAIN_MAX_LENGTH,
+    );
     if (!contextChain) return null;
-  } else if (body.contextChain !== undefined && body.contextChain !== null) {
-    return null;
+    return { submissionId, kind, requestedName, contextChain };
   }
+  if (body.contextChain !== undefined && body.contextChain !== null) return null;
 
-  return { submissionId, kind, requestedName, contextChain };
+  return { submissionId, kind, requestedName, contextChain: null };
 };
 
 /** Maps a validated request to the sheet's row, in `FUNDING_REQUEST_SHEET_COLUMNS` order. */
@@ -66,27 +68,7 @@ export const mapFundingRequestToSheetRow = (
   return FUNDING_REQUEST_SHEET_COLUMNS.map((column) => cells[column]);
 };
 
-/**
- * Parses a buffered blob back into a record, re-running the submit route's validator. Returns
- * `null` for anything unparseable so the replay quarantines it instead of retrying forever.
- */
+/** Parses a buffered blob back into a record, re-running the submit route's validator. */
 export const parsePendingFundingRequestRecord = (
   body: string,
-): PendingFundingRequestRecord | null => {
-  let parsed: unknown;
-  try {
-    parsed = JSON.parse(body);
-  } catch {
-    return null;
-  }
-
-  if (!isRecord(parsed)) return null;
-  if (typeof parsed.submittedAt !== 'string' || Number.isNaN(Date.parse(parsed.submittedAt))) {
-    return null;
-  }
-
-  const submission = parseFundingRequestSubmission(parsed.submission);
-  if (!submission) return null;
-
-  return { submittedAt: parsed.submittedAt, submission };
-};
+): PendingFundingRequestRecord | null => parsePendingRecord(body, parseFundingRequestSubmission);
