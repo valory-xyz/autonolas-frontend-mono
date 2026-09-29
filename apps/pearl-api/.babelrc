@@ -14,7 +14,8 @@
           "hooks": "./hooks",
           "types": "./types",
           "pages": "./pages"
-        }
+        },
+        "cwd": "babelrc"
       }
     ]
   ]
