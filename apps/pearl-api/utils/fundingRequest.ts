@@ -68,7 +68,10 @@ export const mapFundingRequestToSheetRow = (
   return FUNDING_REQUEST_SHEET_COLUMNS.map((column) => cells[column]);
 };
 
-/** Parses a buffered blob back into a record, re-running the submit route's validator. */
+/**
+ * Parses a buffered blob back into a record, re-running the submit route's validator. Returns
+ * `null` for anything unparseable so the replay quarantines it instead of retrying forever.
+ */
 export const parsePendingFundingRequestRecord = (
   body: string,
 ): PendingFundingRequestRecord | null => parsePendingRecord(body, parseFundingRequestSubmission);
