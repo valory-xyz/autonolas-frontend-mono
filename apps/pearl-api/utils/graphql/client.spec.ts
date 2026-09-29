@@ -6,7 +6,7 @@ const ENV_KEYS = ['NEXT_PUBLIC_OLAS_POLYMARKET_AGENTS_SQUID_URL', 'THEGRAPH_API_
 const loadClientModule = () => {
   let clientModule: typeof import('./client') | undefined;
   jest.isolateModules(() => {
-    clientModule = jest.requireActual('./client');
+    clientModule = jest.requireActual<typeof import('./client')>('./client');
   });
   return clientModule as typeof import('./client');
 };
