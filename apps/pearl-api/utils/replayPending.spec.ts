@@ -1,8 +1,16 @@
 /**
  * @jest-environment node
  */
-import { FEEDBACK_REPLAY_BATCH_SIZE } from '../constants';
-import type { ReplayCounts } from '../types';
+import {
+  FEEDBACK_PENDING_PREFIX,
+  FEEDBACK_REPLAY_BATCH_SIZE,
+  FEEDBACK_SHEET_COLUMNS,
+  FEEDBACK_SHEET_RANGE,
+  FUNDING_REQUEST_PENDING_PREFIX,
+  FUNDING_REQUEST_SHEET_COLUMNS,
+  FUNDING_REQUEST_SHEET_RANGE,
+} from '../constants';
+import type { PendingFeedbackRecord, PendingFundingRequestRecord, ReplayCounts } from '../types';
 import {
   deletePendingRecord,
   getPendingRecord,
@@ -11,7 +19,9 @@ import {
 } from './blob';
 import { appendSheetRow } from './googleSheets';
 import {
+  FUNDING_REQUEST_SOURCE,
   PendingSource,
+  SURVEY_SOURCE,
   drainPendingSource,
   hasReplayFailures,
   listPendingPathsWithinBatch,
@@ -133,6 +143,72 @@ describe('hasReplayFailures', () => {
 
   it('is true when a source left an appended record undeleted', () => {
     expect(hasReplayFailures([{ ...noCounts, replayed: 1, undeleted: 1 }, noCounts])).toBe(true);
+  });
+});
+
+describe('real sources', () => {
+  const SUBMISSION_ID = '9f1c2b7e-5a3d-4f2e-8c11-6b0d7a4e93f5';
+  const SUBMITTED_AT = '2026-09-28T10:00:00.000Z';
+
+  beforeEach(() => {
+    jest.resetAllMocks();
+  });
+
+  /** The appended row keyed by its sheet's column names. */
+  const appendedRow = (columns: readonly string[]) => {
+    const [, row] = mockAppendSheetRow.mock.calls[0];
+    return Object.fromEntries(columns.map((column, i) => [column, row[i]]));
+  };
+
+  it('appends a buffered funding request to the FundingRequests tab in its column order', async () => {
+    const record: PendingFundingRequestRecord = {
+      submittedAt: SUBMITTED_AT,
+      submission: {
+        submissionId: SUBMISSION_ID,
+        kind: 'token',
+        requestedName: 'USDT',
+        contextChain: 'base',
+      },
+    };
+    mockGetPendingRecord.mockResolvedValue({ status: 'ok', record });
+
+    await drainPendingSource(FUNDING_REQUEST_SOURCE, [`${FUNDING_REQUEST_PENDING_PREFIX}/a.json`]);
+
+    expect(mockAppendSheetRow.mock.calls[0][0]).toBe(FUNDING_REQUEST_SHEET_RANGE);
+    expect(appendedRow(FUNDING_REQUEST_SHEET_COLUMNS)).toEqual({
+      request_id: SUBMISSION_ID,
+      submitted_at: '2026-09-28T10:00:00Z',
+      kind: 'token',
+      requested_name: 'USDT',
+      context_chain: 'base',
+    });
+  });
+
+  it('appends a buffered survey to the Responses tab in its column order', async () => {
+    const record: PendingFeedbackRecord = {
+      submittedAt: SUBMITTED_AT,
+      submission: {
+        submissionId: SUBMISSION_ID,
+        frictionAreas: [],
+        rating: 3,
+        comment: 'Smooth.',
+        os: { type: 'Darwin', platform: 'darwin', arch: 'arm64', release: '24.3.0' },
+        agentType: 'polymarket_trader',
+        pearlVersion: '0.9.4',
+        timeToFirstSuccessSeconds: null,
+        timeToCompleteSurveySeconds: 42,
+      },
+    };
+    mockGetPendingRecord.mockResolvedValue({ status: 'ok', record });
+
+    await drainPendingSource(SURVEY_SOURCE, [`${FEEDBACK_PENDING_PREFIX}/a.json`]);
+
+    expect(mockAppendSheetRow.mock.calls[0][0]).toBe(FEEDBACK_SHEET_RANGE);
+    expect(appendedRow(FEEDBACK_SHEET_COLUMNS)).toMatchObject({
+      response_id: SUBMISSION_ID,
+      'rating (1-3)': 3,
+      open_text: 'Smooth.',
+    });
   });
 });
 
