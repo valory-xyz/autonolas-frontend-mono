@@ -4,36 +4,10 @@ import type { PersistentImage } from '@takumi-rs/core';
 import type { AchievementData, AchievementQueryParams, AgentType } from 'types/achievement';
 import { AGENT_LOGO_PATH_MAPPING, OG_IMAGE_CONFIG } from 'constants/achievement';
 import { AchievementUI } from './AchievementUI';
-import { getPolymarketBet } from 'utils/polystrat';
+import { getAchievementData } from 'utils/achievementData';
+import { fetchMarketImage } from 'utils/marketThumbnail';
 
-/**
- * Fetches the achievement data based on the agent type.
- * @returns The achievement data or null if not found. Null ensures
- * that the API throws an error and that the image is not generated.
- */
-const getAchievementData = async (
-  params: AchievementQueryParams,
-): Promise<AchievementData | null> => {
-  if (params.agent === 'polystrat') {
-    if (params.type === 'payout') {
-      try {
-        const data = await getPolymarketBet(params.id);
-
-        if (!data) {
-          console.error('Polymarket bet data not found or invalid.');
-          return null;
-        }
-
-        return data;
-      } catch (error) {
-        console.error('Error fetching Polymarket bet:', error);
-        throw error;
-      }
-    }
-  }
-
-  return null;
-};
+const MARKET_IMAGE_SRC = 'market';
 
 const getPersistentImages = async (
   origin: string,
@@ -56,6 +30,17 @@ const getPersistentImages = async (
   ];
 };
 
+const getMarketImage = async (data: AchievementData): Promise<PersistentImage | null> => {
+  if (!data.marketImageUrl) return null;
+
+  const imageData = await fetchMarketImage(data.marketImageUrl);
+  return imageData ? { src: MARKET_IMAGE_SRC, data: imageData } : null;
+};
+
+/**
+ * Renders the achievement card. Returns null when the achievement data is not
+ * found, so the API does not generate an image.
+ */
 export const generateAchievementImage = async (
   params: AchievementQueryParams,
   origin: string,
@@ -63,10 +48,23 @@ export const generateAchievementImage = async (
   const persistentImages = await getPersistentImages(origin, params.agent);
   const data = await getAchievementData(params);
 
-  if (!data) return null;
+  if (!data) {
+    console.error(`Achievement data not found for agent=${params.agent}, id=${params.id}.`);
+    return null;
+  }
+
+  const marketImage = await getMarketImage(data);
+  if (marketImage) persistentImages.push(marketImage);
 
   const imageResponse = new ImageResponse(
-    <AchievementUI params={params} logoSrc={params.agent} data={data} />,
+    (
+      <AchievementUI
+        params={params}
+        logoSrc={params.agent}
+        marketImageSrc={marketImage ? MARKET_IMAGE_SRC : undefined}
+        data={data}
+      />
+    ),
     {
       width: OG_IMAGE_CONFIG.WIDTH,
       height: OG_IMAGE_CONFIG.HEIGHT,
