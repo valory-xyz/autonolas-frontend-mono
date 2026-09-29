@@ -13,7 +13,7 @@ Guidance for working on the **Pearl API** app in this repo.
 ## Stack
 
 - **Wallet / Auth**: **Web3Auth** (modal, login, swap-owner-session). Not WalletConnect for general dapp use; used for embedded auth/session.
-- **API routes**: Next.js `pages/api/` – Zendesk (create-ticket, upload-file), achievement (get-image, generate-image), geo (agent-eligibility), feedback (onboarding-survey, replay-pending).
+- **API routes**: Next.js `pages/api/` – Zendesk (create-ticket, upload-file), achievement (get-image, generate-image, get-data), geo (agent-eligibility), feedback (onboarding-survey, replay-pending).
 - **Key libs**: No shared Nx libs in project config; uses Next.js, Web3Auth, styled-components, and app-local `context/`, `hooks/`, `utils/`, `constants/`, `types/`.
 
 ## Env / backends
@@ -24,6 +24,11 @@ Guidance for working on the **Pearl API** app in this repo.
 - **Zendesk**: `ZENDESK_SUBDOMAIN`, `ZENDESK_API_TOKEN`, `ZENDESK_API_EMAIL` (see root `.env.example`)
 - **Achievements Blob store** (public): `BLOB_READ_WRITE_TOKEN`, resolved by the SDK from the
   environment.
+- **Achievement card data**: `NEXT_PUBLIC_OLAS_POLYMARKET_AGENTS_SQUID_URL` (Polystrat bets, the
+  predict-polymarket SQD squid), `PREDICT_OMEN_URL` (optional override of the public predict-omen
+  subgraph for Omenstrat bets) and `THEGRAPH_API_KEY` (server-only; Omen market thumbnails). The
+  clients are built on first use, so a missing variable fails only the agent that needs it, and a
+  missing `THEGRAPH_API_KEY` renders the Omenstrat card without the market icon.
 - **Onboarding survey**: `GOOGLE_SHEETS_CLIENT_EMAIL`, `GOOGLE_SHEETS_PRIVATE_KEY`,
   `PEARL_FEEDBACK_SHEET_ID`, `CRON_SECRET`, `FEEDBACK_BLOB_READ_WRITE_TOKEN`. All server-only —
   none may be given a `NEXT_PUBLIC_` prefix, which would inline it into the client bundle.
@@ -40,6 +45,22 @@ Guidance for working on the **Pearl API** app in this repo.
 - Build: `yarn nx run pearl-api:build`
 - Test: `yarn nx test pearl-api`
 - Lint: `yarn nx lint pearl-api`
+
+## Achievements (winning cards)
+
+Pearl posts `generate-image?agent&type&id` when it shows a winning-card pop-up; olas-predict reads
+`get-image` for `og:image` and `get-data` for the card figures of its public page.
+
+- Agents: `polystrat` and `omenstrat`, type `payout`. `id` is the bet id the agent put in the
+  achievement record; `_` is allowed for squid ids (`0x…_1460`), and legacy Polymarket ids are
+  converted with `toSquidBetId`.
+- `GET /api/achievement/get-data` returns the card figures plus `marketImageUrl` (Omen only, may be
+  null). `404` when the bet is not a settled win; only a `200` carries a long `s-maxage`.
+- **"Won" is this bet's share, not the market total.** `utils/betPayout.ts` ports the trader
+  agent's FIFO sell folding and per-agent payout rule, so the card agrees with Pearl's pop-up when
+  an agent holds several bets in one market. Its spec shares a fixture with the trader's
+  `test_multi_bet_per_buy_payout_parity_fixture`; change both together.
+- Responses and cards carry no bettor or Safe address.
 
 ## Onboarding survey (OPE-1899)
 
