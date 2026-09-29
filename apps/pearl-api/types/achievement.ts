@@ -20,7 +20,7 @@ export type AchievementsLookupJson = {
   [key: string]: LookupEntry;
 };
 
-export type PolymarketBetData = {
+export type PredictionBetData = {
   question: string;
   position: string;
   transactionHash: string;
@@ -29,7 +29,9 @@ export type PolymarketBetData = {
   betAmountFormatted: string;
   amountWonFormatted: string;
   multiplier: string;
+  // Only Omen markets carry a thumbnail; null when there is none or the lookup failed.
+  marketImageUrl: string | null;
 };
 
 // Union type of all possible achievement data
-export type AchievementData = PolymarketBetData;
+export type AchievementData = PredictionBetData;

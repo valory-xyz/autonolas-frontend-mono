@@ -1,65 +1,92 @@
+import { PredictionBetData } from '../types';
+import { allocateFifo, formatBetFigures, getPolymarketBuyPayout } from './betPayout';
+import { getPredictPolymarketClient } from './graphql/client';
 import { getPolymarketDataQuery } from './graphql/queries';
-import { PREDICT_POLYMARKET_CLIENT } from './graphql/client';
-import { PolymarketBetData } from 'types';
 
 const USDC_DECIMALS = 6;
-
-type PolymarketDataResponse = {
-  marketParticipants: Array<{
-    totalPayout: string;
-    bets: Array<{
-      transactionHash: string;
-      outcomeIndex: string;
-      amount: string;
-      bettor: {
-        id: string;
-      };
-    }>;
-    question: {
-      metadata: {
-        title: string;
-        outcomes: string[];
-      } | null;
-    } | null;
-  }>;
-};
-
+// Positional, not read from the market metadata: the squid's `metadata.outcomes` is ordered
+// independently of a bet's `outcomeIndex`. Index 0 is Yes.
 const OUTCOMES = ['Yes', 'No'];
 
-const transformPolymarketData = (response: PolymarketDataResponse): PolymarketBetData | null => {
-  const participant = response.marketParticipants[0];
-  if (!participant) return null;
+// Older achievement records carry the retired subgraph's id: the transaction hash followed by the
+// log index as four little-endian bytes. The squid keys bets as `{txHash}_{logIndex}`.
+const LEGACY_BET_ID = /^0x([0-9a-fA-F]{64})([0-9a-fA-F]{8})$/;
+const SQUID_BET_ID = /^0x[0-9a-fA-F]{64}_\d+$/;
 
-  const bet = participant.bets[0];
-  if (!bet) return null;
+export const toSquidBetId = (betId: string): string | null => {
+  if (SQUID_BET_ID.test(betId)) return betId.toLowerCase();
 
-  const { question, totalPayout } = participant;
-  const { amount, transactionHash, outcomeIndex } = bet;
-  const parsedOutcomeIndex = parseInt(outcomeIndex);
+  const legacy = LEGACY_BET_ID.exec(betId);
+  if (!legacy) return null;
 
-  const title = question?.metadata?.title ?? 'N/A';
-  const position = OUTCOMES[parsedOutcomeIndex] ?? 'N/A';
+  const [, transactionHash, logIndexBytes] = legacy;
+  const logIndex = parseInt((logIndexBytes.match(/../g) as string[]).reverse().join(''), 16);
 
-  const betAmount = parseFloat(amount) / Math.pow(10, USDC_DECIMALS);
-  const amountWon = parseFloat(totalPayout) / Math.pow(10, USDC_DECIMALS);
-
-  return {
-    question: title,
-    position,
-    transactionHash,
-    betAmount,
-    amountWon,
-    betAmountFormatted: `$${betAmount.toFixed(2)}`,
-    amountWonFormatted: `$${amountWon.toFixed(2)}`,
-    multiplier: amountWon > 0 ? (amountWon / betAmount).toFixed(2) : '0.00',
-  };
+  return `0x${transactionHash.toLowerCase()}_${logIndex}`;
 };
 
-export const getPolymarketBet = async (id: string) => {
-  const data = await PREDICT_POLYMARKET_CLIENT.request<PolymarketDataResponse>(
-    getPolymarketDataQuery,
-    { id },
-  );
+type PolymarketDataResponse = {
+  betById: {
+    id: string;
+    outcomeIndex: string;
+    transactionHash: string;
+    question: {
+      metadata: { title: string } | null;
+      resolution: { winningIndex: string } | null;
+    } | null;
+    marketParticipant: {
+      totalPayout: string;
+      bets: Array<{
+        id: string;
+        outcomeIndex: string;
+        amount: string;
+        shares: string;
+        isBuy: boolean;
+        blockTimestamp: string;
+      }>;
+    } | null;
+  } | null;
+};
 
-  return transformPolymarketData(data);
+/**
+ * Returns the card figures for a Polymarket buy that won, or null when the bet
+ * is unknown, the market is unresolved or cancelled, or the buy did not win.
+ */
+export const getPolymarketBet = async (id: string): Promise<PredictionBetData | null> => {
+  const squidBetId = toSquidBetId(id);
+  if (!squidBetId) return null;
+
+  const { betById: bet } = await getPredictPolymarketClient().request<PolymarketDataResponse>(
+    getPolymarketDataQuery,
+    { id: squidBetId },
+  );
+  if (!bet?.marketParticipant) return null;
+
+  const winningIndex = bet.question?.resolution?.winningIndex;
+  if (winningIndex === undefined || winningIndex === null || Number(winningIndex) < 0) return null;
+
+  const { bets, totalPayout } = bet.marketParticipant;
+  const buys = allocateFifo(
+    bets.map((row) => ({
+      id: row.id,
+      outcomeIndex: Number(row.outcomeIndex),
+      amount: BigInt(row.amount),
+      shares: BigInt(row.shares),
+      isBuy: row.isBuy,
+      blockTimestamp: Number(row.blockTimestamp),
+    })),
+  );
+  const buy = buys.find((b) => b.id === bet.id);
+  if (!buy) return null;
+
+  const won = getPolymarketBuyPayout(buys, bet.id, BigInt(totalPayout), Number(winningIndex));
+  if (won === null || won <= 0n) return null;
+
+  return {
+    question: bet.question?.metadata?.title ?? 'N/A',
+    position: OUTCOMES[Number(bet.outcomeIndex)] ?? 'N/A',
+    transactionHash: bet.transactionHash,
+    ...formatBetFigures(buy.originalCost, won, USDC_DECIMALS),
+    marketImageUrl: null,
+  };
 };
