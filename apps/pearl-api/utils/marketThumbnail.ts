@@ -43,7 +43,7 @@ export const getMarketImageUrl = async (fpmmId: string): Promise<string | null> 
 
     return `${GATEWAY_URL}${byte32ToIpfsCidV0(imageHash)}`;
   } catch (error) {
-    console.error('Error fetching Omen market thumbnail:', error);
+    console.error(`Error fetching Omen market thumbnail for fpmm=${fpmmId}:`, error);
     return null;
   }
 };
@@ -52,12 +52,12 @@ export const fetchMarketImage = async (url: string): Promise<ArrayBuffer | null>
   try {
     const response = await fetch(url, { signal: AbortSignal.timeout(IMAGE_FETCH_TIMEOUT_MS) });
     if (!response.ok) {
-      console.error(`Market thumbnail fetch failed with status ${response.status}`);
+      console.error(`Market thumbnail fetch failed with status ${response.status} for url=${url}`);
       return null;
     }
     return await response.arrayBuffer();
   } catch (error) {
-    console.error('Error fetching market thumbnail image:', error);
+    console.error(`Error fetching market thumbnail image for url=${url}:`, error);
     return null;
   }
 };
