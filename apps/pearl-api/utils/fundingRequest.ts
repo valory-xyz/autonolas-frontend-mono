@@ -1,5 +1,6 @@
 import {
   FUNDING_REQUEST_CONTEXT_CHAIN_MAX_LENGTH,
+  FUNDING_REQUEST_CONTEXT_CHAIN_PATTERN,
   FUNDING_REQUEST_KINDS,
   FUNDING_REQUEST_NAME_MAX_LENGTH,
   FUNDING_REQUEST_SHEET_COLUMNS,
@@ -23,10 +24,7 @@ const parseBoundedText = (value: unknown, maxLength: number): string | null => {
   return trimmed;
 };
 
-/**
- * Validates a funding-request body; returns a typed submission, or `null` so the handler owns
- * the 400. Only the fields named here survive, so an extra property cannot reach the sheet.
- */
+/** Returns only the fields named here, so an extra property cannot reach the sheet. */
 export const parseFundingRequestSubmission = (body: unknown): FundingRequestSubmission | null => {
   if (!isRecord(body)) return null;
 
@@ -44,7 +42,7 @@ export const parseFundingRequestSubmission = (body: unknown): FundingRequestSubm
       body.contextChain,
       FUNDING_REQUEST_CONTEXT_CHAIN_MAX_LENGTH,
     );
-    if (!contextChain) return null;
+    if (!contextChain || !FUNDING_REQUEST_CONTEXT_CHAIN_PATTERN.test(contextChain)) return null;
     return { submissionId, kind, requestedName, contextChain };
   }
   if (body.contextChain !== undefined && body.contextChain !== null) return null;
@@ -68,10 +66,7 @@ export const mapFundingRequestToSheetRow = (
   return FUNDING_REQUEST_SHEET_COLUMNS.map((column) => cells[column]);
 };
 
-/**
- * Parses a buffered blob back into a record, re-running the submit route's validator. Returns
- * `null` for anything unparseable so the replay quarantines it instead of retrying forever.
- */
+/** `null` means the replay quarantines the blob. */
 export const parsePendingFundingRequestRecord = (
   body: string,
 ): PendingFundingRequestRecord | null => parsePendingRecord(body, parseFundingRequestSubmission);

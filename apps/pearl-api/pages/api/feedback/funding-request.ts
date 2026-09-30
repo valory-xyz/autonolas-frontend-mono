@@ -11,11 +11,6 @@ import {
 import { appendSheetRow } from '../../../utils/googleSheets';
 import { putPendingFundingRequest } from '../../../utils/blob';
 
-/**
- * One anonymous "Other chain" / "Other token" request from Pearl's funding flow (OPE-1903):
- * Sheets append first, Blob buffer on failure (still 200), 502 only when both fail. The body is
- * an acknowledgement only. No server-side dedup.
- */
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<FundingRequestResponse | ApiErrorResponse>,
@@ -45,7 +40,6 @@ export default async function handler(
     });
   }
 
-  // Server-side: a client clock is not trustworthy, and a timestamp is not identifying.
   const submittedAt = new Date().toISOString();
 
   res.setHeader('Cache-Control', 'no-store, max-age=0');

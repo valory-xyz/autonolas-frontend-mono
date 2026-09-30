@@ -1,4 +1,8 @@
-import { FUNDING_REQUEST_NAME_MAX_LENGTH, FUNDING_REQUEST_SHEET_COLUMNS } from '../constants';
+import {
+  FUNDING_REQUEST_CONTEXT_CHAIN_MAX_LENGTH,
+  FUNDING_REQUEST_NAME_MAX_LENGTH,
+  FUNDING_REQUEST_SHEET_COLUMNS,
+} from '../constants';
 import {
   mapFundingRequestToSheetRow,
   parseFundingRequestSubmission,
@@ -41,6 +45,24 @@ describe('parseFundingRequestSubmission', () => {
     );
   });
 
+  it('accepts a name of exactly the maximum length', () => {
+    const requestedName = 'x'.repeat(FUNDING_REQUEST_NAME_MAX_LENGTH);
+    expect(parseFundingRequestSubmission({ ...chainRequest, requestedName })).toEqual({
+      ...chainRequest,
+      requestedName,
+    });
+  });
+
+  it.each([
+    ['exactly the maximum length', 'a'.repeat(FUNDING_REQUEST_CONTEXT_CHAIN_MAX_LENGTH)],
+    ['an underscore, hyphen and digit', 'arbitrum_one-2'],
+  ])('accepts a contextChain of %s', (_case, contextChain) => {
+    expect(parseFundingRequestSubmission({ ...tokenRequest, contextChain })).toEqual({
+      ...tokenRequest,
+      contextChain,
+    });
+  });
+
   it.each([
     ['a non-object body', 'Monad'],
     ['a bad uuid', { ...chainRequest, submissionId: 'not-a-uuid' }],
@@ -54,6 +76,19 @@ describe('parseFundingRequestSubmission', () => {
     ],
     ['a token request without contextChain', { ...tokenRequest, contextChain: null }],
     ['a token request with an empty contextChain', { ...tokenRequest, contextChain: ' ' }],
+    [
+      'an over-length contextChain',
+      {
+        ...tokenRequest,
+        contextChain: 'a'.repeat(FUNDING_REQUEST_CONTEXT_CHAIN_MAX_LENGTH + 1),
+      },
+    ],
+    [
+      'a wallet address as contextChain',
+      { ...tokenRequest, contextChain: '0xab5801a7d398351b8be11c439e05c5b3259aec9b' },
+    ],
+    ['an uppercase contextChain', { ...tokenRequest, contextChain: 'Base' }],
+    ['a contextChain with spaces', { ...tokenRequest, contextChain: 'base mainnet' }],
     ['a chain request with a contextChain', { ...chainRequest, contextChain: 'base' }],
   ])('rejects %s', (_case, body) => {
     expect(parseFundingRequestSubmission(body)).toBeNull();
