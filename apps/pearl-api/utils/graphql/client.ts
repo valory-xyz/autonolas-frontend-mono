@@ -1,9 +1,6 @@
 import { GraphQLClient } from 'graphql-request';
 
-import {
-  DEFAULT_PREDICT_OMEN_URL,
-  OMEN_THUMBNAIL_MAPPING_SUBGRAPH_ID,
-} from '../../constants/achievement';
+import { OMEN_THUMBNAIL_MAPPING_SUBGRAPH_ID } from '../../constants/achievement';
 
 const REQUEST_TIMEOUT_MS = 10_000;
 const THUMBNAIL_TIMEOUT_MS = 5_000;
@@ -35,9 +32,14 @@ export const getPredictPolymarketClient = (): GraphQLClient => {
 };
 
 export const getPredictOmenClient = (): GraphQLClient => {
-  if (!predictOmenClient) {
-    predictOmenClient = createClient(process.env.PREDICT_OMEN_URL || DEFAULT_PREDICT_OMEN_URL);
+  if (predictOmenClient) return predictOmenClient;
+
+  const url = process.env.PREDICT_OMEN_URL;
+  if (!url) {
+    throw new Error('Environment variable PREDICT_OMEN_URL is not set.');
   }
+
+  predictOmenClient = createClient(url);
   return predictOmenClient;
 };
 

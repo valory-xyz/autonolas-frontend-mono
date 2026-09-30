@@ -35,7 +35,4 @@ export const AGENT_LOGO_PATH_MAPPING: Partial<Record<AgentType, string>> = {
   omenstrat: '/images/omenstrat-logo.png',
 };
 
-export const DEFAULT_PREDICT_OMEN_URL =
-  'https://api.subgraph.autonolas.tech/api/proxy/predict-omen';
-
 export const OMEN_THUMBNAIL_MAPPING_SUBGRAPH_ID = 'EWN14ciGK53PpUiKSm7kMWQ6G4iz3tDrRLyZ1iXMQEdu';

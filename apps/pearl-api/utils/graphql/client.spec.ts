@@ -1,7 +1,11 @@
 /**
  * @jest-environment node
  */
-const ENV_KEYS = ['NEXT_PUBLIC_OLAS_POLYMARKET_AGENTS_SQUID_URL', 'THEGRAPH_API_KEY'] as const;
+const ENV_KEYS = [
+  'NEXT_PUBLIC_OLAS_POLYMARKET_AGENTS_SQUID_URL',
+  'PREDICT_OMEN_URL',
+  'THEGRAPH_API_KEY',
+] as const;
 
 const loadClientModule = () => {
   let clientModule: typeof import('./client') | undefined;
@@ -18,17 +22,22 @@ describe('graphql clients', () => {
     expect(loadClientModule).not.toThrow();
   });
 
-  it('throws only when the Polymarket client is used without its squid URL', () => {
+  it('throws only when a client is used without its required URL', () => {
     const { getPredictPolymarketClient, getPredictOmenClient } = loadClientModule();
 
     expect(getPredictPolymarketClient).toThrow('NEXT_PUBLIC_OLAS_POLYMARKET_AGENTS_SQUID_URL');
-    expect(getPredictOmenClient()).toBeDefined();
+    expect(getPredictOmenClient).toThrow('PREDICT_OMEN_URL');
   });
 
-  it('builds the Polymarket client once the squid URL is set', () => {
+  it('builds each agent client once its URL is set', () => {
     process.env.NEXT_PUBLIC_OLAS_POLYMARKET_AGENTS_SQUID_URL = 'https://squid.example/graphql';
 
     expect(loadClientModule().getPredictPolymarketClient()).toBeDefined();
+
+    process.env.PREDICT_OMEN_URL = 'https://omen.example/graphql';
+    const { getPredictOmenClient } = loadClientModule();
+    expect(getPredictOmenClient()).toBeDefined();
+    expect(getPredictOmenClient()).toBe(getPredictOmenClient());
   });
 
   it('builds a thumbnail client only with a Graph API key', () => {
@@ -39,6 +48,7 @@ describe('graphql clients', () => {
   });
 
   it('bounds every request with a timeout signal', async () => {
+    process.env.PREDICT_OMEN_URL = 'https://omen.example/graphql';
     const signal = new AbortController().signal;
     const timeoutSpy = jest.spyOn(AbortSignal, 'timeout').mockReturnValue(signal);
     const fetchSpy = jest
