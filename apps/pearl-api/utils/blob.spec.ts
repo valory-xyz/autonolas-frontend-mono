@@ -14,13 +14,13 @@ import {
 import type { PendingFeedbackRecord } from '../types/feedback';
 import type { PendingFundingRequestRecord } from '../types/fundingRequest';
 import {
-  getPendingFeedback,
   getPendingRecord,
   listPendingPaths,
   putPendingFeedback,
   putPendingFundingRequest,
   quarantinePendingRecord,
 } from './blob';
+import { parsePendingFeedbackRecord } from './feedback';
 import { parsePendingFundingRequestRecord } from './fundingRequest';
 
 jest.mock('@vercel/blob', () => ({
@@ -72,7 +72,10 @@ beforeEach(() => {
   jest.clearAllMocks();
 });
 
-describe('getPendingFeedback', () => {
+const getPendingFeedback = (pathname: string) =>
+  getPendingRecord(pathname, parsePendingFeedbackRecord);
+
+describe('getPendingRecord', () => {
   it('returns the record when the blob holds a valid submission', async () => {
     mockStoredBody(JSON.stringify(record));
 
@@ -83,6 +86,17 @@ describe('getPendingFeedback', () => {
     mockGet.mockResolvedValue(null);
 
     await expect(getPendingFeedback(PATHNAME)).resolves.toEqual({ status: 'missing' });
+  });
+
+  it('warns with the status when the read is not a 200', async () => {
+    const warn = jest.spyOn(console, 'warn').mockImplementation(() => undefined);
+    mockGet.mockResolvedValue({ statusCode: 304, stream: null } as unknown as Awaited<
+      ReturnType<typeof get>
+    >);
+
+    await expect(getPendingFeedback(PATHNAME)).resolves.toEqual({ status: 'missing' });
+    expect(warn).toHaveBeenCalledWith(expect.stringContaining('status 304'));
+    warn.mockRestore();
   });
 
   it.each([
@@ -119,6 +133,15 @@ describe('quarantinePendingRecord', () => {
     );
     expect(mockDel).toHaveBeenCalledWith(PATHNAME, { token: FEEDBACK_TOKEN });
     expect(mockPut.mock.invocationCallOrder[0]).toBeLessThan(mockDel.mock.invocationCallOrder[0]);
+  });
+
+  it('refuses a pathname outside the given prefix, touching nothing', async () => {
+    await expect(
+      quarantinePendingRecord(FUNDING_REQUEST_PENDING_PREFIX, PATHNAME, 'x'),
+    ).rejects.toThrow(`${PATHNAME} is not under ${FUNDING_REQUEST_PENDING_PREFIX}/`);
+
+    expect(mockPut).not.toHaveBeenCalled();
+    expect(mockDel).not.toHaveBeenCalled();
   });
 });
 
@@ -165,14 +188,16 @@ describe('pending prefixes', () => {
     }
   });
 
-  it('lists only the requested prefix', async () => {
+  it('lists only the requested prefix and reports whether more are pending', async () => {
     mockList.mockResolvedValue({
       blobs: [{ pathname: FUNDING_PATHNAME }],
+      hasMore: true,
     } as unknown as Awaited<ReturnType<typeof list>>);
 
-    await expect(listPendingPaths(FUNDING_REQUEST_PENDING_PREFIX)).resolves.toEqual([
-      FUNDING_PATHNAME,
-    ]);
+    await expect(listPendingPaths(FUNDING_REQUEST_PENDING_PREFIX)).resolves.toEqual({
+      pathnames: [FUNDING_PATHNAME],
+      hasMore: true,
+    });
     expect(mockList).toHaveBeenCalledWith(
       expect.objectContaining({
         prefix: `${FUNDING_REQUEST_PENDING_PREFIX}/`,
@@ -182,7 +207,9 @@ describe('pending prefixes', () => {
   });
 
   it('lists at most the given number of paths', async () => {
-    mockList.mockResolvedValue({ blobs: [] } as unknown as Awaited<ReturnType<typeof list>>);
+    mockList.mockResolvedValue({ blobs: [], hasMore: false } as unknown as Awaited<
+      ReturnType<typeof list>
+    >);
 
     await listPendingPaths(FUNDING_REQUEST_PENDING_PREFIX, 7);
 

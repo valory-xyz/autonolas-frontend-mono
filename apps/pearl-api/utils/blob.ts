@@ -5,11 +5,7 @@ import type {
   AchievementQueryParams,
   AchievementsLookupJson,
 } from '../types/achievement';
-import type {
-  PendingFeedbackRead,
-  PendingFeedbackRecord,
-  PendingRecordRead,
-} from '../types/feedback';
+import type { PendingFeedbackRecord, PendingRecordRead } from '../types/feedback';
 import type { PendingFundingRequestRecord } from '../types/fundingRequest';
 import { ACHIEVEMENTS_LOOKUP_PREFIX } from '../constants/achievement';
 import {
@@ -19,7 +15,6 @@ import {
   FEEDBACK_UNREADABLE_PREFIX,
 } from '../constants/feedback';
 import { FUNDING_REQUEST_PENDING_PREFIX } from '../constants/fundingRequest';
-import { parsePendingFeedbackRecord } from './feedback';
 
 // New per-entry path: achievements-lookup/{agent}/{type}/{id}.json
 const getEntryFileName = (agent: string, type: string, id: string): string =>
@@ -124,8 +119,13 @@ const getPendingPath = (prefix: string, submissionId: string): string =>
   `${prefix}/${submissionId}.json`;
 
 /** `<prefix>/<id>.json` → `feedback/unreadable/<id>.json`. */
-const getUnreadablePath = (prefix: string, pendingPathname: string): string =>
-  pendingPathname.replace(`${prefix}/`, `${FEEDBACK_UNREADABLE_PREFIX}/`);
+const getUnreadablePath = (prefix: string, pendingPathname: string): string => {
+  // Otherwise the copy would land back on the pending path and the delete would lose the record.
+  if (!pendingPathname.startsWith(`${prefix}/`)) {
+    throw new Error(`${pendingPathname} is not under ${prefix}/`);
+  }
+  return `${FEEDBACK_UNREADABLE_PREFIX}/${pendingPathname.slice(prefix.length + 1)}`;
+};
 
 /** No `allowOverwrite`: every attempt has a fresh `submissionId`, so a repeat path is a bug. */
 const putPendingRecord = async (
@@ -147,17 +147,18 @@ export const putPendingFeedback = (record: PendingFeedbackRecord): Promise<void>
 export const putPendingFundingRequest = (record: PendingFundingRequestRecord): Promise<void> =>
   putPendingRecord(FUNDING_REQUEST_PENDING_PREFIX, record.submission.submissionId, record);
 
+/** `hasMore` is set when records beyond `limit` are still pending. */
 export const listPendingPaths = async (
   prefix: string,
   limit: number = FEEDBACK_REPLAY_BATCH_SIZE,
-): Promise<string[]> => {
-  const { blobs } = await list({
+): Promise<{ pathnames: string[]; hasMore: boolean }> => {
+  const { blobs, hasMore } = await list({
     prefix: `${prefix}/`,
     limit,
     token: getFeedbackBlobToken(),
   });
 
-  return blobs.map((blob) => blob.pathname);
+  return { pathnames: blobs.map((blob) => blob.pathname), hasMore };
 };
 
 /** Re-validates a buffered record; `unreadable` lets the caller quarantine it instead of retrying forever. */
@@ -166,16 +167,17 @@ export const getPendingRecord = async <T>(
   parse: (raw: string) => T | null,
 ): Promise<PendingRecordRead<T>> => {
   const result = await get(pathname, { access: 'private', token: getFeedbackBlobToken() });
-  if (result?.statusCode !== 200 || !result.stream) return { status: 'missing' };
+  if (!result) return { status: 'missing' };
+  if (result.statusCode !== 200 || !result.stream) {
+    console.warn(`Pending blob ${pathname} not readable (status ${result.statusCode})`);
+    return { status: 'missing' };
+  }
 
   const raw = await new Response(result.stream).text();
   const record = parse(raw);
 
   return record ? { status: 'ok', record } : { status: 'unreadable', raw };
 };
-
-export const getPendingFeedback = (pathname: string): Promise<PendingFeedbackRead> =>
-  getPendingRecord(pathname, parsePendingFeedbackRecord);
 
 export const deletePendingRecord = async (pathname: string): Promise<void> => {
   await del(pathname, { token: getFeedbackBlobToken() });

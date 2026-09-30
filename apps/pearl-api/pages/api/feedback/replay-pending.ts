@@ -2,13 +2,7 @@ import { timingSafeEqual } from 'node:crypto';
 import type { NextApiRequest, NextApiResponse } from 'next';
 
 import type { ApiErrorResponse, ReplayPendingResponse } from '../../../types';
-import {
-  FUNDING_REQUEST_SOURCE,
-  SURVEY_SOURCE,
-  drainPendingSource,
-  hasReplayFailures,
-  listPendingPathsWithinBatch,
-} from '../../../utils/replayPending';
+import { replayAllPending } from '../../../utils/replayPending';
 
 /** Constant-time comparison so the secret cannot be probed byte by byte. */
 const isAuthorizedCronCall = (authorization: string | undefined, secret: string): boolean => {
@@ -43,25 +37,9 @@ export default async function handler(
 
   res.setHeader('Cache-Control', 'no-store, max-age=0');
 
-  let surveyPaths: string[];
-  let fundingRequestPaths: string[];
-  try {
-    [surveyPaths, fundingRequestPaths] = await listPendingPathsWithinBatch([
-      SURVEY_SOURCE.prefix,
-      FUNDING_REQUEST_SOURCE.prefix,
-    ]);
-  } catch (error) {
-    console.error('Feedback replay: could not list pending submissions:', error);
-    return res
-      .status(502)
-      .json({ error: 'Bad gateway', message: 'Could not list pending submissions' });
-  }
-
-  const survey = await drainPendingSource(SURVEY_SOURCE, surveyPaths);
-  const fundingRequests = await drainPendingSource(FUNDING_REQUEST_SOURCE, fundingRequestPaths);
+  const result = await replayAllPending();
 
   // A non-2xx marks the run as failed in Vercel's cron history, so a backlog that never drains is
   // visible without extra monitoring.
-  const status = hasReplayFailures([survey, fundingRequests]) ? 500 : 200;
-  return res.status(status).json({ ok: status === 200, ...survey, fundingRequests });
+  return res.status(result.ok ? 200 : 500).json(result);
 }

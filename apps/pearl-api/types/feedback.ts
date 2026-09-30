@@ -55,8 +55,6 @@ export type PendingRecordRead<T> =
   | { status: 'missing' }
   | { status: 'unreadable'; raw: string };
 
-export type PendingFeedbackRead = PendingRecordRead<PendingFeedbackRecord>;
-
 /**
  * One sheet cell. Numbers and booleans are kept typed rather than stringified so the sheet
  * gets numeric/boolean cells under `valueInputOption=RAW` and AVERAGE/filters work on them.
@@ -71,17 +69,19 @@ export type OnboardingSurveyResponse = {
 export type ReplayCounts = {
   /** Appended to the sheet. */
   replayed: number;
-  /** Append failed; left in the pending prefix for the next run. */
+  /** Append failed, or the prefix could not be listed; left for the next run. */
   failed: number;
   /** Unparseable; moved to the unreadable prefix and never retried. */
   quarantined: number;
   /** Appended but the delete failed, so the next run will append it again. */
   undeleted: number;
+  /** Records were left pending beyond this run's batch. */
+  backlog: boolean;
 };
 
 /** Top-level counts are the onboarding survey's; funding requests are reported alongside. */
 export type ReplayPendingResponse = ReplayCounts & {
-  /** `false` when anything failed or was left undeleted; the route then answers 500. */
+  /** `false` when anything failed, was left undeleted or left pending; the route then answers 500. */
   ok: boolean;
   fundingRequests: ReplayCounts;
 };

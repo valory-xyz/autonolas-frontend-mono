@@ -24,7 +24,7 @@ import {
   SURVEY_SOURCE,
   drainPendingSource,
   hasReplayFailures,
-  listPendingPathsWithinBatch,
+  replayAllPending,
 } from './replayPending';
 
 jest.mock('./blob', () => ({
@@ -59,7 +59,13 @@ const source: PendingSource<string> = {
   toRow: (record) => [record],
 };
 
-const noCounts: ReplayCounts = { replayed: 0, failed: 0, quarantined: 0, undeleted: 0 };
+const noCounts: ReplayCounts = {
+  replayed: 0,
+  failed: 0,
+  quarantined: 0,
+  undeleted: 0,
+  backlog: false,
+};
 
 describe('drainPendingSource', () => {
   beforeEach(() => {
@@ -144,9 +150,18 @@ describe('hasReplayFailures', () => {
   it('is true when a source left an appended record undeleted', () => {
     expect(hasReplayFailures([{ ...noCounts, replayed: 1, undeleted: 1 }, noCounts])).toBe(true);
   });
+
+  it('is true when a source left records beyond the batch', () => {
+    expect(hasReplayFailures([noCounts, { ...noCounts, backlog: true }])).toBe(true);
+  });
 });
 
 describe('real sources', () => {
+  it('read from their own pending prefixes', () => {
+    expect(SURVEY_SOURCE.prefix).toBe('feedback/pending');
+    expect(FUNDING_REQUEST_SOURCE.prefix).toBe('feedback/pending-funding-requests');
+  });
+
   const SUBMISSION_ID = '9f1c2b7e-5a3d-4f2e-8c11-6b0d7a4e93f5';
   const SUBMITTED_AT = '2026-09-28T10:00:00.000Z';
 
@@ -184,6 +199,20 @@ describe('real sources', () => {
     });
   });
 
+  it('quarantines an unreadable funding request under the funding prefix', async () => {
+    jest.spyOn(console, 'error').mockImplementation(() => undefined);
+    const pathname = `${FUNDING_REQUEST_PENDING_PREFIX}/a.json`;
+    mockGetPendingRecord.mockResolvedValue({ status: 'unreadable', raw: 'garbage' });
+
+    await drainPendingSource(FUNDING_REQUEST_SOURCE, [pathname]);
+
+    expect(mockQuarantinePendingRecord).toHaveBeenCalledWith(
+      FUNDING_REQUEST_PENDING_PREFIX,
+      pathname,
+      'garbage',
+    );
+  });
+
   it('appends a buffered survey to the Responses tab in its column order', async () => {
     const record: PendingFeedbackRecord = {
       submittedAt: SUBMITTED_AT,
@@ -212,30 +241,147 @@ describe('real sources', () => {
   });
 });
 
-describe('listPendingPathsWithinBatch', () => {
+describe('replayAllPending', () => {
+  const surveyPath = (i: number) => `${FEEDBACK_PENDING_PREFIX}/${i}.json`;
+  const fundingPath = (i: number) => `${FUNDING_REQUEST_PENDING_PREFIX}/${i}.json`;
+  const page = (pathnames: string[], hasMore = false) => ({ pathnames, hasMore });
+
+  /** Routes each list call to its prefix's page, so the test does not depend on call order. */
+  const mockPages = (pages: Record<string, ReturnType<typeof page> | Error>) => {
+    mockListPendingPaths.mockImplementation(async (prefix) => {
+      const result = pages[prefix];
+      if (result instanceof Error) throw result;
+      return result ?? page([]);
+    });
+  };
+
   beforeEach(() => {
     jest.resetAllMocks();
+    jest.spyOn(console, 'error').mockImplementation(() => undefined);
+    mockGetPendingRecord.mockImplementation(async (pathname) => ({
+      status: 'ok',
+      record: pathname,
+    }));
   });
 
-  const paths = (prefix: string, count: number) =>
-    Array.from({ length: count }, (_, i) => `${prefix}/${i}.json`);
-
-  it('gives the next prefix only what the earlier ones left of the batch', async () => {
-    mockListPendingPaths.mockResolvedValueOnce(paths('a', 30)).mockResolvedValueOnce(paths('b', 5));
-
-    const result = await listPendingPathsWithinBatch(['a', 'b']);
-
-    expect(mockListPendingPaths).toHaveBeenNthCalledWith(1, 'a', FEEDBACK_REPLAY_BATCH_SIZE);
-    expect(mockListPendingPaths).toHaveBeenNthCalledWith(2, 'b', FEEDBACK_REPLAY_BATCH_SIZE - 30);
-    expect(result).toEqual([paths('a', 30), paths('b', 5)]);
+  afterEach(() => {
+    jest.restoreAllMocks();
   });
 
-  it('does not list a prefix once the batch is used up', async () => {
-    mockListPendingPaths.mockResolvedValueOnce(paths('a', FEEDBACK_REPLAY_BATCH_SIZE));
+  it('drains each source into its own tab and reports surveys flat, funding requests nested', async () => {
+    mockPages({
+      [FEEDBACK_PENDING_PREFIX]: page([surveyPath(0)]),
+      [FUNDING_REQUEST_PENDING_PREFIX]: page([fundingPath(0), fundingPath(1)]),
+    });
+    jest.spyOn(SURVEY_SOURCE, 'toRow').mockReturnValue(['survey']);
+    jest.spyOn(FUNDING_REQUEST_SOURCE, 'toRow').mockReturnValue(['funding']);
 
-    const result = await listPendingPathsWithinBatch(['a', 'b']);
+    const result = await replayAllPending();
 
-    expect(mockListPendingPaths).toHaveBeenCalledTimes(1);
-    expect(result).toEqual([paths('a', FEEDBACK_REPLAY_BATCH_SIZE), []]);
+    expect(result).toEqual({
+      ok: true,
+      ...noCounts,
+      replayed: 1,
+      fundingRequests: { ...noCounts, replayed: 2 },
+    });
+    expect(mockAppendSheetRow.mock.calls).toEqual([
+      [FEEDBACK_SHEET_RANGE, ['survey']],
+      [FUNDING_REQUEST_SHEET_RANGE, ['funding']],
+      [FUNDING_REQUEST_SHEET_RANGE, ['funding']],
+    ]);
+    expect(mockDeletePendingRecord.mock.calls).toEqual([
+      [surveyPath(0)],
+      [fundingPath(0)],
+      [fundingPath(1)],
+    ]);
+  });
+
+  it('gives funding requests only what surveys left of the batch', async () => {
+    mockPages({ [FEEDBACK_PENDING_PREFIX]: page([surveyPath(0), surveyPath(1)]) });
+    jest.spyOn(SURVEY_SOURCE, 'toRow').mockReturnValue(['survey']);
+
+    await replayAllPending();
+
+    expect(mockListPendingPaths).toHaveBeenCalledWith(
+      FEEDBACK_PENDING_PREFIX,
+      FEEDBACK_REPLAY_BATCH_SIZE,
+    );
+    expect(mockListPendingPaths).toHaveBeenCalledWith(
+      FUNDING_REQUEST_PENDING_PREFIX,
+      FEEDBACK_REPLAY_BATCH_SIZE - 2,
+    );
+  });
+
+  it('fails the run when surveys use up the batch and funding requests are left pending', async () => {
+    const surveys = Array.from({ length: FEEDBACK_REPLAY_BATCH_SIZE }, (_, i) => surveyPath(i));
+    mockPages({
+      [FEEDBACK_PENDING_PREFIX]: page(surveys),
+      [FUNDING_REQUEST_PENDING_PREFIX]: page([fundingPath(0)]),
+    });
+    jest.spyOn(SURVEY_SOURCE, 'toRow').mockReturnValue(['survey']);
+
+    const result = await replayAllPending();
+
+    expect(mockListPendingPaths).toHaveBeenCalledWith(FUNDING_REQUEST_PENDING_PREFIX, 1);
+    expect(result.fundingRequests).toEqual({ ...noCounts, backlog: true });
+    expect(result.ok).toBe(false);
+    expect(mockAppendSheetRow).toHaveBeenCalledTimes(FEEDBACK_REPLAY_BATCH_SIZE);
+  });
+
+  it('stays green when surveys use up the batch and no funding request is pending', async () => {
+    const surveys = Array.from({ length: FEEDBACK_REPLAY_BATCH_SIZE }, (_, i) => surveyPath(i));
+    mockPages({ [FEEDBACK_PENDING_PREFIX]: page(surveys) });
+    jest.spyOn(SURVEY_SOURCE, 'toRow').mockReturnValue(['survey']);
+
+    const result = await replayAllPending();
+
+    expect(result.ok).toBe(true);
+    expect(result.fundingRequests).toEqual(noCounts);
+  });
+
+  it('fails the run when a source has more pending than it listed', async () => {
+    mockPages({ [FEEDBACK_PENDING_PREFIX]: page([surveyPath(0)], true) });
+    jest.spyOn(SURVEY_SOURCE, 'toRow').mockReturnValue(['survey']);
+
+    const result = await replayAllPending();
+
+    expect(result).toMatchObject({ ok: false, replayed: 1, backlog: true });
+  });
+
+  it('still drains surveys when the funding list fails, and fails the run', async () => {
+    mockPages({
+      [FEEDBACK_PENDING_PREFIX]: page([surveyPath(0)]),
+      [FUNDING_REQUEST_PENDING_PREFIX]: new Error('blob down'),
+    });
+    jest.spyOn(SURVEY_SOURCE, 'toRow').mockReturnValue(['survey']);
+
+    const result = await replayAllPending();
+
+    expect(result).toEqual({
+      ok: false,
+      ...noCounts,
+      replayed: 1,
+      fundingRequests: { ...noCounts, failed: 1 },
+    });
+    expect(console.error).toHaveBeenCalledWith(
+      'Funding request: could not list pending records:',
+      expect.any(Error),
+    );
+  });
+
+  it('still drains funding requests when the survey list fails', async () => {
+    mockPages({
+      [FEEDBACK_PENDING_PREFIX]: new Error('blob down'),
+      [FUNDING_REQUEST_PENDING_PREFIX]: page([fundingPath(0)]),
+    });
+    jest.spyOn(FUNDING_REQUEST_SOURCE, 'toRow').mockReturnValue(['funding']);
+
+    const result = await replayAllPending();
+
+    expect(result).toMatchObject({ ok: false, failed: 1, fundingRequests: { replayed: 1 } });
+    expect(mockListPendingPaths).toHaveBeenCalledWith(
+      FUNDING_REQUEST_PENDING_PREFIX,
+      FEEDBACK_REPLAY_BATCH_SIZE,
+    );
   });
 });

@@ -9,6 +9,7 @@ import type {
   PendingFeedbackRecord,
   PendingFundingRequestRecord,
   ReplayCounts,
+  ReplayPendingResponse,
   SheetCell,
 } from '../types';
 import {
@@ -46,29 +47,20 @@ export const FUNDING_REQUEST_SOURCE: PendingSource<PendingFundingRequestRecord> 
   toRow: (record) => mapFundingRequestToSheetRow(record.submission, record.submittedAt),
 };
 
-/**
- * Lists each prefix's pending paths in order, sharing one `FEEDBACK_REPLAY_BATCH_SIZE` budget so a
- * run stays within the time the batch size was sized for however many sources there are.
- */
-export const listPendingPathsWithinBatch = async (prefixes: string[]): Promise<string[][]> => {
-  const pathsPerPrefix: string[][] = [];
-  let remaining = FEEDBACK_REPLAY_BATCH_SIZE;
-
-  for (const prefix of prefixes) {
-    const paths = remaining > 0 ? await listPendingPaths(prefix, remaining) : [];
-    pathsPerPrefix.push(paths);
-    remaining -= paths.length;
-  }
-
-  return pathsPerPrefix;
-};
+const emptyCounts = (): ReplayCounts => ({
+  replayed: 0,
+  failed: 0,
+  quarantined: 0,
+  undeleted: 0,
+  backlog: false,
+});
 
 /** Appends each pending record of one source to its sheet, deleting it only once appended. */
 export const drainPendingSource = async <T>(
   source: PendingSource<T>,
   pathnames: string[],
 ): Promise<ReplayCounts> => {
-  const counts: ReplayCounts = { replayed: 0, failed: 0, quarantined: 0, undeleted: 0 };
+  const counts = emptyCounts();
 
   for (const pathname of pathnames) {
     try {
@@ -109,6 +101,48 @@ export const drainPendingSource = async <T>(
   return counts;
 };
 
-/** Whether any source left a record behind to be appended again by the next run. */
+/** Whether any source left a record behind for the next run. */
 export const hasReplayFailures = (counts: ReplayCounts[]): boolean =>
-  counts.some((c) => c.failed > 0 || c.undeleted > 0);
+  counts.some((c) => c.failed > 0 || c.undeleted > 0 || c.backlog);
+
+/**
+ * Lists and drains one source within `limit`. A list failure is contained here so the other
+ * sources still drain.
+ */
+const replaySource = async <T>(
+  source: PendingSource<T>,
+  limit: number,
+): Promise<{ counts: ReplayCounts; listed: number }> => {
+  try {
+    if (limit <= 0) {
+      // The batch is spent; only find out whether this source is being left behind.
+      const { pathnames } = await listPendingPaths(source.prefix, 1);
+      return { counts: { ...emptyCounts(), backlog: pathnames.length > 0 }, listed: 0 };
+    }
+
+    const { pathnames, hasMore } = await listPendingPaths(source.prefix, limit);
+    const counts = await drainPendingSource(source, pathnames);
+    return { counts: { ...counts, backlog: hasMore }, listed: pathnames.length };
+  } catch (error) {
+    console.error(`${source.label}: could not list pending records:`, error);
+    return { counts: { ...emptyCounts(), failed: 1 }, listed: 0 };
+  }
+};
+
+/**
+ * Drains every source, surveys first, sharing one `FEEDBACK_REPLAY_BATCH_SIZE` so a run stays
+ * within the time the batch was sized for.
+ */
+export const replayAllPending = async (): Promise<ReplayPendingResponse> => {
+  const survey = await replaySource(SURVEY_SOURCE, FEEDBACK_REPLAY_BATCH_SIZE);
+  const fundingRequests = await replaySource(
+    FUNDING_REQUEST_SOURCE,
+    FEEDBACK_REPLAY_BATCH_SIZE - survey.listed,
+  );
+
+  return {
+    ok: !hasReplayFailures([survey.counts, fundingRequests.counts]),
+    ...survey.counts,
+    fundingRequests: fundingRequests.counts,
+  };
+};
