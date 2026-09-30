@@ -12,7 +12,6 @@ import {
   FEEDBACK_BLOB_CONFIG,
   FEEDBACK_PENDING_PREFIX,
   FEEDBACK_REPLAY_BATCH_SIZE,
-  FEEDBACK_UNREADABLE_PREFIX,
 } from '../constants/feedback';
 import { FUNDING_REQUEST_PENDING_PREFIX } from '../constants/fundingRequest';
 
@@ -118,13 +117,18 @@ const getFeedbackBlobToken = (): string => {
 const getPendingPath = (prefix: string, submissionId: string): string =>
   `${prefix}/${submissionId}.json`;
 
-/** `<prefix>/<id>.json` → `feedback/unreadable/<id>.json`. */
-const getUnreadablePath = (prefix: string, pendingPathname: string): string => {
+type PendingLocation = { prefix: string; unreadablePrefix: string };
+
+/** `<prefix>/<id>.json` → `<unreadablePrefix>/<id>.json`. */
+const getUnreadablePath = (
+  { prefix, unreadablePrefix }: PendingLocation,
+  pendingPathname: string,
+): string => {
   // Otherwise the copy would land back on the pending path and the delete would lose the record.
   if (!pendingPathname.startsWith(`${prefix}/`)) {
     throw new Error(`${pendingPathname} is not under ${prefix}/`);
   }
-  return `${FEEDBACK_UNREADABLE_PREFIX}/${pendingPathname.slice(prefix.length + 1)}`;
+  return `${unreadablePrefix}/${pendingPathname.slice(prefix.length + 1)}`;
 };
 
 /** No `allowOverwrite`: every attempt has a fresh `submissionId`, so a repeat path is a bug. */
@@ -185,12 +189,12 @@ export const deletePendingRecord = async (pathname: string): Promise<void> => {
 
 /** Copies the bytes to the unreadable prefix, then deletes the original. */
 export const quarantinePendingRecord = async (
-  prefix: string,
+  location: PendingLocation,
   pathname: string,
   raw: string,
 ): Promise<void> => {
   const token = getFeedbackBlobToken();
-  await put(getUnreadablePath(prefix, pathname), raw, {
+  await put(getUnreadablePath(location, pathname), raw, {
     access: 'private',
     addRandomSuffix: false,
     allowOverwrite: true,

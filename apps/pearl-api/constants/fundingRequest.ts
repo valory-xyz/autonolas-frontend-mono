@@ -26,3 +26,6 @@ export const FUNDING_REQUEST_SHEET_RANGE = FUNDING_REQUEST_SHEET_TAB;
 
 /** Requests buffered in the private feedback Blob store after a Sheets failure. */
 export const FUNDING_REQUEST_PENDING_PREFIX = 'feedback/pending-funding-requests';
+
+/** Nested so a funding request cannot overwrite a quarantined survey with the same id. */
+export const FUNDING_REQUEST_UNREADABLE_PREFIX = 'feedback/unreadable/funding-requests';

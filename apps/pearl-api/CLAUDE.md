@@ -127,9 +127,10 @@ an internal demand signal.
   `405`, or `502` when both tiers fail.
 - Same two-tier delivery as the survey: a failed append buffers the validated request to the
   private feedback Blob store under `feedback/pending-funding-requests/<submissionId>.json`, and
-  `GET /api/feedback/replay-pending` drains that prefix too, after the surveys and within the same
-  batch (its counts are reported under `fundingRequests`). Unreadable records go to
-  `feedback/unreadable/`, as for the survey.
+  `GET /api/feedback/replay-pending` drains that prefix too, splitting one batch evenly with the
+  surveys so a stuck survey backlog cannot block it (its counts are reported under
+  `fundingRequests`). Unreadable records go to `feedback/unreadable/funding-requests/`, apart
+  from the surveys' so the same id cannot overwrite one.
 
 Rules that are easy to break:
 

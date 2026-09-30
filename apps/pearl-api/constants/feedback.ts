@@ -102,8 +102,8 @@ export const FEEDBACK_PENDING_PREFIX = 'feedback/pending';
 export const FEEDBACK_UNREADABLE_PREFIX = 'feedback/unreadable';
 
 /**
- * One cron run drains at most this many buffered records across **all** sources (surveys, then
- * funding requests), so a large backlog cannot time out.
+ * One cron run drains at most this many buffered records across **all** sources, split evenly
+ * between them, so a large backlog cannot time out.
  *
  * Sized against the `maxDuration: 60` that `vercel.json` gives the replay route. The loop is
  * sequential — one Blob read plus one Sheets append per record — so at a conservative ~400ms per

@@ -10,6 +10,7 @@ import {
   FEEDBACK_PENDING_PREFIX,
   FEEDBACK_UNREADABLE_PREFIX,
   FUNDING_REQUEST_PENDING_PREFIX,
+  FUNDING_REQUEST_UNREADABLE_PREFIX,
 } from '../constants';
 import type { PendingFeedbackRecord } from '../types/feedback';
 import type { PendingFundingRequestRecord } from '../types/fundingRequest';
@@ -45,6 +46,14 @@ const mockList = list as jest.MockedFunction<typeof list>;
 
 const VALID_UUID = '9f1c2b7e-5a3d-4f2e-8c11-6b0d7a4e93f5';
 const PATHNAME = `${FEEDBACK_PENDING_PREFIX}/${VALID_UUID}.json`;
+const SURVEY_LOCATION = {
+  prefix: FEEDBACK_PENDING_PREFIX,
+  unreadablePrefix: FEEDBACK_UNREADABLE_PREFIX,
+};
+const FUNDING_LOCATION = {
+  prefix: FUNDING_REQUEST_PENDING_PREFIX,
+  unreadablePrefix: FUNDING_REQUEST_UNREADABLE_PREFIX,
+};
 
 const record: PendingFeedbackRecord = {
   submittedAt: '2026-09-07T10:00:00.000Z',
@@ -124,7 +133,7 @@ describe('quarantinePendingRecord', () => {
   it('copies the bytes under the unreadable prefix before deleting the original', async () => {
     const raw = '{"broken":true}';
 
-    await quarantinePendingRecord(FEEDBACK_PENDING_PREFIX, PATHNAME, raw);
+    await quarantinePendingRecord(SURVEY_LOCATION, PATHNAME, raw);
 
     expect(mockPut).toHaveBeenCalledWith(
       `${FEEDBACK_UNREADABLE_PREFIX}/${VALID_UUID}.json`,
@@ -136,9 +145,9 @@ describe('quarantinePendingRecord', () => {
   });
 
   it('refuses a pathname outside the given prefix, touching nothing', async () => {
-    await expect(
-      quarantinePendingRecord(FUNDING_REQUEST_PENDING_PREFIX, PATHNAME, 'x'),
-    ).rejects.toThrow(`${PATHNAME} is not under ${FUNDING_REQUEST_PENDING_PREFIX}/`);
+    await expect(quarantinePendingRecord(FUNDING_LOCATION, PATHNAME, 'x')).rejects.toThrow(
+      `${PATHNAME} is not under ${FUNDING_REQUEST_PENDING_PREFIX}/`,
+    );
 
     expect(mockPut).not.toHaveBeenCalled();
     expect(mockDel).not.toHaveBeenCalled();
@@ -224,11 +233,11 @@ describe('pending prefixes', () => {
     ).resolves.toEqual({ status: 'ok', record: fundingRecord });
   });
 
-  it('quarantines a funding request into the shared unreadable prefix', async () => {
-    await quarantinePendingRecord(FUNDING_REQUEST_PENDING_PREFIX, FUNDING_PATHNAME, 'x');
+  it('quarantines a funding request apart from a survey with the same id', async () => {
+    await quarantinePendingRecord(FUNDING_LOCATION, FUNDING_PATHNAME, 'x');
 
     expect(mockPut).toHaveBeenCalledWith(
-      `${FEEDBACK_UNREADABLE_PREFIX}/${VALID_UUID}.json`,
+      `${FUNDING_REQUEST_UNREADABLE_PREFIX}/${VALID_UUID}.json`,
       'x',
       expect.objectContaining({ token: FEEDBACK_TOKEN }),
     );
