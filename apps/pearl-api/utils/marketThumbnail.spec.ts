@@ -62,6 +62,10 @@ describe('getMarketImageUrl', () => {
     mockRequest.mockRejectedValue(new Error('gateway down'));
 
     await expect(getMarketImageUrl('0xabc')).resolves.toBeNull();
+    expect(console.error).toHaveBeenCalledWith(
+      expect.stringContaining('fpmm=0xabc'),
+      expect.any(Error),
+    );
   });
 });
 
@@ -81,6 +85,9 @@ describe('fetchMarketImage', () => {
     jest.spyOn(global, 'fetch').mockResolvedValue(new Response(null, { status: 404 }));
 
     await expect(fetchMarketImage('https://example.com/x.png')).resolves.toBeNull();
+    expect(console.error).toHaveBeenCalledWith(
+      expect.stringContaining('url=https://example.com/x.png'),
+    );
   });
 
   it('returns null when the fetch throws', async () => {
@@ -88,5 +95,9 @@ describe('fetchMarketImage', () => {
     jest.spyOn(global, 'fetch').mockRejectedValue(new Error('timeout'));
 
     await expect(fetchMarketImage('https://example.com/x.png')).resolves.toBeNull();
+    expect(console.error).toHaveBeenCalledWith(
+      expect.stringContaining('url=https://example.com/x.png'),
+      expect.any(Error),
+    );
   });
 });

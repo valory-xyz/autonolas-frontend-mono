@@ -53,7 +53,13 @@ export default async function handler(
   } catch (error) {
     const { agent, type, id } = req.query;
     // A constant format string keeps raw query values from being read as format specifiers.
-    console.error('Error getting achievement data for agent=%s, type=%s, id=%s:', agent, type, id, error);
+    console.error(
+      'Error getting achievement data for agent=%s, type=%s, id=%s:',
+      agent,
+      type,
+      id,
+      error,
+    );
     return res.status(500).json({
       error: 'Internal Server Error',
       message: error instanceof Error ? error.message : 'An unknown error occurred',

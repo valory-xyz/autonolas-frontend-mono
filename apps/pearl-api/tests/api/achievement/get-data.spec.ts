@@ -105,6 +105,21 @@ describe('GET /api/achievement/get-data', () => {
     expect(res.headers['Cache-Control']).toBeUndefined();
   });
 
+  it('logs raw query values as arguments, not inside the format string', async () => {
+    const error = new Error('subgraph down');
+    mockGetAchievementData.mockRejectedValue(error);
+
+    await call({ agent: 'omenstrat', type: 'payout', id: BET_ID });
+
+    expect(console.error).toHaveBeenCalledWith(
+      'Error getting achievement data for agent=%s, type=%s, id=%s:',
+      'omenstrat',
+      'payout',
+      BET_ID,
+      error,
+    );
+  });
+
   it('rejects non-GET methods', async () => {
     const res = await call({ agent: 'omenstrat', type: 'payout', id: BET_ID }, 'POST');
 

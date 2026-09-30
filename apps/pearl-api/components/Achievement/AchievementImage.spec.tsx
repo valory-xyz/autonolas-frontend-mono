@@ -69,9 +69,7 @@ describe('generateAchievementImage', () => {
     mockGetAchievementData.mockResolvedValue(DATA);
     mockFetchMarketImage.mockResolvedValue(new ArrayBuffer(1));
 
-    await expect(generateAchievementImage(PARAMS, 'https://pearl')).resolves.toBeInstanceOf(
-      Buffer,
-    );
+    await expect(generateAchievementImage(PARAMS, 'https://pearl')).resolves.toBeInstanceOf(Buffer);
 
     expect(mockFetchMarketImage).toHaveBeenCalledWith(MARKET_IMAGE_URL);
     const { html, imageKeys } = renderedCall();
@@ -84,9 +82,7 @@ describe('generateAchievementImage', () => {
     mockGetAchievementData.mockResolvedValue(DATA);
     mockFetchMarketImage.mockResolvedValue(null);
 
-    await expect(generateAchievementImage(PARAMS, 'https://pearl')).resolves.toBeInstanceOf(
-      Buffer,
-    );
+    await expect(generateAchievementImage(PARAMS, 'https://pearl')).resolves.toBeInstanceOf(Buffer);
 
     const { html, imageKeys } = renderedCall();
     expect(imageKeys).toEqual(['omenstrat']);
