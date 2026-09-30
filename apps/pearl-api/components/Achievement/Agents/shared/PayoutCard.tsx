@@ -202,16 +202,19 @@ type MarketCardProps = {
 
 const MarketCard = ({ question, stats, marketImageSrc }: MarketCardProps) => {
   const isLongQuestion = question.length > 120;
+  const questionStyle = { ...styles.marketQuestion, fontSize: isLongQuestion ? 24 : 30 };
 
   return (
     <div style={{ ...styles.marketCard, marginBottom: isLongQuestion ? 32 : 40 }}>
-      {/* The icon is taller than one line of text; trim padding so the CTA stays in frame. */}
-      <div style={{ ...styles.marketInfo, padding: marketImageSrc ? '24px 40px' : '38px 40px' }}>
-        {marketImageSrc && <img src={marketImageSrc} alt="Market" style={styles.marketIcon} />}
-        <div style={{ ...styles.marketQuestion, fontSize: isLongQuestion ? 24 : 30 }}>
-          {question}
+      {marketImageSrc ? (
+        // The icon is taller than one line of text; trim padding so the CTA stays in frame.
+        <div style={{ ...styles.marketInfo, padding: '24px 40px' }}>
+          <img src={marketImageSrc} alt="Market" style={styles.marketIcon} />
+          <div style={questionStyle}>{question}</div>
         </div>
-      </div>
+      ) : (
+        <div style={{ ...questionStyle, padding: '38px 40px' }}>{question}</div>
+      )}
       <DashedDivider />
       <StatsRow stats={stats} />
     </div>

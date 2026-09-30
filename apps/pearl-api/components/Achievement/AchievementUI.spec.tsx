@@ -51,6 +51,10 @@ describe('AchievementUI', () => {
     expect(html).not.toContain('alt="Market"');
   });
 
+  it('keeps the Polystrat card layout', () => {
+    expect(render('polystrat')).toMatchSnapshot();
+  });
+
   it('falls back for an unsupported agent', () => {
     expect(render('optimus')).toContain('Agent not yet supported.');
   });
