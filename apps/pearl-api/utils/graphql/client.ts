@@ -34,9 +34,11 @@ export const getPredictPolymarketClient = (): GraphQLClient => {
 export const getPredictOmenClient = (): GraphQLClient => {
   if (predictOmenClient) return predictOmenClient;
 
-  const url = process.env.PREDICT_OMEN_URL;
+  const url = process.env.NEXT_PUBLIC_OLAS_PREDICT_AGENTS_SUBGRAPH_URL;
   if (!url) {
-    throw new Error('Environment variable PREDICT_OMEN_URL is not set.');
+    throw new Error(
+      'Environment variable NEXT_PUBLIC_OLAS_PREDICT_AGENTS_SUBGRAPH_URL is not set.',
+    );
   }
 
   predictOmenClient = createClient(url);

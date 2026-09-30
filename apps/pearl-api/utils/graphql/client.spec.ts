@@ -3,7 +3,7 @@
  */
 const ENV_KEYS = [
   'NEXT_PUBLIC_OLAS_POLYMARKET_AGENTS_SQUID_URL',
-  'PREDICT_OMEN_URL',
+  'NEXT_PUBLIC_OLAS_PREDICT_AGENTS_SUBGRAPH_URL',
   'THEGRAPH_API_KEY',
 ] as const;
 
@@ -26,7 +26,7 @@ describe('graphql clients', () => {
     const { getPredictPolymarketClient, getPredictOmenClient } = loadClientModule();
 
     expect(getPredictPolymarketClient).toThrow('NEXT_PUBLIC_OLAS_POLYMARKET_AGENTS_SQUID_URL');
-    expect(getPredictOmenClient).toThrow('PREDICT_OMEN_URL');
+    expect(getPredictOmenClient).toThrow('NEXT_PUBLIC_OLAS_PREDICT_AGENTS_SUBGRAPH_URL');
   });
 
   it('builds each agent client once its URL is set', () => {
@@ -34,7 +34,7 @@ describe('graphql clients', () => {
 
     expect(loadClientModule().getPredictPolymarketClient()).toBeDefined();
 
-    process.env.PREDICT_OMEN_URL = 'https://omen.example/graphql';
+    process.env.NEXT_PUBLIC_OLAS_PREDICT_AGENTS_SUBGRAPH_URL = 'https://omen.example/graphql';
     const { getPredictOmenClient } = loadClientModule();
     expect(getPredictOmenClient()).toBeDefined();
     expect(getPredictOmenClient()).toBe(getPredictOmenClient());
@@ -48,7 +48,7 @@ describe('graphql clients', () => {
   });
 
   it('bounds every request with a timeout signal', async () => {
-    process.env.PREDICT_OMEN_URL = 'https://omen.example/graphql';
+    process.env.NEXT_PUBLIC_OLAS_PREDICT_AGENTS_SUBGRAPH_URL = 'https://omen.example/graphql';
     const signal = new AbortController().signal;
     const timeoutSpy = jest.spyOn(AbortSignal, 'timeout').mockReturnValue(signal);
     const fetchSpy = jest

@@ -25,8 +25,8 @@ Guidance for working on the **Pearl API** app in this repo.
 - **Achievements Blob store** (public): `BLOB_READ_WRITE_TOKEN`, resolved by the SDK from the
   environment.
 - **Achievement card data**: `NEXT_PUBLIC_OLAS_POLYMARKET_AGENTS_SQUID_URL` (Polystrat bets, the
-  predict-polymarket SQD squid), `PREDICT_OMEN_URL` (predict-omen subgraph for Omenstrat bets;
-  both agent URLs are required when used and have no default) and `THEGRAPH_API_KEY` (server-only;
+  predict-polymarket SQD squid), `NEXT_PUBLIC_OLAS_PREDICT_AGENTS_SUBGRAPH_URL` (predict-omen
+  subgraph for Omenstrat bets; both agent URLs are required when used and have no default) and `THEGRAPH_API_KEY` (server-only;
   Omen market thumbnails). The clients are built on first use, so a missing variable fails only the agent that needs it, and a
   missing `THEGRAPH_API_KEY` renders the Omenstrat card without the market icon.
 - **Onboarding survey**: `GOOGLE_SHEETS_CLIENT_EMAIL`, `GOOGLE_SHEETS_PRIVATE_KEY`,
