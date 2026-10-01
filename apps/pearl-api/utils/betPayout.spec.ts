@@ -58,13 +58,13 @@ describe('getOmenBuyPayout', () => {
     expect(getOmenBuyPayout(buys, 'lose', 2n * WEI, 0)).toBeNull();
   });
 
-  it('returns only sell proceeds before the participant is paid out', () => {
+  it('rejects an unredeemed Omen buy despite sell proceeds', () => {
     const buys = allocateFifo([
       row('buy', 2n * WEI, 4n * WEI, 1),
       row('sell', -1n * WEI, -2n * WEI, 2),
     ]);
 
-    expect(getOmenBuyPayout(buys, 'buy', 0n, 0)).toBe(1n * WEI);
+    expect(getOmenBuyPayout(buys, 'buy', 0n, 0)).toBeNull();
   });
 });
 
@@ -81,14 +81,19 @@ describe('getPolymarketBuyPayout', () => {
     expect(getPolymarketBuyPayout(buys, 'b', 5n * USDC, 0)).toBe(3n * USDC);
   });
 
-  it('adds sell proceeds to the unsold shares of a partly sold buy', () => {
-    const buys = allocateFifo([
-      row('buy', 2n * USDC, 4n * USDC, 1),
-      { ...row('sell', -3n * USDC, -2n * USDC, 2), isBuy: false },
-    ]);
+  it.each([0n, 9_999n, 10_000n, 10_001n, 2n * USDC])(
+    'handles remaining shares %s with trader dust semantics',
+    (remainingShares) => {
+      const buys = allocateFifo([
+        row('buy', 2n * USDC, 4n * USDC, 1),
+        { ...row('sell', -3n * USDC, -(4n * USDC - remainingShares), 2), isBuy: false },
+      ]);
 
-    expect(getPolymarketBuyPayout(buys, 'buy', 2n * USDC, 0)).toBe(5n * USDC);
-  });
+      expect(getPolymarketBuyPayout(buys, 'buy', 2n * USDC, 0)).toBe(
+        3n * USDC + (remainingShares <= 10_000n ? 0n : remainingShares),
+      );
+    },
+  );
 
   it('returns null for a losing buy', () => {
     const buys = allocateFifo([row('buy', 1n * USDC, 2n * USDC, 1, 1)]);

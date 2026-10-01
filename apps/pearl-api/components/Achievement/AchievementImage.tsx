@@ -28,8 +28,7 @@ const getPersistentImages = async (
 };
 
 /**
- * Renders the achievement card. Returns null when the achievement data is not
- * found, so the API does not generate an image.
+ * Renders the card when getAchievementData returns eligible figures.
  */
 export const generateAchievementImage = async (
   params: AchievementQueryParams,

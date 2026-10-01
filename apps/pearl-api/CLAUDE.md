@@ -48,8 +48,9 @@ Guidance for working on the **Pearl API** app in this repo.
 
 ## Achievements (winning cards)
 
-Pearl posts `generate-image?agent&type&id` when it shows a winning-card pop-up; olas-predict reads
-`get-image` for `og:image` and `get-data` for the card figures of its public page.
+Pearl posts `generate-image?agent&type&id` for the winning card sharing image. Predict reads
+the generated OG image through the Blob lookup and fetches its card figures directly from
+the venue-specific data sources; it does not consume `get-data`.
 
 - Agents: `polystrat` and `omenstrat`, type `payout`. `id` is the bet id the agent put in the
   achievement record; `_` is allowed for squid ids (`0x…_1460`), and legacy Polymarket ids are
@@ -137,3 +138,14 @@ unauthenticated by product requirement, so abuse control lives there rather than
 - This app is API- and auth-focused; it does not use the same WalletConnect/Web3Modal pattern as Bond, Marketplace, etc.
 - Zendesk and Web3Auth env vars must be set for those features to work.
 - CORS is **not** configurable by env var — `utils/cors.ts` hardcodes the localhost origin check.
+
+### Achievement eligibility
+
+- Both agents require per-buy payout / original cost strictly above 1.5.
+- Omenstrat requires a winning outcome, positive redeemed participant payout and
+  FIFO shares remaining above 10^16 base units. Redemption is the finalization signal;
+  provisional answers and sale proceeds alone cannot qualify. Fully sold buys are excluded.
+- Polystrat follows trader's existing hybrid rule: a resolved, non-invalid market with
+  a profitable fully exited buy can qualify regardless of outcome. Otherwise require a
+  redeemed winning outcome. Remaining shares <=10,000 base units contribute no redemption.
+- `marketImageUrl` remains null for compatibility; no thumbnail subgraph is queried.

@@ -1,5 +1,5 @@
 import { PredictionBetData } from '../types';
-import { allocateFifo, formatBetFigures, getPolymarketBuyPayout } from './betPayout';
+import { allocateFifo, formatBetFigures, getPolymarketBuyPayout, isHighReturn } from './betPayout';
 import { getPredictPolymarketClient } from './graphql/client';
 import { getPolymarketDataQuery } from './graphql/queries';
 
@@ -48,10 +48,6 @@ type PolymarketDataResponse = {
   } | null;
 };
 
-/**
- * Returns the card figures for a Polymarket buy that won, or null when the bet
- * is unknown, the market is unresolved or cancelled, or the buy did not win.
- */
 export const getPolymarketBet = async (id: string): Promise<PredictionBetData | null> => {
   const squidBetId = toSquidBetId(id);
   if (!squidBetId) return null;
@@ -80,7 +76,7 @@ export const getPolymarketBet = async (id: string): Promise<PredictionBetData | 
   if (!buy) return null;
 
   const won = getPolymarketBuyPayout(buys, bet.id, BigInt(totalPayout), Number(winningIndex));
-  if (won === null || won <= 0n) return null;
+  if (won === null || !isHighReturn(buy.originalCost, won)) return null;
 
   return {
     question: bet.question?.metadata?.title ?? 'N/A',

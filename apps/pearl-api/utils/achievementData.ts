@@ -4,7 +4,8 @@ import { getPolymarketBet } from './polystrat';
 
 /**
  * Fetches the figures for one achievement. Null means the achievement does not
- * exist or is not a settled win; upstream errors are thrown.
+ * exist or does not qualify (>1.5x, with venue-specific settlement rules);
+ * upstream errors are thrown.
  */
 export const getAchievementData = async (
   params: AchievementQueryParams,

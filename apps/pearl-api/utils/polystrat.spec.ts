@@ -88,6 +88,17 @@ describe('getPolymarketBet', () => {
 
   it.each([
     ['the market is unresolved', response({ winningIndex: null })],
+    ['the participant has not redeemed', response({ totalPayout: 0n })],
+    ['the return is exactly 1.5x', response({ bets: [row(SQUID_ID, USDC, 1_500_000n, true, 1)] })],
+    [
+      'the buy was sold at a loss',
+      response({
+        bets: [
+          row(SQUID_ID, USDC, 2n * USDC, true, 1),
+          row('sell', -400_000n, -2n * USDC, false, 2),
+        ],
+      }),
+    ],
     ['the market was cancelled', response({ winningIndex: '-1' })],
     ['the buy lost', response({ winningIndex: '1' })],
     ['the bet does not exist', { betById: null }],

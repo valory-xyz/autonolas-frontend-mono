@@ -79,6 +79,19 @@ describe('getOmenBet', () => {
   it.each([
     ['the participant is unknown', { marketParticipants: [] }],
     ['the market is unresolved', response({ currentAnswer: null })],
+    ['the participant has not redeemed', response({ totalPayout: 0n })],
+    ['the return is exactly 1.5x', response({ totalPayout: 15n * 10n ** 17n })],
+    ['the return is a loss', response({ totalPayout: 4n * 10n ** 17n })],
+    [
+      'the buy was fully sold',
+      response({ bets: [bet(BUY_ID, WEI, 2n * WEI, 1), bet('sell', -3n * WEI, -2n * WEI, 2)] }),
+    ],
+    [
+      'only dust remains',
+      response({
+        bets: [bet(BUY_ID, WEI, 2n * WEI, 1), bet('sell', -3n * WEI, -(2n * WEI - 10n ** 16n), 2)],
+      }),
+    ],
     ['the market is invalid', response({ currentAnswer: INVALID })],
     ['the buy lost', response({ currentAnswer: NO })],
     ['the bet is not in the participant history', response({ bets: [] })],

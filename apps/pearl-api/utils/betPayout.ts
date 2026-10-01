@@ -29,6 +29,13 @@ export type FifoBuy = {
 const max = (a: bigint, b: bigint) => (a > b ? a : b);
 const min = (a: bigint, b: bigint) => (a < b ? a : b);
 
+// Match the trader's dust thresholds in each venue's outcome-token base units.
+const OMEN_SHARES_EPSILON = 10n ** 16n;
+const POLYMARKET_SHARES_EPSILON = 10_000n;
+
+export const isHighReturn = (cost: bigint, payout: bigint): boolean =>
+  cost > 0n && payout * 2n > cost * 3n;
+
 const remainingCost = (buy: FifoBuy) => max(buy.originalCost - buy.allocatedCost, 0n);
 
 /**
@@ -86,7 +93,7 @@ export const allocateFifo = (rows: PayoutBetRow[]): FifoBuy[] => {
 /**
  * Omen: this buy's sell proceeds plus its share of the participant's payout,
  * pro-rated by unsold cost across the participant's winning buys.
- * Returns null when the buy is not on the winning outcome.
+ * Requires a redeemed winning position with shares remaining above dust.
  */
 export const getOmenBuyPayout = (
   buys: FifoBuy[],
@@ -95,13 +102,19 @@ export const getOmenBuyPayout = (
   winningIndex: number,
 ): bigint | null => {
   const buy = buys.find(({ id }) => id === buyId);
-  if (!buy || buy.outcomeIndex !== winningIndex) return null;
+  if (
+    !buy ||
+    buy.outcomeIndex !== winningIndex ||
+    buy.remainingShares <= OMEN_SHARES_EPSILON ||
+    totalPayout <= 0n
+  )
+    return null;
 
   const winningTotal = buys
     .filter(({ outcomeIndex }) => outcomeIndex === winningIndex)
     .reduce((sum, winningBuy) => sum + remainingCost(winningBuy), 0n);
 
-  if (totalPayout <= 0n || winningTotal <= 0n) return buy.allocatedProceeds;
+  if (winningTotal <= 0n) return null;
 
   return buy.allocatedProceeds + (totalPayout * remainingCost(buy)) / winningTotal;
 };
@@ -109,7 +122,7 @@ export const getOmenBuyPayout = (
 /**
  * Polymarket: this buy's sell proceeds plus one collateral unit per unsold
  * share, counted once the participant has been paid out.
- * Returns null when the buy is not on the winning outcome.
+ * Fully exited profitable buys retain trader's sale-profit classification.
  */
 export const getPolymarketBuyPayout = (
   buys: FifoBuy[],
@@ -118,9 +131,14 @@ export const getPolymarketBuyPayout = (
   winningIndex: number,
 ): bigint | null => {
   const buy = buys.find(({ id }) => id === buyId);
-  if (!buy || buy.outcomeIndex !== winningIndex) return null;
+  if (!buy || winningIndex < 0) return null;
 
-  if (totalPayout <= 0n || buy.remainingShares <= 0n) return buy.allocatedProceeds;
+  // Trader classifies fully exited Polystrat buys by realised profit, even
+  // on the losing outcome. Dust contributes no redemption value.
+  if (buy.originalShares > 0n && buy.remainingShares <= POLYMARKET_SHARES_EPSILON) {
+    return buy.allocatedProceeds > buy.allocatedCost ? buy.allocatedProceeds : null;
+  }
+  if (buy.outcomeIndex !== winningIndex || totalPayout <= 0n) return null;
 
   return buy.allocatedProceeds + buy.remainingShares;
 };
