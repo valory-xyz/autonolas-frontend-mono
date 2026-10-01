@@ -4,7 +4,7 @@ Guidance for working on the **Pearl API** app in this repo.
 
 ## Purpose
 
-**API and auth backend** for Olas: provides Next.js API routes and Web3Auth-based flows. Used for support (Zendesk), achievements (image generation), agent eligibility (geo), Pearl onboarding-survey feedback, and Web3Auth login/session management. Not a typical frontend; it’s an API app with a few front-end pages for Web3Auth.
+**API and auth backend** for Olas: provides Next.js API routes and Web3Auth-based flows. Used for support (Zendesk), achievements (image generation), agent eligibility (geo), Pearl onboarding-survey feedback, Pearl funding-flow chain/token requests, and Web3Auth login/session management. Not a typical frontend; it’s an API app with a few front-end pages for Web3Auth.
 
 ## Port
 
@@ -13,7 +13,7 @@ Guidance for working on the **Pearl API** app in this repo.
 ## Stack
 
 - **Wallet / Auth**: **Web3Auth** (modal, login, swap-owner-session). Not WalletConnect for general dapp use; used for embedded auth/session.
-- **API routes**: Next.js `pages/api/` – Zendesk (create-ticket, upload-file), achievement (get-image, generate-image), geo (agent-eligibility), feedback (onboarding-survey, replay-pending).
+- **API routes**: Next.js `pages/api/` – Zendesk (create-ticket, upload-file), achievement (get-image, generate-image), geo (agent-eligibility), feedback (onboarding-survey, funding-request, replay-pending).
 - **Key libs**: No shared Nx libs in project config; uses Next.js, Web3Auth, styled-components, and app-local `context/`, `hooks/`, `utils/`, `constants/`, `types/`.
 
 ## Env / backends
@@ -73,8 +73,10 @@ Rules that are easy to break:
   export with care rather than trusting the cell.
 - **Both Google calls carry `AbortSignal.timeout`.** Without it a stalled connection runs to the
   route's `maxDuration`, Vercel kills the function, and the Blob fallback never runs.
-- **The replay cron answers 500 when anything failed or was left undeleted**, so a backlog that
-  never drains shows up in Vercel's cron history.
+- **The replay cron answers 500 when anything failed, was left undeleted, or was left pending
+  beyond the run's batch**, so a backlog that never drains shows up in Vercel's cron history. Each
+  source is listed and drained on its own: a source whose list fails counts as `failed` and the
+  others still drain.
 - **There is no server-side dedup.** `submissionId` exists so duplicates can be filtered during
   analysis; a client must not auto-retry a 2xx.
 - **Pending blobs live in a separate private Blob store.** They hold free text and must not be
@@ -110,6 +112,44 @@ achievements store's `BLOB_READ_WRITE_TOKEN`.
 **Also configure in the Vercel dashboard** (not in this repo): a WAF rate-limit rule on
 `/api/feedback/onboarding-survey`, keyed by IP, fixed window, `429` action. The endpoint is
 unauthenticated by product requirement, so abuse control lives there rather than in code.
+
+## Funding requests (OPE-1903)
+
+Pearl's funding flow offers "Other chain" / "Other token". Submitting one records the request as
+an internal demand signal.
+
+- `POST /api/feedback/funding-request` – public, called by Pearl's renderer directly (the
+  middleware is not involved). Body `{ submissionId, kind: "chain" | "token", requestedName,
+  contextChain }`; `contextChain` is `null` for a chain request and the already-selected chain's
+  middleware name (e.g. `base`) for a token request. Appends one row to the `FundingRequests` tab
+  of the **same** spreadsheet as the survey (`PEARL_FEEDBACK_SHEET_ID`), columns
+  `FUNDING_REQUEST_SHEET_COLUMNS` in `constants/fundingRequest.ts`. Answers `{ ok: true }`, `400`,
+  `405`, or `502` when both tiers fail.
+- Same two-tier delivery as the survey: a failed append buffers the validated request to the
+  private feedback Blob store under `feedback/pending-funding-requests/<submissionId>.json`, and
+  `GET /api/feedback/replay-pending` drains that prefix too, splitting one batch evenly with the
+  surveys so a stuck survey backlog cannot block it (its counts are reported under
+  `fundingRequests`). Unreadable records go to `feedback/unreadable/funding-requests/`, apart
+  from the surveys' so the same id cannot overwrite one.
+
+Rules that are easy to break:
+
+- **Anonymity by construction.** The payload is the requested name plus, for a token, the chain
+  it was asked on, which must be a lowercase slug starting with a letter so an address cannot
+  pass. No wallet address, balance, account id, IP or Pearl version may be added. The row mapper
+  and the Blob writer read the typed `FundingRequestSubmission`, never `req.body`.
+- **The acknowledgement is neutral.** The response body is only `{ ok: true }`; the copy Pearl
+  shows promises nothing about the request being acted on.
+- **Free text is untrusted.** `valueInputOption=RAW` keeps a leading `=`/`+` from being evaluated
+  in Sheets, but a CSV export opened in Excel or Numbers will evaluate it — export with care.
+- All the survey rules above about `INSERT_ROWS`, `AbortSignal.timeout`, the private Blob token,
+  no overwrite on `put` and no server-side dedup apply unchanged: the route reuses the same
+  helpers.
+
+**One-time setup** (not code): add a `FundingRequests` tab to the existing feedback spreadsheet
+with the header row `request_id, submitted_at, kind, requested_name, context_chain`. The service
+account already has access. In the Vercel dashboard, add a WAF rate-limit rule on
+`/api/feedback/funding-request`, keyed by IP, mirroring the survey route's.
 
 ## Notes
 

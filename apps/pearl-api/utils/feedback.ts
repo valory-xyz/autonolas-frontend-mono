@@ -17,9 +17,10 @@ import type {
   SurveyRating,
 } from '../types/feedback';
 
-const UUID_V4_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+export const UUID_V4_PATTERN =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
-const isRecord = (value: unknown): value is Record<string, unknown> =>
+export const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
 
 const isFrictionArea = (value: unknown): value is FrictionArea =>
@@ -126,7 +127,8 @@ export const parseOnboardingSurveySubmission = (
 const SECONDS_PER_MINUTE = 60;
 
 /** `2026-09-02T14:32:10Z`, the second-precision form the sheet's examples use. */
-const toSheetTimestamp = (isoTimestamp: string): string => isoTimestamp.replace(/\.\d{3}Z$/, 'Z');
+export const toSheetTimestamp = (isoTimestamp: string): string =>
+  isoTimestamp.replace(/\.\d{3}Z$/, 'Z');
 
 type StepColumn = Extract<FeedbackSheetColumn, `step_${string}`>;
 
@@ -192,7 +194,10 @@ export const mapSubmissionToSheetRow = (
  * path carries the same "only the typed value reaches the sheet" guarantee. Returns `null` for
  * anything unparseable so the caller can quarantine it instead of retrying forever.
  */
-export const parsePendingFeedbackRecord = (body: string): PendingFeedbackRecord | null => {
+export const parsePendingRecord = <T>(
+  body: string,
+  parseSubmission: (value: unknown) => T | null,
+): { submittedAt: string; submission: T } | null => {
   let parsed: unknown;
   try {
     parsed = JSON.parse(body);
@@ -205,11 +210,14 @@ export const parsePendingFeedbackRecord = (body: string): PendingFeedbackRecord 
     return null;
   }
 
-  const submission = parseOnboardingSurveySubmission(parsed.submission);
+  const submission = parseSubmission(parsed.submission);
   if (!submission) return null;
 
   return { submittedAt: parsed.submittedAt, submission };
 };
+
+export const parsePendingFeedbackRecord = (body: string): PendingFeedbackRecord | null =>
+  parsePendingRecord(body, parseOnboardingSurveySubmission);
 
 /** `application/json`, with or without a `; charset=...` parameter. */
 export const isJsonContentType = (contentType: string | string[] | undefined): boolean =>
