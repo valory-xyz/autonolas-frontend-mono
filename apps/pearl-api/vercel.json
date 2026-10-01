@@ -15,6 +15,9 @@
     "pages/api/feedback/onboarding-survey.ts": {
       "maxDuration": 30
     },
+    "pages/api/feedback/funding-request.ts": {
+      "maxDuration": 30
+    },
     "pages/api/feedback/replay-pending.ts": {
       "maxDuration": 60
     }

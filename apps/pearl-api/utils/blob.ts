@@ -5,15 +5,15 @@ import type {
   AchievementQueryParams,
   AchievementsLookupJson,
 } from '../types/achievement';
-import type { PendingFeedbackRead, PendingFeedbackRecord } from '../types/feedback';
+import type { PendingFeedbackRecord, PendingRecordRead } from '../types/feedback';
+import type { PendingFundingRequestRecord } from '../types/fundingRequest';
 import { ACHIEVEMENTS_LOOKUP_PREFIX } from '../constants/achievement';
 import {
   FEEDBACK_BLOB_CONFIG,
   FEEDBACK_PENDING_PREFIX,
   FEEDBACK_REPLAY_BATCH_SIZE,
-  FEEDBACK_UNREADABLE_PREFIX,
 } from '../constants/feedback';
-import { parsePendingFeedbackRecord } from './feedback';
+import { FUNDING_REQUEST_PENDING_PREFIX } from '../constants/fundingRequest';
 
 // New per-entry path: achievements-lookup/{agent}/{type}/{id}.json
 const getEntryFileName = (agent: string, type: string, id: string): string =>
@@ -95,12 +95,13 @@ export const setLookupEntry = async (
 };
 
 // ---------------------------------------------------------------------------
-// Onboarding-survey pending buffer
+// Feedback pending buffer (onboarding surveys and funding requests)
 //
 // A submission lands here only when the Google Sheets write failed, and lives here only until
-// the replay cron appends it. Unlike the achievement blobs above, these hold free-text feedback
-// and must not be readable by URL, so they live in a separate *private* store (store access is
-// fixed at creation) and every call passes that store's token explicitly.
+// the replay cron appends it. Unlike the achievement blobs above, these hold free text and must
+// not be readable by URL, so they live in a separate *private* store (store access is fixed at
+// creation) and every call passes that store's token explicitly. Each kind of record has its own
+// prefix; the helpers below are shared.
 // ---------------------------------------------------------------------------
 
 const getFeedbackBlobToken = (): string => {
@@ -113,16 +114,30 @@ const getFeedbackBlobToken = (): string => {
   return token;
 };
 
-const getPendingFeedbackPath = (submissionId: string): string =>
-  `${FEEDBACK_PENDING_PREFIX}/${submissionId}.json`;
+const getPendingPath = (prefix: string, submissionId: string): string =>
+  `${prefix}/${submissionId}.json`;
 
-/** `feedback/pending/<id>.json` → `feedback/unreadable/<id>.json`. */
-const getUnreadableFeedbackPath = (pendingPathname: string): string =>
-  pendingPathname.replace(`${FEEDBACK_PENDING_PREFIX}/`, `${FEEDBACK_UNREADABLE_PREFIX}/`);
+type PendingLocation = { prefix: string; unreadablePrefix: string };
+
+/** `<prefix>/<id>.json` → `<unreadablePrefix>/<id>.json`. */
+const getUnreadablePath = (
+  { prefix, unreadablePrefix }: PendingLocation,
+  pendingPathname: string,
+): string => {
+  // Otherwise the copy would land back on the pending path and the delete would lose the record.
+  if (!pendingPathname.startsWith(`${prefix}/`)) {
+    throw new Error(`${pendingPathname} is not under ${prefix}/`);
+  }
+  return `${unreadablePrefix}/${pendingPathname.slice(prefix.length + 1)}`;
+};
 
 /** No `allowOverwrite`: every attempt has a fresh `submissionId`, so a repeat path is a bug. */
-export const putPendingFeedback = async (record: PendingFeedbackRecord): Promise<void> => {
-  await put(getPendingFeedbackPath(record.submission.submissionId), JSON.stringify(record), {
+const putPendingRecord = async (
+  prefix: string,
+  submissionId: string,
+  record: unknown,
+): Promise<void> => {
+  await put(getPendingPath(prefix, submissionId), JSON.stringify(record), {
     access: 'private',
     addRandomSuffix: false,
     contentType: 'application/json',
@@ -130,35 +145,56 @@ export const putPendingFeedback = async (record: PendingFeedbackRecord): Promise
   });
 };
 
-export const listPendingFeedbackPaths = async (): Promise<string[]> => {
-  const { blobs } = await list({
-    prefix: `${FEEDBACK_PENDING_PREFIX}/`,
-    limit: FEEDBACK_REPLAY_BATCH_SIZE,
+export const putPendingFeedback = (record: PendingFeedbackRecord): Promise<void> =>
+  putPendingRecord(FEEDBACK_PENDING_PREFIX, record.submission.submissionId, record);
+
+export const putPendingFundingRequest = (record: PendingFundingRequestRecord): Promise<void> =>
+  putPendingRecord(FUNDING_REQUEST_PENDING_PREFIX, record.submission.submissionId, record);
+
+/** `hasMore` is set when records beyond `limit` are still pending. */
+export const listPendingPaths = async (
+  prefix: string,
+  limit: number = FEEDBACK_REPLAY_BATCH_SIZE,
+): Promise<{ pathnames: string[]; hasMore: boolean }> => {
+  const { blobs, hasMore } = await list({
+    prefix: `${prefix}/`,
+    limit,
     token: getFeedbackBlobToken(),
   });
 
-  return blobs.map((blob) => blob.pathname);
+  return { pathnames: blobs.map((blob) => blob.pathname), hasMore };
 };
 
-/** Re-validates a buffered submission; `unreadable` lets the caller quarantine it instead of retrying forever. */
-export const getPendingFeedback = async (pathname: string): Promise<PendingFeedbackRead> => {
+/** Re-validates a buffered record; `unreadable` lets the caller quarantine it instead of retrying forever. */
+export const getPendingRecord = async <T>(
+  pathname: string,
+  parse: (raw: string) => T | null,
+): Promise<PendingRecordRead<T>> => {
   const result = await get(pathname, { access: 'private', token: getFeedbackBlobToken() });
-  if (result?.statusCode !== 200 || !result.stream) return { status: 'missing' };
+  if (!result) return { status: 'missing' };
+  if (result.statusCode !== 200 || !result.stream) {
+    console.warn(`Pending blob ${pathname} not readable (status ${result.statusCode})`);
+    return { status: 'missing' };
+  }
 
   const raw = await new Response(result.stream).text();
-  const record = parsePendingFeedbackRecord(raw);
+  const record = parse(raw);
 
   return record ? { status: 'ok', record } : { status: 'unreadable', raw };
 };
 
-export const deletePendingFeedback = async (pathname: string): Promise<void> => {
+export const deletePendingRecord = async (pathname: string): Promise<void> => {
   await del(pathname, { token: getFeedbackBlobToken() });
 };
 
 /** Copies the bytes to the unreadable prefix, then deletes the original. */
-export const quarantinePendingFeedback = async (pathname: string, raw: string): Promise<void> => {
+export const quarantinePendingRecord = async (
+  location: PendingLocation,
+  pathname: string,
+  raw: string,
+): Promise<void> => {
   const token = getFeedbackBlobToken();
-  await put(getUnreadableFeedbackPath(pathname), raw, {
+  await put(getUnreadablePath(location, pathname), raw, {
     access: 'private',
     addRandomSuffix: false,
     allowOverwrite: true,
