@@ -30,11 +30,37 @@ const max = (a: bigint, b: bigint) => (a > b ? a : b);
 const min = (a: bigint, b: bigint) => (a < b ? a : b);
 
 // Match the trader's dust thresholds in each venue's outcome-token base units.
-const OMEN_SHARES_EPSILON = 10n ** 16n;
+export const OMEN_SHARES_EPSILON = 10n ** 16n;
 const POLYMARKET_SHARES_EPSILON = 10_000n;
 
-export const isHighReturn = (cost: bigint, payout: bigint): boolean =>
-  cost > 0n && payout * 2n > cost * 3n;
+const pow10 = (exponent: number): bigint => {
+  let value = 1n;
+  for (let i = 0; i < exponent; i += 1) value *= 10n;
+  return value;
+};
+
+const roundToMilliUnits = (value: bigint, decimals: number): bigint => {
+  if (decimals < 3) return value * pow10(3 - decimals);
+
+  const divisor = pow10(decimals - 3);
+  const quotient = value / divisor;
+  const remainder = value % divisor;
+  const doubledRemainder = remainder * 2n;
+
+  // Python round(value, 3) uses ties-to-even; mirror that for the agent's
+  // persisted bet_amount and total_payout before applying the strict cutoff.
+  if (doubledRemainder > divisor || (doubledRemainder === divisor && quotient % 2n !== 0n)) {
+    return quotient + 1n;
+  }
+
+  return quotient;
+};
+
+export const isHighReturn = (cost: bigint, payout: bigint, decimals: number): boolean => {
+  const roundedCost = roundToMilliUnits(cost, decimals);
+  const roundedPayout = roundToMilliUnits(payout, decimals);
+  return roundedCost > 0n && roundedPayout * 2n > roundedCost * 3n;
+};
 
 const remainingCost = (buy: FifoBuy) => max(buy.originalCost - buy.allocatedCost, 0n);
 
@@ -100,15 +126,19 @@ export const getOmenBuyPayout = (
   buyId: string,
   totalPayout: bigint,
   winningIndex: number,
+  currentAnswerTimestamp: string | null = null,
 ): bigint | null => {
   const buy = buys.find(({ id }) => id === buyId);
-  if (
-    !buy ||
-    buy.outcomeIndex !== winningIndex ||
-    buy.remainingShares <= OMEN_SHARES_EPSILON ||
-    totalPayout <= 0n
-  )
-    return null;
+  if (!buy) return null;
+
+  // The trader classifies a fully exited Omen buy by realized PnL. It records
+  // settled_at from currentAnswerTimestamp, even when its eventual outcome lost.
+  if (buy.originalShares > 0n && buy.remainingShares <= OMEN_SHARES_EPSILON) {
+    if (!currentAnswerTimestamp || buy.allocatedProceeds <= buy.allocatedCost) return null;
+    return buy.allocatedProceeds;
+  }
+
+  if (buy.outcomeIndex !== winningIndex || totalPayout <= 0n) return null;
 
   const winningTotal = buys
     .filter(({ outcomeIndex }) => outcomeIndex === winningIndex)

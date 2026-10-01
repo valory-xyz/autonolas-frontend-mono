@@ -76,7 +76,7 @@ export const getPolymarketBet = async (id: string): Promise<PredictionBetData | 
   if (!buy) return null;
 
   const won = getPolymarketBuyPayout(buys, bet.id, BigInt(totalPayout), Number(winningIndex));
-  if (won === null || !isHighReturn(buy.originalCost, won)) return null;
+  if (won === null || !isHighReturn(buy.originalCost, won, USDC_DECIMALS)) return null;
 
   return {
     question: bet.question?.metadata?.title ?? 'N/A',

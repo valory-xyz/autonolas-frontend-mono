@@ -34,6 +34,9 @@ const response = ({
         question: 'Does Google have the best AI model end of January?',
         outcomes: ['Yes', 'No'],
         currentAnswer,
+        currentAnswerTimestamp: '1700000000',
+        answerFinalizedTimestamp: '1700000000',
+        isPendingArbitration: false,
       },
       bets,
     },
@@ -82,16 +85,6 @@ describe('getOmenBet', () => {
     ['the participant has not redeemed', response({ totalPayout: 0n })],
     ['the return is exactly 1.5x', response({ totalPayout: 15n * 10n ** 17n })],
     ['the return is a loss', response({ totalPayout: 4n * 10n ** 17n })],
-    [
-      'the buy was fully sold',
-      response({ bets: [bet(BUY_ID, WEI, 2n * WEI, 1), bet('sell', -3n * WEI, -2n * WEI, 2)] }),
-    ],
-    [
-      'only dust remains',
-      response({
-        bets: [bet(BUY_ID, WEI, 2n * WEI, 1), bet('sell', -3n * WEI, -(2n * WEI - 10n ** 16n), 2)],
-      }),
-    ],
     ['the market is invalid', response({ currentAnswer: INVALID })],
     ['the buy lost', response({ currentAnswer: NO })],
     ['the bet is not in the participant history', response({ bets: [] })],
@@ -99,6 +92,16 @@ describe('getOmenBet', () => {
     mockRequest.mockResolvedValue(data);
 
     await expect(getOmenBet(BUY_ID)).resolves.toBeNull();
+  });
+
+  it('treats remaining dust as fully exited, matching the trader', async () => {
+    mockRequest.mockResolvedValue(
+      response({
+        bets: [bet(BUY_ID, WEI, 2n * WEI, 1), bet('sell', -3n * WEI, -(2n * WEI - 10n ** 16n), 2)],
+      }),
+    );
+
+    await expect(getOmenBet(BUY_ID)).resolves.toMatchObject({ amountWon: 3, multiplier: '3.00' });
   });
 
   it('never exposes the bettor address', async () => {

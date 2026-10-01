@@ -1,5 +1,11 @@
 import { PredictionBetData } from '../types';
-import { allocateFifo, formatBetFigures, getOmenBuyPayout, isHighReturn } from './betPayout';
+import {
+  allocateFifo,
+  formatBetFigures,
+  getOmenBuyPayout,
+  isHighReturn,
+  OMEN_SHARES_EPSILON,
+} from './betPayout';
 import { getPredictOmenClient } from './graphql/client';
 import { getOmenBetDataQuery } from './graphql/queries';
 
@@ -14,6 +20,9 @@ type OmenBetDataResponse = {
       question: string | null;
       outcomes: string[] | null;
       currentAnswer: string | null;
+      currentAnswerTimestamp: string | null;
+      answerFinalizedTimestamp: string | null;
+      isPendingArbitration: boolean | null;
     };
     bets: Array<{
       id: string;
@@ -39,11 +48,6 @@ export const getOmenBet = async (id: string): Promise<PredictionBetData | null> 
   const bet = bets.find((b) => b.id.toLowerCase() === id.toLowerCase());
   if (!bet || !market.currentAnswer) return null;
 
-  // Conditional-token redemption requires a finalized answer. A positive
-  // participant payout is the settlement signal; a provisional answer plus
-  // sale proceeds alone must never produce a card.
-  if (BigInt(totalPayout) <= 0n) return null;
-
   const answer = BigInt(market.currentAnswer);
   if (answer === INVALID_ANSWER) return null;
 
@@ -60,8 +64,28 @@ export const getOmenBet = async (id: string): Promise<PredictionBetData | null> 
   const buy = buys.find((b) => b.id === bet.id);
   if (!buy) return null;
 
-  const won = getOmenBuyPayout(buys, bet.id, BigInt(totalPayout), Number(answer));
-  if (won === null || !isHighReturn(buy.originalCost, won)) return null;
+  const fullySold = buy.originalShares > 0n && buy.remainingShares <= OMEN_SHARES_EPSILON;
+  if (!fullySold) {
+    const finalizedAt = market.answerFinalizedTimestamp
+      ? Number(market.answerFinalizedTimestamp)
+      : 0;
+    if (
+      !finalizedAt ||
+      finalizedAt > Math.floor(Date.now() / 1000) ||
+      market.isPendingArbitration ||
+      BigInt(totalPayout) <= 0n
+    )
+      return null;
+  }
+
+  const won = getOmenBuyPayout(
+    buys,
+    bet.id,
+    BigInt(totalPayout),
+    Number(answer),
+    market.currentAnswerTimestamp,
+  );
+  if (won === null || !isHighReturn(buy.originalCost, won, XDAI_DECIMALS)) return null;
 
   const outcomeIndex = Number(bet.outcomeIndex);
 

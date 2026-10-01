@@ -40,6 +40,9 @@ export const getOmenBetDataQuery = gql`
         question
         outcomes
         currentAnswer
+        currentAnswerTimestamp
+        answerFinalizedTimestamp
+        isPendingArbitration
       }
       bets(first: 1000, orderBy: timestamp, orderDirection: asc) {
         id

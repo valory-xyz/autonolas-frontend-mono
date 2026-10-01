@@ -3,6 +3,7 @@ import {
   formatBetFigures,
   getOmenBuyPayout,
   getPolymarketBuyPayout,
+  isHighReturn,
   PayoutBetRow,
 } from './betPayout';
 
@@ -66,6 +67,16 @@ describe('getOmenBuyPayout', () => {
 
     expect(getOmenBuyPayout(buys, 'buy', 0n, 0)).toBeNull();
   });
+
+  it('returns realized proceeds for a settled profitable fully sold buy', () => {
+    const buys = allocateFifo([
+      row('buy', 1n * WEI, 2n * WEI, 1, 0),
+      { ...row('sell', -2n * WEI, -2n * WEI, 2, 0), isBuy: false },
+    ]);
+
+    expect(getOmenBuyPayout(buys, 'buy', 0n, 1, '1700000000')).toBe(2n * WEI);
+    expect(getOmenBuyPayout(buys, 'buy', 0n, 1, null)).toBeNull();
+  });
 });
 
 describe('getPolymarketBuyPayout', () => {
@@ -111,5 +122,13 @@ describe('formatBetFigures', () => {
       amountWonFormatted: '$2.40',
       multiplier: '2.40',
     });
+  });
+});
+
+describe('isHighReturn', () => {
+  it('uses the same three-decimal values as the trader achievement checker', () => {
+    expect(isHighReturn(1_000_400n, 1_500_600n, 6)).toBe(true);
+    expect(isHighReturn(1_000_000n, 1_500_000n, 6)).toBe(false);
+    expect(isHighReturn(1_000_400_000_000_000_000n, 1_500_600_000_000_000_000n, 18)).toBe(true);
   });
 });
