@@ -26,9 +26,9 @@ Guidance for working on the **Pearl API** app in this repo.
   environment.
 - **Achievement card data**: `NEXT_PUBLIC_OLAS_POLYMARKET_AGENTS_SQUID_URL` (Polystrat bets, the
   predict-polymarket SQD squid), `NEXT_PUBLIC_OLAS_PREDICT_AGENTS_SUBGRAPH_URL` (predict-omen
-  subgraph for Omenstrat bets; both agent URLs are required when used and have no default) and `THEGRAPH_API_KEY` (server-only;
-  Omen market thumbnails). The clients are built on first use, so a missing variable fails only the agent that needs it, and a
-  missing `THEGRAPH_API_KEY` renders the Omenstrat card without the market icon.
+  subgraph for Omenstrat bets). Both agent URLs are required when used and have no default.
+  Clients are built on first use, so a missing variable fails only the agent that needs it.
+  Achievement cards use agent logos and do not fetch market thumbnails.
 - **Onboarding survey**: `GOOGLE_SHEETS_CLIENT_EMAIL`, `GOOGLE_SHEETS_PRIVATE_KEY`,
   `PEARL_FEEDBACK_SHEET_ID`, `CRON_SECRET`, `FEEDBACK_BLOB_READ_WRITE_TOKEN`. All server-only —
   none may be given a `NEXT_PUBLIC_` prefix, which would inline it into the client bundle.
@@ -54,8 +54,8 @@ Pearl posts `generate-image?agent&type&id` when it shows a winning-card pop-up; 
 - Agents: `polystrat` and `omenstrat`, type `payout`. `id` is the bet id the agent put in the
   achievement record; `_` is allowed for squid ids (`0x…_1460`), and legacy Polymarket ids are
   converted with `toSquidBetId`.
-- `GET /api/achievement/get-data` returns the card figures plus `marketImageUrl` (Omen only, may be
-  null). `404` when the bet is not a settled win; only a `200` carries a long `s-maxage`.
+- `GET /api/achievement/get-data` returns the card figures plus `marketImageUrl: null` for
+  compatibility. `404` when the bet is not a settled win; only a `200` carries a long `s-maxage`.
 - **"Won" is this bet's share, not the market total.** `utils/betPayout.ts` ports the trader
   agent's FIFO sell folding and per-agent payout rule, so the card agrees with Pearl's pop-up when
   an agent holds several bets in one market. Its spec shares a fixture with the trader's

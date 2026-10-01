@@ -52,11 +52,3 @@ export const getOmenBetDataQuery = gql`
     }
   }
 `;
-
-export const getOmenThumbnailQuery = gql`
-  query GetOmenThumbnail($id: ID!) {
-    omenThumbnailMapping(id: $id) {
-      image_hash
-    }
-  }
-`;

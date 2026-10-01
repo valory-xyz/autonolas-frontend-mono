@@ -15,28 +15,23 @@ const DATA: AchievementData = {
   marketImageUrl: null,
 };
 
-const render = (agent: AchievementQueryParams['agent'], marketImageSrc?: string) =>
+const render = (agent: AchievementQueryParams['agent']) =>
   renderToStaticMarkup(
-    <AchievementUI
-      params={{ agent, type: 'payout', id: 'bet' }}
-      logoSrc={agent}
-      marketImageSrc={marketImageSrc}
-      data={DATA}
-    />,
+    <AchievementUI params={{ agent, type: 'payout', id: 'bet' }} logoSrc={agent} data={DATA} />,
   );
 
 describe('AchievementUI', () => {
-  it('renders the Omenstrat card with Omen copy and the market icon', () => {
-    const html = render('omenstrat', 'market');
+  it('renders the Omenstrat card with Omen copy and no market icon', () => {
+    const html = render('omenstrat');
 
     expect(html).toContain('Made by Omenstrat AI agent on Omen Markets');
     expect(html).toContain('Get your own Omenstrat');
     expect(html).toContain('2.40x');
-    expect(html).toContain('src="market"');
+    expect(html).not.toContain('alt="Market"');
     expect(html).not.toMatch(/Polystrat|Polymarket|Polygon/);
   });
 
-  it('renders the Omenstrat card without a market icon when there is none', () => {
+  it('renders the Omenstrat card without a market icon', () => {
     const html = render('omenstrat');
 
     expect(html).not.toContain('alt="Market"');
@@ -44,7 +39,7 @@ describe('AchievementUI', () => {
   });
 
   it('keeps the Polystrat card copy and renders no market icon', () => {
-    const html = render('polystrat', 'market');
+    const html = render('polystrat');
 
     expect(html).toContain('Made by Polystrat AI agent on Polymarket');
     expect(html).toContain('Get your own Polystrat');

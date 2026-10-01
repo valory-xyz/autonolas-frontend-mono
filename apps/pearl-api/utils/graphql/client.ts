@@ -1,15 +1,12 @@
 import { GraphQLClient } from 'graphql-request';
 
-import { OMEN_THUMBNAIL_MAPPING_SUBGRAPH_ID } from '../../constants/achievement';
-
 const REQUEST_TIMEOUT_MS = 10_000;
-const THUMBNAIL_TIMEOUT_MS = 5_000;
 
 // A stalled upstream must fail the request instead of running to the function's maxDuration.
-const createClient = (url: string, timeoutMs = REQUEST_TIMEOUT_MS) =>
+const createClient = (url: string) =>
   new GraphQLClient(url, {
     fetch: (input: RequestInfo | URL, init?: RequestInit) =>
-      fetch(input, { ...init, signal: AbortSignal.timeout(timeoutMs) }),
+      fetch(input, { ...init, signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS) }),
   });
 
 // Clients are built on first use so a missing variable fails only the agent that needs it,
@@ -43,15 +40,4 @@ export const getPredictOmenClient = (): GraphQLClient => {
 
   predictOmenClient = createClient(url);
   return predictOmenClient;
-};
-
-/** Returns null when `THEGRAPH_API_KEY` is unset: thumbnails are optional. */
-export const getOmenThumbnailClient = (): GraphQLClient | null => {
-  const apiKey = process.env.THEGRAPH_API_KEY;
-  if (!apiKey) return null;
-
-  return createClient(
-    `https://gateway-arbitrum.network.thegraph.com/api/${apiKey}/subgraphs/id/${OMEN_THUMBNAIL_MAPPING_SUBGRAPH_ID}`,
-    THUMBNAIL_TIMEOUT_MS,
-  );
 };

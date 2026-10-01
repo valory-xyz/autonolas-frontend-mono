@@ -1,13 +1,10 @@
 import { ImageResponse } from '@takumi-rs/image-response';
 import type { PersistentImage } from '@takumi-rs/core';
 
-import type { AchievementData, AchievementQueryParams, AgentType } from 'types/achievement';
+import type { AchievementQueryParams, AgentType } from 'types/achievement';
 import { AGENT_LOGO_PATH_MAPPING, OG_IMAGE_CONFIG } from 'constants/achievement';
 import { AchievementUI } from './AchievementUI';
 import { getAchievementData } from 'utils/achievementData';
-import { fetchMarketImage } from 'utils/marketThumbnail';
-
-const MARKET_IMAGE_SRC = 'market';
 
 const getPersistentImages = async (
   origin: string,
@@ -30,13 +27,6 @@ const getPersistentImages = async (
   ];
 };
 
-const getMarketImage = async (data: AchievementData): Promise<PersistentImage | null> => {
-  if (!data.marketImageUrl) return null;
-
-  const imageData = await fetchMarketImage(data.marketImageUrl);
-  return imageData ? { src: MARKET_IMAGE_SRC, data: imageData } : null;
-};
-
 /**
  * Renders the achievement card. Returns null when the achievement data is not
  * found, so the API does not generate an image.
@@ -53,18 +43,8 @@ export const generateAchievementImage = async (
     return null;
   }
 
-  const marketImage = await getMarketImage(data);
-  if (marketImage) persistentImages.push(marketImage);
-
   const imageResponse = new ImageResponse(
-    (
-      <AchievementUI
-        params={params}
-        logoSrc={params.agent}
-        marketImageSrc={marketImage ? MARKET_IMAGE_SRC : undefined}
-        data={data}
-      />
-    ),
+    <AchievementUI params={params} logoSrc={params.agent} data={data} />,
     {
       width: OG_IMAGE_CONFIG.WIDTH,
       height: OG_IMAGE_CONFIG.HEIGHT,

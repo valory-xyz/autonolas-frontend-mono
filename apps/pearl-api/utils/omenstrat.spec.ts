@@ -5,11 +5,6 @@ jest.mock('./graphql/client', () => ({
   getPredictOmenClient: () => ({ request: (...args: unknown[]) => mockRequest(...args) }),
 }));
 
-const mockGetMarketImageUrl = jest.fn();
-jest.mock('./marketThumbnail', () => ({
-  getMarketImageUrl: (...args: unknown[]) => mockGetMarketImageUrl(...args),
-}));
-
 const WEI = 10n ** 18n;
 const YES = `0x${'0'.repeat(64)}`;
 const NO = `0x${'0'.repeat(63)}1`;
@@ -48,10 +43,9 @@ const response = ({
 describe('getOmenBet', () => {
   beforeEach(() => {
     mockRequest.mockReset();
-    mockGetMarketImageUrl.mockReset().mockResolvedValue('https://gateway/ipfs/Qm');
   });
 
-  it('returns the card figures and market image of a winning buy', async () => {
+  it('returns the card figures of a winning buy', async () => {
     mockRequest.mockResolvedValue(response());
 
     await expect(getOmenBet(BUY_ID)).resolves.toEqual({
@@ -63,9 +57,8 @@ describe('getOmenBet', () => {
       betAmountFormatted: '$1.00',
       amountWonFormatted: '$2.40',
       multiplier: '2.40',
-      marketImageUrl: 'https://gateway/ipfs/Qm',
+      marketImageUrl: null,
     });
-    expect(mockGetMarketImageUrl).toHaveBeenCalledWith('0xmarket');
   });
 
   it("uses this buy's share of the payout, not the whole market payout", async () => {

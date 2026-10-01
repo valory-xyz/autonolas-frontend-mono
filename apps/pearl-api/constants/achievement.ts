@@ -34,5 +34,3 @@ export const AGENT_LOGO_PATH_MAPPING: Partial<Record<AgentType, string>> = {
   polystrat: '/images/polystrat-logo.png',
   omenstrat: '/images/omenstrat-logo.png',
 };
-
-export const OMEN_THUMBNAIL_MAPPING_SUBGRAPH_ID = 'EWN14ciGK53PpUiKSm7kMWQ6G4iz3tDrRLyZ1iXMQEdu';

@@ -29,7 +29,7 @@ export type PredictionBetData = {
   betAmountFormatted: string;
   amountWonFormatted: string;
   multiplier: string;
-  // Only Omen markets carry a thumbnail; null when there is none or the lookup failed.
+  // Retained for API compatibility; achievement market images are no longer fetched.
   marketImageUrl: string | null;
 };
 

@@ -2,7 +2,6 @@ import { PredictionBetData } from '../types';
 import { allocateFifo, formatBetFigures, getOmenBuyPayout } from './betPayout';
 import { getPredictOmenClient } from './graphql/client';
 import { getOmenBetDataQuery } from './graphql/queries';
-import { getMarketImageUrl } from './marketThumbnail';
 
 const XDAI_DECIMALS = 18;
 const INVALID_ANSWER = BigInt('0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff');
@@ -70,6 +69,6 @@ export const getOmenBet = async (id: string): Promise<PredictionBetData | null> 
     position: market.outcomes?.[outcomeIndex] ?? 'N/A',
     transactionHash: bet.transactionHash,
     ...formatBetFigures(buy.originalCost, won, XDAI_DECIMALS),
-    marketImageUrl: await getMarketImageUrl(market.id),
+    marketImageUrl: null,
   };
 };

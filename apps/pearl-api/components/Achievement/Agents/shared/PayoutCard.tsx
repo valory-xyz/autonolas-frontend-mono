@@ -102,18 +102,6 @@ const styles: Record<string, CSSProperties> = {
     borderRadius: 16,
     width: '100%',
   },
-  marketInfo: {
-    display: 'flex',
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 24,
-  },
-  marketIcon: {
-    width: 92,
-    height: 92,
-    borderRadius: 20,
-    flexShrink: 0,
-  },
   marketQuestion: {
     display: 'flex',
     fontWeight: 450,
@@ -197,24 +185,15 @@ const StatsRow = ({ stats }: StatsRowProps) => (
 type MarketCardProps = {
   question: string;
   stats: StatItemProps[];
-  marketImageSrc?: string;
 };
 
-const MarketCard = ({ question, stats, marketImageSrc }: MarketCardProps) => {
+const MarketCard = ({ question, stats }: MarketCardProps) => {
   const isLongQuestion = question.length > 120;
   const questionStyle = { ...styles.marketQuestion, fontSize: isLongQuestion ? 24 : 30 };
 
   return (
     <div style={{ ...styles.marketCard, marginBottom: isLongQuestion ? 32 : 40 }}>
-      {marketImageSrc ? (
-        // The icon is taller than one line of text; trim padding so the CTA stays in frame.
-        <div style={{ ...styles.marketInfo, padding: '24px 40px' }}>
-          <img src={marketImageSrc} alt="Market" style={styles.marketIcon} />
-          <div style={questionStyle}>{question}</div>
-        </div>
-      ) : (
-        <div style={{ ...questionStyle, padding: '38px 40px' }}>{question}</div>
-      )}
+      <div style={{ ...questionStyle, padding: '38px 40px' }}>{question}</div>
       <DashedDivider />
       <StatsRow stats={stats} />
     </div>
@@ -238,17 +217,10 @@ type PayoutCardProps = {
   agentName: string;
   venueName: string;
   logoSrc?: string;
-  marketImageSrc?: string;
   data: AchievementData;
 };
 
-export const PayoutCard = ({
-  agentName,
-  venueName,
-  logoSrc,
-  marketImageSrc,
-  data,
-}: PayoutCardProps) => {
+export const PayoutCard = ({ agentName, venueName, logoSrc, data }: PayoutCardProps) => {
   const stats = [
     { label: 'Position', value: data.position },
     { label: 'Amount', value: data.betAmountFormatted },
@@ -263,7 +235,7 @@ export const PayoutCard = ({
           multiplier={`${data.multiplier}x`}
           subtitle={`Made by ${agentName} AI agent on ${venueName}`}
         />
-        <MarketCard question={data.question} stats={stats} marketImageSrc={marketImageSrc} />
+        <MarketCard question={data.question} stats={stats} />
         <CTAButton logoSrc={logoSrc} agentName={agentName} />
       </div>
     </div>

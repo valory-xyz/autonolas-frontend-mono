@@ -20,13 +20,6 @@ jest.mock('../../utils/achievementData', () => ({
   getAchievementData: (...args: unknown[]) => mockGetAchievementData(...args),
 }));
 
-const mockFetchMarketImage = jest.fn();
-jest.mock('../../utils/marketThumbnail', () => ({
-  fetchMarketImage: (...args: unknown[]) => mockFetchMarketImage(...args),
-}));
-
-const MARKET_IMAGE_URL = 'https://gateway.autonolas.tech/ipfs/QmMarket';
-
 const DATA: AchievementData = {
   question: 'Does Google have the best AI model end of January?',
   position: 'Yes',
@@ -36,7 +29,7 @@ const DATA: AchievementData = {
   betAmountFormatted: '$1.00',
   amountWonFormatted: '$2.40',
   multiplier: '2.40',
-  marketImageUrl: MARKET_IMAGE_URL,
+  marketImageUrl: null,
 };
 
 const PARAMS = { agent: 'omenstrat', type: 'payout', id: 'bet' } as const;
@@ -56,7 +49,6 @@ describe('generateAchievementImage', () => {
   beforeEach(() => {
     mockImageResponse.mockReset();
     mockGetAchievementData.mockReset();
-    mockFetchMarketImage.mockReset();
     global.fetch = jest.fn().mockResolvedValue({ arrayBuffer: async () => new ArrayBuffer(1) });
     jest.spyOn(console, 'error').mockImplementation(() => undefined);
   });
@@ -65,22 +57,8 @@ describe('generateAchievementImage', () => {
     jest.restoreAllMocks();
   });
 
-  it('renders the Omenstrat card with the market icon from a persistent image', async () => {
+  it('renders the Omenstrat card with only the agent logo', async () => {
     mockGetAchievementData.mockResolvedValue(DATA);
-    mockFetchMarketImage.mockResolvedValue(new ArrayBuffer(1));
-
-    await expect(generateAchievementImage(PARAMS, 'https://pearl')).resolves.toBeInstanceOf(Buffer);
-
-    expect(mockFetchMarketImage).toHaveBeenCalledWith(MARKET_IMAGE_URL);
-    const { html, imageKeys } = renderedCall();
-    expect(imageKeys).toEqual(['omenstrat', 'market']);
-    const marketSrc = html.match(/<img src="([^"]+)" alt="Market"/)?.[1];
-    expect(imageKeys).toContain(marketSrc);
-  });
-
-  it('renders the Omenstrat card without the icon when the image cannot be fetched', async () => {
-    mockGetAchievementData.mockResolvedValue(DATA);
-    mockFetchMarketImage.mockResolvedValue(null);
 
     await expect(generateAchievementImage(PARAMS, 'https://pearl')).resolves.toBeInstanceOf(Buffer);
 
@@ -88,15 +66,8 @@ describe('generateAchievementImage', () => {
     expect(imageKeys).toEqual(['omenstrat']);
     expect(html).not.toContain('alt="Market"');
     expect(html).toContain(DATA.question);
-  });
-
-  it('does not fetch a market image when the achievement has none', async () => {
-    mockGetAchievementData.mockResolvedValue({ ...DATA, marketImageUrl: null });
-
-    await generateAchievementImage(PARAMS, 'https://pearl');
-
-    expect(mockFetchMarketImage).not.toHaveBeenCalled();
-    expect(renderedCall().imageKeys).toEqual(['omenstrat']);
+    expect(global.fetch).toHaveBeenCalledTimes(1);
+    expect(global.fetch).toHaveBeenCalledWith('https://pearl/images/omenstrat-logo.png');
   });
 
   it('renders nothing when the achievement is not a settled win', async () => {

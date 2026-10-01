@@ -4,7 +4,6 @@
 const ENV_KEYS = [
   'NEXT_PUBLIC_OLAS_POLYMARKET_AGENTS_SQUID_URL',
   'NEXT_PUBLIC_OLAS_PREDICT_AGENTS_SUBGRAPH_URL',
-  'THEGRAPH_API_KEY',
 ] as const;
 
 const loadClientModule = () => {
@@ -38,13 +37,6 @@ describe('graphql clients', () => {
     const { getPredictOmenClient } = loadClientModule();
     expect(getPredictOmenClient()).toBeDefined();
     expect(getPredictOmenClient()).toBe(getPredictOmenClient());
-  });
-
-  it('builds a thumbnail client only with a Graph API key', () => {
-    expect(loadClientModule().getOmenThumbnailClient()).toBeNull();
-
-    process.env.THEGRAPH_API_KEY = 'key';
-    expect(loadClientModule().getOmenThumbnailClient()).not.toBeNull();
   });
 
   it('bounds every request with a timeout signal', async () => {
