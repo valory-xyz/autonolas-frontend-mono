@@ -10,5 +10,7 @@ type PayoutProps = {
 export const Payout = ({ logoSrc, data }: PayoutProps) => {
   if (!data) return null;
 
-  return <PayoutCard agentName="Polystrat" venueName="Polymarket" logoSrc={logoSrc} data={data} />;
+  return (
+    <PayoutCard agentName="Omenstrat" venueName="Omen Markets" logoSrc={logoSrc} data={data} />
+  );
 };

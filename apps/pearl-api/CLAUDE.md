@@ -13,7 +13,7 @@ Guidance for working on the **Pearl API** app in this repo.
 ## Stack
 
 - **Wallet / Auth**: **Web3Auth** (modal, login, swap-owner-session). Not WalletConnect for general dapp use; used for embedded auth/session.
-- **API routes**: Next.js `pages/api/` – Zendesk (create-ticket, upload-file), achievement (get-image, generate-image), geo (agent-eligibility), feedback (onboarding-survey, funding-request, replay-pending).
+- **API routes**: Next.js `pages/api/` – Zendesk (create-ticket, upload-file), achievement (get-image, generate-image, get-data), geo (agent-eligibility), feedback (onboarding-survey, funding-request, replay-pending).
 - **Key libs**: No shared Nx libs in project config; uses Next.js, Web3Auth, styled-components, and app-local `context/`, `hooks/`, `utils/`, `constants/`, `types/`.
 
 ## Env / backends
@@ -24,6 +24,11 @@ Guidance for working on the **Pearl API** app in this repo.
 - **Zendesk**: `ZENDESK_SUBDOMAIN`, `ZENDESK_API_TOKEN`, `ZENDESK_API_EMAIL` (see root `.env.example`)
 - **Achievements Blob store** (public): `BLOB_READ_WRITE_TOKEN`, resolved by the SDK from the
   environment.
+- **Achievement card data**: `NEXT_PUBLIC_OLAS_POLYMARKET_AGENTS_SQUID_URL` (Polystrat bets, the
+  predict-polymarket SQD squid), `NEXT_PUBLIC_OLAS_PREDICT_AGENTS_SUBGRAPH_URL` (predict-omen
+  subgraph for Omenstrat bets). Both agent URLs are required when used and have no default.
+  Clients are built on first use, so a missing variable fails only the agent that needs it.
+  Achievement cards use agent logos and do not fetch market thumbnails.
 - **Onboarding survey**: `GOOGLE_SHEETS_CLIENT_EMAIL`, `GOOGLE_SHEETS_PRIVATE_KEY`,
   `PEARL_FEEDBACK_SHEET_ID`, `CRON_SECRET`, `FEEDBACK_BLOB_READ_WRITE_TOKEN`. All server-only —
   none may be given a `NEXT_PUBLIC_` prefix, which would inline it into the client bundle.
@@ -40,6 +45,23 @@ Guidance for working on the **Pearl API** app in this repo.
 - Build: `yarn nx run pearl-api:build`
 - Test: `yarn nx test pearl-api`
 - Lint: `yarn nx lint pearl-api`
+
+## Achievements (winning cards)
+
+Pearl posts `generate-image?agent&type&id` for the winning card sharing image. Predict reads
+the generated OG image through the Blob lookup and fetches its card figures directly from
+the venue-specific data sources; it does not consume `get-data`.
+
+- Agents: `polystrat` and `omenstrat`, type `payout`. `id` is the bet id the agent put in the
+  achievement record; `_` is allowed for squid ids (`0x…_1460`), and legacy Polymarket ids are
+  converted with `toSquidBetId`.
+- `GET /api/achievement/get-data` returns the card figures plus `marketImageUrl: null` for
+  compatibility. `404` when the bet is not a settled win; only a `200` carries a long `s-maxage`.
+- **"Won" is this bet's share, not the market total.** `utils/betPayout.ts` ports the trader
+  agent's FIFO sell folding and per-agent payout rule, so the card agrees with Pearl's pop-up when
+  an agent holds several bets in one market. Its spec shares a fixture with the trader's
+  `test_multi_bet_per_buy_payout_parity_fixture`; change both together.
+- Responses and cards carry no bettor or Safe address.
 
 ## Onboarding survey (OPE-1899)
 
@@ -156,3 +178,14 @@ account already has access. In the Vercel dashboard, add a WAF rate-limit rule o
 - This app is API- and auth-focused; it does not use the same WalletConnect/Web3Modal pattern as Bond, Marketplace, etc.
 - Zendesk and Web3Auth env vars must be set for those features to work.
 - CORS is **not** configurable by env var — `utils/cors.ts` hardcodes the localhost origin check.
+
+### Achievement eligibility
+
+- Both agents require per-buy payout / original cost strictly above 1.5.
+- Omenstrat requires a winning outcome, positive redeemed participant payout and
+  FIFO shares remaining above 10^16 base units. Redemption is the finalization signal;
+  provisional answers and sale proceeds alone cannot qualify. Fully sold buys are excluded.
+- Polystrat follows trader's existing hybrid rule: a resolved, non-invalid market with
+  a profitable fully exited buy can qualify regardless of outcome. Otherwise require a
+  redeemed winning outcome. Remaining shares <=10,000 base units contribute no redemption.
+- `marketImageUrl` remains null for compatibility; no thumbnail subgraph is queried.
