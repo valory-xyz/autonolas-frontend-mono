@@ -1,13 +1,50 @@
 {
-  "_doc": "Allowlist for yarn audit high/critical advisories that cannot be fixed in the current branch. Every entry needs a reason and a review date. See SUPPLY-CHAIN-SECURITY.md §6.",
+  "_doc": "Allowlist for yarn audit high/critical advisories that cannot be fixed in the current branch. Every entry needs a reason and a review date. See SUPPLY-CHAIN-SECURITY.md \u00a76.",
   "_fields": {
     "id": "npm advisory numeric ID (from `yarn audit --json` advisory.id)",
-    "ghsa": "GitHub Security Advisory ID, for humans — not used for matching",
+    "ghsa": "GitHub Security Advisory ID, for humans \u2014 not used for matching",
     "package": "package name, for humans",
     "severity": "advisory severity, for humans",
-    "reason": "why the advisory is allowlisted — upstream has no fix, major version bump deferred, not on a reachable code path, etc.",
+    "reason": "why the advisory is allowlisted \u2014 upstream has no fix, major version bump deferred, not on a reachable code path, etc.",
     "added": "YYYY-MM-DD when the entry was added",
     "review": "YYYY-MM-DD by which the entry must be re-evaluated. An expired entry prints a CI warning but does not fail the job."
   },
-  "entries": []
+  "entries": [
+    {
+      "id": 1241216,
+      "ghsa": "GHSA-w2vw-w76x-qr89",
+      "package": "nx",
+      "severity": "high",
+      "reason": "nx is build tooling pulled into the production tree only through @nx/next; it is not executed by any served app, so the git-ref and local-socket issues apply to developer machines and CI, not to users. The patched release (22.7.9) is five major versions ahead of the workspace's Nx 17.2.5 and needs a separate Nx migration.",
+      "added": "2026-10-08",
+      "review": "2027-01-08"
+    },
+    {
+      "id": 1241218,
+      "ghsa": "GHSA-w3vv-58gj-gw77",
+      "package": "nx",
+      "severity": "high",
+      "reason": "nx is build tooling pulled into the production tree only through @nx/next; it is not executed by any served app, so the git-ref and local-socket issues apply to developer machines and CI, not to users. The patched release (22.7.9) is five major versions ahead of the workspace's Nx 17.2.5 and needs a separate Nx migration.",
+      "added": "2026-10-08",
+      "review": "2027-01-08"
+    },
+    {
+      "id": 1240912,
+      "ghsa": "GHSA-86w9-cpqp-85rv",
+      "package": "node-forge",
+      "severity": "high",
+      "reason": "Upstream has no patched release (latest 1.4.0 is in the affected range). Reached only through WalletConnect's keyvaluestorage > unstorage > listhen chain; the app does not verify RSA PKCS#1 signatures with node-forge.",
+      "added": "2026-10-08",
+      "review": "2027-01-08"
+    },
+    {
+      "id": 1240992,
+      "ghsa": "GHSA-vfj7-8cjw-p6xm",
+      "package": "braces",
+      "severity": "high",
+      "reason": "Upstream has no patched release (latest 3.0.3 is in the affected range). Glob-pattern expansion used by build tooling and file watchers (fast-glob, micromatch, chokidar); patterns are not user-supplied in any served app.",
+      "added": "2026-10-08",
+      "review": "2027-01-08"
+    }
+  ]
 }
