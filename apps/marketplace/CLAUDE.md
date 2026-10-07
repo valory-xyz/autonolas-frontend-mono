@@ -113,17 +113,32 @@ screen.
 ## Key Features
 
 ### ERC8004 Metadata Standard
-
 ERC8004 is a token metadata standard for autonomous agents. The app exposes API endpoints that generate:
+- **Registration response** (`/api/erc8004/...`) – Standard ERC8004 registration with name, description, image, services, x402 support, and registration info. `name` is the mech's own name from its IPFS manifest (fallback: service config name, then the generated pseudonym). `active` mirrors the registry state (true only for Deployed). No `supportedTrust` claim: no reputation system exists. CDN TTL is 1 hour so the flag does not lag much.
+- **Agent Card** (`agent-card.json`) – A2A-compatible agent card with skills derived from IPFS tool metadata, plus `provider` and `price`.
+- **MCP Descriptor** (`mcp.json`) – Model Context Protocol server descriptor with tools. Carries no `auth` block: the mech implements no API-key or wallet-signature scheme.
 
-- **Registration response** (`/api/erc8004/...`) – Standard ERC8004 registration with name, description, image, services, x402 support, and registration info.
-- **Agent Card** (`agent-card.json`) – A2A-compatible agent card with skills derived from IPFS tool metadata.
-- **MCP Descriptor** (`mcp.json`) – Model Context Protocol server descriptor with tools.
+#### Know-your-agent (KYA) fields
+The mech manifest (the `metadata` hash on the marketplace subgraph) may carry an optional top-level `operator` (`{ name, domain, contact? }`, `domain` a bare hostname) and a per-tool `toolMetadata.<tool>.benchmark` (`{ metric, value, window, url }`). Shared types and helpers live in `common-util/functions/erc8004Kya.ts`.
+
+Registration `services` entries added from the manifest, each only when present:
+
+| name | endpoint |
+|---|---|
+| `manifest` | IPFS gateway URL of the manifest CID |
+| `benchmark` | the `benchmark.url` the operator published (one endpoint per mech). Never synthesised: a link we build reads as our endorsement |
+| `operator` | `https://<operator.domain>` |
+
+`provider` (`{ organization, url }`) is set on the registration response and the agent card only when `https://<domain>/.well-known/agent-registration.json` lists `eip155:<chainId>:<identity registry>` with `agentId` equal to the Olas service id. Ownership of the on-chain entry is not checked: every Olas entry is owned by the bridger proxy.
+
+`price` on the agent card is read from the mech contract (`maxDeliveryRate()`, `paymentType()`) on **every** request, including in-memory cache hits and stale fallbacks, and is omitted when the RPC read fails. Shape: `{ amount: "<integer string>", unit: "NATIVE" | "USDC" | "CREDITS" | null, paymentType: "<bytes32>", mechAddress: "eip155:<chainId>:<address>" }`. The cached card body never contains a price.
 
 **Key files:**
 - `common-util/functions/erc8004Helpers.ts` – `getChainIdFromNetworkSlug()`, `normalizeToolSchema()`, `getAgentCardUrl()`, `getMcpJsonUrl()`
+- `common-util/functions/erc8004Kya.ts` – manifest types, operator domain proof, benchmark link, `isServiceDeployed()`, `readMechPrice()`
 - `pages/api/erc8004/` – API route handlers
 - `common-util/graphql/registry.ts` – Subgraph query includes `erc8004Agent` field
+- `tests/pages/api/erc8004/` – route specs (the global `jest.setup.js` stubs `Login/config` to chain 1 only; these specs re-mock it with the gnosis slug)
 
 **Supported ERC8004 chains:** Ethereum (1), Optimism (10), Gnosis (100), Polygon (137), Base (8453), Arbitrum (42161), Celo (42220).
 

@@ -1,10 +1,9 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 
-import { IDENTITY_REGISTRY_UPGRADEABLE } from 'libs/util-contracts/src/lib/abiAndAddresses/identityRegistryUpgradeable';
 import { RPC_URLS } from 'libs/util-constants/src';
 
 import { ADDRESSES } from 'common-util/Contracts/addresses';
-import { getIpfsResponse } from 'common-util/functions/ipfs';
+import { getIpfsResponse, getIpfsUrl } from 'common-util/functions/ipfs';
 import { generateName } from 'common-util/functions/agentName';
 import { isMarketplaceSupportedNetwork } from 'common-util/functions';
 import type { MarketplaceSubgraphChainId } from 'common-util/graphql';
@@ -22,12 +21,24 @@ import {
   getAgentCardUrl,
   getMcpJsonUrl,
 } from 'common-util/functions/erc8004Helpers';
+import {
+  type Erc8004Provider,
+  type MechManifest,
+  getBenchmarkUrl,
+  getIdentityRegistryAddress,
+  getOperatorUrl,
+  isServiceDeployed,
+  isValidOperatorDomain,
+  parseAgentId,
+  resolveProvider,
+} from 'common-util/functions/erc8004Kya';
 
 type Erc8004Response = {
   type: 'https://eips.ethereum.org/EIPS/eip-8004#registration-v1';
   name: string;
   description: string;
   image: string;
+  provider?: Erc8004Provider;
   services: Array<{
     name: string;
     endpoint: string;
@@ -39,7 +50,6 @@ type Erc8004Response = {
     agentId: number;
     agentRegistry: string;
   }>;
-  supportedTrust: string[];
 };
 
 const getImageUrl = (image: string | undefined) => {
@@ -121,16 +131,22 @@ export default async function handler(
           })
         : Promise.resolve(null),
     ]);
-    const registrations: Erc8004Response['registrations'] = [];
 
-    if (serviceFromRegistry?.erc8004Agent?.id) {
-      const agentId = Number(serviceFromRegistry.erc8004Agent.id);
-      if (!Number.isNaN(agentId)) {
-        registrations.push({
-          agentId,
-          agentRegistry: `eip155:${chainId}:${IDENTITY_REGISTRY_UPGRADEABLE.addresses[chainId as keyof typeof IDENTITY_REGISTRY_UPGRADEABLE.addresses]}`,
-        });
-      }
+    const serviceFromMarketplace = servicesFromMarketplace?.[0];
+    const manifestHash = serviceFromMarketplace?.metadata || '';
+    const manifest = manifestHash
+      ? ((await getIpfsResponse(manifestHash)) as unknown as MechManifest | null)
+      : null;
+
+    const registrations: Erc8004Response['registrations'] = [];
+    const agentId = parseAgentId(serviceFromRegistry?.erc8004Agent?.id);
+    const identityRegistryAddress = getIdentityRegistryAddress(chainId);
+
+    if (agentId !== null && identityRegistryAddress) {
+      registrations.push({
+        agentId,
+        agentRegistry: `eip155:${chainId}:${identityRegistryAddress}`,
+      });
     }
 
     const services: Erc8004Response['services'] = [
@@ -150,7 +166,6 @@ export default async function handler(
     }
 
     // Add A2A Agent Card and MCP entries for services with Supply role (totalDeliveries >= 1)
-    const serviceFromMarketplace = servicesFromMarketplace?.[0];
     if (serviceFromMarketplace && serviceFromMarketplace.totalDeliveries >= 1) {
       services.push({
         name: 'A2A',
@@ -164,24 +179,43 @@ export default async function handler(
       });
     }
 
-    const agentName = generateName(chainId, Number(serviceId));
-    const nameWithSuffix = `${agentName} by Olas`;
+    if (manifestHash) {
+      services.push({ name: 'manifest', endpoint: getIpfsUrl(manifestHash) });
+    }
+
+    const benchmarkUrl = manifest ? getBenchmarkUrl(manifest) : null;
+    if (benchmarkUrl) {
+      services.push({ name: 'benchmark', endpoint: benchmarkUrl });
+    }
+
+    const operator = manifest?.operator;
+    if (operator && isValidOperatorDomain(operator.domain)) {
+      services.push({
+        name: 'operator',
+        endpoint: getOperatorUrl(operator.domain),
+      });
+    }
+
+    const provider = await resolveProvider(operator, chainId, agentId);
+
+    const name =
+      manifest?.name?.trim() || metadata?.name?.trim() || generateName(chainId, Number(serviceId));
 
     const response: Erc8004Response = {
       type: 'https://eips.ethereum.org/EIPS/eip-8004#registration-v1',
-      name: nameWithSuffix,
+      name,
       description: metadata?.description ?? '',
       image: getImageUrl(metadata?.image),
+      ...(provider && { provider }),
       services,
       x402Support: false,
-      active: true,
+      active: isServiceDeployed(serviceData.state),
       registrations,
-      supportedTrust: ['reputation'],
     };
 
     res.setHeader(
       'Cache-Control',
-      `public, s-maxage=${CACHE_DURATION.SIX_HOURS}, stale-while-revalidate=${CACHE_DURATION.FIVE_MINUTES}`,
+      `public, s-maxage=${CACHE_DURATION.ONE_HOUR}, stale-while-revalidate=${CACHE_DURATION.FIVE_MINUTES}`,
     );
 
     return res.status(200).json(response);

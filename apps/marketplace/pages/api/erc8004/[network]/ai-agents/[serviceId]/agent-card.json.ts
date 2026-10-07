@@ -1,6 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 
-import { IDENTITY_REGISTRY_UPGRADEABLE } from 'libs/util-contracts/src/lib/abiAndAddresses/identityRegistryUpgradeable';
+import { RPC_URLS } from 'libs/util-constants/src';
 
 import { ADDRESSES } from 'common-util/Contracts/addresses';
 import { getIpfsCIDFromHash, getIpfsResponse } from 'common-util/functions/ipfs';
@@ -21,30 +21,17 @@ import {
   getServiceFromRegistrySafe,
   normalizeToolSchema,
 } from 'common-util/functions/erc8004Helpers';
+import {
+  type Erc8004Provider,
+  type MechManifest,
+  type MechPrice,
+  type ToolInputOutput,
+  getIdentityRegistryAddress,
+  parseAgentId,
+  readMechPrice,
+  resolveProvider,
+} from 'common-util/functions/erc8004Kya';
 import { getCached, getStaleFallback, setCache } from 'util/apiCache';
-
-type ToolInputOutput = {
-  type: string;
-  description: string;
-  schema?: Record<string, unknown>;
-};
-
-type ToolMetadataEntry = {
-  name: string;
-  description: string;
-  input: ToolInputOutput;
-  output: ToolInputOutput;
-};
-
-type MechMetadata = {
-  name: string;
-  description: string;
-  url?: string;
-  inputFormat: string;
-  outputFormat: string;
-  tools: string[];
-  toolMetadata?: Record<string, ToolMetadataEntry>;
-};
 
 type AgentCardSkill = {
   id: string;
@@ -59,11 +46,13 @@ type AgentCardSkill = {
   };
 };
 
-type AgentCardResponse = {
+/** The cacheable part of the card. `price` is read from chain on every request and never stored. */
+type AgentCardBody = {
   name: string;
   description: string;
   version: '1.0.0';
   url?: string;
+  provider?: Erc8004Provider;
   defaultInputModes: string[];
   defaultOutputModes: string[];
   capabilities: {
@@ -89,7 +78,12 @@ type AgentCardResponse = {
   skills: AgentCardSkill[];
 };
 
-const buildSkills = (metadata: MechMetadata): AgentCardSkill[] => {
+type AgentCardResponse = AgentCardBody & { price?: MechPrice };
+
+const FRESH_CACHE_CONTROL = `public, s-maxage=${CACHE_DURATION.SIX_HOURS}, stale-while-revalidate=${CACHE_DURATION.FIVE_MINUTES}`;
+const STALE_CACHE_CONTROL = `public, s-maxage=${CACHE_DURATION.FIVE_MINUTES}, stale-while-revalidate=${CACHE_DURATION.FIVE_MINUTES}`;
+
+const buildSkills = (metadata: MechManifest): AgentCardSkill[] => {
   const { tools, toolMetadata, inputFormat, outputFormat } = metadata;
   if (!tools || !toolMetadata) return [];
 
@@ -112,6 +106,18 @@ const buildSkills = (metadata: MechMetadata): AgentCardSkill[] => {
     });
 };
 
+/** `eip155:<chainId>:<address>` -> `<address>` */
+const addressFromCaip = (caip: string | undefined): string | undefined => caip?.split(':')[2];
+
+const withLivePrice = async (body: AgentCardBody, chainId: number): Promise<AgentCardResponse> => {
+  const rpcUrl = RPC_URLS[chainId];
+  const mechAddress = addressFromCaip(body.metadata.mechAddress);
+  if (!rpcUrl || !mechAddress) return body;
+
+  const price = await readMechPrice(rpcUrl, chainId, mechAddress);
+  return price ? { ...body, price } : body;
+};
+
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<AgentCardResponse | { error: string }>,
@@ -121,6 +127,13 @@ export default async function handler(
   }
 
   let cacheKey = '';
+  let chainId: keyof typeof ADDRESSES | null = null;
+
+  const sendBody = async (body: AgentCardBody, cacheControl: string, stale: boolean) => {
+    if (stale) res.setHeader('X-Cache-Status', 'stale');
+    res.setHeader('Cache-Control', cacheControl);
+    return res.status(200).json(chainId === null ? body : await withLivePrice(body, chainId));
+  };
 
   try {
     const { network: networkParam, serviceId: serviceIdParam } = req.query;
@@ -146,7 +159,7 @@ export default async function handler(
       });
     }
 
-    const chainId = unTypedChainId as keyof typeof ADDRESSES;
+    chainId = unTypedChainId as keyof typeof ADDRESSES;
 
     if (!isMarketplaceSupportedNetwork(chainId)) {
       return res.status(400).json({
@@ -155,13 +168,9 @@ export default async function handler(
     }
 
     cacheKey = `agentCard:${network}:${serviceId}`;
-    const cached = getCached<AgentCardResponse>(cacheKey);
+    const cached = getCached<AgentCardBody>(cacheKey);
     if (cached) {
-      res.setHeader(
-        'Cache-Control',
-        `public, s-maxage=${CACHE_DURATION.SIX_HOURS}, stale-while-revalidate=${CACHE_DURATION.FIVE_MINUTES}`,
-      );
-      return res.status(200).json(cached);
+      return sendBody(cached, FRESH_CACHE_CONTROL, false);
     }
 
     const marketplaceSubgraphChainId = chainId as MarketplaceSubgraphChainId;
@@ -192,39 +201,29 @@ export default async function handler(
       return res.status(502).json({ error: 'Failed to fetch metadata from IPFS' });
     }
 
-    const mechMetadata = untypedIpfsMetadata as unknown as MechMetadata;
+    const mechMetadata = untypedIpfsMetadata as unknown as MechManifest;
 
     if (!mechMetadata.name || !mechMetadata.description) {
       console.warn(`Invalid IPFS metadata for agent card ${cacheKey}, falling back to cache`);
-      const stale = getStaleFallback<AgentCardResponse>(cacheKey);
+      const stale = getStaleFallback<AgentCardBody>(cacheKey);
       if (stale) {
-        res.setHeader('X-Cache-Status', 'stale');
-        res.setHeader(
-          'Cache-Control',
-          `public, s-maxage=${CACHE_DURATION.FIVE_MINUTES}, stale-while-revalidate=${CACHE_DURATION.FIVE_MINUTES}`,
-        );
-        return res.status(200).json(stale);
+        return sendBody(stale, STALE_CACHE_CONTROL, true);
       }
       return res.status(502).json({ error: 'Invalid metadata from IPFS' });
     }
 
-    const registrations: AgentCardResponse['registrations'] = [];
+    const registrations: AgentCardBody['registrations'] = [];
+    const agentId = parseAgentId(serviceFromRegistry?.erc8004Agent?.id);
+    const identityRegistryAddress = getIdentityRegistryAddress(chainId);
 
-    if (serviceFromRegistry?.erc8004Agent?.id) {
-      const agentId = Number(serviceFromRegistry.erc8004Agent.id);
-      if (!Number.isNaN(agentId)) {
-        const identityRegistryAddress =
-          IDENTITY_REGISTRY_UPGRADEABLE.addresses[
-            chainId as keyof typeof IDENTITY_REGISTRY_UPGRADEABLE.addresses
-          ];
-        if (identityRegistryAddress) {
-          registrations.push({
-            agentId,
-            agentRegistry: `eip155:${chainId}:${identityRegistryAddress}`,
-          });
-        }
-      }
+    if (agentId !== null && identityRegistryAddress) {
+      registrations.push({
+        agentId,
+        agentRegistry: `eip155:${chainId}:${identityRegistryAddress}`,
+      });
     }
+
+    const provider = await resolveProvider(mechMetadata.operator, chainId, agentId);
 
     const erc8004Network = ERC8004_CHAIN_MAPPING[chainId as keyof typeof ERC8004_CHAIN_MAPPING];
     const chainAddresses = ADDRESSES[chainId];
@@ -233,11 +232,12 @@ export default async function handler(
         ? chainAddresses.mechMarketplace
         : undefined;
 
-    const response: AgentCardResponse = {
+    const body: AgentCardBody = {
       name: mechMetadata.name,
       description: mechMetadata.description,
       version: '1.0.0',
       ...(mechMetadata.url && { url: mechMetadata.url }),
+      ...(provider && { provider }),
       defaultInputModes: ['text/plain'],
       defaultOutputModes: ['application/json'],
       capabilities: {
@@ -276,25 +276,15 @@ export default async function handler(
       skills: buildSkills(mechMetadata),
     };
 
-    setCache(cacheKey, response);
+    setCache(cacheKey, body);
 
-    res.setHeader(
-      'Cache-Control',
-      `public, s-maxage=${CACHE_DURATION.SIX_HOURS}, stale-while-revalidate=${CACHE_DURATION.FIVE_MINUTES}`,
-    );
-
-    return res.status(200).json(response);
+    return sendBody(body, FRESH_CACHE_CONTROL, false);
   } catch (error) {
     if (cacheKey) {
-      const stale = getStaleFallback<AgentCardResponse>(cacheKey);
+      const stale = getStaleFallback<AgentCardBody>(cacheKey);
       if (stale) {
         console.warn(`Serving stale agent card cache for ${cacheKey} due to upstream error`);
-        res.setHeader('X-Cache-Status', 'stale');
-        res.setHeader(
-          'Cache-Control',
-          `public, s-maxage=${CACHE_DURATION.FIVE_MINUTES}, stale-while-revalidate=${CACHE_DURATION.FIVE_MINUTES}`,
-        );
-        return res.status(200).json(stale);
+        return sendBody(stale, STALE_CACHE_CONTROL, true);
       }
     }
 

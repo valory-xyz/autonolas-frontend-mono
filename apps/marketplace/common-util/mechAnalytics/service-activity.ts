@@ -370,7 +370,11 @@ const PAYMENT_TYPE_TO_FEE = new Map<
     (rate) =>
       rate == null
         ? BLANK_FEE
-        : { feeUnit: 'USDC', feeRaw: rate, finalFeeUSD: (Number(rate) / 1e6).toFixed(2) },
+        : {
+            feeUnit: 'USDC',
+            feeRaw: rate,
+            finalFeeUSD: (Number(rate) / 1e6).toFixed(2),
+          },
   ],
   // NvmSubscriptionNative — rate is credits consumed.
   [
@@ -401,6 +405,14 @@ const PAYMENT_TYPE_TO_FEE = new Map<
 // keeps this predicate in sync automatically.
 export const isDriftedPaymentType = (paymentType: string | null): boolean =>
   paymentType !== null && !PAYMENT_TYPE_TO_FEE.has(paymentType);
+
+// Unit for a ``paymentType()`` hash read straight from a mech contract.
+// Accepts the 0x-prefixed form the RPC returns; the map keys are bare hex.
+export const feeUnitForPaymentType = (paymentType: string): FeeUnit | null => {
+  const key = paymentType.replace(/^0x/i, '').toLowerCase();
+  const toFee = PAYMENT_TYPE_TO_FEE.get(key);
+  return toFee ? (toFee('0').feeUnit ?? null) : null;
+};
 
 // Bounded LRU-ish cache of payment_type strings we've already warned
 // about, so a batch of drift rows produces one log line per
