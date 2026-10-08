@@ -17,7 +17,7 @@
       "severity": "high",
       "reason": "nx is build tooling pulled into the production tree only through @nx/next; it is not executed by any served app, so the git-ref and local-socket issues apply to developer machines and CI, not to users. The patched release (22.7.9) is five major versions ahead of the workspace's Nx 17.2.5 and needs a separate Nx migration.",
       "added": "2026-10-08",
-      "review": "2027-01-08"
+      "review": "2026-10-31"
     },
     {
       "id": 1241218,
@@ -26,7 +26,7 @@
       "severity": "high",
       "reason": "nx is build tooling pulled into the production tree only through @nx/next; it is not executed by any served app, so the git-ref and local-socket issues apply to developer machines and CI, not to users. The patched release (22.7.9) is five major versions ahead of the workspace's Nx 17.2.5 and needs a separate Nx migration.",
       "added": "2026-10-08",
-      "review": "2027-01-08"
+      "review": "2026-10-31"
     },
     {
       "id": 1240912,
