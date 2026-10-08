@@ -116,14 +116,33 @@ screen.
 
 ERC8004 is a token metadata standard for autonomous agents. The app exposes API endpoints that generate:
 
-- **Registration response** (`/api/erc8004/...`) – Standard ERC8004 registration with name, description, image, services, x402 support, and registration info.
-- **Agent Card** (`agent-card.json`) – A2A-compatible agent card with skills derived from IPFS tool metadata.
-- **MCP Descriptor** (`mcp.json`) – Model Context Protocol server descriptor with tools.
+- **Registration response** (`/api/erc8004/...`) – Standard ERC8004 registration with name, description, image, services, x402 support, and registration info. `name` and `description` come from the mech manifest when it carries its own name; a service with no manifest, or one still named after the metadata template (`Autonolas Mech …`), keeps its generated pseudonym and its service config description. `active` mirrors the registry state (true only for Deployed). No `supportedTrust` claim: no reputation system exists. CDN TTL is 1 hour.
+- **Agent Card** (`agent-card.json`) – A2A-compatible agent card with skills derived from IPFS tool metadata, plus `provider` and `payment`.
+- **MCP Descriptor** (`mcp.json`) – Model Context Protocol server descriptor with tools. Carries no `auth` block: the mech implements no API-key or wallet-signature scheme.
+
+#### Know-your-agent (KYA) fields
+
+The mech manifest (the `metadata` hash on the marketplace subgraph) may carry an optional top-level `operator` (`{ name, domain, contact? }`, `domain` a bare lowercase hostname) and a per-tool `toolMetadata.<tool>.benchmark` (`{ metric, value?, window, url }`). Shared types and helpers live in `common-util/functions/erc8004Kya.ts`.
+
+Registration `services` entries added from the manifest, each only when present:
+
+| name | endpoint |
+|---|---|
+| `manifest` | IPFS gateway URL of the manifest CID |
+| `benchmark` | the `benchmark.url` the operator published, taken from the first tool by sorted name. Never synthesised: a link we build reads as our endorsement |
+| `operator` | `https://<operator.domain>` |
+
+`provider` (`{ organization, url }`) exists on the agent card only (ERC-8004 has no such field). It is set when `https://<domain>/.well-known/agent-registration.json` lists `eip155:<chainId>:<identity registry>` with the service's **ERC-8004 agent id** (`erc8004Agent.id` from the registry subgraph, which is not always the service id). The proof is fetched from the exact host with `redirect: 'manual'`, so a 3xx is a not-found verdict; ownership of the on-chain entry is not checked, since every Olas entry is owned by the bridger proxy. A proof fetch that fails (timeout, network error, 5xx) is not a verdict: the card is cached without `provider` but re-tries the proof on the next hit until it gets one.
+
+`payment` on the agent card is `{ paymentType: "<bytes32>", unit: "NATIVE" | "USDC" | "CREDITS" | null, mechAddress: "eip155:<chainId>:<address>" }`. It carries **no amount**: `maxDeliveryRate()` is only the ceiling a request can be charged, and with dynamic mech pricing the actual charge can be lower, so the card names the payment method and points at the contract as the source of the quote. `paymentType()` is fixed at deploy, so it is read once at card build time (one RPC attempt via a `FetchRequest` with `maxAttempts: 1`, 3-second limit, provider destroyed afterwards) and cached with the body. A failed read is marked pending and retried on the next hit, like the provider proof. The card keeps the normal 6-hour CDN cache.
 
 **Key files:**
+
 - `common-util/functions/erc8004Helpers.ts` – `getChainIdFromNetworkSlug()`, `normalizeToolSchema()`, `getAgentCardUrl()`, `getMcpJsonUrl()`
+- `common-util/functions/erc8004Kya.ts` – manifest types, operator domain proof, benchmark link, `getOwnMechName()`, `isServiceDeployed()`, `readMechPayment()`
 - `pages/api/erc8004/` – API route handlers
 - `common-util/graphql/registry.ts` – Subgraph query includes `erc8004Agent` field
+- `tests/pages/api/erc8004/` – route specs (the global `jest.setup.js` stubs `Login/config` to chain 1 only; these specs re-mock it with the gnosis slug)
 
 **Supported ERC8004 chains:** Ethereum (1), Optimism (10), Gnosis (100), Polygon (137), Base (8453), Arbitrum (42161), Celo (42220).
 

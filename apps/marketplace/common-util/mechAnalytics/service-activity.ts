@@ -402,6 +402,14 @@ const PAYMENT_TYPE_TO_FEE = new Map<
 export const isDriftedPaymentType = (paymentType: string | null): boolean =>
   paymentType !== null && !PAYMENT_TYPE_TO_FEE.has(paymentType);
 
+// Unit for a ``paymentType()`` hash read straight from a mech contract.
+// Accepts the 0x-prefixed form the RPC returns; the map keys are bare hex.
+export const feeUnitForPaymentType = (paymentType: string): FeeUnit | null => {
+  const key = paymentType.replace(/^0x/i, '').toLowerCase();
+  const toFee = PAYMENT_TYPE_TO_FEE.get(key);
+  return toFee ? (toFee('0').feeUnit ?? null) : null;
+};
+
 // Bounded LRU-ish cache of payment_type strings we've already warned
 // about, so a batch of drift rows produces one log line per
 // unrecognised value rather than one per row. Bounded because the

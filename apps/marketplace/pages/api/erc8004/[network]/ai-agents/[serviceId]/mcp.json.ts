@@ -18,30 +18,8 @@ import {
   normalizeQueryParam,
   normalizeToolSchema,
 } from 'common-util/functions/erc8004Helpers';
+import type { MechManifest, ToolInputOutput } from 'common-util/functions/erc8004Kya';
 import { getCached, getStaleFallback, setCache } from 'util/apiCache';
-
-type ToolInputOutput = {
-  type: string;
-  description: string;
-  schema?: Record<string, unknown>;
-};
-
-type ToolMetadataEntry = {
-  name: string;
-  description: string;
-  input: ToolInputOutput;
-  output: ToolInputOutput;
-};
-
-type MechMetadata = {
-  name: string;
-  description: string;
-  url?: string;
-  inputFormat: string;
-  outputFormat: string;
-  tools: string[];
-  toolMetadata?: Record<string, ToolMetadataEntry>;
-};
 
 type McpTool = {
   name: string;
@@ -59,13 +37,6 @@ type McpResponse = {
   capabilities: {
     tools: { listChanged: boolean };
   };
-  auth: {
-    methods: Array<
-      | { type: 'api_key'; header: string }
-      | { type: 'wallet_signature'; scheme: string; header: string }
-    >;
-    required: string[];
-  };
   metadata: {
     network: string;
     serviceId: string;
@@ -81,15 +52,7 @@ const MCP_CAPABILITIES: McpResponse['capabilities'] = {
   tools: { listChanged: false },
 };
 
-const MCP_AUTH: McpResponse['auth'] = {
-  methods: [
-    { type: 'api_key', header: 'X-API-Key' },
-    { type: 'wallet_signature', scheme: 'eip712', header: 'X-Signature' },
-  ],
-  required: ['api_key', 'wallet_signature'],
-};
-
-const buildMcpTools = (metadata: MechMetadata): McpTool[] => {
+const buildMcpTools = (metadata: MechManifest): McpTool[] => {
   const { tools, toolMetadata } = metadata;
   if (!tools || !toolMetadata) return [];
 
@@ -183,7 +146,7 @@ export default async function handler(
       return res.status(502).json({ error: 'Failed to fetch metadata from IPFS' });
     }
 
-    const mechMetadata = untypedIpfsMetadata as unknown as MechMetadata;
+    const mechMetadata = untypedIpfsMetadata as unknown as MechManifest;
 
     if (!mechMetadata.name || !mechMetadata.description) {
       console.warn(`Invalid IPFS metadata for MCP ${cacheKey}, falling back to cache`);
@@ -213,7 +176,6 @@ export default async function handler(
       version: '1.0.0',
       ...(mechMetadata.url && { endpoint: mechMetadata.url }),
       capabilities: MCP_CAPABILITIES,
-      auth: MCP_AUTH,
       metadata: {
         network: erc8004Network,
         serviceId,
