@@ -69,15 +69,36 @@ export type MechPrice = {
 };
 
 const PROOF_TIMEOUT_MS = 5_000;
+const PRICE_READ_TIMEOUT_MS = 3_000;
 
-/** A service is active only while its registry state is Deployed. */
 export const isServiceDeployed = (state: unknown): boolean =>
   state !== null && state !== undefined && String(state) === SERVICE_STATE_KEY_MAP.deployed;
 
-// Bare hostname: labels of letters, digits and inner hyphens, at least one
-// dot, no scheme, path, port or trailing dot.
+/** Trimmed string for a manifest field that may be missing or wrongly typed. */
+export const asText = (value: unknown): string => (typeof value === 'string' ? value.trim() : '');
+
+// Name left in place from the metadata template shipped with the mech
+// tooling. It identifies the template, not the mech, so it never counts as
+// the mech's own name.
+const TEMPLATE_MECH_NAME_REGEX = /^autonolas mech\b/i;
+
+export const isTemplateMechName = (name: string): boolean => TEMPLATE_MECH_NAME_REGEX.test(name);
+
+/**
+ * The mech's own name: the manifest name unless it is absent, not a string
+ * or the template default. Empty string when the mech has none.
+ */
+export const getOwnMechName = (manifest: Pick<MechManifest, 'name'> | null): string => {
+  const name = asText(manifest?.name);
+  return name && !isTemplateMechName(name) ? name : '';
+};
+
+// Bare lowercase hostname per the manifest spec: labels of lowercase
+// letters, digits and inner hyphens, at least one dot, no scheme, path,
+// port or trailing dot. The last label must not be all digits, which
+// keeps IPv4 literals out; IPv6 literals fail on the colons.
 const HOSTNAME_REGEX =
-  /^(?=.{1,253}$)[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?(?:\.[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?)+$/i;
+  /^(?=.{1,253}$)[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?(?:\.[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?)*\.[a-z0-9-]*[a-z][a-z0-9-]*$/;
 
 export const isValidOperatorDomain = (domain: unknown): domain is string =>
   typeof domain === 'string' && HOSTNAME_REGEX.test(domain);
@@ -101,33 +122,60 @@ export type DomainProof = {
   registrations?: DomainProofRegistration[];
 };
 
-export const fetchDomainProof = async (domain: string): Promise<DomainProof | null> => {
-  if (!isValidOperatorDomain(domain)) return null;
+/**
+ * `ok`: the domain served a JSON document. `not-found`: the domain answered
+ * but has no usable proof (4xx, redirect, non-object body). `unavailable`:
+ * the domain could not be reached or answered 5xx, so nothing is known.
+ */
+export type DomainProofResult =
+  | { status: 'ok'; proof: DomainProof }
+  | { status: 'not-found' }
+  | { status: 'unavailable' };
+
+const isAbortError = (error: unknown): boolean =>
+  error instanceof Error && error.name === 'AbortError';
+
+/**
+ * Reads the proof file from the exact host named in the manifest. Redirects
+ * are not followed: a proof must be served by the host it vouches for.
+ */
+export const fetchDomainProof = async (domain: string): Promise<DomainProofResult> => {
+  if (!isValidOperatorDomain(domain)) return { status: 'not-found' };
+
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), PROOF_TIMEOUT_MS);
 
   try {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), PROOF_TIMEOUT_MS);
     const response = await fetch(getDomainProofUrl(domain), {
       signal: controller.signal,
+      redirect: 'error',
     });
-    clearTimeout(timeoutId);
 
-    if (!response.ok) return null;
+    if (response.status >= 500) return { status: 'unavailable' };
+    if (!response.ok) return { status: 'not-found' };
 
     const json: unknown = await response.json();
-    if (!json || typeof json !== 'object') return null;
-    return json as DomainProof;
+    if (!json || typeof json !== 'object') return { status: 'not-found' };
+    return { status: 'ok', proof: json as DomainProof };
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'Unknown error';
+    if (error instanceof SyntaxError) return { status: 'not-found' };
+
+    const message = isAbortError(error)
+      ? `timed out after ${PROOF_TIMEOUT_MS}ms`
+      : error instanceof Error
+        ? error.message
+        : 'Unknown error';
     console.warn(`Could not read domain proof for ${domain}:`, message);
-    return null;
+    return { status: 'unavailable' };
+  } finally {
+    clearTimeout(timeoutId);
   }
 };
 
 /**
  * True when the proof lists this chain's identity registry with the given
- * agent id. Ownership of the on-chain entry is not part of the check: every
- * Olas entry is owned by the bridger proxy, and the agent id is the service id.
+ * ERC-8004 agent id. Ownership of the on-chain entry is not part of the
+ * check: every Olas entry is owned by the bridger proxy.
  */
 export const domainProofMatches = (
   proof: DomainProof | null,
@@ -153,26 +201,37 @@ export const domainProofMatches = (
   });
 };
 
+export type ProviderResolution = {
+  provider: Erc8004Provider | null;
+  /** True when the proof could not be read, so `provider: null` is not a verdict. */
+  unavailable: boolean;
+};
+
+const NO_PROVIDER: ProviderResolution = { provider: null, unavailable: false };
+
 /**
- * Resolves the operator to an ERC-8004 / A2A `provider` entry. Returns null
- * unless the manifest names an operator with a valid domain and that domain
- * serves a proof matching the agent id.
+ * Resolves the operator to an A2A `provider` entry. The provider is set only
+ * when the manifest names an operator with a valid domain and that domain
+ * serves a proof matching the ERC-8004 agent id (read from the registry
+ * subgraph; it is not always the service id).
  */
 export const resolveProvider = async (
   operator: MechOperator | undefined,
   chainId: number,
   agentId: number | null,
-): Promise<Erc8004Provider | null> => {
-  if (!operator || typeof operator.name !== 'string' || !operator.name.trim()) return null;
-  if (!isValidOperatorDomain(operator.domain)) return null;
-  if (agentId === null) return null;
+): Promise<ProviderResolution> => {
+  if (!operator || !asText(operator.name)) return NO_PROVIDER;
+  if (!isValidOperatorDomain(operator.domain)) return NO_PROVIDER;
+  if (agentId === null) return NO_PROVIDER;
 
-  const proof = await fetchDomainProof(operator.domain);
-  if (!domainProofMatches(proof, chainId, agentId)) return null;
+  const result = await fetchDomainProof(operator.domain);
+  if (result.status === 'unavailable') return { provider: null, unavailable: true };
+  if (result.status === 'not-found') return NO_PROVIDER;
+  if (!domainProofMatches(result.proof, chainId, agentId)) return NO_PROVIDER;
 
   return {
-    organization: operator.name.trim(),
-    url: getOperatorUrl(operator.domain),
+    provider: { organization: asText(operator.name), url: getOperatorUrl(operator.domain) },
+    unavailable: false,
   };
 };
 
@@ -202,22 +261,39 @@ const MECH_PRICE_ABI = [
   'function paymentType() view returns (bytes32)',
 ];
 
+const withTimeout = <T>(promise: Promise<T>, ms: number, label: string): Promise<T> =>
+  new Promise<T>((resolve, reject) => {
+    const timer = setTimeout(() => reject(new Error(`${label} timed out after ${ms}ms`)), ms);
+    promise.then(
+      (value) => {
+        clearTimeout(timer);
+        resolve(value);
+      },
+      (error) => {
+        clearTimeout(timer);
+        reject(error);
+      },
+    );
+  });
+
 /**
- * Reads the mech's current price from chain. Never cached: a stale price on a
- * paid action is worse than a missing one, so callers omit the field on null.
+ * Reads the mech's current price from chain, giving up after
+ * PRICE_READ_TIMEOUT_MS. Never cached: a stale price on a paid action is
+ * worse than a missing one, so callers omit the field on null.
  */
 export const readMechPrice = async (
   rpcUrl: string,
   chainId: number,
   mechAddress: string,
 ): Promise<MechPrice | null> => {
+  const provider = new ethers.JsonRpcProvider(rpcUrl, undefined, { staticNetwork: true });
   try {
-    const provider = new ethers.JsonRpcProvider(rpcUrl);
     const mech = new ethers.Contract(mechAddress, MECH_PRICE_ABI, provider);
-    const [maxDeliveryRate, paymentType] = await Promise.all([
-      mech.maxDeliveryRate(),
-      mech.paymentType(),
-    ]);
+    const [maxDeliveryRate, paymentType] = await withTimeout(
+      Promise.all([mech.maxDeliveryRate(), mech.paymentType()]),
+      PRICE_READ_TIMEOUT_MS,
+      'mech price read',
+    );
 
     const amount = BigInt(maxDeliveryRate).toString();
     const paymentTypeHash = String(paymentType).toLowerCase();
@@ -232,5 +308,7 @@ export const readMechPrice = async (
     const message = error instanceof Error ? error.message : 'Unknown error';
     console.warn(`Could not read price from mech ${mechAddress} on chain ${chainId}:`, message);
     return null;
+  } finally {
+    provider.destroy();
   }
 };

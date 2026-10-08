@@ -8,11 +8,7 @@ import { isMarketplaceSupportedNetwork } from 'common-util/functions';
 import type { MarketplaceSubgraphChainId } from 'common-util/graphql';
 import { getServicesFromMarketplaceSubgraph } from 'common-util/graphql/services';
 
-import {
-  CACHE_DURATION,
-  ERC8004_CHAIN_MAPPING,
-  MARKETPLACE_SUPPORTED_CHAIN_IDS,
-} from 'util/constants';
+import { ERC8004_CHAIN_MAPPING, MARKETPLACE_SUPPORTED_CHAIN_IDS } from 'util/constants';
 
 import {
   getChainIdFromNetworkSlug,
@@ -24,6 +20,7 @@ import {
 import {
   type Erc8004Provider,
   type MechManifest,
+  type MechOperator,
   type MechPrice,
   type ToolInputOutput,
   getIdentityRegistryAddress,
@@ -80,8 +77,23 @@ type AgentCardBody = {
 
 type AgentCardResponse = AgentCardBody & { price?: MechPrice };
 
-const FRESH_CACHE_CONTROL = `public, s-maxage=${CACHE_DURATION.SIX_HOURS}, stale-while-revalidate=${CACHE_DURATION.FIVE_MINUTES}`;
-const STALE_CACHE_CONTROL = `public, s-maxage=${CACHE_DURATION.FIVE_MINUTES}, stale-while-revalidate=${CACHE_DURATION.FIVE_MINUTES}`;
+/**
+ * What the in-memory cache holds. `providerPending` is set when the operator
+ * domain could not be reached at build time; the next hit retries the proof
+ * instead of serving "no provider" as a verdict.
+ */
+type CachedAgentCard = {
+  body: AgentCardBody;
+  mechAddress?: string;
+  operator?: MechOperator;
+  agentId: number | null;
+  providerPending: boolean;
+};
+
+// Every 200 carries a price read from chain for this request, so the CDN
+// must not hold the response. The expensive part (subgraph + IPFS) is
+// cached in memory instead.
+const LIVE_CACHE_CONTROL = 'no-store';
 
 const buildSkills = (metadata: MechManifest): AgentCardSkill[] => {
   const { tools, toolMetadata, inputFormat, outputFormat } = metadata;
@@ -106,16 +118,37 @@ const buildSkills = (metadata: MechManifest): AgentCardSkill[] => {
     });
 };
 
-/** `eip155:<chainId>:<address>` -> `<address>` */
-const addressFromCaip = (caip: string | undefined): string | undefined => caip?.split(':')[2];
-
-const withLivePrice = async (body: AgentCardBody, chainId: number): Promise<AgentCardResponse> => {
+const withLivePrice = async (
+  body: AgentCardBody,
+  chainId: number,
+  mechAddress: string | undefined,
+): Promise<AgentCardResponse> => {
   const rpcUrl = RPC_URLS[chainId];
-  const mechAddress = addressFromCaip(body.metadata.mechAddress);
   if (!rpcUrl || !mechAddress) return body;
 
   const price = await readMechPrice(rpcUrl, chainId, mechAddress);
   return price ? { ...body, price } : body;
+};
+
+/** Retries a proof that was unavailable when the card was built, updating the cache on a verdict. */
+const settleProvider = async (
+  cacheKey: string,
+  entry: CachedAgentCard,
+  chainId: number,
+): Promise<CachedAgentCard> => {
+  if (!entry.providerPending) return entry;
+
+  const resolution = await resolveProvider(entry.operator, chainId, entry.agentId);
+  if (resolution.unavailable) return entry;
+
+  const { provider, ...rest } = entry.body;
+  const settled: CachedAgentCard = {
+    ...entry,
+    body: resolution.provider ? { ...rest, provider: resolution.provider } : rest,
+    providerPending: false,
+  };
+  setCache(cacheKey, settled);
+  return settled;
 };
 
 export default async function handler(
@@ -129,10 +162,17 @@ export default async function handler(
   let cacheKey = '';
   let chainId: keyof typeof ADDRESSES | null = null;
 
-  const sendBody = async (body: AgentCardBody, cacheControl: string, stale: boolean) => {
+  /** `fromCache` entries may carry a pending provider verdict worth retrying; a freshly built entry was just attempted. */
+  const sendEntry = async (
+    entry: CachedAgentCard,
+    { stale, fromCache }: { stale: boolean; fromCache: boolean },
+  ) => {
     if (stale) res.setHeader('X-Cache-Status', 'stale');
-    res.setHeader('Cache-Control', cacheControl);
-    return res.status(200).json(chainId === null ? body : await withLivePrice(body, chainId));
+    res.setHeader('Cache-Control', LIVE_CACHE_CONTROL);
+    if (chainId === null) return res.status(200).json(entry.body);
+
+    const settled = fromCache ? await settleProvider(cacheKey, entry, chainId) : entry;
+    return res.status(200).json(await withLivePrice(settled.body, chainId, settled.mechAddress));
   };
 
   try {
@@ -168,9 +208,9 @@ export default async function handler(
     }
 
     cacheKey = `agentCard:${network}:${serviceId}`;
-    const cached = getCached<AgentCardBody>(cacheKey);
+    const cached = getCached<CachedAgentCard>(cacheKey);
     if (cached) {
-      return sendBody(cached, FRESH_CACHE_CONTROL, false);
+      return sendEntry(cached, { stale: false, fromCache: true });
     }
 
     const marketplaceSubgraphChainId = chainId as MarketplaceSubgraphChainId;
@@ -205,9 +245,9 @@ export default async function handler(
 
     if (!mechMetadata.name || !mechMetadata.description) {
       console.warn(`Invalid IPFS metadata for agent card ${cacheKey}, falling back to cache`);
-      const stale = getStaleFallback<AgentCardBody>(cacheKey);
+      const stale = getStaleFallback<CachedAgentCard>(cacheKey);
       if (stale) {
-        return sendBody(stale, STALE_CACHE_CONTROL, true);
+        return sendEntry(stale, { stale: true, fromCache: true });
       }
       return res.status(502).json({ error: 'Invalid metadata from IPFS' });
     }
@@ -223,7 +263,9 @@ export default async function handler(
       });
     }
 
-    const provider = await resolveProvider(mechMetadata.operator, chainId, agentId);
+    const resolution = await resolveProvider(mechMetadata.operator, chainId, agentId);
+    const provider = resolution.provider;
+    const mechAddress = serviceFromMarketplace.mechAddresses?.[0];
 
     const erc8004Network = ERC8004_CHAIN_MAPPING[chainId as keyof typeof ERC8004_CHAIN_MAPPING];
     const chainAddresses = ADDRESSES[chainId];
@@ -253,9 +295,7 @@ export default async function handler(
         ...(mechMarketplaceAddress && {
           marketplaceAddress: `eip155:${chainId}:${mechMarketplaceAddress}`,
         }),
-        ...(serviceFromMarketplace.mechAddresses?.[0] && {
-          mechAddress: `eip155:${chainId}:${serviceFromMarketplace.mechAddresses[0]}`,
-        }),
+        ...(mechAddress && { mechAddress: `eip155:${chainId}:${mechAddress}` }),
         howToHire: {
           summary:
             'To hire this Mech, follow the Hire guide and submit a request via the Mech Marketplace client. The Marketplace page provides the service details for this network.',
@@ -276,15 +316,22 @@ export default async function handler(
       skills: buildSkills(mechMetadata),
     };
 
-    setCache(cacheKey, body);
+    const entry: CachedAgentCard = {
+      body,
+      mechAddress,
+      operator: mechMetadata.operator,
+      agentId,
+      providerPending: resolution.unavailable,
+    };
+    setCache(cacheKey, entry);
 
-    return sendBody(body, FRESH_CACHE_CONTROL, false);
+    return sendEntry(entry, { stale: false, fromCache: false });
   } catch (error) {
     if (cacheKey) {
-      const stale = getStaleFallback<AgentCardBody>(cacheKey);
+      const stale = getStaleFallback<CachedAgentCard>(cacheKey);
       if (stale) {
         console.warn(`Serving stale agent card cache for ${cacheKey} due to upstream error`);
-        return sendBody(stale, STALE_CACHE_CONTROL, true);
+        return sendEntry(stale, { stale: true, fromCache: true });
       }
     }
 

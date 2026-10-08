@@ -113,13 +113,37 @@ export const callHandler = async (
 export const lastJson = <T>(res: MockRes): T =>
   res.json.mock.calls[res.json.mock.calls.length - 1][0];
 
+type ProofFetchOptions = {
+  ok?: boolean;
+  status?: number;
+  reject?: boolean;
+  /** Never settle until the request's signal aborts. */
+  hang?: boolean;
+  /** Answer 200 with a body that is not JSON. */
+  invalidJson?: boolean;
+};
+
+const abortError = () => Object.assign(new Error('aborted'), { name: 'AbortError' });
+
 /** A fetch stub that answers only the domain proof URL. */
 export const makeProofFetch = (
   proof: unknown,
-  { ok = true, reject = false }: { ok?: boolean; reject?: boolean } = {},
+  { ok = true, status, reject = false, hang = false, invalidJson = false }: ProofFetchOptions = {},
 ): jest.Mock =>
-  jest.fn(async (url: string) => {
+  jest.fn(async (url: string, init?: { signal?: AbortSignal }) => {
     if (url !== DOMAIN_PROOF_URL) throw new Error(`unexpected fetch: ${url}`);
     if (reject) throw new Error('network down');
-    return { ok, json: async () => proof };
+    if (hang) {
+      return new Promise((_, rejectFetch) => {
+        init?.signal?.addEventListener('abort', () => rejectFetch(abortError()));
+      });
+    }
+    return {
+      ok,
+      status: status ?? (ok ? 200 : 404),
+      json: async () => {
+        if (invalidJson) throw new SyntaxError('Unexpected token < in JSON');
+        return proof;
+      },
+    };
   });

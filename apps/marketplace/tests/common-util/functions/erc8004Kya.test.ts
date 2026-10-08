@@ -1,6 +1,9 @@
 import {
+  asText,
   domainProofMatches,
+  fetchDomainProof,
   getBenchmarkUrl,
+  getOwnMechName,
   isServiceDeployed,
   isValidOperatorDomain,
   parseAgentId,
@@ -26,6 +29,11 @@ describe('isValidOperatorDomain', () => {
     'valory.xyz.',
     'valory.xyz:443',
     'valory',
+    'Valory.xyz',
+    'WWW.VALORY.XYZ',
+    '203.0.113.7',
+    '[2001:db8::1]',
+    '2001:db8::1',
     '-valory.xyz',
     'valory-.xyz',
     'val ory.xyz',
@@ -137,6 +145,142 @@ describe('getBenchmarkUrl', () => {
     ['a non-string url', { toolMetadata: { a: tool({ url: 42 }) } }],
   ])('returns null for %s', (_label, manifest) => {
     expect(getBenchmarkUrl(manifest as never)).toBeNull();
+  });
+});
+
+describe('fetchDomainProof', () => {
+  const unmockedFetch = global.fetch;
+  const url = 'https://www.valory.xyz/.well-known/agent-registration.json';
+  const abortError = () => Object.assign(new Error('aborted'), { name: 'AbortError' });
+
+  afterEach(() => {
+    global.fetch = unmockedFetch;
+    jest.useRealTimers();
+  });
+
+  it('requests the exact host without following redirects and returns the parsed proof', async () => {
+    global.fetch = jest.fn(async () => ({
+      ok: true,
+      status: 200,
+      json: async () => ({ registrations: [] }),
+    })) as never;
+    await expect(fetchDomainProof('www.valory.xyz')).resolves.toEqual({
+      status: 'ok',
+      proof: { registrations: [] },
+    });
+    expect(global.fetch).toHaveBeenCalledWith(url, expect.objectContaining({ redirect: 'error' }));
+  });
+
+  it.each([
+    ['a 404', { ok: false, status: 404, json: async () => ({}) }],
+    ['a 403', { ok: false, status: 403, json: async () => ({}) }],
+    ['a non-object body', { ok: true, status: 200, json: async () => 'nope' }],
+    ['a null body', { ok: true, status: 200, json: async () => null }],
+  ])('treats %s as not-found (a verdict)', async (_label, response) => {
+    global.fetch = jest.fn(async () => response) as never;
+    await expect(fetchDomainProof('www.valory.xyz')).resolves.toEqual({ status: 'not-found' });
+  });
+
+  it('treats a body that is not JSON as not-found', async () => {
+    global.fetch = jest.fn(async () => ({
+      ok: true,
+      status: 200,
+      json: async () => {
+        throw new SyntaxError('Unexpected token');
+      },
+    })) as never;
+    await expect(fetchDomainProof('www.valory.xyz')).resolves.toEqual({ status: 'not-found' });
+  });
+
+  it.each([
+    ['a 503', jest.fn(async () => ({ ok: false, status: 503, json: async () => ({}) }))],
+    [
+      'a network error',
+      jest.fn(async () => {
+        throw new Error('ECONNRESET');
+      }),
+    ],
+    [
+      'a refused redirect',
+      jest.fn(async () => {
+        throw new TypeError('redirect');
+      }),
+    ],
+  ])('treats %s as unavailable (not a verdict)', async (_label, fetchStub) => {
+    global.fetch = fetchStub as never;
+    await expect(fetchDomainProof('www.valory.xyz')).resolves.toEqual({ status: 'unavailable' });
+  });
+
+  it('times out a request that never answers', async () => {
+    jest.useFakeTimers();
+    global.fetch = jest.fn(
+      (_url: string, init?: { signal?: AbortSignal }) =>
+        new Promise((_, reject) =>
+          init?.signal?.addEventListener('abort', () => reject(abortError())),
+        ),
+    ) as never;
+
+    const pending = fetchDomainProof('www.valory.xyz');
+    await jest.advanceTimersByTimeAsync(5_100);
+    await expect(pending).resolves.toEqual({ status: 'unavailable' });
+  });
+
+  it('times out a body read that never finishes', async () => {
+    jest.useFakeTimers();
+    global.fetch = jest.fn(async (_url: string, init?: { signal?: AbortSignal }) => ({
+      ok: true,
+      status: 200,
+      json: () =>
+        new Promise((_, reject) =>
+          init?.signal?.addEventListener('abort', () => reject(abortError())),
+        ),
+    })) as never;
+
+    const pending = fetchDomainProof('www.valory.xyz');
+    await jest.advanceTimersByTimeAsync(5_100);
+    await expect(pending).resolves.toEqual({ status: 'unavailable' });
+  });
+
+  it('does not fetch for an invalid domain', async () => {
+    global.fetch = jest.fn() as never;
+    await expect(fetchDomainProof('https://www.valory.xyz')).resolves.toEqual({
+      status: 'not-found',
+    });
+    expect(global.fetch).not.toHaveBeenCalled();
+  });
+});
+
+describe('getOwnMechName', () => {
+  it.each([
+    ['Prediction mech', 'Prediction mech'],
+    ['  Profit Pulse Mech  ', 'Profit Pulse Mech'],
+    ['Autonolas Mech III', ''],
+    ['Autonolas Mech', ''],
+    ['autonolas mech II', ''],
+    ['Autonolas Mechanic', 'Autonolas Mechanic'],
+    ['', ''],
+    ['   ', ''],
+    [123, ''],
+    [null, ''],
+    [undefined, ''],
+  ])('maps manifest name %p to %p', (name, expected) => {
+    expect(getOwnMechName({ name: name as never })).toBe(expected);
+    expect(getOwnMechName(null)).toBe('');
+  });
+});
+
+describe('asText', () => {
+  it.each([
+    [' x ', 'x'],
+    ['', ''],
+    [0, ''],
+    [false, ''],
+    [{}, ''],
+    [[], ''],
+    [null, ''],
+    [undefined, ''],
+  ])('returns %p as %p', (value, expected) => {
+    expect(asText(value)).toBe(expected);
   });
 });
 

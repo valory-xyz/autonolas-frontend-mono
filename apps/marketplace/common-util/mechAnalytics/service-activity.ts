@@ -370,11 +370,7 @@ const PAYMENT_TYPE_TO_FEE = new Map<
     (rate) =>
       rate == null
         ? BLANK_FEE
-        : {
-            feeUnit: 'USDC',
-            feeRaw: rate,
-            finalFeeUSD: (Number(rate) / 1e6).toFixed(2),
-          },
+        : { feeUnit: 'USDC', feeRaw: rate, finalFeeUSD: (Number(rate) / 1e6).toFixed(2) },
   ],
   // NvmSubscriptionNative — rate is credits consumed.
   [

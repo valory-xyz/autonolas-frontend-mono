@@ -1,6 +1,9 @@
 import handler from '../../../../pages/api/erc8004/[network]/ai-agents/[serviceId]/agent-card.json';
 import {
+  AGENT_ID,
   CHAIN_ID,
+  DOMAIN_PROOF_URL,
+  GNOSIS_IDENTITY_REGISTRY,
   MANIFEST_HASH,
   MAX_DELIVERY_RATE_WEI,
   MECH_ADDRESS,
@@ -18,6 +21,7 @@ import {
   makeRegistryService,
 } from './fixtures';
 
+const mockProviderDestroy = jest.fn();
 jest.mock('ethers', () => {
   const actual = jest.requireActual('ethers');
   return {
@@ -25,7 +29,7 @@ jest.mock('ethers', () => {
     ethers: {
       ...actual.ethers,
       Contract: jest.fn(),
-      JsonRpcProvider: jest.fn(),
+      JsonRpcProvider: jest.fn(() => ({ destroy: mockProviderDestroy })),
     },
   };
 });
@@ -74,6 +78,9 @@ const unmockedFetch = global.fetch;
 let nextServiceId = 100;
 const freshServiceId = () => String(nextServiceId++);
 
+const expectNoStore = (res: { headers: Record<string, string> }) =>
+  expect(res.headers['Cache-Control']).toBe('no-store');
+
 type Card = {
   name: string;
   provider?: { organization: string; url: string };
@@ -113,30 +120,84 @@ describe('GET .../agent-card.json — provider', () => {
   it('sets provider from the manifest operator when the domain proof matches', async () => {
     const body = lastJson<Card>(await call(freshServiceId()));
     expect(body.name).toBe('Prediction mech');
-    expect(body.provider).toEqual({
-      organization: 'Valory',
-      url: OPERATOR_URL,
-    });
+    expect(body.provider).toEqual({ organization: 'Valory', url: OPERATOR_URL });
   });
 
-  it('leaves provider unset when the proof names another agent id', async () => {
-    global.fetch = makeProofFetch(
-      makeDomainProof([
-        {
-          agentRegistry: `eip155:${CHAIN_ID}:0x8004A169FB4a3325136EB29fA0ceB6D2e539a432`,
-          agentId: 8,
-        },
-      ]),
+  it('fetches the proof from the exact host without following redirects', async () => {
+    await call(freshServiceId());
+    expect(global.fetch).toHaveBeenCalledWith(
+      DOMAIN_PROOF_URL,
+      expect.objectContaining({ redirect: 'error' }),
     );
-    const body = lastJson<Card>(await call(freshServiceId()));
-    expect(body).not.toHaveProperty('provider');
   });
+
+  it.each([
+    [
+      'the proof names another agent id',
+      () =>
+        makeProofFetch(
+          makeDomainProof([
+            {
+              agentRegistry: `eip155:${CHAIN_ID}:${GNOSIS_IDENTITY_REGISTRY}`,
+              agentId: AGENT_ID + 1,
+            },
+          ]),
+        ),
+    ],
+    ['the domain answers 404', () => makeProofFetch(makeDomainProof(), { ok: false, status: 404 })],
+    ['the body is not JSON', () => makeProofFetch(undefined, { invalidJson: true })],
+  ])('leaves provider unset and caches that verdict when %s', async (_label, fetchFor) => {
+    global.fetch = fetchFor();
+    const serviceId = freshServiceId();
+
+    const first = lastJson<Card>(await call(serviceId));
+    expect(first).not.toHaveProperty('provider');
+
+    global.fetch = makeProofFetch(makeDomainProof());
+    const second = lastJson<Card>(await call(serviceId));
+    expect(second).not.toHaveProperty('provider');
+    expect(global.fetch).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    ['the domain is unreachable', () => makeProofFetch(makeDomainProof(), { reject: true })],
+    ['the domain answers 503', () => makeProofFetch(makeDomainProof(), { ok: false, status: 503 })],
+    ['the proof read times out', () => makeProofFetch(makeDomainProof(), { hang: true })],
+  ])(
+    'retries the proof on the next hit instead of caching "no provider" when %s',
+    async (_label, fetchFor) => {
+      jest.useFakeTimers();
+      try {
+        global.fetch = fetchFor();
+        const serviceId = freshServiceId();
+
+        const firstCall = call(serviceId);
+        await jest.advanceTimersByTimeAsync(6_000);
+        const first = lastJson<Card>(await firstCall);
+        expect(first).not.toHaveProperty('provider');
+        expect(first.name).toBe('Prediction mech');
+
+        global.fetch = makeProofFetch(makeDomainProof());
+        const second = lastJson<Card>(await call(serviceId));
+        expect(second.provider).toEqual({ organization: 'Valory', url: OPERATOR_URL });
+        expect(getServicesFromMarketplaceSubgraph).toHaveBeenCalledTimes(1);
+
+        const third = lastJson<Card>(await call(serviceId));
+        expect(third.provider).toEqual({ organization: 'Valory', url: OPERATOR_URL });
+        expect(global.fetch).toHaveBeenCalledTimes(1);
+      } finally {
+        jest.useRealTimers();
+      }
+    },
+  );
 });
 
 describe('GET .../agent-card.json — price', () => {
-  it('reads the price from the mech contract as an integer string with its unit', async () => {
-    const body = lastJson<Card>(await call(freshServiceId()));
+  it('reads the price from the mech contract as an integer string with its unit, and tells the CDN not to store it', async () => {
+    const res = await call(freshServiceId());
+    const body = lastJson<Card>(res);
 
+    expectNoStore(res);
     expect(body.price).toEqual({
       amount: MAX_DELIVERY_RATE_WEI.toString(),
       unit: 'NATIVE',
@@ -180,8 +241,25 @@ describe('GET .../agent-card.json — price', () => {
     const body = lastJson<Card>(res);
 
     expect(res.status).toHaveBeenCalledWith(200);
+    expectNoStore(res);
     expect(body).not.toHaveProperty('price');
     expect(body.metadata.mechAddress).toBe(`eip155:${CHAIN_ID}:${MECH_ADDRESS}`);
+  });
+
+  it('gives up on a hanging RPC and omits price instead of holding the card', async () => {
+    jest.useFakeTimers();
+    try {
+      mechContract.maxDeliveryRate.mockReturnValue(new Promise(() => undefined));
+      const pending = call(freshServiceId());
+      await jest.advanceTimersByTimeAsync(3_500);
+      const res = await pending;
+
+      expect(res.status).toHaveBeenCalledWith(200);
+      expect(lastJson<Card>(res)).not.toHaveProperty('price');
+      expect(mockProviderDestroy).toHaveBeenCalled();
+    } finally {
+      jest.useRealTimers();
+    }
   });
 
   it('omits price when the service has no mech address', async () => {

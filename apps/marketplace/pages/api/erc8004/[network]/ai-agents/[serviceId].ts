@@ -22,15 +22,15 @@ import {
   getMcpJsonUrl,
 } from 'common-util/functions/erc8004Helpers';
 import {
-  type Erc8004Provider,
   type MechManifest,
+  asText,
   getBenchmarkUrl,
   getIdentityRegistryAddress,
   getOperatorUrl,
+  getOwnMechName,
   isServiceDeployed,
   isValidOperatorDomain,
   parseAgentId,
-  resolveProvider,
 } from 'common-util/functions/erc8004Kya';
 
 type Erc8004Response = {
@@ -38,7 +38,6 @@ type Erc8004Response = {
   name: string;
   description: string;
   image: string;
-  provider?: Erc8004Provider;
   services: Array<{
     name: string;
     endpoint: string;
@@ -196,17 +195,17 @@ export default async function handler(
       });
     }
 
-    const provider = await resolveProvider(operator, chainId, agentId);
-
-    const name =
-      manifest?.name?.trim() || metadata?.name?.trim() || generateName(chainId, Number(serviceId));
+    // A service that is not a mech, or a mech still carrying the template
+    // name, keeps its generated pseudonym and its service config text.
+    const ownName = getOwnMechName(manifest);
+    const name = ownName || generateName(chainId, Number(serviceId));
+    const description = (ownName && asText(manifest?.description)) || asText(metadata?.description);
 
     const response: Erc8004Response = {
       type: 'https://eips.ethereum.org/EIPS/eip-8004#registration-v1',
       name,
-      description: metadata?.description ?? '',
+      description,
       image: getImageUrl(metadata?.image),
-      ...(provider && { provider }),
       services,
       x402Support: false,
       active: isServiceDeployed(serviceData.state),
