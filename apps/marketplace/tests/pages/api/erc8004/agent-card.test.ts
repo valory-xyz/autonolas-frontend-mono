@@ -1,3 +1,7 @@
+import { FetchRequest } from 'ethers';
+
+import { RPC_URLS } from 'libs/util-constants/src';
+
 import handler from '../../../../pages/api/erc8004/[network]/ai-agents/[serviceId]/agent-card.json';
 import {
   AGENT_ID,
@@ -5,7 +9,6 @@ import {
   DOMAIN_PROOF_URL,
   GNOSIS_IDENTITY_REGISTRY,
   MANIFEST_HASH,
-  MAX_DELIVERY_RATE_WEI,
   MECH_ADDRESS,
   NATIVE_PAYMENT_TYPE,
   NETWORK,
@@ -54,7 +57,7 @@ jest.mock('common-util/functions/ipfs', () => ({
 }));
 
 const { ethers: mockedEthers } = jest.requireMock('ethers') as {
-  ethers: { Contract: jest.Mock };
+  ethers: { Contract: jest.Mock; JsonRpcProvider: jest.Mock };
 };
 const { getServicesFromMarketplaceSubgraph } = jest.requireMock('common-util/graphql/services') as {
   getServicesFromMarketplaceSubgraph: jest.Mock;
@@ -67,7 +70,6 @@ const { getIpfsResponse } = jest.requireMock('common-util/functions/ipfs') as {
 };
 
 const mechContract = {
-  maxDeliveryRate: jest.fn(),
   paymentType: jest.fn(),
 };
 
@@ -78,18 +80,10 @@ const unmockedFetch = global.fetch;
 let nextServiceId = 100;
 const freshServiceId = () => String(nextServiceId++);
 
-const expectNoStore = (res: { headers: Record<string, string> }) =>
-  expect(res.headers['Cache-Control']).toBe('no-store');
-
 type Card = {
   name: string;
   provider?: { organization: string; url: string };
-  price?: {
-    amount: string;
-    unit: string | null;
-    paymentType: string;
-    mechAddress: string;
-  };
+  payment?: { paymentType: string; unit: string | null; mechAddress: string };
   metadata: { mechAddress?: string };
 };
 
@@ -98,7 +92,6 @@ const call = (serviceId: string) => callHandler(handler, { network: NETWORK, ser
 beforeEach(() => {
   jest.clearAllMocks();
   mockedEthers.Contract.mockImplementation(() => mechContract);
-  mechContract.maxDeliveryRate.mockResolvedValue(MAX_DELIVERY_RATE_WEI);
   mechContract.paymentType.mockResolvedValue(NATIVE_PAYMENT_TYPE);
   getServicesFromMarketplaceSubgraph.mockImplementation(async ({ serviceIds }) => [
     makeMarketplaceService({ id: serviceIds[0] }),
@@ -127,7 +120,7 @@ describe('GET .../agent-card.json — provider', () => {
     await call(freshServiceId());
     expect(global.fetch).toHaveBeenCalledWith(
       DOMAIN_PROOF_URL,
-      expect.objectContaining({ redirect: 'error' }),
+      expect.objectContaining({ redirect: 'manual' }),
     );
   });
 
@@ -145,6 +138,10 @@ describe('GET .../agent-card.json — provider', () => {
         ),
     ],
     ['the domain answers 404', () => makeProofFetch(makeDomainProof(), { ok: false, status: 404 })],
+    [
+      'the domain redirects (301)',
+      () => makeProofFetch(makeDomainProof(), { ok: false, status: 301 }),
+    ],
     ['the body is not JSON', () => makeProofFetch(undefined, { invalidJson: true })],
   ])('leaves provider unset and caches that verdict when %s', async (_label, fetchFor) => {
     global.fetch = fetchFor();
@@ -192,23 +189,31 @@ describe('GET .../agent-card.json — provider', () => {
   );
 });
 
-describe('GET .../agent-card.json — price', () => {
-  it('reads the price from the mech contract as an integer string with its unit, and tells the CDN not to store it', async () => {
+describe('GET .../agent-card.json — payment', () => {
+  it('states the payment method and the contract, with no amount, and stays CDN cacheable', async () => {
     const res = await call(freshServiceId());
     const body = lastJson<Card>(res);
 
-    expectNoStore(res);
-    expect(body.price).toEqual({
-      amount: MAX_DELIVERY_RATE_WEI.toString(),
-      unit: 'NATIVE',
+    expect(body.payment).toEqual({
       paymentType: NATIVE_PAYMENT_TYPE,
+      unit: 'NATIVE',
       mechAddress: `eip155:${CHAIN_ID}:${MECH_ADDRESS}`,
     });
+    expect(body).not.toHaveProperty('price');
+    expect(res.headers['Cache-Control']).toContain('s-maxage=21600');
     expect(mockedEthers.Contract).toHaveBeenCalledWith(
       MECH_ADDRESS,
-      expect.arrayContaining([expect.stringContaining('maxDeliveryRate')]),
+      ['function paymentType() view returns (bytes32)'],
       expect.anything(),
     );
+  });
+
+  it('builds the RPC provider for a single attempt and tears it down', async () => {
+    await call(freshServiceId());
+    const [request] = mockedEthers.JsonRpcProvider.mock.calls[0];
+    expect(request).toBeInstanceOf(FetchRequest);
+    expect((request as FetchRequest).url).toBe(RPC_URLS[CHAIN_ID]);
+    expect(mockProviderDestroy).toHaveBeenCalled();
   });
 
   it.each([
@@ -217,58 +222,60 @@ describe('GET .../agent-card.json — price', () => {
   ])('maps paymentType %s to unit %s', async (paymentType, unit) => {
     mechContract.paymentType.mockResolvedValue(paymentType);
     const body = lastJson<Card>(await call(freshServiceId()));
-    expect(body.price?.unit).toBe(unit);
-    expect(body.price?.amount).toBe(MAX_DELIVERY_RATE_WEI.toString());
+    expect(body.payment?.unit).toBe(unit);
+    expect(body.payment?.paymentType).toBe(paymentType);
   });
 
-  it('re-reads the price on a cached card instead of serving the stored one', async () => {
+  it('reads the payment type once and serves it from the cached card afterwards', async () => {
     const serviceId = freshServiceId();
-
-    const first = lastJson<Card>(await call(serviceId));
-    expect(first.price?.amount).toBe(MAX_DELIVERY_RATE_WEI.toString());
-
-    mechContract.maxDeliveryRate.mockResolvedValue(MAX_DELIVERY_RATE_WEI * 2n);
+    await call(serviceId);
     const second = lastJson<Card>(await call(serviceId));
 
+    expect(second.payment?.paymentType).toBe(NATIVE_PAYMENT_TYPE);
+    expect(mechContract.paymentType).toHaveBeenCalledTimes(1);
     expect(getServicesFromMarketplaceSubgraph).toHaveBeenCalledTimes(1);
-    expect(mechContract.maxDeliveryRate).toHaveBeenCalledTimes(2);
-    expect(second.price?.amount).toBe((MAX_DELIVERY_RATE_WEI * 2n).toString());
   });
 
-  it('omits price entirely when the RPC read fails', async () => {
-    mechContract.maxDeliveryRate.mockRejectedValue(new Error('rpc down'));
-    const res = await call(freshServiceId());
-    const body = lastJson<Card>(res);
+  it('omits payment when the RPC read fails and retries it on the next hit', async () => {
+    mechContract.paymentType.mockRejectedValueOnce(new Error('rpc down'));
+    const serviceId = freshServiceId();
 
-    expect(res.status).toHaveBeenCalledWith(200);
-    expectNoStore(res);
-    expect(body).not.toHaveProperty('price');
-    expect(body.metadata.mechAddress).toBe(`eip155:${CHAIN_ID}:${MECH_ADDRESS}`);
+    const first = await call(serviceId);
+    expect(first.status).toHaveBeenCalledWith(200);
+    expect(lastJson<Card>(first)).not.toHaveProperty('payment');
+
+    const second = lastJson<Card>(await call(serviceId));
+    expect(second.payment?.paymentType).toBe(NATIVE_PAYMENT_TYPE);
+    expect(mechContract.paymentType).toHaveBeenCalledTimes(2);
+    expect(getServicesFromMarketplaceSubgraph).toHaveBeenCalledTimes(1);
+
+    await call(serviceId);
+    expect(mechContract.paymentType).toHaveBeenCalledTimes(2);
   });
 
-  it('gives up on a hanging RPC and omits price instead of holding the card', async () => {
+  it('gives up on a hanging RPC and omits payment instead of holding the card', async () => {
     jest.useFakeTimers();
     try {
-      mechContract.maxDeliveryRate.mockReturnValue(new Promise(() => undefined));
+      mechContract.paymentType.mockReturnValue(new Promise(() => undefined));
       const pending = call(freshServiceId());
       await jest.advanceTimersByTimeAsync(3_500);
       const res = await pending;
 
       expect(res.status).toHaveBeenCalledWith(200);
-      expect(lastJson<Card>(res)).not.toHaveProperty('price');
+      expect(lastJson<Card>(res)).not.toHaveProperty('payment');
       expect(mockProviderDestroy).toHaveBeenCalled();
     } finally {
       jest.useRealTimers();
     }
   });
 
-  it('omits price when the service has no mech address', async () => {
+  it('omits payment when the service has no mech address', async () => {
     getServicesFromMarketplaceSubgraph.mockImplementation(async ({ serviceIds }) => [
       makeMarketplaceService({ id: serviceIds[0], mechAddresses: [] }),
     ]);
     const body = lastJson<Card>(await call(freshServiceId()));
 
-    expect(body).not.toHaveProperty('price');
-    expect(mechContract.maxDeliveryRate).not.toHaveBeenCalled();
+    expect(body).not.toHaveProperty('payment');
+    expect(mechContract.paymentType).not.toHaveBeenCalled();
   });
 });

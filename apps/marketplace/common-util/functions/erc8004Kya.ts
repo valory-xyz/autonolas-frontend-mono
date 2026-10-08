@@ -59,17 +59,20 @@ export type Erc8004Provider = {
   url: string;
 };
 
-export type MechPrice = {
-  /** `maxDeliveryRate()` as a decimal integer string in the payment type's smallest unit. */
-  amount: string;
-  unit: FeeUnit | null;
-  /** `paymentType()` bytes32 hash, 0x-prefixed. */
+/**
+ * How a mech is paid and where its price is quoted. Carries no amount:
+ * `maxDeliveryRate()` is only the ceiling, and the contract quotes the
+ * actual charge at request time.
+ */
+export type MechPayment = {
+  /** `paymentType()` bytes32 hash, 0x-prefixed. Fixed when the mech is deployed. */
   paymentType: string;
+  unit: FeeUnit | null;
   mechAddress: string;
 };
 
 const PROOF_TIMEOUT_MS = 5_000;
-const PRICE_READ_TIMEOUT_MS = 3_000;
+const RPC_READ_TIMEOUT_MS = 3_000;
 
 export const isServiceDeployed = (state: unknown): boolean =>
   state !== null && state !== undefined && String(state) === SERVICE_STATE_KEY_MAP.deployed;
@@ -124,7 +127,7 @@ export type DomainProof = {
 
 /**
  * `ok`: the domain served a JSON document. `not-found`: the domain answered
- * but has no usable proof (4xx, redirect, non-object body). `unavailable`:
+ * but has no usable proof (3xx, 4xx, non-object body). `unavailable`:
  * the domain could not be reached or answered 5xx, so nothing is known.
  */
 export type DomainProofResult =
@@ -137,7 +140,8 @@ const isAbortError = (error: unknown): boolean =>
 
 /**
  * Reads the proof file from the exact host named in the manifest. Redirects
- * are not followed: a proof must be served by the host it vouches for.
+ * are not followed: a proof must be served by the host it vouches for, so a
+ * 3xx answer is a verdict (not-found), not an outage.
  */
 export const fetchDomainProof = async (domain: string): Promise<DomainProofResult> => {
   if (!isValidOperatorDomain(domain)) return { status: 'not-found' };
@@ -148,7 +152,7 @@ export const fetchDomainProof = async (domain: string): Promise<DomainProofResul
   try {
     const response = await fetch(getDomainProofUrl(domain), {
       signal: controller.signal,
-      redirect: 'error',
+      redirect: 'manual',
     });
 
     if (response.status >= 500) return { status: 'unavailable' };
@@ -256,10 +260,7 @@ export const parseAgentId = (rawId: unknown): number | null => {
   return null;
 };
 
-const MECH_PRICE_ABI = [
-  'function maxDeliveryRate() view returns (uint256)',
-  'function paymentType() view returns (bytes32)',
-];
+const MECH_PAYMENT_ABI = ['function paymentType() view returns (bytes32)'];
 
 const withTimeout = <T>(promise: Promise<T>, ms: number, label: string): Promise<T> =>
   new Promise<T>((resolve, reject) => {
@@ -277,36 +278,39 @@ const withTimeout = <T>(promise: Promise<T>, ms: number, label: string): Promise
   });
 
 /**
- * Reads the mech's current price from chain, giving up after
- * PRICE_READ_TIMEOUT_MS. Never cached: a stale price on a paid action is
- * worse than a missing one, so callers omit the field on null.
+ * Reads the mech's payment type from chain with one RPC attempt and no
+ * retries, giving up after RPC_READ_TIMEOUT_MS. The value is fixed at deploy
+ * time, so callers may cache it; null means the read failed and should be
+ * retried later rather than recorded.
  */
-export const readMechPrice = async (
+export const readMechPayment = async (
   rpcUrl: string,
   chainId: number,
   mechAddress: string,
-): Promise<MechPrice | null> => {
-  const provider = new ethers.JsonRpcProvider(rpcUrl, undefined, { staticNetwork: true });
+): Promise<MechPayment | null> => {
+  const request = new ethers.FetchRequest(rpcUrl);
+  request.setThrottleParams({ maxAttempts: 1 });
+  const provider = new ethers.JsonRpcProvider(request, undefined, { staticNetwork: true });
   try {
-    const mech = new ethers.Contract(mechAddress, MECH_PRICE_ABI, provider);
-    const [maxDeliveryRate, paymentType] = await withTimeout(
-      Promise.all([mech.maxDeliveryRate(), mech.paymentType()]),
-      PRICE_READ_TIMEOUT_MS,
-      'mech price read',
+    const mech = new ethers.Contract(mechAddress, MECH_PAYMENT_ABI, provider);
+    const paymentType = await withTimeout(
+      mech.paymentType(),
+      RPC_READ_TIMEOUT_MS,
+      'mech paymentType read',
     );
-
-    const amount = BigInt(maxDeliveryRate).toString();
     const paymentTypeHash = String(paymentType).toLowerCase();
 
     return {
-      amount,
-      unit: feeUnitForPaymentType(paymentTypeHash),
       paymentType: paymentTypeHash,
+      unit: feeUnitForPaymentType(paymentTypeHash),
       mechAddress: `eip155:${chainId}:${mechAddress}`,
     };
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Unknown error';
-    console.warn(`Could not read price from mech ${mechAddress} on chain ${chainId}:`, message);
+    console.warn(
+      `Could not read payment type from mech ${mechAddress} on chain ${chainId}:`,
+      message,
+    );
     return null;
   } finally {
     provider.destroy();

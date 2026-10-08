@@ -23,7 +23,6 @@ export const NATIVE_PAYMENT_TYPE =
 export const USDC_PAYMENT_TYPE =
   '0x6406bb5f31a732f898e1ce9fdd988a80a808d36ab5d9a4a4805a8be8d197d5e3';
 export const UNKNOWN_PAYMENT_TYPE = `0x${'77'.repeat(32)}`;
-export const MAX_DELIVERY_RATE_WEI = 10_000_000_000_000_000n;
 
 export const makeManifest = (overrides: Partial<MechManifest> = {}): MechManifest => ({
   name: 'Prediction mech',

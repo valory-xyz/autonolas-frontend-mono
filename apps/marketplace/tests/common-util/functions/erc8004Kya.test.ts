@@ -168,11 +168,13 @@ describe('fetchDomainProof', () => {
       status: 'ok',
       proof: { registrations: [] },
     });
-    expect(global.fetch).toHaveBeenCalledWith(url, expect.objectContaining({ redirect: 'error' }));
+    expect(global.fetch).toHaveBeenCalledWith(url, expect.objectContaining({ redirect: 'manual' }));
   });
 
   it.each([
     ['a 404', { ok: false, status: 404, json: async () => ({}) }],
+    ['a 301 redirect', { ok: false, status: 301, json: async () => ({}) }],
+    ['a 302 redirect', { ok: false, status: 302, json: async () => ({}) }],
     ['a 403', { ok: false, status: 403, json: async () => ({}) }],
     ['a non-object body', { ok: true, status: 200, json: async () => 'nope' }],
     ['a null body', { ok: true, status: 200, json: async () => null }],
@@ -198,12 +200,6 @@ describe('fetchDomainProof', () => {
       'a network error',
       jest.fn(async () => {
         throw new Error('ECONNRESET');
-      }),
-    ],
-    [
-      'a refused redirect',
-      jest.fn(async () => {
-        throw new TypeError('redirect');
       }),
     ],
   ])('treats %s as unavailable (not a verdict)', async (_label, fetchStub) => {

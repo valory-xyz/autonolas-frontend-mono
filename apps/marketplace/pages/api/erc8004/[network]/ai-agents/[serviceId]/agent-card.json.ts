@@ -8,7 +8,11 @@ import { isMarketplaceSupportedNetwork } from 'common-util/functions';
 import type { MarketplaceSubgraphChainId } from 'common-util/graphql';
 import { getServicesFromMarketplaceSubgraph } from 'common-util/graphql/services';
 
-import { ERC8004_CHAIN_MAPPING, MARKETPLACE_SUPPORTED_CHAIN_IDS } from 'util/constants';
+import {
+  CACHE_DURATION,
+  ERC8004_CHAIN_MAPPING,
+  MARKETPLACE_SUPPORTED_CHAIN_IDS,
+} from 'util/constants';
 
 import {
   getChainIdFromNetworkSlug,
@@ -21,11 +25,11 @@ import {
   type Erc8004Provider,
   type MechManifest,
   type MechOperator,
-  type MechPrice,
+  type MechPayment,
   type ToolInputOutput,
   getIdentityRegistryAddress,
   parseAgentId,
-  readMechPrice,
+  readMechPayment,
   resolveProvider,
 } from 'common-util/functions/erc8004Kya';
 import { getCached, getStaleFallback, setCache } from 'util/apiCache';
@@ -43,13 +47,13 @@ type AgentCardSkill = {
   };
 };
 
-/** The cacheable part of the card. `price` is read from chain on every request and never stored. */
 type AgentCardBody = {
   name: string;
   description: string;
   version: '1.0.0';
   url?: string;
   provider?: Erc8004Provider;
+  payment?: MechPayment;
   defaultInputModes: string[];
   defaultOutputModes: string[];
   capabilities: {
@@ -75,12 +79,10 @@ type AgentCardBody = {
   skills: AgentCardSkill[];
 };
 
-type AgentCardResponse = AgentCardBody & { price?: MechPrice };
-
 /**
- * What the in-memory cache holds. `providerPending` is set when the operator
- * domain could not be reached at build time; the next hit retries the proof
- * instead of serving "no provider" as a verdict.
+ * What the in-memory cache holds. A `*Pending` flag marks a lookup that failed
+ * at build time (operator domain unreachable, RPC down); the next hit retries
+ * it instead of serving the gap as a verdict.
  */
 type CachedAgentCard = {
   body: AgentCardBody;
@@ -88,12 +90,14 @@ type CachedAgentCard = {
   operator?: MechOperator;
   agentId: number | null;
   providerPending: boolean;
+  paymentPending: boolean;
 };
 
-// Every 200 carries a price read from chain for this request, so the CDN
-// must not hold the response. The expensive part (subgraph + IPFS) is
-// cached in memory instead.
-const LIVE_CACHE_CONTROL = 'no-store';
+const FRESH_CACHE_CONTROL = `public, s-maxage=${CACHE_DURATION.SIX_HOURS}, stale-while-revalidate=${CACHE_DURATION.FIVE_MINUTES}`;
+const STALE_CACHE_CONTROL = `public, s-maxage=${CACHE_DURATION.FIVE_MINUTES}, stale-while-revalidate=${CACHE_DURATION.FIVE_MINUTES}`;
+
+const HOW_TO_HIRE_SUMMARY =
+  'To hire this Mech, follow the Hire guide and submit a request via the Mech Marketplace client. The Marketplace page provides the service details for this network. The price is quoted by the mech contract at request time: maxDeliveryRate() is the most a request can be charged, and the actual charge may be lower.';
 
 const buildSkills = (metadata: MechManifest): AgentCardSkill[] => {
   const { tools, toolMetadata, inputFormat, outputFormat } = metadata;
@@ -118,42 +122,45 @@ const buildSkills = (metadata: MechManifest): AgentCardSkill[] => {
     });
 };
 
-const withLivePrice = async (
-  body: AgentCardBody,
-  chainId: number,
-  mechAddress: string | undefined,
-): Promise<AgentCardResponse> => {
-  const rpcUrl = RPC_URLS[chainId];
-  if (!rpcUrl || !mechAddress) return body;
-
-  const price = await readMechPrice(rpcUrl, chainId, mechAddress);
-  return price ? { ...body, price } : body;
-};
-
-/** Retries a proof that was unavailable when the card was built, updating the cache on a verdict. */
-const settleProvider = async (
+/** Retries the lookups that failed when the card was built, updating the cache on each verdict. */
+const settlePending = async (
   cacheKey: string,
   entry: CachedAgentCard,
   chainId: number,
 ): Promise<CachedAgentCard> => {
-  if (!entry.providerPending) return entry;
+  if (!entry.providerPending && !entry.paymentPending) return entry;
 
-  const resolution = await resolveProvider(entry.operator, chainId, entry.agentId);
-  if (resolution.unavailable) return entry;
+  let { body, providerPending, paymentPending } = entry;
 
-  const { provider, ...rest } = entry.body;
-  const settled: CachedAgentCard = {
-    ...entry,
-    body: resolution.provider ? { ...rest, provider: resolution.provider } : rest,
-    providerPending: false,
-  };
+  if (providerPending) {
+    const resolution = await resolveProvider(entry.operator, chainId, entry.agentId);
+    if (!resolution.unavailable) {
+      const { provider, ...rest } = body;
+      body = resolution.provider ? { ...rest, provider: resolution.provider } : rest;
+      providerPending = false;
+    }
+  }
+
+  const rpcUrl = RPC_URLS[chainId];
+  if (paymentPending && rpcUrl && entry.mechAddress) {
+    const payment = await readMechPayment(rpcUrl, chainId, entry.mechAddress);
+    if (payment) {
+      body = { ...body, payment };
+      paymentPending = false;
+    }
+  }
+
+  if (providerPending === entry.providerPending && paymentPending === entry.paymentPending) {
+    return entry;
+  }
+  const settled: CachedAgentCard = { ...entry, body, providerPending, paymentPending };
   setCache(cacheKey, settled);
   return settled;
 };
 
 export default async function handler(
   req: NextApiRequest,
-  res: NextApiResponse<AgentCardResponse | { error: string }>,
+  res: NextApiResponse<AgentCardBody | { error: string }>,
 ) {
   if (req.method !== 'GET') {
     return res.status(405).json({ error: 'Method not allowed' });
@@ -162,17 +169,17 @@ export default async function handler(
   let cacheKey = '';
   let chainId: keyof typeof ADDRESSES | null = null;
 
-  /** `fromCache` entries may carry a pending provider verdict worth retrying; a freshly built entry was just attempted. */
+  /** `fromCache` entries may carry pending lookups worth retrying; a freshly built entry was just attempted. */
   const sendEntry = async (
     entry: CachedAgentCard,
     { stale, fromCache }: { stale: boolean; fromCache: boolean },
   ) => {
     if (stale) res.setHeader('X-Cache-Status', 'stale');
-    res.setHeader('Cache-Control', LIVE_CACHE_CONTROL);
-    if (chainId === null) return res.status(200).json(entry.body);
+    res.setHeader('Cache-Control', stale ? STALE_CACHE_CONTROL : FRESH_CACHE_CONTROL);
+    if (chainId === null || !fromCache) return res.status(200).json(entry.body);
 
-    const settled = fromCache ? await settleProvider(cacheKey, entry, chainId) : entry;
-    return res.status(200).json(await withLivePrice(settled.body, chainId, settled.mechAddress));
+    const settled = await settlePending(cacheKey, entry, chainId);
+    return res.status(200).json(settled.body);
   };
 
   try {
@@ -263,9 +270,13 @@ export default async function handler(
       });
     }
 
-    const resolution = await resolveProvider(mechMetadata.operator, chainId, agentId);
-    const provider = resolution.provider;
     const mechAddress = serviceFromMarketplace.mechAddresses?.[0];
+    const rpcUrl = RPC_URLS[chainId];
+    const [resolution, payment] = await Promise.all([
+      resolveProvider(mechMetadata.operator, chainId, agentId),
+      mechAddress && rpcUrl ? readMechPayment(rpcUrl, chainId, mechAddress) : Promise.resolve(null),
+    ]);
+    const provider = resolution.provider;
 
     const erc8004Network = ERC8004_CHAIN_MAPPING[chainId as keyof typeof ERC8004_CHAIN_MAPPING];
     const chainAddresses = ADDRESSES[chainId];
@@ -280,6 +291,7 @@ export default async function handler(
       version: '1.0.0',
       ...(mechMetadata.url && { url: mechMetadata.url }),
       ...(provider && { provider }),
+      ...(payment && { payment }),
       defaultInputModes: ['text/plain'],
       defaultOutputModes: ['application/json'],
       capabilities: {
@@ -297,8 +309,7 @@ export default async function handler(
         }),
         ...(mechAddress && { mechAddress: `eip155:${chainId}:${mechAddress}` }),
         howToHire: {
-          summary:
-            'To hire this Mech, follow the Hire guide and submit a request via the Mech Marketplace client. The Marketplace page provides the service details for this network.',
+          summary: HOW_TO_HIRE_SUMMARY,
           links: [
             {
               rel: 'hire',
@@ -322,6 +333,7 @@ export default async function handler(
       operator: mechMetadata.operator,
       agentId,
       providerPending: resolution.unavailable,
+      paymentPending: Boolean(mechAddress && rpcUrl) && payment === null,
     };
     setCache(cacheKey, entry);
 
