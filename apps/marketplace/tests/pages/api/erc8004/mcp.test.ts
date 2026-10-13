@@ -12,6 +12,18 @@ import {
   makeMarketplaceService,
 } from './fixtures';
 
+const registryContract = { getService: jest.fn() };
+jest.mock('ethers', () => {
+  const actual = jest.requireActual('ethers');
+  return {
+    ...actual,
+    ethers: {
+      ...actual.ethers,
+      Contract: jest.fn(() => registryContract),
+      JsonRpcProvider: jest.fn(() => ({ destroy: jest.fn() })),
+    },
+  };
+});
 jest.mock('common-util/Login/config', () => ({
   EVM_SUPPORTED_CHAINS: [
     { id: 1, networkName: 'ethereum', networkDisplayName: 'Ethereum', vmType: 'EVM' },
@@ -52,8 +64,11 @@ const freshServiceId = () => String(nextServiceId++);
 
 const call = (serviceId: string) => callHandler(handler, { network: NETWORK, serviceId });
 
+const CONFIG_HASH = '0xconfig';
+
 beforeEach(() => {
   jest.clearAllMocks();
+  registryContract.getService.mockResolvedValue({ configHash: CONFIG_HASH });
   getServicesFromMarketplaceSubgraph.mockResolvedValue([makeMarketplaceService()]);
   getIpfsResponse.mockImplementation(async (hash: string) =>
     hash === MANIFEST_HASH ? makeManifest() : null,
@@ -80,6 +95,25 @@ describe('GET .../mcp.json', () => {
     const res = await call(serviceId);
     expect(res.status).toHaveBeenCalledWith(200);
     expect(lastJson<Descriptor>(res).name).toBe(generateName(CHAIN_ID, Number(serviceId)));
+  });
+
+  it('uses the service config description for a template-named mech', async () => {
+    getIpfsResponse.mockImplementation(async (hash: string) => {
+      if (hash === MANIFEST_HASH) return makeManifest({ name: 'Autonolas Mech III' });
+      if (hash === CONFIG_HASH) return { description: 'Prediction service run by Bob.' };
+      return null;
+    });
+    const res = await call(freshServiceId());
+    expect(lastJson<{ description: string }>(res).description).toBe(
+      'Prediction service run by Bob.',
+    );
+  });
+
+  it('keeps the manifest description of a mech with its own name', async () => {
+    getIpfsResponse.mockResolvedValue(makeManifest({ name: 'Profit Pulse Mech' }));
+    const res = await call(freshServiceId());
+    expect(lastJson<{ description: string }>(res).description).toBe(makeManifest().description);
+    expect(registryContract.getService).not.toHaveBeenCalled();
   });
 
   it('still lists a tool that publishes no input or output schema, without the schema fields', async () => {

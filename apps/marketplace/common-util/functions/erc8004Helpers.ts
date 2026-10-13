@@ -1,6 +1,7 @@
 import { ethers } from 'ethers';
 import type { NextApiRequest } from 'next';
 
+import { RPC_URLS } from 'libs/util-constants/src';
 import { isL1Network } from 'libs/util-functions/src';
 
 import { SERVICE_REGISTRY_CONTRACT, SERVICE_REGISTRY_L2 } from 'common-util/AbiAndAddresses';
@@ -8,7 +9,9 @@ import { ADDRESSES } from 'common-util/Contracts/addresses';
 import { EVM_SUPPORTED_CHAINS } from 'common-util/Login/config';
 import { getServiceFromRegistry } from 'common-util/graphql/registry';
 import { REGISTRY_SUBGRAPH_CLIENTS, ERC8004_SUPPORTED_CHAINS } from 'common-util/graphql';
+import { asText } from 'common-util/functions/erc8004Kya';
 import type { ToolInputOutput } from 'common-util/functions/erc8004Kya';
+import { getIpfsResponse } from 'common-util/functions/ipfs';
 
 export const getChainIdFromNetworkSlug = (network: string): number | null => {
   if (typeof network !== 'string') return null;
@@ -82,6 +85,26 @@ export const buildServiceRegistryContext = (
  * 2. If a nested `schema` wrapper exists, its properties are spread to the
  *    top level and the wrapper is removed.
  * Null when the tool publishes no schema, so callers omit the field. */
+/** The description in the service's own config (its on-chain `configHash` on IPFS), or ''. */
+export const getServiceConfigDescription = async (
+  chainId: number,
+  serviceId: string,
+): Promise<string> => {
+  const rpcUrl = RPC_URLS[chainId];
+  const registryCtx = rpcUrl
+    ? buildServiceRegistryContext(chainId as keyof typeof ADDRESSES, rpcUrl)
+    : null;
+  if (!registryCtx) return '';
+  try {
+    const service = await registryCtx.serviceRegistryContract.getService(serviceId);
+    const config = await getIpfsResponse(service.configHash);
+    return asText(config?.description);
+  } catch (error) {
+    console.error(`Error reading the config of service ${serviceId} on chain ${chainId}:`, error);
+    return '';
+  }
+};
+
 export const normalizeToolSchema = (
   raw: ToolInputOutput | undefined,
 ): { type: string; description: string } | null => {

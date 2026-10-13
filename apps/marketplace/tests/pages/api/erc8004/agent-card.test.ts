@@ -71,9 +71,14 @@ const { getIpfsResponse } = jest.requireMock('common-util/functions/ipfs') as {
   getIpfsResponse: jest.Mock;
 };
 
+// One stub stands in for every contract the route builds: the mech and the service registry.
 const mechContract = {
   paymentType: jest.fn(),
+  getService: jest.fn(),
 };
+
+const CONFIG_HASH = '0xconfig';
+const SERVICE_CONFIG_DESCRIPTION = 'Prediction service run by Bob.';
 
 const unmockedFetch = global.fetch;
 
@@ -104,6 +109,7 @@ beforeEach(() => {
   jest.clearAllMocks();
   mockedEthers.Contract.mockImplementation(() => mechContract);
   mechContract.paymentType.mockResolvedValue(NATIVE_PAYMENT_TYPE);
+  mechContract.getService.mockResolvedValue({ configHash: CONFIG_HASH });
   getServicesFromMarketplaceSubgraph.mockImplementation(async ({ serviceIds }) => [
     makeMarketplaceService({ id: serviceIds[0] }),
   ]);
@@ -136,6 +142,49 @@ describe('GET .../agent-card.json — name', () => {
   it('trims the manifest name when the mech has one of its own', async () => {
     getIpfsResponse.mockResolvedValue(makeManifest({ name: '  Profit Pulse Mech  ' }));
     expect(lastJson<Card>(await call(freshServiceId())).name).toBe('Profit Pulse Mech');
+  });
+});
+
+describe('GET .../agent-card.json — description', () => {
+  type Described = Card & { description: string };
+  const serveManifestAndConfig = (name: string, config: unknown) =>
+    getIpfsResponse.mockImplementation(async (hash: string) => {
+      if (hash === MANIFEST_HASH) return makeManifest({ name });
+      if (hash === CONFIG_HASH) return config;
+      return null;
+    });
+
+  it('uses the service config description, as the registration file does, for a template-named mech', async () => {
+    serveManifestAndConfig('Autonolas Mech III', {
+      description: `  ${SERVICE_CONFIG_DESCRIPTION} `,
+    });
+    const res = await call(freshServiceId());
+    expect(lastJson<Described>(res).description).toBe(SERVICE_CONFIG_DESCRIPTION);
+  });
+
+  it('keeps the manifest description of a mech with its own name, without reading the config', async () => {
+    serveManifestAndConfig('Profit Pulse Mech', { description: SERVICE_CONFIG_DESCRIPTION });
+    const res = await call(freshServiceId());
+    expect(lastJson<Described>(res).description).toBe(makeManifest().description);
+    expect(mechContract.getService).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    ['the config has no description', { name: 'x' }],
+    ['the config cannot be fetched', null],
+  ])('falls back to the manifest description when %s', async (_case, config) => {
+    serveManifestAndConfig('Autonolas Mech III', config);
+    const res = await call(freshServiceId());
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(lastJson<Described>(res).description).toBe(makeManifest().description);
+  });
+
+  it('falls back to the manifest description when the registry read fails', async () => {
+    serveManifestAndConfig('Autonolas Mech III', { description: SERVICE_CONFIG_DESCRIPTION });
+    mechContract.getService.mockRejectedValue(new Error('rpc down'));
+    const res = await call(freshServiceId());
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(lastJson<Described>(res).description).toBe(makeManifest().description);
   });
 });
 

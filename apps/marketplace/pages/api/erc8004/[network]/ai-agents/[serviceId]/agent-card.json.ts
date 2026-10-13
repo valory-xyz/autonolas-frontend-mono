@@ -21,6 +21,7 @@ import {
   normalizeQueryParam,
   getServiceFromRegistrySafe,
   normalizeToolSchema,
+  getServiceConfigDescription,
 } from 'common-util/functions/erc8004Helpers';
 import {
   type Erc8004Provider,
@@ -33,6 +34,7 @@ import {
   parseAgentId,
   readMechPayment,
   resolveProvider,
+  asText,
 } from 'common-util/functions/erc8004Kya';
 import { getCached, getStaleFallback, setCache } from 'util/apiCache';
 
@@ -289,9 +291,17 @@ export default async function handler(
         ? chainAddresses.mechMarketplace
         : undefined;
 
+    // A mech still carrying the template name keeps its pseudonym and its
+    // service config text, as in the registration file.
+    const ownName = getOwnMechName(mechMetadata);
+    const description =
+      (ownName && asText(mechMetadata.description)) ||
+      (await getServiceConfigDescription(chainId, serviceId)) ||
+      mechMetadata.description;
+
     const body: AgentCardBody = {
-      name: getOwnMechName(mechMetadata) || generateName(chainId, Number(serviceId)),
-      description: mechMetadata.description,
+      name: ownName || generateName(chainId, Number(serviceId)),
+      description,
       version: '1.0.0',
       ...(mechMetadata.url && { url: mechMetadata.url }),
       ...(provider && { provider }),
