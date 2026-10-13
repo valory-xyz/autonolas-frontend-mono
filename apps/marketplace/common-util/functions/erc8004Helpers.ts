@@ -8,6 +8,7 @@ import { ADDRESSES } from 'common-util/Contracts/addresses';
 import { EVM_SUPPORTED_CHAINS } from 'common-util/Login/config';
 import { getServiceFromRegistry } from 'common-util/graphql/registry';
 import { REGISTRY_SUBGRAPH_CLIENTS, ERC8004_SUPPORTED_CHAINS } from 'common-util/graphql';
+import type { ToolInputOutput } from 'common-util/functions/erc8004Kya';
 
 export const getChainIdFromNetworkSlug = (network: string): number | null => {
   if (typeof network !== 'string') return null;
@@ -79,12 +80,12 @@ export const buildServiceRegistryContext = (
  * Normalize a tool schema from IPFS metadata so that:
  * 1. `type: "text"` becomes `type: "string"`.
  * 2. If a nested `schema` wrapper exists, its properties are spread to the
- *    top level and the wrapper is removed. */
-export const normalizeToolSchema = (raw: {
-  type: string;
-  description: string;
-  schema?: Record<string, unknown>;
-}): { type: string; description: string } => {
+ *    top level and the wrapper is removed.
+ * Null when the tool publishes no schema, so callers omit the field. */
+export const normalizeToolSchema = (
+  raw: ToolInputOutput | undefined,
+): { type: string; description: string } | null => {
+  if (!raw || typeof raw !== 'object') return null;
   const { schema, ...rest } = raw;
   const base = schema ? { ...rest, ...schema } : rest;
   return {

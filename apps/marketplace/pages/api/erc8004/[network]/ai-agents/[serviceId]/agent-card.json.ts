@@ -4,6 +4,7 @@ import { RPC_URLS } from 'libs/util-constants/src';
 
 import { ADDRESSES } from 'common-util/Contracts/addresses';
 import { getIpfsCIDFromHash, getIpfsResponse } from 'common-util/functions/ipfs';
+import { generateName } from 'common-util/functions/agentName';
 import { isMarketplaceSupportedNetwork } from 'common-util/functions';
 import type { MarketplaceSubgraphChainId } from 'common-util/graphql';
 import { getServicesFromMarketplaceSubgraph } from 'common-util/graphql/services';
@@ -28,6 +29,7 @@ import {
   type MechPayment,
   type ToolInputOutput,
   getIdentityRegistryAddress,
+  getOwnMechName,
   parseAgentId,
   readMechPayment,
   resolveProvider,
@@ -38,8 +40,8 @@ type AgentCardSkill = {
   id: string;
   name: string;
   description: string;
-  inputSchema: ToolInputOutput;
-  outputSchema: ToolInputOutput;
+  inputSchema?: ToolInputOutput;
+  outputSchema?: ToolInputOutput;
   metadata: {
     runtimeToolName: string;
     inputFormat: string;
@@ -107,12 +109,14 @@ const buildSkills = (metadata: MechManifest): AgentCardSkill[] => {
     .filter((toolName) => toolName in toolMetadata)
     .map((toolName) => {
       const tool = toolMetadata[toolName];
+      const inputSchema = normalizeToolSchema(tool.input);
+      const outputSchema = normalizeToolSchema(tool.output);
       return {
         id: `tool:${toolName}`,
         name: toolName,
         description: tool.description,
-        inputSchema: normalizeToolSchema(tool.input),
-        outputSchema: normalizeToolSchema(tool.output),
+        ...(inputSchema && { inputSchema }),
+        ...(outputSchema && { outputSchema }),
         metadata: {
           runtimeToolName: tool.name,
           inputFormat,
@@ -286,7 +290,7 @@ export default async function handler(
         : undefined;
 
     const body: AgentCardBody = {
-      name: mechMetadata.name,
+      name: getOwnMechName(mechMetadata) || generateName(chainId, Number(serviceId)),
       description: mechMetadata.description,
       version: '1.0.0',
       ...(mechMetadata.url && { url: mechMetadata.url }),

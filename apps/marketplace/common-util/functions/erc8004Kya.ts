@@ -28,11 +28,12 @@ export type ToolBenchmark = {
   url: string;
 };
 
+/** `input` and `output` are absent when the tool publishes no schema. */
 export type ToolMetadataEntry = {
   name: string;
   description: string;
-  input: ToolInputOutput;
-  output: ToolInputOutput;
+  input?: ToolInputOutput;
+  output?: ToolInputOutput;
   benchmark?: ToolBenchmark;
 };
 

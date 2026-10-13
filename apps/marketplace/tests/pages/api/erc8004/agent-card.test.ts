@@ -2,6 +2,8 @@ import { FetchRequest } from 'ethers';
 
 import { RPC_URLS } from 'libs/util-constants/src';
 
+import { generateName } from 'common-util/functions/agentName';
+
 import handler from '../../../../pages/api/erc8004/[network]/ai-agents/[serviceId]/agent-card.json';
 import {
   AGENT_ID,
@@ -80,11 +82,20 @@ const unmockedFetch = global.fetch;
 let nextServiceId = 100;
 const freshServiceId = () => String(nextServiceId++);
 
+type CardSkill = {
+  id: string;
+  name: string;
+  description: string;
+  inputSchema?: { type: string; description: string };
+  outputSchema?: { type: string; description: string };
+};
+
 type Card = {
   name: string;
   provider?: { organization: string; url: string };
   payment?: { paymentType: string; unit: string | null; mechAddress: string };
   metadata: { mechAddress?: string };
+  skills: CardSkill[];
 };
 
 const call = (serviceId: string) => callHandler(handler, { network: NETWORK, serviceId });
@@ -107,6 +118,69 @@ beforeEach(() => {
 
 afterAll(() => {
   global.fetch = unmockedFetch;
+});
+
+describe('GET .../agent-card.json — name', () => {
+  it.each(['Autonolas Mech III', 'Autonolas Mech', 'autonolas mech II'])(
+    'uses the pseudonym, as the registration file does, when the manifest still carries the template name %p',
+    async (templateName) => {
+      getIpfsResponse.mockResolvedValue(makeManifest({ name: templateName }));
+      const serviceId = freshServiceId();
+
+      const res = await call(serviceId);
+      expect(res.status).toHaveBeenCalledWith(200);
+      expect(lastJson<Card>(res).name).toBe(generateName(CHAIN_ID, Number(serviceId)));
+    },
+  );
+
+  it('trims the manifest name when the mech has one of its own', async () => {
+    getIpfsResponse.mockResolvedValue(makeManifest({ name: '  Profit Pulse Mech  ' }));
+    expect(lastJson<Card>(await call(freshServiceId())).name).toBe('Profit Pulse Mech');
+  });
+});
+
+describe('GET .../agent-card.json — skills', () => {
+  it('normalizes the input and output schemas of a tool that publishes them', async () => {
+    const body = lastJson<Card>(await call(freshServiceId()));
+
+    expect(body.skills).toEqual([
+      expect.objectContaining({
+        id: 'tool:prediction-online',
+        inputSchema: { type: 'string', description: 'The question.' },
+        outputSchema: { type: 'string', description: 'The probability.' },
+      }),
+    ]);
+  });
+
+  it('still lists a tool that publishes no input or output schema, without the schema fields', async () => {
+    getIpfsResponse.mockResolvedValue(
+      makeManifest({
+        tools: ['prediction-online', 'bare-tool'],
+        toolMetadata: {
+          ...makeManifest().toolMetadata,
+          'bare-tool': { name: 'bare-tool', description: 'No schema published.' },
+        },
+      }),
+    );
+
+    const res = await call(freshServiceId());
+    expect(res.status).toHaveBeenCalledWith(200);
+
+    const { skills } = lastJson<Card>(res);
+    expect(skills.map((skill) => skill.id)).toEqual(['tool:prediction-online', 'tool:bare-tool']);
+    expect(skills[1]).toEqual({
+      id: 'tool:bare-tool',
+      name: 'bare-tool',
+      description: 'No schema published.',
+      metadata: {
+        runtimeToolName: 'bare-tool',
+        inputFormat: 'ipfs-v0.1',
+        outputFormat: 'ipfs-v0.1',
+      },
+    });
+    expect(skills[1]).not.toHaveProperty('inputSchema');
+    expect(skills[1]).not.toHaveProperty('outputSchema');
+  });
 });
 
 describe('GET .../agent-card.json — provider', () => {
