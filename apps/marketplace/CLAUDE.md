@@ -117,7 +117,7 @@ screen.
 ERC8004 is a token metadata standard for autonomous agents. The app exposes API endpoints that generate:
 
 - **Registration response** (`/api/erc8004/...`) – Standard ERC8004 registration with name, description, image, services, x402 support, and registration info. `name` and `description` come from the mech manifest when it carries its own name; a service with no manifest, or one still named after the metadata template (`Autonolas Mech …`), keeps its generated pseudonym and its service config description. `active` mirrors the registry state (true only for Deployed). No `supportedTrust` claim: no reputation system exists. CDN TTL is 1 hour.
-- **Agent Card** (`agent-card.json`) – A2A-compatible agent card with skills derived from IPFS tool metadata, plus `provider` and `payment`.
+- **Agent Card** (`agent-card.json`) – A2A-compatible agent card with skills derived from IPFS tool metadata, plus `provider` and `payment`. `name` follows the registration file's rule (own manifest name, else the pseudonym). A tool with no `input` or `output` schema is still listed, with `inputSchema` / `outputSchema` omitted; the same holds for `mcp.json` tools.
 - **MCP Descriptor** (`mcp.json`) – Model Context Protocol server descriptor with tools. Carries no `auth` block: the mech implements no API-key or wallet-signature scheme.
 
 #### Know-your-agent (KYA) fields

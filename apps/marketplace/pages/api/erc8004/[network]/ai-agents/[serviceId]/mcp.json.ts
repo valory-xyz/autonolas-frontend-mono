@@ -2,6 +2,7 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 
 import { ADDRESSES } from 'common-util/Contracts/addresses';
 import { getIpfsCIDFromHash, getIpfsResponse } from 'common-util/functions/ipfs';
+import { generateName } from 'common-util/functions/agentName';
 import { isMarketplaceSupportedNetwork } from 'common-util/functions';
 import type { MarketplaceSubgraphChainId } from 'common-util/graphql';
 import { getServicesFromMarketplaceSubgraph } from 'common-util/graphql/services';
@@ -17,15 +18,21 @@ import {
   getSupportedNetworkNames,
   normalizeQueryParam,
   normalizeToolSchema,
+  getServiceConfigDescription,
 } from 'common-util/functions/erc8004Helpers';
-import type { MechManifest, ToolInputOutput } from 'common-util/functions/erc8004Kya';
+import {
+  type MechManifest,
+  type ToolInputOutput,
+  getOwnMechName,
+  asText,
+} from 'common-util/functions/erc8004Kya';
 import { getCached, getStaleFallback, setCache } from 'util/apiCache';
 
 type McpTool = {
   name: string;
   description: string;
-  inputSchema: ToolInputOutput;
-  outputSchema: ToolInputOutput;
+  inputSchema?: ToolInputOutput;
+  outputSchema?: ToolInputOutput;
 };
 
 type McpResponse = {
@@ -60,11 +67,13 @@ const buildMcpTools = (metadata: MechManifest): McpTool[] => {
     .filter((toolName) => toolName in toolMetadata)
     .map((toolName) => {
       const tool = toolMetadata[toolName];
+      const inputSchema = normalizeToolSchema(tool.input);
+      const outputSchema = normalizeToolSchema(tool.output);
       return {
         name: tool.name,
         description: tool.description,
-        inputSchema: normalizeToolSchema(tool.input),
-        outputSchema: normalizeToolSchema(tool.output),
+        ...(inputSchema && { inputSchema }),
+        ...(outputSchema && { outputSchema }),
       };
     });
 };
@@ -169,10 +178,18 @@ export default async function handler(
         ? chainAddresses.mechMarketplace
         : undefined;
 
+    // A mech still carrying the template name keeps its pseudonym and its
+    // service config text, as in the registration file.
+    const ownName = getOwnMechName(mechMetadata);
+    const description =
+      (ownName && asText(mechMetadata.description)) ||
+      (await getServiceConfigDescription(chainId, serviceId)) ||
+      mechMetadata.description;
+
     const response: McpResponse = {
       type: 'mcp-server-v1',
-      name: mechMetadata.name,
-      description: mechMetadata.description,
+      name: ownName || generateName(chainId, Number(serviceId)),
+      description,
       version: '1.0.0',
       ...(mechMetadata.url && { endpoint: mechMetadata.url }),
       capabilities: MCP_CAPABILITIES,

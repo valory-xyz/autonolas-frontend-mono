@@ -2,6 +2,8 @@ import { FetchRequest } from 'ethers';
 
 import { RPC_URLS } from 'libs/util-constants/src';
 
+import { generateName } from 'common-util/functions/agentName';
+
 import handler from '../../../../pages/api/erc8004/[network]/ai-agents/[serviceId]/agent-card.json';
 import {
   AGENT_ID,
@@ -69,9 +71,14 @@ const { getIpfsResponse } = jest.requireMock('common-util/functions/ipfs') as {
   getIpfsResponse: jest.Mock;
 };
 
+// One stub stands in for every contract the route builds: the mech and the service registry.
 const mechContract = {
   paymentType: jest.fn(),
+  getService: jest.fn(),
 };
+
+const CONFIG_HASH = '0xconfig';
+const SERVICE_CONFIG_DESCRIPTION = 'Prediction service run by Bob.';
 
 const unmockedFetch = global.fetch;
 
@@ -80,11 +87,20 @@ const unmockedFetch = global.fetch;
 let nextServiceId = 100;
 const freshServiceId = () => String(nextServiceId++);
 
+type CardSkill = {
+  id: string;
+  name: string;
+  description: string;
+  inputSchema?: { type: string; description: string };
+  outputSchema?: { type: string; description: string };
+};
+
 type Card = {
   name: string;
   provider?: { organization: string; url: string };
   payment?: { paymentType: string; unit: string | null; mechAddress: string };
   metadata: { mechAddress?: string };
+  skills: CardSkill[];
 };
 
 const call = (serviceId: string) => callHandler(handler, { network: NETWORK, serviceId });
@@ -93,6 +109,7 @@ beforeEach(() => {
   jest.clearAllMocks();
   mockedEthers.Contract.mockImplementation(() => mechContract);
   mechContract.paymentType.mockResolvedValue(NATIVE_PAYMENT_TYPE);
+  mechContract.getService.mockResolvedValue({ configHash: CONFIG_HASH });
   getServicesFromMarketplaceSubgraph.mockImplementation(async ({ serviceIds }) => [
     makeMarketplaceService({ id: serviceIds[0] }),
   ]);
@@ -107,6 +124,172 @@ beforeEach(() => {
 
 afterAll(() => {
   global.fetch = unmockedFetch;
+});
+
+describe('GET .../agent-card.json — name', () => {
+  it.each(['Autonolas Mech III', 'Autonolas Mech', 'autonolas mech II'])(
+    'uses the pseudonym, as the registration file does, when the manifest still carries the template name %p',
+    async (templateName) => {
+      getIpfsResponse.mockResolvedValue(makeManifest({ name: templateName }));
+      const serviceId = freshServiceId();
+
+      const res = await call(serviceId);
+      expect(res.status).toHaveBeenCalledWith(200);
+      expect(lastJson<Card>(res).name).toBe(generateName(CHAIN_ID, Number(serviceId)));
+    },
+  );
+
+  it('trims the manifest name when the mech has one of its own', async () => {
+    getIpfsResponse.mockResolvedValue(makeManifest({ name: '  Profit Pulse Mech  ' }));
+    expect(lastJson<Card>(await call(freshServiceId())).name).toBe('Profit Pulse Mech');
+  });
+});
+
+describe('GET .../agent-card.json — description', () => {
+  type Described = Card & { description: string };
+  const serveManifestAndConfig = (name: string, config: unknown) =>
+    getIpfsResponse.mockImplementation(async (hash: string) => {
+      if (hash === MANIFEST_HASH) return makeManifest({ name });
+      if (hash === CONFIG_HASH) return config;
+      return null;
+    });
+
+  it('uses the service config description, as the registration file does, for a template-named mech', async () => {
+    serveManifestAndConfig('Autonolas Mech III', {
+      description: `  ${SERVICE_CONFIG_DESCRIPTION} `,
+    });
+    const res = await call(freshServiceId());
+    expect(lastJson<Described>(res).description).toBe(SERVICE_CONFIG_DESCRIPTION);
+  });
+
+  it('keeps the manifest description of a mech with its own name, without reading the config', async () => {
+    serveManifestAndConfig('Profit Pulse Mech', { description: SERVICE_CONFIG_DESCRIPTION });
+    const res = await call(freshServiceId());
+    expect(lastJson<Described>(res).description).toBe(makeManifest().description);
+    expect(mechContract.getService).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    ['the config has no description', { name: 'x' }],
+    ['the config cannot be fetched', null],
+  ])('falls back to the manifest description when %s', async (_case, config) => {
+    serveManifestAndConfig('Autonolas Mech III', config);
+    const res = await call(freshServiceId());
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(lastJson<Described>(res).description).toBe(makeManifest().description);
+  });
+
+  const NEVER = () => new Promise(() => undefined);
+
+  // Resolves the card while fake time advances, and says whether it had answered by then.
+  const callWithin = async (ms: number) => {
+    let answered = false;
+    const pending = call(freshServiceId()).then((res) => {
+      answered = true;
+      return res;
+    });
+    await jest.advanceTimersByTimeAsync(ms);
+    return { answered, res: await pending };
+  };
+
+  it.each([
+    ['the registry read hangs', () => mechContract.getService.mockReturnValue(NEVER())],
+    [
+      'the config fetch hangs',
+      () =>
+        getIpfsResponse.mockImplementation((hash: string) =>
+          hash === MANIFEST_HASH
+            ? Promise.resolve(makeManifest({ name: 'Autonolas Mech III' }))
+            : NEVER(),
+        ),
+    ],
+  ])(
+    'gives up after the RPC read timeout when %s and serves the manifest description',
+    async (_case, hang) => {
+      serveManifestAndConfig('Autonolas Mech III', { description: SERVICE_CONFIG_DESCRIPTION });
+      hang();
+      jest.useFakeTimers();
+      try {
+        const { answered, res } = await callWithin(3_500);
+
+        expect(answered).toBe(true);
+        expect(res.status).toHaveBeenCalledWith(200);
+        expect(lastJson<Described>(res).description).toBe(makeManifest().description);
+        // Every provider the route opened, the payment's and the config's, is closed.
+        expect(mockedEthers.JsonRpcProvider).toHaveBeenCalledTimes(2);
+        expect(mockProviderDestroy).toHaveBeenCalledTimes(2);
+      } finally {
+        jest.useRealTimers();
+      }
+    },
+  );
+
+  it('reads the config alongside the payment, so two hanging reads cost one timeout', async () => {
+    serveManifestAndConfig('Autonolas Mech III', { description: SERVICE_CONFIG_DESCRIPTION });
+    mechContract.getService.mockReturnValue(NEVER());
+    mechContract.paymentType.mockReturnValue(NEVER());
+    jest.useFakeTimers();
+    try {
+      const { answered, res } = await callWithin(3_500);
+
+      expect(answered).toBe(true);
+      expect(lastJson<Card>(res)).not.toHaveProperty('payment');
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
+  it('falls back to the manifest description when the registry read fails', async () => {
+    serveManifestAndConfig('Autonolas Mech III', { description: SERVICE_CONFIG_DESCRIPTION });
+    mechContract.getService.mockRejectedValue(new Error('rpc down'));
+    const res = await call(freshServiceId());
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(lastJson<Described>(res).description).toBe(makeManifest().description);
+  });
+});
+
+describe('GET .../agent-card.json — skills', () => {
+  it('normalizes the input and output schemas of a tool that publishes them', async () => {
+    const body = lastJson<Card>(await call(freshServiceId()));
+
+    expect(body.skills).toEqual([
+      expect.objectContaining({
+        id: 'tool:prediction-online',
+        inputSchema: { type: 'string', description: 'The question.' },
+        outputSchema: { type: 'string', description: 'The probability.' },
+      }),
+    ]);
+  });
+
+  it('still lists a tool that publishes no input or output schema, without the schema fields', async () => {
+    getIpfsResponse.mockResolvedValue(
+      makeManifest({
+        tools: ['prediction-online', 'bare-tool'],
+        toolMetadata: {
+          ...makeManifest().toolMetadata,
+          'bare-tool': { name: 'bare-tool', description: 'No schema published.' },
+        },
+      }),
+    );
+
+    const res = await call(freshServiceId());
+    expect(res.status).toHaveBeenCalledWith(200);
+
+    const { skills } = lastJson<Card>(res);
+    expect(skills.map((skill) => skill.id)).toEqual(['tool:prediction-online', 'tool:bare-tool']);
+    expect(skills[1]).toEqual({
+      id: 'tool:bare-tool',
+      name: 'bare-tool',
+      description: 'No schema published.',
+      metadata: {
+        runtimeToolName: 'bare-tool',
+        inputFormat: 'ipfs-v0.1',
+        outputFormat: 'ipfs-v0.1',
+      },
+    });
+    expect(skills[1]).not.toHaveProperty('inputSchema');
+    expect(skills[1]).not.toHaveProperty('outputSchema');
+  });
 });
 
 describe('GET .../agent-card.json — provider', () => {

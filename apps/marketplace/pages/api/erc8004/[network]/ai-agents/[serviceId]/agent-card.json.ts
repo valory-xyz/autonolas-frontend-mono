@@ -4,6 +4,7 @@ import { RPC_URLS } from 'libs/util-constants/src';
 
 import { ADDRESSES } from 'common-util/Contracts/addresses';
 import { getIpfsCIDFromHash, getIpfsResponse } from 'common-util/functions/ipfs';
+import { generateName } from 'common-util/functions/agentName';
 import { isMarketplaceSupportedNetwork } from 'common-util/functions';
 import type { MarketplaceSubgraphChainId } from 'common-util/graphql';
 import { getServicesFromMarketplaceSubgraph } from 'common-util/graphql/services';
@@ -20,6 +21,7 @@ import {
   normalizeQueryParam,
   getServiceFromRegistrySafe,
   normalizeToolSchema,
+  getServiceConfigDescription,
 } from 'common-util/functions/erc8004Helpers';
 import {
   type Erc8004Provider,
@@ -28,9 +30,11 @@ import {
   type MechPayment,
   type ToolInputOutput,
   getIdentityRegistryAddress,
+  getOwnMechName,
   parseAgentId,
   readMechPayment,
   resolveProvider,
+  asText,
 } from 'common-util/functions/erc8004Kya';
 import { getCached, getStaleFallback, setCache } from 'util/apiCache';
 
@@ -38,8 +42,8 @@ type AgentCardSkill = {
   id: string;
   name: string;
   description: string;
-  inputSchema: ToolInputOutput;
-  outputSchema: ToolInputOutput;
+  inputSchema?: ToolInputOutput;
+  outputSchema?: ToolInputOutput;
   metadata: {
     runtimeToolName: string;
     inputFormat: string;
@@ -107,12 +111,14 @@ const buildSkills = (metadata: MechManifest): AgentCardSkill[] => {
     .filter((toolName) => toolName in toolMetadata)
     .map((toolName) => {
       const tool = toolMetadata[toolName];
+      const inputSchema = normalizeToolSchema(tool.input);
+      const outputSchema = normalizeToolSchema(tool.output);
       return {
         id: `tool:${toolName}`,
         name: toolName,
         description: tool.description,
-        inputSchema: normalizeToolSchema(tool.input),
-        outputSchema: normalizeToolSchema(tool.output),
+        ...(inputSchema && { inputSchema }),
+        ...(outputSchema && { outputSchema }),
         metadata: {
           runtimeToolName: tool.name,
           inputFormat,
@@ -272,9 +278,14 @@ export default async function handler(
 
     const mechAddress = serviceFromMarketplace.mechAddresses?.[0];
     const rpcUrl = RPC_URLS[chainId];
-    const [resolution, payment] = await Promise.all([
+    // A mech still carrying the template name keeps its pseudonym and its
+    // service config text, as in the registration file.
+    const ownName = getOwnMechName(mechMetadata);
+    const ownDescription = ownName ? asText(mechMetadata.description) : '';
+    const [resolution, payment, configDescription] = await Promise.all([
       resolveProvider(mechMetadata.operator, chainId, agentId),
       mechAddress && rpcUrl ? readMechPayment(rpcUrl, chainId, mechAddress) : Promise.resolve(null),
+      ownDescription ? Promise.resolve('') : getServiceConfigDescription(chainId, serviceId),
     ]);
     const provider = resolution.provider;
 
@@ -285,9 +296,11 @@ export default async function handler(
         ? chainAddresses.mechMarketplace
         : undefined;
 
+    const description = ownDescription || configDescription || mechMetadata.description;
+
     const body: AgentCardBody = {
-      name: mechMetadata.name,
-      description: mechMetadata.description,
+      name: ownName || generateName(chainId, Number(serviceId)),
+      description,
       version: '1.0.0',
       ...(mechMetadata.url && { url: mechMetadata.url }),
       ...(provider && { provider }),
