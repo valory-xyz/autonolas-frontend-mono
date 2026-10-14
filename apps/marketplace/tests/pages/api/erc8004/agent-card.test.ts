@@ -179,6 +179,66 @@ describe('GET .../agent-card.json — description', () => {
     expect(lastJson<Described>(res).description).toBe(makeManifest().description);
   });
 
+  const NEVER = () => new Promise(() => undefined);
+
+  // Resolves the card while fake time advances, and says whether it had answered by then.
+  const callWithin = async (ms: number) => {
+    let answered = false;
+    const pending = call(freshServiceId()).then((res) => {
+      answered = true;
+      return res;
+    });
+    await jest.advanceTimersByTimeAsync(ms);
+    return { answered, res: await pending };
+  };
+
+  it.each([
+    ['the registry read hangs', () => mechContract.getService.mockReturnValue(NEVER())],
+    [
+      'the config fetch hangs',
+      () =>
+        getIpfsResponse.mockImplementation((hash: string) =>
+          hash === MANIFEST_HASH
+            ? Promise.resolve(makeManifest({ name: 'Autonolas Mech III' }))
+            : NEVER(),
+        ),
+    ],
+  ])(
+    'gives up after the RPC read timeout when %s and serves the manifest description',
+    async (_case, hang) => {
+      serveManifestAndConfig('Autonolas Mech III', { description: SERVICE_CONFIG_DESCRIPTION });
+      hang();
+      jest.useFakeTimers();
+      try {
+        const { answered, res } = await callWithin(3_500);
+
+        expect(answered).toBe(true);
+        expect(res.status).toHaveBeenCalledWith(200);
+        expect(lastJson<Described>(res).description).toBe(makeManifest().description);
+        // Every provider the route opened, the payment's and the config's, is closed.
+        expect(mockedEthers.JsonRpcProvider).toHaveBeenCalledTimes(2);
+        expect(mockProviderDestroy).toHaveBeenCalledTimes(2);
+      } finally {
+        jest.useRealTimers();
+      }
+    },
+  );
+
+  it('reads the config alongside the payment, so two hanging reads cost one timeout', async () => {
+    serveManifestAndConfig('Autonolas Mech III', { description: SERVICE_CONFIG_DESCRIPTION });
+    mechContract.getService.mockReturnValue(NEVER());
+    mechContract.paymentType.mockReturnValue(NEVER());
+    jest.useFakeTimers();
+    try {
+      const { answered, res } = await callWithin(3_500);
+
+      expect(answered).toBe(true);
+      expect(lastJson<Card>(res)).not.toHaveProperty('payment');
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
   it('falls back to the manifest description when the registry read fails', async () => {
     serveManifestAndConfig('Autonolas Mech III', { description: SERVICE_CONFIG_DESCRIPTION });
     mechContract.getService.mockRejectedValue(new Error('rpc down'));

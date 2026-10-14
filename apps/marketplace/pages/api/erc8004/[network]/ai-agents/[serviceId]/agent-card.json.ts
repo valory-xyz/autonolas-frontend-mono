@@ -278,9 +278,14 @@ export default async function handler(
 
     const mechAddress = serviceFromMarketplace.mechAddresses?.[0];
     const rpcUrl = RPC_URLS[chainId];
-    const [resolution, payment] = await Promise.all([
+    // A mech still carrying the template name keeps its pseudonym and its
+    // service config text, as in the registration file.
+    const ownName = getOwnMechName(mechMetadata);
+    const ownDescription = ownName ? asText(mechMetadata.description) : '';
+    const [resolution, payment, configDescription] = await Promise.all([
       resolveProvider(mechMetadata.operator, chainId, agentId),
       mechAddress && rpcUrl ? readMechPayment(rpcUrl, chainId, mechAddress) : Promise.resolve(null),
+      ownDescription ? Promise.resolve('') : getServiceConfigDescription(chainId, serviceId),
     ]);
     const provider = resolution.provider;
 
@@ -291,13 +296,7 @@ export default async function handler(
         ? chainAddresses.mechMarketplace
         : undefined;
 
-    // A mech still carrying the template name keeps its pseudonym and its
-    // service config text, as in the registration file.
-    const ownName = getOwnMechName(mechMetadata);
-    const description =
-      (ownName && asText(mechMetadata.description)) ||
-      (await getServiceConfigDescription(chainId, serviceId)) ||
-      mechMetadata.description;
+    const description = ownDescription || configDescription || mechMetadata.description;
 
     const body: AgentCardBody = {
       name: ownName || generateName(chainId, Number(serviceId)),

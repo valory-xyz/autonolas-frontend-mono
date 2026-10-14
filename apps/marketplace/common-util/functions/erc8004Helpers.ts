@@ -9,7 +9,12 @@ import { ADDRESSES } from 'common-util/Contracts/addresses';
 import { EVM_SUPPORTED_CHAINS } from 'common-util/Login/config';
 import { getServiceFromRegistry } from 'common-util/graphql/registry';
 import { REGISTRY_SUBGRAPH_CLIENTS, ERC8004_SUPPORTED_CHAINS } from 'common-util/graphql';
-import { asText } from 'common-util/functions/erc8004Kya';
+import {
+  RPC_READ_TIMEOUT_MS,
+  asText,
+  singleAttemptProvider,
+  withTimeout,
+} from 'common-util/functions/erc8004Kya';
 import type { ToolInputOutput } from 'common-util/functions/erc8004Kya';
 import { getIpfsResponse } from 'common-util/functions/ipfs';
 
@@ -57,6 +62,7 @@ export type ServiceRegistryContext = {
 export const buildServiceRegistryContext = (
   chainId: keyof typeof ADDRESSES,
   rpcUrl: string,
+  provider: ethers.JsonRpcProvider = new ethers.JsonRpcProvider(rpcUrl),
 ): ServiceRegistryContext | null => {
   const registryAddresses = ADDRESSES[chainId];
   if (!registryAddresses) return null;
@@ -69,7 +75,6 @@ export const buildServiceRegistryContext = (
   if (!serviceRegistryAddress) return null;
 
   const serviceRegistryAbi = isL1 ? SERVICE_REGISTRY_CONTRACT.abi : SERVICE_REGISTRY_L2.abi;
-  const provider = new ethers.JsonRpcProvider(rpcUrl);
   const serviceRegistryContract = new ethers.Contract(
     serviceRegistryAddress,
     serviceRegistryAbi,
@@ -80,31 +85,45 @@ export const buildServiceRegistryContext = (
 };
 
 /**
- * Normalize a tool schema from IPFS metadata so that:
- * 1. `type: "text"` becomes `type: "string"`.
- * 2. If a nested `schema` wrapper exists, its properties are spread to the
- *    top level and the wrapper is removed.
- * Null when the tool publishes no schema, so callers omit the field. */
-/** The description in the service's own config (its on-chain `configHash` on IPFS), or ''. */
+ * The description in the service's own config (its on-chain `configHash` on
+ * IPFS), or ''. One RPC attempt, and the whole read gives up after
+ * RPC_READ_TIMEOUT_MS, like the mech payment read in the same routes.
+ */
 export const getServiceConfigDescription = async (
   chainId: number,
   serviceId: string,
 ): Promise<string> => {
   const rpcUrl = RPC_URLS[chainId];
-  const registryCtx = rpcUrl
-    ? buildServiceRegistryContext(chainId as keyof typeof ADDRESSES, rpcUrl)
-    : null;
-  if (!registryCtx) return '';
+  if (!rpcUrl) return '';
+  const provider = singleAttemptProvider(rpcUrl);
   try {
-    const service = await registryCtx.serviceRegistryContract.getService(serviceId);
-    const config = await getIpfsResponse(service.configHash);
-    return asText(config?.description);
+    const registryCtx = buildServiceRegistryContext(
+      chainId as keyof typeof ADDRESSES,
+      rpcUrl,
+      provider,
+    );
+    if (!registryCtx) return '';
+    const read = async () => {
+      const service = await registryCtx.serviceRegistryContract.getService(serviceId);
+      const config = await getIpfsResponse(service.configHash);
+      return asText(config?.description);
+    };
+    return await withTimeout(read(), RPC_READ_TIMEOUT_MS, `service ${serviceId} config read`);
   } catch (error) {
-    console.error(`Error reading the config of service ${serviceId} on chain ${chainId}:`, error);
+    const message = error instanceof Error ? error.message : 'Unknown error';
+    console.warn(`Could not read the config of service ${serviceId} on chain ${chainId}:`, message);
     return '';
+  } finally {
+    provider.destroy();
   }
 };
 
+/**
+ * Normalize a tool schema from IPFS metadata so that:
+ * 1. `type: "text"` becomes `type: "string"`.
+ * 2. If a nested `schema` wrapper exists, its properties are spread to the
+ *    top level and the wrapper is removed.
+ * Null when the tool publishes no schema, so callers omit the field. */
 export const normalizeToolSchema = (
   raw: ToolInputOutput | undefined,
 ): { type: string; description: string } | null => {

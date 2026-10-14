@@ -109,6 +109,29 @@ describe('GET .../mcp.json', () => {
     );
   });
 
+  it('gives up on a hanging registry read and serves the manifest description', async () => {
+    getIpfsResponse.mockImplementation(async (hash: string) =>
+      hash === MANIFEST_HASH ? makeManifest({ name: 'Autonolas Mech III' }) : null,
+    );
+    registryContract.getService.mockReturnValue(new Promise(() => undefined));
+    jest.useFakeTimers();
+    try {
+      let answered = false;
+      const pending = call(freshServiceId()).then((res) => {
+        answered = true;
+        return res;
+      });
+      await jest.advanceTimersByTimeAsync(3_500);
+      const res = await pending;
+
+      expect(answered).toBe(true);
+      expect(res.status).toHaveBeenCalledWith(200);
+      expect(lastJson<{ description: string }>(res).description).toBe(makeManifest().description);
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
   it('keeps the manifest description of a mech with its own name', async () => {
     getIpfsResponse.mockResolvedValue(makeManifest({ name: 'Profit Pulse Mech' }));
     const res = await call(freshServiceId());

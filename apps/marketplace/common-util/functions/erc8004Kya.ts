@@ -73,7 +73,7 @@ export type MechPayment = {
 };
 
 const PROOF_TIMEOUT_MS = 5_000;
-const RPC_READ_TIMEOUT_MS = 3_000;
+export const RPC_READ_TIMEOUT_MS = 3_000;
 
 export const isServiceDeployed = (state: unknown): boolean =>
   state !== null && state !== undefined && String(state) === SERVICE_STATE_KEY_MAP.deployed;
@@ -263,7 +263,7 @@ export const parseAgentId = (rawId: unknown): number | null => {
 
 const MECH_PAYMENT_ABI = ['function paymentType() view returns (bytes32)'];
 
-const withTimeout = <T>(promise: Promise<T>, ms: number, label: string): Promise<T> =>
+export const withTimeout = <T>(promise: Promise<T>, ms: number, label: string): Promise<T> =>
   new Promise<T>((resolve, reject) => {
     const timer = setTimeout(() => reject(new Error(`${label} timed out after ${ms}ms`)), ms);
     promise.then(
@@ -278,6 +278,13 @@ const withTimeout = <T>(promise: Promise<T>, ms: number, label: string): Promise
     );
   });
 
+/** A provider that makes one attempt per call, so a read is bounded by its own timeout. */
+export const singleAttemptProvider = (rpcUrl: string): ethers.JsonRpcProvider => {
+  const request = new ethers.FetchRequest(rpcUrl);
+  request.setThrottleParams({ maxAttempts: 1 });
+  return new ethers.JsonRpcProvider(request, undefined, { staticNetwork: true });
+};
+
 /**
  * Reads the mech's payment type from chain with one RPC attempt and no
  * retries, giving up after RPC_READ_TIMEOUT_MS. The value is fixed at deploy
@@ -289,9 +296,7 @@ export const readMechPayment = async (
   chainId: number,
   mechAddress: string,
 ): Promise<MechPayment | null> => {
-  const request = new ethers.FetchRequest(rpcUrl);
-  request.setThrottleParams({ maxAttempts: 1 });
-  const provider = new ethers.JsonRpcProvider(request, undefined, { staticNetwork: true });
+  const provider = singleAttemptProvider(rpcUrl);
   try {
     const mech = new ethers.Contract(mechAddress, MECH_PAYMENT_ABI, provider);
     const paymentType = await withTimeout(
