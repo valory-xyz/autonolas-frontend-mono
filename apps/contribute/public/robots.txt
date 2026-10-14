@@ -1,3 +1,4 @@
 User-agent: *
 Allow: /
+Disallow: /profile/
 Sitemap: https://contribute.olas.network/sitemap.xml
