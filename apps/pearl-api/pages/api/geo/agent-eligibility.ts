@@ -61,6 +61,7 @@ const AGENT_POLICIES: Record<AgentId, AgentPolicy> = {
       'IT', // Italy
       'JP', // Japan
       'KP', // North Korea
+      'KR', // South Korea
       'LB', // Lebanon
       'LY', // Libya
       'ML', // Mali
