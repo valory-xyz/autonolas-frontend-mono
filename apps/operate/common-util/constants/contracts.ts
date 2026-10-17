@@ -212,6 +212,18 @@ export const STAKING_CONTRACT_DETAILS: Record<Address, StakingContractDetailsInf
   '0x0000000000000000000000007dbf10769ca7528ec9aa440b668c716caf08e7ea': {
     availableOn: ['pearl'],
   },
+  // Polystrat IV
+  '0x000000000000000000000000b7d3bad3a08889838096b4b583fa6785c614d0a5': {
+    availableOn: ['pearl'],
+  },
+  // Polystrat V
+  '0x0000000000000000000000004c367f1df1e16263d55a896c0909cca7333d835f': {
+    availableOn: ['pearl'],
+  },
+  // Polystrat VI
+  '0x000000000000000000000000f7f371f2e72e326d42323562a14ed01ff5a53d12': {
+    availableOn: ['pearl'],
+  },
 };
 
 /**
