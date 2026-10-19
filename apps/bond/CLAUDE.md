@@ -50,8 +50,16 @@ lives in Redux, populated by an effect in `useHelpers`. On the server it was alw
   and several places in `useBondingList`) would throw during the server render.
 - The `NoProducts` empty state describes what the table lists. It renders server-side before the
   client has fetched anything, so a bare "No products" told crawlers Olas has none at all.
-- Guarded by `yarn check:served-text --url <host> bond`. Bond renders per request, so there is
-  no build output to inspect — point it at a running server or a deployment.
+- Guarded by `yarn check:served-text bond` after a build, or `--url <host>` against a deployment.
+
+## Static pages (crawl speed)
+
+Every page except `/` and `/paths/[pathId]` is prerendered at build time and served from the
+CDN. Do **not** add `getInitialProps` to `pages/_app.jsx` (or an `i18n` block to
+`next.config.js`): the former turns every page into a per-request serverless render, and cold
+starts of 4–8 s made Semrush time out on the site. `<html lang="en">` comes from `_document.tsx`.
+The proxy matcher also deliberately skips `robots.txt`, `sitemap.xml` and `llms.txt` so the
+geo-redirect never hides crawler metadata.
 
 **Still client-only:** the product rows themselves. `useBondingList` is a ~613-line hook chain
 spanning depository reads, Balancer and Uniswap LP pricing across six chains, and a Solana
