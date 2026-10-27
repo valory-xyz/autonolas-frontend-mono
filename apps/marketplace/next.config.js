@@ -94,6 +94,11 @@ const nextConfig = {
       permanent: true,
     },
     {
+      source: '/arbitrum/:path*',
+      destination: '/arbitrum-one/:path*',
+      permanent: true,
+    },
+    {
       source: '/:network((?!api).+)/services',
       destination: '/:network/ai-agents',
       permanent: true,
