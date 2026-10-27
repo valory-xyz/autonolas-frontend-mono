@@ -172,7 +172,7 @@
     "base-x": "4.0.1",
     "minimatch": "5.1.8",
     "secp256k1": "5.0.1",
-    "undici": "7.29.1",
+    "undici": "7.30.1",
     "ws": "8.21.0",
     "flatted": "3.4.2",
     "bigint-buffer": "npm:@exodus/bigint-buffer@1.1.5-exodus.1",

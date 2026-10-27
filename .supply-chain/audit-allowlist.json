@@ -9,5 +9,33 @@
     "added": "YYYY-MM-DD when the entry was added",
     "review": "YYYY-MM-DD by which the entry must be re-evaluated. An expired entry prints a CI warning but does not fail the job."
   },
-  "entries": []
+  "entries": [
+    {
+      "id": 1241216,
+      "ghsa": "GHSA-w2vw-w76x-qr89",
+      "package": "nx",
+      "severity": "high",
+      "reason": "Nx 17 is build tooling pulled into the production tree through @nx/next; it is not executed by served apps. The patched release 22.7.9 is five major versions ahead and requires a coordinated Nx migration with the matching @nx plugins.",
+      "added": "2026-10-27",
+      "review": "2027-01-27"
+    },
+    {
+      "id": 1241218,
+      "ghsa": "GHSA-w3vv-58gj-gw77",
+      "package": "nx",
+      "severity": "high",
+      "reason": "Nx 17 is build tooling pulled into the production tree through @nx/next; it is not executed by served apps. The patched release 22.7.9 is five major versions ahead and requires a coordinated Nx migration with the matching @nx plugins.",
+      "added": "2026-10-27",
+      "review": "2027-01-27"
+    },
+    {
+      "id": 1240912,
+      "ghsa": "GHSA-86w9-cpqp-85rv",
+      "package": "node-forge",
+      "severity": "high",
+      "reason": "The advisory has no patched node-forge release. The transitive copy is reached through WalletConnect storage; no app path verifies RSA PKCS#1 v1.5 signatures with node-forge. Reassess when upstream publishes a fix.",
+      "added": "2026-10-27",
+      "review": "2027-01-27"
+    }
+  ]
 }
