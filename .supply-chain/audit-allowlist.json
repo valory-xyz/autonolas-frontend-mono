@@ -15,36 +15,27 @@
       "ghsa": "GHSA-w2vw-w76x-qr89",
       "package": "nx",
       "severity": "high",
-      "reason": "nx is build tooling pulled into the production tree only through @nx/next; it is not executed by any served app, so the git-ref and local-socket issues apply to developer machines and CI, not to users. The patched release (22.7.9) is five major versions ahead of the workspace's Nx 17.2.5 and needs a separate Nx migration.",
-      "added": "2026-10-08",
-      "review": "2026-10-31"
+      "reason": "Nx 17 is build tooling pulled into the production tree through @nx/next; it is not executed by served apps. The patched release 22.7.9 is five major versions ahead and requires a coordinated Nx migration with the matching @nx plugins.",
+      "added": "2026-10-27",
+      "review": "2027-01-27"
     },
     {
       "id": 1241218,
       "ghsa": "GHSA-w3vv-58gj-gw77",
       "package": "nx",
       "severity": "high",
-      "reason": "nx is build tooling pulled into the production tree only through @nx/next; it is not executed by any served app, so the git-ref and local-socket issues apply to developer machines and CI, not to users. The patched release (22.7.9) is five major versions ahead of the workspace's Nx 17.2.5 and needs a separate Nx migration.",
-      "added": "2026-10-08",
-      "review": "2026-10-31"
+      "reason": "Nx 17 is build tooling pulled into the production tree through @nx/next; it is not executed by served apps. The patched release 22.7.9 is five major versions ahead and requires a coordinated Nx migration with the matching @nx plugins.",
+      "added": "2026-10-27",
+      "review": "2027-01-27"
     },
     {
       "id": 1240912,
       "ghsa": "GHSA-86w9-cpqp-85rv",
       "package": "node-forge",
       "severity": "high",
-      "reason": "Upstream has no patched release (latest 1.4.0 is in the affected range). Reached only through WalletConnect's keyvaluestorage > unstorage > listhen chain; the app does not verify RSA PKCS#1 signatures with node-forge.",
-      "added": "2026-10-08",
-      "review": "2027-01-08"
-    },
-    {
-      "id": 1240992,
-      "ghsa": "GHSA-vfj7-8cjw-p6xm",
-      "package": "braces",
-      "severity": "high",
-      "reason": "Upstream has no patched release (latest 3.0.3 is in the affected range). Glob-pattern expansion used by build tooling and file watchers (fast-glob, micromatch, chokidar); patterns are not user-supplied in any served app.",
-      "added": "2026-10-08",
-      "review": "2027-01-08"
+      "reason": "The advisory has no patched node-forge release. The transitive copy is reached through WalletConnect storage; no app path verifies RSA PKCS#1 v1.5 signatures with node-forge. Reassess when upstream publishes a fix.",
+      "added": "2026-10-27",
+      "review": "2027-01-27"
     }
   ]
 }

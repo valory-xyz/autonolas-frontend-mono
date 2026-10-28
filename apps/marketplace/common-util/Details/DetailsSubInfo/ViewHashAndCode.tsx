@@ -56,7 +56,7 @@ type ViewHashAndCodeProps = {
   type: NavTypesValues;
   metadataLoadState: string;
   hashUrl: string;
-  codeHref: string;
+  codeHref: string | null;
   chainId?: number | null;
   serviceId?: string | null;
 };
@@ -80,13 +80,29 @@ export const ViewHashAndCode = ({
   return (
     <>
       {type === NAV_TYPES.AI_AGENTS && <>&nbsp;•&nbsp;</>}
-      <Link target="_blank" rel="noopener noreferrer" data-testid="view-hash-link" href={hashUrl}>
-        View Hash {UNICODE_SYMBOLS.EXTERNAL_LINK}
-      </Link>
-      &nbsp;•&nbsp;
-      <Link target="_blank" rel="noopener noreferrer" data-testid="view-code-link" href={codeHref}>
-        View Code {UNICODE_SYMBOLS.EXTERNAL_LINK}
-      </Link>
+      {hashUrl && (
+        <>
+          <Link
+            target="_blank"
+            rel="noopener noreferrer"
+            data-testid="view-hash-link"
+            href={hashUrl}
+          >
+            View Hash {UNICODE_SYMBOLS.EXTERNAL_LINK}
+          </Link>
+          {codeHref && <>&nbsp;•&nbsp;</>}
+        </>
+      )}
+      {codeHref && (
+        <Link
+          target="_blank"
+          rel="noopener noreferrer"
+          data-testid="view-code-link"
+          href={codeHref}
+        >
+          View Code {UNICODE_SYMBOLS.EXTERNAL_LINK}
+        </Link>
+      )}
       {type === NAV_TYPES.AI_AGENTS && erc8004ScanUrl && (
         <>
           &nbsp;•&nbsp;
