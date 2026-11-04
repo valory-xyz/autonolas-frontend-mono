@@ -18,7 +18,7 @@ import {
 import { formatToEth } from 'common-util/functions';
 import { formatTimeDifference } from 'common-util/functions/time';
 import { Checkpoint } from 'types/staking';
-import { SERVICE_STAKING_STATE, STAKING_CONTRACTS_BASE_SUBGRAPH_URL } from 'util/constants';
+import { SERVICE_STAKING_STATE, STAKING_CONTRACTS_BASE_SQUID_URL } from 'util/constants';
 
 // A hook to get the user service's info based on their account
 // and if the info should be searched in old ContributorsManager or new Contributors
@@ -68,9 +68,11 @@ export const useReadStakingContract = <
   });
 };
 
+// id_DESC matches the tie-break the Graph applied by default: without it the squid keeps a
+// different 1000 of the checkpoints that share an epoch.
 const checkpointQuery = gql`
   {
-    checkpoints(orderBy: epoch, orderDirection: desc, first: 1000) {
+    checkpoints(orderBy: [epoch_DESC, id_DESC], limit: 1000) {
       id
       epoch
       contractAddress
@@ -90,7 +92,7 @@ export const useStakingDetails = (
     enabled: !!serviceId,
     queryFn: async () =>
       await request<{ checkpoints: Checkpoint[] } | null>(
-        STAKING_CONTRACTS_BASE_SUBGRAPH_URL,
+        STAKING_CONTRACTS_BASE_SQUID_URL,
         checkpointQuery,
       ),
   });
