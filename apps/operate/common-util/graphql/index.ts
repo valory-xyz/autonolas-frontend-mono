@@ -1,6 +1,7 @@
 import { gql, GraphQLClient } from 'graphql-request';
 import { arbitrum, base, celo, gnosis, mainnet, mode, optimism, polygon } from 'viem/chains';
 import type { RequestConfig } from 'graphql-request/build/esm/types';
+import { STAKING_SQUID_CHAIN_IDS } from 'libs/util-constants/src';
 
 const requestConfig: RequestConfig = {
   method: 'POST',
@@ -22,9 +23,6 @@ const STAKING_SUBGRAPH_URLS = {
 } as const;
 
 export type SupportedStakingChain = keyof typeof STAKING_SUBGRAPH_URLS;
-
-/** Chains whose staking URL is a squid (OpenReader) rather than a Graph subgraph. */
-const STAKING_SQUID_CHAIN_IDS: readonly number[] = [base.id];
 
 /** An unset env var used to reach `GraphQLClient` as `undefined`, which only surfaced later as
  *  "Only absolute URLs are supported" — one failed request per contract on that chain, each

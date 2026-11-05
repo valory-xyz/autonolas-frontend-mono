@@ -10,9 +10,6 @@ const requestConfig: RequestConfig = {
   },
 };
 
-/** Chains whose staking client points at a squid (OpenReader) rather than a Graph subgraph. */
-export const STAKING_SQUID_CHAIN_IDS: readonly number[] = [base.id];
-
 export const STAKING_GRAPH_CLIENTS = {
   [mode.id]: new GraphQLClient(process.env.NEXT_PUBLIC_MODE_STAKING_SUBGRAPH_URL!, requestConfig),
   [optimism.id]: new GraphQLClient(

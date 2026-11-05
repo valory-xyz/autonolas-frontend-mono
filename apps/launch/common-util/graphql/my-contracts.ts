@@ -1,5 +1,6 @@
 import { gql, GraphQLClient } from 'graphql-request';
-import { STAKING_GRAPH_CLIENTS, STAKING_SQUID_CHAIN_IDS } from './index';
+import { STAKING_SQUID_CHAIN_IDS } from 'libs/util-constants/src';
+import { STAKING_GRAPH_CLIENTS } from './index';
 
 export type SupportedStakingChain = keyof typeof STAKING_GRAPH_CLIENTS;
 
