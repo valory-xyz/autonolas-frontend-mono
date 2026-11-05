@@ -29,13 +29,13 @@
       "review": "2027-01-27"
     },
     {
-      "id": 1240912,
-      "ghsa": "GHSA-86w9-cpqp-85rv",
-      "package": "node-forge",
+      "id": 1243857,
+      "ghsa": "GHSA-qr28-fpjm-wq7f",
+      "package": "decode-uri-component",
       "severity": "high",
-      "reason": "The advisory has no patched node-forge release. The transitive copy is reached through WalletConnect storage; no app path verifies RSA PKCS#1 v1.5 signatures with node-forge. Reassess when upstream publishes a fix.",
-      "added": "2026-10-27",
-      "review": "2027-01-27"
+      "reason": "Patched 0.5.1 is ESM-only; the only consumer, query-string 7.1.3 via WalletConnect, loads it with require, so a resolution crashes parse(). Denial of service only, in client-side parsing. Reassess when WalletConnect moves off query-string 7.",
+      "added": "2026-11-05",
+      "review": "2027-02-05"
     }
   ]
 }
