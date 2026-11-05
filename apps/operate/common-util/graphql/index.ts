@@ -73,15 +73,19 @@ export type SubgraphStakingRow = {
 
 type StakingContractsResponse = { stakingContracts: SubgraphStakingContract[] };
 
+const STAKING_CONTRACT_FIELDS = `
+  id
+  maxNumServices
+  rewardsPerSecond
+  minStakingDeposit
+  numAgentInstances
+  agentIds
+`;
+
 const STAKING_CONTRACTS_QUERY = gql`
   query StakingContractsByIds($ids: [Bytes!]!) {
     stakingContracts(where: { id_in: $ids }) {
-      id
-      maxNumServices
-      rewardsPerSecond
-      minStakingDeposit
-      numAgentInstances
-      agentIds
+      ${STAKING_CONTRACT_FIELDS}
     }
   }
 `;
@@ -89,12 +93,7 @@ const STAKING_CONTRACTS_QUERY = gql`
 const STAKING_CONTRACTS_SQUID_QUERY = gql`
   query StakingContractsByIds($ids: [String!]!) {
     stakingContracts(where: { id_in: $ids }) {
-      id
-      maxNumServices
-      rewardsPerSecond
-      minStakingDeposit
-      numAgentInstances
-      agentIds
+      ${STAKING_CONTRACT_FIELDS}
     }
   }
 `;

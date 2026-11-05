@@ -18,7 +18,7 @@ Guidance for working on the **Launch** app in this repo.
 
 ## Env / backends
 
-- Staking contract subgraphs (Gnosis, Base, Optimism, Polygon, Mode, Ethereum, Arbitrum, Celo) in `common-util/graphql/index.ts`. **Robinhood Chain (4663)** has no staking subgraph yet: `hasSubgraphSupport` is false so `hooks/useGetMyStakingContracts.ts` falls back to `InstanceCreated` logs from the `StakingFactory`, scanned from its deployment block in `common-util/constants/stakingContract.ts` (`blockNumbers`). Add a `NEXT_PUBLIC_ROBINHOOD_STAKING_SUBGRAPH_URL` client there once one is deployed.
+- Staking contract subgraphs (Gnosis, Optimism, Polygon, Mode, Ethereum, Arbitrum, Celo) and the Base squid (`NEXT_PUBLIC_STAKING_BASE_SQUID_URL`) in `common-util/graphql/index.ts`. **Robinhood Chain (4663)** has no staking subgraph yet: `hasSubgraphSupport` is false so `hooks/useGetMyStakingContracts.ts` falls back to `InstanceCreated` logs from the `StakingFactory`, scanned from its deployment block in `common-util/constants/stakingContract.ts` (`blockNumbers`). Add a `NEXT_PUBLIC_ROBINHOOD_STAKING_SUBGRAPH_URL` client there once one is deployed.
 - RPCs and Wallet Project ID for RainbowKit (WalletConnect Cloud projectId — required by `getDefaultConfig`).
 
 ## Structure
