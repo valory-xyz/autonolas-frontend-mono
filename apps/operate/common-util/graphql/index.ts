@@ -1,6 +1,7 @@
 import { gql, GraphQLClient } from 'graphql-request';
 import { arbitrum, base, celo, gnosis, mainnet, mode, optimism, polygon } from 'viem/chains';
 import type { RequestConfig } from 'graphql-request/build/esm/types';
+import { STAKING_SQUID_CHAIN_IDS } from 'libs/util-constants/src';
 
 const requestConfig: RequestConfig = {
   method: 'POST',
@@ -14,7 +15,7 @@ const STAKING_SUBGRAPH_URLS = {
   [mode.id]: process.env.NEXT_PUBLIC_MODE_STAKING_SUBGRAPH_URL,
   [optimism.id]: process.env.NEXT_PUBLIC_OPTIMISM_STAKING_SUBGRAPH_URL,
   [gnosis.id]: process.env.NEXT_PUBLIC_GNOSIS_STAKING_SUBGRAPH_URL,
-  [base.id]: process.env.NEXT_PUBLIC_BASE_STAKING_SUBGRAPH_URL,
+  [base.id]: process.env.NEXT_PUBLIC_STAKING_BASE_SQUID_URL,
   [polygon.id]: process.env.NEXT_PUBLIC_POLYGON_STAKING_SUBGRAPH_URL,
   [mainnet.id]: process.env.NEXT_PUBLIC_ETHEREUM_STAKING_SUBGRAPH_URL,
   [arbitrum.id]: process.env.NEXT_PUBLIC_ARBITRUM_STAKING_SUBGRAPH_URL,
@@ -70,15 +71,27 @@ export type SubgraphStakingRow = {
 
 type StakingContractsResponse = { stakingContracts: SubgraphStakingContract[] };
 
+const STAKING_CONTRACT_FIELDS = `
+  id
+  maxNumServices
+  rewardsPerSecond
+  minStakingDeposit
+  numAgentInstances
+  agentIds
+`;
+
 const STAKING_CONTRACTS_QUERY = gql`
   query StakingContractsByIds($ids: [Bytes!]!) {
     stakingContracts(where: { id_in: $ids }) {
-      id
-      maxNumServices
-      rewardsPerSecond
-      minStakingDeposit
-      numAgentInstances
-      agentIds
+      ${STAKING_CONTRACT_FIELDS}
+    }
+  }
+`;
+
+const STAKING_CONTRACTS_SQUID_QUERY = gql`
+  query StakingContractsByIds($ids: [String!]!) {
+    stakingContracts(where: { id_in: $ids }) {
+      ${STAKING_CONTRACT_FIELDS}
     }
   }
 `;
@@ -86,14 +99,15 @@ const STAKING_CONTRACTS_QUERY = gql`
 const CHECKPOINTS_CHUNK_SIZE = 10;
 const CHECKPOINT_CHUNK_CONCURRENCY = 2;
 
-function buildLatestCheckpointsChunkQuery(count: number): string {
+function buildLatestCheckpointsChunkQuery(count: number, isSquid: boolean): string {
   const fields = 'id contractAddress availableRewards blockTimestamp epoch';
-  const aliases = Array.from(
-    { length: count },
-    (_, i) =>
-      `cp${i}: checkpoints(where: { contractAddress: $addr${i} }, orderBy: blockTimestamp, orderDirection: desc, first: 1) { ${fields} }`,
+  const aliases = Array.from({ length: count }, (_, i) =>
+    isSquid
+      ? `cp${i}: checkpoints(where: { contractAddress_eq: $addr${i} }, orderBy: [blockTimestamp_DESC, id_DESC], limit: 1) { ${fields} }`
+      : `cp${i}: checkpoints(where: { contractAddress: $addr${i} }, orderBy: blockTimestamp, orderDirection: desc, first: 1) { ${fields} }`,
   ).join(' ');
-  const vars = Array.from({ length: count }, (_, i) => `$addr${i}: Bytes!`).join(' ');
+  const addrType = isSquid ? 'String!' : 'Bytes!';
+  const vars = Array.from({ length: count }, (_, i) => `$addr${i}: ${addrType}`).join(' ');
   return `query LatestCheckpointsChunk(${vars}) { ${aliases} }`;
 }
 
@@ -133,12 +147,14 @@ export async function fetchStakingDataFromSubgraph(
   if (!client) return new Map();
 
   const ids = addresses.map(normalizeAddress);
+  const isSquid = STAKING_SQUID_CHAIN_IDS.includes(chainId);
 
   let contracts: SubgraphStakingContract[] = [];
   try {
-    const contractsRes = await client.request<StakingContractsResponse>(STAKING_CONTRACTS_QUERY, {
-      ids,
-    });
+    const contractsRes = await client.request<StakingContractsResponse>(
+      isSquid ? STAKING_CONTRACTS_SQUID_QUERY : STAKING_CONTRACTS_QUERY,
+      { ids },
+    );
     contracts = contractsRes.stakingContracts ?? [];
   } catch (err) {
     console.warn('Subgraph staking contracts request failed:', err);
@@ -152,7 +168,7 @@ export async function fetchStakingDataFromSubgraph(
     chunk.forEach((addr, j) => {
       variables[`addr${j}`] = addr;
     });
-    const query = buildLatestCheckpointsChunkQuery(chunk.length);
+    const query = buildLatestCheckpointsChunkQuery(chunk.length, isSquid);
     chunkTasks.push(() =>
       client.request<ChunkResponse>(query, variables).then((chunkRes) => ({ chunk, chunkRes })),
     );
