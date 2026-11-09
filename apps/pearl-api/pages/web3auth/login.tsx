@@ -19,10 +19,9 @@ export const Styles = createGlobalStyle`
   }
 `;
 
+// The init/close events live in WEB3AUTH_LOGIN_EVENTS, shared with the disabled view.
 enum Events {
   WEB3AUTH_AUTH_SUCCESS = 'WEB3AUTH_AUTH_SUCCESS',
-  WEB3AUTH_MODAL_CLOSED = 'WEB3AUTH_MODAL_CLOSED',
-  WEB3AUTH_MODAL_INITIALIZED = 'WEB3AUTH_MODAL_INITIALIZED',
 }
 
 const Web3AuthModal = () => {
@@ -35,7 +34,7 @@ const Web3AuthModal = () => {
   // Notify once initialized
   useEffect(() => {
     if (isInitialized && typeof window !== 'undefined') {
-      window.parent.postMessage({ event_id: Events.WEB3AUTH_MODAL_INITIALIZED }, '*');
+      window.parent.postMessage({ event_id: WEB3AUTH_LOGIN_EVENTS.initialized }, '*');
     }
   }, [isInitialized]);
 
@@ -100,7 +99,7 @@ const Web3AuthModal = () => {
 
     const handleClose = (isVisible: boolean) => {
       if (isVisible) return;
-      window.parent.postMessage({ event_id: Events.WEB3AUTH_MODAL_CLOSED }, '*');
+      window.parent.postMessage({ event_id: WEB3AUTH_LOGIN_EVENTS.closed }, '*');
     };
     web3Auth.on('MODAL_VISIBILITY', handleClose);
     return () => {

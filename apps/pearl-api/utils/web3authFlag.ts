@@ -19,7 +19,6 @@ export const isWeb3AuthEnabled = (): boolean => {
   return value === 'true';
 };
 
-/** `getServerSideProps` shared by the Web3Auth pages. */
 export const getWeb3AuthPageProps: GetServerSideProps<Web3AuthPageProps> = async () => ({
   props: { web3AuthEnabled: isWeb3AuthEnabled() },
 });
