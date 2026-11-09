@@ -93,6 +93,7 @@ describe('GET /api/web3auth/status', () => {
     const res = call('POST');
 
     expect(res.statusCode).toBe(405);
+    expect(res.headers['Allow']).toBe('GET, OPTIONS');
     expect(res.body).toEqual({ error: 'Method Not Allowed' });
   });
 });

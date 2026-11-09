@@ -94,7 +94,7 @@ type Web3AuthDisabledProps = {
   message: string;
 };
 
-/** Shown instead of a Web3Auth page while `WEB3AUTH_ENABLED` is off. Never loads the SDK. */
+/** Shown instead of a Web3Auth page while `WEB3AUTH_ENABLED` is off. Never initialises the SDK. */
 export const Web3AuthDisabled = ({ initEventId, message }: Web3AuthDisabledProps) => {
   useEffect(() => {
     window.parent.postMessage({ event_id: initEventId }, '*');

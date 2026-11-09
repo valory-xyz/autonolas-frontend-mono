@@ -361,7 +361,7 @@ const SwapOwnerSession = () => {
   );
 };
 
-export const DISABLED_MESSAGE =
+const DISABLED_MESSAGE =
   'Recovery with a Google or Apple backup wallet is temporarily disabled. Close this window and use your recovery phrase instead.';
 
 export const getServerSideProps: GetServerSideProps<Web3AuthPageProps> = async () => ({

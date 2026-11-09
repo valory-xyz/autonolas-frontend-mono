@@ -1,12 +1,8 @@
 import { render, screen } from '@testing-library/react';
 import type { GetServerSidePropsContext } from 'next';
 
-import LoginPage, {
-  DISABLED_MESSAGE as LOGIN_DISABLED_MESSAGE,
-  getServerSideProps as getLoginProps,
-} from '../../../pages/web3auth/login';
+import LoginPage, { getServerSideProps as getLoginProps } from '../../../pages/web3auth/login';
 import SwapOwnerPage, {
-  DISABLED_MESSAGE as SWAP_OWNER_DISABLED_MESSAGE,
   getServerSideProps as getSwapOwnerProps,
 } from '../../../pages/web3auth/swap-owner-session';
 
@@ -42,14 +38,16 @@ describe.each([
     name: '/web3auth/login',
     Page: LoginPage,
     getServerSideProps: getLoginProps,
-    message: LOGIN_DISABLED_MESSAGE,
+    message:
+      'Setting up a backup wallet with Google or Apple is temporarily disabled. Close this window and enter a wallet address instead.',
     initEventId: 'WEB3AUTH_MODAL_INITIALIZED',
   },
   {
     name: '/web3auth/swap-owner-session',
     Page: SwapOwnerPage,
     getServerSideProps: getSwapOwnerProps,
-    message: SWAP_OWNER_DISABLED_MESSAGE,
+    message:
+      'Recovery with a Google or Apple backup wallet is temporarily disabled. Close this window and use your recovery phrase instead.',
     initEventId: 'WEB3AUTH_SWAP_OWNER_MODAL_INITIALIZED',
   },
 ])('$name', ({ Page, getServerSideProps, message, initEventId }) => {
@@ -93,7 +91,6 @@ describe.each([
       render(<Page web3AuthEnabled={false} />);
 
       expect(screen.getByText(message)).toBeTruthy();
-      expect(message).toContain('temporarily disabled');
     });
   });
 

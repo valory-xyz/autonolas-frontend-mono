@@ -42,7 +42,7 @@ Guidance for working on the **Pearl API** app in this repo.
 
 ## Structure
 
-- `pages/api/` – Zendesk, achievement, geo and feedback API handlers.
+- `pages/api/` – Zendesk, achievement, geo, feedback and web3auth API handlers.
 - `pages/web3auth/` – Web3Auth login and swap-owner-session pages.
 - `context/`, `hooks/`, `components/`, `utils/`, `constants/`, `types/` – App-local code.
 

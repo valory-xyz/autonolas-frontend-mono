@@ -8,9 +8,6 @@ type ErrorResponse = {
   error: string;
 };
 
-/**
- * Tells Pearl whether Google/Apple (Web3Auth) backup-wallet setup and recovery are offered.
- */
 export default function handler(
   req: NextApiRequest,
   res: NextApiResponse<Web3AuthStatusResponse | ErrorResponse>,

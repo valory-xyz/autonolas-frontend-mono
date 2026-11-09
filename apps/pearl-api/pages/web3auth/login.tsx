@@ -113,7 +113,7 @@ const Web3AuthModal = () => {
   return <div></div>;
 };
 
-export const DISABLED_MESSAGE =
+const DISABLED_MESSAGE =
   'Setting up a backup wallet with Google or Apple is temporarily disabled. Close this window and enter a wallet address instead.';
 
 export const getServerSideProps: GetServerSideProps<Web3AuthPageProps> = async () => ({
