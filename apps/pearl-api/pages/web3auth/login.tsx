@@ -123,7 +123,10 @@ export const getServerSideProps: GetServerSideProps<Web3AuthPageProps> = async (
 export default function Page({ web3AuthEnabled }: Web3AuthPageProps) {
   if (!web3AuthEnabled) {
     return (
-      <Web3AuthDisabled initEventId={Events.WEB3AUTH_MODAL_INITIALIZED} message={DISABLED_MESSAGE} />
+      <Web3AuthDisabled
+        initEventId={Events.WEB3AUTH_MODAL_INITIALIZED}
+        message={DISABLED_MESSAGE}
+      />
     );
   }
 

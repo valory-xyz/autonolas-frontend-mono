@@ -100,12 +100,5 @@ export const Web3AuthDisabled = ({ initEventId, message }: Web3AuthDisabledProps
     window.parent.postMessage({ event_id: initEventId }, '*');
   }, [initEventId]);
 
-  return (
-    <Alert
-      message={<Text>{message}</Text>}
-      type="warning"
-      showIcon
-      style={{ margin: 16 }}
-    />
-  );
+  return <Alert message={<Text>{message}</Text>} type="warning" showIcon style={{ margin: 16 }} />;
 };
