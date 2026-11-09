@@ -1,5 +1,5 @@
 describe('web3authFlag', () => {
-  const original = process.env.WEB3AUTH_ENABLED;
+  const originalEnv = process.env;
   let warn: jest.SpyInstance;
 
   // A fresh module per test, so the once-per-process warning starts unfired.
@@ -12,13 +12,13 @@ describe('web3authFlag', () => {
   };
 
   beforeEach(() => {
+    process.env = { ...originalEnv };
     warn = jest.spyOn(console, 'warn').mockImplementation(() => undefined);
   });
 
   afterEach(() => {
     warn.mockRestore();
-    if (original === undefined) delete process.env.WEB3AUTH_ENABLED;
-    else process.env.WEB3AUTH_ENABLED = original;
+    process.env = originalEnv;
   });
 
   describe('isWeb3AuthEnabled', () => {

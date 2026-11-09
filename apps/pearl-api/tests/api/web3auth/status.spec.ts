@@ -16,11 +16,14 @@ const call = (method = 'GET', origin?: string) => {
 };
 
 describe('GET /api/web3auth/status', () => {
-  const original = process.env.WEB3AUTH_ENABLED;
+  const originalEnv = process.env;
+
+  beforeEach(() => {
+    process.env = { ...originalEnv };
+  });
 
   afterEach(() => {
-    if (original === undefined) delete process.env.WEB3AUTH_ENABLED;
-    else process.env.WEB3AUTH_ENABLED = original;
+    process.env = originalEnv;
   });
 
   it('returns enabled: true when WEB3AUTH_ENABLED is "true"', () => {

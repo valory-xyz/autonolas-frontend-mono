@@ -1,4 +1,3 @@
-/** postMessage events each Web3Auth page sends to Pearl that its disabled view also sends. */
 export const WEB3AUTH_LOGIN_EVENTS = {
   initialized: 'WEB3AUTH_MODAL_INITIALIZED',
   closed: 'WEB3AUTH_MODAL_CLOSED',

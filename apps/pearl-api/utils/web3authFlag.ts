@@ -4,11 +4,10 @@ import type { Web3AuthPageProps } from '../types/web3auth';
 
 let hasWarnedAboutValue = false;
 
-/** Server-only (no NEXT_PUBLIC_ prefix): call from API routes / getServerSideProps, and import from this file, not the utils barrel. */
 export const isWeb3AuthEnabled = (): boolean => {
   const value = process.env.WEB3AUTH_ENABLED;
 
-  // Anything but `true` keeps Web3Auth off; flag a likely typo (e.g. `TRUE`) so it is not silent.
+  // Warn on likely typos so a mistyped flag isn't silently off.
   if (value !== undefined && value !== 'true' && value !== 'false' && !hasWarnedAboutValue) {
     hasWarnedAboutValue = true;
     console.warn(

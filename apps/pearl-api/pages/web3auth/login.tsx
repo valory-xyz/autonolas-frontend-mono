@@ -5,11 +5,10 @@ import { createGlobalStyle } from 'styled-components';
 import { Address } from 'viem';
 
 import { Web3AuthProvider } from 'context/Web3AuthProvider';
+import { WEB3AUTH_LOGIN_EVENTS } from 'constants/web3auth';
 import { useReconnectWeb3Auth } from 'hooks/useReconnectWeb3Auth';
 import type { Web3AuthPageProps } from 'types/web3auth';
 import { getWeb3AuthPageProps } from 'utils/web3authFlag';
-
-import { WEB3AUTH_LOGIN_EVENTS } from '../../constants/web3auth';
 
 import { InitErrorAlert, Loading, Web3AuthDisabled } from '../../components/web3auth';
 

@@ -15,8 +15,9 @@ jest.mock('../../../context/Web3AuthProvider', () => ({
 }));
 
 jest.mock('@web3auth/modal', () => ({}));
+let mockIsInitialized = false;
 jest.mock('@web3auth/modal/react', () => ({
-  useWeb3Auth: () => ({ isInitialized: false, initError: null }),
+  useWeb3Auth: () => ({ isInitialized: mockIsInitialized, initError: null }),
   useWeb3AuthConnect: () => ({ connect: jest.fn(), isConnected: false }),
   useWeb3AuthDisconnect: () => ({ disconnect: jest.fn() }),
 }));
@@ -53,18 +54,19 @@ describe.each([
     closeEventId: 'WEB3AUTH_SWAP_OWNER_MODAL_CLOSED',
   },
 ])('$name', ({ Page, getServerSideProps, message, initEventId, closeEventId }) => {
-  const original = process.env.WEB3AUTH_ENABLED;
+  const originalEnv = process.env;
   let postMessage: jest.SpyInstance;
 
   beforeEach(() => {
+    process.env = { ...originalEnv };
+    mockIsInitialized = false;
     mockProvider.mockClear();
     postMessage = jest.spyOn(window.parent, 'postMessage').mockImplementation(() => undefined);
   });
 
   afterEach(() => {
     postMessage.mockRestore();
-    if (original === undefined) delete process.env.WEB3AUTH_ENABLED;
-    else process.env.WEB3AUTH_ENABLED = original;
+    process.env = originalEnv;
   });
 
   it('reads the flag server-side', async () => {
@@ -111,6 +113,14 @@ describe.each([
 
       expect(mockProvider).toHaveBeenCalled();
       expect(screen.queryByText(message)).toBeNull();
+    });
+
+    it('posts the same init event Pearl listens for once Web3Auth initialises', () => {
+      mockIsInitialized = true;
+      render(<Page web3AuthEnabled />);
+
+      expect(postMessage).toHaveBeenCalledWith({ event_id: initEventId }, '*');
+      expect(postMessage).not.toHaveBeenCalledWith({ event_id: closeEventId }, '*');
     });
   });
 });

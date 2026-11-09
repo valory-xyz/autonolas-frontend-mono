@@ -2,7 +2,6 @@ import { CheckCircleOutlined, CloseCircleOutlined } from '@ant-design/icons';
 import { Alert, Button, Card, Flex, Space, Spin, Typography } from 'antd';
 import { useEffect } from 'react';
 
-import type { Web3AuthPageEvents } from '../types/web3auth';
 import { EvmChainDetails, EvmChainId } from '../utils';
 
 const { Paragraph, Link, Text } = Typography;
@@ -90,11 +89,7 @@ export const SwapOwnerFailed = ({ error, txHash, chainId }: SwapOwnerFailedProps
 };
 
 type Web3AuthDisabledProps = {
-  /**
-   * The page's existing events: `initialized` makes Pearl drop its loading spinner and show
-   * this view, `closed` makes it close the window.
-   */
-  events: Web3AuthPageEvents;
+  events: { initialized: string; closed: string };
   message: string;
 };
 
