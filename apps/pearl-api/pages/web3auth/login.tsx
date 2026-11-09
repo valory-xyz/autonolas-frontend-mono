@@ -1,13 +1,16 @@
 import { Maybe } from '@web3auth/modal';
 import { useWeb3Auth, useWeb3AuthConnect, useWeb3AuthDisconnect } from '@web3auth/modal/react';
+import type { GetServerSideProps } from 'next';
 import { useEffect, useRef } from 'react';
 import { createGlobalStyle } from 'styled-components';
 import { Address } from 'viem';
 
 import { Web3AuthProvider } from 'context/Web3AuthProvider';
 import { useReconnectWeb3Auth } from 'hooks/useReconnectWeb3Auth';
+import type { Web3AuthPageProps } from 'types/web3auth';
+import { isWeb3AuthEnabled } from 'utils/web3authFlag';
 
-import { InitErrorAlert, Loading } from '../../components/web3auth';
+import { InitErrorAlert, Loading, Web3AuthDisabled } from '../../components/web3auth';
 
 export const Styles = createGlobalStyle`
   .w3a-parent-container > div {
@@ -110,7 +113,20 @@ const Web3AuthModal = () => {
   return <div></div>;
 };
 
-export default function Page() {
+export const DISABLED_MESSAGE =
+  'Setting up a backup wallet with Google or Apple is temporarily disabled. Close this window and enter a wallet address instead.';
+
+export const getServerSideProps: GetServerSideProps<Web3AuthPageProps> = async () => ({
+  props: { web3AuthEnabled: isWeb3AuthEnabled() },
+});
+
+export default function Page({ web3AuthEnabled }: Web3AuthPageProps) {
+  if (!web3AuthEnabled) {
+    return (
+      <Web3AuthDisabled initEventId={Events.WEB3AUTH_MODAL_INITIALIZED} message={DISABLED_MESSAGE} />
+    );
+  }
+
   return (
     <>
       <Styles />
