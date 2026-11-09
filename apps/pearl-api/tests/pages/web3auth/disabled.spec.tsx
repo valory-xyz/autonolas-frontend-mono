@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import type { GetServerSidePropsContext } from 'next';
 
 import LoginPage, { getServerSideProps as getLoginProps } from '../../../pages/web3auth/login';
@@ -41,6 +41,7 @@ describe.each([
     message:
       'Setting up a backup wallet with Google or Apple is temporarily disabled. Close this window and enter a wallet address instead.',
     initEventId: 'WEB3AUTH_MODAL_INITIALIZED',
+    closeEventId: 'WEB3AUTH_MODAL_CLOSED',
   },
   {
     name: '/web3auth/swap-owner-session',
@@ -49,8 +50,9 @@ describe.each([
     message:
       'Recovery with a Google or Apple backup wallet is temporarily disabled. Close this window and use your recovery phrase instead.',
     initEventId: 'WEB3AUTH_SWAP_OWNER_MODAL_INITIALIZED',
+    closeEventId: 'WEB3AUTH_SWAP_OWNER_MODAL_CLOSED',
   },
-])('$name', ({ Page, getServerSideProps, message, initEventId }) => {
+])('$name', ({ Page, getServerSideProps, message, initEventId, closeEventId }) => {
   const original = process.env.WEB3AUTH_ENABLED;
   let postMessage: jest.SpyInstance;
 
@@ -85,6 +87,15 @@ describe.each([
       render(<Page web3AuthEnabled={false} />);
 
       expect(postMessage).toHaveBeenCalledWith({ event_id: initEventId }, '*');
+    });
+
+    it('posts its close event from the Close button so Pearl closes the window', () => {
+      render(<Page web3AuthEnabled={false} />);
+      expect(postMessage).not.toHaveBeenCalledWith({ event_id: closeEventId }, '*');
+
+      fireEvent.click(screen.getByRole('button', { name: 'Close' }));
+
+      expect(postMessage).toHaveBeenCalledWith({ event_id: closeEventId }, '*');
     });
 
     it('shows the temporarily disabled message', () => {

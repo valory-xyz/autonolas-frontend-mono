@@ -4,30 +4,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 
 import handler from '../../../pages/api/web3auth/status';
-
-const createRes = () => {
-  const res = {
-    statusCode: 0,
-    body: undefined as unknown,
-    headers: {} as Record<string, string>,
-    status(code: number) {
-      res.statusCode = code;
-      return res;
-    },
-    json(body: unknown) {
-      res.body = body;
-      return res;
-    },
-    end() {
-      return res;
-    },
-    setHeader(name: string, value: string) {
-      res.headers[name] = value;
-      return res;
-    },
-  };
-  return res;
-};
+import { createRes } from '../helpers';
 
 const call = (method = 'GET', origin?: string) => {
   const res = createRes();

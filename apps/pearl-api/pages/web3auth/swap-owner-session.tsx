@@ -2,7 +2,6 @@ import { LoadingOutlined } from '@ant-design/icons';
 import Safe from '@safe-global/protocol-kit';
 import { useWeb3Auth, useWeb3AuthConnect } from '@web3auth/modal/react';
 import { Card, Flex, Space, Typography } from 'antd';
-import type { GetServerSideProps } from 'next';
 import { useRouter } from 'next/router';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { createGlobalStyle } from 'styled-components';
@@ -11,7 +10,9 @@ import { Address } from 'viem';
 import { Web3AuthProvider } from 'context/Web3AuthProvider';
 import { useReconnectWeb3Auth } from 'hooks/useReconnectWeb3Auth';
 import type { Web3AuthPageProps } from 'types/web3auth';
-import { isWeb3AuthEnabled } from 'utils/web3authFlag';
+import { getWeb3AuthPageProps } from 'utils/web3authFlag';
+
+import { WEB3AUTH_SWAP_OWNER_EVENTS } from '../../constants/web3auth';
 
 import {
   ChainIdMissingAlert,
@@ -364,21 +365,14 @@ const SwapOwnerSession = () => {
 const DISABLED_MESSAGE =
   'Recovery with a Google or Apple backup wallet is temporarily disabled. Close this window and use your recovery phrase instead.';
 
-export const getServerSideProps: GetServerSideProps<Web3AuthPageProps> = async () => ({
-  props: { web3AuthEnabled: isWeb3AuthEnabled() },
-});
+export const getServerSideProps = getWeb3AuthPageProps;
 
 export default function Page({ web3AuthEnabled }: Web3AuthPageProps) {
   const router = useRouter();
   const { chainId } = router.query;
 
   if (!web3AuthEnabled) {
-    return (
-      <Web3AuthDisabled
-        initEventId={Events.WEB3AUTH_SWAP_OWNER_MODAL_INITIALIZED}
-        message={DISABLED_MESSAGE}
-      />
-    );
+    return <Web3AuthDisabled events={WEB3AUTH_SWAP_OWNER_EVENTS} message={DISABLED_MESSAGE} />;
   }
 
   return (

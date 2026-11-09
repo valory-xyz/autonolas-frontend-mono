@@ -1,7 +1,8 @@
 import { CheckCircleOutlined, CloseCircleOutlined } from '@ant-design/icons';
-import { Alert, Card, Flex, Space, Spin, Typography } from 'antd';
+import { Alert, Button, Card, Flex, Space, Spin, Typography } from 'antd';
 import { useEffect } from 'react';
 
+import type { Web3AuthPageEvents } from '../types/web3auth';
 import { EvmChainDetails, EvmChainId } from '../utils';
 
 const { Paragraph, Link, Text } = Typography;
@@ -89,16 +90,29 @@ export const SwapOwnerFailed = ({ error, txHash, chainId }: SwapOwnerFailedProps
 };
 
 type Web3AuthDisabledProps = {
-  /** The page's existing init event, so Pearl drops its loading spinner and shows this view. */
-  initEventId: string;
+  /**
+   * The page's existing events: `initialized` makes Pearl drop its loading spinner and show
+   * this view, `closed` makes it close the window.
+   */
+  events: Web3AuthPageEvents;
   message: string;
 };
 
 /** Shown instead of a Web3Auth page while `WEB3AUTH_ENABLED` is off. Never initialises the SDK. */
-export const Web3AuthDisabled = ({ initEventId, message }: Web3AuthDisabledProps) => {
+export const Web3AuthDisabled = ({ events, message }: Web3AuthDisabledProps) => {
   useEffect(() => {
-    window.parent.postMessage({ event_id: initEventId }, '*');
-  }, [initEventId]);
+    window.parent.postMessage({ event_id: events.initialized }, '*');
+  }, [events.initialized]);
 
-  return <Alert message={<Text>{message}</Text>} type="warning" showIcon style={{ margin: 16 }} />;
+  const close = () => window.parent.postMessage({ event_id: events.closed }, '*');
+
+  return (
+    <Alert
+      message={<Text>{message}</Text>}
+      type="warning"
+      showIcon
+      action={<Button onClick={close}>Close</Button>}
+      style={{ margin: 16 }}
+    />
+  );
 };
