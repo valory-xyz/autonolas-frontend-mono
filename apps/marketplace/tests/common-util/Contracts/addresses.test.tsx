@@ -16,6 +16,9 @@ import {
   FALLBACK_HANDLER,
   multisigCandidates,
 } from '../../../common-util/Contracts/addresses';
+// `docs/configuration.json` of valory-xyz/autonolas-registries at commit
+// cca0949e806f5d98316db0463d1312960829499c. Re-capture it when registries publishes new wrappers.
+import pinnedRegistriesConfig from '../../fixtures/registries-configuration.json';
 
 const LOCAL_ARTIFACTS = [
   COMPONENT_REGISTRY_CONTRACT,
@@ -68,19 +71,12 @@ describe('common-utils/addresses', () => {
         for (let j = 0; j < contracts.length; j += 1) {
           const currentContract = contracts[j];
 
-          // GnosisSafeMultisig has no local artifact, so check it before skipping unknown contracts
-          if (currentContract.name === 'GnosisSafeMultisig') {
-            expect(multisigCandidates[chainId]).toContain(currentContract.address);
-            continue;
-          }
-
           const localArtifact = LOCAL_ARTIFACTS.find(
             (artifact) => artifact.contractName === currentContract.name,
           );
           if (!localArtifact) continue;
 
-          // Take the configuration and local contract names that match
-          // Get local and configuration ABIs, stringify them
+          // Fetch the remote artifact of the contract the configuration names
           const remoteArtifactResponse = await fetch(
             REGISTRIES_REPO_URL + currentContract.artifact,
           );
@@ -93,7 +89,6 @@ describe('common-utils/addresses', () => {
           const lowLetter =
             localArtifact.contractName.charAt(0).toLowerCase() +
             localArtifact.contractName.slice(1);
-          // Need to stringify and then convert then parse to access the address field
           const addressStruct = JSON.stringify(ADDRESSES[chainId]);
           const addressStructJSON = JSON.parse(addressStruct);
           const localAddress = addressStructJSON[lowLetter];
@@ -103,6 +98,22 @@ describe('common-utils/addresses', () => {
     },
     2 * 60 * 1000,
   );
+
+  it('offers every GnosisSafeMultisig the pinned registries configuration lists', () => {
+    const wrappers = (pinnedRegistriesConfig as unknown as Chain[]).flatMap(({ chainId, contracts }) =>
+      contracts
+        .filter(({ name }) => name === 'GnosisSafeMultisig')
+        .map(({ address }) => ({ chainId, address })),
+    );
+
+    expect(wrappers.length).toBeGreaterThan(0);
+    wrappers.forEach(({ chainId, address }) => {
+      expect({ chainId, candidates: multisigCandidates[chainId] }).toEqual({
+        chainId,
+        candidates: expect.arrayContaining([address]),
+      });
+    });
+  });
 
   it('should ensure FALLBACK_HANDLER matches between remote and local sources', async () => {
     const fallbackHandlerResponse = await fetch(
