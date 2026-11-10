@@ -145,8 +145,8 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      # SHA-pinned to match the rest of the repo (snyk-security.yml and
-      # the supply-chain jobs above). See SUPPLY-CHAIN-SECURITY.md §5.
+      # SHA-pinned to match the rest of the repo (the supply-chain jobs
+      # above). See SUPPLY-CHAIN-SECURITY.md §5.
       - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
         with:
           fetch-depth: 0
@@ -169,7 +169,7 @@ jobs:
     # Aggregator gate referenced by `main` branch protection. The protection
     # rule requires a status context named exactly "All checks passed";
     # this job posts it. `needs:` only works within a single workflow, so
-    # this aggregator covers in-workflow jobs only — Snyk and Vercel run in
+    # this aggregator covers in-workflow jobs only — CodeQL and Vercel run in
     # separate workflows and are not gated through here. Mirrors the
     # pattern used in valory-xyz/agent-scan (.github/workflows/ci.yml).
     #

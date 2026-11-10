@@ -15,7 +15,7 @@ This policy covers:
 Out of scope (report directly to the upstream maintainer):
 
 - Vulnerabilities in third-party npm packages we depend on. Report to the package's own security contact; if disclosure affects us, follow up on this repo so we can pin / mitigate.
-- Vulnerabilities in upstream services (Vercel, Snyk, GitHub Actions runners, RPC providers, IPFS gateways).
+- Vulnerabilities in upstream services (Vercel, GitHub Actions runners, RPC providers, IPFS gateways).
 - Smart contract vulnerabilities — those live in the contract repos, not this frontend monorepo.
 
 ## Supported versions
@@ -50,7 +50,7 @@ We acknowledge receipt within **48 hours** and aim to send a substantive respons
 5. Deploy the fix to the affected Vercel projects.
 6. Publish a brief post-mortem if the issue is significant.
 
-For credentials / secrets exposure: we additionally rotate any tokens that may have been exposed (per-app Vercel env vars, RPC keys, Wallet Project ID, Etherscan keys, Vercel Blob tokens, `SNYK_TOKEN`, etc.) following the playbook in [SUPPLY-CHAIN-SECURITY.md](./SUPPLY-CHAIN-SECURITY.md#response-playbook-a-dependency-we-use-was-just-disclosed-as-compromised).
+For credentials / secrets exposure: we additionally rotate any tokens that may have been exposed (per-app Vercel env vars, RPC keys, Wallet Project ID, Etherscan keys, Vercel Blob tokens, etc.) following the playbook in [SUPPLY-CHAIN-SECURITY.md](./SUPPLY-CHAIN-SECURITY.md#response-playbook-a-dependency-we-use-was-just-disclosed-as-compromised).
 
 ## Acknowledgement
 
