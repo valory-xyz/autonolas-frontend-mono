@@ -22,6 +22,7 @@ import {
 import { getAddressFromBytes32 } from 'libs/util-functions/src';
 import { estimateGasWithBuffer } from 'libs/util-functions/src/lib/estimateGasWithBuffer';
 
+import { MAINNET_CHAIN_ID } from 'common-util/constants/chains';
 import { wagmiConfig } from 'common-util/config/wagmi';
 import { Nominee } from 'types';
 
@@ -29,10 +30,6 @@ import { getUnixNextWeekStartTimestamp } from './time';
 
 // All governance contracts live on mainnet.
 const MAINNET = mainnet.id;
-// Widened version for wagmi simulate/write/wait overloads — the literal `1`
-// doesn't satisfy the chain-tuple constraint in wagmi 2.19+, so each params
-// bag passes `chainId: MAINNET_CHAIN_ID` instead of the literal mainnet.id.
-const MAINNET_CHAIN_ID: number = mainnet.id;
 
 const voteWeightingParams = {
   address: (VOTE_WEIGHTING.addresses as Record<number, Address>)[MAINNET],
