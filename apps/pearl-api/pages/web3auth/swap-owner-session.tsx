@@ -8,13 +8,18 @@ import { createGlobalStyle } from 'styled-components';
 import { Address } from 'viem';
 
 import { Web3AuthProvider } from 'context/Web3AuthProvider';
+import { WEB3AUTH_SWAP_OWNER_EVENTS } from 'constants/web3auth';
 import { useReconnectWeb3Auth } from 'hooks/useReconnectWeb3Auth';
+import type { Web3AuthPageProps } from 'types/web3auth';
+import { getWeb3AuthPageProps } from 'utils/web3authFlag';
+
 import {
   ChainIdMissingAlert,
   InitErrorAlert,
   Loading,
   SwapOwnerFailed,
   SwapOwnerSuccess,
+  Web3AuthDisabled,
 } from '../../components/web3auth';
 import {
   EvmChainDetails,
@@ -34,11 +39,10 @@ const Styles = createGlobalStyle`
   }
 `;
 
+// The init/close events live in WEB3AUTH_SWAP_OWNER_EVENTS, shared with the disabled view.
 enum Events {
-  WEB3AUTH_SWAP_OWNER_MODAL_INITIALIZED = 'WEB3AUTH_SWAP_OWNER_MODAL_INITIALIZED',
   WEB3AUTH_SWAP_OWNER_SUCCESS = 'WEB3AUTH_SWAP_OWNER_SUCCESS',
   WEB3AUTH_SWAP_OWNER_FAILURE = 'WEB3AUTH_SWAP_OWNER_FAILURE',
-  WEB3AUTH_SWAP_OWNER_MODAL_CLOSED = 'WEB3AUTH_SWAP_OWNER_MODAL_CLOSED',
 }
 
 type TransactionSuccess = {
@@ -85,7 +89,7 @@ const SwapOwnerSession = () => {
   // Notify when Web3Auth is initialized
   useEffect(() => {
     if (isInitialized && targetWindow) {
-      targetWindow.postMessage({ event_id: Events.WEB3AUTH_SWAP_OWNER_MODAL_INITIALIZED }, '*');
+      targetWindow.postMessage({ event_id: WEB3AUTH_SWAP_OWNER_EVENTS.initialized }, '*');
     }
   }, [isInitialized, targetWindow]);
 
@@ -269,7 +273,7 @@ const SwapOwnerSession = () => {
       if (!isVisible && targetWindow) {
         targetWindow.postMessage(
           {
-            event_id: Events.WEB3AUTH_SWAP_OWNER_MODAL_CLOSED,
+            event_id: WEB3AUTH_SWAP_OWNER_EVENTS.closed,
             error: 'User closed Web3Auth modal without connecting',
           },
           '*',
@@ -292,7 +296,7 @@ const SwapOwnerSession = () => {
 
       targetWindow.postMessage(
         {
-          event_id: Events.WEB3AUTH_SWAP_OWNER_MODAL_CLOSED,
+          event_id: WEB3AUTH_SWAP_OWNER_EVENTS.closed,
           success: false,
           error: 'User closed window before transaction completed',
         },
@@ -356,9 +360,18 @@ const SwapOwnerSession = () => {
   );
 };
 
-export default function Page() {
+const DISABLED_MESSAGE =
+  'Recovery with a Google or Apple backup wallet is temporarily disabled. Close this window and use your recovery phrase instead.';
+
+export const getServerSideProps = getWeb3AuthPageProps;
+
+export default function Page({ web3AuthEnabled }: Web3AuthPageProps) {
   const router = useRouter();
   const { chainId } = router.query;
+
+  if (!web3AuthEnabled) {
+    return <Web3AuthDisabled events={WEB3AUTH_SWAP_OWNER_EVENTS} message={DISABLED_MESSAGE} />;
+  }
 
   return (
     <>

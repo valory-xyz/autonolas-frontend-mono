@@ -5,9 +5,12 @@ import { createGlobalStyle } from 'styled-components';
 import { Address } from 'viem';
 
 import { Web3AuthProvider } from 'context/Web3AuthProvider';
+import { WEB3AUTH_LOGIN_EVENTS } from 'constants/web3auth';
 import { useReconnectWeb3Auth } from 'hooks/useReconnectWeb3Auth';
+import type { Web3AuthPageProps } from 'types/web3auth';
+import { getWeb3AuthPageProps } from 'utils/web3authFlag';
 
-import { InitErrorAlert, Loading } from '../../components/web3auth';
+import { InitErrorAlert, Loading, Web3AuthDisabled } from '../../components/web3auth';
 
 export const Styles = createGlobalStyle`
   .w3a-parent-container > div {
@@ -15,10 +18,9 @@ export const Styles = createGlobalStyle`
   }
 `;
 
+// The init/close events live in WEB3AUTH_LOGIN_EVENTS, shared with the disabled view.
 enum Events {
   WEB3AUTH_AUTH_SUCCESS = 'WEB3AUTH_AUTH_SUCCESS',
-  WEB3AUTH_MODAL_CLOSED = 'WEB3AUTH_MODAL_CLOSED',
-  WEB3AUTH_MODAL_INITIALIZED = 'WEB3AUTH_MODAL_INITIALIZED',
 }
 
 const Web3AuthModal = () => {
@@ -31,7 +33,7 @@ const Web3AuthModal = () => {
   // Notify once initialized
   useEffect(() => {
     if (isInitialized && typeof window !== 'undefined') {
-      window.parent.postMessage({ event_id: Events.WEB3AUTH_MODAL_INITIALIZED }, '*');
+      window.parent.postMessage({ event_id: WEB3AUTH_LOGIN_EVENTS.initialized }, '*');
     }
   }, [isInitialized]);
 
@@ -96,7 +98,7 @@ const Web3AuthModal = () => {
 
     const handleClose = (isVisible: boolean) => {
       if (isVisible) return;
-      window.parent.postMessage({ event_id: Events.WEB3AUTH_MODAL_CLOSED }, '*');
+      window.parent.postMessage({ event_id: WEB3AUTH_LOGIN_EVENTS.closed }, '*');
     };
     web3Auth.on('MODAL_VISIBILITY', handleClose);
     return () => {
@@ -110,7 +112,16 @@ const Web3AuthModal = () => {
   return <div></div>;
 };
 
-export default function Page() {
+const DISABLED_MESSAGE =
+  'Setting up a backup wallet with Google or Apple is temporarily disabled. Close this window and enter a wallet address instead.';
+
+export const getServerSideProps = getWeb3AuthPageProps;
+
+export default function Page({ web3AuthEnabled }: Web3AuthPageProps) {
+  if (!web3AuthEnabled) {
+    return <Web3AuthDisabled events={WEB3AUTH_LOGIN_EVENTS} message={DISABLED_MESSAGE} />;
+  }
+
   return (
     <>
       <Styles />

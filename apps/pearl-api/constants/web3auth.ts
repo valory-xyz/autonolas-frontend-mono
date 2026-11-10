@@ -1,0 +1,9 @@
+export const WEB3AUTH_LOGIN_EVENTS = {
+  initialized: 'WEB3AUTH_MODAL_INITIALIZED',
+  closed: 'WEB3AUTH_MODAL_CLOSED',
+} as const;
+
+export const WEB3AUTH_SWAP_OWNER_EVENTS = {
+  initialized: 'WEB3AUTH_SWAP_OWNER_MODAL_INITIALIZED',
+  closed: 'WEB3AUTH_SWAP_OWNER_MODAL_CLOSED',
+} as const;
