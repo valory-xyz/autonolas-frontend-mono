@@ -14,32 +14,51 @@ jest.mock('common-util/List/ListCommon', () => ({ convertStringToArray: jest.fn(
 const mockReadContracts = readContracts as jest.Mock;
 const GNOSIS = 100;
 
+// Gnosis ServiceRegistryL2, as `serviceRegistryParams(100)` reads it.
+const GNOSIS_SERVICE_REGISTRY_L2 = '0x9338b5153AE39BB89f50468E608eD9d764B755fD';
+
 describe('getEnabledMultisigs', () => {
   const originalCandidates = multisigCandidates[GNOSIS];
 
   afterEach(() => {
-    multisigCandidates[GNOSIS] = originalCandidates;
+    jest.restoreAllMocks();
     jest.resetAllMocks();
   });
 
   it('keeps only the candidates ServiceRegistry.mapMultisigs enables', async () => {
     const [current] = originalCandidates;
     const other = '0x00000000000000000000000000000000000000b2';
-    multisigCandidates[GNOSIS] = [current, other];
+    jest.replaceProperty(multisigCandidates, GNOSIS, [current, other]);
     mockReadContracts.mockResolvedValue([false, true]);
 
     await expect(getEnabledMultisigs(GNOSIS)).resolves.toEqual([other]);
 
-    const { contracts } = mockReadContracts.mock.calls[0][1];
+    const { allowFailure, contracts } = mockReadContracts.mock.calls[0][1];
+    // With allowFailure, wagmi returns { status, result } objects and nothing would ever match.
+    expect(allowFailure).toBe(false);
     expect(
-      contracts.map(({ functionName, args }: { functionName: string; args: unknown[] }) => [
-        functionName,
-        args,
-      ]),
+      contracts.map(
+        ({
+          address,
+          chainId,
+          functionName,
+          args,
+        }: {
+          address: string;
+          chainId: number;
+          functionName: string;
+          args: unknown[];
+        }) => [address, chainId, functionName, args],
+      ),
     ).toEqual([
-      ['mapMultisigs', [current]],
-      ['mapMultisigs', [other]],
+      [GNOSIS_SERVICE_REGISTRY_L2, GNOSIS, 'mapMultisigs', [current]],
+      [GNOSIS_SERVICE_REGISTRY_L2, GNOSIS, 'mapMultisigs', [other]],
     ]);
+  });
+
+  it('offers nothing on a chain without candidates, without reading the registry', async () => {
+    await expect(getEnabledMultisigs(999999)).resolves.toEqual([]);
+    expect(mockReadContracts).not.toHaveBeenCalled();
   });
 
   it('offers nothing when every candidate is disabled', async () => {

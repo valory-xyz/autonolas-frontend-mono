@@ -99,9 +99,7 @@ export const ADDRESSES = {
 
 export type ChainIds = keyof typeof ADDRESSES;
 
-export type MultisigCandidates = {
-  [chainId in ChainIds]: Address[];
-};
+export type MultisigCandidates = Readonly<Record<ChainIds, readonly Address[]>>;
 /**
  * Safe creation wrappers (GnosisSafeMultisig) per chain. While a chain moves to a new wrapper it
  * lists both, and only those enabled in `ServiceRegistry.mapMultisigs` are offered.
