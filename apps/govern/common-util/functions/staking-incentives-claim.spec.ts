@@ -10,9 +10,11 @@ import {
   encodeFunctionResult,
   multicall3Abi,
   pad,
+  parseAbi,
+  zeroAddress,
 } from 'viem';
 
-import { DISPENSER } from 'libs/util-contracts/src/lib/abiAndAddresses';
+import { DISPENSER, VOTE_WEIGHTING } from 'libs/util-contracts/src/lib/abiAndAddresses';
 
 import {
   type ClaimBatch,
@@ -46,6 +48,9 @@ const ZERO = BigInt(0);
 const OLAS = BigInt(10) ** BigInt(18);
 
 const target = (n: number) => pad(`0x${n.toString(16)}`, { size: 32 }) as Address;
+const CHECKPOINT_ABI = parseAbi(['function checkpointNominee(bytes32 account, uint256 chainId)']);
+const DISPENSER_ADDRESS = DISPENSER.addresses[1];
+const VOTE_WEIGHTING_ADDRESS = (VOTE_WEIGHTING.addresses as Record<number, Address>)[1];
 
 type ChainSetup = { withheld?: bigint; bridgingDecimals?: bigint };
 
@@ -131,6 +136,31 @@ describe('quoteChainClaims', () => {
     expect(quote.value).toBe(MESSAGE_COST + TOKEN_COST);
   });
 
+  it('does not charge the token cost when withheld OLAS equals the incentive exactly', async () => {
+    mockChainState([{ withheld: OLAS }], [[OLAS]]);
+
+    const [quote] = await quoteChainClaims([[ARBITRUM], [[target(1)]]], ACCOUNT);
+
+    expect(quote.value).toBe(MESSAGE_COST);
+  });
+
+  it('charges the token cost when targets each below the withheld amount exceed it together', async () => {
+    mockChainState([{ withheld: OLAS }], [[(OLAS * BigInt(3)) / BigInt(4), OLAS / BigInt(2)]]);
+
+    const [quote] = await quoteChainClaims([[ARBITRUM], [[target(1), target(2)]]], ACCOUNT);
+
+    expect(quote.value).toBe(MESSAGE_COST + TOKEN_COST);
+  });
+
+  it('names the chain when the Dispenser has no deposit processor for it', async () => {
+    mockReadContracts.mockResolvedValueOnce([zeroAddress, ZERO]);
+
+    await expect(quoteChainClaims([[ARBITRUM], [[target(1)]]], ACCOUNT)).rejects.toThrow(
+      'No deposit processor is registered on the Dispenser for chain 42161',
+    );
+    expect(mockReadContracts).toHaveBeenCalledTimes(1);
+  });
+
   it('keeps one chain fee and zero for the others in a mixed batch', async () => {
     mockChainState([{}, {}], [[OLAS], [OLAS]]);
 
@@ -162,21 +192,29 @@ describe('quoteChainClaims', () => {
     const aggregate = mockSimulateContract.mock.calls.find(
       ([, { functionName }]) => functionName === 'aggregate3',
     );
-    const calls = aggregate?.[1].args[0] as { callData: Hex }[];
-    const decoded = calls.map(({ callData }) => {
-      try {
-        return decodeFunctionData({ abi: DISPENSER.abi, data: callData });
-      } catch {
-        return { functionName: 'checkpointNominee', args: [] };
-      }
-    });
-    expect(decoded.map(({ functionName }) => functionName)).toEqual([
-      'checkpointNominee',
+    const calls = aggregate?.[1].args[0] as { target: Address; callData: Hex }[];
+    expect(calls.map((call) => call.target)).toEqual([
+      VOTE_WEIGHTING_ADDRESS,
+      DISPENSER_ADDRESS,
+      VOTE_WEIGHTING_ADDRESS,
+      DISPENSER_ADDRESS,
+    ]);
+    const checkpoints = [calls[0], calls[2]].map(({ callData }) =>
+      decodeFunctionData({ abi: CHECKPOINT_ABI, data: callData }),
+    );
+    expect(checkpoints).toEqual([
+      { functionName: 'checkpointNominee', args: [target(1), BigInt(GNOSIS)] },
+      { functionName: 'checkpointNominee', args: [target(2), BigInt(GNOSIS)] },
+    ]);
+    const calculations = [calls[1], calls[3]].map(({ callData }) =>
+      decodeFunctionData({ abi: DISPENSER.abi, data: callData }),
+    );
+    expect(calculations.map(({ functionName }) => functionName)).toEqual([
       'calculateStakingIncentives',
-      'checkpointNominee',
       'calculateStakingIncentives',
     ]);
-    expect(decoded[1].args).toEqual([BigInt(1), BigInt(GNOSIS), target(1), BigInt(8)]);
+    expect(calculations[0].args).toEqual([BigInt(1), BigInt(GNOSIS), target(1), BigInt(8)]);
+    expect(calculations[1].args).toEqual([BigInt(1), BigInt(GNOSIS), target(2), BigInt(8)]);
     expect(aggregate?.[1].abi).toBe(multicall3Abi);
     expect(aggregate?.[1].account).toBe(ACCOUNT);
   });
@@ -241,12 +279,26 @@ describe('claim error classification', () => {
   });
 
   it('tells a wallet rejection apart from other errors', () => {
-    expect(toClaimError(new UserRejectedRequestError(new Error('denied')))).toEqual({
-      kind: 'wallet-rejected',
-    });
+    // wagmi throws the rejection wrapped, the same way it wraps a revert.
+    const rejection = new ContractFunctionExecutionError(
+      new UserRejectedRequestError(new Error('denied')),
+      {
+        abi: DISPENSER.abi,
+        functionName: 'claimStakingIncentivesBatch',
+        args: [BigInt(1), [], [], [], []],
+      },
+    );
+    expect(toClaimError(rejection)).toEqual({ kind: 'wallet-rejected' });
     expect(toClaimError(new Error('network down'))).toEqual({
       kind: 'other',
       message: 'network down',
+    });
+  });
+
+  it('names the decoded revert in the message of an unrelated contract revert', () => {
+    expect(toClaimError(revert)).toEqual({
+      kind: 'other',
+      message: expect.stringContaining('WrongAmount(1, 0)'),
     });
   });
 });

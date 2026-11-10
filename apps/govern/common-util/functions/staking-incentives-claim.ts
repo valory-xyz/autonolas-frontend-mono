@@ -8,11 +8,13 @@ import {
   encodeFunctionData,
   multicall3Abi,
   parseAbi,
+  zeroAddress,
 } from 'viem';
 import { mainnet } from 'viem/chains';
 
 import { DISPENSER, VOTE_WEIGHTING } from 'libs/util-contracts/src/lib/abiAndAddresses';
 
+import { MAINNET_CHAIN_ID } from 'common-util/constants/chains';
 import { wagmiConfig } from 'common-util/config/wagmi';
 
 import { getArbitrumBridgePayload, isOrbitChainId } from './arbitrum-bridge';
@@ -39,7 +41,6 @@ export type ClaimError =
   | { kind: 'reverted-after-simulation' }
   | { kind: 'other'; message: string };
 
-const MAINNET_CHAIN_ID: number = mainnet.id;
 // Each batch claims one epoch per target; a target owed more epochs appears in later batches.
 const NUM_CLAIMED_EPOCHS = BigInt(1);
 const MULTICALL3_ADDRESS = mainnet.contracts.multicall3.address;
@@ -74,6 +75,13 @@ const readChainStates = async (chainIds: number[]): Promise<ChainState[]> => {
   });
   const processors = chainIds.map((_, i) => dispenserReads[2 * i] as Address);
   const withheldAmounts = chainIds.map((_, i) => dispenserReads[2 * i + 1] as bigint);
+  // Until governance wires a chain's processor the claim cannot be bridged; say so instead of
+  // reading the zero address, which returns no data.
+  processors.forEach((processor, i) => {
+    if (processor === zeroAddress) {
+      throw new Error(`No deposit processor is registered on the Dispenser for chain ${chainIds[i]}`);
+    }
+  });
 
   const bridgingDecimals = await readContracts(wagmiConfig, {
     allowFailure: false,
@@ -225,9 +233,23 @@ const findInChain = <T extends Error>(error: unknown, type: new (...args: never[
 export const isContractRevert = (error: unknown) =>
   findInChain(error, ContractFunctionRevertedError) !== null;
 
+/** The decoded revert, e.g. `WrongAmount(1, 0)`, so an unrelated revert says what failed. */
+const getRevertReason = (error: unknown) => {
+  const revert = findInChain(error, ContractFunctionRevertedError);
+  if (!(revert instanceof ContractFunctionRevertedError)) return null;
+  if (revert.data) return `${revert.data.errorName}(${(revert.data.args ?? []).join(', ')})`;
+  return revert.reason ?? null;
+};
+
 export const toClaimError = (error: unknown): ClaimError => {
   if (findInChain(error, UserRejectedRequestError) !== null) return { kind: 'wallet-rejected' };
-  if (error instanceof BaseError) return { kind: 'other', message: error.shortMessage };
+  const revertReason = getRevertReason(error);
+  if (error instanceof BaseError) {
+    return {
+      kind: 'other',
+      message: revertReason ? `${error.shortMessage} ${revertReason}` : error.shortMessage,
+    };
+  }
   if (error instanceof Error) return { kind: 'other', message: error.message };
   return { kind: 'other', message: 'Unknown error' };
 };
