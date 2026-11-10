@@ -36,6 +36,7 @@ jest.mock('./arbitrum-bridge', () => ({
   getArbitrumBridgePayload: (...args: unknown[]) => mockGetArbitrumBridgePayload(...args),
 }));
 
+const ACCOUNT: Address = '0x00000000000000000000000000000000000000aa';
 const ARBITRUM = 42161;
 const GNOSIS = 100;
 const ORBIT_PAYLOAD = `0x${'ab'.repeat(160)}` as Hex;
@@ -96,7 +97,7 @@ describe('quoteChainClaims', () => {
   it('attaches no value and no payload to an Orbit chain whose incentives are all zero', async () => {
     mockChainState([{}], [[ZERO, ZERO]]);
 
-    const [quote] = await quoteChainClaims([[ARBITRUM], [[target(1), target(2)]]]);
+    const [quote] = await quoteChainClaims([[ARBITRUM], [[target(1), target(2)]]], ACCOUNT);
 
     expect(quote).toMatchObject({ sendsMessage: false, value: ZERO, bridgePayload: '0x' });
     expect(mockGetArbitrumBridgePayload).not.toHaveBeenCalled();
@@ -105,7 +106,7 @@ describe('quoteChainClaims', () => {
   it('charges the message and token costs for a positive incentive bridged as fresh OLAS', async () => {
     mockChainState([{}], [[OLAS]]);
 
-    const [quote] = await quoteChainClaims([[ARBITRUM], [[target(1)]]]);
+    const [quote] = await quoteChainClaims([[ARBITRUM], [[target(1)]]], ACCOUNT);
 
     expect(quote).toMatchObject({
       sendsMessage: true,
@@ -117,7 +118,7 @@ describe('quoteChainClaims', () => {
   it('still charges the message when withheld OLAS covers the whole incentive', async () => {
     mockChainState([{ withheld: OLAS * BigInt(2) }], [[OLAS]]);
 
-    const [quote] = await quoteChainClaims([[ARBITRUM], [[target(1)]]]);
+    const [quote] = await quoteChainClaims([[ARBITRUM], [[target(1)]]], ACCOUNT);
 
     expect(quote).toMatchObject({ sendsMessage: true, value: MESSAGE_COST });
   });
@@ -125,7 +126,7 @@ describe('quoteChainClaims', () => {
   it('charges the token cost when withheld OLAS covers only part of the incentive', async () => {
     mockChainState([{ withheld: OLAS / BigInt(2) }], [[OLAS]]);
 
-    const [quote] = await quoteChainClaims([[ARBITRUM], [[target(1)]]]);
+    const [quote] = await quoteChainClaims([[ARBITRUM], [[target(1)]]], ACCOUNT);
 
     expect(quote.value).toBe(MESSAGE_COST + TOKEN_COST);
   });
@@ -133,10 +134,13 @@ describe('quoteChainClaims', () => {
   it('keeps one chain fee and zero for the others in a mixed batch', async () => {
     mockChainState([{}, {}], [[OLAS], [OLAS]]);
 
-    const quotes = await quoteChainClaims([
-      [GNOSIS, ARBITRUM],
-      [[target(1)], [target(2)]],
-    ]);
+    const quotes = await quoteChainClaims(
+      [
+        [GNOSIS, ARBITRUM],
+        [[target(1)], [target(2)]],
+      ],
+      ACCOUNT,
+    );
 
     expect(quotes.map(({ value }) => value)).toEqual([ZERO, MESSAGE_COST + TOKEN_COST]);
     expect(quotes.map(({ bridgePayload }) => bridgePayload)).toEqual(['0x', ORBIT_PAYLOAD]);
@@ -145,7 +149,7 @@ describe('quoteChainClaims', () => {
   it('sizes the Orbit bridge estimate to the targets with a positive incentive', async () => {
     mockChainState([{}], [[ZERO, OLAS, ZERO]]);
 
-    await quoteChainClaims([[ARBITRUM], [[target(1), target(2), target(3)]]]);
+    await quoteChainClaims([[ARBITRUM], [[target(1), target(2), target(3)]]], ACCOUNT);
 
     expect(mockGetArbitrumBridgePayload).toHaveBeenCalledWith([target(2)], ARBITRUM);
   });
@@ -153,7 +157,7 @@ describe('quoteChainClaims', () => {
   it('checkpoints each nominee before calculating its incentive with the processor decimals', async () => {
     mockChainState([{ bridgingDecimals: BigInt(8) }], [[OLAS, OLAS]]);
 
-    await quoteChainClaims([[GNOSIS], [[target(1), target(2)]]]);
+    await quoteChainClaims([[GNOSIS], [[target(1), target(2)]]], ACCOUNT);
 
     const aggregate = mockSimulateContract.mock.calls.find(
       ([, { functionName }]) => functionName === 'aggregate3',
@@ -174,6 +178,7 @@ describe('quoteChainClaims', () => {
     ]);
     expect(decoded[1].args).toEqual([BigInt(1), BigInt(GNOSIS), target(1), BigInt(8)]);
     expect(aggregate?.[1].abi).toBe(multicall3Abi);
+    expect(aggregate?.[1].account).toBe(ACCOUNT);
   });
 });
 
@@ -194,7 +199,7 @@ describe('prepareClaim', () => {
       [[target(1)], [target(2)]],
     ];
 
-    await prepareClaim(batch, '0x00000000000000000000000000000000000000aa');
+    await prepareClaim(batch, ACCOUNT);
 
     const claim = mockSimulateContract.mock.calls.find(
       ([, { functionName }]) => functionName === 'claimStakingIncentivesBatch',
@@ -207,7 +212,7 @@ describe('prepareClaim', () => {
       [MESSAGE_COST + TOKEN_COST, ZERO],
     ]);
     expect(claim.value).toBe(MESSAGE_COST + TOKEN_COST);
-    expect(claim.account).toBe('0x00000000000000000000000000000000000000aa');
+    expect(claim.account).toBe(ACCOUNT);
   });
 });
 

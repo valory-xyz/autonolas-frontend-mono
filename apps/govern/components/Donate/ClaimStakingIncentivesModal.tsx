@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { Button, Collapse, Flex, Modal, Space, Spin, Steps, Table, Tag, Typography } from 'antd';
 
 import {
@@ -104,20 +104,25 @@ export const ClaimStakingIncentivesModal = ({ onClose }: ClaimStakingIncentivesM
     clearClaimableBatches,
     refetchClaimableBatches,
   } = useClaimableNomineesBatches();
+  // A claim settles after its own render: a rebuild may have reset the batches meanwhile.
+  const latest = useRef({ currentBatch, batchCount: nomineesToClaimBatches.length });
+  latest.current = { currentBatch, batchCount: nomineesToClaimBatches.length };
+
   const { claimIncentivesForBatch, isPending, isEstimating } = useClaimStakingIncentivesBatch({
     onSuccess: () => {
-      setClaimedBatches((prev) => [...prev, currentBatch]);
+      const { currentBatch: claimedBatch, batchCount } = latest.current;
+      setClaimedBatches((prev) => [...prev, claimedBatch]);
       // Only move to next batch, if more batches are remaining.
-      if (currentBatch < nomineesToClaimBatches.length - 1) {
+      if (claimedBatch < batchCount - 1) {
         setTimeout(() => {
           setCurrentBatch((prev) => prev + 1);
         }, STEP_CHANGE_DELAY);
       }
-      notifySuccess(`Staking incentives for batch ${currentBatch + 1} claimed successfully`);
+      notifySuccess(`Staking incentives for batch ${claimedBatch + 1} claimed successfully`);
     },
     onError: (error) => {
       console.error(error);
-      notifyClaimError(error, currentBatch + 1);
+      notifyClaimError(error, latest.current.currentBatch + 1);
     },
     refetchClaimableBatches,
     onBatchesRebuilt: () => {

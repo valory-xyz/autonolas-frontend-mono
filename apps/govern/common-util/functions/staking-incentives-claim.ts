@@ -99,6 +99,7 @@ const readChainStates = async (chainIds: number[]): Promise<ChainState[]> => {
 const readIncentives = async (
   [chainIds, stakingTargets]: ClaimBatch,
   states: ChainState[],
+  account: Address,
 ): Promise<bigint[][]> => {
   const calls = chainIds.flatMap((chainId, i) =>
     stakingTargets[i].flatMap((target) => [
@@ -129,6 +130,7 @@ const readIncentives = async (
     chainId: MAINNET_CHAIN_ID,
     functionName: 'aggregate3',
     args: [calls],
+    account,
   });
 
   let callIndex = 0;
@@ -158,10 +160,13 @@ const getTransferAmount = (incentives: bigint[], withheldAmount: bigint) => {
  * that sends no message, so only Orbit chains with a positive incentive attach value: the message
  * cost always, and the token cost only when fresh OLAS is bridged.
  */
-export const quoteChainClaims = async (batch: ClaimBatch): Promise<ChainClaimQuote[]> => {
+export const quoteChainClaims = async (
+  batch: ClaimBatch,
+  account: Address,
+): Promise<ChainClaimQuote[]> => {
   const [chainIds, stakingTargets] = batch;
   const states = await readChainStates(chainIds);
-  const incentives = await readIncentives(batch, states);
+  const incentives = await readIncentives(batch, states, account);
 
   return Promise.all(
     chainIds.map(async (chainId, i) => {
@@ -193,7 +198,7 @@ export const quoteChainClaims = async (batch: ClaimBatch): Promise<ChainClaimQuo
 
 /** Quotes the batch and simulates the exact claim the wallet will be asked to sign. */
 export const prepareClaim = async (batch: ClaimBatch, account: Address) => {
-  const quotes = await quoteChainClaims(batch);
+  const quotes = await quoteChainClaims(batch, account);
   const params = {
     address: DISPENSER_ADDRESS,
     abi: DISPENSER.abi,
