@@ -4,7 +4,6 @@ import { type Address, encodeAbiParameters, parseAbiParameters } from 'viem';
 import { arbitrum, mainnet } from 'viem/chains';
 
 import { RPC_URLS, robinhood } from 'libs/util-constants/src';
-import { DISPENSER } from 'libs/util-contracts/src/lib/abiAndAddresses';
 
 export const ARBITRUM_CHAIN_ID = arbitrum.id;
 export const ROBINHOOD_CHAIN_ID = robinhood.id;
@@ -128,35 +127,20 @@ export type ArbitrumBridgeParams = {
  *   (refundAddress, gasPriceBid, maxSubmissionCostToken, gasLimitMessage, maxSubmissionCostMessage)
  *
  * `sendingTargets` are the targets with a positive incentive: the Dispenser drops the others
- * from the message, so only they size its calldata.
+ * from the message, so only they size its calldata. `depositProcessor` is the chain's
+ * `ArbitrumDepositProcessorL1`, as the Dispenser maps it (the caller checks it is set).
  */
 export const getArbitrumBridgePayload = async (
   sendingTargets: Address[],
   chainId: OrbitChainId,
+  depositProcessor: Address,
 ): Promise<ArbitrumBridgeParams> => {
   if (chainId === ROBINHOOD_CHAIN_ID) ensureRobinhoodNetworkRegistered();
 
   const l1Provider = getProvider(mainnet.id);
   const l2Provider = getProvider(chainId);
-
-  // Read the chain's ArbitrumDepositProcessorL1 address from Dispenser contract
-  const dispenserContract = new ethersV5.Contract(
-    DISPENSER.addresses[mainnet.id],
-    ['function mapChainIdDepositProcessors(uint256) view returns (address)'],
-    l1Provider,
-  );
-
-  // Fetch deposit processor address and L1 base fee in parallel (independent calls)
-  const [l1DepositProcessorAddress, l1BaseFee] = await Promise.all([
-    dispenserContract.mapChainIdDepositProcessors(chainId) as Promise<string>,
-    getL1BaseFee(l1Provider),
-  ]);
-
-  // The Dispenser maps a chain to its processor via governance; until that lands the claim
-  // cannot be bridged, so fail here instead of calling into the zero address.
-  if (l1DepositProcessorAddress === ethersV5.constants.AddressZero) {
-    throw new Error(`No deposit processor is registered on the Dispenser for chain ${chainId}`);
-  }
+  const l1DepositProcessorAddress = depositProcessor;
+  const l1BaseFee = await getL1BaseFee(l1Provider);
 
   // Read l2TargetDispenser from the ArbitrumDepositProcessorL1 contract
   const depositProcessorContract = new ethersV5.Contract(

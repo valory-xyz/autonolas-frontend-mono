@@ -3,7 +3,9 @@ import {
   type Address,
   BaseError,
   ContractFunctionRevertedError,
+  type Hex,
   UserRejectedRequestError,
+  decodeErrorResult,
   decodeFunctionResult,
   encodeFunctionData,
   multicall3Abi,
@@ -50,24 +52,47 @@ const VOTE_WEIGHTING_ABI = parseAbi([
   'function checkpointNominee(bytes32 account, uint256 chainId)',
 ]);
 const DEPOSIT_PROCESSOR_ABI = parseAbi(['function getBridgingDecimals() view returns (uint256)']);
+const dispenserParams = {
+  address: DISPENSER_ADDRESS,
+  abi: DISPENSER.abi,
+  chainId: MAINNET_CHAIN_ID,
+} as const;
 
-type ChainState = { bridgingDecimals: bigint; withheldAmount: bigint };
+type ChainState = { processor: Address; bridgingDecimals: bigint; withheldAmount: bigint };
+
+/**
+ * A quote sub-call reverted. Multicall3 would hide the reason behind "Multicall3: call failed",
+ * so the call is named with its decoded revert.
+ */
+export class QuoteCallRevertedError extends Error {
+  constructor(functionName: string, target: Address, chainId: number, reason: string) {
+    super(`${functionName} reverted for staking target ${target} on chain ${chainId}: ${reason}`);
+    this.name = 'QuoteCallRevertedError';
+  }
+}
+
+const decodeCallRevert = (abi: Parameters<typeof decodeErrorResult>[0]['abi'], data: Hex) => {
+  if (data === '0x') return 'no revert data';
+  try {
+    const { errorName, args } = decodeErrorResult({ abi, data });
+    if (errorName === 'Error') return String(args?.[0]);
+    return `${errorName}(${(args ?? []).join(', ')})`;
+  } catch {
+    return data;
+  }
+};
 
 const readChainStates = async (chainIds: number[]): Promise<ChainState[]> => {
   const dispenserReads = await readContracts(wagmiConfig, {
     allowFailure: false,
     contracts: chainIds.flatMap((chainId) => [
       {
-        address: DISPENSER_ADDRESS,
-        abi: DISPENSER.abi,
-        chainId: MAINNET_CHAIN_ID,
+        ...dispenserParams,
         functionName: 'mapChainIdDepositProcessors' as const,
         args: [BigInt(chainId)] as const,
       },
       {
-        address: DISPENSER_ADDRESS,
-        abi: DISPENSER.abi,
-        chainId: MAINNET_CHAIN_ID,
+        ...dispenserParams,
         functionName: 'mapChainIdWithheldAmounts' as const,
         args: [BigInt(chainId)] as const,
       },
@@ -75,8 +100,7 @@ const readChainStates = async (chainIds: number[]): Promise<ChainState[]> => {
   });
   const processors = chainIds.map((_, i) => dispenserReads[2 * i] as Address);
   const withheldAmounts = chainIds.map((_, i) => dispenserReads[2 * i + 1] as bigint);
-  // Until governance wires a chain's processor the claim cannot be bridged; say so instead of
-  // reading the zero address, which returns no data.
+  // Reading the zero address returns no data, which would hide that governance has not wired it.
   processors.forEach((processor, i) => {
     if (processor === zeroAddress) {
       throw new Error(
@@ -96,6 +120,7 @@ const readChainStates = async (chainIds: number[]): Promise<ChainState[]> => {
   });
 
   return chainIds.map((_, i) => ({
+    processor: processors[i],
     bridgingDecimals: bridgingDecimals[i] as bigint,
     withheldAmount: withheldAmounts[i],
   }));
@@ -115,7 +140,7 @@ const readIncentives = async (
     stakingTargets[i].flatMap((target) => [
       {
         target: VOTE_WEIGHTING_ADDRESS,
-        allowFailure: false,
+        allowFailure: true,
         callData: encodeFunctionData({
           abi: VOTE_WEIGHTING_ABI,
           functionName: 'checkpointNominee',
@@ -124,7 +149,7 @@ const readIncentives = async (
       },
       {
         target: DISPENSER_ADDRESS,
-        allowFailure: false,
+        allowFailure: true,
         callData: encodeFunctionData({
           abi: DISPENSER.abi,
           functionName: 'calculateStakingIncentives',
@@ -143,16 +168,25 @@ const readIncentives = async (
     account,
   });
 
+  const callResults: readonly { success: boolean; returnData: Hex }[] = result;
   let callIndex = 0;
-  return stakingTargets.map((targets) =>
-    targets.map(() => {
-      // Skip the checkpoint result; the calculation follows it.
-      const { returnData } = result[callIndex + 1];
+  return stakingTargets.map((targets, i) =>
+    targets.map((target) => {
+      const checkpoint = callResults[callIndex];
+      const calculation = callResults[callIndex + 1];
       callIndex += 2;
+      if (!checkpoint.success) {
+        const reason = decodeCallRevert(VOTE_WEIGHTING.abi, checkpoint.returnData);
+        throw new QuoteCallRevertedError('checkpointNominee', target, chainIds[i], reason);
+      }
+      if (!calculation.success) {
+        const reason = decodeCallRevert(DISPENSER.abi, calculation.returnData);
+        throw new QuoteCallRevertedError('calculateStakingIncentives', target, chainIds[i], reason);
+      }
       const [totalStakingIncentive] = decodeFunctionResult({
         abi: DISPENSER.abi,
         functionName: 'calculateStakingIncentives',
-        data: returnData,
+        data: calculation.returnData,
       });
       return totalStakingIncentive;
     }),
@@ -195,6 +229,7 @@ export const quoteChainClaims = async (
       const { bridgePayload, messageCost, tokenCost } = await getArbitrumBridgePayload(
         sendingTargets,
         chainId,
+        states[i].processor,
       );
       const sendsTokens = getTransferAmount(incentives[i], states[i].withheldAmount) > BigInt(0);
       return {
@@ -210,9 +245,7 @@ export const quoteChainClaims = async (
 export const prepareClaim = async (batch: ClaimBatch, account: Address) => {
   const quotes = await quoteChainClaims(batch, account);
   const params = {
-    address: DISPENSER_ADDRESS,
-    abi: DISPENSER.abi,
-    chainId: MAINNET_CHAIN_ID,
+    ...dispenserParams,
     functionName: 'claimStakingIncentivesBatch' as const,
     args: [
       NUM_CLAIMED_EPOCHS,
@@ -233,14 +266,16 @@ const findInChain = <T extends Error>(error: unknown, type: new (...args: never[
 
 /** A contract revert, as opposed to an RPC, network or wallet failure. */
 export const isContractRevert = (error: unknown) =>
+  error instanceof QuoteCallRevertedError ||
   findInChain(error, ContractFunctionRevertedError) !== null;
 
 /** The decoded revert, e.g. `WrongAmount(1, 0)`, so an unrelated revert says what failed. */
 const getRevertReason = (error: unknown) => {
   const revert = findInChain(error, ContractFunctionRevertedError);
   if (!(revert instanceof ContractFunctionRevertedError)) return null;
-  if (revert.data) return `${revert.data.errorName}(${(revert.data.args ?? []).join(', ')})`;
-  return revert.reason ?? null;
+  // viem's shortMessage already carries the reason of an Error(string) or Panic(uint256).
+  if (!revert.data || ['Error', 'Panic'].includes(revert.data.errorName)) return null;
+  return `${revert.data.errorName}(${(revert.data.args ?? []).join(', ')})`;
 };
 
 export const toClaimError = (error: unknown): ClaimError => {

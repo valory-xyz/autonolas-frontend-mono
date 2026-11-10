@@ -18,6 +18,7 @@ import { DISPENSER, VOTE_WEIGHTING } from 'libs/util-contracts/src/lib/abiAndAdd
 
 import {
   type ClaimBatch,
+  QuoteCallRevertedError,
   isContractRevert,
   prepareClaim,
   quoteChainClaims,
@@ -48,6 +49,7 @@ const ZERO = BigInt(0);
 const OLAS = BigInt(10) ** BigInt(18);
 
 const target = (n: number) => pad(`0x${n.toString(16)}`, { size: 32 }) as Address;
+const processor = (i: number) => `0x${(i + 1).toString(16).padStart(40, '0')}` as Address;
 const CHECKPOINT_ABI = parseAbi(['function checkpointNominee(bytes32 account, uint256 chainId)']);
 const DISPENSER_ADDRESS = DISPENSER.addresses[1];
 const VOTE_WEIGHTING_ADDRESS = (VOTE_WEIGHTING.addresses as Record<number, Address>)[1];
@@ -61,10 +63,7 @@ type ChainSetup = { withheld?: bigint; bridgingDecimals?: bigint };
 const mockChainState = (chains: ChainSetup[], incentives: bigint[][]) => {
   mockReadContracts
     .mockResolvedValueOnce(
-      chains.flatMap(({ withheld = ZERO }, i) => [
-        `0x${(i + 1).toString(16).padStart(40, '0')}`,
-        withheld,
-      ]),
+      chains.flatMap(({ withheld = ZERO }, i) => [processor(i), withheld]),
     )
     .mockResolvedValueOnce(chains.map(({ bridgingDecimals = BigInt(18) }) => bridgingDecimals));
 
@@ -161,6 +160,85 @@ describe('quoteChainClaims', () => {
     expect(mockReadContracts).toHaveBeenCalledTimes(1);
   });
 
+  it.each([
+    ['the other chain', [ZERO, OLAS * BigInt(2)], MESSAGE_COST],
+    ['this chain', [OLAS * BigInt(2), ZERO], MESSAGE_COST + TOKEN_COST],
+  ])(
+    'uses only the Orbit chain own withheld amount when %s has none',
+    async (_case, [gnosisWithheld, arbitrumWithheld], expected) => {
+      mockChainState(
+        [{ withheld: gnosisWithheld }, { withheld: arbitrumWithheld }],
+        [[OLAS], [OLAS]],
+      );
+
+      const quotes = await quoteChainClaims(
+        [
+          [GNOSIS, ARBITRUM],
+          [[target(1)], [target(2)]],
+        ],
+        ACCOUNT,
+      );
+
+      expect(quotes[1].value).toBe(expected);
+    },
+  );
+
+  it('passes the chain own deposit processor to the Orbit bridge estimate', async () => {
+    mockChainState([{}, {}], [[OLAS], [OLAS]]);
+
+    await quoteChainClaims(
+      [
+        [GNOSIS, ARBITRUM],
+        [[target(1)], [target(2)]],
+      ],
+      ACCOUNT,
+    );
+
+    expect(mockGetArbitrumBridgePayload).toHaveBeenCalledWith([target(2)], ARBITRUM, processor(1));
+  });
+
+  it('names the quote call, target, chain and decoded revert when a sub-call reverts', async () => {
+    mockChainState([{}], [[OLAS]]);
+    mockSimulateContract.mockResolvedValue({
+      result: [
+        { success: true, returnData: '0x' },
+        {
+          success: false,
+          returnData: encodeErrorResult({
+            abi: DISPENSER.abi,
+            errorName: 'WrongAmount',
+            args: [BigInt(1), ZERO],
+          }),
+        },
+      ],
+    });
+
+    const quote = quoteChainClaims([[GNOSIS], [[target(1)]]], ACCOUNT);
+
+    await expect(quote).rejects.toBeInstanceOf(QuoteCallRevertedError);
+    await expect(quote).rejects.toThrow(
+      `calculateStakingIncentives reverted for staking target ${target(1)} on chain ${GNOSIS}: WrongAmount(1, 0)`,
+    );
+    const aggregate = mockSimulateContract.mock.calls[0][1];
+    expect(aggregate.args[0].every((call: { allowFailure: boolean }) => call.allowFailure)).toBe(
+      true,
+    );
+  });
+
+  it('names a failed checkpoint with no revert data', async () => {
+    mockChainState([{}], [[OLAS]]);
+    mockSimulateContract.mockResolvedValue({
+      result: [
+        { success: false, returnData: '0x' },
+        { success: true, returnData: '0x' },
+      ],
+    });
+
+    await expect(quoteChainClaims([[GNOSIS], [[target(1)]]], ACCOUNT)).rejects.toThrow(
+      `checkpointNominee reverted for staking target ${target(1)} on chain ${GNOSIS}: no revert data`,
+    );
+  });
+
   it('keeps one chain fee and zero for the others in a mixed batch', async () => {
     mockChainState([{}, {}], [[OLAS], [OLAS]]);
 
@@ -181,7 +259,7 @@ describe('quoteChainClaims', () => {
 
     await quoteChainClaims([[ARBITRUM], [[target(1), target(2), target(3)]]], ACCOUNT);
 
-    expect(mockGetArbitrumBridgePayload).toHaveBeenCalledWith([target(2)], ARBITRUM);
+    expect(mockGetArbitrumBridgePayload).toHaveBeenCalledWith([target(2)], ARBITRUM, processor(0));
   });
 
   it('checkpoints each nominee before calculating its incentive with the processor decimals', async () => {
@@ -274,6 +352,9 @@ describe('claim error classification', () => {
 
   it('treats a contract revert as a revert, and an RPC failure as not one', () => {
     expect(isContractRevert(revert)).toBe(true);
+    expect(isContractRevert(new QuoteCallRevertedError('checkpointNominee', target(1), 1, 'x'))).toBe(
+      true,
+    );
     expect(isContractRevert(new HttpRequestError({ url: 'https://rpc.example' }))).toBe(false);
     expect(isContractRevert(new Error('network down'))).toBe(false);
   });
@@ -300,5 +381,35 @@ describe('claim error classification', () => {
       kind: 'other',
       message: expect.stringContaining('WrongAmount(1, 0)'),
     });
+  });
+
+  it('does not repeat the reason of an Error(string) revert', () => {
+    const stringRevert = new ContractFunctionExecutionError(
+      new ContractFunctionRevertedError({
+        abi: DISPENSER.abi,
+        functionName: 'claimStakingIncentivesBatch',
+        data: encodeErrorResult({
+          abi: [{ type: 'error', name: 'Error', inputs: [{ name: 'message', type: 'string' }] }],
+          errorName: 'Error',
+          args: ['Paused'],
+        }),
+      }),
+      {
+        abi: DISPENSER.abi,
+        functionName: 'claimStakingIncentivesBatch',
+        args: [BigInt(1), [], [], [], []],
+      },
+    );
+
+    const error = toClaimError(stringRevert);
+
+    expect(error).toEqual({ kind: 'other', message: stringRevert.shortMessage });
+    expect(stringRevert.shortMessage).toContain('Paused');
+  });
+
+  it('falls back to the short message, the error message, or a generic one', () => {
+    const rpcError = new HttpRequestError({ url: 'https://rpc.example' });
+    expect(toClaimError(rpcError)).toEqual({ kind: 'other', message: rpcError.shortMessage });
+    expect(toClaimError('boom')).toEqual({ kind: 'other', message: 'Unknown error' });
   });
 });
