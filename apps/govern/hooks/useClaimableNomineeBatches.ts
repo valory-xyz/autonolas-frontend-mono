@@ -1,4 +1,4 @@
-import { useMemo, useCallback } from 'react';
+import { useMemo, useCallback, useRef } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import type { Address } from 'viem';
 import { mainnet } from 'viem/chains';
@@ -36,10 +36,12 @@ const useMinStakingValue = ({ epoch }: { epoch: number | null }) => {
   return { minStakingWeight, isMinStakingLoading };
 };
 
+type CursorRead = { status?: 'success' | 'failure'; result?: unknown };
+
 /** Last claimed epoch per nominee address, from the `mapLastClaimedStakingEpochs` reads. */
 const toLastClaimedEpochs = (
   nominees: StakingContract[],
-  results: readonly { result?: unknown }[],
+  results: readonly CursorRead[],
 ): Record<Address, number> =>
   nominees.reduce(
     (acc, nominee, index) => {
@@ -48,6 +50,29 @@ const toLastClaimedEpochs = (
     },
     {} as Record<Address, number>,
   );
+
+/** Like `toLastClaimedEpochs`, but throws on a failed read instead of turning it into `NaN`. */
+const toCheckedLastClaimedEpochs = (
+  nominees: StakingContract[],
+  results: readonly CursorRead[] | undefined,
+): Record<Address, number> => {
+  nominees.forEach((nominee, index) => {
+    if (results?.[index]?.status !== 'success') {
+      throw new Error(`Could not read the claim cursor of staking contract ${nominee.address}`);
+    }
+  });
+  return toLastClaimedEpochs(nominees, results ?? []);
+};
+
+/** The rebuilt batches, and whether any claim cursor moved since it was last read. */
+export type ClaimableBatchesRefresh = { batches: ClaimBatch[]; cursorsChanged: boolean };
+
+const haveCursorsChanged = (
+  previous: Record<Address, number> | null,
+  fresh: Record<Address, number>,
+) =>
+  !previous ||
+  Object.keys(fresh).some((address) => previous[address as Address] !== fresh[address as Address]);
 
 const useNomineesLastClaimedStakingEpoch = ({ nominees }: { nominees: StakingContract[] }) => {
   const queryClient = useQueryClient();
@@ -79,7 +104,7 @@ const useNomineesLastClaimedStakingEpoch = ({ nominees }: { nominees: StakingCon
   /** Re-reads the claim cursors; resolves to the fresh last claimed epoch per nominee. */
   const refetchLastClaimedEpochs = useCallback(async () => {
     const { data } = await refetchLastClaimedStakingEpoch({ throwOnError: true });
-    return toLastClaimedEpochs(nominees, data ?? []);
+    return toCheckedLastClaimedEpochs(nominees, data);
   }, [nominees, refetchLastClaimedStakingEpoch]);
 
   return {
@@ -161,7 +186,10 @@ type BuildClaimBatchesParams = {
   lastClaimedEpochs: Record<Address, number>;
   currentEpoch: number;
   minStakingWeight: number;
-  /** Relative weight per nominee address at the previous epoch's end, in percent. */
+  /**
+   * Relative weight per nominee address at the previous epoch's end, in percent × 100: the same
+   * unit as `minStakingWeight`.
+   */
   relativeWeights: Record<Address, number>;
 };
 
@@ -174,7 +202,7 @@ export const buildClaimBatches = ({
 }: BuildClaimBatchesParams): ClaimBatch[] => {
   /**
    * Filter nominees to be claimed as per the conditions:
-   * 1. Nominee's relative weight > min staking weight
+   * 1. Nominee's relative weight is at least the min staking weight
    * 2. Nominee has not claimed in the current or future epochs
    */
   const filteredNominees = nominees.filter((nominee) => {
@@ -356,18 +384,29 @@ export const useClaimableNomineesBatches = () => {
 
   /**
    * Re-reads the claim cursors and rebuilds the batches from them, e.g. after another claimer
-   * advanced a cursor. Resolves to the rebuilt batches; the hook's own batches follow.
+   * advanced a cursor. Throws if a cursor cannot be read, rather than reporting it as claimed.
    */
-  const refetchClaimableBatches = useCallback(async (): Promise<ClaimBatch[]> => {
-    if (!currentEpoch || !minStakingWeight || !relativeWeights) return [];
+  // The cursors the batches were last built from, so a refresh can tell whether any moved.
+  const builtFromCursors = useRef(lastClaimedStakingEpochByNominee);
+  builtFromCursors.current = lastClaimedStakingEpochByNominee;
+
+  const refetchClaimableBatches = useCallback(async (): Promise<ClaimableBatchesRefresh> => {
+    if (!currentEpoch || !minStakingWeight || !relativeWeights) {
+      throw new Error('The claimable staking contracts are still loading. Try again shortly.');
+    }
     const lastClaimedEpochs = await refetchLastClaimedEpochs();
-    return buildClaimBatches({
-      nominees,
-      lastClaimedEpochs,
-      currentEpoch,
-      minStakingWeight,
-      relativeWeights,
-    });
+    const cursorsChanged = haveCursorsChanged(builtFromCursors.current, lastClaimedEpochs);
+    builtFromCursors.current = lastClaimedEpochs;
+    return {
+      batches: buildClaimBatches({
+        nominees,
+        lastClaimedEpochs,
+        currentEpoch,
+        minStakingWeight,
+        relativeWeights,
+      }),
+      cursorsChanged,
+    };
   }, [nominees, currentEpoch, minStakingWeight, relativeWeights, refetchLastClaimedEpochs]);
 
   return {

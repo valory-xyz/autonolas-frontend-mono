@@ -108,7 +108,7 @@ export const ClaimStakingIncentivesModal = ({ onClose }: ClaimStakingIncentivesM
   const latest = useRef({ currentBatch, batchCount: nomineesToClaimBatches.length });
   latest.current = { currentBatch, batchCount: nomineesToClaimBatches.length };
 
-  const { claimIncentivesForBatch, isPending, isEstimating } = useClaimStakingIncentivesBatch({
+  const { claimIncentivesForBatch, isPending, isPreparing } = useClaimStakingIncentivesBatch({
     onSuccess: () => {
       const { currentBatch: claimedBatch, batchCount } = latest.current;
       setClaimedBatches((prev) => [...prev, claimedBatch]);
@@ -165,7 +165,7 @@ export const ClaimStakingIncentivesModal = ({ onClose }: ClaimStakingIncentivesM
           isCurrentBatchClaimed={isCurrentBatchClaimed}
           nomineesForCurrentBatch={nomineesForCurrentBatch}
           isPending={isPending}
-          isEstimating={isEstimating}
+          isPreparing={isPreparing}
           handleClaimForBatch={handleClaimForBatch}
         />
       )}
@@ -194,7 +194,7 @@ type ModalContentProps = {
   isCurrentBatchClaimed: boolean;
   nomineesForCurrentBatch: StakingContract[];
   isPending: boolean;
-  isEstimating: boolean;
+  isPreparing: boolean;
   handleClaimForBatch: () => void;
 };
 
@@ -204,7 +204,7 @@ const ModalContent = ({
   isCurrentBatchClaimed,
   nomineesForCurrentBatch,
   isPending,
-  isEstimating,
+  isPreparing,
   handleClaimForBatch,
 }: ModalContentProps) => (
   <StakingIncentivesModalContainer>
@@ -242,7 +242,7 @@ const ModalContent = ({
 
       {!isCurrentBatchClaimed && (
         <Button type="primary" size="large" loading={isPending} onClick={handleClaimForBatch}>
-          {isEstimating ? 'Preparing claim...' : 'Claim Incentives'}
+          {isPreparing ? 'Preparing claim...' : 'Claim Incentives'}
         </Button>
       )}
     </Flex>

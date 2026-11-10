@@ -44,11 +44,13 @@ const prepared = (forBatch: ClaimBatch) => ({
   request: { args: forBatch },
 });
 
-const setup = (rebuiltBatches: ClaimBatch[] = [REBUILT]) => {
+const setup = (rebuiltBatches: ClaimBatch[] = [REBUILT], cursorsChanged = true) => {
   const props = {
     onSuccess: jest.fn(),
     onError: jest.fn(),
-    refetchClaimableBatches: jest.fn().mockResolvedValue(rebuiltBatches),
+    refetchClaimableBatches: jest
+      .fn()
+      .mockResolvedValue({ batches: rebuiltBatches, cursorsChanged }),
     onBatchesRebuilt: jest.fn(),
   };
   const { result } = renderHook(() => useClaimStakingIncentivesBatch(props));
@@ -59,6 +61,7 @@ const setup = (rebuiltBatches: ClaimBatch[] = [REBUILT]) => {
 describe('useClaimStakingIncentivesBatch', () => {
   beforeEach(() => {
     jest.resetAllMocks();
+    jest.spyOn(console, 'error').mockImplementation(() => undefined);
     mockWriteContract.mockResolvedValue(HASH);
     mockWaitForTransactionReceipt.mockResolvedValue({ status: 'success' });
   });
@@ -131,6 +134,107 @@ describe('useClaimStakingIncentivesBatch', () => {
 
     expect(props.onError).toHaveBeenCalledWith({ kind: 'wallet-rejected' });
     expect(props.refetchClaimableBatches).not.toHaveBeenCalled();
+  });
+
+  it('reports a revert with unchanged cursors as is, without a rebuild or a retry', async () => {
+    mockPrepareClaim.mockRejectedValue(new RevertError('Paused()'));
+    const { props, claim } = setup([FIRST], false);
+
+    await claim();
+
+    expect(mockPrepareClaim).toHaveBeenCalledTimes(1);
+    expect(props.refetchClaimableBatches).toHaveBeenCalledTimes(1);
+    expect(props.onBatchesRebuilt).not.toHaveBeenCalled();
+    expect(props.onError).toHaveBeenCalledWith({ kind: 'other', message: 'Paused()' });
+    expect(mockWriteContract).not.toHaveBeenCalled();
+  });
+
+  it('reports the second revert as is when the cursors did not move again', async () => {
+    mockPrepareClaim
+      .mockRejectedValueOnce(new RevertError('cursor moved'))
+      .mockRejectedValueOnce(new RevertError('WrongAmount(1, 0)'));
+    const { props, claim } = setup();
+    props.refetchClaimableBatches
+      .mockResolvedValueOnce({ batches: [REBUILT], cursorsChanged: true })
+      .mockResolvedValueOnce({ batches: [REBUILT], cursorsChanged: false });
+
+    await claim();
+
+    expect(props.onBatchesRebuilt).toHaveBeenCalledTimes(1);
+    expect(props.onError).toHaveBeenCalledWith({ kind: 'other', message: 'WrongAmount(1, 0)' });
+  });
+
+  it('logs the original error before reporting it', async () => {
+    const error = new Error('rpc down');
+    mockPrepareClaim.mockRejectedValue(error);
+    const { claim } = setup();
+
+    await claim();
+
+    expect(console.error).toHaveBeenCalledWith('Failed to claim staking incentives', error);
+  });
+
+  it('waits for the receipt without a timeout', async () => {
+    mockPrepareClaim.mockResolvedValue(prepared(FIRST));
+    const { claim } = setup();
+
+    await claim();
+
+    expect(mockWaitForTransactionReceipt).toHaveBeenCalledWith(
+      expect.objectContaining({ hash: HASH, timeout: 0, onReplaced: expect.any(Function) }),
+    );
+  });
+
+  it.each([
+    ['cancelled', { kind: 'wallet-rejected' }],
+    ['replaced', { kind: 'reverted-after-simulation' }],
+  ])(
+    'does not report a claim when the transaction was %s in the wallet',
+    async (reason, expected) => {
+      mockPrepareClaim.mockResolvedValue(prepared(FIRST));
+      mockWaitForTransactionReceipt.mockImplementation(
+        async ({ onReplaced }: { onReplaced: (r: { reason: string }) => void }) => {
+          onReplaced({ reason });
+          return { status: 'success', transactionHash: '0xother' };
+        },
+      );
+      const { props, claim } = setup();
+
+      await claim();
+
+      expect(props.onSuccess).not.toHaveBeenCalled();
+      expect(props.onError).toHaveBeenCalledWith(expected);
+      expect(mockWriteContract).toHaveBeenCalledTimes(1);
+    },
+  );
+
+  it('reports a repriced transaction that succeeded as claimed', async () => {
+    mockPrepareClaim.mockResolvedValue(prepared(FIRST));
+    mockWaitForTransactionReceipt.mockImplementation(
+      async ({ onReplaced }: { onReplaced: (r: { reason: string }) => void }) => {
+        onReplaced({ reason: 'repriced' });
+        return { status: 'success', transactionHash: '0xrepriced' };
+      },
+    );
+    const { props, claim } = setup();
+
+    await claim();
+
+    expect(props.onSuccess).toHaveBeenCalledTimes(1);
+    expect(props.onError).not.toHaveBeenCalled();
+  });
+
+  it('still reports the on-chain failure when the refresh after it fails', async () => {
+    mockPrepareClaim.mockResolvedValue(prepared(FIRST));
+    mockWaitForTransactionReceipt.mockResolvedValue({ status: 'reverted', transactionHash: HASH });
+    const { props, claim } = setup();
+    props.refetchClaimableBatches.mockRejectedValue(new Error('rate limited'));
+
+    await claim();
+
+    expect(props.onError).toHaveBeenCalledTimes(1);
+    expect(props.onError).toHaveBeenCalledWith({ kind: 'reverted-after-simulation' });
+    expect(console.error).toHaveBeenCalledWith(expect.stringContaining(HASH));
   });
 
   it('refreshes after a revert that follows a successful simulation, without resending', async () => {

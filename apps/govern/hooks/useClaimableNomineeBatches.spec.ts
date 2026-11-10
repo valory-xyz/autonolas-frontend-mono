@@ -1,12 +1,20 @@
+import { renderHook } from '@testing-library/react';
 import type { Address } from 'viem';
+import { useReadContract, useReadContracts } from 'wagmi';
 
+import { useAppSelector } from 'store/index';
+import { useNomineesWeights } from 'hooks/useNomineesWeights';
+import { useEpochCounter, useEpochTokenomics } from 'components/Donate/hooks';
 import type { StakingContract } from 'types';
 
-import { buildClaimBatches } from './useClaimableNomineeBatches';
+import { buildClaimBatches, useClaimableNomineesBatches } from './useClaimableNomineeBatches';
 
 jest.mock('wagmi', () => ({ useReadContract: jest.fn(), useReadContracts: jest.fn() }));
-jest.mock('@tanstack/react-query', () => ({ useQueryClient: jest.fn() }));
+jest.mock('@tanstack/react-query', () => ({
+  useQueryClient: () => ({ removeQueries: jest.fn() }),
+}));
 jest.mock('store/index', () => ({ useAppSelector: jest.fn() }));
+jest.mock('common-util/functions/nominee-hash', () => ({ getNomineeHash: () => '0xhash' }));
 jest.mock('hooks/useNomineesWeights', () => ({ useNomineesWeights: jest.fn() }));
 jest.mock('components/Donate/hooks', () => ({
   useEpochCounter: jest.fn(),
@@ -64,5 +72,73 @@ describe('buildClaimBatches', () => {
     });
 
     expect(batches).toEqual([[[42161], [[C]]]]);
+  });
+});
+
+describe('useClaimableNomineesBatches refetchClaimableBatches', () => {
+  const nominees = [nominee(A, 100), nominee(B, 100)];
+  const cursorReads = (a: number, b: number) => [
+    { status: 'success', result: BigInt(a) },
+    { status: 'success', result: BigInt(b) },
+  ];
+  const mockRefetch = jest.fn();
+
+  const renderBatches = ({ epoch = 10 }: { epoch?: number | null } = {}) => {
+    jest.mocked(useAppSelector).mockImplementation((selector) =>
+      selector({ govern: { stakingContracts: nominees } } as never),
+    );
+    jest.mocked(useEpochCounter).mockReturnValue({ data: epoch, isLoading: false } as never);
+    jest.mocked(useEpochTokenomics).mockReturnValue({ data: { endTime: 1 } } as never);
+    jest.mocked(useReadContract).mockReturnValue({ data: 100, isLoading: false } as never);
+    jest.mocked(useReadContracts).mockReturnValue({
+      data: cursorReads(9, 9),
+      isLoading: false,
+      queryKey: ['cursors'],
+      refetch: mockRefetch,
+    } as never);
+    jest.mocked(useNomineesWeights).mockReturnValue({
+      data: { [A]: { percentage: 5 }, [B]: { percentage: 5 } },
+    } as never);
+    return renderHook(() => useClaimableNomineesBatches()).result;
+  };
+
+  beforeEach(() => jest.clearAllMocks());
+
+  it('rebuilds the batches from fresh cursors and reports that one moved', async () => {
+    const result = renderBatches();
+    expect(result.current.nomineesToClaimBatches).toEqual([[[100], [[A, B]]]]);
+    mockRefetch.mockResolvedValue({ data: cursorReads(10, 9) });
+
+    const refresh = await result.current.refetchClaimableBatches();
+
+    expect(mockRefetch).toHaveBeenCalledWith({ throwOnError: true });
+    expect(refresh).toEqual({ batches: [[[100], [[B]]]], cursorsChanged: true });
+  });
+
+  it('reports unchanged cursors when nobody claimed meanwhile', async () => {
+    const result = renderBatches();
+    mockRefetch.mockResolvedValue({ data: cursorReads(9, 9) });
+
+    const refresh = await result.current.refetchClaimableBatches();
+
+    expect(refresh).toEqual({ batches: [[[100], [[A, B]]]], cursorsChanged: false });
+  });
+
+  it('throws on a failed cursor read instead of treating the nominee as claimed', async () => {
+    const result = renderBatches();
+    mockRefetch.mockResolvedValue({
+      data: [{ status: 'success', result: BigInt(9) }, { status: 'failure', error: new Error() }],
+    });
+
+    await expect(result.current.refetchClaimableBatches()).rejects.toThrow(
+      `Could not read the claim cursor of staking contract ${B}`,
+    );
+  });
+
+  it('throws while the claim data is still loading instead of returning no batches', async () => {
+    const result = renderBatches({ epoch: null });
+
+    await expect(result.current.refetchClaimableBatches()).rejects.toThrow('still loading');
+    expect(mockRefetch).not.toHaveBeenCalled();
   });
 });
