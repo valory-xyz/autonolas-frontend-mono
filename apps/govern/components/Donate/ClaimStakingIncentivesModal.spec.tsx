@@ -75,36 +75,35 @@ describe('<ClaimStakingIncentivesModal />', () => {
     expect(screen.getByText('Batch Claimed')).toBeInTheDocument();
   });
 
-  it.each<[ClaimError, jest.Mock, string]>([
-    [{ kind: 'wallet-rejected' }, notifyWarning as jest.Mock, 'Claim cancelled in your wallet'],
+  it.each<[ClaimError, jest.Mock, string[]]>([
+    [{ kind: 'wallet-rejected' }, notifyWarning as jest.Mock, ['Claim cancelled in your wallet']],
     [
       { kind: 'nothing-to-claim' },
       notifyWarning as jest.Mock,
-      'Someone else claimed these incentives. Nothing is left to claim.',
+      ['Someone else claimed these incentives. Nothing is left to claim.'],
     ],
     [
       { kind: 'claims-changed' },
       notifyWarning as jest.Mock,
-      'Claims changed while preparing the transaction',
+      ['Claims changed while preparing the transaction'],
     ],
     [
       { kind: 'reverted-after-simulation' },
       notifyError as jest.Mock,
-      'The claim for batch 2 failed on-chain',
+      ['The claim for batch 2 failed on-chain'],
     ],
     [
       { kind: 'other', message: 'Paused()' },
       notifyError as jest.Mock,
-      'Failed to claim staking incentives for batch 2',
+      ['Failed to claim staking incentives for batch 2', 'Paused()'],
     ],
-  ])('shows the %o error with its own message', (error, notifier, title) => {
+  ])('shows the %o error with its own message', (error, notifier, expectedArgs) => {
     const { latestProps, claimBatch } = renderModal();
     claimBatch();
 
     act(() => latestProps().onError(error));
 
     expect(notifier).toHaveBeenCalledTimes(1);
-    expect(notifier.mock.calls[0][0]).toBe(title);
-    if (error.kind === 'other') expect(notifier.mock.calls[0][1]).toBe('Paused()');
+    expect(notifier.mock.calls[0].slice(0, expectedArgs.length)).toEqual(expectedArgs);
   });
 });

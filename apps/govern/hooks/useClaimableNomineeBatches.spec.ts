@@ -84,9 +84,11 @@ describe('useClaimableNomineesBatches refetchClaimableBatches', () => {
   const mockRefetch = jest.fn();
 
   const renderBatches = ({ epoch = 10 }: { epoch?: number | null } = {}) => {
-    jest.mocked(useAppSelector).mockImplementation((selector) =>
-      selector({ govern: { stakingContracts: nominees } } as never),
-    );
+    jest
+      .mocked(useAppSelector)
+      .mockImplementation((selector) =>
+        selector({ govern: { stakingContracts: nominees } } as never),
+      );
     jest.mocked(useEpochCounter).mockReturnValue({ data: epoch, isLoading: false } as never);
     jest.mocked(useEpochTokenomics).mockReturnValue({ data: { endTime: 1 } } as never);
     jest.mocked(useReadContract).mockReturnValue({ data: 100, isLoading: false } as never);
@@ -127,7 +129,10 @@ describe('useClaimableNomineesBatches refetchClaimableBatches', () => {
   it('throws on a failed cursor read instead of treating the nominee as claimed', async () => {
     const result = renderBatches();
     mockRefetch.mockResolvedValue({
-      data: [{ status: 'success', result: BigInt(9) }, { status: 'failure', error: new Error() }],
+      data: [
+        { status: 'success', result: BigInt(9) },
+        { status: 'failure', error: new Error() },
+      ],
     });
 
     await expect(result.current.refetchClaimableBatches()).rejects.toThrow(

@@ -100,10 +100,11 @@ describe('common-utils/addresses', () => {
   );
 
   it('offers every GnosisSafeMultisig the pinned registries configuration lists', () => {
-    const wrappers = (pinnedRegistriesConfig as unknown as Chain[]).flatMap(({ chainId, contracts }) =>
-      contracts
-        .filter(({ name }) => name === 'GnosisSafeMultisig')
-        .map(({ address }) => ({ chainId, address })),
+    const wrappers = (pinnedRegistriesConfig as unknown as Chain[]).flatMap(
+      ({ chainId, contracts }) =>
+        contracts
+          .filter(({ name }) => name === 'GnosisSafeMultisig')
+          .map(({ address }) => ({ chainId, address })),
     );
 
     expect(wrappers.length).toBeGreaterThan(0);

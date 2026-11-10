@@ -64,7 +64,9 @@ const selectWrapper = async (address) => {
 describe('FinishedRegistration multisig picker', () => {
   beforeEach(() => {
     // Not resetAllMocks: that would also reset jest.setup's window.matchMedia mock, which antd needs.
-    [getEnabledMultisigs, onStep3Deploy, notifyError, useHelpers].forEach((mock) => mock.mockReset());
+    [getEnabledMultisigs, onStep3Deploy, notifyError, useHelpers].forEach((mock) =>
+      mock.mockReset(),
+    );
     jest.spyOn(console, 'warn').mockImplementation(() => undefined);
     jest.spyOn(console, 'error').mockImplementation(() => undefined);
   });
@@ -124,9 +126,7 @@ describe('FinishedRegistration multisig picker', () => {
     const checksBeforeSubmit = getEnabledMultisigs.mock.calls.length;
 
     fireEvent.click(submit);
-    await waitFor(() =>
-      expect(getEnabledMultisigs).toHaveBeenCalledTimes(checksBeforeSubmit + 1),
-    );
+    await waitFor(() => expect(getEnabledMultisigs).toHaveBeenCalledTimes(checksBeforeSubmit + 1));
     fireEvent.click(submit);
     await act(async () => check.resolve([A]));
 

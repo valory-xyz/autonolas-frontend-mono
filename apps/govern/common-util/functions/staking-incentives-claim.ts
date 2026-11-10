@@ -79,7 +79,9 @@ const readChainStates = async (chainIds: number[]): Promise<ChainState[]> => {
   // reading the zero address, which returns no data.
   processors.forEach((processor, i) => {
     if (processor === zeroAddress) {
-      throw new Error(`No deposit processor is registered on the Dispenser for chain ${chainIds[i]}`);
+      throw new Error(
+        `No deposit processor is registered on the Dispenser for chain ${chainIds[i]}`,
+      );
     }
   });
 
