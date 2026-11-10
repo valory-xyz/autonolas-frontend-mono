@@ -99,15 +99,15 @@ export const ADDRESSES = {
 
 export type ChainIds = keyof typeof ADDRESSES;
 
-type MultisigAddress = {
+export type MultisigCandidates = {
   [chainId in ChainIds]: Address[];
 };
-// TODO: add testcases for all networks
 /**
- * check addresses here - GnosisSafeMultisig
+ * Safe creation wrappers (GnosisSafeMultisig) per chain. While a chain moves to a new wrapper it
+ * lists both, and only those enabled in `ServiceRegistry.mapMultisigs` are offered.
  * Addresses: https://github.com/valory-xyz/autonolas-registries/blob/main/docs/configuration.json
  */
-export const multisigAddresses: MultisigAddress = {
+export const multisigCandidates: MultisigCandidates = {
   [mainnet.id]: ['0x46C0D07F55d4F9B5Eed2Fc9680B5953e5fd7b461'],
   [optimism.id]: ['0x5953f21495BD9aF1D78e87bb42AcCAA55C1e896C'],
   [gnosis.id]: ['0x3C1fF68f5aa342D296d4DEe4Bb1cACCA912D95fE'],

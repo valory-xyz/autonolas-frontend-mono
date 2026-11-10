@@ -1,10 +1,10 @@
 import { Button, Divider, Form, Input, Radio } from 'antd';
 import { ethers } from 'ethers';
 import PropTypes from 'prop-types';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import { notifyError, notifySuccess } from 'libs/util-functions/src';
-import { FALLBACK_HANDLER, multisigAddresses } from 'common-util/Contracts/addresses';
+import { FALLBACK_HANDLER } from 'common-util/Contracts/addresses';
 import { RegistryForm } from 'common-util/TransactionHelpers/RegistryForm';
 import { SendTransactionButton } from 'common-util/TransactionHelpers/SendTransactionButton';
 import { isValidSolanaPublicKey } from 'common-util/functions';
@@ -13,6 +13,7 @@ import { SVM_EMPTY_ADDRESS } from 'util/constants';
 
 import { RadioLabel } from '../styles';
 import { useFinishRegistration } from '../useSvmServiceStateManagement';
+import { getEnabledMultisigs } from '../../utils';
 import { onStep3Deploy } from '../utils';
 
 const STEP = 3;
@@ -129,8 +130,29 @@ export const FinishedRegistration = ({
 
   const [form] = Form.useForm();
   const [radioValue, setRadioValue] = useState(null);
+  const [enabledMultisigs, setEnabledMultisigs] = useState([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isTerminating, setIsTerminating] = useState(false);
+
+  // Offer only the wrappers this chain still enables; a chain change clears the selection.
+  useEffect(() => {
+    setRadioValue(null);
+    setEnabledMultisigs([]);
+    if (isSvm || !chainId) return undefined;
+
+    let isCurrent = true;
+    getEnabledMultisigs(chainId)
+      .then((enabled) => {
+        if (isCurrent) setEnabledMultisigs(enabled);
+      })
+      .catch((error) => {
+        console.error(error);
+        if (isCurrent) notifyError('Could not check which multisig options are enabled');
+      });
+    return () => {
+      isCurrent = false;
+    };
+  }, [chainId, isSvm]);
 
   const handleStep3Deploy = async (radioValuePassed, payload) => {
     try {
@@ -146,7 +168,23 @@ export const FinishedRegistration = ({
     }
   };
 
-  const onFinish = (values) => {
+  const onFinish = async (values) => {
+    // The wrapper may have been disabled since the options were loaded.
+    let enabled;
+    try {
+      enabled = await getEnabledMultisigs(chainId);
+    } catch (error) {
+      console.error(error);
+      notifyError('Could not check that the selected multisig option is still enabled');
+      return;
+    }
+    setEnabledMultisigs(enabled);
+    if (!enabled.includes(radioValue)) {
+      setRadioValue(null);
+      notifyError('The selected multisig option is no longer enabled. Please choose another.');
+      return;
+    }
+
     const payload = ethers.solidityPacked(
       ['address', 'address', 'address', 'address', 'uint256', 'uint256', 'bytes'],
       [
@@ -167,8 +205,7 @@ export const FinishedRegistration = ({
     console.log('Failed:', errorInfo); /* eslint-disable-line no-console */
   };
 
-  const options = multisigAddresses[chainId] || [];
-  const isMultiSig = options[0];
+  const options = enabledMultisigs;
   const btnProps = getOtherBtnProps(STEP);
 
   const terminateBtn = (
@@ -233,7 +270,7 @@ export const FinishedRegistration = ({
       ) : null}
 
       {/* form is shown only once the multisig option is selected */}
-      {radioValue === isMultiSig && (
+      {radioValue && options.includes(radioValue) && (
         <RegistryForm
           form={form}
           layout="vertical"
