@@ -13,12 +13,14 @@ Guidance for working on the **Pearl API** app in this repo.
 ## Stack
 
 - **Wallet / Auth**: **Web3Auth** (modal, login, swap-owner-session). Not WalletConnect for general dapp use; used for embedded auth/session.
-- **API routes**: Next.js `pages/api/` – Zendesk (create-ticket, upload-file), achievement (get-image, generate-image, get-data), geo (agent-eligibility), feedback (onboarding-survey, funding-request, replay-pending).
+- **API routes**: Next.js `pages/api/` – Zendesk (create-ticket, upload-file), achievement (get-image, generate-image, get-data), geo (agent-eligibility), feedback (onboarding-survey, funding-request, replay-pending), web3auth (status).
 - **Key libs**: No shared Nx libs in project config; uses Next.js, Web3Auth, styled-components, and app-local `context/`, `hooks/`, `utils/`, `constants/`, `types/`.
 
 ## Env / backends
 
 - **Web3Auth**: `NEXT_PUBLIC_WEB3AUTH_CLIENT_ID`
+- **Web3Auth on/off**: `WEB3AUTH_ENABLED`, server-only. Only exactly `true` enables Google/Apple
+  backup-wallet setup and recovery. `GET /api/web3auth/status` returns `{ enabled }` for Pearl.
 - **CORS**: no env var. `utils/cors.ts` hardcodes an allowlist of `http://localhost:*` and
   `http://127.0.0.1:*` origins, which is what lets Pearl's Electron renderer call these routes.
 - **Zendesk**: `ZENDESK_SUBDOMAIN`, `ZENDESK_API_TOKEN`, `ZENDESK_API_EMAIL` (see root `.env.example`)
@@ -35,7 +37,7 @@ Guidance for working on the **Pearl API** app in this repo.
 
 ## Structure
 
-- `pages/api/` – Zendesk, achievement, geo and feedback API handlers.
+- `pages/api/` – Zendesk, achievement, geo, feedback and web3auth API handlers.
 - `pages/web3auth/` – Web3Auth login and swap-owner-session pages.
 - `context/`, `hooks/`, `components/`, `utils/`, `constants/`, `types/` – App-local code.
 

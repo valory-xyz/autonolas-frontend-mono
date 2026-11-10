@@ -1,5 +1,6 @@
 import { CheckCircleOutlined, CloseCircleOutlined } from '@ant-design/icons';
-import { Alert, Card, Flex, Space, Spin, Typography } from 'antd';
+import { Alert, Button, Card, Flex, Space, Spin, Typography } from 'antd';
+import { useEffect } from 'react';
 
 import { EvmChainDetails, EvmChainId } from '../utils';
 
@@ -83,6 +84,30 @@ export const SwapOwnerFailed = ({ error, txHash, chainId }: SwapOwnerFailedProps
       type="error"
       icon={<CloseCircleOutlined />}
       showIcon
+    />
+  );
+};
+
+type Web3AuthDisabledProps = {
+  events: { initialized: string; closed: string };
+  message: string;
+};
+
+/** Shown instead of a Web3Auth page while `WEB3AUTH_ENABLED` is off. Never initialises the SDK. */
+export const Web3AuthDisabled = ({ events, message }: Web3AuthDisabledProps) => {
+  useEffect(() => {
+    window.parent.postMessage({ event_id: events.initialized }, '*');
+  }, [events.initialized]);
+
+  const close = () => window.parent.postMessage({ event_id: events.closed }, '*');
+
+  return (
+    <Alert
+      message={<Text>{message}</Text>}
+      type="warning"
+      showIcon
+      action={<Button onClick={close}>Close</Button>}
+      style={{ margin: 16 }}
     />
   );
 };

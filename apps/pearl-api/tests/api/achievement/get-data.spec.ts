@@ -4,6 +4,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 
 import handler from '../../../pages/api/achievement/get-data';
+import { createRes } from '../helpers';
 
 const mockGetAchievementData = jest.fn();
 jest.mock('../../../utils/achievementData', () => ({
@@ -22,30 +23,6 @@ const DATA = {
   amountWonFormatted: '$2.40',
   multiplier: '2.40',
   marketImageUrl: null,
-};
-
-const createRes = () => {
-  const res = {
-    statusCode: 0,
-    body: undefined as unknown,
-    headers: {} as Record<string, string>,
-    status(code: number) {
-      res.statusCode = code;
-      return res;
-    },
-    json(body: unknown) {
-      res.body = body;
-      return res;
-    },
-    end() {
-      return res;
-    },
-    setHeader(name: string, value: string) {
-      res.headers[name] = value;
-      return res;
-    },
-  };
-  return res;
 };
 
 const call = async (query: Record<string, string>, method = 'GET') => {
