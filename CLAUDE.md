@@ -240,7 +240,7 @@ Key things to know:
   - `yarn audit:install-hooks` ([scripts/audit-install-hooks.mjs](scripts/audit-install-hooks.mjs)) — diffs the set of packages with `pre/post/install` scripts against [.supply-chain/install-hooks.allowlist](.supply-chain/install-hooks.allowlist). A new install hook in the tree fails CI.
 - **After any dependency change**, run `yarn install` then `yarn audit:install-hooks:update` and commit the regenerated allowlist alongside the `package.json` / `yarn.lock` diff.
 - **Adding a new env var**: anything not prefixed `NEXT_PUBLIC_` is server-only and won't ship to the browser. Anything prefixed `NEXT_PUBLIC_` is inlined into the client bundle — treat it as public configuration. RPC URLs with embedded API keys must NOT be `NEXT_PUBLIC_*` unless the endpoint is genuinely unkeyed.
-- **GitHub Actions**: SHA-pin every action you add. The pattern in [.github/workflows/snyk-security.yml](.github/workflows/snyk-security.yml) and [.github/workflows/supply-chain.yml](.github/workflows/supply-chain.yml) is the example to follow.
+- **GitHub Actions**: SHA-pin every action you add. The pattern in [.github/workflows/supply-chain.yml](.github/workflows/supply-chain.yml) is the example to follow.
 - **Vulnerability reporting**: see [SECURITY.md](SECURITY.md).
 
 ## Contributing
