@@ -1,23 +1,37 @@
 import { useEffect, useRef, useState } from 'react';
-import type { Address } from 'viem';
+import { getPublicClient, writeContract } from '@wagmi/core';
 import { mainnet } from 'viem/chains';
-import { useWriteContract } from 'wagmi';
+import { useAccount } from 'wagmi';
 
-import { DISPENSER } from 'libs/util-contracts/src/lib/abiAndAddresses';
+import { estimateGasWithBuffer } from 'libs/util-functions/src/lib/estimateGasWithBuffer';
 
-import { getArbitrumBridgePayload, isOrbitChainId } from 'common-util/functions/arbitrum-bridge';
+import { wagmiConfig } from 'common-util/config/wagmi';
+import {
+  type ClaimBatch,
+  type ClaimError,
+  isContractRevert,
+  prepareClaim,
+  toClaimError,
+} from 'common-util/functions/staking-incentives-claim';
 
 type ClaimStakingIncentivesBatchProps = {
   onSuccess: () => void;
-  onError: (error: Error) => void;
+  onError: (error: ClaimError) => void;
+  /** Re-reads the claim cursors and resolves to the rebuilt batches. */
+  refetchClaimableBatches: () => Promise<ClaimBatch[]>;
+  /** The batches were rebuilt, so the caller restarts from the first one. */
+  onBatchesRebuilt: () => void;
 };
 
 export const useClaimStakingIncentivesBatch = ({
   onSuccess,
   onError,
+  refetchClaimableBatches,
+  onBatchesRebuilt,
 }: ClaimStakingIncentivesBatchProps) => {
-  const { writeContract, isPending: isWritePending } = useWriteContract();
-  const [isEstimating, setIsEstimating] = useState(false);
+  const { address: account } = useAccount();
+  const [isPreparing, setIsPreparing] = useState(false);
+  const [isSending, setIsSending] = useState(false);
   const mountedRef = useRef(true);
 
   useEffect(() => {
@@ -26,62 +40,80 @@ export const useClaimStakingIncentivesBatch = ({
     };
   }, []);
 
-  const claimIncentivesForBatch = async (batch: [number[], Address[][]]) => {
-    const [chainIds, stakingTargets] = batch;
-
-    const bridgePayloads: `0x${string}`[] = chainIds.map(() => '0x');
-    const valueAmounts: bigint[] = chainIds.map(() => BigInt(0));
-
-    // Orbit chains (Arbitrum One, Robinhood Chain) bridge through retryable tickets and need
-    // a gas-priced payload plus ETH; every other chain claims with `0x` and zero value.
-    const orbitClaims = chainIds.flatMap((chainId, index) =>
-      isOrbitChainId(chainId) ? [{ chainId, index }] : [],
-    );
-
-    if (orbitClaims.length > 0) {
-      if (mountedRef.current) setIsEstimating(true);
-      try {
-        // Each estimate is several RPC round-trips, so run the chains concurrently.
-        const estimates = await Promise.all(
-          orbitClaims.map(({ chainId, index }) =>
-            getArbitrumBridgePayload(stakingTargets[index], chainId).then((result) => ({
-              ...result,
-              index,
-            })),
-          ),
-        );
-        for (const { index, bridgePayload, value } of estimates) {
-          bridgePayloads[index] = bridgePayload;
-          valueAmounts[index] = value;
-        }
-      } catch (error) {
-        onError(error instanceof Error ? error : new Error('Failed to estimate bridge gas'));
-        return;
-      } finally {
-        if (mountedRef.current) setIsEstimating(false);
-      }
-    }
-
-    const totalValue = valueAmounts.reduce((sum, v) => sum + v, BigInt(0));
-
-    return writeContract(
-      {
-        address: DISPENSER.addresses[mainnet.id],
-        abi: DISPENSER.abi,
-        chainId: mainnet.id,
-        functionName: 'claimStakingIncentivesBatch',
-        args: [
-          BigInt(1), // numClaimedEpochs
-          chainIds.map((id) => BigInt(id)),
-          stakingTargets,
-          bridgePayloads,
-          valueAmounts,
-        ],
-        value: totalValue,
-      },
-      { onSuccess, onError },
-    );
+  const rebuildBatches = async () => {
+    const batches = await refetchClaimableBatches();
+    onBatchesRebuilt();
+    return batches;
   };
 
-  return { claimIncentivesForBatch, isPending: isWritePending || isEstimating, isEstimating };
+  /**
+   * Quotes and simulates the batch. A revert usually means someone else claimed meanwhile, so the
+   * batches are rebuilt from fresh cursors and the first one is tried once more.
+   */
+  const prepareWithOneRebuild = async (batch: ClaimBatch, from: NonNullable<typeof account>) => {
+    try {
+      return await prepareClaim(batch, from);
+    } catch (error) {
+      if (!isContractRevert(error)) throw error;
+    }
+
+    const [rebuiltBatch] = await rebuildBatches();
+    if (!rebuiltBatch) return { kind: 'nothing-to-claim' } as const;
+
+    try {
+      return await prepareClaim(rebuiltBatch, from);
+    } catch (error) {
+      if (!isContractRevert(error)) throw error;
+      await rebuildBatches();
+      return { kind: 'claims-changed' } as const;
+    }
+  };
+
+  const claimIncentivesForBatch = async (batch: ClaimBatch) => {
+    if (!account) {
+      onError({ kind: 'other', message: 'Connect a wallet to claim' });
+      return;
+    }
+
+    try {
+      if (mountedRef.current) setIsPreparing(true);
+      const prepared = await prepareWithOneRebuild(batch, account).finally(() => {
+        if (mountedRef.current) setIsPreparing(false);
+      });
+      if ('kind' in prepared) {
+        onError(prepared);
+        return;
+      }
+
+      // viem's receipt action, not wagmi's: wagmi throws on a reverted receipt instead of returning it.
+      const publicClient = getPublicClient(wagmiConfig, { chainId: mainnet.id });
+      if (!publicClient) throw new Error('No Ethereum mainnet client is configured');
+
+      if (mountedRef.current) setIsSending(true);
+      const gas = await estimateGasWithBuffer(wagmiConfig, prepared.params);
+      const hash = await writeContract(wagmiConfig, { ...prepared.request, gas });
+      const receipt = await publicClient.waitForTransactionReceipt({ hash });
+
+      if (receipt.status === 'reverted') {
+        // Never resend this transaction: rebuild, and let the user confirm a fresh one.
+        await rebuildBatches();
+        onError({ kind: 'reverted-after-simulation' });
+        return;
+      }
+      onSuccess();
+    } catch (error) {
+      onError(toClaimError(error));
+    } finally {
+      if (mountedRef.current) {
+        setIsPreparing(false);
+        setIsSending(false);
+      }
+    }
+  };
+
+  return {
+    claimIncentivesForBatch,
+    isPending: isPreparing || isSending,
+    isEstimating: isPreparing,
+  };
 };

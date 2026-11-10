@@ -151,7 +151,7 @@ describe('getArbitrumBridgePayload', () => {
     expect(result.bridgePayload).toBe(expectedPayload);
   });
 
-  it('should calculate the correct total cost', async () => {
+  it('should return the token and message costs separately', async () => {
     const result = await getArbitrumBridgePayload(stakingTargets, ARBITRUM_CHAIN_ID);
 
     const gasLimitMessage = mockGasLimit.add(100_000);
@@ -166,9 +166,20 @@ describe('getArbitrumBridgePayload', () => {
     const tokenCost = bufferedTokenSubmissionCost.add(mockGasPriceBid.mul(TOKEN_GAS_LIMIT));
     // messageCost = maxSubmissionCost + gasLimitMessage * gasPriceBid
     const messageCost = mockMaxSubmissionCost.add(gasLimitMessage.mul(mockGasPriceBid));
-    const expectedTotalCost = tokenCost.add(messageCost);
 
-    expect(result.value).toBe(BigInt(expectedTotalCost.toString()));
+    expect(result.tokenCost).toBe(BigInt(tokenCost.toString()));
+    expect(result.messageCost).toBe(BigInt(messageCost.toString()));
+  });
+
+  it('should size the message calldata to the targets that send', async () => {
+    await getArbitrumBridgePayload(stakingTargets, ARBITRUM_CHAIN_ID);
+    await getArbitrumBridgePayload([stakingTargets[0]], ARBITRUM_CHAIN_ID);
+
+    const [twoTargets, oneTarget] = mockEstimateAll.mock.calls.map(
+      ([{ data }]: [{ data: string }]) => data.length,
+    );
+    // Each target adds one address word and one amount word (2 x 32 bytes = 128 hex chars)
+    expect(twoTargets - oneTarget).toBe(128);
   });
 
   it('should read deposit processor address from dispenser contract', async () => {

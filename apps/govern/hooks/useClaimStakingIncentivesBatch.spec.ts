@@ -1,185 +1,148 @@
-import { renderHook, act } from '@testing-library/react';
+import { act, renderHook } from '@testing-library/react';
 import type { Address } from 'viem';
 
-import { useClaimStakingIncentivesBatch } from './useClaimStakingIncentivesBatch';
-import { ARBITRUM_CHAIN_ID, ROBINHOOD_CHAIN_ID } from 'common-util/functions/arbitrum-bridge';
+import type { ClaimBatch } from 'common-util/functions/staking-incentives-claim';
 
-// Mock wagmi hooks
-const mockWriteContract = jest.fn();
+import { useClaimStakingIncentivesBatch } from './useClaimStakingIncentivesBatch';
+
+const ACCOUNT: Address = '0x00000000000000000000000000000000000000aa';
+const HASH = '0xhash';
 
 jest.mock('wagmi', () => ({
-  useWriteContract: () => ({
-    writeContract: mockWriteContract,
-    isPending: false,
+  useAccount: () => ({ address: ACCOUNT }),
+}));
+
+const mockWriteContract = jest.fn();
+const mockWaitForTransactionReceipt = jest.fn();
+jest.mock('@wagmi/core', () => ({
+  writeContract: (...args: unknown[]) => mockWriteContract(...args),
+  getPublicClient: () => ({
+    waitForTransactionReceipt: (...args: unknown[]) => mockWaitForTransactionReceipt(...args),
   }),
 }));
-
-// Mock the dispenser contract
-jest.mock('libs/util-contracts/src/lib/abiAndAddresses', () => ({
-  DISPENSER: {
-    addresses: { 1: '0x5650300fCBab43A0D7D02F8Cb5d0f039402593f0' },
-    abi: [],
-  },
+jest.mock('common-util/config/wagmi', () => ({ wagmiConfig: {} }));
+jest.mock('libs/util-functions/src/lib/estimateGasWithBuffer', () => ({
+  estimateGasWithBuffer: () => Promise.resolve(BigInt(100)),
 }));
 
-// Mock the Arbitrum bridge payload
-const mockGetArbitrumBridgePayload = jest.fn();
-jest.mock('common-util/functions/arbitrum-bridge', () => ({
-  ARBITRUM_CHAIN_ID: 42161,
-  ROBINHOOD_CHAIN_ID: 4663,
-  isOrbitChainId: (chainId: number) => chainId === 42161 || chainId === 4663,
-  getArbitrumBridgePayload: (...args: unknown[]) => mockGetArbitrumBridgePayload(...args),
+class RevertError extends Error {}
+const mockPrepareClaim = jest.fn();
+jest.mock('common-util/functions/staking-incentives-claim', () => ({
+  prepareClaim: (...args: unknown[]) => mockPrepareClaim(...args),
+  isContractRevert: (error: unknown) => error instanceof RevertError,
+  toClaimError: (error: Error) =>
+    error.message === 'rejected'
+      ? { kind: 'wallet-rejected' }
+      : { kind: 'other', message: error.message },
 }));
+
+const batch = (target: Address): ClaimBatch => [[100], [[target]]];
+const FIRST = batch('0x0000000000000000000000000000000000000001');
+const REBUILT = batch('0x0000000000000000000000000000000000000002');
+const prepared = (forBatch: ClaimBatch) => ({
+  params: { args: forBatch },
+  request: { args: forBatch },
+});
+
+const setup = (rebuiltBatches: ClaimBatch[] = [REBUILT]) => {
+  const props = {
+    onSuccess: jest.fn(),
+    onError: jest.fn(),
+    refetchClaimableBatches: jest.fn().mockResolvedValue(rebuiltBatches),
+    onBatchesRebuilt: jest.fn(),
+  };
+  const { result } = renderHook(() => useClaimStakingIncentivesBatch(props));
+  const claim = () => act(() => result.current.claimIncentivesForBatch(FIRST));
+  return { props, claim };
+};
 
 describe('useClaimStakingIncentivesBatch', () => {
-  const onSuccess = jest.fn();
-  const onError = jest.fn();
-
   beforeEach(() => {
-    jest.clearAllMocks();
+    jest.resetAllMocks();
+    mockWriteContract.mockResolvedValue(HASH);
+    mockWaitForTransactionReceipt.mockResolvedValue({ status: 'success' });
   });
 
-  it('should use empty payloads and zero values for non-Arbitrum chains', async () => {
-    const { result } = renderHook(() => useClaimStakingIncentivesBatch({ onSuccess, onError }));
+  it('sends the simulated request once and reports success', async () => {
+    mockPrepareClaim.mockResolvedValue(prepared(FIRST));
+    const { props, claim } = setup();
 
-    const batch: [number[], Address[][]] = [
-      [100, 137],
-      [
-        ['0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'],
-        ['0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'],
-      ],
-    ];
+    await claim();
 
-    await act(async () => {
-      await result.current.claimIncentivesForBatch(batch);
-    });
-
-    expect(mockGetArbitrumBridgePayload).not.toHaveBeenCalled();
-    expect(mockWriteContract).toHaveBeenCalledTimes(1);
-
-    const callArgs = mockWriteContract.mock.calls[0][0];
-    expect(callArgs.args[3]).toEqual(['0x', '0x']); // bridgePayloads
-    expect(callArgs.args[4]).toEqual([BigInt(0), BigInt(0)]); // valueAmounts
-    expect(callArgs.value).toBe(BigInt(0)); // total value
+    expect(mockPrepareClaim).toHaveBeenCalledWith(FIRST, ACCOUNT);
+    expect(mockWriteContract).toHaveBeenCalledWith({}, { args: FIRST, gas: BigInt(100) });
+    expect(props.onSuccess).toHaveBeenCalledTimes(1);
+    expect(props.refetchClaimableBatches).not.toHaveBeenCalled();
   });
 
-  it('should compute Arbitrum bridge payload when batch includes Arbitrum', async () => {
-    const mockPayload = '0x' + 'ab'.repeat(160);
-    const mockValue = BigInt('500000000000000');
+  it('rebuilds from fresh cursors after a concurrent claim and sends the rebuilt batch', async () => {
+    mockPrepareClaim
+      .mockRejectedValueOnce(new RevertError('cursor moved'))
+      .mockResolvedValueOnce(prepared(REBUILT));
+    const { props, claim } = setup();
 
-    mockGetArbitrumBridgePayload.mockResolvedValue({
-      bridgePayload: mockPayload,
-      value: mockValue,
-    });
+    await claim();
 
-    const { result } = renderHook(() => useClaimStakingIncentivesBatch({ onSuccess, onError }));
-
-    const arbTargets: Address[] = ['0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'];
-    const otherTargets: Address[] = ['0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'];
-
-    const batch: [number[], Address[][]] = [
-      [100, ARBITRUM_CHAIN_ID],
-      [otherTargets, arbTargets],
-    ];
-
-    await act(async () => {
-      await result.current.claimIncentivesForBatch(batch);
-    });
-
-    expect(mockGetArbitrumBridgePayload).toHaveBeenCalledWith(arbTargets, ARBITRUM_CHAIN_ID);
-    expect(mockWriteContract).toHaveBeenCalledTimes(1);
-
-    const callArgs = mockWriteContract.mock.calls[0][0];
-    expect(callArgs.args[3]).toEqual(['0x', mockPayload]); // bridgePayloads
-    expect(callArgs.args[4]).toEqual([BigInt(0), mockValue]); // valueAmounts
-    expect(callArgs.value).toBe(mockValue); // total value = sum
+    expect(props.refetchClaimableBatches).toHaveBeenCalledTimes(1);
+    expect(props.onBatchesRebuilt).toHaveBeenCalledTimes(1);
+    expect(mockPrepareClaim).toHaveBeenLastCalledWith(REBUILT, ACCOUNT);
+    expect(mockWriteContract).toHaveBeenCalledWith({}, { args: REBUILT, gas: BigInt(100) });
+    expect(props.onSuccess).toHaveBeenCalledTimes(1);
   });
 
-  it('should call onError when Arbitrum gas estimation fails', async () => {
-    mockGetArbitrumBridgePayload.mockRejectedValue(new Error('Estimation failed'));
+  it('reports nothing to claim when the rebuild leaves no batch', async () => {
+    mockPrepareClaim.mockRejectedValueOnce(new RevertError('cursor moved'));
+    const { props, claim } = setup([]);
 
-    const { result } = renderHook(() => useClaimStakingIncentivesBatch({ onSuccess, onError }));
+    await claim();
 
-    const batch: [number[], Address[][]] = [
-      [ARBITRUM_CHAIN_ID],
-      [['0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa']],
-    ];
-
-    await act(async () => {
-      await result.current.claimIncentivesForBatch(batch);
-    });
-
-    expect(onError).toHaveBeenCalledWith(expect.objectContaining({ message: 'Estimation failed' }));
+    expect(props.onError).toHaveBeenCalledWith({ kind: 'nothing-to-claim' });
     expect(mockWriteContract).not.toHaveBeenCalled();
   });
 
-  it('should handle mixed chains with correct value sum', async () => {
-    const mockPayload = '0x' + 'cd'.repeat(160);
-    const mockValue = BigInt('1000000000000000');
+  it('rebuilds only once, then refreshes and reports that claims changed', async () => {
+    mockPrepareClaim.mockRejectedValue(new RevertError('cursor moved'));
+    const { props, claim } = setup();
 
-    mockGetArbitrumBridgePayload.mockResolvedValue({
-      bridgePayload: mockPayload,
-      value: mockValue,
-    });
+    await claim();
 
-    const { result } = renderHook(() => useClaimStakingIncentivesBatch({ onSuccess, onError }));
-
-    const batch: [number[], Address[][]] = [
-      [10, ARBITRUM_CHAIN_ID, 137],
-      [
-        ['0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'],
-        ['0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'],
-        ['0xcccccccccccccccccccccccccccccccccccccccc'],
-      ],
-    ];
-
-    await act(async () => {
-      await result.current.claimIncentivesForBatch(batch);
-    });
-
-    const callArgs = mockWriteContract.mock.calls[0][0];
-    // Chain order: Optimism (0x), Arbitrum (payload), Polygon (0x)
-    expect(callArgs.args[3]).toEqual(['0x', mockPayload, '0x']);
-    expect(callArgs.args[4]).toEqual([BigInt(0), mockValue, BigInt(0)]);
-    expect(callArgs.value).toBe(mockValue); // only Arbitrum contributes value
+    expect(mockPrepareClaim).toHaveBeenCalledTimes(2);
+    expect(props.refetchClaimableBatches).toHaveBeenCalledTimes(2);
+    expect(props.onError).toHaveBeenCalledWith({ kind: 'claims-changed' });
+    expect(mockWriteContract).not.toHaveBeenCalled();
   });
 
-  it('should estimate a payload per Orbit chain and sum their values', async () => {
-    const arbPayload = '0x' + 'ab'.repeat(160);
-    const arbValue = BigInt('500000000000000');
-    const robinhoodPayload = '0x' + 'ef'.repeat(160);
-    const robinhoodValue = BigInt('250000000000000');
+  it('does not rebuild on an error that is not a revert', async () => {
+    mockPrepareClaim.mockRejectedValue(new Error('rpc down'));
+    const { props, claim } = setup();
 
-    mockGetArbitrumBridgePayload.mockImplementation((_targets: Address[], chainId: number) =>
-      Promise.resolve(
-        chainId === ROBINHOOD_CHAIN_ID
-          ? { bridgePayload: robinhoodPayload, value: robinhoodValue }
-          : { bridgePayload: arbPayload, value: arbValue },
-      ),
-    );
+    await claim();
 
-    const { result } = renderHook(() => useClaimStakingIncentivesBatch({ onSuccess, onError }));
+    expect(props.refetchClaimableBatches).not.toHaveBeenCalled();
+    expect(props.onError).toHaveBeenCalledWith({ kind: 'other', message: 'rpc down' });
+  });
 
-    const robinhoodTargets: Address[] = ['0xcccccccccccccccccccccccccccccccccccccccc'];
-    const batch: [number[], Address[][]] = [
-      [ARBITRUM_CHAIN_ID, 100, ROBINHOOD_CHAIN_ID],
-      [
-        ['0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'],
-        ['0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'],
-        robinhoodTargets,
-      ],
-    ];
+  it('keeps a wallet rejection separate and does not rebuild', async () => {
+    mockPrepareClaim.mockResolvedValue(prepared(FIRST));
+    mockWriteContract.mockRejectedValue(new Error('rejected'));
+    const { props, claim } = setup();
 
-    await act(async () => {
-      await result.current.claimIncentivesForBatch(batch);
-    });
+    await claim();
 
-    expect(mockGetArbitrumBridgePayload).toHaveBeenCalledTimes(2);
-    expect(mockGetArbitrumBridgePayload).toHaveBeenCalledWith(robinhoodTargets, ROBINHOOD_CHAIN_ID);
+    expect(props.onError).toHaveBeenCalledWith({ kind: 'wallet-rejected' });
+    expect(props.refetchClaimableBatches).not.toHaveBeenCalled();
+  });
 
-    const callArgs = mockWriteContract.mock.calls[0][0];
-    expect(callArgs.args[3]).toEqual([arbPayload, '0x', robinhoodPayload]);
-    expect(callArgs.args[4]).toEqual([arbValue, BigInt(0), robinhoodValue]);
-    expect(callArgs.value).toBe(arbValue + robinhoodValue);
+  it('refreshes after a revert that follows a successful simulation, without resending', async () => {
+    mockPrepareClaim.mockResolvedValue(prepared(FIRST));
+    mockWaitForTransactionReceipt.mockResolvedValue({ status: 'reverted' });
+    const { props, claim } = setup();
+
+    await claim();
+
+    expect(mockWriteContract).toHaveBeenCalledTimes(1);
+    expect(props.refetchClaimableBatches).toHaveBeenCalledTimes(1);
+    expect(props.onError).toHaveBeenCalledWith({ kind: 'reverted-after-simulation' });
+    expect(props.onSuccess).not.toHaveBeenCalled();
   });
 });

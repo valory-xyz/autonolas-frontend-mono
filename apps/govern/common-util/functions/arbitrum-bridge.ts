@@ -114,20 +114,24 @@ const GAS_LIMIT_BUFFER = 100_000;
 
 export type ArbitrumBridgeParams = {
   bridgePayload: `0x${string}`;
-  value: bigint;
+  /** ETH the processor spends on the staking message; charged whenever the chain sends one. */
+  messageCost: bigint;
+  /** ETH the processor spends on the OLAS token bridge; charged only when fresh OLAS is sent. */
+  tokenCost: bigint;
 };
 
 /**
- * Computes the Arbitrum-style bridge payload and required ETH value for L1->L2 message passing
+ * Computes the Arbitrum-style bridge payload and the ETH costs for L1->L2 message passing
  * to an Orbit chain.
  *
  * The bridge payload encodes 5 values expected by ArbitrumDepositProcessorL1._sendMessage:
  *   (refundAddress, gasPriceBid, maxSubmissionCostToken, gasLimitMessage, maxSubmissionCostMessage)
  *
- * The value is the total cost: token transfer cost + message transfer cost.
+ * `sendingTargets` are the targets with a positive incentive: the Dispenser drops the others
+ * from the message, so only they size its calldata.
  */
 export const getArbitrumBridgePayload = async (
-  stakingTargets: Address[],
+  sendingTargets: Address[],
   chainId: OrbitChainId,
 ): Promise<ArbitrumBridgeParams> => {
   if (chainId === ROBINHOOD_CHAIN_ID) ensureRobinhoodNetworkRegistered();
@@ -165,9 +169,9 @@ export const getArbitrumBridgePayload = async (
   // Construct approximate message calldata for gas estimation.
   // The contract sends: abi.encodeWithSelector(RECEIVE_MESSAGE, abi.encode(targets, stakingIncentives, batchHash))
   // We use dummy values since only the calldata size matters for gas estimation.
-  // Note: stakingTargets may be bytes32-padded, so we use dummy addresses of the same length.
-  const dummyTargets = stakingTargets.map(() => ORBIT_BRIDGE_MEDIATOR);
-  const dummyAmounts = stakingTargets.map(() => ethersV5.BigNumber.from(100));
+  // Note: the targets may be bytes32-padded, so we use dummy addresses of the same length.
+  const dummyTargets = sendingTargets.map(() => ORBIT_BRIDGE_MEDIATOR);
+  const dummyAmounts = sendingTargets.map(() => ethersV5.BigNumber.from(100));
   const dummyBatchHash = ethersV5.constants.HashZero;
   const innerData = ethersV5.utils.defaultAbiCoder.encode(
     ['address[]', 'uint256[]', 'bytes32'],
@@ -230,12 +234,11 @@ export const getArbitrumBridgePayload = async (
     .add(99)
     .div(100);
 
-  // Calculate total cost:
-  // cost[0] = maxSubmissionCostToken + TOKEN_GAS_LIMIT * gasPriceBid (token transfer)
+  // Mirrors ArbitrumDepositProcessorL1._sendMessage:
+  // cost[0] = maxSubmissionCostToken + TOKEN_GAS_LIMIT * gasPriceBid (token transfer, if any)
   // cost[1] = maxSubmissionCostMessage + gasLimitMessage * gasPriceBid (message)
   const tokenCost = maxSubmissionCostToken.add(gasPriceBid.mul(TOKEN_GAS_LIMIT));
   const messageCost = maxSubmissionCostMessage.add(gasLimitMessage.mul(gasPriceBid));
-  const totalCost = tokenCost.add(messageCost);
 
   // Encode bridge payload: (address, uint256, uint256, uint256, uint256)
   // Must be exactly 160 bytes (BRIDGE_PAYLOAD_LENGTH in the contract)
@@ -252,6 +255,7 @@ export const getArbitrumBridgePayload = async (
 
   return {
     bridgePayload,
-    value: BigInt(totalCost.toString()),
+    messageCost: BigInt(messageCost.toString()),
+    tokenCost: BigInt(tokenCost.toString()),
   };
 };
