@@ -17,6 +17,12 @@ export const findInErrorChain = <T extends Error>(
 export const getErrorMessage = (error: unknown) => {
   if (error instanceof BaseError) return error.shortMessage;
   if (error instanceof Error) return error.message;
+  // Providers may reject with a bare string or a `{ code, message }` object.
+  if (typeof error === 'string' && error) return error;
+  if (typeof error === 'object' && error !== null && 'message' in error) {
+    const { message } = error;
+    if (typeof message === 'string' && message) return message;
+  }
   return 'Unknown error';
 };
 

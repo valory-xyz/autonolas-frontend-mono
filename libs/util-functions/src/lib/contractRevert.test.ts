@@ -40,10 +40,14 @@ describe('formatRevert', () => {
 });
 
 describe('getErrorMessage', () => {
-  it("prefers viem's short message, then the error message", () => {
+  it("prefers viem's short message, then the error message, then a rejected string or message", () => {
     expect(getErrorMessage(new BaseError('RPC request failed.'))).toBe('RPC request failed.');
     expect(getErrorMessage(new Error('plain'))).toBe('plain');
-    expect(getErrorMessage('boom')).toBe('Unknown error');
+    expect(getErrorMessage('boom')).toBe('boom');
+    expect(getErrorMessage({ code: 4001, message: 'User rejected' })).toBe('User rejected');
+    expect(getErrorMessage({ code: 4001 })).toBe('Unknown error');
+    expect(getErrorMessage('')).toBe('Unknown error');
+    expect(getErrorMessage(undefined)).toBe('Unknown error');
   });
 });
 
