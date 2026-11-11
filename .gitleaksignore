@@ -168,3 +168,12 @@ d8375c535fba0ffcd1161714448dc92a84b17858:apps/autonolas-registry/common-util/Con
 d8810d2030e1f57c8d873dda381116798d02660b:apps/bond/components/Paths/data.json:generic-api-key:178
 e138e7782c054f97afd336c73bfb963fbe9d2839:apps/marketplace/tests/common-util/mechAnalytics/service-activity.test.ts:generic-api-key:53
 009b9bad9b1ba4914847e6ae00a7d92aa232a8ca:apps/bond/common-util/functions/summaryProduct.spec.js:generic-api-key:13
+1c8f96ad8d3c6c38f5f3dd26e32237c114313bbb:apps/launch/common-util/constants/registries-staking-token-globals.json:generic-api-key:4
+1c8f96ad8d3c6c38f5f3dd26e32237c114313bbb:apps/launch/common-util/constants/registries-staking-token-globals.json:generic-api-key:8
+1c8f96ad8d3c6c38f5f3dd26e32237c114313bbb:apps/launch/common-util/constants/registries-staking-token-globals.json:generic-api-key:12
+1c8f96ad8d3c6c38f5f3dd26e32237c114313bbb:apps/launch/common-util/constants/registries-staking-token-globals.json:generic-api-key:16
+1c8f96ad8d3c6c38f5f3dd26e32237c114313bbb:apps/launch/common-util/constants/registries-staking-token-globals.json:generic-api-key:20
+1c8f96ad8d3c6c38f5f3dd26e32237c114313bbb:apps/launch/common-util/constants/registries-staking-token-globals.json:generic-api-key:24
+1c8f96ad8d3c6c38f5f3dd26e32237c114313bbb:apps/launch/common-util/constants/registries-staking-token-globals.json:generic-api-key:28
+1c8f96ad8d3c6c38f5f3dd26e32237c114313bbb:apps/launch/common-util/constants/registries-staking-token-globals.json:generic-api-key:32
+1c8f96ad8d3c6c38f5f3dd26e32237c114313bbb:apps/launch/common-util/constants/registries-staking-token-globals.json:generic-api-key:36

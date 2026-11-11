@@ -14,8 +14,15 @@ import {
   ADDRESSES,
   ChainIds,
   FALLBACK_HANDLER,
-  multisigAddresses,
+  isMultisigChainId,
+  multisigCandidates,
 } from '../../../common-util/Contracts/addresses';
+// `docs/configuration.json` of valory-xyz/autonolas-registries at 5d5b1f1 (autonolas-registries#343),
+// unchanged since cca0949e. Re-capture both fixtures when registries publishes new wrappers.
+import pinnedRegistriesConfig from '../../fixtures/registries-configuration.json';
+// `gnosisSafeMultisigImplementationAddress` of each `scripts/deployment` globals file named in it,
+// at the same commit: the new wrappers, which `docs/configuration.json` does not list yet.
+import pinnedSafeMultisigGlobals from '../../fixtures/registries-safe-multisig-globals.json';
 
 const LOCAL_ARTIFACTS = [
   COMPONENT_REGISTRY_CONTRACT,
@@ -39,74 +46,128 @@ type Contract = {
   address: string;
 };
 
+/** As the fixture holds it: `chainId` is a string. */
 type Chain = {
   name: string;
-  chainId: ChainIds;
+  chainId: string;
   contracts: Contract[];
 };
 
+const toChainId = (chainId: string): ChainIds => {
+  const id = Number(chainId);
+  if (!isMultisigChainId(id)) {
+    throw new Error(
+      `The pinned registries configuration has chain ${chainId}, which the app lacks`,
+    );
+  }
+  return id;
+};
+
 const chainIds = Object.keys(ADDRESSES);
+const pinnedChains = (pinnedRegistriesConfig as Chain[]).map((chain) => ({
+  ...chain,
+  chainId: toChainId(chain.chainId),
+}));
+
+const lowerFirst = (name: string) => name.charAt(0).toLowerCase() + name.slice(1);
+
+// Fetches registries' moving `main` branch, so it only runs when asked for.
+const describeLive = process.env.REGISTRIES_LIVE_CHECK === 'true' ? describe : describe.skip;
 
 const isValidKey = (object: object, value: string): value is keyof typeof object => {
   return Object.keys(object).includes(value);
 };
 
-describe('common-utils/addresses', () => {
+describeLive('common-utils/addresses against registries main', () => {
   it(
-    'check contract addresses and ABIs',
+    'check contract ABIs',
     async () => {
-      // Registries repository
-      // Fetch the actual config
       const response = await fetch(`${REGISTRIES_REPO_URL}docs/configuration.json`);
       const parsedConfig: Chain[] = await response.json();
 
-      // Loop over chains
-      const numChains = parsedConfig.length;
-      for (let i = 0; i < numChains; i += 1) {
-        const { contracts, chainId } = parsedConfig[i];
-        // Traverse all up-to-date configuration contracts
-        for (let j = 0; j < contracts.length; j += 1) {
-          const currentContract = contracts[j];
-
+      for (const { contracts } of parsedConfig) {
+        for (const currentContract of contracts) {
           const localArtifact = LOCAL_ARTIFACTS.find(
             (artifact) => artifact.contractName === currentContract.name,
           );
+          if (!localArtifact) continue;
 
-          if (!localArtifact) return;
+          const remoteArtifactResponse = await fetch(
+            REGISTRIES_REPO_URL + currentContract.artifact,
+          );
+          const remoteArtifact = await remoteArtifactResponse.json();
 
-          // Go over local artifacts
-          // for (let k = 0; k < LOCAL_ARTIFACTS.length; k += 1) {
-          if (currentContract.name === 'GnosisSafeMultisig') {
-            // Check for the GnosisSafeMultisig address
-            const multisigAddressesChainId = chainId as keyof typeof multisigAddresses;
-
-            expect(currentContract.address).toBe(multisigAddresses[multisigAddressesChainId][0]);
-          } else if (currentContract.name === localArtifact.contractName) {
-            // Take the configuration and local contract names that match
-            // Get local and configuration ABIs, stringify them
-            const remoteArtifactResponse = await fetch(
-              REGISTRIES_REPO_URL + currentContract.artifact,
-            );
-            const remoteArtifact = await remoteArtifactResponse.json();
-
-            // Local and remote ABIs should match
-            expect(localArtifact.abi).toMatchObject(remoteArtifact.abi);
-
-            // Check the address
-            const lowLetter =
-              localArtifact.contractName.charAt(0).toLowerCase() +
-              localArtifact.contractName.slice(1);
-            // Need to stringify and then convert then parse to access the address field
-            const addressStruct = JSON.stringify(ADDRESSES[chainId]);
-            const addressStructJSON = JSON.parse(addressStruct);
-            const localAddress = addressStructJSON[lowLetter];
-            expect(localAddress).toBe(currentContract.address);
-          }
+          expect(localArtifact.abi).toMatchObject(remoteArtifact.abi);
         }
       }
     },
     2 * 60 * 1000,
   );
+});
+
+describe('common-utils/addresses', () => {
+  // ServiceManager addresses are not kept in `ADDRESSES`, so only the contracts it holds are compared.
+  it('holds the address the pinned registries configuration lists for each of its contracts', () => {
+    const checked = pinnedChains.flatMap(({ chainId, contracts }) => {
+      const local: Record<string, string> = ADDRESSES[chainId];
+      return contracts
+        .filter(({ name }) => LOCAL_ARTIFACTS.some(({ contractName }) => contractName === name))
+        .filter(({ name }) => Object.hasOwn(local, lowerFirst(name)))
+        .map(({ name, address }) => ({
+          chainId,
+          name,
+          address,
+          local: local[lowerFirst(name)],
+        }));
+    });
+
+    expect(checked.length).toBeGreaterThan(0);
+    checked.forEach(({ chainId, name, address, local }) => {
+      expect({ chainId, name, address: local }).toEqual({
+        chainId,
+        name,
+        address,
+      });
+    });
+  });
+
+  it('offers exactly the old and the new GnosisSafeMultisig of every chain, and no other', () => {
+    const globals = pinnedSafeMultisigGlobals as Record<
+      string,
+      { gnosisSafeMultisigImplementationAddress: string }
+    >;
+    const expected = Object.fromEntries(
+      pinnedChains.map(({ chainId, contracts }) => [
+        chainId,
+        [
+          ...contracts
+            .filter(({ name }) => name === 'GnosisSafeMultisig')
+            .map(({ address }) => address),
+          globals[chainId].gnosisSafeMultisigImplementationAddress,
+        ],
+      ]),
+    );
+
+    expect(Object.keys(globals).sort()).toEqual(Object.keys(expected).sort());
+    expect(multisigCandidates).toEqual(expected);
+  });
+
+  it('offers no same-address adapter, which reuses a multisig, as a Safe creation wrapper', () => {
+    const adapters = pinnedChains.flatMap(({ chainId, contracts }) =>
+      contracts
+        .filter(({ name }) => name.endsWith('SameAddressMultisig'))
+        .map(({ address }) => ({ chainId, address: address.toLowerCase() })),
+    );
+
+    expect(adapters.length).toBeGreaterThan(0);
+    adapters.forEach(({ chainId, address }) => {
+      const candidates = multisigCandidates[chainId].map((c) => c.toLowerCase());
+      expect({ chainId, offersAdapter: candidates.includes(address) }).toEqual({
+        chainId,
+        offersAdapter: false,
+      });
+    });
+  });
 
   it('should ensure FALLBACK_HANDLER matches between remote and local sources', async () => {
     const fallbackHandlerResponse = await fetch(

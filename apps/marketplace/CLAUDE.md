@@ -161,6 +161,14 @@ Services have 6 states with step-by-step UI in `components/ListServices/ServiceS
 
 **Key state functions** in `ServiceState/utils.jsx`: `getBonds()`, `onActivateRegistration()`, `onStep2RegisterAgents()`, `onStep3Deploy()`, `onTerminate()`, `onStep5Unbond()`.
 
+#### Safe creation wrappers (step 3)
+
+- `multisigCandidates` (`common-util/Contracts/addresses.tsx`, read-only) lists every `GnosisSafeMultisig` wrapper per chain. While a chain moves to a new wrapper it lists both the old and the new one.
+- `getEnabledMultisigs(chainId)` (`components/ListServices/utils.tsx`) filters those candidates through `ServiceRegistry.mapMultisigs` (one `readContracts` with `allowFailure: false`), so step 3 offers only wrappers the chain still enables.
+- `ServiceState/deployWithEnabledMultisig.jsx` owns the pre-deploy rule: `deployWithEnabledMultisig` re-checks `mapMultisigs` (a failed re-check is refused as `RECHECK_FAILED`, with the read error as `cause`), then refuses a chain switch, then a wrapper no longer enabled, each as a `DeployRefusedError` (`DEPLOY_REFUSAL`), and only then calls `onStep3Deploy`.
+- `3rdStepFinishedRegistration` clears the selection when the chain changes and ignores a late answer for the previous chain. On submit it calls `deployWithEnabledMultisig`, blocks a second submit while it runs, and maps each refusal reason to its notice. A failed `deploy` is shown with its reason (`getDeployFailureReason`, using `libs/util-functions/src/lib/contractRevert`). While the enabled options load it shows a spinner. When no wrapper is enabled, or the read failed (with a Retry), it says so instead of showing an empty panel.
+- `tests/common-util/Contracts/addresses.test.tsx` checks the candidates against a pinned copy of registries' `docs/configuration.json` (`tests/fixtures/registries-configuration.json`) and the new wrappers from its deployment globals (`tests/fixtures/registries-safe-multisig-globals.json`): the candidates are exactly the old and the new `GnosisSafeMultisig` of each chain, and no `*SameAddressMultisig` adapter is one: such an adapter reuses an existing multisig instead of creating a Safe, so it must never appear among step 3's Safe creation options, even though `mapMultisigs` enables it.
+
 ### Mech Marketplace Activity
 
 Tracks **requests** (demand) and **deliveries** (supply) for mech services.

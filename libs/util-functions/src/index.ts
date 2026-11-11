@@ -9,6 +9,7 @@ export * from './lib/dateTime';
 export * from './lib/numbers';
 export * from './lib/chains';
 export * from './lib/withTimeout';
+export * from './lib/contractRevert';
 export * from './lib/useSuppressSafeWcRedirect';
 // NOTE: estimateGasWithBuffer is intentionally NOT exported from this barrel
 // — it imports `@wagmi/core` and would force any test that transitively

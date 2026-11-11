@@ -1,10 +1,16 @@
-import { Button, Divider, Form, Input, Radio } from 'antd';
+import { Alert, Button, Divider, Form, Input, Radio, Spin } from 'antd';
 import { ethers } from 'ethers';
 import PropTypes from 'prop-types';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
-import { notifyError, notifySuccess } from 'libs/util-functions/src';
-import { FALLBACK_HANDLER, multisigAddresses } from 'common-util/Contracts/addresses';
+import {
+  getErrorMessage,
+  findContractRevert,
+  formatRevert,
+  notifyError,
+  notifySuccess,
+} from 'libs/util-functions/src';
+import { FALLBACK_HANDLER, multisigCandidates } from 'common-util/Contracts/addresses';
 import { RegistryForm } from 'common-util/TransactionHelpers/RegistryForm';
 import { SendTransactionButton } from 'common-util/TransactionHelpers/SendTransactionButton';
 import { isValidSolanaPublicKey } from 'common-util/functions';
@@ -13,7 +19,21 @@ import { SVM_EMPTY_ADDRESS } from 'util/constants';
 
 import { RadioLabel } from '../styles';
 import { useFinishRegistration } from '../useSvmServiceStateManagement';
-import { onStep3Deploy } from '../utils';
+import { getEnabledMultisigs } from '../../utils';
+import {
+  DEPLOY_REFUSAL,
+  DeployRefusedError,
+  deployWithEnabledMultisig,
+} from '../deployWithEnabledMultisig';
+
+const MULTISIG_STATUS = Object.freeze({ LOADING: 'loading', LOADED: 'loaded', ERROR: 'error' });
+
+const getDeployFailureReason = (error) => {
+  const revert = findContractRevert(error);
+  if (revert?.data) return formatRevert(revert.data);
+  if (revert?.signature) return `unrecognised revert ${revert.signature}`;
+  return getErrorMessage(error);
+};
 
 const STEP = 3;
 const OPTION_1 = 'Creates a new service multisig with currently registered agent instances';
@@ -129,46 +149,131 @@ export const FinishedRegistration = ({
 
   const [form] = Form.useForm();
   const [radioValue, setRadioValue] = useState(null);
+  const [multisigs, setMultisigs] = useState({ status: MULTISIG_STATUS.LOADING, enabled: [] });
+  const [reloadCount, setReloadCount] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const isSubmittingRef = useRef(false);
+  // The submit awaits RPC calls, so it compares against the chain at the time of the deploy.
+  const chainIdRef = useRef(chainId);
+  chainIdRef.current = chainId;
   const [isTerminating, setIsTerminating] = useState(false);
 
-  const handleStep3Deploy = async (radioValuePassed, payload) => {
-    try {
-      setIsSubmitting(true);
-      await onStep3Deploy(account, serviceId, radioValuePassed, payload);
+  useEffect(() => {
+    setRadioValue(null);
+    setMultisigs({ status: MULTISIG_STATUS.LOADING, enabled: [] });
+    if (isSvm || !chainId) return undefined;
 
-      await updateDetails();
-      notifySuccess('Deployed successfully');
-    } catch (e) {
-      console.error(e);
-    } finally {
-      setIsSubmitting(false);
+    let isCurrent = true;
+    getEnabledMultisigs(chainId)
+      .then((enabled) => {
+        if (!isCurrent) return;
+        if (enabled.length === 0) {
+          console.warn('No multisig creation option is enabled', {
+            chainId,
+            candidates: multisigCandidates[chainId],
+          });
+        }
+        setMultisigs({ status: MULTISIG_STATUS.LOADED, enabled });
+      })
+      .catch((error) => {
+        console.error('Could not read the enabled multisig options', { chainId }, error);
+        if (isCurrent) setMultisigs({ status: MULTISIG_STATUS.ERROR, enabled: [] });
+      });
+    return () => {
+      isCurrent = false;
+    };
+  }, [chainId, isSvm, reloadCount]);
+
+  const notifyDeployRefused = (error, submitContext) => {
+    switch (error.reason) {
+      case DEPLOY_REFUSAL.RECHECK_FAILED:
+        console.error(
+          'Could not re-check the selected multisig option',
+          submitContext,
+          error.cause,
+        );
+        notifyError('Could not check that the selected multisig option is still enabled');
+        return;
+      case DEPLOY_REFUSAL.CHAIN_CHANGED:
+        notifyError('The network changed before the deploy. Please submit again.');
+        return;
+      case DEPLOY_REFUSAL.NOT_ENABLED:
+        if (chainIdRef.current === submitContext.chainId) {
+          setMultisigs({ status: MULTISIG_STATUS.LOADED, enabled: error.enabled });
+          setRadioValue(null);
+        }
+        notifyError('The selected multisig option is no longer enabled. Please choose another.');
+        return;
+      default:
+        console.error('Deploy refused', submitContext, error);
+        notifyError('Could not deploy. Please try again.');
     }
   };
 
-  const onFinish = (values) => {
-    const payload = ethers.solidityPacked(
-      ['address', 'address', 'address', 'address', 'uint256', 'uint256', 'bytes'],
-      [
-        values.addressTo,
-        values.addressFallbackHandler,
-        values.paymentToken,
-        values.payablePaymentReceiver,
-        Number(values.payment),
-        Number(values.nonce),
-        values.payload,
-      ],
-    );
-
-    handleStep3Deploy(radioValue, payload);
+  const onFinish = async (values) => {
+    // The enabled-wrapper check awaits an RPC call, so guard against a second submit.
+    if (isSubmittingRef.current) return;
+    isSubmittingRef.current = true;
+    setIsSubmitting(true);
+    const submitChainId = chainId;
+    const submitContext = {
+      chainId: submitChainId,
+      serviceId,
+      multisig: radioValue,
+    };
+    try {
+      try {
+        const payload = ethers.solidityPacked(
+          ['address', 'address', 'address', 'address', 'uint256', 'uint256', 'bytes'],
+          [
+            values.addressTo,
+            values.addressFallbackHandler,
+            values.paymentToken,
+            values.payablePaymentReceiver,
+            Number(values.payment),
+            Number(values.nonce),
+            values.payload,
+          ],
+        );
+        const enabled = await deployWithEnabledMultisig({
+          account,
+          serviceId,
+          multisig: radioValue,
+          payload,
+          chainId: submitChainId,
+          getCurrentChainId: () => chainIdRef.current,
+        });
+        // The deploy can outlast a chain switch; the new chain's options must stay its own.
+        if (chainIdRef.current === submitChainId) {
+          setMultisigs({ status: MULTISIG_STATUS.LOADED, enabled });
+        }
+      } catch (error) {
+        if (error instanceof DeployRefusedError) {
+          notifyDeployRefused(error, submitContext);
+          return;
+        }
+        console.error('Deploy failed', submitContext, error);
+        notifyError(`Error occurred while deploying: ${getDeployFailureReason(error)}`);
+        return;
+      }
+      notifySuccess('Deployed successfully');
+      try {
+        await updateDetails();
+      } catch (error) {
+        console.error('Deployed, but could not refresh the service details', submitContext, error);
+        notifyError('Deployed, but the service details could not be refreshed. Reload the page.');
+      }
+    } finally {
+      isSubmittingRef.current = false;
+      setIsSubmitting(false);
+    }
   };
 
   const onFinishFailed = (errorInfo) => {
     console.log('Failed:', errorInfo); /* eslint-disable-line no-console */
   };
 
-  const options = multisigAddresses[chainId] || [];
-  const isMultiSig = options[0];
+  const options = multisigs.status === MULTISIG_STATUS.LOADED ? multisigs.enabled : [];
   const btnProps = getOtherBtnProps(STEP);
 
   const terminateBtn = (
@@ -232,8 +337,37 @@ export const FinishedRegistration = ({
         </Radio.Group>
       ) : null}
 
+      {multisigs.status === MULTISIG_STATUS.LOADING && (
+        <div className="mt-8">
+          <Spin size="small" /> Checking which multisig options are enabled on this chain…
+        </div>
+      )}
+
+      {multisigs.status === MULTISIG_STATUS.ERROR && (
+        <Alert
+          type="error"
+          showIcon
+          className="mt-8"
+          message="Could not check which multisig options are enabled on this chain."
+          action={
+            <Button size="small" onClick={() => setReloadCount((count) => count + 1)}>
+              Retry
+            </Button>
+          }
+        />
+      )}
+
+      {multisigs.status === MULTISIG_STATUS.LOADED && multisigs.enabled.length === 0 && (
+        <Alert
+          type="warning"
+          showIcon
+          className="mt-8"
+          message="No multisig creation option is currently enabled on this chain, so the service cannot be deployed right now."
+        />
+      )}
+
       {/* form is shown only once the multisig option is selected */}
-      {radioValue === isMultiSig && (
+      {options.includes(radioValue) && (
         <RegistryForm
           form={form}
           layout="vertical"
