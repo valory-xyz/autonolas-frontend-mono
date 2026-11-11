@@ -7,11 +7,7 @@ import { useNomineesWeights } from 'hooks/useNomineesWeights';
 import { useEpochCounter, useEpochTokenomics } from 'components/Donate/hooks';
 import type { StakingContract } from 'types';
 
-import {
-  buildClaimBatches,
-  getCursorChange,
-  useClaimableNomineesBatches,
-} from './useClaimableNomineeBatches';
+import { useClaimableNomineesBatches } from './useClaimableNomineeBatches';
 
 jest.mock('wagmi', () => ({ useReadContract: jest.fn(), useReadContracts: jest.fn() }));
 jest.mock('@tanstack/react-query', () => ({
@@ -27,82 +23,9 @@ jest.mock('components/Donate/hooks', () => ({
 
 const A: Address = '0x000000000000000000000000000000000000000a';
 const B: Address = '0x000000000000000000000000000000000000000b';
-const C: Address = '0x000000000000000000000000000000000000000c';
 
 const nominee = (address: Address, chainId: number) =>
   ({ address, chainId }) as unknown as StakingContract;
-
-describe('buildClaimBatches', () => {
-  const nominees = [nominee(B, 100), nominee(A, 100), nominee(C, 42161)];
-  const relativeWeights = { [A]: 5, [B]: 5, [C]: 5 };
-
-  it('groups claimable nominees by chain, sorted, one epoch per batch', () => {
-    const batches = buildClaimBatches({
-      nominees,
-      lastClaimedEpochs: { [A]: 9, [B]: 8, [C]: 9 },
-      currentEpoch: 10,
-      minStakingWeight: 1,
-      relativeWeights,
-    });
-
-    expect(batches).toEqual([
-      [
-        [100, 42161],
-        [[A, B], [C]],
-      ],
-      [[100], [[B]]],
-    ]);
-  });
-
-  it('drops nominees whose cursor already reached the current epoch', () => {
-    const batches = buildClaimBatches({
-      nominees,
-      lastClaimedEpochs: { [A]: 10, [B]: 10, [C]: 9 },
-      currentEpoch: 10,
-      minStakingWeight: 1,
-      relativeWeights,
-    });
-
-    expect(batches).toEqual([[[42161], [[C]]]]);
-  });
-
-  it.each([
-    ['vote weight', { relativeWeights: { [A]: 5, [B]: 5 } }],
-    ['claim cursor', { lastClaimedEpochs: { [A]: 9, [B]: 9 } }],
-  ])('throws on a nominee with no %s instead of dropping it as claimed', (what, override) => {
-    expect(() =>
-      buildClaimBatches({
-        nominees,
-        lastClaimedEpochs: { [A]: 9, [B]: 9, [C]: 9 },
-        currentEpoch: 10,
-        minStakingWeight: 1,
-        relativeWeights,
-        ...override,
-      }),
-    ).toThrow(`No ${what} for staking contract ${C}`);
-  });
-
-  it('drops nominees below the minimum staking weight', () => {
-    const batches = buildClaimBatches({
-      nominees,
-      lastClaimedEpochs: { [A]: 9, [B]: 9, [C]: 9 },
-      currentEpoch: 10,
-      minStakingWeight: 6,
-      relativeWeights: { ...relativeWeights, [C]: 7 },
-    });
-
-    expect(batches).toEqual([[[42161], [[C]]]]);
-  });
-});
-
-describe('getCursorChange', () => {
-  const cursors = { [A]: 9, [B]: 9 };
-
-  it('reports a staking contract the batches were not built from as concurrent', () => {
-    // C has no expected cursor to compare against, so its claim cannot be one of the user's.
-    expect(getCursorChange(cursors, cursors, { ...cursors, [C]: 3 })).toBe('concurrent');
-  });
-});
 
 describe('useClaimableNomineesBatches refetchClaimableBatches', () => {
   const nominees = [nominee(A, 100), nominee(B, 100)];
@@ -188,16 +111,37 @@ describe('useClaimableNomineesBatches refetchClaimableBatches', () => {
 
   it('throws on a failed cursor read instead of treating the nominee as claimed', async () => {
     const result = renderBatches();
+    const readError = new Error('execution reverted');
     mockRefetch.mockResolvedValue({
       data: [
         { status: 'success', result: BigInt(9) },
-        { status: 'failure', error: new Error() },
+        { status: 'failure', error: readError },
       ],
     });
 
-    await expect(result.current.refetchClaimableBatches()).rejects.toThrow(
+    const refresh = result.current.refetchClaimableBatches();
+
+    await expect(refresh).rejects.toThrow(
       `Could not read the claim cursor of staking contract ${B}`,
     );
+    await expect(refresh).rejects.toHaveProperty('cause', readError);
+  });
+
+  it('keeps showing cached cursors when a later cursor query fails', () => {
+    jest.spyOn(console, 'error').mockImplementation(() => undefined);
+    renderBatches();
+    jest.mocked(useReadContracts).mockReturnValue({
+      data: cursorReads(9, 9),
+      error: new BaseError('RPC request failed.'),
+      isLoading: false,
+      queryKey: ['cursors'],
+      refetch: mockRefetch,
+    } as never);
+
+    const { result } = renderHook(() => useClaimableNomineesBatches());
+
+    expect(result.current.claimableBatchesError).toBeNull();
+    expect(result.current.nomineesToClaimBatches).toEqual([[[100], [[A, B]]]]);
   });
 
   it('throws while the claim data is still loading instead of returning no batches', async () => {
@@ -269,7 +213,6 @@ describe('useClaimableNomineesBatches refetchClaimableBatches', () => {
 
     expect(result.current.claimableBatchesError).toBeNull();
     expect(failed.current.claimableBatchesError).toBe('RPC request failed.');
-    // The read that failed will not settle, so the hook must not stay loading.
     expect(failed.current.isLoadingClaimableBatches).toBe(false);
     expect(console.error).toHaveBeenCalledWith(
       'Could not read the claimable staking contracts',

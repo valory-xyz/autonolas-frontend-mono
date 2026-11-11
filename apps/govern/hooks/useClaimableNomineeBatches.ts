@@ -3,7 +3,6 @@ import { useQueryClient } from '@tanstack/react-query';
 import type { Address, MulticallResponse } from 'viem';
 import { mainnet } from 'viem/chains';
 import { useReadContract, useReadContracts } from 'wagmi';
-import { cloneDeep } from 'lodash';
 
 import { useAppSelector } from 'store/index';
 import { useNomineesWeights } from 'hooks/useNomineesWeights';
@@ -13,11 +12,15 @@ import { DISPENSER } from 'libs/util-contracts/src/lib/abiAndAddresses';
 
 import { DISPENSER_ADDRESS } from 'common-util/constants/addresses';
 import { getNomineeHash } from 'common-util/functions/nominee-hash';
+import {
+  buildClaimBatches,
+  type ClaimableBatchesRefresh,
+  type Cursors,
+  getCursorChange,
+} from 'common-util/functions/claim-batches';
 import type { ClaimBatch } from 'common-util/functions/staking-incentives-claim';
 import { useEpochCounter, useEpochTokenomics } from 'components/Donate/hooks';
 import type { StakingContract } from 'types';
-
-const MAX_BATCH_SIZE = 10;
 
 const useMinStakingValue = ({ epoch }: { epoch: number | null }) => {
   const {
@@ -54,45 +57,15 @@ const toLastClaimedEpochs = (
     (acc, nominee, index) => {
       const read = results?.[index];
       if (read?.status !== 'success') {
-        throw new Error(`Could not read the claim cursor of staking contract ${nominee.address}`);
+        throw new Error(`Could not read the claim cursor of staking contract ${nominee.address}`, {
+          cause: read?.error,
+        });
       }
       acc[nominee.address] = Number(read.result);
       return acc;
     },
     {} as Record<Address, number>,
   );
-
-/**
- * How the claim cursors moved since the shown list was built:
- * - `none`: not at all, so the list is unchanged;
- * - `own-claims`: only as this user's recorded claims explain, so the list re-indexes;
- * - `concurrent`: past what those claims explain (someone else claimed meanwhile), or with no
- *   earlier cursors to compare against.
- */
-export type CursorChange = 'none' | 'own-claims' | 'concurrent';
-
-/** The rebuilt batches, and how the cursors they were built from moved. */
-export type ClaimableBatchesRefresh = { batches: ClaimBatch[]; change: CursorChange };
-
-/** A number per staking contract; a contract that was not read has none. */
-type ByAddress = Partial<Record<Address, number>>;
-type Cursors = ByAddress;
-
-export const getCursorChange = (
-  built: Cursors | null,
-  expected: Cursors | null,
-  fresh: Record<Address, number>,
-): CursorChange => {
-  if (!built || !expected) return 'concurrent';
-  const addresses = Object.keys(fresh) as Address[];
-  // A cursor only moves forward: one below what own claims explain is a lagging read, not a claim.
-  const movedByOthers = addresses.some((address) => {
-    const expectedCursor = expected[address];
-    return expectedCursor === undefined || fresh[address] > expectedCursor;
-  });
-  if (movedByOthers) return 'concurrent';
-  return addresses.some((address) => fresh[address] !== built[address]) ? 'own-claims' : 'none';
-};
 
 const useNomineesLastClaimedStakingEpoch = ({ nominees }: { nominees: StakingContract[] }) => {
   const queryClient = useQueryClient();
@@ -118,7 +91,6 @@ const useNomineesLastClaimedStakingEpoch = ({ nominees }: { nominees: StakingCon
   }, [queryClient, queryKey]);
 
   const { epochs: lastClaimedStakingEpochByNominee, error: lastClaimedError } = useMemo(() => {
-    // A failed query with no cached data leaves no cursors: that is an error, not "all claimed".
     if (!lastClaimedStakingEpoch) return { epochs: null, error: lastClaimedQueryError ?? null };
     try {
       return { epochs: toLastClaimedEpochs(nominees, lastClaimedStakingEpoch), error: null };
@@ -164,182 +136,6 @@ const useNomineesWeightsAtPrevEpochEnd = ({
   };
 };
 
-/**
- * Assuming max batch size to be "3"
- * nomineesTimesToClaimArray: [[0x1, 1], [0x2, 1], [0x3, 2], [0x4, 1]]
- *
- * returns:
- * [
- *  [0x1, 0x2, 0x3],
- *  [0x3, 0x4],
- * ]
- */
-const chunkNomineesArrayByTimeToClaim = (
-  nomineesTimesToClaimArray: [Address, number][],
-  chunkSize: number = MAX_BATCH_SIZE,
-) => {
-  const chunks: Address[][] = [];
-  let filteredNomineesTimesToClaim = cloneDeep(nomineesTimesToClaimArray);
-
-  // eslint-disable-next-line no-constant-condition
-  while (true) {
-    const currentChunk: Address[] = [];
-    let index = 0;
-
-    for (index = 0; index < Math.min(chunkSize, filteredNomineesTimesToClaim.length); index++) {
-      const nominee = filteredNomineesTimesToClaim[index][0];
-      currentChunk.push(nominee);
-      /* Decrease time to claim by 1 each time the nominee gets into the currentChunk, this ensures 
-      the order as well as the times a nominee needs to be claimed works as expected */
-      filteredNomineesTimesToClaim[index][1] -= 1;
-    }
-
-    chunks.push(currentChunk);
-    filteredNomineesTimesToClaim = filteredNomineesTimesToClaim.filter(
-      ([, timesToClaim]) => timesToClaim > 0,
-    );
-
-    if (filteredNomineesTimesToClaim.length === 0) {
-      break;
-    }
-  }
-
-  return chunks;
-};
-
-/** A nominee's entry in a per-address map; a missing one is a failed read, never "claimed". */
-const requireEntry = (map: ByAddress, address: Address, what: string) => {
-  const value = map[address];
-  if (value === undefined) throw new Error(`No ${what} for staking contract ${address}`);
-  return value;
-};
-
-type BuildClaimBatchesParams = {
-  nominees: StakingContract[];
-  lastClaimedEpochs: Cursors;
-  currentEpoch: number;
-  minStakingWeight: number;
-  /**
-   * Relative weight per nominee address at the previous epoch's end, in percent × 100: the same
-   * unit as `minStakingWeight`.
-   */
-  relativeWeights: ByAddress;
-};
-
-export const buildClaimBatches = ({
-  nominees,
-  lastClaimedEpochs,
-  currentEpoch,
-  minStakingWeight,
-  relativeWeights,
-}: BuildClaimBatchesParams): ClaimBatch[] => {
-  const filteredNominees = nominees.filter((nominee) => {
-    const nomineeRelativeWeight = requireEntry(relativeWeights, nominee.address, 'vote weight');
-    const lastClaimedStakingEpoch = requireEntry(
-      lastClaimedEpochs,
-      nominee.address,
-      'claim cursor',
-    );
-
-    return nomineeRelativeWeight >= minStakingWeight && lastClaimedStakingEpoch < currentEpoch;
-  });
-
-  const nomineesByChain = filteredNominees.reduce(
-    (acc, nominee) => {
-      acc[nominee.chainId] = [...(acc[nominee.chainId] || []), nominee.address];
-      return acc;
-    },
-    {} as Record<number, Address[]>,
-  );
-
-  const sortedNomineesByChain = Object.keys(nomineesByChain).reduce(
-    (acc, chainId) => {
-      acc[Number(chainId)] = nomineesByChain[Number(chainId)].sort((a, b) =>
-        a.toString().localeCompare(b.toString()),
-      );
-      return acc;
-    },
-    {} as Record<number, Address[]>,
-  );
-
-  /**
-   * Chunk the nominees array into smaller arrays of max size `MAX_BATCH_SIZE`
-   * eg:
-   * {
-   *  1: [
-   *    [0x1, 0x2, 0x3],
-   *    [0x4, 0x5, 0x6],
-   *    [0x7, 0x8, 0x9],
-   *    [0x10, 0x11, 0x12],
-   *  ],
-   *  2: [
-   *    [0x13, 0x14, 0x15],
-   *    [0x16, 0x17, 0x18],
-   *    [0x19, 0x20, 0x21],
-   *    [0x22, 0x23, 0x24],
-   *  ],
-   * }
-   */
-  const batchesByChain = Object.keys(sortedNomineesByChain).reduce(
-    (acc, chainId) => {
-      const nominees = sortedNomineesByChain[Number(chainId)];
-
-      /**
-       * Nominees along with their timesToClaim
-       * eg: [[0x1, 1], [0x2, 1], [0x3, 2], [0x4, 1]]
-       */
-      const nomineesTimesToClaimArray = nominees.reduce(
-        (acc, nominee) => {
-          const lastClaimedStakingEpoch = requireEntry(lastClaimedEpochs, nominee, 'claim cursor');
-          acc.push([nominee, currentEpoch - lastClaimedStakingEpoch]);
-          return acc;
-        },
-        [] as [Address, number][],
-      );
-      const chunks = chunkNomineesArrayByTimeToClaim(nomineesTimesToClaimArray, MAX_BATCH_SIZE);
-      acc[Number(chainId)] = chunks;
-      return acc;
-    },
-    {} as Record<number, Address[][]>,
-  );
-
-  const sortedChainIds = Object.keys(batchesByChain).sort((a, b) => Number(a) - Number(b));
-
-  /**
-   * Create batches of nominees to claim
-   * eg:
-   * [
-   *    [[1, 2], [[0x1, 0x2, 0x3], [0x13, 0x14, 0x15]]],
-   *    [[1, 2], [[0x4, 0x5, 0x6], [0x16, 0x17, 0x18]]],
-   * ]
-   * The max size of the second element of the subarray would be determined by the `MAX_BATCH_SIZE`
-   */
-  let batchIndex = 0;
-  const batches: ClaimBatch[] = [];
-  // eslint-disable-next-line no-constant-condition
-  while (true) {
-    const currentBatchChainIds: number[] = [];
-    const currentBatchNominees: Address[][] = [];
-
-    sortedChainIds.forEach((chainId) => {
-      const nomineesByChainAtIndex = batchesByChain[Number(chainId)]?.[batchIndex] || [];
-      if (nomineesByChainAtIndex.length !== 0) {
-        currentBatchChainIds.push(Number(chainId));
-        currentBatchNominees.push(nomineesByChainAtIndex);
-      }
-    });
-
-    batchIndex++;
-    if (currentBatchNominees.length === 0) {
-      break;
-    }
-
-    batches.push([currentBatchChainIds, currentBatchNominees]);
-  }
-
-  return batches;
-};
-
 export const useClaimableNomineesBatches = () => {
   const nominees = useAppSelector((state) => state.govern.stakingContracts);
   const { data: currentEpoch, isLoading: isEpochLoading, error: epochError } = useEpochCounter();
@@ -360,31 +156,43 @@ export const useClaimableNomineesBatches = () => {
       previousEpoch,
     });
 
-  // A missing nominee is a failed read, not zero weight.
-  const { relativeWeights, missingWeightError } = useMemo(() => {
-    if (!nomineesWeightsAtPrevEpochEnd) return { relativeWeights: null, missingWeightError: null };
-    const weights: Record<Address, number> = {};
-    for (const nominee of nominees) {
-      const weight = nomineesWeightsAtPrevEpochEnd[nominee.address];
-      if (!weight) {
-        return {
-          relativeWeights: null,
-          missingWeightError: new Error(
-            `Could not read the vote weight of staking contract ${nominee.address}`,
-          ),
-        };
-      }
-      weights[nominee.address] = weight.percentage * 100;
+  const relativeWeights = useMemo(() => {
+    if (!nomineesWeightsAtPrevEpochEnd) return null;
+    const weights: Partial<Record<Address, number>> = {};
+    for (const [address, weight] of Object.entries(nomineesWeightsAtPrevEpochEnd)) {
+      if (weight) weights[address as Address] = weight.percentage * 100;
     }
-    return { relativeWeights: weights, missingWeightError: null };
-  }, [nominees, nomineesWeightsAtPrevEpochEnd]);
+    return weights;
+  }, [nomineesWeightsAtPrevEpochEnd]);
+
+  const { batches: nomineesToClaimBatches, buildError } = useMemo((): {
+    batches: ClaimBatch[];
+    buildError: unknown;
+  } => {
+    if (
+      !nominees.length ||
+      !lastClaimedStakingEpochByNominee ||
+      !currentEpoch ||
+      !minStakingWeight ||
+      !relativeWeights
+    )
+      return { batches: [], buildError: null };
+    try {
+      const batches = buildClaimBatches({
+        nominees,
+        lastClaimedEpochs: lastClaimedStakingEpochByNominee,
+        currentEpoch,
+        minStakingWeight,
+        relativeWeights,
+      });
+      return { batches, buildError: null };
+    } catch (error) {
+      return { batches: [], buildError: error };
+    }
+  }, [nominees, lastClaimedStakingEpochByNominee, currentEpoch, minStakingWeight, relativeWeights]);
 
   const readError =
-    lastClaimedError ??
-    epochError ??
-    minStakingError ??
-    prevEpochWeightsError ??
-    missingWeightError;
+    lastClaimedError ?? epochError ?? minStakingError ?? prevEpochWeightsError ?? buildError;
   useEffect(() => {
     if (readError) console.error('Could not read the claimable staking contracts', readError);
   }, [readError]);
@@ -408,25 +216,6 @@ export const useClaimableNomineesBatches = () => {
   const clearClaimableBatches = useCallback(async () => {
     await clearLastClaimedStakingEpoch();
   }, [clearLastClaimedStakingEpoch]);
-
-  const nomineesToClaimBatches = useMemo(() => {
-    if (
-      !nominees.length ||
-      !lastClaimedStakingEpochByNominee ||
-      !currentEpoch ||
-      !minStakingWeight ||
-      !relativeWeights
-    )
-      return [];
-
-    return buildClaimBatches({
-      nominees,
-      lastClaimedEpochs: lastClaimedStakingEpochByNominee,
-      currentEpoch,
-      minStakingWeight,
-      relativeWeights,
-    });
-  }, [nominees, lastClaimedStakingEpochByNominee, currentEpoch, minStakingWeight, relativeWeights]);
 
   // The cursors the batches were last built from, so a refresh can tell whether any moved.
   const builtFromCursors = useRef(lastClaimedStakingEpochByNominee);

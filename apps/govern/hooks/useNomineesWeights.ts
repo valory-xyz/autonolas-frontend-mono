@@ -32,8 +32,9 @@ const useStakingInflation = () => {
           return item.result;
         });
         const failedReads = TOKENOMICS_READS.filter((_, i) => data[i]?.status !== 'success');
+        const failedReadError = data.find((item) => item.status !== 'success')?.error;
 
-        return { epoch, epochLen, inflationPerSecond, failedReads };
+        return { epoch, epochLen, inflationPerSecond, failedReads, failedReadError };
       },
     },
   });
@@ -71,12 +72,17 @@ const useStakingInflation = () => {
 
   // Without the inflation the weights read never runs, so its failure must surface here.
   const failedReads = tokenomicsData?.failedReads.join(', ');
+  const failedReadError = tokenomicsData?.failedReadError;
   const error = useMemo(
     () =>
       tokenomicsError ??
       stakingPointError ??
-      (failedReads ? new Error(`Could not read the staking inflation (${failedReads})`) : null),
-    [tokenomicsError, stakingPointError, failedReads],
+      (failedReads
+        ? new Error(`Could not read the staking inflation (${failedReads})`, {
+            cause: failedReadError,
+          })
+        : null),
+    [tokenomicsError, stakingPointError, failedReads, failedReadError],
   );
 
   return { projectedInflation, error };

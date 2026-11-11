@@ -25,7 +25,7 @@ const mockReads = ({
   stakingPointError = null,
   weightsError = null,
 }: {
-  tokenomics: { status: string; result?: unknown }[];
+  tokenomics: { status: string; result?: unknown; error?: Error }[];
   tokenomicsError?: Error | null;
   stakingPointError?: Error | null;
   weightsError?: Error | null;
@@ -46,10 +46,11 @@ describe('useNomineesWeights', () => {
   beforeEach(() => jest.resetAllMocks());
 
   it('reports a failed staking-inflation read, which would leave the weights read disabled', () => {
+    const readError = new Error('execution reverted');
     mockReads({
       tokenomics: [
         { status: 'success', result: 7n },
-        { status: 'failure' },
+        { status: 'failure', error: readError },
         { status: 'success', result: 1n },
       ],
     });
@@ -58,6 +59,7 @@ describe('useNomineesWeights', () => {
 
     expect(result.current.data).toBeUndefined();
     expect(result.current.error?.message).toBe('Could not read the staking inflation (epochLen)');
+    expect(result.current.error?.cause).toBe(readError);
   });
 
   it.each([
