@@ -106,7 +106,7 @@ describe('quoteChainClaims', () => {
 
     const [quote] = await quoteChainClaims([[ARBITRUM], [[target(1), target(2)]]], ACCOUNT);
 
-    expect(quote).toMatchObject({ value: ZERO, bridgePayload: '0x' });
+    expect(quote).toMatchObject({ sendsMessage: false, value: ZERO, bridgePayload: '0x' });
     expect(mockGetArbitrumBridgePayload).not.toHaveBeenCalled();
   });
 
@@ -116,6 +116,7 @@ describe('quoteChainClaims', () => {
     const [quote] = await quoteChainClaims([[ARBITRUM], [[target(1)]]], ACCOUNT);
 
     expect(quote).toMatchObject({
+      sendsMessage: true,
       value: MESSAGE_COST + TOKEN_COST,
       bridgePayload: ORBIT_PAYLOAD,
     });
@@ -480,6 +481,24 @@ describe('prepareClaim', () => {
     ]);
     expect(claim.value).toBe(MESSAGE_COST + TOKEN_COST);
     expect(claim.account).toBe(ACCOUNT);
+  });
+
+  it('attaches the sum of two Orbit chains values, each in batch order', async () => {
+    const ROBINHOOD = 4663;
+    // Arbitrum is covered by withheld OLAS (message only); Robinhood bridges fresh OLAS.
+    mockChainState([{ withheld: OLAS * BigInt(2) }, {}], [[OLAS], [OLAS]]);
+    const batch: ClaimBatch = [
+      [ARBITRUM, ROBINHOOD],
+      [[target(1)], [target(2)]],
+    ];
+
+    await prepareClaim(batch, ACCOUNT);
+
+    const claim = mockSimulateContract.mock.calls.find(
+      ([, { functionName }]) => functionName === 'claimStakingIncentivesBatch',
+    )?.[1];
+    expect(claim.args[4]).toEqual([MESSAGE_COST, MESSAGE_COST + TOKEN_COST]);
+    expect(claim.value).toBe(MESSAGE_COST * BigInt(2) + TOKEN_COST);
   });
 
   it('sizes the gas of the exact simulated claim and returns it on the request', async () => {

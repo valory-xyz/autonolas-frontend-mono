@@ -1,5 +1,5 @@
 import { BigNumber, ethers as ethersV5 } from 'ethers-v5';
-import { encodeAbiParameters, parseAbiParameters } from 'viem';
+import { encodeAbiParameters, parseAbiParameters, zeroAddress } from 'viem';
 
 import {
   ARBITRUM_CHAIN_ID,
@@ -107,6 +107,15 @@ describe('getArbitrumBridgePayload', () => {
     });
 
     mockEstimateSubmissionFee.mockResolvedValue(mockMaxSubmissionCostToken);
+  });
+
+  it('names the chain when it is given no deposit processor', async () => {
+    await expect(
+      getArbitrumBridgePayload(stakingTargets, ARBITRUM_CHAIN_ID, zeroAddress),
+    ).rejects.toThrow(
+      `No deposit processor is registered on the Dispenser for chain ${ARBITRUM_CHAIN_ID}`,
+    );
+    expect(mockL2TargetDispenser).not.toHaveBeenCalled();
   });
 
   it('should return a bridge payload of exactly 160 bytes (320 hex chars + 0x prefix)', async () => {

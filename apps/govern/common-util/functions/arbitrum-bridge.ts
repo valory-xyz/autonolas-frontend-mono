@@ -1,6 +1,6 @@
 import { ParentToChildMessageGasEstimator, registerCustomArbitrumNetwork } from '@arbitrum/sdk';
 import { ethers as ethersV5 } from 'ethers-v5';
-import { type Address, encodeAbiParameters, parseAbiParameters } from 'viem';
+import { type Address, encodeAbiParameters, parseAbiParameters, zeroAddress } from 'viem';
 import { arbitrum, mainnet } from 'viem/chains';
 
 import { RPC_URLS, robinhood } from 'libs/util-constants/src';
@@ -129,13 +129,16 @@ export type ArbitrumBridgeParams = {
  *
  * `sendingTargets` are the targets with a positive incentive: the Dispenser drops the others
  * from the message, so only they size its calldata. `l1DepositProcessorAddress` is the chain's
- * `ArbitrumDepositProcessorL1`, as the Dispenser maps it (the caller checks it is set).
+ * `ArbitrumDepositProcessorL1`, as the Dispenser maps it.
  */
 export const getArbitrumBridgePayload = async (
   sendingTargets: Address[],
   chainId: OrbitChainId,
   l1DepositProcessorAddress: Address,
 ): Promise<ArbitrumBridgeParams> => {
+  if (l1DepositProcessorAddress === zeroAddress) {
+    throw new Error(`No deposit processor is registered on the Dispenser for chain ${chainId}`);
+  }
   if (chainId === ROBINHOOD_CHAIN_ID) ensureRobinhoodNetworkRegistered();
 
   const l1Provider = getProvider(mainnet.id);

@@ -36,6 +36,8 @@ export type ChainClaimQuote = {
   targets: `0x${string}`[];
   /** Checkpoint-aware, rounded to the processor's bridging decimals. */
   incentives: bigint[];
+  /** Some incentive is positive, so the Dispenser sends this chain a message. */
+  sendsMessage: boolean;
   /** ETH attached for this chain; see `quoteChainClaims` for when it is non-zero. */
   value: bigint;
   bridgePayload: `0x${string}`;
@@ -220,11 +222,11 @@ export const quoteChainClaims = async (
         chainId,
         targets,
         incentives: incentives[i],
+        sendsMessage: sendingTargets.length > 0,
         value: BigInt(0),
         bridgePayload: '0x',
       };
-      const sendsMessage = sendingTargets.length > 0;
-      if (!sendsMessage || !isOrbitChainId(chainId)) return quote;
+      if (!quote.sendsMessage || !isOrbitChainId(chainId)) return quote;
 
       const { bridgePayload, messageCost, tokenCost } = await getArbitrumBridgePayload(
         sendingTargets,
