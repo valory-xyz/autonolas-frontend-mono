@@ -20,14 +20,7 @@ const TOKENOMICS_READS = ['epochCounter', 'epochLen', 'inflationPerSecond'] as c
 
 const useStakingInflation = () => {
   const { data: tokenomicsData, error: tokenomicsError } = useReadContracts({
-    contracts: [
-      {
-        ...TOKENOMICS_CONTRACT,
-        functionName: 'epochCounter',
-      },
-      { ...TOKENOMICS_CONTRACT, functionName: 'epochLen' },
-      { ...TOKENOMICS_CONTRACT, functionName: 'inflationPerSecond' },
-    ],
+    contracts: TOKENOMICS_READS.map((functionName) => ({ ...TOKENOMICS_CONTRACT, functionName })),
     query: {
       select: (data) => {
         const [epoch, epochLen, inflationPerSecond] = data.map((item) => {
