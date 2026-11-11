@@ -1,21 +1,11 @@
-import { useMemo, useRef, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Button, Collapse, Flex, Modal, Space, Spin, Steps, Table, Tag, Typography } from 'antd';
 
-import {
-  formatWeiNumber,
-  notifyError,
-  notifySuccess,
-  notifyWarning,
-} from 'libs/util-functions/src';
+import { formatWeiNumber, notifyError, notifySuccess } from 'libs/util-functions/src';
 import { useAppSelector } from 'store/index';
 import { StakingContract } from 'types';
 import { useClaimableNomineesBatches } from 'hooks/useClaimableNomineeBatches';
-import {
-  type ClaimButtonState,
-  type ClaimNotice,
-  stillPendingMessage,
-  useClaimStakingIncentivesBatch,
-} from 'hooks/useClaimStakingIncentivesBatch';
+import { useClaimStakingIncentivesBatch } from 'hooks/useClaimStakingIncentivesBatch';
 
 import { StakingIncentivesModalContainer } from './styles';
 
@@ -23,9 +13,7 @@ const { Text } = Typography;
 
 const MODAL_WIDTH = 860;
 const TABLE_SCROLL_HEIGHT = 420;
-/** How long a claimed batch stays on screen before the next one is shown. */
-export const STEP_CHANGE_DELAY = 1000;
-const FAILED_ON_CHAIN_HINT = 'Claim again to sign a new transaction.';
+const STEP_CHANGE_DELAY = 1000;
 
 const modalProps = {
   title: 'Claim Staking Incentives',
@@ -70,51 +58,6 @@ const columns = [
   },
 ];
 
-const isClaimFailure = ({ kind }: ClaimNotice) =>
-  kind === 'reverted-after-simulation' || kind === 'other';
-
-const notifyClaimNotice = (notice: ClaimNotice, batchNumber: number) => {
-  switch (notice.kind) {
-    case 'wallet-rejected':
-      notifyWarning('Claim cancelled in your wallet');
-      return;
-    case 'nothing-to-claim':
-      notifyWarning('These incentives were already claimed. Nothing is left to claim.');
-      return;
-    case 'claims-changed':
-      notifyWarning(
-        'Claims changed while preparing the transaction',
-        'The list has been refreshed. Review it and claim again.',
-      );
-      return;
-    case 'reverted-after-simulation':
-      notifyError(`The claim for batch ${batchNumber} failed on-chain`, FAILED_ON_CHAIN_HINT);
-      return;
-    case 'still-pending':
-      notifyWarning(
-        'Claim not confirmed yet',
-        notice.timedOut
-          ? stillPendingMessage(notice.hash)
-          : `Could not confirm transaction ${notice.hash}. Check your wallet before claiming again.`,
-      );
-      return;
-    case 'already-in-flight':
-      notifyWarning('A claim is already in progress', notice.message);
-      return;
-    case 'refresh-failed':
-      notifyWarning('Could not refresh the claim list', notice.message);
-      return;
-    case 'other':
-      notifyError(`Failed to claim staking incentives for batch ${batchNumber}`, notice.message);
-      return;
-    default: {
-      // A new kind must be handled above; until then it still reads as a failure.
-      const unhandled: never = notice;
-      notifyError('Failed to claim staking incentives', JSON.stringify(unhandled));
-    }
-  }
-};
-
 type ClaimStakingIncentivesModalProps = {
   onClose: () => void;
 };
@@ -124,62 +67,26 @@ export const ClaimStakingIncentivesModal = ({ onClose }: ClaimStakingIncentivesM
   const [claimedBatches, setClaimedBatches] = useState<number[]>([]);
   const { stakingContracts } = useAppSelector((state) => state.govern);
 
-  const {
-    nomineesToClaimBatches,
-    claimableBatchesError,
-    getClaimedThrough,
-    isLoadingClaimableBatches,
-    clearClaimableBatches,
-    refetchClaimableBatches,
-  } = useClaimableNomineesBatches();
-  // A claim settles after its own render: a rebuild may have reset the batches meanwhile.
-  const latest = useRef({
-    currentBatch,
-    batchCount: nomineesToClaimBatches.length,
-  });
-  latest.current = { currentBatch, batchCount: nomineesToClaimBatches.length };
-
-  const {
-    claimIncentivesForBatch,
-    dismissPendingClaim,
-    claimButtonState,
-    pendingHash,
-    canDismissPendingClaim,
-  } = useClaimStakingIncentivesBatch({
+  const { nomineesToClaimBatches, isLoadingClaimableBatches, clearClaimableBatches } =
+    useClaimableNomineesBatches();
+  const { claimIncentivesForBatch, isPending, isEstimating } = useClaimStakingIncentivesBatch({
     onSuccess: () => {
-      const { currentBatch: claimedBatch, batchCount } = latest.current;
-      setClaimedBatches((prev) => [...prev, claimedBatch]);
+      setClaimedBatches((prev) => [...prev, currentBatch]);
       // Only move to next batch, if more batches are remaining.
-      if (claimedBatch < batchCount - 1) {
+      if (currentBatch < nomineesToClaimBatches.length - 1) {
         setTimeout(() => {
           setCurrentBatch((prev) => prev + 1);
         }, STEP_CHANGE_DELAY);
       }
-      notifySuccess(`Staking incentives for batch ${claimedBatch + 1} claimed successfully`);
+      notifySuccess(`Staking incentives for batch ${currentBatch + 1} claimed successfully`);
     },
-    onNotice: (notice) => {
-      if (isClaimFailure(notice)) console.error(notice);
-      else console.warn(notice);
-      notifyClaimNotice(notice, latest.current.currentBatch + 1);
+    onError: (error) => {
+      console.error(error);
+      notifyError(
+        `Failed to claim staking incentives for batch ${currentBatch + 1}`,
+        error instanceof Error ? error.message : undefined,
+      );
     },
-    onReceiptLookupFailed: ({ hash }) =>
-      notifyWarning(
-        `Could not check claim transaction ${hash}`,
-        'It may still be pending. Check your wallet or a block explorer.',
-      ),
-    onLateReceipt: ({ hash, claimed }) => {
-      if (claimed) {
-        notifySuccess(`Claim transaction ${hash} was confirmed.`);
-      } else {
-        notifyError(`Claim transaction ${hash} failed on-chain`, FAILED_ON_CHAIN_HINT);
-      }
-    },
-    refetchClaimableBatches,
-    onBatchesRebuilt: () => {
-      setCurrentBatch(0);
-      setClaimedBatches([]);
-    },
-    getClaimedThrough,
   });
 
   const nomineesForCurrentBatch = useMemo(() => {
@@ -187,10 +94,12 @@ export const ClaimStakingIncentivesModal = ({ onClose }: ClaimStakingIncentivesM
     if (!currentBatchNomineesSubArray) return [];
     return currentBatchNomineesSubArray
       .flat()
-      .map((nomineeAddress) =>
-        stakingContracts.find((nominee) => nominee.address === nomineeAddress),
-      )
-      .filter((nominee): nominee is StakingContract => nominee !== undefined);
+      .map((nomineeAddress) => {
+        const nominee = stakingContracts.find((nominee) => nominee.address === nomineeAddress);
+        if (!nominee) return null;
+        return nominee;
+      })
+      .filter((nominee): nominee is StakingContract => nominee !== null);
   }, [currentBatch, nomineesToClaimBatches, stakingContracts]);
 
   const handleClose = () => {
@@ -205,28 +114,7 @@ export const ClaimStakingIncentivesModal = ({ onClose }: ClaimStakingIncentivesM
   const isCurrentBatchClaimed = claimedBatches.includes(currentBatch);
   return (
     <Modal {...modalProps} onCancel={handleClose}>
-      {(pendingHash || canDismissPendingClaim) && (
-        <Space direction="vertical" size={4}>
-          {pendingHash && <Text type="warning">{stillPendingMessage(pendingHash)}</Text>}
-          {canDismissPendingClaim && (
-            <Space size={8}>
-              <Text type="secondary">
-                {pendingHash
-                  ? 'Sped up or cancelled it in your wallet? Dismiss this once your wallet shows it settled.'
-                  : 'An earlier claim is still waiting for your wallet. Dismiss it if your wallet shows no open request.'}
-              </Text>
-              <Button size="small" onClick={dismissPendingClaim}>
-                Dismiss
-              </Button>
-            </Space>
-          )}
-        </Space>
-      )}
-      {claimableBatchesError ? (
-        <StakingIncentivesModalContainer $isEmpty>
-          <Text type="danger">{`Could not load the claimable staking contracts: ${claimableBatchesError}`}</Text>
-        </StakingIncentivesModalContainer>
-      ) : nomineesToClaimBatches.length === 0 || isLoadingClaimableBatches ? (
+      {nomineesToClaimBatches.length === 0 || isLoadingClaimableBatches ? (
         <EmptyModalContent isLoadingClaimableBatches={isLoadingClaimableBatches} />
       ) : (
         <ModalContent
@@ -234,7 +122,8 @@ export const ClaimStakingIncentivesModal = ({ onClose }: ClaimStakingIncentivesM
           currentBatch={currentBatch}
           isCurrentBatchClaimed={isCurrentBatchClaimed}
           nomineesForCurrentBatch={nomineesForCurrentBatch}
-          claimButtonState={claimButtonState}
+          isPending={isPending}
+          isEstimating={isEstimating}
           handleClaimForBatch={handleClaimForBatch}
         />
       )}
@@ -262,7 +151,8 @@ type ModalContentProps = {
   currentBatch: number;
   isCurrentBatchClaimed: boolean;
   nomineesForCurrentBatch: StakingContract[];
-  claimButtonState: ClaimButtonState;
+  isPending: boolean;
+  isEstimating: boolean;
   handleClaimForBatch: () => void;
 };
 
@@ -271,7 +161,8 @@ const ModalContent = ({
   currentBatch,
   isCurrentBatchClaimed,
   nomineesForCurrentBatch,
-  claimButtonState,
+  isPending,
+  isEstimating,
   handleClaimForBatch,
 }: ModalContentProps) => (
   <StakingIncentivesModalContainer>
@@ -308,13 +199,8 @@ const ModalContent = ({
       />
 
       {!isCurrentBatchClaimed && (
-        <Button
-          type="primary"
-          size="large"
-          loading={claimButtonState !== 'idle'}
-          onClick={handleClaimForBatch}
-        >
-          {claimButtonState === 'preparing' ? 'Preparing claim...' : 'Claim Incentives'}
+        <Button type="primary" size="large" loading={isPending} onClick={handleClaimForBatch}>
+          {isEstimating ? 'Estimating bridge costs...' : 'Claim Incentives'}
         </Button>
       )}
     </Flex>

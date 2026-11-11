@@ -1,41 +1,23 @@
-import { useEffect, useMemo, useCallback, useRef, useState } from 'react';
-import { useStore } from 'react-redux';
+import { useMemo, useCallback } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import type { Address, MulticallResponse } from 'viem';
+import type { Address } from 'viem';
 import { mainnet } from 'viem/chains';
 import { useReadContract, useReadContracts } from 'wagmi';
+import { cloneDeep } from 'lodash';
 
-import { pruneOwnClaims } from 'store/govern';
-import { type RootState, useAppDispatch, useAppSelector } from 'store/index';
+import { useAppSelector } from 'store/index';
 import { useNomineesWeights } from 'hooks/useNomineesWeights';
 import { TOKENOMICS } from 'libs/util-contracts/src';
-import { getErrorMessage } from 'libs/util-functions/src';
 import { DISPENSER } from 'libs/util-contracts/src/lib/abiAndAddresses';
 
-import { DISPENSER_ADDRESS } from 'common-util/constants/addresses';
 import { getNomineeHash } from 'common-util/functions/nominee-hash';
-import {
-  buildClaimBatches,
-  type ByAddress,
-  type ClaimableBatchesRefresh,
-  type Cursors,
-  getCursorChange,
-  claimedThroughOf,
-  getExpectedCursors,
-  getRefreshChange,
-  READ_TARGET,
-  readFailure,
-} from 'common-util/functions/claim-batches';
-import type { ClaimBatch } from 'common-util/functions/staking-incentives-claim';
 import { useEpochCounter, useEpochTokenomics } from 'components/Donate/hooks';
 import type { StakingContract } from 'types';
 
+const MAX_BATCH_SIZE = 10;
+
 const useMinStakingValue = ({ epoch }: { epoch: number | null }) => {
-  const {
-    data: minStakingWeight,
-    isLoading: isMinStakingLoading,
-    error: minStakingError,
-  } = useReadContract({
+  const { data: minStakingWeight, isLoading: isMinStakingLoading } = useReadContract({
     address: TOKENOMICS.addresses[mainnet.id],
     abi: TOKENOMICS.abi,
     chainId: mainnet.id,
@@ -50,33 +32,13 @@ const useMinStakingValue = ({ epoch }: { epoch: number | null }) => {
     },
   });
 
-  return { minStakingWeight, isMinStakingLoading, minStakingError };
+  return { minStakingWeight, isMinStakingLoading };
 };
-
-/**
- * Last claimed epoch per nominee address. Throws on a failed read: `useReadContracts` allows
- * failures, and a failed read would otherwise become `NaN` and drop the contract as claimed.
- */
-const toLastClaimedEpochs = (
-  nominees: StakingContract[],
-  results: readonly MulticallResponse<unknown>[] | undefined,
-): Record<Address, number> =>
-  nominees.reduce(
-    (acc, nominee, index) => {
-      const read = results?.[index];
-      if (read?.status !== 'success') {
-        throw readFailure(READ_TARGET.claimCursor, nominee.address, read?.error);
-      }
-      acc[nominee.address] = Number(read.result);
-      return acc;
-    },
-    {} as Record<Address, number>,
-  );
 
 const useNomineesLastClaimedStakingEpoch = ({ nominees }: { nominees: StakingContract[] }) => {
   const queryClient = useQueryClient();
   const contracts = nominees.map((nominee) => ({
-    address: DISPENSER_ADDRESS,
+    address: DISPENSER.addresses[mainnet.id],
     abi: DISPENSER.abi,
     chainId: mainnet.id,
     functionName: 'mapLastClaimedStakingEpochs',
@@ -84,10 +46,8 @@ const useNomineesLastClaimedStakingEpoch = ({ nominees }: { nominees: StakingCon
   }));
   const {
     data: lastClaimedStakingEpoch,
-    error: lastClaimedQueryError,
     isLoading: isLastClaimedLoading,
     queryKey,
-    refetch: refetchLastClaimedStakingEpoch,
   } = useReadContracts({
     contracts,
   });
@@ -96,26 +56,23 @@ const useNomineesLastClaimedStakingEpoch = ({ nominees }: { nominees: StakingCon
     queryClient.removeQueries({ queryKey });
   }, [queryClient, queryKey]);
 
-  const { epochs: lastClaimedStakingEpochByNominee, error: lastClaimedError } = useMemo(() => {
-    if (!lastClaimedStakingEpoch) return { epochs: null, error: lastClaimedQueryError ?? null };
-    try {
-      return { epochs: toLastClaimedEpochs(nominees, lastClaimedStakingEpoch), error: null };
-    } catch (error) {
-      return { epochs: null, error };
-    }
-  }, [lastClaimedStakingEpoch, lastClaimedQueryError, nominees]);
+  // Map the results to an object with nominee address as key
+  const lastClaimedStakingEpochByNominee = useMemo(() => {
+    if (!lastClaimedStakingEpoch) return null;
 
-  const refetchLastClaimedEpochs = useCallback(async () => {
-    const { data } = await refetchLastClaimedStakingEpoch({ throwOnError: true });
-    return toLastClaimedEpochs(nominees, data);
-  }, [nominees, refetchLastClaimedStakingEpoch]);
+    return lastClaimedStakingEpoch.reduce(
+      (acc, res, index) => {
+        acc[nominees[index].address] = res;
+        return acc;
+      },
+      {} as Record<Address, (typeof lastClaimedStakingEpoch)[number]>,
+    );
+  }, [lastClaimedStakingEpoch, nominees]);
 
   return {
     lastClaimedStakingEpochByNominee,
-    lastClaimedError,
     isLastClaimedLoading,
     clearLastClaimedStakingEpoch,
-    refetchLastClaimedEpochs,
   };
 };
 
@@ -126,13 +83,9 @@ const useNomineesWeightsAtPrevEpochEnd = ({
   nominees: StakingContract[];
   previousEpoch: number | null;
 }) => {
-  const { data: prevEpochPoint, error: prevEpochError } = useEpochTokenomics(previousEpoch);
+  const { data: prevEpochPoint } = useEpochTokenomics(previousEpoch);
 
-  const {
-    data: nomineesWeightsAtPrevEpochEnd,
-    weightReadErrors,
-    error: weightsError,
-  } = useNomineesWeights(
+  const { data: nomineesWeightsAtPrevEpochEnd } = useNomineesWeights(
     nominees.map((nominee) => ({
       account: nominee.address,
       chainId: BigInt(nominee.chainId),
@@ -142,117 +95,73 @@ const useNomineesWeightsAtPrevEpochEnd = ({
 
   return {
     nomineesWeightsAtPrevEpochEnd,
-    weightReadErrors,
-    error: prevEpochError ?? weightsError,
   };
+};
+
+/**
+ * Assuming max batch size to be "3"
+ * nomineesTimesToClaimArray: [[0x1, 1], [0x2, 1], [0x3, 2], [0x4, 1]]
+ *
+ * returns:
+ * [
+ *  [0x1, 0x2, 0x3],
+ *  [0x3, 0x4],
+ * ]
+ */
+const chunkNomineesArrayByTimeToClaim = (
+  nomineesTimesToClaimArray: [Address, number][],
+  chunkSize: number = MAX_BATCH_SIZE,
+) => {
+  const chunks: Address[][] = [];
+  let filteredNomineesTimesToClaim = cloneDeep(nomineesTimesToClaimArray);
+
+  // eslint-disable-next-line no-constant-condition
+  while (true) {
+    const currentChunk: Address[] = [];
+    let index = 0;
+
+    for (index = 0; index < Math.min(chunkSize, filteredNomineesTimesToClaim.length); index++) {
+      const nominee = filteredNomineesTimesToClaim[index][0];
+      currentChunk.push(nominee);
+      /* Decrease time to claim by 1 each time the nominee gets into the currentChunk, this ensures 
+      the order as well as the times a nominee needs to be claimed works as expected */
+      filteredNomineesTimesToClaim[index][1] -= 1;
+    }
+
+    chunks.push(currentChunk);
+    filteredNomineesTimesToClaim = filteredNomineesTimesToClaim.filter(
+      ([, timesToClaim]) => timesToClaim > 0,
+    );
+
+    if (filteredNomineesTimesToClaim.length === 0) {
+      break;
+    }
+  }
+
+  return chunks;
 };
 
 export const useClaimableNomineesBatches = () => {
   const nominees = useAppSelector((state) => state.govern.stakingContracts);
-  const { data: currentEpoch, isLoading: isEpochLoading, error: epochError } = useEpochCounter();
+  const { data: currentEpoch, isLoading: isEpochLoading } = useEpochCounter();
   const previousEpoch = currentEpoch ? currentEpoch - 1 : null;
-  const { minStakingWeight, isMinStakingLoading, minStakingError } = useMinStakingValue({
+  const { minStakingWeight, isMinStakingLoading } = useMinStakingValue({
     epoch: previousEpoch,
   });
-  const {
-    lastClaimedStakingEpochByNominee,
-    lastClaimedError,
-    isLastClaimedLoading,
-    clearLastClaimedStakingEpoch,
-    refetchLastClaimedEpochs,
-  } = useNomineesLastClaimedStakingEpoch({ nominees });
-  const {
-    nomineesWeightsAtPrevEpochEnd,
-    weightReadErrors,
-    error: prevEpochWeightsError,
-  } = useNomineesWeightsAtPrevEpochEnd({
+  const { lastClaimedStakingEpochByNominee, isLastClaimedLoading, clearLastClaimedStakingEpoch } =
+    useNomineesLastClaimedStakingEpoch({ nominees });
+  const { nomineesWeightsAtPrevEpochEnd } = useNomineesWeightsAtPrevEpochEnd({
     nominees,
     previousEpoch,
   });
 
-  const relativeWeights = useMemo(() => {
-    if (!nomineesWeightsAtPrevEpochEnd) return null;
-    const weights: ByAddress = {};
-    for (const [address, weight] of Object.entries(nomineesWeightsAtPrevEpochEnd)) {
-      if (weight) weights[address as Address] = weight.percentage * 100;
-    }
-    return weights;
-  }, [nomineesWeightsAtPrevEpochEnd]);
-
-  const store = useStore<RootState>();
-  const dispatch = useAppDispatch();
-  // In the store, so a claim confirmed after its modal closed still counts in the next one.
-  const readOwnClaims = useCallback(
-    (): Cursors => store.getState().govern.ownClaimedThrough,
-    [store],
-  );
-
-  // Bumped by a refresh, so the shown list takes up claims recorded since it was built. A claim
-  // recorded on its own does not rebuild it: the modal steps through this list by index.
-  const [refreshCount, setRefreshCount] = useState(0);
-
-  const {
-    batches: nomineesToClaimBatches,
-    buildError,
-    builtWithOwnClaims,
-  } = useMemo((): {
-    batches: ClaimBatch[];
-    buildError: unknown;
-    builtWithOwnClaims: Cursors;
-  } => {
-    const own = readOwnClaims();
-    if (
-      !nominees.length ||
-      !lastClaimedStakingEpochByNominee ||
-      !currentEpoch ||
-      !minStakingWeight ||
-      !relativeWeights
-    )
-      return { batches: [], buildError: null, builtWithOwnClaims: own };
-    try {
-      const batches = buildClaimBatches({
-        nominees,
-        lastClaimedEpochs: getExpectedCursors(lastClaimedStakingEpochByNominee, own),
-        currentEpoch,
-        minStakingWeight,
-        relativeWeights,
-        weightReadErrors,
-      });
-      return { batches, buildError: null, builtWithOwnClaims: own };
-    } catch (error) {
-      return { batches: [], buildError: error, builtWithOwnClaims: own };
-    }
-    // The body does not read `refreshCount`; it is listed only to force the rebuild.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [
-    nominees,
-    lastClaimedStakingEpochByNominee,
-    currentEpoch,
-    minStakingWeight,
-    relativeWeights,
-    weightReadErrors,
-    readOwnClaims,
-    refreshCount,
-  ]);
-  const shownOwnClaims = useRef(builtWithOwnClaims);
-  shownOwnClaims.current = builtWithOwnClaims;
-
-  const readError =
-    lastClaimedError ?? epochError ?? minStakingError ?? prevEpochWeightsError ?? buildError;
-  useEffect(() => {
-    if (readError) console.error('Could not read the claimable staking contracts', readError);
-  }, [readError]);
-  const claimableBatchesError = readError ? getErrorMessage(readError) : null;
-
-  // A failed read ends the loading: without its data the weights read never runs, so
-  // `nomineesWeightsAtPrevEpochEnd` would keep it on.
+  // Calculate if we're still loading data
   const isLoading =
-    !readError &&
-    (isEpochLoading ||
-      isMinStakingLoading ||
-      isLastClaimedLoading ||
-      !nominees.length ||
-      !nomineesWeightsAtPrevEpochEnd);
+    isEpochLoading ||
+    isMinStakingLoading ||
+    isLastClaimedLoading ||
+    !nominees.length ||
+    !nomineesWeightsAtPrevEpochEnd;
 
   /**
    * Clear the last claimed staking epoch for the nominees, this is required in
@@ -263,74 +172,146 @@ export const useClaimableNomineesBatches = () => {
     await clearLastClaimedStakingEpoch();
   }, [clearLastClaimedStakingEpoch]);
 
-  // The cursors the batches were last built from, so a refresh can tell whether any moved.
-  const builtFromCursors = useRef(lastClaimedStakingEpochByNominee);
-  builtFromCursors.current = lastClaimedStakingEpochByNominee;
-  /**
-   * Uses the latest cursor read and every own claim recorded so far, so a claim sent after an
-   * earlier one moves on from it. Taken when a claim is sent, so its confirmation records it
-   * whatever this or another modal has loaded by then.
-   */
-  const getClaimedThrough = useCallback(
-    (batch: ClaimBatch): Cursors => {
-      const expected = getExpectedCursors(builtFromCursors.current, readOwnClaims());
-      return expected ? claimedThroughOf(expected, batch) : {};
-    },
-    [readOwnClaims],
-  );
+  const nomineesToClaimBatches = useMemo(() => {
+    if (
+      !nominees.length ||
+      !lastClaimedStakingEpochByNominee ||
+      !currentEpoch ||
+      !minStakingWeight ||
+      !nomineesWeightsAtPrevEpochEnd
+    )
+      return [];
 
-  /**
-   * Re-reads the claim cursors and rebuilds the batches from them, e.g. after another claimer
-   * advanced a cursor. Throws while the claim data is still loading, if a cursor cannot be read,
-   * or if a nominee's vote weight could not be read.
-   */
-  const refetchClaimableBatches = useCallback(async (): Promise<ClaimableBatchesRefresh> => {
-    if (!currentEpoch || !minStakingWeight || !relativeWeights) {
-      throw new Error('The claimable staking contracts are still loading. Try again shortly.');
-    }
-    const lastClaimedEpochs = await refetchLastClaimedEpochs();
-    const own = readOwnClaims();
-    const refreshed = getExpectedCursors(lastClaimedEpochs, own);
-    const change = getRefreshChange(
-      getCursorChange(
-        builtFromCursors.current,
-        getExpectedCursors(builtFromCursors.current, own),
-        lastClaimedEpochs,
-      ),
-      getExpectedCursors(builtFromCursors.current, shownOwnClaims.current),
-      refreshed,
+    /**
+     * Filter nominees to be claimed as per the conditions:
+     * 1. Nominee's relative weight > min staking weight
+     * 2. Nominee has not claimed in the current or future epochs
+     */
+    const filteredNominees = nominees.filter((nominee) => {
+      const nomineeRelativeWeight = nomineesWeightsAtPrevEpochEnd[nominee.address].percentage * 100;
+      const lastClaimedStakingEpoch = Number(
+        lastClaimedStakingEpochByNominee[nominee.address].result,
+      );
+
+      return nomineeRelativeWeight >= minStakingWeight && lastClaimedStakingEpoch < currentEpoch;
+    });
+
+    /**
+     * Group nominees by chain Ids and extract their addresses
+     */
+    const nomineesByChain = filteredNominees.reduce(
+      (acc, nominee) => {
+        acc[nominee.chainId] = [...(acc[nominee.chainId] || []), nominee.address];
+        return acc;
+      },
+      {} as Record<number, Address[]>,
     );
-    builtFromCursors.current = lastClaimedEpochs;
-    dispatch(pruneOwnClaims(lastClaimedEpochs));
-    setRefreshCount((count) => count + 1);
-    return {
-      batches: buildClaimBatches({
-        nominees,
-        lastClaimedEpochs: refreshed,
-        currentEpoch,
-        minStakingWeight,
-        relativeWeights,
-        weightReadErrors,
-      }),
-      change,
-    };
+
+    /**
+     * Sort the addresses lexicographically
+     */
+    const sortedNomineesByChain = Object.keys(nomineesByChain).reduce(
+      (acc, chainId) => {
+        acc[Number(chainId)] = nomineesByChain[Number(chainId)].sort((a, b) =>
+          a.toString().localeCompare(b.toString()),
+        );
+        return acc;
+      },
+      {} as Record<number, Address[]>,
+    );
+
+    /**
+     * Chunk the nominees array into smaller arrays of max size `MAX_BATCH_SIZE`
+     * eg:
+     * {
+     *  1: [
+     *    [0x1, 0x2, 0x3],
+     *    [0x4, 0x5, 0x6],
+     *    [0x7, 0x8, 0x9],
+     *    [0x10, 0x11, 0x12],
+     *  ],
+     *  2: [
+     *    [0x13, 0x14, 0x15],
+     *    [0x16, 0x17, 0x18],
+     *    [0x19, 0x20, 0x21],
+     *    [0x22, 0x23, 0x24],
+     *  ],
+     * }
+     */
+    const batchesByChain = Object.keys(sortedNomineesByChain).reduce(
+      (acc, chainId) => {
+        const nominees = sortedNomineesByChain[Number(chainId)];
+
+        /**
+         * Nominees along with their timesToClaim
+         * eg: [[0x1, 1], [0x2, 1], [0x3, 2], [0x4, 1]]
+         */
+        const nomineesTimesToClaimArray = nominees.reduce(
+          (acc, nominee) => {
+            const lastClaimedStakingEpoch = Number(
+              lastClaimedStakingEpochByNominee[nominee].result,
+            );
+            acc.push([nominee, currentEpoch - lastClaimedStakingEpoch]);
+            return acc;
+          },
+          [] as [Address, number][],
+        );
+        const chunks = chunkNomineesArrayByTimeToClaim(nomineesTimesToClaimArray, MAX_BATCH_SIZE);
+        acc[Number(chainId)] = chunks;
+        return acc;
+      },
+      {} as Record<number, Address[][]>,
+    );
+
+    /**
+     * Sort the chain ids in ascending order
+     */
+    const sortedChainIds = Object.keys(batchesByChain).sort((a, b) => Number(a) - Number(b));
+
+    /**
+     * Create batches of nominees to claim
+     * eg:
+     * [
+     *    [[1, 2], [[0x1, 0x2, 0x3], [0x13, 0x14, 0x15]]],
+     *    [[1, 2], [[0x4, 0x5, 0x6], [0x16, 0x17, 0x18]]],
+     * ]
+     * The max size of the second element of the subarray would be determined by the `MAX_BATCH_SIZE`
+     */
+    let batchIndex = 0;
+    const batches: [number[], Address[][]][] = [];
+    // eslint-disable-next-line no-constant-condition
+    while (true) {
+      const currentBatchChainIds: number[] = [];
+      const currentBatchNominees: Address[][] = [];
+
+      sortedChainIds.forEach((chainId) => {
+        const nomineesByChainAtIndex = batchesByChain[Number(chainId)]?.[batchIndex] || [];
+        if (nomineesByChainAtIndex.length !== 0) {
+          currentBatchChainIds.push(Number(chainId));
+          currentBatchNominees.push(nomineesByChainAtIndex);
+        }
+      });
+
+      batchIndex++;
+      if (currentBatchNominees.length === 0) {
+        break;
+      }
+
+      batches.push([currentBatchChainIds, currentBatchNominees]);
+    }
+
+    return batches;
   }, [
     nominees,
+    lastClaimedStakingEpochByNominee,
     currentEpoch,
     minStakingWeight,
-    relativeWeights,
-    refetchLastClaimedEpochs,
-    weightReadErrors,
-    readOwnClaims,
-    dispatch,
+    nomineesWeightsAtPrevEpochEnd,
   ]);
 
   return {
     nomineesToClaimBatches,
-    claimableBatchesError,
-    getClaimedThrough,
     isLoadingClaimableBatches: isLoading,
     clearClaimableBatches,
-    refetchClaimableBatches,
   };
 };

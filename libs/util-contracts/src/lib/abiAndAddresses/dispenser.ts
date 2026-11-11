@@ -17,18 +17,43 @@ export const DISPENSER = {
           type: 'address',
         },
         {
+          internalType: 'address',
+          name: '_treasury',
+          type: 'address',
+        },
+        {
+          internalType: 'address',
+          name: '_voteWeighting',
+          type: 'address',
+        },
+        {
           internalType: 'bytes32',
           name: '_retainer',
           type: 'bytes32',
         },
+        {
+          internalType: 'uint256',
+          name: '_maxNumClaimingEpochs',
+          type: 'uint256',
+        },
+        {
+          internalType: 'uint256',
+          name: '_maxNumStakingTargets',
+          type: 'uint256',
+        },
+        {
+          internalType: 'uint256',
+          name: '_defaultMinStakingWeight',
+          type: 'uint256',
+        },
+        {
+          internalType: 'uint256',
+          name: '_defaultMaxStakingIncentive',
+          type: 'uint256',
+        },
       ],
       stateMutability: 'nonpayable',
       type: 'constructor',
-    },
-    {
-      inputs: [],
-      name: 'AlreadyInitialized',
-      type: 'error',
     },
     {
       inputs: [
@@ -126,11 +151,6 @@ export const DISPENSER = {
       type: 'error',
     },
     {
-      inputs: [],
-      name: 'Unpaused',
-      type: 'error',
-    },
-    {
       inputs: [
         {
           internalType: 'bytes32',
@@ -205,19 +225,6 @@ export const DISPENSER = {
         },
       ],
       name: 'AddNomineeHash',
-      type: 'event',
-    },
-    {
-      anonymous: false,
-      inputs: [
-        {
-          indexed: true,
-          internalType: 'address',
-          name: 'implementation',
-          type: 'address',
-        },
-      ],
-      name: 'ImplementationUpdated',
       type: 'event',
     },
     {
@@ -430,6 +437,38 @@ export const DISPENSER = {
       anonymous: false,
       inputs: [
         {
+          indexed: false,
+          internalType: 'uint256',
+          name: 'maxNumClaimingEpochs',
+          type: 'uint256',
+        },
+        {
+          indexed: false,
+          internalType: 'uint256',
+          name: 'maxNumStakingTargets',
+          type: 'uint256',
+        },
+      ],
+      name: 'StakingParamsUpdated',
+      type: 'event',
+    },
+    {
+      anonymous: false,
+      inputs: [
+        {
+          indexed: true,
+          internalType: 'address',
+          name: 'tokenomics',
+          type: 'address',
+        },
+      ],
+      name: 'TokenomicsUpdated',
+      type: 'event',
+    },
+    {
+      anonymous: false,
+      inputs: [
+        {
           indexed: true,
           internalType: 'address',
           name: 'treasury',
@@ -497,19 +536,6 @@ export const DISPENSER = {
       type: 'function',
     },
     {
-      inputs: [],
-      name: 'PROXY_DISPENSER',
-      outputs: [
-        {
-          internalType: 'bytes32',
-          name: '',
-          type: 'bytes32',
-        },
-      ],
-      stateMutability: 'view',
-      type: 'function',
-    },
-    {
       inputs: [
         {
           internalType: 'bytes32',
@@ -567,30 +593,17 @@ export const DISPENSER = {
           name: 'nomineeHash',
           type: 'bytes32',
         },
-        {
-          internalType: 'uint256[]',
-          name: 'zeroWeightEpochs',
-          type: 'uint256[]',
-        },
       ],
-      stateMutability: 'view',
+      stateMutability: 'nonpayable',
       type: 'function',
     },
     {
       inputs: [
         {
           internalType: 'address',
-          name: 'implementation',
+          name: '_tokenomics',
           type: 'address',
         },
-      ],
-      name: 'changeImplementation',
-      outputs: [],
-      stateMutability: 'nonpayable',
-      type: 'function',
-    },
-    {
-      inputs: [
         {
           internalType: 'address',
           name: '_treasury',
@@ -616,6 +629,24 @@ export const DISPENSER = {
         },
       ],
       name: 'changeOwner',
+      outputs: [],
+      stateMutability: 'nonpayable',
+      type: 'function',
+    },
+    {
+      inputs: [
+        {
+          internalType: 'uint256',
+          name: '_maxNumClaimingEpochs',
+          type: 'uint256',
+        },
+        {
+          internalType: 'uint256',
+          name: '_maxNumStakingTargets',
+          type: 'uint256',
+        },
+      ],
+      name: 'changeStakingParams',
       outputs: [],
       stateMutability: 'nonpayable',
       type: 'function',
@@ -711,31 +742,29 @@ export const DISPENSER = {
       type: 'function',
     },
     {
-      inputs: [
-        {
-          internalType: 'address',
-          name: '_treasury',
-          type: 'address',
-        },
-        {
-          internalType: 'address',
-          name: '_voteWeighting',
-          type: 'address',
-        },
+      inputs: [],
+      name: 'defaultMaxStakingIncentive',
+      outputs: [
         {
           internalType: 'uint256',
-          name: '_maxNumClaimingEpochs',
-          type: 'uint256',
-        },
-        {
-          internalType: 'uint256',
-          name: '_maxNumStakingTargets',
+          name: '',
           type: 'uint256',
         },
       ],
-      name: 'initialize',
-      outputs: [],
-      stateMutability: 'nonpayable',
+      stateMutability: 'view',
+      type: 'function',
+    },
+    {
+      inputs: [],
+      name: 'defaultMinStakingWeight',
+      outputs: [
+        {
+          internalType: 'uint256',
+          name: '',
+          type: 'uint256',
+        },
+      ],
+      stateMutability: 'view',
       type: 'function',
     },
     {
@@ -883,13 +912,6 @@ export const DISPENSER = {
         },
       ],
       stateMutability: 'view',
-      type: 'function',
-    },
-    {
-      inputs: [],
-      name: 'pause',
-      outputs: [],
-      stateMutability: 'nonpayable',
       type: 'function',
     },
     {
