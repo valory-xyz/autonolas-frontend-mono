@@ -5,6 +5,7 @@ import { mainnet } from 'viem/chains';
 import { useReadContract, useReadContracts } from 'wagmi';
 
 import { TOKENOMICS, VOTE_WEIGHTING } from 'libs/util-contracts/src/lib/abiAndAddresses';
+import { VOTE_WEIGHTING_ADDRESS } from 'common-util/constants/addresses';
 import { useMemo } from 'react';
 import { Nominee } from 'types';
 
@@ -16,16 +17,11 @@ const TOKENOMICS_CONTRACT = {
   chainId: mainnet.id,
 } as const;
 
+const TOKENOMICS_READS = ['epochCounter', 'epochLen', 'inflationPerSecond'] as const;
+
 const useStakingInflation = () => {
-  const { data: tokenomicsData } = useReadContracts({
-    contracts: [
-      {
-        ...TOKENOMICS_CONTRACT,
-        functionName: 'epochCounter',
-      },
-      { ...TOKENOMICS_CONTRACT, functionName: 'epochLen' },
-      { ...TOKENOMICS_CONTRACT, functionName: 'inflationPerSecond' },
-    ],
+  const { data: tokenomicsData, error: tokenomicsError } = useReadContracts({
+    contracts: TOKENOMICS_READS.map((functionName) => ({ ...TOKENOMICS_CONTRACT, functionName })),
     query: {
       select: (data) => {
         const [epoch, epochLen, inflationPerSecond] = data.map((item) => {
@@ -35,14 +31,16 @@ const useStakingInflation = () => {
 
           return item.result;
         });
+        const failedReads = TOKENOMICS_READS.filter((_, i) => data[i]?.status !== 'success');
+        const failedReadError = data.find((item) => item.status !== 'success')?.error;
 
-        return { epoch, epochLen, inflationPerSecond };
+        return { epoch, epochLen, inflationPerSecond, failedReads, failedReadError };
       },
     },
   });
 
   // Get epoch inflation
-  const { data: stakingPoint } = useReadContract({
+  const { data: stakingPoint, error: stakingPointError } = useReadContract({
     address: TOKENOMICS.addresses[mainnet.id],
     abi: TOKENOMICS.abi,
     chainId: mainnet.id,
@@ -72,7 +70,22 @@ const useStakingInflation = () => {
     return result;
   }, [tokenomicsData, stakingPoint]);
 
-  return { projectedInflation };
+  // Without the inflation the weights read never runs, so its failure must surface here.
+  const failedReads = tokenomicsData?.failedReads.join(', ');
+  const failedReadError = tokenomicsData?.failedReadError;
+  const error = useMemo(
+    () =>
+      tokenomicsError ??
+      stakingPointError ??
+      (failedReads
+        ? new Error(`Could not read the staking inflation (${failedReads})`, {
+            cause: failedReadError,
+          })
+        : null),
+    [tokenomicsError, stakingPointError, failedReads, failedReadError],
+  );
+
+  return { projectedInflation, error };
 };
 
 export const useNomineesWeights = (
@@ -80,10 +93,10 @@ export const useNomineesWeights = (
   timestamp: number | null,
   scopeKey?: string,
 ) => {
-  const { projectedInflation } = useStakingInflation();
+  const { projectedInflation, error: inflationError } = useStakingInflation();
 
   const contracts = nominees.map((nominee) => ({
-    address: (VOTE_WEIGHTING.addresses as Record<number, Address>)[mainnet.id],
+    address: VOTE_WEIGHTING_ADDRESS,
     abi: VOTE_WEIGHTING.abi as Abi,
     chainId: mainnet.id,
     // There may be cases where no one voted on the contract during the week,
@@ -93,7 +106,7 @@ export const useNomineesWeights = (
     args: [nominee.account, nominee.chainId, timestamp],
   }));
 
-  const { data } = useReadContracts({
+  const { data, error } = useReadContracts({
     contracts,
     scopeKey,
     query: {
@@ -101,7 +114,10 @@ export const useNomineesWeights = (
       select: (data) => {
         if (!projectedInflation) return;
 
-        return data.reduce((res: Record<Address, Weight>, item, index) => {
+        // A nominee whose read failed is left out of `weights`, with its error in `weightReadErrors`.
+        const weightReadErrors: Partial<Record<Address, unknown>> = {};
+        const weights = data.reduce((res: Partial<Record<Address, Weight>>, item, index) => {
+          if (item.status === 'failure') weightReadErrors[nominees[index].account] = item.error;
           if (item.status === 'success' && item.result) {
             const [weight, totalSum] = item.result as number[];
 
@@ -119,9 +135,14 @@ export const useNomineesWeights = (
           }
           return res;
         }, {});
+        return { weights, weightReadErrors };
       },
     },
   });
 
-  return { data };
+  return {
+    data: data?.weights,
+    weightReadErrors: data?.weightReadErrors,
+    error: inflationError ?? error,
+  };
 };

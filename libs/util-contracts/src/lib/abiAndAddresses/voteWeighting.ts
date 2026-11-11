@@ -13,6 +13,11 @@ export const VOTE_WEIGHTING: Contract = {
           name: '_ve',
           type: 'address',
         },
+        {
+          internalType: 'address',
+          name: '_dispenser',
+          type: 'address',
+        },
       ],
       stateMutability: 'nonpayable',
       type: 'constructor',
@@ -52,6 +57,17 @@ export const VOTE_WEIGHTING: Contract = {
         },
       ],
       name: 'NegativeSlope',
+      type: 'error',
+    },
+    {
+      inputs: [
+        {
+          internalType: 'uint256',
+          name: 'chainId',
+          type: 'uint256',
+        },
+      ],
+      name: 'NoDepositProcessor',
       type: 'error',
     },
     {
@@ -148,6 +164,22 @@ export const VOTE_WEIGHTING: Contract = {
         },
       ],
       name: 'OwnerOnly',
+      type: 'error',
+    },
+    {
+      inputs: [
+        {
+          internalType: 'bytes32',
+          name: 'account',
+          type: 'bytes32',
+        },
+        {
+          internalType: 'uint256',
+          name: 'chainId',
+          type: 'uint256',
+        },
+      ],
+      name: 'RetainerOnForeignChain',
       type: 'error',
     },
     {
@@ -300,19 +332,6 @@ export const VOTE_WEIGHTING: Contract = {
         {
           indexed: true,
           internalType: 'address',
-          name: 'dispenser',
-          type: 'address',
-        },
-      ],
-      name: 'DispenserUpdated',
-      type: 'event',
-    },
-    {
-      anonymous: false,
-      inputs: [
-        {
-          indexed: true,
-          internalType: 'address',
           name: 'sender',
           type: 'address',
         },
@@ -415,8 +434,45 @@ export const VOTE_WEIGHTING: Contract = {
           name: 'weight',
           type: 'uint256',
         },
+        {
+          indexed: false,
+          internalType: 'uint256',
+          name: 'powerUsed',
+          type: 'uint256',
+        },
       ],
       name: 'VoteForNominee',
+      type: 'event',
+    },
+    {
+      anonymous: false,
+      inputs: [
+        {
+          indexed: true,
+          internalType: 'address',
+          name: 'user',
+          type: 'address',
+        },
+        {
+          indexed: true,
+          internalType: 'bytes32',
+          name: 'nominee',
+          type: 'bytes32',
+        },
+        {
+          indexed: false,
+          internalType: 'uint256',
+          name: 'chainId',
+          type: 'uint256',
+        },
+        {
+          indexed: false,
+          internalType: 'uint256',
+          name: 'powerUsed',
+          type: 'uint256',
+        },
+      ],
+      name: 'VotingPowerRevoked',
       type: 'event',
     },
     {
@@ -516,19 +572,6 @@ export const VOTE_WEIGHTING: Contract = {
         },
       ],
       name: 'addNomineeNonEVM',
-      outputs: [],
-      stateMutability: 'nonpayable',
-      type: 'function',
-    },
-    {
-      inputs: [
-        {
-          internalType: 'address',
-          name: 'newDispenser',
-          type: 'address',
-        },
-      ],
-      name: 'changeDispenser',
       outputs: [],
       stateMutability: 'nonpayable',
       type: 'function',
