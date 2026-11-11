@@ -18,7 +18,7 @@ const TOKENOMICS_OK = [
   { status: 'success', result: 1n },
 ];
 
-/** Mocks the reads: the staking-inflation read runs its `select` over `tokenomics`; the weights read returns no data and `weightsError`. */
+/** Mocks the inflation and weights reads. */
 const mockReads = ({
   tokenomics,
   tokenomicsError = null,
