@@ -742,6 +742,42 @@ describe('useClaimStakingIncentivesBatch', () => {
       expect(props.refetchClaimableBatches).not.toHaveBeenCalled();
     });
 
+    it('names the sent hash of a claim behind one still being prepared', async () => {
+      const OLD_HASH = '0xold';
+      mockPrepareClaim.mockResolvedValue(prepared(FIRST));
+      let signFirst: (hash: string) => void = () => undefined;
+      mockWriteContract.mockReturnValueOnce(
+        new Promise((resolve) => {
+          signFirst = resolve;
+        }),
+      );
+      mockWaitForTransactionReceipt.mockReturnValue(new Promise(() => undefined));
+      const first = setup();
+      await act(async () => {
+        first.result.current.claimIncentivesForBatch(FIRST);
+      });
+      first.unmount();
+      const reopened = setup();
+      act(() => reopened.result.current.dismissPendingClaim());
+      mockPrepareClaim.mockReturnValueOnce(new Promise(() => undefined));
+      await act(async () => {
+        reopened.result.current.claimIncentivesForBatch(FIRST);
+      });
+
+      await act(async () => {
+        signFirst(OLD_HASH);
+        await Promise.resolve();
+      });
+      expect(pendingStatuses()).toEqual(['preparing', `waiting ${OLD_HASH}`]);
+
+      expect(reopened.result.current.pendingHash).toBe(OLD_HASH);
+      await reopened.claim();
+      expect(reopened.props.onError).toHaveBeenCalledWith({
+        kind: 'already-in-flight',
+        message: stillPendingMessage(OLD_HASH),
+      });
+    });
+
     it('reports isPreparing only while the claim is being prepared', async () => {
       let finishPrepare: (value: unknown) => void = () => undefined;
       mockPrepareClaim.mockReturnValueOnce(
@@ -1016,6 +1052,44 @@ describe('useClaimStakingIncentivesBatch', () => {
         await poll();
         expect(props.onLateReceipt).toHaveBeenCalledWith({ hash: HASH, claimed: true });
         expect(result.current.pendingHash).toBeUndefined();
+      });
+
+      it('polls every unconfirmed claim, not only the first', async () => {
+        const OLD_HASH = '0xold';
+        mockPrepareClaim.mockResolvedValue(prepared(FIRST));
+        let signFirst: (hash: string) => void = () => undefined;
+        mockWriteContract.mockReturnValueOnce(
+          new Promise((resolve) => {
+            signFirst = resolve;
+          }),
+        );
+        timeOut();
+        const first = setup();
+        await act(async () => {
+          first.result.current.claimIncentivesForBatch(FIRST);
+        });
+        first.unmount();
+        const reopened = setup();
+        act(() => reopened.result.current.dismissPendingClaim());
+        await reopened.claim();
+        await act(async () => {
+          signFirst(OLD_HASH);
+        });
+        expect(pendingStatuses()).toEqual([`unconfirmed ${HASH}`, `unconfirmed ${OLD_HASH}`]);
+
+        // Only the dismissed claim, second in the list, has mined.
+        mockGetTransactionReceipt.mockImplementation(({ hash }: { hash: string }) =>
+          hash === OLD_HASH
+            ? Promise.resolve({ status: 'success', transactionHash: OLD_HASH })
+            : Promise.reject(new TransactionReceiptNotFoundError({ hash: HASH })),
+        );
+        await poll();
+
+        expect(reopened.props.onLateReceipt).toHaveBeenCalledWith({
+          hash: OLD_HASH,
+          claimed: true,
+        });
+        expect(pendingStatuses()).toEqual([`unconfirmed ${HASH}`]);
       });
 
       it('can be dismissed, for a hash the wallet replaced', async () => {
