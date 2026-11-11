@@ -47,16 +47,21 @@ type Addresses = {
   [key in ChainId]: Address;
 };
 
+/**
+ * The StakingToken 0.4.0 implementation new staking contracts are created from, per chain
+ * (autonolas-registries `scripts/deployment` globals, `stakingTokenAddress`). Existing contracts
+ * keep the implementation they were created from.
+ */
 export const STAKING_TOKEN_ADDRESSES: Addresses = {
-  [mainnet.id]: '0x0Dc23eEf3bC64CF3cbd8f9329B57AE4C4f28d5d2',
-  [optimism.id]: '0x63C2c53c09dE534Dd3bc0b7771bf976070936bAC',
-  [gnosis.id]: '0xEa00be6690a871827fAfD705440D20dd75e67AB1',
-  [polygon.id]: '0x4aba1Cf7a39a51D75cBa789f5f21cf4882162519',
-  [base.id]: '0xEB5638eefE289691EcE01943f768EDBF96258a80',
-  [arbitrum.id]: '0x04b0007b2aFb398015B76e5f22993a1fddF83644',
-  [celo.id]: '0xe1E1B286EbE95b39F785d8069f2248ae9C41b7a9',
-  [mode.id]: '0xE49CB081e8d96920C38aA7AB90cb0294ab4Bc8EA',
-  [robinhood.id]: '0x87c511c8aE3fAF0063b3F3CF9C6ab96c4AA5C60c',
+  [mainnet.id]: '0x3A8867A5A31c5E26e6b8c740c1E1Aa920802d4BA',
+  [optimism.id]: '0x28C1edC7CEd549F7f80B732fDC19f0370160707d',
+  [gnosis.id]: '0x5777C44C8926085C2d7cF33735F57f2f05A90a1a',
+  [polygon.id]: '0x980b47e2B78403fBeDd59fbd6C7f8bF93d2E6B10',
+  [base.id]: '0x67C48a1cdCBCC311CA6484560F8c5066F3655b6e',
+  [arbitrum.id]: '0x887A511e3DfE4dDa77c0b1783c01d9920351A83D',
+  [celo.id]: '0xf78b3C22A204Da5d9a0B080C5D3d695AF4918886',
+  [mode.id]: '0x5add592ce0a1B5DceCebB5Dcac086Cd9F9e3eA5C',
+  [robinhood.id]: '0x5add592ce0a1B5DceCebB5Dcac086Cd9F9e3eA5C',
 };
 
 export const SERVICE_REGISTRY_ADDRESSES: Addresses = {
