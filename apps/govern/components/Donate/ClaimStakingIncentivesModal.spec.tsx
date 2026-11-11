@@ -167,7 +167,6 @@ describe('<ClaimStakingIncentivesModal />', () => {
     act(() => latestProps().onError(error));
 
     expect(notifier).toHaveBeenCalledTimes(1);
-    // A warning is never also shown as a failure.
     expect(notifyError).toHaveBeenCalledTimes(notifier === notifyError ? 1 : 0);
     expect(notifier.mock.calls[0].slice(0, expectedArgs.length)).toEqual(expectedArgs);
   });
@@ -208,6 +207,12 @@ describe('<ClaimStakingIncentivesModal />', () => {
     expect(dismissPendingClaim).toHaveBeenCalledTimes(1);
   });
 
+  it('says the claim is being prepared while it is', () => {
+    renderModal({ isPending: true, isPreparing: true });
+
+    expect(screen.getByRole('button', { name: /Preparing claim/ })).toBeInTheDocument();
+  });
+
   it('lets the user dismiss an earlier claim whose wallet request was never answered', () => {
     const dismissPendingClaim = jest.fn();
     renderModal({ isPending: true, canDismissPendingClaim: true, dismissPendingClaim });
@@ -219,11 +224,7 @@ describe('<ClaimStakingIncentivesModal />', () => {
   });
 
   it.each<[boolean, jest.Mock, unknown[]]>([
-    [
-      true,
-      notifySuccess as jest.Mock,
-      [`Claim transaction ${HASH} was confirmed. The list has been refreshed.`],
-    ],
+    [true, notifySuccess as jest.Mock, [`Claim transaction ${HASH} was confirmed.`]],
     [
       false,
       notifyError as jest.Mock,

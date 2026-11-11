@@ -24,7 +24,8 @@ const MODAL_WIDTH = 860;
 const TABLE_SCROLL_HEIGHT = 420;
 /** How long a claimed batch stays on screen before the next one is shown. */
 export const STEP_CHANGE_DELAY = 1000;
-const FAILED_ON_CHAIN_HINT = 'The list has been refreshed. Claim again to sign a new transaction.';
+// The list refresh runs after this is shown; a failed refresh is reported on its own.
+const FAILED_ON_CHAIN_HINT = 'Claim again to sign a new transaction.';
 
 const modalProps = {
   title: 'Claim Staking Incentives',
@@ -160,7 +161,7 @@ export const ClaimStakingIncentivesModal = ({ onClose }: ClaimStakingIncentivesM
       ),
     onLateReceipt: ({ hash, claimed }) => {
       if (claimed) {
-        notifySuccess(`Claim transaction ${hash} was confirmed. The list has been refreshed.`);
+        notifySuccess(`Claim transaction ${hash} was confirmed.`);
       } else {
         notifyError(`Claim transaction ${hash} failed on-chain`, FAILED_ON_CHAIN_HINT);
       }
