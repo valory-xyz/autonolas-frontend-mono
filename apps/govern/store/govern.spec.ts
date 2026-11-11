@@ -106,9 +106,9 @@ describe('govern slice', () => {
   it('records own claims by the furthest cursor, so recording one twice changes nothing', () => {
     let state = governReducer(undefined, recordOwnClaims({ [STAKING_CONTRACT]: 10 }));
     state = governReducer(state, recordOwnClaims({ [STAKING_CONTRACT]: 9, [OTHER_CONTRACT]: 4 }));
-    state = governReducer(state, recordOwnClaims({ [STAKING_CONTRACT]: 10 }));
 
     expect(state.ownClaimedThrough).toEqual({ [STAKING_CONTRACT]: 10, [OTHER_CONTRACT]: 4 });
+    expect(governReducer(state, recordOwnClaims({ [STAKING_CONTRACT]: 10 }))).toEqual(state);
   });
 
   it('drops the own claims a read reached or did not read, and keeps those it lags', () => {

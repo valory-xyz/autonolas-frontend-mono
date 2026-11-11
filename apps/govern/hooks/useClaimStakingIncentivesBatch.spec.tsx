@@ -801,6 +801,26 @@ describe('useClaimStakingIncentivesBatch', () => {
       expect(reopened.props.refetchClaimableBatches).not.toHaveBeenCalled();
     });
 
+    it('records the cursors taken when the claim was sent, not those known at confirmation', async () => {
+      mockPrepareClaim.mockResolvedValue(prepared(FIRST));
+      const settle = settleLater();
+      const { props, result } = setup();
+      let claiming: Promise<void> = Promise.resolve();
+      await act(async () => {
+        claiming = result.current.claimIncentivesForBatch(FIRST);
+      });
+      // By confirmation the cursors have moved on, e.g. after a refresh read the claim.
+      props.getClaimedThrough.mockReturnValue({});
+
+      await act(async () => {
+        settle({ status: 'success', transactionHash: HASH });
+        await claiming;
+      });
+
+      expect(props.getClaimedThrough).toHaveBeenCalledTimes(1);
+      expect(ownClaims()).toEqual(claimedThroughOf(FIRST));
+    });
+
     it('records a claim before clearing its entry, so another mount reads it as its own', async () => {
       mockPrepareClaim.mockResolvedValue(prepared(FIRST));
       const { claim } = setup();

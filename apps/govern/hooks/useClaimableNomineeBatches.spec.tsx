@@ -257,6 +257,16 @@ describe('useClaimableNomineesBatches refetchClaimableBatches', () => {
     expect(refresh.batches).toEqual([]);
   });
 
+  it('forgets an own claim once a refresh reads it, and keeps one a lagging read missed', async () => {
+    const result = renderBatches();
+    act(() => recordClaim(result.current, [[100], [[A, B]]]));
+    mockRefetch.mockResolvedValue({ data: cursorReads(10, 9) });
+
+    await act(() => result.current.refetchClaimableBatches());
+
+    expect(store.getState().govern.ownClaimedThrough).toEqual({ [B]: 10 });
+  });
+
   it('keeps the shown list as it is when a claim is recorded, until the cursors change', () => {
     const result = renderBatches({ reads: cursorReads(9, 8) });
     const before = result.current.nomineesToClaimBatches;
