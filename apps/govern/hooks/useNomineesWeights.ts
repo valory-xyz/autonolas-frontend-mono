@@ -114,10 +114,10 @@ export const useNomineesWeights = (
       select: (data) => {
         if (!projectedInflation) return;
 
-        // A nominee whose read failed is left out of `weights`, with its error in `failedReads`.
-        const failedReads: Partial<Record<Address, unknown>> = {};
+        // A nominee whose read failed is left out of `weights`, with its error in `weightReadErrors`.
+        const weightReadErrors: Partial<Record<Address, unknown>> = {};
         const weights = data.reduce((res: Partial<Record<Address, Weight>>, item, index) => {
-          if (item.status === 'failure') failedReads[nominees[index].account] = item.error;
+          if (item.status === 'failure') weightReadErrors[nominees[index].account] = item.error;
           if (item.status === 'success' && item.result) {
             const [weight, totalSum] = item.result as number[];
 
@@ -135,10 +135,14 @@ export const useNomineesWeights = (
           }
           return res;
         }, {});
-        return { weights, failedReads };
+        return { weights, weightReadErrors };
       },
     },
   });
 
-  return { data: data?.weights, failedReads: data?.failedReads, error: inflationError ?? error };
+  return {
+    data: data?.weights,
+    weightReadErrors: data?.weightReadErrors,
+    error: inflationError ?? error,
+  };
 };

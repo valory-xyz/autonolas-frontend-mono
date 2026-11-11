@@ -235,6 +235,37 @@ describe('useClaimableNomineesBatches refetchClaimableBatches', () => {
     expect(caughtUp.change).toBe('own-claims');
   });
 
+  it('does not offer an epoch an own claim took when the refresh read lags it', async () => {
+    const result = renderBatches({ reads: cursorReads(8, 9) });
+    result.current.recordClaimedBatch([[100], [[A, B]]]);
+    result.current.recordClaimedBatch([[100], [[A]]]);
+    // The RPC is a block behind the second claim: A still reads 9, though it was claimed to 10.
+    mockRefetch.mockResolvedValue({ data: cursorReads(9, 10) });
+
+    const refresh = await result.current.refetchClaimableBatches();
+
+    expect(refresh.change).toBe('own-claims');
+    expect(refresh.batches).toEqual([]);
+  });
+
+  it('gives the failed weight read as the cause of the logged missing-weight error', () => {
+    const spy = jest.spyOn(console, 'error').mockImplementation(() => undefined);
+    const readError = new Error('execution reverted');
+    renderBatches();
+    jest.mocked(useNomineesWeights).mockReturnValue({
+      data: { [A]: { percentage: 5 } },
+      weightReadErrors: { [B]: readError },
+      error: null,
+    } as never);
+
+    renderHook(() => useClaimableNomineesBatches());
+
+    expect(spy).toHaveBeenCalledWith(
+      'Could not read the claimable staking contracts',
+      expect.objectContaining({ cause: readError }),
+    );
+  });
+
   it('exposes one nominee whose weight read failed instead of crashing', () => {
     jest.spyOn(console, 'error').mockImplementation(() => undefined);
     const result = renderBatches();

@@ -7,6 +7,7 @@ jest.mock('wagmi', () => ({ useReadContract: jest.fn(), useReadContracts: jest.f
 
 type Select = (data: unknown) => unknown;
 
+const B_ACCOUNT = '0x000000000000000000000000000000000000000b' as const;
 const NOMINEES = [
   { account: '0x000000000000000000000000000000000000000a' as const, chainId: 100n },
 ];
@@ -88,18 +89,23 @@ describe('useNomineesWeights', () => {
     expect(result.current.error).toBe(weightsError);
   });
 
-  it("keeps a nominee's failed weight read error, and leaves the nominee out", () => {
+  it("keeps each nominee's failed weight read error, and the others' weights", () => {
     const readError = new Error('execution reverted');
+    const nominees = [NOMINEES[0], { account: B_ACCOUNT, chainId: 100n }];
     mockReads({
       tokenomics: TOKENOMICS_OK,
       stakingPoint: { stakingIncentive: 1n, stakingFraction: 1n },
-      weights: [{ status: 'failure', error: readError }],
+      weights: [
+        { status: 'failure', error: readError },
+        { status: 'success', result: [10n ** 16n, 10n ** 18n] },
+      ],
     });
 
-    const { result } = renderHook(() => useNomineesWeights(NOMINEES, 1));
+    const { result } = renderHook(() => useNomineesWeights(nominees, 1));
 
-    expect(result.current.data).toEqual({});
-    expect(result.current.failedReads).toEqual({ [NOMINEES[0].account]: readError });
+    expect(Object.keys(result.current.data ?? {})).toEqual([B_ACCOUNT]);
+    expect(result.current.data?.[B_ACCOUNT]?.percentage).toBe(1);
+    expect(result.current.weightReadErrors).toEqual({ [NOMINEES[0].account]: readError });
   });
 
   it('reports no error while every read succeeds', () => {
