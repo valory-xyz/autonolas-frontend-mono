@@ -112,28 +112,28 @@ export const ClaimStakingIncentivesModal = ({ onClose }: ClaimStakingIncentivesM
 
   const { claimIncentivesForBatch, isPending, isPreparing, pendingHash } =
     useClaimStakingIncentivesBatch({
-    onSuccess: () => {
-      const { currentBatch: claimedBatch, batchCount } = latest.current;
-      setClaimedBatches((prev) => [...prev, claimedBatch]);
-      // Only move to next batch, if more batches are remaining.
-      if (claimedBatch < batchCount - 1) {
-        setTimeout(() => {
-          setCurrentBatch((prev) => prev + 1);
-        }, STEP_CHANGE_DELAY);
-      }
-      notifySuccess(`Staking incentives for batch ${claimedBatch + 1} claimed successfully`);
-    },
-    onError: (error) => {
-      console.error(error);
-      notifyClaimError(error, latest.current.currentBatch + 1);
-    },
-    refetchClaimableBatches,
-    onBatchesRebuilt: () => {
-      setCurrentBatch(0);
-      setClaimedBatches([]);
-    },
-    recordClaimedBatch,
-  });
+      onSuccess: () => {
+        const { currentBatch: claimedBatch, batchCount } = latest.current;
+        setClaimedBatches((prev) => [...prev, claimedBatch]);
+        // Only move to next batch, if more batches are remaining.
+        if (claimedBatch < batchCount - 1) {
+          setTimeout(() => {
+            setCurrentBatch((prev) => prev + 1);
+          }, STEP_CHANGE_DELAY);
+        }
+        notifySuccess(`Staking incentives for batch ${claimedBatch + 1} claimed successfully`);
+      },
+      onError: (error) => {
+        console.error(error);
+        notifyClaimError(error, latest.current.currentBatch + 1);
+      },
+      refetchClaimableBatches,
+      onBatchesRebuilt: () => {
+        setCurrentBatch(0);
+        setClaimedBatches([]);
+      },
+      recordClaimedBatch,
+    });
 
   const nomineesForCurrentBatch = useMemo(() => {
     const [, currentBatchNomineesSubArray] = nomineesToClaimBatches?.[currentBatch] ?? [];

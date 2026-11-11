@@ -183,7 +183,10 @@ describe('useClaimableNomineesBatches refetchClaimableBatches', () => {
   it('exposes a failed first cursor read instead of dropping the staking contract', () => {
     jest.spyOn(console, 'error').mockImplementation(() => undefined);
     const result = renderBatches({
-      reads: [{ status: 'success', result: BigInt(9) }, { status: 'failure', error: new Error() }],
+      reads: [
+        { status: 'success', result: BigInt(9) },
+        { status: 'failure', error: new Error() },
+      ],
     });
 
     expect(result.current.nomineesToClaimBatches).toEqual([]);

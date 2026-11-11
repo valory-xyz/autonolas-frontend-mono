@@ -88,7 +88,9 @@ export const useClaimStakingIncentivesBatch = ({
     getPublicClient(wagmiConfig, { chainId: MAINNET_CHAIN_ID })
       ?.getTransactionReceipt({ hash: pending.hash })
       .then(() => setPendingClaim(account, null))
-      .catch((error) => console.warn(`Claim transaction ${pending.hash} has no receipt yet`, error));
+      .catch((error) =>
+        console.warn(`Claim transaction ${pending.hash} has no receipt yet`, error),
+      );
   }, [account]);
 
   const refreshBatches = async () => {

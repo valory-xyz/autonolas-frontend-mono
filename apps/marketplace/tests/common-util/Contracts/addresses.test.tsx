@@ -116,10 +116,11 @@ describe('common-utils/addresses', () => {
   });
 
   it('offers no same-address adapter as a Safe creation wrapper (D10)', () => {
-    const adapters = (pinnedRegistriesConfig as unknown as Chain[]).flatMap(({ chainId, contracts }) =>
-      contracts
-        .filter(({ name }) => name.endsWith('SameAddressMultisig'))
-        .map(({ address }) => ({ chainId, address: address.toLowerCase() })),
+    const adapters = (pinnedRegistriesConfig as unknown as Chain[]).flatMap(
+      ({ chainId, contracts }) =>
+        contracts
+          .filter(({ name }) => name.endsWith('SameAddressMultisig'))
+          .map(({ address }) => ({ chainId, address: address.toLowerCase() })),
     );
 
     expect(adapters.length).toBeGreaterThan(0);

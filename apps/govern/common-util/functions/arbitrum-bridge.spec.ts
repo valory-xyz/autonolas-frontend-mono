@@ -110,14 +110,22 @@ describe('getArbitrumBridgePayload', () => {
   });
 
   it('should return a bridge payload of exactly 160 bytes (320 hex chars + 0x prefix)', async () => {
-    const result = await getArbitrumBridgePayload(stakingTargets, ARBITRUM_CHAIN_ID, DEPOSIT_PROCESSOR);
+    const result = await getArbitrumBridgePayload(
+      stakingTargets,
+      ARBITRUM_CHAIN_ID,
+      DEPOSIT_PROCESSOR,
+    );
 
     // 160 bytes = 320 hex chars, plus "0x" prefix = 322 chars
     expect(result.bridgePayload).toMatch(/^0x[0-9a-f]{320}$/i);
   });
 
   it('should encode the correct parameters in the bridge payload', async () => {
-    const result = await getArbitrumBridgePayload(stakingTargets, ARBITRUM_CHAIN_ID, DEPOSIT_PROCESSOR);
+    const result = await getArbitrumBridgePayload(
+      stakingTargets,
+      ARBITRUM_CHAIN_ID,
+      DEPOSIT_PROCESSOR,
+    );
 
     // The gas limit in the payload should include the 100k buffer
     const expectedGasLimitMessage = mockGasLimit.add(100_000);
@@ -142,7 +150,11 @@ describe('getArbitrumBridgePayload', () => {
   });
 
   it('should return the token and message costs separately', async () => {
-    const result = await getArbitrumBridgePayload(stakingTargets, ARBITRUM_CHAIN_ID, DEPOSIT_PROCESSOR);
+    const result = await getArbitrumBridgePayload(
+      stakingTargets,
+      ARBITRUM_CHAIN_ID,
+      DEPOSIT_PROCESSOR,
+    );
 
     const gasLimitMessage = mockGasLimit.add(100_000);
     const TOKEN_GAS_LIMIT = 300_000;
@@ -192,9 +204,9 @@ describe('getArbitrumBridgePayload', () => {
   it('should propagate errors from SDK estimation', async () => {
     mockEstimateAll.mockRejectedValue(new Error('RPC error'));
 
-    await expect(getArbitrumBridgePayload(stakingTargets, ARBITRUM_CHAIN_ID, DEPOSIT_PROCESSOR)).rejects.toThrow(
-      'RPC error',
-    );
+    await expect(
+      getArbitrumBridgePayload(stakingTargets, ARBITRUM_CHAIN_ID, DEPOSIT_PROCESSOR),
+    ).rejects.toThrow('RPC error');
   });
 
   describe('Robinhood Chain', () => {
@@ -221,7 +233,11 @@ describe('getArbitrumBridgePayload', () => {
     });
 
     it('should still produce a 160-byte payload', async () => {
-      const result = await getArbitrumBridgePayload(stakingTargets, ROBINHOOD_CHAIN_ID, DEPOSIT_PROCESSOR);
+      const result = await getArbitrumBridgePayload(
+        stakingTargets,
+        ROBINHOOD_CHAIN_ID,
+        DEPOSIT_PROCESSOR,
+      );
 
       expect(result.bridgePayload).toMatch(/^0x[0-9a-f]{320}$/i);
     });

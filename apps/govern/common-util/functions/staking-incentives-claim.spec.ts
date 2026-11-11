@@ -62,9 +62,7 @@ type ChainSetup = { withheld?: bigint; bridgingDecimals?: bigint };
  */
 const mockChainState = (chains: ChainSetup[], incentives: bigint[][]) => {
   mockReadContracts
-    .mockResolvedValueOnce(
-      chains.flatMap(({ withheld = ZERO }, i) => [processor(i), withheld]),
-    )
+    .mockResolvedValueOnce(chains.flatMap(({ withheld = ZERO }, i) => [processor(i), withheld]))
     .mockResolvedValueOnce(chains.map(({ bridgingDecimals = BigInt(18) }) => bridgingDecimals));
 
   const result = incentives.flat().flatMap((incentive) => [
@@ -352,9 +350,9 @@ describe('claim error classification', () => {
 
   it('treats a contract revert as a revert, and an RPC failure as not one', () => {
     expect(isContractRevert(revert)).toBe(true);
-    expect(isContractRevert(new QuoteCallRevertedError('checkpointNominee', target(1), 1, 'x'))).toBe(
-      true,
-    );
+    expect(
+      isContractRevert(new QuoteCallRevertedError('checkpointNominee', target(1), 1, 'x')),
+    ).toBe(true);
     expect(isContractRevert(new HttpRequestError({ url: 'https://rpc.example' }))).toBe(false);
     expect(isContractRevert(new Error('network down'))).toBe(false);
   });
