@@ -83,14 +83,19 @@ const selectWrapper = async (address) => {
 };
 
 describe('FinishedRegistration multisig picker', () => {
+  let spies = [];
   beforeEach(() => {
     // Not resetAllMocks: that would also reset jest.setup's window.matchMedia mock, which antd needs.
     [getEnabledMultisigs, onStep3Deploy, notifyError, notifySuccess, useHelpers].forEach((mock) =>
       mock.mockReset(),
     );
-    jest.spyOn(console, 'warn').mockImplementation(() => undefined);
-    jest.spyOn(console, 'error').mockImplementation(() => undefined);
+    spies = [
+      jest.spyOn(console, 'warn').mockImplementation(() => undefined),
+      jest.spyOn(console, 'error').mockImplementation(() => undefined),
+    ];
   });
+  // Only this file's spies: restoreAllMocks would also reset jest.setup's matchMedia mock.
+  afterEach(() => spies.forEach((spy) => spy.mockRestore()));
 
   it('clears the selection on a chain change and ignores the previous chain late answer', async () => {
     getEnabledMultisigs.mockResolvedValueOnce([A]);
@@ -136,6 +141,11 @@ describe('FinishedRegistration multisig picker', () => {
       ),
     );
     expect(onStep3Deploy).not.toHaveBeenCalled();
+    // The re-check's answer replaces the offered options and clears the selection.
+    expect(screen.queryByRole('radio', { name: A })).toBeNull();
+    expect(
+      screen.getByText(/No multisig creation option is currently enabled on this chain/),
+    ).toBeInTheDocument();
   });
 
   it('deploys once when the form is submitted again during the enabled check', async () => {
@@ -185,7 +195,7 @@ describe('FinishedRegistration multisig picker', () => {
 
   it('deploys through the wrapper the owner picks when two are enabled', async () => {
     const NOW_SECONDS = 1_700_000_000;
-    jest.spyOn(Date, 'now').mockReturnValue(NOW_SECONDS * 1000);
+    spies.push(jest.spyOn(Date, 'now').mockReturnValue(NOW_SECONDS * 1000));
     getEnabledMultisigs.mockResolvedValueOnce([A, B]).mockResolvedValueOnce([A, B]);
     onStep3Deploy.mockResolvedValue(undefined);
     renderStep(GNOSIS);
@@ -198,7 +208,6 @@ describe('FinishedRegistration multisig picker', () => {
       [ZERO_ADDRESS, FALLBACK_HANDLER[GNOSIS], ZERO_ADDRESS, ZERO_ADDRESS, 0, NOW_SECONDS, '0x'],
     );
     await waitFor(() => expect(onStep3Deploy).toHaveBeenCalledWith('0xowner', '1', B, payload));
-    jest.mocked(Date.now).mockRestore();
   });
 
   it('reports a malformed form value as a deploy failure, without deploying', async () => {

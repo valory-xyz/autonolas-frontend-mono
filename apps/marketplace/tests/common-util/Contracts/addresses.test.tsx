@@ -81,10 +81,8 @@ describe('common-utils/addresses', () => {
           );
           const remoteArtifact = await remoteArtifactResponse.json();
 
-          // Local and remote ABIs should match
           expect(localArtifact.abi).toMatchObject(remoteArtifact.abi);
 
-          // Check the address
           const lowLetter =
             localArtifact.contractName.charAt(0).toLowerCase() +
             localArtifact.contractName.slice(1);

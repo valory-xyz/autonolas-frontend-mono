@@ -24,6 +24,13 @@ import { onStep3Deploy } from '../utils';
 
 const MULTISIG_STATUS = Object.freeze({ LOADING: 'loading', LOADED: 'loaded', ERROR: 'error' });
 
+const getDeployFailureReason = (error) => {
+  const revert = findContractRevert(error);
+  if (revert?.data) return formatRevert(revert.data);
+  if (revert?.signature) return `unrecognised revert ${revert.signature}`;
+  return errorMessage(error);
+};
+
 const STEP = 3;
 const OPTION_1 = 'Creates a new service multisig with currently registered agent instances';
 
@@ -219,26 +226,27 @@ export const FinishedRegistration = ({
         );
         await onStep3Deploy(account, serviceId, radioValue, payload);
       } catch (error) {
-        console.error(error);
+        console.error(
+          'Deploy failed',
+          { chainId: submitChainId, serviceId, multisig: radioValue },
+          error,
+        );
         notifyError(`Error occurred while deploying: ${getDeployFailureReason(error)}`);
         return;
       }
       notifySuccess('Deployed successfully');
       await updateDetails();
     } catch (e) {
-      console.error(e);
+      console.error(
+        'Deployed, but could not refresh the service details',
+        { chainId: submitChainId, serviceId, multisig: radioValue },
+        e,
+      );
       notifyError('Deployed, but the service details could not be refreshed. Reload the page.');
     } finally {
       isSubmittingRef.current = false;
       setIsSubmitting(false);
     }
-  };
-
-  const getDeployFailureReason = (error) => {
-    const revert = findContractRevert(error);
-    if (revert?.data) return formatRevert(revert.data);
-    if (revert?.signature) return `unrecognised revert ${revert.signature}`;
-    return errorMessage(error);
   };
 
   const onFinishFailed = (errorInfo) => {
@@ -339,7 +347,7 @@ export const FinishedRegistration = ({
       )}
 
       {/* form is shown only once the multisig option is selected */}
-      {radioValue && options.includes(radioValue) && (
+      {options.includes(radioValue) && (
         <RegistryForm
           form={form}
           layout="vertical"
