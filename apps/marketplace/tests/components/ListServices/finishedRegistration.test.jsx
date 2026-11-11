@@ -156,6 +156,16 @@ describe('FinishedRegistration multisig picker', () => {
     expect(getEnabledMultisigs).toHaveBeenCalledTimes(checksBeforeSubmit + 1);
   });
 
+  it('shows that the enabled options are loading instead of a blank step', async () => {
+    getEnabledMultisigs.mockReturnValue(deferred().promise);
+    renderStep(GNOSIS);
+
+    expect(
+      await screen.findByText(/Checking which multisig options are enabled on this chain/),
+    ).toBeInTheDocument();
+    expect(screen.queryByRole('radio')).toBeNull();
+  });
+
   it('says so when no wrapper is enabled on the chain', async () => {
     getEnabledMultisigs.mockResolvedValueOnce([]);
     renderStep(GNOSIS);

@@ -1,4 +1,4 @@
-import { Alert, Button, Divider, Form, Input, Radio } from 'antd';
+import { Alert, Button, Divider, Form, Input, Radio, Spin } from 'antd';
 import { ethers } from 'ethers';
 import PropTypes from 'prop-types';
 import { useEffect, useRef, useState } from 'react';
@@ -21,6 +21,9 @@ import { RadioLabel } from '../styles';
 import { useFinishRegistration } from '../useSvmServiceStateManagement';
 import { getEnabledMultisigs } from '../../utils';
 import { onStep3Deploy } from '../utils';
+
+/** Where the read of the enabled multisig options stands. */
+const MULTISIG_STATUS = Object.freeze({ LOADING: 'loading', LOADED: 'loaded', ERROR: 'error' });
 
 const STEP = 3;
 const OPTION_1 = 'Creates a new service multisig with currently registered agent instances';
@@ -136,7 +139,7 @@ export const FinishedRegistration = ({
 
   const [form] = Form.useForm();
   const [radioValue, setRadioValue] = useState(null);
-  const [multisigs, setMultisigs] = useState({ status: 'loading', enabled: [] });
+  const [multisigs, setMultisigs] = useState({ status: MULTISIG_STATUS.LOADING, enabled: [] });
   const [reloadCount, setReloadCount] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const isSubmittingRef = useRef(false);
@@ -148,7 +151,7 @@ export const FinishedRegistration = ({
   // Offer only the wrappers this chain still enables; a chain change clears the selection.
   useEffect(() => {
     setRadioValue(null);
-    setMultisigs({ status: 'loading', enabled: [] });
+    setMultisigs({ status: MULTISIG_STATUS.LOADING, enabled: [] });
     if (isSvm || !chainId) return undefined;
 
     let isCurrent = true;
@@ -161,11 +164,11 @@ export const FinishedRegistration = ({
             candidates: multisigCandidates[chainId] ?? [],
           });
         }
-        setMultisigs({ status: 'loaded', enabled });
+        setMultisigs({ status: MULTISIG_STATUS.LOADED, enabled });
       })
       .catch((error) => {
         console.error(error);
-        if (isCurrent) setMultisigs({ status: 'error', enabled: [] });
+        if (isCurrent) setMultisigs({ status: MULTISIG_STATUS.ERROR, enabled: [] });
       });
     return () => {
       isCurrent = false;
@@ -192,7 +195,7 @@ export const FinishedRegistration = ({
         notifyError('The network changed before the deploy. Please submit again.');
         return;
       }
-      setMultisigs({ status: 'loaded', enabled });
+      setMultisigs({ status: MULTISIG_STATUS.LOADED, enabled });
       if (!enabled.includes(radioValue)) {
         setRadioValue(null);
         notifyError('The selected multisig option is no longer enabled. Please choose another.');
@@ -305,7 +308,13 @@ export const FinishedRegistration = ({
         </Radio.Group>
       ) : null}
 
-      {multisigs.status === 'error' && (
+      {multisigs.status === MULTISIG_STATUS.LOADING && (
+        <div className="mt-8">
+          <Spin size="small" /> Checking which multisig options are enabled on this chain…
+        </div>
+      )}
+
+      {multisigs.status === MULTISIG_STATUS.ERROR && (
         <Alert
           type="error"
           showIcon
@@ -319,7 +328,7 @@ export const FinishedRegistration = ({
         />
       )}
 
-      {multisigs.status === 'loaded' && multisigs.enabled.length === 0 && (
+      {multisigs.status === MULTISIG_STATUS.LOADED && multisigs.enabled.length === 0 && (
         <Alert
           type="warning"
           showIcon
