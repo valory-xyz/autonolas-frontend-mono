@@ -7,6 +7,7 @@ import {
   getCursorChange,
   claimedThroughOf,
   getExpectedCursors,
+  getRefreshChange,
 } from './claim-batches';
 
 const A: Address = '0x000000000000000000000000000000000000000a';
@@ -140,6 +141,17 @@ describe('own claims', () => {
 
   it('moves each claimed target one epoch past what was expected, skipping unknown ones', () => {
     expect(claimedThroughOf({ [A]: 9, [B]: 9 }, [[100], [[A, C]]])).toEqual({ [A]: 10 });
+  });
+});
+
+describe('getRefreshChange', () => {
+  it('reports own claims recorded since the list was built, even when no cursor moved', () => {
+    expect(getRefreshChange('none', { [A]: 9 }, { [A]: 10 })).toBe('own-claims');
+  });
+
+  it('keeps a moved cursor change, and none when the list is the same', () => {
+    expect(getRefreshChange('concurrent', { [A]: 9 }, { [A]: 10 })).toBe('concurrent');
+    expect(getRefreshChange('none', { [A]: 10 }, { [A]: 10 })).toBe('none');
   });
 });
 

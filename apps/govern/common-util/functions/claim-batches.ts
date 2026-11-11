@@ -1,5 +1,5 @@
 import type { Address } from 'viem';
-import { cloneDeep } from 'lodash';
+import { cloneDeep, isEqual } from 'lodash';
 
 import type { StakingContract } from 'types';
 
@@ -8,9 +8,10 @@ import type { ClaimBatch } from './staking-incentives-claim';
 const MAX_BATCH_SIZE = 10;
 
 /**
- * How the claim cursors moved since the shown list was built:
- * - `none`: not at all, so the list is unchanged;
- * - `own-claims`: only as this user's recorded claims explain, so the list re-indexes;
+ * How a refresh changes the shown list:
+ * - `none`: not at all;
+ * - `own-claims`: only as this user's recorded claims explain (cursors moved by them, or claims
+ *   recorded since the list was built while the read lags them), so the list re-indexes;
  * - `concurrent`: past what those claims explain (someone else claimed meanwhile), or with no
  *   earlier cursors to compare against.
  */
@@ -81,6 +82,17 @@ export const getCursorChange = (
   if (movedByOthers) return 'concurrent';
   return addresses.some((address) => fresh[address] !== built[address]) ? 'own-claims' : 'none';
 };
+
+/**
+ * A refresh whose cursors did not move still changes the shown list when own claims recorded
+ * since it was built apply to it: `shown` and `refreshed` are the cursors each list is built from.
+ */
+export const getRefreshChange = (
+  cursorChange: CursorChange,
+  shown: Cursors | null,
+  refreshed: Cursors,
+): CursorChange =>
+  cursorChange === 'none' && !isEqual(shown, refreshed) ? 'own-claims' : cursorChange;
 
 /**
  * Assuming max batch size to be "3"

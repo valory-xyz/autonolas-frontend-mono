@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useCallback, useRef, useState } from 'react';
-import { isEqual } from 'lodash';
 import { useStore } from 'react-redux';
 import { useQueryClient } from '@tanstack/react-query';
 import type { Address, MulticallResponse } from 'viem';
@@ -23,6 +22,7 @@ import {
   getCursorChange,
   claimedThroughOf,
   getExpectedCursors,
+  getRefreshChange,
   READ_TARGET,
   readFailure,
 } from 'common-util/functions/claim-batches';
@@ -222,7 +222,7 @@ export const useClaimableNomineesBatches = () => {
     } catch (error) {
       return { batches: [], buildError: error, builtWithOwnClaims: own };
     }
-    // `refreshCount` only re-runs the build after a refresh.
+    // The body does not read `refreshCount`; it is listed only to force the rebuild.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     nominees,
@@ -290,23 +290,23 @@ export const useClaimableNomineesBatches = () => {
     }
     const lastClaimedEpochs = await refetchLastClaimedEpochs();
     const own = readOwnClaims();
-    const cursorChange = getCursorChange(
-      builtFromCursors.current,
-      getExpectedCursors(builtFromCursors.current, own),
-      lastClaimedEpochs,
+    const refreshed = getExpectedCursors(lastClaimedEpochs, own);
+    const change = getRefreshChange(
+      getCursorChange(
+        builtFromCursors.current,
+        getExpectedCursors(builtFromCursors.current, own),
+        lastClaimedEpochs,
+      ),
+      getExpectedCursors(builtFromCursors.current, shownOwnClaims.current),
+      refreshed,
     );
-    // A claim confirmed since the list was built (late, or in another modal) changes the list even
-    // when the read lags it and shows no cursor move.
-    const shown = getExpectedCursors(builtFromCursors.current, shownOwnClaims.current);
-    const listChanged = !isEqual(shown, getExpectedCursors(lastClaimedEpochs, own));
-    const change = cursorChange === 'none' && listChanged ? 'own-claims' : cursorChange;
     builtFromCursors.current = lastClaimedEpochs;
     dispatch(pruneOwnClaims(lastClaimedEpochs));
     setRefreshCount((count) => count + 1);
     return {
       batches: buildClaimBatches({
         nominees,
-        lastClaimedEpochs: getExpectedCursors(lastClaimedEpochs, own),
+        lastClaimedEpochs: refreshed,
         currentEpoch,
         minStakingWeight,
         relativeWeights,
