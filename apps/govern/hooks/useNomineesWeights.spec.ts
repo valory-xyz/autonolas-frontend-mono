@@ -11,6 +11,13 @@ const NOMINEES = [
   { account: '0x000000000000000000000000000000000000000a' as const, chainId: 100n },
 ];
 
+/** Every staking-inflation read (`epochCounter`, `epochLen`, `inflationPerSecond`) succeeding. */
+const TOKENOMICS_OK = [
+  { status: 'success', result: 7n },
+  { status: 'success', result: 1n },
+  { status: 'success', result: 1n },
+];
+
 /** Runs each read's `select` over `results`, the way wagmi would. */
 const mockReads = ({
   tokenomics,
@@ -56,11 +63,7 @@ describe('useNomineesWeights', () => {
     ['staking point', { stakingPointError: new Error('rpc down') }],
   ])('reports a failed %s call as is', (_, errors) => {
     mockReads({
-      tokenomics: [
-        { status: 'success', result: 7n },
-        { status: 'success', result: 1n },
-        { status: 'success', result: 1n },
-      ],
+      tokenomics: TOKENOMICS_OK,
       ...errors,
     });
 
@@ -71,11 +74,7 @@ describe('useNomineesWeights', () => {
 
   it('reports no error while every read succeeds', () => {
     mockReads({
-      tokenomics: [
-        { status: 'success', result: 7n },
-        { status: 'success', result: 1n },
-        { status: 'success', result: 1n },
-      ],
+      tokenomics: TOKENOMICS_OK,
     });
 
     const { result } = renderHook(() => useNomineesWeights(NOMINEES, 1));
