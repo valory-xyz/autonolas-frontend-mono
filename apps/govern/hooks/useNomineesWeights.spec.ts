@@ -11,7 +11,7 @@ const NOMINEES = [
   { account: '0x000000000000000000000000000000000000000a' as const, chainId: 100n },
 ];
 
-/** Every staking-inflation read (`epochCounter`, `epochLen`, `inflationPerSecond`) succeeding. */
+/** Every staking-inflation read succeeding, in `TOKENOMICS_READS` order. */
 const TOKENOMICS_OK = [
   { status: 'success', result: 7n },
   { status: 'success', result: 1n },
@@ -23,17 +23,19 @@ const mockReads = ({
   tokenomics,
   tokenomicsError = null,
   stakingPointError = null,
+  weightsError = null,
 }: {
   tokenomics: { status: string; result?: unknown }[];
   tokenomicsError?: Error | null;
   stakingPointError?: Error | null;
+  weightsError?: Error | null;
 }) => {
   jest.mocked(useReadContracts).mockImplementation((({ query }: { query: { select: Select } }) => {
-    // The first call is the inflation read; the weights read stays disabled without inflation.
+    // Only the weights read sets `enabled` (it waits for the inflation), which tells them apart.
     const isInflation = !('enabled' in query);
     return isInflation
       ? { data: query.select(tokenomics), error: tokenomicsError }
-      : { data: undefined, error: null };
+      : { data: undefined, error: weightsError };
   }) as never);
   jest
     .mocked(useReadContract)
@@ -70,6 +72,15 @@ describe('useNomineesWeights', () => {
     const { result } = renderHook(() => useNomineesWeights(NOMINEES, 1));
 
     expect(result.current.error).toBe(Object.values(errors)[0]);
+  });
+
+  it('reports a failed weights read once the inflation reads succeeded', () => {
+    const weightsError = new Error('rpc down');
+    mockReads({ tokenomics: TOKENOMICS_OK, weightsError });
+
+    const { result } = renderHook(() => useNomineesWeights(NOMINEES, 1));
+
+    expect(result.current.error).toBe(weightsError);
   });
 
   it('reports no error while every read succeeds', () => {
