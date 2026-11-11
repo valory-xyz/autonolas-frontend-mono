@@ -11,7 +11,7 @@ import {
 } from 'viem';
 import { useAccount } from 'wagmi';
 
-import { type PendingClaim, setPendingClaim } from 'store/govern';
+import { type PendingClaim, type PendingClaimStatus, setPendingClaim } from 'store/govern';
 import { type RootState, useAppDispatch, useAppSelector } from 'store/index';
 import { MAINNET_CHAIN_ID } from 'common-util/constants/chains';
 import { wagmiConfig } from 'common-util/config/wagmi';
@@ -23,7 +23,7 @@ import {
   prepareClaim,
   toClaimError,
 } from 'common-util/functions/staking-incentives-claim';
-import type { ClaimableBatchesRefresh } from 'hooks/useClaimableNomineeBatches';
+import type { ClaimableBatchesRefresh } from 'common-util/functions/claim-batches';
 
 /** Long enough for a congested mainnet; past it the tx is reported as still pending, not resent. */
 export const RECEIPT_TIMEOUT_MS = 20 * 60 * 1000;
@@ -32,6 +32,11 @@ export const PENDING_RECEIPT_POLL_MS = 15 * 1000;
 
 /** Source of each claim's run (see `PendingClaim`). */
 let lastClaimRun = 0;
+
+const NO_PENDING_CLAIMS: PendingClaim[] = [];
+
+const isSent = (entry: PendingClaim): entry is Extract<PendingClaim, { hash: Hex }> =>
+  'hash' in entry;
 
 export const stillPendingMessage = (hash: Hex) =>
   `Transaction ${hash} is still pending. Check your wallet before claiming again.`;
@@ -65,18 +70,20 @@ export const useClaimStakingIncentivesBatch = (props: ClaimStakingIncentivesBatc
   const [isPreparing, setIsPreparing] = useState(false);
   const [isSending, setIsSending] = useState(false);
   const mountedRef = useRef(true);
+  const ownRuns = useRef(new Set<number>());
   // The poll below outlives a render, so it reports through the latest callbacks.
   const latestProps = useRef(props);
   latestProps.current = props;
 
-  const pending = useAppSelector((state) =>
-    account ? state.govern.pendingClaims[account] : undefined,
-  );
-  const pendingHash = pending && 'hash' in pending ? pending.hash : undefined;
-  const unconfirmedHash = pending?.status === 'unconfirmed' ? pending.hash : undefined;
+  const pendingClaims =
+    useAppSelector((state) => (account ? state.govern.pendingClaims[account] : undefined)) ??
+    NO_PENDING_CLAIMS;
+  const pendingHash = pendingClaims.find(isSent)?.hash;
+  const unconfirmed = pendingClaims.filter(isSent).filter(({ status }) => status === 'unconfirmed');
+  const unconfirmedKey = unconfirmed.map(({ run, hash }) => `${run}:${hash}`).join(',');
 
-  const setPending = (forAccount: Address, next: PendingClaim | null) =>
-    dispatch(setPendingClaim({ account: forAccount, pending: next }));
+  const setPending = (forAccount: Address, run: number, next: PendingClaimStatus | null) =>
+    dispatch(setPendingClaim({ account: forAccount, run, pending: next }));
 
   useEffect(() => {
     return () => {
@@ -104,47 +111,68 @@ export const useClaimStakingIncentivesBatch = (props: ClaimStakingIncentivesBatc
     }
   };
 
-  // While a sent claim has no receipt, keep looking: it may still mine, revert or be dropped.
+  // Once the receipt wait has given up, keep looking: the claim may still mine or revert.
   useEffect(() => {
-    if (!account || !unconfirmedHash) return;
+    if (!account || unconfirmed.length === 0) return;
     const publicClient = getPublicClient(wagmiConfig, { chainId: MAINNET_CHAIN_ID });
     if (!publicClient) {
-      console.error(`No Ethereum mainnet client to check claim transaction ${unconfirmedHash}`);
+      console.error(`No Ethereum mainnet client to check claim transaction ${unconfirmed[0].hash}`);
       return;
     }
     let isActive = true;
-    let reportedLookupFailure = false;
-    const checkReceipt = async () => {
+    const settled = new Set<number>();
+    const reportedLookupFailure = new Set<number>();
+    const checkReceipt = async ({ run, hash }: { run: number; hash: Hex }) => {
       let receipt: TransactionReceipt;
       try {
-        receipt = await publicClient.getTransactionReceipt({ hash: unconfirmedHash });
+        receipt = await publicClient.getTransactionReceipt({ hash });
       } catch (error) {
         if (error instanceof TransactionReceiptNotFoundError) return;
-        console.error(`Could not check claim transaction ${unconfirmedHash}`, error);
+        console.error(`Could not check claim transaction ${hash}`, error);
         // Once while the modal is open: the poll keeps trying, but the user should know.
-        if (isActive && !reportedLookupFailure) {
-          reportedLookupFailure = true;
-          latestProps.current.onReceiptLookupFailed({ hash: unconfirmedHash });
+        if (isActive && !reportedLookupFailure.has(run)) {
+          reportedLookupFailure.add(run);
+          latestProps.current.onReceiptLookupFailed({ hash });
         }
         return;
       }
-      if (!isActive) return;
-      isActive = false;
-      setPending(account, null);
+      if (!isActive || settled.has(run)) return;
+      settled.add(run);
+      setPending(account, run, null);
       const claimed = getUnclaimedReason(receipt) === null;
-      if (!claimed) console.error(`Claim transaction ${unconfirmedHash} reverted`);
-      latestProps.current.onLateReceipt({ hash: unconfirmedHash, claimed });
+      if (!claimed) console.error(`Claim transaction ${hash} reverted`);
+      latestProps.current.onLateReceipt({ hash, claimed });
       await refreshReportingFailure();
     };
-    checkReceipt();
-    const timer = setInterval(checkReceipt, PENDING_RECEIPT_POLL_MS);
+    const checkAll = () => unconfirmed.forEach(checkReceipt);
+    checkAll();
+    const timer = setInterval(checkAll, PENDING_RECEIPT_POLL_MS);
     return () => {
       isActive = false;
       clearInterval(timer);
     };
+    // `unconfirmedKey` stands for `unconfirmed`; refreshReportingFailure reads its callbacks
+    // through latestProps.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [account, unconfirmedKey, dispatch]);
+
+  // A claim an earlier mount sent and is still awaiting settles there, whose callbacks belong to
+  // the closed modal, so this mount refreshes its own list.
+  const previousClaims = useRef({ account, claims: pendingClaims });
+  useEffect(() => {
+    const previous = previousClaims.current;
+    previousClaims.current = { account, claims: pendingClaims };
+    if (previous.account !== account) return;
+    const settledElsewhere = previous.claims.some(
+      (entry) =>
+        entry.status === 'waiting' &&
+        !ownRuns.current.has(entry.run) &&
+        !pendingClaims.some(({ run }) => run === entry.run),
+    );
+    if (settledElsewhere) refreshReportingFailure();
     // refreshReportingFailure reads its callbacks through latestProps.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [account, unconfirmedHash, dispatch]);
+  }, [account, pendingClaims]);
 
   // The revert is rethrown as is: the refresh error as its `cause` would break viem's decoding.
   const refreshAfterRevert = async (revert: unknown) => {
@@ -195,24 +223,20 @@ export const useClaimStakingIncentivesBatch = (props: ClaimStakingIncentivesBatc
     // Read from the store, not the render, so a second click before the re-render is refused.
     const inFlight = store.getState().govern.pendingClaims[account];
     if (inFlight) {
+      const sentHash = inFlight.find(isSent)?.hash;
       onError({
         kind: 'already-in-flight',
-        message:
-          'hash' in inFlight
-            ? stillPendingMessage(inFlight.hash)
-            : 'A claim is already being prepared. Finish it in your wallet first.',
+        message: sentHash
+          ? stillPendingMessage(sentHash)
+          : 'A claim is already being prepared. Finish it in your wallet first.',
       });
       return;
     }
     lastClaimRun += 1;
     const run = lastClaimRun;
-    setPending(account, { status: 'preparing', run });
-    // After a Dismiss the entry may belong to a newer claim, whose guard must stay. A dismissed
-    // claim that is signed anyway takes a free entry back, so its hash is still guarded.
-    const writeOwnEntry = (next: PendingClaim | null) => {
-      const current = store.getState().govern.pendingClaims[account];
-      if (current ? current.run === run : next !== null) setPending(account, next);
-    };
+    ownRuns.current.add(run);
+    const writeOwnEntry = (next: PendingClaimStatus | null) => setPending(account, run, next);
+    writeOwnEntry({ status: 'preparing' });
 
     let hash: Hex | undefined;
     try {
@@ -231,9 +255,9 @@ export const useClaimStakingIncentivesBatch = (props: ClaimStakingIncentivesBatc
       if (!publicClient) throw new Error('No Ethereum mainnet client is configured');
 
       if (mountedRef.current) setIsSending(true);
-      writeOwnEntry({ status: 'sending', run });
+      writeOwnEntry({ status: 'sending' });
       hash = await writeContract(wagmiConfig, prepared.request);
-      writeOwnEntry({ status: 'waiting', hash, run });
+      writeOwnEntry({ status: 'waiting', hash });
 
       let replacedReason: ReplacementReason | undefined;
       let receipt: TransactionReceipt;
@@ -247,7 +271,7 @@ export const useClaimStakingIncentivesBatch = (props: ClaimStakingIncentivesBatc
         });
       } catch (waitError) {
         // The transaction may still mine, so it stays pending and Claim does not send another.
-        writeOwnEntry({ status: 'unconfirmed', hash, run });
+        writeOwnEntry({ status: 'unconfirmed', hash });
         console.error(`Could not confirm claim transaction ${hash}`, waitError);
         onError({
           kind: 'still-pending',
@@ -280,21 +304,26 @@ export const useClaimStakingIncentivesBatch = (props: ClaimStakingIncentivesBatc
   };
 
   /**
-   * A `sending` claim this mount is not sending was left by an earlier mount whose wallet has
-   * not answered. A `preparing` one is not: its run is still going and will reach the wallet.
+   * An `unconfirmed` claim, or a `sending` one an earlier mount left whose wallet has not
+   * answered. A `preparing` one is not: its run is still going and will reach the wallet.
    */
-  const isStaleSending = pending?.status === 'sending' && !isSending;
-  const canDismissPendingClaim = unconfirmedHash !== undefined || isStaleSending;
+  const dismissable = pendingClaims.filter(
+    (entry) =>
+      entry.status === 'unconfirmed' ||
+      (entry.status === 'sending' && !ownRuns.current.has(entry.run)),
+  );
+  const canDismissPendingClaim = dismissable.length > 0;
 
   /** For a hash the wallet replaced or dropped, or a wallet request that was never answered. */
   const dismissPendingClaim = () => {
-    if (account && canDismissPendingClaim) setPending(account, null);
+    if (!account) return;
+    dismissable.forEach(({ run }) => setPending(account, run, null));
   };
 
   return {
     claimIncentivesForBatch,
     dismissPendingClaim,
-    isPending: isPreparing || isSending || pending !== undefined,
+    isPending: isPreparing || isSending || pendingClaims.length > 0,
     isPreparing,
     pendingHash,
     canDismissPendingClaim,

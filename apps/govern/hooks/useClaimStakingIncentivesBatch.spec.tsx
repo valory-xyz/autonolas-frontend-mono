@@ -10,10 +10,11 @@ import {
 
 import { governReducer } from 'store/govern';
 import type { ClaimBatch } from 'common-util/functions/staking-incentives-claim';
-import type { CursorChange } from 'hooks/useClaimableNomineeBatches';
+import type { CursorChange } from 'common-util/functions/claim-batches';
 
 import {
   PENDING_RECEIPT_POLL_MS,
+  stillPendingMessage,
   useClaimStakingIncentivesBatch,
 } from './useClaimStakingIncentivesBatch';
 
@@ -84,6 +85,11 @@ const setup = (rebuiltBatches: ClaimBatch[] = [REBUILT], change: CursorChange = 
   const claim = () => act(() => result.current.claimIncentivesForBatch(FIRST));
   return { props, claim, result, unmount, rerender };
 };
+
+const pendingStatuses = () =>
+  (store.getState().govern.pendingClaims[ACCOUNT] ?? []).map((entry) =>
+    'hash' in entry ? `${entry.status} ${entry.hash}` : entry.status,
+  );
 
 const settleLater = () => {
   let settle: (value: unknown) => void = () => undefined;
@@ -588,7 +594,7 @@ describe('useClaimStakingIncentivesBatch', () => {
         await firstClaim;
       });
 
-      expect(store.getState().govern.pendingClaims[ACCOUNT]?.status).toBe('preparing');
+      expect(pendingStatuses()).toEqual(['preparing']);
       expect(reopened.result.current.isPending).toBe(true);
     });
 
@@ -616,20 +622,14 @@ describe('useClaimStakingIncentivesBatch', () => {
       await act(async () => {
         reopened.result.current.claimIncentivesForBatch(FIRST);
       });
-      expect(store.getState().govern.pendingClaims[ACCOUNT]).toMatchObject({
-        status: 'waiting',
-        hash: HASH,
-      });
+      expect(pendingStatuses()).toEqual([`waiting ${HASH}`]);
 
       await act(async () => {
         signFirst(OLD_HASH);
         await firstClaim;
       });
 
-      expect(store.getState().govern.pendingClaims[ACCOUNT]).toMatchObject({
-        status: 'waiting',
-        hash: HASH,
-      });
+      expect(pendingStatuses()).toEqual([`waiting ${HASH}`]);
       expect(reopened.result.current.isPending).toBe(true);
     });
 
@@ -657,11 +657,89 @@ describe('useClaimStakingIncentivesBatch', () => {
         await Promise.resolve();
       });
 
-      expect(store.getState().govern.pendingClaims[ACCOUNT]).toMatchObject({
-        status: 'waiting',
-        hash: OLD_HASH,
-      });
+      expect(pendingStatuses()).toEqual([`waiting ${OLD_HASH}`]);
       expect(reopened.result.current.isPending).toBe(true);
+    });
+
+    it('guards a dismissed claim signed while a newer one holds the guard, after the newer settles', async () => {
+      const OLD_HASH = '0xold';
+      mockPrepareClaim.mockResolvedValue(prepared(FIRST));
+      let signFirst: (hash: string) => void = () => undefined;
+      mockWriteContract.mockReturnValueOnce(
+        new Promise((resolve) => {
+          signFirst = resolve;
+        }),
+      );
+      let settleNewer: (receipt: unknown) => void = () => undefined;
+      mockWaitForTransactionReceipt.mockImplementation(({ hash }: { hash: string }) =>
+        hash === OLD_HASH
+          ? new Promise(() => undefined)
+          : new Promise((resolve) => {
+              settleNewer = resolve;
+            }),
+      );
+      const first = setup();
+      await act(async () => {
+        first.result.current.claimIncentivesForBatch(FIRST);
+      });
+      first.unmount();
+      const reopened = setup();
+      act(() => reopened.result.current.dismissPendingClaim());
+      let newerClaim: Promise<void> = Promise.resolve();
+      await act(async () => {
+        newerClaim = reopened.result.current.claimIncentivesForBatch(FIRST);
+      });
+
+      await act(async () => {
+        signFirst(OLD_HASH);
+        await Promise.resolve();
+      });
+      expect(pendingStatuses()).toEqual([`waiting ${HASH}`, `waiting ${OLD_HASH}`]);
+
+      await act(async () => {
+        settleNewer({ status: 'success', transactionHash: HASH });
+        await newerClaim;
+      });
+      expect(pendingStatuses()).toEqual([`waiting ${OLD_HASH}`]);
+      expect(reopened.result.current.isPending).toBe(true);
+      await reopened.claim();
+      expect(reopened.props.onError).toHaveBeenCalledWith({
+        kind: 'already-in-flight',
+        message: stillPendingMessage(OLD_HASH),
+      });
+      expect(mockWriteContract).toHaveBeenCalledTimes(2);
+    });
+
+    it('refreshes a reopened modal when a claim an earlier modal sent confirms', async () => {
+      mockPrepareClaim.mockResolvedValue(prepared(FIRST));
+      const settle = settleLater();
+      const first = setup();
+      let firstClaim: Promise<void> = Promise.resolve();
+      await act(async () => {
+        firstClaim = first.result.current.claimIncentivesForBatch(FIRST);
+      });
+      first.unmount();
+      const reopened = setup();
+      expect(reopened.props.refetchClaimableBatches).not.toHaveBeenCalled();
+
+      await act(async () => {
+        settle({ status: 'success', transactionHash: HASH });
+        await firstClaim;
+      });
+
+      expect(reopened.props.refetchClaimableBatches).toHaveBeenCalledTimes(1);
+      expect(reopened.props.onBatchesRebuilt).toHaveBeenCalledTimes(1);
+      expect(first.props.refetchClaimableBatches).not.toHaveBeenCalled();
+    });
+
+    it("does not refresh for the mount's own claim confirming", async () => {
+      mockPrepareClaim.mockResolvedValue(prepared(FIRST));
+      const { claim, props } = setup();
+
+      await claim();
+
+      expect(props.onSuccess).toHaveBeenCalledTimes(1);
+      expect(props.refetchClaimableBatches).not.toHaveBeenCalled();
     });
 
     it('reports isPreparing only while the claim is being prepared', async () => {
@@ -809,7 +887,7 @@ describe('useClaimStakingIncentivesBatch', () => {
       // It may still mine, so it cannot be dismissed.
       expect(reopened.result.current.canDismissPendingClaim).toBe(false);
       act(() => reopened.result.current.dismissPendingClaim());
-      expect(store.getState().govern.pendingClaims[ACCOUNT]?.status).toBe('waiting');
+      expect(pendingStatuses()).toEqual([`waiting ${HASH}`]);
     });
 
     describe('after the wait timed out', () => {

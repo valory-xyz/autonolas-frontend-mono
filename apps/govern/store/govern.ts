@@ -5,16 +5,17 @@ import { StakingContract, UserVotes } from 'types';
 
 import { Proposal } from 'common-util/graphql/types';
 
-/**
- * A claim in flight per account, so a reopened modal cannot send a second one. `run` identifies
- * the claim that set the entry, so a dismissed claim never overwrites a newer one's.
- */
-export type PendingClaim = { run: number } & (
+export type PendingClaimStatus =
   | { status: 'preparing' }
   | { status: 'sending' }
   | { status: 'waiting'; hash: Hex }
-  | { status: 'unconfirmed'; hash: Hex }
-);
+  | { status: 'unconfirmed'; hash: Hex };
+
+/**
+ * A claim in flight, so a reopened modal cannot send another while one may still mine. `run`
+ * identifies the claim that owns the entry.
+ */
+export type PendingClaim = { run: number } & PendingClaimStatus;
 
 interface GovernState {
   isStakingContractsLoading: boolean;
@@ -24,7 +25,7 @@ interface GovernState {
   proposalVotes: Record<string, Proposal['voteCasts'][0]>;
   /** The timestamp of the last user vote */
   lastUserVote: number | null;
-  pendingClaims: Partial<Record<Address, PendingClaim>>;
+  pendingClaims: Partial<Record<Address, PendingClaim[]>>;
 }
 
 const initialState: GovernState = {
@@ -62,12 +63,25 @@ export const governSlice = createSlice({
     setProposalVotes: (state, action: PayloadAction<GovernState['proposalVotes']>) => {
       state.proposalVotes = { ...state.proposalVotes, ...action.payload };
     },
+    /**
+     * Writes or clears only the entry of `run`. A run whose entry was dismissed gets one back when
+     * it writes again, since only a claim that was signed anyway still writes.
+     */
     setPendingClaim: (
       state,
-      action: PayloadAction<{ account: Address; pending: PendingClaim | null }>,
+      action: PayloadAction<{
+        account: Address;
+        run: number;
+        pending: PendingClaimStatus | null;
+      }>,
     ) => {
-      const { account, pending } = action.payload;
-      if (pending) state.pendingClaims[account] = pending;
+      const { account, run, pending } = action.payload;
+      const entries = state.pendingClaims[account] ?? [];
+      const index = entries.findIndex((entry) => entry.run === run);
+      if (pending && index === -1) entries.push({ ...pending, run });
+      else if (pending) entries[index] = { ...pending, run };
+      else if (index !== -1) entries.splice(index, 1);
+      if (entries.length > 0) state.pendingClaims[account] = entries;
       else delete state.pendingClaims[account];
     },
   },
