@@ -65,24 +65,29 @@ const toLastClaimedEpochs = (
  * How the claim cursors moved since the shown list was built:
  * - `none`: not at all, so the list is unchanged;
  * - `own-claims`: only as this user's recorded claims explain, so the list re-indexes;
- * - `concurrent`: past what those claims explain, i.e. someone else claimed meanwhile.
+ * - `concurrent`: past what those claims explain (someone else claimed meanwhile), or with no
+ *   earlier cursors to compare against.
  */
 export type CursorChange = 'none' | 'own-claims' | 'concurrent';
 
 /** The rebuilt batches, and how the cursors they were built from moved. */
 export type ClaimableBatchesRefresh = { batches: ClaimBatch[]; change: CursorChange };
 
+/** Claim cursors by staking contract; a contract the batches were not built from has none. */
+type Cursors = Partial<Record<Address, number>>;
+
 export const getCursorChange = (
-  built: Record<Address, number> | null,
-  expected: Record<Address, number> | null,
+  built: Cursors | null,
+  expected: Cursors | null,
   fresh: Record<Address, number>,
 ): CursorChange => {
   if (!built || !expected) return 'concurrent';
   const addresses = Object.keys(fresh) as Address[];
   // A cursor only moves forward: one below what own claims explain is a lagging read, not a claim.
-  const movedByOthers = addresses.some(
-    (address) => expected[address] === undefined || fresh[address] > expected[address],
-  );
+  const movedByOthers = addresses.some((address) => {
+    const expectedCursor = expected[address];
+    return expectedCursor === undefined || fresh[address] > expectedCursor;
+  });
   if (movedByOthers) return 'concurrent';
   return addresses.some((address) => fresh[address] !== built[address]) ? 'own-claims' : 'none';
 };
@@ -115,7 +120,7 @@ const useNomineesLastClaimedStakingEpoch = ({ nominees }: { nominees: StakingCon
       return { epochs: toLastClaimedEpochs(nominees, lastClaimedStakingEpoch), error: null };
     } catch (error) {
       console.error(error);
-      return { epochs: null, error: error instanceof Error ? error.message : String(error) };
+      return { epochs: null, error: errorMessage(error) };
     }
   }, [lastClaimedStakingEpoch, nominees]);
 
@@ -417,9 +422,9 @@ export const useClaimableNomineesBatches = () => {
   const builtFromCursors = useRef(lastClaimedStakingEpochByNominee);
   builtFromCursors.current = lastClaimedStakingEpochByNominee;
   // Cursors this user's own confirmed claims advanced to, which the cache does not show yet.
-  const ownClaimedThrough = useRef<Record<Address, number>>({});
+  const ownClaimedThrough = useRef<Cursors>({});
 
-  const getExpectedCursors = useCallback(() => {
+  const getExpectedCursors = useCallback((): Cursors | null => {
     const built = builtFromCursors.current;
     if (!built) return null;
     return Object.fromEntries(
@@ -427,7 +432,7 @@ export const useClaimableNomineesBatches = () => {
         address,
         Math.max(cursor, ownClaimedThrough.current[address as Address] ?? cursor),
       ]),
-    ) as Record<Address, number>;
+    );
   }, []);
 
   /** Records a confirmed claim, so the cursors it advanced do not later read as a concurrent claim. */
@@ -436,7 +441,10 @@ export const useClaimableNomineesBatches = () => {
       const expected = getExpectedCursors();
       if (!expected) return;
       stakingTargets.flat().forEach((address) => {
-        ownClaimedThrough.current[address] = expected[address] + 1;
+        const cursor = expected[address];
+        // Not in the list the cursors were read for: the next refresh reads it as concurrent.
+        if (cursor === undefined) return;
+        ownClaimedThrough.current[address] = cursor + 1;
       });
     },
     [getExpectedCursors],
@@ -460,7 +468,8 @@ export const useClaimableNomineesBatches = () => {
     // Keep the own claims a lagging read has not reached yet, so they never read as concurrent.
     ownClaimedThrough.current = Object.fromEntries(
       Object.entries(ownClaimedThrough.current).filter(
-        ([address, through]) => lastClaimedEpochs[address as Address] < through,
+        ([address, through]) =>
+          through !== undefined && lastClaimedEpochs[address as Address] < through,
       ),
     );
     return {
