@@ -7,13 +7,17 @@ export const DEPLOY_REFUSAL = Object.freeze({
   NOT_ENABLED: 'not-enabled',
 });
 
-/** The deploy was not sent; `enabled` is the re-checked list when it was read. */
+/** The deploy was not sent. A `NOT_ENABLED` refusal always carries the re-checked list. */
 export class DeployRefusedError extends Error {
   constructor(reason, { enabled, cause } = {}) {
     super(`Deploy refused: ${reason}`, { cause });
     this.name = 'DeployRefusedError';
     this.reason = reason;
     this.enabled = enabled;
+  }
+
+  static notEnabled(enabled) {
+    return new DeployRefusedError(DEPLOY_REFUSAL.NOT_ENABLED, { enabled });
   }
 }
 
@@ -42,7 +46,7 @@ export const deployWithEnabledMultisig = async ({
     throw new DeployRefusedError(DEPLOY_REFUSAL.CHAIN_CHANGED);
   }
   if (!enabled.includes(multisig)) {
-    throw new DeployRefusedError(DEPLOY_REFUSAL.NOT_ENABLED, { enabled });
+    throw DeployRefusedError.notEnabled(enabled);
   }
   await onStep3Deploy(account, serviceId, multisig, payload);
   return enabled;

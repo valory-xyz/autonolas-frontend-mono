@@ -157,7 +157,7 @@ describe('FinishedRegistration multisig picker', () => {
   });
 
   it('does not deploy through a wrapper disabled since the options loaded', async () => {
-    getEnabledMultisigs.mockResolvedValueOnce([A]).mockResolvedValueOnce([]);
+    getEnabledMultisigs.mockResolvedValueOnce([A]).mockResolvedValueOnce([B]);
     renderStep(GNOSIS);
     fireEvent.click(await selectWrapper(A));
 
@@ -169,9 +169,8 @@ describe('FinishedRegistration multisig picker', () => {
     expect(onStep3Deploy).not.toHaveBeenCalled();
     // The re-check's answer replaces the offered options and clears the selection.
     expect(screen.queryByRole('radio', { name: A })).toBeNull();
-    expect(
-      screen.getByText(/No multisig creation option is currently enabled on this chain/),
-    ).toBeInTheDocument();
+    expect(screen.getByRole('radio', { name: B })).not.toBeChecked();
+    expect(screen.queryByRole('radio', { checked: true })).toBeNull();
   });
 
   it('deploys once when the form is submitted again during the enabled check', async () => {

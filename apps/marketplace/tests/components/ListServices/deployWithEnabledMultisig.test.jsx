@@ -82,6 +82,17 @@ describe('deployWithEnabledMultisig', () => {
     expect(onStep3Deploy).not.toHaveBeenCalled();
   });
 
+  it('refuses a chain change before judging the old chain answer', async () => {
+    getEnabledMultisigs.mockResolvedValue([B]);
+
+    const error = await refusal(deploy({ getCurrentChainId: () => 10 }));
+
+    expect(error).toBeInstanceOf(DeployRefusedError);
+    expect(error.reason).toBe(DEPLOY_REFUSAL.CHAIN_CHANGED);
+    // The old chain's list must not replace the new chain's options.
+    expect(error.enabled).toBeUndefined();
+  });
+
   it('passes a deploy failure through as is', async () => {
     const deployError = new Error('reverted');
     getEnabledMultisigs.mockResolvedValue([A]);

@@ -197,13 +197,14 @@ export const FinishedRegistration = ({
       case DEPLOY_REFUSAL.CHAIN_CHANGED:
         notifyError('The network changed before the deploy. Please submit again.');
         return;
-      default:
-        setMultisigs({
-          status: MULTISIG_STATUS.LOADED,
-          enabled: error.enabled,
-        });
+      case DEPLOY_REFUSAL.NOT_ENABLED:
+        setMultisigs({ status: MULTISIG_STATUS.LOADED, enabled: error.enabled });
         setRadioValue(null);
         notifyError('The selected multisig option is no longer enabled. Please choose another.');
+        return;
+      default:
+        console.error('Deploy refused', submitContext, error);
+        notifyError('Could not deploy. Please try again.');
     }
   };
 

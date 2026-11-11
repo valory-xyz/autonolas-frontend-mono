@@ -102,8 +102,8 @@ export type ChainIds = keyof typeof ADDRESSES;
 export type MultisigCandidates = Readonly<Record<ChainIds, readonly Address[]>>;
 /**
  * `GnosisSafeMultisig` wrappers, old then new: autonolas-registries' `docs/configuration.json`, then
- * `gnosisSafeMultisigImplementationAddress` of its `scripts/deployment` globals. Only those
- * `ServiceRegistry.mapMultisigs` enables are offered.
+ * `gnosisSafeMultisigImplementationAddress` of its `scripts/deployment` globals. Filtered by
+ * `getEnabledMultisigs`.
  */
 export const multisigCandidates: MultisigCandidates = {
   [mainnet.id]: [
