@@ -72,7 +72,7 @@ export type CursorChange = 'none' | 'own-claims' | 'concurrent';
 /** The rebuilt batches, and how the cursors they were built from moved. */
 export type ClaimableBatchesRefresh = { batches: ClaimBatch[]; change: CursorChange };
 
-const getCursorChange = (
+export const getCursorChange = (
   built: Record<Address, number> | null,
   expected: Record<Address, number> | null,
   fresh: Record<Address, number>,
@@ -457,7 +457,12 @@ export const useClaimableNomineesBatches = () => {
       lastClaimedEpochs,
     );
     builtFromCursors.current = lastClaimedEpochs;
-    ownClaimedThrough.current = {};
+    // Keep the own claims a lagging read has not reached yet, so they never read as concurrent.
+    ownClaimedThrough.current = Object.fromEntries(
+      Object.entries(ownClaimedThrough.current).filter(
+        ([address, through]) => lastClaimedEpochs[address as Address] < through,
+      ),
+    );
     return {
       batches: buildClaimBatches({
         nominees,

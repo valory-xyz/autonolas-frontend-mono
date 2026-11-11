@@ -7,7 +7,11 @@ import { useNomineesWeights } from 'hooks/useNomineesWeights';
 import { useEpochCounter, useEpochTokenomics } from 'components/Donate/hooks';
 import type { StakingContract } from 'types';
 
-import { buildClaimBatches, useClaimableNomineesBatches } from './useClaimableNomineeBatches';
+import {
+  buildClaimBatches,
+  getCursorChange,
+  useClaimableNomineesBatches,
+} from './useClaimableNomineeBatches';
 
 jest.mock('wagmi', () => ({ useReadContract: jest.fn(), useReadContracts: jest.fn() }));
 jest.mock('@tanstack/react-query', () => ({
@@ -72,6 +76,15 @@ describe('buildClaimBatches', () => {
     });
 
     expect(batches).toEqual([[[42161], [[C]]]]);
+  });
+});
+
+describe('getCursorChange', () => {
+  const cursors = { [A]: 9, [B]: 9 };
+
+  it('reports a staking contract the batches were not built from as concurrent', () => {
+    // C has no expected cursor to compare against, so its claim cannot be one of the user's.
+    expect(getCursorChange(cursors, cursors, { ...cursors, [C]: 3 })).toBe('concurrent');
   });
 });
 
@@ -229,9 +242,13 @@ describe('useClaimableNomineesBatches refetchClaimableBatches', () => {
     // The RPC has not caught up with the own claim yet: A still reads 9.
     mockRefetch.mockResolvedValue({ data: cursorReads(9, 9) });
 
-    const refresh = await result.current.refetchClaimableBatches();
+    const lagging = await result.current.refetchClaimableBatches();
+    mockRefetch.mockResolvedValue({ data: cursorReads(10, 9) });
+    const caughtUp = await result.current.refetchClaimableBatches();
 
-    expect(refresh.change).toBe('none');
+    expect(lagging.change).toBe('none');
+    // Once the RPC catches up, the cursor A moved is still the own claim, not someone else's.
+    expect(caughtUp.change).toBe('own-claims');
   });
 
   it('exposes one nominee whose weight read failed instead of crashing', () => {
