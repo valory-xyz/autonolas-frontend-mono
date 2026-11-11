@@ -11,9 +11,8 @@ export const ROBINHOOD_CHAIN_ID = robinhood.id;
 
 /**
  * Chains whose staking incentives are bridged through `ArbitrumDepositProcessorL1` (Arbitrum One
- * and the Orbit rollups deployed with the same processor). Each needs a retryable-ticket bridge
- * payload and an ETH value when the claim sends it a message; otherwise it passes `0x` and zero,
- * like every other chain.
+ * and the Orbit rollups deployed with the same processor), so their claims carry a retryable-ticket
+ * bridge payload.
  */
 export const ORBIT_CHAIN_IDS = [ARBITRUM_CHAIN_ID, ROBINHOOD_CHAIN_ID] as const;
 export type OrbitChainId = (typeof ORBIT_CHAIN_IDS)[number];

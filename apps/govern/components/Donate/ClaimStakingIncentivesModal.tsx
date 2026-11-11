@@ -24,7 +24,6 @@ const MODAL_WIDTH = 860;
 const TABLE_SCROLL_HEIGHT = 420;
 /** How long a claimed batch stays on screen before the next one is shown. */
 export const STEP_CHANGE_DELAY = 1000;
-// The list refresh runs after this is shown; a failed refresh is reported on its own.
 const FAILED_ON_CHAIN_HINT = 'Claim again to sign a new transaction.';
 
 const modalProps = {

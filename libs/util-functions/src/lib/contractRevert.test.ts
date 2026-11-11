@@ -7,7 +7,7 @@ import {
   parseAbi,
 } from 'viem';
 
-import { errorMessage, findContractRevert, findInChain, formatRevert } from './contractRevert';
+import { errorMessage, findContractRevert, findInErrorChain, formatRevert } from './contractRevert';
 
 const abi = parseAbi(['error WrongAmount(uint256 provided, uint256 expected)']);
 
@@ -42,14 +42,14 @@ describe('errorMessage', () => {
   });
 });
 
-describe('findInChain', () => {
+describe('findInErrorChain', () => {
   it('finds an error of the given type wrapped in a viem error', () => {
     const rejection = new UserRejectedRequestError(new Error('denied'));
     const wrapped = new ContractFunctionExecutionError(rejection, { abi, functionName: 'claim' });
 
-    expect(findInChain(wrapped, UserRejectedRequestError)).toBe(rejection);
-    expect(findInChain(wrapped, ContractFunctionRevertedError)).toBeNull();
-    expect(findInChain(new Error('plain'), UserRejectedRequestError)).toBeNull();
+    expect(findInErrorChain(wrapped, UserRejectedRequestError)).toBe(rejection);
+    expect(findInErrorChain(wrapped, ContractFunctionRevertedError)).toBeNull();
+    expect(findInErrorChain(new Error('plain'), UserRejectedRequestError)).toBeNull();
   });
 });
 

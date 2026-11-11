@@ -6,7 +6,7 @@ export type DecodedRevert = { errorName: string; args?: readonly unknown[] };
 export const formatRevert = ({ errorName, args = [] }: DecodedRevert) =>
   errorName === 'Error' ? String(args[0]) : `${errorName}(${args.join(', ')})`;
 
-export const findInChain = <T extends Error>(
+export const findInErrorChain = <T extends Error>(
   error: unknown,
   type: new (...args: never[]) => T,
 ): T | null => {
@@ -22,4 +22,4 @@ export const errorMessage = (error: unknown) => {
 };
 
 export const findContractRevert = (error: unknown) =>
-  findInChain(error, ContractFunctionRevertedError);
+  findInErrorChain(error, ContractFunctionRevertedError);

@@ -18,7 +18,7 @@ import { DISPENSER, VOTE_WEIGHTING } from 'libs/util-contracts/src/lib/abiAndAdd
 import {
   errorMessage,
   findContractRevert,
-  findInChain,
+  findInErrorChain,
   formatRevert,
 } from 'libs/util-functions/src';
 import { estimateGasWithBuffer } from 'libs/util-functions/src/lib/estimateGasWithBuffer';
@@ -301,7 +301,8 @@ export const getUnclaimedReason = (
 };
 
 export const toClaimError = (error: unknown): ClaimError => {
-  if (findInChain(error, UserRejectedRequestError) !== null) return { kind: 'wallet-rejected' };
+  if (findInErrorChain(error, UserRejectedRequestError) !== null)
+    return { kind: 'wallet-rejected' };
   const revertReason = getRevertReason(error);
   const message = errorMessage(error);
   return { kind: 'other', message: revertReason ? `${message} ${revertReason}` : message };
