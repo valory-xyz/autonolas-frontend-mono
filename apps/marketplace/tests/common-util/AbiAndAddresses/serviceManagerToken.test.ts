@@ -6,7 +6,7 @@ import { SERVICE_MANAGER_TOKEN_CONTRACT } from '../../../common-util/AbiAndAddre
 // Re-capture it when registries publishes a new ServiceManager.
 import bundledAbi from '../../fixtures/service-manager-1.3.0-abi.json';
 
-const bySignature = (abi: readonly unknown[]) =>
+const canonicalOrder = (abi: readonly unknown[]) =>
   [...abi].sort((a, b) => JSON.stringify(a).localeCompare(JSON.stringify(b)));
 
 // The direct calls the Marketplace sends, as encoded before ServiceManager 1.3.0
@@ -17,7 +17,7 @@ const PRE_1_3_0_ABI = parseAbi([
 
 describe('ServiceManager 1.3.0 ABI', () => {
   it('is the bundled 1.3.0 ABI, entry for entry', () => {
-    expect(bySignature(SERVICE_MANAGER_TOKEN_CONTRACT.abi)).toEqual(bySignature(bundledAbi));
+    expect(canonicalOrder(SERVICE_MANAGER_TOKEN_CONTRACT.abi)).toEqual(canonicalOrder(bundledAbi));
   });
 
   it('encodes registerAgents as before', () => {

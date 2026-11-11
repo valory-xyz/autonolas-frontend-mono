@@ -16,7 +16,7 @@ import { mainnet } from 'viem/chains';
 
 import { DISPENSER, VOTE_WEIGHTING } from 'libs/util-contracts/src/lib/abiAndAddresses';
 import {
-  errorMessage,
+  getErrorMessage,
   findContractRevert,
   findInErrorChain,
   formatRevert,
@@ -234,9 +234,12 @@ export const quoteChainClaims = async (
         states[i].processor,
       ).catch((error: unknown) => {
         // The bridge estimate's L1 and L2 RPCs can fail too; name the chain, as the other quote errors do.
-        throw new Error(`Could not quote the bridge for chain ${chainId}: ${errorMessage(error)}`, {
-          cause: error,
-        });
+        throw new Error(
+          `Could not quote the bridge for chain ${chainId}: ${getErrorMessage(error)}`,
+          {
+            cause: error,
+          },
+        );
       });
       // The Dispenser bridges fresh OLAS only for what the chain's withheld OLAS does not cover.
       const total = incentives[i].reduce((sum, incentive) => sum + incentive, BigInt(0));
@@ -304,6 +307,6 @@ export const toClaimError = (error: unknown): ClaimError => {
   if (findInErrorChain(error, UserRejectedRequestError) !== null)
     return { kind: 'wallet-rejected' };
   const revertReason = getRevertReason(error);
-  const message = errorMessage(error);
+  const message = getErrorMessage(error);
   return { kind: 'other', message: revertReason ? `${message} ${revertReason}` : message };
 };

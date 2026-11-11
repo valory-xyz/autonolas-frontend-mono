@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 import { useEffect, useRef, useState } from 'react';
 
 import {
-  errorMessage,
+  getErrorMessage,
   findContractRevert,
   formatRevert,
   notifyError,
@@ -32,7 +32,7 @@ const getDeployFailureReason = (error) => {
   const revert = findContractRevert(error);
   if (revert?.data) return formatRevert(revert.data);
   if (revert?.signature) return `unrecognised revert ${revert.signature}`;
-  return errorMessage(error);
+  return getErrorMessage(error);
 };
 
 const STEP = 3;

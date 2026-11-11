@@ -91,16 +91,21 @@ const mockChainState = (chains: ChainSetup[], incentives: bigint[][]) => {
   );
 };
 
-describe('quoteChainClaims', () => {
-  beforeEach(() => {
-    jest.resetAllMocks();
-    mockGetArbitrumBridgePayload.mockResolvedValue({
-      bridgePayload: ORBIT_PAYLOAD,
-      messageCost: MESSAGE_COST,
-      tokenCost: TOKEN_COST,
-    });
+beforeEach(() => {
+  jest.resetAllMocks();
+  mockGetArbitrumBridgePayload.mockResolvedValue({
+    bridgePayload: ORBIT_PAYLOAD,
+    messageCost: MESSAGE_COST,
+    tokenCost: TOKEN_COST,
   });
+});
 
+/** The params of the first simulation of `functionName`. */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const simulatedParams = (functionName: string): any =>
+  mockSimulateContract.mock.calls.find(([, params]) => params.functionName === functionName)?.[1];
+
+describe('quoteChainClaims', () => {
   it('attaches no value and no payload to an Orbit chain whose incentives are all zero', async () => {
     mockChainState([{}], [[ZERO, ZERO]]);
 
@@ -373,10 +378,8 @@ describe('quoteChainClaims', () => {
 
     await quoteChainClaims([[GNOSIS], [[target(1), target(2)]]], ACCOUNT);
 
-    const aggregate = mockSimulateContract.mock.calls.find(
-      ([, { functionName }]) => functionName === 'aggregate3',
-    );
-    const calls = aggregate?.[1].args[0] as { target: Address; callData: Hex }[];
+    const aggregate = simulatedParams('aggregate3');
+    const calls = aggregate.args[0] as { target: Address; callData: Hex }[];
     expect(calls.map((call) => call.target)).toEqual([
       VOTE_WEIGHTING_ADDRESS,
       DISPENSER_ADDRESS,
@@ -399,11 +402,11 @@ describe('quoteChainClaims', () => {
     ]);
     expect(calculations[0].args).toEqual([BigInt(1), BigInt(GNOSIS), target(1), BigInt(8)]);
     expect(calculations[1].args).toEqual([BigInt(1), BigInt(GNOSIS), target(2), BigInt(8)]);
-    expect(aggregate?.[1].abi).toBe(multicall3Abi);
-    expect(aggregate?.[1].account).toBe(ACCOUNT);
+    expect(aggregate.abi).toBe(multicall3Abi);
+    expect(aggregate.account).toBe(ACCOUNT);
     // Mainnet's Multicall3, whichever chain the wallet is on.
-    expect(aggregate?.[1].address.toLowerCase()).toBe('0xca11bde05977b3631167028862be2a173976ca11');
-    expect(aggregate?.[1].chainId).toBe(1);
+    expect(aggregate.address.toLowerCase()).toBe('0xca11bde05977b3631167028862be2a173976ca11');
+    expect(aggregate.chainId).toBe(1);
   });
 
   it('reads each chain processor and withheld amount, then the decimals from that processor', async () => {
@@ -459,10 +462,8 @@ describe('quoteChainClaims', () => {
       ACCOUNT,
     );
 
-    const aggregate = mockSimulateContract.mock.calls.find(
-      ([, { functionName }]) => functionName === 'aggregate3',
-    );
-    const calls = aggregate?.[1].args[0] as { callData: Hex }[];
+    const aggregate = simulatedParams('aggregate3');
+    const calls = aggregate.args[0] as { callData: Hex }[];
     const decimals = [calls[1], calls[3]].map(
       ({ callData }) => decodeFunctionData({ abi: DISPENSER.abi, data: callData }).args?.[3],
     );
@@ -471,15 +472,6 @@ describe('quoteChainClaims', () => {
 });
 
 describe('prepareClaim', () => {
-  beforeEach(() => {
-    jest.resetAllMocks();
-    mockGetArbitrumBridgePayload.mockResolvedValue({
-      bridgePayload: ORBIT_PAYLOAD,
-      messageCost: MESSAGE_COST,
-      tokenCost: TOKEN_COST,
-    });
-  });
-
   it('simulates the exact batch with each chain value and their sum', async () => {
     mockChainState([{}, {}], [[OLAS], [ZERO]]);
     const batch: ClaimBatch = [
@@ -490,9 +482,7 @@ describe('prepareClaim', () => {
     const prepared = await prepareClaim(batch, ACCOUNT);
 
     expect(prepared.batch).toEqual(batch);
-    const claim = mockSimulateContract.mock.calls.find(
-      ([, { functionName }]) => functionName === 'claimStakingIncentivesBatch',
-    )?.[1];
+    const claim = simulatedParams('claimStakingIncentivesBatch');
     expect(claim.args).toEqual([
       BigInt(1),
       [BigInt(ARBITRUM), BigInt(GNOSIS)],
@@ -518,9 +508,7 @@ describe('prepareClaim', () => {
 
     await prepareClaim(batch, ACCOUNT);
 
-    const claim = mockSimulateContract.mock.calls.find(
-      ([, { functionName }]) => functionName === 'claimStakingIncentivesBatch',
-    )?.[1];
+    const claim = simulatedParams('claimStakingIncentivesBatch');
     expect(claim.args[4]).toEqual([MESSAGE_COST, MESSAGE_COST + TOKEN_COST]);
     expect(claim.value).toBe(MESSAGE_COST * BigInt(2) + TOKEN_COST);
   });
@@ -531,9 +519,7 @@ describe('prepareClaim', () => {
 
     const { request } = await prepareClaim([[GNOSIS], [[target(1)]]], ACCOUNT);
 
-    const simulated = mockSimulateContract.mock.calls.find(
-      ([, { functionName }]) => functionName === 'claimStakingIncentivesBatch',
-    )?.[1];
+    const simulated = simulatedParams('claimStakingIncentivesBatch');
     expect(mockEstimateGas).toHaveBeenCalledWith({}, simulated);
     expect(request).toEqual({ functionName: 'claimStakingIncentivesBatch', gas: BigInt(123) });
   });

@@ -63,7 +63,6 @@ const ROBINHOOD_ADDRESSES: Addresses = {
   mechMarketplace: '0xa45E64d13A30a51b91ae0eb182e88a40e9b18eD8',
 };
 
-// TODO: add testcases for all networks
 // get addresses from scripts/deployment folder in autonolas-registries repo
 export const ADDRESSES = {
   [mainnet.id]: MAINNET_ADDRESSES,

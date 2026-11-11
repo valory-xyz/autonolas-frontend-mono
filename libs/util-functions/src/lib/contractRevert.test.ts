@@ -7,7 +7,12 @@ import {
   parseAbi,
 } from 'viem';
 
-import { errorMessage, findContractRevert, findInErrorChain, formatRevert } from './contractRevert';
+import {
+  getErrorMessage,
+  findContractRevert,
+  findInErrorChain,
+  formatRevert,
+} from './contractRevert';
 
 const abi = parseAbi(['error WrongAmount(uint256 provided, uint256 expected)']);
 
@@ -34,11 +39,11 @@ describe('formatRevert', () => {
   });
 });
 
-describe('errorMessage', () => {
+describe('getErrorMessage', () => {
   it("prefers viem's short message, then the error message", () => {
-    expect(errorMessage(new BaseError('RPC request failed.'))).toBe('RPC request failed.');
-    expect(errorMessage(new Error('plain'))).toBe('plain');
-    expect(errorMessage('boom')).toBe('Unknown error');
+    expect(getErrorMessage(new BaseError('RPC request failed.'))).toBe('RPC request failed.');
+    expect(getErrorMessage(new Error('plain'))).toBe('plain');
+    expect(getErrorMessage('boom')).toBe('Unknown error');
   });
 });
 

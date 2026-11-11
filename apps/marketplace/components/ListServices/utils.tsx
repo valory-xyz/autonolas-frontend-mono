@@ -49,7 +49,7 @@ export const getEnabledMultisigs = async (chainId: number): Promise<Address[]> =
   const candidates = multisigCandidates[chainId];
   if (candidates.length === 0) return [];
 
-  const isEnabled = await readContracts(wagmiConfig, {
+  const enabledFlags = await readContracts(wagmiConfig, {
     allowFailure: false,
     contracts: candidates.map((multisig) => ({
       ...serviceRegistryParams(chainId),
@@ -57,7 +57,7 @@ export const getEnabledMultisigs = async (chainId: number): Promise<Address[]> =
       args: [multisig],
     })),
   });
-  return candidates.filter((_, index) => isEnabled[index] === true);
+  return candidates.filter((_, index) => enabledFlags[index] === true);
 };
 
 // --------- utils ---------

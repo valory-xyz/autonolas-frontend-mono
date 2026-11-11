@@ -195,6 +195,28 @@ describe('FinishedRegistration multisig picker', () => {
     expect(getEnabledMultisigs).toHaveBeenCalledTimes(checksBeforeSubmit + 1);
   });
 
+  it('reads nothing while no chain is connected, and keeps showing the check', async () => {
+    renderStep(undefined);
+
+    expect(
+      await screen.findByText(/Checking which multisig options are enabled on this chain/),
+    ).toBeInTheDocument();
+    expect(getEnabledMultisigs).not.toHaveBeenCalled();
+    expect(screen.queryByRole('radio')).toBeNull();
+  });
+
+  it('offers what the submit re-check found after a successful deploy', async () => {
+    getEnabledMultisigs.mockResolvedValueOnce([A, B]).mockResolvedValueOnce([A]);
+    onStep3Deploy.mockResolvedValue(undefined);
+    renderStep(GNOSIS);
+
+    fireEvent.click(await selectWrapper(A));
+
+    await waitFor(() => expect(notifySuccess).toHaveBeenCalledWith('Deployed successfully'));
+    expect(screen.getByRole('radio', { name: A })).toBeInTheDocument();
+    expect(screen.queryByRole('radio', { name: B })).toBeNull();
+  });
+
   it('shows that the enabled options are loading instead of a blank step', async () => {
     getEnabledMultisigs.mockReturnValue(deferred().promise);
     renderStep(GNOSIS);

@@ -14,6 +14,7 @@ import {
   ADDRESSES,
   ChainIds,
   FALLBACK_HANDLER,
+  isMultisigChainId,
   multisigCandidates,
 } from '../../../common-util/Contracts/addresses';
 // `docs/configuration.json` of valory-xyz/autonolas-registries at 5d5b1f1 (autonolas-registries#343),
@@ -45,14 +46,28 @@ type Contract = {
   address: string;
 };
 
+/** As the fixture holds it: `chainId` is a string. */
 type Chain = {
   name: string;
-  chainId: ChainIds;
+  chainId: string;
   contracts: Contract[];
 };
 
+const toChainId = (chainId: string): ChainIds => {
+  const id = Number(chainId);
+  if (!isMultisigChainId(id)) {
+    throw new Error(
+      `The pinned registries configuration has chain ${chainId}, which the app lacks`,
+    );
+  }
+  return id;
+};
+
 const chainIds = Object.keys(ADDRESSES);
-const pinnedChains = pinnedRegistriesConfig as unknown as Chain[];
+const pinnedChains = (pinnedRegistriesConfig as Chain[]).map((chain) => ({
+  ...chain,
+  chainId: toChainId(chain.chainId),
+}));
 
 const lowerFirst = (name: string) => name.charAt(0).toLowerCase() + name.slice(1);
 
