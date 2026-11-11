@@ -96,16 +96,16 @@ describe('useNomineesWeights', () => {
       tokenomics: TOKENOMICS_OK,
       stakingPoint: { stakingIncentive: 1n, stakingFraction: 1n },
       weights: [
-        { status: 'failure', error: readError },
         { status: 'success', result: [10n ** 16n, 10n ** 18n] },
+        { status: 'failure', error: readError },
       ],
     });
 
     const { result } = renderHook(() => useNomineesWeights(nominees, 1));
 
-    expect(Object.keys(result.current.data ?? {})).toEqual([B_ACCOUNT]);
-    expect(result.current.data?.[B_ACCOUNT]?.percentage).toBe(1);
-    expect(result.current.weightReadErrors).toEqual({ [NOMINEES[0].account]: readError });
+    expect(Object.keys(result.current.data ?? {})).toEqual([NOMINEES[0].account]);
+    expect(result.current.data?.[NOMINEES[0].account]?.percentage).toBe(1);
+    expect(result.current.weightReadErrors).toEqual({ [B_ACCOUNT]: readError });
   });
 
   it('reports no error while every read succeeds', () => {

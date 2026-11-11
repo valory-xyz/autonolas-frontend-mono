@@ -248,6 +248,44 @@ describe('useClaimableNomineesBatches refetchClaimableBatches', () => {
     expect(refresh.batches).toEqual([]);
   });
 
+  it('does not show an epoch an own claim took when the cached read lags it', () => {
+    const view = renderHook(() => useClaimableNomineesBatches());
+    renderBatches({ reads: cursorReads(8, 9) });
+    view.rerender();
+    view.result.current.recordClaimedBatch([[100], [[A, B]]]);
+    view.result.current.recordClaimedBatch([[100], [[A]]]);
+    // The cache refills from an RPC a block behind the second claim.
+    jest.mocked(useReadContracts).mockReturnValue({
+      data: cursorReads(9, 10),
+      isLoading: false,
+      queryKey: ['cursors'],
+      refetch: mockRefetch,
+    } as never);
+
+    view.rerender();
+
+    expect(view.result.current.nomineesToClaimBatches).toEqual([]);
+  });
+
+  it('gives the failed weight read as the cause when a refresh finds the weight missing', async () => {
+    const result = renderBatches();
+    const readError = new Error('execution reverted');
+    jest.mocked(useNomineesWeights).mockReturnValue({
+      data: { [A]: { percentage: 5 } },
+      weightReadErrors: { [B]: readError },
+      error: null,
+    } as never);
+    jest.spyOn(console, 'error').mockImplementation(() => undefined);
+    const { result: partial } = renderHook(() => useClaimableNomineesBatches());
+    mockRefetch.mockResolvedValue({ data: cursorReads(9, 9) });
+
+    await expect(partial.current.refetchClaimableBatches()).rejects.toHaveProperty(
+      'cause',
+      readError,
+    );
+    expect(result.current.claimableBatchesError).toBeNull();
+  });
+
   it('gives the failed weight read as the cause of the logged missing-weight error', () => {
     const spy = jest.spyOn(console, 'error').mockImplementation(() => undefined);
     const readError = new Error('execution reverted');
