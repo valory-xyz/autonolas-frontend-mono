@@ -31,11 +31,13 @@ const mockWaitForTransactionReceipt = jest.fn();
 const mockGetTransactionReceipt = jest.fn();
 jest.mock('@wagmi/core', () => ({
   writeContract: (...args: unknown[]) => mockWriteContract(...args),
-  getPublicClient: () => ({
-    waitForTransactionReceipt: (...args: unknown[]) => mockWaitForTransactionReceipt(...args),
-    getTransactionReceipt: (...args: unknown[]) => mockGetTransactionReceipt(...args),
-  }),
+  getPublicClient: (...args: unknown[]) => mockGetPublicClient(...args),
 }));
+const mockGetPublicClient = jest.fn();
+const mockPublicClient = {
+  waitForTransactionReceipt: (...args: unknown[]) => mockWaitForTransactionReceipt(...args),
+  getTransactionReceipt: (...args: unknown[]) => mockGetTransactionReceipt(...args),
+};
 jest.mock('common-util/config/wagmi', () => ({ wagmiConfig: {} }));
 
 class RevertError extends Error {}
@@ -99,6 +101,7 @@ describe('useClaimStakingIncentivesBatch', () => {
     store = configureStore({ reducer: { govern: governReducer } });
     mockAccount.current = ACCOUNT;
     jest.spyOn(console, 'error').mockImplementation(() => undefined);
+    mockGetPublicClient.mockReturnValue(mockPublicClient);
     mockWriteContract.mockResolvedValue(HASH);
     mockWaitForTransactionReceipt.mockResolvedValue({ status: 'success' });
     mockGetTransactionReceipt.mockRejectedValue(
@@ -111,6 +114,9 @@ describe('useClaimStakingIncentivesBatch', () => {
     const { props, claim } = setup();
 
     await claim();
+
+    // The receipt is awaited on mainnet, whichever chain the wallet is on.
+    expect(mockGetPublicClient).toHaveBeenCalledWith({}, { chainId: 1 });
 
     expect(mockPrepareClaim).toHaveBeenCalledWith(FIRST, ACCOUNT);
     expect(mockWriteContract).toHaveBeenCalledWith({}, { args: FIRST, gas: BigInt(100) });
@@ -420,6 +426,21 @@ describe('useClaimStakingIncentivesBatch', () => {
     expect(props.onError).not.toHaveBeenCalled();
   });
 
+  it('reports a missing mainnet client before the wallet opens, and leaves no pending claim', async () => {
+    mockPrepareClaim.mockResolvedValue(prepared(FIRST));
+    mockGetPublicClient.mockReturnValue(undefined);
+    const { props, claim } = setup();
+
+    await claim();
+
+    expect(props.onError).toHaveBeenCalledWith({
+      kind: 'other',
+      message: 'No Ethereum mainnet client is configured',
+    });
+    expect(mockWriteContract).not.toHaveBeenCalled();
+    expect(store.getState().govern.pendingClaims[ACCOUNT]).toBeUndefined();
+  });
+
   it('refuses to claim without a connected wallet, before preparing anything', async () => {
     mockAccount.current = undefined;
     const { props, claim } = setup();
@@ -482,10 +503,6 @@ describe('useClaimStakingIncentivesBatch', () => {
     const timeOut = () =>
       mockWaitForTransactionReceipt.mockRejectedValue(
         new WaitForTransactionReceiptTimeoutError({ hash: HASH }),
-      );
-    const notMinedYet = () =>
-      mockGetTransactionReceipt.mockRejectedValue(
-        new TransactionReceiptNotFoundError({ hash: HASH }),
       );
 
     it('refuses a claim from a reopened modal while the first is still being prepared', async () => {
@@ -750,7 +767,6 @@ describe('useClaimStakingIncentivesBatch', () => {
     it('is kept per account', async () => {
       mockPrepareClaim.mockResolvedValue(prepared(FIRST));
       timeOut();
-      notMinedYet();
       const { claim, result, rerender } = setup();
       await claim();
       expect(result.current.pendingHash).toBe(HASH);
@@ -783,6 +799,10 @@ describe('useClaimStakingIncentivesBatch', () => {
 
       expect(reopened.result.current.pendingHash).toBe(HASH);
       expect(mockGetTransactionReceipt).not.toHaveBeenCalled();
+      // It may still mine, so it cannot be dismissed.
+      expect(reopened.result.current.canDismissPendingClaim).toBe(false);
+      act(() => reopened.result.current.dismissPendingClaim());
+      expect(store.getState().govern.pendingClaims[ACCOUNT]?.status).toBe('waiting');
     });
 
     describe('after the wait timed out', () => {
@@ -792,7 +812,6 @@ describe('useClaimStakingIncentivesBatch', () => {
       const timedOutClaim = async () => {
         mockPrepareClaim.mockResolvedValue(prepared(FIRST));
         timeOut();
-        notMinedYet();
         const view = setup();
         await view.claim();
         return view;
@@ -815,6 +834,33 @@ describe('useClaimStakingIncentivesBatch', () => {
         expect(props.refetchClaimableBatches).toHaveBeenCalledTimes(1);
         expect(result.current.pendingHash).toBeUndefined();
         expect(result.current.isPending).toBe(false);
+      });
+
+      it('looks the receipt up on mainnet', async () => {
+        const { unmount } = await timedOutClaim();
+        unmount();
+        mockGetPublicClient.mockClear();
+
+        setup();
+        await poll();
+
+        expect(mockGetPublicClient).toHaveBeenCalledWith({}, { chainId: 1 });
+        expect(mockGetTransactionReceipt).toHaveBeenCalled();
+      });
+
+      it('logs and skips the lookup when there is no mainnet client', async () => {
+        const { unmount } = await timedOutClaim();
+        unmount();
+        mockGetPublicClient.mockReturnValue(undefined);
+        mockGetTransactionReceipt.mockClear();
+
+        setup();
+        await poll();
+
+        expect(mockGetTransactionReceipt).not.toHaveBeenCalled();
+        expect(console.error).toHaveBeenCalledWith(
+          `No Ethereum mainnet client to check claim transaction ${HASH}`,
+        );
       });
 
       it('reports a late receipt once when two lookups overlap', async () => {

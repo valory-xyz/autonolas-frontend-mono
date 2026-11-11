@@ -210,7 +210,15 @@ describe('<ClaimStakingIncentivesModal />', () => {
   it('says the claim is being prepared while it is', () => {
     renderModal({ isPending: true, isPreparing: true });
 
-    expect(screen.getByRole('button', { name: /Preparing claim/ })).toBeInTheDocument();
+    const button = screen.getByRole('button', { name: /Preparing claim/ });
+    expect(button).toHaveClass('ant-btn-loading');
+  });
+
+  it('keeps the claim button loading while a sent claim is awaited', () => {
+    renderModal({ isPending: true, isPreparing: false });
+
+    const button = screen.getByRole('button', { name: /Claim Incentives/ });
+    expect(button).toHaveClass('ant-btn-loading');
   });
 
   it('lets the user dismiss an earlier claim whose wallet request was never answered', () => {

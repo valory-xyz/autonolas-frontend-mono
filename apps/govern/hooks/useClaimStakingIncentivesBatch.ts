@@ -30,7 +30,7 @@ export const RECEIPT_TIMEOUT_MS = 20 * 60 * 1000;
 /** How often an unconfirmed claim's receipt is looked up again while the modal is open. */
 export const PENDING_RECEIPT_POLL_MS = 15 * 1000;
 
-/** Numbers each claim, so a claim only clears the hash-less pending entry it set itself. */
+/** Source of each claim's run (see `PendingClaim`). */
 let lastClaimRun = 0;
 
 export const stillPendingMessage = (hash: Hex) =>
@@ -159,10 +159,7 @@ export const useClaimStakingIncentivesBatch = (props: ClaimStakingIncentivesBatc
     }
   };
 
-  /**
-   * Quotes and simulates the batch. A revert with a moved cursor means someone else claimed
-   * meanwhile, so the first rebuilt batch is tried once more.
-   */
+  /** After a revert, a `concurrent` cursor change rebuilds once and retries the first batch. */
   const prepareWithOneRebuild = async (batch: ClaimBatch, from: Address) => {
     try {
       return await prepareClaim(batch, from);

@@ -70,8 +70,8 @@ const columns = [
   },
 ];
 
-const notifyClaimError = (error: ClaimNotice, batchNumber: number) => {
-  switch (error.kind) {
+const notifyClaimNotice = (notice: ClaimNotice, batchNumber: number) => {
+  switch (notice.kind) {
     case 'wallet-rejected':
       notifyWarning('Claim cancelled in your wallet');
       return;
@@ -88,20 +88,20 @@ const notifyClaimError = (error: ClaimNotice, batchNumber: number) => {
       notifyError(`The claim for batch ${batchNumber} failed on-chain`, FAILED_ON_CHAIN_HINT);
       return;
     case 'still-pending':
-      notifyWarning('Claim not confirmed yet', error.message);
+      notifyWarning('Claim not confirmed yet', notice.message);
       return;
     case 'already-in-flight':
-      notifyWarning('A claim is already in progress', error.message);
+      notifyWarning('A claim is already in progress', notice.message);
       return;
     case 'refresh-failed':
-      notifyWarning('Could not refresh the claim list', error.message);
+      notifyWarning('Could not refresh the claim list', notice.message);
       return;
     case 'other':
-      notifyError(`Failed to claim staking incentives for batch ${batchNumber}`, error.message);
+      notifyError(`Failed to claim staking incentives for batch ${batchNumber}`, notice.message);
       return;
     default: {
       // A new kind must be handled above; until then it still reads as a failure.
-      const unhandled: never = error;
+      const unhandled: never = notice;
       notifyError('Failed to claim staking incentives', JSON.stringify(unhandled));
     }
   }
@@ -150,9 +150,9 @@ export const ClaimStakingIncentivesModal = ({ onClose }: ClaimStakingIncentivesM
       }
       notifySuccess(`Staking incentives for batch ${claimedBatch + 1} claimed successfully`);
     },
-    onError: (error) => {
-      console.error(error);
-      notifyClaimError(error, latest.current.currentBatch + 1);
+    onError: (notice) => {
+      console.error(notice);
+      notifyClaimNotice(notice, latest.current.currentBatch + 1);
     },
     onReceiptLookupFailed: ({ hash }) =>
       notifyWarning(
