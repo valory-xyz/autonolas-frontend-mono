@@ -223,6 +223,69 @@ describe('quoteChainClaims', () => {
     );
   });
 
+  it('names the target and chain whose calculation reverted in a multi-chain batch', async () => {
+    mockChainState([{}, {}], [[OLAS], [OLAS, OLAS]]);
+    const ok = { success: true, returnData: '0x' };
+    const calculated = {
+      success: true,
+      returnData: encodeFunctionResult({
+        abi: DISPENSER.abi,
+        functionName: 'calculateStakingIncentives',
+        result: [OLAS, ZERO, BigInt(5), target(0), []],
+      }),
+    };
+    mockSimulateContract.mockResolvedValue({
+      result: [
+        ok,
+        calculated,
+        ok,
+        calculated,
+        ok,
+        {
+          success: false,
+          returnData: encodeErrorResult({ abi: DISPENSER.abi, errorName: 'Paused' }),
+        },
+      ],
+    });
+
+    await expect(
+      quoteChainClaims(
+        [
+          [GNOSIS, ARBITRUM],
+          [[target(1)], [target(2), target(3)]],
+        ],
+        ACCOUNT,
+      ),
+    ).rejects.toThrow(
+      `calculateStakingIncentives reverted for staking target ${target(3)} on chain ${ARBITRUM}: Paused()`,
+    );
+  });
+
+  it.each([
+    [
+      'an Error(string) as its reason',
+      encodeErrorResult({
+        abi: [{ type: 'error', name: 'Error', inputs: [{ name: 'message', type: 'string' }] }],
+        errorName: 'Error',
+        args: ['Paused'],
+      }),
+      'Paused',
+    ],
+    ['an unknown selector as the raw data', '0xdeadbeef' as Hex, '0xdeadbeef'],
+  ])('reports a reverted quote call with %s', async (_, returnData, reason) => {
+    mockChainState([{}], [[OLAS]]);
+    mockSimulateContract.mockResolvedValue({
+      result: [
+        { success: false, returnData },
+        { success: true, returnData: '0x' },
+      ],
+    });
+
+    await expect(quoteChainClaims([[GNOSIS], [[target(1)]]], ACCOUNT)).rejects.toThrow(
+      `checkpointNominee reverted for staking target ${target(1)} on chain ${GNOSIS}: ${reason}`,
+    );
+  });
+
   it('names a failed checkpoint with no revert data', async () => {
     mockChainState([{}], [[OLAS]]);
     mockSimulateContract.mockResolvedValue({
@@ -381,15 +444,18 @@ describe('claim error classification', () => {
     });
   });
 
-  it('does not repeat the reason of an Error(string) revert', () => {
-    const stringRevert = new ContractFunctionExecutionError(
+  it.each([
+    ['an Error(string)', 'Error', 'string', 'Paused', 'Paused'],
+    ['a Panic', 'Panic', 'uint256', BigInt(17), 'overflow'],
+  ])('does not repeat the reason of %s revert', (_, errorName, inputType, arg, reason) => {
+    const builtinRevert = new ContractFunctionExecutionError(
       new ContractFunctionRevertedError({
         abi: DISPENSER.abi,
         functionName: 'claimStakingIncentivesBatch',
         data: encodeErrorResult({
-          abi: [{ type: 'error', name: 'Error', inputs: [{ name: 'message', type: 'string' }] }],
-          errorName: 'Error',
-          args: ['Paused'],
+          abi: [{ type: 'error', name: errorName, inputs: [{ name: 'value', type: inputType }] }],
+          errorName,
+          args: [arg],
         }),
       }),
       {
@@ -399,10 +465,10 @@ describe('claim error classification', () => {
       },
     );
 
-    const error = toClaimError(stringRevert);
+    const error = toClaimError(builtinRevert);
 
-    expect(error).toEqual({ kind: 'other', message: stringRevert.shortMessage });
-    expect(stringRevert.shortMessage).toContain('Paused');
+    expect(error).toEqual({ kind: 'other', message: builtinRevert.shortMessage });
+    expect(builtinRevert.shortMessage).toContain(reason);
   });
 
   it('falls back to the short message, the error message, or a generic one', () => {

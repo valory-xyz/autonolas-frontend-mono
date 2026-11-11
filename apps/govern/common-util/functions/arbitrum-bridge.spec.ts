@@ -1,4 +1,4 @@
-import { BigNumber } from 'ethers-v5';
+import { BigNumber, ethers as ethersV5 } from 'ethers-v5';
 import { encodeAbiParameters, parseAbiParameters } from 'viem';
 
 import {
@@ -184,9 +184,14 @@ describe('getArbitrumBridgePayload', () => {
     expect(twoTargets - oneTarget).toBe(128);
   });
 
-  it('should read l2TargetDispenser from deposit processor contract', async () => {
+  it('should read l2TargetDispenser from the deposit processor it is given', async () => {
     await getArbitrumBridgePayload(stakingTargets, ARBITRUM_CHAIN_ID, DEPOSIT_PROCESSOR);
 
+    expect(ethersV5.Contract).toHaveBeenCalledWith(
+      DEPOSIT_PROCESSOR,
+      [expect.stringContaining('l2TargetDispenser')],
+      expect.anything(),
+    );
     expect(mockL2TargetDispenser).toHaveBeenCalled();
   });
 

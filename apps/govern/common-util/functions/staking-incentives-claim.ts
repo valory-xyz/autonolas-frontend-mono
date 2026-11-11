@@ -2,7 +2,6 @@ import { readContracts, simulateContract } from '@wagmi/core';
 import {
   type Address,
   BaseError,
-  ContractFunctionRevertedError,
   type Hex,
   UserRejectedRequestError,
   decodeErrorResult,
@@ -15,6 +14,7 @@ import {
 import { mainnet } from 'viem/chains';
 
 import { DISPENSER, VOTE_WEIGHTING } from 'libs/util-contracts/src/lib/abiAndAddresses';
+import { findContractRevert, formatRevert } from 'libs/util-functions/src/lib/contractRevert';
 
 import { MAINNET_CHAIN_ID } from 'common-util/constants/chains';
 import { wagmiConfig } from 'common-util/config/wagmi';
@@ -74,9 +74,7 @@ export class QuoteCallRevertedError extends Error {
 const decodeCallRevert = (abi: Parameters<typeof decodeErrorResult>[0]['abi'], data: Hex) => {
   if (data === '0x') return 'no revert data';
   try {
-    const { errorName, args } = decodeErrorResult({ abi, data });
-    if (errorName === 'Error') return String(args?.[0]);
-    return `${errorName}(${(args ?? []).join(', ')})`;
+    return formatRevert(decodeErrorResult({ abi, data }));
   } catch {
     return data;
   }
@@ -266,16 +264,14 @@ const findInChain = <T extends Error>(error: unknown, type: new (...args: never[
 
 /** A contract revert, as opposed to an RPC, network or wallet failure. */
 export const isContractRevert = (error: unknown) =>
-  error instanceof QuoteCallRevertedError ||
-  findInChain(error, ContractFunctionRevertedError) !== null;
+  error instanceof QuoteCallRevertedError || findContractRevert(error) !== null;
 
-/** The decoded revert, e.g. `WrongAmount(1, 0)`, so an unrelated revert says what failed. */
+/** The decoded custom revert, e.g. `WrongAmount(1, 0)`, so an unrelated revert says what failed. */
 const getRevertReason = (error: unknown) => {
-  const revert = findInChain(error, ContractFunctionRevertedError);
-  if (!(revert instanceof ContractFunctionRevertedError)) return null;
-  // viem's shortMessage already carries the reason of an Error(string) or Panic(uint256).
-  if (!revert.data || ['Error', 'Panic'].includes(revert.data.errorName)) return null;
-  return `${revert.data.errorName}(${(revert.data.args ?? []).join(', ')})`;
+  const revert = findContractRevert(error);
+  // viem's shortMessage already carries `reason`, set for an Error(string) or a Panic.
+  if (!revert?.data || revert.reason) return null;
+  return formatRevert(revert.data);
 };
 
 export const toClaimError = (error: unknown): ClaimError => {
