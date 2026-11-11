@@ -99,7 +99,7 @@ export const governSlice = createSlice({
       });
     },
     /** Keeps only the own claims a read lags behind; one it reached, or did not read, is dropped. */
-    pruneOwnClaims: (state, action: PayloadAction<Record<Address, number>>) => {
+    pruneOwnClaims: (state, action: PayloadAction<Cursors>) => {
       Object.entries(state.ownClaimedThrough).forEach(([address, through]) => {
         const fresh = action.payload[address as Address];
         if (through === undefined || fresh === undefined || fresh >= through) {

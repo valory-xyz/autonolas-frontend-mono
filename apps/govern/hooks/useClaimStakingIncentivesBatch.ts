@@ -66,7 +66,7 @@ type ClaimStakingIncentivesBatchProps = {
   refetchClaimableBatches: () => Promise<ClaimableBatchesRefresh>;
   /** The batches were rebuilt, so the caller restarts from the first one. */
   onBatchesRebuilt: () => void;
-  /** The cursors a confirmed claim of `batch` moves its targets to (see `recordOwnClaims`). */
+  /** See `useClaimableNomineesBatches`' `getClaimedThrough`. */
   getClaimedThrough: (batch: ClaimBatch) => Cursors;
 };
 
@@ -153,9 +153,12 @@ export const useClaimStakingIncentivesBatch = (props: ClaimStakingIncentivesBatc
       if (!isActive || settled.has(run)) return;
       settled.add(run);
       const claimed = getUnclaimedReason(receipt) === null;
-      if (claimed) settleClaimed(account, run, claimedThrough);
-      else setPending(account, run, null);
-      if (!claimed) console.error(`Claim transaction ${hash} reverted`);
+      if (claimed) {
+        settleClaimed(account, run, claimedThrough);
+      } else {
+        setPending(account, run, null);
+        console.error(`Claim transaction ${hash} reverted`);
+      }
       latestProps.current.onLateReceipt({ hash, claimed });
       await refreshReportingFailure();
     };
@@ -290,9 +293,8 @@ export const useClaimStakingIncentivesBatch = (props: ClaimStakingIncentivesBatc
         return;
       }
       const notClaimed = getUnclaimedReason(receipt, replacedReason);
-      if (notClaimed) writeOwnEntry(null);
-      else settleClaimed(account, run, claimedThrough);
       if (notClaimed) {
+        writeOwnEntry(null);
         console.error(
           `Claim transaction ${hash} did not claim (${replacedReason ?? receipt.status}); receipt ${receipt.transactionHash}`,
         );
@@ -300,6 +302,7 @@ export const useClaimStakingIncentivesBatch = (props: ClaimStakingIncentivesBatc
         await refreshReportingFailure();
         return;
       }
+      settleClaimed(account, run, claimedThrough);
       onSuccess();
     } catch (error) {
       // Nothing was sent, so nothing can mine: the next Claim may send.

@@ -5,7 +5,7 @@ import type { StakingContract } from 'types';
 import {
   buildClaimBatches,
   getCursorChange,
-  getClaimedThrough,
+  claimedThroughOf,
   getExpectedCursors,
 } from './claim-batches';
 
@@ -139,7 +139,7 @@ describe('own claims', () => {
   });
 
   it('moves each claimed target one epoch past what was expected, skipping unknown ones', () => {
-    expect(getClaimedThrough({ [A]: 9, [B]: 9 }, [[100], [[A, C]]])).toEqual({ [A]: 10 });
+    expect(claimedThroughOf({ [A]: 9, [B]: 9 }, [[100], [[A, C]]])).toEqual({ [A]: 10 });
   });
 });
 

@@ -57,7 +57,7 @@ export function getExpectedCursors(
  * The cursors a confirmed claim of `batch` moves its targets to: one epoch past what was expected.
  * A target with no expected cursor is left out, so the next refresh reads its move as concurrent.
  */
-export const getClaimedThrough = (expected: Cursors, [, stakingTargets]: ClaimBatch): Cursors => {
+export const claimedThroughOf = (expected: Cursors, [, stakingTargets]: ClaimBatch): Cursors => {
   const claimedThrough: Cursors = {};
   stakingTargets.flat().forEach((address) => {
     const cursor = expected[address];
