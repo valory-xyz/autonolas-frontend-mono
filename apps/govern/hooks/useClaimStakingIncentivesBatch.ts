@@ -222,7 +222,7 @@ export const useClaimStakingIncentivesBatch = (props: ClaimStakingIncentivesBatc
     }
     // Read from the store, not the render, so a second click before the re-render is refused.
     const inFlight = store.getState().govern.pendingClaims[account];
-    if (inFlight) {
+    if (inFlight?.length) {
       const sentHash = inFlight.find(isSent)?.hash;
       onError({
         kind: 'already-in-flight',

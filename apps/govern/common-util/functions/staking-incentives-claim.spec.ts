@@ -401,6 +401,9 @@ describe('quoteChainClaims', () => {
     expect(calculations[1].args).toEqual([BigInt(1), BigInt(GNOSIS), target(2), BigInt(8)]);
     expect(aggregate?.[1].abi).toBe(multicall3Abi);
     expect(aggregate?.[1].account).toBe(ACCOUNT);
+    // Mainnet's Multicall3, whichever chain the wallet is on.
+    expect(aggregate?.[1].address.toLowerCase()).toBe('0xca11bde05977b3631167028862be2a173976ca11');
+    expect(aggregate?.[1].chainId).toBe(1);
   });
 
   it('reads each chain processor and withheld amount, then the decimals from that processor', async () => {
@@ -499,6 +502,9 @@ describe('prepareClaim', () => {
     ]);
     expect(claim.value).toBe(MESSAGE_COST + TOKEN_COST);
     expect(claim.account).toBe(ACCOUNT);
+    // The request the wallet sends: mainnet's Dispenser, whichever chain the wallet is on.
+    expect(claim.address).toBe(DISPENSER_ADDRESS);
+    expect(claim.chainId).toBe(1);
   });
 
   it('attaches the sum of two Orbit chains values, each in batch order', async () => {

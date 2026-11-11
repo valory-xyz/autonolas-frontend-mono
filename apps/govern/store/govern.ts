@@ -63,10 +63,7 @@ export const governSlice = createSlice({
     setProposalVotes: (state, action: PayloadAction<GovernState['proposalVotes']>) => {
       state.proposalVotes = { ...state.proposalVotes, ...action.payload };
     },
-    /**
-     * Writes or clears only the entry of `run`. A run whose entry was dismissed gets one back when
-     * it writes again, since only a claim that was signed anyway still writes.
-     */
+    // A dismissed run gets an entry back when it writes again: only a claim signed anyway does.
     setPendingClaim: (
       state,
       action: PayloadAction<{

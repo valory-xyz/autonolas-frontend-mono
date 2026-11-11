@@ -21,6 +21,7 @@ import {
 const ACCOUNT: Address = '0x00000000000000000000000000000000000000aa';
 const OTHER_ACCOUNT: Address = '0x00000000000000000000000000000000000000bb';
 const HASH = '0xhash';
+const OLD_HASH = '0xold';
 
 const mockAccount: { current: Address | undefined } = { current: ACCOUNT };
 jest.mock('wagmi', () => ({
@@ -90,6 +91,17 @@ const pendingStatuses = () =>
   (store.getState().govern.pendingClaims[ACCOUNT] ?? []).map((entry) =>
     'hash' in entry ? `${entry.status} ${entry.hash}` : entry.status,
   );
+
+/** Holds the next wallet request until the returned function signs it with a hash. */
+const signLater = () => {
+  let sign: (hash: string) => void = () => undefined;
+  mockWriteContract.mockReturnValueOnce(
+    new Promise((resolve) => {
+      sign = resolve;
+    }),
+  );
+  return (hash: string) => sign(hash);
+};
 
 const settleLater = () => {
   let settle: (value: unknown) => void = () => undefined;
@@ -563,6 +575,8 @@ describe('useClaimStakingIncentivesBatch', () => {
       act(() => reopened.result.current.dismissPendingClaim());
 
       expect(reopened.result.current.isPending).toBe(false);
+      // Dismissing a claim that was never sent leaves the list as it is.
+      expect(reopened.props.refetchClaimableBatches).not.toHaveBeenCalled();
       await reopened.claim();
       expect(mockWriteContract).toHaveBeenCalledTimes(2);
     });
@@ -599,14 +613,8 @@ describe('useClaimStakingIncentivesBatch', () => {
     });
 
     it('keeps a newer claim guarded when a dismissed one is signed and mined later', async () => {
-      const OLD_HASH = '0xold';
       mockPrepareClaim.mockResolvedValue(prepared(FIRST));
-      let signFirst: (hash: string) => void = () => undefined;
-      mockWriteContract.mockReturnValueOnce(
-        new Promise((resolve) => {
-          signFirst = resolve;
-        }),
-      );
+      const signFirst = signLater();
       // The dismissed claim mines at once; the newer one is still awaited.
       mockWaitForTransactionReceipt.mockImplementation(({ hash }: { hash: string }) =>
         hash === OLD_HASH ? Promise.resolve({ status: 'success' }) : new Promise(() => undefined),
@@ -634,14 +642,8 @@ describe('useClaimStakingIncentivesBatch', () => {
     });
 
     it('guards the hash of a dismissed claim that is signed anyway', async () => {
-      const OLD_HASH = '0xold';
       mockPrepareClaim.mockResolvedValue(prepared(FIRST));
-      let signFirst: (hash: string) => void = () => undefined;
-      mockWriteContract.mockReturnValueOnce(
-        new Promise((resolve) => {
-          signFirst = resolve;
-        }),
-      );
+      const signFirst = signLater();
       mockWaitForTransactionReceipt.mockReturnValue(new Promise(() => undefined));
       const first = setup();
       await act(async () => {
@@ -662,14 +664,8 @@ describe('useClaimStakingIncentivesBatch', () => {
     });
 
     it('guards a dismissed claim signed while a newer one holds the guard, after the newer settles', async () => {
-      const OLD_HASH = '0xold';
       mockPrepareClaim.mockResolvedValue(prepared(FIRST));
-      let signFirst: (hash: string) => void = () => undefined;
-      mockWriteContract.mockReturnValueOnce(
-        new Promise((resolve) => {
-          signFirst = resolve;
-        }),
-      );
+      const signFirst = signLater();
       let settleNewer: (receipt: unknown) => void = () => undefined;
       mockWaitForTransactionReceipt.mockImplementation(({ hash }: { hash: string }) =>
         hash === OLD_HASH
@@ -732,6 +728,27 @@ describe('useClaimStakingIncentivesBatch', () => {
       expect(first.props.refetchClaimableBatches).not.toHaveBeenCalled();
     });
 
+    it('does not refresh for a claim of the account it switched away from', async () => {
+      mockPrepareClaim.mockResolvedValue(prepared(FIRST));
+      const settle = settleLater();
+      const first = setup();
+      let firstClaim: Promise<void> = Promise.resolve();
+      await act(async () => {
+        firstClaim = first.result.current.claimIncentivesForBatch(FIRST);
+      });
+      first.unmount();
+      const reopened = setup();
+      mockAccount.current = OTHER_ACCOUNT;
+      reopened.rerender();
+
+      await act(async () => {
+        settle({ status: 'success', transactionHash: HASH });
+        await firstClaim;
+      });
+
+      expect(reopened.props.refetchClaimableBatches).not.toHaveBeenCalled();
+    });
+
     it("does not refresh for the mount's own claim confirming", async () => {
       mockPrepareClaim.mockResolvedValue(prepared(FIRST));
       const { claim, props } = setup();
@@ -743,14 +760,8 @@ describe('useClaimStakingIncentivesBatch', () => {
     });
 
     it('names the sent hash of a claim behind one still being prepared', async () => {
-      const OLD_HASH = '0xold';
       mockPrepareClaim.mockResolvedValue(prepared(FIRST));
-      let signFirst: (hash: string) => void = () => undefined;
-      mockWriteContract.mockReturnValueOnce(
-        new Promise((resolve) => {
-          signFirst = resolve;
-        }),
-      );
+      const signFirst = signLater();
       mockWaitForTransactionReceipt.mockReturnValue(new Promise(() => undefined));
       const first = setup();
       await act(async () => {
@@ -1055,14 +1066,8 @@ describe('useClaimStakingIncentivesBatch', () => {
       });
 
       it('polls every unconfirmed claim, not only the first', async () => {
-        const OLD_HASH = '0xold';
         mockPrepareClaim.mockResolvedValue(prepared(FIRST));
-        let signFirst: (hash: string) => void = () => undefined;
-        mockWriteContract.mockReturnValueOnce(
-          new Promise((resolve) => {
-            signFirst = resolve;
-          }),
-        );
+        const signFirst = signLater();
         timeOut();
         const first = setup();
         await act(async () => {
@@ -1089,6 +1094,8 @@ describe('useClaimStakingIncentivesBatch', () => {
           hash: OLD_HASH,
           claimed: true,
         });
+        // Once, by the poll: an `unconfirmed` entry that clears is not a claim settling elsewhere.
+        expect(reopened.props.refetchClaimableBatches).toHaveBeenCalledTimes(1);
         expect(pendingStatuses()).toEqual([`unconfirmed ${HASH}`]);
       });
 
