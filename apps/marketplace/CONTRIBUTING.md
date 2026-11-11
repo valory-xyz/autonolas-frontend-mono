@@ -10,12 +10,16 @@
 - **Lint**: `yarn nx lint marketplace`
 - **Env**: Copy root `.env.example` and set registry URL, mech/marketplace/registry subgraphs per chain, Wallet Project ID, RPCs. Optional: Solana/SVM, Etherscan API key. For full registry testing, local registry (Docker) may be needed.
 
-### Base and Polygon Marketplace indexers
+### Base and Polygon indexers
 
-Marketplace queries use SQD on Base, Polygon and Robinhood. Registry routing is
-selected separately. Set `NEXT_PUBLIC_MARKETPLACE_BASE_SQUID_URL` and
-`NEXT_PUBLIC_MARKETPLACE_POLYGON_SQUID_URL` to the corresponding
-`https://subgraph.autonolas.tech/squid/marketplace-<chain>/graphql` endpoint.
-The existing variable names are retained; these two endpoints speak OpenReader.
-Set them before building, then rebuild/redeploy so the browser bundle uses the
-new values. Other indexer URLs and the Mech Analytics feature flag are unchanged.
+This app consumes marketplace activity and service registry squids on Base and Polygon.
+Configure these four variables before building, then rebuild/redeploy:
+
+- `NEXT_PUBLIC_MARKETPLACE_BASE_SQUID_URL`
+- `NEXT_PUBLIC_MARKETPLACE_POLYGON_SQUID_URL`
+- `NEXT_PUBLIC_REGISTRY_BASE_SQUID_URL`
+- `NEXT_PUBLIC_REGISTRY_POLYGON_SQUID_URL`
+
+Marketplace and registry each select the OpenReader dialect. This app does not require
+staking indexer variables. Other chains and Mech Analytics configuration are unchanged.
+See [the per-app deployment table](../../docs/base-polygon-squid-cutover.md) for variable replacements.

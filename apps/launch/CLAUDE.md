@@ -1,11 +1,9 @@
 # Launch app – CLAUDE.md
 
-Base/Polygon cutover: marketplace, registry and staking now use SQD OpenReader. Polygon
-uses `NEXT_PUBLIC_REGISTRY_POLYGON_SQUID_URL` and `NEXT_PUBLIC_STAKING_POLYGON_SQUID_URL`;
-Base uses `NEXT_PUBLIC_REGISTRY_BASE_SQUID_URL` and `NEXT_PUBLIC_STAKING_BASE_SQUID_URL`.
-These replace the earlier Graph envs for those sources. See `docs/base-polygon-squid-cutover.md`
-at the repository root.
-
+Base/Polygon staking reads use SQD OpenReader. Configure
+`NEXT_PUBLIC_STAKING_POLYGON_SQUID_URL` for Polygon and retain the existing
+`NEXT_PUBLIC_STAKING_BASE_SQUID_URL` for Base. Launch does not consume the Marketplace
+app's marketplace or registry indexers. See [the per-app deployment table](../../docs/base-polygon-squid-cutover.md).
 
 Guidance for working on the **Launch** app in this repo.
 
@@ -25,7 +23,7 @@ Guidance for working on the **Launch** app in this repo.
 
 ## Env / backends
 
-- Staking contract subgraphs (Gnosis, Optimism, Polygon, Mode, Ethereum, Arbitrum, Celo) and the Base squid (`NEXT_PUBLIC_STAKING_BASE_SQUID_URL`) in `common-util/graphql/index.ts`. **Robinhood Chain (4663)** has no staking subgraph yet: `hasSubgraphSupport` is false so `hooks/useGetMyStakingContracts.ts` falls back to `InstanceCreated` logs from the `StakingFactory`, scanned from its deployment block in `common-util/constants/stakingContract.ts` (`blockNumbers`). Add a `NEXT_PUBLIC_ROBINHOOD_STAKING_SUBGRAPH_URL` client there once one is deployed.
+- Staking contract subgraphs (Gnosis, Optimism, Mode, Ethereum, Arbitrum, Celo) and the Base/Polygon squids (`NEXT_PUBLIC_STAKING_BASE_SQUID_URL`, `NEXT_PUBLIC_STAKING_POLYGON_SQUID_URL`) in `common-util/graphql/index.ts`. **Robinhood Chain (4663)** has no staking subgraph yet: `hasSubgraphSupport` is false so `hooks/useGetMyStakingContracts.ts` falls back to `InstanceCreated` logs from the `StakingFactory`, scanned from its deployment block in `common-util/constants/stakingContract.ts` (`blockNumbers`). Add a `NEXT_PUBLIC_ROBINHOOD_STAKING_SUBGRAPH_URL` client there once one is deployed.
 - RPCs and Wallet Project ID for RainbowKit (WalletConnect Cloud projectId — required by `getDefaultConfig`).
 
 ## Structure
