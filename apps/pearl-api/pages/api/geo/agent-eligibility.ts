@@ -39,6 +39,7 @@ const AGENT_POLICIES: Record<AgentId, AgentPolicy> = {
   polymarket_trader: {
     restrictedCountries: new Set([
       'AF', // Afghanistan
+      'AR', // Argentina
       'AU', // Australia
       'BE', // Belgium
       'BI', // Burundi
