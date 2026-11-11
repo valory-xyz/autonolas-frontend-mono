@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useCallback, useRef } from 'react';
+import { useEffect, useMemo, useCallback, useRef, useState } from 'react';
+import { isEqual } from 'lodash';
 import { useStore } from 'react-redux';
 import { useQueryClient } from '@tanstack/react-query';
 import type { Address, MulticallResponse } from 'viem';
@@ -20,7 +21,7 @@ import {
   type ClaimableBatchesRefresh,
   type Cursors,
   getCursorChange,
-  getClaimedThrough as claimedThroughFrom,
+  claimedThroughOf,
   getExpectedCursors,
   READ_TARGET,
   readFailure,
@@ -186,10 +187,20 @@ export const useClaimableNomineesBatches = () => {
     [store],
   );
 
-  const { batches: nomineesToClaimBatches, buildError } = useMemo((): {
+  // Bumped by a refresh, so the shown list takes up claims recorded since it was built. A claim
+  // recorded on its own does not rebuild it: the modal steps through this list by index.
+  const [refreshCount, setRefreshCount] = useState(0);
+
+  const {
+    batches: nomineesToClaimBatches,
+    buildError,
+    builtWithOwnClaims,
+  } = useMemo((): {
     batches: ClaimBatch[];
     buildError: unknown;
+    builtWithOwnClaims: Cursors;
   } => {
+    const own = readOwnClaims();
     if (
       !nominees.length ||
       !lastClaimedStakingEpochByNominee ||
@@ -197,22 +208,22 @@ export const useClaimableNomineesBatches = () => {
       !minStakingWeight ||
       !relativeWeights
     )
-      return { batches: [], buildError: null };
+      return { batches: [], buildError: null, builtWithOwnClaims: own };
     try {
       const batches = buildClaimBatches({
         nominees,
-        // Read when the cursors change, not on every recorded claim: the modal steps through this
-        // list by index, so it must not shrink under a claim the modal is still marking as done.
-        lastClaimedEpochs: getExpectedCursors(lastClaimedStakingEpochByNominee, readOwnClaims()),
+        lastClaimedEpochs: getExpectedCursors(lastClaimedStakingEpochByNominee, own),
         currentEpoch,
         minStakingWeight,
         relativeWeights,
         weightReadErrors,
       });
-      return { batches, buildError: null };
+      return { batches, buildError: null, builtWithOwnClaims: own };
     } catch (error) {
-      return { batches: [], buildError: error };
+      return { batches: [], buildError: error, builtWithOwnClaims: own };
     }
+    // `refreshCount` only re-runs the build after a refresh.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     nominees,
     lastClaimedStakingEpochByNominee,
@@ -221,7 +232,10 @@ export const useClaimableNomineesBatches = () => {
     relativeWeights,
     weightReadErrors,
     readOwnClaims,
+    refreshCount,
   ]);
+  const shownOwnClaims = useRef(builtWithOwnClaims);
+  shownOwnClaims.current = builtWithOwnClaims;
 
   const readError =
     lastClaimedError ?? epochError ?? minStakingError ?? prevEpochWeightsError ?? buildError;
@@ -253,14 +267,14 @@ export const useClaimableNomineesBatches = () => {
   const builtFromCursors = useRef(lastClaimedStakingEpochByNominee);
   builtFromCursors.current = lastClaimedStakingEpochByNominee;
   /**
-   * The cursors a confirmed claim of `batch` will move its targets to, computed from the cursors
-   * the batch was built from. Taken when the claim is sent, so a later confirmation records it
+   * Uses the latest cursor read and every own claim recorded so far, so a claim sent after an
+   * earlier one moves on from it. Taken when a claim is sent, so its confirmation records it
    * whatever this or another modal has loaded by then.
    */
   const getClaimedThrough = useCallback(
     (batch: ClaimBatch): Cursors => {
       const expected = getExpectedCursors(builtFromCursors.current, readOwnClaims());
-      return expected ? claimedThroughFrom(expected, batch) : {};
+      return expected ? claimedThroughOf(expected, batch) : {};
     },
     [readOwnClaims],
   );
@@ -276,18 +290,23 @@ export const useClaimableNomineesBatches = () => {
     }
     const lastClaimedEpochs = await refetchLastClaimedEpochs();
     const own = readOwnClaims();
-    const change = getCursorChange(
+    const cursorChange = getCursorChange(
       builtFromCursors.current,
       getExpectedCursors(builtFromCursors.current, own),
       lastClaimedEpochs,
     );
-    const ownClaimAware = getExpectedCursors(lastClaimedEpochs, own);
+    // A claim confirmed since the list was built (late, or in another modal) changes the list even
+    // when the read lags it and shows no cursor move.
+    const shown = getExpectedCursors(builtFromCursors.current, shownOwnClaims.current);
+    const listChanged = !isEqual(shown, getExpectedCursors(lastClaimedEpochs, own));
+    const change = cursorChange === 'none' && listChanged ? 'own-claims' : cursorChange;
     builtFromCursors.current = lastClaimedEpochs;
     dispatch(pruneOwnClaims(lastClaimedEpochs));
+    setRefreshCount((count) => count + 1);
     return {
       batches: buildClaimBatches({
         nominees,
-        lastClaimedEpochs: ownClaimAware,
+        lastClaimedEpochs: getExpectedCursors(lastClaimedEpochs, own),
         currentEpoch,
         minStakingWeight,
         relativeWeights,

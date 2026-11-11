@@ -235,11 +235,15 @@ describe('useClaimableNomineesBatches refetchClaimableBatches', () => {
     // The RPC has not caught up with the own claim yet: A still reads 9.
     mockRefetch.mockResolvedValue({ data: cursorReads(9, 9) });
 
-    const lagging = await result.current.refetchClaimableBatches();
+    // The list was built before the claim, so the first lagging read rebuilds it; the next one,
+    // with the claim already applied, changes nothing. Neither counts as someone else's claim.
+    const lagging = await act(() => result.current.refetchClaimableBatches());
+    const laggingAgain = await act(() => result.current.refetchClaimableBatches());
     mockRefetch.mockResolvedValue({ data: cursorReads(10, 9) });
-    const caughtUp = await result.current.refetchClaimableBatches();
+    const caughtUp = await act(() => result.current.refetchClaimableBatches());
 
-    expect(lagging.change).toBe('none');
+    expect(lagging.change).toBe('own-claims');
+    expect(laggingAgain.change).toBe('none');
     // Once the RPC catches up, the cursor A moved is still the own claim, not someone else's.
     expect(caughtUp.change).toBe('own-claims');
   });
@@ -268,17 +272,39 @@ describe('useClaimableNomineesBatches refetchClaimableBatches', () => {
   });
 
   it('keeps the shown list as it is when a claim is recorded, until the cursors change', () => {
-    const result = renderBatches({ reads: cursorReads(9, 8) });
-    const before = result.current.nomineesToClaimBatches;
+    mockBatchReads({ reads: cursorReads(9, 8) });
+    const view = renderBatchesHook();
+    const before = view.result.current.nomineesToClaimBatches;
     expect(before).toEqual([
       [[100], [[A, B]]],
       [[100], [[B]]],
     ]);
 
     // The modal marks the batch claimed by its index; the list must not shrink under it.
-    act(() => recordClaim(result.current, [[100], [[A, B]]]));
+    act(() => recordClaim(view.result.current, [[100], [[A, B]]]));
+    view.rerender();
+    expect(view.result.current.nomineesToClaimBatches).toEqual(before);
 
-    expect(result.current.nomineesToClaimBatches).toEqual(before);
+    // A new cursor read, even one that has not caught up yet, applies the recorded claim.
+    mockCursorQuery(cursorReads(9, 8));
+    view.rerender();
+    expect(view.result.current.nomineesToClaimBatches).toEqual([[[100], [[B]]]]);
+  });
+
+  it('rebuilds after a claim confirmed late, even when the refresh read lags it', async () => {
+    const reads = cursorReads(9, 9);
+    mockBatchReads({ reads });
+    const view = renderBatchesHook();
+    // Confirmed by the receipt poll or another modal: recorded, but this list was built before.
+    act(() => recordClaim(view.result.current, [[100], [[A]]]));
+    // The RPC is a block behind, and the query keeps the same data reference.
+    mockRefetch.mockResolvedValue({ data: reads });
+
+    const refresh = await act(() => view.result.current.refetchClaimableBatches());
+
+    expect(refresh.change).toBe('own-claims');
+    expect(refresh.batches).toEqual([[[100], [[B]]]]);
+    expect(view.result.current.nomineesToClaimBatches).toEqual([[[100], [[B]]]]);
   });
 
   it('does not show an epoch an own claim took when the cached read lags it', () => {
