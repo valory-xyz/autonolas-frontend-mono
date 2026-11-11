@@ -223,7 +223,6 @@ export const quoteChainClaims = async (
         value: BigInt(0),
         bridgePayload: '0x',
       };
-      // A positive incentive is what makes the Dispenser send this chain a message.
       const sendsMessage = sendingTargets.length > 0;
       if (!sendsMessage || !isOrbitChainId(chainId)) return quote;
 
@@ -231,7 +230,12 @@ export const quoteChainClaims = async (
         sendingTargets,
         chainId,
         states[i].processor,
-      );
+      ).catch((error: unknown) => {
+        // The L2 RPC can fail too; name the chain, as the other quote errors do.
+        throw new Error(`Could not quote the bridge for chain ${chainId}: ${errorMessage(error)}`, {
+          cause: error,
+        });
+      });
       const sendsTokens = getTransferAmount(incentives[i], states[i].withheldAmount) > BigInt(0);
       return {
         ...quote,
@@ -264,11 +268,7 @@ export const prepareClaim = async (batch: ClaimBatch, account: Address) => {
   };
   const { request } = await simulateContract(wagmiConfig, params);
   const gas = await estimateGasWithBuffer(wagmiConfig, params);
-  const simulatedBatch: ClaimBatch = [
-    quotes.map(({ chainId }) => chainId),
-    quotes.map(({ targets }) => targets),
-  ];
-  return { quotes, batch: simulatedBatch, request: { ...request, gas } };
+  return { quotes, batch, request: { ...request, gas } };
 };
 
 /** A contract revert, as opposed to an RPC, network or wallet failure. */

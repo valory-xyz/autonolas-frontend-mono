@@ -304,6 +304,38 @@ describe('quoteChainClaims', () => {
     );
   });
 
+  it('names the failed checkpoint when both of a target sub-calls fail', async () => {
+    mockChainState([{}], [[OLAS]]);
+    const wrongAmount = encodeErrorResult({
+      abi: DISPENSER.abi,
+      errorName: 'WrongAmount',
+      args: [BigInt(1), ZERO],
+    });
+    mockSimulateContract.mockResolvedValue({
+      result: [
+        { success: false, returnData: '0x' },
+        { success: false, returnData: wrongAmount },
+      ],
+    });
+
+    await expect(quoteChainClaims([[GNOSIS], [[target(1)]]], ACCOUNT)).rejects.toThrow(
+      `checkpointNominee reverted for staking target ${target(1)} on chain ${GNOSIS}: no revert data`,
+    );
+  });
+
+  it('names the chain whose bridge quote failed', async () => {
+    mockChainState([{}], [[OLAS]]);
+    const cause = new Error('could not detect network');
+    mockGetArbitrumBridgePayload.mockRejectedValue(cause);
+
+    const quote = quoteChainClaims([[ARBITRUM], [[target(1)]]], ACCOUNT);
+
+    await expect(quote).rejects.toThrow(
+      `Could not quote the bridge for chain ${ARBITRUM}: could not detect network`,
+    );
+    await expect(quote).rejects.toMatchObject({ cause });
+  });
+
   it('keeps one chain fee and zero for the others in a mixed batch', async () => {
     mockChainState([{}, {}], [[OLAS], [OLAS]]);
 
@@ -435,7 +467,6 @@ describe('prepareClaim', () => {
 
     const prepared = await prepareClaim(batch, ACCOUNT);
 
-    // The batch it simulated, which a confirmed claim records.
     expect(prepared.batch).toEqual(batch);
     const claim = mockSimulateContract.mock.calls.find(
       ([, { functionName }]) => functionName === 'claimStakingIncentivesBatch',
