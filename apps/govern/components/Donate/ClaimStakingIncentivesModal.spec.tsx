@@ -30,7 +30,7 @@ jest.mock('hooks/useClaimableNomineeBatches', () => ({
   useClaimableNomineesBatches: () => ({
     nomineesToClaimBatches: mockBatches.current,
     claimableBatchesError: mockLoadError.current,
-    recordClaimedBatch: jest.fn(),
+    getClaimedThrough: jest.fn(),
     isLoadingClaimableBatches: false,
     clearClaimableBatches: jest.fn(),
     refetchClaimableBatches: jest.fn(),
@@ -195,10 +195,10 @@ describe('<ClaimStakingIncentivesModal />', () => {
 
       act(() => latestProps().onNotice(notice));
 
-      expect(notifier).toHaveBeenCalledTimes(1);
-      expect(notifyError).toHaveBeenCalledTimes(notifier === notifyError ? 1 : 0);
-      expect(notifier).toHaveBeenCalledWith(...expectedArgs);
       const isFailure = notifier === notifyError;
+      expect(notifier).toHaveBeenCalledTimes(1);
+      expect(notifyError).toHaveBeenCalledTimes(isFailure ? 1 : 0);
+      expect(notifier).toHaveBeenCalledWith(...expectedArgs);
       expect([errorLog.mock.calls, warnLog.mock.calls]).toEqual(
         isFailure ? [[[notice]], []] : [[], [[notice]]],
       );
