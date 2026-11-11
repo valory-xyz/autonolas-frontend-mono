@@ -88,7 +88,12 @@ const notifyClaimNotice = (notice: ClaimNotice, batchNumber: number) => {
       notifyError(`The claim for batch ${batchNumber} failed on-chain`, FAILED_ON_CHAIN_HINT);
       return;
     case 'still-pending':
-      notifyWarning('Claim not confirmed yet', notice.message);
+      notifyWarning(
+        'Claim not confirmed yet',
+        notice.timedOut
+          ? stillPendingMessage(notice.hash)
+          : `Could not confirm transaction ${notice.hash}. Check your wallet before claiming again.`,
+      );
       return;
     case 'already-in-flight':
       notifyWarning('A claim is already in progress', notice.message);
@@ -179,12 +184,10 @@ export const ClaimStakingIncentivesModal = ({ onClose }: ClaimStakingIncentivesM
     if (!currentBatchNomineesSubArray) return [];
     return currentBatchNomineesSubArray
       .flat()
-      .map((nomineeAddress) => {
-        const nominee = stakingContracts.find((nominee) => nominee.address === nomineeAddress);
-        if (!nominee) return null;
-        return nominee;
-      })
-      .filter((nominee): nominee is StakingContract => nominee !== null);
+      .map((nomineeAddress) =>
+        stakingContracts.find((nominee) => nominee.address === nomineeAddress),
+      )
+      .filter((nominee): nominee is StakingContract => nominee !== undefined);
   }, [currentBatch, nomineesToClaimBatches, stakingContracts]);
 
   const handleClose = () => {

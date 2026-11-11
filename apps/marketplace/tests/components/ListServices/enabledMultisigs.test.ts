@@ -55,8 +55,10 @@ describe('getEnabledMultisigs', () => {
     ]);
   });
 
-  it('offers nothing on a chain without candidates, without reading the registry', async () => {
-    await expect(getEnabledMultisigs(999999)).resolves.toEqual([]);
+  it('refuses a chain with no candidates configured, without reading the registry', async () => {
+    await expect(getEnabledMultisigs(999999)).rejects.toThrow(
+      'No Safe creation wrapper is configured for chain 999999',
+    );
     expect(mockReadContracts).not.toHaveBeenCalled();
   });
 

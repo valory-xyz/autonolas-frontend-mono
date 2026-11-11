@@ -6,11 +6,8 @@ import { StakingContract, UserVotes } from 'types';
 import { Proposal } from 'common-util/graphql/types';
 
 /**
- * A staking incentives claim in flight, per account, so a reopened claim modal cannot send a
- * second one: being quoted and simulated (`preparing`), waiting for the wallet to sign
- * (`sending`), sent and awaited (`waiting`), or sent with no receipt after the wait ended
- * (`unconfirmed`). `run` identifies the claim that set the entry, so a dismissed claim never
- * overwrites a newer one's.
+ * A claim in flight per account, so a reopened modal cannot send a second one. `run` identifies
+ * the claim that set the entry, so a dismissed claim never overwrites a newer one's.
  */
 export type PendingClaim = { run: number } & (
   | { status: 'preparing' }

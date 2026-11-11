@@ -39,11 +39,8 @@ export const stillPendingMessage = (hash: Hex) =>
 /** A claim that failed, or that this hook could not finish on its own. */
 export type ClaimNotice =
   | ClaimError
-  /** Sent, but with no receipt yet: it may still mine, so nothing else is sent. */
-  | { kind: 'still-pending'; message: string }
-  /** Another claim from this account is in flight, so this one was not sent. */
+  | { kind: 'still-pending'; hash: Hex; timedOut: boolean }
   | { kind: 'already-in-flight'; message: string }
-  /** The claim settled, but the list could not be re-read afterwards. */
   | { kind: 'refresh-failed'; message: string };
 
 type ClaimStakingIncentivesBatchProps = {
@@ -133,7 +130,7 @@ export const useClaimStakingIncentivesBatch = (props: ClaimStakingIncentivesBatc
       }
       if (!isActive) return;
       isActive = false;
-      dispatch(setPendingClaim({ account, pending: null }));
+      setPending(account, null);
       const claimed = getUnclaimedReason(receipt) === null;
       if (!claimed) console.error(`Claim transaction ${unconfirmedHash} reverted`);
       latestProps.current.onLateReceipt({ hash: unconfirmedHash, claimed });
@@ -254,10 +251,8 @@ export const useClaimStakingIncentivesBatch = (props: ClaimStakingIncentivesBatc
         console.error(`Could not confirm claim transaction ${hash}`, waitError);
         onError({
           kind: 'still-pending',
-          message:
-            waitError instanceof WaitForTransactionReceiptTimeoutError
-              ? stillPendingMessage(hash)
-              : `Could not confirm transaction ${hash}. Check your wallet before claiming again.`,
+          hash,
+          timedOut: waitError instanceof WaitForTransactionReceiptTimeoutError,
         });
         return;
       }

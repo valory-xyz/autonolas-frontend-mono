@@ -9,7 +9,6 @@ import { DISPENSER, VOTE_WEIGHTING } from 'libs/util-contracts/src/lib/abiAndAdd
  */
 export const RETAINER_ADDRESS = '0x000000000000000000000000000000000000dEaD';
 
-/** Mainnet addresses, as `libs/util-contracts` maps them (the D23 address switch edits those). */
 export const DISPENSER_ADDRESS = DISPENSER.addresses[mainnet.id];
 export const VOTE_WEIGHTING_ADDRESS = (VOTE_WEIGHTING.addresses as Record<number, Address>)[
   mainnet.id

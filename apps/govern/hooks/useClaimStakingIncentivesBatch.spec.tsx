@@ -355,7 +355,8 @@ describe('useClaimStakingIncentivesBatch', () => {
 
     expect(first.props.onError).toHaveBeenCalledWith({
       kind: 'still-pending',
-      message: `Transaction ${HASH} is still pending. Check your wallet before claiming again.`,
+      hash: HASH,
+      timedOut: true,
     });
     first.unmount();
 
@@ -378,7 +379,8 @@ describe('useClaimStakingIncentivesBatch', () => {
 
     expect(props.onError).toHaveBeenCalledWith({
       kind: 'still-pending',
-      message: `Could not confirm transaction ${HASH}. Check your wallet before claiming again.`,
+      hash: HASH,
+      timedOut: false,
     });
     expect(result.current.pendingHash).toBe(HASH);
     expect(props.onSuccess).not.toHaveBeenCalled();

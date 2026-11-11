@@ -1,7 +1,7 @@
 import { readContract, readContracts } from '@wagmi/core';
 import { Address } from 'viem';
 
-import { ChainIds, multisigCandidates } from 'common-util/Contracts/addresses';
+import { isMultisigChainId, multisigCandidates } from 'common-util/Contracts/addresses';
 import { serviceRegistryParams } from 'common-util/Contracts/params';
 import { filterByOwner } from 'common-util/ContractUtils/myList';
 import { getTokenDetailsRequest } from 'common-util/Details/utils';
@@ -43,7 +43,10 @@ export const getServiceOwner = async (id: string) => {
 
 /** The chain's Safe creation wrappers that `ServiceRegistry.mapMultisigs` still enables. */
 export const getEnabledMultisigs = async (chainId: number): Promise<Address[]> => {
-  const candidates = multisigCandidates[chainId as ChainIds] ?? [];
+  if (!isMultisigChainId(chainId)) {
+    throw new Error(`No Safe creation wrapper is configured for chain ${chainId}`);
+  }
+  const candidates = multisigCandidates[chainId];
   if (candidates.length === 0) return [];
 
   const isEnabled = await readContracts(wagmiConfig, {

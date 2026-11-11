@@ -113,6 +113,9 @@ export const multisigCandidates: MultisigCandidates = {
   [robinhood.id]: ['0xBb7e1D6Cb6F243D6bdE81CE92a9f2aFF7Fbe7eac'],
 };
 
+export const isMultisigChainId = (chainId: number): chainId is ChainIds =>
+  Object.hasOwn(multisigCandidates, chainId);
+
 /**
  * check addresses here
  * https://github.com/safe-global/safe-deployments/blob/main/src/assets/v1.3.0/compatibility_fallback_handler.json

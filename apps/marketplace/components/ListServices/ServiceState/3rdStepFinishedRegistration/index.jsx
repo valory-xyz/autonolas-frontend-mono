@@ -166,7 +166,7 @@ export const FinishedRegistration = ({
         if (enabled.length === 0) {
           console.warn('No multisig creation option is enabled', {
             chainId,
-            candidates: multisigCandidates[chainId] ?? [],
+            candidates: multisigCandidates[chainId],
           });
         }
         setMultisigs({ status: MULTISIG_STATUS.LOADED, enabled });

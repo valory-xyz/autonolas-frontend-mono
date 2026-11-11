@@ -61,12 +61,13 @@ const CHECKPOINT_ABI = parseAbi(['function checkpointNominee(bytes32 account, ui
 type ChainSetup = { withheld?: bigint; bridgingDecimals?: bigint };
 
 /**
- * Mocks the chain reads: per chain the processor and withheld amount, then bridging decimals,
+ * Mocks the chain reads: the processors and withheld amounts, then bridging decimals,
  * then one aggregate3 call answering each target's calculateStakingIncentives with `incentives`.
  */
 const mockChainState = (chains: ChainSetup[], incentives: bigint[][]) => {
   mockReadContracts
-    .mockResolvedValueOnce(chains.flatMap(({ withheld = ZERO }, i) => [processor(i), withheld]))
+    .mockResolvedValueOnce(chains.map((_, i) => processor(i)))
+    .mockResolvedValueOnce(chains.map(({ withheld = ZERO }) => withheld))
     .mockResolvedValueOnce(chains.map(({ bridgingDecimals = BigInt(18) }) => bridgingDecimals));
 
   const result = incentives.flat().flatMap((incentive) => [
@@ -154,12 +155,12 @@ describe('quoteChainClaims', () => {
   });
 
   it('names the chain when the Dispenser has no deposit processor for it', async () => {
-    mockReadContracts.mockResolvedValueOnce([zeroAddress, ZERO]);
+    mockReadContracts.mockResolvedValueOnce([zeroAddress]).mockResolvedValueOnce([ZERO]);
 
     await expect(quoteChainClaims([[ARBITRUM], [[target(1)]]], ACCOUNT)).rejects.toThrow(
       'No deposit processor is registered on the Dispenser for chain 42161',
     );
-    expect(mockReadContracts).toHaveBeenCalledTimes(1);
+    expect(mockReadContracts).toHaveBeenCalledTimes(2);
   });
 
   it.each([
@@ -405,16 +406,20 @@ describe('quoteChainClaims', () => {
       ACCOUNT,
     );
 
-    const [dispenserReads, decimalsReads] = mockReadContracts.mock.calls.map(
+    const [processorReads, withheldReads, decimalsReads] = mockReadContracts.mock.calls.map(
       ([, { contracts }]) =>
         contracts as { address: Address; functionName: string; args?: unknown[] }[],
     );
     expect(
-      dispenserReads.map(({ address, functionName, args }) => [address, functionName, args]),
+      [...processorReads, ...withheldReads].map(({ address, functionName, args }) => [
+        address,
+        functionName,
+        args,
+      ]),
     ).toEqual([
       [DISPENSER_ADDRESS, 'mapChainIdDepositProcessors', [BigInt(GNOSIS)]],
-      [DISPENSER_ADDRESS, 'mapChainIdWithheldAmounts', [BigInt(GNOSIS)]],
       [DISPENSER_ADDRESS, 'mapChainIdDepositProcessors', [BigInt(ARBITRUM)]],
+      [DISPENSER_ADDRESS, 'mapChainIdWithheldAmounts', [BigInt(GNOSIS)]],
       [DISPENSER_ADDRESS, 'mapChainIdWithheldAmounts', [BigInt(ARBITRUM)]],
     ]);
     expect(decimalsReads.map(({ address, functionName }) => [address, functionName])).toEqual([
@@ -423,6 +428,7 @@ describe('quoteChainClaims', () => {
     ]);
     // Raw values, not { status, result }: a failed read throws instead of passing through.
     expect(mockReadContracts.mock.calls.map(([, params]) => params.allowFailure)).toEqual([
+      false,
       false,
       false,
     ]);

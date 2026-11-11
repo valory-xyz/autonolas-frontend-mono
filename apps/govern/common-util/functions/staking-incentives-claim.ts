@@ -32,17 +32,16 @@ import { getArbitrumBridgePayload, isOrbitChainId } from './arbitrum-bridge';
 /** `[chainIds, stakingTargets per chain]`; targets are bytes32-padded nominee accounts. */
 export type ClaimBatch = [number[], Address[][]];
 
+/** The Dispenser reverts with `WrongAmount(value, 0)` if a chain sending no message gets value. */
 export type ChainClaimQuote = {
   chainId: number;
-  targets: `0x${string}`[];
+  targets: Address[];
   /** Checkpoint-aware, rounded to the processor's bridging decimals. */
   incentives: bigint[];
-  /** Some incentive is positive, so the Dispenser sends this chain a message. */
-  sendsMessage: boolean;
-  /** ETH attached for this chain; see `quoteChainClaims` for when it is non-zero. */
-  value: bigint;
-  bridgePayload: `0x${string}`;
-};
+} & (
+  | { sendsMessage: false; value: 0n; bridgePayload: '0x' }
+  | { sendsMessage: true; value: bigint; bridgePayload: Hex }
+);
 
 export type ClaimError =
   | { kind: 'claims-changed' }
@@ -68,7 +67,12 @@ type ChainState = { processor: Address; bridgingDecimals: bigint; withheldAmount
  * so the call is named with its decoded revert.
  */
 export class QuoteCallRevertedError extends Error {
-  constructor(functionName: string, target: Address, chainId: number, reason: string) {
+  constructor(
+    readonly functionName: 'checkpointNominee' | 'calculateStakingIncentives',
+    readonly target: Address,
+    readonly chainId: number,
+    readonly reason: string,
+  ) {
     super(`${functionName} reverted for staking target ${target} on chain ${chainId}: ${reason}`);
     this.name = 'QuoteCallRevertedError';
   }
@@ -84,23 +88,24 @@ const decodeCallRevert = (abi: Parameters<typeof decodeErrorResult>[0]['abi'], d
 };
 
 const readChainStates = async (chainIds: number[]): Promise<ChainState[]> => {
-  const dispenserReads = await readContracts(wagmiConfig, {
-    allowFailure: false,
-    contracts: chainIds.flatMap((chainId) => [
-      {
+  const [processors, withheldAmounts] = await Promise.all([
+    readContracts(wagmiConfig, {
+      allowFailure: false,
+      contracts: chainIds.map((chainId) => ({
         ...dispenserParams,
         functionName: 'mapChainIdDepositProcessors' as const,
         args: [BigInt(chainId)] as const,
-      },
-      {
+      })),
+    }),
+    readContracts(wagmiConfig, {
+      allowFailure: false,
+      contracts: chainIds.map((chainId) => ({
         ...dispenserParams,
         functionName: 'mapChainIdWithheldAmounts' as const,
         args: [BigInt(chainId)] as const,
-      },
-    ]),
-  });
-  const processors = chainIds.map((_, i) => dispenserReads[2 * i] as Address);
-  const withheldAmounts = chainIds.map((_, i) => dispenserReads[2 * i + 1] as bigint);
+      })),
+    }),
+  ]);
   // Reading the zero address returns no data, which would hide that governance has not wired it.
   processors.forEach((processor, i) => {
     if (processor === zeroAddress) {
@@ -122,7 +127,7 @@ const readChainStates = async (chainIds: number[]): Promise<ChainState[]> => {
 
   return chainIds.map((_, i) => ({
     processor: processors[i],
-    bridgingDecimals: bridgingDecimals[i] as bigint,
+    bridgingDecimals: bridgingDecimals[i],
     withheldAmount: withheldAmounts[i],
   }));
 };
@@ -214,18 +219,16 @@ export const quoteChainClaims = async (
   const incentives = await readIncentives(batch, states, account);
 
   return Promise.all(
-    chainIds.map(async (chainId, i) => {
+    chainIds.map(async (chainId, i): Promise<ChainClaimQuote> => {
       const targets = stakingTargets[i];
       const sendingTargets = targets.filter((_, j) => incentives[i][j] > BigInt(0));
-      const quote: ChainClaimQuote = {
-        chainId,
-        targets,
-        incentives: incentives[i],
-        sendsMessage: sendingTargets.length > 0,
-        value: BigInt(0),
-        bridgePayload: '0x',
-      };
-      if (!quote.sendsMessage || !isOrbitChainId(chainId)) return quote;
+      const base = { chainId, targets, incentives: incentives[i] };
+      if (sendingTargets.length === 0) {
+        return { ...base, sendsMessage: false, value: 0n, bridgePayload: '0x' };
+      }
+      if (!isOrbitChainId(chainId)) {
+        return { ...base, sendsMessage: true, value: BigInt(0), bridgePayload: '0x' };
+      }
 
       const { bridgePayload, messageCost, tokenCost } = await getArbitrumBridgePayload(
         sendingTargets,
@@ -239,7 +242,8 @@ export const quoteChainClaims = async (
       });
       const sendsTokens = getTransferAmount(incentives[i], states[i].withheldAmount) > BigInt(0);
       return {
-        ...quote,
+        ...base,
+        sendsMessage: true,
         bridgePayload,
         value: messageCost + (sendsTokens ? tokenCost : BigInt(0)),
       };

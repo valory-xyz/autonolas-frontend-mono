@@ -1,8 +1,7 @@
 import { encodeFunctionData, parseAbi } from 'viem';
 
 import { SERVICE_MANAGER_TOKEN_CONTRACT } from '../../../common-util/AbiAndAddresses';
-// `abis/ServiceManager.json` of the OPE-2034 ABI bundle (valory-xyz/scopes at 5d587c9), compiled
-// from autonolas-registries v1.3.5-pre-deployment. Re-capture it with the final deployment ABIs.
+// Pinned copy of the ServiceManager 1.3.0 ABI.
 import bundledAbi from '../../fixtures/service-manager-1.3.0-abi.json';
 
 const bySignature = (abi: readonly unknown[]) =>

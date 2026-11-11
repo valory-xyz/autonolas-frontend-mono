@@ -161,9 +161,17 @@ describe('<ClaimStakingIncentivesModal />', () => {
     ],
     // Not failures: the claim may still mine, was not sent, or already settled.
     [
-      { kind: 'still-pending', message: `pending: ${HASH}` },
+      { kind: 'still-pending', hash: HASH, timedOut: true },
       notifyWarning as jest.Mock,
       ['Claim not confirmed yet', `pending: ${HASH}`],
+    ],
+    [
+      { kind: 'still-pending', hash: HASH, timedOut: false },
+      notifyWarning as jest.Mock,
+      [
+        'Claim not confirmed yet',
+        `Could not confirm transaction ${HASH}. Check your wallet before claiming again.`,
+      ],
     ],
     [
       { kind: 'already-in-flight', message: 'in flight' },

@@ -127,9 +127,7 @@ export type ArbitrumBridgeParams = {
  * The bridge payload encodes 5 values expected by ArbitrumDepositProcessorL1._sendMessage:
  *   (refundAddress, gasPriceBid, maxSubmissionCostToken, gasLimitMessage, maxSubmissionCostMessage)
  *
- * `sendingTargets` are the targets with a positive incentive: the Dispenser drops the others
- * from the message, so only they size its calldata. `l1DepositProcessorAddress` is the chain's
- * `ArbitrumDepositProcessorL1`, as the Dispenser maps it.
+ * Only `sendingTargets` size the calldata: the Dispenser drops zero-incentive targets from the message.
  */
 export const getArbitrumBridgePayload = async (
   sendingTargets: Address[],
