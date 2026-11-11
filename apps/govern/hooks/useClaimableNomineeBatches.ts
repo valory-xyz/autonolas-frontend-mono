@@ -204,17 +204,24 @@ const chunkNomineesArrayByTimeToClaim = (
   return chunks;
 };
 
+/** A nominee's entry in a per-address map; a missing one is a failed read, never "claimed". */
+const requireEntry = (map: Partial<Record<Address, number>>, address: Address, what: string) => {
+  const value = map[address];
+  if (value === undefined) throw new Error(`No ${what} for staking contract ${address}`);
+  return value;
+};
+
 type BuildClaimBatchesParams = {
   nominees: StakingContract[];
   /** Last claimed epoch per nominee address (the Dispenser's claim cursor). */
-  lastClaimedEpochs: Record<Address, number>;
+  lastClaimedEpochs: Partial<Record<Address, number>>;
   currentEpoch: number;
   minStakingWeight: number;
   /**
    * Relative weight per nominee address at the previous epoch's end, in percent × 100: the same
    * unit as `minStakingWeight`.
    */
-  relativeWeights: Record<Address, number>;
+  relativeWeights: Partial<Record<Address, number>>;
 };
 
 export const buildClaimBatches = ({
@@ -230,8 +237,12 @@ export const buildClaimBatches = ({
    * 2. Nominee has not claimed in the current or future epochs
    */
   const filteredNominees = nominees.filter((nominee) => {
-    const nomineeRelativeWeight = relativeWeights[nominee.address];
-    const lastClaimedStakingEpoch = lastClaimedEpochs[nominee.address];
+    const nomineeRelativeWeight = requireEntry(relativeWeights, nominee.address, 'vote weight');
+    const lastClaimedStakingEpoch = requireEntry(
+      lastClaimedEpochs,
+      nominee.address,
+      'claim cursor',
+    );
 
     return nomineeRelativeWeight >= minStakingWeight && lastClaimedStakingEpoch < currentEpoch;
   });
@@ -282,7 +293,7 @@ export const buildClaimBatches = ({
        */
       const nomineesTimesToClaimArray = nominees.reduce(
         (acc, nominee) => {
-          const lastClaimedStakingEpoch = lastClaimedEpochs[nominee];
+          const lastClaimedStakingEpoch = requireEntry(lastClaimedEpochs, nominee, 'claim cursor');
           acc.push([nominee, currentEpoch - lastClaimedStakingEpoch]);
           return acc;
         },
@@ -351,7 +362,7 @@ export const useClaimableNomineesBatches = () => {
     previousEpoch,
   });
 
-  // The weights read allows failures, so a failed nominee is missing rather than an error.
+  // A missing nominee is a failed read, not zero weight.
   const { relativeWeights, missingWeightError } = useMemo(() => {
     if (!nomineesWeightsAtPrevEpochEnd) return { relativeWeights: null, missingWeightError: null };
     const weights: Record<Address, number> = {};

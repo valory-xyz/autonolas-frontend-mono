@@ -66,6 +66,22 @@ describe('buildClaimBatches', () => {
     expect(batches).toEqual([[[42161], [[C]]]]);
   });
 
+  it.each([
+    ['vote weight', { relativeWeights: { [A]: 5, [B]: 5 } }],
+    ['claim cursor', { lastClaimedEpochs: { [A]: 9, [B]: 9 } }],
+  ])('throws on a nominee with no %s instead of dropping it as claimed', (what, override) => {
+    expect(() =>
+      buildClaimBatches({
+        nominees,
+        lastClaimedEpochs: { [A]: 9, [B]: 9, [C]: 9 },
+        currentEpoch: 10,
+        minStakingWeight: 1,
+        relativeWeights,
+        ...override,
+      }),
+    ).toThrow(`No ${what} for staking contract ${C}`);
+  });
+
   it('drops nominees below the minimum staking weight', () => {
     const batches = buildClaimBatches({
       nominees,
@@ -254,7 +270,6 @@ describe('useClaimableNomineesBatches refetchClaimableBatches', () => {
   it('exposes one nominee whose weight read failed instead of crashing', () => {
     jest.spyOn(console, 'error').mockImplementation(() => undefined);
     const result = renderBatches();
-    // The weights read allows failures, so B is simply missing from its result.
     jest.mocked(useNomineesWeights).mockReturnValue({
       data: { [A]: { percentage: 5 } },
       error: null,
