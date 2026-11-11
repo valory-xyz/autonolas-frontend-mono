@@ -18,28 +18,31 @@ const TOKENOMICS_OK = [
   { status: 'success', result: 1n },
 ];
 
-/** Mocks the inflation and weights reads. */
 const mockReads = ({
   tokenomics,
   tokenomicsError = null,
   stakingPointError = null,
   weightsError = null,
+  weights,
+  stakingPoint,
 }: {
   tokenomics: { status: string; result?: unknown; error?: Error }[];
   tokenomicsError?: Error | null;
   stakingPointError?: Error | null;
   weightsError?: Error | null;
+  weights?: { status: string; result?: unknown; error?: Error }[];
+  stakingPoint?: Record<string, bigint>;
 }) => {
   jest.mocked(useReadContracts).mockImplementation((({ query }: { query: { select: Select } }) => {
     // Only the weights read sets `enabled` (it waits for the inflation), which tells them apart.
     const isInflation = !('enabled' in query);
     return isInflation
       ? { data: query.select(tokenomics), error: tokenomicsError }
-      : { data: undefined, error: weightsError };
+      : { data: weights && query.select(weights), error: weightsError };
   }) as never);
   jest
     .mocked(useReadContract)
-    .mockReturnValue({ data: undefined, error: stakingPointError } as never);
+    .mockReturnValue({ data: stakingPoint, error: stakingPointError } as never);
 };
 
 describe('useNomineesWeights', () => {
@@ -83,6 +86,20 @@ describe('useNomineesWeights', () => {
     const { result } = renderHook(() => useNomineesWeights(NOMINEES, 1));
 
     expect(result.current.error).toBe(weightsError);
+  });
+
+  it("keeps a nominee's failed weight read error, and leaves the nominee out", () => {
+    const readError = new Error('execution reverted');
+    mockReads({
+      tokenomics: TOKENOMICS_OK,
+      stakingPoint: { stakingIncentive: 1n, stakingFraction: 1n },
+      weights: [{ status: 'failure', error: readError }],
+    });
+
+    const { result } = renderHook(() => useNomineesWeights(NOMINEES, 1));
+
+    expect(result.current.data).toEqual({});
+    expect(result.current.failedReads).toEqual({ [NOMINEES[0].account]: readError });
   });
 
   it('reports no error while every read succeeds', () => {

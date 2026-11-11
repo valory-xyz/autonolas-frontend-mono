@@ -2,7 +2,13 @@ import type { Address } from 'viem';
 
 import type { StakingContract } from 'types';
 
-import { buildClaimBatches, getCursorChange } from './claim-batches';
+import {
+  advanceOwnClaims,
+  buildClaimBatches,
+  getCursorChange,
+  getExpectedCursors,
+  pruneReachedOwnClaims,
+} from './claim-batches';
 
 const A: Address = '0x000000000000000000000000000000000000000a';
 const B: Address = '0x000000000000000000000000000000000000000b';
@@ -71,6 +77,76 @@ describe('buildClaimBatches', () => {
     });
 
     expect(batches).toEqual([[[42161], [[C]]]]);
+  });
+});
+
+describe('buildClaimBatches boundaries', () => {
+  it('batches a contract whose weight equals the minimum', () => {
+    const batches = buildClaimBatches({
+      nominees: [nominee(A, 100)],
+      lastClaimedEpochs: { [A]: 9 },
+      currentEpoch: 10,
+      minStakingWeight: 5,
+      relativeWeights: { [A]: 5 },
+    });
+
+    expect(batches).toEqual([[[100], [[A]]]]);
+  });
+
+  it('splits more than 10 claimable contracts of one chain into batches of 10', () => {
+    const addresses = Array.from(
+      { length: 11 },
+      (_, i) => `0x${(i + 1).toString(16).padStart(40, '0')}` as Address,
+    );
+
+    const batches = buildClaimBatches({
+      nominees: addresses.map((address) => nominee(address, 100)),
+      lastClaimedEpochs: Object.fromEntries(addresses.map((address) => [address, 9])),
+      currentEpoch: 10,
+      minStakingWeight: 1,
+      relativeWeights: Object.fromEntries(addresses.map((address) => [address, 5])),
+    });
+
+    expect(batches.map(([chainIds, targets]) => [chainIds, targets[0].length])).toEqual([
+      [[100], 10],
+      [[100], 1],
+    ]);
+  });
+
+  it('gives a failed weight read as the cause of the missing weight', () => {
+    const readError = new Error('execution reverted');
+
+    const build = () =>
+      buildClaimBatches({
+        nominees: [nominee(A, 100)],
+        lastClaimedEpochs: { [A]: 9 },
+        currentEpoch: 10,
+        minStakingWeight: 1,
+        relativeWeights: {},
+        weightReadErrors: { [A]: readError },
+      });
+
+    expect(build).toThrow(expect.objectContaining({ cause: readError }));
+  });
+});
+
+describe('own claims', () => {
+  it('expects each cursor at the larger of the built one and the own claim', () => {
+    expect(getExpectedCursors({ [A]: 9, [B]: 9 }, { [A]: 11, [B]: 8 })).toEqual({
+      [A]: 11,
+      [B]: 9,
+    });
+    expect(getExpectedCursors(null, { [A]: 11 })).toBeNull();
+  });
+
+  it('moves each claimed target one epoch past what was expected, skipping unknown ones', () => {
+    const next = advanceOwnClaims({ [B]: 4 }, { [A]: 9, [B]: 9 }, [[100], [[A, C]]]);
+
+    expect(next).toEqual({ [A]: 10, [B]: 4 });
+  });
+
+  it('forgets an own claim once a read reaches it, and keeps one a lagging read has not', () => {
+    expect(pruneReachedOwnClaims({ [A]: 10, [B]: 10 }, { [A]: 10, [B]: 9 })).toEqual({ [B]: 10 });
   });
 });
 

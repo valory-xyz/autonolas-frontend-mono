@@ -19,8 +19,53 @@ export type CursorChange = 'none' | 'own-claims' | 'concurrent';
 export type ClaimableBatchesRefresh = { batches: ClaimBatch[]; change: CursorChange };
 
 /** A number per staking contract; a contract that was not read has none. */
-type ByAddress = Partial<Record<Address, number>>;
+export type ByAddress = Partial<Record<Address, number>>;
 export type Cursors = ByAddress;
+
+export const readFailure = (what: string, address: Address, cause?: unknown) =>
+  new Error(`Could not read the ${what} of staking contract ${address}`, { cause });
+
+/** The cursors the shown list was built from, moved on by this user's own confirmed claims. */
+export const getExpectedCursors = (
+  built: Record<Address, number> | null,
+  ownClaimedThrough: Cursors,
+): Cursors | null => {
+  if (!built) return null;
+  return Object.fromEntries(
+    Object.entries(built).map(([address, cursor]) => [
+      address,
+      Math.max(cursor, ownClaimedThrough[address as Address] ?? cursor),
+    ]),
+  );
+};
+
+/**
+ * Records a confirmed claim of `batch`: each target's cursor moves one epoch past what was
+ * expected. A target with no expected cursor is skipped, so the next refresh reads it as concurrent.
+ */
+export const advanceOwnClaims = (
+  ownClaimedThrough: Cursors,
+  expected: Cursors,
+  [, stakingTargets]: ClaimBatch,
+): Cursors => {
+  const next = { ...ownClaimedThrough };
+  stakingTargets.flat().forEach((address) => {
+    const cursor = expected[address];
+    if (cursor !== undefined) next[address] = cursor + 1;
+  });
+  return next;
+};
+
+/** Keeps the own claims a lagging read has not reached yet, so they never read as concurrent. */
+export const pruneReachedOwnClaims = (
+  ownClaimedThrough: Cursors,
+  fresh: Record<Address, number>,
+): Cursors =>
+  Object.fromEntries(
+    Object.entries(ownClaimedThrough).filter(
+      ([address, through]) => through !== undefined && fresh[address as Address] < through,
+    ),
+  );
 
 export const getCursorChange = (
   built: Cursors | null,
@@ -81,10 +126,9 @@ const chunkNomineesArrayByTimeToClaim = (
   return chunks;
 };
 
-const requireEntry = (map: ByAddress, address: Address, what: string) => {
+const requireEntry = (map: ByAddress, address: Address, what: string, cause?: unknown) => {
   const value = map[address];
-  if (value === undefined)
-    throw new Error(`Could not read the ${what} of staking contract ${address}`);
+  if (value === undefined) throw readFailure(what, address, cause);
   return value;
 };
 
@@ -98,6 +142,8 @@ type BuildClaimBatchesParams = {
    * unit as `minStakingWeight`.
    */
   relativeWeights: ByAddress;
+  /** Why a nominee's weight read failed, given as the cause of its missing-weight error. */
+  weightReadErrors?: Partial<Record<Address, unknown>>;
 };
 
 export const buildClaimBatches = ({
@@ -106,9 +152,15 @@ export const buildClaimBatches = ({
   currentEpoch,
   minStakingWeight,
   relativeWeights,
+  weightReadErrors = {},
 }: BuildClaimBatchesParams): ClaimBatch[] => {
   const filteredNominees = nominees.filter((nominee) => {
-    const nomineeRelativeWeight = requireEntry(relativeWeights, nominee.address, 'vote weight');
+    const nomineeRelativeWeight = requireEntry(
+      relativeWeights,
+      nominee.address,
+      'vote weight',
+      weightReadErrors[nominee.address],
+    );
     const lastClaimedStakingEpoch = requireEntry(
       lastClaimedEpochs,
       nominee.address,

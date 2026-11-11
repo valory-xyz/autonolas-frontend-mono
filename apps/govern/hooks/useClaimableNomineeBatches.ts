@@ -13,10 +13,15 @@ import { DISPENSER } from 'libs/util-contracts/src/lib/abiAndAddresses';
 import { DISPENSER_ADDRESS } from 'common-util/constants/addresses';
 import { getNomineeHash } from 'common-util/functions/nominee-hash';
 import {
+  advanceOwnClaims,
   buildClaimBatches,
+  type ByAddress,
   type ClaimableBatchesRefresh,
   type Cursors,
   getCursorChange,
+  getExpectedCursors,
+  pruneReachedOwnClaims,
+  readFailure,
 } from 'common-util/functions/claim-batches';
 import type { ClaimBatch } from 'common-util/functions/staking-incentives-claim';
 import { useEpochCounter, useEpochTokenomics } from 'components/Donate/hooks';
@@ -57,9 +62,7 @@ const toLastClaimedEpochs = (
     (acc, nominee, index) => {
       const read = results?.[index];
       if (read?.status !== 'success') {
-        throw new Error(`Could not read the claim cursor of staking contract ${nominee.address}`, {
-          cause: read?.error,
-        });
+        throw readFailure('claim cursor', nominee.address, read?.error);
       }
       acc[nominee.address] = Number(read.result);
       return acc;
@@ -122,7 +125,11 @@ const useNomineesWeightsAtPrevEpochEnd = ({
 }) => {
   const { data: prevEpochPoint, error: prevEpochError } = useEpochTokenomics(previousEpoch);
 
-  const { data: nomineesWeightsAtPrevEpochEnd, error: weightsError } = useNomineesWeights(
+  const {
+    data: nomineesWeightsAtPrevEpochEnd,
+    failedReads: weightReadErrors,
+    error: weightsError,
+  } = useNomineesWeights(
     nominees.map((nominee) => ({
       account: nominee.address,
       chainId: BigInt(nominee.chainId),
@@ -132,6 +139,7 @@ const useNomineesWeightsAtPrevEpochEnd = ({
 
   return {
     nomineesWeightsAtPrevEpochEnd,
+    weightReadErrors,
     error: prevEpochError ?? weightsError,
   };
 };
@@ -150,15 +158,18 @@ export const useClaimableNomineesBatches = () => {
     clearLastClaimedStakingEpoch,
     refetchLastClaimedEpochs,
   } = useNomineesLastClaimedStakingEpoch({ nominees });
-  const { nomineesWeightsAtPrevEpochEnd, error: prevEpochWeightsError } =
-    useNomineesWeightsAtPrevEpochEnd({
-      nominees,
-      previousEpoch,
-    });
+  const {
+    nomineesWeightsAtPrevEpochEnd,
+    weightReadErrors,
+    error: prevEpochWeightsError,
+  } = useNomineesWeightsAtPrevEpochEnd({
+    nominees,
+    previousEpoch,
+  });
 
   const relativeWeights = useMemo(() => {
     if (!nomineesWeightsAtPrevEpochEnd) return null;
-    const weights: Partial<Record<Address, number>> = {};
+    const weights: ByAddress = {};
     for (const [address, weight] of Object.entries(nomineesWeightsAtPrevEpochEnd)) {
       if (weight) weights[address as Address] = weight.percentage * 100;
     }
@@ -184,12 +195,20 @@ export const useClaimableNomineesBatches = () => {
         currentEpoch,
         minStakingWeight,
         relativeWeights,
+        weightReadErrors,
       });
       return { batches, buildError: null };
     } catch (error) {
       return { batches: [], buildError: error };
     }
-  }, [nominees, lastClaimedStakingEpochByNominee, currentEpoch, minStakingWeight, relativeWeights]);
+  }, [
+    nominees,
+    lastClaimedStakingEpochByNominee,
+    currentEpoch,
+    minStakingWeight,
+    relativeWeights,
+    weightReadErrors,
+  ]);
 
   const readError =
     lastClaimedError ?? epochError ?? minStakingError ?? prevEpochWeightsError ?? buildError;
@@ -198,8 +217,8 @@ export const useClaimableNomineesBatches = () => {
   }, [readError]);
   const claimableBatchesError = readError ? errorMessage(readError) : null;
 
-  // Calculate if we're still loading data
-  // A failed read ends the loading: its reads would otherwise never settle.
+  // A failed read ends the loading: without its data the weights read never runs, so
+  // `nomineesWeightsAtPrevEpochEnd` would keep it on.
   const isLoading =
     !readError &&
     (isEpochLoading ||
@@ -223,54 +242,29 @@ export const useClaimableNomineesBatches = () => {
   // Cursors this user's own confirmed claims advanced to, which the cache does not show yet.
   const ownClaimedThrough = useRef<Cursors>({});
 
-  const getExpectedCursors = useCallback((): Cursors | null => {
-    const built = builtFromCursors.current;
-    if (!built) return null;
-    return Object.fromEntries(
-      Object.entries(built).map(([address, cursor]) => [
-        address,
-        Math.max(cursor, ownClaimedThrough.current[address as Address] ?? cursor),
-      ]),
-    );
-  }, []);
+  const expectedCursors = () =>
+    getExpectedCursors(builtFromCursors.current, ownClaimedThrough.current);
 
   /** Records a confirmed claim, so the cursors it advanced do not later read as a concurrent claim. */
-  const recordClaimedBatch = useCallback(
-    ([, stakingTargets]: ClaimBatch) => {
-      const expected = getExpectedCursors();
-      if (!expected) return;
-      stakingTargets.flat().forEach((address) => {
-        const cursor = expected[address];
-        // Not in the list the cursors were read for: the next refresh reads it as concurrent.
-        if (cursor === undefined) return;
-        ownClaimedThrough.current[address] = cursor + 1;
-      });
-    },
-    [getExpectedCursors],
-  );
+  const recordClaimedBatch = useCallback((batch: ClaimBatch) => {
+    const expected = getExpectedCursors(builtFromCursors.current, ownClaimedThrough.current);
+    if (expected)
+      ownClaimedThrough.current = advanceOwnClaims(ownClaimedThrough.current, expected, batch);
+  }, []);
 
   /**
    * Re-reads the claim cursors and rebuilds the batches from them, e.g. after another claimer
-   * advanced a cursor. Throws if a cursor cannot be read.
+   * advanced a cursor. Throws while the claim data is still loading, if a cursor cannot be read,
+   * or if a nominee has no vote weight.
    */
   const refetchClaimableBatches = useCallback(async (): Promise<ClaimableBatchesRefresh> => {
     if (!currentEpoch || !minStakingWeight || !relativeWeights) {
       throw new Error('The claimable staking contracts are still loading. Try again shortly.');
     }
     const lastClaimedEpochs = await refetchLastClaimedEpochs();
-    const change = getCursorChange(
-      builtFromCursors.current,
-      getExpectedCursors(),
-      lastClaimedEpochs,
-    );
+    const change = getCursorChange(builtFromCursors.current, expectedCursors(), lastClaimedEpochs);
     builtFromCursors.current = lastClaimedEpochs;
-    // Keep the own claims a lagging read has not reached yet, so they never read as concurrent.
-    ownClaimedThrough.current = Object.fromEntries(
-      Object.entries(ownClaimedThrough.current).filter(
-        ([address, through]) =>
-          through !== undefined && lastClaimedEpochs[address as Address] < through,
-      ),
-    );
+    ownClaimedThrough.current = pruneReachedOwnClaims(ownClaimedThrough.current, lastClaimedEpochs);
     return {
       batches: buildClaimBatches({
         nominees,
@@ -278,6 +272,7 @@ export const useClaimableNomineesBatches = () => {
         currentEpoch,
         minStakingWeight,
         relativeWeights,
+        weightReadErrors,
       }),
       change,
     };
@@ -287,7 +282,7 @@ export const useClaimableNomineesBatches = () => {
     minStakingWeight,
     relativeWeights,
     refetchLastClaimedEpochs,
-    getExpectedCursors,
+    weightReadErrors,
   ]);
 
   return {
