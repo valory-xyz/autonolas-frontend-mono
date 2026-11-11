@@ -11,6 +11,8 @@ import { ethers } from 'ethers';
 
 import { notifyError, notifySuccess } from 'libs/util-functions/src';
 import { FALLBACK_HANDLER } from 'common-util/Contracts/addresses';
+
+import bundledServiceManagerAbi from '../../fixtures/service-manager-1.3.0-abi.json';
 import { SERVICE_MANAGER_TOKEN_CONTRACT } from 'common-util/AbiAndAddresses';
 import { useHelpers } from 'common-util/hooks';
 
@@ -280,8 +282,9 @@ describe('FinishedRegistration multisig picker', () => {
     getEnabledMultisigs.mockResolvedValueOnce([A]).mockResolvedValueOnce([A]);
     onStep3Deploy.mockRejectedValue(
       deployError(
+        // Encoded with the published 1.3.0 ABI, decoded with the app's own.
         encodeErrorResult({
-          abi,
+          abi: bundledServiceManagerAbi,
           errorName: 'MultisigAlreadyBound',
           args: [A, BigInt(2), BigInt(1)],
         }),

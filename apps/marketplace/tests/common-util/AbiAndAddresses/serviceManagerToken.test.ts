@@ -1,6 +1,12 @@
 import { encodeFunctionData, parseAbi } from 'viem';
 
 import { SERVICE_MANAGER_TOKEN_CONTRACT } from '../../../common-util/AbiAndAddresses';
+// `abis/ServiceManager.json` of the OPE-2034 ABI bundle (valory-xyz/scopes at 5d587c9), compiled
+// from autonolas-registries v1.3.5-pre-deployment. Re-capture it with the final deployment ABIs.
+import bundledAbi from '../../fixtures/service-manager-1.3.0-abi.json';
+
+const bySignature = (abi: readonly unknown[]) =>
+  [...abi].sort((a, b) => JSON.stringify(a).localeCompare(JSON.stringify(b)));
 
 // The direct calls the Marketplace sends, as encoded before ServiceManager 1.3.0
 const PRE_1_3_0_ABI = parseAbi([
@@ -9,6 +15,10 @@ const PRE_1_3_0_ABI = parseAbi([
 ]);
 
 describe('ServiceManager 1.3.0 ABI', () => {
+  it('is the bundled 1.3.0 ABI, entry for entry', () => {
+    expect(bySignature(SERVICE_MANAGER_TOKEN_CONTRACT.abi)).toEqual(bySignature(bundledAbi));
+  });
+
   it('encodes registerAgents as before', () => {
     const args = [
       BigInt(7),
