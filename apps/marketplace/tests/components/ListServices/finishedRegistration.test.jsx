@@ -217,6 +217,26 @@ describe('FinishedRegistration multisig picker', () => {
     expect(screen.queryByRole('radio', { name: B })).toBeNull();
   });
 
+  it('keeps the new chain options when a deploy started on the old chain completes', async () => {
+    const deploy = deferred();
+    getEnabledMultisigs
+      .mockResolvedValueOnce([A])
+      .mockResolvedValueOnce([A])
+      .mockResolvedValueOnce([B]);
+    onStep3Deploy.mockReturnValue(deploy.promise);
+    const { switchChain } = renderStep(GNOSIS);
+    fireEvent.click(await selectWrapper(A));
+    await waitFor(() => expect(onStep3Deploy).toHaveBeenCalled());
+
+    switchChain(OPTIMISM);
+    expect(await screen.findByRole('radio', { name: B })).toBeInTheDocument();
+    await act(async () => deploy.resolve(undefined));
+
+    await waitFor(() => expect(notifySuccess).toHaveBeenCalledWith('Deployed successfully'));
+    expect(screen.getByRole('radio', { name: B })).toBeInTheDocument();
+    expect(screen.queryByRole('radio', { name: A })).toBeNull();
+  });
+
   it('shows that the enabled options are loading instead of a blank step', async () => {
     getEnabledMultisigs.mockReturnValue(deferred().promise);
     renderStep(GNOSIS);

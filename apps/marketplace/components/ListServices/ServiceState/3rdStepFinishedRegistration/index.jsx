@@ -241,7 +241,10 @@ export const FinishedRegistration = ({
           chainId: submitChainId,
           getCurrentChainId: () => chainIdRef.current,
         });
-        setMultisigs({ status: MULTISIG_STATUS.LOADED, enabled });
+        // The deploy can outlast a chain switch; the new chain's options must stay its own.
+        if (chainIdRef.current === submitChainId) {
+          setMultisigs({ status: MULTISIG_STATUS.LOADED, enabled });
+        }
       } catch (error) {
         if (error instanceof DeployRefusedError) {
           notifyDeployRefused(error, submitContext);
