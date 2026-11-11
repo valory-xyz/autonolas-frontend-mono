@@ -14,7 +14,8 @@ import {
   zeroAddress,
 } from 'viem';
 
-import { DISPENSER, VOTE_WEIGHTING } from 'libs/util-contracts/src/lib/abiAndAddresses';
+import { DISPENSER } from 'libs/util-contracts/src/lib/abiAndAddresses';
+import { DISPENSER_ADDRESS, VOTE_WEIGHTING_ADDRESS } from 'common-util/constants/addresses';
 
 import {
   type ClaimBatch,
@@ -56,8 +57,6 @@ const OLAS = BigInt(10) ** BigInt(18);
 const target = (n: number) => pad(`0x${n.toString(16)}`, { size: 32 }) as Address;
 const processor = (i: number) => `0x${(i + 1).toString(16).padStart(40, '0')}` as Address;
 const CHECKPOINT_ABI = parseAbi(['function checkpointNominee(bytes32 account, uint256 chainId)']);
-const DISPENSER_ADDRESS = DISPENSER.addresses[1];
-const VOTE_WEIGHTING_ADDRESS = (VOTE_WEIGHTING.addresses as Record<number, Address>)[1];
 
 type ChainSetup = { withheld?: bigint; bridgingDecimals?: bigint };
 

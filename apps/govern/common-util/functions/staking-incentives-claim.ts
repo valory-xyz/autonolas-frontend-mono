@@ -24,7 +24,7 @@ import {
 import { estimateGasWithBuffer } from 'libs/util-functions/src/lib/estimateGasWithBuffer';
 
 import { MAINNET_CHAIN_ID } from 'common-util/constants/chains';
-import { DISPENSER_ADDRESS, VOTE_WEIGHTING_ADDRESS } from 'common-util/constants/contracts';
+import { DISPENSER_ADDRESS, VOTE_WEIGHTING_ADDRESS } from 'common-util/constants/addresses';
 import { wagmiConfig } from 'common-util/config/wagmi';
 
 import { getArbitrumBridgePayload, isOrbitChainId } from './arbitrum-bridge';

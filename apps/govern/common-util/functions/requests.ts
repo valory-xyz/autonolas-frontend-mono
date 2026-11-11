@@ -23,7 +23,7 @@ import { getAddressFromBytes32 } from 'libs/util-functions/src';
 import { estimateGasWithBuffer } from 'libs/util-functions/src/lib/estimateGasWithBuffer';
 
 import { MAINNET_CHAIN_ID } from 'common-util/constants/chains';
-import { VOTE_WEIGHTING_ADDRESS } from 'common-util/constants/contracts';
+import { VOTE_WEIGHTING_ADDRESS } from 'common-util/constants/addresses';
 import { wagmiConfig } from 'common-util/config/wagmi';
 import { Nominee } from 'types';
 

@@ -11,7 +11,7 @@ import { TOKENOMICS } from 'libs/util-contracts/src';
 import { errorMessage } from 'libs/util-functions/src';
 import { DISPENSER } from 'libs/util-contracts/src/lib/abiAndAddresses';
 
-import { DISPENSER_ADDRESS } from 'common-util/constants/contracts';
+import { DISPENSER_ADDRESS } from 'common-util/constants/addresses';
 import { getNomineeHash } from 'common-util/functions/nominee-hash';
 import type { ClaimBatch } from 'common-util/functions/staking-incentives-claim';
 import { useEpochCounter, useEpochTokenomics } from 'components/Donate/hooks';
@@ -76,7 +76,6 @@ export type ClaimableBatchesRefresh = { batches: ClaimBatch[]; change: CursorCha
 
 /** A number per staking contract; a contract that was not read has none. */
 type ByAddress = Partial<Record<Address, number>>;
-/** Claim cursors by staking contract. */
 type Cursors = ByAddress;
 
 export const getCursorChange = (
@@ -215,7 +214,6 @@ const requireEntry = (map: ByAddress, address: Address, what: string) => {
 
 type BuildClaimBatchesParams = {
   nominees: StakingContract[];
-  /** Last claimed epoch per nominee address (the Dispenser's claim cursor). */
   lastClaimedEpochs: Cursors;
   currentEpoch: number;
   minStakingWeight: number;
@@ -378,7 +376,6 @@ export const useClaimableNomineesBatches = () => {
     return { relativeWeights: weights, missingWeightError: null };
   }, [nominees, nomineesWeightsAtPrevEpochEnd]);
 
-  // A failed read would otherwise leave no batches and read as everything claimed.
   const readError =
     lastClaimedError ?? epochError ?? minStakingError ?? weightsError ?? missingWeightError;
   useEffect(() => {
@@ -456,7 +453,7 @@ export const useClaimableNomineesBatches = () => {
 
   /**
    * Re-reads the claim cursors and rebuilds the batches from them, e.g. after another claimer
-   * advanced a cursor. Throws if a cursor cannot be read, rather than reporting it as claimed.
+   * advanced a cursor. Throws if a cursor cannot be read.
    */
   const refetchClaimableBatches = useCallback(async (): Promise<ClaimableBatchesRefresh> => {
     if (!currentEpoch || !minStakingWeight || !relativeWeights) {

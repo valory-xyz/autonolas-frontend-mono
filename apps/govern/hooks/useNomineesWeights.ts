@@ -5,6 +5,7 @@ import { mainnet } from 'viem/chains';
 import { useReadContract, useReadContracts } from 'wagmi';
 
 import { TOKENOMICS, VOTE_WEIGHTING } from 'libs/util-contracts/src/lib/abiAndAddresses';
+import { VOTE_WEIGHTING_ADDRESS } from 'common-util/constants/addresses';
 import { useMemo } from 'react';
 import { Nominee } from 'types';
 
@@ -89,7 +90,7 @@ export const useNomineesWeights = (
   const { projectedInflation, error: inflationError } = useStakingInflation();
 
   const contracts = nominees.map((nominee) => ({
-    address: (VOTE_WEIGHTING.addresses as Record<number, Address>)[mainnet.id],
+    address: VOTE_WEIGHTING_ADDRESS,
     abi: VOTE_WEIGHTING.abi as Abi,
     chainId: mainnet.id,
     // There may be cases where no one voted on the contract during the week,
