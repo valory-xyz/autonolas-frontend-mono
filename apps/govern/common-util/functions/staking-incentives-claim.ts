@@ -24,6 +24,7 @@ import {
 import { estimateGasWithBuffer } from 'libs/util-functions/src/lib/estimateGasWithBuffer';
 
 import { MAINNET_CHAIN_ID } from 'common-util/constants/chains';
+import { DISPENSER_ADDRESS, VOTE_WEIGHTING_ADDRESS } from 'common-util/constants/contracts';
 import { wagmiConfig } from 'common-util/config/wagmi';
 
 import { getArbitrumBridgePayload, isOrbitChainId } from './arbitrum-bridge';
@@ -53,8 +54,6 @@ export type ClaimError =
 // Each batch claims one epoch per target; a target owed more epochs appears in later batches.
 const NUM_CLAIMED_EPOCHS = BigInt(1);
 const MULTICALL3_ADDRESS = mainnet.contracts.multicall3.address;
-const DISPENSER_ADDRESS = DISPENSER.addresses[mainnet.id];
-const VOTE_WEIGHTING_ADDRESS = (VOTE_WEIGHTING.addresses as Record<number, Address>)[mainnet.id];
 const DEPOSIT_PROCESSOR_ABI = parseAbi(['function getBridgingDecimals() view returns (uint256)']);
 const dispenserParams = {
   address: DISPENSER_ADDRESS,
@@ -233,7 +232,7 @@ export const quoteChainClaims = async (
         chainId,
         states[i].processor,
       ).catch((error: unknown) => {
-        // The L2 RPC can fail too; name the chain, as the other quote errors do.
+        // The bridge estimate's L1 and L2 RPCs can fail too; name the chain, as the other quote errors do.
         throw new Error(`Could not quote the bridge for chain ${chainId}: ${errorMessage(error)}`, {
           cause: error,
         });

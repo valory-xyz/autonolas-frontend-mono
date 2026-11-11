@@ -23,6 +23,7 @@ import { getAddressFromBytes32 } from 'libs/util-functions/src';
 import { estimateGasWithBuffer } from 'libs/util-functions/src/lib/estimateGasWithBuffer';
 
 import { MAINNET_CHAIN_ID } from 'common-util/constants/chains';
+import { VOTE_WEIGHTING_ADDRESS } from 'common-util/constants/contracts';
 import { wagmiConfig } from 'common-util/config/wagmi';
 import { Nominee } from 'types';
 
@@ -32,7 +33,7 @@ import { getUnixNextWeekStartTimestamp } from './time';
 const MAINNET = mainnet.id;
 
 const voteWeightingParams = {
-  address: (VOTE_WEIGHTING.addresses as Record<number, Address>)[MAINNET],
+  address: VOTE_WEIGHTING_ADDRESS,
   abi: VOTE_WEIGHTING.abi as Abi,
   chainId: MAINNET_CHAIN_ID,
 };

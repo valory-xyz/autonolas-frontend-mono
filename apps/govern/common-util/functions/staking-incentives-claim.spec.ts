@@ -422,6 +422,11 @@ describe('quoteChainClaims', () => {
       [processor(0), 'getBridgingDecimals'],
       [processor(1), 'getBridgingDecimals'],
     ]);
+    // Raw values, not { status, result }: a failed read throws instead of passing through.
+    expect(mockReadContracts.mock.calls.map(([, params]) => params.allowFailure)).toEqual([
+      false,
+      false,
+    ]);
   });
 
   it('calculates each chain incentive with that chain own bridging decimals', async () => {
