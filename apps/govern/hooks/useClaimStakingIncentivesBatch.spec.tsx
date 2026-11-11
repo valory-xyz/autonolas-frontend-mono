@@ -56,6 +56,7 @@ const FIRST = batch('0x0000000000000000000000000000000000000001');
 const REBUILT = batch('0x0000000000000000000000000000000000000002');
 const prepared = (forBatch: ClaimBatch) => ({
   quotes: forBatch[0].map((chainId, i) => ({ chainId, targets: forBatch[1][i] })),
+  batch: forBatch,
   request: { args: forBatch, gas: BigInt(100) },
 });
 
@@ -130,6 +131,50 @@ describe('useClaimStakingIncentivesBatch', () => {
     expect(mockPrepareClaim).toHaveBeenLastCalledWith(REBUILT, ACCOUNT);
     expect(mockWriteContract).toHaveBeenCalledWith({}, { args: REBUILT, gas: BigInt(100) });
     expect(props.onSuccess).toHaveBeenCalledTimes(1);
+    // The batch that was sent, not the one the claim started from.
+    expect(props.recordClaimedBatch).toHaveBeenCalledWith(REBUILT);
+  });
+
+  it('reports a retry that fails with an error that is not a revert as is, without a second refresh', async () => {
+    mockPrepareClaim
+      .mockRejectedValueOnce(new RevertError('cursor moved'))
+      .mockRejectedValueOnce(new Error('rpc down'));
+    const { props, claim } = setup();
+
+    await claim();
+
+    expect(props.refetchClaimableBatches).toHaveBeenCalledTimes(1);
+    expect(props.onError).toHaveBeenCalledWith({ kind: 'other', message: 'rpc down' });
+    expect(mockWriteContract).not.toHaveBeenCalled();
+  });
+
+  it('reports the revert, not a failed refresh after it', async () => {
+    mockPrepareClaim.mockRejectedValueOnce(new RevertError('Paused()'));
+    const { props, claim } = setup();
+    props.refetchClaimableBatches.mockRejectedValueOnce(new Error('rate limited'));
+
+    await claim();
+
+    expect(props.onError).toHaveBeenCalledWith({ kind: 'other', message: 'Paused()' });
+    expect(console.error).toHaveBeenCalledWith(
+      'Failed to refresh the claimable batches after a revert',
+      expect.objectContaining({ message: 'rate limited' }),
+    );
+  });
+
+  it('reports the retry revert, not a failed refresh after it', async () => {
+    mockPrepareClaim
+      .mockRejectedValueOnce(new RevertError('cursor moved'))
+      .mockRejectedValueOnce(new RevertError('WrongAmount(1, 0)'));
+    const { props, claim } = setup();
+    props.refetchClaimableBatches
+      .mockResolvedValueOnce({ batches: [REBUILT], change: 'concurrent' })
+      .mockRejectedValueOnce(new Error('rate limited'));
+
+    await claim();
+
+    expect(props.refetchClaimableBatches).toHaveBeenCalledTimes(2);
+    expect(props.onError).toHaveBeenCalledWith({ kind: 'other', message: 'WrongAmount(1, 0)' });
   });
 
   it('reports nothing to claim when the rebuild leaves no batch', async () => {
@@ -303,7 +348,7 @@ describe('useClaimStakingIncentivesBatch', () => {
     await first.claim();
 
     expect(first.props.onError).toHaveBeenCalledWith({
-      kind: 'other',
+      kind: 'still-pending',
       message: `Transaction ${HASH} is still pending. Check your wallet before claiming again.`,
     });
     first.unmount();
@@ -313,7 +358,7 @@ describe('useClaimStakingIncentivesBatch', () => {
     await reopened.claim();
     expect(mockWriteContract).toHaveBeenCalledTimes(1);
     expect(reopened.props.onError).toHaveBeenCalledWith({
-      kind: 'other',
+      kind: 'already-in-flight',
       message: expect.stringContaining(HASH),
     });
   });
@@ -326,7 +371,7 @@ describe('useClaimStakingIncentivesBatch', () => {
     await claim();
 
     expect(props.onError).toHaveBeenCalledWith({
-      kind: 'other',
+      kind: 'still-pending',
       message: `Could not confirm transaction ${HASH}. Check your wallet before claiming again.`,
     });
     expect(result.current.pendingHash).toBe(HASH);
@@ -386,8 +431,8 @@ describe('useClaimStakingIncentivesBatch', () => {
     expect(props.onError).toHaveBeenCalledTimes(2);
     expect(props.onError).toHaveBeenNthCalledWith(1, { kind: 'reverted-after-simulation' });
     expect(props.onError).toHaveBeenNthCalledWith(2, {
-      kind: 'other',
-      message: 'Could not refresh the claim list: rate limited',
+      kind: 'refresh-failed',
+      message: 'rate limited',
     });
     expect(console.error).toHaveBeenCalledWith(expect.stringContaining(HASH));
   });
@@ -437,7 +482,7 @@ describe('useClaimStakingIncentivesBatch', () => {
       expect(reopened.result.current.isPending).toBe(true);
       await reopened.claim();
       expect(reopened.props.onError).toHaveBeenCalledWith({
-        kind: 'other',
+        kind: 'already-in-flight',
         message: 'A claim is already being prepared. Finish it in your wallet first.',
       });
       expect(mockPrepareClaim).toHaveBeenCalledTimes(1);
@@ -447,6 +492,28 @@ describe('useClaimStakingIncentivesBatch', () => {
         await firstClaim;
       });
       expect(mockWriteContract).toHaveBeenCalledTimes(1);
+    });
+
+    it('lets a reopened modal dismiss a claim whose wallet never answered', async () => {
+      mockPrepareClaim.mockResolvedValue(prepared(FIRST));
+      // The wallet prompt was closed without an answer: no hash ever comes back.
+      mockWriteContract.mockReturnValueOnce(new Promise(() => undefined));
+      const first = setup();
+      await act(async () => {
+        first.result.current.claimIncentivesForBatch(FIRST);
+      });
+      // While this mount is still sending, the entry is not stale.
+      expect(first.result.current.canDismissPendingClaim).toBe(false);
+      first.unmount();
+
+      const reopened = setup();
+      expect(reopened.result.current.isPending).toBe(true);
+      expect(reopened.result.current.canDismissPendingClaim).toBe(true);
+      act(() => reopened.result.current.dismissPendingClaim());
+
+      expect(reopened.result.current.isPending).toBe(false);
+      await reopened.claim();
+      expect(mockWriteContract).toHaveBeenCalledTimes(2);
     });
 
     it('refuses a second click before the first has re-rendered', async () => {
@@ -461,7 +528,7 @@ describe('useClaimStakingIncentivesBatch', () => {
       expect(mockPrepareClaim).toHaveBeenCalledTimes(1);
       expect(mockWriteContract).toHaveBeenCalledTimes(1);
       expect(props.onError).toHaveBeenCalledWith({
-        kind: 'other',
+        kind: 'already-in-flight',
         message: 'A claim is already being prepared. Finish it in your wallet first.',
       });
     });
@@ -635,7 +702,7 @@ describe('useClaimStakingIncentivesBatch', () => {
 
       it('can be dismissed, for a hash the wallet replaced', async () => {
         const { result } = await timedOutClaim();
-        expect(result.current.isPendingUnconfirmed).toBe(true);
+        expect(result.current.canDismissPendingClaim).toBe(true);
 
         act(() => result.current.dismissPendingClaim());
 

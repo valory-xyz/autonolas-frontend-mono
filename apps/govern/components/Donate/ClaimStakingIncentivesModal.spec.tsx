@@ -3,10 +3,13 @@ import { act, render, screen } from '@testing-library/react';
 import type { Address } from 'viem';
 
 import { notifyError, notifySuccess, notifyWarning } from 'libs/util-functions/src';
-import type { ClaimBatch, ClaimError } from 'common-util/functions/staking-incentives-claim';
-import { useClaimStakingIncentivesBatch } from 'hooks/useClaimStakingIncentivesBatch';
+import type { ClaimBatch } from 'common-util/functions/staking-incentives-claim';
+import {
+  type ClaimNotice,
+  useClaimStakingIncentivesBatch,
+} from 'hooks/useClaimStakingIncentivesBatch';
 
-import { ClaimStakingIncentivesModal } from './ClaimStakingIncentivesModal';
+import { ClaimStakingIncentivesModal, STEP_CHANGE_DELAY } from './ClaimStakingIncentivesModal';
 
 jest.mock('libs/util-functions/src', () => ({
   formatWeiNumber: () => '0',
@@ -39,7 +42,6 @@ jest.mock('hooks/useClaimStakingIncentivesBatch', () => ({
 }));
 
 type ClaimProps = Parameters<typeof useClaimStakingIncentivesBatch>[0];
-const STEP_CHANGE_DELAY = 1000;
 
 type ClaimState = ReturnType<typeof useClaimStakingIncentivesBatch>;
 const HASH = '0xabc';
@@ -54,7 +56,7 @@ const renderModal = (claimState: Partial<ClaimState> = {}) => {
       isPending: false,
       isPreparing: false,
       pendingHash: undefined,
-      isPendingUnconfirmed: false,
+      canDismissPendingClaim: false,
       ...claimState,
     };
   });
@@ -120,7 +122,7 @@ describe('<ClaimStakingIncentivesModal />', () => {
     expect(screen.queryByRole('button', { name: 'Claim Incentives' })).not.toBeInTheDocument();
   });
 
-  it.each<[ClaimError, jest.Mock, string[]]>([
+  it.each<[ClaimNotice, jest.Mock, string[]]>([
     [{ kind: 'wallet-rejected' }, notifyWarning as jest.Mock, ['Claim cancelled in your wallet']],
     [
       { kind: 'nothing-to-claim' },
@@ -142,6 +144,22 @@ describe('<ClaimStakingIncentivesModal />', () => {
       notifyError as jest.Mock,
       ['Failed to claim staking incentives for batch 2', 'Paused()'],
     ],
+    // Not failures: the claim may still mine, was not sent, or already settled.
+    [
+      { kind: 'still-pending', message: `pending: ${HASH}` },
+      notifyWarning as jest.Mock,
+      ['Claim not confirmed yet', `pending: ${HASH}`],
+    ],
+    [
+      { kind: 'already-in-flight', message: 'in flight' },
+      notifyWarning as jest.Mock,
+      ['A claim is already in progress', 'in flight'],
+    ],
+    [
+      { kind: 'refresh-failed', message: 'rate limited' },
+      notifyWarning as jest.Mock,
+      ['Could not refresh the claim list', 'rate limited'],
+    ],
   ])('shows the %o error with its own message', (error, notifier, expectedArgs) => {
     const { latestProps, claimBatch } = renderModal();
     claimBatch();
@@ -149,6 +167,8 @@ describe('<ClaimStakingIncentivesModal />', () => {
     act(() => latestProps().onError(error));
 
     expect(notifier).toHaveBeenCalledTimes(1);
+    // A warning is never also shown as a failure.
+    expect(notifyError).toHaveBeenCalledTimes(notifier === notifyError ? 1 : 0);
     expect(notifier.mock.calls[0].slice(0, expectedArgs.length)).toEqual(expectedArgs);
   });
 
@@ -178,11 +198,21 @@ describe('<ClaimStakingIncentivesModal />', () => {
     renderModal({
       pendingHash: HASH,
       isPending: true,
-      isPendingUnconfirmed: true,
+      canDismissPendingClaim: true,
       dismissPendingClaim,
     });
 
     expect(screen.getByText(`pending: ${HASH}`)).toBeInTheDocument();
+    act(() => screen.getByRole('button', { name: 'Dismiss' }).click());
+
+    expect(dismissPendingClaim).toHaveBeenCalledTimes(1);
+  });
+
+  it('lets the user dismiss an earlier claim whose wallet request was never answered', () => {
+    const dismissPendingClaim = jest.fn();
+    renderModal({ isPending: true, canDismissPendingClaim: true, dismissPendingClaim });
+
+    expect(screen.getByText(/still waiting for your wallet/)).toBeInTheDocument();
     act(() => screen.getByRole('button', { name: 'Dismiss' }).click());
 
     expect(dismissPendingClaim).toHaveBeenCalledTimes(1);

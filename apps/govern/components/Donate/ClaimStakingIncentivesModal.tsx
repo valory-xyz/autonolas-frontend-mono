@@ -11,10 +11,10 @@ import { useAppSelector } from 'store/index';
 import { StakingContract } from 'types';
 import { useClaimableNomineesBatches } from 'hooks/useClaimableNomineeBatches';
 import {
+  type ClaimNotice,
   stillPendingMessage,
   useClaimStakingIncentivesBatch,
 } from 'hooks/useClaimStakingIncentivesBatch';
-import type { ClaimError } from 'common-util/functions/staking-incentives-claim';
 
 import { StakingIncentivesModalContainer } from './styles';
 
@@ -22,7 +22,8 @@ const { Text } = Typography;
 
 const MODAL_WIDTH = 860;
 const TABLE_SCROLL_HEIGHT = 420;
-const STEP_CHANGE_DELAY = 1000;
+/** How long a claimed batch stays on screen before the next one is shown. */
+export const STEP_CHANGE_DELAY = 1000;
 const FAILED_ON_CHAIN_HINT = 'The list has been refreshed. Claim again to sign a new transaction.';
 
 const modalProps = {
@@ -68,7 +69,7 @@ const columns = [
   },
 ];
 
-const notifyClaimError = (error: ClaimError, batchNumber: number) => {
+const notifyClaimError = (error: ClaimNotice, batchNumber: number) => {
   switch (error.kind) {
     case 'wallet-rejected':
       notifyWarning('Claim cancelled in your wallet');
@@ -85,8 +86,23 @@ const notifyClaimError = (error: ClaimError, batchNumber: number) => {
     case 'reverted-after-simulation':
       notifyError(`The claim for batch ${batchNumber} failed on-chain`, FAILED_ON_CHAIN_HINT);
       return;
+    case 'still-pending':
+      notifyWarning('Claim not confirmed yet', error.message);
+      return;
+    case 'already-in-flight':
+      notifyWarning('A claim is already in progress', error.message);
+      return;
+    case 'refresh-failed':
+      notifyWarning('Could not refresh the claim list', error.message);
+      return;
     case 'other':
       notifyError(`Failed to claim staking incentives for batch ${batchNumber}`, error.message);
+      return;
+    default: {
+      // A new kind must be handled above; until then it still reads as a failure.
+      const unhandled: never = error;
+      notifyError('Failed to claim staking incentives', JSON.stringify(unhandled));
+    }
   }
 };
 
@@ -120,7 +136,7 @@ export const ClaimStakingIncentivesModal = ({ onClose }: ClaimStakingIncentivesM
     isPending,
     isPreparing,
     pendingHash,
-    isPendingUnconfirmed,
+    canDismissPendingClaim,
   } = useClaimStakingIncentivesBatch({
     onSuccess: () => {
       const { currentBatch: claimedBatch, batchCount } = latest.current;
@@ -182,14 +198,15 @@ export const ClaimStakingIncentivesModal = ({ onClose }: ClaimStakingIncentivesM
   const isCurrentBatchClaimed = claimedBatches.includes(currentBatch);
   return (
     <Modal {...modalProps} onCancel={handleClose}>
-      {pendingHash && (
+      {(pendingHash || canDismissPendingClaim) && (
         <Space direction="vertical" size={4}>
-          <Text type="warning">{stillPendingMessage(pendingHash)}</Text>
-          {isPendingUnconfirmed && (
+          {pendingHash && <Text type="warning">{stillPendingMessage(pendingHash)}</Text>}
+          {canDismissPendingClaim && (
             <Space size={8}>
               <Text type="secondary">
-                Sped up or cancelled it in your wallet? Dismiss this once your wallet shows it
-                settled.
+                {pendingHash
+                  ? 'Sped up or cancelled it in your wallet? Dismiss this once your wallet shows it settled.'
+                  : 'An earlier claim is still waiting for your wallet. Dismiss it if your wallet shows no open request.'}
               </Text>
               <Button size="small" onClick={dismissPendingClaim}>
                 Dismiss
