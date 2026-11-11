@@ -221,9 +221,11 @@ export const quoteChainClaims = async (
   return Promise.all(
     chainIds.map(async (chainId, i): Promise<ChainClaimQuote> => {
       const targets = stakingTargets[i];
-      const sendingTargets = targets.filter((_, j) => incentives[i][j] > BigInt(0));
+      const sending = targets
+        .map((target, j) => ({ target, amount: incentives[i][j] }))
+        .filter(({ amount }) => amount > BigInt(0));
       const base = { chainId, targets, incentives: incentives[i] };
-      if (sendingTargets.length === 0) {
+      if (sending.length === 0) {
         return { ...base, sendsMessage: false, value: 0n, bridgePayload: '0x' };
       }
       if (!isOrbitChainId(chainId)) {
@@ -231,7 +233,7 @@ export const quoteChainClaims = async (
       }
 
       const { bridgePayload, messageCost, tokenCost } = await getArbitrumBridgePayload(
-        sendingTargets,
+        sending,
         chainId,
         states[i].processor,
       ).catch((error: unknown) => {

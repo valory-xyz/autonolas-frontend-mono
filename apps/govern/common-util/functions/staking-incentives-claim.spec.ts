@@ -197,7 +197,11 @@ describe('quoteChainClaims', () => {
       ACCOUNT,
     );
 
-    expect(mockGetArbitrumBridgePayload).toHaveBeenCalledWith([target(2)], ARBITRUM, processor(1));
+    expect(mockGetArbitrumBridgePayload).toHaveBeenCalledWith(
+      [{ target: target(2), amount: OLAS }],
+      ARBITRUM,
+      processor(1),
+    );
   });
 
   it('names the quote call, target, chain and decoded revert when a sub-call reverts', async () => {
@@ -352,12 +356,16 @@ describe('quoteChainClaims', () => {
     expect(quotes.map(({ bridgePayload }) => bridgePayload)).toEqual(['0x', ORBIT_PAYLOAD]);
   });
 
-  it('sizes the Orbit bridge estimate to the targets with a positive incentive', async () => {
+  it('estimates the Orbit bridge on the targets with a positive incentive and their amounts', async () => {
     mockChainState([{}], [[ZERO, OLAS, ZERO]]);
 
     await quoteChainClaims([[ARBITRUM], [[target(1), target(2), target(3)]]], ACCOUNT);
 
-    expect(mockGetArbitrumBridgePayload).toHaveBeenCalledWith([target(2)], ARBITRUM, processor(0));
+    expect(mockGetArbitrumBridgePayload).toHaveBeenCalledWith(
+      [{ target: target(2), amount: OLAS }],
+      ARBITRUM,
+      processor(0),
+    );
   });
 
   it('checkpoints each nominee before calculating its incentive with the processor decimals', async () => {

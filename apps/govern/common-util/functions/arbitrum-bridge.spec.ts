@@ -81,8 +81,8 @@ describe('isOrbitChainId', () => {
 
 describe('getArbitrumBridgePayload', () => {
   const stakingTargets = [
-    '0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa' as const,
-    '0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb' as const,
+    { target: '0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa' as const, amount: 7n * 10n ** 18n },
+    { target: '0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb' as const, amount: 3n },
   ];
 
   const mockGasPriceBid = BigNumber.from('100000000'); // 0.1 gwei
@@ -191,6 +191,25 @@ describe('getArbitrumBridgePayload', () => {
     );
     // Each target adds one address word and one amount word (2 x 32 bytes = 128 hex chars)
     expect(twoTargets - oneTarget).toBe(128);
+  });
+
+  it('estimates the L2 execution on the real targets and amounts', async () => {
+    await getArbitrumBridgePayload(stakingTargets, ARBITRUM_CHAIN_ID, DEPOSIT_PROCESSOR);
+
+    const [[{ data }]] = mockEstimateAll.mock.calls as [[{ data: string }]];
+    const [innerData] = new ethersV5.utils.Interface([
+      'function receiveMessage(bytes memory data)',
+    ]).decodeFunctionData('receiveMessage', data);
+    const [targets, amounts] = ethersV5.utils.defaultAbiCoder.decode(
+      ['address[]', 'uint256[]', 'bytes32'],
+      innerData,
+    );
+    expect(targets.map((target: string) => target.toLowerCase())).toEqual(
+      stakingTargets.map(({ target }) => target),
+    );
+    expect(amounts.map((amount: BigNumber) => BigInt(amount.toString()))).toEqual(
+      stakingTargets.map(({ amount }) => amount),
+    );
   });
 
   it('should read l2TargetDispenser from the deposit processor it is given', async () => {

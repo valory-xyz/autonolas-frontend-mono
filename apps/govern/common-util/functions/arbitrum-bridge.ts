@@ -112,6 +112,9 @@ export const GAS_OVERRIDES = {
 /** Extra buffer added to gas limit for message execution */
 const GAS_LIMIT_BUFFER = 100_000;
 
+/** A staking target the claim message carries, with the OLAS amount the Dispenser sends it. */
+export type BridgedIncentive = { target: Address; amount: bigint };
+
 export type ArbitrumBridgeParams = {
   bridgePayload: `0x${string}`;
   /** ETH the processor spends on the staking message. */
@@ -127,10 +130,12 @@ export type ArbitrumBridgeParams = {
  * The bridge payload encodes 5 values expected by ArbitrumDepositProcessorL1._sendMessage:
  *   (refundAddress, gasPriceBid, maxSubmissionCostToken, gasLimitMessage, maxSubmissionCostMessage)
  *
- * Only `sendingTargets` size the calldata: the Dispenser drops zero-incentive targets from the message.
+ * The L2 execution is estimated on the real message: `incentives` are the targets that send (the
+ * Dispenser drops zero-incentive targets) with their amounts. A placeholder target would fail the
+ * L2 dispenser's staking-instance check and skip the deposit, under-estimating its gas.
  */
 export const getArbitrumBridgePayload = async (
-  sendingTargets: Address[],
+  incentives: BridgedIncentive[],
   chainId: OrbitChainId,
   l1DepositProcessorAddress: Address,
 ): Promise<ArbitrumBridgeParams> => {
@@ -151,16 +156,15 @@ export const getArbitrumBridgePayload = async (
   );
   const l2TargetDispenserAddress: string = await depositProcessorContract.l2TargetDispenser();
 
-  // Construct approximate message calldata for gas estimation.
-  // The contract sends: abi.encodeWithSelector(RECEIVE_MESSAGE, abi.encode(targets, stakingIncentives, batchHash))
-  // We use dummy values since only the calldata size matters for gas estimation.
-  // Note: the targets may be bytes32-padded, so we use dummy addresses of the same length.
-  const dummyTargets = sendingTargets.map(() => ORBIT_BRIDGE_MEDIATOR);
-  const dummyAmounts = sendingTargets.map(() => ethersV5.BigNumber.from(100));
-  const dummyBatchHash = ethersV5.constants.HashZero;
+  // The contract sends: abi.encodeWithSelector(RECEIVE_MESSAGE, abi.encode(targets, stakingIncentives, batchHash)).
+  // Only the batch hash is a placeholder: it changes the calldata bytes, not their size.
   const innerData = ethersV5.utils.defaultAbiCoder.encode(
     ['address[]', 'uint256[]', 'bytes32'],
-    [dummyTargets, dummyAmounts, dummyBatchHash],
+    [
+      incentives.map(({ target }) => target),
+      incentives.map(({ amount }) => ethersV5.BigNumber.from(amount.toString())),
+      ethersV5.constants.HashZero,
+    ],
   );
   const receiveMessageIface = new ethersV5.utils.Interface([
     'function receiveMessage(bytes memory data)',
