@@ -161,7 +161,7 @@ describe('common-utils/addresses', () => {
 
     expect(adapters.length).toBeGreaterThan(0);
     adapters.forEach(({ chainId, address }) => {
-      const candidates = (multisigCandidates[chainId] ?? []).map((c) => c.toLowerCase());
+      const candidates = multisigCandidates[chainId].map((c) => c.toLowerCase());
       expect({ chainId, offersAdapter: candidates.includes(address) }).toEqual({
         chainId,
         offersAdapter: false,

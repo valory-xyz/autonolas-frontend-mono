@@ -59,7 +59,7 @@ const renderStep = (chainId) => {
   const props = {
     isOwner: true,
     serviceId: '1',
-    multisig: '0x0000000000000000000000000000000000000000',
+    multisig: ZERO_ADDRESS,
     handleTerminate: jest.fn(),
     getOtherBtnProps: () => ({}),
     getButton: (button) => button,

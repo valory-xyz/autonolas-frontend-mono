@@ -198,8 +198,10 @@ export const FinishedRegistration = ({
         notifyError('The network changed before the deploy. Please submit again.');
         return;
       case DEPLOY_REFUSAL.NOT_ENABLED:
-        setMultisigs({ status: MULTISIG_STATUS.LOADED, enabled: error.enabled });
-        setRadioValue(null);
+        if (chainIdRef.current === submitContext.chainId) {
+          setMultisigs({ status: MULTISIG_STATUS.LOADED, enabled: error.enabled });
+          setRadioValue(null);
+        }
         notifyError('The selected multisig option is no longer enabled. Please choose another.');
         return;
       default:
