@@ -44,10 +44,12 @@ const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000';
 
 const deferred = () => {
   let resolve;
-  const promise = new Promise((res) => {
+  let reject;
+  const promise = new Promise((res, rej) => {
     resolve = res;
+    reject = rej;
   });
-  return { promise, resolve };
+  return { promise, resolve, reject };
 };
 
 const renderStep = (chainId) => {
@@ -85,7 +87,8 @@ const selectWrapper = async (address) => {
 describe('FinishedRegistration multisig picker', () => {
   let spies = [];
   beforeEach(() => {
-    // Not resetAllMocks: that would also reset jest.setup's window.matchMedia mock, which antd needs.
+    // Not resetAllMocks / restoreAllMocks: they would also reset jest.setup's window.matchMedia
+    // mock, which antd needs.
     [getEnabledMultisigs, onStep3Deploy, notifyError, notifySuccess, useHelpers].forEach((mock) =>
       mock.mockReset(),
     );
@@ -94,7 +97,6 @@ describe('FinishedRegistration multisig picker', () => {
       jest.spyOn(console, 'error').mockImplementation(() => undefined),
     ];
   });
-  // Only this file's spies: restoreAllMocks would also reset jest.setup's matchMedia mock.
   afterEach(() => spies.forEach((spy) => spy.mockRestore()));
 
   it('clears the selection on a chain change and ignores the previous chain late answer', async () => {
@@ -117,6 +119,28 @@ describe('FinishedRegistration multisig picker', () => {
 
     expect(screen.getByRole('radio', { name: B })).toBeInTheDocument();
     expect(screen.queryByRole('radio', { name: A })).not.toBeInTheDocument();
+  });
+
+  it('ignores the previous chain late failure', async () => {
+    getEnabledMultisigs.mockResolvedValueOnce([A]);
+    const { switchChain } = renderStep(GNOSIS);
+    await selectWrapper(A);
+
+    const staleOptimism = deferred();
+    const freshGnosis = deferred();
+    getEnabledMultisigs
+      .mockReturnValueOnce(staleOptimism.promise)
+      .mockReturnValueOnce(freshGnosis.promise);
+    switchChain(OPTIMISM);
+    switchChain(GNOSIS);
+
+    await act(async () => freshGnosis.resolve([B]));
+    await act(async () => staleOptimism.reject(new Error('rpc down')));
+
+    expect(screen.getByRole('radio', { name: B })).toBeInTheDocument();
+    expect(
+      screen.queryByText('Could not check which multisig options are enabled on this chain.'),
+    ).toBeNull();
   });
 
   it('clears the selection when the new chain enables the same wrapper address', async () => {
