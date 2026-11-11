@@ -3,8 +3,12 @@ import { ethers } from 'ethers';
 import PropTypes from 'prop-types';
 import { useEffect, useRef, useState } from 'react';
 
-import { notifyError, notifySuccess } from 'libs/util-functions/src';
-import { findContractRevert, formatRevert } from 'libs/util-functions/src/lib/contractRevert';
+import {
+  findContractRevert,
+  formatRevert,
+  notifyError,
+  notifySuccess,
+} from 'libs/util-functions/src';
 import { FALLBACK_HANDLER, multisigCandidates } from 'common-util/Contracts/addresses';
 import { RegistryForm } from 'common-util/TransactionHelpers/RegistryForm';
 import { SendTransactionButton } from 'common-util/TransactionHelpers/SendTransactionButton';

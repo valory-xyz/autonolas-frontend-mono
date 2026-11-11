@@ -2,11 +2,12 @@ import {
   BaseError,
   ContractFunctionExecutionError,
   ContractFunctionRevertedError,
+  UserRejectedRequestError,
   encodeErrorResult,
   parseAbi,
 } from 'viem';
 
-import { findContractRevert, formatRevert } from './contractRevert';
+import { findContractRevert, findInChain, formatRevert } from './contractRevert';
 
 const abi = parseAbi(['error WrongAmount(uint256 provided, uint256 expected)']);
 
@@ -30,6 +31,17 @@ describe('formatRevert', () => {
 
   it('keeps the code of a Panic', () => {
     expect(formatRevert({ errorName: 'Panic', args: [BigInt(17)] })).toBe('Panic(17)');
+  });
+});
+
+describe('findInChain', () => {
+  it('finds an error of the given type wrapped in a viem error', () => {
+    const rejection = new UserRejectedRequestError(new Error('denied'));
+    const wrapped = new ContractFunctionExecutionError(rejection, { abi, functionName: 'claim' });
+
+    expect(findInChain(wrapped, UserRejectedRequestError)).toBe(rejection);
+    expect(findInChain(wrapped, ContractFunctionRevertedError)).toBeNull();
+    expect(findInChain(new Error('plain'), UserRejectedRequestError)).toBeNull();
   });
 });
 

@@ -15,6 +15,7 @@ import { onStep3Deploy } from '../../../components/ListServices/ServiceState/uti
 import { getEnabledMultisigs } from '../../../components/ListServices/utils';
 
 jest.mock('libs/util-functions/src', () => ({
+  ...jest.requireActual('libs/util-functions/src/lib/contractRevert'),
   notifyError: jest.fn(),
   notifySuccess: jest.fn(),
 }));
