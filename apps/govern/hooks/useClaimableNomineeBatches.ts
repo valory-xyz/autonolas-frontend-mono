@@ -105,6 +105,7 @@ const useNomineesLastClaimedStakingEpoch = ({ nominees }: { nominees: StakingCon
   }));
   const {
     data: lastClaimedStakingEpoch,
+    error: lastClaimedQueryError,
     isLoading: isLastClaimedLoading,
     queryKey,
     refetch: refetchLastClaimedStakingEpoch,
@@ -117,13 +118,14 @@ const useNomineesLastClaimedStakingEpoch = ({ nominees }: { nominees: StakingCon
   }, [queryClient, queryKey]);
 
   const { epochs: lastClaimedStakingEpochByNominee, error: lastClaimedError } = useMemo(() => {
-    if (!lastClaimedStakingEpoch) return { epochs: null, error: null };
+    // A failed query with no cached data leaves no cursors: that is an error, not "all claimed".
+    if (!lastClaimedStakingEpoch) return { epochs: null, error: lastClaimedQueryError ?? null };
     try {
       return { epochs: toLastClaimedEpochs(nominees, lastClaimedStakingEpoch), error: null };
     } catch (error) {
       return { epochs: null, error };
     }
-  }, [lastClaimedStakingEpoch, nominees]);
+  }, [lastClaimedStakingEpoch, lastClaimedQueryError, nominees]);
 
   const refetchLastClaimedEpochs = useCallback(async () => {
     const { data } = await refetchLastClaimedStakingEpoch({ throwOnError: true });

@@ -255,6 +255,7 @@ describe('useClaimableNomineesBatches refetchClaimableBatches', () => {
 
   it.each([
     ['epoch counter', () => jest.mocked(useEpochCounter)],
+    ['claim cursors', () => jest.mocked(useReadContracts)],
     ['minimum staking weight', () => jest.mocked(useReadContract)],
     ['previous epoch', () => jest.mocked(useEpochTokenomics)],
     ['nominee weights', () => jest.mocked(useNomineesWeights)],
