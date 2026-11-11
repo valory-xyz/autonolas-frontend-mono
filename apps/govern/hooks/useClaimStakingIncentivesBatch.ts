@@ -50,7 +50,7 @@ export type ClaimNotice =
 
 type ClaimStakingIncentivesBatchProps = {
   onSuccess: () => void;
-  onError: (error: ClaimNotice) => void;
+  onNotice: (error: ClaimNotice) => void;
   /** A claim whose wait ended without a receipt got one later. */
   onLateReceipt: (outcome: { hash: Hex; claimed: boolean }) => void;
   /** Looking up that claim's receipt failed; the claim itself may still mine. */
@@ -63,12 +63,11 @@ type ClaimStakingIncentivesBatchProps = {
 };
 
 export const useClaimStakingIncentivesBatch = (props: ClaimStakingIncentivesBatchProps) => {
-  const { onSuccess, onError, recordClaimedBatch } = props;
+  const { onSuccess, onNotice, recordClaimedBatch } = props;
   const { address: account } = useAccount();
   const dispatch = useAppDispatch();
   const store = useStore<RootState>();
-  const [isPreparing, setIsPreparing] = useState(false);
-  const [isSending, setIsSending] = useState(false);
+  const [phase, setPhase] = useState<'idle' | 'preparing' | 'sending'>('idle');
   const mountedRef = useRef(true);
   const ownRuns = useRef(new Set<number>());
   // The poll below outlives a render, so it reports through the latest callbacks.
@@ -103,7 +102,7 @@ export const useClaimStakingIncentivesBatch = (props: ClaimStakingIncentivesBatc
     } catch (refreshError) {
       console.error('Failed to refresh the claimable batches', refreshError);
       const claimError = toClaimError(refreshError);
-      latestProps.current.onError(
+      latestProps.current.onNotice(
         claimError.kind === 'other'
           ? { kind: 'refresh-failed', message: claimError.message }
           : claimError,
@@ -129,7 +128,7 @@ export const useClaimStakingIncentivesBatch = (props: ClaimStakingIncentivesBatc
       } catch (error) {
         if (error instanceof TransactionReceiptNotFoundError) return;
         console.error(`Could not check claim transaction ${hash}`, error);
-        // Once while the modal is open: the poll keeps trying, but the user should know.
+        // Once per hash while this poll runs: it keeps trying, but the user should know.
         if (isActive && !reportedLookupFailure.has(run)) {
           reportedLookupFailure.add(run);
           latestProps.current.onReceiptLookupFailed({ hash });
@@ -174,21 +173,15 @@ export const useClaimStakingIncentivesBatch = (props: ClaimStakingIncentivesBatc
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [account, pendingClaims]);
 
-  // The revert is rethrown as is: the refresh error as its `cause` would break viem's decoding.
-  const refreshAfterRevert = async (revert: unknown) => {
-    try {
-      return await refreshBatches();
-    } catch (refreshError) {
-      console.error('Failed to refresh the claimable batches after a revert', refreshError);
-      throw revert;
-    }
-  };
-
   /** The rebuilt batches after a revert from a `concurrent` change; rethrows anything else. */
   const batchesAfterConcurrentRevert = async (error: unknown, logMessage: string) => {
     if (!isContractRevert(error)) throw error;
     console.error(logMessage, error);
-    const { batches, change } = await refreshAfterRevert(error);
+    // The revert is rethrown as is: the refresh error as its `cause` would break viem's decoding.
+    const { batches, change } = await refreshBatches().catch((refreshError: unknown) => {
+      console.error('Failed to refresh the claimable batches after a revert', refreshError);
+      throw error;
+    });
     if (change !== 'concurrent') throw error;
     return batches;
   };
@@ -217,14 +210,14 @@ export const useClaimStakingIncentivesBatch = (props: ClaimStakingIncentivesBatc
 
   const claimIncentivesForBatch = async (batch: ClaimBatch) => {
     if (!account) {
-      onError({ kind: 'other', message: 'Connect a wallet to claim' });
+      onNotice({ kind: 'other', message: 'Connect a wallet to claim' });
       return;
     }
     // Read from the store, not the render, so a second click before the re-render is refused.
     const inFlight = store.getState().govern.pendingClaims[account];
     if (inFlight?.length) {
       const sentHash = inFlight.find(isSent)?.hash;
-      onError({
+      onNotice({
         kind: 'already-in-flight',
         message: sentHash
           ? stillPendingMessage(sentHash)
@@ -240,13 +233,13 @@ export const useClaimStakingIncentivesBatch = (props: ClaimStakingIncentivesBatc
 
     let hash: Hex | undefined;
     try {
-      if (mountedRef.current) setIsPreparing(true);
+      if (mountedRef.current) setPhase('preparing');
       const prepared = await prepareWithOneRebuild(batch, account).finally(() => {
-        if (mountedRef.current) setIsPreparing(false);
+        if (mountedRef.current) setPhase('idle');
       });
       if ('kind' in prepared) {
         writeOwnEntry(null);
-        onError(prepared);
+        onNotice(prepared);
         return;
       }
 
@@ -254,7 +247,7 @@ export const useClaimStakingIncentivesBatch = (props: ClaimStakingIncentivesBatc
       const publicClient = getPublicClient(wagmiConfig, { chainId: MAINNET_CHAIN_ID });
       if (!publicClient) throw new Error('No Ethereum mainnet client is configured');
 
-      if (mountedRef.current) setIsSending(true);
+      if (mountedRef.current) setPhase('sending');
       writeOwnEntry({ status: 'sending' });
       hash = await writeContract(wagmiConfig, prepared.request);
       writeOwnEntry({ status: 'waiting', hash });
@@ -273,7 +266,7 @@ export const useClaimStakingIncentivesBatch = (props: ClaimStakingIncentivesBatc
         // The transaction may still mine, so it stays pending and Claim does not send another.
         writeOwnEntry({ status: 'unconfirmed', hash });
         console.error(`Could not confirm claim transaction ${hash}`, waitError);
-        onError({
+        onNotice({
           kind: 'still-pending',
           hash,
           timedOut: waitError instanceof WaitForTransactionReceiptTimeoutError,
@@ -287,7 +280,7 @@ export const useClaimStakingIncentivesBatch = (props: ClaimStakingIncentivesBatc
         console.error(
           `Claim transaction ${hash} did not claim (${replacedReason ?? receipt.status}); receipt ${receipt.transactionHash}`,
         );
-        onError(notClaimed);
+        onNotice(notClaimed);
         await refreshReportingFailure();
         return;
       }
@@ -297,16 +290,13 @@ export const useClaimStakingIncentivesBatch = (props: ClaimStakingIncentivesBatc
       // Nothing was sent, so nothing can mine: the next Claim may send.
       if (!hash) writeOwnEntry(null);
       console.error(`Failed to claim staking incentives${hash ? ` (tx ${hash})` : ''}`, error);
-      onError(toClaimError(error));
+      onNotice(toClaimError(error));
     } finally {
-      if (mountedRef.current) setIsSending(false);
+      if (mountedRef.current) setPhase('idle');
     }
   };
 
-  /**
-   * An `unconfirmed` claim, or a `sending` one an earlier mount left whose wallet has not
-   * answered. A `preparing` one is not: its run is still going and will reach the wallet.
-   */
+  // Never a `preparing` claim: its run is still going and will reach the wallet.
   const dismissable = pendingClaims.filter(
     (entry) =>
       entry.status === 'unconfirmed' ||
@@ -320,11 +310,15 @@ export const useClaimStakingIncentivesBatch = (props: ClaimStakingIncentivesBatc
     dismissable.forEach(({ run }) => setPending(account, run, null));
   };
 
+  const isPending = phase !== 'idle' || pendingClaims.length > 0;
+  const claimButtonState: 'idle' | 'preparing' | 'pending' =
+    phase === 'preparing' ? 'preparing' : isPending ? 'pending' : 'idle';
+
   return {
     claimIncentivesForBatch,
     dismissPendingClaim,
-    isPending: isPreparing || isSending || pendingClaims.length > 0,
-    isPreparing,
+    isPending,
+    claimButtonState,
     pendingHash,
     canDismissPendingClaim,
   };

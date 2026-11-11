@@ -54,7 +54,7 @@ const renderModal = (claimState: Partial<ClaimState> = {}) => {
       claimIncentivesForBatch: jest.fn(),
       dismissPendingClaim: jest.fn(),
       isPending: false,
-      isPreparing: false,
+      claimButtonState: 'idle',
       pendingHash: undefined,
       canDismissPendingClaim: false,
       ...claimState,
@@ -103,7 +103,7 @@ describe('<ClaimStakingIncentivesModal />', () => {
     const propsWhenClaimStarted = latestProps();
 
     act(() => propsWhenClaimStarted.onBatchesRebuilt());
-    act(() => propsWhenClaimStarted.onError({ kind: 'other', message: 'x' }));
+    act(() => propsWhenClaimStarted.onNotice({ kind: 'other', message: 'x' }));
 
     expect(notifyError).toHaveBeenLastCalledWith(
       'Failed to claim staking incentives for batch 1',
@@ -137,16 +137,16 @@ describe('<ClaimStakingIncentivesModal />', () => {
     expect(screen.queryByRole('button', { name: 'Claim Incentives' })).not.toBeInTheDocument();
   });
 
-  it.each<[ClaimNotice, jest.Mock, string[]]>([
-    [{ kind: 'wallet-rejected' }, notifyWarning as jest.Mock, ['Claim cancelled in your wallet']],
+  it.each<[ClaimNotice, typeof notifyError, string[]]>([
+    [{ kind: 'wallet-rejected' }, notifyWarning, ['Claim cancelled in your wallet']],
     [
       { kind: 'nothing-to-claim' },
-      notifyWarning as jest.Mock,
-      ['Someone else claimed these incentives. Nothing is left to claim.'],
+      notifyWarning,
+      ['These incentives were already claimed. Nothing is left to claim.'],
     ],
     [
       { kind: 'claims-changed' },
-      notifyWarning as jest.Mock,
+      notifyWarning,
       [
         'Claims changed while preparing the transaction',
         'The list has been refreshed. Review it and claim again.',
@@ -154,23 +154,23 @@ describe('<ClaimStakingIncentivesModal />', () => {
     ],
     [
       { kind: 'reverted-after-simulation' },
-      notifyError as jest.Mock,
+      notifyError,
       ['The claim for batch 2 failed on-chain', 'Claim again to sign a new transaction.'],
     ],
     [
       { kind: 'other', message: 'Paused()' },
-      notifyError as jest.Mock,
+      notifyError,
       ['Failed to claim staking incentives for batch 2', 'Paused()'],
     ],
     // Not failures: the claim may still mine, was not sent, or already settled.
     [
       { kind: 'still-pending', hash: HASH, timedOut: true },
-      notifyWarning as jest.Mock,
+      notifyWarning,
       ['Claim not confirmed yet', `pending: ${HASH}`],
     ],
     [
       { kind: 'still-pending', hash: HASH, timedOut: false },
-      notifyWarning as jest.Mock,
+      notifyWarning,
       [
         'Claim not confirmed yet',
         `Could not confirm transaction ${HASH}. Check your wallet before claiming again.`,
@@ -178,19 +178,19 @@ describe('<ClaimStakingIncentivesModal />', () => {
     ],
     [
       { kind: 'already-in-flight', message: 'in flight' },
-      notifyWarning as jest.Mock,
+      notifyWarning,
       ['A claim is already in progress', 'in flight'],
     ],
     [
       { kind: 'refresh-failed', message: 'rate limited' },
-      notifyWarning as jest.Mock,
+      notifyWarning,
       ['Could not refresh the claim list', 'rate limited'],
     ],
   ])('shows the %o error with its own message', (error, notifier, expectedArgs) => {
     const { latestProps, claimBatch } = renderModal();
     claimBatch();
 
-    act(() => latestProps().onError(error));
+    act(() => latestProps().onNotice(error));
 
     expect(notifier).toHaveBeenCalledTimes(1);
     expect(notifyError).toHaveBeenCalledTimes(notifier === notifyError ? 1 : 0);
@@ -209,6 +209,19 @@ describe('<ClaimStakingIncentivesModal />', () => {
       ),
     ).toBeInTheDocument();
     expect(screen.queryByText('All staking incentives were claimed this epoch.')).toBeNull();
+  });
+
+  it('shows a read error in place of an already loaded list, so no claim starts from it', () => {
+    mockLoadError.current = 'Could not read the vote weight of staking contract 0x1';
+
+    renderModal();
+
+    expect(
+      screen.getByText(
+        'Could not load the claimable staking contracts: Could not read the vote weight of staking contract 0x1',
+      ),
+    ).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Claim Incentives' })).toBeNull();
   });
 
   it('warns about a claim still being awaited, without offering a dismissal', () => {
@@ -234,21 +247,21 @@ describe('<ClaimStakingIncentivesModal />', () => {
   });
 
   it('says the claim is being prepared while it is', () => {
-    renderModal({ isPending: true, isPreparing: true });
+    renderModal({ isPending: true, claimButtonState: 'preparing' });
 
     const button = screen.getByRole('button', { name: /Preparing claim/ });
     expect(button).toHaveClass('ant-btn-loading');
   });
 
   it('leaves the claim button clickable when no claim is in flight', () => {
-    renderModal({ isPending: false, isPreparing: false });
+    renderModal({ isPending: false, claimButtonState: 'idle' });
 
     const button = screen.getByRole('button', { name: /Claim Incentives/ });
     expect(button).not.toHaveClass('ant-btn-loading');
   });
 
   it('keeps the claim button loading while a sent claim is awaited', () => {
-    renderModal({ isPending: true, isPreparing: false });
+    renderModal({ isPending: true, claimButtonState: 'pending' });
 
     const button = screen.getByRole('button', { name: /Claim Incentives/ });
     expect(button).toHaveClass('ant-btn-loading');
@@ -264,11 +277,11 @@ describe('<ClaimStakingIncentivesModal />', () => {
     expect(dismissPendingClaim).toHaveBeenCalledTimes(1);
   });
 
-  it.each<[boolean, jest.Mock, unknown[]]>([
-    [true, notifySuccess as jest.Mock, [`Claim transaction ${HASH} was confirmed.`]],
+  it.each<[boolean, typeof notifyError, unknown[]]>([
+    [true, notifySuccess, [`Claim transaction ${HASH} was confirmed.`]],
     [
       false,
-      notifyError as jest.Mock,
+      notifyError,
       [`Claim transaction ${HASH} failed on-chain`, 'Claim again to sign a new transaction.'],
     ],
   ])('reports a late receipt (claimed: %s) by its hash', (claimed, notifier, expectedArgs) => {

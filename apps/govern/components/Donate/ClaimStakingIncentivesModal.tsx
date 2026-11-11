@@ -69,13 +69,16 @@ const columns = [
   },
 ];
 
+const isClaimFailure = ({ kind }: ClaimNotice) =>
+  kind === 'reverted-after-simulation' || kind === 'other';
+
 const notifyClaimNotice = (notice: ClaimNotice, batchNumber: number) => {
   switch (notice.kind) {
     case 'wallet-rejected':
       notifyWarning('Claim cancelled in your wallet');
       return;
     case 'nothing-to-claim':
-      notifyWarning('Someone else claimed these incentives. Nothing is left to claim.');
+      notifyWarning('These incentives were already claimed. Nothing is left to claim.');
       return;
     case 'claims-changed':
       notifyWarning(
@@ -138,8 +141,7 @@ export const ClaimStakingIncentivesModal = ({ onClose }: ClaimStakingIncentivesM
   const {
     claimIncentivesForBatch,
     dismissPendingClaim,
-    isPending,
-    isPreparing,
+    claimButtonState,
     pendingHash,
     canDismissPendingClaim,
   } = useClaimStakingIncentivesBatch({
@@ -154,8 +156,9 @@ export const ClaimStakingIncentivesModal = ({ onClose }: ClaimStakingIncentivesM
       }
       notifySuccess(`Staking incentives for batch ${claimedBatch + 1} claimed successfully`);
     },
-    onError: (notice) => {
-      console.error(notice);
+    onNotice: (notice) => {
+      if (isClaimFailure(notice)) console.error(notice);
+      else console.warn(notice);
       notifyClaimNotice(notice, latest.current.currentBatch + 1);
     },
     onReceiptLookupFailed: ({ hash }) =>
@@ -230,7 +233,7 @@ export const ClaimStakingIncentivesModal = ({ onClose }: ClaimStakingIncentivesM
           currentBatch={currentBatch}
           isCurrentBatchClaimed={isCurrentBatchClaimed}
           nomineesForCurrentBatch={nomineesForCurrentBatch}
-          claimButtonState={isPreparing ? 'preparing' : isPending ? 'pending' : 'idle'}
+          claimButtonState={claimButtonState}
           handleClaimForBatch={handleClaimForBatch}
         />
       )}
