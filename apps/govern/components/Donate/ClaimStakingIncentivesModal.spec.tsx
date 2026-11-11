@@ -96,6 +96,21 @@ describe('<ClaimStakingIncentivesModal />', () => {
     expect(screen.getByText('Batch Claimed')).toBeInTheDocument();
   });
 
+  it('names the batch shown now when a claim fails after a rebuild', () => {
+    const { latestProps, claimBatch } = renderModal();
+    claimBatch();
+    claimBatch();
+    const propsWhenClaimStarted = latestProps();
+
+    act(() => propsWhenClaimStarted.onBatchesRebuilt());
+    act(() => propsWhenClaimStarted.onError({ kind: 'other', message: 'x' }));
+
+    expect(notifyError).toHaveBeenLastCalledWith(
+      'Failed to claim staking incentives for batch 1',
+      'x',
+    );
+  });
+
   it('clears the claimed marks on a rebuild so the rebuilt first batch can be claimed', () => {
     const { latestProps } = renderModal();
     act(() => latestProps().onSuccess());
