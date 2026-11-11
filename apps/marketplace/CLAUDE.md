@@ -1,5 +1,12 @@
 # Marketplace app – CLAUDE.md
 
+Base/Polygon cutover: marketplace, registry and staking now use SQD OpenReader. Polygon
+uses `NEXT_PUBLIC_REGISTRY_POLYGON_SQUID_URL` and `NEXT_PUBLIC_STAKING_POLYGON_SQUID_URL`;
+Base uses `NEXT_PUBLIC_REGISTRY_BASE_SQUID_URL` and `NEXT_PUBLIC_STAKING_BASE_SQUID_URL`.
+These replace the earlier Graph envs for those sources. See `docs/base-polygon-squid-cutover.md`
+at the repository root.
+
+
 Guidance for working on the **Marketplace** app in this repo. This app powers the [Olas Mech Marketplace](https://marketplace.olas.network/) and on-chain **Registry** for agents, components, and services.
 
 ## Purpose

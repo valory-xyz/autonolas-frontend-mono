@@ -17,13 +17,10 @@ import {
 const squeeze = (s: string) => s.replace(/\s+/g, ' ').trim();
 
 describe('indexer dialects', () => {
-  it.each([137, 8453] as const)(
-    'migrates marketplace on %s without switching its registry',
-    (chainId) => {
-      expect(getMarketplaceDialect(chainId)).toBe('squid');
-      expect(getRegistryDialect(chainId)).toBe('graph');
-    },
-  );
+  it.each([137, 8453] as const)('reads marketplace and registry on %s from squids', (chainId) => {
+    expect(getMarketplaceDialect(chainId)).toBe('squid');
+    expect(getRegistryDialect(chainId)).toBe('squid');
+  });
 
   it('keeps Robinhood on squid and the other existing chains on Graph', () => {
     expect(getMarketplaceDialect(4663)).toBe('squid');

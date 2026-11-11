@@ -4,7 +4,7 @@ import type { MarketplaceSubgraphChainId, RegistrySubgraphChainId } from './inde
 export type SubgraphDialect = 'graph' | 'squid';
 
 export const MARKETPLACE_SQUID_CHAIN_IDS = [137, 8453, 4663] as const;
-export const REGISTRY_SQUID_CHAIN_IDS = [4663] as const;
+export const REGISTRY_SQUID_CHAIN_IDS = [137, 8453, 4663] as const;
 
 export const getMarketplaceDialect = (chainId: MarketplaceSubgraphChainId): SubgraphDialect =>
   (MARKETPLACE_SQUID_CHAIN_IDS as readonly number[]).includes(chainId) ? 'squid' : 'graph';

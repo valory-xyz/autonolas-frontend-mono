@@ -12,12 +12,12 @@ jest.mock('common-util/graphql/index', () => ({
     },
     137: {
       get request() {
-        return mockGraphRequest;
+        return mockSquidRequest;
       },
     },
     8453: {
       get request() {
-        return mockGraphRequest;
+        return mockSquidRequest;
       },
     },
     4663: {
@@ -40,7 +40,7 @@ describe('getServiceFromRegistry', () => {
     mockSquidRequest.mockReset();
   });
 
-  it.each([100, 137, 8453] as const)('keeps registry Graph routing on %s', async (chainId) => {
+  it.each([100] as const)('keeps registry Graph routing on %s', async (chainId) => {
     mockGraphRequest.mockResolvedValueOnce({ service: ROW });
     const service = await getServiceFromRegistry({ chainId, id: '1' });
     expect(service).toEqual(ROW);
@@ -49,9 +49,9 @@ describe('getServiceFromRegistry', () => {
     expect(variables).toEqual({ id: '1' });
   });
 
-  it('reads `serviceById` from a squid response', async () => {
+  it.each([137, 8453, 4663] as const)('reads `serviceById` on %s', async (chainId) => {
     mockSquidRequest.mockResolvedValueOnce({ serviceById: ROW });
-    const service = await getServiceFromRegistry({ chainId: 4663, id: '1' });
+    const service = await getServiceFromRegistry({ chainId, id: '1' });
     expect(service).toEqual(ROW);
     expect(String(mockSquidRequest.mock.calls[0][0])).toContain('serviceById(id: $id)');
   });

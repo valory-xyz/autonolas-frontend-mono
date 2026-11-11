@@ -16,7 +16,7 @@ const STAKING_SUBGRAPH_URLS = {
   [optimism.id]: process.env.NEXT_PUBLIC_OPTIMISM_STAKING_SUBGRAPH_URL,
   [gnosis.id]: process.env.NEXT_PUBLIC_GNOSIS_STAKING_SUBGRAPH_URL,
   [base.id]: process.env.NEXT_PUBLIC_STAKING_BASE_SQUID_URL,
-  [polygon.id]: process.env.NEXT_PUBLIC_POLYGON_STAKING_SUBGRAPH_URL,
+  [polygon.id]: process.env.NEXT_PUBLIC_STAKING_POLYGON_SQUID_URL,
   [mainnet.id]: process.env.NEXT_PUBLIC_ETHEREUM_STAKING_SUBGRAPH_URL,
   [arbitrum.id]: process.env.NEXT_PUBLIC_ARBITRUM_STAKING_SUBGRAPH_URL,
   [celo.id]: process.env.NEXT_PUBLIC_CELO_STAKING_SUBGRAPH_URL,
