@@ -23,6 +23,7 @@ const { Text } = Typography;
 const MODAL_WIDTH = 860;
 const TABLE_SCROLL_HEIGHT = 420;
 const STEP_CHANGE_DELAY = 1000;
+const FAILED_ON_CHAIN_HINT = 'The list has been refreshed. Claim again to sign a new transaction.';
 
 const modalProps = {
   title: 'Claim Staking Incentives',
@@ -82,10 +83,7 @@ const notifyClaimError = (error: ClaimError, batchNumber: number) => {
       );
       return;
     case 'reverted-after-simulation':
-      notifyError(
-        `The claim for batch ${batchNumber} failed on-chain`,
-        'The list has been refreshed. Claim again to sign a new transaction.',
-      );
+      notifyError(`The claim for batch ${batchNumber} failed on-chain`, FAILED_ON_CHAIN_HINT);
       return;
     case 'other':
       notifyError(`Failed to claim staking incentives for batch ${batchNumber}`, error.message);
@@ -143,10 +141,7 @@ export const ClaimStakingIncentivesModal = ({ onClose }: ClaimStakingIncentivesM
       if (claimed) {
         notifySuccess(`Claim transaction ${hash} was confirmed. The list has been refreshed.`);
       } else {
-        notifyError(
-          `Claim transaction ${hash} failed on-chain`,
-          'The list has been refreshed. Claim again to sign a new transaction.',
-        );
+        notifyError(`Claim transaction ${hash} failed on-chain`, FAILED_ON_CHAIN_HINT);
       }
     },
     refetchClaimableBatches,

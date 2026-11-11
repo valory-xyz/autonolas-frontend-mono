@@ -11,8 +11,6 @@ import {
 } from 'viem';
 import { useAccount } from 'wagmi';
 
-import { estimateGasWithBuffer } from 'libs/util-functions/src/lib/estimateGasWithBuffer';
-
 import { type PendingClaim, setPendingClaim } from 'store/govern';
 import { type RootState, useAppDispatch, useAppSelector } from 'store/index';
 import { MAINNET_CHAIN_ID } from 'common-util/constants/chains';
@@ -20,6 +18,7 @@ import { wagmiConfig } from 'common-util/config/wagmi';
 import {
   type ClaimBatch,
   type ClaimError,
+  getUnclaimedReason,
   isContractRevert,
   prepareClaim,
   toClaimError,
@@ -44,18 +43,6 @@ type ClaimStakingIncentivesBatchProps = {
   /** The batches were rebuilt, so the caller restarts from the first one. */
   onBatchesRebuilt: () => void;
   recordClaimedBatch: (batch: ClaimBatch) => void;
-};
-
-/** The receipt's outcome: `null` when it claimed, else why it did not. */
-const getUnclaimedReason = (
-  receipt: TransactionReceipt,
-  replacedReason?: ReplacementReason,
-): ClaimError | null => {
-  if (replacedReason === 'cancelled') return { kind: 'wallet-rejected' };
-  if (replacedReason === 'replaced' || receipt.status === 'reverted') {
-    return { kind: 'reverted-after-simulation' };
-  }
-  return null;
 };
 
 export const useClaimStakingIncentivesBatch = (props: ClaimStakingIncentivesBatchProps) => {
@@ -87,7 +74,7 @@ export const useClaimStakingIncentivesBatch = (props: ClaimStakingIncentivesBatc
 
   const refreshBatches = async () => {
     const refresh = await latestProps.current.refetchClaimableBatches();
-    if (refresh.cursorsChanged) latestProps.current.onBatchesRebuilt();
+    if (refresh.cursorsChanged || refresh.listChanged) latestProps.current.onBatchesRebuilt();
     return refresh;
   };
 
@@ -115,13 +102,21 @@ export const useClaimStakingIncentivesBatch = (props: ClaimStakingIncentivesBatc
       return;
     }
     let isActive = true;
+    let reportedLookupFailure = false;
     const checkReceipt = async () => {
       let receipt: TransactionReceipt;
       try {
         receipt = await publicClient.getTransactionReceipt({ hash: unconfirmedHash });
       } catch (error) {
-        if (!(error instanceof TransactionReceiptNotFoundError)) {
-          console.error(`Could not check claim transaction ${unconfirmedHash}`, error);
+        if (error instanceof TransactionReceiptNotFoundError) return;
+        console.error(`Could not check claim transaction ${unconfirmedHash}`, error);
+        // Once per hash: the poll keeps trying, but the user should know the check is failing.
+        if (isActive && !reportedLookupFailure) {
+          reportedLookupFailure = true;
+          latestProps.current.onError({
+            kind: 'other',
+            message: `Could not check transaction ${unconfirmedHash}. Check your wallet or a block explorer.`,
+          });
         }
         return;
       }
@@ -209,8 +204,7 @@ export const useClaimStakingIncentivesBatch = (props: ClaimStakingIncentivesBatc
       if (!publicClient) throw new Error('No Ethereum mainnet client is configured');
 
       if (mountedRef.current) setIsSending(true);
-      const gas = await estimateGasWithBuffer(wagmiConfig, prepared.params);
-      hash = await writeContract(wagmiConfig, { ...prepared.request, gas });
+      hash = await writeContract(wagmiConfig, prepared.request);
       setPending(account, { status: 'waiting', hash });
 
       let replacedReason: ReplacementReason | undefined;

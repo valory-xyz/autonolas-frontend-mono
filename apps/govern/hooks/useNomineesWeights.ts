@@ -93,7 +93,7 @@ export const useNomineesWeights = (
     args: [nominee.account, nominee.chainId, timestamp],
   }));
 
-  const { data } = useReadContracts({
+  const { data, error } = useReadContracts({
     contracts,
     scopeKey,
     query: {
@@ -123,5 +123,5 @@ export const useNomineesWeights = (
     },
   });
 
-  return { data };
+  return { data, error };
 };

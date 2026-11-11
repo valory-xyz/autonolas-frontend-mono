@@ -1,4 +1,4 @@
-import { useMemo, useCallback, useRef } from 'react';
+import { useEffect, useMemo, useCallback, useRef } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import type { Address, MulticallResponse } from 'viem';
 import { mainnet } from 'viem/chains';
@@ -18,7 +18,11 @@ import type { StakingContract } from 'types';
 const MAX_BATCH_SIZE = 10;
 
 const useMinStakingValue = ({ epoch }: { epoch: number | null }) => {
-  const { data: minStakingWeight, isLoading: isMinStakingLoading } = useReadContract({
+  const {
+    data: minStakingWeight,
+    isLoading: isMinStakingLoading,
+    error: minStakingError,
+  } = useReadContract({
     address: TOKENOMICS.addresses[mainnet.id],
     abi: TOKENOMICS.abi,
     chainId: mainnet.id,
@@ -33,7 +37,7 @@ const useMinStakingValue = ({ epoch }: { epoch: number | null }) => {
     },
   });
 
-  return { minStakingWeight, isMinStakingLoading };
+  return { minStakingWeight, isMinStakingLoading, minStakingError };
 };
 
 /**
@@ -56,8 +60,16 @@ const toLastClaimedEpochs = (
     {} as Record<Address, number>,
   );
 
-/** The rebuilt batches, and whether any claim cursor moved since it was last read. */
-export type ClaimableBatchesRefresh = { batches: ClaimBatch[]; cursorsChanged: boolean };
+/**
+ * The rebuilt batches. `cursorsChanged`: a cursor moved that this user's own recorded claims do
+ * not explain, i.e. a concurrent claim. `listChanged`: the rebuilt list differs from the one shown,
+ * own claims included, so the caller must restart from its first batch.
+ */
+export type ClaimableBatchesRefresh = {
+  batches: ClaimBatch[];
+  cursorsChanged: boolean;
+  listChanged: boolean;
+};
 
 const haveCursorsChanged = (
   expected: Record<Address, number> | null,
@@ -119,9 +131,9 @@ const useNomineesWeightsAtPrevEpochEnd = ({
   nominees: StakingContract[];
   previousEpoch: number | null;
 }) => {
-  const { data: prevEpochPoint } = useEpochTokenomics(previousEpoch);
+  const { data: prevEpochPoint, error: prevEpochError } = useEpochTokenomics(previousEpoch);
 
-  const { data: nomineesWeightsAtPrevEpochEnd } = useNomineesWeights(
+  const { data: nomineesWeightsAtPrevEpochEnd, error: weightsError } = useNomineesWeights(
     nominees.map((nominee) => ({
       account: nominee.address,
       chainId: BigInt(nominee.chainId),
@@ -131,6 +143,7 @@ const useNomineesWeightsAtPrevEpochEnd = ({
 
   return {
     nomineesWeightsAtPrevEpochEnd,
+    weightsError: prevEpochError ?? weightsError,
   };
 };
 
@@ -307,9 +320,9 @@ export const buildClaimBatches = ({
 
 export const useClaimableNomineesBatches = () => {
   const nominees = useAppSelector((state) => state.govern.stakingContracts);
-  const { data: currentEpoch, isLoading: isEpochLoading } = useEpochCounter();
+  const { data: currentEpoch, isLoading: isEpochLoading, error: epochError } = useEpochCounter();
   const previousEpoch = currentEpoch ? currentEpoch - 1 : null;
-  const { minStakingWeight, isMinStakingLoading } = useMinStakingValue({
+  const { minStakingWeight, isMinStakingLoading, minStakingError } = useMinStakingValue({
     epoch: previousEpoch,
   });
   const {
@@ -319,10 +332,21 @@ export const useClaimableNomineesBatches = () => {
     clearLastClaimedStakingEpoch,
     refetchLastClaimedEpochs,
   } = useNomineesLastClaimedStakingEpoch({ nominees });
-  const { nomineesWeightsAtPrevEpochEnd } = useNomineesWeightsAtPrevEpochEnd({
+  const { nomineesWeightsAtPrevEpochEnd, weightsError } = useNomineesWeightsAtPrevEpochEnd({
     nominees,
     previousEpoch,
   });
+
+  // A failed read would otherwise leave no batches and read as everything claimed.
+  const readError = epochError ?? minStakingError ?? weightsError;
+  useEffect(() => {
+    if (readError) console.error('Could not read the claimable staking contracts', readError);
+  }, [readError]);
+  const claimableBatchesError =
+    lastClaimedError ??
+    (readError
+      ? ((readError as { shortMessage?: string }).shortMessage ?? readError.message)
+      : null);
 
   // Calculate if we're still loading data
   const isLoading =
@@ -410,6 +434,7 @@ export const useClaimableNomineesBatches = () => {
     }
     const lastClaimedEpochs = await refetchLastClaimedEpochs();
     const cursorsChanged = haveCursorsChanged(getExpectedCursors(), lastClaimedEpochs);
+    const listChanged = haveCursorsChanged(builtFromCursors.current, lastClaimedEpochs);
     builtFromCursors.current = lastClaimedEpochs;
     ownClaimedThrough.current = {};
     return {
@@ -421,6 +446,7 @@ export const useClaimableNomineesBatches = () => {
         relativeWeights,
       }),
       cursorsChanged,
+      listChanged,
     };
   }, [
     nominees,
@@ -433,7 +459,7 @@ export const useClaimableNomineesBatches = () => {
 
   return {
     nomineesToClaimBatches,
-    claimableBatchesError: lastClaimedError,
+    claimableBatchesError,
     recordClaimedBatch,
     isLoadingClaimableBatches: isLoading,
     clearClaimableBatches,

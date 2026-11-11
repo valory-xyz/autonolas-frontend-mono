@@ -117,7 +117,11 @@ describe('useClaimableNomineesBatches refetchClaimableBatches', () => {
     const refresh = await result.current.refetchClaimableBatches();
 
     expect(mockRefetch).toHaveBeenCalledWith({ throwOnError: true });
-    expect(refresh).toEqual({ batches: [[[100], [[B]]]], cursorsChanged: true });
+    expect(refresh).toEqual({
+      batches: [[[100], [[B]]]],
+      cursorsChanged: true,
+      listChanged: true,
+    });
   });
 
   it('reports unchanged cursors when nobody claimed meanwhile', async () => {
@@ -126,7 +130,11 @@ describe('useClaimableNomineesBatches refetchClaimableBatches', () => {
 
     const refresh = await result.current.refetchClaimableBatches();
 
-    expect(refresh).toEqual({ batches: [[[100], [[A, B]]]], cursorsChanged: false });
+    expect(refresh).toEqual({
+      batches: [[[100], [[A, B]]]],
+      cursorsChanged: false,
+      listChanged: false,
+    });
   });
 
   it('throws on a failed cursor read instead of treating the nominee as claimed', async () => {
@@ -178,6 +186,9 @@ describe('useClaimableNomineesBatches refetchClaimableBatches', () => {
     const refresh = await result.current.refetchClaimableBatches();
 
     expect(refresh.cursorsChanged).toBe(false);
+    // The shown list still changed: the claimed nominee drops out, so the modal must restart.
+    expect(refresh.listChanged).toBe(true);
+    expect(refresh.batches).toEqual([[[100], [[B]]]]);
   });
 
   it('adds up own claims of one nominee across a multi-epoch backlog', async () => {
@@ -192,6 +203,27 @@ describe('useClaimableNomineesBatches refetchClaimableBatches', () => {
 
     expect(ownClaimsOnly.cursorsChanged).toBe(false);
     expect(someoneElseToo.cursorsChanged).toBe(true);
+  });
+
+  it.each([
+    ['epoch counter', () => jest.mocked(useEpochCounter)],
+    ['minimum staking weight', () => jest.mocked(useReadContract)],
+    ['previous epoch', () => jest.mocked(useEpochTokenomics)],
+    ['nominee weights', () => jest.mocked(useNomineesWeights)],
+  ])('exposes a failed %s read instead of showing everything claimed', (_, hook) => {
+    jest.spyOn(console, 'error').mockImplementation(() => undefined);
+    const readError = Object.assign(new Error('raw'), { shortMessage: 'RPC request failed.' });
+    const result = renderBatches();
+    hook().mockReturnValue({ data: undefined, isLoading: false, error: readError } as never);
+
+    const { result: failed } = renderHook(() => useClaimableNomineesBatches());
+
+    expect(result.current.claimableBatchesError).toBeNull();
+    expect(failed.current.claimableBatchesError).toBe('RPC request failed.');
+    expect(console.error).toHaveBeenCalledWith(
+      'Could not read the claimable staking contracts',
+      readError,
+    );
   });
 
   it('exposes a failed first cursor read instead of dropping the staking contract', () => {

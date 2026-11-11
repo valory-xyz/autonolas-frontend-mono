@@ -3,6 +3,8 @@ import {
   type Address,
   BaseError,
   type Hex,
+  type ReplacementReason,
+  type TransactionReceipt,
   UserRejectedRequestError,
   decodeErrorResult,
   decodeFunctionResult,
@@ -14,7 +16,8 @@ import {
 import { mainnet } from 'viem/chains';
 
 import { DISPENSER, VOTE_WEIGHTING } from 'libs/util-contracts/src/lib/abiAndAddresses';
-import { findContractRevert, formatRevert } from 'libs/util-functions/src/lib/contractRevert';
+import { findContractRevert, findInChain, formatRevert } from 'libs/util-functions/src';
+import { estimateGasWithBuffer } from 'libs/util-functions/src/lib/estimateGasWithBuffer';
 
 import { MAINNET_CHAIN_ID } from 'common-util/constants/chains';
 import { wagmiConfig } from 'common-util/config/wagmi';
@@ -31,7 +34,7 @@ export type ChainClaimQuote = {
   incentives: bigint[];
   /** Some incentive is positive, so the Dispenser sends this chain a message. */
   sendsMessage: boolean;
-  /** 0 unless an Orbit chain (Arbitrum, Robinhood) with `sendsMessage`. */
+  /** ETH attached for this chain; see `quoteChainClaims` for when it is non-zero. */
   value: bigint;
   bridgePayload: `0x${string}`;
 };
@@ -48,9 +51,6 @@ const NUM_CLAIMED_EPOCHS = BigInt(1);
 const MULTICALL3_ADDRESS = mainnet.contracts.multicall3.address;
 const DISPENSER_ADDRESS = DISPENSER.addresses[mainnet.id];
 const VOTE_WEIGHTING_ADDRESS = (VOTE_WEIGHTING.addresses as Record<number, Address>)[mainnet.id];
-const VOTE_WEIGHTING_ABI = parseAbi([
-  'function checkpointNominee(bytes32 account, uint256 chainId)',
-]);
 const DEPOSIT_PROCESSOR_ABI = parseAbi(['function getBridgingDecimals() view returns (uint256)']);
 const dispenserParams = {
   address: DISPENSER_ADDRESS,
@@ -140,7 +140,7 @@ const readIncentives = async (
         target: VOTE_WEIGHTING_ADDRESS,
         allowFailure: true,
         callData: encodeFunctionData({
-          abi: VOTE_WEIGHTING_ABI,
+          abi: VOTE_WEIGHTING.abi,
           functionName: 'checkpointNominee',
           args: [target, BigInt(chainId)],
         }),
@@ -239,7 +239,10 @@ export const quoteChainClaims = async (
   );
 };
 
-/** Quotes the batch and simulates the exact claim the wallet will be asked to sign. */
+/**
+ * Quotes the batch, simulates the exact claim the wallet will be asked to sign, and sizes its gas.
+ * The estimate runs the claim again, so a claim that moved meanwhile reverts here too.
+ */
 export const prepareClaim = async (batch: ClaimBatch, account: Address) => {
   const quotes = await quoteChainClaims(batch, account);
   const params = {
@@ -256,11 +259,9 @@ export const prepareClaim = async (batch: ClaimBatch, account: Address) => {
     account,
   };
   const { request } = await simulateContract(wagmiConfig, params);
-  return { quotes, params, request };
+  const gas = await estimateGasWithBuffer(wagmiConfig, params);
+  return { quotes, params, request: { ...request, gas } };
 };
-
-const findInChain = <T extends Error>(error: unknown, type: new (...args: never[]) => T) =>
-  error instanceof BaseError ? error.walk((cause) => cause instanceof type) : null;
 
 /** A contract revert, as opposed to an RPC, network or wallet failure. */
 export const isContractRevert = (error: unknown) =>
@@ -272,6 +273,18 @@ const getRevertReason = (error: unknown) => {
   // viem's shortMessage already carries `reason`, set for an Error(string) or a Panic.
   if (!revert?.data || revert.reason) return null;
   return formatRevert(revert.data);
+};
+
+/** A mined claim's outcome: `null` when it claimed, else why it did not. */
+export const getUnclaimedReason = (
+  receipt: Pick<TransactionReceipt, 'status'>,
+  replacedReason?: ReplacementReason,
+): ClaimError | null => {
+  if (replacedReason === 'cancelled') return { kind: 'wallet-rejected' };
+  if (replacedReason === 'replaced' || receipt.status === 'reverted') {
+    return { kind: 'reverted-after-simulation' };
+  }
+  return null;
 };
 
 export const toClaimError = (error: unknown): ClaimError => {

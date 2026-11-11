@@ -127,19 +127,18 @@ export type ArbitrumBridgeParams = {
  *   (refundAddress, gasPriceBid, maxSubmissionCostToken, gasLimitMessage, maxSubmissionCostMessage)
  *
  * `sendingTargets` are the targets with a positive incentive: the Dispenser drops the others
- * from the message, so only they size its calldata. `depositProcessor` is the chain's
+ * from the message, so only they size its calldata. `l1DepositProcessorAddress` is the chain's
  * `ArbitrumDepositProcessorL1`, as the Dispenser maps it (the caller checks it is set).
  */
 export const getArbitrumBridgePayload = async (
   sendingTargets: Address[],
   chainId: OrbitChainId,
-  depositProcessor: Address,
+  l1DepositProcessorAddress: Address,
 ): Promise<ArbitrumBridgeParams> => {
   if (chainId === ROBINHOOD_CHAIN_ID) ensureRobinhoodNetworkRegistered();
 
   const l1Provider = getProvider(mainnet.id);
   const l2Provider = getProvider(chainId);
-  const l1DepositProcessorAddress = depositProcessor;
   const l1BaseFee = await getL1BaseFee(l1Provider);
 
   // Read l2TargetDispenser from the ArbitrumDepositProcessorL1 contract

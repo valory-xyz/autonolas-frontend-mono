@@ -19,6 +19,7 @@ import { DISPENSER, VOTE_WEIGHTING } from 'libs/util-contracts/src/lib/abiAndAdd
 import {
   type ClaimBatch,
   QuoteCallRevertedError,
+  getUnclaimedReason,
   isContractRevert,
   prepareClaim,
   quoteChainClaims,
@@ -32,6 +33,10 @@ jest.mock('@wagmi/core', () => ({
   simulateContract: (...args: unknown[]) => mockSimulateContract(...args),
 }));
 jest.mock('common-util/config/wagmi', () => ({ wagmiConfig: {} }));
+const mockEstimateGas = jest.fn();
+jest.mock('libs/util-functions/src/lib/estimateGasWithBuffer', () => ({
+  estimateGasWithBuffer: (...args: unknown[]) => mockEstimateGas(...args),
+}));
 
 const mockGetArbitrumBridgePayload = jest.fn();
 jest.mock('./arbitrum-bridge', () => ({
@@ -390,6 +395,36 @@ describe('prepareClaim', () => {
     ]);
     expect(claim.value).toBe(MESSAGE_COST + TOKEN_COST);
     expect(claim.account).toBe(ACCOUNT);
+  });
+
+  it('sizes the gas of the exact simulated claim and returns it on the request', async () => {
+    mockChainState([{}], [[OLAS]]);
+    mockEstimateGas.mockResolvedValue(BigInt(123));
+
+    const { params, request } = await prepareClaim([[GNOSIS], [[target(1)]]], ACCOUNT);
+
+    expect(mockEstimateGas).toHaveBeenCalledWith({}, params);
+    expect(request).toEqual({ functionName: 'claimStakingIncentivesBatch', gas: BigInt(123) });
+  });
+
+  it('rejects when the gas estimate reverts, so the claim gets the rebuild handling', async () => {
+    mockChainState([{}], [[OLAS]]);
+    const revert = new Error('estimate reverted');
+    mockEstimateGas.mockRejectedValue(revert);
+
+    await expect(prepareClaim([[GNOSIS], [[target(1)]]], ACCOUNT)).rejects.toBe(revert);
+  });
+});
+
+describe('getUnclaimedReason', () => {
+  it.each([
+    [{ status: 'success' as const }, undefined, null],
+    [{ status: 'success' as const }, 'repriced' as const, null],
+    [{ status: 'reverted' as const }, undefined, { kind: 'reverted-after-simulation' }],
+    [{ status: 'success' as const }, 'replaced' as const, { kind: 'reverted-after-simulation' }],
+    [{ status: 'success' as const }, 'cancelled' as const, { kind: 'wallet-rejected' }],
+  ])('maps a %o receipt replaced as %s to %o', (receipt, reason, expected) => {
+    expect(getUnclaimedReason(receipt, reason)).toEqual(expected);
   });
 });
 

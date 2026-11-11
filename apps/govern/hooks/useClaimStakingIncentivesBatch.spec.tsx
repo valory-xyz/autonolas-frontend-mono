@@ -36,13 +36,12 @@ jest.mock('@wagmi/core', () => ({
   }),
 }));
 jest.mock('common-util/config/wagmi', () => ({ wagmiConfig: {} }));
-jest.mock('libs/util-functions/src/lib/estimateGasWithBuffer', () => ({
-  estimateGasWithBuffer: () => Promise.resolve(BigInt(100)),
-}));
 
 class RevertError extends Error {}
 const mockPrepareClaim = jest.fn();
 jest.mock('common-util/functions/staking-incentives-claim', () => ({
+  getUnclaimedReason: jest.requireActual('common-util/functions/staking-incentives-claim')
+    .getUnclaimedReason,
   prepareClaim: (...args: unknown[]) => mockPrepareClaim(...args),
   isContractRevert: (error: unknown) => error instanceof RevertError,
   toClaimError: (error: Error) =>
@@ -57,7 +56,7 @@ const REBUILT = batch('0x0000000000000000000000000000000000000002');
 const prepared = (forBatch: ClaimBatch) => ({
   quotes: forBatch[0].map((chainId, i) => ({ chainId, targets: forBatch[1][i] })),
   params: { args: forBatch },
-  request: { args: forBatch },
+  request: { args: forBatch, gas: BigInt(100) },
 });
 
 // One store per test, shared by every mount in it, as the app shares one across modal reopens.
@@ -201,6 +200,39 @@ describe('useClaimStakingIncentivesBatch', () => {
     expect(props.onBatchesRebuilt).not.toHaveBeenCalled();
     expect(props.onError).toHaveBeenCalledWith({ kind: 'other', message: 'Paused()' });
     expect(mockWriteContract).not.toHaveBeenCalled();
+  });
+
+  it('restarts the modal when only its own claims changed the list, without a retry', async () => {
+    mockPrepareClaim.mockRejectedValue(new RevertError('Paused()'));
+    const { props, claim } = setup();
+    // An earlier own claim moved a cursor: no concurrent claim, but the shown list re-indexes.
+    props.refetchClaimableBatches.mockResolvedValue({
+      batches: [REBUILT],
+      cursorsChanged: false,
+      listChanged: true,
+    });
+
+    await claim();
+
+    expect(props.onBatchesRebuilt).toHaveBeenCalledTimes(1);
+    expect(mockPrepareClaim).toHaveBeenCalledTimes(1);
+    expect(props.onError).toHaveBeenCalledWith({ kind: 'other', message: 'Paused()' });
+  });
+
+  it('restarts the modal after an on-chain failure that re-indexed the list', async () => {
+    mockPrepareClaim.mockResolvedValue(prepared(FIRST));
+    mockWaitForTransactionReceipt.mockResolvedValue({ status: 'reverted', transactionHash: HASH });
+    const { props, claim } = setup();
+    props.refetchClaimableBatches.mockResolvedValue({
+      batches: [REBUILT],
+      cursorsChanged: false,
+      listChanged: true,
+    });
+
+    await claim();
+
+    expect(props.onError).toHaveBeenCalledWith({ kind: 'reverted-after-simulation' });
+    expect(props.onBatchesRebuilt).toHaveBeenCalledTimes(1);
   });
 
   it('reports the second revert as is when the cursors did not move again', async () => {
@@ -437,18 +469,36 @@ describe('useClaimStakingIncentivesBatch', () => {
       });
     });
 
-    it.each([
-      ['the prepare fails', () => mockPrepareClaim.mockRejectedValueOnce(new Error('rpc down'))],
+    it.each<[string, () => void, ClaimBatch[]]>([
+      [
+        'the prepare fails',
+        () => mockPrepareClaim.mockRejectedValueOnce(new Error('rpc down')),
+        [REBUILT],
+      ],
       [
         'the wallet rejects',
         () => {
           mockPrepareClaim.mockResolvedValue(prepared(FIRST));
           mockWriteContract.mockRejectedValueOnce(new Error('rejected'));
         },
+        [REBUILT],
       ],
-    ])('is cleared when %s, so the next claim can send', async (_, fail) => {
+      [
+        'claims changed twice',
+        () =>
+          mockPrepareClaim
+            .mockRejectedValueOnce(new RevertError('cursor moved'))
+            .mockRejectedValueOnce(new RevertError('cursor moved again')),
+        [REBUILT],
+      ],
+      [
+        'nothing is left to claim',
+        () => mockPrepareClaim.mockRejectedValueOnce(new RevertError('cursor moved')),
+        [],
+      ],
+    ])('is cleared when %s, so the next claim can send', async (_, fail, rebuiltBatches) => {
       fail();
-      const { claim, result } = setup();
+      const { claim, result } = setup(rebuiltBatches);
       await claim();
       expect(result.current.isPending).toBe(false);
 
@@ -566,6 +616,25 @@ describe('useClaimStakingIncentivesBatch', () => {
           `Could not check claim transaction ${HASH}`,
           expect.any(Error),
         );
+      });
+
+      it('tells the user once that the lookup is failing, and keeps polling', async () => {
+        const { props, result } = await timedOutClaim();
+        props.onError.mockClear();
+        mockGetTransactionReceipt.mockRejectedValue(new Error('rpc down'));
+
+        await poll();
+        await poll();
+
+        expect(props.onError).toHaveBeenCalledTimes(1);
+        expect(props.onError).toHaveBeenCalledWith({
+          kind: 'other',
+          message: `Could not check transaction ${HASH}. Check your wallet or a block explorer.`,
+        });
+        mockGetTransactionReceipt.mockResolvedValue({ status: 'success', transactionHash: HASH });
+        await poll();
+        expect(props.onLateReceipt).toHaveBeenCalledWith({ hash: HASH, claimed: true });
+        expect(result.current.pendingHash).toBeUndefined();
       });
 
       it('can be dismissed, for a hash the wallet replaced', async () => {
