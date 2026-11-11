@@ -1,13 +1,11 @@
 import { useEffect, useMemo, useCallback, useRef } from 'react';
+import { useStore } from 'react-redux';
 import { useQueryClient } from '@tanstack/react-query';
-import { isEqual } from 'lodash';
 import type { Address, MulticallResponse } from 'viem';
 import { mainnet } from 'viem/chains';
 import { useReadContract, useReadContracts } from 'wagmi';
 
-import { useStore } from 'react-redux';
-
-import { setOwnClaimedThrough } from 'store/govern';
+import { pruneOwnClaims } from 'store/govern';
 import { type RootState, useAppDispatch, useAppSelector } from 'store/index';
 import { useNomineesWeights } from 'hooks/useNomineesWeights';
 import { TOKENOMICS } from 'libs/util-contracts/src';
@@ -17,14 +15,13 @@ import { DISPENSER } from 'libs/util-contracts/src/lib/abiAndAddresses';
 import { DISPENSER_ADDRESS } from 'common-util/constants/addresses';
 import { getNomineeHash } from 'common-util/functions/nominee-hash';
 import {
-  advanceOwnClaims,
   buildClaimBatches,
   type ByAddress,
   type ClaimableBatchesRefresh,
   type Cursors,
   getCursorChange,
+  getClaimedThrough as claimedThroughFrom,
   getExpectedCursors,
-  pruneReachedOwnClaims,
   READ_TARGET,
   readFailure,
 } from 'common-util/functions/claim-batches';
@@ -184,18 +181,9 @@ export const useClaimableNomineesBatches = () => {
   const store = useStore<RootState>();
   const dispatch = useAppDispatch();
   // In the store, so a claim confirmed after its modal closed still counts in the next one.
-  const ownClaimedThrough = useAppSelector((state) => state.govern.ownClaimedThrough);
   const readOwnClaims = useCallback(
     (): Cursors => store.getState().govern.ownClaimedThrough,
     [store],
-  );
-  const writeOwnClaims = useCallback(
-    (next: Cursors) => {
-      if (!isEqual(next, store.getState().govern.ownClaimedThrough)) {
-        dispatch(setOwnClaimedThrough(next));
-      }
-    },
-    [dispatch, store],
   );
 
   const { batches: nomineesToClaimBatches, buildError } = useMemo((): {
@@ -213,7 +201,9 @@ export const useClaimableNomineesBatches = () => {
     try {
       const batches = buildClaimBatches({
         nominees,
-        lastClaimedEpochs: getExpectedCursors(lastClaimedStakingEpochByNominee, ownClaimedThrough),
+        // Read when the cursors change, not on every recorded claim: the modal steps through this
+        // list by index, so it must not shrink under a claim the modal is still marking as done.
+        lastClaimedEpochs: getExpectedCursors(lastClaimedStakingEpochByNominee, readOwnClaims()),
         currentEpoch,
         minStakingWeight,
         relativeWeights,
@@ -230,7 +220,7 @@ export const useClaimableNomineesBatches = () => {
     minStakingWeight,
     relativeWeights,
     weightReadErrors,
-    ownClaimedThrough,
+    readOwnClaims,
   ]);
 
   const readError =
@@ -262,13 +252,17 @@ export const useClaimableNomineesBatches = () => {
   // The cursors the batches were last built from, so a refresh can tell whether any moved.
   const builtFromCursors = useRef(lastClaimedStakingEpochByNominee);
   builtFromCursors.current = lastClaimedStakingEpochByNominee;
-  /** Records a confirmed claim, so the cursors it advanced do not later read as a concurrent claim. */
-  const recordClaimedBatch = useCallback(
-    (batch: ClaimBatch) => {
+  /**
+   * The cursors a confirmed claim of `batch` will move its targets to, computed from the cursors
+   * the batch was built from. Taken when the claim is sent, so a later confirmation records it
+   * whatever this or another modal has loaded by then.
+   */
+  const getClaimedThrough = useCallback(
+    (batch: ClaimBatch): Cursors => {
       const expected = getExpectedCursors(builtFromCursors.current, readOwnClaims());
-      if (expected) writeOwnClaims(advanceOwnClaims(readOwnClaims(), expected, batch));
+      return expected ? claimedThroughFrom(expected, batch) : {};
     },
-    [readOwnClaims, writeOwnClaims],
+    [readOwnClaims],
   );
 
   /**
@@ -281,14 +275,15 @@ export const useClaimableNomineesBatches = () => {
       throw new Error('The claimable staking contracts are still loading. Try again shortly.');
     }
     const lastClaimedEpochs = await refetchLastClaimedEpochs();
+    const own = readOwnClaims();
     const change = getCursorChange(
       builtFromCursors.current,
-      getExpectedCursors(builtFromCursors.current, readOwnClaims()),
+      getExpectedCursors(builtFromCursors.current, own),
       lastClaimedEpochs,
     );
-    const ownClaimAware = getExpectedCursors(lastClaimedEpochs, readOwnClaims());
+    const ownClaimAware = getExpectedCursors(lastClaimedEpochs, own);
     builtFromCursors.current = lastClaimedEpochs;
-    writeOwnClaims(pruneReachedOwnClaims(readOwnClaims(), lastClaimedEpochs));
+    dispatch(pruneOwnClaims(lastClaimedEpochs));
     return {
       batches: buildClaimBatches({
         nominees,
@@ -308,13 +303,13 @@ export const useClaimableNomineesBatches = () => {
     refetchLastClaimedEpochs,
     weightReadErrors,
     readOwnClaims,
-    writeOwnClaims,
+    dispatch,
   ]);
 
   return {
     nomineesToClaimBatches,
     claimableBatchesError,
-    recordClaimedBatch,
+    getClaimedThrough,
     isLoadingClaimableBatches: isLoading,
     clearClaimableBatches,
     refetchClaimableBatches,

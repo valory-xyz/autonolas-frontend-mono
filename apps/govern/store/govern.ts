@@ -4,13 +4,13 @@ import type { Address, Hex } from 'viem';
 import { StakingContract, UserVotes } from 'types';
 
 import { Proposal } from 'common-util/graphql/types';
-import type { ClaimBatch } from 'common-util/functions/staking-incentives-claim';
+import type { Cursors } from 'common-util/functions/claim-batches';
 
 export type PendingClaimStatus =
   | { status: 'preparing' }
   | { status: 'sending' }
-  | { status: 'waiting'; hash: Hex; batch: ClaimBatch }
-  | { status: 'unconfirmed'; hash: Hex; batch: ClaimBatch };
+  | { status: 'waiting'; hash: Hex; claimedThrough: Cursors }
+  | { status: 'unconfirmed'; hash: Hex; claimedThrough: Cursors };
 
 /**
  * A claim in flight, so a reopened modal cannot send another while one may still mine. `run`
@@ -28,7 +28,7 @@ interface GovernState {
   lastUserVote: number | null;
   pendingClaims: Partial<Record<Address, PendingClaim[]>>;
   /** Claim cursors this user's confirmed claims advanced to, kept across modal mounts. */
-  ownClaimedThrough: Partial<Record<Address, number>>;
+  ownClaimedThrough: Cursors;
 }
 
 const initialState: GovernState = {
@@ -89,8 +89,23 @@ export const governSlice = createSlice({
       if (entries.length > 0) state.pendingClaims[account] = entries;
       else delete state.pendingClaims[account];
     },
-    setOwnClaimedThrough: (state, action: PayloadAction<GovernState['ownClaimedThrough']>) => {
-      state.ownClaimedThrough = action.payload;
+    /** Merges a confirmed claim's cursors; recording one twice changes nothing. */
+    recordOwnClaims: (state, action: PayloadAction<Cursors>) => {
+      Object.entries(action.payload).forEach(([address, through]) => {
+        const current = state.ownClaimedThrough[address as Address];
+        if (through !== undefined && (current === undefined || through > current)) {
+          state.ownClaimedThrough[address as Address] = through;
+        }
+      });
+    },
+    /** Keeps only the own claims a read lags behind; one it reached, or did not read, is dropped. */
+    pruneOwnClaims: (state, action: PayloadAction<Record<Address, number>>) => {
+      Object.entries(state.ownClaimedThrough).forEach(([address, through]) => {
+        const fresh = action.payload[address as Address];
+        if (through === undefined || fresh === undefined || fresh >= through) {
+          delete state.ownClaimedThrough[address as Address];
+        }
+      });
     },
   },
 });
@@ -103,6 +118,7 @@ export const {
   clearUserState,
   setProposalVotes,
   setPendingClaim,
-  setOwnClaimedThrough,
+  recordOwnClaims,
+  pruneOwnClaims,
 } = governSlice.actions;
 export const governReducer = governSlice.reducer;

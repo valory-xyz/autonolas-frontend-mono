@@ -5,7 +5,8 @@ import { act, renderHook } from '@testing-library/react';
 import { type Address, BaseError } from 'viem';
 import { useReadContract, useReadContracts } from 'wagmi';
 
-import { governReducer, setStakingContracts } from 'store/govern';
+import { governReducer, recordOwnClaims, setStakingContracts } from 'store/govern';
+import type { ClaimBatch } from 'common-util/functions/staking-incentives-claim';
 import { useNomineesWeights } from 'hooks/useNomineesWeights';
 import { useEpochCounter, useEpochTokenomics } from 'components/Donate/hooks';
 import type { StakingContract } from 'types';
@@ -42,6 +43,9 @@ describe('useClaimableNomineesBatches refetchClaimableBatches', () => {
     <Provider store={store}>{children}</Provider>
   );
   const renderBatchesHook = () => renderHook(() => useClaimableNomineesBatches(), { wrapper });
+  /** A confirmed claim of `batch`, recorded as the claim hook does. */
+  const recordClaim = (hook: ReturnType<typeof useClaimableNomineesBatches>, batch: ClaimBatch) =>
+    store.dispatch(recordOwnClaims(hook.getClaimedThrough(batch)));
   const mockCursorQuery = (data: unknown, error: Error | null = null) =>
     jest.mocked(useReadContracts).mockReturnValue({
       data,
@@ -80,7 +84,7 @@ describe('useClaimableNomineesBatches refetchClaimableBatches', () => {
     // The cursors arrive on a later render, as they do in the app.
     mockCursorQuery(cursorReads(9, 9));
     view.rerender();
-    act(() => view.result.current.recordClaimedBatch([[100], [[A]]]));
+    act(() => recordClaim(view.result.current, [[100], [[A]]]));
 
     // A refetch also refills the cache, as the query does in the app.
     mockRefetch.mockImplementation(async () => {
@@ -178,7 +182,7 @@ describe('useClaimableNomineesBatches refetchClaimableBatches', () => {
 
   it('does not count the cursors of a recorded own claim as moved', async () => {
     const result = renderBatches();
-    act(() => result.current.recordClaimedBatch([[100], [[A]]]));
+    act(() => recordClaim(result.current, [[100], [[A]]]));
     mockRefetch.mockResolvedValue({ data: cursorReads(10, 9) });
 
     const refresh = await result.current.refetchClaimableBatches();
@@ -190,8 +194,8 @@ describe('useClaimableNomineesBatches refetchClaimableBatches', () => {
 
   it('adds up own claims of one nominee across a multi-epoch backlog', async () => {
     const result = renderBatches({ reads: cursorReads(9, 8) });
-    act(() => result.current.recordClaimedBatch([[100], [[A, B]]]));
-    act(() => result.current.recordClaimedBatch([[100], [[B]]]));
+    act(() => recordClaim(result.current, [[100], [[A, B]]]));
+    act(() => recordClaim(result.current, [[100], [[B]]]));
     mockRefetch.mockResolvedValueOnce({ data: cursorReads(10, 10) });
     mockRefetch.mockResolvedValueOnce({ data: cursorReads(10, 11) });
 
@@ -227,7 +231,7 @@ describe('useClaimableNomineesBatches refetchClaimableBatches', () => {
 
   it('treats a cursor below what own claims explain as a lagging read, not a claim', async () => {
     const result = renderBatches();
-    act(() => result.current.recordClaimedBatch([[100], [[A]]]));
+    act(() => recordClaim(result.current, [[100], [[A]]]));
     // The RPC has not caught up with the own claim yet: A still reads 9.
     mockRefetch.mockResolvedValue({ data: cursorReads(9, 9) });
 
@@ -242,8 +246,8 @@ describe('useClaimableNomineesBatches refetchClaimableBatches', () => {
 
   it('does not offer an epoch an own claim took when the refresh read lags it', async () => {
     const result = renderBatches({ reads: cursorReads(8, 9) });
-    act(() => result.current.recordClaimedBatch([[100], [[A, B]]]));
-    act(() => result.current.recordClaimedBatch([[100], [[A]]]));
+    act(() => recordClaim(result.current, [[100], [[A, B]]]));
+    act(() => recordClaim(result.current, [[100], [[A]]]));
     // The RPC is a block behind the second claim: A still reads 9, though it was claimed to 10.
     mockRefetch.mockResolvedValue({ data: cursorReads(9, 10) });
 
@@ -253,11 +257,25 @@ describe('useClaimableNomineesBatches refetchClaimableBatches', () => {
     expect(refresh.batches).toEqual([]);
   });
 
+  it('keeps the shown list as it is when a claim is recorded, until the cursors change', () => {
+    const result = renderBatches({ reads: cursorReads(9, 8) });
+    const before = result.current.nomineesToClaimBatches;
+    expect(before).toEqual([
+      [[100], [[A, B]]],
+      [[100], [[B]]],
+    ]);
+
+    // The modal marks the batch claimed by its index; the list must not shrink under it.
+    act(() => recordClaim(result.current, [[100], [[A, B]]]));
+
+    expect(result.current.nomineesToClaimBatches).toEqual(before);
+  });
+
   it('does not show an epoch an own claim took when the cached read lags it', () => {
     mockBatchReads({ reads: cursorReads(8, 9) });
     const view = renderBatchesHook();
-    act(() => view.result.current.recordClaimedBatch([[100], [[A, B]]]));
-    act(() => view.result.current.recordClaimedBatch([[100], [[A]]]));
+    act(() => recordClaim(view.result.current, [[100], [[A, B]]]));
+    act(() => recordClaim(view.result.current, [[100], [[A]]]));
     // The cache refills from an RPC a block behind the second claim.
     mockCursorQuery(cursorReads(9, 10));
 
@@ -269,7 +287,7 @@ describe('useClaimableNomineesBatches refetchClaimableBatches', () => {
   it('keeps a claim recorded in a closed modal out of the next one, on a lagging read', async () => {
     mockBatchReads({ reads: cursorReads(9, 9) });
     const closed = renderBatchesHook();
-    act(() => closed.result.current.recordClaimedBatch([[100], [[A]]]));
+    act(() => recordClaim(closed.result.current, [[100], [[A]]]));
     closed.unmount();
 
     const reopened = renderBatchesHook();

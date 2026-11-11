@@ -1,18 +1,22 @@
 import type { Address } from 'viem';
 
-import type { ClaimBatch } from 'common-util/functions/staking-incentives-claim';
+import type { Cursors } from 'common-util/functions/claim-batches';
 
 import {
   clearState,
   governReducer,
-  setOwnClaimedThrough,
+  pruneOwnClaims,
+  recordOwnClaims,
   setPendingClaim,
   setStakingContracts,
 } from './govern';
 
 const ACCOUNT: Address = '0x00000000000000000000000000000000000000aa';
 const OTHER: Address = '0x00000000000000000000000000000000000000bb';
-const BATCH: ClaimBatch = [[100], [['0x01']]];
+const STAKING_CONTRACT: Address = '0x00000000000000000000000000000000000000cc';
+const OTHER_CONTRACT: Address = '0x00000000000000000000000000000000000000dd';
+const UNREAD_CONTRACT: Address = '0x00000000000000000000000000000000000000ee';
+const THROUGH: Cursors = { [STAKING_CONTRACT]: 10 };
 
 const write = (
   state: ReturnType<typeof governReducer> | undefined,
@@ -25,15 +29,18 @@ describe('govern slice', () => {
   it('keeps the pending and own claims through clearState, and resets everything else', () => {
     const initial = governReducer(undefined, { type: 'init' });
     let state = governReducer(initial, setStakingContracts([]));
-    state = write(state, ACCOUNT, 1, { status: 'waiting', hash: '0xhash', batch: BATCH });
+    state = write(state, ACCOUNT, 1, {
+      status: 'waiting',
+      hash: '0xhash',
+      claimedThrough: THROUGH,
+    });
 
-    state = governReducer(state, setOwnClaimedThrough({ [ACCOUNT]: 10 }));
+    state = governReducer(state, recordOwnClaims(THROUGH));
     const cleared = governReducer(state, clearState());
 
-    expect(cleared.ownClaimedThrough).toEqual({ [ACCOUNT]: 10 });
-
+    expect(cleared.ownClaimedThrough).toEqual(THROUGH);
     expect(cleared.pendingClaims[ACCOUNT]).toEqual([
-      { status: 'waiting', hash: '0xhash', batch: BATCH, run: 1 },
+      { status: 'waiting', hash: '0xhash', claimedThrough: THROUGH, run: 1 },
     ]);
     expect({ ...cleared, pendingClaims: {}, ownClaimedThrough: {} }).toEqual(initial);
   });
@@ -49,18 +56,18 @@ describe('govern slice', () => {
     let state = write(undefined, OTHER, 2, {
       status: 'waiting',
       hash: '0xother',
-      batch: BATCH,
+      claimedThrough: THROUGH,
     });
     state = write(state, ACCOUNT, 1, { status: 'preparing' });
     expect(state.pendingClaims).toEqual({
-      [OTHER]: [{ status: 'waiting', hash: '0xother', batch: BATCH, run: 2 }],
+      [OTHER]: [{ status: 'waiting', hash: '0xother', claimedThrough: THROUGH, run: 2 }],
       [ACCOUNT]: [{ status: 'preparing', run: 1 }],
     });
 
     state = write(state, ACCOUNT, 1, null);
 
     expect(state.pendingClaims).toEqual({
-      [OTHER]: [{ status: 'waiting', hash: '0xother', batch: BATCH, run: 2 }],
+      [OTHER]: [{ status: 'waiting', hash: '0xother', claimedThrough: THROUGH, run: 2 }],
     });
   });
 
@@ -68,20 +75,24 @@ describe('govern slice', () => {
     let state = write(undefined, ACCOUNT, 2, {
       status: 'waiting',
       hash: '0xnew',
-      batch: BATCH,
+      claimedThrough: THROUGH,
     });
 
     // A dismissed claim signed anyway is guarded next to the newer one.
-    state = write(state, ACCOUNT, 1, { status: 'waiting', hash: '0xold', batch: BATCH });
+    state = write(state, ACCOUNT, 1, { status: 'waiting', hash: '0xold', claimedThrough: THROUGH });
     expect(state.pendingClaims[ACCOUNT]).toEqual([
-      { status: 'waiting', hash: '0xnew', batch: BATCH, run: 2 },
-      { status: 'waiting', hash: '0xold', batch: BATCH, run: 1 },
+      { status: 'waiting', hash: '0xnew', claimedThrough: THROUGH, run: 2 },
+      { status: 'waiting', hash: '0xold', claimedThrough: THROUGH, run: 1 },
     ]);
 
-    state = write(state, ACCOUNT, 1, { status: 'unconfirmed', hash: '0xold', batch: BATCH });
+    state = write(state, ACCOUNT, 1, {
+      status: 'unconfirmed',
+      hash: '0xold',
+      claimedThrough: THROUGH,
+    });
     state = write(state, ACCOUNT, 2, null);
     expect(state.pendingClaims[ACCOUNT]).toEqual([
-      { status: 'unconfirmed', hash: '0xold', batch: BATCH, run: 1 },
+      { status: 'unconfirmed', hash: '0xold', claimedThrough: THROUGH, run: 1 },
     ]);
   });
 
@@ -90,5 +101,23 @@ describe('govern slice', () => {
     state = write(state, ACCOUNT, 1, null);
 
     expect(state.pendingClaims[ACCOUNT]).toEqual([{ status: 'preparing', run: 2 }]);
+  });
+
+  it('records own claims by the furthest cursor, so recording one twice changes nothing', () => {
+    let state = governReducer(undefined, recordOwnClaims({ [STAKING_CONTRACT]: 10 }));
+    state = governReducer(state, recordOwnClaims({ [STAKING_CONTRACT]: 9, [OTHER_CONTRACT]: 4 }));
+    state = governReducer(state, recordOwnClaims({ [STAKING_CONTRACT]: 10 }));
+
+    expect(state.ownClaimedThrough).toEqual({ [STAKING_CONTRACT]: 10, [OTHER_CONTRACT]: 4 });
+  });
+
+  it('drops the own claims a read reached or did not read, and keeps those it lags', () => {
+    let state = governReducer(
+      undefined,
+      recordOwnClaims({ [STAKING_CONTRACT]: 10, [OTHER_CONTRACT]: 4, [UNREAD_CONTRACT]: 7 }),
+    );
+    state = governReducer(state, pruneOwnClaims({ [STAKING_CONTRACT]: 9, [OTHER_CONTRACT]: 4 }));
+
+    expect(state.ownClaimedThrough).toEqual({ [STAKING_CONTRACT]: 10 });
   });
 });

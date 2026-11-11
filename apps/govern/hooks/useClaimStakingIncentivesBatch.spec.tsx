@@ -64,6 +64,9 @@ const prepared = (forBatch: ClaimBatch) => ({
   request: { args: forBatch, gas: BigInt(100) },
 });
 
+/** What the batches hook would return: each batch's first target claimed through epoch 10. */
+const claimedThroughOf = (forBatch: ClaimBatch) => ({ [forBatch[1][0][0]]: 10 });
+
 // One store per test, shared by every mount in it, as the app shares one across modal reopens.
 let store = configureStore({ reducer: { govern: governReducer } });
 const wrapper = ({ children }: { children: ReactNode }) => (
@@ -78,7 +81,7 @@ const setup = (rebuiltBatches: ClaimBatch[] = [REBUILT], change: CursorChange = 
     onReceiptLookupFailed: jest.fn(),
     refetchClaimableBatches: jest.fn().mockResolvedValue({ batches: rebuiltBatches, change }),
     onBatchesRebuilt: jest.fn(),
-    recordClaimedBatch: jest.fn(),
+    getClaimedThrough: jest.fn(claimedThroughOf),
   };
   const { result, unmount, rerender } = renderHook(() => useClaimStakingIncentivesBatch(props), {
     wrapper,
@@ -86,6 +89,8 @@ const setup = (rebuiltBatches: ClaimBatch[] = [REBUILT], change: CursorChange = 
   const claim = () => act(() => result.current.claimIncentivesForBatch(FIRST));
   return { props, claim, result, unmount, rerender };
 };
+
+const ownClaims = () => store.getState().govern.ownClaimedThrough;
 
 const pendingStatuses = () =>
   (store.getState().govern.pendingClaims[ACCOUNT] ?? []).map((entry) =>
@@ -167,7 +172,8 @@ describe('useClaimStakingIncentivesBatch', () => {
     expect(mockWriteContract).toHaveBeenCalledWith({}, { args: REBUILT, gas: BigInt(100) });
     expect(props.onSuccess).toHaveBeenCalledTimes(1);
     // The batch that was sent, not the one the claim started from.
-    expect(props.recordClaimedBatch).toHaveBeenCalledWith(REBUILT);
+    expect(props.getClaimedThrough).toHaveBeenCalledWith(REBUILT);
+    expect(ownClaims()).toEqual(claimedThroughOf(REBUILT));
   });
 
   it('reports a retry that fails with an error that is not a revert as is, without a second refresh', async () => {
@@ -339,7 +345,7 @@ describe('useClaimStakingIncentivesBatch', () => {
 
   it('waits for the receipt for a bounded time and records the claimed batch', async () => {
     mockPrepareClaim.mockResolvedValue(prepared(FIRST));
-    const { props, claim } = setup();
+    const { claim } = setup();
 
     await claim();
 
@@ -350,7 +356,7 @@ describe('useClaimStakingIncentivesBatch', () => {
         onReplaced: expect.any(Function),
       }),
     );
-    expect(props.recordClaimedBatch).toHaveBeenCalledWith(FIRST);
+    expect(ownClaims()).toEqual(claimedThroughOf(FIRST));
   });
 
   it('stays pending while the receipt is awaited, and clears once it settles', async () => {
@@ -362,7 +368,6 @@ describe('useClaimStakingIncentivesBatch', () => {
     await act(async () => {
       claiming = result.current.claimIncentivesForBatch(FIRST);
     });
-    expect(result.current.claimButtonState).not.toBe('idle');
     expect(result.current.claimButtonState).toBe('pending');
     expect(result.current.pendingHash).toBe(HASH);
 
@@ -391,7 +396,6 @@ describe('useClaimStakingIncentivesBatch', () => {
     first.unmount();
 
     const reopened = setup();
-    expect(reopened.result.current.claimButtonState).not.toBe('idle');
     expect(reopened.result.current.claimButtonState).toBe('pending');
     await reopened.claim();
     expect(mockWriteContract).toHaveBeenCalledTimes(1);
@@ -529,7 +533,7 @@ describe('useClaimStakingIncentivesBatch', () => {
       props.refetchClaimableBatches.mock.invocationCallOrder[0],
     );
     expect(props.onSuccess).not.toHaveBeenCalled();
-    expect(props.recordClaimedBatch).not.toHaveBeenCalled();
+    expect(ownClaims()).toEqual({});
   });
 
   describe('the pending claim', () => {
@@ -799,16 +803,21 @@ describe('useClaimStakingIncentivesBatch', () => {
 
     it('records a claim before clearing its entry, so another mount reads it as its own', async () => {
       mockPrepareClaim.mockResolvedValue(prepared(FIRST));
-      const { claim, props } = setup();
-      let entriesWhenRecorded: string[] = [];
-      props.recordClaimedBatch.mockImplementation(() => {
-        entriesWhenRecorded = pendingStatuses();
-      });
+      const { claim } = setup();
+      // Every state the store passes through: the own claim must be there before the entry goes.
+      const seen: { own: object; entries: string[] }[] = [];
+      const unsubscribe = store.subscribe(() =>
+        seen.push({ own: ownClaims(), entries: pendingStatuses() }),
+      );
 
       await claim();
+      unsubscribe();
 
-      expect(props.recordClaimedBatch).toHaveBeenCalledWith(FIRST);
-      expect(entriesWhenRecorded).toEqual([`waiting ${HASH}`]);
+      const cleared = seen.findIndex(({ entries }) => entries.length === 0);
+      expect(seen[cleared - 1]).toEqual({
+        own: claimedThroughOf(FIRST),
+        entries: [`waiting ${HASH}`],
+      });
     });
 
     it('names the sent hash of a claim behind one still being prepared', async () => {
@@ -1012,20 +1021,51 @@ describe('useClaimStakingIncentivesBatch', () => {
         expect(props.onLateReceipt).toHaveBeenCalledWith({ hash: HASH, claimed });
         expect(props.refetchClaimableBatches).toHaveBeenCalledTimes(1);
         // A late confirmation still counts as an own claim; a revert does not.
-        expect(props.recordClaimedBatch.mock.calls).toEqual(claimed ? [[FIRST]] : []);
+        expect(ownClaims()).toEqual(claimed ? claimedThroughOf(FIRST) : {});
         expect(result.current.pendingHash).toBeUndefined();
         expect(result.current.claimButtonState).toBe('idle');
       });
 
       it('records a late confirmation before refreshing the list', async () => {
         const { props } = await timedOutClaim();
+        let ownAtRefresh: object | undefined;
+        props.refetchClaimableBatches.mockImplementation(async () => {
+          ownAtRefresh = ownClaims();
+          return { batches: [], change: 'none' };
+        });
         mockGetTransactionReceipt.mockResolvedValue({ status: 'success', transactionHash: HASH });
 
         await poll();
 
-        expect(props.recordClaimedBatch.mock.invocationCallOrder[0]).toBeLessThan(
-          props.refetchClaimableBatches.mock.invocationCallOrder[0],
-        );
+        expect(ownAtRefresh).toEqual(claimedThroughOf(FIRST));
+      });
+
+      it('records what the claim moved when sent, whatever a reopened modal has loaded', async () => {
+        const { unmount } = await timedOutClaim();
+        unmount();
+        // The reopened modal's cursors are still loading, so it knows of no claimed cursors.
+        const reopened = setup();
+        reopened.props.getClaimedThrough.mockReturnValue({});
+        mockGetTransactionReceipt.mockResolvedValue({ status: 'success', transactionHash: HASH });
+
+        await poll();
+
+        expect(reopened.props.getClaimedThrough).not.toHaveBeenCalled();
+        expect(ownClaims()).toEqual(claimedThroughOf(FIRST));
+      });
+
+      it('keeps the rebuilt batch for a late confirmation, not the one the claim started from', async () => {
+        mockPrepareClaim
+          .mockRejectedValueOnce(new RevertError('cursor moved'))
+          .mockResolvedValueOnce(prepared(REBUILT));
+        timeOut();
+        const { claim } = setup();
+        await claim();
+        mockGetTransactionReceipt.mockResolvedValue({ status: 'success', transactionHash: HASH });
+
+        await poll();
+
+        expect(ownClaims()).toEqual(claimedThroughOf(REBUILT));
       });
 
       it('looks the receipt up on mainnet', async () => {

@@ -11,7 +11,12 @@ import {
 } from 'viem';
 import { useAccount } from 'wagmi';
 
-import { type PendingClaim, type PendingClaimStatus, setPendingClaim } from 'store/govern';
+import {
+  type PendingClaim,
+  type PendingClaimStatus,
+  recordOwnClaims,
+  setPendingClaim,
+} from 'store/govern';
 import { type RootState, useAppDispatch, useAppSelector } from 'store/index';
 import { MAINNET_CHAIN_ID } from 'common-util/constants/chains';
 import { wagmiConfig } from 'common-util/config/wagmi';
@@ -23,7 +28,7 @@ import {
   prepareClaim,
   toClaimError,
 } from 'common-util/functions/staking-incentives-claim';
-import type { ClaimableBatchesRefresh } from 'common-util/functions/claim-batches';
+import type { ClaimableBatchesRefresh, Cursors } from 'common-util/functions/claim-batches';
 
 /** Long enough for a congested mainnet; past it the tx is reported as still pending, not resent. */
 export const RECEIPT_TIMEOUT_MS = 20 * 60 * 1000;
@@ -61,11 +66,12 @@ type ClaimStakingIncentivesBatchProps = {
   refetchClaimableBatches: () => Promise<ClaimableBatchesRefresh>;
   /** The batches were rebuilt, so the caller restarts from the first one. */
   onBatchesRebuilt: () => void;
-  recordClaimedBatch: (batch: ClaimBatch) => void;
+  /** The cursors a confirmed claim of `batch` moves its targets to (see `recordOwnClaims`). */
+  getClaimedThrough: (batch: ClaimBatch) => Cursors;
 };
 
 export const useClaimStakingIncentivesBatch = (props: ClaimStakingIncentivesBatchProps) => {
-  const { onSuccess, onNotice, recordClaimedBatch } = props;
+  const { onSuccess, onNotice, getClaimedThrough } = props;
   const { address: account } = useAccount();
   const dispatch = useAppDispatch();
   const store = useStore<RootState>();
@@ -85,6 +91,13 @@ export const useClaimStakingIncentivesBatch = (props: ClaimStakingIncentivesBatc
 
   const setPending = (forAccount: Address, run: number, next: PendingClaimStatus | null) =>
     dispatch(setPendingClaim({ account: forAccount, run, pending: next }));
+
+  // Recorded before the entry clears, so no refresh, in this mount or another, reads the cursors
+  // the claim moved as someone else's.
+  const settleClaimed = (forAccount: Address, run: number, claimedThrough: Cursors) => {
+    dispatch(recordOwnClaims(claimedThrough));
+    setPending(forAccount, run, null);
+  };
 
   useEffect(() => {
     return () => {
@@ -123,7 +136,7 @@ export const useClaimStakingIncentivesBatch = (props: ClaimStakingIncentivesBatc
     let isActive = true;
     const settled = new Set<number>();
     const reportedLookupFailure = new Set<number>();
-    const checkReceipt = async ({ run, hash, batch }: (typeof unconfirmed)[number]) => {
+    const checkReceipt = async ({ run, hash, claimedThrough }: (typeof unconfirmed)[number]) => {
       let receipt: TransactionReceipt;
       try {
         receipt = await publicClient.getTransactionReceipt({ hash });
@@ -140,9 +153,8 @@ export const useClaimStakingIncentivesBatch = (props: ClaimStakingIncentivesBatc
       if (!isActive || settled.has(run)) return;
       settled.add(run);
       const claimed = getUnclaimedReason(receipt) === null;
-      // Before the entry clears, so no refresh can read the claimed cursors as someone else's.
-      if (claimed) latestProps.current.recordClaimedBatch(batch);
-      setPending(account, run, null);
+      if (claimed) settleClaimed(account, run, claimedThrough);
+      else setPending(account, run, null);
       if (!claimed) console.error(`Claim transaction ${hash} reverted`);
       latestProps.current.onLateReceipt({ hash, claimed });
       await refreshReportingFailure();
@@ -249,10 +261,12 @@ export const useClaimStakingIncentivesBatch = (props: ClaimStakingIncentivesBatc
       const publicClient = getPublicClient(wagmiConfig, { chainId: MAINNET_CHAIN_ID });
       if (!publicClient) throw new Error('No Ethereum mainnet client is configured');
 
+      // From the cursors this batch was simulated against, before any confirmation can move them.
+      const claimedThrough = getClaimedThrough(prepared.batch);
       if (mountedRef.current) setPhase('sending');
       writeOwnEntry({ status: 'sending' });
       hash = await writeContract(wagmiConfig, prepared.request);
-      writeOwnEntry({ status: 'waiting', hash, batch: prepared.batch });
+      writeOwnEntry({ status: 'waiting', hash, claimedThrough });
 
       let replacedReason: ReplacementReason | undefined;
       let receipt: TransactionReceipt;
@@ -266,7 +280,7 @@ export const useClaimStakingIncentivesBatch = (props: ClaimStakingIncentivesBatc
         });
       } catch (waitError) {
         // The transaction may still mine, so it stays pending and Claim does not send another.
-        writeOwnEntry({ status: 'unconfirmed', hash, batch: prepared.batch });
+        writeOwnEntry({ status: 'unconfirmed', hash, claimedThrough });
         console.error(`Could not confirm claim transaction ${hash}`, waitError);
         onNotice({
           kind: 'still-pending',
@@ -276,9 +290,8 @@ export const useClaimStakingIncentivesBatch = (props: ClaimStakingIncentivesBatc
         return;
       }
       const notClaimed = getUnclaimedReason(receipt, replacedReason);
-      // Before the entry clears, so another mount's refresh reads these cursors as own claims.
-      if (!notClaimed) recordClaimedBatch(prepared.batch);
-      writeOwnEntry(null);
+      if (notClaimed) writeOwnEntry(null);
+      else settleClaimed(account, run, claimedThrough);
       if (notClaimed) {
         console.error(
           `Claim transaction ${hash} did not claim (${replacedReason ?? receipt.status}); receipt ${receipt.transactionHash}`,

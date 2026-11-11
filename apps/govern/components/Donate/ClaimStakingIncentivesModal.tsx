@@ -127,7 +127,7 @@ export const ClaimStakingIncentivesModal = ({ onClose }: ClaimStakingIncentivesM
   const {
     nomineesToClaimBatches,
     claimableBatchesError,
-    recordClaimedBatch,
+    getClaimedThrough,
     isLoadingClaimableBatches,
     clearClaimableBatches,
     refetchClaimableBatches,
@@ -179,7 +179,7 @@ export const ClaimStakingIncentivesModal = ({ onClose }: ClaimStakingIncentivesM
       setCurrentBatch(0);
       setClaimedBatches([]);
     },
-    recordClaimedBatch,
+    getClaimedThrough,
   });
 
   const nomineesForCurrentBatch = useMemo(() => {

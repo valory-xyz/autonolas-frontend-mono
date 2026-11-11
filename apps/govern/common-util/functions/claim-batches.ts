@@ -54,32 +54,17 @@ export function getExpectedCursors(
 }
 
 /**
- * Records a confirmed claim of `batch`: each target's cursor moves one epoch past what was
- * expected. A target with no expected cursor is skipped, so the next refresh reads it as concurrent.
+ * The cursors a confirmed claim of `batch` moves its targets to: one epoch past what was expected.
+ * A target with no expected cursor is left out, so the next refresh reads its move as concurrent.
  */
-export const advanceOwnClaims = (
-  ownClaimedThrough: Cursors,
-  expected: Cursors,
-  [, stakingTargets]: ClaimBatch,
-): Cursors => {
-  const next = { ...ownClaimedThrough };
+export const getClaimedThrough = (expected: Cursors, [, stakingTargets]: ClaimBatch): Cursors => {
+  const claimedThrough: Cursors = {};
   stakingTargets.flat().forEach((address) => {
     const cursor = expected[address];
-    if (cursor !== undefined) next[address] = cursor + 1;
+    if (cursor !== undefined) claimedThrough[address] = cursor + 1;
   });
-  return next;
+  return claimedThrough;
 };
-
-/** Keeps the own claims a lagging read has not reached yet, so they never read as concurrent. */
-export const pruneReachedOwnClaims = (
-  ownClaimedThrough: Cursors,
-  fresh: Record<Address, number>,
-): Cursors =>
-  Object.fromEntries(
-    Object.entries(ownClaimedThrough).filter(
-      ([address, through]) => through !== undefined && fresh[address as Address] < through,
-    ),
-  );
 
 export const getCursorChange = (
   built: Cursors | null,

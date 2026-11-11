@@ -3,11 +3,10 @@ import type { Address } from 'viem';
 import type { StakingContract } from 'types';
 
 import {
-  advanceOwnClaims,
   buildClaimBatches,
   getCursorChange,
+  getClaimedThrough,
   getExpectedCursors,
-  pruneReachedOwnClaims,
 } from './claim-batches';
 
 const A: Address = '0x000000000000000000000000000000000000000a';
@@ -140,13 +139,7 @@ describe('own claims', () => {
   });
 
   it('moves each claimed target one epoch past what was expected, skipping unknown ones', () => {
-    const next = advanceOwnClaims({ [B]: 4 }, { [A]: 9, [B]: 9 }, [[100], [[A, C]]]);
-
-    expect(next).toEqual({ [A]: 10, [B]: 4 });
-  });
-
-  it('forgets an own claim once a read reaches it, and keeps one a lagging read has not', () => {
-    expect(pruneReachedOwnClaims({ [A]: 10, [B]: 10 }, { [A]: 10, [B]: 9 })).toEqual({ [B]: 10 });
+    expect(getClaimedThrough({ [A]: 9, [B]: 9 }, [[100], [[A, C]]])).toEqual({ [A]: 10 });
   });
 });
 
