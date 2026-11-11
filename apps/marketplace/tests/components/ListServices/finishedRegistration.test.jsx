@@ -2,6 +2,7 @@ import { act, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import {
   ContractFunctionExecutionError,
   ContractFunctionRevertedError,
+  UserRejectedRequestError,
   encodeErrorResult,
   getAddress,
 } from 'viem';
@@ -133,23 +134,25 @@ describe('FinishedRegistration multisig picker', () => {
     expect(onStep3Deploy).not.toHaveBeenCalled();
   });
 
-  it('deploys once when Submit is pressed twice during the enabled check', async () => {
+  it('deploys once when the form is submitted again during the enabled check', async () => {
     const check = deferred();
     getEnabledMultisigs.mockResolvedValue([A]);
     onStep3Deploy.mockResolvedValue(undefined);
     renderStep(GNOSIS);
     const submit = await selectWrapper(A);
-    getEnabledMultisigs.mockReturnValueOnce(check.promise);
+    getEnabledMultisigs.mockReturnValue(check.promise);
     const checksBeforeSubmit = getEnabledMultisigs.mock.calls.length;
 
     fireEvent.click(submit);
     await waitFor(() => expect(getEnabledMultisigs).toHaveBeenCalledTimes(checksBeforeSubmit + 1));
-    fireEvent.click(submit);
-    // antd validates before calling onFinish, so let the second submit settle before the check does.
-    await act(() => new Promise((resolve) => setTimeout(resolve, 100)));
+    // The button is loading now, but Enter in a field still submits the form.
+    fireEvent.submit(submit.closest('form'));
+    // antd validates before calling onFinish; one macrotask lets that validation finish.
+    await act(() => new Promise((resolve) => setTimeout(resolve, 0)));
     await act(async () => check.resolve([A]));
 
-    await waitFor(() => expect(onStep3Deploy).toHaveBeenCalledTimes(1));
+    await waitFor(() => expect(onStep3Deploy).toHaveBeenCalled());
+    expect(onStep3Deploy).toHaveBeenCalledTimes(1);
     expect(getEnabledMultisigs).toHaveBeenCalledTimes(checksBeforeSubmit + 1);
   });
 
@@ -221,20 +224,31 @@ describe('FinishedRegistration multisig picker', () => {
 
     await waitFor(() =>
       expect(notifyError).toHaveBeenCalledWith(
-        `Error occurred while deploying: MultisigAlreadyBound(${getAddress(A)}, 2, 1). Please try again.`,
+        `Error occurred while deploying: MultisigAlreadyBound(${getAddress(A)}, 2, 1)`,
       ),
     );
   });
 
-  it('reports a deploy failure with no decoded revert without a reason', async () => {
+  it.each([
+    [
+      'a revert the ABI does not know, by its selector',
+      deployError('0xdeadbeef'),
+      'unrecognised revert 0xdeadbeef',
+    ],
+    [
+      'a failure that is not a revert, by its short message',
+      new UserRejectedRequestError(new Error('User rejected the request.')),
+      'User rejected the request.',
+    ],
+  ])('names %s', async (_, error, reason) => {
     getEnabledMultisigs.mockResolvedValueOnce([A]).mockResolvedValueOnce([A]);
-    onStep3Deploy.mockRejectedValue(deployError('0x'));
+    onStep3Deploy.mockRejectedValue(error);
     renderStep(GNOSIS);
 
     fireEvent.click(await selectWrapper(A));
 
     await waitFor(() =>
-      expect(notifyError).toHaveBeenCalledWith('Error occurred while deploying. Please try again.'),
+      expect(notifyError).toHaveBeenCalledWith(`Error occurred while deploying: ${reason}`),
     );
   });
 

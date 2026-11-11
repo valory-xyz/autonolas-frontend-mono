@@ -4,6 +4,7 @@ import PropTypes from 'prop-types';
 import { useEffect, useRef, useState } from 'react';
 
 import {
+  errorMessage,
   findContractRevert,
   formatRevert,
   notifyError,
@@ -214,10 +215,7 @@ export const FinishedRegistration = ({
         await onStep3Deploy(account, serviceId, radioValue, payload);
       } catch (error) {
         console.error(error);
-        const revert = findContractRevert(error)?.data;
-        notifyError(
-          `Error occurred while deploying${revert ? `: ${formatRevert(revert)}` : ''}. Please try again.`,
-        );
+        notifyError(`Error occurred while deploying: ${getDeployFailureReason(error)}`);
         return;
       }
       notifySuccess('Deployed successfully');
@@ -229,6 +227,14 @@ export const FinishedRegistration = ({
       isSubmittingRef.current = false;
       setIsSubmitting(false);
     }
+  };
+
+  /** The decoded revert, else its raw selector, else viem's short message (e.g. a rejection). */
+  const getDeployFailureReason = (error) => {
+    const revert = findContractRevert(error);
+    if (revert?.data) return formatRevert(revert.data);
+    if (revert?.signature) return `unrecognised revert ${revert.signature}`;
+    return errorMessage(error);
   };
 
   const onFinishFailed = (errorInfo) => {
