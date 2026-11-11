@@ -100,17 +100,48 @@ export const ADDRESSES = {
 export type ChainIds = keyof typeof ADDRESSES;
 
 export type MultisigCandidates = Readonly<Record<ChainIds, readonly Address[]>>;
-/** Addresses: https://github.com/valory-xyz/autonolas-registries/blob/main/docs/configuration.json */
+/**
+ * `GnosisSafeMultisig` wrappers, old then new: autonolas-registries' `docs/configuration.json`, then
+ * `gnosisSafeMultisigImplementationAddress` of its `scripts/deployment` globals. Only those
+ * `ServiceRegistry.mapMultisigs` enables are offered.
+ */
 export const multisigCandidates: MultisigCandidates = {
-  [mainnet.id]: ['0x46C0D07F55d4F9B5Eed2Fc9680B5953e5fd7b461'],
-  [optimism.id]: ['0x5953f21495BD9aF1D78e87bb42AcCAA55C1e896C'],
-  [gnosis.id]: ['0x3C1fF68f5aa342D296d4DEe4Bb1cACCA912D95fE'],
-  [polygon.id]: ['0x3d77596beb0f130a4415df3D2D8232B3d3D31e44'],
-  [base.id]: ['0x22bE6fDcd3e29851B29b512F714C328A00A96B83'],
-  [arbitrum.id]: ['0x63e66d7ad413C01A7b49C7FF4e3Bb765C4E4bd1b'],
-  [celo.id]: ['0x63e66d7ad413C01A7b49C7FF4e3Bb765C4E4bd1b'],
-  [mode.id]: ['0xBb7e1D6Cb6F243D6bdE81CE92a9f2aFF7Fbe7eac'],
-  [robinhood.id]: ['0xBb7e1D6Cb6F243D6bdE81CE92a9f2aFF7Fbe7eac'],
+  [mainnet.id]: [
+    '0x46C0D07F55d4F9B5Eed2Fc9680B5953e5fd7b461',
+    '0x48BE9146eBe74Af8f9BbC42A0EB68B484AC8Df31',
+  ],
+  [optimism.id]: [
+    '0x5953f21495BD9aF1D78e87bb42AcCAA55C1e896C',
+    '0xe15Eb6549484F7f8F45D0707EA05AA39DBDd65Ce',
+  ],
+  [gnosis.id]: [
+    '0x3C1fF68f5aa342D296d4DEe4Bb1cACCA912D95fE',
+    '0x3835C338Fe82abEc60DB21dB2f22E251A26D071F',
+  ],
+  [polygon.id]: [
+    '0x3d77596beb0f130a4415df3D2D8232B3d3D31e44',
+    '0x87E6a97bD97D41904B1125A014B16bec50C6A89D',
+  ],
+  [base.id]: [
+    '0x22bE6fDcd3e29851B29b512F714C328A00A96B83',
+    '0x25c980328762a03F70c2649ef4Be691b811B690A',
+  ],
+  [arbitrum.id]: [
+    '0x63e66d7ad413C01A7b49C7FF4e3Bb765C4E4bd1b',
+    '0xeED0000fE94d7cfeF4Dc0CA86a223f0F603A61B8',
+  ],
+  [celo.id]: [
+    '0x63e66d7ad413C01A7b49C7FF4e3Bb765C4E4bd1b',
+    '0xaaFBeef195BDAb1Bb6f3Dc9cEbA875Cd72499230',
+  ],
+  [mode.id]: [
+    '0xBb7e1D6Cb6F243D6bdE81CE92a9f2aFF7Fbe7eac',
+    '0x22bE6fDcd3e29851B29b512F714C328A00A96B83',
+  ],
+  [robinhood.id]: [
+    '0xBb7e1D6Cb6F243D6bdE81CE92a9f2aFF7Fbe7eac',
+    '0x22bE6fDcd3e29851B29b512F714C328A00A96B83',
+  ],
 };
 
 export const isMultisigChainId = (chainId: number): chainId is ChainIds =>
