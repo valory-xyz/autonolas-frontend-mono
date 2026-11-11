@@ -30,6 +30,9 @@ export const RECEIPT_TIMEOUT_MS = 20 * 60 * 1000;
 /** How often an unconfirmed claim's receipt is looked up again while the modal is open. */
 export const PENDING_RECEIPT_POLL_MS = 15 * 1000;
 
+/** Numbers each claim, so a claim only clears the hash-less pending entry it set itself. */
+let lastClaimRun = 0;
+
 export const stillPendingMessage = (hash: Hex) =>
   `Transaction ${hash} is still pending. Check your wallet before claiming again.`;
 
@@ -208,7 +211,14 @@ export const useClaimStakingIncentivesBatch = (props: ClaimStakingIncentivesBatc
       });
       return;
     }
-    setPending(account, { status: 'sending' });
+    lastClaimRun += 1;
+    const run = lastClaimRun;
+    setPending(account, { status: 'preparing', run });
+    // A dismissed entry may since belong to a newer claim, whose guard must stay.
+    const clearOwnEntry = () => {
+      const current = store.getState().govern.pendingClaims[account];
+      if (current && 'run' in current && current.run === run) setPending(account, null);
+    };
 
     let hash: Hex | undefined;
     try {
@@ -217,7 +227,7 @@ export const useClaimStakingIncentivesBatch = (props: ClaimStakingIncentivesBatc
         if (mountedRef.current) setIsPreparing(false);
       });
       if ('kind' in prepared) {
-        setPending(account, null);
+        clearOwnEntry();
         onError(prepared);
         return;
       }
@@ -227,6 +237,7 @@ export const useClaimStakingIncentivesBatch = (props: ClaimStakingIncentivesBatc
       if (!publicClient) throw new Error('No Ethereum mainnet client is configured');
 
       if (mountedRef.current) setIsSending(true);
+      setPending(account, { status: 'sending', run });
       hash = await writeContract(wagmiConfig, prepared.request);
       setPending(account, { status: 'waiting', hash });
 
@@ -268,7 +279,7 @@ export const useClaimStakingIncentivesBatch = (props: ClaimStakingIncentivesBatc
       onSuccess();
     } catch (error) {
       // Nothing was sent, so nothing can mine: the next Claim may send.
-      if (!hash) setPending(account, null);
+      if (!hash) clearOwnEntry();
       console.error(`Failed to claim staking incentives${hash ? ` (tx ${hash})` : ''}`, error);
       onError(toClaimError(error));
     } finally {
@@ -280,10 +291,10 @@ export const useClaimStakingIncentivesBatch = (props: ClaimStakingIncentivesBatc
   };
 
   /**
-   * A `sending` claim this mount is not preparing or sending was left by an earlier mount whose
-   * wallet never answered. Nothing was broadcast without a hash, so it is safe to clear.
+   * A `sending` claim this mount is not sending was left by an earlier mount whose wallet has
+   * not answered. A `preparing` one is not: its run is still going and will reach the wallet.
    */
-  const isStaleSending = pending?.status === 'sending' && !isPreparing && !isSending;
+  const isStaleSending = pending?.status === 'sending' && !isSending;
   const canDismissPendingClaim = unconfirmedHash !== undefined || isStaleSending;
 
   /** For a hash the wallet replaced or dropped, or a wallet request that was never answered. */

@@ -21,7 +21,7 @@ const ACCOUNT: Address = '0x00000000000000000000000000000000000000aa';
 const OTHER_ACCOUNT: Address = '0x00000000000000000000000000000000000000bb';
 const HASH = '0xhash';
 
-const mockAccount = { current: ACCOUNT };
+const mockAccount: { current: Address | undefined } = { current: ACCOUNT };
 jest.mock('wagmi', () => ({
   useAccount: () => ({ address: mockAccount.current }),
 }));
@@ -420,6 +420,30 @@ describe('useClaimStakingIncentivesBatch', () => {
     expect(props.onError).not.toHaveBeenCalled();
   });
 
+  it('refuses to claim without a connected wallet, before preparing anything', async () => {
+    mockAccount.current = undefined;
+    const { props, claim } = setup();
+
+    await claim();
+
+    expect(props.onError).toHaveBeenCalledWith({
+      kind: 'other',
+      message: 'Connect a wallet to claim',
+    });
+    expect(mockPrepareClaim).not.toHaveBeenCalled();
+  });
+
+  it('passes a refresh failure that is not `other` through as its own kind', async () => {
+    mockPrepareClaim.mockResolvedValue(prepared(FIRST));
+    mockWaitForTransactionReceipt.mockResolvedValue({ status: 'reverted', transactionHash: HASH });
+    const { props, claim } = setup();
+    props.refetchClaimableBatches.mockRejectedValue(new Error('rejected'));
+
+    await claim();
+
+    expect(props.onError).toHaveBeenNthCalledWith(2, { kind: 'wallet-rejected' });
+  });
+
   it('still reports the on-chain failure when the refresh after it fails', async () => {
     mockPrepareClaim.mockResolvedValue(prepared(FIRST));
     mockWaitForTransactionReceipt.mockResolvedValue({ status: 'reverted', transactionHash: HASH });
@@ -480,6 +504,8 @@ describe('useClaimStakingIncentivesBatch', () => {
 
       const reopened = setup();
       expect(reopened.result.current.isPending).toBe(true);
+      // The first run will still reach the wallet, so its entry cannot be dismissed.
+      expect(reopened.result.current.canDismissPendingClaim).toBe(false);
       await reopened.claim();
       expect(reopened.props.onError).toHaveBeenCalledWith({
         kind: 'already-in-flight',
@@ -514,6 +540,37 @@ describe('useClaimStakingIncentivesBatch', () => {
       expect(reopened.result.current.isPending).toBe(false);
       await reopened.claim();
       expect(mockWriteContract).toHaveBeenCalledTimes(2);
+    });
+
+    it('keeps a newer claim guarded when a dismissed one fails later', async () => {
+      mockPrepareClaim.mockResolvedValue(prepared(FIRST));
+      let rejectFirstWallet: (error: Error) => void = () => undefined;
+      mockWriteContract.mockReturnValueOnce(
+        new Promise((_, reject) => {
+          rejectFirstWallet = reject;
+        }),
+      );
+      const first = setup();
+      let firstClaim: Promise<void> = Promise.resolve();
+      await act(async () => {
+        firstClaim = first.result.current.claimIncentivesForBatch(FIRST);
+      });
+      first.unmount();
+      const reopened = setup();
+      act(() => reopened.result.current.dismissPendingClaim());
+      // The newer claim is still being prepared when the dismissed wallet request fails.
+      mockPrepareClaim.mockReturnValueOnce(new Promise(() => undefined));
+      await act(async () => {
+        reopened.result.current.claimIncentivesForBatch(FIRST);
+      });
+
+      await act(async () => {
+        rejectFirstWallet(new Error('rejected'));
+        await firstClaim;
+      });
+
+      expect(store.getState().govern.pendingClaims[ACCOUNT]?.status).toBe('preparing');
+      expect(reopened.result.current.isPending).toBe(true);
     });
 
     it('refuses a second click before the first has re-rendered', async () => {
