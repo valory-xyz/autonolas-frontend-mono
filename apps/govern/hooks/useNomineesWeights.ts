@@ -16,8 +16,10 @@ const TOKENOMICS_CONTRACT = {
   chainId: mainnet.id,
 } as const;
 
+const TOKENOMICS_READS = ['epochCounter', 'epochLen', 'inflationPerSecond'] as const;
+
 const useStakingInflation = () => {
-  const { data: tokenomicsData } = useReadContracts({
+  const { data: tokenomicsData, error: tokenomicsError } = useReadContracts({
     contracts: [
       {
         ...TOKENOMICS_CONTRACT,
@@ -35,14 +37,15 @@ const useStakingInflation = () => {
 
           return item.result;
         });
+        const failedReads = TOKENOMICS_READS.filter((_, i) => data[i]?.status !== 'success');
 
-        return { epoch, epochLen, inflationPerSecond };
+        return { epoch, epochLen, inflationPerSecond, failedReads };
       },
     },
   });
 
   // Get epoch inflation
-  const { data: stakingPoint } = useReadContract({
+  const { data: stakingPoint, error: stakingPointError } = useReadContract({
     address: TOKENOMICS.addresses[mainnet.id],
     abi: TOKENOMICS.abi,
     chainId: mainnet.id,
@@ -72,7 +75,17 @@ const useStakingInflation = () => {
     return result;
   }, [tokenomicsData, stakingPoint]);
 
-  return { projectedInflation };
+  // Without the inflation the weights read never runs, so its failure must surface here.
+  const failedReads = tokenomicsData?.failedReads.join(', ');
+  const error = useMemo(
+    () =>
+      tokenomicsError ??
+      stakingPointError ??
+      (failedReads ? new Error(`Could not read the staking inflation (${failedReads})`) : null),
+    [tokenomicsError, stakingPointError, failedReads],
+  );
+
+  return { projectedInflation, error };
 };
 
 export const useNomineesWeights = (
@@ -80,7 +93,7 @@ export const useNomineesWeights = (
   timestamp: number | null,
   scopeKey?: string,
 ) => {
-  const { projectedInflation } = useStakingInflation();
+  const { projectedInflation, error: inflationError } = useStakingInflation();
 
   const contracts = nominees.map((nominee) => ({
     address: (VOTE_WEIGHTING.addresses as Record<number, Address>)[mainnet.id],
@@ -123,5 +136,5 @@ export const useNomineesWeights = (
     },
   });
 
-  return { data, error };
+  return { data, error: inflationError ?? error };
 };

@@ -206,4 +206,16 @@ describe('<ClaimStakingIncentivesModal />', () => {
 
     expect(notifier).toHaveBeenCalledWith(...expectedArgs);
   });
+
+  it('warns that a failed receipt lookup leaves the claim pending, not failed', () => {
+    const { latestProps } = renderModal();
+
+    act(() => latestProps().onReceiptLookupFailed({ hash: HASH }));
+
+    expect(notifyWarning).toHaveBeenCalledWith(
+      `Could not check claim transaction ${HASH}`,
+      'It may still be pending. Check your wallet or a block explorer.',
+    );
+    expect(notifyError).not.toHaveBeenCalled();
+  });
 });

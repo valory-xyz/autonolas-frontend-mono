@@ -401,9 +401,12 @@ describe('prepareClaim', () => {
     mockChainState([{}], [[OLAS]]);
     mockEstimateGas.mockResolvedValue(BigInt(123));
 
-    const { params, request } = await prepareClaim([[GNOSIS], [[target(1)]]], ACCOUNT);
+    const { request } = await prepareClaim([[GNOSIS], [[target(1)]]], ACCOUNT);
 
-    expect(mockEstimateGas).toHaveBeenCalledWith({}, params);
+    const simulated = mockSimulateContract.mock.calls.find(
+      ([, { functionName }]) => functionName === 'claimStakingIncentivesBatch',
+    )?.[1];
+    expect(mockEstimateGas).toHaveBeenCalledWith({}, simulated);
     expect(request).toEqual({ functionName: 'claimStakingIncentivesBatch', gas: BigInt(123) });
   });
 

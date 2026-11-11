@@ -1,5 +1,5 @@
 import { renderHook } from '@testing-library/react';
-import type { Address } from 'viem';
+import { type Address, BaseError } from 'viem';
 import { useReadContract, useReadContracts } from 'wagmi';
 
 import { useAppSelector } from 'store/index';
@@ -119,8 +119,7 @@ describe('useClaimableNomineesBatches refetchClaimableBatches', () => {
     expect(mockRefetch).toHaveBeenCalledWith({ throwOnError: true });
     expect(refresh).toEqual({
       batches: [[[100], [[B]]]],
-      cursorsChanged: true,
-      listChanged: true,
+      change: 'concurrent',
     });
   });
 
@@ -132,8 +131,7 @@ describe('useClaimableNomineesBatches refetchClaimableBatches', () => {
 
     expect(refresh).toEqual({
       batches: [[[100], [[A, B]]]],
-      cursorsChanged: false,
-      listChanged: false,
+      change: 'none',
     });
   });
 
@@ -165,8 +163,8 @@ describe('useClaimableNomineesBatches refetchClaimableBatches', () => {
     const first = await result.current.refetchClaimableBatches();
     const second = await result.current.refetchClaimableBatches();
 
-    expect(first.cursorsChanged).toBe(true);
-    expect(second.cursorsChanged).toBe(false);
+    expect(first.change).toBe('concurrent');
+    expect(second.change).toBe('none');
   });
 
   it('reports moved cursors when there was nothing to compare against', async () => {
@@ -175,7 +173,7 @@ describe('useClaimableNomineesBatches refetchClaimableBatches', () => {
 
     const refresh = await result.current.refetchClaimableBatches();
 
-    expect(refresh.cursorsChanged).toBe(true);
+    expect(refresh.change).toBe('concurrent');
   });
 
   it('does not count the cursors of a recorded own claim as moved', async () => {
@@ -185,9 +183,8 @@ describe('useClaimableNomineesBatches refetchClaimableBatches', () => {
 
     const refresh = await result.current.refetchClaimableBatches();
 
-    expect(refresh.cursorsChanged).toBe(false);
-    // The shown list still changed: the claimed nominee drops out, so the modal must restart.
-    expect(refresh.listChanged).toBe(true);
+    // Not a concurrent claim, but the claimed nominee drops out, so the modal must restart.
+    expect(refresh.change).toBe('own-claims');
     expect(refresh.batches).toEqual([[[100], [[B]]]]);
   });
 
@@ -201,8 +198,8 @@ describe('useClaimableNomineesBatches refetchClaimableBatches', () => {
     const ownClaimsOnly = await result.current.refetchClaimableBatches();
     const someoneElseToo = await result.current.refetchClaimableBatches();
 
-    expect(ownClaimsOnly.cursorsChanged).toBe(false);
-    expect(someoneElseToo.cursorsChanged).toBe(true);
+    expect(ownClaimsOnly.change).toBe('own-claims');
+    expect(someoneElseToo.change).toBe('concurrent');
   });
 
   it.each([
@@ -212,7 +209,7 @@ describe('useClaimableNomineesBatches refetchClaimableBatches', () => {
     ['nominee weights', () => jest.mocked(useNomineesWeights)],
   ])('exposes a failed %s read instead of showing everything claimed', (_, hook) => {
     jest.spyOn(console, 'error').mockImplementation(() => undefined);
-    const readError = Object.assign(new Error('raw'), { shortMessage: 'RPC request failed.' });
+    const readError = new BaseError('RPC request failed.');
     const result = renderBatches();
     hook().mockReturnValue({ data: undefined, isLoading: false, error: readError } as never);
 
@@ -223,6 +220,35 @@ describe('useClaimableNomineesBatches refetchClaimableBatches', () => {
     expect(console.error).toHaveBeenCalledWith(
       'Could not read the claimable staking contracts',
       readError,
+    );
+  });
+
+  it('treats a cursor below what own claims explain as a lagging read, not a claim', async () => {
+    const result = renderBatches();
+    result.current.recordClaimedBatch([[100], [[A]]]);
+    // The RPC has not caught up with the own claim yet: A still reads 9.
+    mockRefetch.mockResolvedValue({ data: cursorReads(9, 9) });
+
+    const refresh = await result.current.refetchClaimableBatches();
+
+    expect(refresh.change).toBe('none');
+  });
+
+  it('exposes one nominee whose weight read failed instead of crashing', () => {
+    jest.spyOn(console, 'error').mockImplementation(() => undefined);
+    const result = renderBatches();
+    // The weights read allows failures, so B is simply missing from its result.
+    jest.mocked(useNomineesWeights).mockReturnValue({
+      data: { [A]: { percentage: 5 } },
+      error: null,
+    } as never);
+
+    const { result: partial } = renderHook(() => useClaimableNomineesBatches());
+
+    expect(result.current.claimableBatchesError).toBeNull();
+    expect(partial.current.nomineesToClaimBatches).toEqual([]);
+    expect(partial.current.claimableBatchesError).toBe(
+      `Could not read the vote weight of staking contract ${B}`,
     );
   });
 

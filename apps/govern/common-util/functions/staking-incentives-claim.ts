@@ -1,7 +1,6 @@
 import { readContracts, simulateContract } from '@wagmi/core';
 import {
   type Address,
-  BaseError,
   type Hex,
   type ReplacementReason,
   type TransactionReceipt,
@@ -16,7 +15,12 @@ import {
 import { mainnet } from 'viem/chains';
 
 import { DISPENSER, VOTE_WEIGHTING } from 'libs/util-contracts/src/lib/abiAndAddresses';
-import { findContractRevert, findInChain, formatRevert } from 'libs/util-functions/src';
+import {
+  errorMessage,
+  findContractRevert,
+  findInChain,
+  formatRevert,
+} from 'libs/util-functions/src';
 import { estimateGasWithBuffer } from 'libs/util-functions/src/lib/estimateGasWithBuffer';
 
 import { MAINNET_CHAIN_ID } from 'common-util/constants/chains';
@@ -260,7 +264,7 @@ export const prepareClaim = async (batch: ClaimBatch, account: Address) => {
   };
   const { request } = await simulateContract(wagmiConfig, params);
   const gas = await estimateGasWithBuffer(wagmiConfig, params);
-  return { quotes, params, request: { ...request, gas } };
+  return { quotes, request: { ...request, gas } };
 };
 
 /** A contract revert, as opposed to an RPC, network or wallet failure. */
@@ -290,12 +294,6 @@ export const getUnclaimedReason = (
 export const toClaimError = (error: unknown): ClaimError => {
   if (findInChain(error, UserRejectedRequestError) !== null) return { kind: 'wallet-rejected' };
   const revertReason = getRevertReason(error);
-  if (error instanceof BaseError) {
-    return {
-      kind: 'other',
-      message: revertReason ? `${error.shortMessage} ${revertReason}` : error.shortMessage,
-    };
-  }
-  if (error instanceof Error) return { kind: 'other', message: error.message };
-  return { kind: 'other', message: 'Unknown error' };
+  const message = errorMessage(error);
+  return { kind: 'other', message: revertReason ? `${message} ${revertReason}` : message };
 };

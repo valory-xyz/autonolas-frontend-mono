@@ -10,6 +10,7 @@ import {
 
 import { governReducer } from 'store/govern';
 import type { ClaimBatch } from 'common-util/functions/staking-incentives-claim';
+import type { CursorChange } from 'hooks/useClaimableNomineeBatches';
 
 import {
   PENDING_RECEIPT_POLL_MS,
@@ -55,7 +56,6 @@ const FIRST = batch('0x0000000000000000000000000000000000000001');
 const REBUILT = batch('0x0000000000000000000000000000000000000002');
 const prepared = (forBatch: ClaimBatch) => ({
   quotes: forBatch[0].map((chainId, i) => ({ chainId, targets: forBatch[1][i] })),
-  params: { args: forBatch },
   request: { args: forBatch, gas: BigInt(100) },
 });
 
@@ -65,14 +65,13 @@ const wrapper = ({ children }: { children: ReactNode }) => (
   <Provider store={store}>{children}</Provider>
 );
 
-const setup = (rebuiltBatches: ClaimBatch[] = [REBUILT], cursorsChanged = true) => {
+const setup = (rebuiltBatches: ClaimBatch[] = [REBUILT], change: CursorChange = 'concurrent') => {
   const props = {
     onSuccess: jest.fn(),
     onError: jest.fn(),
     onLateReceipt: jest.fn(),
-    refetchClaimableBatches: jest
-      .fn()
-      .mockResolvedValue({ batches: rebuiltBatches, cursorsChanged }),
+    onReceiptLookupFailed: jest.fn(),
+    refetchClaimableBatches: jest.fn().mockResolvedValue({ batches: rebuiltBatches, change }),
     onBatchesRebuilt: jest.fn(),
     recordClaimedBatch: jest.fn(),
   };
@@ -147,8 +146,8 @@ describe('useClaimStakingIncentivesBatch', () => {
     mockPrepareClaim.mockRejectedValue(new RevertError('cursor moved'));
     const { props, claim } = setup();
     props.refetchClaimableBatches
-      .mockResolvedValueOnce({ batches: [REBUILT], cursorsChanged: true })
-      .mockResolvedValueOnce({ batches: [], cursorsChanged: true });
+      .mockResolvedValueOnce({ batches: [REBUILT], change: 'concurrent' })
+      .mockResolvedValueOnce({ batches: [], change: 'concurrent' });
 
     await claim();
 
@@ -191,7 +190,7 @@ describe('useClaimStakingIncentivesBatch', () => {
 
   it('reports a revert with unchanged cursors as is, without a rebuild or a retry', async () => {
     mockPrepareClaim.mockRejectedValue(new RevertError('Paused()'));
-    const { props, claim } = setup([FIRST], false);
+    const { props, claim } = setup([FIRST], 'none');
 
     await claim();
 
@@ -208,8 +207,7 @@ describe('useClaimStakingIncentivesBatch', () => {
     // An earlier own claim moved a cursor: no concurrent claim, but the shown list re-indexes.
     props.refetchClaimableBatches.mockResolvedValue({
       batches: [REBUILT],
-      cursorsChanged: false,
-      listChanged: true,
+      change: 'own-claims',
     });
 
     await claim();
@@ -225,8 +223,7 @@ describe('useClaimStakingIncentivesBatch', () => {
     const { props, claim } = setup();
     props.refetchClaimableBatches.mockResolvedValue({
       batches: [REBUILT],
-      cursorsChanged: false,
-      listChanged: true,
+      change: 'own-claims',
     });
 
     await claim();
@@ -241,8 +238,8 @@ describe('useClaimStakingIncentivesBatch', () => {
       .mockRejectedValueOnce(new RevertError('WrongAmount(1, 0)'));
     const { props, claim } = setup();
     props.refetchClaimableBatches
-      .mockResolvedValueOnce({ batches: [REBUILT], cursorsChanged: true })
-      .mockResolvedValueOnce({ batches: [REBUILT], cursorsChanged: false });
+      .mockResolvedValueOnce({ batches: [REBUILT], change: 'concurrent' })
+      .mockResolvedValueOnce({ batches: [REBUILT], change: 'none' });
 
     await claim();
 
@@ -626,11 +623,10 @@ describe('useClaimStakingIncentivesBatch', () => {
         await poll();
         await poll();
 
-        expect(props.onError).toHaveBeenCalledTimes(1);
-        expect(props.onError).toHaveBeenCalledWith({
-          kind: 'other',
-          message: `Could not check transaction ${HASH}. Check your wallet or a block explorer.`,
-        });
+        expect(props.onReceiptLookupFailed).toHaveBeenCalledTimes(1);
+        expect(props.onReceiptLookupFailed).toHaveBeenCalledWith({ hash: HASH });
+        // Not a claim failure: the transaction may still mine.
+        expect(props.onError).not.toHaveBeenCalled();
         mockGetTransactionReceipt.mockResolvedValue({ status: 'success', transactionHash: HASH });
         await poll();
         expect(props.onLateReceipt).toHaveBeenCalledWith({ hash: HASH, claimed: true });

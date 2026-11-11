@@ -38,6 +38,8 @@ type ClaimStakingIncentivesBatchProps = {
   onError: (error: ClaimError) => void;
   /** A claim whose wait ended without a receipt got one later. */
   onLateReceipt: (outcome: { hash: Hex; claimed: boolean }) => void;
+  /** Looking up that claim's receipt failed; the claim itself may still mine. */
+  onReceiptLookupFailed: (pending: { hash: Hex }) => void;
   /** Re-reads the claim cursors and resolves to the rebuilt batches. */
   refetchClaimableBatches: () => Promise<ClaimableBatchesRefresh>;
   /** The batches were rebuilt, so the caller restarts from the first one. */
@@ -74,7 +76,7 @@ export const useClaimStakingIncentivesBatch = (props: ClaimStakingIncentivesBatc
 
   const refreshBatches = async () => {
     const refresh = await latestProps.current.refetchClaimableBatches();
-    if (refresh.cursorsChanged || refresh.listChanged) latestProps.current.onBatchesRebuilt();
+    if (refresh.change !== 'none') latestProps.current.onBatchesRebuilt();
     return refresh;
   };
 
@@ -113,10 +115,7 @@ export const useClaimStakingIncentivesBatch = (props: ClaimStakingIncentivesBatc
         // Once per hash: the poll keeps trying, but the user should know the check is failing.
         if (isActive && !reportedLookupFailure) {
           reportedLookupFailure = true;
-          latestProps.current.onError({
-            kind: 'other',
-            message: `Could not check transaction ${unconfirmedHash}. Check your wallet or a block explorer.`,
-          });
+          latestProps.current.onReceiptLookupFailed({ hash: unconfirmedHash });
         }
         return;
       }
@@ -148,8 +147,8 @@ export const useClaimStakingIncentivesBatch = (props: ClaimStakingIncentivesBatc
     } catch (error) {
       if (!isContractRevert(error)) throw error;
       console.error('Claim simulation reverted', error);
-      const { batches, cursorsChanged } = await refreshBatches();
-      if (!cursorsChanged) throw error;
+      const { batches, change } = await refreshBatches();
+      if (change !== 'concurrent') throw error;
 
       const [rebuiltBatch] = batches;
       if (!rebuiltBatch) return { kind: 'nothing-to-claim' } as const;
@@ -160,7 +159,7 @@ export const useClaimStakingIncentivesBatch = (props: ClaimStakingIncentivesBatc
         if (!isContractRevert(retryError)) throw retryError;
         console.error('Claim simulation reverted after the rebuild', retryError);
         const refreshed = await refreshBatches();
-        if (!refreshed.cursorsChanged) throw retryError;
+        if (refreshed.change !== 'concurrent') throw retryError;
         return refreshed.batches.length === 0
           ? ({ kind: 'nothing-to-claim' } as const)
           : ({ kind: 'claims-changed' } as const);

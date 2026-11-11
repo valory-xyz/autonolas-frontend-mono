@@ -137,6 +137,11 @@ export const ClaimStakingIncentivesModal = ({ onClose }: ClaimStakingIncentivesM
       console.error(error);
       notifyClaimError(error, latest.current.currentBatch + 1);
     },
+    onReceiptLookupFailed: ({ hash }) =>
+      notifyWarning(
+        `Could not check claim transaction ${hash}`,
+        'It may still be pending. Check your wallet or a block explorer.',
+      ),
     onLateReceipt: ({ hash, claimed }) => {
       if (claimed) {
         notifySuccess(`Claim transaction ${hash} was confirmed. The list has been refreshed.`);
