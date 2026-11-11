@@ -1046,6 +1046,15 @@ describe('useClaimStakingIncentivesBatch', () => {
         expect(result.current.claimButtonState).toBe('idle');
       });
 
+      it('logs a late receipt that reverted, with its hash', async () => {
+        await timedOutClaim();
+        mockGetTransactionReceipt.mockResolvedValue({ status: 'reverted', transactionHash: HASH });
+
+        await poll();
+
+        expect(console.error).toHaveBeenCalledWith(`Claim transaction ${HASH} reverted`);
+      });
+
       it('records a late confirmation before refreshing the list', async () => {
         const { props } = await timedOutClaim();
         let ownAtRefresh: object | undefined;
