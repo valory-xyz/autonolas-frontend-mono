@@ -1,8 +1,18 @@
 import { PayloadAction } from '@reduxjs/toolkit';
 import { createSlice } from '@reduxjs/toolkit';
+import type { Address, Hex } from 'viem';
 import { StakingContract, UserVotes } from 'types';
 
 import { Proposal } from 'common-util/graphql/types';
+
+/**
+ * A staking incentives claim in flight: being prepared or signed (`sending`), sent and awaited
+ * (`waiting`), or sent with no receipt yet after the wait ended (`unconfirmed`).
+ */
+export type PendingClaim =
+  | { status: 'sending' }
+  | { status: 'waiting'; hash: Hex }
+  | { status: 'unconfirmed'; hash: Hex };
 
 interface GovernState {
   isStakingContractsLoading: boolean;
@@ -12,6 +22,8 @@ interface GovernState {
   proposalVotes: Record<string, Proposal['voteCasts'][0]>;
   /** The timestamp of the last user vote */
   lastUserVote: number | null;
+  /** Per account, so closing and reopening the claim modal cannot send a second claim. */
+  pendingClaims: Partial<Record<Address, PendingClaim>>;
 }
 
 const initialState: GovernState = {
@@ -21,6 +33,7 @@ const initialState: GovernState = {
   userVotes: {},
   proposalVotes: {},
   lastUserVote: null,
+  pendingClaims: {},
 };
 
 export const governSlice = createSlice({
@@ -38,7 +51,8 @@ export const governSlice = createSlice({
     setLastUserVote: (state, action: PayloadAction<GovernState['lastUserVote']>) => {
       state.lastUserVote = action.payload;
     },
-    clearState: () => initialState,
+    // A sent claim can still mine, so its guard outlives a state reset.
+    clearState: (state) => ({ ...initialState, pendingClaims: state.pendingClaims }),
     clearUserState: (state) => {
       state.userVotes = initialState.userVotes;
       state.isUserVotesLoading = true;
@@ -46,6 +60,14 @@ export const governSlice = createSlice({
     },
     setProposalVotes: (state, action: PayloadAction<GovernState['proposalVotes']>) => {
       state.proposalVotes = { ...state.proposalVotes, ...action.payload };
+    },
+    setPendingClaim: (
+      state,
+      action: PayloadAction<{ account: Address; pending: PendingClaim | null }>,
+    ) => {
+      const { account, pending } = action.payload;
+      if (pending) state.pendingClaims[account] = pending;
+      else delete state.pendingClaims[account];
     },
   },
 });
@@ -57,5 +79,6 @@ export const {
   clearState,
   clearUserState,
   setProposalVotes,
+  setPendingClaim,
 } = governSlice.actions;
 export const governReducer = governSlice.reducer;

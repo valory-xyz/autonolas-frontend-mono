@@ -10,7 +10,10 @@ import {
 import { useAppSelector } from 'store/index';
 import { StakingContract } from 'types';
 import { useClaimableNomineesBatches } from 'hooks/useClaimableNomineeBatches';
-import { useClaimStakingIncentivesBatch } from 'hooks/useClaimStakingIncentivesBatch';
+import {
+  stillPendingMessage,
+  useClaimStakingIncentivesBatch,
+} from 'hooks/useClaimStakingIncentivesBatch';
 import type { ClaimError } from 'common-util/functions/staking-incentives-claim';
 
 import { StakingIncentivesModalContainer } from './styles';
@@ -107,33 +110,52 @@ export const ClaimStakingIncentivesModal = ({ onClose }: ClaimStakingIncentivesM
     refetchClaimableBatches,
   } = useClaimableNomineesBatches();
   // A claim settles after its own render: a rebuild may have reset the batches meanwhile.
-  const latest = useRef({ currentBatch, batchCount: nomineesToClaimBatches.length });
+  const latest = useRef({
+    currentBatch,
+    batchCount: nomineesToClaimBatches.length,
+  });
   latest.current = { currentBatch, batchCount: nomineesToClaimBatches.length };
 
-  const { claimIncentivesForBatch, isPending, isPreparing, pendingHash } =
-    useClaimStakingIncentivesBatch({
-      onSuccess: () => {
-        const { currentBatch: claimedBatch, batchCount } = latest.current;
-        setClaimedBatches((prev) => [...prev, claimedBatch]);
-        // Only move to next batch, if more batches are remaining.
-        if (claimedBatch < batchCount - 1) {
-          setTimeout(() => {
-            setCurrentBatch((prev) => prev + 1);
-          }, STEP_CHANGE_DELAY);
-        }
-        notifySuccess(`Staking incentives for batch ${claimedBatch + 1} claimed successfully`);
-      },
-      onError: (error) => {
-        console.error(error);
-        notifyClaimError(error, latest.current.currentBatch + 1);
-      },
-      refetchClaimableBatches,
-      onBatchesRebuilt: () => {
-        setCurrentBatch(0);
-        setClaimedBatches([]);
-      },
-      recordClaimedBatch,
-    });
+  const {
+    claimIncentivesForBatch,
+    dismissPendingClaim,
+    isPending,
+    isPreparing,
+    pendingHash,
+    isPendingUnconfirmed,
+  } = useClaimStakingIncentivesBatch({
+    onSuccess: () => {
+      const { currentBatch: claimedBatch, batchCount } = latest.current;
+      setClaimedBatches((prev) => [...prev, claimedBatch]);
+      // Only move to next batch, if more batches are remaining.
+      if (claimedBatch < batchCount - 1) {
+        setTimeout(() => {
+          setCurrentBatch((prev) => prev + 1);
+        }, STEP_CHANGE_DELAY);
+      }
+      notifySuccess(`Staking incentives for batch ${claimedBatch + 1} claimed successfully`);
+    },
+    onError: (error) => {
+      console.error(error);
+      notifyClaimError(error, latest.current.currentBatch + 1);
+    },
+    onLateReceipt: ({ hash, claimed }) => {
+      if (claimed) {
+        notifySuccess(`Claim transaction ${hash} was confirmed. The list has been refreshed.`);
+      } else {
+        notifyError(
+          `Claim transaction ${hash} failed on-chain`,
+          'The list has been refreshed. Claim again to sign a new transaction.',
+        );
+      }
+    },
+    refetchClaimableBatches,
+    onBatchesRebuilt: () => {
+      setCurrentBatch(0);
+      setClaimedBatches([]);
+    },
+    recordClaimedBatch,
+  });
 
   const nomineesForCurrentBatch = useMemo(() => {
     const [, currentBatchNomineesSubArray] = nomineesToClaimBatches?.[currentBatch] ?? [];
@@ -161,9 +183,20 @@ export const ClaimStakingIncentivesModal = ({ onClose }: ClaimStakingIncentivesM
   return (
     <Modal {...modalProps} onCancel={handleClose}>
       {pendingHash && (
-        <Text type="warning">
-          {`Claim transaction ${pendingHash} is still pending. Check your wallet before claiming again.`}
-        </Text>
+        <Space direction="vertical" size={4}>
+          <Text type="warning">{stillPendingMessage(pendingHash)}</Text>
+          {isPendingUnconfirmed && (
+            <Space size={8}>
+              <Text type="secondary">
+                Sped up or cancelled it in your wallet? Dismiss this once your wallet shows it
+                settled.
+              </Text>
+              <Button size="small" onClick={dismissPendingClaim}>
+                Dismiss
+              </Button>
+            </Space>
+          )}
+        </Space>
       )}
       {claimableBatchesError ? (
         <StakingIncentivesModalContainer $isEmpty>

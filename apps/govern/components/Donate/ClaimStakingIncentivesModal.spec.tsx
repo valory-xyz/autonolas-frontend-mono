@@ -22,10 +22,11 @@ jest.mock('store/index', () => ({
 const batch = (n: number): ClaimBatch => [[100], [[`0x${n}` as Address]]];
 const BATCHES = [batch(1), batch(2), batch(3)];
 const mockBatches = { current: BATCHES };
+const mockLoadError: { current: string | null } = { current: null };
 jest.mock('hooks/useClaimableNomineeBatches', () => ({
   useClaimableNomineesBatches: () => ({
     nomineesToClaimBatches: mockBatches.current,
-    claimableBatchesError: null,
+    claimableBatchesError: mockLoadError.current,
     recordClaimedBatch: jest.fn(),
     isLoadingClaimableBatches: false,
     clearClaimableBatches: jest.fn(),
@@ -33,21 +34,28 @@ jest.mock('hooks/useClaimableNomineeBatches', () => ({
   }),
 }));
 jest.mock('hooks/useClaimStakingIncentivesBatch', () => ({
+  stillPendingMessage: (hash: string) => `pending: ${hash}`,
   useClaimStakingIncentivesBatch: jest.fn(),
 }));
 
 type ClaimProps = Parameters<typeof useClaimStakingIncentivesBatch>[0];
 const STEP_CHANGE_DELAY = 1000;
 
-const renderModal = () => {
+type ClaimState = ReturnType<typeof useClaimStakingIncentivesBatch>;
+const HASH = '0xabc';
+
+const renderModal = (claimState: Partial<ClaimState> = {}) => {
   const renders: ClaimProps[] = [];
   jest.mocked(useClaimStakingIncentivesBatch).mockImplementation((props) => {
     renders.push(props);
     return {
       claimIncentivesForBatch: jest.fn(),
+      dismissPendingClaim: jest.fn(),
       isPending: false,
       isPreparing: false,
       pendingHash: undefined,
+      isPendingUnconfirmed: false,
+      ...claimState,
     };
   });
   const view = render(<ClaimStakingIncentivesModal onClose={jest.fn()} />);
@@ -65,6 +73,7 @@ describe('<ClaimStakingIncentivesModal />', () => {
     jest.useFakeTimers();
     jest.clearAllMocks();
     mockBatches.current = BATCHES;
+    mockLoadError.current = null;
     jest.spyOn(console, 'error').mockImplementation(() => undefined);
   });
   afterEach(() => jest.useRealTimers());
@@ -141,5 +150,60 @@ describe('<ClaimStakingIncentivesModal />', () => {
 
     expect(notifier).toHaveBeenCalledTimes(1);
     expect(notifier.mock.calls[0].slice(0, expectedArgs.length)).toEqual(expectedArgs);
+  });
+
+  it('shows a failed first load as an error, not as everything claimed', () => {
+    mockBatches.current = [];
+    mockLoadError.current = 'Could not read the claim cursor of staking contract 0x1';
+
+    renderModal();
+
+    expect(
+      screen.getByText(
+        'Could not load the claimable staking contracts: Could not read the claim cursor of staking contract 0x1',
+      ),
+    ).toBeInTheDocument();
+    expect(screen.queryByText('All staking incentives were claimed this epoch.')).toBeNull();
+  });
+
+  it('warns about a claim still being awaited, without offering a dismissal', () => {
+    renderModal({ pendingHash: HASH, isPending: true });
+
+    expect(screen.getByText(`pending: ${HASH}`)).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Dismiss' })).toBeNull();
+  });
+
+  it('lets the user dismiss a claim whose wait ended without a receipt', () => {
+    const dismissPendingClaim = jest.fn();
+    renderModal({
+      pendingHash: HASH,
+      isPending: true,
+      isPendingUnconfirmed: true,
+      dismissPendingClaim,
+    });
+
+    expect(screen.getByText(`pending: ${HASH}`)).toBeInTheDocument();
+    act(() => screen.getByRole('button', { name: 'Dismiss' }).click());
+
+    expect(dismissPendingClaim).toHaveBeenCalledTimes(1);
+  });
+
+  it.each<[boolean, jest.Mock, unknown[]]>([
+    [
+      true,
+      notifySuccess as jest.Mock,
+      [`Claim transaction ${HASH} was confirmed. The list has been refreshed.`],
+    ],
+    [
+      false,
+      notifyError as jest.Mock,
+      [`Claim transaction ${HASH} failed on-chain`, expect.any(String)],
+    ],
+  ])('reports a late receipt (claimed: %s) by its hash', (claimed, notifier, expectedArgs) => {
+    const { latestProps } = renderModal();
+
+    act(() => latestProps().onLateReceipt({ hash: HASH, claimed }));
+
+    expect(notifier).toHaveBeenCalledWith(...expectedArgs);
   });
 });
