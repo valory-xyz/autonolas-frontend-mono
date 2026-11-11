@@ -180,6 +180,20 @@ describe('useClaimableNomineesBatches refetchClaimableBatches', () => {
     expect(refresh.cursorsChanged).toBe(false);
   });
 
+  it('adds up own claims of one nominee across a multi-epoch backlog', async () => {
+    const result = renderBatches({ reads: cursorReads(9, 8) });
+    result.current.recordClaimedBatch([[100], [[A, B]]]);
+    result.current.recordClaimedBatch([[100], [[B]]]);
+    mockRefetch.mockResolvedValueOnce({ data: cursorReads(10, 10) });
+    mockRefetch.mockResolvedValueOnce({ data: cursorReads(10, 11) });
+
+    const ownClaimsOnly = await result.current.refetchClaimableBatches();
+    const someoneElseToo = await result.current.refetchClaimableBatches();
+
+    expect(ownClaimsOnly.cursorsChanged).toBe(false);
+    expect(someoneElseToo.cursorsChanged).toBe(true);
+  });
+
   it('exposes a failed first cursor read instead of dropping the staking contract', () => {
     jest.spyOn(console, 'error').mockImplementation(() => undefined);
     const result = renderBatches({
