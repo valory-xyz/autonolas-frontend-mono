@@ -158,7 +158,7 @@ const useNomineesWeightsAtPrevEpochEnd = ({
 
   return {
     nomineesWeightsAtPrevEpochEnd,
-    weightsError: prevEpochError ?? weightsError,
+    error: prevEpochError ?? weightsError,
   };
 };
 
@@ -352,10 +352,11 @@ export const useClaimableNomineesBatches = () => {
     clearLastClaimedStakingEpoch,
     refetchLastClaimedEpochs,
   } = useNomineesLastClaimedStakingEpoch({ nominees });
-  const { nomineesWeightsAtPrevEpochEnd, weightsError } = useNomineesWeightsAtPrevEpochEnd({
-    nominees,
-    previousEpoch,
-  });
+  const { nomineesWeightsAtPrevEpochEnd, error: prevEpochWeightsError } =
+    useNomineesWeightsAtPrevEpochEnd({
+      nominees,
+      previousEpoch,
+    });
 
   // A missing nominee is a failed read, not zero weight.
   const { relativeWeights, missingWeightError } = useMemo(() => {
@@ -377,19 +378,25 @@ export const useClaimableNomineesBatches = () => {
   }, [nominees, nomineesWeightsAtPrevEpochEnd]);
 
   const readError =
-    lastClaimedError ?? epochError ?? minStakingError ?? weightsError ?? missingWeightError;
+    lastClaimedError ??
+    epochError ??
+    minStakingError ??
+    prevEpochWeightsError ??
+    missingWeightError;
   useEffect(() => {
     if (readError) console.error('Could not read the claimable staking contracts', readError);
   }, [readError]);
   const claimableBatchesError = readError ? errorMessage(readError) : null;
 
   // Calculate if we're still loading data
+  // A failed read ends the loading: its reads would otherwise never settle.
   const isLoading =
-    isEpochLoading ||
-    isMinStakingLoading ||
-    isLastClaimedLoading ||
-    !nominees.length ||
-    !nomineesWeightsAtPrevEpochEnd;
+    !readError &&
+    (isEpochLoading ||
+      isMinStakingLoading ||
+      isLastClaimedLoading ||
+      !nominees.length ||
+      !nomineesWeightsAtPrevEpochEnd);
 
   /**
    * Clear the last claimed staking epoch for the nominees, this is required in

@@ -268,6 +268,8 @@ describe('useClaimableNomineesBatches refetchClaimableBatches', () => {
 
     expect(result.current.claimableBatchesError).toBeNull();
     expect(failed.current.claimableBatchesError).toBe('RPC request failed.');
+    // The read that failed will not settle, so the hook must not stay loading.
+    expect(failed.current.isLoadingClaimableBatches).toBe(false);
     expect(console.error).toHaveBeenCalledWith(
       'Could not read the claimable staking contracts',
       readError,

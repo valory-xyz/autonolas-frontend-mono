@@ -280,10 +280,7 @@ export const useClaimStakingIncentivesBatch = (props: ClaimStakingIncentivesBatc
       console.error(`Failed to claim staking incentives${hash ? ` (tx ${hash})` : ''}`, error);
       onError(toClaimError(error));
     } finally {
-      if (mountedRef.current) {
-        setIsPreparing(false);
-        setIsSending(false);
-      }
+      if (mountedRef.current) setIsSending(false);
     }
   };
 
