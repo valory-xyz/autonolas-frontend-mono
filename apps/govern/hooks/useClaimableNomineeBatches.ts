@@ -11,6 +11,7 @@ import { TOKENOMICS } from 'libs/util-contracts/src';
 import { errorMessage } from 'libs/util-functions/src';
 import { DISPENSER } from 'libs/util-contracts/src/lib/abiAndAddresses';
 
+import { DISPENSER_ADDRESS } from 'common-util/constants/contracts';
 import { getNomineeHash } from 'common-util/functions/nominee-hash';
 import type { ClaimBatch } from 'common-util/functions/staking-incentives-claim';
 import { useEpochCounter, useEpochTokenomics } from 'components/Donate/hooks';
@@ -73,8 +74,10 @@ export type CursorChange = 'none' | 'own-claims' | 'concurrent';
 /** The rebuilt batches, and how the cursors they were built from moved. */
 export type ClaimableBatchesRefresh = { batches: ClaimBatch[]; change: CursorChange };
 
-/** Claim cursors by staking contract; a contract the batches were not built from has none. */
-type Cursors = Partial<Record<Address, number>>;
+/** A number per staking contract; a contract that was not read has none. */
+type ByAddress = Partial<Record<Address, number>>;
+/** Claim cursors by staking contract. */
+type Cursors = ByAddress;
 
 export const getCursorChange = (
   built: Cursors | null,
@@ -95,7 +98,7 @@ export const getCursorChange = (
 const useNomineesLastClaimedStakingEpoch = ({ nominees }: { nominees: StakingContract[] }) => {
   const queryClient = useQueryClient();
   const contracts = nominees.map((nominee) => ({
-    address: DISPENSER.addresses[mainnet.id],
+    address: DISPENSER_ADDRESS,
     abi: DISPENSER.abi,
     chainId: mainnet.id,
     functionName: 'mapLastClaimedStakingEpochs',
@@ -119,8 +122,7 @@ const useNomineesLastClaimedStakingEpoch = ({ nominees }: { nominees: StakingCon
     try {
       return { epochs: toLastClaimedEpochs(nominees, lastClaimedStakingEpoch), error: null };
     } catch (error) {
-      console.error(error);
-      return { epochs: null, error: errorMessage(error) };
+      return { epochs: null, error };
     }
   }, [lastClaimedStakingEpoch, nominees]);
 
@@ -205,7 +207,7 @@ const chunkNomineesArrayByTimeToClaim = (
 };
 
 /** A nominee's entry in a per-address map; a missing one is a failed read, never "claimed". */
-const requireEntry = (map: Partial<Record<Address, number>>, address: Address, what: string) => {
+const requireEntry = (map: ByAddress, address: Address, what: string) => {
   const value = map[address];
   if (value === undefined) throw new Error(`No ${what} for staking contract ${address}`);
   return value;
@@ -214,14 +216,14 @@ const requireEntry = (map: Partial<Record<Address, number>>, address: Address, w
 type BuildClaimBatchesParams = {
   nominees: StakingContract[];
   /** Last claimed epoch per nominee address (the Dispenser's claim cursor). */
-  lastClaimedEpochs: Partial<Record<Address, number>>;
+  lastClaimedEpochs: Cursors;
   currentEpoch: number;
   minStakingWeight: number;
   /**
    * Relative weight per nominee address at the previous epoch's end, in percent × 100: the same
    * unit as `minStakingWeight`.
    */
-  relativeWeights: Partial<Record<Address, number>>;
+  relativeWeights: ByAddress;
 };
 
 export const buildClaimBatches = ({
@@ -231,11 +233,6 @@ export const buildClaimBatches = ({
   minStakingWeight,
   relativeWeights,
 }: BuildClaimBatchesParams): ClaimBatch[] => {
-  /**
-   * Filter nominees to be claimed as per the conditions:
-   * 1. Nominee's relative weight is at least the min staking weight
-   * 2. Nominee has not claimed in the current or future epochs
-   */
   const filteredNominees = nominees.filter((nominee) => {
     const nomineeRelativeWeight = requireEntry(relativeWeights, nominee.address, 'vote weight');
     const lastClaimedStakingEpoch = requireEntry(
@@ -382,11 +379,12 @@ export const useClaimableNomineesBatches = () => {
   }, [nominees, nomineesWeightsAtPrevEpochEnd]);
 
   // A failed read would otherwise leave no batches and read as everything claimed.
-  const readError = epochError ?? minStakingError ?? weightsError ?? missingWeightError;
+  const readError =
+    lastClaimedError ?? epochError ?? minStakingError ?? weightsError ?? missingWeightError;
   useEffect(() => {
     if (readError) console.error('Could not read the claimable staking contracts', readError);
   }, [readError]);
-  const claimableBatchesError = lastClaimedError ?? (readError ? errorMessage(readError) : null);
+  const claimableBatchesError = readError ? errorMessage(readError) : null;
 
   // Calculate if we're still loading data
   const isLoading =

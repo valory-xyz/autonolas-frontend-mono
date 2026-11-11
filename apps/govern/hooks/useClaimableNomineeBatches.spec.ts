@@ -138,6 +138,28 @@ describe('useClaimableNomineesBatches refetchClaimableBatches', () => {
 
   beforeEach(() => jest.clearAllMocks());
 
+  it('compares against cursors that loaded after the first render', async () => {
+    renderBatches({ reads: null });
+    const view = renderHook(() => useClaimableNomineesBatches());
+    // The cursors arrive on a later render, as they do in the app.
+    jest.mocked(useReadContracts).mockReturnValue({
+      data: cursorReads(9, 9),
+      isLoading: false,
+      queryKey: ['cursors'],
+      refetch: mockRefetch,
+    } as never);
+    view.rerender();
+    view.result.current.recordClaimedBatch([[100], [[A]]]);
+
+    mockRefetch.mockResolvedValueOnce({ data: cursorReads(10, 9) });
+    const ownClaim = await view.result.current.refetchClaimableBatches();
+    mockRefetch.mockResolvedValueOnce({ data: cursorReads(10, 9) });
+    const unchanged = await view.result.current.refetchClaimableBatches();
+
+    expect(ownClaim.change).toBe('own-claims');
+    expect(unchanged.change).toBe('none');
+  });
+
   it('rebuilds the batches from fresh cursors and reports that one moved', async () => {
     const result = renderBatches();
     expect(result.current.nomineesToClaimBatches).toEqual([[[100], [[A, B]]]]);
