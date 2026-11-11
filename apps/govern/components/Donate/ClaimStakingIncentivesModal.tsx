@@ -228,8 +228,7 @@ export const ClaimStakingIncentivesModal = ({ onClose }: ClaimStakingIncentivesM
           currentBatch={currentBatch}
           isCurrentBatchClaimed={isCurrentBatchClaimed}
           nomineesForCurrentBatch={nomineesForCurrentBatch}
-          isPending={isPending}
-          isPreparing={isPreparing}
+          claimButtonState={isPreparing ? 'preparing' : isPending ? 'pending' : 'idle'}
           handleClaimForBatch={handleClaimForBatch}
         />
       )}
@@ -257,8 +256,7 @@ type ModalContentProps = {
   currentBatch: number;
   isCurrentBatchClaimed: boolean;
   nomineesForCurrentBatch: StakingContract[];
-  isPending: boolean;
-  isPreparing: boolean;
+  claimButtonState: 'idle' | 'preparing' | 'pending';
   handleClaimForBatch: () => void;
 };
 
@@ -267,8 +265,7 @@ const ModalContent = ({
   currentBatch,
   isCurrentBatchClaimed,
   nomineesForCurrentBatch,
-  isPending,
-  isPreparing,
+  claimButtonState,
   handleClaimForBatch,
 }: ModalContentProps) => (
   <StakingIncentivesModalContainer>
@@ -305,8 +302,13 @@ const ModalContent = ({
       />
 
       {!isCurrentBatchClaimed && (
-        <Button type="primary" size="large" loading={isPending} onClick={handleClaimForBatch}>
-          {isPreparing ? 'Preparing claim...' : 'Claim Incentives'}
+        <Button
+          type="primary"
+          size="large"
+          loading={claimButtonState !== 'idle'}
+          onClick={handleClaimForBatch}
+        >
+          {claimButtonState === 'preparing' ? 'Preparing claim...' : 'Claim Incentives'}
         </Button>
       )}
     </Flex>

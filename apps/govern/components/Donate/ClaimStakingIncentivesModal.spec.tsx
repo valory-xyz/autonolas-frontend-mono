@@ -137,7 +137,7 @@ describe('<ClaimStakingIncentivesModal />', () => {
     [
       { kind: 'reverted-after-simulation' },
       notifyError as jest.Mock,
-      ['The claim for batch 2 failed on-chain'],
+      ['The claim for batch 2 failed on-chain', 'Claim again to sign a new transaction.'],
     ],
     [
       { kind: 'other', message: 'Paused()' },
@@ -228,7 +228,7 @@ describe('<ClaimStakingIncentivesModal />', () => {
     [
       false,
       notifyError as jest.Mock,
-      [`Claim transaction ${HASH} failed on-chain`, expect.any(String)],
+      [`Claim transaction ${HASH} failed on-chain`, 'Claim again to sign a new transaction.'],
     ],
   ])('reports a late receipt (claimed: %s) by its hash', (claimed, notifier, expectedArgs) => {
     const { latestProps } = renderModal();
