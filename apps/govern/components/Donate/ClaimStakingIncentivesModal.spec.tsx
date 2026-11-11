@@ -53,7 +53,6 @@ const renderModal = (claimState: Partial<ClaimState> = {}) => {
     return {
       claimIncentivesForBatch: jest.fn(),
       dismissPendingClaim: jest.fn(),
-      isPending: false,
       claimButtonState: 'idle',
       pendingHash: undefined,
       canDismissPendingClaim: false,
@@ -138,6 +137,17 @@ describe('<ClaimStakingIncentivesModal />', () => {
   });
 
   it.each<[ClaimNotice, typeof notifyError, string[]]>([
+    [
+      { kind: 'reverted-after-simulation' },
+      notifyError,
+      ['The claim for batch 2 failed on-chain', 'Claim again to sign a new transaction.'],
+    ],
+    [
+      { kind: 'other', message: 'Paused()' },
+      notifyError,
+      ['Failed to claim staking incentives for batch 2', 'Paused()'],
+    ],
+    // Not failures: cancelled, nothing changed hands, the claim may still mine, or it was not sent.
     [{ kind: 'wallet-rejected' }, notifyWarning, ['Claim cancelled in your wallet']],
     [
       { kind: 'nothing-to-claim' },
@@ -152,17 +162,6 @@ describe('<ClaimStakingIncentivesModal />', () => {
         'The list has been refreshed. Review it and claim again.',
       ],
     ],
-    [
-      { kind: 'reverted-after-simulation' },
-      notifyError,
-      ['The claim for batch 2 failed on-chain', 'Claim again to sign a new transaction.'],
-    ],
-    [
-      { kind: 'other', message: 'Paused()' },
-      notifyError,
-      ['Failed to claim staking incentives for batch 2', 'Paused()'],
-    ],
-    // Not failures: the claim may still mine, was not sent, or already settled.
     [
       { kind: 'still-pending', hash: HASH, timedOut: true },
       notifyWarning,
@@ -186,16 +185,27 @@ describe('<ClaimStakingIncentivesModal />', () => {
       notifyWarning,
       ['Could not refresh the claim list', 'rate limited'],
     ],
-  ])('shows the %o error with its own message', (error, notifier, expectedArgs) => {
-    const { latestProps, claimBatch } = renderModal();
-    claimBatch();
+  ])(
+    'shows the %o notice with its own message, and logs it by kind',
+    (notice, notifier, expectedArgs) => {
+      const errorLog = jest.spyOn(console, 'error').mockImplementation(() => undefined);
+      const warnLog = jest.spyOn(console, 'warn').mockImplementation(() => undefined);
+      const { latestProps, claimBatch } = renderModal();
+      claimBatch();
 
-    act(() => latestProps().onNotice(error));
+      act(() => latestProps().onNotice(notice));
 
-    expect(notifier).toHaveBeenCalledTimes(1);
-    expect(notifyError).toHaveBeenCalledTimes(notifier === notifyError ? 1 : 0);
-    expect(notifier).toHaveBeenCalledWith(...expectedArgs);
-  });
+      expect(notifier).toHaveBeenCalledTimes(1);
+      expect(notifyError).toHaveBeenCalledTimes(notifier === notifyError ? 1 : 0);
+      expect(notifier).toHaveBeenCalledWith(...expectedArgs);
+      const isFailure = notifier === notifyError;
+      expect([errorLog.mock.calls, warnLog.mock.calls]).toEqual(
+        isFailure ? [[[notice]], []] : [[], [[notice]]],
+      );
+      errorLog.mockRestore();
+      warnLog.mockRestore();
+    },
+  );
 
   it('shows a failed first load as an error, not as everything claimed', () => {
     mockBatches.current = [];
@@ -225,7 +235,7 @@ describe('<ClaimStakingIncentivesModal />', () => {
   });
 
   it('warns about a claim still being awaited, without offering a dismissal', () => {
-    renderModal({ pendingHash: HASH, isPending: true });
+    renderModal({ pendingHash: HASH, claimButtonState: 'pending' });
 
     expect(screen.getByText(`pending: ${HASH}`)).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'Dismiss' })).toBeNull();
@@ -235,7 +245,6 @@ describe('<ClaimStakingIncentivesModal />', () => {
     const dismissPendingClaim = jest.fn();
     renderModal({
       pendingHash: HASH,
-      isPending: true,
       canDismissPendingClaim: true,
       dismissPendingClaim,
     });
@@ -247,21 +256,21 @@ describe('<ClaimStakingIncentivesModal />', () => {
   });
 
   it('says the claim is being prepared while it is', () => {
-    renderModal({ isPending: true, claimButtonState: 'preparing' });
+    renderModal({ claimButtonState: 'preparing' });
 
     const button = screen.getByRole('button', { name: /Preparing claim/ });
     expect(button).toHaveClass('ant-btn-loading');
   });
 
   it('leaves the claim button clickable when no claim is in flight', () => {
-    renderModal({ isPending: false, claimButtonState: 'idle' });
+    renderModal({ claimButtonState: 'idle' });
 
     const button = screen.getByRole('button', { name: /Claim Incentives/ });
     expect(button).not.toHaveClass('ant-btn-loading');
   });
 
   it('keeps the claim button loading while a sent claim is awaited', () => {
-    renderModal({ isPending: true, claimButtonState: 'pending' });
+    renderModal({ claimButtonState: 'pending' });
 
     const button = screen.getByRole('button', { name: /Claim Incentives/ });
     expect(button).toHaveClass('ant-btn-loading');
@@ -269,7 +278,7 @@ describe('<ClaimStakingIncentivesModal />', () => {
 
   it('lets the user dismiss an earlier claim whose wallet request was never answered', () => {
     const dismissPendingClaim = jest.fn();
-    renderModal({ isPending: true, canDismissPendingClaim: true, dismissPendingClaim });
+    renderModal({ canDismissPendingClaim: true, dismissPendingClaim });
 
     expect(screen.getByText(/still waiting for your wallet/)).toBeInTheDocument();
     act(() => screen.getByRole('button', { name: 'Dismiss' }).click());

@@ -11,6 +11,7 @@ import { useAppSelector } from 'store/index';
 import { StakingContract } from 'types';
 import { useClaimableNomineesBatches } from 'hooks/useClaimableNomineeBatches';
 import {
+  type ClaimButtonState,
   type ClaimNotice,
   stillPendingMessage,
   useClaimStakingIncentivesBatch,
@@ -261,7 +262,7 @@ type ModalContentProps = {
   currentBatch: number;
   isCurrentBatchClaimed: boolean;
   nomineesForCurrentBatch: StakingContract[];
-  claimButtonState: 'idle' | 'preparing' | 'pending';
+  claimButtonState: ClaimButtonState;
   handleClaimForBatch: () => void;
 };
 

@@ -60,6 +60,16 @@ const CHECKPOINT_ABI = parseAbi(['function checkpointNominee(bytes32 account, ui
 
 type ChainSetup = { withheld?: bigint; bridgingDecimals?: bigint };
 
+/** A successful `calculateStakingIncentives` sub-call answering `incentive`. */
+const calculatedResult = (incentive: bigint) => ({
+  success: true,
+  returnData: encodeFunctionResult({
+    abi: DISPENSER.abi,
+    functionName: 'calculateStakingIncentives',
+    result: [incentive, ZERO, BigInt(5), target(0), []],
+  }),
+});
+
 /**
  * Mocks the chain reads: the processors and withheld amounts, then bridging decimals. Every
  * simulation is answered too: aggregate3 with each target's `incentives`, any other with a request.
@@ -70,17 +80,9 @@ const mockChainState = (chains: ChainSetup[], incentives: bigint[][]) => {
     .mockResolvedValueOnce(chains.map(({ withheld = ZERO }) => withheld))
     .mockResolvedValueOnce(chains.map(({ bridgingDecimals = BigInt(18) }) => bridgingDecimals));
 
-  const result = incentives.flat().flatMap((incentive) => [
-    { success: true, returnData: '0x' },
-    {
-      success: true,
-      returnData: encodeFunctionResult({
-        abi: DISPENSER.abi,
-        functionName: 'calculateStakingIncentives',
-        result: [incentive, ZERO, BigInt(5), target(0), []],
-      }),
-    },
-  ]);
+  const result = incentives
+    .flat()
+    .flatMap((incentive) => [{ success: true, returnData: '0x' }, calculatedResult(incentive)]);
   mockSimulateContract.mockImplementation(
     (_config: unknown, { functionName }: { functionName: string }) =>
       Promise.resolve(
@@ -100,10 +102,24 @@ beforeEach(() => {
   });
 });
 
+type SimulatedParams = {
+  functionName: string;
+  args: readonly unknown[];
+  abi?: unknown;
+  account?: Address;
+  address?: Address;
+  chainId?: number;
+  value?: bigint;
+};
+
 /** The params of the first simulation of `functionName`. */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const simulatedParams = (functionName: string): any =>
-  mockSimulateContract.mock.calls.find(([, params]) => params.functionName === functionName)?.[1];
+const simulatedParams = (functionName: string): SimulatedParams => {
+  const call = (mockSimulateContract.mock.calls as [unknown, SimulatedParams][]).find(
+    ([, params]) => params.functionName === functionName,
+  );
+  if (!call) throw new Error(`No ${functionName} simulation`);
+  return call[1];
+};
 
 describe('quoteChainClaims', () => {
   it('attaches no value and no payload to an Orbit chain whose incentives are all zero', async () => {
@@ -166,6 +182,22 @@ describe('quoteChainClaims', () => {
       'No deposit processor is registered on the Dispenser for chain 42161',
     );
     expect(mockReadContracts).toHaveBeenCalledTimes(2);
+  });
+
+  it('names the second chain when only its deposit processor is missing', async () => {
+    mockReadContracts
+      .mockResolvedValueOnce([processor(0), zeroAddress])
+      .mockResolvedValueOnce([ZERO, ZERO]);
+
+    await expect(
+      quoteChainClaims(
+        [
+          [GNOSIS, ARBITRUM],
+          [[target(1)], [target(2)]],
+        ],
+        ACCOUNT,
+      ),
+    ).rejects.toThrow('No deposit processor is registered on the Dispenser for chain 42161');
   });
 
   it.each([
@@ -240,14 +272,7 @@ describe('quoteChainClaims', () => {
   it('names the target and chain whose calculation reverted in a multi-chain batch', async () => {
     mockChainState([{}, {}], [[OLAS], [OLAS, OLAS]]);
     const ok = { success: true, returnData: '0x' };
-    const calculated = {
-      success: true,
-      returnData: encodeFunctionResult({
-        abi: DISPENSER.abi,
-        functionName: 'calculateStakingIncentives',
-        result: [OLAS, ZERO, BigInt(5), target(0), []],
-      }),
-    };
+    const calculated = calculatedResult(OLAS);
     mockSimulateContract.mockResolvedValue({
       result: [
         ok,
@@ -405,7 +430,7 @@ describe('quoteChainClaims', () => {
     expect(aggregate.abi).toBe(multicall3Abi);
     expect(aggregate.account).toBe(ACCOUNT);
     // Mainnet's Multicall3, whichever chain the wallet is on.
-    expect(aggregate.address.toLowerCase()).toBe('0xca11bde05977b3631167028862be2a173976ca11');
+    expect(aggregate.address?.toLowerCase()).toBe('0xca11bde05977b3631167028862be2a173976ca11');
     expect(aggregate.chainId).toBe(1);
   });
 
@@ -623,9 +648,10 @@ describe('claim error classification', () => {
     expect(builtinRevert.shortMessage).toContain(reason);
   });
 
-  it('falls back to the short message, the error message, or a generic one', () => {
+  it('falls back to the short message, a rejected string, or a generic one', () => {
     const rpcError = new HttpRequestError({ url: 'https://rpc.example' });
     expect(toClaimError(rpcError)).toEqual({ kind: 'other', message: rpcError.shortMessage });
-    expect(toClaimError('boom')).toEqual({ kind: 'other', message: 'Unknown error' });
+    expect(toClaimError('boom')).toEqual({ kind: 'other', message: 'boom' });
+    expect(toClaimError(null)).toEqual({ kind: 'other', message: 'Unknown error' });
   });
 });
