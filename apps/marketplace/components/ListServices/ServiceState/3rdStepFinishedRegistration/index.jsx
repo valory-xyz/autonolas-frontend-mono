@@ -20,7 +20,11 @@ import { SVM_EMPTY_ADDRESS } from 'util/constants';
 import { RadioLabel } from '../styles';
 import { useFinishRegistration } from '../useSvmServiceStateManagement';
 import { getEnabledMultisigs } from '../../utils';
-import { onStep3Deploy } from '../utils';
+import {
+  DEPLOY_REFUSAL,
+  DeployRefusedError,
+  deployWithEnabledMultisig,
+} from '../deployWithEnabledMultisig';
 
 const MULTISIG_STATUS = Object.freeze({ LOADING: 'loading', LOADED: 'loaded', ERROR: 'error' });
 
@@ -180,37 +184,41 @@ export const FinishedRegistration = ({
     };
   }, [chainId, isSvm, reloadCount]);
 
+  const notifyDeployRefused = (error, submitContext) => {
+    switch (error.reason) {
+      case DEPLOY_REFUSAL.RECHECK_FAILED:
+        console.error(
+          'Could not re-check the selected multisig option',
+          submitContext,
+          error.cause,
+        );
+        notifyError('Could not check that the selected multisig option is still enabled');
+        return;
+      case DEPLOY_REFUSAL.CHAIN_CHANGED:
+        notifyError('The network changed before the deploy. Please submit again.');
+        return;
+      default:
+        setMultisigs({
+          status: MULTISIG_STATUS.LOADED,
+          enabled: error.enabled,
+        });
+        setRadioValue(null);
+        notifyError('The selected multisig option is no longer enabled. Please choose another.');
+    }
+  };
+
   const onFinish = async (values) => {
-    // The enabled-wrapper check below awaits an RPC call, so guard against a second submit.
+    // The enabled-wrapper check awaits an RPC call, so guard against a second submit.
     if (isSubmittingRef.current) return;
     isSubmittingRef.current = true;
     setIsSubmitting(true);
     const submitChainId = chainId;
+    const submitContext = {
+      chainId: submitChainId,
+      serviceId,
+      multisig: radioValue,
+    };
     try {
-      // The wrapper may have been disabled since the options were loaded.
-      let enabled;
-      try {
-        enabled = await getEnabledMultisigs(submitChainId);
-      } catch (error) {
-        console.error(
-          'Could not re-check the selected multisig option',
-          { chainId: submitChainId, serviceId, multisig: radioValue },
-          error,
-        );
-        notifyError('Could not check that the selected multisig option is still enabled');
-        return;
-      }
-      if (chainIdRef.current !== submitChainId) {
-        notifyError('The network changed before the deploy. Please submit again.');
-        return;
-      }
-      setMultisigs({ status: MULTISIG_STATUS.LOADED, enabled });
-      if (!enabled.includes(radioValue)) {
-        setRadioValue(null);
-        notifyError('The selected multisig option is no longer enabled. Please choose another.');
-        return;
-      }
-
       try {
         const payload = ethers.solidityPacked(
           ['address', 'address', 'address', 'address', 'uint256', 'uint256', 'bytes'],
@@ -224,25 +232,31 @@ export const FinishedRegistration = ({
             values.payload,
           ],
         );
-        await onStep3Deploy(account, serviceId, radioValue, payload);
+        const enabled = await deployWithEnabledMultisig({
+          account,
+          serviceId,
+          multisig: radioValue,
+          payload,
+          chainId: submitChainId,
+          getCurrentChainId: () => chainIdRef.current,
+        });
+        setMultisigs({ status: MULTISIG_STATUS.LOADED, enabled });
       } catch (error) {
-        console.error(
-          'Deploy failed',
-          { chainId: submitChainId, serviceId, multisig: radioValue },
-          error,
-        );
+        if (error instanceof DeployRefusedError) {
+          notifyDeployRefused(error, submitContext);
+          return;
+        }
+        console.error('Deploy failed', submitContext, error);
         notifyError(`Error occurred while deploying: ${getDeployFailureReason(error)}`);
         return;
       }
       notifySuccess('Deployed successfully');
-      await updateDetails();
-    } catch (e) {
-      console.error(
-        'Deployed, but could not refresh the service details',
-        { chainId: submitChainId, serviceId, multisig: radioValue },
-        e,
-      );
-      notifyError('Deployed, but the service details could not be refreshed. Reload the page.');
+      try {
+        await updateDetails();
+      } catch (error) {
+        console.error('Deployed, but could not refresh the service details', submitContext, error);
+        notifyError('Deployed, but the service details could not be refreshed. Reload the page.');
+      }
     } finally {
       isSubmittingRef.current = false;
       setIsSubmitting(false);
