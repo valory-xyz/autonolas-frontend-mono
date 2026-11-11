@@ -107,7 +107,8 @@ export const useNomineesWeights = (
       select: (data) => {
         if (!projectedInflation) return;
 
-        return data.reduce((res: Record<Address, Weight>, item, index) => {
+        // A nominee whose read failed is left out, so the map is partial.
+        return data.reduce((res: Partial<Record<Address, Weight>>, item, index) => {
           if (item.status === 'success' && item.result) {
             const [weight, totalSum] = item.result as number[];
 

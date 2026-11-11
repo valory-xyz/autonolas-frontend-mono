@@ -354,25 +354,20 @@ export const useClaimableNomineesBatches = () => {
   // The weights read allows failures, so a failed nominee is missing rather than an error.
   const { relativeWeights, missingWeightError } = useMemo(() => {
     if (!nomineesWeightsAtPrevEpochEnd) return { relativeWeights: null, missingWeightError: null };
-    const missing = nominees.find((nominee) => !nomineesWeightsAtPrevEpochEnd[nominee.address]);
-    if (missing) {
-      return {
-        relativeWeights: null,
-        missingWeightError: new Error(
-          `Could not read the vote weight of staking contract ${missing.address}`,
-        ),
-      };
+    const weights: Record<Address, number> = {};
+    for (const nominee of nominees) {
+      const weight = nomineesWeightsAtPrevEpochEnd[nominee.address];
+      if (!weight) {
+        return {
+          relativeWeights: null,
+          missingWeightError: new Error(
+            `Could not read the vote weight of staking contract ${nominee.address}`,
+          ),
+        };
+      }
+      weights[nominee.address] = weight.percentage * 100;
     }
-    return {
-      relativeWeights: nominees.reduce(
-        (acc, nominee) => {
-          acc[nominee.address] = nomineesWeightsAtPrevEpochEnd[nominee.address].percentage * 100;
-          return acc;
-        },
-        {} as Record<Address, number>,
-      ),
-      missingWeightError: null,
-    };
+    return { relativeWeights: weights, missingWeightError: null };
   }, [nominees, nomineesWeightsAtPrevEpochEnd]);
 
   // A failed read would otherwise leave no batches and read as everything claimed.
