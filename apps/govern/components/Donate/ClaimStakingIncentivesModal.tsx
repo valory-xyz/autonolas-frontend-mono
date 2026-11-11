@@ -100,6 +100,8 @@ export const ClaimStakingIncentivesModal = ({ onClose }: ClaimStakingIncentivesM
 
   const {
     nomineesToClaimBatches,
+    claimableBatchesError,
+    recordClaimedBatch,
     isLoadingClaimableBatches,
     clearClaimableBatches,
     refetchClaimableBatches,
@@ -108,7 +110,8 @@ export const ClaimStakingIncentivesModal = ({ onClose }: ClaimStakingIncentivesM
   const latest = useRef({ currentBatch, batchCount: nomineesToClaimBatches.length });
   latest.current = { currentBatch, batchCount: nomineesToClaimBatches.length };
 
-  const { claimIncentivesForBatch, isPending, isPreparing } = useClaimStakingIncentivesBatch({
+  const { claimIncentivesForBatch, isPending, isPreparing, pendingHash } =
+    useClaimStakingIncentivesBatch({
     onSuccess: () => {
       const { currentBatch: claimedBatch, batchCount } = latest.current;
       setClaimedBatches((prev) => [...prev, claimedBatch]);
@@ -129,6 +132,7 @@ export const ClaimStakingIncentivesModal = ({ onClose }: ClaimStakingIncentivesM
       setCurrentBatch(0);
       setClaimedBatches([]);
     },
+    recordClaimedBatch,
   });
 
   const nomineesForCurrentBatch = useMemo(() => {
@@ -156,7 +160,16 @@ export const ClaimStakingIncentivesModal = ({ onClose }: ClaimStakingIncentivesM
   const isCurrentBatchClaimed = claimedBatches.includes(currentBatch);
   return (
     <Modal {...modalProps} onCancel={handleClose}>
-      {nomineesToClaimBatches.length === 0 || isLoadingClaimableBatches ? (
+      {pendingHash && (
+        <Text type="warning">
+          {`Claim transaction ${pendingHash} is still pending. Check your wallet before claiming again.`}
+        </Text>
+      )}
+      {claimableBatchesError ? (
+        <StakingIncentivesModalContainer $isEmpty>
+          <Text type="danger">{`Could not load the claimable staking contracts: ${claimableBatchesError}`}</Text>
+        </StakingIncentivesModalContainer>
+      ) : nomineesToClaimBatches.length === 0 || isLoadingClaimableBatches ? (
         <EmptyModalContent isLoadingClaimableBatches={isLoadingClaimableBatches} />
       ) : (
         <ModalContent

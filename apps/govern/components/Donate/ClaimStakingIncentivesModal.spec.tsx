@@ -21,9 +21,12 @@ jest.mock('store/index', () => ({
 
 const batch = (n: number): ClaimBatch => [[100], [[`0x${n}` as Address]]];
 const BATCHES = [batch(1), batch(2), batch(3)];
+const mockBatches = { current: BATCHES };
 jest.mock('hooks/useClaimableNomineeBatches', () => ({
   useClaimableNomineesBatches: () => ({
-    nomineesToClaimBatches: BATCHES,
+    nomineesToClaimBatches: mockBatches.current,
+    claimableBatchesError: null,
+    recordClaimedBatch: jest.fn(),
     isLoadingClaimableBatches: false,
     clearClaimableBatches: jest.fn(),
     refetchClaimableBatches: jest.fn(),
@@ -40,21 +43,28 @@ const renderModal = () => {
   const renders: ClaimProps[] = [];
   jest.mocked(useClaimStakingIncentivesBatch).mockImplementation((props) => {
     renders.push(props);
-    return { claimIncentivesForBatch: jest.fn(), isPending: false, isPreparing: false };
+    return {
+      claimIncentivesForBatch: jest.fn(),
+      isPending: false,
+      isPreparing: false,
+      pendingHash: undefined,
+    };
   });
-  render(<ClaimStakingIncentivesModal onClose={jest.fn()} />);
+  const view = render(<ClaimStakingIncentivesModal onClose={jest.fn()} />);
+  const rerender = () => view.rerender(<ClaimStakingIncentivesModal onClose={jest.fn()} />);
   const latestProps = () => renders[renders.length - 1];
   const claimBatch = () => {
     act(() => latestProps().onSuccess());
     act(() => jest.advanceTimersByTime(STEP_CHANGE_DELAY));
   };
-  return { latestProps, claimBatch };
+  return { latestProps, claimBatch, rerender };
 };
 
 describe('<ClaimStakingIncentivesModal />', () => {
   beforeEach(() => {
     jest.useFakeTimers();
     jest.clearAllMocks();
+    mockBatches.current = BATCHES;
     jest.spyOn(console, 'error').mockImplementation(() => undefined);
   });
   afterEach(() => jest.useRealTimers());
@@ -73,6 +83,32 @@ describe('<ClaimStakingIncentivesModal />', () => {
       'Staking incentives for batch 1 claimed successfully',
     );
     expect(screen.getByText('Batch Claimed')).toBeInTheDocument();
+  });
+
+  it('clears the claimed marks on a rebuild so the rebuilt first batch can be claimed', () => {
+    const { latestProps } = renderModal();
+    act(() => latestProps().onSuccess());
+    expect(screen.getByText('Batch Claimed')).toBeInTheDocument();
+
+    act(() => latestProps().onBatchesRebuilt());
+
+    expect(screen.queryByText('Batch Claimed')).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Claim Incentives' })).toBeInTheDocument();
+  });
+
+  it('does not advance past the last batch when a rebuild shrank the list', () => {
+    const { latestProps, claimBatch, rerender } = renderModal();
+    claimBatch();
+    const propsWhenClaimStarted = latestProps();
+
+    mockBatches.current = [batch(4)];
+    rerender();
+    act(() => propsWhenClaimStarted.onBatchesRebuilt());
+    act(() => propsWhenClaimStarted.onSuccess());
+    act(() => jest.advanceTimersByTime(STEP_CHANGE_DELAY));
+
+    expect(screen.getByText('Batch Claimed')).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Claim Incentives' })).not.toBeInTheDocument();
   });
 
   it.each<[ClaimError, jest.Mock, string[]]>([

@@ -83,7 +83,10 @@ describe('useClaimableNomineesBatches refetchClaimableBatches', () => {
   ];
   const mockRefetch = jest.fn();
 
-  const renderBatches = ({ epoch = 10 }: { epoch?: number | null } = {}) => {
+  const renderBatches = ({
+    epoch = 10,
+    reads = cursorReads(9, 9),
+  }: { epoch?: number | null; reads?: unknown } = {}) => {
     jest
       .mocked(useAppSelector)
       .mockImplementation((selector) =>
@@ -93,7 +96,7 @@ describe('useClaimableNomineesBatches refetchClaimableBatches', () => {
     jest.mocked(useEpochTokenomics).mockReturnValue({ data: { endTime: 1 } } as never);
     jest.mocked(useReadContract).mockReturnValue({ data: 100, isLoading: false } as never);
     jest.mocked(useReadContracts).mockReturnValue({
-      data: cursorReads(9, 9),
+      data: reads,
       isLoading: false,
       queryKey: ['cursors'],
       refetch: mockRefetch,
@@ -145,5 +148,47 @@ describe('useClaimableNomineesBatches refetchClaimableBatches', () => {
 
     await expect(result.current.refetchClaimableBatches()).rejects.toThrow('still loading');
     expect(mockRefetch).not.toHaveBeenCalled();
+  });
+
+  it('reports a cursor moved since the last refresh, and not again on the next one', async () => {
+    const result = renderBatches();
+    mockRefetch.mockResolvedValue({ data: cursorReads(10, 9) });
+
+    const first = await result.current.refetchClaimableBatches();
+    const second = await result.current.refetchClaimableBatches();
+
+    expect(first.cursorsChanged).toBe(true);
+    expect(second.cursorsChanged).toBe(false);
+  });
+
+  it('reports moved cursors when there was nothing to compare against', async () => {
+    const result = renderBatches({ reads: null });
+    mockRefetch.mockResolvedValue({ data: cursorReads(9, 9) });
+
+    const refresh = await result.current.refetchClaimableBatches();
+
+    expect(refresh.cursorsChanged).toBe(true);
+  });
+
+  it('does not count the cursors of a recorded own claim as moved', async () => {
+    const result = renderBatches();
+    result.current.recordClaimedBatch([[100], [[A]]]);
+    mockRefetch.mockResolvedValue({ data: cursorReads(10, 9) });
+
+    const refresh = await result.current.refetchClaimableBatches();
+
+    expect(refresh.cursorsChanged).toBe(false);
+  });
+
+  it('exposes a failed first cursor read instead of dropping the staking contract', () => {
+    jest.spyOn(console, 'error').mockImplementation(() => undefined);
+    const result = renderBatches({
+      reads: [{ status: 'success', result: BigInt(9) }, { status: 'failure', error: new Error() }],
+    });
+
+    expect(result.current.nomineesToClaimBatches).toEqual([]);
+    expect(result.current.claimableBatchesError).toBe(
+      `Could not read the claim cursor of staking contract ${B}`,
+    );
   });
 });

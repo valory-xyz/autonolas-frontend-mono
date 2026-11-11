@@ -1,9 +1,13 @@
 import { act, renderHook } from '@testing-library/react';
-import type { Address } from 'viem';
+import { type Address, WaitForTransactionReceiptTimeoutError } from 'viem';
 
 import type { ClaimBatch } from 'common-util/functions/staking-incentives-claim';
 
-import { useClaimStakingIncentivesBatch } from './useClaimStakingIncentivesBatch';
+import {
+  RECEIPT_TIMEOUT_MS,
+  resetPendingClaims,
+  useClaimStakingIncentivesBatch,
+} from './useClaimStakingIncentivesBatch';
 
 const ACCOUNT: Address = '0x00000000000000000000000000000000000000aa';
 const HASH = '0xhash';
@@ -14,10 +18,12 @@ jest.mock('wagmi', () => ({
 
 const mockWriteContract = jest.fn();
 const mockWaitForTransactionReceipt = jest.fn();
+const mockGetTransactionReceipt = jest.fn();
 jest.mock('@wagmi/core', () => ({
   writeContract: (...args: unknown[]) => mockWriteContract(...args),
   getPublicClient: () => ({
     waitForTransactionReceipt: (...args: unknown[]) => mockWaitForTransactionReceipt(...args),
+    getTransactionReceipt: (...args: unknown[]) => mockGetTransactionReceipt(...args),
   }),
 }));
 jest.mock('common-util/config/wagmi', () => ({ wagmiConfig: {} }));
@@ -40,6 +46,7 @@ const batch = (target: Address): ClaimBatch => [[100], [[target]]];
 const FIRST = batch('0x0000000000000000000000000000000000000001');
 const REBUILT = batch('0x0000000000000000000000000000000000000002');
 const prepared = (forBatch: ClaimBatch) => ({
+  quotes: forBatch[0].map((chainId, i) => ({ chainId, targets: forBatch[1][i] })),
   params: { args: forBatch },
   request: { args: forBatch },
 });
@@ -52,15 +59,27 @@ const setup = (rebuiltBatches: ClaimBatch[] = [REBUILT], cursorsChanged = true) 
       .fn()
       .mockResolvedValue({ batches: rebuiltBatches, cursorsChanged }),
     onBatchesRebuilt: jest.fn(),
+    recordClaimedBatch: jest.fn(),
   };
-  const { result } = renderHook(() => useClaimStakingIncentivesBatch(props));
+  const { result, unmount } = renderHook(() => useClaimStakingIncentivesBatch(props));
   const claim = () => act(() => result.current.claimIncentivesForBatch(FIRST));
-  return { props, claim };
+  return { props, claim, result, unmount };
+};
+
+const settleLater = () => {
+  let settle: (value: unknown) => void = () => undefined;
+  mockWaitForTransactionReceipt.mockReturnValue(
+    new Promise((resolve) => {
+      settle = resolve;
+    }),
+  );
+  return (value: unknown) => settle(value);
 };
 
 describe('useClaimStakingIncentivesBatch', () => {
   beforeEach(() => {
     jest.resetAllMocks();
+    resetPendingClaims();
     jest.spyOn(console, 'error').mockImplementation(() => undefined);
     mockWriteContract.mockResolvedValue(HASH);
     mockWaitForTransactionReceipt.mockResolvedValue({ status: 'success' });
@@ -174,15 +193,99 @@ describe('useClaimStakingIncentivesBatch', () => {
     expect(console.error).toHaveBeenCalledWith('Failed to claim staking incentives', error);
   });
 
-  it('waits for the receipt without a timeout', async () => {
+  it('waits for the receipt for a bounded time and records the claimed batch', async () => {
     mockPrepareClaim.mockResolvedValue(prepared(FIRST));
-    const { claim } = setup();
+    const { props, claim } = setup();
 
     await claim();
 
     expect(mockWaitForTransactionReceipt).toHaveBeenCalledWith(
-      expect.objectContaining({ hash: HASH, timeout: 0, onReplaced: expect.any(Function) }),
+      expect.objectContaining({
+        hash: HASH,
+        timeout: RECEIPT_TIMEOUT_MS,
+        onReplaced: expect.any(Function),
+      }),
     );
+    expect(RECEIPT_TIMEOUT_MS).toBeGreaterThan(0);
+    expect(props.recordClaimedBatch).toHaveBeenCalledWith(FIRST);
+  });
+
+  it('stays pending while the receipt is awaited, and clears once it settles', async () => {
+    mockPrepareClaim.mockResolvedValue(prepared(FIRST));
+    const settle = settleLater();
+    const { result } = setup();
+
+    let claiming: Promise<void> = Promise.resolve();
+    await act(async () => {
+      claiming = result.current.claimIncentivesForBatch(FIRST);
+    });
+    expect(result.current.isPending).toBe(true);
+    expect(result.current.pendingHash).toBe(HASH);
+
+    await act(async () => {
+      settle({ status: 'success', transactionHash: HASH });
+      await claiming;
+    });
+    expect(result.current.isPending).toBe(false);
+    expect(result.current.pendingHash).toBeUndefined();
+  });
+
+  it('keeps a timed-out claim pending, across a remount, and refuses to send another', async () => {
+    mockPrepareClaim.mockResolvedValue(prepared(FIRST));
+    mockWaitForTransactionReceipt.mockRejectedValue(
+      new WaitForTransactionReceiptTimeoutError({ hash: HASH }),
+    );
+    mockGetTransactionReceipt.mockRejectedValue(new Error('not found'));
+    const first = setup();
+
+    await first.claim();
+
+    expect(first.props.onError).toHaveBeenCalledWith({
+      kind: 'other',
+      message: `Transaction ${HASH} is still pending. Check your wallet before claiming again.`,
+    });
+    first.unmount();
+
+    const reopened = setup();
+    expect(reopened.result.current.isPending).toBe(true);
+    await reopened.claim();
+    expect(mockWriteContract).toHaveBeenCalledTimes(1);
+    expect(reopened.props.onError).toHaveBeenCalledWith({
+      kind: 'other',
+      message: expect.stringContaining(HASH),
+    });
+  });
+
+  it('clears a stale pending claim once its receipt exists', async () => {
+    mockPrepareClaim.mockResolvedValue(prepared(FIRST));
+    mockWaitForTransactionReceipt.mockRejectedValue(
+      new WaitForTransactionReceiptTimeoutError({ hash: HASH }),
+    );
+    const first = setup();
+    await first.claim();
+    first.unmount();
+    mockGetTransactionReceipt.mockResolvedValue({ status: 'success' });
+
+    const reopened = setup();
+    await act(async () => undefined);
+
+    expect(mockGetTransactionReceipt).toHaveBeenCalledWith({ hash: HASH });
+    expect(reopened.result.current.isPending).toBe(false);
+  });
+
+  it('keeps the hash when the receipt wait fails', async () => {
+    mockPrepareClaim.mockResolvedValue(prepared(FIRST));
+    mockWaitForTransactionReceipt.mockRejectedValue(new Error('rpc down'));
+    const { props, claim, result } = setup();
+
+    await claim();
+
+    expect(props.onError).toHaveBeenCalledWith({
+      kind: 'other',
+      message: `Could not confirm transaction ${HASH}. Check your wallet before claiming again.`,
+    });
+    expect(result.current.pendingHash).toBe(HASH);
+    expect(props.onSuccess).not.toHaveBeenCalled();
   });
 
   it.each([
@@ -205,6 +308,9 @@ describe('useClaimStakingIncentivesBatch', () => {
       expect(props.onSuccess).not.toHaveBeenCalled();
       expect(props.onError).toHaveBeenCalledWith(expected);
       expect(mockWriteContract).toHaveBeenCalledTimes(1);
+      expect(props.onError.mock.invocationCallOrder[0]).toBeLessThan(
+        props.refetchClaimableBatches.mock.invocationCallOrder[0],
+      );
     },
   );
 
@@ -232,8 +338,12 @@ describe('useClaimStakingIncentivesBatch', () => {
 
     await claim();
 
-    expect(props.onError).toHaveBeenCalledTimes(1);
-    expect(props.onError).toHaveBeenCalledWith({ kind: 'reverted-after-simulation' });
+    expect(props.onError).toHaveBeenCalledTimes(2);
+    expect(props.onError).toHaveBeenNthCalledWith(1, { kind: 'reverted-after-simulation' });
+    expect(props.onError).toHaveBeenNthCalledWith(2, {
+      kind: 'other',
+      message: 'Could not refresh the claim list: rate limited',
+    });
     expect(console.error).toHaveBeenCalledWith(expect.stringContaining(HASH));
   });
 
@@ -247,6 +357,10 @@ describe('useClaimStakingIncentivesBatch', () => {
     expect(mockWriteContract).toHaveBeenCalledTimes(1);
     expect(props.refetchClaimableBatches).toHaveBeenCalledTimes(1);
     expect(props.onError).toHaveBeenCalledWith({ kind: 'reverted-after-simulation' });
+    expect(props.onError.mock.invocationCallOrder[0]).toBeLessThan(
+      props.refetchClaimableBatches.mock.invocationCallOrder[0],
+    );
     expect(props.onSuccess).not.toHaveBeenCalled();
+    expect(props.recordClaimedBatch).not.toHaveBeenCalled();
   });
 });
