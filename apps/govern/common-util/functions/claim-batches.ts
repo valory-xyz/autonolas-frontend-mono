@@ -22,14 +22,28 @@ export type ClaimableBatchesRefresh = { batches: ClaimBatch[]; change: CursorCha
 export type ByAddress = Partial<Record<Address, number>>;
 export type Cursors = ByAddress;
 
-export const readFailure = (what: string, address: Address, cause?: unknown) =>
+export const READ_TARGET = { claimCursor: 'claim cursor', voteWeight: 'vote weight' } as const;
+type ReadTarget = (typeof READ_TARGET)[keyof typeof READ_TARGET];
+
+export const readFailure = (what: ReadTarget, address: Address, cause?: unknown) =>
   new Error(`Could not read the ${what} of staking contract ${address}`, { cause });
 
-/** The cursors the shown list was built from, moved on by this user's own confirmed claims. */
-export const getExpectedCursors = (
+/**
+ * Cursors moved on by this user's own confirmed claims. A read can lag those claims, and a list
+ * built from it alone would offer an epoch they already took.
+ */
+export function getExpectedCursors(
+  built: Record<Address, number>,
+  ownClaimedThrough: Cursors,
+): Record<Address, number>;
+export function getExpectedCursors(
   built: Record<Address, number> | null,
   ownClaimedThrough: Cursors,
-): Cursors | null => {
+): Record<Address, number> | null;
+export function getExpectedCursors(
+  built: Record<Address, number> | null,
+  ownClaimedThrough: Cursors,
+): Record<Address, number> | null {
   if (!built) return null;
   return Object.fromEntries(
     Object.entries(built).map(([address, cursor]) => [
@@ -37,7 +51,7 @@ export const getExpectedCursors = (
       Math.max(cursor, ownClaimedThrough[address as Address] ?? cursor),
     ]),
   );
-};
+}
 
 /**
  * Records a confirmed claim of `batch`: each target's cursor moves one epoch past what was
@@ -126,7 +140,7 @@ const chunkNomineesArrayByTimeToClaim = (
   return chunks;
 };
 
-const requireEntry = (map: ByAddress, address: Address, what: string, cause?: unknown) => {
+const requireEntry = (map: ByAddress, address: Address, what: ReadTarget, cause?: unknown) => {
   const value = map[address];
   if (value === undefined) throw readFailure(what, address, cause);
   return value;
@@ -158,13 +172,13 @@ export const buildClaimBatches = ({
     const nomineeRelativeWeight = requireEntry(
       relativeWeights,
       nominee.address,
-      'vote weight',
+      READ_TARGET.voteWeight,
       weightReadErrors[nominee.address],
     );
     const lastClaimedStakingEpoch = requireEntry(
       lastClaimedEpochs,
       nominee.address,
-      'claim cursor',
+      READ_TARGET.claimCursor,
     );
 
     return nomineeRelativeWeight >= minStakingWeight && lastClaimedStakingEpoch < currentEpoch;
@@ -216,7 +230,11 @@ export const buildClaimBatches = ({
        */
       const nomineesTimesToClaimArray = nominees.reduce(
         (acc, nominee) => {
-          const lastClaimedStakingEpoch = requireEntry(lastClaimedEpochs, nominee, 'claim cursor');
+          const lastClaimedStakingEpoch = requireEntry(
+            lastClaimedEpochs,
+            nominee,
+            READ_TARGET.claimCursor,
+          );
           acc.push([nominee, currentEpoch - lastClaimedStakingEpoch]);
           return acc;
         },

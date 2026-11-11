@@ -1,8 +1,11 @@
-import { renderHook } from '@testing-library/react';
+import type { ReactNode } from 'react';
+import { Provider } from 'react-redux';
+import { configureStore } from '@reduxjs/toolkit';
+import { act, renderHook } from '@testing-library/react';
 import { type Address, BaseError } from 'viem';
 import { useReadContract, useReadContracts } from 'wagmi';
 
-import { useAppSelector } from 'store/index';
+import { governReducer, setStakingContracts } from 'store/govern';
 import { useNomineesWeights } from 'hooks/useNomineesWeights';
 import { useEpochCounter, useEpochTokenomics } from 'components/Donate/hooks';
 import type { StakingContract } from 'types';
@@ -13,7 +16,6 @@ jest.mock('wagmi', () => ({ useReadContract: jest.fn(), useReadContracts: jest.f
 jest.mock('@tanstack/react-query', () => ({
   useQueryClient: () => ({ removeQueries: jest.fn() }),
 }));
-jest.mock('store/index', () => ({ useAppSelector: jest.fn() }));
 jest.mock('common-util/functions/nominee-hash', () => ({ getNomineeHash: () => '0xhash' }));
 jest.mock('hooks/useNomineesWeights', () => ({ useNomineesWeights: jest.fn() }));
 jest.mock('components/Donate/hooks', () => ({
@@ -34,50 +36,59 @@ describe('useClaimableNomineesBatches refetchClaimableBatches', () => {
     { status: 'success', result: BigInt(b) },
   ];
   const mockRefetch = jest.fn();
+  // One store per test, shared by every mount in it, as the app shares one across modal reopens.
+  let store = configureStore({ reducer: { govern: governReducer } });
+  const wrapper = ({ children }: { children: ReactNode }) => (
+    <Provider store={store}>{children}</Provider>
+  );
+  const renderBatchesHook = () => renderHook(() => useClaimableNomineesBatches(), { wrapper });
+  const mockCursorQuery = (data: unknown, error: Error | null = null) =>
+    jest.mocked(useReadContracts).mockReturnValue({
+      data,
+      error,
+      isLoading: false,
+      queryKey: ['cursors'],
+      refetch: mockRefetch,
+    } as never);
 
-  const renderBatches = ({
+  const mockBatchReads = ({
     epoch = 10,
     reads = cursorReads(9, 9),
   }: { epoch?: number | null; reads?: unknown } = {}) => {
-    jest
-      .mocked(useAppSelector)
-      .mockImplementation((selector) =>
-        selector({ govern: { stakingContracts: nominees } } as never),
-      );
     jest.mocked(useEpochCounter).mockReturnValue({ data: epoch, isLoading: false } as never);
     jest.mocked(useEpochTokenomics).mockReturnValue({ data: { endTime: 1 } } as never);
     jest.mocked(useReadContract).mockReturnValue({ data: 100, isLoading: false } as never);
-    jest.mocked(useReadContracts).mockReturnValue({
-      data: reads,
-      isLoading: false,
-      queryKey: ['cursors'],
-      refetch: mockRefetch,
-    } as never);
+    mockCursorQuery(reads);
     jest.mocked(useNomineesWeights).mockReturnValue({
       data: { [A]: { percentage: 5 }, [B]: { percentage: 5 } },
     } as never);
-    return renderHook(() => useClaimableNomineesBatches()).result;
+  };
+  const renderBatches = (reads?: Parameters<typeof mockBatchReads>[0]) => {
+    mockBatchReads(reads);
+    return renderBatchesHook().result;
   };
 
-  beforeEach(() => jest.clearAllMocks());
+  beforeEach(() => {
+    jest.clearAllMocks();
+    store = configureStore({ reducer: { govern: governReducer } });
+    store.dispatch(setStakingContracts(nominees));
+  });
 
   it('compares against cursors that loaded after the first render', async () => {
     renderBatches({ reads: null });
-    const view = renderHook(() => useClaimableNomineesBatches());
+    const view = renderBatchesHook();
     // The cursors arrive on a later render, as they do in the app.
-    jest.mocked(useReadContracts).mockReturnValue({
-      data: cursorReads(9, 9),
-      isLoading: false,
-      queryKey: ['cursors'],
-      refetch: mockRefetch,
-    } as never);
+    mockCursorQuery(cursorReads(9, 9));
     view.rerender();
-    view.result.current.recordClaimedBatch([[100], [[A]]]);
+    act(() => view.result.current.recordClaimedBatch([[100], [[A]]]));
 
-    mockRefetch.mockResolvedValueOnce({ data: cursorReads(10, 9) });
-    const ownClaim = await view.result.current.refetchClaimableBatches();
-    mockRefetch.mockResolvedValueOnce({ data: cursorReads(10, 9) });
-    const unchanged = await view.result.current.refetchClaimableBatches();
+    // A refetch also refills the cache, as the query does in the app.
+    mockRefetch.mockImplementation(async () => {
+      mockCursorQuery(cursorReads(10, 9));
+      return { data: cursorReads(10, 9) };
+    });
+    const ownClaim = await act(() => view.result.current.refetchClaimableBatches());
+    const unchanged = await act(() => view.result.current.refetchClaimableBatches());
 
     expect(ownClaim.change).toBe('own-claims');
     expect(unchanged.change).toBe('none');
@@ -130,15 +141,9 @@ describe('useClaimableNomineesBatches refetchClaimableBatches', () => {
   it('keeps showing cached cursors when a later cursor query fails', () => {
     jest.spyOn(console, 'error').mockImplementation(() => undefined);
     renderBatches();
-    jest.mocked(useReadContracts).mockReturnValue({
-      data: cursorReads(9, 9),
-      error: new BaseError('RPC request failed.'),
-      isLoading: false,
-      queryKey: ['cursors'],
-      refetch: mockRefetch,
-    } as never);
+    mockCursorQuery(cursorReads(9, 9), new BaseError('RPC request failed.'));
 
-    const { result } = renderHook(() => useClaimableNomineesBatches());
+    const { result } = renderBatchesHook();
 
     expect(result.current.claimableBatchesError).toBeNull();
     expect(result.current.nomineesToClaimBatches).toEqual([[[100], [[A, B]]]]);
@@ -173,7 +178,7 @@ describe('useClaimableNomineesBatches refetchClaimableBatches', () => {
 
   it('does not count the cursors of a recorded own claim as moved', async () => {
     const result = renderBatches();
-    result.current.recordClaimedBatch([[100], [[A]]]);
+    act(() => result.current.recordClaimedBatch([[100], [[A]]]));
     mockRefetch.mockResolvedValue({ data: cursorReads(10, 9) });
 
     const refresh = await result.current.refetchClaimableBatches();
@@ -185,8 +190,8 @@ describe('useClaimableNomineesBatches refetchClaimableBatches', () => {
 
   it('adds up own claims of one nominee across a multi-epoch backlog', async () => {
     const result = renderBatches({ reads: cursorReads(9, 8) });
-    result.current.recordClaimedBatch([[100], [[A, B]]]);
-    result.current.recordClaimedBatch([[100], [[B]]]);
+    act(() => result.current.recordClaimedBatch([[100], [[A, B]]]));
+    act(() => result.current.recordClaimedBatch([[100], [[B]]]));
     mockRefetch.mockResolvedValueOnce({ data: cursorReads(10, 10) });
     mockRefetch.mockResolvedValueOnce({ data: cursorReads(10, 11) });
 
@@ -209,7 +214,7 @@ describe('useClaimableNomineesBatches refetchClaimableBatches', () => {
     const result = renderBatches();
     hook().mockReturnValue({ data: undefined, isLoading: false, error: readError } as never);
 
-    const { result: failed } = renderHook(() => useClaimableNomineesBatches());
+    const { result: failed } = renderBatchesHook();
 
     expect(result.current.claimableBatchesError).toBeNull();
     expect(failed.current.claimableBatchesError).toBe('RPC request failed.');
@@ -222,7 +227,7 @@ describe('useClaimableNomineesBatches refetchClaimableBatches', () => {
 
   it('treats a cursor below what own claims explain as a lagging read, not a claim', async () => {
     const result = renderBatches();
-    result.current.recordClaimedBatch([[100], [[A]]]);
+    act(() => result.current.recordClaimedBatch([[100], [[A]]]));
     // The RPC has not caught up with the own claim yet: A still reads 9.
     mockRefetch.mockResolvedValue({ data: cursorReads(9, 9) });
 
@@ -237,8 +242,8 @@ describe('useClaimableNomineesBatches refetchClaimableBatches', () => {
 
   it('does not offer an epoch an own claim took when the refresh read lags it', async () => {
     const result = renderBatches({ reads: cursorReads(8, 9) });
-    result.current.recordClaimedBatch([[100], [[A, B]]]);
-    result.current.recordClaimedBatch([[100], [[A]]]);
+    act(() => result.current.recordClaimedBatch([[100], [[A, B]]]));
+    act(() => result.current.recordClaimedBatch([[100], [[A]]]));
     // The RPC is a block behind the second claim: A still reads 9, though it was claimed to 10.
     mockRefetch.mockResolvedValue({ data: cursorReads(9, 10) });
 
@@ -249,22 +254,32 @@ describe('useClaimableNomineesBatches refetchClaimableBatches', () => {
   });
 
   it('does not show an epoch an own claim took when the cached read lags it', () => {
-    const view = renderHook(() => useClaimableNomineesBatches());
-    renderBatches({ reads: cursorReads(8, 9) });
-    view.rerender();
-    view.result.current.recordClaimedBatch([[100], [[A, B]]]);
-    view.result.current.recordClaimedBatch([[100], [[A]]]);
+    mockBatchReads({ reads: cursorReads(8, 9) });
+    const view = renderBatchesHook();
+    act(() => view.result.current.recordClaimedBatch([[100], [[A, B]]]));
+    act(() => view.result.current.recordClaimedBatch([[100], [[A]]]));
     // The cache refills from an RPC a block behind the second claim.
-    jest.mocked(useReadContracts).mockReturnValue({
-      data: cursorReads(9, 10),
-      isLoading: false,
-      queryKey: ['cursors'],
-      refetch: mockRefetch,
-    } as never);
+    mockCursorQuery(cursorReads(9, 10));
 
     view.rerender();
 
     expect(view.result.current.nomineesToClaimBatches).toEqual([]);
+  });
+
+  it('keeps a claim recorded in a closed modal out of the next one, on a lagging read', async () => {
+    mockBatchReads({ reads: cursorReads(9, 9) });
+    const closed = renderBatchesHook();
+    act(() => closed.result.current.recordClaimedBatch([[100], [[A]]]));
+    closed.unmount();
+
+    const reopened = renderBatchesHook();
+    // The RPC has not caught up with the claim made in the closed modal.
+    mockRefetch.mockResolvedValue({ data: cursorReads(9, 9) });
+    const refresh = await act(() => reopened.result.current.refetchClaimableBatches());
+
+    expect(reopened.result.current.nomineesToClaimBatches).toEqual([[[100], [[B]]]]);
+    expect(refresh.batches).toEqual([[[100], [[B]]]]);
+    expect(refresh.change).toBe('none');
   });
 
   it('gives the failed weight read as the cause when a refresh finds the weight missing', async () => {
@@ -276,7 +291,7 @@ describe('useClaimableNomineesBatches refetchClaimableBatches', () => {
       error: null,
     } as never);
     jest.spyOn(console, 'error').mockImplementation(() => undefined);
-    const { result: partial } = renderHook(() => useClaimableNomineesBatches());
+    const { result: partial } = renderBatchesHook();
     mockRefetch.mockResolvedValue({ data: cursorReads(9, 9) });
 
     await expect(partial.current.refetchClaimableBatches()).rejects.toHaveProperty(
@@ -296,7 +311,7 @@ describe('useClaimableNomineesBatches refetchClaimableBatches', () => {
       error: null,
     } as never);
 
-    renderHook(() => useClaimableNomineesBatches());
+    renderBatchesHook();
 
     expect(spy).toHaveBeenCalledWith(
       'Could not read the claimable staking contracts',
@@ -312,7 +327,7 @@ describe('useClaimableNomineesBatches refetchClaimableBatches', () => {
       error: null,
     } as never);
 
-    const { result: partial } = renderHook(() => useClaimableNomineesBatches());
+    const { result: partial } = renderBatchesHook();
 
     expect(result.current.claimableBatchesError).toBeNull();
     expect(partial.current.nomineesToClaimBatches).toEqual([]);

@@ -4,12 +4,13 @@ import type { Address, Hex } from 'viem';
 import { StakingContract, UserVotes } from 'types';
 
 import { Proposal } from 'common-util/graphql/types';
+import type { ClaimBatch } from 'common-util/functions/staking-incentives-claim';
 
 export type PendingClaimStatus =
   | { status: 'preparing' }
   | { status: 'sending' }
-  | { status: 'waiting'; hash: Hex }
-  | { status: 'unconfirmed'; hash: Hex };
+  | { status: 'waiting'; hash: Hex; batch: ClaimBatch }
+  | { status: 'unconfirmed'; hash: Hex; batch: ClaimBatch };
 
 /**
  * A claim in flight, so a reopened modal cannot send another while one may still mine. `run`
@@ -26,6 +27,8 @@ interface GovernState {
   /** The timestamp of the last user vote */
   lastUserVote: number | null;
   pendingClaims: Partial<Record<Address, PendingClaim[]>>;
+  /** Claim cursors this user's confirmed claims advanced to, kept across modal mounts. */
+  ownClaimedThrough: Partial<Record<Address, number>>;
 }
 
 const initialState: GovernState = {
@@ -36,6 +39,7 @@ const initialState: GovernState = {
   proposalVotes: {},
   lastUserVote: null,
   pendingClaims: {},
+  ownClaimedThrough: {},
 };
 
 export const governSlice = createSlice({
@@ -53,8 +57,12 @@ export const governSlice = createSlice({
     setLastUserVote: (state, action: PayloadAction<GovernState['lastUserVote']>) => {
       state.lastUserVote = action.payload;
     },
-    // A sent claim can still mine, so its guard outlives a state reset.
-    clearState: (state) => ({ ...initialState, pendingClaims: state.pendingClaims }),
+    // A sent claim can still mine, so its guard and the cursors it moved outlive a state reset.
+    clearState: (state) => ({
+      ...initialState,
+      pendingClaims: state.pendingClaims,
+      ownClaimedThrough: state.ownClaimedThrough,
+    }),
     clearUserState: (state) => {
       state.userVotes = initialState.userVotes;
       state.isUserVotesLoading = true;
@@ -81,6 +89,9 @@ export const governSlice = createSlice({
       if (entries.length > 0) state.pendingClaims[account] = entries;
       else delete state.pendingClaims[account];
     },
+    setOwnClaimedThrough: (state, action: PayloadAction<GovernState['ownClaimedThrough']>) => {
+      state.ownClaimedThrough = action.payload;
+    },
   },
 });
 
@@ -92,5 +103,6 @@ export const {
   clearUserState,
   setProposalVotes,
   setPendingClaim,
+  setOwnClaimedThrough,
 } = governSlice.actions;
 export const governReducer = governSlice.reducer;

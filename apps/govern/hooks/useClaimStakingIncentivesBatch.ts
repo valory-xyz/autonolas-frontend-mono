@@ -41,6 +41,8 @@ const isSent = (entry: PendingClaim): entry is Extract<PendingClaim, { hash: Hex
 export const stillPendingMessage = (hash: Hex) =>
   `Transaction ${hash} is still pending. Check your wallet before claiming again.`;
 
+export type ClaimButtonState = 'idle' | 'preparing' | 'pending';
+
 /** A claim that failed, or that this hook could not finish on its own. */
 export type ClaimNotice =
   | ClaimError
@@ -50,7 +52,7 @@ export type ClaimNotice =
 
 type ClaimStakingIncentivesBatchProps = {
   onSuccess: () => void;
-  onNotice: (error: ClaimNotice) => void;
+  onNotice: (notice: ClaimNotice) => void;
   /** A claim whose wait ended without a receipt got one later. */
   onLateReceipt: (outcome: { hash: Hex; claimed: boolean }) => void;
   /** Looking up that claim's receipt failed; the claim itself may still mine. */
@@ -121,7 +123,7 @@ export const useClaimStakingIncentivesBatch = (props: ClaimStakingIncentivesBatc
     let isActive = true;
     const settled = new Set<number>();
     const reportedLookupFailure = new Set<number>();
-    const checkReceipt = async ({ run, hash }: { run: number; hash: Hex }) => {
+    const checkReceipt = async ({ run, hash, batch }: (typeof unconfirmed)[number]) => {
       let receipt: TransactionReceipt;
       try {
         receipt = await publicClient.getTransactionReceipt({ hash });
@@ -137,8 +139,10 @@ export const useClaimStakingIncentivesBatch = (props: ClaimStakingIncentivesBatc
       }
       if (!isActive || settled.has(run)) return;
       settled.add(run);
-      setPending(account, run, null);
       const claimed = getUnclaimedReason(receipt) === null;
+      // Before the entry clears, so no refresh can read the claimed cursors as someone else's.
+      if (claimed) latestProps.current.recordClaimedBatch(batch);
+      setPending(account, run, null);
       if (!claimed) console.error(`Claim transaction ${hash} reverted`);
       latestProps.current.onLateReceipt({ hash, claimed });
       await refreshReportingFailure();
@@ -234,9 +238,7 @@ export const useClaimStakingIncentivesBatch = (props: ClaimStakingIncentivesBatc
     let hash: Hex | undefined;
     try {
       if (mountedRef.current) setPhase('preparing');
-      const prepared = await prepareWithOneRebuild(batch, account).finally(() => {
-        if (mountedRef.current) setPhase('idle');
-      });
+      const prepared = await prepareWithOneRebuild(batch, account);
       if ('kind' in prepared) {
         writeOwnEntry(null);
         onNotice(prepared);
@@ -250,7 +252,7 @@ export const useClaimStakingIncentivesBatch = (props: ClaimStakingIncentivesBatc
       if (mountedRef.current) setPhase('sending');
       writeOwnEntry({ status: 'sending' });
       hash = await writeContract(wagmiConfig, prepared.request);
-      writeOwnEntry({ status: 'waiting', hash });
+      writeOwnEntry({ status: 'waiting', hash, batch: prepared.batch });
 
       let replacedReason: ReplacementReason | undefined;
       let receipt: TransactionReceipt;
@@ -264,7 +266,7 @@ export const useClaimStakingIncentivesBatch = (props: ClaimStakingIncentivesBatc
         });
       } catch (waitError) {
         // The transaction may still mine, so it stays pending and Claim does not send another.
-        writeOwnEntry({ status: 'unconfirmed', hash });
+        writeOwnEntry({ status: 'unconfirmed', hash, batch: prepared.batch });
         console.error(`Could not confirm claim transaction ${hash}`, waitError);
         onNotice({
           kind: 'still-pending',
@@ -273,9 +275,10 @@ export const useClaimStakingIncentivesBatch = (props: ClaimStakingIncentivesBatc
         });
         return;
       }
-      writeOwnEntry(null);
-
       const notClaimed = getUnclaimedReason(receipt, replacedReason);
+      // Before the entry clears, so another mount's refresh reads these cursors as own claims.
+      if (!notClaimed) recordClaimedBatch(prepared.batch);
+      writeOwnEntry(null);
       if (notClaimed) {
         console.error(
           `Claim transaction ${hash} did not claim (${replacedReason ?? receipt.status}); receipt ${receipt.transactionHash}`,
@@ -284,7 +287,6 @@ export const useClaimStakingIncentivesBatch = (props: ClaimStakingIncentivesBatc
         await refreshReportingFailure();
         return;
       }
-      recordClaimedBatch(prepared.batch);
       onSuccess();
     } catch (error) {
       // Nothing was sent, so nothing can mine: the next Claim may send.
@@ -311,13 +313,12 @@ export const useClaimStakingIncentivesBatch = (props: ClaimStakingIncentivesBatc
   };
 
   const isPending = phase !== 'idle' || pendingClaims.length > 0;
-  const claimButtonState: 'idle' | 'preparing' | 'pending' =
+  const claimButtonState: ClaimButtonState =
     phase === 'preparing' ? 'preparing' : isPending ? 'pending' : 'idle';
 
   return {
     claimIncentivesForBatch,
     dismissPendingClaim,
-    isPending,
     claimButtonState,
     pendingHash,
     canDismissPendingClaim,

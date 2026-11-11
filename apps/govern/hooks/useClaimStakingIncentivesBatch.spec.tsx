@@ -103,6 +103,17 @@ const signLater = () => {
   return (hash: string) => sign(hash);
 };
 
+/** Holds the next prepare until the returned function resolves it. */
+const prepareLater = () => {
+  let finish: (value: unknown) => void = () => undefined;
+  mockPrepareClaim.mockReturnValueOnce(
+    new Promise((resolve) => {
+      finish = resolve;
+    }),
+  );
+  return (value: unknown) => finish(value);
+};
+
 const settleLater = () => {
   let settle: (value: unknown) => void = () => undefined;
   mockWaitForTransactionReceipt.mockReturnValue(
@@ -351,14 +362,15 @@ describe('useClaimStakingIncentivesBatch', () => {
     await act(async () => {
       claiming = result.current.claimIncentivesForBatch(FIRST);
     });
-    expect(result.current.isPending).toBe(true);
+    expect(result.current.claimButtonState).not.toBe('idle');
+    expect(result.current.claimButtonState).toBe('pending');
     expect(result.current.pendingHash).toBe(HASH);
 
     await act(async () => {
       settle({ status: 'success', transactionHash: HASH });
       await claiming;
     });
-    expect(result.current.isPending).toBe(false);
+    expect(result.current.claimButtonState).toBe('idle');
     expect(result.current.pendingHash).toBeUndefined();
   });
 
@@ -379,7 +391,8 @@ describe('useClaimStakingIncentivesBatch', () => {
     first.unmount();
 
     const reopened = setup();
-    expect(reopened.result.current.isPending).toBe(true);
+    expect(reopened.result.current.claimButtonState).not.toBe('idle');
+    expect(reopened.result.current.claimButtonState).toBe('pending');
     await reopened.claim();
     expect(mockWriteContract).toHaveBeenCalledTimes(1);
     expect(reopened.props.onNotice).toHaveBeenCalledWith({
@@ -526,12 +539,7 @@ describe('useClaimStakingIncentivesBatch', () => {
       );
 
     it('refuses a claim from a reopened modal while the first is still being prepared', async () => {
-      let finishPrepare: (value: unknown) => void = () => undefined;
-      mockPrepareClaim.mockReturnValueOnce(
-        new Promise((resolve) => {
-          finishPrepare = resolve;
-        }),
-      );
+      const finishPrepare = prepareLater();
       const first = setup();
       let firstClaim: Promise<void> = Promise.resolve();
       await act(async () => {
@@ -540,7 +548,7 @@ describe('useClaimStakingIncentivesBatch', () => {
       first.unmount();
 
       const reopened = setup();
-      expect(reopened.result.current.isPending).toBe(true);
+      expect(reopened.result.current.claimButtonState).not.toBe('idle');
       // The first run will still reach the wallet, so its entry cannot be dismissed.
       expect(reopened.result.current.canDismissPendingClaim).toBe(false);
       await reopened.claim();
@@ -570,11 +578,11 @@ describe('useClaimStakingIncentivesBatch', () => {
       first.unmount();
 
       const reopened = setup();
-      expect(reopened.result.current.isPending).toBe(true);
+      expect(reopened.result.current.claimButtonState).not.toBe('idle');
       expect(reopened.result.current.canDismissPendingClaim).toBe(true);
       act(() => reopened.result.current.dismissPendingClaim());
 
-      expect(reopened.result.current.isPending).toBe(false);
+      expect(reopened.result.current.claimButtonState).toBe('idle');
       // Dismissing a claim that was never sent leaves the list as it is.
       expect(reopened.props.refetchClaimableBatches).not.toHaveBeenCalled();
       await reopened.claim();
@@ -609,7 +617,7 @@ describe('useClaimStakingIncentivesBatch', () => {
       });
 
       expect(pendingStatuses()).toEqual(['preparing']);
-      expect(reopened.result.current.isPending).toBe(true);
+      expect(reopened.result.current.claimButtonState).not.toBe('idle');
     });
 
     it('keeps a newer claim guarded when a dismissed one is signed and mined later', async () => {
@@ -638,7 +646,7 @@ describe('useClaimStakingIncentivesBatch', () => {
       });
 
       expect(pendingStatuses()).toEqual([`waiting ${HASH}`]);
-      expect(reopened.result.current.isPending).toBe(true);
+      expect(reopened.result.current.claimButtonState).not.toBe('idle');
     });
 
     it('guards the hash of a dismissed claim that is signed anyway', async () => {
@@ -652,7 +660,7 @@ describe('useClaimStakingIncentivesBatch', () => {
       first.unmount();
       const reopened = setup();
       act(() => reopened.result.current.dismissPendingClaim());
-      expect(reopened.result.current.isPending).toBe(false);
+      expect(reopened.result.current.claimButtonState).toBe('idle');
 
       await act(async () => {
         signFirst(OLD_HASH);
@@ -660,7 +668,7 @@ describe('useClaimStakingIncentivesBatch', () => {
       });
 
       expect(pendingStatuses()).toEqual([`waiting ${OLD_HASH}`]);
-      expect(reopened.result.current.isPending).toBe(true);
+      expect(reopened.result.current.claimButtonState).not.toBe('idle');
     });
 
     it('guards a dismissed claim signed while a newer one holds the guard, after the newer settles', async () => {
@@ -697,7 +705,7 @@ describe('useClaimStakingIncentivesBatch', () => {
         await newerClaim;
       });
       expect(pendingStatuses()).toEqual([`waiting ${OLD_HASH}`]);
-      expect(reopened.result.current.isPending).toBe(true);
+      expect(reopened.result.current.claimButtonState).not.toBe('idle');
       await reopened.claim();
       expect(reopened.props.onNotice).toHaveBeenCalledWith({
         kind: 'already-in-flight',
@@ -751,12 +759,56 @@ describe('useClaimStakingIncentivesBatch', () => {
 
     it("does not refresh for the mount's own claim confirming", async () => {
       mockPrepareClaim.mockResolvedValue(prepared(FIRST));
-      const { claim, props } = setup();
+      const settle = settleLater();
+      const { props, result } = setup();
+      let claiming: Promise<void> = Promise.resolve();
+      await act(async () => {
+        claiming = result.current.claimIncentivesForBatch(FIRST);
+      });
+      expect(pendingStatuses()).toEqual([`waiting ${HASH}`]);
 
-      await claim();
+      await act(async () => {
+        settle({ status: 'success', transactionHash: HASH });
+        await claiming;
+      });
 
       expect(props.onSuccess).toHaveBeenCalledTimes(1);
       expect(props.refetchClaimableBatches).not.toHaveBeenCalled();
+      expect(props.onBatchesRebuilt).not.toHaveBeenCalled();
+    });
+
+    it('does not refresh when an earlier modal claim is dropped before it was sent', async () => {
+      const finishPrepare = prepareLater();
+      const first = setup();
+      let firstClaim: Promise<void> = Promise.resolve();
+      await act(async () => {
+        firstClaim = first.result.current.claimIncentivesForBatch(FIRST);
+      });
+      first.unmount();
+      const reopened = setup();
+      expect(pendingStatuses()).toEqual(['preparing']);
+
+      await act(async () => {
+        finishPrepare(Promise.reject(new Error('rpc down')));
+        await firstClaim;
+      });
+
+      expect(pendingStatuses()).toEqual([]);
+      expect(reopened.props.refetchClaimableBatches).not.toHaveBeenCalled();
+    });
+
+    it('records a claim before clearing its entry, so another mount reads it as its own', async () => {
+      mockPrepareClaim.mockResolvedValue(prepared(FIRST));
+      const { claim, props } = setup();
+      let entriesWhenRecorded: string[] = [];
+      props.recordClaimedBatch.mockImplementation(() => {
+        entriesWhenRecorded = pendingStatuses();
+      });
+
+      await claim();
+
+      expect(props.recordClaimedBatch).toHaveBeenCalledWith(FIRST);
+      expect(entriesWhenRecorded).toEqual([`waiting ${HASH}`]);
     });
 
     it('names the sent hash of a claim behind one still being prepared', async () => {
@@ -790,12 +842,7 @@ describe('useClaimStakingIncentivesBatch', () => {
     });
 
     it('reports the preparing button state only while the claim is being prepared', async () => {
-      let finishPrepare: (value: unknown) => void = () => undefined;
-      mockPrepareClaim.mockReturnValueOnce(
-        new Promise((resolve) => {
-          finishPrepare = resolve;
-        }),
-      );
+      const finishPrepare = prepareLater();
       const { result } = setup();
       let claiming: Promise<void> = Promise.resolve();
       await act(async () => {
@@ -858,7 +905,7 @@ describe('useClaimStakingIncentivesBatch', () => {
       fail();
       const { claim, props, result } = setup(rebuiltBatches);
       await claim();
-      expect(result.current.isPending).toBe(false);
+      expect(result.current.claimButtonState).toBe('idle');
       const sendsBefore = mockWriteContract.mock.calls.length;
 
       mockPrepareClaim.mockResolvedValue(prepared(FIRST));
@@ -889,7 +936,7 @@ describe('useClaimStakingIncentivesBatch', () => {
 
         await claim();
         expect(result.current.pendingHash).toBeUndefined();
-        expect(result.current.isPending).toBe(false);
+        expect(result.current.claimButtonState).toBe('idle');
 
         await claim();
         expect(mockWriteContract).toHaveBeenCalledTimes(2);
@@ -905,7 +952,7 @@ describe('useClaimStakingIncentivesBatch', () => {
 
       mockAccount.current = OTHER_ACCOUNT;
       rerender();
-      expect(result.current.isPending).toBe(false);
+      expect(result.current.claimButtonState).toBe('idle');
       mockWaitForTransactionReceipt.mockResolvedValue({ status: 'success' });
       await claim();
       expect(mockWriteContract).toHaveBeenCalledTimes(2);
@@ -964,8 +1011,21 @@ describe('useClaimStakingIncentivesBatch', () => {
 
         expect(props.onLateReceipt).toHaveBeenCalledWith({ hash: HASH, claimed });
         expect(props.refetchClaimableBatches).toHaveBeenCalledTimes(1);
+        // A late confirmation still counts as an own claim; a revert does not.
+        expect(props.recordClaimedBatch.mock.calls).toEqual(claimed ? [[FIRST]] : []);
         expect(result.current.pendingHash).toBeUndefined();
-        expect(result.current.isPending).toBe(false);
+        expect(result.current.claimButtonState).toBe('idle');
+      });
+
+      it('records a late confirmation before refreshing the list', async () => {
+        const { props } = await timedOutClaim();
+        mockGetTransactionReceipt.mockResolvedValue({ status: 'success', transactionHash: HASH });
+
+        await poll();
+
+        expect(props.recordClaimedBatch.mock.invocationCallOrder[0]).toBeLessThan(
+          props.refetchClaimableBatches.mock.invocationCallOrder[0],
+        );
       });
 
       it('looks the receipt up on mainnet', async () => {
@@ -1106,7 +1166,7 @@ describe('useClaimStakingIncentivesBatch', () => {
         act(() => result.current.dismissPendingClaim());
 
         expect(result.current.pendingHash).toBeUndefined();
-        expect(result.current.isPending).toBe(false);
+        expect(result.current.claimButtonState).toBe('idle');
         mockGetTransactionReceipt.mockClear();
         await poll();
         expect(mockGetTransactionReceipt).not.toHaveBeenCalled();
