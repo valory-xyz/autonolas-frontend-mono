@@ -93,7 +93,6 @@ export const useClaimStakingIncentivesBatch = (props: ClaimStakingIncentivesBatc
     return refresh;
   };
 
-  /** Refreshes after a claim settled outside the normal path, reporting a failed refresh on its own. */
   const refreshReportingFailure = async () => {
     try {
       await refreshBatches();
@@ -150,11 +149,7 @@ export const useClaimStakingIncentivesBatch = (props: ClaimStakingIncentivesBatc
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [account, unconfirmedHash, dispatch]);
 
-  /**
-   * Refreshes after a simulation revert. A failed refresh is logged and the revert is rethrown
-   * as is, so the user learns the claim would have reverted. (Setting the refresh error as its
-   * `cause` would break the viem error chain the revert is decoded from.)
-   */
+  // The revert is rethrown as is: the refresh error as its `cause` would break viem's decoding.
   const refreshAfterRevert = async (revert: unknown) => {
     try {
       return await refreshBatches();
@@ -214,10 +209,11 @@ export const useClaimStakingIncentivesBatch = (props: ClaimStakingIncentivesBatc
     lastClaimRun += 1;
     const run = lastClaimRun;
     setPending(account, { status: 'preparing', run });
-    // A dismissed entry may since belong to a newer claim, whose guard must stay.
-    const clearOwnEntry = () => {
+    // After a Dismiss the entry may belong to a newer claim, whose guard must stay. A dismissed
+    // claim that is signed anyway takes a free entry back, so its hash is still guarded.
+    const writeOwnEntry = (next: PendingClaim | null) => {
       const current = store.getState().govern.pendingClaims[account];
-      if (current && 'run' in current && current.run === run) setPending(account, null);
+      if (current ? current.run === run : next !== null) setPending(account, next);
     };
 
     let hash: Hex | undefined;
@@ -227,7 +223,7 @@ export const useClaimStakingIncentivesBatch = (props: ClaimStakingIncentivesBatc
         if (mountedRef.current) setIsPreparing(false);
       });
       if ('kind' in prepared) {
-        clearOwnEntry();
+        writeOwnEntry(null);
         onError(prepared);
         return;
       }
@@ -237,9 +233,9 @@ export const useClaimStakingIncentivesBatch = (props: ClaimStakingIncentivesBatc
       if (!publicClient) throw new Error('No Ethereum mainnet client is configured');
 
       if (mountedRef.current) setIsSending(true);
-      setPending(account, { status: 'sending', run });
+      writeOwnEntry({ status: 'sending', run });
       hash = await writeContract(wagmiConfig, prepared.request);
-      setPending(account, { status: 'waiting', hash });
+      writeOwnEntry({ status: 'waiting', hash, run });
 
       let replacedReason: ReplacementReason | undefined;
       let receipt: TransactionReceipt;
@@ -253,7 +249,7 @@ export const useClaimStakingIncentivesBatch = (props: ClaimStakingIncentivesBatc
         });
       } catch (waitError) {
         // The transaction may still mine, so it stays pending and Claim does not send another.
-        setPending(account, { status: 'unconfirmed', hash });
+        writeOwnEntry({ status: 'unconfirmed', hash, run });
         console.error(`Could not confirm claim transaction ${hash}`, waitError);
         onError({
           kind: 'still-pending',
@@ -264,7 +260,7 @@ export const useClaimStakingIncentivesBatch = (props: ClaimStakingIncentivesBatc
         });
         return;
       }
-      setPending(account, null);
+      writeOwnEntry(null);
 
       const notClaimed = getUnclaimedReason(receipt, replacedReason);
       if (notClaimed) {
@@ -279,7 +275,7 @@ export const useClaimStakingIncentivesBatch = (props: ClaimStakingIncentivesBatc
       onSuccess();
     } catch (error) {
       // Nothing was sent, so nothing can mine: the next Claim may send.
-      if (!hash) clearOwnEntry();
+      if (!hash) writeOwnEntry(null);
       console.error(`Failed to claim staking incentives${hash ? ` (tx ${hash})` : ''}`, error);
       onError(toClaimError(error));
     } finally {

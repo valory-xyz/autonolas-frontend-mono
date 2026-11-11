@@ -9,13 +9,15 @@ import { Proposal } from 'common-util/graphql/types';
  * A staking incentives claim in flight, per account, so a reopened claim modal cannot send a
  * second one: being quoted and simulated (`preparing`), waiting for the wallet to sign
  * (`sending`), sent and awaited (`waiting`), or sent with no receipt after the wait ended
- * (`unconfirmed`). `run` identifies the claim that set a hash-less entry, so only it clears it.
+ * (`unconfirmed`). `run` identifies the claim that set the entry, so a dismissed claim never
+ * overwrites a newer one's.
  */
-export type PendingClaim =
-  | { status: 'preparing'; run: number }
-  | { status: 'sending'; run: number }
+export type PendingClaim = { run: number } & (
+  | { status: 'preparing' }
+  | { status: 'sending' }
   | { status: 'waiting'; hash: Hex }
-  | { status: 'unconfirmed'; hash: Hex };
+  | { status: 'unconfirmed'; hash: Hex }
+);
 
 interface GovernState {
   isStakingContractsLoading: boolean;
@@ -25,7 +27,6 @@ interface GovernState {
   proposalVotes: Record<string, Proposal['voteCasts'][0]>;
   /** The timestamp of the last user vote */
   lastUserVote: number | null;
-  /** See `PendingClaim`. */
   pendingClaims: Partial<Record<Address, PendingClaim>>;
 }
 

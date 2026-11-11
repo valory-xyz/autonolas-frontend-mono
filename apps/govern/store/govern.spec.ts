@@ -11,12 +11,12 @@ describe('govern slice', () => {
     let state = governReducer(initial, setStakingContracts([]));
     state = governReducer(
       state,
-      setPendingClaim({ account: ACCOUNT, pending: { status: 'waiting', hash: '0xhash' } }),
+      setPendingClaim({ account: ACCOUNT, pending: { status: 'waiting', hash: '0xhash', run: 1 } }),
     );
 
     const cleared = governReducer(state, clearState());
 
-    expect(cleared.pendingClaims[ACCOUNT]).toEqual({ status: 'waiting', hash: '0xhash' });
+    expect(cleared.pendingClaims[ACCOUNT]).toEqual({ status: 'waiting', hash: '0xhash', run: 1 });
     expect({ ...cleared, pendingClaims: {} }).toEqual(initial);
   });
 
@@ -31,7 +31,7 @@ describe('govern slice', () => {
   });
 
   it('sets and clears one account without touching another', () => {
-    const waiting = { status: 'waiting', hash: '0xother' } as const;
+    const waiting = { status: 'waiting', hash: '0xother', run: 2 } as const;
     let state = governReducer(undefined, setPendingClaim({ account: OTHER, pending: waiting }));
     state = governReducer(
       state,

@@ -573,6 +573,68 @@ describe('useClaimStakingIncentivesBatch', () => {
       expect(reopened.result.current.isPending).toBe(true);
     });
 
+    it('keeps a newer claim guarded when a dismissed one is signed and mined later', async () => {
+      const OLD_HASH = '0xold';
+      mockPrepareClaim.mockResolvedValue(prepared(FIRST));
+      let signFirst: (hash: string) => void = () => undefined;
+      mockWriteContract.mockReturnValueOnce(
+        new Promise((resolve) => {
+          signFirst = resolve;
+        }),
+      );
+      // The dismissed claim mines at once; the newer one is still awaited.
+      mockWaitForTransactionReceipt.mockImplementation(({ hash }: { hash: string }) =>
+        hash === OLD_HASH ? Promise.resolve({ status: 'success' }) : new Promise(() => undefined),
+      );
+      const first = setup();
+      let firstClaim: Promise<void> = Promise.resolve();
+      await act(async () => {
+        firstClaim = first.result.current.claimIncentivesForBatch(FIRST);
+      });
+      first.unmount();
+      const reopened = setup();
+      act(() => reopened.result.current.dismissPendingClaim());
+      await act(async () => {
+        reopened.result.current.claimIncentivesForBatch(FIRST);
+      });
+      expect(store.getState().govern.pendingClaims[ACCOUNT]).toMatchObject({
+        status: 'waiting',
+        hash: HASH,
+      });
+
+      await act(async () => {
+        signFirst(OLD_HASH);
+        await firstClaim;
+      });
+
+      expect(store.getState().govern.pendingClaims[ACCOUNT]).toMatchObject({
+        status: 'waiting',
+        hash: HASH,
+      });
+      expect(reopened.result.current.isPending).toBe(true);
+    });
+
+    it('reports isPreparing only while the claim is being prepared', async () => {
+      let finishPrepare: (value: unknown) => void = () => undefined;
+      mockPrepareClaim.mockReturnValueOnce(
+        new Promise((resolve) => {
+          finishPrepare = resolve;
+        }),
+      );
+      const { result } = setup();
+      let claiming: Promise<void> = Promise.resolve();
+      await act(async () => {
+        claiming = result.current.claimIncentivesForBatch(FIRST);
+      });
+      expect(result.current.isPreparing).toBe(true);
+
+      await act(async () => {
+        finishPrepare(prepared(FIRST));
+        await claiming;
+      });
+      expect(result.current.isPreparing).toBe(false);
+    });
+
     it('refuses a second click before the first has re-rendered', async () => {
       mockPrepareClaim.mockResolvedValue(prepared(FIRST));
       const { props, result } = setup();
@@ -722,6 +784,43 @@ describe('useClaimStakingIncentivesBatch', () => {
         expect(props.refetchClaimableBatches).toHaveBeenCalledTimes(1);
         expect(result.current.pendingHash).toBeUndefined();
         expect(result.current.isPending).toBe(false);
+      });
+
+      it('reports a late receipt once when two lookups overlap', async () => {
+        const { props } = await timedOutClaim();
+        const lookups: ((receipt: unknown) => void)[] = [];
+        mockGetTransactionReceipt.mockImplementation(
+          () =>
+            new Promise((resolve) => {
+              lookups.push(resolve);
+            }),
+        );
+        await poll();
+        await poll();
+        expect(lookups.length).toBeGreaterThanOrEqual(2);
+
+        await act(async () => {
+          lookups.forEach((resolve) => resolve({ status: 'success', transactionHash: HASH }));
+        });
+
+        expect(props.onLateReceipt).toHaveBeenCalledTimes(1);
+        expect(props.refetchClaimableBatches).toHaveBeenCalledTimes(1);
+      });
+
+      it('reports nothing for a lookup that resolves after the claim was dismissed', async () => {
+        const { props, result } = await timedOutClaim();
+        let resolveLookup: (receipt: unknown) => void = () => undefined;
+        mockGetTransactionReceipt.mockReturnValue(
+          new Promise((resolve) => {
+            resolveLookup = resolve;
+          }),
+        );
+        await poll();
+
+        act(() => result.current.dismissPendingClaim());
+        await act(async () => resolveLookup({ status: 'success', transactionHash: HASH }));
+
+        expect(props.onLateReceipt).not.toHaveBeenCalled();
       });
 
       it('logs a failed lookup, but not a receipt that does not exist yet', async () => {
