@@ -1,6 +1,6 @@
 import { ParentToChildMessageGasEstimator, registerCustomArbitrumNetwork } from '@arbitrum/sdk';
 import { ethers as ethersV5 } from 'ethers-v5';
-import { type Address, encodeAbiParameters, parseAbiParameters, zeroAddress } from 'viem';
+import { type Address, type Hex, encodeAbiParameters, parseAbiParameters, zeroAddress } from 'viem';
 import { arbitrum, mainnet } from 'viem/chains';
 
 import { RPC_URLS, robinhood } from 'libs/util-constants/src';
@@ -117,7 +117,7 @@ const GAS_LIMIT_BUFFER = 100_000;
  * A staking target the claim message carries, with the OLAS amount the Dispenser sends it. `target`
  * is the nominee account, bytes32-padded as VoteWeighting stores it.
  */
-export type BridgedIncentive = { target: Address; amount: bigint };
+export type BridgedIncentive = { target: Hex; amount: bigint };
 
 export type ArbitrumBridgeParams = {
   bridgePayload: `0x${string}`;

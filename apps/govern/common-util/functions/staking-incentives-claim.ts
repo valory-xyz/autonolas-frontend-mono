@@ -30,12 +30,11 @@ import { wagmiConfig } from 'common-util/config/wagmi';
 import { getArbitrumBridgePayload, isOrbitChainId } from './arbitrum-bridge';
 
 /** `[chainIds, stakingTargets per chain]`; targets are bytes32-padded nominee accounts. */
-export type ClaimBatch = [number[], Address[][]];
+export type ClaimBatch = [number[], Hex[][]];
 
-/** The Dispenser reverts with `WrongAmount(value, 0)` if a chain sending no message gets value. */
 export type ChainClaimQuote = {
   chainId: number;
-  targets: Address[];
+  targets: Hex[];
   /** Checkpoint-aware, rounded to the processor's bridging decimals. */
   incentives: bigint[];
 } & (
@@ -54,6 +53,9 @@ export type ClaimError =
 const NUM_CLAIMED_EPOCHS = BigInt(1);
 const MULTICALL3_ADDRESS = mainnet.contracts.multicall3.address;
 const DEPOSIT_PROCESSOR_ABI = parseAbi(['function getBridgingDecimals() view returns (uint256)']);
+const CHECKPOINT_NOMINEE_ABI = parseAbi([
+  'function checkpointNominee(bytes32 account, uint256 chainId)',
+]);
 const dispenserParams = {
   address: DISPENSER_ADDRESS,
   abi: DISPENSER.abi,
@@ -69,7 +71,7 @@ type ChainState = { processor: Address; bridgingDecimals: bigint; withheldAmount
 export class QuoteCallRevertedError extends Error {
   constructor(
     readonly functionName: 'checkpointNominee' | 'calculateStakingIncentives',
-    readonly target: Address,
+    readonly target: Hex,
     readonly chainId: number,
     readonly reason: string,
   ) {
@@ -148,7 +150,7 @@ const readIncentives = async (
         target: VOTE_WEIGHTING_ADDRESS,
         allowFailure: true,
         callData: encodeFunctionData({
-          abi: VOTE_WEIGHTING.abi,
+          abi: CHECKPOINT_NOMINEE_ABI,
           functionName: 'checkpointNominee',
           args: [target, BigInt(chainId)],
         }),
@@ -199,12 +201,6 @@ const readIncentives = async (
   );
 };
 
-/** OLAS the Dispenser bridges for a chain once withheld OLAS has covered what it can. */
-const getTransferAmount = (incentives: bigint[], withheldAmount: bigint) => {
-  const total = incentives.reduce((sum, incentive) => sum + incentive, BigInt(0));
-  return total > withheldAmount ? total - withheldAmount : BigInt(0);
-};
-
 /**
  * Quotes each chain of a batch. The Dispenser reverts with `WrongAmount(value, 0)` for a chain
  * that sends no message, so only Orbit chains with a positive incentive attach value: the message
@@ -242,7 +238,9 @@ export const quoteChainClaims = async (
           cause: error,
         });
       });
-      const sendsTokens = getTransferAmount(incentives[i], states[i].withheldAmount) > BigInt(0);
+      // The Dispenser bridges fresh OLAS only for what the chain's withheld OLAS does not cover.
+      const total = incentives[i].reduce((sum, incentive) => sum + incentive, BigInt(0));
+      const sendsTokens = total > states[i].withheldAmount;
       return {
         ...base,
         sendsMessage: true,

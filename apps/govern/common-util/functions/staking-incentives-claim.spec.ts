@@ -54,15 +54,15 @@ const TOKEN_COST = BigInt(300);
 const ZERO = BigInt(0);
 const OLAS = BigInt(10) ** BigInt(18);
 
-const target = (n: number) => pad(`0x${n.toString(16)}`, { size: 32 }) as Address;
+const target = (n: number) => pad(`0x${n.toString(16)}`, { size: 32 });
 const processor = (i: number) => `0x${(i + 1).toString(16).padStart(40, '0')}` as Address;
 const CHECKPOINT_ABI = parseAbi(['function checkpointNominee(bytes32 account, uint256 chainId)']);
 
 type ChainSetup = { withheld?: bigint; bridgingDecimals?: bigint };
 
 /**
- * Mocks the chain reads: the processors and withheld amounts, then bridging decimals,
- * then one aggregate3 call answering each target's calculateStakingIncentives with `incentives`.
+ * Mocks the chain reads: the processors and withheld amounts, then bridging decimals. Every
+ * simulation is answered too: aggregate3 with each target's `incentives`, any other with a request.
  */
 const mockChainState = (chains: ChainSetup[], incentives: bigint[][]) => {
   mockReadContracts

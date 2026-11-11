@@ -147,7 +147,10 @@ describe('<ClaimStakingIncentivesModal />', () => {
     [
       { kind: 'claims-changed' },
       notifyWarning as jest.Mock,
-      ['Claims changed while preparing the transaction'],
+      [
+        'Claims changed while preparing the transaction',
+        'The list has been refreshed. Review it and claim again.',
+      ],
     ],
     [
       { kind: 'reverted-after-simulation' },
@@ -191,7 +194,7 @@ describe('<ClaimStakingIncentivesModal />', () => {
 
     expect(notifier).toHaveBeenCalledTimes(1);
     expect(notifyError).toHaveBeenCalledTimes(notifier === notifyError ? 1 : 0);
-    expect(notifier.mock.calls[0].slice(0, expectedArgs.length)).toEqual(expectedArgs);
+    expect(notifier).toHaveBeenCalledWith(...expectedArgs);
   });
 
   it('shows a failed first load as an error, not as everything claimed', () => {
