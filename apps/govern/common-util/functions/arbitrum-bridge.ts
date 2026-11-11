@@ -4,6 +4,7 @@ import { type Address, encodeAbiParameters, parseAbiParameters, zeroAddress } fr
 import { arbitrum, mainnet } from 'viem/chains';
 
 import { RPC_URLS, robinhood } from 'libs/util-constants/src';
+import { getAddressFromBytes32 } from 'libs/util-functions/src';
 
 export const ARBITRUM_CHAIN_ID = arbitrum.id;
 export const ROBINHOOD_CHAIN_ID = robinhood.id;
@@ -112,7 +113,10 @@ export const GAS_OVERRIDES = {
 /** Extra buffer added to gas limit for message execution */
 const GAS_LIMIT_BUFFER = 100_000;
 
-/** A staking target the claim message carries, with the OLAS amount the Dispenser sends it. */
+/**
+ * A staking target the claim message carries, with the OLAS amount the Dispenser sends it. `target`
+ * is the nominee account, bytes32-padded as VoteWeighting stores it.
+ */
 export type BridgedIncentive = { target: Address; amount: bigint };
 
 export type ArbitrumBridgeParams = {
@@ -161,7 +165,8 @@ export const getArbitrumBridgePayload = async (
   const innerData = ethersV5.utils.defaultAbiCoder.encode(
     ['address[]', 'uint256[]', 'bytes32'],
     [
-      incentives.map(({ target }) => target),
+      // The message carries the 20-byte staking address; ethers rejects the padded nominee account.
+      incentives.map(({ target }) => getAddressFromBytes32(target)),
       incentives.map(({ amount }) => ethersV5.BigNumber.from(amount.toString())),
       ethersV5.constants.HashZero,
     ],

@@ -80,9 +80,13 @@ describe('isOrbitChainId', () => {
 });
 
 describe('getArbitrumBridgePayload', () => {
+  // Nominee accounts are bytes32-padded, as VoteWeighting stores them.
+  const STAKING_A = '0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa';
+  const STAKING_B = '0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb';
+  const padded = (address: string) => `0x${address.slice(2).padStart(64, '0')}` as const;
   const stakingTargets = [
-    { target: '0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa' as const, amount: 7n * 10n ** 18n },
-    { target: '0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb' as const, amount: 3n },
+    { target: padded(STAKING_A), amount: 7n * 10n ** 18n },
+    { target: padded(STAKING_B), amount: 3n },
   ];
 
   const mockGasPriceBid = BigNumber.from('100000000'); // 0.1 gwei
@@ -204,9 +208,7 @@ describe('getArbitrumBridgePayload', () => {
       ['address[]', 'uint256[]', 'bytes32'],
       innerData,
     );
-    expect(targets.map((target: string) => target.toLowerCase())).toEqual(
-      stakingTargets.map(({ target }) => target),
-    );
+    expect(targets.map((target: string) => target.toLowerCase())).toEqual([STAKING_A, STAKING_B]);
     expect(amounts.map((amount: BigNumber) => BigInt(amount.toString()))).toEqual(
       stakingTargets.map(({ amount }) => amount),
     );
