@@ -76,7 +76,6 @@ describe('common-utils/addresses', () => {
           );
           if (!localArtifact) continue;
 
-          // Fetch the remote artifact of the contract the configuration names
           const remoteArtifactResponse = await fetch(
             REGISTRIES_REPO_URL + currentContract.artifact,
           );
@@ -112,6 +111,23 @@ describe('common-utils/addresses', () => {
       expect({ chainId, candidates: multisigCandidates[chainId] }).toEqual({
         chainId,
         candidates: expect.arrayContaining([address]),
+      });
+    });
+  });
+
+  it('offers no same-address adapter as a Safe creation wrapper (D10)', () => {
+    const adapters = (pinnedRegistriesConfig as unknown as Chain[]).flatMap(({ chainId, contracts }) =>
+      contracts
+        .filter(({ name }) => name.endsWith('SameAddressMultisig'))
+        .map(({ address }) => ({ chainId, address: address.toLowerCase() })),
+    );
+
+    expect(adapters.length).toBeGreaterThan(0);
+    adapters.forEach(({ chainId, address }) => {
+      const candidates = (multisigCandidates[chainId] ?? []).map((c) => c.toLowerCase());
+      expect({ chainId, offersAdapter: candidates.includes(address) }).toEqual({
+        chainId,
+        offersAdapter: false,
       });
     });
   });

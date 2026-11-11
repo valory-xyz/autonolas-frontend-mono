@@ -165,8 +165,8 @@ Services have 6 states with step-by-step UI in `components/ListServices/ServiceS
 
 - `multisigCandidates` (`common-util/Contracts/addresses.tsx`, read-only) lists every `GnosisSafeMultisig` wrapper per chain. While a chain moves to a new wrapper it lists both the old and the new one.
 - `getEnabledMultisigs(chainId)` (`components/ListServices/utils.tsx`) filters those candidates through `ServiceRegistry.mapMultisigs` (one `readContracts` with `allowFailure: false`), so step 3 offers only wrappers the chain still enables.
-- `3rdStepFinishedRegistration` clears the selection when the chain changes and ignores a late answer for the previous chain. On submit it re-checks that the selected wrapper is still enabled before `deploy`, and it blocks a second submit while that check runs. When no wrapper is enabled it says so instead of showing an empty panel.
-- `tests/common-util/Contracts/addresses.test.tsx` checks the candidates against a pinned copy of registries' `docs/configuration.json` (`tests/fixtures/registries-configuration.json`). Re-capture the fixture when registries publishes new wrappers.
+- `3rdStepFinishedRegistration` clears the selection when the chain changes and ignores a late answer for the previous chain. On submit it re-checks that the selected wrapper is still enabled, refuses if the chain changed meanwhile, and blocks a second submit while that check runs. A failed `deploy` is shown with its decoded revert name. When no wrapper is enabled, or the read failed (with a Retry), it says so instead of showing an empty panel.
+- `tests/common-util/Contracts/addresses.test.tsx` checks the candidates against a pinned copy of registries' `docs/configuration.json` (`tests/fixtures/registries-configuration.json`): every `GnosisSafeMultisig` is a candidate, and no `*SameAddressMultisig` adapter is (D10). Re-capture the fixture when registries publishes new wrappers.
 
 ### Mech Marketplace Activity
 

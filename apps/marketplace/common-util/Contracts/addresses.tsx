@@ -100,11 +100,7 @@ export const ADDRESSES = {
 export type ChainIds = keyof typeof ADDRESSES;
 
 export type MultisigCandidates = Readonly<Record<ChainIds, readonly Address[]>>;
-/**
- * Safe creation wrappers (GnosisSafeMultisig) per chain. While a chain moves to a new wrapper it
- * lists both, and only those enabled in `ServiceRegistry.mapMultisigs` are offered.
- * Addresses: https://github.com/valory-xyz/autonolas-registries/blob/main/docs/configuration.json
- */
+/** Addresses: https://github.com/valory-xyz/autonolas-registries/blob/main/docs/configuration.json */
 export const multisigCandidates: MultisigCandidates = {
   [mainnet.id]: ['0x46C0D07F55d4F9B5Eed2Fc9680B5953e5fd7b461'],
   [optimism.id]: ['0x5953f21495BD9aF1D78e87bb42AcCAA55C1e896C'],
