@@ -614,6 +614,37 @@ describe('useClaimStakingIncentivesBatch', () => {
       expect(reopened.result.current.isPending).toBe(true);
     });
 
+    it('guards the hash of a dismissed claim that is signed anyway', async () => {
+      const OLD_HASH = '0xold';
+      mockPrepareClaim.mockResolvedValue(prepared(FIRST));
+      let signFirst: (hash: string) => void = () => undefined;
+      mockWriteContract.mockReturnValueOnce(
+        new Promise((resolve) => {
+          signFirst = resolve;
+        }),
+      );
+      mockWaitForTransactionReceipt.mockReturnValue(new Promise(() => undefined));
+      const first = setup();
+      await act(async () => {
+        first.result.current.claimIncentivesForBatch(FIRST);
+      });
+      first.unmount();
+      const reopened = setup();
+      act(() => reopened.result.current.dismissPendingClaim());
+      expect(reopened.result.current.isPending).toBe(false);
+
+      await act(async () => {
+        signFirst(OLD_HASH);
+        await Promise.resolve();
+      });
+
+      expect(store.getState().govern.pendingClaims[ACCOUNT]).toMatchObject({
+        status: 'waiting',
+        hash: OLD_HASH,
+      });
+      expect(reopened.result.current.isPending).toBe(true);
+    });
+
     it('reports isPreparing only while the claim is being prepared', async () => {
       let finishPrepare: (value: unknown) => void = () => undefined;
       mockPrepareClaim.mockReturnValueOnce(
