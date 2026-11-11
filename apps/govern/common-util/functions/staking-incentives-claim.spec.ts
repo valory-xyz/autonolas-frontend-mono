@@ -106,7 +106,7 @@ describe('quoteChainClaims', () => {
 
     const [quote] = await quoteChainClaims([[ARBITRUM], [[target(1), target(2)]]], ACCOUNT);
 
-    expect(quote).toMatchObject({ sendsMessage: false, value: ZERO, bridgePayload: '0x' });
+    expect(quote).toMatchObject({ value: ZERO, bridgePayload: '0x' });
     expect(mockGetArbitrumBridgePayload).not.toHaveBeenCalled();
   });
 
@@ -116,7 +116,6 @@ describe('quoteChainClaims', () => {
     const [quote] = await quoteChainClaims([[ARBITRUM], [[target(1)]]], ACCOUNT);
 
     expect(quote).toMatchObject({
-      sendsMessage: true,
       value: MESSAGE_COST + TOKEN_COST,
       bridgePayload: ORBIT_PAYLOAD,
     });
@@ -127,7 +126,7 @@ describe('quoteChainClaims', () => {
 
     const [quote] = await quoteChainClaims([[ARBITRUM], [[target(1)]]], ACCOUNT);
 
-    expect(quote).toMatchObject({ sendsMessage: true, value: MESSAGE_COST });
+    expect(quote).toMatchObject({ value: MESSAGE_COST });
   });
 
   it('charges the token cost when withheld OLAS covers only part of the incentive', async () => {
@@ -362,6 +361,59 @@ describe('quoteChainClaims', () => {
     expect(aggregate?.[1].abi).toBe(multicall3Abi);
     expect(aggregate?.[1].account).toBe(ACCOUNT);
   });
+
+  it('reads each chain processor and withheld amount, then the decimals from that processor', async () => {
+    mockChainState([{}, {}], [[OLAS], [OLAS]]);
+
+    await quoteChainClaims(
+      [
+        [GNOSIS, ARBITRUM],
+        [[target(1)], [target(2)]],
+      ],
+      ACCOUNT,
+    );
+
+    const [dispenserReads, decimalsReads] = mockReadContracts.mock.calls.map(
+      ([, { contracts }]) =>
+        contracts as { address: Address; functionName: string; args?: unknown[] }[],
+    );
+    expect(
+      dispenserReads.map(({ address, functionName, args }) => [address, functionName, args]),
+    ).toEqual([
+      [DISPENSER_ADDRESS, 'mapChainIdDepositProcessors', [BigInt(GNOSIS)]],
+      [DISPENSER_ADDRESS, 'mapChainIdWithheldAmounts', [BigInt(GNOSIS)]],
+      [DISPENSER_ADDRESS, 'mapChainIdDepositProcessors', [BigInt(ARBITRUM)]],
+      [DISPENSER_ADDRESS, 'mapChainIdWithheldAmounts', [BigInt(ARBITRUM)]],
+    ]);
+    expect(decimalsReads.map(({ address, functionName }) => [address, functionName])).toEqual([
+      [processor(0), 'getBridgingDecimals'],
+      [processor(1), 'getBridgingDecimals'],
+    ]);
+  });
+
+  it('calculates each chain incentive with that chain own bridging decimals', async () => {
+    mockChainState(
+      [{ bridgingDecimals: BigInt(8) }, { bridgingDecimals: BigInt(18) }],
+      [[OLAS], [OLAS]],
+    );
+
+    await quoteChainClaims(
+      [
+        [GNOSIS, ARBITRUM],
+        [[target(1)], [target(2)]],
+      ],
+      ACCOUNT,
+    );
+
+    const aggregate = mockSimulateContract.mock.calls.find(
+      ([, { functionName }]) => functionName === 'aggregate3',
+    );
+    const calls = aggregate?.[1].args[0] as { callData: Hex }[];
+    const decimals = [calls[1], calls[3]].map(
+      ({ callData }) => decodeFunctionData({ abi: DISPENSER.abi, data: callData }).args?.[3],
+    );
+    expect(decimals).toEqual([BigInt(8), BigInt(18)]);
+  });
 });
 
 describe('prepareClaim', () => {
@@ -381,8 +433,10 @@ describe('prepareClaim', () => {
       [[target(1)], [target(2)]],
     ];
 
-    await prepareClaim(batch, ACCOUNT);
+    const prepared = await prepareClaim(batch, ACCOUNT);
 
+    // The batch it simulated, which a confirmed claim records.
+    expect(prepared.batch).toEqual(batch);
     const claim = mockSimulateContract.mock.calls.find(
       ([, { functionName }]) => functionName === 'claimStakingIncentivesBatch',
     )?.[1];

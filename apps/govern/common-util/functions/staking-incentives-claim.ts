@@ -36,8 +36,6 @@ export type ChainClaimQuote = {
   targets: `0x${string}`[];
   /** Checkpoint-aware, rounded to the processor's bridging decimals. */
   incentives: bigint[];
-  /** Some incentive is positive, so the Dispenser sends this chain a message. */
-  sendsMessage: boolean;
   /** ETH attached for this chain; see `quoteChainClaims` for when it is non-zero. */
   value: bigint;
   bridgePayload: `0x${string}`;
@@ -222,11 +220,12 @@ export const quoteChainClaims = async (
         chainId,
         targets,
         incentives: incentives[i],
-        sendsMessage: sendingTargets.length > 0,
         value: BigInt(0),
         bridgePayload: '0x',
       };
-      if (!quote.sendsMessage || !isOrbitChainId(chainId)) return quote;
+      // A positive incentive is what makes the Dispenser send this chain a message.
+      const sendsMessage = sendingTargets.length > 0;
+      if (!sendsMessage || !isOrbitChainId(chainId)) return quote;
 
       const { bridgePayload, messageCost, tokenCost } = await getArbitrumBridgePayload(
         sendingTargets,
@@ -245,7 +244,8 @@ export const quoteChainClaims = async (
 
 /**
  * Quotes the batch, simulates the exact claim the wallet will be asked to sign, and sizes its gas.
- * The estimate runs the claim again, so a claim that moved meanwhile reverts here too.
+ * The estimate runs the claim again, so a claim that moved meanwhile reverts here too. Returns
+ * the batch it simulated, which is the one a confirmed claim records.
  */
 export const prepareClaim = async (batch: ClaimBatch, account: Address) => {
   const quotes = await quoteChainClaims(batch, account);
@@ -264,7 +264,11 @@ export const prepareClaim = async (batch: ClaimBatch, account: Address) => {
   };
   const { request } = await simulateContract(wagmiConfig, params);
   const gas = await estimateGasWithBuffer(wagmiConfig, params);
-  return { quotes, request: { ...request, gas } };
+  const simulatedBatch: ClaimBatch = [
+    quotes.map(({ chainId }) => chainId),
+    quotes.map(({ targets }) => targets),
+  ];
+  return { quotes, batch: simulatedBatch, request: { ...request, gas } };
 };
 
 /** A contract revert, as opposed to an RPC, network or wallet failure. */

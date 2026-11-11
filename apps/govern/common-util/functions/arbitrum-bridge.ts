@@ -113,9 +113,9 @@ const GAS_LIMIT_BUFFER = 100_000;
 
 export type ArbitrumBridgeParams = {
   bridgePayload: `0x${string}`;
-  /** ETH the processor spends on the staking message; charged whenever the chain sends one. */
+  /** ETH the processor spends on the staking message. */
   messageCost: bigint;
-  /** ETH the processor spends on the OLAS token bridge; charged only when fresh OLAS is sent. */
+  /** ETH the processor spends on the OLAS token bridge. */
   tokenCost: bigint;
 };
 
