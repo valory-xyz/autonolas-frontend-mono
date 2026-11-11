@@ -4,6 +4,7 @@ import PropTypes from 'prop-types';
 import { useEffect, useRef, useState } from 'react';
 
 import { notifyError, notifySuccess } from 'libs/util-functions/src';
+import { findContractRevert, formatRevert } from 'libs/util-functions/src/lib/contractRevert';
 import { FALLBACK_HANDLER, multisigCandidates } from 'common-util/Contracts/addresses';
 import { RegistryForm } from 'common-util/TransactionHelpers/RegistryForm';
 import { SendTransactionButton } from 'common-util/TransactionHelpers/SendTransactionButton';
@@ -18,13 +19,6 @@ import { onStep3Deploy } from '../utils';
 
 const STEP = 3;
 const OPTION_1 = 'Creates a new service multisig with currently registered agent instances';
-
-/** The decoded revert name viem attaches to a contract error, e.g. `MultisigAlreadyBound`. */
-const getRevertName = (error) => {
-  const revert =
-    typeof error?.walk === 'function' ? error.walk((cause) => cause?.data?.errorName) : null;
-  return revert?.data?.errorName ?? null;
-};
 
 const SvmFinishedRegistration = ({
   isOwner,
@@ -216,9 +210,9 @@ export const FinishedRegistration = ({
         await onStep3Deploy(account, serviceId, radioValue, payload);
       } catch (error) {
         console.error(error);
-        const revertName = getRevertName(error);
+        const revert = findContractRevert(error)?.data;
         notifyError(
-          `Error occurred while deploying${revertName ? `: ${revertName}` : ''}. Please try again.`,
+          `Error occurred while deploying${revert ? `: ${formatRevert(revert)}` : ''}. Please try again.`,
         );
         return;
       }

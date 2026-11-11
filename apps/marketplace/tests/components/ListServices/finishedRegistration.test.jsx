@@ -1,6 +1,13 @@
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import {
+  ContractFunctionExecutionError,
+  ContractFunctionRevertedError,
+  encodeErrorResult,
+  getAddress,
+} from 'viem';
 
-import { notifyError } from 'libs/util-functions/src';
+import { notifyError, notifySuccess } from 'libs/util-functions/src';
+import { SERVICE_MANAGER_TOKEN_CONTRACT } from 'common-util/AbiAndAddresses';
 import { useHelpers } from 'common-util/hooks';
 
 import { FinishedRegistration } from '../../../components/ListServices/ServiceState/3rdStepFinishedRegistration';
@@ -53,8 +60,16 @@ const renderStep = (chainId) => {
     useHelpers.mockReturnValue({ account: '0xowner', chainId: nextChainId, isSvm: false });
     view.rerender(<FinishedRegistration {...props} />);
   };
-  return { switchChain };
+  return { props, switchChain };
 };
+
+const { abi } = SERVICE_MANAGER_TOKEN_CONTRACT;
+// What wagmi throws for a reverted deploy: the decoded revert wrapped in an execution error.
+const deployError = (data) =>
+  new ContractFunctionExecutionError(
+    new ContractFunctionRevertedError({ abi, data, functionName: 'deploy' }),
+    { abi, functionName: 'deploy', args: [] },
+  );
 
 const selectWrapper = async (address) => {
   fireEvent.click(await screen.findByRole('radio', { name: address }));
@@ -64,7 +79,7 @@ const selectWrapper = async (address) => {
 describe('FinishedRegistration multisig picker', () => {
   beforeEach(() => {
     // Not resetAllMocks: that would also reset jest.setup's window.matchMedia mock, which antd needs.
-    [getEnabledMultisigs, onStep3Deploy, notifyError, useHelpers].forEach((mock) =>
+    [getEnabledMultisigs, onStep3Deploy, notifyError, notifySuccess, useHelpers].forEach((mock) =>
       mock.mockReset(),
     );
     jest.spyOn(console, 'warn').mockImplementation(() => undefined);
@@ -129,6 +144,8 @@ describe('FinishedRegistration multisig picker', () => {
     fireEvent.click(submit);
     await waitFor(() => expect(getEnabledMultisigs).toHaveBeenCalledTimes(checksBeforeSubmit + 1));
     fireEvent.click(submit);
+    // antd validates before calling onFinish, so let the second submit settle before the check does.
+    await act(() => new Promise((resolve) => setTimeout(resolve, 100)));
     await act(async () => check.resolve([A]));
 
     await waitFor(() => expect(onStep3Deploy).toHaveBeenCalledTimes(1));
@@ -188,22 +205,57 @@ describe('FinishedRegistration multisig picker', () => {
 
   it('tells the owner why a deploy failed', async () => {
     getEnabledMultisigs.mockResolvedValueOnce([A]).mockResolvedValueOnce([A]);
-    const revert = {
-      walk: (predicate) =>
-        predicate({ data: { errorName: 'MultisigAlreadyBound' } })
-          ? { data: { errorName: 'MultisigAlreadyBound' } }
-          : null,
-    };
-    onStep3Deploy.mockRejectedValue(revert);
+    onStep3Deploy.mockRejectedValue(
+      deployError(
+        encodeErrorResult({
+          abi,
+          errorName: 'MultisigAlreadyBound',
+          args: [A, BigInt(2), BigInt(1)],
+        }),
+      ),
+    );
     renderStep(GNOSIS);
 
     fireEvent.click(await selectWrapper(A));
 
     await waitFor(() =>
       expect(notifyError).toHaveBeenCalledWith(
-        'Error occurred while deploying: MultisigAlreadyBound. Please try again.',
+        `Error occurred while deploying: MultisigAlreadyBound(${getAddress(A)}, 2, 1). Please try again.`,
       ),
     );
+  });
+
+  it('reports a deploy failure with no decoded revert without a reason', async () => {
+    getEnabledMultisigs.mockResolvedValueOnce([A]).mockResolvedValueOnce([A]);
+    onStep3Deploy.mockRejectedValue(deployError('0x'));
+    renderStep(GNOSIS);
+
+    fireEvent.click(await selectWrapper(A));
+
+    await waitFor(() =>
+      expect(notifyError).toHaveBeenCalledWith('Error occurred while deploying. Please try again.'),
+    );
+  });
+
+  it('reports a deploy that succeeded even when the details refresh fails', async () => {
+    getEnabledMultisigs.mockResolvedValueOnce([A]).mockResolvedValueOnce([A]);
+    onStep3Deploy.mockResolvedValue(undefined);
+    const { props } = renderStep(GNOSIS);
+    props.updateDetails.mockRejectedValue(new Error('rpc down'));
+
+    const submit = await selectWrapper(A);
+    fireEvent.click(submit);
+
+    await waitFor(() =>
+      expect(notifyError).toHaveBeenCalledWith(
+        'Deployed, but the service details could not be refreshed. Reload the page.',
+      ),
+    );
+    expect(notifySuccess).toHaveBeenCalledWith('Deployed successfully');
+    expect(notifyError).not.toHaveBeenCalledWith(
+      expect.stringContaining('Error occurred while deploying'),
+    );
+    await waitFor(() => expect(submit).toBeEnabled());
   });
 
   it('refuses to deploy when the chain changed during the submit check', async () => {

@@ -115,7 +115,7 @@ describe('common-utils/addresses', () => {
     });
   });
 
-  it('offers no same-address adapter as a Safe creation wrapper (D10)', () => {
+  it('offers no same-address adapter, which reuses a multisig, as a Safe creation wrapper', () => {
     const adapters = (pinnedRegistriesConfig as unknown as Chain[]).flatMap(
       ({ chainId, contracts }) =>
         contracts
