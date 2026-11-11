@@ -1,6 +1,6 @@
 import { Request, Delivery, FeeUnit } from 'common-util/types';
 import { MARKETPLACE_SUBGRAPH_CLIENTS, type MarketplaceSubgraphChainId } from './index';
-import { getSubgraphDialect, omitOnSquid, type SubgraphDialect } from './dialect';
+import { getMarketplaceDialect, omitOnSquid, type SubgraphDialect } from './dialect';
 
 type ActivityType = 'Demand' | 'Supply';
 
@@ -262,8 +262,10 @@ export const getServiceActivityFromMarketplaceSubgraph = async ({
 }) => {
   const client = MARKETPLACE_SUBGRAPH_CLIENTS[chainId];
 
-  const query = getQueryForServiceActivity(getSubgraphDialect(chainId));
-  const response: Omit<ActivityResponse, 'id'> = await client.request(query, { serviceId });
+  const query = getQueryForServiceActivity(getMarketplaceDialect(chainId));
+  const response: Omit<ActivityResponse, 'id'> = await client.request(query, {
+    serviceId,
+  });
   const serviceActivity = mergeServiceActivity({ id: serviceId, ...response });
   return serviceActivity;
 };

@@ -12,6 +12,16 @@ jest.mock('common-util/graphql/index', () => ({
         return mockRequest;
       },
     },
+    137: {
+      get request() {
+        return mockRequest;
+      },
+    },
+    8453: {
+      get request() {
+        return mockRequest;
+      },
+    },
     4663: {
       get request() {
         return mockRequest;
@@ -41,7 +51,10 @@ const squidResponse = {
           mech: MECH,
           transactionHash: '0xdel',
           blockTimestamp: '300',
-          marketplaceDelivery: { ipfsHashBytes: '0xdelhash', deliveryRate: '10000' },
+          marketplaceDelivery: {
+            ipfsHashBytes: '0xdelhash',
+            deliveryRate: '10000',
+          },
         },
       ],
     },
@@ -52,7 +65,10 @@ const squidResponse = {
       mech: MECH,
       blockTimestamp: '300',
       transactionHash: '0xdel',
-      marketplaceDelivery: { ipfsHashBytes: '0xdelhash', deliveryRate: '10000' },
+      marketplaceDelivery: {
+        ipfsHashBytes: '0xdelhash',
+        deliveryRate: '10000',
+      },
       request: {
         id: 'req-1',
         blockTimestamp: '200',
@@ -67,16 +83,22 @@ const squidResponse = {
 describe('getServiceActivityFromMarketplaceSubgraph', () => {
   beforeEach(() => mockRequest.mockReset());
 
-  it('sends the service id as a variable with the squid document', async () => {
-    mockRequest.mockResolvedValueOnce({ requests: [], delivers: [] });
+  it.each([137, 8453, 4663] as const)(
+    'sends the service id with the squid document on %s',
+    async (chainId) => {
+      mockRequest.mockResolvedValueOnce({ requests: [], delivers: [] });
 
-    await getServiceActivityFromMarketplaceSubgraph({ chainId: 4663, serviceId: '7' });
+      await getServiceActivityFromMarketplaceSubgraph({
+        chainId,
+        serviceId: '7',
+      });
 
-    const [doc, variables] = mockRequest.mock.calls[0];
-    expect(doc).toContain('$serviceId: String!');
-    expect(doc).toContain('id_eq: $serviceId');
-    expect(variables).toEqual({ serviceId: '7' });
-  });
+      const [doc, variables] = mockRequest.mock.calls[0];
+      expect(doc).toContain('$serviceId: String!');
+      expect(doc).toContain('id_eq: $serviceId');
+      expect(variables).toEqual({ serviceId: '7' });
+    },
+  );
 
   it('converts a squid-shaped response (marketplace payloads only) on both sides', async () => {
     mockRequest.mockResolvedValueOnce(squidResponse);

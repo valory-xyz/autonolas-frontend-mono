@@ -3,7 +3,7 @@ import { shouldUseMechAnalytics } from 'common-util/mechAnalytics/config';
 import { fetchRequesterMetrics } from 'common-util/mechAnalytics/client';
 import { mapWithConcurrency } from 'common-util/mechAnalytics/concurrency';
 import { MARKETPLACE_SUBGRAPH_CLIENTS, type MarketplaceSubgraphChainId } from './index';
-import { getSubgraphDialect, omitOnSquid, type SubgraphDialect } from './dialect';
+import { getMarketplaceDialect, omitOnSquid, type SubgraphDialect } from './dialect';
 
 // Max in-flight requester-metrics fetches. Higher = faster response,
 // more pressure on mech-analytics + the serverless function's socket budget.
@@ -193,7 +193,7 @@ export const getServiceEndpointsFromMarketplaceSubgraph = async ({
   serviceId: string;
 }): Promise<{ multisigs: string[]; mechAddresses: string[] }> => {
   const client = MARKETPLACE_SUBGRAPH_CLIENTS[chainId];
-  const dialect = getSubgraphDialect(chainId);
+  const dialect = getMarketplaceDialect(chainId);
   const response = await client.request<{
     service?: ServiceDetails | null;
     serviceById?: ServiceDetails | null;
@@ -221,7 +221,7 @@ export const getServicesFromMarketplaceSubgraph = async ({
   serviceIds: string[];
 }): Promise<Service[]> => {
   const client = MARKETPLACE_SUBGRAPH_CLIENTS[chainId];
-  const dialect = getSubgraphDialect(chainId);
+  const dialect = getMarketplaceDialect(chainId);
 
   const query = getQueryForServiceDetails({ serviceIds, dialect });
   const response = await client.request<ServiceDetailsResponse>(query);

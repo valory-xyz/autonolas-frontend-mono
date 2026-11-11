@@ -21,7 +21,7 @@ Discover, register, deploy, and interact with **mechs** (autonomous AI agents) a
 - **Registry**: `NEXT_PUBLIC_REGISTRY_URL`, `NEXT_PUBLIC_AUTONOLAS_URL`; Safe APIs per chain.
 - **Marketplace activity subgraphs** (per chain): `NEXT_PUBLIC_*_MARKETPLACE_SUBGRAPH_URL` for Ethereum (1), Optimism (10), Gnosis (100), Polygon (137), Base (8453), Arbitrum (42161), Celo (42220).
 - **Registry subgraphs**: Ethereum (1), Optimism (10), Gnosis (100), Polygon (137), Base (8453), Mode (34443), Arbitrum (42161), Celo (42220).
-- **Robinhood Chain (4663)** — route slug `robinhood-chain`. Served by **SQD squids**, not subgraphs: `NEXT_PUBLIC_ROBINHOOD_MARKETPLACE_SUBGRAPH_URL` and `NEXT_PUBLIC_ROBINHOOD_REGISTRY_SUBGRAPH` point at `subgraph.autonolas.tech/squid/{marketplace,service-registry}-robinhood/graphql`. Squids speak the OpenReader dialect (`serviceById`, `limit`, `orderBy: field_DESC`, `where: {rel: {id_eq}}`), so every query builder in `common-util/graphql/` branches on `getSubgraphDialect(chainId)` from `common-util/graphql/dialect.ts`; the squid has no legacy `mechRequest` / `mechDelivery` / `Service.mechs` entities. Chain definition: `libs/util-constants/src/lib/chains.ts` (`robinhood`, viem has no entry). Not covered by mech-analytics.
+- **Robinhood Chain (4663)** — route slug `robinhood-chain`. Served by **SQD squids**, not subgraphs: `NEXT_PUBLIC_ROBINHOOD_MARKETPLACE_SUBGRAPH_URL` and `NEXT_PUBLIC_ROBINHOOD_REGISTRY_SUBGRAPH` point at `subgraph.autonolas.tech/squid/{marketplace,service-registry}-robinhood/graphql`. Squids speak the OpenReader dialect (`serviceById`, `limit`, `orderBy: field_DESC`, `where: {rel: {id_eq}}`), so every query builder in `common-util/graphql/` branches on `getMarketplaceDialect(chainId)` / `getRegistryDialect(chainId)` from `common-util/graphql/dialect.ts`; the squid has no legacy `mechRequest` / `mechDelivery` / `Service.mechs` entities. Chain definition: `libs/util-constants/src/lib/chains.ts` (`robinhood`, viem has no entry). Not covered by mech-analytics.
 - **mech-analytics** (activity read path, chains 10 / 100 / 137 / 8453):
   - API base URL is built in, not an env var: `MECH_ANALYTICS_URL` in `common-util/mechAnalytics/config.ts` (`https://mech-analytics-api.autonolas.tech`). If the endpoint moves, change the constant.
   - `NEXT_PUBLIC_USE_MECH_ANALYTICS_ROWS` — the only switch. Default ON when unset; set to exactly `"false"` to fall back to the subgraph reader.
@@ -320,3 +320,11 @@ The `ipfsRetrievable` gate on `AddressLink` renders CIDs as text always, and wra
 
 - `components/Meta.tsx` renders per-page `<title>`/`<meta>` plus a `<link rel="canonical">` built from `pageUrl` (query-string-free) — pass clean `pageUrl` values (no `?legacy=`, `?activity=`, etc.) so query-param variants consolidate onto one canonical URL.
 - Since list pages exist per network, their titles must include the network or the same list type on different chains is a duplicate title. Use `getNetworkDisplayName(network)` (`common-util/functions`) to map the route slug (e.g. `arbitrum-one`) to a display name (e.g. `Arbitrum One`); the AI Agents list/mint and `[network]` dashboard build titles like `AI Agents on Gnosis`.
+
+### Base and Polygon Marketplace cutover
+
+Marketplace uses SQD on chains 8453 and 137, with the existing
+`NEXT_PUBLIC_MARKETPLACE_BASE_SQUID_URL` and
+`NEXT_PUBLIC_MARKETPLACE_POLYGON_SQUID_URL` set to the corresponding squid
+endpoints. Registry dialects are selected independently and are unchanged.
+Rebuild after changing these public environment variables.

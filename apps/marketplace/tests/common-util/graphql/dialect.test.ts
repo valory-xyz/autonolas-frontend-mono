@@ -1,10 +1,11 @@
-import { getSubgraphDialect, omitOnSquid, SQUID_CHAIN_IDS } from 'common-util/graphql/dialect';
 import {
-  MARKETPLACE_SUBGRAPH_CLIENTS,
-  REGISTRY_SUBGRAPH_CLIENTS,
-  type MarketplaceSubgraphChainId,
-  type RegistrySubgraphChainId,
-} from 'common-util/graphql/index';
+  getMarketplaceDialect,
+  getRegistryDialect,
+  omitOnSquid,
+  MARKETPLACE_SQUID_CHAIN_IDS,
+  REGISTRY_SQUID_CHAIN_IDS,
+} from 'common-util/graphql/dialect';
+import { MARKETPLACE_SUBGRAPH_CLIENTS, REGISTRY_SUBGRAPH_CLIENTS } from 'common-util/graphql/index';
 import { getServiceQuery } from 'common-util/graphql/registry';
 import { getQueryForServiceActivity } from 'common-util/graphql/service-activity';
 import {
@@ -15,27 +16,36 @@ import {
 
 const squeeze = (s: string) => s.replace(/\s+/g, ' ').trim();
 
-describe('getSubgraphDialect', () => {
-  it('maps Robinhood to the squid dialect and every other chain to The Graph', () => {
-    expect(SQUID_CHAIN_IDS).toEqual([4663]);
-    expect(getSubgraphDialect(4663)).toBe('squid');
-    const graphChains: (MarketplaceSubgraphChainId | RegistrySubgraphChainId)[] = [
-      1, 10, 100, 137, 8453, 34443, 42161, 42220,
-    ];
-    for (const chainId of graphChains) {
-      expect(getSubgraphDialect(chainId)).toBe('graph');
+describe('indexer dialects', () => {
+  it.each([137, 8453] as const)(
+    'migrates marketplace on %s without switching its registry',
+    (chainId) => {
+      expect(getMarketplaceDialect(chainId)).toBe('squid');
+      expect(getRegistryDialect(chainId)).toBe('graph');
+    },
+  );
+
+  it('keeps Robinhood on squid and the other existing chains on Graph', () => {
+    expect(getMarketplaceDialect(4663)).toBe('squid');
+    expect(getRegistryDialect(4663)).toBe('squid');
+    for (const chainId of [1, 10, 100, 42161] as const) {
+      expect(getMarketplaceDialect(chainId)).toBe('graph');
+      expect(getRegistryDialect(chainId)).toBe('graph');
     }
+    expect(getRegistryDialect(34443)).toBe('graph');
+    expect(getRegistryDialect(42220)).toBe('graph');
   });
 
-  // A squid chain without a client entry would only fail at the first request.
-  it('every squid chain has a marketplace and a registry client', () => {
-    for (const chainId of SQUID_CHAIN_IDS) {
+  it('has clients for every migrated indexer', () => {
+    for (const chainId of MARKETPLACE_SQUID_CHAIN_IDS) {
       expect(MARKETPLACE_SUBGRAPH_CLIENTS[chainId]).toBeDefined();
+    }
+    for (const chainId of REGISTRY_SQUID_CHAIN_IDS) {
       expect(REGISTRY_SUBGRAPH_CLIENTS[chainId]).toBeDefined();
     }
   });
 
-  it('omitOnSquid drops the fragment only on the squid', () => {
+  it('omitOnSquid drops only unsupported legacy fields', () => {
     expect(omitOnSquid('graph', 'mechs { id }')).toBe('mechs { id }');
     expect(omitOnSquid('squid', 'mechs { id }')).toBe('');
   });
