@@ -159,27 +159,31 @@ export const useClaimStakingIncentivesBatch = (props: ClaimStakingIncentivesBatc
     }
   };
 
+  /** The rebuilt batches after a revert from a `concurrent` change; rethrows anything else. */
+  const batchesAfterConcurrentRevert = async (error: unknown, logMessage: string) => {
+    if (!isContractRevert(error)) throw error;
+    console.error(logMessage, error);
+    const { batches, change } = await refreshAfterRevert(error);
+    if (change !== 'concurrent') throw error;
+    return batches;
+  };
+
   /** After a revert, a `concurrent` cursor change rebuilds once and retries the first batch. */
   const prepareWithOneRebuild = async (batch: ClaimBatch, from: Address) => {
     try {
       return await prepareClaim(batch, from);
     } catch (error) {
-      if (!isContractRevert(error)) throw error;
-      console.error('Claim simulation reverted', error);
-      const { batches, change } = await refreshAfterRevert(error);
-      if (change !== 'concurrent') throw error;
-
-      const [rebuiltBatch] = batches;
+      const [rebuiltBatch] = await batchesAfterConcurrentRevert(error, 'Claim simulation reverted');
       if (!rebuiltBatch) return { kind: 'nothing-to-claim' } as const;
 
       try {
         return await prepareClaim(rebuiltBatch, from);
       } catch (retryError) {
-        if (!isContractRevert(retryError)) throw retryError;
-        console.error('Claim simulation reverted after the rebuild', retryError);
-        const refreshed = await refreshAfterRevert(retryError);
-        if (refreshed.change !== 'concurrent') throw retryError;
-        return refreshed.batches.length === 0
+        const remaining = await batchesAfterConcurrentRevert(
+          retryError,
+          'Claim simulation reverted after the rebuild',
+        );
+        return remaining.length === 0
           ? ({ kind: 'nothing-to-claim' } as const)
           : ({ kind: 'claims-changed' } as const);
       }

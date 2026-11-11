@@ -729,14 +729,19 @@ describe('useClaimStakingIncentivesBatch', () => {
       ],
     ])('is cleared when %s, so the next claim can send', async (_, fail, rebuiltBatches) => {
       fail();
-      const { claim, result } = setup(rebuiltBatches);
+      const { claim, props, result } = setup(rebuiltBatches);
       await claim();
       expect(result.current.isPending).toBe(false);
+      const sendsBefore = mockWriteContract.mock.calls.length;
 
       mockPrepareClaim.mockResolvedValue(prepared(FIRST));
       mockWriteContract.mockResolvedValue(HASH);
       await claim();
+      expect(mockWriteContract).toHaveBeenCalledTimes(sendsBefore + 1);
       expect(mockWriteContract).toHaveBeenLastCalledWith({}, { args: FIRST, gas: BigInt(100) });
+      expect(props.onError).not.toHaveBeenCalledWith(
+        expect.objectContaining({ kind: 'already-in-flight' }),
+      );
     });
 
     it.each([

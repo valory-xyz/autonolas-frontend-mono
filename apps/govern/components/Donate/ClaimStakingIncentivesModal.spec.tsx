@@ -214,6 +214,13 @@ describe('<ClaimStakingIncentivesModal />', () => {
     expect(button).toHaveClass('ant-btn-loading');
   });
 
+  it('leaves the claim button clickable when no claim is in flight', () => {
+    renderModal({ isPending: false, isPreparing: false });
+
+    const button = screen.getByRole('button', { name: /Claim Incentives/ });
+    expect(button).not.toHaveClass('ant-btn-loading');
+  });
+
   it('keeps the claim button loading while a sent claim is awaited', () => {
     renderModal({ isPending: true, isPreparing: false });
 
