@@ -19,6 +19,13 @@ import { onStep3Deploy } from '../utils';
 const STEP = 3;
 const OPTION_1 = 'Creates a new service multisig with currently registered agent instances';
 
+/** The decoded revert name viem attaches to a contract error, e.g. `MultisigAlreadyBound`. */
+const getRevertName = (error) => {
+  const revert =
+    typeof error?.walk === 'function' ? error.walk((cause) => cause?.data?.errorName) : null;
+  return revert?.data?.errorName ?? null;
+};
+
 const SvmFinishedRegistration = ({
   isOwner,
   serviceId,
@@ -130,16 +137,19 @@ export const FinishedRegistration = ({
 
   const [form] = Form.useForm();
   const [radioValue, setRadioValue] = useState(null);
-  // null while the enabled wrappers are being read, then the (possibly empty) list.
-  const [enabledMultisigs, setEnabledMultisigs] = useState(null);
+  const [multisigs, setMultisigs] = useState({ status: 'loading', enabled: [] });
+  const [reloadCount, setReloadCount] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const isSubmittingRef = useRef(false);
+  // The submit awaits RPC calls, so it compares against the chain at the time of the deploy.
+  const chainIdRef = useRef(chainId);
+  chainIdRef.current = chainId;
   const [isTerminating, setIsTerminating] = useState(false);
 
   // Offer only the wrappers this chain still enables; a chain change clears the selection.
   useEffect(() => {
     setRadioValue(null);
-    setEnabledMultisigs(null);
+    setMultisigs({ status: 'loading', enabled: [] });
     if (isSvm || !chainId) return undefined;
 
     let isCurrent = true;
@@ -152,57 +162,71 @@ export const FinishedRegistration = ({
             candidates: multisigCandidates[chainId] ?? [],
           });
         }
-        setEnabledMultisigs(enabled);
+        setMultisigs({ status: 'loaded', enabled });
       })
       .catch((error) => {
         console.error(error);
-        if (isCurrent) notifyError('Could not check which multisig options are enabled');
+        if (isCurrent) setMultisigs({ status: 'error', enabled: [] });
       });
     return () => {
       isCurrent = false;
     };
-  }, [chainId, isSvm]);
+  }, [chainId, isSvm, reloadCount]);
 
   const onFinish = async (values) => {
     // The enabled-wrapper check below awaits an RPC call, so guard against a second submit.
     if (isSubmittingRef.current) return;
     isSubmittingRef.current = true;
     setIsSubmitting(true);
+    const submitChainId = chainId;
     try {
       // The wrapper may have been disabled since the options were loaded.
       let enabled;
       try {
-        enabled = await getEnabledMultisigs(chainId);
+        enabled = await getEnabledMultisigs(submitChainId);
       } catch (error) {
         console.error(error);
         notifyError('Could not check that the selected multisig option is still enabled');
         return;
       }
-      setEnabledMultisigs(enabled);
+      if (chainIdRef.current !== submitChainId) {
+        notifyError('The network changed before the deploy. Please submit again.');
+        return;
+      }
+      setMultisigs({ status: 'loaded', enabled });
       if (!enabled.includes(radioValue)) {
         setRadioValue(null);
         notifyError('The selected multisig option is no longer enabled. Please choose another.');
         return;
       }
 
-      const payload = ethers.solidityPacked(
-        ['address', 'address', 'address', 'address', 'uint256', 'uint256', 'bytes'],
-        [
-          values.addressTo,
-          values.addressFallbackHandler,
-          values.paymentToken,
-          values.payablePaymentReceiver,
-          Number(values.payment),
-          Number(values.nonce),
-          values.payload,
-        ],
-      );
-
-      await onStep3Deploy(account, serviceId, radioValue, payload);
-      await updateDetails();
+      try {
+        const payload = ethers.solidityPacked(
+          ['address', 'address', 'address', 'address', 'uint256', 'uint256', 'bytes'],
+          [
+            values.addressTo,
+            values.addressFallbackHandler,
+            values.paymentToken,
+            values.payablePaymentReceiver,
+            Number(values.payment),
+            Number(values.nonce),
+            values.payload,
+          ],
+        );
+        await onStep3Deploy(account, serviceId, radioValue, payload);
+      } catch (error) {
+        console.error(error);
+        const revertName = getRevertName(error);
+        notifyError(
+          `Error occurred while deploying${revertName ? `: ${revertName}` : ''}. Please try again.`,
+        );
+        return;
+      }
       notifySuccess('Deployed successfully');
+      await updateDetails();
     } catch (e) {
       console.error(e);
+      notifyError('Deployed, but the service details could not be refreshed. Reload the page.');
     } finally {
       isSubmittingRef.current = false;
       setIsSubmitting(false);
@@ -213,7 +237,7 @@ export const FinishedRegistration = ({
     console.log('Failed:', errorInfo); /* eslint-disable-line no-console */
   };
 
-  const options = enabledMultisigs ?? [];
+  const options = multisigs.enabled;
   const btnProps = getOtherBtnProps(STEP);
 
   const terminateBtn = (
@@ -277,7 +301,21 @@ export const FinishedRegistration = ({
         </Radio.Group>
       ) : null}
 
-      {enabledMultisigs?.length === 0 && (
+      {multisigs.status === 'error' && (
+        <Alert
+          type="error"
+          showIcon
+          className="mt-8"
+          message="Could not check which multisig options are enabled on this chain."
+          action={
+            <Button size="small" onClick={() => setReloadCount((count) => count + 1)}>
+              Retry
+            </Button>
+          }
+        />
+      )}
+
+      {multisigs.status === 'loaded' && multisigs.enabled.length === 0 && (
         <Alert
           type="warning"
           showIcon

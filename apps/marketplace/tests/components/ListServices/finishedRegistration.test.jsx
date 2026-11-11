@@ -119,10 +119,11 @@ describe('FinishedRegistration multisig picker', () => {
 
   it('deploys once when Submit is pressed twice during the enabled check', async () => {
     const check = deferred();
-    getEnabledMultisigs.mockResolvedValueOnce([A]).mockReturnValueOnce(check.promise);
+    getEnabledMultisigs.mockResolvedValue([A]);
     onStep3Deploy.mockResolvedValue(undefined);
     renderStep(GNOSIS);
     const submit = await selectWrapper(A);
+    getEnabledMultisigs.mockReturnValueOnce(check.promise);
     const checksBeforeSubmit = getEnabledMultisigs.mock.calls.length;
 
     fireEvent.click(submit);
@@ -145,5 +146,84 @@ describe('FinishedRegistration multisig picker', () => {
       'No multisig creation option is enabled',
       expect.objectContaining({ chainId: GNOSIS }),
     );
+  });
+
+  it('deploys through the wrapper the owner picks when two are enabled', async () => {
+    getEnabledMultisigs.mockResolvedValueOnce([A, B]).mockResolvedValueOnce([A, B]);
+    onStep3Deploy.mockResolvedValue(undefined);
+    renderStep(GNOSIS);
+
+    fireEvent.click(await selectWrapper(B));
+
+    await waitFor(() =>
+      expect(onStep3Deploy).toHaveBeenCalledWith('0xowner', '1', B, expect.any(String)),
+    );
+  });
+
+  it('does not deploy when the submit re-check cannot be read', async () => {
+    getEnabledMultisigs.mockResolvedValueOnce([A]).mockRejectedValueOnce(new Error('rpc down'));
+    renderStep(GNOSIS);
+
+    fireEvent.click(await selectWrapper(A));
+
+    await waitFor(() =>
+      expect(notifyError).toHaveBeenCalledWith(
+        'Could not check that the selected multisig option is still enabled',
+      ),
+    );
+    expect(onStep3Deploy).not.toHaveBeenCalled();
+  });
+
+  it('shows a failed load with a retry instead of a blank panel', async () => {
+    getEnabledMultisigs.mockRejectedValueOnce(new Error('rpc down')).mockResolvedValueOnce([A]);
+    renderStep(GNOSIS);
+
+    expect(
+      await screen.findByText('Could not check which multisig options are enabled on this chain.'),
+    ).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Retry' }));
+
+    expect(await screen.findByRole('radio', { name: A })).toBeInTheDocument();
+  });
+
+  it('tells the owner why a deploy failed', async () => {
+    getEnabledMultisigs.mockResolvedValueOnce([A]).mockResolvedValueOnce([A]);
+    const revert = {
+      walk: (predicate) =>
+        predicate({ data: { errorName: 'MultisigAlreadyBound' } })
+          ? { data: { errorName: 'MultisigAlreadyBound' } }
+          : null,
+    };
+    onStep3Deploy.mockRejectedValue(revert);
+    renderStep(GNOSIS);
+
+    fireEvent.click(await selectWrapper(A));
+
+    await waitFor(() =>
+      expect(notifyError).toHaveBeenCalledWith(
+        'Error occurred while deploying: MultisigAlreadyBound. Please try again.',
+      ),
+    );
+  });
+
+  it('refuses to deploy when the chain changed during the submit check', async () => {
+    const check = deferred();
+    getEnabledMultisigs
+      .mockResolvedValueOnce([A])
+      .mockReturnValueOnce(check.promise)
+      .mockReturnValue(new Promise(() => undefined));
+    const { switchChain } = renderStep(GNOSIS);
+
+    fireEvent.click(await selectWrapper(A));
+    await waitFor(() => expect(getEnabledMultisigs).toHaveBeenCalledWith(GNOSIS));
+    switchChain(OPTIMISM);
+    await act(async () => check.resolve([A]));
+
+    await waitFor(() =>
+      expect(notifyError).toHaveBeenCalledWith(
+        'The network changed before the deploy. Please submit again.',
+      ),
+    );
+    expect(onStep3Deploy).not.toHaveBeenCalled();
   });
 });
