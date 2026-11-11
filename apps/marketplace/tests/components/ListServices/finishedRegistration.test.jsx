@@ -7,7 +7,10 @@ import {
   getAddress,
 } from 'viem';
 
+import { ethers } from 'ethers';
+
 import { notifyError, notifySuccess } from 'libs/util-functions/src';
+import { FALLBACK_HANDLER } from 'common-util/Contracts/addresses';
 import { SERVICE_MANAGER_TOKEN_CONTRACT } from 'common-util/AbiAndAddresses';
 import { useHelpers } from 'common-util/hooks';
 
@@ -37,6 +40,7 @@ const GNOSIS = 100;
 const OPTIMISM = 10;
 const A = '0x00000000000000000000000000000000000000a1';
 const B = '0x00000000000000000000000000000000000000b2';
+const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000';
 
 const deferred = () => {
   let resolve;
@@ -180,15 +184,37 @@ describe('FinishedRegistration multisig picker', () => {
   });
 
   it('deploys through the wrapper the owner picks when two are enabled', async () => {
+    const NOW_SECONDS = 1_700_000_000;
+    jest.spyOn(Date, 'now').mockReturnValue(NOW_SECONDS * 1000);
     getEnabledMultisigs.mockResolvedValueOnce([A, B]).mockResolvedValueOnce([A, B]);
     onStep3Deploy.mockResolvedValue(undefined);
     renderStep(GNOSIS);
 
     fireEvent.click(await selectWrapper(B));
 
-    await waitFor(() =>
-      expect(onStep3Deploy).toHaveBeenCalledWith('0xowner', '1', B, expect.any(String)),
+    // The form's defaults, packed in the order the wrapper decodes them.
+    const payload = ethers.solidityPacked(
+      ['address', 'address', 'address', 'address', 'uint256', 'uint256', 'bytes'],
+      [ZERO_ADDRESS, FALLBACK_HANDLER[GNOSIS], ZERO_ADDRESS, ZERO_ADDRESS, 0, NOW_SECONDS, '0x'],
     );
+    await waitFor(() => expect(onStep3Deploy).toHaveBeenCalledWith('0xowner', '1', B, payload));
+    jest.mocked(Date.now).mockRestore();
+  });
+
+  it('reports a malformed form value as a deploy failure, without deploying', async () => {
+    getEnabledMultisigs.mockResolvedValueOnce([A]).mockResolvedValueOnce([A]);
+    renderStep(GNOSIS);
+    const submit = await selectWrapper(A);
+
+    fireEvent.change(screen.getByLabelText('To'), { target: { value: '0x123' } });
+    fireEvent.click(submit);
+
+    await waitFor(() =>
+      expect(notifyError).toHaveBeenCalledWith(
+        expect.stringMatching(/^Error occurred while deploying: /),
+      ),
+    );
+    expect(onStep3Deploy).not.toHaveBeenCalled();
   });
 
   it('does not deploy when the submit re-check cannot be read', async () => {

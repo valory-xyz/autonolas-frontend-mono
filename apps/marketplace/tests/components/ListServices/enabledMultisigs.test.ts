@@ -14,7 +14,6 @@ jest.mock('common-util/List/ListCommon', () => ({ convertStringToArray: jest.fn(
 const mockReadContracts = readContracts as jest.Mock;
 const GNOSIS = 100;
 
-// Gnosis ServiceRegistryL2, as `serviceRegistryParams(100)` reads it.
 const GNOSIS_SERVICE_REGISTRY_L2 = '0x9338b5153AE39BB89f50468E608eD9d764B755fD';
 
 describe('getEnabledMultisigs', () => {

@@ -22,7 +22,6 @@ import { useFinishRegistration } from '../useSvmServiceStateManagement';
 import { getEnabledMultisigs } from '../../utils';
 import { onStep3Deploy } from '../utils';
 
-/** Where the read of the enabled multisig options stands. */
 const MULTISIG_STATUS = Object.freeze({ LOADING: 'loading', LOADED: 'loaded', ERROR: 'error' });
 
 const STEP = 3;
@@ -148,7 +147,6 @@ export const FinishedRegistration = ({
   chainIdRef.current = chainId;
   const [isTerminating, setIsTerminating] = useState(false);
 
-  // Offer only the wrappers this chain still enables; a chain change clears the selection.
   useEffect(() => {
     setRadioValue(null);
     setMultisigs({ status: MULTISIG_STATUS.LOADING, enabled: [] });
@@ -167,7 +165,7 @@ export const FinishedRegistration = ({
         setMultisigs({ status: MULTISIG_STATUS.LOADED, enabled });
       })
       .catch((error) => {
-        console.error(error);
+        console.error('Could not read the enabled multisig options', { chainId }, error);
         if (isCurrent) setMultisigs({ status: MULTISIG_STATUS.ERROR, enabled: [] });
       });
     return () => {
@@ -187,7 +185,11 @@ export const FinishedRegistration = ({
       try {
         enabled = await getEnabledMultisigs(submitChainId);
       } catch (error) {
-        console.error(error);
+        console.error(
+          'Could not re-check the selected multisig option',
+          { chainId: submitChainId, serviceId, multisig: radioValue },
+          error,
+        );
         notifyError('Could not check that the selected multisig option is still enabled');
         return;
       }
@@ -232,7 +234,6 @@ export const FinishedRegistration = ({
     }
   };
 
-  /** The decoded revert, else its raw selector, else viem's short message (e.g. a rejection). */
   const getDeployFailureReason = (error) => {
     const revert = findContractRevert(error);
     if (revert?.data) return formatRevert(revert.data);
@@ -244,7 +245,7 @@ export const FinishedRegistration = ({
     console.log('Failed:', errorInfo); /* eslint-disable-line no-console */
   };
 
-  const options = multisigs.enabled;
+  const options = multisigs.status === MULTISIG_STATUS.LOADED ? multisigs.enabled : [];
   const btnProps = getOtherBtnProps(STEP);
 
   const terminateBtn = (
