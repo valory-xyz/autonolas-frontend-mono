@@ -1,0 +1,682 @@
+import {
+  type Address,
+  type Hex,
+  ContractFunctionExecutionError,
+  ContractFunctionRevertedError,
+  HttpRequestError,
+  UserRejectedRequestError,
+  decodeFunctionData,
+  encodeErrorResult,
+  encodeFunctionResult,
+  multicall3Abi,
+  pad,
+  parseAbi,
+  zeroAddress,
+} from 'viem';
+
+import { DISPENSER } from 'libs/util-contracts/src/lib/abiAndAddresses';
+import { DISPENSER_ADDRESS, VOTE_WEIGHTING_ADDRESS } from 'common-util/constants/addresses';
+
+import {
+  type ClaimBatch,
+  QuoteCallRevertedError,
+  getUnclaimedReason,
+  isContractRevert,
+  prepareClaim,
+  quoteChainClaims,
+  toClaimError,
+} from './staking-incentives-claim';
+
+const mockReadContracts = jest.fn();
+const mockSimulateContract = jest.fn();
+jest.mock('@wagmi/core', () => ({
+  readContracts: (...args: unknown[]) => mockReadContracts(...args),
+  simulateContract: (...args: unknown[]) => mockSimulateContract(...args),
+}));
+jest.mock('common-util/config/wagmi', () => ({ wagmiConfig: {} }));
+const mockEstimateGas = jest.fn();
+jest.mock('libs/util-functions/src/lib/estimateGasWithBuffer', () => ({
+  estimateGasWithBuffer: (...args: unknown[]) => mockEstimateGas(...args),
+}));
+
+const mockGetArbitrumBridgePayload = jest.fn();
+jest.mock('./arbitrum-bridge', () => ({
+  isOrbitChainId: (chainId: number) => chainId === 42161 || chainId === 4663,
+  getArbitrumBridgePayload: (...args: unknown[]) => mockGetArbitrumBridgePayload(...args),
+}));
+
+const ACCOUNT: Address = '0x00000000000000000000000000000000000000aa';
+const ARBITRUM = 42161;
+const ROBINHOOD = 4663;
+const GNOSIS = 100;
+// The new Dispenser's ArbitrumDepositProcessorL1 for each Orbit chain (OPE-2034 scope, D34).
+const ARBITRUM_DEPOSIT_PROCESSOR: Address = '0xFBB25d10a2Cd2c28403F6edb1D25C27F7Da60656';
+const ROBINHOOD_DEPOSIT_PROCESSOR: Address = '0xCd4dDd34C7a5C3dA5E9361ceDC8b6fa04b40f22E';
+const ORBIT_PAYLOAD = `0x${'ab'.repeat(160)}` as Hex;
+const MESSAGE_COST = BigInt(700);
+const TOKEN_COST = BigInt(300);
+const ZERO = BigInt(0);
+const OLAS = BigInt(10) ** BigInt(18);
+
+const target = (n: number) => pad(`0x${n.toString(16)}`, { size: 32 });
+const processor = (i: number) => `0x${(i + 1).toString(16).padStart(40, '0')}` as Address;
+const CHECKPOINT_ABI = parseAbi(['function checkpointNominee(bytes32 account, uint256 chainId)']);
+
+type ChainSetup = { processor?: Address; withheld?: bigint; bridgingDecimals?: bigint };
+
+/** A successful `calculateStakingIncentives` sub-call answering `incentive`. */
+const calculatedResult = (incentive: bigint) => ({
+  success: true,
+  returnData: encodeFunctionResult({
+    abi: DISPENSER.abi,
+    functionName: 'calculateStakingIncentives',
+    result: [incentive, ZERO, BigInt(5), target(0), []],
+  }),
+});
+
+/**
+ * Mocks the chain reads: the processors and withheld amounts, then bridging decimals. Every
+ * simulation is answered too: aggregate3 with each target's `incentives`, any other with a request.
+ */
+const mockChainState = (chains: ChainSetup[], incentives: bigint[][]) => {
+  mockReadContracts
+    .mockResolvedValueOnce(chains.map((chain, i) => chain.processor ?? processor(i)))
+    .mockResolvedValueOnce(chains.map(({ withheld = ZERO }) => withheld))
+    .mockResolvedValueOnce(chains.map(({ bridgingDecimals = BigInt(18) }) => bridgingDecimals));
+
+  const result = incentives
+    .flat()
+    .flatMap((incentive) => [{ success: true, returnData: '0x' }, calculatedResult(incentive)]);
+  mockSimulateContract.mockImplementation(
+    (_config: unknown, { functionName }: { functionName: string }) =>
+      Promise.resolve(
+        functionName === 'aggregate3'
+          ? { result }
+          : { request: { functionName }, result: undefined },
+      ),
+  );
+};
+
+beforeEach(() => {
+  jest.resetAllMocks();
+  mockGetArbitrumBridgePayload.mockResolvedValue({
+    bridgePayload: ORBIT_PAYLOAD,
+    messageCost: MESSAGE_COST,
+    tokenCost: TOKEN_COST,
+  });
+});
+
+type SimulatedParams = {
+  functionName: string;
+  args: readonly unknown[];
+  abi?: unknown;
+  account?: Address;
+  address?: Address;
+  chainId?: number;
+  value?: bigint;
+};
+
+/** The params of the first simulation of `functionName`. */
+const simulatedParams = (functionName: string): SimulatedParams => {
+  const call = (mockSimulateContract.mock.calls as [unknown, SimulatedParams][]).find(
+    ([, params]) => params.functionName === functionName,
+  );
+  if (!call) throw new Error(`No ${functionName} simulation`);
+  return call[1];
+};
+
+describe('quoteChainClaims', () => {
+  it('attaches no value and no payload to an Orbit chain whose incentives are all zero', async () => {
+    mockChainState([{}], [[ZERO, ZERO]]);
+
+    const [quote] = await quoteChainClaims([[ARBITRUM], [[target(1), target(2)]]], ACCOUNT);
+
+    expect(quote).toMatchObject({ sendsMessage: false, value: ZERO, bridgePayload: '0x' });
+    expect(mockGetArbitrumBridgePayload).not.toHaveBeenCalled();
+  });
+
+  it('charges the message and token costs for a positive incentive bridged as fresh OLAS', async () => {
+    mockChainState([{}], [[OLAS]]);
+
+    const [quote] = await quoteChainClaims([[ARBITRUM], [[target(1)]]], ACCOUNT);
+
+    expect(quote).toMatchObject({
+      sendsMessage: true,
+      value: MESSAGE_COST + TOKEN_COST,
+      bridgePayload: ORBIT_PAYLOAD,
+    });
+  });
+
+  it('still charges the message when withheld OLAS covers the whole incentive', async () => {
+    mockChainState([{ withheld: OLAS * BigInt(2) }], [[OLAS]]);
+
+    const [quote] = await quoteChainClaims([[ARBITRUM], [[target(1)]]], ACCOUNT);
+
+    expect(quote).toMatchObject({ value: MESSAGE_COST });
+  });
+
+  it('charges the token cost when withheld OLAS covers only part of the incentive', async () => {
+    mockChainState([{ withheld: OLAS / BigInt(2) }], [[OLAS]]);
+
+    const [quote] = await quoteChainClaims([[ARBITRUM], [[target(1)]]], ACCOUNT);
+
+    expect(quote.value).toBe(MESSAGE_COST + TOKEN_COST);
+  });
+
+  it('does not charge the token cost when withheld OLAS equals the incentive exactly', async () => {
+    mockChainState([{ withheld: OLAS }], [[OLAS]]);
+
+    const [quote] = await quoteChainClaims([[ARBITRUM], [[target(1)]]], ACCOUNT);
+
+    expect(quote.value).toBe(MESSAGE_COST);
+  });
+
+  it('charges the token cost when targets each below the withheld amount exceed it together', async () => {
+    mockChainState([{ withheld: OLAS }], [[(OLAS * BigInt(3)) / BigInt(4), OLAS / BigInt(2)]]);
+
+    const [quote] = await quoteChainClaims([[ARBITRUM], [[target(1), target(2)]]], ACCOUNT);
+
+    expect(quote.value).toBe(MESSAGE_COST + TOKEN_COST);
+  });
+
+  it('names the chain when the Dispenser has no deposit processor for it', async () => {
+    mockReadContracts.mockResolvedValueOnce([zeroAddress]).mockResolvedValueOnce([ZERO]);
+
+    await expect(quoteChainClaims([[ARBITRUM], [[target(1)]]], ACCOUNT)).rejects.toThrow(
+      'No deposit processor is registered on the Dispenser for chain 42161',
+    );
+    expect(mockReadContracts).toHaveBeenCalledTimes(2);
+  });
+
+  it('names the second chain when only its deposit processor is missing', async () => {
+    mockReadContracts
+      .mockResolvedValueOnce([processor(0), zeroAddress])
+      .mockResolvedValueOnce([ZERO, ZERO]);
+
+    await expect(
+      quoteChainClaims(
+        [
+          [GNOSIS, ARBITRUM],
+          [[target(1)], [target(2)]],
+        ],
+        ACCOUNT,
+      ),
+    ).rejects.toThrow('No deposit processor is registered on the Dispenser for chain 42161');
+  });
+
+  it.each([
+    ['the other chain', [ZERO, OLAS * BigInt(2)], MESSAGE_COST],
+    ['this chain', [OLAS * BigInt(2), ZERO], MESSAGE_COST + TOKEN_COST],
+  ])(
+    'uses only the Orbit chain own withheld amount when %s has none',
+    async (_case, [gnosisWithheld, arbitrumWithheld], expected) => {
+      mockChainState(
+        [{ withheld: gnosisWithheld }, { withheld: arbitrumWithheld }],
+        [[OLAS], [OLAS]],
+      );
+
+      const quotes = await quoteChainClaims(
+        [
+          [GNOSIS, ARBITRUM],
+          [[target(1)], [target(2)]],
+        ],
+        ACCOUNT,
+      );
+
+      expect(quotes[1].value).toBe(expected);
+    },
+  );
+
+  it('passes the chain own deposit processor to the Orbit bridge estimate', async () => {
+    mockChainState([{}, { processor: ARBITRUM_DEPOSIT_PROCESSOR }], [[OLAS], [OLAS]]);
+
+    await quoteChainClaims(
+      [
+        [GNOSIS, ARBITRUM],
+        [[target(1)], [target(2)]],
+      ],
+      ACCOUNT,
+    );
+
+    expect(mockGetArbitrumBridgePayload).toHaveBeenCalledWith(
+      [{ target: target(2), amount: OLAS }],
+      ARBITRUM,
+      ARBITRUM_DEPOSIT_PROCESSOR,
+    );
+  });
+
+  it('passes Robinhood its own deposit processor, not Arbitrum one', async () => {
+    mockChainState(
+      [{ processor: ARBITRUM_DEPOSIT_PROCESSOR }, { processor: ROBINHOOD_DEPOSIT_PROCESSOR }],
+      [[OLAS], [OLAS]],
+    );
+
+    await quoteChainClaims(
+      [
+        [ARBITRUM, ROBINHOOD],
+        [[target(1)], [target(2)]],
+      ],
+      ACCOUNT,
+    );
+
+    expect(mockGetArbitrumBridgePayload).toHaveBeenCalledWith(
+      [{ target: target(2), amount: OLAS }],
+      ROBINHOOD,
+      ROBINHOOD_DEPOSIT_PROCESSOR,
+    );
+  });
+
+  it('names the quote call, target, chain and decoded revert when a sub-call reverts', async () => {
+    mockChainState([{}], [[OLAS]]);
+    mockSimulateContract.mockResolvedValue({
+      result: [
+        { success: true, returnData: '0x' },
+        {
+          success: false,
+          returnData: encodeErrorResult({
+            abi: DISPENSER.abi,
+            errorName: 'WrongAmount',
+            args: [BigInt(1), ZERO],
+          }),
+        },
+      ],
+    });
+
+    const quote = quoteChainClaims([[GNOSIS], [[target(1)]]], ACCOUNT);
+
+    await expect(quote).rejects.toBeInstanceOf(QuoteCallRevertedError);
+    await expect(quote).rejects.toThrow(
+      `calculateStakingIncentives reverted for staking target ${target(1)} on chain ${GNOSIS}: WrongAmount(1, 0)`,
+    );
+    const aggregate = mockSimulateContract.mock.calls[0][1];
+    expect(aggregate.args[0].every((call: { allowFailure: boolean }) => call.allowFailure)).toBe(
+      true,
+    );
+  });
+
+  it('names the target and chain whose calculation reverted in a multi-chain batch', async () => {
+    mockChainState([{}, {}], [[OLAS], [OLAS, OLAS]]);
+    const ok = { success: true, returnData: '0x' };
+    const calculated = calculatedResult(OLAS);
+    mockSimulateContract.mockResolvedValue({
+      result: [
+        ok,
+        calculated,
+        ok,
+        calculated,
+        ok,
+        {
+          success: false,
+          returnData: encodeErrorResult({ abi: DISPENSER.abi, errorName: 'Paused' }),
+        },
+      ],
+    });
+
+    await expect(
+      quoteChainClaims(
+        [
+          [GNOSIS, ARBITRUM],
+          [[target(1)], [target(2), target(3)]],
+        ],
+        ACCOUNT,
+      ),
+    ).rejects.toThrow(
+      `calculateStakingIncentives reverted for staking target ${target(3)} on chain ${ARBITRUM}: Paused()`,
+    );
+  });
+
+  it.each([
+    [
+      'an Error(string) as its reason',
+      encodeErrorResult({
+        abi: [{ type: 'error', name: 'Error', inputs: [{ name: 'message', type: 'string' }] }],
+        errorName: 'Error',
+        args: ['Paused'],
+      }),
+      'Paused',
+    ],
+    ['an unknown selector as the raw data', '0xdeadbeef' as Hex, '0xdeadbeef'],
+  ])('reports a reverted quote call with %s', async (_, returnData, reason) => {
+    mockChainState([{}], [[OLAS]]);
+    mockSimulateContract.mockResolvedValue({
+      result: [
+        { success: false, returnData },
+        { success: true, returnData: '0x' },
+      ],
+    });
+
+    await expect(quoteChainClaims([[GNOSIS], [[target(1)]]], ACCOUNT)).rejects.toThrow(
+      `checkpointNominee reverted for staking target ${target(1)} on chain ${GNOSIS}: ${reason}`,
+    );
+  });
+
+  it('names a failed checkpoint with no revert data', async () => {
+    mockChainState([{}], [[OLAS]]);
+    mockSimulateContract.mockResolvedValue({
+      result: [
+        { success: false, returnData: '0x' },
+        { success: true, returnData: '0x' },
+      ],
+    });
+
+    await expect(quoteChainClaims([[GNOSIS], [[target(1)]]], ACCOUNT)).rejects.toThrow(
+      `checkpointNominee reverted for staking target ${target(1)} on chain ${GNOSIS}: no revert data`,
+    );
+  });
+
+  it('names the failed checkpoint when both of a target sub-calls fail', async () => {
+    mockChainState([{}], [[OLAS]]);
+    const wrongAmount = encodeErrorResult({
+      abi: DISPENSER.abi,
+      errorName: 'WrongAmount',
+      args: [BigInt(1), ZERO],
+    });
+    mockSimulateContract.mockResolvedValue({
+      result: [
+        { success: false, returnData: '0x' },
+        { success: false, returnData: wrongAmount },
+      ],
+    });
+
+    await expect(quoteChainClaims([[GNOSIS], [[target(1)]]], ACCOUNT)).rejects.toThrow(
+      `checkpointNominee reverted for staking target ${target(1)} on chain ${GNOSIS}: no revert data`,
+    );
+  });
+
+  it('names the chain whose bridge quote failed', async () => {
+    mockChainState([{}], [[OLAS]]);
+    const cause = new Error('could not detect network');
+    mockGetArbitrumBridgePayload.mockRejectedValue(cause);
+
+    const quote = quoteChainClaims([[ARBITRUM], [[target(1)]]], ACCOUNT);
+
+    await expect(quote).rejects.toThrow(
+      `Could not quote the bridge for chain ${ARBITRUM}: could not detect network`,
+    );
+    await expect(quote).rejects.toMatchObject({ cause });
+  });
+
+  it('keeps one chain fee and zero for the others in a mixed batch', async () => {
+    mockChainState([{}, {}], [[OLAS], [OLAS]]);
+
+    const quotes = await quoteChainClaims(
+      [
+        [GNOSIS, ARBITRUM],
+        [[target(1)], [target(2)]],
+      ],
+      ACCOUNT,
+    );
+
+    expect(quotes.map(({ value }) => value)).toEqual([ZERO, MESSAGE_COST + TOKEN_COST]);
+    expect(quotes.map(({ bridgePayload }) => bridgePayload)).toEqual(['0x', ORBIT_PAYLOAD]);
+  });
+
+  it('estimates the Orbit bridge on the targets with a positive incentive and their amounts', async () => {
+    mockChainState([{ processor: ARBITRUM_DEPOSIT_PROCESSOR }], [[ZERO, OLAS, ZERO]]);
+
+    await quoteChainClaims([[ARBITRUM], [[target(1), target(2), target(3)]]], ACCOUNT);
+
+    expect(mockGetArbitrumBridgePayload).toHaveBeenCalledWith(
+      [{ target: target(2), amount: OLAS }],
+      ARBITRUM,
+      ARBITRUM_DEPOSIT_PROCESSOR,
+    );
+  });
+
+  it('checkpoints each nominee before calculating its incentive with the processor decimals', async () => {
+    mockChainState([{ bridgingDecimals: BigInt(8) }], [[OLAS, OLAS]]);
+
+    await quoteChainClaims([[GNOSIS], [[target(1), target(2)]]], ACCOUNT);
+
+    const aggregate = simulatedParams('aggregate3');
+    const calls = aggregate.args[0] as { target: Address; callData: Hex }[];
+    expect(calls.map((call) => call.target)).toEqual([
+      VOTE_WEIGHTING_ADDRESS,
+      DISPENSER_ADDRESS,
+      VOTE_WEIGHTING_ADDRESS,
+      DISPENSER_ADDRESS,
+    ]);
+    const checkpoints = [calls[0], calls[2]].map(({ callData }) =>
+      decodeFunctionData({ abi: CHECKPOINT_ABI, data: callData }),
+    );
+    expect(checkpoints).toEqual([
+      { functionName: 'checkpointNominee', args: [target(1), BigInt(GNOSIS)] },
+      { functionName: 'checkpointNominee', args: [target(2), BigInt(GNOSIS)] },
+    ]);
+    const calculations = [calls[1], calls[3]].map(({ callData }) =>
+      decodeFunctionData({ abi: DISPENSER.abi, data: callData }),
+    );
+    expect(calculations.map(({ functionName }) => functionName)).toEqual([
+      'calculateStakingIncentives',
+      'calculateStakingIncentives',
+    ]);
+    expect(calculations[0].args).toEqual([BigInt(1), BigInt(GNOSIS), target(1), BigInt(8)]);
+    expect(calculations[1].args).toEqual([BigInt(1), BigInt(GNOSIS), target(2), BigInt(8)]);
+    expect(aggregate.abi).toBe(multicall3Abi);
+    expect(aggregate.account).toBe(ACCOUNT);
+    // Mainnet's Multicall3, whichever chain the wallet is on.
+    expect(aggregate.address?.toLowerCase()).toBe('0xca11bde05977b3631167028862be2a173976ca11');
+    expect(aggregate.chainId).toBe(1);
+  });
+
+  it('reads each chain processor and withheld amount, then the decimals from that processor', async () => {
+    mockChainState([{}, { processor: ARBITRUM_DEPOSIT_PROCESSOR }], [[OLAS], [OLAS]]);
+
+    await quoteChainClaims(
+      [
+        [GNOSIS, ARBITRUM],
+        [[target(1)], [target(2)]],
+      ],
+      ACCOUNT,
+    );
+
+    const [processorReads, withheldReads, decimalsReads] = mockReadContracts.mock.calls.map(
+      ([, { contracts }]) =>
+        contracts as { address: Address; functionName: string; args?: unknown[] }[],
+    );
+    expect(
+      [...processorReads, ...withheldReads].map(({ address, functionName, args }) => [
+        address,
+        functionName,
+        args,
+      ]),
+    ).toEqual([
+      [DISPENSER_ADDRESS, 'mapChainIdDepositProcessors', [BigInt(GNOSIS)]],
+      [DISPENSER_ADDRESS, 'mapChainIdDepositProcessors', [BigInt(ARBITRUM)]],
+      [DISPENSER_ADDRESS, 'mapChainIdWithheldAmounts', [BigInt(GNOSIS)]],
+      [DISPENSER_ADDRESS, 'mapChainIdWithheldAmounts', [BigInt(ARBITRUM)]],
+    ]);
+    expect(decimalsReads.map(({ address, functionName }) => [address, functionName])).toEqual([
+      [processor(0), 'getBridgingDecimals'],
+      [ARBITRUM_DEPOSIT_PROCESSOR, 'getBridgingDecimals'],
+    ]);
+    // Raw values, not { status, result }: a failed read throws instead of passing through.
+    expect(mockReadContracts.mock.calls.map(([, params]) => params.allowFailure)).toEqual([
+      false,
+      false,
+      false,
+    ]);
+  });
+
+  it('calculates each chain incentive with that chain own bridging decimals', async () => {
+    mockChainState(
+      [{ bridgingDecimals: BigInt(8) }, { bridgingDecimals: BigInt(18) }],
+      [[OLAS], [OLAS]],
+    );
+
+    await quoteChainClaims(
+      [
+        [GNOSIS, ARBITRUM],
+        [[target(1)], [target(2)]],
+      ],
+      ACCOUNT,
+    );
+
+    const aggregate = simulatedParams('aggregate3');
+    const calls = aggregate.args[0] as { callData: Hex }[];
+    const decimals = [calls[1], calls[3]].map(
+      ({ callData }) => decodeFunctionData({ abi: DISPENSER.abi, data: callData }).args?.[3],
+    );
+    expect(decimals).toEqual([BigInt(8), BigInt(18)]);
+  });
+});
+
+describe('prepareClaim', () => {
+  it('simulates the exact batch with each chain value and their sum', async () => {
+    mockChainState([{}, {}], [[OLAS], [ZERO]]);
+    const batch: ClaimBatch = [
+      [ARBITRUM, GNOSIS],
+      [[target(1)], [target(2)]],
+    ];
+
+    const prepared = await prepareClaim(batch, ACCOUNT);
+
+    expect(prepared.batch).toEqual(batch);
+    const claim = simulatedParams('claimStakingIncentivesBatch');
+    expect(claim.args).toEqual([
+      BigInt(1),
+      [BigInt(ARBITRUM), BigInt(GNOSIS)],
+      [[target(1)], [target(2)]],
+      [ORBIT_PAYLOAD, '0x'],
+      [MESSAGE_COST + TOKEN_COST, ZERO],
+    ]);
+    expect(claim.value).toBe(MESSAGE_COST + TOKEN_COST);
+    expect(claim.account).toBe(ACCOUNT);
+    // The request the wallet sends: mainnet's Dispenser, whichever chain the wallet is on.
+    expect(claim.address).toBe(DISPENSER_ADDRESS);
+    expect(claim.chainId).toBe(1);
+  });
+
+  it('attaches the sum of two Orbit chains values, each in batch order', async () => {
+    const ROBINHOOD = 4663;
+    // Arbitrum is covered by withheld OLAS (message only); Robinhood bridges fresh OLAS.
+    mockChainState([{ withheld: OLAS * BigInt(2) }, {}], [[OLAS], [OLAS]]);
+    const batch: ClaimBatch = [
+      [ARBITRUM, ROBINHOOD],
+      [[target(1)], [target(2)]],
+    ];
+
+    await prepareClaim(batch, ACCOUNT);
+
+    const claim = simulatedParams('claimStakingIncentivesBatch');
+    expect(claim.args[4]).toEqual([MESSAGE_COST, MESSAGE_COST + TOKEN_COST]);
+    expect(claim.value).toBe(MESSAGE_COST * BigInt(2) + TOKEN_COST);
+  });
+
+  it('sizes the gas of the exact simulated claim and returns it on the request', async () => {
+    mockChainState([{}], [[OLAS]]);
+    mockEstimateGas.mockResolvedValue(BigInt(123));
+
+    const { request } = await prepareClaim([[GNOSIS], [[target(1)]]], ACCOUNT);
+
+    const simulated = simulatedParams('claimStakingIncentivesBatch');
+    expect(mockEstimateGas).toHaveBeenCalledWith({}, simulated);
+    expect(request).toEqual({ functionName: 'claimStakingIncentivesBatch', gas: BigInt(123) });
+  });
+
+  it('rejects when the gas estimate reverts, so the claim gets the rebuild handling', async () => {
+    mockChainState([{}], [[OLAS]]);
+    const revert = new Error('estimate reverted');
+    mockEstimateGas.mockRejectedValue(revert);
+
+    await expect(prepareClaim([[GNOSIS], [[target(1)]]], ACCOUNT)).rejects.toBe(revert);
+  });
+});
+
+describe('getUnclaimedReason', () => {
+  it.each([
+    [{ status: 'success' as const }, undefined, null],
+    [{ status: 'success' as const }, 'repriced' as const, null],
+    [{ status: 'reverted' as const }, undefined, { kind: 'reverted-after-simulation' }],
+    [{ status: 'success' as const }, 'replaced' as const, { kind: 'reverted-after-simulation' }],
+    [{ status: 'success' as const }, 'cancelled' as const, { kind: 'wallet-rejected' }],
+  ])('maps a %o receipt replaced as %s to %o', (receipt, reason, expected) => {
+    expect(getUnclaimedReason(receipt, reason)).toEqual(expected);
+  });
+});
+
+describe('claim error classification', () => {
+  const revert = new ContractFunctionExecutionError(
+    new ContractFunctionRevertedError({
+      abi: DISPENSER.abi,
+      functionName: 'claimStakingIncentivesBatch',
+      data: encodeErrorResult({
+        abi: DISPENSER.abi,
+        errorName: 'WrongAmount',
+        args: [BigInt(1), ZERO],
+      }),
+    }),
+    {
+      abi: DISPENSER.abi,
+      functionName: 'claimStakingIncentivesBatch',
+      args: [BigInt(1), [], [], [], []],
+    },
+  );
+
+  it('treats a contract revert as a revert, and an RPC failure as not one', () => {
+    expect(isContractRevert(revert)).toBe(true);
+    expect(
+      isContractRevert(new QuoteCallRevertedError('checkpointNominee', target(1), 1, 'x')),
+    ).toBe(true);
+    expect(isContractRevert(new HttpRequestError({ url: 'https://rpc.example' }))).toBe(false);
+    expect(isContractRevert(new Error('network down'))).toBe(false);
+  });
+
+  it('tells a wallet rejection apart from other errors', () => {
+    // wagmi throws the rejection wrapped, the same way it wraps a revert.
+    const rejection = new ContractFunctionExecutionError(
+      new UserRejectedRequestError(new Error('denied')),
+      {
+        abi: DISPENSER.abi,
+        functionName: 'claimStakingIncentivesBatch',
+        args: [BigInt(1), [], [], [], []],
+      },
+    );
+    expect(toClaimError(rejection)).toEqual({ kind: 'wallet-rejected' });
+    expect(toClaimError(new Error('network down'))).toEqual({
+      kind: 'other',
+      message: 'network down',
+    });
+  });
+
+  it('names the decoded revert in the message of an unrelated contract revert', () => {
+    expect(toClaimError(revert)).toEqual({
+      kind: 'other',
+      message: expect.stringContaining('WrongAmount(1, 0)'),
+    });
+  });
+
+  it.each([
+    ['an Error(string)', 'Error', 'string', 'Paused', 'Paused'],
+    ['a Panic', 'Panic', 'uint256', BigInt(17), 'overflow'],
+  ])('does not repeat the reason of %s revert', (_, errorName, inputType, arg, reason) => {
+    const builtinRevert = new ContractFunctionExecutionError(
+      new ContractFunctionRevertedError({
+        abi: DISPENSER.abi,
+        functionName: 'claimStakingIncentivesBatch',
+        data: encodeErrorResult({
+          abi: [{ type: 'error', name: errorName, inputs: [{ name: 'value', type: inputType }] }],
+          errorName,
+          args: [arg],
+        }),
+      }),
+      {
+        abi: DISPENSER.abi,
+        functionName: 'claimStakingIncentivesBatch',
+        args: [BigInt(1), [], [], [], []],
+      },
+    );
+
+    const error = toClaimError(builtinRevert);
+
+    expect(error).toEqual({ kind: 'other', message: builtinRevert.shortMessage });
+    expect(builtinRevert.shortMessage).toContain(reason);
+  });
+
+  it('falls back to the short message, a rejected string, or a generic one', () => {
+    const rpcError = new HttpRequestError({ url: 'https://rpc.example' });
+    expect(toClaimError(rpcError)).toEqual({ kind: 'other', message: rpcError.shortMessage });
+    expect(toClaimError('boom')).toEqual({ kind: 'other', message: 'boom' });
+    expect(toClaimError(null)).toEqual({ kind: 'other', message: 'Unknown error' });
+  });
+});
