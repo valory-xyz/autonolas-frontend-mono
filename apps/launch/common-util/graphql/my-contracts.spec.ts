@@ -1,4 +1,4 @@
-import { base, gnosis } from 'viem/chains';
+import { base, gnosis, polygon } from 'viem/chains';
 
 const mockRequest = jest.fn();
 
@@ -10,10 +10,12 @@ jest.mock('graphql-request', () => ({
 }));
 
 const SQUID_URL = 'https://squid.test/staking-base/graphql';
+const POLYGON_SQUID_URL = 'https://squid.test/staking-polygon/graphql';
 const GNOSIS_URL = 'https://graph.test/staking-gnosis';
 const SENDER = '0x00000000000000000000000000000000000000AA';
 
 process.env.NEXT_PUBLIC_STAKING_BASE_SQUID_URL = SQUID_URL;
+process.env.NEXT_PUBLIC_STAKING_POLYGON_SQUID_URL = POLYGON_SQUID_URL;
 process.env.NEXT_PUBLIC_GNOSIS_STAKING_SUBGRAPH_URL = GNOSIS_URL;
 
 // Loaded after the env is set: the clients read their URLs on load.
@@ -26,11 +28,14 @@ describe('getStakingContractsBySender', () => {
     mockRequest.mockResolvedValue({ stakingContracts: [] });
   });
 
-  it('reads Base from the squid with an OpenReader query, in the Graph order', async () => {
-    await getStakingContractsBySender({ chain: base.id, senderId: SENDER });
+  it.each([
+    [base.id, SQUID_URL],
+    [polygon.id, POLYGON_SQUID_URL],
+  ] as const)('reads %s from its squid in the Graph order', async (chainId, squidUrl) => {
+    await getStakingContractsBySender({ chain: chainId, senderId: SENDER });
 
     const [url, query, variables] = mockRequest.mock.calls[0];
-    expect(url).toBe(SQUID_URL);
+    expect(url).toBe(squidUrl);
     expect(query).toContain('$sender: String!');
     expect(query).toContain('stakingContracts(where: { sender_eq: $sender }, orderBy: id_ASC)');
     expect(query).toContain('activityChecker');

@@ -146,6 +146,11 @@ Apps use Redux Toolkit for state management:
 
 ### Environment Configuration
 
+Base/Polygon squid variables are app-specific: Marketplace consumes marketplace activity
+and registry; Launch and Operate consume staking; Contribute retains its existing Base
+staking reader. Use [the per-app variable table](docs/base-polygon-squid-cutover.md)
+when configuring deployments, rather than applying all root `.env.example` entries to every app.
+
 Environment variables are prefixed with `NEXT_PUBLIC_` for client-side access. Each app has specific requirements:
 - RPC URLs for different chains (Mainnet, Gnosis, Polygon, Arbitrum, etc.)
 - Subgraph URLs for data indexing
