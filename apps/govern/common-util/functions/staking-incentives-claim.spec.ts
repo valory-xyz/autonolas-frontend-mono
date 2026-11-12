@@ -47,7 +47,11 @@ jest.mock('./arbitrum-bridge', () => ({
 
 const ACCOUNT: Address = '0x00000000000000000000000000000000000000aa';
 const ARBITRUM = 42161;
+const ROBINHOOD = 4663;
 const GNOSIS = 100;
+// The new Dispenser's ArbitrumDepositProcessorL1 for each Orbit chain (OPE-2034 scope, D34).
+const ARBITRUM_DEPOSIT_PROCESSOR: Address = '0xFBB25d10a2Cd2c28403F6edb1D25C27F7Da60656';
+const ROBINHOOD_DEPOSIT_PROCESSOR: Address = '0xCd4dDd34C7a5C3dA5E9361ceDC8b6fa04b40f22E';
 const ORBIT_PAYLOAD = `0x${'ab'.repeat(160)}` as Hex;
 const MESSAGE_COST = BigInt(700);
 const TOKEN_COST = BigInt(300);
@@ -58,7 +62,7 @@ const target = (n: number) => pad(`0x${n.toString(16)}`, { size: 32 });
 const processor = (i: number) => `0x${(i + 1).toString(16).padStart(40, '0')}` as Address;
 const CHECKPOINT_ABI = parseAbi(['function checkpointNominee(bytes32 account, uint256 chainId)']);
 
-type ChainSetup = { withheld?: bigint; bridgingDecimals?: bigint };
+type ChainSetup = { processor?: Address; withheld?: bigint; bridgingDecimals?: bigint };
 
 /** A successful `calculateStakingIncentives` sub-call answering `incentive`. */
 const calculatedResult = (incentive: bigint) => ({
@@ -76,7 +80,7 @@ const calculatedResult = (incentive: bigint) => ({
  */
 const mockChainState = (chains: ChainSetup[], incentives: bigint[][]) => {
   mockReadContracts
-    .mockResolvedValueOnce(chains.map((_, i) => processor(i)))
+    .mockResolvedValueOnce(chains.map((chain, i) => chain.processor ?? processor(i)))
     .mockResolvedValueOnce(chains.map(({ withheld = ZERO }) => withheld))
     .mockResolvedValueOnce(chains.map(({ bridgingDecimals = BigInt(18) }) => bridgingDecimals));
 
@@ -224,7 +228,7 @@ describe('quoteChainClaims', () => {
   );
 
   it('passes the chain own deposit processor to the Orbit bridge estimate', async () => {
-    mockChainState([{}, {}], [[OLAS], [OLAS]]);
+    mockChainState([{}, { processor: ARBITRUM_DEPOSIT_PROCESSOR }], [[OLAS], [OLAS]]);
 
     await quoteChainClaims(
       [
@@ -237,7 +241,28 @@ describe('quoteChainClaims', () => {
     expect(mockGetArbitrumBridgePayload).toHaveBeenCalledWith(
       [{ target: target(2), amount: OLAS }],
       ARBITRUM,
-      processor(1),
+      ARBITRUM_DEPOSIT_PROCESSOR,
+    );
+  });
+
+  it('passes Robinhood its own deposit processor, not Arbitrum one', async () => {
+    mockChainState(
+      [{ processor: ARBITRUM_DEPOSIT_PROCESSOR }, { processor: ROBINHOOD_DEPOSIT_PROCESSOR }],
+      [[OLAS], [OLAS]],
+    );
+
+    await quoteChainClaims(
+      [
+        [ARBITRUM, ROBINHOOD],
+        [[target(1)], [target(2)]],
+      ],
+      ACCOUNT,
+    );
+
+    expect(mockGetArbitrumBridgePayload).toHaveBeenCalledWith(
+      [{ target: target(2), amount: OLAS }],
+      ROBINHOOD,
+      ROBINHOOD_DEPOSIT_PROCESSOR,
     );
   });
 
@@ -387,14 +412,14 @@ describe('quoteChainClaims', () => {
   });
 
   it('estimates the Orbit bridge on the targets with a positive incentive and their amounts', async () => {
-    mockChainState([{}], [[ZERO, OLAS, ZERO]]);
+    mockChainState([{ processor: ARBITRUM_DEPOSIT_PROCESSOR }], [[ZERO, OLAS, ZERO]]);
 
     await quoteChainClaims([[ARBITRUM], [[target(1), target(2), target(3)]]], ACCOUNT);
 
     expect(mockGetArbitrumBridgePayload).toHaveBeenCalledWith(
       [{ target: target(2), amount: OLAS }],
       ARBITRUM,
-      processor(0),
+      ARBITRUM_DEPOSIT_PROCESSOR,
     );
   });
 
@@ -435,7 +460,7 @@ describe('quoteChainClaims', () => {
   });
 
   it('reads each chain processor and withheld amount, then the decimals from that processor', async () => {
-    mockChainState([{}, {}], [[OLAS], [OLAS]]);
+    mockChainState([{}, { processor: ARBITRUM_DEPOSIT_PROCESSOR }], [[OLAS], [OLAS]]);
 
     await quoteChainClaims(
       [
@@ -463,7 +488,7 @@ describe('quoteChainClaims', () => {
     ]);
     expect(decimalsReads.map(({ address, functionName }) => [address, functionName])).toEqual([
       [processor(0), 'getBridgingDecimals'],
-      [processor(1), 'getBridgingDecimals'],
+      [ARBITRUM_DEPOSIT_PROCESSOR, 'getBridgingDecimals'],
     ]);
     // Raw values, not { status, result }: a failed read throws instead of passing through.
     expect(mockReadContracts.mock.calls.map(([, params]) => params.allowFailure)).toEqual([
