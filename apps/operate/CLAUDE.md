@@ -1,5 +1,11 @@
 # Operate app – CLAUDE.md
 
+Operate reads staking contracts and checkpoints from Base and Polygon squids. Configure
+`NEXT_PUBLIC_STAKING_POLYGON_SQUID_URL` for this PR and retain
+`NEXT_PUBLIC_STAKING_BASE_SQUID_URL`. Operate does not consume marketplace or registry
+indexers. See [the per-app deployment table](../../docs/base-polygon-squid-cutover.md).
+
+
 Guidance for working on the **Operate** app in this repo.
 
 ## Purpose
@@ -77,8 +83,8 @@ readable text with `No data` where the table belongs, which contradicted what `l
   check:served-text <app>` makes the same assertions against real built HTML after `nx build`.
 - Transports use `http(rpc, { batch: true })`. Without it the per-contract reads are slow enough
   to blow the ISR budget.
-- `hasSubgraphSupport` reports false for chains whose `NEXT_PUBLIC_*_STAKING_SUBGRAPH_URL` (Base:
-  the squid, `NEXT_PUBLIC_STAKING_BASE_SQUID_URL`) is unset. Previously an unset var still produced a client and failed later with "Only absolute URLs
+- `hasSubgraphSupport` reports false for chains whose `NEXT_PUBLIC_*_STAKING_SUBGRAPH_URL` (Base/Polygon:
+  `NEXT_PUBLIC_STAKING_BASE_SQUID_URL` / `NEXT_PUBLIC_STAKING_POLYGON_SQUID_URL`) is unset. Previously an unset var still produced a client and failed later with "Only absolute URLs
   are supported", one wasted request per contract before falling back to RPC.
 
 ## Notes

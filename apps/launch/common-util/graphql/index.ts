@@ -22,7 +22,7 @@ export const STAKING_GRAPH_CLIENTS = {
   ),
   [base.id]: new GraphQLClient(process.env.NEXT_PUBLIC_STAKING_BASE_SQUID_URL!, requestConfig),
   [polygon.id]: new GraphQLClient(
-    process.env.NEXT_PUBLIC_POLYGON_STAKING_SUBGRAPH_URL!,
+    process.env.NEXT_PUBLIC_STAKING_POLYGON_SQUID_URL!,
     requestConfig,
   ),
   [mainnet.id]: new GraphQLClient(

@@ -1,5 +1,10 @@
 # Contribute app – CLAUDE.md
 
+Contribute's existing Base staking reader uses `NEXT_PUBLIC_STAKING_BASE_SQUID_URL`.
+This PR requires no new indexer variables for Contribute; it has no Polygon staking reader.
+See [the per-app deployment table](../../docs/base-polygon-squid-cutover.md).
+
+
 Guidance for working on the **Contribute** app in this repo.
 
 ## Purpose

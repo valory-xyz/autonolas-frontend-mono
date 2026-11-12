@@ -13,6 +13,16 @@ jest.mock('common-util/graphql/index', () => ({
       },
     },
     // Robinhood: squid dialect (see common-util/graphql/dialect.ts)
+    137: {
+      get request() {
+        return mockRequest;
+      },
+    },
+    8453: {
+      get request() {
+        return mockRequest;
+      },
+    },
     4663: {
       get request() {
         return mockRequest;
@@ -42,7 +52,11 @@ const mockSubgraph = ({
 }: {
   services?: ServiceRow[];
   meches?: { id: string; totalDeliveriesTransactions: string }[];
-  senders?: { id: string; totalLegacyRequests: string; totalMarketplaceRequests?: string }[];
+  senders?: {
+    id: string;
+    totalLegacyRequests: string;
+    totalMarketplaceRequests?: string;
+  }[];
 }) => {
   mockRequest.mockReset();
   mockRequest
@@ -66,7 +80,10 @@ describe('getServicesFromMarketplaceSubgraph', () => {
   // own beforeEach.
   const originalEnv = process.env;
   beforeEach(() => {
-    process.env = { ...originalEnv, NEXT_PUBLIC_USE_MECH_ANALYTICS_ROWS: 'false' };
+    process.env = {
+      ...originalEnv,
+      NEXT_PUBLIC_USE_MECH_ANALYTICS_ROWS: 'false',
+    };
   });
   afterEach(() => {
     process.env = originalEnv;
@@ -80,7 +97,11 @@ describe('getServicesFromMarketplaceSubgraph', () => {
       mockSubgraph({
         services: [{ id: '1', totalRequests: '0', latestMultisig: SAFE }],
         senders: [
-          { id: SAFE.toLowerCase(), totalLegacyRequests: '100', totalMarketplaceRequests: '500' },
+          {
+            id: SAFE.toLowerCase(),
+            totalLegacyRequests: '100',
+            totalMarketplaceRequests: '500',
+          },
         ],
       });
 
@@ -137,7 +158,14 @@ describe('getServicesFromMarketplaceSubgraph', () => {
 
     it('skips the sender query when no service has a multisig', async () => {
       mockSubgraph({
-        services: [{ id: '1', totalRequests: '3', latestMultisig: null, historicalMultisigs: [] }],
+        services: [
+          {
+            id: '1',
+            totalRequests: '3',
+            latestMultisig: null,
+            historicalMultisigs: [],
+          },
+        ],
       });
 
       const [service] = await getServices();
@@ -230,7 +258,13 @@ describe('getServicesFromMarketplaceSubgraph', () => {
       mockRequest
         .mockResolvedValueOnce({
           services: [{ id: '1', mechs: [{ id: '0xa', address: '0xLegacyMech' }] }],
-          meches: [{ id: '1', address: '0xMarketMech', totalDeliveriesTransactions: '2' }],
+          meches: [
+            {
+              id: '1',
+              address: '0xMarketMech',
+              totalDeliveriesTransactions: '2',
+            },
+          ],
         })
         .mockRejectedValue(new Error('unexpected second request'));
 
@@ -276,7 +310,11 @@ describe('getServicesFromMarketplaceSubgraph', () => {
     it('reads serviceById / mechById on the squid and unions the addresses', async () => {
       mockRequest.mockReset();
       mockRequest.mockResolvedValueOnce({
-        serviceById: { id: '1', latestMultisig: SAFE, historicalMultisigs: null },
+        serviceById: {
+          id: '1',
+          latestMultisig: SAFE,
+          historicalMultisigs: null,
+        },
         mechById: { address: '0xMechOnRobinhood' },
       });
 
@@ -421,18 +459,26 @@ describe('getServicesFromMarketplaceSubgraph', () => {
     });
   });
 
-  describe('squid dialect (Robinhood, 4663)', () => {
+  describe.each([137, 8453, 4663] as const)('squid dialect on %s', (chainId) => {
     const getSquidServices = () =>
-      getServicesFromMarketplaceSubgraph({ chainId: 4663, serviceIds: ['1'] });
+      getServicesFromMarketplaceSubgraph({ chainId, serviceIds: ['1'] });
 
     it('sends OpenReader paging and still reads the top-level `meches`', async () => {
       mockRequest.mockReset();
       mockRequest
         .mockResolvedValueOnce({
           services: [{ id: '1', totalDeliveries: '0', latestMultisig: SAFE }],
-          meches: [{ id: '1', address: '0xMechOnRobinhood', totalDeliveriesTransactions: '3' }],
+          meches: [
+            {
+              id: '1',
+              address: '0xMechOnRobinhood',
+              totalDeliveriesTransactions: '3',
+            },
+          ],
         })
-        .mockResolvedValueOnce({ senders: [{ id: SAFE.toLowerCase(), totalLegacyRequests: '4' }] })
+        .mockResolvedValueOnce({
+          senders: [{ id: SAFE.toLowerCase(), totalLegacyRequests: '4' }],
+        })
         .mockRejectedValue(new Error('unexpected third request'));
 
       const [service] = await getSquidServices();
