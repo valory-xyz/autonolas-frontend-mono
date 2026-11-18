@@ -1,0 +1,38 @@
+{
+  "1": {
+    "globals": "scripts/deployment/globals_mainnet.json",
+    "gnosisSafeMultisigImplementationAddress": "0x48BE9146eBe74Af8f9BbC42A0EB68B484AC8Df31"
+  },
+  "100": {
+    "globals": "scripts/deployment/l2/globals_gnosis_mainnet.json",
+    "gnosisSafeMultisigImplementationAddress": "0x3835C338Fe82abEc60DB21dB2f22E251A26D071F"
+  },
+  "137": {
+    "globals": "scripts/deployment/l2/globals_polygon_mainnet.json",
+    "gnosisSafeMultisigImplementationAddress": "0x87E6a97bD97D41904B1125A014B16bec50C6A89D"
+  },
+  "10": {
+    "globals": "scripts/deployment/l2/globals_optimism_mainnet.json",
+    "gnosisSafeMultisigImplementationAddress": "0xe15Eb6549484F7f8F45D0707EA05AA39DBDd65Ce"
+  },
+  "42161": {
+    "globals": "scripts/deployment/l2/globals_arbitrum_mainnet.json",
+    "gnosisSafeMultisigImplementationAddress": "0xeED0000fE94d7cfeF4Dc0CA86a223f0F603A61B8"
+  },
+  "8453": {
+    "globals": "scripts/deployment/l2/globals_base_mainnet.json",
+    "gnosisSafeMultisigImplementationAddress": "0x25c980328762a03F70c2649ef4Be691b811B690A"
+  },
+  "42220": {
+    "globals": "scripts/deployment/l2/globals_celo_mainnet.json",
+    "gnosisSafeMultisigImplementationAddress": "0xaaFBeef195BDAb1Bb6f3Dc9cEbA875Cd72499230"
+  },
+  "34443": {
+    "globals": "scripts/deployment/l2/globals_mode_mainnet.json",
+    "gnosisSafeMultisigImplementationAddress": "0x22bE6fDcd3e29851B29b512F714C328A00A96B83"
+  },
+  "4663": {
+    "globals": "scripts/deployment/l2/globals_robinhood_mainnet.json",
+    "gnosisSafeMultisigImplementationAddress": "0x22bE6fDcd3e29851B29b512F714C328A00A96B83"
+  }
+}
