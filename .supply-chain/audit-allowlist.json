@@ -1,11 +1,11 @@
 {
-  "_doc": "Allowlist for yarn audit high/critical advisories that cannot be fixed in the current branch. Every entry needs a reason and a review date. See SUPPLY-CHAIN-SECURITY.md \u00a76.",
+  "_doc": "Allowlist for yarn audit high/critical advisories that cannot be fixed in the current branch. Every entry needs a reason and a review date. See SUPPLY-CHAIN-SECURITY.md §6.",
   "_fields": {
     "id": "npm advisory numeric ID (from `yarn audit --json` advisory.id)",
-    "ghsa": "GitHub Security Advisory ID, for humans \u2014 not used for matching",
+    "ghsa": "GitHub Security Advisory ID, for humans — not used for matching",
     "package": "package name, for humans",
     "severity": "advisory severity, for humans",
-    "reason": "why the advisory is allowlisted \u2014 upstream has no fix, major version bump deferred, not on a reachable code path, etc.",
+    "reason": "why the advisory is allowlisted — upstream has no fix, major version bump deferred, not on a reachable code path, etc.",
     "added": "YYYY-MM-DD when the entry was added",
     "review": "YYYY-MM-DD by which the entry must be re-evaluated. An expired entry prints a CI warning but does not fail the job."
   },
@@ -36,6 +36,15 @@
       "reason": "Patched 0.5.1 is ESM-only; the only consumer, query-string 7.1.3 via WalletConnect, loads it with require, so a resolution crashes parse(). Denial of service only, in client-side parsing. Reassess when WalletConnect moves off query-string 7.",
       "added": "2026-11-05",
       "review": "2027-02-05"
+    },
+    {
+      "id": 1247710,
+      "ghsa": "GHSA-fc5q-39xc-vjpf",
+      "package": "picomatch",
+      "severity": "high",
+      "reason": "No patched release exists as of 2026-11-18: the advisory affects <=4.0.7, including this tree's 2.3.2 resolution, and upstream's latest tag is 4.0.7. Reaches production dependencies via Nx/build and file-watching tools and wallet SDK storage helpers (unstorage). The ReDoS requires attacker-controlled extglob patterns; first-party app code does not call picomatch/micromatch or expose glob-pattern input. Temporary exception while a supported upstream fix is unavailable; reassess on a patched release or changes to pattern reachability.",
+      "added": "2026-11-18",
+      "review": "2026-12-18"
     }
   ]
 }
