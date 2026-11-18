@@ -10,6 +10,16 @@ jest.mock('common-util/graphql/index', () => ({
         return mockGraphRequest;
       },
     },
+    137: {
+      get request() {
+        return mockSquidRequest;
+      },
+    },
+    8453: {
+      get request() {
+        return mockSquidRequest;
+      },
+    },
     4663: {
       get request() {
         return mockSquidRequest;
@@ -18,7 +28,11 @@ jest.mock('common-util/graphql/index', () => ({
   },
 }));
 
-const ROW = { id: '1', multisig: '0xsafe', erc8004Agent: { id: '256', agentWallet: '0xsafe' } };
+const ROW = {
+  id: '1',
+  multisig: '0xsafe',
+  erc8004Agent: { id: '256', agentWallet: '0xsafe' },
+};
 
 describe('getServiceFromRegistry', () => {
   beforeEach(() => {
@@ -26,18 +40,18 @@ describe('getServiceFromRegistry', () => {
     mockSquidRequest.mockReset();
   });
 
-  it('reads `service` from a Graph response', async () => {
+  it.each([100] as const)('keeps registry Graph routing on %s', async (chainId) => {
     mockGraphRequest.mockResolvedValueOnce({ service: ROW });
-    const service = await getServiceFromRegistry({ chainId: 100, id: '1' });
+    const service = await getServiceFromRegistry({ chainId, id: '1' });
     expect(service).toEqual(ROW);
     const [doc, variables] = mockGraphRequest.mock.calls[0];
     expect(String(doc)).toContain('service(id: $id)');
     expect(variables).toEqual({ id: '1' });
   });
 
-  it('reads `serviceById` from a squid response', async () => {
+  it.each([137, 8453, 4663] as const)('reads `serviceById` on %s', async (chainId) => {
     mockSquidRequest.mockResolvedValueOnce({ serviceById: ROW });
-    const service = await getServiceFromRegistry({ chainId: 4663, id: '1' });
+    const service = await getServiceFromRegistry({ chainId, id: '1' });
     expect(service).toEqual(ROW);
     expect(String(mockSquidRequest.mock.calls[0][0])).toContain('serviceById(id: $id)');
   });

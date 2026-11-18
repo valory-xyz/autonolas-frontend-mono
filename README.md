@@ -27,6 +27,19 @@ yarn nx run <app-name>:serve
 
 Open the app at `http://localhost:<port>` (see table above).
 
+## Base and Polygon indexer configuration
+
+| App | Squid sources used | Deployment changes in this PR |
+| --- | --- | --- |
+| Marketplace | Marketplace activity and service registry | Configure four Base/Polygon marketplace and registry variables |
+| Launch | Staking | Configure Polygon staking; retain existing Base staking variable |
+| Operate | Staking | Configure Polygon staking; retain existing Base staking variable |
+| Contribute | Base staking | No new variables |
+
+See [the per-app variable list and replacements](docs/base-polygon-squid-cutover.md).
+The shared root `.env.example` contains variables for multiple apps; configure the ones used by
+the app being deployed. Set public variables before rebuilding/redeploying.
+
 ## Architecture (high level)
 
 - **apps/** – Next.js apps; each has its own pages, components, Redux store, and optional wallet/backend.

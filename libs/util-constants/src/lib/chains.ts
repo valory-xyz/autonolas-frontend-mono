@@ -38,7 +38,7 @@ export const CHAINS: Record<string, Chain> = {
 };
 
 /** Chains whose staking indexer is a squid (OpenReader) rather than a Graph subgraph. */
-export const STAKING_SQUID_CHAIN_IDS: readonly number[] = [base.id];
+export const STAKING_SQUID_CHAIN_IDS: readonly number[] = [base.id, polygon.id];
 
 export const VM_TYPE = {
   EVM: 'EVM',

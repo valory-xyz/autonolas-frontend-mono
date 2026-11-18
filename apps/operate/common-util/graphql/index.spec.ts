@@ -1,4 +1,4 @@
-import { base, gnosis } from 'viem/chains';
+import { base, gnosis, polygon } from 'viem/chains';
 
 const mockRequest = jest.fn();
 
@@ -10,6 +10,7 @@ jest.mock('graphql-request', () => ({
 }));
 
 const SQUID_URL = 'https://squid.test/staking-base/graphql';
+const POLYGON_SQUID_URL = 'https://squid.test/staking-polygon/graphql';
 const GNOSIS_URL = 'https://graph.test/staking-gnosis';
 const ADDRESS = '0x00000000000000000000000000000000000000AA';
 const LOWERCASE_ADDRESS = ADDRESS.toLowerCase();
@@ -35,6 +36,7 @@ describe('fetchStakingDataFromSubgraph', () => {
 
   beforeEach(() => {
     process.env.NEXT_PUBLIC_STAKING_BASE_SQUID_URL = SQUID_URL;
+    process.env.NEXT_PUBLIC_STAKING_POLYGON_SQUID_URL = POLYGON_SQUID_URL;
     process.env.NEXT_PUBLIC_GNOSIS_STAKING_SUBGRAPH_URL = GNOSIS_URL;
     mockRequest.mockReset();
     mockRequest.mockImplementation(async (_url: string, query: string) =>
@@ -44,16 +46,19 @@ describe('fetchStakingDataFromSubgraph', () => {
     );
   });
 
-  it('reads Base from the squid with OpenReader queries', async () => {
+  it.each([
+    [base.id, SQUID_URL],
+    [polygon.id, POLYGON_SQUID_URL],
+  ])('reads %s from its squid', async (chainId, url) => {
     const { fetchStakingDataFromSubgraph } = loadModule();
 
-    const rows = await fetchStakingDataFromSubgraph(base.id, [ADDRESS]);
+    const rows = await fetchStakingDataFromSubgraph(Number(chainId), [ADDRESS]);
 
     const [contractsCall, checkpointsCall] = mockRequest.mock.calls;
-    expect(contractsCall[0]).toBe(SQUID_URL);
+    expect(contractsCall[0]).toBe(url);
     expect(contractsCall[1]).toContain('$ids: [String!]!');
     expect(contractsCall[2]).toEqual({ ids: [LOWERCASE_ADDRESS] });
-    expect(checkpointsCall[0]).toBe(SQUID_URL);
+    expect(checkpointsCall[0]).toBe(url);
     expect(checkpointsCall[1]).toContain('$addr0: String!');
     expect(checkpointsCall[1]).toContain(
       'checkpoints(where: { contractAddress_eq: $addr0 }, orderBy: [blockTimestamp_DESC, id_DESC], limit: 1)',

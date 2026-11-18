@@ -1,6 +1,6 @@
 import { gql } from 'graphql-request';
 import { REGISTRY_SUBGRAPH_CLIENTS } from '.';
-import { getSubgraphDialect, type SubgraphDialect } from './dialect';
+import { getRegistryDialect, type SubgraphDialect } from './dialect';
 
 const erc8004Fields = (includeErc8004: boolean) =>
   includeErc8004 ? 'erc8004Agent { id agentWallet }' : '';
@@ -51,7 +51,7 @@ export const getServiceFromRegistry = async ({
   includeErc8004 = true,
 }: GetServiceFromRegistryParams) => {
   const client = REGISTRY_SUBGRAPH_CLIENTS[chainId];
-  const dialect = getSubgraphDialect(chainId);
+  const dialect = getRegistryDialect(chainId);
   const response = await client.request<{
     service?: ServiceFromRegistry | null;
     serviceById?: ServiceFromRegistry | null;
