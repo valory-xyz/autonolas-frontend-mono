@@ -1,18 +1,18 @@
 import { ParentToChildMessageGasEstimator, registerCustomArbitrumNetwork } from '@arbitrum/sdk';
 import { ethers as ethersV5 } from 'ethers-v5';
-import { type Address, encodeAbiParameters, parseAbiParameters } from 'viem';
+import { type Address, type Hex, encodeAbiParameters, parseAbiParameters, zeroAddress } from 'viem';
 import { arbitrum, mainnet } from 'viem/chains';
 
 import { RPC_URLS, robinhood } from 'libs/util-constants/src';
-import { DISPENSER } from 'libs/util-contracts/src/lib/abiAndAddresses';
+import { getAddressFromBytes32 } from 'libs/util-functions/src';
 
 export const ARBITRUM_CHAIN_ID = arbitrum.id;
 export const ROBINHOOD_CHAIN_ID = robinhood.id;
 
 /**
  * Chains whose staking incentives are bridged through `ArbitrumDepositProcessorL1` (Arbitrum One
- * and the Orbit rollups deployed with the same processor). Each needs a retryable-ticket bridge
- * payload and an ETH value on claim; every other chain passes `0x` and zero.
+ * and the Orbit rollups deployed with the same processor), so a claim that sends them a message
+ * carries a retryable-ticket bridge payload.
  */
 export const ORBIT_CHAIN_IDS = [ARBITRUM_CHAIN_ID, ROBINHOOD_CHAIN_ID] as const;
 export type OrbitChainId = (typeof ORBIT_CHAIN_IDS)[number];
@@ -112,47 +112,44 @@ export const GAS_OVERRIDES = {
 /** Extra buffer added to gas limit for message execution */
 const GAS_LIMIT_BUFFER = 100_000;
 
+/**
+ * A staking target the claim message carries, with the OLAS amount the Dispenser sends it. `target`
+ * is the nominee account, bytes32-padded as VoteWeighting stores it.
+ */
+export type BridgedIncentive = { target: Hex; amount: bigint };
+
 export type ArbitrumBridgeParams = {
   bridgePayload: `0x${string}`;
-  value: bigint;
+  /** ETH the processor spends on the staking message. */
+  messageCost: bigint;
+  /** ETH the processor spends on the OLAS token bridge. */
+  tokenCost: bigint;
 };
 
 /**
- * Computes the Arbitrum-style bridge payload and required ETH value for L1->L2 message passing
+ * Computes the Arbitrum-style bridge payload and the ETH costs for L1->L2 message passing
  * to an Orbit chain.
  *
  * The bridge payload encodes 5 values expected by ArbitrumDepositProcessorL1._sendMessage:
  *   (refundAddress, gasPriceBid, maxSubmissionCostToken, gasLimitMessage, maxSubmissionCostMessage)
  *
- * The value is the total cost: token transfer cost + message transfer cost.
+ * The L2 execution is estimated on the real message: `incentives` are the targets that send (the
+ * Dispenser drops zero-incentive targets) with their amounts. A placeholder target would fail the
+ * L2 dispenser's staking-instance check and skip the deposit, under-estimating its gas.
  */
 export const getArbitrumBridgePayload = async (
-  stakingTargets: Address[],
+  incentives: BridgedIncentive[],
   chainId: OrbitChainId,
+  l1DepositProcessorAddress: Address,
 ): Promise<ArbitrumBridgeParams> => {
+  if (l1DepositProcessorAddress === zeroAddress) {
+    throw new Error(`No deposit processor is registered on the Dispenser for chain ${chainId}`);
+  }
   if (chainId === ROBINHOOD_CHAIN_ID) ensureRobinhoodNetworkRegistered();
 
   const l1Provider = getProvider(mainnet.id);
   const l2Provider = getProvider(chainId);
-
-  // Read the chain's ArbitrumDepositProcessorL1 address from Dispenser contract
-  const dispenserContract = new ethersV5.Contract(
-    DISPENSER.addresses[mainnet.id],
-    ['function mapChainIdDepositProcessors(uint256) view returns (address)'],
-    l1Provider,
-  );
-
-  // Fetch deposit processor address and L1 base fee in parallel (independent calls)
-  const [l1DepositProcessorAddress, l1BaseFee] = await Promise.all([
-    dispenserContract.mapChainIdDepositProcessors(chainId) as Promise<string>,
-    getL1BaseFee(l1Provider),
-  ]);
-
-  // The Dispenser maps a chain to its processor via governance; until that lands the claim
-  // cannot be bridged, so fail here instead of calling into the zero address.
-  if (l1DepositProcessorAddress === ethersV5.constants.AddressZero) {
-    throw new Error(`No deposit processor is registered on the Dispenser for chain ${chainId}`);
-  }
+  const l1BaseFee = await getL1BaseFee(l1Provider);
 
   // Read l2TargetDispenser from the ArbitrumDepositProcessorL1 contract
   const depositProcessorContract = new ethersV5.Contract(
@@ -162,16 +159,16 @@ export const getArbitrumBridgePayload = async (
   );
   const l2TargetDispenserAddress: string = await depositProcessorContract.l2TargetDispenser();
 
-  // Construct approximate message calldata for gas estimation.
-  // The contract sends: abi.encodeWithSelector(RECEIVE_MESSAGE, abi.encode(targets, stakingIncentives, batchHash))
-  // We use dummy values since only the calldata size matters for gas estimation.
-  // Note: stakingTargets may be bytes32-padded, so we use dummy addresses of the same length.
-  const dummyTargets = stakingTargets.map(() => ORBIT_BRIDGE_MEDIATOR);
-  const dummyAmounts = stakingTargets.map(() => ethersV5.BigNumber.from(100));
-  const dummyBatchHash = ethersV5.constants.HashZero;
+  // The contract sends: abi.encodeWithSelector(RECEIVE_MESSAGE, abi.encode(targets, stakingIncentives, batchHash)).
+  // Only the batch hash is a placeholder: it changes the calldata bytes, not their size.
   const innerData = ethersV5.utils.defaultAbiCoder.encode(
     ['address[]', 'uint256[]', 'bytes32'],
-    [dummyTargets, dummyAmounts, dummyBatchHash],
+    [
+      // The message carries the 20-byte staking address; ethers rejects the padded nominee account.
+      incentives.map(({ target }) => getAddressFromBytes32(target)),
+      incentives.map(({ amount }) => ethersV5.BigNumber.from(amount.toString())),
+      ethersV5.constants.HashZero,
+    ],
   );
   const receiveMessageIface = new ethersV5.utils.Interface([
     'function receiveMessage(bytes memory data)',
@@ -230,12 +227,11 @@ export const getArbitrumBridgePayload = async (
     .add(99)
     .div(100);
 
-  // Calculate total cost:
-  // cost[0] = maxSubmissionCostToken + TOKEN_GAS_LIMIT * gasPriceBid (token transfer)
+  // Mirrors ArbitrumDepositProcessorL1._sendMessage:
+  // cost[0] = maxSubmissionCostToken + TOKEN_GAS_LIMIT * gasPriceBid (token transfer, if any)
   // cost[1] = maxSubmissionCostMessage + gasLimitMessage * gasPriceBid (message)
   const tokenCost = maxSubmissionCostToken.add(gasPriceBid.mul(TOKEN_GAS_LIMIT));
   const messageCost = maxSubmissionCostMessage.add(gasLimitMessage.mul(gasPriceBid));
-  const totalCost = tokenCost.add(messageCost);
 
   // Encode bridge payload: (address, uint256, uint256, uint256, uint256)
   // Must be exactly 160 bytes (BRIDGE_PAYLOAD_LENGTH in the contract)
@@ -252,6 +248,7 @@ export const getArbitrumBridgePayload = async (
 
   return {
     bridgePayload,
-    value: BigInt(totalCost.toString()),
+    messageCost: BigInt(messageCost.toString()),
+    tokenCost: BigInt(tokenCost.toString()),
   };
 };
