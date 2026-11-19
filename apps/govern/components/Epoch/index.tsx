@@ -20,6 +20,9 @@ const { Title, Paragraph, Text } = Typography;
 // Disable if the "Start new epoch" button should be shown
 const isStartNewEpochShown = true;
 
+// Set to true to temporarily disable the "Start new epoch" button
+const isStartNewEpochDisabled = true;
+
 const StyledMain = styled.main`
   display: flex;
   flex-direction: column;
@@ -122,7 +125,9 @@ export const EpochPage = ({ initialEpochData }: EpochPageProps) => {
               size="large"
               type="primary"
               loading={isCheckpointLoading}
-              disabled={!account || isDataLoading || isExpectedEndTimeInFuture}
+              disabled={
+                !account || isDataLoading || isExpectedEndTimeInFuture || isStartNewEpochDisabled
+              }
               onClick={onCheckpoint}
             >
               Start new epoch
