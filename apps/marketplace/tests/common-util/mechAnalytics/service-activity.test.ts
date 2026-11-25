@@ -237,9 +237,27 @@ describe('getServiceActivityFromMechAnalytics — column-level projection', () =
 
     const activity = result.activities[0];
     expect(activity.feeUnit).toBe('USDC');
-    // 1,234,567 micro-USDC = $1.23 (toFixed(2) rounds down).
-    expect(activity.finalFeeUSD).toBe('1.23');
+    // 1,234,567 micro-USDC = $1.234567 (all 6 USDC decimals kept).
+    expect(activity.finalFeeUSD).toBe('1.234567');
     expect(activity.feeRaw).toBe('1234567');
+  });
+
+  it.each([
+    ['11800', '0.0118'],
+    ['10000', '0.01'],
+    ['9500', '0.0095'],
+  ])('keeps sub-cent USDC charges: %s micro-USDC → finalFeeUSD %s', async (rate, usd) => {
+    iterateScoredRows.mockImplementation(() =>
+      scoredRowIter([scoredRow({ payment_type: PT_USDC, delivery_rate: rate })]),
+    );
+    const result = await getServiceActivityFromMechAnalytics({
+      chainId: 8453,
+      serviceId: '1',
+      multisigs: [REQUESTER],
+      mechAddresses: [],
+      subgraphActivities: [],
+    });
+    expect(result.activities[0].finalFeeUSD).toBe(usd);
   });
 
   it('maps payment_type=native to feeUnit=NATIVE (raw wei)', async () => {

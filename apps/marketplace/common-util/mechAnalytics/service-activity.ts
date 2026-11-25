@@ -1,5 +1,6 @@
 import { LEGACY_DELIVERY_PAYMENT_WEI, type Activity } from 'common-util/graphql/service-activity';
 import type { FeeUnit } from 'common-util/types';
+import { formatMicroUsdc } from 'common-util/functions/usdAmount';
 import { iterateScoredRows, iterateUnscoredRows } from './client';
 import { mapWithConcurrency } from './concurrency';
 import type { ScoredRow } from './types';
@@ -364,13 +365,14 @@ const PAYMENT_TYPE_TO_FEE = new Map<
     'ba699a34be8fe0e7725e93dcbce1701b0211a8ca61330aaeb8a05bf2ec7abed1',
     (rate) => (rate == null ? BLANK_FEE : { feeUnit: 'NATIVE', feeRaw: rate, finalFeeUSD: null }),
   ],
-  // FixedPriceTokenUSDC — 6-decimal micro-USDC.
+  // FixedPriceTokenUSDC — 6-decimal micro-USDC. Kept to 6 decimals
+  // (bigint) so sub-cent dynamic prices like $0.0118 aren't rounded away.
   [
     '6406bb5f31a732f898e1ce9fdd988a80a808d36ab5d9a4a4805a8be8d197d5e3',
-    (rate) =>
-      rate == null
-        ? BLANK_FEE
-        : { feeUnit: 'USDC', feeRaw: rate, finalFeeUSD: (Number(rate) / 1e6).toFixed(2) },
+    (rate) => {
+      const usd = rate == null ? null : formatMicroUsdc(rate);
+      return usd == null ? BLANK_FEE : { feeUnit: 'USDC', feeRaw: rate, finalFeeUSD: usd };
+    },
   ],
   // NvmSubscriptionNative — rate is credits consumed.
   [
