@@ -260,6 +260,34 @@ describe('getServiceActivityFromMechAnalytics — column-level projection', () =
     expect(result.activities[0].finalFeeUSD).toBe(usd);
   });
 
+  it.each([
+    ['17116', '17116', '0.017116'],
+    [undefined, '30000', '0.03'],
+    [null, '30000', '0.03'],
+  ])(
+    'shows the actual charge, not the cap: actual_delivery_rate=%s → feeRaw %s, $%s',
+    async (actual, feeRaw, usd) => {
+      iterateScoredRows.mockImplementation(() =>
+        scoredRowIter([
+          scoredRow({
+            payment_type: PT_USDC,
+            delivery_rate: '30000',
+            ...(actual === undefined ? {} : { actual_delivery_rate: actual }),
+          }),
+        ]),
+      );
+      const result = await getServiceActivityFromMechAnalytics({
+        chainId: 137,
+        serviceId: '25',
+        multisigs: [REQUESTER],
+        mechAddresses: [],
+        subgraphActivities: [],
+      });
+      expect(result.activities[0].feeRaw).toBe(feeRaw);
+      expect(result.activities[0].finalFeeUSD).toBe(usd);
+    },
+  );
+
   it('maps payment_type=native to feeUnit=NATIVE (raw wei)', async () => {
     iterateScoredRows.mockImplementation(() =>
       scoredRowIter([scoredRow({ payment_type: PT_NATIVE, delivery_rate: '10000000000000000' })]),

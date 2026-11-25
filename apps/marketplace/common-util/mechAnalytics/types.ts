@@ -27,6 +27,11 @@ export interface ScoredRow {
   // Decimal string; parse with BigInt, not Number.
   delivery_rate: string | null;
 
+  // What the request was really charged, in the same raw units as
+  // delivery_rate (which is the advertised cap under dynamic pricing).
+  // Absent / NULL on rows from before dynamic pricing.
+  actual_delivery_rate?: string | null;
+
   // Mech that actually delivered. Distinct from mech_address, which is
   // the priority_mech the request was routed to; the two diverge under
   // the marketplace's non-priority delivery path. Consumers rendering

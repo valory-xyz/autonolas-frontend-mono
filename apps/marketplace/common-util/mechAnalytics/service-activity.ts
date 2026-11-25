@@ -457,7 +457,8 @@ const mapPaymentToFee = (
 };
 
 const mapRowToActivity = (row: ScoredRow, activityType: ActivityType): Activity => {
-  const fee = mapPaymentToFee(row.payment_type, row.delivery_rate);
+  // Show the actual charge; delivery_rate is the cap under dynamic pricing.
+  const fee = mapPaymentToFee(row.payment_type, row.actual_delivery_rate ?? row.delivery_rate);
   return {
     activityType,
     requestId: row.request_id,
