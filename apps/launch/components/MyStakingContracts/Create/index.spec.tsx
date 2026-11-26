@@ -1,4 +1,5 @@
 import '@testing-library/jest-dom';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
@@ -39,6 +40,14 @@ jest.mock('store/index', () => ({
   useAppDispatch: jest.fn().mockReturnValue(jest.fn()),
 }));
 
+// Create writes the new contract to the query cache, so it needs a QueryClient.
+const renderCreate = () =>
+  render(
+    <QueryClientProvider client={new QueryClient()}>
+      <CreateStakingContract />
+    </QueryClientProvider>,
+  );
+
 const clickCreateContractButton = async () => {
   const createContractBtn = screen.getByRole('button', { name: 'Create contract' });
   await userEvent.click(createContractBtn);
@@ -46,14 +55,14 @@ const clickCreateContractButton = async () => {
 
 describe('<CreateStakingContract />', () => {
   it('should display title of the staking contract form', () => {
-    render(<CreateStakingContract />);
+    renderCreate();
 
     expect(screen.getByText(/Create staking contract on Ethereum/i)).toBeInTheDocument();
   });
 
   // Name
   it('should display `Name` field as required and able to fill the `Name` field', async () => {
-    render(<CreateStakingContract />);
+    renderCreate();
 
     const nameInput = screen.getByLabelText('Name');
     expect(nameInput).toBeRequired();
@@ -64,7 +73,7 @@ describe('<CreateStakingContract />', () => {
 
   // Description
   it('should display `Description` field as required (including sub info) and able to fill the `Description` field', async () => {
-    render(<CreateStakingContract />);
+    renderCreate();
 
     const descriptionInput = screen.getByLabelText('Description');
     expect(descriptionInput).toBeRequired();
@@ -81,7 +90,7 @@ describe('<CreateStakingContract />', () => {
 
   // Template
   it('should display `Template` field with the default template', () => {
-    render(<CreateStakingContract />);
+    renderCreate();
 
     expect(screen.getByText('Template')).toBeInTheDocument();
     expect(screen.getByText('More templates coming soon')).toBeInTheDocument();
@@ -96,7 +105,7 @@ describe('<CreateStakingContract />', () => {
 
   // Maximum number of staked agents
   it('should display `Maximum number of staked agents` field as required, able to fill and see the error message when the value is out of range', async () => {
-    render(<CreateStakingContract />);
+    renderCreate();
 
     const maxNumServicesInput = screen.getByLabelText('Maximum number of staked agents');
     expect(maxNumServicesInput).toBeRequired();
@@ -112,7 +121,7 @@ describe('<CreateStakingContract />', () => {
 
   // Rewards, OLAS per second
   it('should display `Rewards, OLAS per second` field as required, able to fill and see the error message when the value is out of range', async () => {
-    render(<CreateStakingContract />);
+    renderCreate();
 
     const rewardsPerSecondInput = screen.getByLabelText('Rewards, OLAS per second');
     expect(rewardsPerSecondInput).toBeRequired();
@@ -134,7 +143,7 @@ describe('<CreateStakingContract />', () => {
 
   // Minimum service staking deposit, OLAS
   it('should display `Minimum service staking deposit, OLAS` field as required, able to fill and see the error message when the value is out of range', async () => {
-    render(<CreateStakingContract />);
+    renderCreate();
 
     const minStakingDepositInput = screen.getByLabelText('Minimum service staking deposit, OLAS');
     expect(minStakingDepositInput).toBeRequired();
@@ -152,7 +161,7 @@ describe('<CreateStakingContract />', () => {
 
   // Minimum number of staking periods
   it('should display `Minimum number of staking periods` field as required and able to fill the field', async () => {
-    render(<CreateStakingContract />);
+    renderCreate();
 
     const minStakingPeriodsInput = screen.getByLabelText('Minimum number of staking periods');
     expect(minStakingPeriodsInput).toBeRequired();
@@ -162,7 +171,7 @@ describe('<CreateStakingContract />', () => {
 
   // Maximum number of inactivity periods
   it('should display `Maximum number of inactivity periods` field as required and able to fill the field', async () => {
-    render(<CreateStakingContract />);
+    renderCreate();
 
     const maxInactivityPeriodsInput = screen.getByLabelText('Maximum number of inactivity periods');
     expect(maxInactivityPeriodsInput).toBeRequired();
@@ -172,7 +181,7 @@ describe('<CreateStakingContract />', () => {
 
   // Liveness period
   it('should display `Liveness period` field as required and able to fill the field', async () => {
-    render(<CreateStakingContract />);
+    renderCreate();
 
     const livenessPeriodInput = screen.getByLabelText('Liveness period, seconds');
     expect(livenessPeriodInput).toBeRequired();
@@ -182,7 +191,7 @@ describe('<CreateStakingContract />', () => {
 
   // Time for emissions
   it('should display `Time for emissions` field as required, able to fill and see the error message when the value is out of range', async () => {
-    render(<CreateStakingContract />);
+    renderCreate();
 
     const timeForEmissionsInput = screen.getByLabelText('Time for emissions, seconds');
     expect(timeForEmissionsInput).toBeRequired();
@@ -201,7 +210,7 @@ describe('<CreateStakingContract />', () => {
 
   // Number of agent instances
   it('should display `Number of agent instances` field as required and able to fill the field', async () => {
-    render(<CreateStakingContract />);
+    renderCreate();
 
     const numAgentInstancesInput = screen.getByLabelText('Number of agent instances');
     expect(numAgentInstancesInput).toBeRequired();
@@ -211,7 +220,7 @@ describe('<CreateStakingContract />', () => {
 
   // Multisig threshold
   it('should display `Multisig threshold` field as required and able to fill the field', async () => {
-    render(<CreateStakingContract />);
+    renderCreate();
 
     const multisigThresholdInput = screen.getByLabelText('Multisig threshold');
     expect(multisigThresholdInput).not.toBeRequired();
@@ -221,7 +230,7 @@ describe('<CreateStakingContract />', () => {
 
   // Service configuration hash
   it('should display `Service configuration hash` field as required and able to fill the field', async () => {
-    render(<CreateStakingContract />);
+    renderCreate();
 
     const serviceConfigHashInput = screen.getByLabelText('Service configuration hash');
     expect(serviceConfigHashInput).not.toBeRequired();
@@ -233,7 +242,7 @@ describe('<CreateStakingContract />', () => {
 
   // Activity checker address
   it('should display `Activity checker address` field as required and able to fill the field', async () => {
-    render(<CreateStakingContract />);
+    renderCreate();
 
     const activityCheckerAddressInput = screen.getByLabelText('Activity checker address');
     expect(activityCheckerAddressInput).toBeRequired();
@@ -245,7 +254,7 @@ describe('<CreateStakingContract />', () => {
   });
 
   it('should display cancel & create contract button', () => {
-    render(<CreateStakingContract />);
+    renderCreate();
 
     expect(screen.getByRole('button', { name: 'Cancel' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Create contract' })).toBeInTheDocument();

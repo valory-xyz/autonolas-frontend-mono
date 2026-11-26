@@ -1,6 +1,7 @@
 import { useParams } from 'next/navigation';
 import { useRouter } from 'next/router';
 import React, { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { flushSync } from 'react-dom';
 import { mainnet } from 'viem/chains';
 import { useAccount, useSwitchChain } from 'wagmi';
 
@@ -9,8 +10,11 @@ import { URL } from 'common-util/constants/urls';
 import { Feature, getErrorInfo } from 'common-util/functions/frontend-library';
 import { addNominee } from 'common-util/functions/web3';
 import { useAppDispatch, useAppSelector } from 'store/index';
-import { setIsNominated } from 'store/launch';
+import { recordConfirmedNomination } from 'store/launch';
 import { ErrorType, MyStakingContract } from 'types/index';
+
+import { useMyStakingContracts } from 'hooks/useMyStakingContracts';
+import { useNominees } from 'hooks/useNominees';
 
 import {
   ConnectWalletBeforeNominate,
@@ -19,6 +23,7 @@ import {
   ContractDoesNotExist,
   ErrorTransaction,
   Loader,
+  NominationStatusUnavailable,
   SuccessfulTransaction,
   SwitchNetworkError,
   WaitingForTransaction,
@@ -27,11 +32,14 @@ import {
 type NominatedContractContentProps = {
   contractName: string;
   contractInfo: MyStakingContract;
+  /** Called once the receipt succeeded, before the nomination is recorded. */
+  onNominated: () => void;
 };
 
 const NominatedContractContent: FC<NominatedContractContentProps> = ({
   contractName,
   contractInfo,
+  onNominated,
 }) => {
   const router = useRouter();
   const { chainId, address: account } = useAccount();
@@ -39,6 +47,7 @@ const NominatedContractContent: FC<NominatedContractContentProps> = ({
 
   const { networkName } = useAppSelector((state) => state.network);
   const dispatch = useAppDispatch();
+  const { refetch: refetchNominees } = useNominees();
 
   const [isFailedToSwitch, setIsFailedToSwitch] = useState(false);
   const [isPending, setIsPending] = useState(false);
@@ -74,11 +83,27 @@ const NominatedContractContent: FC<NominatedContractContentProps> = ({
         account,
       });
 
-      setIsSuccessful(true);
+      // Committed before the nomination is recorded below: recording makes the contract
+      // nominated, and this page must keep showing the success state rather than switch to
+      // "already nominated" (which would unmount this view).
+      flushSync(() => {
+        setIsSuccessful(true);
+        onNominated();
+      });
 
-      // Wait for 2s so the user can see success state
+      // The receipt succeeded (addNominee throws otherwise): record it now, so leaving this page
+      // straight away shows the contract as nominated, and keep it nominated until the
+      // refreshed nominee read includes it, so a lagging RPC cannot bring back "not nominated".
+      dispatch(
+        recordConfirmedNomination({
+          chainId: contractInfo.chainId,
+          address: contractInfo.id,
+        }),
+      );
+      refetchNominees();
+
+      // Wait for 2s so the user can see success state.
       setTimeout(() => {
-        dispatch(setIsNominated({ id: contractInfo.id }));
         router.replace(`/${networkName}/${URL.myStakingContracts}`);
       }, 2000);
     } catch (error) {
@@ -87,7 +112,7 @@ const NominatedContractContent: FC<NominatedContractContentProps> = ({
     } finally {
       setIsPending(false);
     }
-  }, [account, contractInfo, dispatch, networkName, router]);
+  }, [account, contractInfo, dispatch, networkName, onNominated, refetchNominees, router]);
 
   useEffect(() => {
     if (!account) return;
@@ -137,9 +162,11 @@ export const NominateContract = () => {
   const id = params?.id;
 
   const { networkDisplayName } = useAppSelector((state) => state.network);
-  const { isMyStakingContractsLoading, myStakingContracts } = useAppSelector(
-    (state) => state.launch,
-  );
+  const { isMyStakingContractsLoading, myStakingContracts } = useMyStakingContracts();
+  const { refetch: refetchNominees, isFetching: isNomineesFetching } = useNominees();
+  // The contract this page has just nominated: it stays on the transaction view (success, then
+  // redirect) although the contract now reads as nominated.
+  const [nominatedId, setNominatedId] = useState<string | null>(null);
 
   // my contracts are still loading
   if (isMyStakingContractsLoading) return <Loader />;
@@ -160,9 +187,23 @@ export const NominateContract = () => {
   } on ${networkDisplayName} chain`;
   if (!account) return <ConnectWalletBeforeNominate contractName={contractName} />;
 
-  // contract already nominated
-  const contractAlreadyNominated = contractInfo.isNominated;
-  if (contractAlreadyNominated) return <ContractAlreadyNominated contractName={contractName} />;
+  // nomination status: only a contract known not to be nominated gets the transaction
+  switch (nominatedId === contractInfo.id ? 'notNominated' : contractInfo.nominationStatus) {
+    case 'loading':
+      return <Loader />;
+    case 'unknown':
+      return (
+        <NominationStatusUnavailable
+          contractName={contractName}
+          isRetrying={isNomineesFetching}
+          onRetry={() => refetchNominees()}
+        />
+      );
+    case 'nominated':
+      return <ContractAlreadyNominated contractName={contractName} />;
+    case 'notNominated':
+      break;
+  }
 
   return (
     <Container>
@@ -170,6 +211,7 @@ export const NominateContract = () => {
         key={contractInfo.id}
         contractName={contractName}
         contractInfo={contractInfo}
+        onNominated={() => setNominatedId(contractInfo.id)}
       />
     </Container>
   );

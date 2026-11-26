@@ -84,5 +84,10 @@ export const addNominee = async ({ address, nomineeChainId, account }: AddNomine
   const gas = await estimateGasWithBuffer(wagmiConfig, callParams);
 
   const hash = await writeContract(wagmiConfig, { ...request, gas, chainId: txChainId });
-  return waitForTransactionReceipt(wagmiConfig, { hash, chainId: txChainId });
+  const receipt = await waitForTransactionReceipt(wagmiConfig, { hash, chainId: txChainId });
+  // A mined but reverted transaction still returns a receipt; it is not a nomination.
+  if (receipt.status !== 'success') {
+    throw Object.assign(new Error('Nomination transaction reverted'), { transactionHash: hash });
+  }
+  return receipt;
 };

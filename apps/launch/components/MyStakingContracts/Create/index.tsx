@@ -11,6 +11,7 @@ import {
   Tag,
   Typography,
 } from 'antd';
+import { useQueryClient } from '@tanstack/react-query';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { useRouter } from 'next/router';
@@ -32,8 +33,9 @@ import { URL } from 'common-util/constants/urls';
 import { Feature, createStakingContract, getErrorInfo, getIpfsHash } from 'common-util/functions';
 import { getChainIdFromPath } from 'common-util/functions/networkHelpers';
 import { getStakingContractInitPayload } from 'common-util/functions/stakingContract';
+import { seedStakingContractMetadata } from 'common-util/queries/myStakingContracts';
 import { useAppDispatch } from 'store/index';
-import { addStakingContract } from 'store/launch';
+import { recordCreatedStakingContract } from 'store/launch';
 import { ErrorType } from 'types/index';
 
 import { FormValues } from '../FieldConfig';
@@ -96,6 +98,7 @@ export const CreateStakingContract = () => {
 
   const router = useRouter();
   const dispatch = useAppDispatch();
+  const queryClient = useQueryClient();
   const { rulesConfig, onValuesChange } = useFieldRules(form);
 
   const [isLoading, setIsLoading] = useState(false);
@@ -181,14 +184,17 @@ export const CreateStakingContract = () => {
         initPayload,
         account,
       });
+      // The deployment is confirmed (the instance comes from its receipt). List it until the
+      // indexer or log scan returns it too, with the metadata just uploaded.
+      seedStakingContractMetadata(queryClient, metadataHash, { name: contractName, description });
       dispatch(
-        addStakingContract({
-          id: result.instance,
+        recordCreatedStakingContract({
           chainId: chain.id,
+          account,
+          instance: result.instance,
+          metadataHash,
           name: contractName,
           description,
-          template: contractTemplate.title,
-          isNominated: false,
         }),
       );
       router.push(`/${networkName}/${URL.myStakingContracts}`);

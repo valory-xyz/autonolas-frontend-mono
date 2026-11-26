@@ -10,6 +10,8 @@ import { CHAIN_NAMES, GOVERN_URL, UNICODE_SYMBOLS } from 'libs/util-constants/sr
 import { URL } from 'common-util/constants/urls';
 import { useAppSelector } from 'store/index';
 
+import { useMyStakingContracts } from 'hooks/useMyStakingContracts';
+
 import { LoginV2 } from '../Login';
 import { List } from './List';
 
@@ -76,9 +78,7 @@ const CreateStakingContractMessage = () => (
 );
 
 const StakingContractList = () => {
-  const { isMyStakingContractsLoading, myStakingContracts } = useAppSelector(
-    (state) => state.launch,
-  );
+  const { isMyStakingContractsLoading, myStakingContracts } = useMyStakingContracts();
 
   if (isMyStakingContractsLoading) return <Loader />;
   if (myStakingContracts.length === 0) return <CreateStakingContractMessage />;

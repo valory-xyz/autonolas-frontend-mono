@@ -1,11 +1,13 @@
 import '@testing-library/jest-dom';
 import { render, screen, waitFor } from '@testing-library/react';
 import { useParams } from 'next/navigation';
+import { useRouter } from 'next/router';
 import { mainnet } from 'viem/chains';
 import { useAccount, useSwitchChain } from 'wagmi';
 
 import { addNominee } from 'common-util/functions/web3';
-import { useAppSelector } from 'store/index';
+import { useAppDispatch, useAppSelector } from 'store/index';
+import { recordConfirmedNomination } from 'store/launch';
 
 import { NominateContract } from './index';
 
@@ -37,6 +39,19 @@ jest.mock('common-util/functions/web3', () => ({
   addNominee: jest.fn(),
 }));
 jest.mock('../Login', () => ({ LoginV2: 'ConnectWallet' }));
+// The owned-list check is covered in hooks/useGetMyStakingContracts.spec.ts; here the list comes
+// from the same mocked selector state as before.
+jest.mock('hooks/useMyStakingContracts', () => ({
+  useMyStakingContracts: () => {
+    const { useAppSelector: selector } = jest.requireMock('store/index');
+    const { isMyStakingContractsLoading = false, myStakingContracts = [] } = selector();
+    return { isMyStakingContractsLoading, myStakingContracts };
+  },
+}));
+const mockRefetchNominees = jest.fn();
+jest.mock('hooks/useNominees', () => ({
+  useNominees: () => ({ refetch: mockRefetchNominees, isFetching: false }),
+}));
 
 describe('<NominateContract/>', () => {
   beforeEach(() => {
@@ -120,7 +135,7 @@ describe('<NominateContract/>', () => {
         {
           id: '0x12345',
           name: 'My Staking Contract',
-          isNominated: true,
+          nominationStatus: 'nominated',
         },
       ],
     });
@@ -151,7 +166,7 @@ describe('<NominateContract/>', () => {
         {
           id: '0x12345',
           name: 'My Staking Contract',
-          isNominated: false,
+          nominationStatus: 'notNominated',
         },
       ],
     });
@@ -168,13 +183,22 @@ describe('<NominateContract/>', () => {
   // every re-render — flooding the wallet with hundreds of signatures.
   describe('auto-trigger guards', () => {
     const oneContractOnMainnet = () => {
-      (useAccount as jest.Mock).mockReturnValue({ address: '0xMyAddress', chainId: mainnet.id });
+      (useAccount as jest.Mock).mockReturnValue({
+        address: '0xMyAddress',
+        chainId: mainnet.id,
+      });
       // A fresh array/object on every render mimics Redux re-dispatching a new
       // myStakingContracts reference from background wagmi refetches.
       (useAppSelector as jest.Mock).mockImplementation(() => ({
         networkDisplayName: 'Ethereum',
         networkName: 'ethereum',
-        myStakingContracts: [{ id: '0x12345', name: 'My Staking Contract', isNominated: false }],
+        myStakingContracts: [
+          {
+            id: '0x12345',
+            name: 'My Staking Contract',
+            nominationStatus: 'notNominated',
+          },
+        ],
       }));
     };
 
@@ -195,11 +219,20 @@ describe('<NominateContract/>', () => {
       const switchChainAsync = jest.fn().mockResolvedValue(undefined);
       (useSwitchChain as jest.Mock).mockReturnValue({ switchChainAsync });
       // Gnosis (100), i.e. not mainnet.
-      (useAccount as jest.Mock).mockReturnValue({ address: '0xMyAddress', chainId: 100 });
+      (useAccount as jest.Mock).mockReturnValue({
+        address: '0xMyAddress',
+        chainId: 100,
+      });
       (useAppSelector as jest.Mock).mockImplementation(() => ({
         networkDisplayName: 'Gnosis',
         networkName: 'gnosis',
-        myStakingContracts: [{ id: '0x12345', name: 'My Staking Contract', isNominated: false }],
+        myStakingContracts: [
+          {
+            id: '0x12345',
+            name: 'My Staking Contract',
+            nominationStatus: 'notNominated',
+          },
+        ],
       }));
 
       const { rerender } = render(<NominateContract />);
@@ -213,13 +246,24 @@ describe('<NominateContract/>', () => {
     });
 
     it('should nominate again when navigating to a different contract', async () => {
-      (useAccount as jest.Mock).mockReturnValue({ address: '0xMyAddress', chainId: mainnet.id });
+      (useAccount as jest.Mock).mockReturnValue({
+        address: '0xMyAddress',
+        chainId: mainnet.id,
+      });
       (useAppSelector as jest.Mock).mockImplementation(() => ({
         networkDisplayName: 'Ethereum',
         networkName: 'ethereum',
         myStakingContracts: [
-          { id: '0x11111', name: 'Contract A', isNominated: false },
-          { id: '0x22222', name: 'Contract B', isNominated: false },
+          {
+            id: '0x11111',
+            name: 'Contract A',
+            nominationStatus: 'notNominated',
+          },
+          {
+            id: '0x22222',
+            name: 'Contract B',
+            nominationStatus: 'notNominated',
+          },
         ],
       }));
 
@@ -237,6 +281,120 @@ describe('<NominateContract/>', () => {
 
       await waitFor(() => expect(addNominee).toHaveBeenCalledTimes(2));
       expect(addNominee).toHaveBeenLastCalledWith(expect.objectContaining({ address: '0x22222' }));
+    });
+  });
+
+  describe('nomination status', () => {
+    beforeEach(() => {
+      // The guard tests above leave useParams pointing at another contract.
+      (useParams as jest.Mock).mockReturnValue({ id: '0x12345' });
+      (addNominee as jest.Mock).mockReset();
+      mockRefetchNominees.mockClear();
+      (useAppDispatch() as jest.Mock).mockReset();
+    });
+
+    const contractWithStatus = (nominationStatus: string) => {
+      (useAccount as jest.Mock).mockReturnValue({
+        address: '0xMyAddress',
+        chainId: mainnet.id,
+      });
+      (useAppSelector as jest.Mock).mockReturnValue({
+        networkDisplayName: 'Robinhood Chain',
+        networkName: 'robinhood-chain',
+        myStakingContracts: [
+          {
+            id: '0x12345',
+            chainId: 4663,
+            name: 'My Staking Contract',
+            nominationStatus,
+          },
+        ],
+      });
+    };
+
+    it('sends no transaction and offers a retry when the status is unknown', async () => {
+      contractWithStatus('unknown');
+
+      render(<NominateContract />);
+
+      expect(screen.getByText(/Couldn’t check the nomination status/)).toBeInTheDocument();
+      screen.getByTestId('nomination-status-retry').click();
+      expect(mockRefetchNominees).toHaveBeenCalled();
+      expect(addNominee).not.toHaveBeenCalled();
+    });
+
+    it('sends no transaction while the status is loading', () => {
+      contractWithStatus('loading');
+
+      render(<NominateContract />);
+
+      expect(screen.getByTestId('nominate-contract-loader')).toBeInTheDocument();
+      expect(addNominee).not.toHaveBeenCalled();
+    });
+
+    it('records the confirmed nomination and refreshes nominees after a successful receipt', async () => {
+      contractWithStatus('notNominated');
+      (addNominee as jest.Mock).mockResolvedValue({ status: 'success' });
+
+      render(<NominateContract />);
+
+      await waitFor(() => expect(addNominee).toHaveBeenCalledTimes(1));
+      await waitFor(
+        () =>
+          expect(useAppDispatch()).toHaveBeenCalledWith(
+            recordConfirmedNomination({ chainId: 4663, address: '0x12345' }),
+          ),
+        { timeout: 3000 },
+      );
+      expect(mockRefetchNominees).toHaveBeenCalled();
+      await waitFor(
+        () =>
+          expect(useRouter().replace).toHaveBeenCalledWith('/robinhood-chain/my-staking-contracts'),
+        { timeout: 3000 },
+      );
+    });
+
+    it('records the nomination at once and keeps the success view while it reads as nominated', async () => {
+      contractWithStatus('notNominated');
+      (addNominee as jest.Mock).mockResolvedValue({ status: 'success' });
+      // The store as the app has it: recording makes the contract read as nominated.
+      (useAppDispatch() as jest.Mock).mockImplementation((action: { type: string }) => {
+        if (action.type === recordConfirmedNomination.type) contractWithStatus('nominated');
+      });
+
+      const { rerender } = render(<NominateContract />);
+
+      await waitFor(() =>
+        expect(useAppDispatch()).toHaveBeenCalledWith(
+          recordConfirmedNomination({ chainId: 4663, address: '0x12345' }),
+        ),
+      );
+      // Recorded and refreshed before the 2s success delay ends.
+      expect(mockRefetchNominees).toHaveBeenCalled();
+      expect(useRouter().replace).not.toHaveBeenCalled();
+
+      rerender(<NominateContract />);
+      expect(screen.getByText(/Transaction successful/)).toBeInTheDocument();
+      expect(screen.queryByText(/already nominated/i)).not.toBeInTheDocument();
+      expect(addNominee).toHaveBeenCalledTimes(1);
+
+      await waitFor(
+        () =>
+          expect(useRouter().replace).toHaveBeenCalledWith('/robinhood-chain/my-staking-contracts'),
+        { timeout: 3000 },
+      );
+    });
+
+    it('records nothing when the nomination fails', async () => {
+      contractWithStatus('notNominated');
+      (addNominee as jest.Mock).mockRejectedValue(new Error('Nomination transaction reverted'));
+
+      render(<NominateContract />);
+
+      await waitFor(() => expect(addNominee).toHaveBeenCalledTimes(1));
+      await new Promise((resolve) => setTimeout(resolve, 2200));
+      expect(useAppDispatch()).not.toHaveBeenCalled();
+      expect(mockRefetchNominees).not.toHaveBeenCalled();
     });
   });
 });
