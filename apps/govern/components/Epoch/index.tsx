@@ -21,7 +21,7 @@ const { Title, Paragraph, Text } = Typography;
 const isStartNewEpochShown = true;
 
 // Set to true to temporarily disable the "Start new epoch" button
-const isStartNewEpochDisabled = true;
+const isStartNewEpochDisabled = false;
 
 const StyledMain = styled.main`
   display: flex;
