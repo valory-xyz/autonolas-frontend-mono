@@ -288,6 +288,23 @@ describe('getServiceActivityFromMechAnalytics — column-level projection', () =
     },
   );
 
+  it('an undelivered USDC request shows no fee, not its cap', async () => {
+    iterateUnscoredRows.mockImplementation(() =>
+      scoredRowIter([
+        scoredRow({ payment_type: PT_USDC, delivery_rate: '30000', delivered_at: null }),
+      ]),
+    );
+    const result = await getServiceActivityFromMechAnalytics({
+      chainId: 137,
+      serviceId: '25',
+      multisigs: [REQUESTER],
+      mechAddresses: [],
+      subgraphActivities: [],
+    });
+    expect(result.activities[0].feeRaw).toBeNull();
+    expect(result.activities[0].finalFeeUSD).toBeNull();
+  });
+
   it('maps payment_type=native to feeUnit=NATIVE (raw wei)', async () => {
     iterateScoredRows.mockImplementation(() =>
       scoredRowIter([scoredRow({ payment_type: PT_NATIVE, delivery_rate: '10000000000000000' })]),

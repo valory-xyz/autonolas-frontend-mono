@@ -457,8 +457,12 @@ const mapPaymentToFee = (
 };
 
 const mapRowToActivity = (row: ScoredRow, activityType: ActivityType): Activity => {
-  // Show the actual charge; delivery_rate is the cap under dynamic pricing.
-  const fee = mapPaymentToFee(row.payment_type, row.actual_delivery_rate ?? row.delivery_rate);
+  // Show the actual charge; delivery_rate is the cap under dynamic pricing, so an
+  // undelivered request (never charged) gets a blank fee rather than its cap.
+  const fee = mapPaymentToFee(
+    row.payment_type,
+    row.delivered_at ? (row.actual_delivery_rate ?? row.delivery_rate) : null,
+  );
   return {
     activityType,
     requestId: row.request_id,
