@@ -1,6 +1,8 @@
 import { Request, Delivery, FeeUnit } from 'common-util/types';
 import { MARKETPLACE_SUBGRAPH_CLIENTS, type MarketplaceSubgraphChainId } from './index';
 import { getMarketplaceDialect, omitOnSquid, type SubgraphDialect } from './dialect';
+import { feeUnitForPaymentType } from 'common-util/mechAnalytics/service-activity';
+import { formatMicroUsdc } from 'common-util/functions/usdAmount';
 
 type ActivityType = 'Demand' | 'Supply';
 
@@ -50,6 +52,12 @@ const mechRequestFields = (dialect: SubgraphDialect) =>
 
 const mechDeliveryFields = (dialect: SubgraphDialect) =>
   omitOnSquid(dialect, 'mechDelivery { ipfsHash }');
+
+/** The service's marketplace mech(s), for the payment type of signed-only deliveries. */
+const mechArgs = (dialect: SubgraphDialect) =>
+  dialect === 'squid'
+    ? `where: {service: {id_eq: $serviceId}}, limit: ${LIMIT}`
+    : `where: {service_: {id: $serviceId}}, first: ${LIMIT}`;
 
 export const getQueryForServiceActivity = (dialect: SubgraphDialect) => {
   return `
@@ -111,6 +119,11 @@ export const getQueryForServiceActivity = (dialect: SubgraphDialect) => {
         ${mechDeliveryFields(dialect)}
       }
     }
+
+    meches (${mechArgs(dialect)}) {
+      address
+      paymentType
+    }
   }
   `;
 };
@@ -165,7 +178,28 @@ const convertRequestToActivity = (request: Request): Activity => {
   };
 };
 
-const convertDeliveryToActivity = (delivery: Delivery): Activity => {
+type MechPaymentType = { address: string; paymentType: string | null };
+
+/**
+ * Fee fields for a marketplace delivery whose request carries no fee unit.
+ * Signed-only (off-chain) deliveries have no `Request`, so `deliveryRate` is
+ * in the delivering mech's payment unit (micro-USDC for a USDC mech), not wei.
+ */
+const feeFromMechPaymentType = (
+  paymentType: string | null | undefined,
+  deliveryRate: string | null | undefined,
+): Pick<Activity, 'feeUnit' | 'feeRaw' | 'finalFeeUSD'> | null => {
+  if (!paymentType || deliveryRate == null) return null;
+  const feeUnit = feeUnitForPaymentType(paymentType);
+  if (!feeUnit) return null;
+  const finalFeeUSD = feeUnit === 'USDC' ? formatMicroUsdc(deliveryRate) : null;
+  return { feeUnit, feeRaw: deliveryRate, finalFeeUSD };
+};
+
+const convertDeliveryToActivity = (
+  delivery: Delivery,
+  paymentTypeByMech: Map<string, string | null>,
+): Activity => {
   const {
     mech: deliveredBy,
     blockTimestamp: deliveryBlockTimestamp,
@@ -196,6 +230,18 @@ const convertDeliveryToActivity = (delivery: Delivery): Activity => {
     ? LEGACY_DELIVERY_PAYMENT_WEI
     : marketplaceDelivery?.deliveryRate || null;
 
+  // No fee unit from the request (e.g. a signed-only delivery with no
+  // `Request`): take it from the delivering mech's payment type so a USDC
+  // charge isn't formatted as wei of the native coin. Legacy AgentMech
+  // deliveries keep the fixed LEGACY_DELIVERY_PAYMENT_WEI path.
+  const mechFee =
+    !feeUnit && !isDeliveredByMech
+      ? feeFromMechPaymentType(
+          deliveredBy ? paymentTypeByMech.get(deliveredBy.toLowerCase()) : null,
+          marketplaceDelivery?.deliveryRate,
+        )
+      : null;
+
   return {
     activityType: 'Supply',
     requestId,
@@ -209,9 +255,9 @@ const convertDeliveryToActivity = (delivery: Delivery): Activity => {
     deliveryBlockTimestamp,
     payment,
     feeUSD: feeUSD || null,
-    finalFeeUSD: finalFeeUSD || null,
-    feeRaw: feeRaw || null,
-    feeUnit: feeUnit || null,
+    finalFeeUSD: mechFee ? mechFee.finalFeeUSD : finalFeeUSD || null,
+    feeRaw: mechFee ? mechFee.feeRaw : feeRaw || null,
+    feeUnit: mechFee ? mechFee.feeUnit : feeUnit || null,
   };
 };
 
@@ -236,14 +282,23 @@ type ActivityResponse = {
   id: string;
   requests: Request[];
   delivers: Delivery[];
+  meches?: MechPaymentType[] | null;
 };
 
 const mergeServiceActivity = (serviceActivity: ActivityResponse) => {
   const { id } = serviceActivity || {};
-  const { requests: requestsFromMM, delivers: deliveriesFromMM } = serviceActivity || {};
+  const { requests: requestsFromMM, delivers: deliveriesFromMM, meches } = serviceActivity || {};
+
+  const paymentTypeByMech = new Map(
+    (meches || [])
+      .filter((mech) => !!mech?.address)
+      .map((mech) => [mech.address.toLowerCase(), mech.paymentType] as const),
+  );
 
   const requestActivitiesFromMM = (requestsFromMM || [])?.map(convertRequestToActivity);
-  const deliveryActivitiesFromMM = (deliveriesFromMM || [])?.map(convertDeliveryToActivity);
+  const deliveryActivitiesFromMM = (deliveriesFromMM || [])?.map((delivery) =>
+    convertDeliveryToActivity(delivery, paymentTypeByMech),
+  );
   const activities = [...requestActivitiesFromMM, ...deliveryActivitiesFromMM];
   const sortedActivities = sortActivities(activities);
 

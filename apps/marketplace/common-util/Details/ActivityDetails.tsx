@@ -5,6 +5,7 @@ import { AddressLink, Copy } from 'libs/ui-components/src';
 import { DetailsDivider, Info } from './styles';
 import { marketplaceRoleTag } from 'common-util/List/ListTable/helpers';
 import { parseToEth, truncateAddress } from 'libs/util-functions/src';
+import { formatUsdAmount } from 'common-util/functions/usdAmount';
 
 const { Text, Title } = Typography;
 
@@ -49,11 +50,13 @@ const formatTimestamp = (timestamp?: string) => {
   return `${formattedTime} • ${formattedDate}`;
 };
 
-const formatPayment = (activity: Activity, chainId?: number): string | null => {
+export const formatPayment = (activity: Activity, chainId?: number): string | null => {
   const { feeUnit, feeRaw, finalFeeUSD, payment } = activity;
 
   if (feeUnit === 'USDC') {
-    return finalFeeUSD ? `$${Number(finalFeeUSD).toFixed(2)}` : null;
+    // 2–6 decimals so sub-cent charges ($0.0118) aren't rounded to $0.01.
+    const usd = finalFeeUSD ? formatUsdAmount(finalFeeUSD) : null;
+    return usd ? `$${usd}` : null;
   }
   if (feeUnit === 'NATIVE') {
     if (feeRaw == null) return null;
