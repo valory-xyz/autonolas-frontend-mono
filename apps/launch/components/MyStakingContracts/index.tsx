@@ -1,5 +1,5 @@
 import { TableOutlined, WalletOutlined } from '@ant-design/icons';
-import { Button, Card, Flex, Spin, Typography } from 'antd';
+import { Alert, Button, Card, Flex, Spin, Typography } from 'antd';
 import Link from 'next/link';
 import styled from 'styled-components';
 import { match } from 'ts-pattern';
@@ -10,7 +10,7 @@ import { CHAIN_NAMES, GOVERN_URL, UNICODE_SYMBOLS } from 'libs/util-constants/sr
 import { URL } from 'common-util/constants/urls';
 import { useAppSelector } from 'store/index';
 
-import { useMyStakingContracts } from 'hooks/useMyStakingContracts';
+import { useMyStakingContracts, useRetryMyStakingContracts } from 'hooks/useMyStakingContracts';
 
 import { LoginV2 } from '../Login';
 import { List } from './List';
@@ -77,10 +77,40 @@ const CreateStakingContractMessage = () => (
   </>
 );
 
+/** Discovery failed: the account may well have contracts, so offer a retry, not "create one". */
+const LookupFailedMessage = () => {
+  const { retry, isRetrying } = useRetryMyStakingContracts();
+  return (
+    <Alert
+      className="mt-16"
+      type="warning"
+      showIcon
+      data-testid="my-staking-contracts-lookup-failed"
+      message="Couldn’t load your staking contracts"
+      description="The network didn’t respond. Your contracts are not affected; try again."
+      action={
+        <Button size="small" loading={isRetrying} onClick={() => retry()}>
+          Retry
+        </Button>
+      }
+    />
+  );
+};
+
 const StakingContractList = () => {
-  const { isMyStakingContractsLoading, myStakingContracts } = useMyStakingContracts();
+  const { isMyStakingContractsLoading, myStakingContracts, isMyStakingContractsLookupFailed } =
+    useMyStakingContracts();
 
   if (isMyStakingContractsLoading) return <Loader />;
+  if (isMyStakingContractsLookupFailed) {
+    // Contracts created this session can still be listed.
+    return (
+      <>
+        <LookupFailedMessage />
+        {myStakingContracts.length > 0 && <List />}
+      </>
+    );
+  }
   if (myStakingContracts.length === 0) return <CreateStakingContractMessage />;
   return <List />;
 };

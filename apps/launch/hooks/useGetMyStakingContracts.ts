@@ -196,7 +196,8 @@ const fetchInstanceAddresses = async (
   // One window at a time: public RPCs rate-limit bursts of getLogs calls. Stop early once the
   // chain or account changed and nothing reads this result any more.
   for (const range of ranges) {
-    signal.throwIfAborted();
+    // Not signal.throwIfAborted(): older Safari (< 15.4) lacks it. TanStack discards the result.
+    if (signal.aborted) throw new Error('Staking contract lookup cancelled');
     const eventLogs = await client.getLogs({
       address: STAKING_FACTORY.addresses[`${chainId}`] as Address,
       event: INSTANCE_CREATED_EVENT,
@@ -209,6 +210,8 @@ const fetchInstanceAddresses = async (
 
   return addresses;
 };
+
+const INSTANCE_LOOKUP_RETRIES = 2;
 
 /**
  * Staking contracts the connected account created on the selected chain.
@@ -239,19 +242,23 @@ const useGetInstanceAddresses = (chainId: ChainId | undefined) => {
     },
     enabled: isEnabled,
     // The app defaults to staleTime: Infinity. Contracts get created, so switching back to a
-    // chain and account shows its cached list and looks it up again; Create also adds its new
-    // contract to this cache. Not on window focus: the log fallback can be several RPC calls.
+    // chain and account shows its cached list and looks it up again. Not on window focus: the
+    // log fallback can be several RPC calls.
     staleTime: 0,
     refetchOnWindowFocus: false,
-    retry: false,
+    // One rate-limited or timed-out call fails the whole lookup (the windowed log fallback makes
+    // several in a row), so try again before reporting it; the list keeps loading meanwhile.
+    retry: INSTANCE_LOOKUP_RETRIES,
   });
 
   return {
-    // A failed lookup shows no contracts rather than leaving the list loading.
+    // A failed lookup lists no discovered contracts and is reported as failed (isError), so the
+    // page offers a retry instead of the "no contracts yet" state.
     instanceAddresses: data ?? EMPTY_ADDRESSES,
     // What discovery returned for this chain and account, once it has answered.
     discoveredAddresses: isEnabled ? data : undefined,
     isLoading: isEnabled && status === 'pending',
+    isError: isEnabled && status === 'error',
   };
 };
 
@@ -282,6 +289,7 @@ export const useGetMyStakingContracts = () => {
     instanceAddresses: discoveredAddresses,
     discoveredAddresses: discoveryResult,
     isLoading: isInstancesLoading,
+    isError: isLookupFailed,
   } = useGetInstanceAddresses(chainId);
 
   // Contracts this account created on this chain in this session. Discovery can lag a fresh
@@ -382,7 +390,7 @@ export const useGetMyStakingContracts = () => {
       // filter out null values (ie. contracts without metadata - failed to fetch or not available)
       .filter((contract): contract is MyStakingContract => contract !== null);
 
-    published = JSON.stringify({ owner, contracts: myStakingContractsList });
+    published = JSON.stringify({ owner, contracts: myStakingContractsList, isLookupFailed });
   }
 
   useEffect(() => {

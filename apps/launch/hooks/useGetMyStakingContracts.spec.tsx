@@ -5,6 +5,8 @@ import { ReactNode, useLayoutEffect } from 'react';
 import { Provider } from 'react-redux';
 import { useAccount, usePublicClient, useReadContract, useReadContracts } from 'wagmi';
 
+import { LOGS_MAX_BLOCK_SPAN, blockNumbers } from 'common-util/constants/stakingContract';
+import { hasSubgraphSupport } from 'common-util/graphql/my-contracts';
 import { seedStakingContractMetadata } from 'common-util/queries/myStakingContracts';
 import { useAppSelector } from 'store/index';
 import {
@@ -16,7 +18,7 @@ import { networkReducer, setNetworkDetails } from 'store/network';
 import { MyStakingContract } from 'types/index';
 
 import { useGetMyStakingContracts } from './useGetMyStakingContracts';
-import { useMyStakingContracts } from './useMyStakingContracts';
+import { useMyStakingContracts, useRetryMyStakingContracts } from './useMyStakingContracts';
 import { useNominees } from './useNominees';
 
 const ROBINHOOD = 4663;
@@ -39,7 +41,7 @@ jest.mock('wagmi', () => ({
   useReadContracts: jest.fn(),
 }));
 jest.mock('common-util/graphql/my-contracts', () => ({
-  hasSubgraphSupport: () => true,
+  hasSubgraphSupport: jest.fn(() => true),
 }));
 jest.mock('common-util/constants/stakingContract', () => ({
   blockNumbers: {},
@@ -115,6 +117,7 @@ type Commit = {
   chainId: number | null;
   account: string | undefined;
   isLoading: boolean;
+  isLookupFailed: boolean;
   contracts: MyStakingContract[];
 };
 
@@ -155,6 +158,7 @@ describe('useGetMyStakingContracts', () => {
       () => {
         useGetMyStakingContracts();
         const view = useMyStakingContracts();
+        const retry = useRetryMyStakingContracts();
         const nominees = useNominees();
         const { networkId } = useAppSelector((state) => state.network);
         const { address } = useAccount();
@@ -163,10 +167,11 @@ describe('useGetMyStakingContracts', () => {
             chainId: networkId,
             account: address,
             isLoading: view.isMyStakingContractsLoading,
+            isLookupFailed: view.isMyStakingContractsLookupFailed,
             contracts: view.myStakingContracts,
           });
         });
-        return { view, nominees };
+        return { view, nominees, retry };
       },
       {
         wrapper: ({ children }: { children: ReactNode }) => (
@@ -346,23 +351,43 @@ describe('useGetMyStakingContracts', () => {
     });
   });
 
-  it('shows no contracts when the next account’s lookup fails', async () => {
+  it('reports a failed lookup after retrying it, never as “no contracts”, and recovers on retry', async () => {
     lookups[`${ROBINHOOD}:${ACCOUNT_A}`] = [CONTRACT_A];
     lookups[`${ROBINHOOD}:${ACCOUNT_B}`] = 'fail';
+    const lookupCalls = () =>
+      (global.fetch as jest.Mock).mock.calls.filter(([url]) =>
+        String(url).includes(`address=${ACCOUNT_B}`),
+      ).length;
 
-    const { rerender } = render();
+    const { result, rerender } = render();
     await waitForShown([CONTRACT_A]);
 
     account = ACCOUNT_B;
     rerender();
 
-    await waitForShown([]);
+    await waitFor(() => expect(shown().isLookupFailed).toBe(true), { timeout: 8000 });
+    // The first attempt and two retries, each trying the squid route and then the logs.
+    expect(lookupCalls()).toBe(3);
+    expect(shown().isLoading).toBe(false);
+    expect(shownIds()).toEqual([]);
+    // No committed render presented B's failed lookup as a loaded, empty list.
+    expect(
+      commits.filter((c) => c.account === ACCOUNT_B && !c.isLoading && !c.isLookupFailed),
+    ).toEqual([]);
     expectEveryCommitOwned({ [`${ROBINHOOD}:${ACCOUNT_A}`]: [CONTRACT_A] });
     expect(store.getState().launch.myStakingContractsOwner).toEqual({
       chainId: ROBINHOOD,
       account: ACCOUNT_B.toLowerCase(),
     });
-  });
+
+    // The page's Retry button.
+    lookups[`${ROBINHOOD}:${ACCOUNT_B}`] = [CONTRACT_B];
+    await act(async () => {
+      await result.current.retry.retry();
+    });
+    await waitForShown([CONTRACT_B]);
+    expect(shown().isLookupFailed).toBe(false);
+  }, 15000);
 
   it('never reads or commits the previous chain’s contracts on the new chain', async () => {
     lookups[`${ROBINHOOD}:${ACCOUNT_A}`] = [CONTRACT_A];
@@ -612,6 +637,81 @@ describe('useGetMyStakingContracts', () => {
     account = undefined;
     rerender();
     await waitForShown([]);
+  });
+
+  describe('windowed log fallback', () => {
+    const spans = LOGS_MAX_BLOCK_SPAN as Record<number, number>;
+    const starts = blockNumbers as unknown as Record<number, number>;
+    const window = (fromBlock: number, toBlock: number, sender: string) => [
+      BigInt(fromBlock),
+      BigInt(toBlock),
+      sender,
+    ];
+    const getLogsCalls = (client: { getLogs: jest.Mock }) =>
+      client.getLogs.mock.calls.map(([params]) => [
+        params.fromBlock,
+        params.toBlock,
+        params.args.sender,
+      ]);
+
+    beforeEach(() => {
+      // No squid: the lookup reads logs from block 1, at most 50 blocks per call.
+      (hasSubgraphSupport as unknown as jest.Mock).mockReturnValue(false);
+      starts[ROBINHOOD] = 1;
+      spans[ROBINHOOD] = 50;
+    });
+
+    afterEach(() => {
+      (hasSubgraphSupport as unknown as jest.Mock).mockReturnValue(true);
+      delete starts[ROBINHOOD];
+      delete spans[ROBINHOOD];
+    });
+
+    it('reads the logs window by window up to the head and lists every window’s contracts', async () => {
+      const client = {
+        getBlockNumber: jest.fn().mockResolvedValue(BigInt(100)),
+        getLogs: jest
+          .fn()
+          .mockResolvedValueOnce([{ args: { instance: CONTRACT_A } }])
+          .mockResolvedValueOnce([{ args: { instance: CONTRACT_B } }]),
+      };
+      (usePublicClient as jest.Mock).mockReturnValue(client);
+
+      render();
+      await waitForShown([CONTRACT_A, CONTRACT_B]);
+
+      expect(getLogsCalls(client)).toEqual([window(1, 50, ACCOUNT_A), window(51, 100, ACCOUNT_A)]);
+      expect(client.getBlockNumber).toHaveBeenCalledTimes(1);
+      expect(
+        (global.fetch as jest.Mock).mock.calls.filter(([url]) => String(url).startsWith('/api/')),
+      ).toEqual([]);
+    });
+
+    it('stops reading windows once the account changed', async () => {
+      const firstWindow = deferred<{ args: { instance: string } }[]>();
+      const client = {
+        getBlockNumber: jest.fn().mockResolvedValue(BigInt(100)),
+        getLogs: jest.fn().mockReturnValueOnce(firstWindow.promise).mockResolvedValue([]),
+      };
+      (usePublicClient as jest.Mock).mockReturnValue(client);
+
+      const { rerender } = render();
+      await waitFor(() => expect(client.getLogs).toHaveBeenCalledTimes(1));
+
+      account = ACCOUNT_B;
+      rerender();
+      await act(async () => firstWindow.resolve([{ args: { instance: CONTRACT_A } }]));
+      await waitForShown([]);
+      await settle();
+
+      // A's second window was never requested; B's lookup read both of its windows.
+      expect(getLogsCalls(client)).toEqual([
+        window(1, 50, ACCOUNT_A),
+        window(1, 50, ACCOUNT_B),
+        window(51, 100, ACCOUNT_B),
+      ]);
+      expectEveryCommitOwned({});
+    });
   });
 
   describe('nomination status', () => {

@@ -24,6 +24,11 @@ type LaunchState = {
   myStakingContracts: MyStakingContract[];
   /** Who `myStakingContracts` belongs to; null while nothing is published. */
   myStakingContractsOwner: MyStakingContractsOwner | null;
+  /**
+   * Discovery (squid or logs) failed after its retries: `myStakingContracts` holds only this
+   * session's creations, and an empty list does not mean the account has no contracts.
+   */
+  isMyStakingContractsLookupFailed: boolean;
   /** Contracts created this session, kept until discovery (squid or logs) returns them too. */
   createdStakingContracts: CreatedStakingContract[];
   /** `${chainId}:${address}` (lowercased) nominated this session, kept until nominees include them. */
@@ -34,6 +39,7 @@ const initialState: LaunchState = {
   isMyStakingContractsLoading: true,
   myStakingContracts: [],
   myStakingContractsOwner: null,
+  isMyStakingContractsLookupFailed: false,
   createdStakingContracts: [],
   confirmedNominations: [],
 };
@@ -47,16 +53,22 @@ export const launchSlice = createSlice({
   reducers: {
     setMyStakingContracts: (
       state,
-      action: PayloadAction<{ owner: MyStakingContractsOwner; contracts: MyStakingContract[] }>,
+      action: PayloadAction<{
+        owner: MyStakingContractsOwner;
+        contracts: MyStakingContract[];
+        isLookupFailed?: boolean;
+      }>,
     ) => {
       state.myStakingContracts = action.payload.contracts;
       state.myStakingContractsOwner = action.payload.owner;
+      state.isMyStakingContractsLookupFailed = !!action.payload.isLookupFailed;
       state.isMyStakingContractsLoading = false;
     },
     setContractsLoading: (state) => {
       state.isMyStakingContractsLoading = true;
       state.myStakingContracts = [];
       state.myStakingContractsOwner = null;
+      state.isMyStakingContractsLookupFailed = false;
     },
     recordCreatedStakingContract: (state, action: PayloadAction<CreatedStakingContract>) => {
       const created = { ...action.payload, account: action.payload.account.toLowerCase() };

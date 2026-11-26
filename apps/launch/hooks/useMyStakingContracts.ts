@@ -1,6 +1,8 @@
-import { useMemo } from 'react';
+import { useIsFetching, useQueryClient } from '@tanstack/react-query';
+import { useCallback, useMemo } from 'react';
 import { useAccount } from 'wagmi';
 
+import { myStakingContractAddressesKey } from 'common-util/queries/myStakingContracts';
 import { useAppSelector } from 'store/index';
 import { MyStakingContractsOwner, nominationKey } from 'store/launch';
 import { MyStakingContract } from 'types/index';
@@ -33,6 +35,7 @@ export const useMyStakingContracts = () => {
     isMyStakingContractsLoading,
     myStakingContracts,
     myStakingContractsOwner,
+    isMyStakingContractsLookupFailed,
     confirmedNominations,
   } = useAppSelector((state) => state.launch);
 
@@ -55,5 +58,26 @@ export const useMyStakingContracts = () => {
   return {
     isMyStakingContractsLoading: isMyStakingContractsLoading || !isCurrent,
     myStakingContracts: contracts,
+    /** Discovery failed: an empty list is not "no contracts". Offer `useRetryMyStakingContracts`. */
+    isMyStakingContractsLookupFailed: isCurrent && isMyStakingContractsLookupFailed,
   };
+};
+
+/** Looks up the current chain and account's staking contracts again, e.g. after a failure. */
+export const useRetryMyStakingContracts = () => {
+  const queryClient = useQueryClient();
+  const { networkId } = useAppSelector((state) => state.network);
+  const { address } = useAccount();
+  const queryKey = useMemo(
+    () => myStakingContractAddressesKey(networkId ?? undefined, address),
+    [networkId, address],
+  );
+  const isRetrying = useIsFetching({ queryKey, exact: true }) > 0;
+
+  const retry = useCallback(
+    () => queryClient.refetchQueries({ queryKey, exact: true }),
+    [queryClient, queryKey],
+  );
+
+  return { retry, isRetrying };
 };
