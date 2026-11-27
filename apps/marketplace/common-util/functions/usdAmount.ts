@@ -4,7 +4,9 @@
 // and computed with bigint so large or tiny values don't lose precision.
 const USDC_DECIMALS = 6;
 const MIN_DECIMALS = 2;
-const SCALE = 10n ** BigInt(USDC_DECIMALS);
+// 10^6 as a literal: the browser build transpiles `**` to Math.pow, which
+// throws on bigint and breaks every page that imports this module.
+const SCALE = 1_000_000n;
 
 const formatScaled = (scaled: bigint): string => {
   const negative = scaled < 0n;
