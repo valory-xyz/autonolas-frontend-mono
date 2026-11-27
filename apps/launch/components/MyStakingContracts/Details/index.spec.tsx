@@ -1,5 +1,9 @@
 import '@testing-library/jest-dom';
 import { render, screen, within } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { useRouter } from 'next/router';
+
+import { NominationStatus } from 'types/index';
 
 import { Details } from './index';
 
@@ -15,6 +19,14 @@ jest.mock('store/index', () => ({
     networkId: 1,
     networkName: 'ethereum',
     networkDisplayName: 'Ethereum',
+  }),
+}));
+
+let mockNominationStatus: NominationStatus = 'notNominated';
+const mockRefetchNominees = jest.fn();
+jest.mock('hooks/useMyStakingContracts', () => ({
+  useMyStakingContracts: () => ({
+    isMyStakingContractsLoading: false,
     myStakingContracts: [
       {
         id: '0x11111111111111111111111111111111111111',
@@ -22,10 +34,13 @@ jest.mock('store/index', () => ({
         name: 'My contract one',
         description: 'Some good description one',
         template: 'Staking Token',
-        isNominated: false,
+        nominationStatus: mockNominationStatus,
       },
     ],
   }),
+}));
+jest.mock('hooks/useNominees', () => ({
+  useNominees: () => ({ refetch: mockRefetchNominees, isFetching: false }),
 }));
 
 jest.mock('hooks/useGetStakingConstants', () => ({
@@ -51,6 +66,42 @@ jest.mock('hooks/useGetStakingConstants', () => ({
 }));
 
 describe('<Details />', () => {
+  beforeEach(() => {
+    mockNominationStatus = 'notNominated';
+    mockRefetchNominees.mockClear();
+  });
+
+  it('opens the nominate page for this contract', async () => {
+    render(<Details />);
+
+    await userEvent.click(screen.getByRole('button', { name: 'Nominate' }));
+
+    expect(useRouter().push).toHaveBeenCalledWith(
+      '/nominate-contract/0x11111111111111111111111111111111111111',
+    );
+  });
+
+  it('offers no Nominate action while the nomination status is unknown, only a retry', async () => {
+    mockNominationStatus = 'unknown';
+    render(<Details />);
+
+    expect(screen.queryByRole('button', { name: 'Nominate' })).not.toBeInTheDocument();
+    expect(screen.queryByTestId('nominate-info')).not.toBeInTheDocument();
+    expect(screen.getByText('Status unavailable')).toBeInTheDocument();
+
+    await userEvent.click(screen.getByRole('button', { name: /Retry/ }));
+    expect(mockRefetchNominees).toHaveBeenCalled();
+  });
+
+  it('offers no Nominate action while the nomination status is loading', () => {
+    mockNominationStatus = 'loading';
+    render(<Details />);
+
+    expect(screen.queryByRole('button', { name: 'Nominate' })).not.toBeInTheDocument();
+    expect(screen.queryByTestId('nominate-info')).not.toBeInTheDocument();
+    expect(screen.getByTestId('nomination-status-loading')).toBeInTheDocument();
+  });
+
   it('should display contract name', () => {
     render(<Details />);
 

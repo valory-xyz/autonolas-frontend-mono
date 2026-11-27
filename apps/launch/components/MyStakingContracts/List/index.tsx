@@ -1,5 +1,5 @@
-import { CheckCircleOutlined, CopyOutlined, InfoCircleOutlined } from '@ant-design/icons';
-import { Alert, Button, Flex, message, Popover, Table, Tag, Typography } from 'antd';
+import { CopyOutlined, InfoCircleOutlined } from '@ant-design/icons';
+import { Alert, Button, Flex, message, Popover, Table, Typography } from 'antd';
 import type { TableProps } from 'antd';
 import Link from 'next/link';
 import React, { FC, useMemo } from 'react';
@@ -10,6 +10,10 @@ import { UNICODE_SYMBOLS } from 'libs/util-constants/src/lib/symbols';
 import { URL } from 'common-util/constants/urls';
 import { useAppSelector } from 'store/index';
 import { MyStakingContract } from 'types/index';
+
+import { useMyStakingContracts } from 'hooks/useMyStakingContracts';
+
+import { NominationStatusContent } from '../NominationStatus';
 
 const { Paragraph, Text } = Typography;
 
@@ -92,18 +96,16 @@ const useColumns = () => {
         render: (_, record) => {
           return (
             <Flex justify="center">
-              {record.isNominated ? (
-                <Tag color="success">
-                  <CheckCircleOutlined />
-                  &nbsp;Nominated
-                </Tag>
-              ) : (
-                <Link href={`/${URL.nominateContract}/${record.id}`} passHref>
-                  <Button type="primary" ghost>
-                    Nominate
-                  </Button>
-                </Link>
-              )}
+              <NominationStatusContent
+                status={record.nominationStatus}
+                nominateAction={
+                  <Link href={`/${URL.nominateContract}/${record.id}`} passHref>
+                    <Button type="primary" ghost>
+                      Nominate
+                    </Button>
+                  </Link>
+                }
+              />
             </Flex>
           );
         },
@@ -116,11 +118,12 @@ const useColumns = () => {
 };
 
 export const List: FC = () => {
-  const { myStakingContracts } = useAppSelector((state) => state.launch);
+  const { myStakingContracts } = useMyStakingContracts();
   const listColumns = useColumns();
 
+  // Only contracts known not to be nominated; loading or unknown status is not counted.
   const nonNominatedContracts = myStakingContracts.filter(
-    (contract) => !contract.isNominated,
+    (contract) => contract.nominationStatus === 'notNominated',
   ).length;
 
   return (

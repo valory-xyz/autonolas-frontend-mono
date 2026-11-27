@@ -124,3 +124,14 @@ export const blockNumbers: BlockNumbers = {
   // is at 60148213 and its next deployer tx (nonce 17) at 58662633, both later.
   [robinhood.id]: 58661778,
 };
+
+/**
+ * Largest block span one `eth_getLogs` call may cover, for chains whose RPC caps it. The log
+ * fallback in `hooks/useGetMyStakingContracts.ts` scans these chains in windows of this many
+ * blocks (both ends counted); other chains keep a single call.
+ */
+export const LOGS_MAX_BLOCK_SPAN: Partial<Record<ChainId, number>> = {
+  // rpc.mainnet.chain.robinhood.com rejects spans above 10,000,000 blocks ("query spans 10000001
+  // blocks ... but only 10000000 are allowed"); a 10,000,000-block span is accepted.
+  [robinhood.id]: 10_000_000,
+};

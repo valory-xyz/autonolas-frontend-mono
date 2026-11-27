@@ -83,6 +83,38 @@ export const ContractAlreadyNominated: FC<{ contractName: string }> = ({ contrac
   );
 };
 
+/** The nominee read failed: the contract may already be nominated, so no transaction is offered. */
+export const NominationStatusUnavailable: FC<{
+  contractName: string;
+  isRetrying: boolean;
+  onRetry: () => void;
+}> = ({ contractName, isRetrying, onRetry }) => (
+  <Container>
+    <Title level={4}>Couldn’t check the nomination status</Title>
+    <Flex vertical gap={14}>
+      <Text>{contractName}</Text>
+      <Text type="secondary">
+        Reading the current nominees from Ethereum failed, so it isn’t known whether this contract
+        is already nominated. Try again before nominating it.
+      </Text>
+    </Flex>
+
+    <Flex align="center" justify="center">
+      <Button
+        size="large"
+        className="mt-24"
+        type="primary"
+        icon={<ReloadOutlined />}
+        loading={isRetrying}
+        onClick={onRetry}
+        data-testid="nomination-status-retry"
+      >
+        Retry
+      </Button>
+    </Flex>
+  </Container>
+);
+
 export const ConnectWalletBeforeNominate: FC<{ contractName: string }> = ({ contractName }) => (
   <Container>
     <Title level={4}>Connect your wallet to nominate...</Title>

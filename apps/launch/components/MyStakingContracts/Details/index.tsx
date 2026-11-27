@@ -1,5 +1,5 @@
-import { CheckCircleOutlined, CopyOutlined } from '@ant-design/icons';
-import { Alert, Button, Card, Flex, Row, Spin, Tag, Typography } from 'antd';
+import { CopyOutlined } from '@ant-design/icons';
+import { Alert, Button, Card, Flex, Row, Spin, Typography } from 'antd';
 import { useRouter } from 'next/router';
 import { FC, ReactNode } from 'react';
 import styled from 'styled-components';
@@ -11,6 +11,10 @@ import { ChainId, STAKING_TOKEN_ADDRESSES } from 'common-util/constants/stakingC
 import { URL } from 'common-util/constants/urls';
 import { useAppSelector } from 'store/index';
 import { MyStakingContract } from 'types/index';
+
+import { useMyStakingContracts } from 'hooks/useMyStakingContracts';
+
+import { NominationStatusContent } from '../NominationStatus';
 
 import { ColFlexContainer, ContractConfiguration } from './ContractConfiguration';
 
@@ -82,19 +86,24 @@ const NominateInfo = () => (
   />
 );
 
-const NominatedForIncentives: FC<{ isNominated: boolean }> = ({ isNominated }) => {
+const NominatedForIncentives: FC<{ myStakingContract: MyStakingContract }> = ({
+  myStakingContract,
+}) => {
   const router = useRouter();
-  const { networkName } = useAppSelector((state) => state.network);
 
-  return isNominated ? (
-    <Tag color="success">
-      <CheckCircleOutlined />
-      &nbsp;Nominated
-    </Tag>
-  ) : (
-    <Button type="primary" onClick={() => router.push(`/${networkName}/${URL.nominateContract}`)}>
-      Nominate
-    </Button>
+  return (
+    <NominationStatusContent
+      status={myStakingContract.nominationStatus}
+      nominateAction={
+        // Same route as the list's Nominate link (the page is /nominate-contract/[id]).
+        <Button
+          type="primary"
+          onClick={() => router.push(`/${URL.nominateContract}/${myStakingContract.id}`)}
+        >
+          Nominate
+        </Button>
+      }
+    />
   );
 };
 
@@ -148,12 +157,12 @@ const EachStakingContractContent: FC<{ myStakingContract: MyStakingContract }> =
 
   return (
     <>
-      {myStakingContract.isNominated ? null : <NominateInfo />}
+      {myStakingContract.nominationStatus === 'notNominated' ? <NominateInfo /> : null}
 
       <Row gutter={24}>
         <ColFlexContainer
           text="Nominated for incentives?"
-          content={<NominatedForIncentives isNominated={myStakingContract.isNominated} />}
+          content={<NominatedForIncentives myStakingContract={myStakingContract} />}
         />
         <ColFlexContainer
           text="Address"
@@ -184,9 +193,7 @@ const EachStakingContractContent: FC<{ myStakingContract: MyStakingContract }> =
 
 export const Details = () => {
   const router = useRouter();
-  const { myStakingContracts, isMyStakingContractsLoading } = useAppSelector(
-    (state) => state.launch,
-  );
+  const { myStakingContracts, isMyStakingContractsLoading } = useMyStakingContracts();
 
   const myStakingContractIndex = myStakingContracts.findIndex(
     (contract) => contract.id === router.query.id,

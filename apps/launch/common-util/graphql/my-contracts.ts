@@ -78,7 +78,7 @@ export async function getStakingContractsBySender({
   chain,
   senderId,
 }: GetStakingContractsParams): Promise<StakingContractsResponse> {
-  const client: GraphQLClient | undefined = STAKING_GRAPH_CLIENTS[chain];
+  const client: GraphQLClient | null | undefined = STAKING_GRAPH_CLIENTS[chain];
 
   if (!client) {
     throw new Error(`Unsupported subgraph chain: ${chain}`);
@@ -95,8 +95,11 @@ export async function getStakingContractsBySender({
 }
 
 /**
- * Check if a chain ID has subgraph support
+ * Check if a chain ID has a configured subgraph or squid
  */
 export function hasSubgraphSupport(chainId: number): chainId is SupportedStakingChain {
-  return chainId in STAKING_GRAPH_CLIENTS;
+  return (
+    chainId in STAKING_GRAPH_CLIENTS &&
+    STAKING_GRAPH_CLIENTS[chainId as SupportedStakingChain] != null
+  );
 }
